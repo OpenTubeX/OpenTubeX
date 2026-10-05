@@ -1,5 +1,15 @@
 export const STARTUP_REVEAL_DURATION_MS = 600
 
+// Capacitor's settings database is asynchronous. Cache only the splash's
+// appearance so the next launch can paint before loading the renderer.
+export function cacheStartupAppearance(appearance) {
+  try {
+    localStorage.setItem('opentubex-startup-appearance', JSON.stringify(appearance))
+  } catch {
+    // Startup still works when WebView storage is unavailable.
+  }
+}
+
 /** Fraction of the curtain remaining at a given height, measured from the rail. */
 export function curtainExtent(elapsedMs, depth) {
   const time = elapsedMs / 1000

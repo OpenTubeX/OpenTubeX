@@ -439,6 +439,7 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 				MARKETING_VERSION = 0.35.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				APP_DISPLAY_NAME = "OpenTubeX Dev";
+				APP_URL_SCHEME = opentubex;
 				PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -461,6 +462,7 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 				);
 				MARKETING_VERSION = 0.35.0;
 				APP_DISPLAY_NAME = OpenTubeX;
+				APP_URL_SCHEME = opentubex;
 				PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";

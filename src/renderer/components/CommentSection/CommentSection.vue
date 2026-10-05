@@ -160,7 +160,9 @@
     >
       <FtInput
         input-type="search"
-        :placeholder="$t('Comments.Search loaded comments')"
+        :label="$t('Comments.Search loaded comments')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="commentSearchQuery"
         @input="updateCommentSearchQuery"
@@ -253,6 +255,7 @@
             </div>
             <FtRetryImage
               v-else
+              :fallback-icon="['fas', 'circle-user']"
               :src="comment.authorThumb"
               class="commentThumbnail"
             />
@@ -303,14 +306,15 @@
                 </template>
               </template>
             </component>
-            <img
-              v-if="comment.isMember"
+            <FtRetryImage
+              v-if="comment.isMember && typeof comment.memberIconUrl === 'string'"
+              :fallback-icon="['fas', 'user-check']"
               :src="comment.memberIconUrl"
               :title="$t('Comments.Member')"
               :aria-label="$t('Comments.Member')"
               class="commentMemberIcon"
               alt=""
-            >
+            />
             <img
               v-if="isSubscribedToChannel(comment.authorId)"
               :title="$t('Comments.Subscribed')"
@@ -381,6 +385,7 @@
               class="commentHeartBadge"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="channelThumbnail"
                 :title="$t('Comments.Hearted')"
                 :aria-label="$t('Comments.Hearted')"
@@ -420,6 +425,7 @@
                 <span class="commentReplyToggleLabel">
                   <FtRetryImage
                     v-if="comment.hasOwnerReplied && channelThumbnail"
+                    :fallback-icon="['fas', 'circle-user']"
                     :src="channelThumbnail"
                     class="commentReplyOwnerThumbnail"
                     aria-hidden="true"
@@ -1460,7 +1466,15 @@ function handleFullscreenActionsFocusout(event) {
   }
 }
 
-const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded'])
+const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded', 'preview-comments'])
+
+watch(() => commentData.value.slice(0, 5).map(comment => ({
+  id: comment.id,
+  author: comment.author,
+  authorThumb: comment.authorThumb,
+  isOwner: comment.isOwner,
+  text: comment.translationText
+})), comments => emit('preview-comments', comments), { immediate: true })
 
 watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
 onBeforeUnmount(() => emit('loaded', false))

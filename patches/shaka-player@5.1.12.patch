@@ -1,7 +1,16 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 15a75205adac5ae9c14227791bcd307d5687b67c..a9e5e038fa59d39c456e92ec4b05edc18196a758 100644
+index 15a75205adac5ae9c14227791bcd307d5687b67c..e8f5c87a42b8eba5c1e03c98d07618ad34dc2262 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
+@@ -1548,7 +1548,7 @@ iI(this)}ke(a){var b=this.g.Va;b&&b.ri(a);this.m&&(b=kI(this),b.title=a,navigato
+ const f=um.get(vm(d.url))??"";f&&(e.type=f);a.artwork.push(e)}b.push(a)}c=kI(this);c.chapterInfo=b;navigator.mediaSession.metadata=new MediaMetadata(c)}}Za(a,b=null){if(this.m)try{if(b){if(!this.j.mediaSession.supportedActions.includes(a))return;this.B.add(a)}else{if(!this.B.has(a))return;this.B.delete(a)}navigator.mediaSession.setActionHandler(a,b)}catch(c){}}Dh(a){var b=this.g.getAd(),c=this.j.keyboardSeekDistance;switch(a.action){case "pause":lI(this.g);break;case "play":lI(this.g);break;case "seekbackward":if(a.seekOffset&&
+ !isFinite(a.seekOffset))break;b&&b.isLinear()||(b=this.g,a=-(a.seekOffset||c),mI(b),nI(b,b.$b()+a));break;case "seekforward":if(a.seekOffset&&!isFinite(a.seekOffset))break;b&&b.isLinear()||(b=this.g,a=a.seekOffset||c,mI(b),nI(b,b.$b()+a));break;case "seekto":if(a.seekTime&&!isFinite(a.seekTime))break;b&&b.isLinear()||(b=a.fastSeek||!1,c=this.g,a=this.i.sa().start+a.seekTime,nI(c,a,b));break;case "stop":this.i.qc();break;case "enterpictureinpicture":b&&b.isLinear()||(a.enterPictureInPictureReason!=
+ "contentoccluded"||this.j.mediaSession.allowAutoPiP)&&this.g.Fc();break;case "nexttrack":this.l.playItem(this.l.getCurrentItemIndex()+1);break;case "previoustrack":this.l.playItem(this.l.getCurrentItemIndex()-1);break;case "skipad":b&&b.skip()}}};x("shaka.ui.MediaSession",oI);oI.prototype.commonActionHandler=oI.prototype.Dh;oI.prototype.addMediaSessionHandler=oI.prototype.Za;oI.prototype.setupChapters=oI.prototype.Ai;oI.prototype.setupPoster=oI.prototype.Af;oI.prototype.setupTitle=oI.prototype.ke;
+-oI.prototype.release=oI.prototype.release;oI.prototype.configure=oI.prototype.configure;function pI(a,b){a.bar.value=qI(a,b.clientX)}function rI(a,b){b.preventDefault();a.bar.value=qI(a,b.changedTouches[0].clientX)}function qI(a,b){var c=a.bar.getBoundingClientRect();const d=parseFloat(a.bar.min),e=parseFloat(a.bar.max);a=parseFloat(a.bar.step)||1;const f=c.left+6;c=c.right-6;b=d+(Math.max(f,Math.min(c,b))-f)/(c-f)*(e-d);b=Math.round((b-d)/a)*a+d;return b=Math.min(e,Math.max(d,b))}
++oI.prototype.release=oI.prototype.release;oI.prototype.configure=oI.prototype.configure;function pI(a,b){a.bar.value=qI(a,b.clientX)}function rI(a,b){b.preventDefault();a.bar.value=qI(a,b.changedTouches[0].clientX)}function qI(a,b){var c=a.bar.getBoundingClientRect();const d=parseFloat(a.bar.min),e=parseFloat(a.bar.max);const g=parseFloat(a.bar.step)||1;const f=c.left+6;c=c.right-6;b=d+(Math.max(f,Math.min(c,b))-f)/(c-f)*(e-d);a.bar.step!="any"&&(b=Math.round((b-d)/g)*g+d);return b=Math.min(e,Math.max(d,b))}
+ var sI=class extends JH{constructor(a,b,c,d){super(a,b);this.container=N("div");this.container.classList.add("shaka-range-container");this.container.classList.add(...c);this.B=this.h=!1;this.bar=document.createElement("input");this.I=new I(()=>{this.onChangeEnd();this.h=!1});this.bar.classList.add("shaka-range-element");this.bar.classList.add(...d);this.bar.type="range";this.bar.step="any";this.bar.min="0";this.bar.max="1";this.bar.value="0";this.bar.disabled=!this.controls.Fa();this.container.appendChild(this.bar);
+ this.parent.appendChild(this.container);this.R=new I(()=>{this.bar.disabled=!1});this.eventManager.u(this.controls,"showingui",()=>{this.R.Y(0)});this.eventManager.u(this.controls,"hidingui",()=>{this.R.stop();this.bar.disabled=!0});this.eventManager.u(this.bar,"mousedown",e=>{this.bar.disabled||(e.preventDefault(),this.bar.focus(),this.B=this.h=!0,pI(this,e),this.onChangeStart(),this.onChange(),e.stopPropagation())});this.eventManager.u(document,"mousemove",e=>{this.B&&(pI(this,e),this.onChange())});
+ this.eventManager.u(document,"mouseup",e=>{this.B&&(this.B=!1,this.h&&(this.h=!1,pI(this,e),this.onChangeEnd()))});this.eventManager.u(this.bar,"input",()=>{this.onChange()});navigator.maxTouchPoints>0&&(this.eventManager.u(this.bar,"touchstart",e=>{this.bar.disabled||(this.h=!0,rI(this,e),this.onChangeStart(),e.stopPropagation())}),this.eventManager.u(this.bar,"touchmove",e=>{this.h&&(rI(this,e),this.onChange(),e.stopPropagation())}),this.eventManager.N(this.bar,["touchend","touchcancel"],e=>{this.h&&
 @@ -1559,9 +1559,9 @@ function vI(a){const b=a.F.seekBarColors.chapters;var c=a.controls.H;if(c.length
  a.A?.stop())}}else a.o.style.background="transparent",a.A?.stop()}function wI(a){a.l.style.visibility="hidden"}function xI(a){var b=a.player.sa();b=b.end-b.start;return a.player.ra()&&(b<5||!isFinite(b))?!1:a.ad==null||!a.ad.isLinear()}function yI(a){const b=()=>{tI(a);var c=a.player.sa();c=c.end-c.start;a.player.ra()&&c>5&&a.G.va(.25)};b();a.player.wd()||a.eventManager.ea(a.player,"loaded",b)}
  function zI(a,b){const c=parseFloat(a.bar.min);var d=parseFloat(a.bar.max);d=(a.bar.getBoundingClientRect().width-12)/(d-c);AI(a,(b-c)*d+6,b)}function uI(a,b){return a.length&&b&&b!=="transparent"?a.map(({position:c,width:d})=>d.endsWith("%")?(c=parseFloat(c),d=c+parseFloat(d),`linear-gradient(to right, ${`transparent ${c}%`}, ${`${b} ${c}%`}, ${`${b} ${d}%`}, ${`transparent ${d}%`}) 0 0 / 100% 100% no-repeat`):`linear-gradient(${b}, ${b}) ${c} / ${d} 100% no-repeat`).join(","):"transparent"}
@@ -75,6 +84,23 @@ index b525e966d69c8e891adf54b7349b36add9b5e8b5..a4903b6f95109a8c1a5157e2630b34f6
      }
    }
 
+diff --git a/ui/range_element.js b/ui/range_element.js
+index 88a7135583067f6378054953ab204179566f41e5..cb524a5768880c6cb1691e6e73e0196acea08f85 100644
+--- a/ui/range_element.js
++++ b/ui/range_element.js
+@@ -299,8 +299,10 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
+     // Convert the percentage into a value within the input's range
+     let value = min + percent * (max - min);
+
+-    // Round the value to the nearest step
+-    value = Math.round((value - min) / step) * step + min;
++    // A continuous range must preserve sub-second seeking and hover positions.
++    if (this.bar.step != 'any') {
++      value = Math.round((value - min) / step) * step + min;
++    }
+
+     // Ensure the value stays within the min and max bounds
+     value = Math.min(max, Math.max(min, value));
 diff --git a/ui/seek_bar.js b/ui/seek_bar.js
 index a5f4162b45c06d7ae196fbe163219f07c1ee9780..7e8797e4ce7b313daba6592faac9aebbedb2c49c 100644
 --- a/ui/seek_bar.js

@@ -1,4 +1,4 @@
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 
 export function isCapacitorMobilePlayer() {
@@ -8,9 +8,12 @@ export function isCapacitorMobilePlayer() {
 export function useMobileFullscreenGestures({
   getContainer,
   getControls,
+  getSeekState,
+  seekToTime,
   isFullscreenActive,
   isFullscreenMetadataShown,
   isFullscreenSwipeEnabled,
+  isSeekSwipeEnabled,
   isPlaybackEnded,
   isPlayerSurfaceTarget,
   isScrollMiniPlayerActive,
@@ -27,12 +30,26 @@ export function useMobileFullscreenGestures({
   const mobileFullscreenSwiping = ref(false)
   const mobileFullscreenSwipeSettling = ref(false)
   const mobileFullscreenSwipeOffset = ref(0)
-  const mobileFullscreenSwipeStyle = computed(() => (
-    mobileFullscreenSwiping.value || mobileFullscreenSwipeSettling.value
+  /** @type {import('vue').Ref<{ time: number, seconds: number } | null>} */
+  const mobileSeekPreview = ref(null)
+  /** @type {import('vue').Ref<number | null>} */
+  const mobileMiniPlayerDismissOffset = ref(null)
+  const mobileMiniPlayerDismissSettling = ref(false)
+  const mobileFullscreenSwipeStyle = computed(() => {
+    if (mobileMiniPlayerDismissOffset.value !== null) {
+      return {
+        '--mobile-mini-dismiss-offset': `${mobileMiniPlayerDismissOffset.value}px`,
+        '--mobile-mini-dismiss-duration': mobileMiniPlayerDismissSettling.value ? '140ms' : '0ms',
+      }
+    }
+    return mobileFullscreenSwiping.value || mobileFullscreenSwipeSettling.value
       ? { '--mobile-fullscreen-swipe-offset': `${mobileFullscreenSwipeOffset.value}px` }
       : undefined
-  ))
-  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number } | null} */
+  })
+  /** @type {number | null} */
+  let mobileMiniPlayerDismissTimer = null
+  let mobileMiniPlayerDismissSequence = 0
+  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
@@ -49,6 +66,7 @@ export function useMobileFullscreenGestures({
   let mobilePlayerSuppressClickUntil = 0
   let mobileControlSuppressClickUntil = 0
   let mobileSurfaceSuppressTouchEndUntil = 0
+  let mobileSeekTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
   let mobileFullscreenTitleGesture = null
@@ -60,10 +78,11 @@ export function useMobileFullscreenGestures({
   }
 
   function isSwipeControlTarget(target) {
-    return target instanceof Element && target.closest('.shaka-controls-button-panel, .shaka-play-button, .scrollMiniPlayPause, .scrollMiniPointerLayer, .mobileMiniBarThumbnailReturn') !== null
+    return target instanceof Element && target.closest('.shaka-controls-button-panel, .shaka-play-button, .scrollMiniPlayPause, .scrollMiniPointerLayer, .mobileMiniBarReturn') !== null
   }
 
   function startMobileFullscreenGesture(event) {
+    if (mobileMiniPlayerDismissSettling.value) return
     if (event.pointerType === 'touch' && !event.isPrimary) {
       cancelMobileFullscreenGesture()
       return
@@ -76,6 +95,8 @@ export function useMobileFullscreenGestures({
     ) {
       return
     }
+
+    mobileSeekTouchCancelled = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
@@ -125,6 +146,11 @@ export function useMobileFullscreenGestures({
       action: ['brightness', 'volume', 'speed'].includes(action) ? action : 'disabled',
       adjusting: false,
       height: Math.max(1, bounds?.height ?? 1),
+      width: Math.max(1, bounds?.width ?? 1),
+      seeking: false,
+      seekState: surfaceTap && isSeekSwipeEnabled() && isFullscreenActive() && !shorts && !restoring && !getControls()?.anySettingsMenusAreOpen()
+        ? getSeekState()
+        : null,
     }
   }
 
@@ -147,7 +173,37 @@ export function useMobileFullscreenGestures({
       mobileSurfaceTapTimer = null
       lastMobileSideTap = null
     }
+    // Lock the direction once: horizontal seeking must not turn into a
+    // volume/brightness adjustment or fullscreen exit after sideways drift.
+    if (mobileFullscreenGesture.seekState && !mobileFullscreenGesture.adjusting && !mobileFullscreenSwiping.value &&
+      (mobileFullscreenGesture.seeking || (Math.abs(deltaX) >= 12 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5))) {
+      if (!mobileFullscreenGesture.seeking) {
+        mobileFullscreenGesture.seeking = true
+        clearMobileSeekFeedback()
+        getContainer()?.setPointerCapture(event.pointerId)
+      }
+      const { time: startTime, start, end } = mobileFullscreenGesture.seekState
+      // At most two minutes per player width keeps long videos controllable.
+      const seconds = Math.round(deltaX / mobileFullscreenGesture.width * Math.min(120, end - start))
+      const time = Math.max(start, Math.min(end, startTime + seconds))
+      mobileSeekPreview.value = { time, seconds: time - startTime }
+      event.preventDefault()
+      event.stopPropagation()
+      return true
+    }
     const dragDistance = deltaY * (mobileFullscreenGesture.restoring ? -1 : 1)
+    if (!mobileFullscreenGesture.fullscreen && mobileFullscreenGesture.restoring && !mobileFullscreenGesture.minimizing &&
+      (mobileFullscreenGesture.dismissing || (deltaY >= 8 && deltaY > Math.abs(deltaX) && miniPlayerDrag?.canDismiss()))) {
+      if (!mobileFullscreenGesture.dismissing) {
+        mobileFullscreenGesture.dismissing = true
+        getContainer()?.setPointerCapture(event.pointerId)
+      }
+      mobileFullscreenGesture.distance = Math.max(0, deltaY)
+      mobileMiniPlayerDismissOffset.value = mobileFullscreenGesture.distance
+      event.preventDefault()
+      event.stopPropagation()
+      return true
+    }
     if (!mobileFullscreenGesture.fullscreen && !mobileFullscreenGesture.shorts && mobileFullscreenGesture.action === 'disabled' &&
       (mobileFullscreenGesture.minimizing || (dragDistance >= 8 && dragDistance > Math.abs(deltaX)))) {
       if (!mobileFullscreenGesture.minimizing) {
@@ -244,7 +300,9 @@ export function useMobileFullscreenGestures({
 
     const gesture = mobileFullscreenGesture
     mobileFullscreenGesture = null
-    if (gesture.minimizing) {
+    if (gesture.seeking) {
+      const preview = mobileSeekPreview.value
+      mobileSeekPreview.value = null
       const container = getContainer()
       if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
       mobilePlayerSuppressClickUntil = performance.now() + 350
@@ -252,21 +310,24 @@ export function useMobileFullscreenGestures({
       mobileControlSuppressClickUntil = performance.now() + 350
       event.preventDefault()
       event.stopImmediatePropagation()
-      miniPlayerDrag.finish(gesture.distance >= 64)
+      if (preview && isFullscreenActive() && isSeekSwipeEnabled()) seekToTime(preview.time)
       return true
     }
-    if (gesture.restoring) {
-      const thumbnail = event.target instanceof Element && event.target.closest('.mobileMiniBarThumbnailReturn')
-      if (thumbnail && performance.now() - gesture.startTime <= 450 &&
-        Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY) <= 12) {
-        mobileControlSuppressClickUntil = performance.now() + 350
-        event.preventDefault()
-        event.stopImmediatePropagation()
-        miniPlayerDrag.returnToVideo()
-        return true
-      }
-      return false
+    if (gesture.minimizing || gesture.dismissing) {
+      const container = getContainer()
+      if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
+      mobilePlayerSuppressClickUntil = performance.now() + 350
+      mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+      mobileControlSuppressClickUntil = performance.now() + 350
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      if (gesture.dismissing) settleMobileMiniPlayerDismiss(gesture.distance >= 64, gesture.height)
+      else miniPlayerDrag.finish(gesture.distance >= 64)
+      return true
     }
+    // Restore taps through the button's click, after Android has dispatched it.
+    // Restoring on pointerup can send that click into the newly exposed Watch page.
+    if (gesture.restoring) return false
     if (gesture.adjusting) {
       adjustments.finish()
       const container = getContainer()
@@ -325,10 +386,48 @@ export function useMobileFullscreenGestures({
       mobileFullscreenSwipeSettling.value = false
       if (shouldToggle && isFullscreenActive() === wasFullscreen) {
         Promise.resolve(togglePlayerFullScreen()).then(() => {
-          if (isFullscreenActive() !== wasFullscreen) lightHaptic()
+          if (isFullscreenActive() !== wasFullscreen) {
+            // Restart Shaka's touchmove-stopped idle timer with the fullscreen
+            // delay, without invoking the surface-tap handler on its child.
+            getContainer()?.dispatchEvent(new Event('touchend'))
+            lightHaptic()
+          }
         }).catch(error => console.warn('Fullscreen gesture failed', error))
       }
     }, settleDuration)
+  }
+
+  function clearMobileMiniPlayerDismiss() {
+    mobileMiniPlayerDismissSequence++
+    clearTimeout(mobileMiniPlayerDismissTimer)
+    mobileMiniPlayerDismissTimer = null
+    mobileMiniPlayerDismissOffset.value = null
+    mobileMiniPlayerDismissSettling.value = false
+  }
+
+  function dismissMobileMiniPlayer() {
+    if (mobileMiniPlayerDismissSettling.value || !isScrollMiniPlayerActive() || !miniPlayerDrag?.canDismiss()) return
+    const container = getContainer()
+    if (!container) return
+    settleMobileMiniPlayerDismiss(true, container.getBoundingClientRect().height)
+  }
+
+  function settleMobileMiniPlayerDismiss(commit, height) {
+    const sequence = ++mobileMiniPlayerDismissSequence
+    mobileMiniPlayerDismissSettling.value = true
+    mobileMiniPlayerDismissOffset.value = commit ? height + 96 : 0
+    const duration = miniPlayerDrag.dismissDuration?.() ??
+      (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140)
+    nextTick(() => {
+      if (sequence !== mobileMiniPlayerDismissSequence) return
+      // Start the timeout after Vue applies the transform and the browser
+      // starts its transition, including a close-button dismissal from rest.
+      getContainer()?.getBoundingClientRect()
+      mobileMiniPlayerDismissTimer = window.setTimeout(() => {
+        clearMobileMiniPlayerDismiss()
+        if (commit && isScrollMiniPlayerActive() && miniPlayerDrag.canDismiss()) miniPlayerDrag.dismiss()
+      }, duration)
+    })
   }
 
   function cancelMobileFullscreenGesture(event) {
@@ -337,20 +436,25 @@ export function useMobileFullscreenGestures({
     }
     if (event && event.pointerId !== mobileFullscreenGesture?.pointerId) return false
 
+    clearMobileMiniPlayerDismiss()
+
     clearTimeout(mobileSurfaceTapTimer)
     mobileSurfaceTapTimer = null
     lastMobileSideTap = null
     const wasActive = mobileFullscreenGesture !== null || mobileFullscreenSwiping.value
     if (mobileFullscreenGesture?.minimizing) miniPlayerDrag.finish(false)
-    if (mobileFullscreenGesture?.adjusting) {
-      adjustments.cancel()
+    if (mobileFullscreenGesture?.adjusting || mobileFullscreenGesture?.dismissing || mobileFullscreenGesture?.seeking) {
+      if (mobileFullscreenGesture.seeking) mobileSeekTouchCancelled = true
+      if (mobileFullscreenGesture.adjusting) adjustments.cancel()
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+      mobileControlSuppressClickUntil = performance.now() + 350
     }
     const container = getContainer()
     const pointerId = mobileFullscreenGesture?.pointerId
     if (pointerId !== undefined && container?.hasPointerCapture(pointerId)) container.releasePointerCapture(pointerId)
     mobileFullscreenGesture = null
+    mobileSeekPreview.value = null
     if (mobileFullscreenSwiping.value) settleMobileFullscreenGesture(false, false)
     return wasActive
   }
@@ -439,14 +543,22 @@ export function useMobileFullscreenGestures({
   function handleMobilePlayerTouchEnd(event) {
     if (
       !isCapacitorMobilePlayer() ||
-      performance.now() >= mobileSurfaceSuppressTouchEndUntil
+      (!mobileSeekTouchCancelled && performance.now() >= mobileSurfaceSuppressTouchEndUntil)
     ) {
       return
     }
 
     mobileSurfaceSuppressTouchEndUntil = 0
+    if (mobileSeekTouchCancelled) {
+      mobileSeekTouchCancelled = event.touches?.length > 0
+      mobilePlayerSuppressClickUntil = performance.now() + 350
+      mobileControlSuppressClickUntil = performance.now() + 350
+    }
     event.preventDefault()
     event.stopImmediatePropagation()
+    // Shaka's surface-tap handler is on the child controls container. Notify
+    // only the player container so its touchmove-stopped idle timer resumes.
+    getContainer()?.dispatchEvent(new Event('touchend'))
   }
 
   function handleMobilePlayerSurfaceClick(event) {
@@ -483,12 +595,14 @@ export function useMobileFullscreenGestures({
   }
 
   onUnmounted(() => {
+    clearMobileMiniPlayerDismiss()
     clearMobileSeekFeedback()
     miniPlayerDrag?.cancel()
     adjustments?.cancel()
     clearTimeout(mobileFullscreenSettleTimer)
     clearTimeout(mobileSurfaceTapTimer)
     mobileFullscreenGesture = null
+    mobileSeekPreview.value = null
     mobilePlayerSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileTitleSuppressClickUntil = 0
@@ -499,12 +613,15 @@ export function useMobileFullscreenGestures({
   return {
     cancelMobileFullscreenGesture,
     consumeMobileTitleClickSuppression,
+    dismissMobileMiniPlayer,
     finishMobileFullscreenGesture,
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
+    mobileMiniPlayerDismissSettling,
+    mobileSeekPreview,
     moveMobileFullscreenGesture,
     startMobileFullscreenGesture,
   }

@@ -162,7 +162,7 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
   )
 
   await mockPlaylist(page)
-  await page.route('https://invidious.test/vi/video-00000/mqdefault.jpg', route => route.fulfill({
+  await page.route('https://invidious.test/vi/video-00000/maxresdefault.jpg', route => route.fulfill({
     contentType: 'image/svg+xml',
     body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
   }))
@@ -178,10 +178,10 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
   await expect(savedPlaylistLink).toBeVisible()
   const savedPlaylistCard = savedPlaylistLink
     .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
-  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  const savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
   await expect(savedPlaylistThumbnail).toHaveAttribute(
     'src',
-    'https://invidious.test/vi/video-00000/mqdefault.jpg'
+    'https://invidious.test/vi/video-00000/maxresdefault.jpg'
   )
   await expect.poll(() => savedPlaylistThumbnail.evaluate(image => image.naturalWidth))
     .toBeGreaterThan(0)
@@ -201,6 +201,7 @@ test('saves a YouTube playlist as a read-only link and persists it', async ({ ap
 })
 
 test('keeps the search result thumbnail when saving a playlist', async ({ page }) => {
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   const playlistId = 'search-thumbnail-playlist'
   const searchThumbnailVideoId = 'search-thumbnail-video'
   const firstPlaylistVideoId = 'first-playlist-video'
@@ -233,8 +234,8 @@ test('keeps the search result thumbnail when saving a playlist', async ({ page }
   const searchResultLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
   const searchResultCard = searchResultLink
     .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
-  const searchResultThumbnail = searchResultCard.locator('img.thumbnailImage')
-  const expectedThumbnail = `https://invidious.test/vi/${searchThumbnailVideoId}/mqdefault.jpg`
+  const searchResultThumbnail = searchResultCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
+  const expectedThumbnail = `https://invidious.test/vi/${searchThumbnailVideoId}/maxresdefault.jpg`
   await expect(searchResultThumbnail).toHaveAttribute('src', expectedThumbnail)
 
   await searchResultLink.click()
@@ -244,11 +245,12 @@ test('keeps the search result thumbnail when saving a playlist', async ({ page }
   const savedPlaylistLink = page.getByRole('link', { name: 'Playlist with search thumbnail' }).last()
   const savedPlaylistCard = savedPlaylistLink
     .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
-  await expect(savedPlaylistCard.locator('img.thumbnailImage'))
+  await expect(savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)'))
     .toHaveAttribute('src', expectedThumbnail)
 })
 
 test('refreshes saved playlist metadata after opening the playlist again', async ({ app, page }) => {
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   const playlistId = 'dynamic-saved-playlist'
   let firstVideoId = 'original-first-video'
   let videoCount = 1
@@ -296,10 +298,10 @@ test('refreshes saved playlist metadata after opening the playlist again', async
   await goTo(page, 'userplaylists')
 
   let savedPlaylistCard = getSavedPlaylistCard()
-  let savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  let savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
   await expect(savedPlaylistThumbnail).toHaveAttribute(
     'src',
-    'https://invidious.test/vi/original-first-video/mqdefault.jpg'
+    'https://invidious.test/vi/original-first-video/maxresdefault.jpg'
   )
   await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('1')
 
@@ -320,13 +322,13 @@ test('refreshes saved playlist metadata after opening the playlist again', async
   await goTo(page, 'userplaylists')
 
   savedPlaylistCard = getSavedPlaylistCard()
-  savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage')
+  savedPlaylistThumbnail = savedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
   await expect(savedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
   await expect(savedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
   await expect(savedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
   await expect(savedPlaylistThumbnail).toHaveAttribute(
     'src',
-    'https://invidious.test/vi/original-first-video/mqdefault.jpg'
+    'https://invidious.test/vi/original-first-video/maxresdefault.jpg'
   )
   await expect(savedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
 
@@ -335,16 +337,20 @@ test('refreshes saved playlist metadata after opening the playlist again', async
   await expect(page.getByText('Playlist video 1', { exact: true })).toBeVisible()
   await goTo(page, 'userplaylists')
 
-  const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/mqdefault.jpg'
+  const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/maxresdefault.jpg'
   await expect(savedPlaylistThumbnail).toHaveAttribute('src', updatedThumbnailUrl)
 
+  // Restore an image-free route so thumbnails cannot fail before the new
+  // page's fixture is installed, then open the persisted playlist cards.
+  await goTo(page, 'history')
   ;({ page } = await app.relaunch())
+  await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   await goTo(page, 'userplaylists')
   const persistedPlaylistCard = getSavedPlaylistCard()
   await expect(persistedPlaylistCard.locator('.h3Title')).toHaveText(playlistTitle)
   await expect(persistedPlaylistCard.locator('.channelNameText')).toHaveText(channelName)
   await expect(persistedPlaylistCard.locator('.channelName')).toHaveAttribute('href', `#/channel/${channelId}`)
-  await expect(persistedPlaylistCard.locator('img.thumbnailImage'))
+  await expect(persistedPlaylistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)'))
     .toHaveAttribute('src', updatedThumbnailUrl)
   await expect(persistedPlaylistCard.locator('.videoCountContainer')).toHaveText('5')
   await expect(page.evaluate(id => {
@@ -488,20 +494,20 @@ test.describe('saved playlist thumbnails', () => {
   })
 
   test('loads a saved playlist thumbnail through the active local backend', async ({ page }) => {
-    await page.route('https://i.ytimg.com/vi/saved-video/mqdefault.jpg', route => route.fulfill({
+    await page.route('https://i.ytimg.com/vi/saved-video/maxresdefault.jpg', route => route.fulfill({
       contentType: 'image/svg+xml',
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="9"/>',
     }))
-    await page.route('https://invidious.test/vi/saved-video/mqdefault.jpg', route => route.abort())
+    await page.route('https://invidious.test/vi/saved-video/maxresdefault.jpg', route => route.abort())
 
     await goTo(page, 'userplaylists')
 
     const playlistCard = page.getByRole('link', { name: 'Saved local playlist' })
       .locator('xpath=ancestor::div[contains(@class, "ft-list-item")]')
-    const thumbnail = playlistCard.locator('img.thumbnailImage')
+    const thumbnail = playlistCard.locator('img.thumbnailImage:not(.retryImagePlaceholder)')
     await expect(thumbnail).toHaveAttribute(
       'src',
-      'https://i.ytimg.com/vi/saved-video/mqdefault.jpg'
+      'https://i.ytimg.com/vi/saved-video/maxresdefault.jpg'
     )
     await expect.poll(() => thumbnail.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   })

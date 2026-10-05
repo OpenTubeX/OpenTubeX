@@ -59,7 +59,7 @@
 }
 
 .selectedTab {
-  border-block-end: 3px solid var(--primary-color);
+  border-block-end: 3px solid transparent;
   color: var(--primary-text-color);
   font-weight: bold;
   box-sizing: border-box;
@@ -67,6 +67,7 @@
 }
 
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -77,6 +78,16 @@
   font-size: 1.1em;
   cursor: pointer;
   align-self: stretch;
+}
+
+.selectedTab::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -3px;
+  block-size: 3px;
+  border-radius: calc(1.5px * var(--ui-roundness));
+  background-color: var(--primary-color);
 }
 
 .tab:hover {

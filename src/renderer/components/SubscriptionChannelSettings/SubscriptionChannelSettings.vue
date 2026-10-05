@@ -19,11 +19,133 @@
     <div class="channelSettingsHeader">
       <FtInput
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="searchQuery = $event"
       />
+      <div
+        v-if="channels.length > 0"
+        class="channelSelectionToolbar"
+      >
+        <div class="channelSelectionSummary">
+          <p
+            :id="`${id}-selection-summary`"
+            aria-live="polite"
+          >
+            {{ selectedChannelCountText }}
+          </p>
+          <div class="channelSelectionActions">
+            <FtButton
+              :disabled="visibleChannels.length === 0 || allVisibleChannelsSelected"
+              @click="selectAllVisibleChannels"
+            >
+              <span>{{ t('Profile.Select All') }}</span>
+              <FtIcon
+                class="channelSelectionActionIcon"
+                :icon="['fas', 'check']"
+                aria-hidden="true"
+              />
+            </FtButton>
+            <FtButton
+              :disabled="selectedChannelIds.size === 0"
+              @click="clearChannelSelection"
+            >
+              <span>{{ t('Profile.Select None') }}</span>
+              <FtIcon
+                class="channelSelectionActionIcon"
+                :icon="['fas', 'xmark']"
+                aria-hidden="true"
+              />
+            </FtButton>
+          </div>
+        </div>
+        <div
+          v-if="selectedChannelIds.size > 0"
+          class="bulkFeedTypeSettings"
+          role="group"
+          :aria-labelledby="`${id}-selection-summary ${id}-bulk-feed-types`"
+        >
+          <p
+            :id="`${id}-bulk-feed-types`"
+            class="settingLabel"
+          >
+            {{ t('Channel.Show in subscription feed') }}
+          </p>
+          <div class="feedTypeOptions bulkFeedTypeOptions">
+            <button
+              v-for="feedType in feedTypes"
+              :key="feedType.id"
+              type="button"
+              class="feedTypeOption"
+              :class="{
+                enabled: selectedFeedTypeStates[feedType.id] === true,
+                mixed: selectedFeedTypeStates[feedType.id] === 'mixed'
+              }"
+              role="checkbox"
+              :aria-checked="selectedFeedTypeStates[feedType.id]"
+              @click="updateSelectedFeedType(feedType.id)"
+            >
+              <FtIcon
+                :icon="feedType.icon"
+                aria-hidden="true"
+              />
+              <span>{{ feedType.label }}</span>
+              <FtIcon
+                v-if="selectedFeedTypeStates[feedType.id] === true"
+                class="feedTypeCheck"
+                :icon="['fas', 'check']"
+                aria-hidden="true"
+              />
+              <span
+                v-else-if="selectedFeedTypeStates[feedType.id] === 'mixed'"
+                class="feedTypeMixedIndicator"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+          <div class="bulkAdditionalSettings">
+            <button
+              v-if="restrictedPlaybackConfigured"
+              type="button"
+              class="bulkMembersOnlySetting"
+              :class="{
+                enabled: selectedMembersOnlyState === true,
+                mixed: selectedMembersOnlyState === 'mixed'
+              }"
+              role="checkbox"
+              :aria-checked="selectedMembersOnlyState"
+              @click="updateSelectedShowMembersOnly"
+            >
+              <span class="bulkMembersOnlyLabel">
+                {{ t('Search Listing.Label.Members Only') }}
+              </span>
+              <FtIcon
+                v-if="selectedMembersOnlyState === true"
+                class="bulkSettingCheck"
+                :icon="['fas', 'check']"
+                aria-hidden="true"
+              />
+              <span
+                v-else-if="selectedMembersOnlyState === 'mixed'"
+                class="feedTypeMixedIndicator"
+                aria-hidden="true"
+              />
+            </button>
+            <FtSelect
+              class="bulkDailyLimitSelect"
+              :placeholder="t('Channel.Videos per day')"
+              :value="selectedDailyLimitValue"
+              :select-names="bulkLimitNames"
+              :select-values="bulkLimitValues"
+              :icon="['fas', 'clock']"
+              @change="updateSelectedChannelLimit"
+            />
+          </div>
+        </div>
+      </div>
     </div>
     <div
       ref="channelSettingsScroller"
@@ -31,126 +153,6 @@
       class="channelSettingsScroller"
     >
       <div ref="channelSettingsContent">
-        <div
-          v-if="channels.length > 0"
-          class="channelSelectionToolbar"
-        >
-          <div class="channelSelectionSummary">
-            <p
-              :id="`${id}-selection-summary`"
-              aria-live="polite"
-            >
-              {{ selectedChannelCountText }}
-            </p>
-            <div class="channelSelectionActions">
-              <FtButton
-                :disabled="visibleChannels.length === 0 || allVisibleChannelsSelected"
-                @click="selectAllVisibleChannels"
-              >
-                <span>{{ t('Profile.Select All') }}</span>
-                <FtIcon
-                  class="channelSelectionActionIcon"
-                  :icon="['fas', 'check']"
-                  aria-hidden="true"
-                />
-              </FtButton>
-              <FtButton
-                :disabled="selectedChannelIds.size === 0"
-                @click="clearChannelSelection"
-              >
-                <span>{{ t('Profile.Select None') }}</span>
-                <FtIcon
-                  class="channelSelectionActionIcon"
-                  :icon="['fas', 'xmark']"
-                  aria-hidden="true"
-                />
-              </FtButton>
-            </div>
-          </div>
-          <div
-            v-if="selectedChannelIds.size > 0"
-            class="bulkFeedTypeSettings"
-            role="group"
-            :aria-labelledby="`${id}-selection-summary ${id}-bulk-feed-types`"
-          >
-            <p
-              :id="`${id}-bulk-feed-types`"
-              class="settingLabel"
-            >
-              {{ t('Channel.Show in subscription feed') }}
-            </p>
-            <div class="feedTypeOptions bulkFeedTypeOptions">
-              <button
-                v-for="feedType in feedTypes"
-                :key="feedType.id"
-                type="button"
-                class="feedTypeOption"
-                :class="{
-                  enabled: selectedFeedTypeStates[feedType.id] === true,
-                  mixed: selectedFeedTypeStates[feedType.id] === 'mixed'
-                }"
-                role="checkbox"
-                :aria-checked="selectedFeedTypeStates[feedType.id]"
-                @click="updateSelectedFeedType(feedType.id)"
-              >
-                <FtIcon
-                  :icon="feedType.icon"
-                  aria-hidden="true"
-                />
-                <span>{{ feedType.label }}</span>
-                <FtIcon
-                  v-if="selectedFeedTypeStates[feedType.id] === true"
-                  class="feedTypeCheck"
-                  :icon="['fas', 'check']"
-                  aria-hidden="true"
-                />
-                <span
-                  v-else-if="selectedFeedTypeStates[feedType.id] === 'mixed'"
-                  class="feedTypeMixedIndicator"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
-            <div class="bulkAdditionalSettings">
-              <button
-                v-if="restrictedPlaybackConfigured"
-                type="button"
-                class="bulkMembersOnlySetting"
-                :class="{
-                  enabled: selectedMembersOnlyState === true,
-                  mixed: selectedMembersOnlyState === 'mixed'
-                }"
-                role="checkbox"
-                :aria-checked="selectedMembersOnlyState"
-                @click="updateSelectedShowMembersOnly"
-              >
-                <span class="bulkMembersOnlyLabel">
-                  {{ t('Search Listing.Label.Members Only') }}
-                </span>
-                <FtIcon
-                  v-if="selectedMembersOnlyState === true"
-                  class="bulkSettingCheck"
-                  :icon="['fas', 'check']"
-                  aria-hidden="true"
-                />
-                <span
-                  v-else-if="selectedMembersOnlyState === 'mixed'"
-                  class="feedTypeMixedIndicator"
-                  aria-hidden="true"
-                />
-              </button>
-              <FtSelect
-                class="bulkDailyLimitSelect"
-                :placeholder="t('Channel.Videos per day')"
-                :value="selectedDailyLimitValue"
-                :select-names="bulkLimitNames"
-                :select-values="bulkLimitValues"
-                :icon="['fas', 'clock']"
-                @change="updateSelectedChannelLimit"
-              />
-            </div>
-          </div>
-        </div>
         <p
           v-if="channels.length === 0"
           class="emptyState"
@@ -193,6 +195,7 @@
               </button>
               <FtRetryImage
                 v-if="channel.thumbnail"
+                :fallback-icon="['fas', 'circle-user']"
                 class="channelThumbnail"
                 :src="channel.thumbnail"
                 alt=""

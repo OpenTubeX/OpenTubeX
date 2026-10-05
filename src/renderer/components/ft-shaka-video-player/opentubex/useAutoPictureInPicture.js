@@ -58,7 +58,7 @@ export function useAutoPictureInPicture({
     return isActiveTab.value || isCrossTabMiniPlayerPresented?.value === true
   })
   const autoPictureInPictureTriggers = computed(() => store.getters.getAutoPictureInPictureTriggers)
-  const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)
+  const mobileAutoPictureInPicture = computed(() => store.getters.getMobileAutoPictureInPicture)
 
   const triggerOnTabChange = computed(() => !store.getters.getKeepPlayingOnNavigation && autoPictureInPictureTriggers.value.includes('tab'))
   const triggerOnMinimize = computed(() => autoPictureInPictureTriggers.value.includes('minimize'))
@@ -124,7 +124,7 @@ export function useAutoPictureInPicture({
       const isPresented = isAndroidPictureInPictureTarget.value
       const enabled = resolveAndroidAutoPictureInPictureUpdate(
         isPresented,
-        androidAutoPictureInPicture.value,
+        mobileAutoPictureInPicture.value,
         props.format,
         videoElement,
         { wasPresented: wasAndroidPictureInPictureTarget }
@@ -266,7 +266,7 @@ export function useAutoPictureInPicture({
     if (process.env.IS_IOS) {
       removeIosBackgroundListener = bindIosAutoPictureInPicture({
         getVideo: () => video.value,
-        isEnabled: () => androidAutoPictureInPicture.value &&
+        isEnabled: () => mobileAutoPictureInPicture.value &&
           isAndroidPictureInPictureTarget.value && props.format !== 'audio'
       })
     } else if (process.env.IS_CAPACITOR) {
@@ -349,7 +349,7 @@ export function useAutoPictureInPicture({
   }
 
   watch([autoPictureInPictureTriggers, triggerOnTabChange], updateAutoPip)
-  watch(androidAutoPictureInPicture, updateAutoPip)
+  watch(mobileAutoPictureInPicture, updateAutoPip)
   watch(isAndroidPictureInPictureTarget, updateAutoPip)
 
   return {

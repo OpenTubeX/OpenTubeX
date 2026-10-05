@@ -263,6 +263,11 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 在縮圖上向左滑動
+      Right: 在縮圖上向右滑動
+      Description: 在影片縮圖上水平滑動並放開，即可執行所選操作。
+    Data Saver Thumbnails: "節省流量的縮圖"
     Use tray icon: "使用系統匣圖示"
     Close to system tray: "關閉時縮小至系統匣"
     Tray required for background refresh: "啟用背景重新整理訂閱時，必須顯示系統匣圖示。"
@@ -270,7 +275,9 @@ Settings:
     Swipe to refresh: 下拉重新整理
     Blur Thumbnails: 模糊縮圖
     Navigation:
-      Show Active Subscriptions: 顯示活躍訂閱
+      Always Show Navigation Bar: 導覽列位於底部時一律顯示
+      Compact Tab Labels: 導覽列位於底部時使用精簡配置
+      Show Active Subscriptions: 在側邊欄顯示活躍訂閱
       Navigation: 導覽
       Customize Navigation: 自訂導覽
       Add Item: 新增項目
@@ -352,6 +359,8 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Compact Mobile Mini Player: "精簡行動迷你播放器"
+    Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
@@ -433,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 淺色"
-      OpenTubeX Dark: "OpenTubeX 深色"
+      Ocean Light: "Ocean 淺色"
+      Ocean Dark: "Ocean 深色"
       Custom: 自訂
     Light Theme: 淺色主題
     Dark Theme: 深色主題
@@ -619,6 +628,8 @@ Settings:
     Preload Upcoming Videos: "預先載入後續影片"
     Upcoming Videos to Preload: "要預先載入的影片數量"
     Concurrent Preloads: "同時預先載入數量"
+    Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
+    Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -655,9 +666,9 @@ Settings:
     Update Managed Tools: 更新
     Managed Tools Download Error Template: '無法下載由應用程式管理的工具：{errors}'
     Download Folder: 下載資料夾
-    Global Additional yt-dlp Arguments: 全域額外 yt-dlp 引數
+    Global Additional yt-dlp Arguments: 附加 yt-dlp 參數
     Concurrent Downloads: 同時下載數量
-    Bandwidth Limit: 頻寬限制（KiB/s，0 表示不限速）
+    Bandwidth Limit: 頻寬限制 (KiB/s)
     Choose Download Folder: 選擇下載資料夾
     Download Templates: 下載範本
     Manage Download Templates: 管理下載範本（{templateCount}）
@@ -730,8 +741,8 @@ Settings:
       Automatic: 自動更新
       Ask: 更新前詢問
       Manual: 僅手動更新
-    yt-dlp Executable Path: yt-dlp 執行檔路徑
-    FFmpeg Executable Path: FFmpeg 執行檔路徑
+    yt-dlp Executable Path: yt-dlp 執行檔
+    FFmpeg Executable Path: FFmpeg 執行檔
     Restricted Playback Authentication: "yt-dlp Cookie"
     Cookie Source: Cookie 來源
     Cookie Sources:
@@ -964,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
     Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。
     Description: '透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、個人檔案、播放清單、觀看記錄及支援的設定。LibreTube 伺服器可能不支援所有同步功能。'
-    Server URL: 伺服器 URL
+    Server URL: 同步伺服器 URL
     Checking Server: 正在檢查同步伺服器…
     Server Unavailable: 無法連線至此同步伺服器。請檢查 URL 後再試一次。
     Username: 使用者名稱
@@ -1053,7 +1064,7 @@ Settings:
     Open All Tabs Confirmation: "開啟所有分頁？"
     Server Update Required: "請更新此伺服器以支援加密即時同步。"
   Proxy Settings:
-    IP Block Recovery Script Path: IP 封鎖復原指令碼路徑
+    IP Block Recovery Script Path: IP 封鎖復原指令碼
     Select IP Block Recovery Script File: 選取 IP 封鎖復原指令碼檔案
     Running IP block recovery script: 正在執行 IP 封鎖復原指令碼
     IP block recovery script failed: 'IP 封鎖復原指令碼執行失敗（結束代碼：{exitCode}）'
@@ -1062,7 +1073,7 @@ Settings:
     Failed to select IP block recovery script: 無法選取 IP 封鎖復原指令碼
   SponsorBlock Settings:
     Enable SponsorBlock Submission: 啟用 SponsorBlock 提交功能
-    SponsorBlock Private User ID (optional): SponsorBlock 私人使用者 ID（選填）
+    SponsorBlock Private User ID (optional): 私人使用者 ID（選用）
     SponsorBlock Private User ID Tooltip: 貼上瀏覽器擴充功能中的 SponsorBlock 私人使用者 ID。留空即可使用應用程式產生的 ID。
     Generated SponsorBlock User ID: 產生的 SponsorBlock 使用者 ID
     Generated SponsorBlock User ID Tooltip: 此應用程式產生的 SponsorBlock 使用者 ID 可用於瀏覽器擴充功能，或在其他電腦上使用本應用程式時使用。
@@ -1074,7 +1085,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: 啟用 Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike API 網址（預設為 https://ryd-proxy.kavin.rocks）
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: 密碼不正確
     Unlock: 解鎖
@@ -1115,6 +1126,21 @@ About:
   Matrix: Matrix
   Email: 電子郵件
 Profile:
+  Customization: 自訂
+  Manage Profile Subscriptions: 管理個人資料的訂閱
+  Icon Names:
+    Person: 人物
+    People: 人群
+    Headphones: 耳機
+    Gaming: 遊戲
+    Film: 電影
+    Art: 藝術
+    Science: 科學
+    Globe: 地球
+    Heart: 愛心
+    Sun: 太陽
+    Moon: 月亮
+    Trophy: 獎盃
   Profile Icon: 個人檔案圖示
   Choose an Emoji: 選擇表情符號
   Custom Emoji: 自訂表情符號
@@ -1299,12 +1325,16 @@ Video:
     Hide: 隱藏
     Show: 顯示
     Scroll Mini Player:
+      Collapse Controls: "收合控制項"
+      Expand Controls: "展開控制項"
       Back to Top: 返回頂端
       Return to Video Tab: 返回影片分頁
       Hide: 隱藏迷你播放器
       Play: 播放
       Pause: 暫停
       Drag Handle: 移動迷你播放器
+      Rewind 10 seconds: 倒轉10秒
+      Forward 10 seconds: 快轉10秒
     SponsorBlock:
       CancelCurrentSegment: 取消建立片段
       ClearSegments: 清除片段
@@ -1441,6 +1471,7 @@ Share:
   Share failed: "無法分享連結"
   Timestamp Link Copied: 已將時間戳記連結複製到剪貼簿
 Context Menu:
+  Open in a Background Tab: "在背景分頁中開啟"
   Select Tab: 選取分頁
   Close Tabs Before: 關閉之前的分頁
   Close Tabs After: 關閉之後的分頁
@@ -1503,6 +1534,8 @@ Context Menu:
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
 Tab Organizer:
+  Tab History: "分頁歷史紀錄"
+  Current Page: "目前頁面"
   Icon Labels:
     Podcast: '播客'
     Clock: '時鐘'
@@ -1599,6 +1632,7 @@ Description:
   Games: 遊戲
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
     Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
     Stream Extraction Method: |
@@ -1642,6 +1676,7 @@ Tooltips:
     Preload Upcoming Videos: "取得並快取後續影片的 yt-dlp 串流網址。佇列優先於播放清單和推薦。"
     Upcoming Videos to Preload: "在背景取得 yt-dlp 串流網址的後續影片數量上限。"
     Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
+    Ignore System Rotation Lock for Fullscreen: 透過轉動裝置進入和退出全螢幕，即使 Android 的自動旋轉已關閉。
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。
@@ -1805,8 +1840,8 @@ Downloads:
   File Name Template: 檔案名稱範本
   File Name Template Help: '可用欄位：{title}、{author}、{upload_date}、{id}、{playlist}、{playlist_index}、{ext}'
   Time Range and Chapters: 時間範圍與章節
-  Start Time: 開始時間 (HH:MM:SS)
-  End Time: 結束時間 (HH:MM:SS)
+  Start Time: 開始時間
+  End Time: 結束時間
   Split by Chapters: 依章節分割成個別檔案
   Remove Segments: 移除片段
   Subtitles and Metadata: 字幕與中繼資料
@@ -1892,3 +1927,40 @@ Tray:
 Tray Icon:
   Title: "系統匣圖示"
   Follow App Theme: "跟隨應用程式主題"
+
+Form Inputs:
+  Enter Password Hint: "輸入你的密碼"
+  Choose Password Hint: "設定密碼"
+  Confirm Password Hint: "再次輸入新密碼"
+  Encryption Passphrase Hint: "輸入你的加密通關密語"
+  Show Password: "顯示密碼"
+  Hide Password: "隱藏密碼"
+  Search Text Hint: "輸入搜尋詞"
+  Playlist Description Hint: "描述此播放清單"
+  Filename Preview: "檔案名稱預覽"
+  Enter Channels: "輸入頻道"
+  Enter Text: "輸入文字"
+  Video URL: 影片或播放清單 URL
+  Paste Link: 貼上影片或播放清單連結
+  Example: 例如：{example}
+  No Minimum: 無最小值
+  No Maximum: 無最大值
+  Any Age: 不限發佈時間
+  Included Terms Example: 例如：教學, 評測
+  Excluded Terms Example: 例如：預告片, 預覽
+  Download Folder Hint: 留空以使用下載資料夾
+  Global Arguments Hint: 所有下載的選用參數
+  Unlimited Hint: 0 表示不限速
+  Add Argument: 新增參數
+  Template Name Example: 例如：僅音訊
+  Download Arguments Hint: 此次下載的選用參數
+  Generated ID Hint: 留空以產生 ID
+  Default Value: 預設值：{value}
+
+Search Filters:
+  Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"
+
+Storage Startup Error:
+  Title: "無法載入應用程式資料"
+  Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
+  Retry: "重試"

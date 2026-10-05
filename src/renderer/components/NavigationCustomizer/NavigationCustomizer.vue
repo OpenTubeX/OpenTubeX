@@ -11,6 +11,7 @@
 
   <FtSettingsSubpage
     :open="open"
+    grow-with-content
     :title="t('Settings.General Settings.Navigation.Customize Navigation')"
     :icon="['fas', 'bars']"
     @close="close"
@@ -122,44 +123,32 @@
         />
         <span>{{ item.label }}</span>
         <div class="itemActions">
-          <button
-            type="button"
+          <FtIconButton
             class="itemAction"
-            :aria-label="t('Home Page.Move section up', { section: item.label })"
             :title="t('Home Page.Move section up', { section: item.label })"
             :disabled="index === 0"
+            :icon="['fas', 'arrow-up']"
+            :use-shadow="false"
+            theme="base"
             @click="moveItem(item.id, -1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-up']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="itemAction"
-            :aria-label="t('Home Page.Move section down', { section: item.label })"
             :title="t('Home Page.Move section down', { section: item.label })"
             :disabled="index === selectedItems.length - 1"
+            :icon="['fas', 'arrow-down']"
+            :use-shadow="false"
+            theme="base"
             @click="moveItem(item.id, 1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-down']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="itemAction"
-            :aria-label="`${t('Search Bar.Remove')} ${item.label}`"
             :title="`${t('Search Bar.Remove')} ${item.label}`"
+            :icon="['fas', 'xmark']"
+            :use-shadow="false"
+            theme="base"
             @click="removeItem(item.id)"
-          >
-            <FtIcon
-              :icon="['fas', 'xmark']"
-              aria-hidden="true"
-            />
-          </button>
+          />
         </div>
       </li>
     </ul>
@@ -171,7 +160,24 @@
     >
       {{ reorderStatus }}
     </p>
-    <div class="fixedNavigationOptions">
+    <div
+      ref="fixedNavigationOptionsRef"
+      class="fixedNavigationOptions"
+    >
+      <FtToggleSwitch
+        :label="t('Settings.General Settings.Navigation.Always Show Navigation Bar')"
+        :compact="true"
+        :default-value="alwaysShowNavigationBar"
+        setting-key="alwaysShowNavigationBar"
+        @change="store.dispatch('updateAlwaysShowNavigationBar', $event)"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.General Settings.Navigation.Compact Tab Labels')"
+        :compact="true"
+        :default-value="compactNavigationLabels"
+        setting-key="compactNavigationLabels"
+        @change="store.dispatch('updateCompactNavigationLabels', $event)"
+      />
       <FtToggleSwitch
         :label="t('Settings.General Settings.Navigation.Show Active Subscriptions')"
         :compact="true"
@@ -183,6 +189,7 @@
 </template>
 
 <script setup>
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -212,7 +219,9 @@ const itemPickerId = `navigation-item-picker-${useId().replaceAll(':', '')}`
 const itemPickerAnchorRef = useTemplateRef('itemPickerAnchorRef')
 const itemPickerListRef = useTemplateRef('itemPickerListRef')
 const itemPickerContentRef = useTemplateRef('itemPickerContentRef')
+const fixedNavigationOptionsRef = useTemplateRef('fixedNavigationOptionsRef')
 let itemPickerResizeObserver = null
+let navigationResizeObserver = null
 
 const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
   .filter(item => !item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API)
@@ -224,6 +233,8 @@ const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
 const catalogById = computed(() => new Map(catalog.value.map(item => [item.id, item])))
 const navigationItems = computed(() => store.getters.getNavigationItems)
 const hideActiveSubscriptions = computed(() => store.getters.getHideActiveSubscriptions)
+const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 const isDefaultNavigation = computed(() => (
   navigationItems.value.length === DEFAULT_NAVIGATION_ITEMS.length &&
   navigationItems.value.every((id, index) => id === DEFAULT_NAVIGATION_ITEMS[index])
@@ -283,6 +294,23 @@ function stopObservingItemPicker() {
   itemPickerResizeObserver = null
 }
 
+function clampNavigationScroll() {
+  const content = fixedNavigationOptionsRef.value?.parentElement
+  const scroller = content?.closest('.settingsSubpageScroll')
+  if (scroller) clampOverlayScrollTop(scroller, content)
+}
+
+watch(fixedNavigationOptionsRef, (options) => {
+  navigationResizeObserver?.disconnect()
+  navigationResizeObserver = null
+  if (!options) return
+
+  navigationResizeObserver = new ResizeObserver(clampNavigationScroll)
+  navigationResizeObserver.observe(options.parentElement)
+  navigationResizeObserver.observe(options.closest('.settingsSubpageScroll'))
+  clampNavigationScroll()
+})
+
 watch(itemPickerOpen, async (isOpen) => {
   stopObservingItemPicker()
   if (!isOpen) return
@@ -299,6 +327,7 @@ watch(itemPickerOpen, async (isOpen) => {
 onMounted(() => document.addEventListener('pointerdown', closeItemPickerFromOutside))
 onBeforeUnmount(() => {
   stopObservingItemPicker()
+  navigationResizeObserver?.disconnect()
   document.removeEventListener('pointerdown', closeItemPickerFromOutside)
 })
 
@@ -482,12 +511,17 @@ function resetItems() {
 }
 
 .fixedNavigationOptions {
+  align-items: stretch;
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
   inline-size: 100%;
+  margin-block-end: 20px;
   margin-block-start: 8px;
   margin-inline: auto;
   max-inline-size: 720px;
+  padding-block: 8px;
   padding-inline: 12px;
 }
 
@@ -499,7 +533,7 @@ function resetItems() {
 .selectedItem.dropAfter::after {
   background: var(--primary-color);
   block-size: 3px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   content: '';
   inset-inline: 0;
   position: absolute;
@@ -540,29 +574,6 @@ function resetItems() {
 .itemActions {
   align-self: stretch;
   display: flex;
-}
-
-.itemAction {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
-  color: var(--secondary-text-color);
-  cursor: pointer;
-  display: flex;
-  inline-size: 44px;
-  justify-content: center;
-}
-
-.itemAction:hover:not(:disabled),
-.itemAction:focus-visible {
-  background: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.itemAction:disabled {
-  cursor: default;
-  opacity: 0.35;
 }
 
 .reorderStatus {

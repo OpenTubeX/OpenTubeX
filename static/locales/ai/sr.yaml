@@ -273,6 +273,11 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Превлачење улево по сличицама
+      Right: Превлачење удесно по сличицама
+      Description: Превуците водоравно преко сличице видеа и отпустите да бисте извршили изабрану радњу.
+    Data Saver Thumbnails: "Сличице за уштеду података"
     Use tray icon: "Користи икону у системској палети"
     Close to system tray: "Затвори у системску палету"
     Tray required for background refresh: "Икона у системској палети је потребна док је омогућено освежавање претплата у позадини."
@@ -280,7 +285,9 @@ Settings:
     Swipe to refresh: Превуците за освежавање
     Blur Thumbnails: Замагли сличице
     Navigation:
-      Show Active Subscriptions: Прикажи активне претплате
+      Always Show Navigation Bar: Увек прикажи траку за навигацију када је на дну
+      Compact Tab Labels: Компактна трака за навигацију када је на дну
+      Show Active Subscriptions: Прикажи активне претплате у бочној траци
       Navigation: Навигација
       Customize Navigation: Прилагоди навигацију
       Add Item: Додај ставку
@@ -362,6 +369,8 @@ Settings:
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактни мобилни мини-плејер"
+    Always Show Mobile Search Bar: "Увек приказуј траку за претрагу на телефону"
     Frosted Glass Player UI: "Интерфејс плејера са ефектом мат стакла"
     Move Downloads to App Header: Премести преузимања у заглавље апликације
     Move Settings to App Header: Премести подешавања у заглавље апликације
@@ -428,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светла"
-      OpenTubeX Dark: "OpenTubeX Тамна"
+      Ocean Light: "Ocean Светла"
+      Ocean Dark: "Ocean Тамна"
       Custom: Прилагођена
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светла тема
@@ -641,6 +650,8 @@ Settings:
     Preload Upcoming Videos: "Учитај следеће видео-снимке унапред"
     Upcoming Videos to Preload: "Број снимака за учитавање унапред"
     Concurrent Preloads: "Истовремена предучитавања"
+    Ignore System Rotation Lock for Fullscreen: Занемари системско закључавање ротације за цео екран
+    Swipe Left or Right to Seek in Fullscreen: Превуците налево или надесно за премотавање преко целог екрана
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -677,9 +688,9 @@ Settings:
     Update Managed Tools: Ажурирај
     Managed Tools Download Error Template: 'Није могуће преузети алате којима управља апликација: {errors}'
     Download Folder: Фасцикла за преузимање
-    Global Additional yt-dlp Arguments: Додатни глобални аргументи за yt-dlp
+    Global Additional yt-dlp Arguments: Додатни yt-dlp аргументи
     Concurrent Downloads: Истовремена преузимања
-    Bandwidth Limit: Ограничење протока (KiB/s, 0 за неограничено)
+    Bandwidth Limit: Ограничење протока (KiB/s)
     Choose Download Folder: Изабери фасциклу за преузимање
     Download Templates: Шаблони за преузимање
     Manage Download Templates: Управљај шаблонима за преузимање ({templateCount})
@@ -752,8 +763,8 @@ Settings:
       Automatic: Ажурирај аутоматски
       Ask: Питај пре ажурирања
       Manual: Ажурирај само ручно
-    yt-dlp Executable Path: Путања до извршне датотеке за yt-dlp
-    FFmpeg Executable Path: Путања до извршне датотеке за FFmpeg
+    yt-dlp Executable Path: Извршна датотека yt-dlp
+    FFmpeg Executable Path: Извршна датотека FFmpeg
     Restricted Playback Authentication: "yt-dlp колачићи"
     Cookie Source: Извор колачића
     Cookie Sources:
@@ -1003,7 +1014,7 @@ Settings:
     Enhanced Privacy Enabled: Побољшана приватност је омогућена. Сервер чува само шифроване податке синхронизације.
     Enhanced Privacy Unsupported: Упозорење — овај сервер не подржава побољшану приватност. Синхронизовани подаци су видљиви администратору сервера.
     Description: 'Синхронизујте претплате, профиле, плејлисте, историју гледања и подржана подешавања са OpenTubeX или LibreTube сервером за синхронизацију. LibreTube сервери можда не подржавају све функције синхронизације.'
-    Server URL: URL сервера
+    Server URL: URL сервера за синхронизацију
     Checking Server: Провера сервера за синхронизацију…
     Server Unavailable: Повезивање са овим сервером за синхронизацију није могуће. Проверите URL и покушајте поново.
     Username: Корисничко име
@@ -1094,7 +1105,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Корисничко име за прокси
     Proxy Password: Лозинка за прокси
-    IP Block Recovery Script Path: Путања скрипте за опоравак од IP блокаде
+    IP Block Recovery Script Path: Скрипта за опоравак од блокирања IP-а
     Select IP Block Recovery Script File: Изабери датотеку скрипте за опоравак од IP блокаде
     Running IP block recovery script: Покретање скрипте за опоравак од IP блокаде
     IP block recovery script failed: 'Скрипта за опоравак од IP блокаде није успела (излазни кôд: {exitCode})'
@@ -1106,7 +1117,7 @@ Settings:
       Excluded Channels: "Изузети канали"
       Tooltip: "Унесите ID канала да се SponsorBlock сегменти не прескачу у његовим видео-снимцима. ID мора да се подудара тачно и разликује велика и мала слова."
     Enable SponsorBlock Submission: Омогући слање у SponsorBlock
-    SponsorBlock Private User ID (optional): Приватни SponsorBlock кориснички ID (опционално)
+    SponsorBlock Private User ID (optional): Приватни кориснички ID (опционо)
     SponsorBlock Private User ID Tooltip: Налепите приватни SponsorBlock кориснички ID из проширења прегледача. Оставите празно да бисте користили ID који је направила апликација.
     Generated SponsorBlock User ID: SponsorBlock кориснички ID који је направила апликација
     Generated SponsorBlock User ID Tooltip: Овај SponsorBlock кориснички ID који је направила апликација може да се користи у проширењу прегледача или при коришћењу апликације на другом рачунару.
@@ -1118,7 +1129,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Омогући Return YouTube Dislike
-    Return YouTube Dislike Url: URL за Return YouTube Dislike API (подразумевано је https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API-ја
   Parental Control Settings:
     Disable Channel Links: Онемогући везе ка каналима
   Password Dialog:
@@ -1166,6 +1177,21 @@ About:
   Please read the {roomRulesLink}: Прочитајте {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX постоји захваљујући {creditsPageLink}
 Profile:
+  Customization: Прилагођавање
+  Manage Profile Subscriptions: Управљај претплатама профила
+  Icon Names:
+    Person: Особа
+    People: Људи
+    Headphones: Слушалице
+    Gaming: Игре
+    Film: Филм
+    Art: Уметност
+    Science: Наука
+    Globe: Глобус
+    Heart: Срце
+    Sun: Сунце
+    Moon: Месец
+    Trophy: Трофеј
   Profile Icon: Икона профила
   Choose an Emoji: Изабери емоџи
   Custom Emoji: Прилагођени емоџи
@@ -1355,12 +1381,16 @@ Video:
     Hide: Сакриј
     Show: Прикажи
     Scroll Mini Player:
+      Collapse Controls: "Скупи контроле"
+      Expand Controls: "Прошири контроле"
       Back to Top: Назад на врх
       Return to Video Tab: Назад на картицу видео-снимка
       Hide: Сакриј мини-плејер
       Play: Репродукуј
       Pause: Паузирај
       Drag Handle: Помери мини-плејер
+      Rewind 10 seconds: Премотај 10 секунди уназад
+      Forward 10 seconds: Премотај 10 секунди унапред
     SponsorBlock:
       CancelCurrentSegment: Откажи прављење сегмента
       ClearSegments: Обриши сегменте
@@ -1505,6 +1535,7 @@ Share:
   Share Post: Подели објаву
   Timestamp Link Copied: Веза до временске ознаке је копирана у привремену меморију
 Context Menu:
+  Open in a Background Tab: "Отвори у картици у позадини"
   Select Tab: Изабери картицу
   Close Tabs Before: Затвори претходне картице
   Close Tabs After: Затвори следеће картице
@@ -1567,6 +1598,8 @@ Context Menu:
   Search With Multiple: Претражи помоћу…
   Selection Too Long: Избор је предугачак за претрагу (> {count} знакова)
 Tab Organizer:
+  Tab History: "Историја картице"
+  Current Page: "Тренутна страница"
   Icon Labels:
     Podcast: 'Подкаст'
     Clock: 'Сат'
@@ -1667,6 +1700,7 @@ Description:
   Games: Игре
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."
     Use AI Translation Completions: Попуни празнине у људским преводима текстом који је генерисала вештачка интелигенција. Људски преводи увек имају предност.
     Update Relative Timestamps: Ажурира релативне временске ознаке у целој апликацији док је страница отворена. Када је искључено, ажурирају се тек након поновног учитавања или повратка на страницу.
     Stream Extraction Method: |
@@ -1710,6 +1744,7 @@ Tooltips:
     Preload Upcoming Videos: "Преузима и кешира yt-dlp адресе следећих снимака. Ред има предност над плејлистама и препорукама."
     Upcoming Videos to Preload: "Највећи број следећих снимака чије се yt-dlp адресе преузимају у позадини."
     Concurrent Preloads: "Највећи број yt-dlp процеса који се користе за истовремено предучитавање видео-снимака. Веће вредности користе више процесора, меморије и мрежног протока."
+    Ignore System Rotation Lock for Fullscreen: Физички окрените уређај за улазак и излазак из целог екрана, чак и када је аутоматска ротација у Андроиду искључена.
   Download Settings:
     Download Folder: Видео-снимци се чувају у овој фасцикли. Оставите празно да бисте користили системску фасциклу за преузимања.
     Global Additional yt-dlp Arguments: Додатни аргументи командне линије који се прослеђују програму yt-dlp при сваком преузимању, на пример --cookies-from-browser firefox.
@@ -1877,8 +1912,8 @@ Downloads:
   File Name Template: Шаблон назива датотеке
   File Name Template Help: 'Доступна поља: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Временски опсег и поглавља
-  Start Time: Почетно време (HH:MM:SS)
-  End Time: Завршно време (HH:MM:SS)
+  Start Time: Почетно време
+  End Time: Завршно време
   Split by Chapters: Подели поглавља у засебне датотеке
   Remove Segments: Уклони сегменте
   Subtitles and Metadata: Титлови и метаподаци
@@ -1967,3 +2002,40 @@ Tray:
 Tray Icon:
   Title: "Икона у системској палети"
   Follow App Theme: "Прати тему апликације"
+
+Form Inputs:
+  Enter Password Hint: "Унесите своју лозинку"
+  Choose Password Hint: "Изаберите лозинку"
+  Confirm Password Hint: "Поновите нову лозинку"
+  Encryption Passphrase Hint: "Унесите своју фразу за шифровање"
+  Show Password: "Прикажи лозинку"
+  Hide Password: "Сакриј лозинку"
+  Search Text Hint: "Унесите појмове за претрагу"
+  Playlist Description Hint: "Опишите ову листу за репродукцију"
+  Filename Preview: "Преглед назива датотеке"
+  Enter Channels: "Унесите канале"
+  Enter Text: "Унесите текст"
+  Video URL: URL видеа или плејлисте
+  Paste Link: Налепите везу до видеа или плејлисте
+  Example: нпр. {example}
+  No Minimum: Без минимума
+  No Maximum: Без максимума
+  Any Age: Било која старост
+  Included Terms Example: нпр. упутство, рецензија
+  Excluded Terms Example: нпр. трејлер, преглед
+  Download Folder Hint: Оставите празно да користите фасциклу Преузимања
+  Global Arguments Hint: Опциони аргументи за свако преузимање
+  Unlimited Hint: 0 за неограничено
+  Add Argument: Додајте аргумент
+  Template Name Example: нпр. Само звук
+  Download Arguments Hint: Опциони аргументи за ово преузимање
+  Generated ID Hint: Оставите празно да генеришете ID
+  Default Value: "Подразумевано: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Претрага са подешеним колачићима није успела."
+
+Storage Startup Error:
+  Title: "Није могуће учитати податке апликације"
+  Message: "Ослободите простор на уређају и покушајте поново. Синхронизација је паузирана док се ваши подаци не учитају."
+  Retry: "Покушај поново"

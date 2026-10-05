@@ -82,7 +82,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { addKeyboardShortcutToActionTitle } from '../../helpers/utils'
-import { useTabLifecycle } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 
 const props = defineProps({
   disableRefresh: {
@@ -226,9 +226,11 @@ const refreshFeedButtonTitle = computed(() => {
 })
 
 const emit = defineEmits(['cancel', 'click'])
+const { isTabPresented } = useTabContext()
 
 useTabLifecycle({
   pullToRefresh(request) {
+    if (isTabPresented && !isTabPresented.value) return
     request.handled = true
     if (!props.disableRefresh && !props.refreshInProgress) {
       emit('click')

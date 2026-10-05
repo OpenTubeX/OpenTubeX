@@ -19,6 +19,13 @@
           class="headingActions"
         >
           <FtButton
+            class="historyActionButton"
+            :label="t('History.Delete Old History')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="showHistoryCleanupPrompt = true"
+          />
+          <FtButton
             ref="repairAction"
             class="historyActionButton"
             :label="t('History.Repair')"
@@ -34,13 +41,6 @@
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
             @click="showMarkAllPrompt = true"
-          />
-          <FtButton
-            class="historyActionButton"
-            :label="t('History.Delete Old History')"
-            :icon="['fas', 'trash']"
-            theme="destructive"
-            @click="showHistoryCleanupPrompt = true"
           />
         </div>
       </div>
@@ -102,7 +102,9 @@
         ref="searchBar"
         class="historySearch"
         input-type="search"
-        :placeholder="t('History.Search bar placeholder')"
+        :label="t('History.Search bar placeholder')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="query"
         @input="handleQueryChange"
@@ -122,6 +124,7 @@
           />
         </div>
         <FtSelect
+          size-to-content
           class="sortSelect"
           :placeholder="t('Global.Sort By')"
           :value="sortBy"
@@ -276,7 +279,9 @@
           />
           <FtInput
             v-if="historyCleanupPeriod === 'custom'"
-            :placeholder="t('History.Number of Days')"
+            :label="t('History.Number of Days')"
+            :icon="['fas', 'calendar-days']"
+            placeholder="30"
             input-type="number"
             :value="customHistoryCleanupDays"
             :show-action-button="false"
@@ -328,7 +333,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { needsHistoryRepair } from '../../../historyRepair'
-import { filterVideosWithQuery } from '../../helpers/historySearch'
+import { filterVideosWithQueryAsync } from '../../helpers/historySearch'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -559,17 +564,25 @@ function increaseLimit() {
   }
 }
 
-function filterHistory() {
+let searchGeneration = 0
+async function filterHistory() {
   filterHistoryAsync.cancel()
-  isSearching.value = false
+  const generation = ++searchGeneration
   if (query.value.trim().length === 0) {
+    isSearching.value = false
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
     clampHistoryScroll()
     return
   }
 
-  const filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value)
+  isSearching.value = true
+  const filteredQuery = await filterVideosWithQueryAsync(
+    historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value,
+    () => generation !== searchGeneration,
+  )
+  if (!filteredQuery || generation !== searchGeneration) return
+  isSearching.value = false
 
   const filteredResultCount = filteredQuery.length
 
@@ -590,6 +603,7 @@ function clampHistoryScroll() {
 const filterHistoryAsync = debounce(filterHistory, 250)
 
 function scheduleHistorySearch() {
+  searchGeneration++
   isSearching.value = true
   clampHistoryScroll()
   filterHistoryAsync()
@@ -653,6 +667,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  searchGeneration++
   filterHistoryAsync.cancel()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })

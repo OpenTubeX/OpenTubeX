@@ -7,8 +7,16 @@
   margin-inline: auto;
 }
 
+.headingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .headingText {
-  display: inline-block;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .playlistList {
@@ -25,9 +33,7 @@
 }
 
 .newPlaylistButton {
-  margin-inline-start: 0.5em;
-  display: inline-block;
-  vertical-align: middle;
+  flex: 0 0 auto;
 }
 
 .searchInputsRow {

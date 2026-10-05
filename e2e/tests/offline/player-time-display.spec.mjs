@@ -1,5 +1,5 @@
 import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -9,6 +9,322 @@ test.use({
       ytDlpPlaybackEngineDefaultMigration: true,
       showPlaybackRateAdjustedTimestamp: true
     }
+  }
+})
+
+test('autoplay keeps its original compact switch geometry', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+  const toggle = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
+  const track = toggle.locator('.ft-autoplay-switch')
+  const thumb = track.locator('.ft-autoplay-switch-thumb')
+  await expect.soft(track).toHaveCSS('width', '36px', { timeout: 1000 })
+  await expect.soft(track).toHaveCSS('height', '18px', { timeout: 1000 })
+  for (const checked of [false, true]) {
+    if ((await toggle.getAttribute('aria-pressed') === 'true') !== checked) await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', String(checked))
+    await expect.soft(thumb).toHaveCSS('width', '16px', { timeout: 1000 })
+    await expect.soft(thumb).toHaveCSS('height', '16px', { timeout: 1000 })
+  }
+})
+
+test('autoplay track and thumb keep their synchronized transitions', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  const button = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    const transitions = await button.evaluate(element => {
+      const duration = (selector, property) => {
+        const style = getComputedStyle(element.querySelector(selector))
+        const index = style.transitionProperty.split(',').map(value => value.trim()).indexOf(property)
+        return index < 0 ? 0 : Number.parseFloat(style.transitionDuration.split(',')[index])
+      }
+      return {
+        track: duration('.ft-autoplay-switch', 'background-color'),
+        thumb: duration('.ft-autoplay-switch-thumb', 'transform'),
+      }
+    })
+    expect(transitions.track).toBeGreaterThan(0)
+    expect(transitions.track).toBe(transitions.thumb)
+    const checked = await button.getAttribute('aria-pressed') === 'true'
+    await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', String(!checked))
+  }
+})
+
+test('download options fit horizontally and its Cancel button retains a border', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+  const prompt = page.locator('.downloadPromptCard')
+  await expect(prompt).toBeVisible()
+  const advanced = prompt.locator('.advancedDownloadOptions')
+  if (!await advanced.evaluate(element => element.open)) await advanced.locator('summary').click()
+  const scroller = prompt.locator('.downloadOptions')
+  expect.soft(await scroller.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  const clipped = await scroller.evaluate(element => {
+    const viewport = element.getBoundingClientRect()
+    return Array.from(element.querySelectorAll('.switch-label, .ft-input, .inputIndicators, .select-text'))
+      .map(control => ({ className: control.className, text: control.textContent.trim(), right: control.getBoundingClientRect().right - viewport.right }))
+      .filter(control => control.right > 1)
+  })
+  expect.soft(clipped).toEqual([])
+  const cancel = prompt.getByRole('button', { name: 'Cancel', exact: true })
+  expect.soft(await cancel.evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
+})
+
+test('player controls, overlays, tooltips and captions follow the app font in both themes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await page.route('**/api/videoLabels/**', route => route.fulfill({ status: 404 }))
+  await page.route('**/api/skipSegments/**', route => route.fulfill({
+    json: [{
+      videoID: 'jNQXAC9IVRw',
+      segments: [{
+        UUID: 'typography-highlight',
+        actionType: 'poi',
+        category: 'poi_highlight',
+        segment: [15, 15],
+        videoDuration: 30,
+        votes: 1,
+        locked: 0,
+        description: ''
+      }]
+    }]
+  }))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setUseSponsorBlock', true)
+    store.commit('setSponsorBlockHighlight', { color: '#ff1684', skip: 'promptToSkip' })
+    store.commit('setEnableSubtitlesByDefault', true)
+    store.commit('setUseQuickPlaybackSpeedBar', true)
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.playbackRate = 2
+    element.pause()
+  })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const label = player.locator('.ft-shaka-highlight-button-label')
+  const caption = player.locator('.shaka-text-container [translate="no"]').first()
+  await expect(caption).toBeVisible()
+  await expect(player.locator('.ft-quick-playback-rate-button:not(.shaka-hidden)').first()).toBeVisible()
+
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    for (const scale of [1, 1.25]) {
+      const font = scale === 1 ? 'Geist Variable' : 'Inter Variable'
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value), font)
+      const appFont = await page.locator('body').evaluate(element => getComputedStyle(element).fontFamily)
+      expect(appFont).toContain(font)
+      await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await expect(label).toBeVisible()
+      await expect(label).toHaveText('Skip to Highlight? (Enter)')
+      const typography = await player.evaluate(element => {
+        const properties = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'fontVariantNumeric', 'textRendering', 'letterSpacing']
+        const read = selector => {
+          const style = getComputedStyle(element.querySelector(selector))
+          return Object.fromEntries(properties.map(property => [property, style[property]]))
+        }
+        return {
+          timestamp: read('.ft-time-display-group > .shaka-current-time'),
+          adjustedTimestamp: read('.ft-playback-adjusted-time'),
+          highlight: read('.ft-shaka-highlight-button-label')
+        }
+      })
+      expect(typography.highlight).toEqual(typography.timestamp)
+      expect(typography.adjustedTimestamp).toEqual(typography.timestamp)
+      expect(typography.timestamp.fontFamily).toBe(appFont)
+      await expect(player).toHaveCSS('font-family', appFont)
+      await expect(caption).toHaveCSS('font-family', appFont)
+      // Shaka recreates cues after resizing; create and measure inline-font ruby text together.
+      const captionFonts = await caption.evaluate(element => {
+        const originalFont = element.style.fontFamily
+        element.style.fontFamily = 'serif'
+        const ruby = document.createElement('ruby')
+        ruby.style.fontFamily = 'serif'
+        ruby.textContent = '漢字'
+        const annotation = document.createElement('rt')
+        annotation.style.fontFamily = 'serif'
+        annotation.textContent = 'かんじ'
+        ruby.appendChild(annotation)
+        element.appendChild(ruby)
+        const fonts = [element, ruby, annotation].map(node => getComputedStyle(node).fontFamily)
+        ruby.remove()
+        element.style.fontFamily = originalFont
+        return fonts
+      })
+      expect(captionFonts).toEqual([appFont, appFont, appFont])
+      const mismatchedFonts = await player.evaluate((element, expectedFont) => {
+        const selectors = 'button, input, select, textarea, .ft-chapters-current-title, .playerFullscreenTitleOverlay, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark'
+        return [...element.querySelectorAll(selectors)].flatMap(node => {
+          const family = getComputedStyle(node).fontFamily
+          return family === expectedFont ? [] : [{ element: node.className, family }]
+        })
+      }, appFont)
+      expect(mismatchedFonts).toEqual([])
+
+      // The wrapped mute control and Shaka's regular/status tooltips use separate rules.
+      for (const selector of ['.shaka-mute-button', '.shaka-fullscreen-button']) {
+        const button = player.locator(selector).first()
+        await button.hover()
+        expect(await button.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      }
+      const settingsButton = player.locator('.shaka-overflow-menu-button')
+      await settingsButton.click()
+      const playbackRate = player.locator('.shaka-overflow-menu .shaka-playbackrate-button')
+      await playbackRate.hover()
+      expect(await playbackRate.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      await playbackRate.click()
+      await expect(player.locator('.shaka-playback-rates:not(.shaka-hidden)')).toBeVisible()
+      await player.locator('.shaka-playback-rates .shaka-back-to-overflow-button').click()
+      await settingsButton.click()
+    }
+  }
+})
+
+test('changing fonts remeasures paused controls and clipped menu labels without resizing', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.playbackRate = 2
+    element.pause()
+  })
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+  const setFont = async font => {
+    await page.evaluate(async value => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value)
+      // Force styles to resolve before waiting for the selected bundled font.
+      document.querySelector('.ftVideoPlayer').getBoundingClientRect()
+      await document.fonts.ready
+    }, font)
+  }
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+    await player.evaluate(element => { element.style.width = '1600px' })
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    const widths = []
+    for (const font of ['Source Sans 3 Variable', 'Plus Jakarta Sans Variable']) {
+      await setFont(font)
+      // Locate each font's compact-layout threshold by resizing before the regression.
+      let compactWidth = 300
+      let fullWidth = 1200
+      for (let step = 0; step < 10; step++) {
+        const width = (compactWidth + fullWidth) / 2
+        const compact = await player.evaluate(async (element, value) => {
+          element.style.width = `${value}px`
+          for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame)
+          return element.querySelector('.shaka-controls-button-panel').classList.contains('ft-controls-compact-chapters')
+        }, width)
+        if (compact) compactWidth = width
+        else fullWidth = width
+      }
+      widths.push({ font, width: fullWidth })
+    }
+    widths.sort((a, b) => a.width - b.width)
+    const [narrow, wide] = widths
+    expect(wide.width - narrow.width).toBeGreaterThan(2)
+    await setFont(wide.font)
+    await player.evaluate((element, width) => { element.style.width = `${width}px` }, (wide.width + narrow.width) / 2)
+    await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
+    await setFont(narrow.font)
+    await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
+    await setFont(wide.font)
+    await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
+
+    await panel.locator('.shaka-overflow-menu-button').click()
+    const menuLabel = player.locator('.shaka-overflow-menu .shaka-playbackrate-button .shaka-overflow-button-label > span:not(.shaka-current-selection-span)').first()
+    const labelText = (await menuLabel.textContent()).trim()
+    const labelWidths = []
+    for (const font of [narrow.font, wide.font]) {
+      await setFont(font)
+      labelWidths.push(await menuLabel.evaluate(element => {
+        const style = getComputedStyle(element)
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+        return context.measureText(element.textContent).width
+      }))
+    }
+    expect(labelWidths[1] - labelWidths[0]).toBeGreaterThan(1)
+    await menuLabel.evaluate((element, width) => {
+      element.style.inlineSize = `${width}px`
+      element.style.whiteSpace = 'nowrap'
+      // Shaka's text mutations start the initial measurement.
+      element.textContent = element.textContent.trim()
+    }, (labelWidths[0] + labelWidths[1]) / 2)
+    await expect(menuLabel).toHaveAttribute('title', labelText)
+    await setFont(narrow.font)
+    await expect(menuLabel).not.toHaveAttribute('title')
+    await setFont(wide.font)
+    await expect(menuLabel).toHaveAttribute('title', labelText)
+    await panel.locator('.shaka-overflow-menu-button').click()
+  }
+})
+
+test('portrait mobile controls keep captions and PiP in settings when the row is crowded', async ({ app, page }) => {
+  await page.locator('.app').evaluate(element => {
+    const applyMobileClasses = () => {
+      if (!element.classList.contains('capacitorTabs')) element.classList.add('capacitorTabs')
+      if (!element.classList.contains('capacitorPhoneLayout')) element.classList.add('capacitorPhoneLayout')
+    }
+    new MutationObserver(applyMobileClasses).observe(element, { attributeFilter: ['class'] })
+    applyMobileClasses()
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
+    await player.evaluate(element => { element.style.width = '360px' })
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    await expect(panel.locator('.caption-toggle-button')).toHaveCount(1)
+    await expect(panel).toHaveClass(/ft-controls-overflow-captions/)
+    await expect(panel.locator('.caption-toggle-button')).toBeHidden()
+    await expect(panel.locator('.shaka-pip-button')).toBeHidden()
+    await expect(panel.locator('.shaka-fullscreen-button')).toBeVisible()
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
+    await panel.locator('.shaka-overflow-menu-button').click()
+    const menu = player.locator('.shaka-overflow-menu')
+    await expect(menu.getByRole('button', { name: 'Captions' })).toBeVisible()
+    await expect(menu.locator('.shaka-pip-button')).toBeVisible()
+    await menu.getByRole('button', { name: 'Captions' }).click()
+    await expect(player.locator('.shaka-text-languages')).toBeVisible()
+    await expect(menu.locator('.shaka-pip-button')).toBeHidden()
+    await player.locator('.shaka-text-languages .shaka-back-to-overflow-button').click()
+    await panel.locator('.shaka-overflow-menu-button').click()
+
+    const rateBar = panel.locator('.ft-quick-playback-rate-bar')
+    const endOffset = await rateBar.evaluate(element => {
+      element.scrollLeft = element.scrollWidth
+      return element.scrollLeft
+    })
+    expect(endOffset).toBeGreaterThan(0)
+    await player.evaluate(element => { element.style.width = '1600px' })
+    await expect(panel).not.toHaveClass(/ft-controls-overflow-(pip|captions)/)
+    await expect(panel.locator('.caption-toggle-button')).toBeVisible()
+    await expect(panel.locator('.shaka-pip-button')).toBeVisible()
+    // Wide layouts leave surplus space after the content-sized speed presets.
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(0)
+    await expect.poll(() => panel.evaluate(element => Math.abs(element.getBoundingClientRect().right - element.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right))).toBeLessThan(1)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollLeft)).toBe(0)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)
   }
 })
 
@@ -94,22 +410,55 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
   }
 })
 
-test('paused video shows replay after seeking to the end with End', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
-  await expect(video).toHaveJSProperty('paused', true)
+for (const shorterSeekRange of [false, true]) {
+  test(`paused video shows replay after seeking to the end with End${shorterSeekRange ? ' before the media duration' : ''}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const watch = await page.evaluateHandle(findWatchComponent)
+    const replayPath = await watch.evaluate(component => component.refs.player.$.setupState.replayIcon)
+    const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+    const replayIcon = playButton.locator(':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')
+    const morphIcon = playButton.locator('.ft-play-pause-morph-icon')
 
-  await page.keyboard.press('End')
+    if (shorterSeekRange) {
+      // Adaptive streams can have a seek range ending before the media duration.
+      // Use Shaka's real range configuration to reproduce that state offline.
+      await video.evaluate(element => element.ui.getControls().getPlayer().configure({ playRangeEnd: Math.floor(element.duration) - 0.25 }))
+    }
 
-  const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
-  await expect(video).toHaveJSProperty('ended', true)
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+    for (const frosted of [true, false]) {
+      await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      await video.evaluate(element => element.pause())
+      await expect(video).toHaveJSProperty('paused', true)
 
-  await playButton.click({ force: true })
-  await expect(video).toHaveJSProperty('paused', false)
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
-})
+      await page.keyboard.press('End')
+      await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().isEnded())).toBe(true)
+      await expect(video).toHaveJSProperty('ended', !shorterSeekRange)
+      await expect(playButton).toHaveAccessibleName('Replay')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+      await expect(replayIcon).toHaveCSS('opacity', '1')
+      await expect(replayIcon.locator('path')).toHaveAttribute('d', replayPath)
+      await expect(morphIcon).toHaveCSS('opacity', '0')
+
+      await page.keyboard.press('Home')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'play')
+      await expect(replayIcon).toHaveCSS('opacity', '0')
+      await expect(morphIcon).toHaveCSS('opacity', '1')
+
+      await page.keyboard.press('End')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+      await expect(replayIcon).toHaveCSS('opacity', '1')
+      await expect(replayIcon.locator('path')).toHaveAttribute('d', replayPath)
+      await playButton.click({ force: true })
+      await expect(video).toHaveJSProperty('paused', false)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(5)
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
+      await expect(replayIcon).toHaveCSS('opacity', '0')
+      await expect(morphIcon).toHaveCSS('opacity', '1')
+    }
+    await watch.dispose()
+  })
+}
 
 test('bottom control pills share the volume-to-timestamp spacing', async ({ app, page, attachScreenshot }) => {
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
@@ -151,6 +500,9 @@ test('player controls share pill surfaces and the time display toggles together'
     element.pause()
   })
   await expect(page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')).toHaveCSS('opacity', '0')
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+  // Pill colors inherit the controls' animated fade, so compare them once it finishes.
+  await expect.poll(() => page.locator('.shaka-controls-button-panel').evaluate(element => getComputedStyle(element).getPropertyValue('--ft-controls-fade').trim())).toBe('1')
 
   const group = page.locator('.ft-time-display-group')
   const regular = group.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')
@@ -173,7 +525,8 @@ test('player controls share pill surfaces and the time display toggles together'
 
   const background = await group.evaluate(element => getComputedStyle(element).backgroundImage)
   const glassBackground = await group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)
-  expect(background).not.toBe('none')
+  expect(background).toBe('none')
+  expect(glassBackground).not.toBe('none')
   await adjusted.hover()
   await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(glassBackground)
   const hoveredPillColor = await group.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
@@ -194,7 +547,7 @@ test('player controls share pill surfaces and the time display toggles together'
   await regular.click()
   await expect(regular).toHaveText(initial)
   await page.mouse.move(1, 1)
-  await expect.poll(() => group.evaluate(element => getComputedStyle(element).backgroundImage), { timeout: 3000 }).toBe(background)
+  await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage), { timeout: 3000 }).toBe(glassBackground)
   await page.keyboard.press('Tab')
   await regular.focus()
   await expect.poll(() => regular.evaluate(element => element.matches(':focus-visible'))).toBe(true)
@@ -230,7 +583,7 @@ test('player controls share pill surfaces and the time display toggles together'
     return (icon.left + icon.right) / 2 - group.left - 24
   })
   expect(Math.abs(expandedIconOffset)).toBeLessThan(1)
-  await expect.poll(() => volumeGroup.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')
+  await expect.poll(() => volumeGroup.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')
   const volumeIconGap = await volumeGroup.evaluate(element => {
     const icon = element.querySelector('.shaka-mute-button .shaka-ui-icon').getBoundingClientRect()
     const slider = element.querySelector('.shaka-volume-bar-container').getBoundingClientRect()
@@ -252,8 +605,8 @@ test('player controls share pill surfaces and the time display toggles together'
   expect(rightHoverColors.length).toBeGreaterThan(1)
   expect(rightHoverColors[0]).not.toBe(rightHoverColors[1])
   expect(new Set(rightHoverColors.slice(1)).size).toBe(1)
-  const rightHoverPillSize = /^17px 34px, calc\(100% - 34px\) 34px, 17px 34px, /
-  await expect(page.locator('.shaka-controls-button-panel > .autoplay-toggle')).toHaveCSS('background-size', rightHoverPillSize)
+  await expect(page.locator('.autoplay-toggle > .ft-control-glass')).toHaveCSS('border-radius', '17px')
+  await expect(page.locator('.autoplay-toggle > .ft-control-glass')).toHaveCSS('height', '34px')
   const rightBaseColors = await page.locator('.shaka-controls-button-panel > .shaka-spacer ~ button:not(.shaka-hidden)').evaluateAll(buttons =>
     buttons.map(button => getComputedStyle(button).getPropertyValue('--ft-control-pill-color').trim())
   )
@@ -282,8 +635,8 @@ test('player controls share pill surfaces and the time display toggles together'
   expect(settingsHoverColors[1]).not.toBe(settingsHoverColors[0])
   expect(new Set(settingsHoverColors.filter((_, index) => index !== 1)).size).toBe(1)
   await expect(page.locator('.shaka-overflow-menu-button > .ft-control-glass')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')).toHaveCSS('background-size', rightHoverPillSize)
-  await expect(page.locator('.shaka-controls-button-panel > .shaka-fullscreen-button')).toHaveCSS('background-size', rightHoverPillSize)
+  await expect(page.locator('.shaka-overflow-menu-button > .ft-control-glass')).toHaveCSS('border-radius', '17px')
+  await expect(page.locator('.shaka-fullscreen-button > .ft-control-glass')).toHaveCSS('height', '34px')
   const rightPillOpacitiesOnHover = await page.locator('.shaka-controls-button-panel > .shaka-spacer ~ button:not(.shaka-hidden)').evaluateAll(buttons =>
     buttons.map(button => getComputedStyle(button).opacity)
   )
@@ -313,6 +666,41 @@ test('player controls share pill surfaces and the time display toggles together'
     const alignment = await measureRightGlassAlignment()
     return Math.max(Math.abs(alignment.start), Math.abs(alignment.end))
   }).toBeLessThan(1)
+})
+
+test('right control highlights respond immediately while retaining the row fade', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const button = page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')
+  const glass = button.locator('.ft-control-glass')
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await button.hover()
+  // Hover/focus opacity must switch immediately; only row visibility fades.
+  const transition = await glass.evaluate(element => getComputedStyle(element).transitionProperty)
+  expect(transition.split(',').map(property => property.trim())).not.toContain('opacity')
+  await expect(glass).toHaveCSS('opacity', '1')
+  await expect(glass).toHaveCSS('filter', 'opacity(1)')
+  const fade = await page.locator('.shaka-controls-container').evaluate(element => {
+    element.removeAttribute('casting')
+    element.removeAttribute('shown')
+    for (const animation of element.getAnimations({ subtree: true })) {
+      if (!(animation instanceof CSSTransition)) continue
+      animation.pause()
+      animation.currentTime = 300
+    }
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const highlight = panel.querySelector('.shaka-overflow-menu-button > .ft-control-glass')
+    return {
+      highlightOpacity: Number(getComputedStyle(highlight).filter.match(/opacity\(([^)]+)\)/)[1]),
+      rowOpacity: Number(getComputedStyle(panel.querySelector('.ft-right-control-glass')).opacity),
+    }
+  })
+  expect(fade.highlightOpacity).toBeGreaterThan(0)
+  expect(fade.highlightOpacity).toBeLessThan(1)
+  expect(fade.highlightOpacity).toBeCloseTo(fade.rowOpacity, 2)
+  await page.mouse.move(1, 1)
+  await expect(glass).toHaveCSS('opacity', '0')
 })
 
 test('control glass stays blurred throughout the row fade', async ({ app, page }) => {
@@ -388,6 +776,50 @@ test('reduced motion hides control glass without a fade', async ({ app, page }) 
   })
   expect(hidden).toEqual({ transition: 'none', visibility: 'hidden', glassOpacity: '0' })
 })
+
+for (const scale of [1, 1.25]) {
+  test(`hiding a shorter stacked timestamp restores the full layout at ${scale * 100}% UI scale`, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => {
+      element.pause()
+      element.playbackRate = 10
+    })
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    const panel = page.locator('.shaka-controls-button-panel')
+    await panel.evaluate(element => {
+      // Model a long video whose regular timestamp is wider than its
+      // speed-adjusted timestamp, without depending on the fixture duration.
+      const regular = element.querySelector('.shaka-current-time:not(.ft-playback-adjusted-time)')
+      const adjusted = element.querySelector('.ft-playback-adjusted-time')
+      regular.style.inlineSize = '240px'
+      adjusted.style.inlineSize = '120px'
+    })
+
+    const setWidth = width => panel.evaluate(async (element, width) => {
+      element.style.width = `${width}px`
+      // Let resize observation and the scheduled layout finish even under load.
+      for (let frame = 0; frame < 3; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
+      return element.classList.contains('ft-controls-stack-times')
+    }, width)
+    let compactWidth = 100
+    let fullWidth = 2000
+    for (let index = 0; index < 12; index++) {
+      const width = (compactWidth + fullWidth) / 2
+      if (await setWidth(width)) compactWidth = width
+      else fullWidth = width
+    }
+    // Avoid landing on the fractional-pixel boundary found by the search.
+    await setWidth(compactWidth - 4)
+    await expect(panel).toHaveClass(/ft-controls-stack-times/)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
+    await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
+    await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
+  })
+}
 
 test('volume pill collapses after dragging its slider and leaving', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

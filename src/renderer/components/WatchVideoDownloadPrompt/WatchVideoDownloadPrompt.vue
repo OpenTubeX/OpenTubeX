@@ -37,20 +37,21 @@
           />
           <FtIconButton
             v-if="isDirty"
-            class="saveTemplateButton"
+            class="templateActionButton"
             :title="t('Downloads.Save Template')"
             :icon="['fas', 'save']"
             theme="secondary"
             @click="openSaveTemplatePrompt"
           />
+          <FtIconButton
+            v-if="!isDirty && selectedCustomTemplate !== undefined"
+            class="templateActionButton"
+            :title="t('Downloads.Delete Template')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="deleteTemplate"
+          />
         </div>
-        <FtButton
-          v-if="!isDirty && selectedCustomTemplate !== undefined"
-          :label="t('Downloads.Delete Template')"
-          :icon="['fas', 'trash']"
-          theme="destructive"
-          @click="deleteTemplate"
-        />
       </section>
     </template>
     <div class="downloadPromptContent">
@@ -106,7 +107,9 @@
             <section class="optionSection">
               <FtInput
                 class="fullWidth"
-                :placeholder="t('Downloads.File Name Template')"
+                :icon="['fas', 'file-lines']"
+                :label="t('Downloads.File Name Template')"
+                placeholder="{title}.{ext}"
                 :tooltip="fileNameTemplateHelp"
                 :show-action-button="false"
                 :show-label="true"
@@ -117,17 +120,27 @@
 
             <section class="optionSection">
               <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
-              <div class="optionGrid segmentGrid">
+              <div class="segmentGrid">
                 <FtInput
-                  :placeholder="t('Downloads.Start Time')"
+                  :icon="['fas', 'clock']"
+                  :label="t('Downloads.Start Time')"
+                  :input-filter="filterDownloadTimeInput"
+                  placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
                   :show-label="true"
                   :value="options.startTime"
                   @input="setOption('startTime', $event)"
                 />
+                <span
+                  class="timeRangeSeparator"
+                  aria-hidden="true"
+                />
                 <FtInput
-                  :placeholder="t('Downloads.End Time')"
+                  :icon="['fas', 'clock']"
+                  :label="t('Downloads.End Time')"
+                  :input-filter="filterDownloadTimeInput"
+                  placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
                   :show-label="true"
@@ -135,7 +148,7 @@
                   @input="setOption('endTime', $event)"
                 />
               </div>
-              <div class="toggleGrid">
+              <div class="centeredToggle">
                 <FtToggleSwitch
                   compact
                   :label="t('Downloads.Split by Chapters')"
@@ -148,7 +161,7 @@
 
             <section class="optionSection">
               <h3>{{ t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
-              <div class="toggleGrid">
+              <div class="centeredToggle">
                 <FtToggleSwitch
                   compact
                   :label="t('Downloads.Remove Segments')"
@@ -205,7 +218,9 @@
               </div>
               <FtInput
                 class="fullWidth subtitleLanguages"
-                :placeholder="t('Downloads.Subtitle Languages')"
+                :icon="['fas', 'language']"
+                :label="t('Downloads.Subtitle Languages')"
+                placeholder="en.*,de.*"
                 :tooltip="t('Downloads.Subtitle Languages Help')"
                 :disabled="!subtitlesOnly && !options.includeSubtitles"
                 :show-action-button="false"
@@ -218,7 +233,9 @@
             <section class="optionSection">
               <FtInput
                 class="fullWidth"
-                :placeholder="t('Downloads.Additional yt-dlp Arguments')"
+                :icon="['fas', 'terminal']"
+                :label="t('Downloads.Additional yt-dlp Arguments')"
+                :placeholder="t('Form Inputs.Download Arguments Hint')"
                 :show-action-button="false"
                 :show-label="true"
                 :value="options.customArgs"
@@ -241,7 +258,7 @@
             <div
               class="downloadProgressBarFill"
               :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
-              :style="{ inlineSize: `${activeDownload.percent}%` }"
+              :style="{ transform: `scaleX(${Math.min(100, Math.max(0, activeDownload.percent)) / 100})` }"
             />
           </div>
           <p class="downloadStatusLine">
@@ -274,14 +291,18 @@
       >
         <p class="downloadFolderRow">
           <FtIcon :icon="['fas', 'folder-open']" />
-          <span>{{ downloadFolderDisplay }}</span>
-          <button
+          <span :title="downloadFolderDisplay">{{ downloadFolderDisplay }}</span>
+          <FtButton
             type="button"
             class="chooseFolderButton"
             @click="chooseDownloadFolder"
           >
+            <FtIcon
+              :icon="['fas', 'folder-open']"
+              aria-hidden="true"
+            />
             {{ downloadFolderRequired ? t('Downloads.Select Folder') : t('Downloads.Choose Folder') }}
-          </button>
+          </FtButton>
         </p>
         <FtFlexBox>
           <FtButton
@@ -326,7 +347,9 @@
     <div class="saveTemplatePrompt">
       <FtInput
         ref="templateNameInput"
-        :placeholder="t('Downloads.Template Name')"
+        :icon="['fas', 'hashtag']"
+        :label="t('Downloads.Template Name')"
+        :placeholder="t('Form Inputs.Template Name Example')"
         :show-action-button="false"
         :show-label="true"
         :value="newTemplateName"
@@ -371,7 +394,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
-import { DEFAULT_DOWNLOAD_TEMPLATES, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
+import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
 
@@ -587,8 +610,8 @@ function deleteTemplate() {
   const templates = customTemplates.value.filter(template => template.name !== selectedCustomTemplate.value.name)
   store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify(templates))
   store.dispatch('updateYtDlpSelectedTemplate', 'video:best')
-  store.dispatch('updateYtDlpAutomaticDownloadRules', replaceAutomaticDownloadTemplateReferences(
-    store.getters.getYtDlpAutomaticDownloadRules,
+  store.dispatch('updateYtDlpAutomaticDownloadRules', rules => replaceAutomaticDownloadTemplateReferences(
+    rules,
     deletedValue,
     'video:best'
   ))

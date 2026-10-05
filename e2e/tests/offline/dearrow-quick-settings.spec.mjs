@@ -107,6 +107,26 @@ for (const cached of [false, true]) {
   })
 }
 
+test('preserves portrait DeArrow thumbnails in grid and list layouts', async ({ page }) => {
+  await page.route('https://dearrow-thumb.ajay.app/**', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"><rect width="100%" height="100%" fill="#336699"/></svg>'
+  }))
+  await page.evaluate(async ({ videoId, thumbnail }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addVideoToDeArrowCache', { videoId, thumbnail, thumbnailTimestamp: 10, videoDuration: 60 })
+    await store.dispatch('updateUseDeArrowThumbnails', true)
+  }, { videoId: VIDEO_ID, thumbnail: THUMBNAIL_URL })
+  await goTo(page, 'history')
+  const image = page.locator('.ft-list-video .thumbnailImage').first()
+  await expectImagesLoaded(image)
+  for (const layout of ['grid', 'list']) {
+    await page.evaluate(layout => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', layout), layout)
+    await expect(image).toHaveCSS('object-fit', 'contain')
+    await expect.poll(() => image.evaluate(element => element.naturalHeight)).toBe(1080)
+  }
+})
+
 for (const pending of ['metadata', 'thumbnail']) {
   test(`reused DeArrow cards load the new video with old ${pending} pending`, async ({ page }) => {
     const nextVideoId = 'fffffffffff'

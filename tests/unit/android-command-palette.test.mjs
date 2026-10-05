@@ -45,6 +45,28 @@ for (const isCapacitor of [true, false]) {
   })
 }
 
+test('extra thumbnail action commands are available only in desktop layouts', () => {
+  for (const isCapacitor of [false, true]) {
+    for (const phoneLayout of [false, true]) {
+      const commands = createRegistry({
+        isElectron: false,
+        isCapacitor,
+        phoneLayout,
+        routePath: '/settings',
+        routeAvailable: () => true,
+        t: key => key,
+        tm: path => path.split('.').reduce((value, key) => value?.[key], messages),
+        store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [], getTabs: [], getProfileList: [], getAllPlaylists: [], getYtDlpDownloads: {} } },
+      })
+      const hasThumbnailAction = commands.some(command => (
+        command.id.startsWith('settings.search.general.') && command.label === 'Extra Thumbnail Action Button'
+      ))
+      assert.equal(hasThumbnailAction, !isCapacitor && !phoneLayout,
+        `isCapacitor=${isCapacitor}, phoneLayout=${phoneLayout}`)
+    }
+  }
+})
+
 const shortcutPrompt = await readFile(new URL('../../src/renderer/components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue', import.meta.url), 'utf8')
 const bindingCollector = shortcutPrompt.slice(shortcutPrompt.indexOf('function getAllKeyboardShortcutBindings('), shortcutPrompt.indexOf('function getShortcutActionLabel('))
 for (const isCapacitor of [true, false]) {

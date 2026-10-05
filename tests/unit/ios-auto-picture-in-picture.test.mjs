@@ -13,15 +13,21 @@ for (const ios of [true, false]) {
   test(`${ios ? 'iOS' : 'Android'} exposes one background auto-PiP toggle`, async () => {
     const app = createSSRApp({ render, setup: () => ({
       IS_CAPACITOR: true, IS_IOS: ios, t: key => key,
-      androidAutoPictureInPicture: true, updateAndroidAutoPictureInPicture() {},
+      mobileAutoPictureInPicture: true, updateMobileAutoPictureInPicture() {},
       autoPictureInPictureTriggers: [], autoPictureInPictureTriggerLabels: [], AUTO_PIP_TRIGGER_VALUES: [],
       supportsAutoPictureInPictureMinimize: true,
     }) })
     app.component('FtFlexBox', { setup: (_, { slots }) => () => h('div', slots.default?.()) })
-    app.component('FtToggleSwitch', { setup: () => () => h('input', { type: 'checkbox', 'data-mobile-pip': '' }) })
+    app.component('FtToggleSwitch', {
+      props: ['defaultValue', 'settingKey'],
+      setup: props => () => h('input', {
+        type: 'checkbox', 'data-mobile-pip': props.settingKey, checked: props.defaultValue,
+      }),
+    })
     app.component('FtCheckboxList', { setup: () => () => h('div', { 'data-desktop-pip': '' }) })
     const html = await renderToString(app)
-    assert.ok(html.includes('data-mobile-pip'), html)
+    assert.ok(html.includes('data-mobile-pip="mobileAutoPictureInPicture"'), html)
+    assert.ok(html.includes('checked'), html)
     assert.ok(!html.includes('data-desktop-pip'), html)
   })
 }

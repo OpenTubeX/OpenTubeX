@@ -32,7 +32,7 @@
           class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
           data-tab-loading-indicator
         >
-          <img
+          <FtRetryImage
             v-if="shortsTransitionPreview"
             :src="shortsTransitionPreview"
             class="shortsTransitionPreview"
@@ -41,7 +41,7 @@
               shortsTransitionPrevious: shortsTransitionDirection < 0
             }"
             alt=""
-          >
+          />
           <div
             v-else
             class="shortsSkeleton"
@@ -71,12 +71,12 @@
           :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
           data-tab-loading-indicator
         >
-          <img
+          <FtRetryImage
             v-if="thumbnail"
             :src="thumbnail"
             class="videoThumbnail"
             alt=""
-          >
+          />
           <div class="streamPlaceholderOverlay">
             <span class="streamPlaceholderSpinner">
               <ft-loader />
@@ -144,6 +144,7 @@
             :playlist-video-data="addToPlaylistVideoData"
             :published="videoPublished"
             :is-live="isLive"
+            :is-live-dvr-enabled="isLiveDvrEnabled"
             :is-upcoming="isUpcoming"
             :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
             :sponsor-block-info-open="showSidebarSponsorBlock"
@@ -226,6 +227,7 @@
                   >
                     <FtRetryImage
                       v-if="channelThumbnail"
+                      :fallback-icon="['fas', 'circle-user']"
                       :src="channelThumbnail"
                       class="shortsFullscreenChannelThumbnail"
                       alt=""
@@ -262,12 +264,12 @@
           class="videoPlayer"
           :class="{ videoPlayerError: errorMessage }"
         >
-          <img
+          <FtRetryImage
             v-if="!isUpcoming || playabilityStatus !== 'OK'"
             :src="thumbnail"
             class="videoThumbnail"
             alt=""
-          >
+          />
           <div
             v-if="isUpcoming"
             class="premiereDate"
@@ -396,6 +398,7 @@
               >
                 <FtRetryImage
                   v-if="channelThumbnail"
+                  :fallback-icon="['fas', 'circle-user']"
                   :src="channelThumbnail"
                   class="shortsExternalChannelThumbnail"
                   alt=""
@@ -591,6 +594,7 @@
             @auxclick="openShortsChannel"
           >
             <FtRetryImage
+              :fallback-icon="['fas', 'circle-user']"
               :src="channelThumbnail"
               alt=""
             />
@@ -903,21 +907,31 @@
           />
         </button>
         <button
-          v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
+          v-if="phonePanelsEnabled && watchingPlaylist && !isLoading"
           type="button"
-          class="phonePanelButton phoneCommentsButton watchVideo"
-          @click="openPhonePanel('comments')"
+          class="phonePanelButton phonePlaylistButton watchVideo"
+          aria-haspopup="dialog"
+          :aria-expanded="mobilePanel === 'playlist'"
+          @click="openPhonePanel('playlist')"
         >
           <ft-icon
-            :icon="['fas', 'comment']"
+            :icon="['fas', 'list']"
             aria-hidden="true"
           />
-          <span class="phoneCommentsLabel">{{ $t('Comments.Comments') }}</span>
+          <span class="phoneCommentsLabel">{{ $t('Playlist.Playlist') }}</span>
           <ft-icon
             :icon="['fas', 'angle-down']"
             aria-hidden="true"
           />
         </button>
+        <PhoneCommentsButton
+          v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
+          :key="videoId"
+          :comments="commentPreviews"
+          :panel-open="mobilePanel === 'comments'"
+          class="watchVideo"
+          @open="openPhonePanel('comments')"
+        />
         <watch-video-description
           v-if="phonePanelsEnabled && !isLoading && !hideVideoDescription"
           :description="videoDescription"
@@ -1186,9 +1200,10 @@
         :disabled="!fullscreenPlaylistOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="shortsPhonePanelsEnabled"
+          :enabled="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'playlist'"
           :title="$t('Playlist.Playlist')"
+          custom-header
           fill
           @close="closeShortsPhonePanel"
         >
@@ -1204,6 +1219,7 @@
             :playlist-item-id="playlistItemId"
             :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
             :fullscreen-overlay="fullscreenPlaylistOpen"
+            :phone-panel="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
             class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
             :class="{ theatrePlaylist: useTheatreMode }"
             @close="closeFullscreenPlaylist"
@@ -1274,6 +1290,7 @@
             :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"
             @loaded="commentsLoaded = $event"
+            @preview-comments="commentPreviews = $event"
             @close-comments="closeFullscreenComments"
             @timestamp-event="changeTimestamp"
           />

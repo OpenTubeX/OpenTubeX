@@ -219,9 +219,10 @@ export function getViewportWidth() {
 }
 
 /**
+ * @param {{ includeSideNav?: boolean, revealSideNav?: boolean }} [options]
  * @returns {{ top: number, left: number, right: number, bottom: number }}
  */
-export function getViewportInsets() {
+export function getViewportInsets({ includeSideNav = false, revealSideNav = false } = {}) {
   let topInset = MARGIN
   let leftInset = MARGIN
   let rightInset = MARGIN
@@ -254,12 +255,35 @@ export function getViewportInsets() {
   // Reserve that height throughout its hide animation: its translated top
   // would otherwise change the saved bottom-relative player position.
   if (sideNav) {
-    const rect = sideNav.getBoundingClientRect()
-    const isBottomBar = rect.width > rect.height &&
-      rect.top >= window.innerHeight - rect.bottom
+    let rect = sideNav.getBoundingClientRect()
+    // Match SideNav's responsive breakpoint: an expanded sidebar can be wider
+    // than it is tall in short landscape viewports.
+    const isBottomBar = window.innerWidth <= 680
     if (isBottomBar) {
       // In narrow Electron windows this bar sits above any bottom tabs.
       bottomInset += rect.height
+    } else if (includeSideNav) {
+      const viewportWidth = getViewportWidth()
+      if (revealSideNav && sideNav.hasAttribute('data-watch-return-expanded')) {
+        // Watch forces an expanded, translated sidebar. Measure its browsing
+        // width outside that overlay before the swipe chooses its destination.
+        const probe = sideNav.cloneNode(false)
+        probe.removeAttribute('id')
+        probe.classList.toggle('expanded', sideNav.dataset.watchReturnExpanded === 'true')
+        probe.style.cssText = 'position:fixed;left:0;right:auto;visibility:hidden;transition:none;transform:none'
+        document.body.append(probe)
+        const width = probe.getBoundingClientRect().width
+        probe.remove()
+        const right = rect.left > viewportWidth - rect.right
+        const inset = Number.parseFloat(getComputedStyle(sideNav)[right ? 'right' : 'left']) || 0
+        const left = right ? viewportWidth - inset - width : inset
+        rect = { ...rect, left, right: left + width }
+      }
+      if (rect.left <= viewportWidth - rect.right) {
+        leftInset = Math.max(leftInset, rect.right + MARGIN)
+      } else {
+        rightInset = Math.max(rightInset, viewportWidth - rect.left + MARGIN)
+      }
     }
   }
 

@@ -66,21 +66,9 @@
   }
 }
 
-.activeFilters {
-  font-size: 0.85rem;
-  overflow-wrap: anywhere;
-}
-
 @media (width <= 600px), (height <= 600px) {
   .titleContainer {
     flex-wrap: wrap;
-  }
-
-  .activeFilters {
-    flex: 1 0 100%;
-    order: 1;
-    margin-block: 4px;
-    margin-inline: 0;
   }
 
   .clearFilterButton {

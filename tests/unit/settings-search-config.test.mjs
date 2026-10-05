@@ -13,6 +13,7 @@ import {
   createSettingsSearchIndex,
   findSettingsSearchTab,
   findSettingsSearchTarget,
+  removeRedundantSettingsSearchMatches,
 } from '../../src/renderer/helpers/settingsSearch.js'
 
 const locale = loadYaml(await readFile(
@@ -20,6 +21,25 @@ const locale = loadYaml(await readFile(
   'utf8'
 ))
 const getAtPath = (value, path) => path.split('.').reduce((nested, key) => nested?.[key], value)
+
+test('playback search indexes the lights off visibility toggle instead of its player action', () => {
+  const entries = createSettingsSearchIndex({
+    sections: [{ type: 'playback', title: 'Playback', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron: true,
+  }).get('playback')
+
+  assert.ok(entries.some(({ label }) => label === 'Show Lights Off Toggle'))
+  assert.deepEqual(
+    removeRedundantSettingsSearchMatches(
+      entries.filter(({ label }) => label.toLowerCase().includes('lights off')),
+      'en-US'
+    ).map(({ label }) => label),
+    ['Show Lights Off Toggle']
+  )
+  assert.ok(!entries.some(({ label }) => label === 'Lights Off'))
+})
 
 test('iOS settings search omits unavailable native services', () => {
   const index = createSettingsSearchIndex({
@@ -37,16 +57,32 @@ test('iOS settings search omits unavailable native services', () => {
   assert.equal(labels.includes('Mobile layout'), true)
 })
 
-test('swipe to refresh is searchable in mobile general settings only', () => {
-  for (const isCapacitor of [true, false]) {
+test('fullscreen rotation lock override is searchable only on Android', () => {
+  for (const [isCapacitor, isIos] of [[true, false], [true, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'playback', title: 'Playback', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      isCapacitor,
+      isIos,
+      usingElectron: !isCapacitor,
+    }).get('playback')
+    assert.equal(entries.some(({ label }) => label === 'Ignore system rotation lock for fullscreen'), isCapacitor && !isIos)
+  }
+})
+
+test('mobile general settings search includes swipe to refresh and omits desktop thumbnail actions', () => {
+  for (const [isCapacitor, phoneLayout] of [[true, false], [false, false], [false, true]]) {
     const entries = createSettingsSearchIndex({
       sections: [{ type: 'general', title: 'General', description: '' }],
       tm: path => getAtPath(locale, path),
       store: { getters: {} },
       isCapacitor,
+      phoneLayout,
       usingElectron: !isCapacitor,
     }).get('general')
     assert.equal(entries.some(({ label }) => label === 'Swipe to refresh'), isCapacitor)
+    assert.equal(entries.some(({ label }) => label === 'Extra Thumbnail Action Button'), !isCapacitor && !phoneLayout)
   }
 })
 
@@ -171,6 +207,10 @@ test('shared settings search index includes only settings available on this plat
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings']['Move Settings to App Header']))
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings']['UI Scale']))
   assert.ok(!mobileValues.some(({ label }) => label === 'Show progress as notification'))
+  const mobileSearchLabel = locale.Settings['Theme Settings']['Always Show Mobile Search Bar']
+  assert.ok(mobileValues.some(({ label }) => label === mobileSearchLabel))
+  assert.ok(!desktopValues.some(({ label }) => label === mobileSearchLabel))
+  assert.ok(!webValues.some(({ label }) => label === mobileSearchLabel))
 })
 
 test('mobile playback search excludes settings that have no Capacitor behavior', () => {
@@ -423,7 +463,9 @@ test('settings search retains the subpage containing each control', () => {
     usingElectron: true,
   })
   for (const [section, label, subpage] of [
-    ['appearance', 'Show Active Subscriptions', 'navigation'],
+    ['appearance', 'Show active subscriptions in sidebar', 'navigation'],
+    ['appearance', "Always show navigation bar when it's at the bottom", 'navigation'],
+    ['appearance', "Compact navigation bar when it's at the bottom", 'navigation'],
     ['appearance', 'Add item', 'navigation'],
     ['playback', 'Add Playback Speed', 'quick-playback-speed'],
     ['playback', 'Playback Speed', 'quick-playback-speed'],
@@ -486,4 +528,19 @@ test('subscription activity resolves to its control even with a partially transl
   assert.deepEqual(findSettingsSearchTarget(index, ['Subscription settings'], 'subscriptionChannelSettings'), {
     section: 'subscriptions', match: { label: 'Subscription settings', settingKey: 'subscriptionChannelSettings' },
   })
+})
+
+test('sync search indexes controls and actions without progress or server feedback', () => {
+  const values = ['', 'test-token'].flatMap(token => createSettingsSearchIndex({
+    sections: [{ type: 'sync', title: 'Sync', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getSyncServerEnabled: true, getSyncServerToken: token } },
+    usingElectron: true,
+  }).get('sync').map(match => match.label))
+  for (const key of ['Syncing history', 'Syncing subscriptions', 'Uploading encrypted data', 'Finishing sync', 'History not supported', 'Settings not supported', 'Enhanced Privacy Enabled', 'Previous Auto Sync Notice', 'Video Sent']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), false, key)
+  }
+  for (const key of ['Enable Sync', 'Sync Now', 'Privacy Passphrase', 'Change Password', 'Pair Another Device', 'Privacy Policy', 'Confirm Data Loss', 'Open All Tabs', 'Open On Device', 'Turn Flashlight On', 'Turn Flashlight Off']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), true, key)
+  }
 })

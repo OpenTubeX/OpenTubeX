@@ -16,14 +16,15 @@
         class="engineRow"
       >
         <div class="engineToggle">
-          <img
+          <FtRetryImage
             v-if="hasFavicon(engine)"
+            :fallback-icon="['fas', 'search']"
             class="engineIcon"
             :src="engine.icon"
             alt=""
             referrerpolicy="no-referrer"
             @error="handleFaviconError(engine)"
-          >
+          />
           <FtIcon
             v-else
             class="engineIcon fallbackIcon"
@@ -39,7 +40,9 @@
         <template v-if="engine.id.startsWith('custom-')">
           <FtInput
             :key="inputKey(engine.id, 'name')"
-            :placeholder="t('Settings.Context Menu Search Settings.Engine Name')"
+            :label="t('Settings.Context Menu Search Settings.Engine Name')"
+            :icon="['fas', 'font']"
+            :placeholder="t('Form Inputs.Example', { example: 'DuckDuckGo' })"
             :value="engine.name"
             :show-action-button="false"
             @blur="updateCustomEngine(engine.id, 'name', $event)"
@@ -47,19 +50,22 @@
           <FtInput
             :key="inputKey(engine.id, 'url')"
             input-type="url"
-            :placeholder="t('Settings.Context Menu Search Settings.Search URL')"
+            :label="t('Settings.Context Menu Search Settings.Search URL')"
+            :icon="['fas', 'link']"
+            placeholder="https://example.com/search?q=%s"
             :value="engine.url"
             :show-action-button="false"
             @blur="updateCustomEngine(engine.id, 'url', $event)"
           />
-          <button
+          <FtButton
             class="removeEngine"
+            :label="t('Delete')"
+            theme="destructive"
+            :icon="['fas', 'trash']"
             :aria-label="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             :title="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             @click="removeEngine(engine.id)"
-          >
-            <FtIcon :icon="['fas', 'trash']" />
-          </button>
+          />
         </template>
         <code v-else>{{ engine.url }}</code>
       </div>
@@ -68,14 +74,18 @@
     <h3>{{ t('Settings.Context Menu Search Settings.Add Custom Engine') }}</h3>
     <div class="addEngine">
       <FtInput
-        :placeholder="t('Settings.Context Menu Search Settings.Engine Name')"
+        :label="t('Settings.Context Menu Search Settings.Engine Name')"
+        :icon="['fas', 'font']"
+        :placeholder="t('Form Inputs.Example', { example: 'DuckDuckGo' })"
         :value="customName"
         :show-action-button="false"
         @input="customName = $event"
       />
       <FtInput
         input-type="url"
-        :placeholder="t('Settings.Context Menu Search Settings.Search URL')"
+        :label="t('Settings.Context Menu Search Settings.Search URL')"
+        :icon="['fas', 'link']"
+        placeholder="https://example.com/search?q=%s"
         :value="customUrl"
         :show-action-button="false"
         @input="customUrl = $event"
@@ -99,6 +109,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'

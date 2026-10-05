@@ -48,6 +48,7 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * @param {number} options.onlyShowLatestFromChannelNumber
  * @param {boolean} options.restrictedPlaybackConfigured
  * @param {'newest' | 'oldest'} options.sortBy
+ * @param {boolean} [options.decorateEntries] whether cards need the New feed's indicator overrides
  */
 export function getNewSubscriptionFeedEntries({
   feeds,
@@ -60,6 +61,7 @@ export function getNewSubscriptionFeedEntries({
   onlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured,
   sortBy,
+  decorateEntries = true,
 }) {
   const entries = {
     videos: [],
@@ -79,7 +81,11 @@ export function getNewSubscriptionFeedEntries({
         return
       }
 
-      getNewSubscriptionEntriesSnapshot(cacheEntry?.[entriesKey] ?? []).forEach(entry => {
+      const source = cacheEntry?.[entriesKey] ?? []
+      // Home renders its own shelf cards and needs no indicator overrides.
+      // Keep source entries reactive without copying every field in the cache.
+      const newEntries = getNewSubscriptionEntriesSnapshot(source, decorateEntries)
+      newEntries.forEach(entry => {
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,
           subscription,
@@ -106,7 +112,7 @@ export function getNewSubscriptionFeedEntries({
   })
 
   let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
-    return entries[category].map(entry => ({ category, entry }))
+    return entries[category].map(entry => ({ category, entry, timestamp: entryTimestamp(entry) }))
   })
 
   mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
@@ -115,7 +121,7 @@ export function getNewSubscriptionFeedEntries({
     forbiddenTitles,
   }))
 
-  mediaEntries.sort((a, b) => entryTimestamp(b.entry) - entryTimestamp(a.entry))
+  mediaEntries.sort((a, b) => b.timestamp - a.timestamp)
 
   const hasPerChannelLimit = [...subscriptionsById.values()].some(subscription => (
     Number.isInteger(subscription.dailyVideoLimit) && subscription.dailyVideoLimit > 0

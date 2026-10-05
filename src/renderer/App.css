@@ -3,12 +3,51 @@
   src: url('assets/font/Roboto-Regular.ttf');
 }
 
+/* Accept control taps without waiting for a double tap, while retaining
+   scrolling and pinch zoom. Gesture-specific rules override this default. */
+:global(:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary,
+  [role='button'],
+  [role='link'],
+  [role='tab'],
+  [role='option'],
+  [role='menuitem'],
+  [role='checkbox'],
+  [role='radio'],
+  [role='switch'],
+  [role='combobox'],
+  .ft-playlist-selector,
+  .ft-input-component .optionWrapper,
+  .toast.actionable,
+  .playlistProgressBar,
+  .mobileLinkActionsBackdrop,
+  .tabOrganizerBackdrop,
+  .capacitorPhoneTabOverlay,
+  .capacitorTabActionsBackdrop,
+  .prompt,
+  .dropdownLayer,
+  .commandPaletteBackdrop,
+  .mobileSheet
+)) {
+  touch-action: manipulation;
+}
+
 .app {
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
   --top-nav-height: 60px;
   --progress-bar-height: 6px;
+  --mobile-nav-content-height: 60px;
+  --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+  --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
 
   /* Keep a length so the empty space can be added inside calc(). */
   /* stylelint-disable-next-line length-zero-no-unit */
@@ -56,21 +95,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+:global(html:has(body.androidPictureInPicture)),
 :global(body.androidPictureInPicture) {
   overflow: hidden !important;
+  scrollbar-width: none !important;
   background: #000 !important;
 }
 
-:global(body.androidPictureInPicture .app > *),
-:global(body.androidPictureInPicture .ftVideoPlayer *) {
-  visibility: hidden !important;
+:global(body.androidPictureInPicture .app) {
+  background: #000 !important;
 }
 
-/* Chromium WebView treats an inline-size query container as the containing
-   block for fixed descendants. Drop that containment so the PiP player uses
-   the activity viewport instead of inheriting the route's top-nav offset. */
-:global(body.androidPictureInPicture .app > .routerView) {
-  container-type: normal;
+:global(body.androidPictureInPicture *) {
+  visibility: hidden !important;
 }
 
 .mobileLinkActionsBackdrop {
@@ -183,33 +220,46 @@
   transform: rotate(180deg);
 }
 
+/* Chromium WebView treats an inline-size query container as the containing
+   block for fixed descendants. Use the activity viewport for the PiP player. */
+:global(body.androidPictureInPicture .app > .routerView) {
+  container-type: normal;
+}
+
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface),
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface *) {
   visibility: visible !important;
 }
 
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer.shaka-video-container[data-android-picture-in-picture-target]) {
   position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483647 !important;
-  inline-size: 100vw !important;
-  block-size: 100vh !important;
+
+  /* DOM rectangles use physical coordinates in both text directions. */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  inset: var(--android-pip-source-top, 0) auto auto var(--android-pip-source-left, 0) !important;
+  inline-size: var(--android-pip-source-width, 100vw) !important;
+  block-size: var(--android-pip-source-height, 0) !important;
   min-inline-size: 0 !important;
   max-inline-size: none !important;
   min-block-size: 0 !important;
   max-block-size: none !important;
   margin: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
   transform: none !important;
   translate: none !important;
+  z-index: 2147483647 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   transition: none !important;
 }
 
-/* Override the phone mini bar and its morph geometry while the activity is
-   in PiP. Their fixed thumbnail bounds must not survive into this viewport. */
+/* Override the phone mini bar's transform and clipping while native PiP owns
+   the video crop. Keep the original object fit and video element dimensions. */
 /* stylelint-disable selector-max-compound-selectors */
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .musicAudioSurface),
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
   position: absolute !important;
   inset: 0 !important;
@@ -221,12 +271,21 @@
   max-block-size: none !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  object-fit: contain !important;
+  object-fit: var(--android-pip-video-fit, contain) !important;
   transform: none !important;
   clip-path: none !important;
   transition: none !important;
 }
 /* stylelint-enable selector-max-compound-selectors */
+
+/* Android already animates the window. Restoring the page must not trigger
+   another player or responsive-layout animation after that transition. */
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target]),
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target] *),
+:global(body.androidPictureInPictureRestoring .app),
+:global(body.androidPictureInPictureRestoring .app *) {
+  transition: none !important;
+}
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .scrollMiniPlayerControls) {
@@ -267,6 +326,14 @@
   border-radius: 0;
 }
 
+@media (width <= 680px) {
+  /* Match the phone layout's removal of the screen and header gaps. */
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayer),
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .ftVideoPlayer:not(.scrollMiniPlayer)) {
+    border-radius: 0;
+  }
+}
+
 /* The player owns vertical touch movement on mobile so a short drag can enter
    or leave fullscreen without fighting page scrolling. The layout class lives
    on this component while the player is inside a child component. */
@@ -282,9 +349,10 @@
   touch-action: pan-x pan-down;
 }
 
-/* Chromium may claim the first finger as a pan before the second finger lands,
-   cancelling the pointer stream before the player can recognize a pinch. */
-.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled) {
+/* Keep Chromium from cancelling pointer streams for pinch zoom or fullscreen
+   horizontal seeking, even when the other player gestures are disabled. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled),
+.app.capacitorTabs :deep(.ftVideoPlayer:is(:fullscreen, .fullWindow)) {
   touch-action: none;
 }
 
@@ -308,6 +376,11 @@
   /* Keep the detached player above route content, but below app chrome and
      utility windows. Its own z-index remains local to this stacking context. */
   z-index: 4;
+}
+
+.app.capacitorPhoneLayout .crossTabMiniPlayerLayer {
+  /* A dismissing bottom bar slides behind the navigation (z-index: 3). */
+  z-index: 2;
 }
 
 .flexBox {
@@ -350,7 +423,7 @@
   inline-size: 100%;
   max-inline-size: none;
   margin: 0;
-  padding-block-end: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + var(--mobile-progress-bar-space));
+  padding-block-end: calc(var(--mobile-nav-height) + var(--mobile-progress-bar-space));
 }
 
 /* Narrow viewports normally reserve a phone-sized top gap. The tablet tab
@@ -489,6 +562,8 @@
 
 .findbarInput {
   flex: 1 1 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
   min-inline-size: 90px;
   block-size: 32px;
   padding-block: 0;
@@ -696,11 +771,16 @@
   -webkit-box-orient: vertical;
 }
 
-@media only screen and (width <= 680px) {
+@media (prefers-reduced-motion: reduce) {
   .app {
-    --mobile-nav-height: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
-    --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
-    --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+    --mobile-nav-reveal-transition: none;
+    --mobile-nav-hide-transition: none;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  .app.compactNavigation {
+    --mobile-nav-content-height: 48px;
   }
 
   .app:has(> .progressBar) {
@@ -717,15 +797,8 @@
     transition: var(--mobile-nav-hide-transition);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .app {
-      --mobile-nav-reveal-transition: none;
-      --mobile-nav-hide-transition: none;
-    }
-  }
-
   .routerView {
-    margin-block: 68px calc(68px + var(--mobile-progress-bar-space));
+    margin-block: 68px calc(var(--mobile-nav-content-height) + 8px + var(--mobile-progress-bar-space));
     margin-inline: 8px;
   }
 
@@ -802,7 +875,7 @@
 
 @media only screen and (width <= 680px) {
   .app:is(.topTabs, .bottomTabs) :deep(.sideNav) {
-    block-size: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    block-size: var(--mobile-nav-height);
     inset-block-start: auto;
   }
 
@@ -811,11 +884,11 @@
   }
 
   .app.bottomTabs :deep(.progressBar) {
-    inset-block-end: calc(94px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    inset-block-end: calc(34px + var(--mobile-nav-height));
   }
 
   .app.bottomTabs :deep(.moreOptionContainer) {
-    inset-block-end: calc(94px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + var(--mobile-progress-bar-space));
+    inset-block-end: calc(34px + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
   }
 
   .sideNavBackdrop {

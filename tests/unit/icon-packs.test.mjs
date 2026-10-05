@@ -9,6 +9,7 @@ import {
   resolveMappedIcon,
 } from '../../src/renderer/icons/iconMappingResolver.js'
 import { TAB_GROUP_ICONS } from '../../src/tabGroupIcons.js'
+import { PROFILE_ICONS } from '../../src/renderer/helpers/profileIcons.js'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const rendererRoot = path.join(repoRoot, 'src/renderer')
@@ -85,6 +86,17 @@ test('every selectable tab group icon is available in both icon packs', async ()
   for (const pack of packs) {
     const bundle = await readJson(`iconifyBundles/${pack}.json`)
     for (const name of TAB_GROUP_ICONS) {
+      const iconifyId = resolveIconifyId(['fas', name], pack)
+      assert.ok(iconifyId, `${pack} is missing a mapping for ${name}`)
+      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
+    }
+  }
+})
+
+test('every selectable profile icon is available in both icon packs', async () => {
+  for (const pack of packs) {
+    const bundle = await readJson(`iconifyBundles/${pack}.json`)
+    for (const name of PROFILE_ICONS) {
       const iconifyId = resolveIconifyId(['fas', name], pack)
       assert.ok(iconifyId, `${pack} is missing a mapping for ${name}`)
       assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)

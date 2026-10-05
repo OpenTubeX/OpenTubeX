@@ -267,6 +267,11 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Vuốt sang trái trên hình thu nhỏ
+      Right: Vuốt sang phải trên hình thu nhỏ
+      Description: Vuốt ngang trên hình thu nhỏ của video rồi thả tay để thực hiện thao tác đã chọn.
+    Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
     Use tray icon: "Sử dụng biểu tượng khay hệ thống"
     Close to system tray: "Đóng vào khay hệ thống"
     Tray required for background refresh: "Biểu tượng khay hệ thống là bắt buộc khi bật làm mới kênh đăng ký trong nền."
@@ -274,7 +279,9 @@ Settings:
     Swipe to refresh: Vuốt để làm mới
     Blur Thumbnails: Làm mờ hình thu nhỏ
     Navigation:
-      Show Active Subscriptions: Hiển thị các kênh đăng ký đang hoạt động
+      Always Show Navigation Bar: Luôn hiển thị thanh điều hướng khi nó ở phía dưới
+      Compact Tab Labels: Thanh điều hướng thu gọn khi nó ở phía dưới
+      Show Active Subscriptions: Hiển thị các kênh đăng ký đang hoạt động trong thanh bên
       Navigation: Điều hướng
       Customize Navigation: Tùy chỉnh điều hướng
       Add Item: Thêm mục
@@ -356,6 +363,8 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Compact Mobile Mini Player: "Trình phát mini gọn trên di động"
+    Always Show Mobile Search Bar: "Luôn hiển thị thanh tìm kiếm trên điện thoại"
     Frosted Glass Player UI: "Giao diện trình phát với hiệu ứng kính mờ"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater Màu hoa hồng"
@@ -437,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Sáng"
-      OpenTubeX Dark: "OpenTubeX Tối"
+      Ocean Light: "Ocean Sáng"
+      Ocean Dark: "Ocean Tối"
       Custom: Tùy chỉnh
     Light Theme: Chủ đề sáng
     Dark Theme: Chủ đề tối
@@ -627,6 +636,8 @@ Settings:
     Preload Upcoming Videos: "Tải trước các video tiếp theo"
     Upcoming Videos to Preload: "Số video cần tải trước"
     Concurrent Preloads: "Số lượt tải trước đồng thời"
+    Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
+    Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -663,9 +674,9 @@ Settings:
     Update Managed Tools: Cập nhật
     Managed Tools Download Error Template: 'Không thể tải các công cụ được quản lý: {errors}'
     Download Folder: Thư mục tải xuống
-    Global Additional yt-dlp Arguments: Đối số yt-dlp bổ sung dùng chung
+    Global Additional yt-dlp Arguments: Đối số yt-dlp bổ sung
     Concurrent Downloads: Số lượt tải đồng thời
-    Bandwidth Limit: Giới hạn băng thông (KiB/s, 0 là không giới hạn)
+    Bandwidth Limit: Giới hạn băng thông (KiB/s)
     Choose Download Folder: Chọn thư mục tải xuống
     Download Templates: Mẫu tải xuống
     Manage Download Templates: Quản lý mẫu tải xuống ({templateCount})
@@ -738,8 +749,8 @@ Settings:
       Automatic: Tự động cập nhật
       Ask: Hỏi trước khi cập nhật
       Manual: Chỉ cập nhật thủ công
-    yt-dlp Executable Path: Đường dẫn tệp thực thi yt-dlp
-    FFmpeg Executable Path: Đường dẫn tệp thực thi FFmpeg
+    yt-dlp Executable Path: Tệp thực thi yt-dlp
+    FFmpeg Executable Path: Tệp thực thi FFmpeg
     Restricted Playback Authentication: "Cookie yt-dlp"
     Cookie Source: Nguồn cookie
     Cookie Sources:
@@ -983,7 +994,7 @@ Settings:
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
     Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.
     Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
-    Server URL: URL máy chủ
+    Server URL: URL máy chủ đồng bộ
     Checking Server: Đang kiểm tra máy chủ đồng bộ…
     Server Unavailable: Không thể kết nối với máy chủ đồng bộ này. Hãy kiểm tra URL rồi thử lại.
     Username: Tên người dùng
@@ -1072,7 +1083,7 @@ Settings:
     Open All Tabs Confirmation: "Mở tất cả thẻ?"
     Server Update Required: "Cập nhật máy chủ này để hỗ trợ đồng bộ theo thời gian thực được mã hóa."
   Proxy Settings:
-    IP Block Recovery Script Path: Đường dẫn tập lệnh khôi phục khi bị chặn IP
+    IP Block Recovery Script Path: Tập lệnh khôi phục chặn IP
     Select IP Block Recovery Script File: Chọn tệp tập lệnh khôi phục khi bị chặn IP
     Running IP block recovery script: Đang chạy tập lệnh khôi phục khi bị chặn IP
     IP block recovery script failed: 'Tập lệnh khôi phục khi bị chặn IP đã lỗi (mã thoát: {exitCode})'
@@ -1084,7 +1095,7 @@ Settings:
       Excluded Channels: "Kênh được loại trừ"
       Tooltip: "Nhập ID kênh để ngăn bỏ qua các đoạn SponsorBlock trong video của kênh đó. ID phải khớp chính xác và phân biệt chữ hoa, chữ thường."
     Enable SponsorBlock Submission: Bật gửi dữ liệu lên SponsorBlock
-    SponsorBlock Private User ID (optional): ID người dùng riêng tư SponsorBlock (không bắt buộc)
+    SponsorBlock Private User ID (optional): ID người dùng riêng tư (tùy chọn)
     SponsorBlock Private User ID Tooltip: Dán ID người dùng riêng tư SponsorBlock từ tiện ích trình duyệt. Để trống để dùng ID do ứng dụng tạo.
     Generated SponsorBlock User ID: ID người dùng SponsorBlock đã tạo
     Generated SponsorBlock User ID Tooltip: Có thể dùng ID người dùng SponsorBlock do ứng dụng tạo này trong tiện ích trình duyệt hoặc khi dùng ứng dụng trên máy tính khác.
@@ -1096,7 +1107,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Bật Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (mặc định là https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Password Dialog:
     Incorrect Password: Mật khẩu không đúng
     Unlock: Mở khóa
@@ -1139,6 +1150,21 @@ About:
   Matrix: Matrix
   Email: Thư điện tử
 Profile:
+  Customization: Tùy chỉnh
+  Manage Profile Subscriptions: Quản lý đăng ký của hồ sơ
+  Icon Names:
+    Person: Người
+    People: Mọi người
+    Headphones: Tai nghe
+    Gaming: Trò chơi
+    Film: Phim
+    Art: Nghệ thuật
+    Science: Khoa học
+    Globe: Địa cầu
+    Heart: Trái tim
+    Sun: Mặt trời
+    Moon: Mặt trăng
+    Trophy: Cúp
   Profile Icon: Biểu tượng hồ sơ
   Choose an Emoji: Chọn biểu tượng cảm xúc
   Custom Emoji: Biểu tượng cảm xúc tùy chỉnh
@@ -1326,12 +1352,16 @@ Video:
     Hide: Ẩn
     Show: Hiện
     Scroll Mini Player:
+      Collapse Controls: "Thu gọn điều khiển"
+      Expand Controls: "Mở rộng điều khiển"
       Back to Top: Về đầu trang
       Return to Video Tab: Quay lại thẻ video
       Hide: Ẩn trình phát thu nhỏ
       Play: Phát
       Pause: Tạm dừng
       Drag Handle: Di chuyển trình phát thu nhỏ
+      Rewind 10 seconds: Tua lại 10 giây
+      Forward 10 seconds: Tua tới 10 giây
     SponsorBlock:
       CancelCurrentSegment: Hủy tạo phân đoạn
       ClearSegments: Xóa phân đoạn
@@ -1472,6 +1502,7 @@ Share:
   Share failed: "Không thể chia sẻ liên kết"
   Timestamp Link Copied: Đã sao chép liên kết có mốc thời gian vào bảng nhớ tạm
 Context Menu:
+  Open in a Background Tab: "Mở trong thẻ nền"
   Select Tab: Chọn thẻ
   Close Tabs Before: Đóng các thẻ trước
   Close Tabs After: Đóng các thẻ sau
@@ -1534,6 +1565,8 @@ Context Menu:
   Search With Multiple: Tìm bằng...
   Selection Too Long: Phần đã chọn quá dài để tìm kiếm (> {count} ký tự)
 Tab Organizer:
+  Tab History: "Lịch sử thẻ"
+  Current Page: "Trang hiện tại"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Đồng hồ'
@@ -1631,6 +1664,7 @@ Description:
   Games: Trò chơi
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
     Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.
     Update Relative Timestamps: Cập nhật mốc thời gian tương đối trên toàn ứng dụng khi trang vẫn mở. Khi tắt, mốc thời gian chỉ cập nhật sau khi tải lại hoặc mở lại trang.
     Stream Extraction Method: |
@@ -1674,6 +1708,7 @@ Tooltips:
     Preload Upcoming Videos: "Lấy và lưu đệm URL yt-dlp của các video tiếp theo. Hàng đợi được ưu tiên hơn danh sách phát và đề xuất."
     Upcoming Videos to Preload: "Số video tiếp theo tối đa có URL yt-dlp được lấy trong nền."
     Concurrent Preloads: "Số tiến trình yt-dlp tối đa được dùng để tải trước nhiều video cùng lúc. Giá trị cao hơn sử dụng nhiều CPU, bộ nhớ và băng thông mạng hơn."
+    Ignore System Rotation Lock for Fullscreen: Xoay thiết bị để vào và thoát toàn màn hình ngay cả khi tính năng tự động xoay của Android đang tắt.
   Download Settings:
     Download Folder: Video được lưu vào thư mục này. Để trống để dùng thư mục Tải xuống của hệ thống.
     Global Additional yt-dlp Arguments: Đối số dòng lệnh bổ sung được chuyển cho yt-dlp trong mọi lượt tải, ví dụ --cookies-from-browser firefox.
@@ -1839,8 +1874,8 @@ Downloads:
   File Name Template: Mẫu tên tệp
   File Name Template Help: 'Trường dùng được: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Khoảng thời gian và chương
-  Start Time: Thời gian bắt đầu (HH:MM:SS)
-  End Time: Thời gian kết thúc (HH:MM:SS)
+  Start Time: Thời gian bắt đầu
+  End Time: Thời gian kết thúc
   Split by Chapters: Tách thành tệp riêng theo chương
   Remove Segments: Xóa phân đoạn
   Subtitles and Metadata: Phụ đề và siêu dữ liệu
@@ -1929,3 +1964,40 @@ Tray:
 Tray Icon:
   Title: "Biểu tượng khay hệ thống"
   Follow App Theme: "Theo chủ đề ứng dụng"
+
+Form Inputs:
+  Enter Password Hint: "Nhập mật khẩu của bạn"
+  Choose Password Hint: "Chọn mật khẩu"
+  Confirm Password Hint: "Nhập lại mật khẩu mới"
+  Encryption Passphrase Hint: "Nhập cụm mật khẩu mã hóa của bạn"
+  Show Password: "Hiện mật khẩu"
+  Hide Password: "Ẩn mật khẩu"
+  Search Text Hint: "Nhập từ khóa tìm kiếm"
+  Playlist Description Hint: "Mô tả danh sách phát này"
+  Filename Preview: "Xem trước tên tệp"
+  Enter Channels: "Nhập kênh"
+  Enter Text: "Nhập văn bản"
+  Video URL: URL video hoặc danh sách phát
+  Paste Link: Dán liên kết video hoặc danh sách phát
+  Example: "ví dụ: {example}"
+  No Minimum: Không có mức tối thiểu
+  No Maximum: Không có mức tối đa
+  Any Age: Mọi độ tuổi
+  Included Terms Example: "ví dụ: hướng dẫn, đánh giá"
+  Excluded Terms Example: "ví dụ: trailer, xem trước"
+  Download Folder Hint: Để trống để dùng thư mục Tải xuống
+  Global Arguments Hint: Đối số tùy chọn cho mọi lượt tải
+  Unlimited Hint: 0 để không giới hạn
+  Add Argument: Thêm đối số
+  Template Name Example: "ví dụ: Chỉ âm thanh"
+  Download Arguments Hint: Đối số tùy chọn cho lượt tải này
+  Generated ID Hint: Để trống để tạo ID
+  Default Value: "Mặc định: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+
+Storage Startup Error:
+  Title: "Không thể tải dữ liệu ứng dụng"
+  Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
+  Retry: "Thử lại"

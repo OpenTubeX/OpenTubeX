@@ -59,6 +59,16 @@ test('caption font changes describe caption appearance rather than the unchanged
   assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], 'Settings.Player Settings.Caption Appearance.Caption Appearance')
 })
 
+test('navigation preferences describe translated control labels in sync activity', () => {
+  for (const [key, label] of [
+    ['alwaysShowNavigationBar', 'Always Show Navigation Bar'],
+    ['compactNavigationLabels', 'Compact Tab Labels']
+  ]) {
+    const activity = createSyncActivity('settings', [{ key, value: false }], [{ key, value: true }], 'device', 'Phone')
+    assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], `Settings.General Settings.Navigation.${label}`)
+  }
+})
+
 test('device requests reject another recipient, arbitrary routes, expired messages and invalid positions', () => {
   const now = 100000
   const request = { version: 1, type: 'openVideo', recipient: 'phone', videoId: 'dQw4w9WgXcQ', title: 'Video', position: 30, expiresAt: now + 5000 }
@@ -305,4 +315,38 @@ test('activity bounds large imports and omits long item names', () => {
     { id: 'also-long', name: 'b'.repeat(129) },
   ], 'device', 'Laptop')
   assert.deepEqual(long.changes, [{ collection: 'subscriptions' }])
+})
+
+
+test('shortcut activity ignores JSON formatting and explicit default bindings', () => {
+  const before = [{ key: 'keyboardShortcuts', value: '{}' }]
+  const after = [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: '' } } }) }]
+  assert.equal(createSyncActivity('settings', before, after, 'device', 'Laptop'), null)
+  const equivalent = [{ key: 'keyboardShortcuts', value: '{ "VIDEO_PLAYER": { "PLAYBACK": { "TOGGLE_SKIP_SILENCE": "" } } }' }]
+  assert.equal(createSyncActivity('settings', after, equivalent, 'device', 'Laptop'), null)
+})
+
+test('shortcut activity describes changed bindings without serialized configuration', () => {
+  const activity = createSyncActivity('settings',
+    [{ key: 'keyboardShortcuts', value: '{}' }],
+    [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: 'h' } } }) }],
+    'device', 'Laptop')
+  assert.deepEqual(activity.changes, [{ key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h' }])
+})
+
+
+test('shortcut activity ignores equivalent modifier aliases, ordering, and key spelling', () => {
+  const setting = binding => [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: binding } } }) }]
+  for (const [before, after] of [
+    ['alt+h', 'option+h'],
+    ['ctrl+alt+h', 'option+ctrl+H'],
+    ['shift+alt+h', 'option+shift+h'],
+    [' ', 'space'],
+    ['shift+plus', 'plus'],
+    ['1-9', '1..9'],
+  ]) assert.equal(createSyncActivity('settings', setting(before), setting(after), 'device', 'Laptop'), null, `${before} -> ${after}`)
+  for (const [before, after] of [['alt+h', 'alt+j'], ['alt+h', 'h'], ['h', ''], ['', 'h'], ['1-9', '1'], ['1-9', '2-8']]) {
+    assert.deepEqual(createSyncActivity('settings', setting(before), setting(after), 'device', 'Laptop').changes,
+      [{ key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: after }])
+  }
 })

@@ -14,11 +14,13 @@
     </FtFlexBox>
     <FtFlexBox
       v-else
-      class="settingsFlexStart460px"
+      class="passwordForm"
     >
       <FtInput
-        :placeholder="$t('Settings.Password Dialog.Password')"
-        :label="$t('Settings.Password Settings.Set Password To Prevent Access')"
+        :icon="['fas', 'lock']"
+        :label="$t('Settings.Password Dialog.Password')"
+        :placeholder="$t('Form Inputs.Choose Password Hint')"
+        :supporting-text="$t('Settings.Password Settings.Set Password To Prevent Access')"
         :show-action-button="false"
         show-label
         input-type="password"
@@ -28,6 +30,7 @@
       />
       <FtButton
         class="centerButton"
+        theme="primary"
         :label="$t('Settings.Password Settings.Set Password')"
         :icon="['fas', 'key']"
         @click="handleSetPassword"

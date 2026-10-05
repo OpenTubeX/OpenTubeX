@@ -7,6 +7,10 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 
 import androidx.core.content.ContextCompat;
@@ -22,6 +26,40 @@ import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 public class AndroidMediaSessionLifecycleTest {
+    @Test public void mediaNotificationIconHasTransparentLogoBackground() {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> {
+                activity.getBridge().getWebView().loadUrl("about:blank");
+                ContextCompat.startForegroundService(context, new Intent(context, AndroidMediaSessionService.class)
+                    .setAction(AndroidMediaSessionService.ACTION_UPDATE)
+                    .putExtra(AndroidMediaSessionService.EXTRA_STATE,
+                        "{\"title\":\"Notification icon regression\",\"playbackState\":\"paused\"}"));
+            });
+            awaitForeground(context);
+            NotificationManager manager = context.getSystemService(NotificationManager.class);
+            Notification notification = Arrays.stream(manager.getActiveNotifications())
+                .filter(n -> n.getId() == 0x4d454449).findFirst().orElseThrow().getNotification();
+            Drawable icon = notification.getSmallIcon().loadDrawable(context);
+            assertNotNull("Media notification has a drawable icon", icon);
+            Bitmap rendered = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888);
+            icon.setBounds(0, 0, rendered.getWidth(), rendered.getHeight());
+            icon.draw(new Canvas(rendered));
+            int opaquePixels = 0;
+            for (int y = 0; y < rendered.getHeight(); y++) {
+                for (int x = 0; x < rendered.getWidth(); x++) {
+                    if (Color.alpha(rendered.getPixel(x, y)) > 0) opaquePixels++;
+                }
+            }
+            assertEquals("Notification tint must not turn the background into a rectangle",
+                0, Color.alpha(rendered.getPixel(0, 0)));
+            assertTrue("The logo must remain visible", opaquePixels > 96 * 96 / 10);
+            assertTrue("The logo needs transparent space, not a filled rectangle", opaquePixels < 96 * 96 / 2);
+        } finally {
+            context.stopService(new Intent(context, AndroidMediaSessionService.class));
+        }
+    }
+
     @Test public void finalPositionUpdateAfterClearDoesNotCrashTheProcess() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

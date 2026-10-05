@@ -1,12 +1,13 @@
 <template>
   <main class="externalMedia">
     <div
-      v-if="loading"
+      v-if="loading || errorMessage"
       class="externalMediaLayout"
-      :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
+      :class="{ useTheatreMode, noSidebar: !hasSidebar }"
     >
       <div class="externalMediaVideo">
         <div
+          v-if="loading"
           class="externalMediaState externalMediaLoading"
           data-tab-loading-indicator
           role="status"
@@ -23,42 +24,41 @@
             >{{ hostname }}</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div
-      v-else-if="errorMessage"
-      class="externalMediaState externalMediaError"
-      role="alert"
-    >
-      <div class="externalMediaStateContent">
-        <FtIcon
-          :icon="['fas', 'exclamation-circle']"
-          class="externalMediaErrorIcon"
-          aria-hidden="true"
-        />
-        <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
-        <span
-          v-if="info?.title && hostname"
-          class="externalMediaOrigin"
-        >{{ hostname }}</span>
-        <p class="externalMediaDiagnostic">
-          {{ errorMessage }}
-        </p>
-        <FtButton
-          v-if="isExternalMediaUrl(mediaUrl)"
-          class="externalMediaRetry"
-          :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
-          @click="loadMedia(route.query.url)"
-        />
-        <FtButton
-          v-if="canRetryWithCookies"
-          class="externalMediaRetry"
-          :label="t('Video.Try With Configured Cookies')"
-          :icon="['fas', 'cookie']"
-          @click="loadMedia(mediaUrl, true)"
-        />
+        <div
+          v-else
+          class="externalMediaState externalMediaError"
+          role="alert"
+        >
+          <div class="externalMediaStateContent">
+            <FtIcon
+              :icon="['fas', 'exclamation-circle']"
+              class="externalMediaErrorIcon"
+              aria-hidden="true"
+            />
+            <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
+            <span
+              v-if="info?.title && hostname"
+              class="externalMediaOrigin"
+            >{{ hostname }}</span>
+            <p class="externalMediaDiagnostic">
+              {{ errorMessage }}
+            </p>
+            <FtButton
+              v-if="isExternalMediaUrl(mediaUrl)"
+              class="externalMediaRetry"
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
+              @click="loadMedia(route.query.url)"
+            />
+            <FtButton
+              v-if="canRetryWithCookies"
+              class="externalMediaRetry"
+              :label="t('Video.Try With Configured Cookies')"
+              :icon="['fas', 'cookie']"
+              @click="loadMedia(mediaUrl, true)"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -66,7 +66,7 @@
       <div
         ref="videoLayout"
         class="externalMediaLayout"
-        :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
+        :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar }"
       >
         <div class="externalMediaVideo">
           <template v-if="source">
@@ -87,6 +87,7 @@
               :channel-thumbnail="creatorAvatarUrl"
               :thumbnail="thumbnail"
               :is-live="source.isLive"
+              :start-time="source.separateAudioUrl ? null : startTime"
               :current-playback-rate="defaultPlaybackRate"
               :storyboard-src="source.storyboardSrc"
               :chapters="chapters"
@@ -99,12 +100,13 @@
               :use-theatre-mode="useTheatreMode"
               playback-engine="yt-dlp"
               @error="playerErrorHandler"
+              @loaded="handleMediaLoaded"
               @legacy-format-selected="setCompanionFormat"
               @play="playCompanionAudio"
               @playing="playCompanionAudio"
-              @pause="pauseCompanionAudio"
+              @pause="handlePlaybackStopped"
               @waiting="pauseCompanionAudio"
-              @ended="pauseCompanionAudio"
+              @ended="handlePlaybackStopped"
               @volume-updated="setCompanionVolume"
               @playback-rate-updated="setCompanionPlaybackRate"
               @timeupdate="updateCurrentTime"
@@ -112,7 +114,7 @@
               @seeked="handleSeeked"
               @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
               @toggle-theatre-mode="toggleTheatreMode"
-              @chapters-overlay-change="showChapters = $event"
+              @chapters-overlay-change="handleChaptersOverlayChange"
             />
             <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
             <audio
@@ -123,7 +125,7 @@
               preload="auto"
               hidden
               aria-hidden="true"
-              @loadedmetadata="updateCompanionLoop"
+              @loadedmetadata="handleMediaLoaded"
               @ended="handleCompanionAudioEnded"
             />
           </template>
@@ -184,6 +186,7 @@
               >
                 <FtRetryImage
                   v-if="creatorAvatarUrl"
+                  :fallback-icon="['fas', 'circle-user']"
                   :src="creatorAvatarUrl"
                   class="externalMediaCreatorAvatar"
                   alt=""
@@ -244,35 +247,43 @@
             :license="metadata.license"
             @timestamp-event="seekTo"
           />
-          <FtCard
-            v-if="source && chapters.length && showChapters"
-            class="externalMediaChapters"
-          >
-            <div class="chaptersPanelHeader">
-              <h2>{{ t('Chapters.Chapters') }}</h2>
-              <button
-                type="button"
-                class="chaptersPanelClose"
-                :aria-label="t('Chapters.Close Chapters')"
-                :title="t('Chapters.Close Chapters')"
-                @click="showChapters = false"
-              >
-                <FtIcon :icon="['fas', 'xmark']" />
-              </button>
-            </div>
-            <WatchVideoChapters
-              :chapters="chapters"
-              :current-chapter-index="currentChapterIndex"
-              :fallback-thumbnail="thumbnail"
-              @timestamp-event="seekTo"
-              @copy-timestamp="copyChapterTimestamp"
-            />
-          </FtCard>
         </div>
         <aside
-          v-if="chatAvailable && chatOpen"
+          v-if="hasSidebar"
           class="externalMediaSidebar"
         >
+          <FtPhonePanel
+            :enabled="phoneLayout && !fullscreenLiveChatOpen"
+            :open="chaptersPanelOpen"
+            :title="t('Chapters.Chapters')"
+            fill
+            @close="showChapters = false"
+          >
+            <FtCard
+              v-if="chaptersPanelOpen"
+              class="externalMediaChapters watchVideoChaptersPanel"
+            >
+              <div class="chaptersPanelHeader">
+                <h2>{{ t('Chapters.Chapters') }}</h2>
+                <button
+                  type="button"
+                  class="chaptersPanelClose"
+                  :aria-label="t('Chapters.Close Chapters')"
+                  :title="t('Chapters.Close Chapters')"
+                  @click="showChapters = false"
+                >
+                  <FtIcon :icon="['fas', 'xmark']" />
+                </button>
+              </div>
+              <WatchVideoChapters
+                :chapters="chapters"
+                :current-chapter-index="currentChapterIndex"
+                :fallback-thumbnail="thumbnail"
+                @timestamp-event="seekTo"
+                @copy-timestamp="copyChapterTimestamp"
+              />
+            </FtCard>
+          </FtPhonePanel>
           <Teleport
             :to="fullscreenLiveChatTarget || 'body'"
             :disabled="!fullscreenLiveChatOpen"
@@ -303,7 +314,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -313,6 +324,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
@@ -324,16 +336,19 @@ import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
-import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
+import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
 
 const route = useRoute()
 const { t, locale } = useI18n()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
+const { isTabPresented } = useTabContext()
 
 const loading = ref(true)
 const errorMessage = ref('')
@@ -343,12 +358,23 @@ const player = useTemplateRef('player')
 const companionAudio = useTemplateRef('companionAudio')
 const companionAudioNeeded = ref(false)
 const videoLayout = useTemplateRef('videoLayout')
+const phoneLayout = usePhoneLayout()
+provide('phonePanelPlayer', () => player.value?.$refs.container)
+provide('phonePanelInlinePlayer', () => player.value?.scrollMiniPlayerActive
+  ? player.value.$refs.scrollMiniPlaceholder
+  : player.value?.$refs.container)
 const mediaUrl = ref('')
 const currentTime = ref(0)
+const startTime = ref(null)
+let lastPositionSave = 0
+let lastSavedPosition = 0
+let hasBeenPresented = isTabPresented?.value ?? true
+watch(() => isTabPresented?.value, presented => { if (presented) hasBeenPresented = true })
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
+const ambientModeActive = computed(() => store.getters.getAmbientMode && source.value && !source.value.audioOnly)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)
@@ -373,14 +399,21 @@ const hostname = computed(() => {
 })
 const isCoub = computed(() => hostname.value === 'coub.com' || hostname.value.endsWith('.coub.com'))
 const twitchChatTarget = computed(() => {
-  if (loading.value) return getTwitchChatTarget(mediaUrl.value, true)
+  if (loading.value || (errorMessage.value && !info.value)) return getTwitchChatTarget(mediaUrl.value, true)
   if (!info.value || !source.value) return null
   return getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
 })
 const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarget.value.type === 'replay'
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
-const theatreTogglePossible = computed(() => windowWidth.value > 1350 && Boolean(chatAvailable.value && chatOpen.value))
+const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
+const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value)
+const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
+
+function handleChaptersOverlayChange(open) {
+  if (open && !hasSidebar.value && store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
+  showChapters.value = open
+}
 
 async function toggleTheatreMode() {
   const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
@@ -444,6 +477,8 @@ function updateWindowWidth() {
 }
 
 function handleSeeking(time) {
+  // A seek takes precedence over a restore still waiting for companion metadata.
+  startTime.value = null
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
   seeking.value = true
@@ -454,6 +489,7 @@ function handleSeeking(time) {
 function handleSeeked(time) {
   currentTime.value = time
   syncCompanionAudio(time)
+  if (store.getters.getWatchedProgressSavingMode === 'auto' || player.value?.isPaused()) savePosition()
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
     seekTimer = null
@@ -462,7 +498,10 @@ function handleSeeked(time) {
   }, 150)
 }
 
-onMounted(() => window.addEventListener('resize', updateWindowWidth))
+onMounted(() => {
+  window.addEventListener('resize', updateWindowWidth)
+  window.addEventListener('beforeunload', savePositionOnExit)
+})
 function safeWebUrl(value) {
   try {
     const url = new URL(value)
@@ -595,6 +634,37 @@ function getCompanionVideo() {
   return videoLayout.value?.querySelector('.externalMediaPlayer video')
 }
 
+function getPositionMedia() {
+  const video = getCompanionVideo()
+  return companionAudioNeeded.value && video?.loop ? companionAudio.value : video
+}
+
+function restoreCompanionPosition() {
+  if (!source.value?.separateAudioUrl || startTime.value === null || !player.value?.hasLoaded) return
+  const video = getCompanionVideo()
+  const audio = companionAudio.value
+  if (!Number.isFinite(video?.duration) || (companionAudioNeeded.value && !Number.isFinite(audio?.duration))) return
+  // Separate tracks can have different lengths. Wait for metadata before
+  // deciding whether the soundtrack or the video supplies the resume timeline.
+  const media = getPositionMedia()
+  const position = getExternalMediaPosition(mediaUrl.value, media.duration)
+  lastSavedPosition = position ?? 0
+  startTime.value = null
+  if (position === null) return
+  if (media === audio) {
+    audio.currentTime = position
+    player.value.setCurrentTime(position % video.duration)
+  } else {
+    player.value.setCurrentTime(position)
+    syncCompanionAudio(position)
+  }
+}
+
+function handleMediaLoaded() {
+  updateCompanionLoop()
+  restoreCompanionPosition()
+}
+
 function updateCompanionLoop() {
   const video = getCompanionVideo()
   const audio = companionAudio.value
@@ -608,10 +678,12 @@ function setCompanionFormat(format) {
   companionAudioNeeded.value = Boolean(source.value?.separateAudioUrl && format.requiresSeparateAudio)
   if (!companionAudioNeeded.value) pauseCompanionAudio()
   updateCompanionLoop()
+  restoreCompanionPosition()
 }
 
 function handleCompanionAudioEnded() {
   if (!companionAudioNeeded.value) return
+  savePosition()
   if (!isCoub.value) {
     pauseCompanionVideo()
     return
@@ -649,12 +721,37 @@ function setCompanionPlaybackRate(rate) {
 function updateCurrentTime(seconds) {
   currentTime.value = seconds
   syncCompanionAudio(seconds)
+  if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
+}
+
+function savePosition() {
+  if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
+    loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
+    !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
+  const media = getPositionMedia()
+  const duration = Number.isFinite(media?.duration) ? media.duration : info.value?.duration
+  const seconds = media?.currentTime ?? player.value.getCurrentTime()
+  // Pausing or disposing an unchanged tab must not overwrite another tab's progress.
+  if (seconds === lastSavedPosition) return
+  saveExternalMediaPosition(mediaUrl.value, seconds, duration)
+  lastSavedPosition = seconds
+  lastPositionSave = Date.now()
+}
+
+function savePositionOnExit() {
+  if (store.getters.getWatchedProgressSavingMode === 'auto') savePosition()
+}
+
+function handlePlaybackStopped() {
+  pauseCompanionAudio()
+  savePosition()
 }
 function seekTo(seconds) { player.value?.setCurrentTime(seconds) }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
 function handlePlayerError(error) {
   if (loading.value || !source.value) return
+  savePosition()
   drmError.value = error?.code === 6001
   errorMessage.value = drmError.value
     ? t('Video.External DRM Protected')
@@ -662,6 +759,7 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
@@ -679,6 +777,10 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   info.value = null
   source.value = null
   currentTime.value = 0
+  startTime.value = null
+  lastPositionSave = 0
+  lastSavedPosition = 0
+  hasBeenPresented = isTabPresented?.value ?? true
   showChapters.value = false
   seekCount.value = 0
   seeking.value = false
@@ -701,6 +803,10 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       return
     }
     info.value = result.info
+    if (store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never' && !result.source?.isLive) {
+      startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.separateAudioUrl ? null : result.info.duration)
+      lastSavedPosition = startTime.value ?? 0
+    }
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
@@ -714,12 +820,19 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
+useTabLifecycle({
+  beforeNavigate: savePositionOnExit,
+  deactivate: savePositionOnExit,
+  beforeDispose: savePositionOnExit,
+})
 onBeforeUnmount(() => {
+  savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   theatreModeAnimations.forEach(animation => animation.cancel())
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)
   window.removeEventListener('resize', updateWindowWidth)
+  window.removeEventListener('beforeunload', savePositionOnExit)
 })
 </script>
 
@@ -744,7 +857,7 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaPlayer,
-.externalMediaLoading {
+.externalMediaState {
   inline-size: 100%;
   max-inline-size: calc(80vh * 1.78);
   min-inline-size: 0;
@@ -756,14 +869,24 @@ onBeforeUnmount(() => {
   gap: 16px;
   grid-area: info;
   min-inline-size: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .externalMediaSidebar {
   grid-area: sidebar;
   min-inline-size: 0;
+  position: relative;
+  z-index: 2;
 }
 
-.externalMediaSidebar :deep(.twitchChat) {
+.externalMediaLayout.ambientModeActive :is(.externalMediaDetails, .externalMediaChapters),
+.externalMediaLayout.ambientModeActive .externalMediaSidebar :deep(.twitchChat) {
+  background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
+}
+
+.externalMediaSidebar :deep(.twitchChat),
+.externalMediaSidebar .externalMediaChapters {
   margin-block: 0 16px;
   margin-inline: 8px;
 }
@@ -817,7 +940,7 @@ onBeforeUnmount(() => {
   border-radius: calc(8px * var(--ui-roundness));
   box-sizing: border-box;
   display: grid;
-  min-block-size: 320px;
+  min-block-size: 0;
   padding: 32px;
   place-items: center;
 }
@@ -835,7 +958,6 @@ onBeforeUnmount(() => {
 
 .externalMediaLoading {
   container: external-media-loading / inline-size;
-  min-block-size: 0;
 }
 
 .externalMediaState.externalMediaLoading {
@@ -916,9 +1038,18 @@ onBeforeUnmount(() => {
   min-block-size: 44px;
 }
 
+@media (height <= 500px) and (width > 680px) {
+  .externalMediaError {
+    padding: 16px;
+  }
+
+  .externalMediaError .externalMediaStateContent {
+    gap: 8px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .externalMediaState {
-    min-block-size: 0;
     padding: 20px;
   }
 
@@ -1077,6 +1208,38 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaChapters :deep(.chaptersWrapper) {
-  max-block-size: 360px;
+  max-block-size: 480px;
+  --scrollbar-color: inherit;
+  --scrollbar-color-hover: inherit;
+}
+
+.externalMediaChapters :deep(.chapter) {
+  border-block-end: 1px solid var(--side-nav-hover-color);
+  background-color: transparent;
+}
+
+.externalMediaChapters :deep(.chapter:hover),
+.externalMediaChapters :deep(.chapter:focus-within) {
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 60%, transparent);
+}
+
+.externalMediaChapters :deep(.chapter.current),
+.externalMediaChapters :deep(.chapter.current:hover),
+.externalMediaChapters :deep(.chapter.current:focus-within) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.externalMediaChapters :deep(.chapterSeek),
+.externalMediaChapters :deep(.copyTimestamp) {
+  color: inherit;
+}
+
+.externalMediaChapters :deep(.copyTimestamp:hover),
+.externalMediaChapters :deep(.copyTimestamp:focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.externalMediaChapters :deep(.chapterThumbnail) {
+  background-color: var(--secondary-card-bg-color);
 }
 </style>

@@ -17,6 +17,7 @@
         :value="values[index]"
         :checked="isChecked(values[index])"
         :disabled="isDisabled(values[index])"
+        :indeterminate="!isDisabled(values[index]) && indeterminateValues.includes(values[index])"
         class="checkbox"
         type="checkbox"
         @change="toggle(values[index], $event.target.checked)"
@@ -24,6 +25,10 @@
       <label
         :for="id + values[index]"
       >
+        <span
+          class="checkboxStateLayer"
+          aria-hidden="true"
+        />
         <span class="checkboxLabelText">{{ label }}</span>
         <FtTooltip
           v-if="tooltips[values[index]]"
@@ -61,6 +66,10 @@ const props = defineProps({
     default: false
   },
   disabledValues: {
+    type: Array,
+    default: () => []
+  },
+  indeterminateValues: {
     type: Array,
     default: () => []
   },

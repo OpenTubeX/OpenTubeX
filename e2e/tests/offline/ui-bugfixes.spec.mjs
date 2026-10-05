@@ -513,10 +513,10 @@ for (const iconPack of ['material', 'remix']) {
       await expect.poll(() => row(title).locator('img').evaluate(image => image.naturalWidth)).toBe(24)
     }
     await expect(row('Broken avatar').locator('img')).toBeHidden()
-    // Keep the retry pending to check that only exhausted retries show a fallback.
+    // Keep the retry pending to check the placeholder until the image loads.
     const retryRoute = await retryRequest
-    await expect(row('Retry avatar').locator('img')).toBeVisible()
-    await expect(row('Retry avatar').locator('[data-icon="clapperboard"]')).toHaveCount(0)
+    await expect(row('Retry avatar').locator('img')).toBeHidden()
+    await expect(row('Retry avatar').locator('[data-icon="clapperboard"]')).toBeVisible()
     await retryRoute.fulfill({
       contentType: 'image/svg+xml',
       body: decodeURIComponent(avatar.split(',')[1]),
@@ -1764,63 +1764,72 @@ test.describe('autosized prompts', () => {
   })
 })
 
-test('isolates the owning video surface while Android Picture-in-Picture is active', async ({ page }) => {
-  await goTo(page, 'home')
-  await page.emulateMedia({ colorScheme: 'light' })
-  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
-  await page.evaluate(() => {
-    document.querySelector('.app').classList.add('capacitorTabs')
-    for (const target of [false, true]) {
-      const player = document.createElement('div')
-      player.className = 'ftVideoPlayer shaka-video-container'
-      if (target) player.setAttribute('data-android-picture-in-picture-target', '')
-      const video = document.createElement('video')
-      video.className = 'player'
-      player.append(video)
-      const canvas = document.createElement('canvas')
-      canvas.className = 'vrCanvas'
-      player.append(canvas)
-      document.querySelector('.app > .routerView').append(player)
+for (const scale of [1, 1.25]) {
+  test(`isolates the owning video surface while Android Picture-in-Picture is active at ${scale * 100}% UI scale`, async ({ page }) => {
+    await goTo(page, 'home')
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    const source = { x: 18.5, y: 24.25, width: 480.5, height: 270.25 }
+    await page.emulateMedia({ colorScheme: 'light' })
+    await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
+    await page.evaluate(bounds => {
+      document.querySelector('.app').classList.add('capacitorTabs')
+      // Native PiP crops the live viewport around the saved source geometry.
+      // Supply the same bounds that Android entry normally records.
+      for (const [name, value] of Object.entries({ left: bounds.x, top: bounds.y, width: bounds.width, height: bounds.height })) {
+        document.documentElement.style.setProperty(`--android-pip-source-${name}`, `${value}px`)
+      }
+      for (const target of [false, true]) {
+        const player = document.createElement('div')
+        player.className = 'ftVideoPlayer shaka-video-container'
+        if (target) player.setAttribute('data-android-picture-in-picture-target', '')
+        const video = document.createElement('video')
+        video.className = 'player'
+        player.append(video)
+        const canvas = document.createElement('canvas')
+        canvas.className = 'vrCanvas'
+        player.append(canvas)
+        document.querySelector('.app > .routerView').append(player)
+      }
+      document.body.classList.add('androidPictureInPicture')
+    }, source)
+
+    await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
+    await expect(page.locator('.app > .routerView')).toHaveCSS('container-type', 'normal')
+    await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
+    const target = page.locator('[data-android-picture-in-picture-target]')
+    await expect(target).toHaveCSS('visibility', 'visible')
+    await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+    await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
+    await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
+    const expectSourceBounds = async () => {
+      await expect.poll(() => target.evaluate((element, bounds) => {
+        return [element, element.querySelector(':scope > .player'), element.querySelector(':scope > .vrCanvas')]
+          .every(surface => {
+            const rect = surface.getBoundingClientRect()
+            return ['x', 'y', 'width', 'height'].every(dimension => Math.abs(rect[dimension] - bounds[dimension]) <= 1)
+          })
+      }, source)).toBe(true)
     }
-    document.body.classList.add('androidPictureInPicture')
+    await expectSourceBounds()
+
+    // Vue replaces the class attribute when the player changes into its
+    // cross-tab mini-player layout. PiP ownership must survive that update.
+    await target.evaluate(element => {
+      element.className = 'ftVideoPlayer shaka-video-container scrollMiniPlayer'
+    })
+    await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
+    await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
+    await expectSourceBounds()
+
+    // Entering Android PiP can change the reported system color scheme. Theme
+    // updates must not discard the transient class that isolates the video.
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'dark')
+    await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
+    await expect(target).toHaveCSS('visibility', 'visible')
+    await expectSourceBounds()
   })
-
-  await expect(page.locator('.topNav')).toHaveCSS('visibility', 'hidden')
-  await expect(page.locator('.app > .routerView')).toHaveCSS('container-type', 'normal')
-  await expect(page.locator('.ftVideoPlayer').first()).toHaveCSS('visibility', 'hidden')
-  const target = page.locator('[data-android-picture-in-picture-target]')
-  await expect(target).toHaveCSS('visibility', 'visible')
-  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
-  await expect(target.locator('> .player')).toHaveCSS('transition-property', 'none')
-  await expect(target.locator('> .vrCanvas')).toHaveCSS('transition-property', 'none')
-  await expect.poll(() => target.evaluate(element => {
-    const fillsViewport = (bounds) => {
-      return Math.abs(bounds.top) <= 1 &&
-        Math.abs(bounds.right - window.innerWidth) <= 1 &&
-        Math.abs(bounds.bottom - window.innerHeight) <= 1 &&
-        Math.abs(bounds.left) <= 1
-    }
-    return {
-      target: fillsViewport(element.getBoundingClientRect()),
-      video: fillsViewport(element.querySelector(':scope > .player').getBoundingClientRect()),
-    }
-  })).toEqual({ target: true, video: true })
-
-  // Vue replaces the class attribute when the player changes into its
-  // cross-tab mini-player layout. PiP ownership must survive that update.
-  await target.evaluate(element => {
-    element.className = 'ftVideoPlayer shaka-video-container scrollMiniPlayer'
-  })
-  await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
-  await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')
-
-  // Entering Android PiP can change the reported system color scheme. Theme
-  // updates must not discard the transient class that isolates the video.
-  await page.emulateMedia({ colorScheme: 'dark' })
-  await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'dark')
-  await expect(page.locator('body')).toHaveClass(/androidPictureInPicture/)
-  await expect(target).toHaveCSS('visibility', 'visible')
-})
+}
 
 test.describe('thumbnail watched progress', () => {
   test.use({
@@ -2175,7 +2184,7 @@ test.describe('select dropdown pixel grid', () => {
     expect(inactiveOptionIndex).toBeGreaterThanOrEqual(0)
     const option = options.nth(inactiveOptionIndex)
     // The option label is a direct text node, so measure its rendered range.
-    const textPosition = () => option.evaluate(element => {
+    const textPosition = (target = option) => target.evaluate(element => {
       const range = document.createRange()
       range.selectNodeContents(element)
       const bounds = range.getBoundingClientRect()
@@ -2188,24 +2197,23 @@ test.describe('select dropdown pixel grid', () => {
     expect(await textPosition()).toEqual(beforeHover)
 
     const selectedOption = dropdown.locator('.selectOption[aria-selected="true"]')
+    const selectedTextPosition = await textPosition(selectedOption)
+    const selectedBackground = await selectedOption.evaluate(element => getComputedStyle(element).backgroundColor)
+    expect(selectedBackground).not.toBe('rgba(0, 0, 0, 0)')
     await selectedOption.hover()
     await expect(selectedOption).toHaveClass(/active/)
+    expect(await textPosition(selectedOption)).toEqual(selectedTextPosition)
     const indicatorAppearance = await selectedOption.evaluate(element => {
       const hoverLayer = getComputedStyle(element, '::before')
-      const selectedIndicator = getComputedStyle(element, '::after')
       return {
         hoverLayerZIndex: hoverLayer.zIndex,
-        indicatorColor: selectedIndicator.backgroundColor,
-        indicatorWidth: Number.parseFloat(selectedIndicator.width),
-        indicatorZIndex: selectedIndicator.zIndex
+        selectionBackground: getComputedStyle(element).backgroundColor
       }
     })
     expect(indicatorAppearance).toMatchObject({
       hoverLayerZIndex: '-1',
-      indicatorColor: 'rgb(33, 150, 243)',
-      indicatorZIndex: '1'
+      selectionBackground: selectedBackground
     })
-    expect(indicatorAppearance.indicatorWidth).toBeCloseTo(3, 1)
 
     // At arbitrary UI scales, fixed-height options cannot all start on device
     // pixels. Their stable paint layer must therefore prevent the hover

@@ -237,3 +237,77 @@ test('rechecks premiere history after the clock advances and the Home feed recom
   })
   await expect(page.getByText('Video 0-0', { exact: true })).toHaveCount(0)
 })
+
+test.describe('consecutive refreshes with a changing cache size', () => {
+  test.use({
+    seed: {
+      ...largeSubscriptionsSeed,
+      profiles: largeSubscriptionsSeed.profiles.map(profile => ({
+        ...profile, subscriptions: profile.subscriptions.slice(0, 3)
+      })),
+      subscriptionCache: largeSubscriptionsSeed.subscriptionCache.slice(0, 3)
+    }
+  })
+
+  test('updates the New snapshot and size gate when feeds change without going idle', async ({ page }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
+      const videos = JSON.parse(JSON.stringify(cache.videos))
+      store.commit('setSubscriptionFeedRefreshTab', 'videos')
+      store.commit('setSubscriptionFeedRefreshInProgress', true)
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+        channelId,
+        videos: [
+          { ...videos[0], title: 'Finished Videos snapshot' },
+          ...Array.from({ length: 5000 }, (_, index) => ({
+            ...videos[0], videoId: `hidden-${index}`, isNewInSubscriptionFeed: false
+          }))
+        ]
+      })
+      // A synchronized refresh can switch feeds without an idle state.
+      store.commit('setSubscriptionFeedRefreshTab', 'shorts')
+    })
+    await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
+      const videos = JSON.parse(JSON.stringify(cache.videos))
+      videos[0].title = 'Pending large-cache update'
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
+      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', { detail: { tab: 'shorts' } }))
+      await new Promise(resolve => setTimeout(resolve, 200))
+    })
+    // The new feed's cache has crossed the size threshold. Its updates wait.
+    await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
+    await expect(page.getByText('Pending large-cache update', { exact: true })).toHaveCount(0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos: [cache.videos[0]] })
+      store.commit('setSubscriptionFeedRefreshTab', 'live')
+    })
+    await expect(page.getByText('Pending large-cache update', { exact: true })).toBeVisible()
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+        channelId, videos: [{ ...cache.videos[0], title: 'Incremental small-cache update' }]
+      })
+      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', { detail: { tab: 'live' } }))
+    })
+    // Shrinking below the threshold restores coalesced incremental publication.
+    await expect(page.getByText('Incremental small-cache update', { exact: true })).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .commit('setSubscriptionFeedRefreshInProgress', false))
+    await expect(page.getByText('Incremental small-cache update', { exact: true })).toBeVisible()
+  })
+})

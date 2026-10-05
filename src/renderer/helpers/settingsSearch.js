@@ -86,6 +86,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     store,
     usingElectron,
     isCapacitor = false,
+    phoneLayout = false,
     isIos = false,
     supportsLocalApi,
     isLinuxWayland,
@@ -128,6 +129,8 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'general') {
+    if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
+    if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
     if (group === 'Stream Extraction Method') return usingElectron || isCapacitor
     if (['Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
@@ -306,6 +309,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'theme') {
+    if (group === 'Always Show Mobile Search Bar') return isCapacitor
     if (isCapacitor && group === 'Show Progress as Notification') {
       return false
     }
@@ -346,6 +350,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     'Scroll Volume Over Video Player',
   ].includes(group)) {
     return false
+  }
+
+  if (sectionType === 'player' && group === 'Ignore System Rotation Lock for Fullscreen') {
+    return isCapacitor && !isIos
   }
 
   if (sectionType === 'player' && !isCapacitor && [

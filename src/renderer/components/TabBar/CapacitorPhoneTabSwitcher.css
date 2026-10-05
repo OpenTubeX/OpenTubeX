@@ -70,7 +70,7 @@
   color: var(--text-with-main-color);
   background-color: var(--primary-color);
   border: 2px solid var(--card-bg-color);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
@@ -177,6 +177,58 @@
   overscroll-behavior: contain;
 }
 
+.capacitorPhoneTabHistory {
+  min-block-size: 0;
+  padding-block: 12px;
+  padding-inline: 16px;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+.capacitorPhoneTabHistoryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.capacitorPhoneTabHistoryEntry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 48px;
+  padding: 12px;
+  color: var(--primary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+  text-align: start;
+  font-size: 14px;
+}
+
+.historyEntryLabel {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.capacitorPhoneTabHistoryEntry :deep(.ft-icon) {
+  flex: 0 0 20px;
+  inline-size: 20px;
+}
+
+
+.currentPageLabel {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.capacitorPhoneTabHistoryEntry[aria-current='page'],
+.capacitorPhoneTabHistoryEntry:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+}
+
+
 .capacitorPhoneOpenTabs,
 .capacitorPhoneSyncedTabsContent {
   min-block-size: max-content;
@@ -191,6 +243,8 @@
 
 .capacitorPhoneTabRow {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-inline-size: 0;
   border: 2px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -226,6 +280,7 @@
 
 .capacitorPhoneTabTarget {
   display: flex;
+  flex: 1;
   flex-direction: column;
   inline-size: 100%;
   min-inline-size: 0;
@@ -241,8 +296,13 @@
   touch-action: manipulation;
 }
 
+.capacitorPhoneTabTarget :deep(.capacitorTabPreview) {
+  flex: 1;
+}
+
 .capacitorPhoneTabTitle {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 6px;
   align-self: stretch;

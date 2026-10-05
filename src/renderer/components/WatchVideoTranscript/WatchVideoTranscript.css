@@ -11,6 +11,7 @@
 }
 
 .transcriptHeader {
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
 }
@@ -24,15 +25,19 @@
   align-items: center;
   gap: 9px;
   margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .transcriptActions {
-  flex-wrap: wrap;
+  flex: 0 0 auto;
+  gap: inherit;
   justify-content: flex-end;
 }
 
 .transcriptHeaderActions {
   position: relative;
+  flex: 0 0 auto;
   gap: 8px;
 }
 
@@ -194,7 +199,6 @@
 }
 
 @media only screen and (width <= 600px) {
-  .transcriptHeader,
   .transcriptControls {
     align-items: stretch;
     flex-direction: column;

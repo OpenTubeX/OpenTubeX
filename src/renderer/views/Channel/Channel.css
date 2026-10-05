@@ -9,6 +9,11 @@
 
 .channelDetails {
   padding: 0;
+  margin-block-end: 0;
+}
+
+.channelContent {
+  padding-block-start: 0;
 }
 
 .select-container {
@@ -20,9 +25,24 @@
   margin-block-end: 10px;
 }
 
+.select-container:empty {
+  display: none;
+}
+
 .select-container > :deep(.btn) {
-  margin-block-end: 9px;
+  margin-block: 0 9px;
   margin-inline-end: auto;
+}
+
+.select-container > :deep(.select) {
+  /* Reserve only the half-height of the floating label above its outline. */
+  margin-block-start: 7px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .select-container > :deep(.select) {
+    margin-block-start: 8px;
+  }
 }
 
 @media (width <= 800px) {
@@ -64,7 +84,7 @@
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   padding-block: 7px;
   padding-inline: 14px;
   cursor: pointer;
@@ -89,6 +109,10 @@
   color: var(--tertiary-text-color);
 }
 
+.elementList .message {
+  margin-block-start: 0;
+}
+
 .getNextPage {
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
@@ -98,12 +122,6 @@
   text-align: center;
   cursor: pointer;
   margin-block-start: 16px;
-}
-
-@media only screen and (width <= 800px) {
-  .communityPanel {
-    margin-block-start: 1rem;
-  }
 }
 
 @media only screen and (width <= 680px) {

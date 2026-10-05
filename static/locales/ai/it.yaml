@@ -263,6 +263,11 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Scorri a sinistra sulle miniature
+      Right: Scorri a destra sulle miniature
+      Description: Scorri orizzontalmente sulla miniatura di un video e rilascia per eseguire l'azione selezionata.
+    Data Saver Thumbnails: "Miniature per il risparmio dati"
     Use tray icon: "Usa l’icona nell’area di notifica"
     Close to system tray: "Chiudi nell’area di notifica"
     Tray required for background refresh: "L’icona nell’area di notifica è necessaria quando l’aggiornamento degli abbonamenti in background è attivo."
@@ -270,7 +275,9 @@ Settings:
     Swipe to refresh: Scorri per aggiornare
     Blur Thumbnails: Sfoca le miniature
     Navigation:
-      Show Active Subscriptions: Mostra iscrizioni attive
+      Always Show Navigation Bar: Mostra sempre la barra di navigazione quando è in basso
+      Compact Tab Labels: Barra di navigazione compatta quando è in basso
+      Show Active Subscriptions: Mostra iscrizioni attive nella barra laterale
       Navigation: Navigazione
       Customize Navigation: Personalizza la navigazione
       Add Item: Aggiungi elemento
@@ -352,6 +359,8 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Compact Mobile Mini Player: "Mini lettore mobile compatto"
+    Always Show Mobile Search Bar: "Mostra sempre la barra di ricerca su mobile"
     Frosted Glass Player UI: "Interfaccia del lettore con effetto vetro smerigliato"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato acqua di rose"
@@ -433,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Chiaro"
-      OpenTubeX Dark: "OpenTubeX Scuro"
+      Ocean Light: "Ocean Chiaro"
+      Ocean Dark: "Ocean Scuro"
       Custom: Personalizzato
     Light Theme: Tema chiaro
     Dark Theme: Tema scuro
@@ -619,6 +628,8 @@ Settings:
     Preload Upcoming Videos: "Precarica i prossimi video"
     Upcoming Videos to Preload: "Numero di video da precaricare"
     Concurrent Preloads: "Precaricamenti simultanei"
+    Ignore System Rotation Lock for Fullscreen: Ignora il blocco della rotazione del sistema per lo schermo intero
+    Swipe Left or Right to Seek in Fullscreen: Scorri a sinistra o a destra per avanzare o riavvolgere a schermo intero
   Channel Settings:
     Channel Settings: Impostazioni dei canali
     Channel Settings Description: Ricorda separatamente per ogni canale le impostazioni scelte durante la visione e le riapplica quando guardi un altro video dello stesso canale.
@@ -655,9 +666,9 @@ Settings:
     Update Managed Tools: Aggiorna
     Managed Tools Download Error Template: 'Impossibile scaricare gli strumenti gestiti: {errors}'
     Download Folder: Cartella dei download
-    Global Additional yt-dlp Arguments: Argomenti aggiuntivi globali di yt-dlp
+    Global Additional yt-dlp Arguments: Argomenti aggiuntivi di yt-dlp
     Concurrent Downloads: Download simultanei
-    Bandwidth Limit: Limite di banda (KiB/s, 0 per nessun limite)
+    Bandwidth Limit: Limite di banda (KiB/s)
     Choose Download Folder: Scegli cartella dei download
     Download Templates: Modelli di download
     Manage Download Templates: Gestisci modelli di download ({templateCount})
@@ -730,8 +741,8 @@ Settings:
       Automatic: Aggiorna automaticamente
       Ask: Chiedi prima di aggiornare
       Manual: Aggiorna solo manualmente
-    yt-dlp Executable Path: Percorso dell'eseguibile yt-dlp
-    FFmpeg Executable Path: Percorso dell'eseguibile FFmpeg
+    yt-dlp Executable Path: Eseguibile di yt-dlp
+    FFmpeg Executable Path: Eseguibile di FFmpeg
     Restricted Playback Authentication: "Cookie di yt-dlp"
     Cookie Source: Origine dei cookie
     Cookie Sources:
@@ -963,7 +974,7 @@ Settings:
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
     Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.
     Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
-    Server URL: URL del server
+    Server URL: URL del server di sincronizzazione
     Checking Server: Controllo del server di sincronizzazione…
     Server Unavailable: Impossibile connettersi a questo server di sincronizzazione. Controlla l'URL e riprova.
     Username: Nome utente
@@ -1053,7 +1064,7 @@ Settings:
     Open All Tabs Confirmation: "Aprire tutte le schede?"
     Server Update Required: "Aggiorna questo server per supportare la sincronizzazione cifrata in tempo reale."
   Proxy Settings:
-    IP Block Recovery Script Path: Percorso dello script di ripristino dal blocco IP
+    IP Block Recovery Script Path: Script di recupero dal blocco IP
     Select IP Block Recovery Script File: Seleziona file dello script di ripristino dal blocco IP
     Running IP block recovery script: Esecuzione dello script di ripristino dal blocco IP
     IP block recovery script failed: 'Script di ripristino dal blocco IP non riuscito (codice di uscita: {exitCode})'
@@ -1062,7 +1073,7 @@ Settings:
     Failed to select IP block recovery script: Impossibile selezionare lo script di ripristino dal blocco IP
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Abilita invio a SponsorBlock
-    SponsorBlock Private User ID (optional): ID utente privato di SponsorBlock (facoltativo)
+    SponsorBlock Private User ID (optional): ID utente privato (facoltativo)
     SponsorBlock Private User ID Tooltip: Incolla l'ID utente privato di SponsorBlock dall'estensione del browser. Lascia vuoto per usare un ID generato dall'app.
     Generated SponsorBlock User ID: ID utente SponsorBlock generato
     Generated SponsorBlock User ID Tooltip: Questo ID utente SponsorBlock generato dall'app può essere usato nell'estensione del browser o su un altro computer con l'app.
@@ -1074,7 +1085,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Abilita Return YouTube Dislike
-    Return YouTube Dislike Url: URL dell'API Return YouTube Dislike (predefinito https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL dell’API
   Password Dialog:
     Incorrect Password: Password errata
     Unlock: Sblocca
@@ -1115,6 +1126,21 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Customization: Personalizzazione
+  Manage Profile Subscriptions: Gestisci le iscrizioni del profilo
+  Icon Names:
+    Person: Persona
+    People: Persone
+    Headphones: Cuffie
+    Gaming: Giochi
+    Film: Film
+    Art: Arte
+    Science: Scienza
+    Globe: Globo
+    Heart: Cuore
+    Sun: Sole
+    Moon: Luna
+    Trophy: Trofeo
   Profile Icon: Icona del profilo
   Choose an Emoji: Scegli un'emoji
   Custom Emoji: Emoji personalizzata
@@ -1297,12 +1323,16 @@ Video:
     Hide: Nascondi
     Show: Mostra
     Scroll Mini Player:
+      Collapse Controls: "Comprimi i controlli"
+      Expand Controls: "Espandi i controlli"
       Back to Top: Torna in alto
       Return to Video Tab: Torna alla scheda del video
       Hide: Nascondi mini player
       Play: Riproduci
       Pause: Pausa
       Drag Handle: Sposta mini lettore
+      Rewind 10 seconds: Indietro di 10 secondi
+      Forward 10 seconds: Avanti di 10 secondi
     SponsorBlock:
       CancelCurrentSegment: Annulla creazione del segmento
       ClearSegments: Cancella segmenti
@@ -1439,6 +1469,7 @@ Share:
   Share failed: "Impossibile condividere il link"
   Timestamp Link Copied: Link con indicazione temporale copiato negli appunti
 Context Menu:
+  Open in a Background Tab: "Apri in una scheda in secondo piano"
   Select Tab: Seleziona scheda
   Close Tabs Before: Chiudi schede precedenti
   Close Tabs After: Chiudi schede successive
@@ -1501,6 +1532,8 @@ Context Menu:
   Search With Multiple: Cerca con...
   Selection Too Long: La selezione è troppo lunga per la ricerca (> {count} caratteri)
 Tab Organizer:
+  Tab History: "Cronologia della scheda"
+  Current Page: "Pagina attuale"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Orologio'
@@ -1597,6 +1630,7 @@ Description:
   Games: Giochi
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Usa miniature a risoluzione inferiore per ridurre il consumo di dati."
     Use AI Translation Completions: Completa le parti mancanti delle traduzioni umane con testo generato dall'IA. Le traduzioni umane hanno sempre la precedenza.
     Update Relative Timestamps: Aggiorna gli orari relativi in tutta l'app mentre una pagina rimane aperta. Se disabilitato, si aggiornano solo dopo aver ricaricato o riaperto la pagina.
     Stream Extraction Method: |
@@ -1640,6 +1674,7 @@ Tooltips:
     Preload Upcoming Videos: "Recupera e memorizza nella cache gli URL yt-dlp dei prossimi video. La coda ha la priorità su playlist e consigli."
     Upcoming Videos to Preload: "Numero massimo di prossimi video i cui URL yt-dlp vengono recuperati in background."
     Concurrent Preloads: "Il numero massimo di processi yt-dlp usati per precaricare più video contemporaneamente. Valori più alti usano più CPU, memoria e larghezza di banda di rete."
+    Ignore System Rotation Lock for Fullscreen: Ruota fisicamente il dispositivo per entrare e uscire dallo schermo intero anche quando la rotazione automatica di Android è disattivata.
   Download Settings:
     Download Folder: I video vengono salvati in questa cartella. Lascia vuoto per usare la cartella Download del sistema.
     Global Additional yt-dlp Arguments: Argomenti aggiuntivi della riga di comando passati a yt-dlp per ogni download, ad esempio --cookies-from-browser firefox.
@@ -1803,8 +1838,8 @@ Downloads:
   File Name Template: Modello del nome file
   File Name Template Help: 'Campi disponibili: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervallo di tempo e capitoli
-  Start Time: Ora di inizio (HH:MM:SS)
-  End Time: Ora di fine (HH:MM:SS)
+  Start Time: Ora di inizio
+  End Time: Ora di fine
   Split by Chapters: Dividi in file separati per capitolo
   Remove Segments: Rimuovi segmenti
   Subtitles and Metadata: Sottotitoli e metadati
@@ -1890,3 +1925,40 @@ Tray:
 Tray Icon:
   Title: "Icona nell’area di notifica"
   Follow App Theme: "Segui il tema dell’app"
+
+Form Inputs:
+  Enter Password Hint: "Inserisci la tua password"
+  Choose Password Hint: "Scegli una password"
+  Confirm Password Hint: "Ripeti la nuova password"
+  Encryption Passphrase Hint: "Inserisci la tua passphrase di cifratura"
+  Show Password: "Mostra password"
+  Hide Password: "Nascondi password"
+  Search Text Hint: "Inserisci termini di ricerca"
+  Playlist Description Hint: "Descrivi questa playlist"
+  Filename Preview: "Anteprima del nome del file"
+  Enter Channels: "Inserisci canali"
+  Enter Text: "Inserisci testo"
+  Video URL: URL del video o della playlist
+  Paste Link: Incolla un link a un video o una playlist
+  Example: ad es. {example}
+  No Minimum: Nessun minimo
+  No Maximum: Nessun massimo
+  Any Age: Qualsiasi età
+  Included Terms Example: ad es. tutorial, recensione
+  Excluded Terms Example: ad es. trailer, anteprima
+  Download Folder Hint: Lascia vuoto per usare la cartella Download
+  Global Arguments Hint: Argomenti facoltativi per ogni download
+  Unlimited Hint: 0 per illimitato
+  Add Argument: Aggiungi un argomento
+  Template Name Example: ad es. Solo audio
+  Download Arguments Hint: Argomenti facoltativi per questo download
+  Generated ID Hint: Lascia vuoto per generare un ID
+  Default Value: "Predefinito: {value}"
+
+Search Filters:
+  Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."
+
+Storage Startup Error:
+  Title: "Impossibile caricare i dati dell’app"
+  Message: "Libera spazio sul dispositivo e riprova. La sincronizzazione è sospesa finché i dati non vengono caricati."
+  Retry: "Riprova"

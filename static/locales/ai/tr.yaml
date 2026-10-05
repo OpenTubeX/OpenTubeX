@@ -263,6 +263,11 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Küçük resimlerde sola kaydırma
+      Right: Küçük resimlerde sağa kaydırma
+      Description: Seçilen işlemi gerçekleştirmek için video küçük resmini yatay olarak kaydırıp bırakın.
+    Data Saver Thumbnails: "Veri tasarruflu küçük resimler"
     Use tray icon: "Tepsi simgesini kullan"
     Close to system tray: "Sistem tepsisine kapat"
     Tray required for background refresh: "Arka planda abonelik yenileme etkinken tepsi simgesi gereklidir."
@@ -270,7 +275,9 @@ Settings:
     Swipe to refresh: Yenilemek için kaydır
     Blur Thumbnails: Küçük resimleri bulanıklaştır
     Navigation:
-      Show Active Subscriptions: Etkin abonelikleri göster
+      Always Show Navigation Bar: Gezinme çubuğu alttayken her zaman göster
+      Compact Tab Labels: Gezinme çubuğu alttayken kompakt göster
+      Show Active Subscriptions: Etkin abonelikleri kenar çubuğunda göster
       Navigation: Gezinme
       Customize Navigation: Gezinmeyi özelleştir
       Add Item: Öğe ekle
@@ -352,6 +359,8 @@ Settings:
     Invalid Engine: Bir ad ve %s içeren geçerli bir HTTP veya HTTPS arama URL'si girin.
     Engine Limit: En fazla {count} özel arama motoru ekleyebilirsiniz.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil mini oynatıcı"
+    Always Show Mobile Search Bar: "Mobil arama çubuğunu her zaman göster"
     Frosted Glass Player UI: "Buzlu cam efektli oynatıcı arayüzü"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Gül Suyu"
@@ -433,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Açık"
-      OpenTubeX Dark: "OpenTubeX Koyu"
+      Ocean Light: "Ocean Açık"
+      Ocean Dark: "Ocean Koyu"
       Custom: Özel
     Light Theme: Açık tema
     Dark Theme: Koyu tema
@@ -619,6 +628,8 @@ Settings:
     Preload Upcoming Videos: "Sonraki videoları önceden yükle"
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
+    Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
+    Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -655,9 +666,9 @@ Settings:
     Update Managed Tools: Güncelle
     Managed Tools Download Error Template: 'Yönetilen araçlar indirilemedi: {errors}'
     Download Folder: İndirme Klasörü
-    Global Additional yt-dlp Arguments: Genel Ek yt-dlp Argümanları
+    Global Additional yt-dlp Arguments: Ek yt-dlp argümanları
     Concurrent Downloads: Eş Zamanlı İndirmeler
-    Bandwidth Limit: Bant genişliği sınırı (KiB/sn, sınırsız için 0)
+    Bandwidth Limit: Bant genişliği sınırı (KiB/s)
     Choose Download Folder: İndirme Klasörü Seç
     Download Templates: İndirme Şablonları
     Manage Download Templates: 'İndirme Şablonlarını Yönet ({templateCount})'
@@ -730,8 +741,8 @@ Settings:
       Automatic: Otomatik güncelle
       Ask: Güncellemeden önce sor
       Manual: Yalnızca elle güncelle
-    yt-dlp Executable Path: yt-dlp Yürütülebilir Dosya Yolu
-    FFmpeg Executable Path: FFmpeg Yürütülebilir Dosya Yolu
+    yt-dlp Executable Path: yt-dlp çalıştırılabilir dosyası
+    FFmpeg Executable Path: FFmpeg çalıştırılabilir dosyası
     Restricted Playback Authentication: "yt-dlp çerezleri"
     Cookie Source: Çerez Kaynağı
     Cookie Sources:
@@ -964,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
     Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
-    Server URL: Sunucu URL'si
+    Server URL: Eşitleme sunucusu URL'si
     Checking Server: Eşitleme sunucusu denetleniyor…
     Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
     Username: Kullanıcı adı
@@ -1053,7 +1064,7 @@ Settings:
     Open All Tabs Confirmation: "Tüm sekmeler açılsın mı?"
     Server Update Required: "Şifreli canlı eşitlemeyi desteklemek için bu sunucuyu güncelleyin."
   Proxy Settings:
-    IP Block Recovery Script Path: IP Engeli Kurtarma Betiği Yolu
+    IP Block Recovery Script Path: IP engeli kurtarma betiği
     Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç
     Running IP block recovery script: IP engeli kurtarma betiği çalıştırılıyor
     IP block recovery script failed: 'IP engeli kurtarma betiği başarısız oldu (çıkış kodu: {exitCode})'
@@ -1062,7 +1073,7 @@ Settings:
     Failed to select IP block recovery script: IP engeli kurtarma betiği seçilemedi
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock Gönderimini Etkinleştir
-    SponsorBlock Private User ID (optional): SponsorBlock Özel Kullanıcı Kimliği (isteğe bağlı)
+    SponsorBlock Private User ID (optional): Özel kullanıcı kimliği (isteğe bağlı)
     SponsorBlock Private User ID Tooltip: Tarayıcı uzantısındaki özel SponsorBlock kullanıcı kimliğini yapıştırın. Uygulama tarafından oluşturulan bir kimlik kullanmak için boş bırakın.
     Generated SponsorBlock User ID: Oluşturulan SponsorBlock Kullanıcı Kimliği
     Generated SponsorBlock User ID Tooltip: Uygulama tarafından oluşturulan bu SponsorBlock kullanıcı kimliği, tarayıcı uzantısında veya uygulamayı başka bir bilgisayarda kullandığınızda kullanılabilir.
@@ -1074,7 +1085,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike'ı Etkinleştir
-    Return YouTube Dislike Url: Return YouTube Dislike API URL'si (Varsayılan https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL'si
   Password Dialog:
     Incorrect Password: Parola yanlış
     Unlock: Kilidi aç
@@ -1115,6 +1126,21 @@ About:
   Matrix: Matrix
   Email: E-posta
 Profile:
+  Customization: Özelleştirme
+  Manage Profile Subscriptions: Profil aboneliklerini yönet
+  Icon Names:
+    Person: Kişi
+    People: Kişiler
+    Headphones: Kulaklık
+    Gaming: Oyun
+    Film: Film
+    Art: Sanat
+    Science: Bilim
+    Globe: Küre
+    Heart: Kalp
+    Sun: Güneş
+    Moon: Ay
+    Trophy: Kupa
   Profile Icon: Profil Simgesi
   Choose an Emoji: Bir Emoji Seç
   Custom Emoji: Özel Emoji
@@ -1297,12 +1323,16 @@ Video:
     Hide: Gizle
     Show: Göster
     Scroll Mini Player:
+      Collapse Controls: "Kontrolleri daralt"
+      Expand Controls: "Kontrolleri genişlet"
       Back to Top: Başa dön
       Return to Video Tab: Video sekmesine dön
       Hide: Mini oynatıcıyı gizle
       Play: Oynat
       Pause: Duraklat
       Drag Handle: Mini oynatıcıyı taşı
+      Rewind 10 seconds: 10 saniye geri sar
+      Forward 10 seconds: 10 saniye ileri sar
     SponsorBlock:
       CancelCurrentSegment: Bölüm Oluşturmayı İptal Et
       ClearSegments: Bölümleri Temizle
@@ -1439,6 +1469,7 @@ Share:
   Share failed: "Bağlantı paylaşılamadı"
   Timestamp Link Copied: Zaman damgası bağlantısı panoya kopyalandı
 Context Menu:
+  Open in a Background Tab: "Arka plan sekmesinde aç"
   Select Tab: Sekmeyi Seç
   Close Tabs Before: Önceki Sekmeleri Kapat
   Close Tabs After: Sonraki Sekmeleri Kapat
@@ -1501,6 +1532,8 @@ Context Menu:
   Search With Multiple: Şununla ara...
   Selection Too Long: Seçim arama için çok uzun (> {count} karakter)
 Tab Organizer:
+  Tab History: "Sekme geçmişi"
+  Current Page: "Geçerli sayfa"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Saat'
@@ -1598,6 +1631,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."
     Use AI Translation Completions: İnsan çevirilerindeki eksikleri yapay zekâ tarafından oluşturulan metinlerle tamamlar. İnsan çevirileri her zaman önceliklidir.
     Update Relative Timestamps: Sayfa açık kaldığı sürece uygulamadaki göreli zaman damgalarını günceller. Devre dışı bırakıldığında yalnızca sayfa yeniden yüklendiğinde veya ziyaret edildiğinde güncellenir.
     Stream Extraction Method: |
@@ -1641,6 +1675,7 @@ Tooltips:
     Preload Upcoming Videos: "Sonraki videoların yt-dlp adreslerini alıp önbelleğe kaydeder. Kuyruk, oynatma listeleri ve önerilerden önce gelir."
     Upcoming Videos to Preload: "yt-dlp adresleri arka planda alınacak sonraki videoların azami sayısı."
     Concurrent Preloads: "Videoları aynı anda önceden yüklemek için kullanılan en fazla yt-dlp işlemi sayısı. Daha yüksek değerler daha fazla CPU, bellek ve ağ bant genişliği kullanır."
+    Ignore System Rotation Lock for Fullscreen: Android otomatik döndürmesi kapalı olsa bile tam ekrana girmek ve çıkmak için cihazı fiziksel olarak döndürün.
   Download Settings:
     Download Folder: Videolar bu klasöre kaydedilir. Sisteminizin İndirilenler klasörünü kullanmak için boş bırakın.
     Global Additional yt-dlp Arguments: Her indirmede yt-dlp'ye iletilen ek komut satırı argümanları, örneğin --cookies-from-browser firefox.
@@ -1804,8 +1839,8 @@ Downloads:
   File Name Template: Dosya Adı Şablonu
   File Name Template Help: 'Kullanılabilir alanlar: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zaman Aralığı ve Bölümler
-  Start Time: Başlangıç Zamanı (HH:MM:SS)
-  End Time: Bitiş Zamanı (HH:MM:SS)
+  Start Time: Başlangıç Zamanı
+  End Time: Bitiş Zamanı
   Split by Chapters: Bölümlere göre ayrı dosyalara ayır
   Remove Segments: Bölümleri kaldır
   Subtitles and Metadata: Alt Yazılar ve Meta Veriler
@@ -1891,3 +1926,40 @@ Tray:
 Tray Icon:
   Title: "Sistem tepsisi simgesi"
   Follow App Theme: "Uygulama temasını izle"
+
+Form Inputs:
+  Enter Password Hint: "Parolanızı girin"
+  Choose Password Hint: "Bir parola seçin"
+  Confirm Password Hint: "Yeni parolanızı tekrarlayın"
+  Encryption Passphrase Hint: "Şifreleme parola ifadenizi girin"
+  Show Password: "Parolayı göster"
+  Hide Password: "Parolayı gizle"
+  Search Text Hint: "Arama terimlerini girin"
+  Playlist Description Hint: "Bu oynatma listesini açıklayın"
+  Filename Preview: "Dosya adı önizlemesi"
+  Enter Channels: "Kanalları girin"
+  Enter Text: "Metin girin"
+  Video URL: Video veya oynatma listesi URL'si
+  Paste Link: Video veya oynatma listesi bağlantısı yapıştırın
+  Example: örn. {example}
+  No Minimum: Alt sınır yok
+  No Maximum: Üst sınır yok
+  Any Age: Herhangi bir yaş
+  Included Terms Example: örn. eğitim, inceleme
+  Excluded Terms Example: örn. fragman, önizleme
+  Download Folder Hint: İndirilenler klasörünü kullanmak için boş bırakın
+  Global Arguments Hint: Her indirme için isteğe bağlı argümanlar
+  Unlimited Hint: Sınırsız için 0
+  Add Argument: Argüman ekleyin
+  Template Name Example: örn. Yalnızca ses
+  Download Arguments Hint: Bu indirme için isteğe bağlı argümanlar
+  Generated ID Hint: Kimlik oluşturmak için boş bırakın
+  Default Value: "Varsayılan: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."
+
+Storage Startup Error:
+  Title: "Uygulama verileri yüklenemedi"
+  Message: "Cihazda depolama alanı açıp tekrar deneyin. Verileriniz yüklenene kadar eşitleme duraklatılır."
+  Retry: "Tekrar dene"

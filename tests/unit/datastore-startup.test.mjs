@@ -13,6 +13,7 @@ const datastoreNames = [
 const datastoreModule = datastoreNames.map(name =>
   `export const ${name} = {
     loadDatabaseAsync() { globalThis.__datastoreStartupCalls.push('${name}'); return Promise.resolve() },
+    updateAsync() { return Promise.resolve(0) },
     findAsync() { return Promise.resolve([]) }
   }`
 ).join('\n')

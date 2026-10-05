@@ -24,6 +24,7 @@ test.use({
     settings: {
       currentLocale: 'en-US',
       uiScale: 125,
+      fetchSubscriptionsAutomatically: false,
       ytDlpPlaybackAuthMode: 'browser',
       ytDlpPlaybackCookiesBrowser: 'firefox'
     },
@@ -45,6 +46,115 @@ test.use({
     ]
   }
 })
+
+for (const uiScale of [100, 95, 125]) {
+  test(`subscription cards keep equal spacing and readable feed buttons at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    for (const width of [1600, 480]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
+      const card = page.locator('.channelSettings').first()
+      await card.scrollIntoViewIfNeeded()
+      const gaps = await card.evaluate(element => {
+        const feed = element.querySelector('.feedTypeOptions').getBoundingClientRect()
+        const members = element.querySelector('.membersOnlySetting').getBoundingClientRect()
+        const toggle = element.querySelector('.switch-ctn').getBoundingClientRect()
+        const daily = element.querySelector('.dailyLimitSetting').getBoundingClientRect()
+        const select = element.querySelector('.select-label').getBoundingClientRect()
+        return [members.top - feed.bottom, toggle.top - members.top - 1, daily.top - toggle.bottom, select.top - daily.top - 1]
+      })
+      for (const gap of gaps) expect.soft(gap).toBeCloseTo(gaps[1], 0)
+      for (const label of await card.locator('.feedTypeOption > span').all()) {
+        expect.soft(await label.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      }
+      expect(await card.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await card.screenshot({ path: testInfo.outputPath(`subscription-card-${width}.png`) })
+    }
+  })
+}
+
+for (const uiScale of [100, 95]) {
+  test(`keeps subscription popover controls compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    await goTo(page, 'subscribedchannels')
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+    const popover = page.locator('.profileDropdown')
+    for (const width of [1200, 400]) {
+      await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        const gap = await popover.evaluate(element => {
+          const members = element.querySelector('.membersOnlyPreference button').getBoundingClientRect()
+          const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
+          return label.top - members.bottom
+        })
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(6.95)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9.05)
+        await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+      }
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
+    }
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
+    await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
+    await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+    expect(await popover.evaluate(element => {
+      const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
+      return label.top - element.querySelector('.secondaryPreferences').getBoundingClientRect().top
+    })).toBeGreaterThanOrEqual(5)
+  })
+}
+
+for (const uiScale of [100, 95, 125]) {
+  test(`keeps the selection toolbar fixed with equal search and list gaps at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    const toolbar = page.locator('.channelSelectionToolbar')
+    const scroller = page.locator('.channelSettingsScroller')
+    for (const width of [1600, 480]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
+      await scroller.evaluate(element => { element.scrollTop = 0 })
+      await expect.poll(() => page.evaluate(() => {
+        const search = document.querySelector('.channelSettingsHeader .ft-input').getBoundingClientRect()
+        const toolbar = document.querySelector('.channelSelectionToolbar').getBoundingClientRect()
+        const card = document.querySelector('.channelSettings').getBoundingClientRect()
+        return Math.abs(toolbar.top - search.bottom - (card.top - toolbar.bottom))
+      })).toBeLessThanOrEqual(1)
+      await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`subscription-settings-${width}.png`) })
+      const initialBounds = await toolbar.boundingBox()
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await expect(toolbar).toBeInViewport({ ratio: 1 })
+      expect((await toolbar.boundingBox()).y).toBeCloseTo(initialBounds.y, 0)
+      await expectScrollAtRenderedEnd(scroller)
+      await toolbar.getByRole('button', { name: 'Select All' }).click()
+      await expect(toolbar).toContainText(`${subscriptions.length} selected`)
+      await expect(toolbar).toBeInViewport({ ratio: 1 })
+      await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`subscription-settings-selected-${width}.png`) })
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expectScrollAtRenderedEnd(scroller)
+      await toolbar.getByRole('button', { name: 'Select None' }).click()
+      await expect(toolbar).toContainText('0 selected')
+      await expectScrollAtRenderedEnd(scroller)
+    }
+
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const previousRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1600, height: 1000 }))
+    await expect.poll(async () => Math.abs(await page.evaluate(() => innerWidth) - 1600 * 100 / uiScale)).toBeLessThanOrEqual(1)
+    await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThan(previousRange)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  })
+}
 
 test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
@@ -444,7 +554,7 @@ test('clamps the channel list after searching', async ({ page }) => {
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-  await page.getByPlaceholder('Search channels').fill('Alpha Channel')
+  await page.getByLabel('Search channels').fill('Alpha Channel')
   await expect(page.locator('.channelSettings')).toHaveCount(1)
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)

@@ -12,7 +12,7 @@ test('places View All left of the right-aligned sort dropdown', () => {
   assert.match(selectContainerRule ?? '', /align-items:\s*flex-end;/)
   assert.match(selectContainerRule ?? '', /justify-content:\s*flex-end;/)
   assert.match(viewAllRule ?? '', /margin-inline-end:\s*auto;/)
-  assert.match(viewAllRule ?? '', /margin-block-end:\s*9px;/)
+  assert.match(viewAllRule ?? '', /margin-block:\s*0 9px;/)
   assert.doesNotMatch(viewAllRule ?? '', /align-self:/)
 })
 

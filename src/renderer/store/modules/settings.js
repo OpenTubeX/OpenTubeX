@@ -223,8 +223,9 @@ const state = {
   autoplayVideos: true,
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
   autoPictureInPictureTriggers: [],
-  androidAutoPictureInPicture: false,
+  mobileAutoPictureInPicture: true,
   scrollMiniPlayerEnabled: true,
+  compactMobileMiniPlayer: false,
   scrollMiniPlayerOnAllTabs: false,
   keepPlayingOnNavigation: true,
   scrollMiniPlayerSavedRect: '',
@@ -238,6 +239,7 @@ const state = {
   checkForUpdates: true,
   internetConnectivityChecks: true,
   capacitorLayoutMode: 'auto',
+  alwaysShowMobileSearchBar: false,
   commentTranslationIgnoredLanguages: [],
   confirmCloseApp: true,
   confirmCloseMultipleTabs: true,
@@ -280,9 +282,11 @@ const state = {
   enableSearchSuggestions: true,
   contextMenuSearchEngines: DEFAULT_SEARCH_ENGINES_SETTING,
   enableSubtitlesByDefault: false,
-  enterFullscreenOnDisplayRotate: false,
+  enterFullscreenOnDisplayRotate: true,
+  fullscreenRotationIgnoresSystemLock: false,
   rotateFullscreenToLandscape: true,
   enableMobileFullscreenSwipe: true,
+  enableMobileFullscreenSeek: true,
   mobileLeftSwipeAction: 'disabled',
   mobileRightSwipeAction: 'disabled',
   mobileFullscreenBrightness: false,
@@ -378,6 +382,8 @@ const state = {
   hideUploader: false,
   unsubscriptionPopupStatus: false,
   hideLabelsSideBar: false,
+  alwaysShowNavigationBar: false,
+  compactNavigationLabels: false,
   hideChapters: false,
   homeSectionLayout: DEFAULT_HOME_SECTION_LAYOUT.map(section => ({ ...section })),
   enableHomeRecommendations: false,
@@ -478,6 +484,7 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  thumbnailDataSaver: false,
   showThumbnailPreviews: true,
   showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
@@ -488,6 +495,8 @@ const state = {
   useFrostedGlassPlayerUi: true,
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
+  thumbnailLeftSwipeAction: 'disabled',
+  thumbnailRightSwipeAction: 'disabled',
   blurThumbnails: false,
   syncServerEnabled: false,
   syncServerUrl: 'https://sync.opentubex.org',
@@ -848,8 +857,9 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'scrollMiniPlayerSavedRect',
   'crossTabMiniPlayerSavedRect',
   // These choices describe one physical device, not the user's account.
-  'androidAutoPictureInPicture',
+  'mobileAutoPictureInPicture',
   'capacitorLayoutMode',
+  'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
   'uiScale',
   'verticalTabBarWidth',
@@ -1088,6 +1098,23 @@ const customActions = {
     'navigationItems',
     normalizeNavigationItems(value)
   ),
+
+  updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Capture authorization during the gesture, before earlier saves can delay this one.
+    const persist = process.env.IS_ELECTRON
+      ? window.ftElectron.prepareAutomaticDownloadRulesWrite()
+      : value => DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
+    // Apply every mutation to saved rules so later edits preserve intervening cleanups.
+    pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
+      if (persist === null) throw new Error('Automatic download rules require a user action')
+      const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
+      await persist(value)
+      // Publish successful writes even if a later edit is queued and could fail.
+      commit('setYtDlpAutomaticDownloadRules', value)
+      await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
+    }).catch(error => console.error(error))
+    return pendingAutomaticDownloadRuleUpdate
+  },
 
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
@@ -1715,6 +1742,7 @@ const getters = {}
 const mutations = {}
 const actions = {}
 const runSettingUpdate = createSettingUpdateQueue()
+let pendingAutomaticDownloadRuleUpdate = Promise.resolve()
 
 // Build default getters, mutations and actions for every setting id
 for (const settingId of Object.keys(state)) {

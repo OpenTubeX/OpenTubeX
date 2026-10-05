@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Толькі для ўдзельнікаў
 Search Filters:
+  Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
@@ -279,6 +280,11 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Правесці ўлева па мініяцюрах
+      Right: Правесці ўправа па мініяцюрах
+      Description: Правядзіце гарызантальна па мініяцюры відэа і адпусціце, каб выканаць выбраную дзею.
+    Data Saver Thumbnails: "Эканомныя мініяцюры"
     Use tray icon: "Выкарыстоўваць значок у трэі"
     Close to system tray: "Згортваць у трэй пры закрыцці"
     Tray required for background refresh: "Значок у трэі неабходны, пакуль уключана фонавае абнаўленне падпісак."
@@ -286,7 +292,9 @@ Settings:
     Swipe to refresh: Пацягніце, каб абнавіць
     Blur Thumbnails: Размываць мініяцюры
     Navigation:
-      Show Active Subscriptions: Паказваць актыўныя падпіскі
+      Always Show Navigation Bar: Заўсёды паказваць панэль навігацыі, калі яна ўнізе
+      Compact Tab Labels: Кампактная панэль навігацыі, калі яна ўнізе
+      Show Active Subscriptions: Паказваць актыўныя падпіскі ў бакавой панэлі
       Navigation: Навігацыя
       Customize Navigation: Наладзіць навігацыю
       Add Item: Дадаць элемент
@@ -369,6 +377,8 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Compact Mobile Mini Player: "Кампактны мабільны міні-прайгравальнік"
+    Always Show Mobile Search Bar: "Заўсёды паказваць радок пошуку на тэлефоне"
     Frosted Glass Player UI: "Інтэрфейс прайгравальніка з эфектам матавага шкла"
     Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
     Move Settings to App Header: Перамясціць налады ў загаловак праграмы
@@ -435,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светлая"
-      OpenTubeX Dark: "OpenTubeX Цёмная"
+      Ocean Light: "Ocean Светлая"
+      Ocean Dark: "Ocean Цёмная"
       Custom: Карыстальніцкая
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светлая тэма
@@ -648,6 +658,8 @@ Settings:
     Preload Upcoming Videos: "Папярэдне загружаць наступныя відэа"
     Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
     Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
+    Ignore System Rotation Lock for Fullscreen: Ігнараваць сістэмнае блакаванне павароту для поўнаэкраннага рэжыму
+    Swipe Left or Right to Seek in Fullscreen: Праводзьце налева або направа для перамоткі ў поўнаэкранным рэжыме
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -684,9 +696,9 @@ Settings:
     Update Managed Tools: Абнавіць
     Managed Tools Download Error Template: 'Не ўдалося спампаваць кіраваныя інструменты: {errors}'
     Download Folder: Папка спампоўванняў
-    Global Additional yt-dlp Arguments: Глабальныя дадатковыя аргументы yt-dlp
+    Global Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
     Concurrent Downloads: Адначасовыя спампоўванні
-    Bandwidth Limit: Абмежаванне прапускной здольнасці (КіБ/с, 0 — без абмежавання)
+    Bandwidth Limit: Абмежаванне прапускной здольнасці (KiB/s)
     Choose Download Folder: Выбраць папку спампоўванняў
     Download Templates: Шаблоны спампоўвання
     Manage Download Templates: Кіраванне шаблонамі спампоўвання ({templateCount})
@@ -759,8 +771,8 @@ Settings:
       Automatic: Абнаўляць аўтаматычна
       Ask: Пытацца перад абнаўленнем
       Manual: Абнаўляць толькі ўручную
-    yt-dlp Executable Path: Шлях да выканальнага файла yt-dlp
-    FFmpeg Executable Path: Шлях да выканальнага файла FFmpeg
+    yt-dlp Executable Path: Выканальны файл yt-dlp
+    FFmpeg Executable Path: Выканальны файл FFmpeg
     Restricted Playback Authentication: "Файлы cookie yt-dlp"
     Cookie Source: Крыніца файлаў cookie
     Cookie Sources:
@@ -1009,7 +1021,7 @@ Settings:
     Enhanced Privacy Enabled: Палепшаная прыватнасць уключана. Сервер захоўвае толькі зашыфраваныя даныя сінхранізацыі.
     Enhanced Privacy Unsupported: Увага — гэты сервер не падтрымлівае палепшаную прыватнасць. Аператар сервера можа бачыць сінхранізаваныя даныя.
     Description: 'Сінхранізуйце падпіскі, профілі, плэйлісты, гісторыю праглядаў і падтрыманыя налады з серверам сінхранізацыі OpenTubeX або LibreTube. Серверы LibreTube могуць падтрымліваць не ўсе функцыі сінхранізацыі.'
-    Server URL: URL сервера
+    Server URL: URL сервера сінхранізацыі
     Checking Server: Праверка сервера сінхранізацыі…
     Server Unavailable: Не ўдалося злучыцца з гэтым серверам сінхранізацыі. Праверце URL і паўтарыце спробу.
     Username: Імя карыстальніка
@@ -1101,7 +1113,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Імя карыстальніка проксі
     Proxy Password: Пароль проксі
-    IP Block Recovery Script Path: Шлях да сцэнарыя аднаўлення пасля блакавання IP
+    IP Block Recovery Script Path: Скрыпт аднаўлення пасля блакіроўкі IP
     Select IP Block Recovery Script File: Выберыце файл сцэнарыя аднаўлення пасля блакавання IP
     Running IP block recovery script: Выконваецца сцэнарый аднаўлення пасля блакавання IP
     IP block recovery script failed: 'Памылка сцэнарыя аднаўлення пасля блакавання IP (код выхаду: {exitCode})'
@@ -1113,7 +1125,7 @@ Settings:
       Excluded Channels: "Выключаныя каналы"
       Tooltip: "Увядзіце ID канала, каб сегменты SponsorBlock у яго відэа не прапускаліся. ID павінен дакладна супадаць з улікам рэгістра."
     Enable SponsorBlock Submission: Уключыць адпраўленне даных у SponsorBlock
-    SponsorBlock Private User ID (optional): Прыватны ідэнтыфікатар карыстальніка SponsorBlock (неабавязкова)
+    SponsorBlock Private User ID (optional): Прыватны ID карыстальніка (неабавязкова)
     SponsorBlock Private User ID Tooltip: Устаўце прыватны ідэнтыфікатар карыстальніка SponsorBlock з пашырэння браўзера. Пакіньце поле пустым, каб выкарыстоўваць ідэнтыфікатар, створаны праграмай.
     Generated SponsorBlock User ID: Створаны ідэнтыфікатар карыстальніка SponsorBlock
     Generated SponsorBlock User ID Tooltip: Гэты створаны праграмай ідэнтыфікатар карыстальніка SponsorBlock можна выкарыстоўваць у пашырэнні браўзера або ў праграме на іншым камп'ютары.
@@ -1125,7 +1137,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Уключыць Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (прадвызначана https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Hide Uploader on Watch page: Хаваць аўтара на старонцы прагляду
     Disable Channel Links: Адключыць спасылкі на каналы
@@ -1174,6 +1186,21 @@ About:
   Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
 Profile:
+  Customization: Наладжванне
+  Manage Profile Subscriptions: Кіраванне падпіскамі профілю
+  Icon Names:
+    Person: Чалавек
+    People: Людзі
+    Headphones: Навушнікі
+    Gaming: Гульні
+    Film: Фільм
+    Art: Мастацтва
+    Science: Навука
+    Globe: Глобус
+    Heart: Сэрца
+    Sun: Сонца
+    Moon: Месяц
+    Trophy: Кубак
   Profile Icon: Значок профілю
   Choose an Emoji: Выбраць эмодзі
   Custom Emoji: Уласны эмодзі
@@ -1372,12 +1399,16 @@ Video:
     Hide: Схаваць
     Show: Паказаць
     Scroll Mini Player:
+      Collapse Controls: "Згарнуць элементы кіравання"
+      Expand Controls: "Разгарнуць элементы кіравання"
       Back to Top: Вярнуцца ўверх
       Return to Video Tab: Вярнуцца на ўкладку відэа
       Hide: Схаваць міні-прайгравальнік
       Play: Прайграць
       Pause: Паўза
       Drag Handle: Перамясціць міні-плэер
+      Rewind 10 seconds: Пераматаць на 10 секунд назад
+      Forward 10 seconds: Пераматаць на 10 секунд наперад
     SponsorBlock:
       CancelCurrentSegment: Скасаваць стварэнне сегмента
       ClearSegments: Ачысціць сегменты
@@ -1522,6 +1553,7 @@ Share:
   Share Post: Абагуліць допіс
   Timestamp Link Copied: Спасылка на гэты момант скапіявана ў буфер абмену
 Context Menu:
+  Open in a Background Tab: "Адкрыць у фонавай укладцы"
   Select Tab: Вылучыць укладку
   Close Tabs Before: Закрыць папярэднія ўкладкі
   Close Tabs After: Закрыць наступныя ўкладкі
@@ -1584,6 +1616,8 @@ Context Menu:
   Search With Multiple: Шукаць праз...
   Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
 Tab Organizer:
+  Tab History: "Гісторыя ўкладкі"
+  Current Page: "Бягучая старонка"
   Icon Labels:
     Podcast: 'Падкаст'
     Clock: 'Гадзіннік'
@@ -1684,6 +1718,7 @@ Description:
   Games: Гульні
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Выкарыстоўваць мініяцюры ніжэйшай раздзяляльнасці, каб зменшыць расход даных."
     Use AI Translation Completions: Запаўняе прагалы ў перакладах, зробленых людзьмі, тэкстам, створаным ШІ. Пераклады людзей заўсёды маюць перавагу.
     Update Relative Timestamps: Абнаўляе адносныя пазнакі часу ва ўсёй праграме, пакуль старонка адкрытая. Калі адключана, яны абнаўляюцца толькі пасля перазагрузкі або паўторнага адкрыцця старонкі.
     Stream Extraction Method: |
@@ -1727,6 +1762,7 @@ Tooltips:
     Preload Upcoming Videos: "Атрымлівае і кэшуе спасылкі yt-dlp для наступных відэа. Чарга мае прыярытэт над плэйлістамі і рэкамендацыямі."
     Upcoming Videos to Preload: "Максімальная колькасць наступных відэа, спасылкі на якія атрымліваюцца ў фоне."
     Concurrent Preloads: "Найбольшая колькасць працэсаў yt-dlp, якія адначасова папярэдне загружаюць відэа. Большыя значэнні выкарыстоўваюць больш рэсурсаў працэсара, памяці і прапускной здольнасці сеткі."
+    Ignore System Rotation Lock for Fullscreen: Паварочвайце прыладу, каб уваходзіць у поўнаэкранны рэжым і выходзіць з яго, нават калі аўтапаварот у Android выключаны.
   Download Settings:
     Download Folder: Відэа захоўваюцца ў гэтай папцы. Пакіньце поле пустым, каб выкарыстоўваць сістэмную папку «Спампоўванні».
     Global Additional yt-dlp Arguments: Дадатковыя аргументы каманднага радка, якія перадаюцца yt-dlp пры кожным спампоўванні, напрыклад --cookies-from-browser firefox.
@@ -1897,8 +1933,8 @@ Downloads:
   File Name Template: Шаблон назвы файла
   File Name Template Help: 'Даступныя палі: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Дыяпазон часу і раздзелы
-  Start Time: Час пачатку (HH:MM:SS)
-  End Time: Час заканчэння (HH:MM:SS)
+  Start Time: Час пачатку
+  End Time: Час заканчэння
   Split by Chapters: Раздзяліць кожны раздзел у асобны файл
   Remove Segments: Выдаліць фрагменты
   Subtitles and Metadata: Субцітры і метаданыя
@@ -1987,3 +2023,37 @@ Tray:
 Tray Icon:
   Title: "Значок у трэі"
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
+
+Form Inputs:
+  Enter Password Hint: "Увядзіце свой пароль"
+  Choose Password Hint: "Выберыце пароль"
+  Confirm Password Hint: "Паўтарыце новы пароль"
+  Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"
+  Show Password: "Паказаць пароль"
+  Hide Password: "Схаваць пароль"
+  Search Text Hint: "Увядзіце пошукавыя словы"
+  Playlist Description Hint: "Апішыце гэты плэйліст"
+  Filename Preview: "Папярэдні прагляд назвы файла"
+  Enter Channels: "Увядзіце каналы"
+  Enter Text: "Увядзіце тэкст"
+  Video URL: URL відэа або плэйліста
+  Paste Link: Устаўце спасылку на відэа або плэйліст
+  Example: напр. {example}
+  No Minimum: Без мінімуму
+  No Maximum: Без максімуму
+  Any Age: Любы ўзрост
+  Included Terms Example: напр. інструкцыя, агляд
+  Excluded Terms Example: напр. трэйлер, анонс
+  Download Folder Hint: Пакіньце пустым, каб выкарыстоўваць папку спамповак
+  Global Arguments Hint: Неабавязковыя аргументы для кожнага спампоўвання
+  Unlimited Hint: 0 — без абмежавання
+  Add Argument: Дадаць аргумент
+  Template Name Example: напр. Толькі аўдыя
+  Download Arguments Hint: Неабавязковыя аргументы для гэтага спампоўвання
+  Generated ID Hint: Пакіньце пустым, каб згенераваць ID
+  Default Value: "Прадвызначана: {value}"
+
+Storage Startup Error:
+  Title: "Не ўдалося загрузіць даныя праграмы"
+  Message: "Вызваліце месца на прыладзе і паспрабуйце яшчэ раз. Сінхранізацыя прыпынена, пакуль вашы даныя не загрузяцца."
+  Retry: "Паспрабаваць яшчэ раз"

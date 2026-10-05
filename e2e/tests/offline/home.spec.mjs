@@ -560,6 +560,9 @@ test.describe('compact scaled Home page', () => {
       { route: 'subscriptions', pageSelector: '.subscriptionsPage', cardSelector: '.card' }
     ]) {
       await goTo(page, pageLayout.route)
+      if (pageLayout.route === 'home') {
+        await expect(page.locator('.homePage')).toHaveAttribute('aria-busy', 'false')
+      }
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
 
       // Keep the mobile bar revealed through its keyboard focus behavior while

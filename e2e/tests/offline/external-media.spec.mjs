@@ -6,8 +6,13 @@ import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
-async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = []) {
+async function savedExternalPosition(page, mediaUrl) {
+  return page.evaluate(url => JSON.parse(localStorage.getItem(`externalMediaPosition:${new URL(url).href}`) ?? 'null')?.seconds ?? null, mediaUrl)
+}
+
+async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = [], duration = 30) {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
   const response = JSON.stringify({
     title: live ? 'A Twitch livestream' : 'A Twitch broadcast',
@@ -15,7 +20,7 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     chapters,
     webpage_url: mediaUrl,
     live_status: live ? 'is_live' : 'was_live',
-    ...(live ? {} : { duration: 30 }),
+    ...(live ? {} : { duration }),
     formats: [{
       format_id: 'webm-360',
       url: DEMO_MEDIA_URL,
@@ -41,6 +46,555 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
 }
+
+test('external media resumes its last playback position after reopening and restarting', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeGreaterThan(1)
+  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(12, 0)
+  await goTo(page, 'history')
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(12)
+  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(18, 0)
+  const { page: restartedPage } = await app.relaunch()
+  await routeDemoMedia(restartedPage)
+  await restartedPage.locator(sel.searchInput).fill(mediaUrl)
+  await restartedPage.locator(sel.searchInput).press('Enter')
+  const restartedVideo = await waitForPlayback(restartedPage)
+  await restartedVideo.evaluate(element => element.pause())
+  expect(await restartedVideo.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(18)
+})
+
+test('external media resets completed playback and clears positions with watch history', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  const open = async () => {
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    return waitForPlayback(page)
+  }
+  let video = await open()
+  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+  await goTo(page, 'history')
+  video = await open()
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+  await video.evaluate(element => { element.currentTime = 12 })
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
+  await goTo(page, 'history')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+  expect(await savedExternalPosition(page, mediaUrl)).toBeNull()
+  video = await open()
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+})
+
+test('external media restarts when its extracted duration is shorter than the saved position', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  let video = await waitForPlayback(page)
+  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(18, 0)
+  await goTo(page, 'history')
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [], 8)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+})
+
+for (const seekBeforeMetadata of [false, true]) {
+  test(seekBeforeMetadata
+    ? 'external media preserves seeks made before companion metadata arrives'
+    : 'external media resumes and clears the longer companion-audio timeline', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = 'https://clips.example.test/clip'
+    const videoUrl = 'https://clips.example.test/video.mp4'
+    const audioUrl = 'https://clips.example.test/audio.m4a'
+    const executable = path.join(app.userDataDir, 'external-resume-audio.sh')
+    const response = JSON.stringify({
+      title: 'Looping video with a longer soundtrack',
+      formats: [
+        { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+        { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' },
+      ]
+    })
+    await writeFile(executable, ['#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`,
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    let releaseAudio
+    const audioReady = new Promise(resolve => { releaseAudio = resolve })
+    for (const [url, file, contentType] of [
+      [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
+      [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
+    ]) {
+      const body = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media', file), 'utf8')).replaceAll('\n', ''), 'base64')
+      await page.route(`${url}*`, async route => {
+        if (seekBeforeMetadata && url === audioUrl && route.request().resourceType() === 'media') await audioReady
+        const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '')
+        const start = range ? Number(range[1]) : 0
+        const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+        return route.fulfill({
+          status: range ? 206 : 200,
+          contentType,
+          headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {}) },
+          body: body.subarray(start, end + 1)
+        })
+      })
+    }
+    await page.evaluate(async ytDlpPath => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateHideSideBarOnWatchPages', false)
+    }, executable)
+    const open = async () => {
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      await waitForPlayback(page)
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+      await video.evaluate(element => element.pause())
+    }
+    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+    if (seekBeforeMetadata) {
+      await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 3, updatedAt: Date.now() })), mediaUrl)
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      await expect.poll(() => video.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(2)
+      expect(await audio.evaluate(element => Number.isFinite(element.duration))).toBe(false)
+      await video.evaluate(element => { element.pause(); element.currentTime = 0.75 })
+      await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      releaseAudio()
+      await expect.poll(() => audio.evaluate(element => Number.isFinite(element.duration))).toBe(true)
+      await expect(video).toHaveJSProperty('loop', true)
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeCloseTo(0.75, 1)
+      await video.evaluate(element => element.play())
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(1)
+      await video.evaluate(element => element.pause())
+      const position = await audio.evaluate(element => element.currentTime)
+      await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
+      return
+    }
+    await open()
+    await expect(video).toHaveJSProperty('loop', true)
+    const position = await audio.evaluate(element => element.duration / 2)
+    await audio.evaluate((element, seconds) => { element.currentTime = seconds }, position)
+    await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
+    await video.evaluate(element => element.dispatchEvent(new Event('pause')))
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
+    await goTo(page, 'history')
+    await open()
+    expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(position)
+    expect(await video.evaluate(element => element.currentTime)).toBeCloseTo(position % await video.evaluate(element => element.duration), 0)
+    await audio.evaluate(element => { element.currentTime = element.duration - 0.1 })
+    await video.evaluate(element => element.play())
+    await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+  })
+}
+
+for (const { label, settings, live } of [
+  { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
+  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false },
+  { label: 'the media is live', settings: {}, live: true },
+]) {
+  test(`external media does not save or restore positions when ${label}`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = live ? 'https://www.twitch.tv/example' : 'https://www.twitch.tv/videos/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, live)
+    await page.evaluate(async ({ settings, mediaUrl }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(settings)) {
+        await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
+      }
+      localStorage.setItem(`externalMediaPosition:${mediaUrl}`, JSON.stringify({ seconds: 12, updatedAt: Date.now() }))
+    }, { settings, mediaUrl })
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    await video.evaluate(element => { element.currentTime = 18 })
+    await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+    expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
+  })
+}
+
+test('external media saves on pause in semi-auto mode without periodically saving', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchedProgressSavingMode', 'semi-auto'))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  expect(await savedExternalPosition(page, mediaUrl)).toBeNull()
+  await video.evaluate(element => element.pause())
+  const pausedTime = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(pausedTime, 1)
+})
+
+test('external media keeps background pause and completion positions after switching tabs', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchedProgressSavingMode', 'semi-auto'))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const video = page.locator('.externalMediaPlayer video')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  await video.evaluate(element => element.requestPictureInPicture())
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(`${activeTab} .externalMedia`)).toHaveCount(0)
+  await video.evaluate(element => element.pause())
+  const pausedTime = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(pausedTime, 1)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+})
+
+test('external media does not overwrite saved positions from a never-presented tab', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(async url => {
+    localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 12, updatedAt: Date.now() }))
+    await window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: false })
+  }, mediaUrl)
+  const video = page.locator('.externalMediaPlayer video')
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
+})
+
+for (const newerPosition of [18, 0]) {
+  test(`external media keeps newer same-URL progress at ${newerPosition} when a stale paused tab closes`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false)
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const olderVideo = await waitForPlayback(page)
+    await olderVideo.evaluate(element => { element.pause(); element.currentTime = 12 })
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
+    const olderTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const newerVideo = await waitForPlayback(page)
+    await newerVideo.evaluate((element, seconds) => { element.pause(); element.currentTime = seconds }, newerPosition)
+    const expected = newerPosition || null
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBe(expected)
+    await page.evaluate(id => window.ftElectron.tabs.close(id), olderTabId)
+    await expect(page.locator('.externalMediaPlayer video')).toHaveCount(1)
+    expect(await savedExternalPosition(page, mediaUrl)).toBe(expected)
+  })
+}
+
+test('external media honors the hide sidebar on watch pages setting', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateHideSideBarOnWatchPages', true)
+    if (!store.getters.getIsSideNavOpen) store.commit('toggleSideNav')
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible()
+
+  const sideNav = page.locator('.sideNav')
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    await expect(sideNav).not.toBeInViewport()
+    await page.locator('.menuButton').click()
+    await expect(sideNav).toBeInViewport()
+    await page.locator('.sideNavBackdrop').click()
+    await expect(sideNav).not.toBeInViewport()
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+    await expect(sideNav).toBeInViewport()
+    await expect(sideNav).toHaveClass(/opened/)
+    await expect(page.locator('.sideNavBackdrop')).toHaveCount(0)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', true))
+    await expect(sideNav).not.toBeInViewport()
+  }
+
+  await page.locator('.menuButton').click()
+  await goTo(page, 'history')
+  await expect(sideNav).toBeInViewport()
+  await expect(sideNav).toHaveClass(/opened/)
+  await expect(page.locator('.app')).not.toHaveClass(/watchSideNavOverlay/)
+})
+
+for (const withChat of [false, true]) {
+  test(`external chapters use the watch sidebar${withChat ? ' alongside chat' : ' without chat'}`, async ({ app, page, attachScreenshot }, testInfo) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    await setWindowSize(app, page, { width: 1800, height: 1000 })
+    const mediaUrl = withChat ? 'https://www.twitch.tv/videos/123456789' : 'https://vimeo.com/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A recording with chapters', [
+      { start_time: 0, end_time: 10, title: 'Introduction' },
+      { start_time: 10, end_time: 30, title: 'Main segment' }
+    ])
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    const externalMedia = page.locator(`${activeTab} .externalMedia`)
+    const player = externalMedia.locator('.externalMediaPlayer')
+    const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
+    const panel = externalMedia.locator('.externalMediaSidebar .externalMediaChapters')
+    await player.hover()
+    await chaptersButton.click()
+    await expect(panel).toBeVisible()
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const panelBox = await panel.boundingBox()
+        return panelBox.x >= playerBox.x + playerBox.width - 2 && Math.abs(panelBox.y - playerBox.y) < 2 &&
+          panelBox.x + panelBox.width <= await page.evaluate(() => innerWidth)
+      }).toBe(true)
+      await expect(player.locator('.theatre-button')).toBeVisible()
+      if (withChat) {
+        const panelBox = await panel.boundingBox()
+        const chatBox = await externalMedia.locator('.twitchChat').boundingBox()
+        expect(chatBox.y).toBeGreaterThanOrEqual(panelBox.y + panelBox.height)
+      }
+      if (!withChat && scale === 1) {
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateBaseTheme', 'system')
+          await store.dispatch('updateSystemDarkTheme', 'dark')
+          await store.dispatch('updateSystemLightTheme', 'light')
+          await store.dispatch('updateMainColor', 'Red')
+          await store.dispatch('updateSecColor', 'Blue')
+        })
+        for (const theme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme: theme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+          await expect.poll(() => panel.locator('.chapterSeek').first().evaluate(element =>
+            getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
+          const playerBox = await player.boundingBox()
+          const panelBox = await panel.boundingBox()
+          const screenshotPath = testInfo.outputPath(`external-chapters-${theme}.png`)
+          await page.screenshot({
+            path: screenshotPath,
+            clip: {
+              x: playerBox.x,
+              y: playerBox.y,
+              width: panelBox.x + panelBox.width - playerBox.x,
+              height: Math.max(playerBox.height, panelBox.height)
+            }
+          })
+          await testInfo.attach(`External chapters sidebar (${theme})`, { path: screenshotPath, contentType: 'image/png' })
+        }
+      }
+      await attachScreenshot(`External chapters in the sidebar at ${scale * 100}%${withChat ? ' with chat' : ''}`)
+      await player.hover()
+      await player.locator('.theatre-button').click()
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const panelBox = await panel.boundingBox()
+        return panelBox.y >= playerBox.y + playerBox.height - 2
+      }).toBe(true)
+      await player.hover()
+      await player.locator('.theatre-button').click()
+    }
+    await panel.getByRole('button', { name: /Main segment/ }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
+    await setWindowSize(app, page, { width: 1200, height: 900 })
+    await expect.poll(async () => {
+      const detailsBox = await externalMedia.locator('.externalMediaInfo').boundingBox()
+      const panelBox = await panel.boundingBox()
+      return panelBox.y >= detailsBox.y + detailsBox.height - 2
+    }).toBe(true)
+    await panel.getByRole('button', { name: 'Close Chapters' }).click()
+    await expect(panel).toHaveCount(0)
+    if (!withChat) await expect(externalMedia.locator('.externalMediaLayout')).toHaveClass(/noSidebar/)
+  })
+}
+
+test('external chapters use a phone sheet and keep valid scrolling after resizing', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://vimeo.com/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', Array.from({ length: 30 }, (_, index) => ({
+    start_time: index, end_time: index + 1, title: `Chapter ${index + 1}`
+  })))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await player.hover()
+  await player.locator('.shaka-overflow-menu-button').click()
+  await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
+  const sheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaChapters') })
+  await expect(sheet).toBeVisible()
+  const scroller = page.locator('.externalMediaChapters .chaptersWrapper')
+  const scrollMaximum = () => scroller.evaluate(element => Math.max(0, element.scrollHeight - element.clientHeight))
+  const expectValidScroll = async () => {
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.querySelector('.chaptersContent').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      const maximum = Math.max(0, content.bottom - viewport.top + element.scrollTop - element.clientHeight)
+      const scrollbar = element.querySelector('.os-scrollbar-vertical')
+      const thumb = scrollbar?.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      const track = scrollbar?.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      return element.scrollTop <= maximum + 1 && content.bottom >= viewport.bottom - 1 &&
+        scrollbar.classList.contains('os-scrollbar-visible') &&
+        Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+    })).toBe(true)
+  }
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectValidScroll()
+  await attachScreenshot('External chapters phone sheet')
+  await setWindowSize(app, page, { width: 850, height: 500 })
+  await expectValidScroll()
+  const unzoomedMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await expect.poll(scrollMaximum).toBeGreaterThan(unzoomedMaximum)
+  await expectValidScroll()
+  const zoomedMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await expect.poll(scrollMaximum).toBeLessThan(zoomedMaximum)
+  await expectValidScroll()
+  const landscapeMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await expect.poll(scrollMaximum).toBeLessThan(landscapeMaximum)
+  await expectValidScroll()
+  const phoneMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await expect(sheet).toHaveCount(0)
+  // Leaving phone mode closes the sheet, as on the YouTube watch page.
+  await expect(page.locator('.externalMediaChapters')).toHaveCount(0)
+  await player.hover()
+  await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
+  const panel = page.locator(`${activeTab} .externalMediaSidebar .externalMediaChapters`)
+  await expect(panel).toBeVisible()
+  await expect.poll(scrollMaximum).not.toBe(phoneMaximum)
+  await expectValidScroll()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await expect(sheet).toBeVisible()
+  await expectValidScroll()
+  await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(/noSidebar/)
+})
+
+test('external ambient mode stays behind metadata and chat like the watch page', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A Twitch broadcast description', [
+    { start_time: 0, end_time: 30, title: 'First chapter' }
+  ])
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAmbientMode', true))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await externalMedia.locator('.shaka-controls-button-panel .ft-chapters-button').click()
+  await expect(externalMedia.locator('.externalMediaChapters')).toBeVisible()
+  const canvas = externalMedia.locator('.ambientLayoutCanvas')
+  await expect(canvas).toBeVisible()
+  await expect.poll(() => canvas.evaluate(element =>
+    element.getContext('2d').getImageData(0, 0, element.width, element.height).data.some(value => value > 0))).toBe(true)
+
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(async value => {
+      window.ftElectron.setZoomFactor(value)
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', value === 1 ? 'dark' : 'light')
+    }, scale)
+    for (const chatOpen of [true, false]) {
+      const title = externalMedia.locator('.externalMediaDetails .videoTitle')
+      await title.scrollIntoViewIfNeeded()
+      // Include the decorative canvases in hit testing to inspect their actual
+      // paint order relative to the title, without relying on specific z-index values.
+      await expect.poll(() => title.evaluate(element => {
+        const canvases = [...element.closest('.externalMediaLayout').querySelectorAll('.ambientCanvas, .ambientLayoutCanvas')]
+        const bounds = element.getBoundingClientRect()
+        canvases.forEach(canvas => { canvas.style.pointerEvents = 'auto' })
+        try {
+          const layers = document.elementsFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+          const ambientLayers = layers.filter(layer => canvases.includes(layer))
+          return {
+            overlapsGlow: ambientLayers.length > 0,
+            textAboveGlow: ambientLayers.every(layer => layers.indexOf(element) < layers.indexOf(layer))
+          }
+        } finally {
+          canvases.forEach(canvas => { canvas.style.pointerEvents = '' })
+        }
+      }), { timeout: 5000 }).toEqual({ overlapsGlow: true, textAboveGlow: true })
+
+      for (const selector of ['.externalMediaDetails', '.externalMediaChapters', ...(chatOpen ? ['.twitchChat'] : [])]) {
+        await expect.poll(() => externalMedia.locator(selector).evaluate(element => {
+          const probe = document.createElement('div')
+          probe.style.backgroundColor = 'color-mix(in srgb, var(--card-bg-color) 78%, transparent)'
+          element.append(probe)
+          try {
+            return getComputedStyle(element).backgroundColor === getComputedStyle(probe).backgroundColor
+          } finally {
+            probe.remove()
+          }
+        })).toBe(true)
+      }
+      await attachScreenshot(`External ambient mode at ${scale * 100}% with chat ${chatOpen ? 'open' : 'closed'}`)
+      await externalMedia.locator('.externalMediaDetails').getByRole('button', { name: chatOpen ? 'Close Live Chat Replay' : 'Show Live Chat Replay' }).click()
+    }
+  }
+
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAmbientMode', false))
+  await expect(canvas).toBeHidden()
+  await expect(externalMedia.locator('.externalMediaLayout')).not.toHaveClass(/ambientModeActive/)
+  await expect.poll(() => externalMedia.locator('.externalMediaDetails').evaluate(element => {
+    const probe = document.createElement('div')
+    probe.style.backgroundColor = 'var(--card-bg-color)'
+    element.append(probe)
+    try {
+      return getComputedStyle(element).backgroundColor === getComputedStyle(probe).backgroundColor
+    } finally {
+      probe.remove()
+    }
+  })).toBe(true)
+})
 
 test('external media can stop at the end of its current chapter', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
@@ -185,7 +739,9 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(Math.abs(chatBox.x - playerBox.x - playerBox.width - (viewportWidth - chatBox.x - chatBox.width))).toBeLessThan(3)
   expect(chatBox.x).toBeGreaterThan(playerBox.x + playerBox.width - 5)
   expect(Math.abs(chatBox.y - playerBox.y)).toBeLessThan(12)
-  expect(chatBox.height).toBeGreaterThan(playerBox.height * 0.8)
+  // Chat has a fixed reading area independent of the video's aspect ratio.
+  // The whole panel should remain in view at both desktop UI scales.
+  expect(chatBox.y + chatBox.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight))
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   const scaledPlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
   const scaledChatBox = await externalMedia.locator('.twitchChat').boundingBox()
@@ -194,6 +750,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(Math.abs(scaledPlayerBox.x - scaledInfoBox.x)).toBeLessThan(2)
   expect(Math.abs(scaledPlayerBox.x + scaledPlayerBox.width - scaledInfoBox.x - scaledInfoBox.width)).toBeLessThan(2)
   expect(Math.abs(scaledChatBox.x - scaledPlayerBox.x - scaledPlayerBox.width - (scaledViewportWidth - scaledChatBox.x - scaledChatBox.width))).toBeLessThan(3)
+  expect(scaledChatBox.y + scaledChatBox.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight))
   await page.evaluate(() => window.ftElectron.setZoomFactor(1))
   await attachScreenshot('Twitch chat normal layout')
 
@@ -202,7 +759,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
   const theatreChatBox = await externalMedia.locator('.twitchChat').boundingBox()
-  expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width * 1.25)
+  expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width)
   expect(theatreChatBox.y).toBeGreaterThan(theatrePlayerBox.y + theatrePlayerBox.height - 5)
   await attachScreenshot('Twitch chat theatre layout')
   await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
@@ -415,7 +972,7 @@ for (const iconPack of ['material', 'remix']) {
 }
 
 test('unknown external sites use their own favicon while unloaded', async ({ page }) => {
-  await page.route('https://media.example/favicon.ico', route => route.fulfill({
+  await page.route('https://media.example/favicon.ico*', route => route.fulfill({
     contentType: 'image/png',
     body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
   }))
@@ -971,6 +1528,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
+  await page.route('https://videos.example.test/favicon.ico*', route => fulfillVisualFixture(route, 'avatar'))
   await page.route(avatarUrl, route => route.fulfill({
     contentType: 'image/png',
     headers: { 'access-control-allow-origin': '*' },
@@ -1052,9 +1610,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(player.locator('.ft-chapter-preview')).toBeVisible()
   await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Copy link at 0:10' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Close Chapters' }).click()
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
-  await expect(player.locator('.theatre-button')).toHaveCount(0)
+  await expect(player.locator('.theatre-button')).toBeHidden()
   const playerBox = await player.boundingBox()
   const mediaBox = await externalMedia.boundingBox()
   const expectedYouTubeWidth = Math.min(mediaBox.width, await page.evaluate(() => window.innerHeight * 0.8 * 1.78))
@@ -1066,7 +1625,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await externalMedia.getByRole('button', { name: 'Copy Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
   expect(sponsorBlockRequests).toEqual([])
-  await expect(page.locator(`${sel.activeTab} .tabAvatar`)).toBeVisible()
+  await expect(page.locator(`${sel.activeTab} img.tabAvatar`)).toBeVisible()
   await expect(page.locator('.toast-holder .toast')).toHaveCount(0)
   await expect.poll(() => page.locator(`${activeTab} .externalMediaCreator img`).evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
   for (const theme of ['dark', 'light']) {
@@ -1281,6 +1840,105 @@ for (const scale of [1, 1.25]) {
       const bounds = await player.boundingBox()
       for (const dimension of ['width', 'height']) {
         expect.soft(Math.abs(loadingBounds[dimension] - bounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, player ${bounds[dimension]}`).toBeLessThan(2)
+      }
+    })
+  }
+}
+
+for (const scale of [1, 1.25]) {
+  for (const size of [
+    { width: 1800, height: 1000 },
+    { width: 1800, height: 400 },
+    { width: 375, height: 667 }
+  ]) {
+    test(`external media upcoming keeps the loading panel bounds at ${size.width}×${size.height} and ${scale * 100}% UI scale`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', () => new Promise(resolve => {
+          globalThis.finishUpcomingExtraction = resolve
+        }))
+      })
+      await page.locator(sel.searchInput).fill('https://videos.example.test/upcoming')
+      await page.locator(sel.searchInput).press('Enter')
+      const loading = page.locator(`${activeTab} .externalMediaLoading`)
+      await expect(loading).toBeVisible()
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await page.setViewportSize(size)
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const loadingBounds = await loading.boundingBox()
+      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishUpcomingExtraction)).toBe('function')
+      await app.electronApp.evaluate((_electron, info) => globalThis.finishUpcomingExtraction(info), {
+        title: 'Upcoming stream',
+        liveStatus: 'is_upcoming',
+        formats: [],
+        externalMetadata: mapExternalPlaybackMetadata({})
+      })
+      await expect(loading).toHaveCount(0)
+      const upcoming = page.locator(`${activeTab} .externalMediaVideo .externalMediaState`)
+      await expect(upcoming).toHaveText('Upcoming')
+      const upcomingBounds = await upcoming.boundingBox()
+      for (const dimension of ['x', 'y', 'width', 'height']) {
+        expect.soft(Math.abs(loadingBounds[dimension] - upcomingBounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, upcoming ${upcomingBounds[dimension]}`).toBeLessThan(2)
+      }
+    })
+  }
+}
+
+for (const scale of [1, 1.25]) {
+  for (const layout of [
+    { width: 1800, height: 1000, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1800, height: 400, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1280, height: 720, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789', viewingMode: 'theatre' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789', hideChat: true }
+  ]) {
+    const { mediaUrl, viewingMode = 'default', hideChat = false, ...size } = layout
+    test(`external media error keeps the loading panel bounds for ${mediaUrl} in ${viewingMode} mode${hideChat ? ' without chat' : ''} at ${size.width}×${size.height} and ${scale * 100}% UI scale`, async ({ app, page }, testInfo) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler('twitch-sub-only-vod')
+        ipcMain.handle('twitch-sub-only-vod', () => null)
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', () => new Promise(resolve => {
+          globalThis.failExternalExtraction = () => resolve({ error: 'yt-dlp did not return any playable formats' })
+        }))
+      })
+      await page.evaluate(async ({ viewingMode, hideChat }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateDefaultViewingMode', viewingMode)
+        await store.dispatch('updateHideLiveChatReplay', hideChat)
+      }, { viewingMode, hideChat })
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      const loading = page.locator(`${activeTab} .externalMediaLoading`)
+      await expect(loading).toBeVisible()
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await page.setViewportSize(size)
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const loadingBounds = await loading.boundingBox()
+      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.failExternalExtraction)).toBe('function')
+      await app.electronApp.evaluate(() => globalThis.failExternalExtraction())
+      const error = page.locator(`${activeTab} .externalMediaError`)
+      await expect(error).toBeVisible()
+      const errorBounds = await error.boundingBox()
+      for (const dimension of ['x', 'y', 'width', 'height']) {
+        expect.soft(Math.abs(loadingBounds[dimension] - errorBounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, error ${errorBounds[dimension]}`).toBeLessThan(2)
+      }
+      for (const content of await error.locator('.externalMediaStateContent > *').all()) {
+        const bounds = await content.boundingBox()
+        expect.soft(bounds.y).toBeGreaterThanOrEqual(errorBounds.y - 1)
+        expect.soft(bounds.y + bounds.height).toBeLessThanOrEqual(errorBounds.y + errorBounds.height + 1)
+      }
+      if (size.height === 400 && scale === 1.25) {
+        await page.screenshot({ path: testInfo.outputPath('short-window-error.png') })
+      }
+      await expect(error.getByRole('button', { name: 'Retry', exact: true })).toBeVisible()
+      await error.getByRole('button', { name: 'Retry', exact: true }).click()
+      await expect(loading).toBeVisible()
+      const retryBounds = await loading.boundingBox()
+      // Clicking Retry can scroll the route to bring the button into view.
+      for (const dimension of ['width', 'height']) {
+        expect.soft(Math.abs(errorBounds[dimension] - retryBounds[dimension]), `${dimension}: error ${errorBounds[dimension]}, retry ${retryBounds[dimension]}`).toBeLessThan(2)
       }
     })
   }
@@ -1916,6 +2574,7 @@ ${segmentUrl}
   await page.route(segmentUrl, route => route.fulfill({ contentType: 'audio/mp4', body: media }))
   await page.evaluate(async ytDlpPath => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateAmbientMode', true)
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
@@ -1930,6 +2589,8 @@ ${segmentUrl}
       ? 'playing'
       : 'pending'
   }, { timeout: 20000 }).toBe('playing')
+  await expect(page.locator(`${activeTab} .externalMediaLayout`)).not.toHaveClass(/ambientModeActive/)
+  await expect(page.locator(`${activeTab} .ambientLayoutCanvas`)).toBeHidden()
 })
 
 test('plays both streams when an external clip has separate audio and codec-free video', async ({ app, page }) => {

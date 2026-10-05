@@ -10,7 +10,7 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
-          v-if="isElectron"
+          v-if="isElectron || isCapacitor"
           :label="t('Settings.Distraction Free Settings.Hide Startup Splash')"
           :compact="true"
           :default-value="hideStartupSplash"
@@ -100,7 +100,6 @@
         />
       </div>
     </div>
-    <br class="hide-on-mobile">
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Distraction Free Settings.Enable Block Lists')"
@@ -449,6 +448,7 @@ import { checkYoutubeChannelId, findChannelTagInfo } from '../../helpers/channel
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
+const isCapacitor = process.env.IS_CAPACITOR
 const AI_VIDEO_SUMMARY_MODES = ['hide', 'collapsed', 'expanded']
 
 const channelHiderDisabled = ref(false)

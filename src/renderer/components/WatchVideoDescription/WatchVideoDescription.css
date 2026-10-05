@@ -143,6 +143,16 @@
   overflow: hidden;
 }
 
+.videoDescription.short.descriptionPreview .descriptionScroll,
+.videoDescription.short.descriptionPreview .description {
+  max-block-size: 2lh;
+}
+
+.videoDescription.short.descriptionPreview:has(.description:empty) .descriptionScroll {
+  /* Metadata needs room for its heading and first item when there is no text. */
+  max-block-size: 5lh;
+}
+
 .videoDescription.short .description:empty {
   min-block-size: 0;
   margin-block: 0;

@@ -123,20 +123,17 @@
           />
         </div>
       </div>
-      <label
+      <FtInput
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
+        ref="settingsSearchInputRef"
         class="settingsSearch"
-      >
-        <FtIcon :icon="['fas', 'magnifying-glass']" />
-        <input
-          ref="settingsSearchInputRef"
-          v-model="settingsSearchQuery"
-          type="search"
-          :placeholder="t('Settings.Search Settings')"
-          :aria-label="t('Settings.Search Settings')"
-          @input="handleSettingsSearch"
-        >
-      </label>
+        input-type="search"
+        :value="settingsSearchQuery"
+        :placeholder="t('Settings.Search Settings')"
+        :show-label="false"
+        :show-action-button="false"
+        @input="settingsSearchQuery = $event; handleSettingsSearch()"
+      />
       <div class="settingsHeaderActions">
         <button
           v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
@@ -352,6 +349,7 @@
 </template>
 
 <script setup>
+import FtInput from '../../components/FtInput/FtInput.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import {
@@ -388,11 +386,13 @@ import About from '../About/About.vue'
 import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
 import {
   clampOverlayScrollTop,
   isOverlayScrollTopOutOfBounds,
-  restoreOverlayScrollTop
+  restoreOverlayScrollTop,
+  updateOverlayScrollbars
 } from '../../helpers/overlayScrollbars'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import {
@@ -406,6 +406,7 @@ import {
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const phoneLayout = usePhoneLayout()
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
@@ -657,6 +658,7 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   store,
   usingElectron: USING_ELECTRON,
   isCapacitor: IS_CAPACITOR,
+  phoneLayout: phoneLayout.value,
   isIos: !!process.env.IS_IOS,
   supportsLocalApi: SUPPORTS_LOCAL_API,
   isMac: IS_MAC,
@@ -951,13 +953,21 @@ function observeActiveSettingsSection() {
   const content = settingsContentRef.value
   const contentEnd = getSettingsContentEnd(content)
   if (!content || !contentEnd) return
-  settingsSectionResizeObserver = new ResizeObserver(() => {
-    clampOverlayScrollTop(content, contentEnd)
+  let previousHeight = null
+  settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
+    const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+    const contentShrank = previousHeight !== null && height < previousHeight
+    previousHeight = height
+    if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
+      clampOverlayScrollTop(content, contentEnd)
+    }
   })
   content.querySelectorAll(':scope > .section, :scope > .settingsSearchResults').forEach(element => {
     settingsSectionResizeObserver.observe(element)
   })
-  clampOverlayScrollTop(content, contentEnd)
+  // Desktop keeps this pane visible between categories; reconcile its retained
+  // scrollbar tracks. A fresh phone viewport at the origin has nothing to clamp.
+  if (isInDesktopView.value || content.scrollTop > 0) clampOverlayScrollTop(content, contentEnd)
 }
 
 function clampSettingsContentScroll(event) {
@@ -1016,15 +1026,21 @@ function getRememberedSection() {
 
 function navigateToSection(sectionType) {
   const previousSection = activeSection.value
+  const content = settingsContentRef.value
+  const resetScroll = previousSection !== sectionType && content &&
+    (previousSection !== null || content.scrollTop !== 0 || content.scrollLeft !== 0)
   closeSubpage?.()
   subpageTitle.value = ''
   subpageIcon.value = null
   closeSubpage = null
   activeSection.value = sectionType
-  if (previousSection !== sectionType) {
+  if (resetScroll) {
+    // Reconcile retained scrollbars after replacing an existing category.
+    // Opening a fresh viewport from the phone menu needs no forced update.
     nextTick(() => {
-      const content = settingsContentRef.value
-      if (content) restoreOverlayScrollTop(content, 0)
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+      updateOverlayScrollbars(content)
     })
   }
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
@@ -1225,6 +1241,13 @@ function returnToSettingsMenu() {
   closeSubpage = null
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value
+    const content = settingsContentRef.value
+    // Clear retained offsets while the viewport is visible. Hidden viewports
+    // report zero even when their scrollbar instance retains the old position.
+    if (content && (content.scrollTop !== 0 || content.scrollLeft !== 0)) {
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+    }
     activeSection.value = null
     animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
     nextTick(() => menuRef.value?.focusLink(previousSection))

@@ -21,46 +21,48 @@
           compact
           @change="updateEnableClosedAppSubscriptionRefresh"
         />
-        <FtSelect
-          :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
-          :value="subscriptionFeedAutoRefreshInterval"
-          setting-key="subscriptionFeedAutoRefreshInterval"
-          :select-names="subscriptionFeedAutoRefreshIntervalNames"
-          :select-values="subscriptionFeedAutoRefreshIntervalValues"
-          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-          :icon="['fas', 'clock']"
-          @change="updateSubscriptionFeedAutoRefreshInterval"
-        />
-        <FtSelect
-          :placeholder="$t('Settings.Subscription Settings.Shorts Auto Refresh Interval')"
-          :value="subscriptionShortsAutoRefreshInterval"
-          setting-key="subscriptionShortsAutoRefreshInterval"
-          :select-names="subscriptionFeedAutoRefreshIntervalNames"
-          :select-values="subscriptionFeedAutoRefreshIntervalValues"
-          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-          :icon="['fas', 'clock']"
-          @change="updateSubscriptionShortsAutoRefreshInterval"
-        />
-        <FtSelect
-          :placeholder="$t('Settings.Subscription Settings.Live Auto Refresh Interval')"
-          :value="subscriptionLiveAutoRefreshInterval"
-          setting-key="subscriptionLiveAutoRefreshInterval"
-          :select-names="subscriptionFeedAutoRefreshIntervalNames"
-          :select-values="subscriptionFeedAutoRefreshIntervalValues"
-          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-          :icon="['fas', 'clock']"
-          @change="updateSubscriptionLiveAutoRefreshInterval"
-        />
-        <FtSelect
-          :placeholder="$t('Settings.Subscription Settings.Posts Auto Refresh Interval')"
-          :value="subscriptionPostsAutoRefreshInterval"
-          setting-key="subscriptionPostsAutoRefreshInterval"
-          :select-names="subscriptionFeedAutoRefreshIntervalNames"
-          :select-values="subscriptionFeedAutoRefreshIntervalValues"
-          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
-          :icon="['fas', 'clock']"
-          @change="updateSubscriptionPostsAutoRefreshInterval"
-        />
+        <div class="autoRefreshIntervals">
+          <FtSelect
+            :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
+            :value="subscriptionFeedAutoRefreshInterval"
+            setting-key="subscriptionFeedAutoRefreshInterval"
+            :select-names="subscriptionFeedAutoRefreshIntervalNames"
+            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+            :icon="['fas', 'clock']"
+            @change="updateSubscriptionFeedAutoRefreshInterval"
+          />
+          <FtSelect
+            :placeholder="$t('Settings.Subscription Settings.Shorts Auto Refresh Interval')"
+            :value="subscriptionShortsAutoRefreshInterval"
+            setting-key="subscriptionShortsAutoRefreshInterval"
+            :select-names="subscriptionFeedAutoRefreshIntervalNames"
+            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+            :icon="['fas', 'clock']"
+            @change="updateSubscriptionShortsAutoRefreshInterval"
+          />
+          <FtSelect
+            :placeholder="$t('Settings.Subscription Settings.Live Auto Refresh Interval')"
+            :value="subscriptionLiveAutoRefreshInterval"
+            setting-key="subscriptionLiveAutoRefreshInterval"
+            :select-names="subscriptionFeedAutoRefreshIntervalNames"
+            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+            :icon="['fas', 'clock']"
+            @change="updateSubscriptionLiveAutoRefreshInterval"
+          />
+          <FtSelect
+            :placeholder="$t('Settings.Subscription Settings.Posts Auto Refresh Interval')"
+            :value="subscriptionPostsAutoRefreshInterval"
+            setting-key="subscriptionPostsAutoRefreshInterval"
+            :select-names="subscriptionFeedAutoRefreshIntervalNames"
+            :select-values="subscriptionFeedAutoRefreshIntervalValues"
+            :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+            :icon="['fas', 'clock']"
+            @change="updateSubscriptionPostsAutoRefreshInterval"
+          />
+        </div>
       </div>
       <div class="switchColumn">
         <FtToggleSwitch

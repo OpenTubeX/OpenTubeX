@@ -312,7 +312,9 @@ export class SyncServerClient {
   }
 
   getSyncEvents(since = '') {
-    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`)
+    // Activity is encrypted and padded too; accumulated events can be several
+    // megabytes even when the library collections need no further changes.
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
   sendDeviceRequest(recipient, payload) {
@@ -536,17 +538,6 @@ export class SyncServerClient {
       if (error.status === 404) return null
       throw error
     }
-  }
-
-  putChannelPlaybackSpeed(speed) {
-    return this.apiRequest('/channel_playback_speeds/', { method: 'PUT', body: speed })
-  }
-
-  deleteChannelPlaybackSpeed(channelId) {
-    return this.apiRequest(
-      `/channel_playback_speeds/${encodeURIComponent(channelId)}`,
-      { method: 'DELETE' }
-    )
   }
 }
 

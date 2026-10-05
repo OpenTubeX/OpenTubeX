@@ -108,44 +108,32 @@
         />
         <span>{{ setting.label }}</span>
         <div class="settingActions">
-          <button
-            type="button"
+          <FtIconButton
             class="settingAction"
-            :aria-label="t('Home Page.Move section up', { section: setting.label })"
             :title="t('Home Page.Move section up', { section: setting.label })"
             :disabled="index === 0"
+            :icon="['fas', 'arrow-up']"
+            :use-shadow="false"
+            theme="base"
             @click="moveQuickSetting(setting.id, -1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-up']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="settingAction"
-            :aria-label="t('Home Page.Move section down', { section: setting.label })"
             :title="t('Home Page.Move section down', { section: setting.label })"
             :disabled="index === selectedSettings.length - 1"
+            :icon="['fas', 'arrow-down']"
+            :use-shadow="false"
+            theme="base"
             @click="moveQuickSetting(setting.id, 1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-down']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="settingAction"
-            :aria-label="`${t('Search Bar.Remove')} ${setting.label}`"
             :title="`${t('Search Bar.Remove')} ${setting.label}`"
+            :icon="['fas', 'xmark']"
+            :use-shadow="false"
+            theme="base"
             @click="removeQuickSetting(setting.id)"
-          >
-            <FtIcon
-              :icon="['fas', 'xmark']"
-              aria-hidden="true"
-            />
-          </button>
+          />
         </div>
       </li>
     </ul>
@@ -167,6 +155,7 @@
 </template>
 
 <script setup>
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -371,6 +360,10 @@ function resetQuickSettings() {
   margin-inline-end: var(--scrollbar-track-width);
 }
 
+.settingPicker :deep(.list > li) {
+  border-radius: calc(5px * var(--ui-roundness));
+}
+
 .settingPicker :deep(.optionWrapper) {
   cursor: pointer;
   user-select: none;
@@ -407,7 +400,7 @@ function resetQuickSettings() {
 .selectedSetting.dropAfter::after {
   background: var(--primary-color);
   block-size: 3px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   content: '';
   inset-inline: 0;
   position: absolute;
@@ -448,29 +441,6 @@ function resetQuickSettings() {
 .settingActions {
   align-self: stretch;
   display: flex;
-}
-
-.settingAction {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
-  color: var(--secondary-text-color);
-  cursor: pointer;
-  display: flex;
-  inline-size: 44px;
-  justify-content: center;
-}
-
-.settingAction:hover:not(:disabled),
-.settingAction:focus-visible {
-  background: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.settingAction:disabled {
-  cursor: default;
-  opacity: 0.35;
 }
 
 .reorderStatus {

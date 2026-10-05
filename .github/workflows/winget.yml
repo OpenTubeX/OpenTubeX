@@ -21,12 +21,13 @@ jobs:
   submit:
     if: github.repository == 'OpenTubeX/OpenTubeX'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 60
 
     steps:
     - name: Check out OpenTubeX
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        ref: ${{ github.workflow_sha }}
         persist-credentials: false
 
     - name: Resolve release
@@ -153,6 +154,9 @@ jobs:
         release_url="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}"
         x64_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-beta-setup-x64.exe"
         arm64_url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-beta-setup-arm64.exe"
+
+        bash _scripts/wait-for-release-asset.sh "$x64_url"
+        bash _scripts/wait-for-release-asset.sh "$arm64_url"
 
         # --submit --dry-run avoids Komac's interactive prompt. Submission is
         # handled below because Komac only supports personal forks.

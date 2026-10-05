@@ -47,6 +47,7 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
       constructor (type, options) { this.type = type; this.detail = options.detail }
     },
     cancelMenuHold () {},
+    cancelThumbnailSwipe () {},
     suppressMenuHoldClick () {},
     resetMenuHold () {},
     title: { value: 'Test video' },

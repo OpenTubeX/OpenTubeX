@@ -61,7 +61,7 @@
          visibility uses its own reveal timer. -->
     <div
       ref="container"
-      :data-playing-interface-hide-delay="isFullscreen || fullWindowEnabled ? playingInterfaceHideDelay : null"
+      :data-playing-interface-hide-delay="playingInterfaceHideDelay"
       class="ftVideoPlayer shaka-video-container"
       :data-tab-id="tabId"
       :data-action-dock-visible="actionDockVisible"
@@ -80,6 +80,8 @@
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
         mobileMiniBar: mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating),
+        mobileMiniBarCollapsed,
+        mobileMiniBarCompact: compactMobileMiniPlayer,
         scrollMiniPlayerStashed,
         scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
@@ -151,7 +153,6 @@
         playsinline
         :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
         :loop="shortsPlayer && loopShorts && !autoplayEnabled"
-        :poster="!audioPlayerMode && showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
         @waiting="handleWaiting"
@@ -164,21 +165,27 @@
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
         @ratechange="syncMediaSessionPosition"
-        @loadedmetadata="handleAbRepeatDurationChange"
-        @durationchange="handleAbRepeatDurationChange"
+        @loadedmetadata="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
+        @durationchange="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <!-- Keep the decoded poster and its resolution fallback through playback. -->
+      <div
+        v-if="thumbnail"
+        v-show="audioPlayerMode
+          ? mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)
+          : showPoster || showCountdownOverlay || showEndedScreen"
+        class="countdownPoster"
+        :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
+        aria-hidden="true"
+      >
+        <FtRetryImage
+          :src="thumbnail"
+          alt=""
+        />
+      </div>
       <template v-if="showEndedScreen">
-        <div
-          class="endedPoster"
-          aria-hidden="true"
-        >
-          <img
-            :src="thumbnail"
-            alt=""
-          >
-        </div>
         <div
           v-if="endedRecommendations.length > 0"
           class="endedScreen"
@@ -198,11 +205,11 @@
               :title="recommendation.title"
               :aria-label="recommendation.title"
             >
-              <img
+              <FtRetryImage
                 :class="{ blur: blurThumbnails }"
                 :src="recommendation.thumbnail"
                 alt=""
-              >
+              />
               <span
                 class="endedRecommendationTitle"
                 dir="auto"
@@ -214,28 +221,18 @@
         </div>
       </template>
       <div
-        v-if="(showCountdownOverlay || showAndroidPoster) && !audioPlayerMode && thumbnail"
-        class="countdownPoster"
-        aria-hidden="true"
-      >
-        <img
-          :src="thumbnail"
-          alt=""
-        >
-      </div>
-      <div
         v-if="audioPlayerMode"
         class="musicAudioSurface"
         aria-hidden="true"
       >
-        <img
+        <FtRetryImage
           v-if="thumbnail"
           class="musicAudioBackdrop"
           :src="thumbnail"
           alt=""
           @load="showMusicImage"
           @error="hideBrokenMusicImage"
-        >
+        />
         <div class="musicAudioShade" />
         <canvas
           v-show="musicVisualizerEnabled && !scrollMiniPlayerActive"
@@ -243,14 +240,14 @@
           class="musicVisualizerCanvas"
         />
         <div class="musicAudioContent">
-          <img
+          <FtRetryImage
             v-if="thumbnail"
             class="musicAudioArtwork"
             :src="thumbnail"
             alt=""
             @load="showMusicImage"
             @error="hideBrokenMusicImage"
-          >
+          />
           <div
             v-if="title || artist || channelThumbnail"
             class="musicAudioMetadata"
@@ -267,6 +264,7 @@
             >
               <FtRetryImage
                 v-if="channelThumbnail"
+                :fallback-icon="['fas', 'circle-user']"
                 class="musicAudioAvatar"
                 :src="channelThumbnail"
                 alt=""
@@ -427,11 +425,11 @@
               {{ $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds }) }}
             </p>
             <div class="autoplayThumbnailWrapper">
-              <img
+              <FtRetryImage
                 class="autoplayThumbnail"
                 :src="autoplayThumbnail"
                 alt=""
-              >
+              />
               <span
                 v-if="autoplayDuration"
                 class="autoplayDuration"
@@ -952,9 +950,28 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
+      <div
+        v-if="mobileSeekPreview"
+        class="valueChangePopup mobileSeekPreview"
+        role="status"
+      >
+        <div
+          v-if="mobileSeekThumbnailStyle"
+          class="mobileSeekThumbnail"
+          :style="mobileSeekThumbnailStyle"
+          aria-hidden="true"
+        />
+        <div class="mobileSeekPreviewTime">
+          <ft-icon
+            :icon="['fas', mobileSeekPreview.seconds < 0 ? 'arrow-left' : 'arrow-right']"
+            aria-hidden="true"
+          />
+          <span class="valueChangeText">{{ mobileSeekPreviewMessage }}</span>
+        </div>
+      </div>
       <Transition name="fade">
         <div
-          v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup"
+          v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
           class="valueChangePopup"
           :class="{
             'invert-content-order':
@@ -1222,12 +1239,16 @@
                   >
                     {{ $t('Video.Player.SponsorBlock.NowAction') }}
                   </button>
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.StartTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:00' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                    >
+                  </label>
                 </template>
                 <span
                   v-else
@@ -1240,12 +1261,16 @@
                   class="sponsorBlockDraftTimeDivider"
                 >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
                 <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.EndTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:30' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                    >
+                  </label>
                   <button
                     class="sponsorBlockDraftTimeAction"
                     @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"
@@ -1268,6 +1293,7 @@
               </div>
               <FtSelect
                 class="sponsorBlockDraftCategory"
+                variant="outlined"
                 :placeholder="$t('Video.Player.SponsorBlock.CategoryLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category"
                 :select-names="sponsorBlockSubmissionCategoryNames"
@@ -1279,6 +1305,7 @@
               <FtSelect
                 v-if="!isSponsorBlockPointSegment(segment)"
                 class="sponsorBlockDraftCategory"
+                variant="outlined"
                 :placeholder="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.actionType ?? segment.actionType"
                 :select-names="getSponsorBlockActionTypeSelectNames(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
@@ -1359,17 +1386,48 @@
           :class="{
             mobileMiniBarMorphOverlay: scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating,
             mobileMiniBarDismissible: mobileMiniBarCanDismiss,
+            mobileMiniBarCompact: compactMobileMiniPlayer,
+            mobileMiniBarCollapsed,
             mobileMiniBarRestoring: scrollMiniPlayerDragStyle
               ? scrollMiniPlayerActive
               : scrollMiniPlayerAnimating && !scrollMiniPlayerActive
           }"
           :style="mobileMiniBarOverlayStyle"
         >
+          <div
+            class="mobileMiniBarProgress"
+          >
+            <div
+              aria-hidden="true"
+              :style="{ transform: `scaleX(${mobileMiniBarProgress})` }"
+            />
+            <input
+              v-if="scrollMiniPlayerActive"
+              class="mobileMiniBarSeek"
+              :class="{ mobileMiniBarSeeking }"
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              :value="mobileMiniBarProgress * 100"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="mobileMiniBarSeekLabel"
+              :aria-valuetext="mobileMiniBarSeekValueText"
+              @input="handleMobileMiniBarSeekInput"
+              @pointerdown.stop="startMobileMiniBarSeek"
+              @pointerup="mobileMiniBarSeeking = false"
+              @pointercancel="mobileMiniBarSeeking = false"
+              @lostpointercapture="mobileMiniBarSeeking = false"
+              @blur="mobileMiniBarSeeking = false"
+              @keydown.stop
+              @click.stop
+            >
+          </div>
           <button
             v-if="scrollMiniPlayerActive"
             type="button"
-            class="mobileMiniBarThumbnailReturn"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            class="mobileMiniBarReturn"
+            :disabled="mobileMiniBarControlsDisabled"
             :aria-label="scrollMiniPlayerDetached
               ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
               : $t('Video.Player.Scroll Mini Player.Back to Top')"
@@ -1381,26 +1439,23 @@
               dir="auto"
             >{{ title }}</span>
             <span class="mobileMiniBarUploader">
-              <FtRetryImage
-                v-if="channelThumbnail"
-                class="mobileMiniBarAvatar"
-                :src="channelThumbnail"
-                alt=""
-              />
               <span dir="auto">{{ channelName }}</span>
             </span>
           </div>
           <button
+            v-if="compactMobileMiniPlayer"
             type="button"
-            class="mobileMiniBarReturn"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
-            :aria-label="scrollMiniPlayerDetached
-              ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
-              : $t('Video.Player.Scroll Mini Player.Back to Top')"
-            @click.stop.prevent="scrollMiniScrollToTop"
+            class="mobileMiniBarExpand"
+            :disabled="mobileMiniBarControlsDisabled"
+            :aria-label="mobileMiniBarExpanded ? $t('Video.Player.Scroll Mini Player.Collapse Controls') : $t('Video.Player.Scroll Mini Player.Expand Controls')"
+            :aria-expanded="mobileMiniBarExpanded"
+            @pointerdown.stop
+            @keydown.stop
+            @click.stop.prevent="mobileMiniBarExpanded = !mobileMiniBarExpanded"
           >
             <ft-icon
               :icon="['fas', 'angle-up']"
+              class="mobileMiniBarChevron"
               aria-hidden="true"
             />
           </button>
@@ -1408,15 +1463,81 @@
             v-if="mobileMiniBarCanDismiss"
             type="button"
             class="mobileMiniBarDismiss"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :disabled="mobileMiniBarControlsDisabled"
             :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
-            @click.stop.prevent="dismissCrossTabMiniPlayer"
+            @click.stop.prevent="dismissMobileMiniPlayer"
           >
             <ft-icon
               :icon="['fas', 'times']"
               aria-hidden="true"
             />
           </button>
+          <div
+            class="mobileMiniBarPlayback"
+            @pointerdown.stop
+            @keydown.stop
+          >
+            <button
+              v-if="!mobileMiniBarCollapsed && canSkipPrevious"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Previous')"
+              @click.stop.prevent="$emit('skip-to-prev')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-backward']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed"
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Rewind 10 seconds')"
+              @click.stop.prevent="seekBySeconds(-10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'rewind-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              class="mobileMiniBarPlayPause"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+              @click.stop.prevent="scrollMiniTogglePlayPause"
+            >
+              <ft-icon
+                :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed"
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Forward 10 seconds')"
+              @click.stop.prevent="seekBySeconds(10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'forward-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="!mobileMiniBarCollapsed && canSkipNext"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Next')"
+              @click.stop.prevent="$emit('skip-to-next')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-forward']"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
         </div>
       </Teleport>
       <div

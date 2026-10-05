@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -418,7 +420,9 @@ test.describe('tab bar', () => {
     await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
   })
 
-  test('does not show a cached watch avatar before its loading indicator settles', async ({ page }) => {
+  test('does not show a cached watch avatar before its loading indicator settles', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
     const videoId = 'jNQXAC9IVRw'
     await page.evaluate(({ videoId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -427,7 +431,7 @@ test.describe('tab bar', () => {
       store.commit('setAutoplayVideos', false)
       store.commit('setVideoAvatar', {
         videoId,
-        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
+        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
       })
 
       window.__watchTabIconStates = []
@@ -436,13 +440,13 @@ test.describe('tab bar', () => {
           window.__watchTabIconStates.push({
             id: tab.dataset.tabId,
             loading: tab.querySelector('.tabLoadingDot') != null,
-            avatar: tab.querySelector('.tabAvatar') != null
+            avatar: tab.querySelector('.tabAvatar')?.checkVisibility({ visibilityProperty: true }) === true
           })
         }
       }
       new MutationObserver(recordIconStates).observe(
         document.querySelector('.tabsContainer'),
-        { childList: true, subtree: true }
+        { childList: true, attributes: true, attributeFilter: ['style'], subtree: true }
       )
     }, { videoId })
 
@@ -736,14 +740,19 @@ test.describe('tab bar', () => {
     const tabCounts = await page.evaluate(async () => {
       const initialState = await window.ftElectron.tabs.getState()
       const counts = []
+      let finishBurst
+      const burstFinished = new Promise(resolve => { finishBurst = resolve })
       const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
         if (state.tabs.length === initialState.tabs.length || state.tabs.length === counts.at(-1)) return
         counts.push(state.tabs.length)
+        if (state.tabs.length === initialState.tabs.length + 4) finishBurst()
       })
 
       await Promise.all(Array.from({ length: 4 }, () => (
         window.ftElectron.tabs.create({ route: '/history', makeActive: false })
       )))
+      // Creation replies can arrive before the coalesced state notification.
+      await burstFinished
       removeListener()
       return counts
     })
@@ -1691,7 +1700,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
 
     await searchInput.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-    await page.locator('.topNav .searchInput .clearInputTextButton').click()
+    await clickSearchCancel(searchInput)
     await expect(searchInput).toHaveValue('')
 
     await page.locator(sel.tabs).first().click()
@@ -2875,6 +2884,7 @@ test.describe('tab organizer', () => {
     const openRows = organizer.locator('.tabGroup .tabOrganizerRow')
     await expect(organizer).toBeVisible()
     await expect(search).toHaveAttribute('placeholder', 'Search tabs')
+    await expect(organizer.locator('.tabOrganizerSearch .textInputLabelText')).toHaveCount(0)
 
     await search.fill('/history')
     await expect(openRows).toHaveCount(1)
@@ -2932,10 +2942,10 @@ test.describe('tab organizer', () => {
     await selectNoneButton.click()
     await alphaRow.locator('.tabSelection label').click()
 
-    const groupSelect = bulkActions.getByRole('combobox', { name: 'Move selected tabs to group' })
+    const groupSelect = organizer.locator('.selectionControls').getByRole('combobox', { name: 'Move selected tabs to group' })
     await expect(groupSelect).toBeVisible()
     await expect(bulkActions.locator(':scope > :last-child')).toHaveClass(/tabOrganizerSearch/)
-    const groupSelectLabel = bulkActions.locator('.select-label')
+    const groupSelectLabel = organizer.locator('.bulkActionSelect .select-label')
     await expect(groupSelectLabel).toHaveText('Move selected tabs to group')
     await expect(groupSelectLabel).toBeVisible()
     const [
@@ -2955,18 +2965,24 @@ test.describe('tab organizer', () => {
       search.boundingBox(),
       organizer.locator('.tabOrganizerSearch .searchIcon').boundingBox()
     ])
-    expect(actionsBox.y - (selectionBox.y + selectionBox.height)).toBeLessThanOrEqual(10)
-    expect(groupSelectLabelBox.y + groupSelectLabelBox.height).toBeLessThanOrEqual(groupSelectBox.y)
-    expect(Math.abs(searchContainerBox.y - groupSelectBox.y)).toBeLessThanOrEqual(1)
-    expect(searchContainerBox.x).toBeGreaterThanOrEqual(groupSelectBox.x + groupSelectBox.width + 7)
-    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeLessThanOrEqual(1)
+    expect(actionsBox.y).toBeCloseTo(selectionBox.y, 0)
+    expect(groupSelectLabelBox.y + groupSelectLabelBox.height / 2).toBeCloseTo(groupSelectBox.y, 0)
+    expect(groupSelectBox.y + groupSelectBox.height).toBeLessThanOrEqual(selectionBox.y + selectionBox.height + 1)
+    const pinBox = await pinButton.boundingBox()
+    const closeBox = await bulkActions.getByRole('button', { name: 'Close', exact: true }).boundingBox()
+    expect(Math.abs(searchInputBox.y + searchInputBox.height - pinBox.y - pinBox.height)).toBeLessThanOrEqual(1)
+    expect(searchContainerBox.x).toBeGreaterThanOrEqual(closeBox.x + closeBox.width + 7)
+    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeCloseTo(18, 0)
     expect(searchIconBox.x).toBeGreaterThan(searchInputBox.x)
     expect(searchIconBox.x + searchIconBox.width).toBeLessThan(searchInputBox.x + searchInputBox.width)
     expect(Math.abs(
       searchIconBox.y + searchIconBox.height / 2 - (searchInputBox.y + searchInputBox.height / 2)
     )).toBeLessThanOrEqual(1)
-    await organizer.getByLabel('Group name').fill('Research')
-    await organizer.getByRole('button', { name: 'Create Group' }).click()
+    await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
+    const createGroupPrompt = page.getByRole('dialog', { name: 'Create Group', exact: true })
+    await createGroupPrompt.getByRole('textbox', { name: 'Group name', exact: true }).fill('Research')
+    await createGroupPrompt.getByRole('button', { name: 'Create Group', exact: true }).click()
+    await expect(createGroupPrompt).toHaveCount(0)
 
     let researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Research' })
     await expect(groupSelect.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
@@ -2978,7 +2994,7 @@ test.describe('tab organizer', () => {
     await expect(ungroupedOption.locator('[data-icon="link-slash"]')).toBeVisible()
     await expect(researchOption.locator('.optionColorDot.empty')).toBeVisible()
     await chooseGroupOption.click()
-    await researchGroup.getByRole('button', { name: 'Change color for Research' }).click()
+    await researchGroup.locator('.groupIconButton').click()
     await researchGroup.getByRole('option', { name: 'Blue', exact: true }).click()
     await expect(researchGroup.getByRole('button', { name: 'Collapse group' }).locator('svg')).toBeVisible()
     await expect(researchGroup.getByRole('button', { name: 'Activate First' })).toHaveCount(0)
@@ -2998,10 +3014,12 @@ test.describe('tab organizer', () => {
 
     await researchGroup.getByRole('button', { name: 'Rename Research' }).click()
     const renameInput = organizer.locator('.groupRenameInput')
+    await expect(renameInput).toHaveAccessibleName('Group name')
+    expect(await renameInput.evaluate(element => element.labels.length)).toBe(0)
     await renameInput.fill('Reading')
     await renameInput.press('Enter')
     researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Reading' })
-    await researchGroup.getByRole('button', { name: 'Change color for Reading' }).click()
+    await researchGroup.locator('.groupIconButton').click()
     await researchGroup.getByRole('option', { name: 'Purple', exact: true }).click()
     await expect.poll(() => page.evaluate(async () => {
       const group = (await window.ftElectron.tabs.getState()).groups.find(candidate => candidate.name === 'Reading')
@@ -3047,13 +3065,14 @@ test.describe('tab organizer', () => {
       groupSelect.boundingBox(),
       organizer.locator('.tabOrganizerSearch').boundingBox()
     ])
-    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height)
+    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y - 1)
+    expect(responsiveLabelBox.y + responsiveLabelBox.height).toBeLessThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height + 1)
     expect(responsiveSearchBox.y).toBeGreaterThanOrEqual(responsiveGroupSelectBox.y + responsiveGroupSelectBox.height)
-    expect(Math.abs(responsiveSearchBox.x - responsiveBulkActionsBox.x)).toBeLessThanOrEqual(1)
+    expect(responsiveSearchBox.x - responsiveBulkActionsBox.x).toBeCloseTo(12, 0)
     expect(Math.abs(
       responsiveBulkActionsBox.x + responsiveBulkActionsBox.width -
       (responsiveSearchBox.x + responsiveSearchBox.width)
-    )).toBeLessThanOrEqual(1)
+    )).toBeCloseTo(12, 0)
     expect(Math.max(...responsiveButtonBoxes.map(box => box.y)) - Math.min(...responsiveButtonBoxes.map(box => box.y)))
       .toBeLessThanOrEqual(1)
     const firstResponsiveActionBox = responsiveButtonBoxes[0]
@@ -3238,9 +3257,7 @@ test('selects whole tab groups and changes their icons', async ({ page }) => {
   expect(pickerSize.width).toBeGreaterThan(pickerSize.height)
   await expect(group.locator('.groupIconPicker')).not.toContainText(/Home|Subscriptions|History/)
   await group.getByRole('button', { name: 'Research', exact: true }).click()
-  await expect(group.locator('.groupIconPicker')).toBeHidden()
-  await expect(group.locator('.groupIconButton')).toBeFocused()
-  await group.locator('.groupIconButton').click()
+  await expect(group.locator('.groupIconPicker')).toBeVisible()
   await group.getByRole('button', { name: 'Research', exact: true }).focus()
   await page.keyboard.press('Escape')
   await expect(group.locator('.groupIconPicker')).toBeHidden()

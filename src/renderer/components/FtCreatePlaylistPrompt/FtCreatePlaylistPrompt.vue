@@ -8,9 +8,10 @@
     <FtFlexBox>
       <FtInput
         ref="playlistNameInput"
-        :placeholder="$t('User Playlists.Playlist Name')"
+        :label="$t('User Playlists.Playlist Name')"
+        :icon="['fas', 'list']"
+        :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
         :show-action-button="false"
-        :show-label="false"
         :value="playlistName"
         :maxlength="255"
         class="playlistNameInput"
@@ -31,6 +32,7 @@
     <template #footer>
       <FtFlexBox>
         <FtButton
+          theme="primary"
           :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
           :icon="['fas', 'playlist-add']"
           :disabled="playlistPersistenceDisabled"

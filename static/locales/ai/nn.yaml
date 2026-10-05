@@ -277,6 +277,11 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Sveip til venstre på miniatyrbilete
+      Right: Sveip til høgre på miniatyrbilete
+      Description: Sveip vassrett på eit videominiatyrbilete og slepp for å utføre den valde handlinga.
+    Data Saver Thumbnails: "Datasparande miniatyrbilete"
     Use tray icon: "Bruk ikon i systemtrauet"
     Close to system tray: "Lukk til systemtrauet"
     Tray required for background refresh: "Ikonet i systemtrauet er påkravd medan oppdatering av abonnement i bakgrunnen er aktivert."
@@ -284,7 +289,9 @@ Settings:
     Swipe to refresh: Sveip for å oppdatere
     Blur Thumbnails: Gjer miniatyrbilete uskarpe
     Navigation:
-      Show Active Subscriptions: Vis aktive abonnement
+      Always Show Navigation Bar: Vis alltid navigasjonslinja når ho er nedst
+      Compact Tab Labels: Kompakt navigasjonslinje når ho er nedst
+      Show Active Subscriptions: Vis aktive abonnement i sidepanelet
       Navigation: Navigasjon
       Customize Navigation: Tilpass navigasjon
       Add Item: Legg til element
@@ -374,6 +381,8 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minispelar"
+    Always Show Mobile Search Bar: "Vis alltid søkjefeltet på mobil"
     Frosted Glass Player UI: "Spelargrensesnitt med frosta glas"
     Move Downloads to App Header: Flytt nedlastingar til apphovudet
     Move Settings to App Header: Flytt innstillingar til apphovudet
@@ -440,8 +449,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Lys"
-      OpenTubeX Dark: "OpenTubeX Mørk"
+      Ocean Light: "Ocean Lys"
+      Ocean Dark: "Ocean Mørk"
       Custom: Eige
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -719,6 +728,8 @@ Settings:
     Preload Upcoming Videos: "Førehandslast komande videoar"
     Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
     Concurrent Preloads: "Samstundes førehandslasting"
+    Ignore System Rotation Lock for Fullscreen: Ignorer rotasjonslåsen i systemet for fullskjerm
+    Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -757,9 +768,9 @@ Settings:
     Update Managed Tools: Oppdater
     Managed Tools Download Error Template: 'Klarte ikkje å laste ned dei forvalta verktøya: {errors}'
     Download Folder: Nedlastingsmappe
-    Global Additional yt-dlp Arguments: Globale tilleggsargument for yt-dlp
+    Global Additional yt-dlp Arguments: Ekstra yt-dlp-argument
     Concurrent Downloads: Samstundes nedlastingar
-    Bandwidth Limit: Bandbreiddegrense (KiB/s, 0 for inga grense)
+    Bandwidth Limit: Bandbreiddegrense (KiB/s)
     Choose Download Folder: Vel nedlastingsmappe
     Download Templates: Nedlastingsmalar
     Manage Download Templates: Handsam nedlastingsmalar ({templateCount})
@@ -832,8 +843,8 @@ Settings:
       Automatic: Oppdater automatisk
       Ask: Spør før oppdatering
       Manual: Oppdater berre manuelt
-    yt-dlp Executable Path: Stig til den køyrbare yt-dlp-fila
-    FFmpeg Executable Path: Stig til den køyrbare FFmpeg-fila
+    yt-dlp Executable Path: yt-dlp-programfil
+    FFmpeg Executable Path: FFmpeg-programfil
     Restricted Playback Authentication: "yt-dlp-informasjonskapslar"
     Cookie Source: Kjelde for informasjonskapslar
     Cookie Sources:
@@ -1124,7 +1135,7 @@ Settings:
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
     Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
-    Server URL: Tenaradresse
+    Server URL: URL til synkroniseringstenar
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
     Username: Brukarnamn
@@ -1217,7 +1228,7 @@ Settings:
     Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
     Proxy Username: Brukarnamn for mellomtenar
     Proxy Password: Passord for mellomtenar
-    IP Block Recovery Script Path: Sti til skript for gjenoppretting etter IP-blokkering
+    IP Block Recovery Script Path: Skript for gjenoppretting etter IP-blokkering
     Select IP Block Recovery Script File: Vel skriptfil for gjenoppretting etter IP-blokkering
     Running IP block recovery script: Køyrer skriptet for gjenoppretting etter IP-blokkering
     IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislykkast (avsluttingskode: {exitCode})'
@@ -1229,7 +1240,7 @@ Settings:
       Excluded Channels: "Unntatte kanalar"
       Tooltip: "Skriv inn ein kanal-ID for å hindre at SponsorBlock-segment vert hoppa over i videoane til kanalen. ID-en må samsvare nøyaktig og skil mellom store og små bokstavar."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
-    SponsorBlock Private User ID (optional): Privat SponsorBlock-brukar-ID (valfritt)
+    SponsorBlock Private User ID (optional): Privat brukar-ID (valfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-brukar-ID-en frå nettlesarutvidinga. La feltet stå tomt for å bruka ein ID som appen har laga.
     Generated SponsorBlock User ID: SponsorBlock-brukar-ID laga av appen
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-brukar-ID-en er laga av appen og kan brukast i nettlesarutvidinga eller når du brukar appen på ei anna datamaskin.
@@ -1239,12 +1250,12 @@ Settings:
     Skip notification timeout: Tidsgrense for hoppvarsel
     UseDeArrowTitles: Bruk videotitlar frå DeArrow
     UseDeArrowThumbnails: Bruk DeArrow for miniatyrbilete
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): API-adresse til miniatyrbiletgeneratoren i DeArrow (standard er https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL til DeArrow-miniatyr-API
     Custom Color: Tilpassa farge
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
-    Return YouTube Dislike Url: API-adresse til Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Parental Control Settings:
     Hide Uploader on Watch page: Gøym opplastaren på avspelingssida
     Disable Channel Links: Slå av kanallenkjer
@@ -1295,6 +1306,21 @@ About:
   Please read the {roomRulesLink}: Les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
 Profile:
+  Customization: Tilpassing
+  Manage Profile Subscriptions: Administrer abonnementa til profilen
+  Icon Names:
+    Person: Person
+    People: Personar
+    Headphones: Hovudtelefonar
+    Gaming: Spel
+    Film: Film
+    Art: Kunst
+    Science: Vitskap
+    Globe: Globus
+    Heart: Hjarte
+    Sun: Sol
+    Moon: Måne
+    Trophy: Pokal
   Toggle Profile List: Vis eller gøym profillista
   Edit Profile Name: Rediger profilnamnet
   Create Profile Name: Lag profilnamn
@@ -1569,12 +1595,16 @@ Video:
     You appear to be offline: Det ser ut til at du er fråkopla.
     Playback will resume automatically when your connection comes back: Avspelinga held automatisk fram når sambandet er tilbake.
     Scroll Mini Player:
+      Collapse Controls: "Skjul kontrollar"
+      Expand Controls: "Utvid kontrollar"
       Back to Top: Til toppen
       Return to Video Tab: Tilbake til videofana
       Hide: Gøym minispelaren
       Play: Spel av
       Pause: Pause
       Drag Handle: Flytt minispelaren
+      Rewind 10 seconds: Spol 10 sekund tilbake
+      Forward 10 seconds: Spol 10 sekund fram
     Skipped segment: 'Hoppa over {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Avbryt opprettinga av segmentet
@@ -1733,6 +1763,7 @@ Share:
   Share Post: Del innlegget
   Timestamp Link Copied: Lenkja med tidsstempel er kopiert til utklippstavla
 Context Menu:
+  Open in a Background Tab: "Opne i ei fane i bakgrunnen"
   Select Tab: Vel fane
   Close Tabs Before: Lukk føregåande faner
   Close Tabs After: Lukk etterfølgjande faner
@@ -1795,6 +1826,8 @@ Context Menu:
   Search With Multiple: Søk med …
   Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
 Tab Organizer:
+  Tab History: "Fanelogg"
+  Current Page: "Gjeldande side"
   Icon Labels:
     Podcast: 'Podkast'
     Clock: 'Klokke'
@@ -1900,6 +1933,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."
     Use AI Translation Completions: Fyll ut det som manglar i menneskelagde omsetjingar med KI-generert tekst. Menneskelagde omsetjingar vert alltid brukte fyrst.
     Update Relative Timestamps: Oppdaterer relative tidsstempel i heile appen medan ei side er open. Når dette er slått av, vert dei berre oppdaterte når sida vert lasta inn på nytt eller opna att.
     Stream Extraction Method: |
@@ -1944,6 +1978,7 @@ Tooltips:
     Preload Upcoming Videos: "Hentar og mellomlagrar yt-dlp-adresser for dei neste videoane. Køen har prioritet framfor spelelister og tilrådingar."
     Upcoming Videos to Preload: "Det høgaste talet på komande videoar som får yt-dlp-adressene henta i bakgrunnen."
     Concurrent Preloads: "Det høgaste talet på yt-dlp-prosessar som blir brukte til å førehandslaste videoar samstundes. Høgare verdiar bruker meir prosessorkraft, minne og nettverksbandbreidd."
+    Ignore System Rotation Lock for Fullscreen: Roter eininga fysisk for å opne og avslutte fullskjerm, sjølv når automatisk rotasjon er slått av i Android.
   External Player Settings:
     Ignore Default Arguments: Ikkje send andre standardargument enn URL-en til videoen til den eksterne spelaren, til dømes avspelingsfart eller URL til spelelista. Eigne argument vert framleis sende vidare.
   Download Settings:
@@ -2192,8 +2227,8 @@ Downloads:
   File Name Template: Filnamnmal
   File Name Template Help: 'Tilgjengelege felt: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsrom og kapittel
-  Start Time: Starttid (HH:MM:SS)
-  End Time: Sluttid (HH:MM:SS)
+  Start Time: Starttid
+  End Time: Sluttid
   Split by Chapters: Del i separate filer etter kapittel
   Remove Segments: Fjern segment
   Subtitles and Metadata: Undertekstar og metadata
@@ -2279,3 +2314,40 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemtrauet"
   Follow App Theme: "Følg temaet til appen"
+
+Form Inputs:
+  Enter Password Hint: "Skriv inn passordet ditt"
+  Choose Password Hint: "Vel eit passord"
+  Confirm Password Hint: "Gjenta det nye passordet ditt"
+  Encryption Passphrase Hint: "Skriv inn krypteringspassfrasen din"
+  Show Password: "Vis passord"
+  Hide Password: "Gøym passord"
+  Search Text Hint: "Skriv inn søkjeord"
+  Playlist Description Hint: "Skildre denne spelelista"
+  Filename Preview: "Førehandsvising av filnamn"
+  Enter Channels: "Skriv inn kanalar"
+  Enter Text: "Skriv inn tekst"
+  Video URL: Video- eller speleliste-URL
+  Paste Link: Lim inn ei lenkje til ein video eller ei speleliste
+  Example: t.d. {example}
+  No Minimum: Inga minimumsgrense
+  No Maximum: Inga maksimumsgrense
+  Any Age: Uansett alder
+  Included Terms Example: t.d. rettleiing, melding
+  Excluded Terms Example: t.d. trailer, førehandsvising
+  Download Folder Hint: Lat stå tomt for å bruke Nedlastingar-mappa
+  Global Arguments Hint: Valfrie argument for kvar nedlasting
+  Unlimited Hint: 0 for uavgrensa
+  Add Argument: Legg til eit argument
+  Template Name Example: t.d. Berre lyd
+  Download Arguments Hint: Valfrie argument for denne nedlastinga
+  Generated ID Hint: Lat stå tomt for å generere ein ID
+  Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søk med dei konfigurerte informasjonskapslane mislukkast."
+
+Storage Startup Error:
+  Title: "Kunne ikkje laste appdata"
+  Message: "Frigjer lagringsplass på eininga og prøv igjen. Synkronisering er sett på pause til dataa dine er lasta."
+  Retry: "Prøv igjen"

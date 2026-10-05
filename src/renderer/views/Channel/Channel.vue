@@ -25,7 +25,7 @@
     />
     <FtCard
       v-if="!isLoading && !errorMessage && (isFamilyFriendly || !showFamilyFriendlyOnly)"
-      class="card"
+      class="card channelContent"
     >
       <ChannelAbout
         v-if="currentTab === 'about'"
@@ -50,8 +50,7 @@
           @click="router.push(currentTabViewAllRoute)"
         />
         <FtSelect
-          v-if="showVideoSortBy"
-          v-show="currentTab === 'videos' && (showFetchMoreButton || filteredVideos.length > 1)"
+          v-if="showVideoSortBy && currentTab === 'videos' && (showFetchMoreButton || filteredVideos.length > 1)"
           :value="videoSortBy"
           :select-names="videoLiveShortSelectNames"
           :select-values="videoLiveShortSelectValues"
@@ -60,8 +59,7 @@
           @change="videoSortBy = $event"
         />
         <FtSelect
-          v-if="!hideChannelShorts && showShortSortBy"
-          v-show="currentTab === 'shorts' && (showFetchMoreButton || filteredShorts.length > 1)"
+          v-if="!hideChannelShorts && showShortSortBy && currentTab === 'shorts' && (showFetchMoreButton || filteredShorts.length > 1)"
           :value="shortSortBy"
           :select-names="videoLiveShortSelectNames"
           :select-values="videoLiveShortSelectValues"
@@ -70,8 +68,7 @@
           @change="shortSortBy = $event"
         />
         <FtSelect
-          v-if="showLiveSortBy"
-          v-show="currentTab === 'live' && (showFetchMoreButton || filteredLive.length > 1)"
+          v-if="showLiveSortBy && currentTab === 'live' && (showFetchMoreButton || filteredLive.length > 1)"
           :value="liveSortBy"
           :select-names="videoLiveShortSelectNames"
           :select-values="videoLiveShortSelectValues"
@@ -80,8 +77,7 @@
           @change="liveSortBy = $event"
         />
         <FtSelect
-          v-if="!hideChannelPlaylists && showPlaylistSortBy"
-          v-show="currentTab === 'playlists' && latestPlaylists.length > 0"
+          v-if="!hideChannelPlaylists && showPlaylistSortBy && currentTab === 'playlists' && latestPlaylists.length > 0"
           :value="playlistSortBy"
           :select-names="playlistSelectNames"
           :select-values="PLAYLIST_SELECT_VALUES"

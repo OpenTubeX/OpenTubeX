@@ -68,6 +68,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Subtitrai kurtiesiems ir neprigirdintiesiems
 Search Filters:
+  Cookie Search Failed: "Paieška su sukonfigūruotais slapukais nepavyko."
   Prioritize:
     Prioritize: Teikti pirmenybę
     Popularity: Populiarumui
@@ -376,6 +377,11 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Braukti kairėn per miniatiūras
+      Right: Braukti dešinėn per miniatiūras
+      Description: Braukite horizontaliai per vaizdo įrašo miniatiūrą ir atleiskite, kad atliktumėte pasirinktą veiksmą.
+    Data Saver Thumbnails: "Duomenis taupančios miniatiūros"
     Use tray icon: "Naudoti sistemos dėklo piktogramą"
     Close to system tray: "Uždaryti į sistemos dėklą"
     Tray required for background refresh: "Sistemos dėklo piktograma būtina, kol įjungtas prenumeratų atnaujinimas fone."
@@ -383,7 +389,9 @@ Settings:
     Swipe to refresh: Perbraukite, kad atnaujintumėte
     Blur Thumbnails: Sulieti miniatiūras
     Navigation:
-      Show Active Subscriptions: Rodyti aktyvias prenumeratas
+      Always Show Navigation Bar: Visada rodyti naršymo juostą, kai ji yra apačioje
+      Compact Tab Labels: Kompaktiška naršymo juosta, kai ji yra apačioje
+      Show Active Subscriptions: Rodyti aktyvias prenumeratas šoninėje juostoje
       Navigation: Naršymas
       Customize Navigation: Tinkinti naršymą
       Add Item: Pridėti elementą
@@ -473,6 +481,8 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"
+    Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
     Frosted Glass Player UI: "Grotuvo sąsaja su matinio stiklo efektu"
     Move Downloads to App Header: Atsisiuntimus perkelti į programos antraštę
     Move Settings to App Header: Nustatymus perkelti į programos antraštę
@@ -539,8 +549,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Šviesi"
-      OpenTubeX Dark: "OpenTubeX Tamsi"
+      Ocean Light: "Ocean Šviesi"
+      Ocean Dark: "Ocean Tamsi"
       Custom: Pasirinktinė
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -818,6 +828,8 @@ Settings:
     Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
+    Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
+    Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -856,9 +868,9 @@ Settings:
     Update Managed Tools: Atnaujinti
     Managed Tools Download Error Template: 'Nepavyko atsisiųsti valdomų įrankių: {errors}'
     Download Folder: Atsisiuntimų aplankas
-    Global Additional yt-dlp Arguments: Visuotiniai papildomi yt-dlp argumentai
+    Global Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
     Concurrent Downloads: Vienalaikiai atsisiuntimai
-    Bandwidth Limit: Pralaidumo riba (KiB/s, 0 – neribota)
+    Bandwidth Limit: Pralaidumo riba (KiB/s)
     Choose Download Folder: Pasirinkti atsisiuntimų aplanką
     Download Templates: Atsisiuntimo šablonai
     Manage Download Templates: Tvarkyti atsisiuntimo šablonus ({templateCount})
@@ -931,8 +943,8 @@ Settings:
       Automatic: Atnaujinti automatiškai
       Ask: Klausti prieš atnaujinant
       Manual: Atnaujinti tik rankiniu būdu
-    yt-dlp Executable Path: Kelias iki yt-dlp vykdomojo failo
-    FFmpeg Executable Path: Kelias iki FFmpeg vykdomojo failo
+    yt-dlp Executable Path: yt-dlp vykdomasis failas
+    FFmpeg Executable Path: FFmpeg vykdomasis failas
     Restricted Playback Authentication: "yt-dlp slapukai"
     Cookie Source: Slapukų šaltinis
     Cookie Sources:
@@ -1215,7 +1227,7 @@ Settings:
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
     Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
-    Server URL: Serverio URL
+    Server URL: Sinchronizavimo serverio URL
     Checking Server: Tikrinamas sinchronizavimo serveris…
     Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.
     Username: Naudotojo vardas
@@ -1308,7 +1320,7 @@ Settings:
     Proxy Warning: OpenTubeX neturi integruoto įgaliotojo serverio, tačiau gali prisijungti prie išorinio, pavyzdžiui, šiame kompiuteryje veikiančio Tor arba kai kurių VPN teikiamo SOCKS5 įgaliotojo serverio. Įjungę įsitikinkite, kad įgaliotasis serveris arba Tor tinkamai sukonfigūruotas, kitaip OpenTubeX negalės gauti duomenų.
     Proxy Username: Įgaliotojo serverio naudotojo vardas
     Proxy Password: Įgaliotojo serverio slaptažodis
-    IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijaus kelias
+    IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijus
     Select IP Block Recovery Script File: Pasirinkti IP blokavimo atkūrimo scenarijaus failą
     Running IP block recovery script: Vykdomas IP blokavimo atkūrimo scenarijus
     IP block recovery script failed: 'IP blokavimo atkūrimo scenarijaus vykdyti nepavyko (išėjimo kodas: {exitCode})'
@@ -1320,7 +1332,7 @@ Settings:
       Excluded Channels: "Neįtraukti kanalai"
       Tooltip: "Įveskite kanalo ID, kad jo vaizdo įrašuose nebūtų praleidžiami SponsorBlock segmentai. ID turi tiksliai sutapti, atsižvelgiant į raidžių dydį."
     Enable SponsorBlock Submission: Leisti teikti duomenis „SponsorBlock“
-    SponsorBlock Private User ID (optional): Privatus „SponsorBlock“ naudotojo ID (nebūtina)
+    SponsorBlock Private User ID (optional): Privatus naudotojo ID (nebūtina)
     SponsorBlock Private User ID Tooltip: Įklijuokite privatų „SponsorBlock“ naudotojo ID iš naršyklės plėtinio. Jei norite naudoti programėlės sugeneruotą ID, palikite tuščią.
     Generated SponsorBlock User ID: Sugeneruotas „SponsorBlock“ naudotojo ID
     Generated SponsorBlock User ID Tooltip: Šį programėlės sugeneruotą „SponsorBlock“ naudotojo ID galite naudoti naršyklės plėtinyje arba programėlėje kitame kompiuteryje.
@@ -1330,12 +1342,12 @@ Settings:
     Skip notification timeout: Praleidimo pranešimo rodymo trukmė
     UseDeArrowTitles: Naudoti „DeArrow“ vaizdo įrašų pavadinimus
     UseDeArrowThumbnails: Naudoti „DeArrow“ miniatiūroms
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): „DeArrow“ miniatiūrų generatoriaus API URL (numatytasis yra https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow miniatiūrų API URL
     Custom Color: Pasirinktinė spalva
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“
-    Return YouTube Dislike Url: „Return YouTube Dislike“ API URL (numatytasis yra https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Hide Uploader on Watch page: Slėpti įkėlėją žiūrėjimo puslapyje
     Disable Channel Links: Išjungti kanalų nuorodas
@@ -1391,6 +1403,21 @@ About:
   Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
 Profile:
+  Customization: Tinkinimas
+  Manage Profile Subscriptions: Tvarkyti profilio prenumeratas
+  Icon Names:
+    Person: Asmuo
+    People: Žmonės
+    Headphones: Ausinės
+    Gaming: Žaidimai
+    Film: Filmas
+    Art: Menas
+    Science: Mokslas
+    Globe: Gaublys
+    Heart: Širdis
+    Sun: Saulė
+    Moon: Mėnulis
+    Trophy: Taurė
   Toggle Profile List: Rodyti arba slėpti profilių sąrašą
   Edit Profile Name: Keisti profilio pavadinimą
   Create Profile Name: Naujo profilio pavadinimas
@@ -1673,12 +1700,16 @@ Video:
     You appear to be offline: Panašu, kad neprisijungėte prie interneto.
     Playback will resume automatically when your connection comes back: Atkūrimas bus tęsiamas automatiškai, kai ryšys bus atkurtas.
     Scroll Mini Player:
+      Collapse Controls: "Suskleisti valdiklius"
+      Expand Controls: "Išskleisti valdiklius"
       Back to Top: Grįžti į viršų
       Return to Video Tab: Grįžti į vaizdo įrašo kortelę
       Hide: Slėpti mini leistuvą
       Play: Leisti
       Pause: Pristabdyti
       Drag Handle: Perkelti minileistuvą
+      Rewind 10 seconds: Atsukti 10 sekundžių atgal
+      Forward 10 seconds: Prasukti 10 sekundžių pirmyn
     Skipped segment: 'Praleista: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Atšaukti segmento kūrimą
@@ -1837,6 +1868,7 @@ Share:
   Share Post: Bendrinti įrašą
   Timestamp Link Copied: Nuoroda su laiko žyma nukopijuota į iškarpinę
 Context Menu:
+  Open in a Background Tab: "Atverti kortelėje fone"
   Select Tab: Pasirinkti kortelę
   Close Tabs Before: Uždaryti ankstesnes korteles
   Close Tabs After: Uždaryti paskesnes korteles
@@ -1899,6 +1931,8 @@ Context Menu:
   Search With Multiple: Ieškoti naudojant...
   Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
 Tab Organizer:
+  Tab History: "Kortelės istorija"
+  Current Page: "Dabartinis puslapis"
   Icon Labels:
     Podcast: 'Tinklalaidė'
     Clock: 'Laikrodis'
@@ -2006,6 +2040,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
     Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.
     Stream Extraction Method: |
@@ -2051,6 +2086,7 @@ Tooltips:
     Preload Upcoming Videos: "Gauna ir talpykloje išsaugo kitų vaizdo įrašų yt-dlp adresus. Eilė yra svarbesnė už grojaraščius ir rekomendacijas."
     Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
+    Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:
@@ -2301,8 +2337,8 @@ Downloads:
   File Name Template: Failo pavadinimo šablonas
   File Name Template Help: 'Galimi laukai: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Laiko intervalas ir skyriai
-  Start Time: Pradžios laikas (HH:MM:SS)
-  End Time: Pabaigos laikas (HH:MM:SS)
+  Start Time: Pradžios laikas
+  End Time: Pabaigos laikas
   Split by Chapters: Skaidyti į atskirus failus pagal skyrius
   Remove Segments: Pašalinti segmentus
   Subtitles and Metadata: Subtitrai ir metaduomenys
@@ -2391,3 +2427,37 @@ Tray:
 Tray Icon:
   Title: "Sistemos dėklo piktograma"
   Follow App Theme: "Naudoti programos apipavidalinimą"
+
+Form Inputs:
+  Enter Password Hint: "Įveskite savo slaptažodį"
+  Choose Password Hint: "Pasirinkite slaptažodį"
+  Confirm Password Hint: "Pakartokite naują slaptažodį"
+  Encryption Passphrase Hint: "Įveskite savo šifravimo slaptafrazę"
+  Show Password: "Rodyti slaptažodį"
+  Hide Password: "Slėpti slaptažodį"
+  Search Text Hint: "Įveskite paieškos žodžius"
+  Playlist Description Hint: "Aprašykite šį grojaraštį"
+  Filename Preview: "Failo pavadinimo peržiūra"
+  Enter Channels: "Įveskite kanalus"
+  Enter Text: "Įveskite tekstą"
+  Video URL: Vaizdo įrašo arba grojaraščio URL
+  Paste Link: Įklijuokite vaizdo įrašo arba grojaraščio nuorodą
+  Example: pvz. {example}
+  No Minimum: Be minimumo
+  No Maximum: Be maksimumo
+  Any Age: Bet kokio senumo
+  Included Terms Example: pvz. pamoka, apžvalga
+  Excluded Terms Example: pvz. anonsas, peržiūra
+  Download Folder Hint: Palikite tuščią, kad būtų naudojamas atsisiuntimų aplankas
+  Global Arguments Hint: Pasirinktiniai argumentai kiekvienam atsisiuntimui
+  Unlimited Hint: 0 – neribota
+  Add Argument: Pridėkite argumentą
+  Template Name Example: pvz. Tik garsas
+  Download Arguments Hint: Pasirinktiniai argumentai šiam atsisiuntimui
+  Generated ID Hint: Palikite tuščią, kad būtų sukurtas ID
+  Default Value: "Numatyta: {value}"
+
+Storage Startup Error:
+  Title: "Nepavyko įkelti programėlės duomenų"
+  Message: "Atlaisvinkite vietos įrenginyje ir bandykite dar kartą. Sinchronizavimas pristabdytas, kol bus įkelti jūsų duomenys."
+  Retry: "Bandyti dar kartą"

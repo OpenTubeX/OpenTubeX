@@ -35,7 +35,9 @@
       </FtFlexBox>
       <FtFlexBox>
         <FtInput
-          :placeholder="$t('Settings.Proxy Settings.Proxy Host')"
+          :icon="['fas', 'network-wired']"
+          :label="$t('Settings.Proxy Settings.Proxy Host')"
+          placeholder="127.0.0.1"
           :show-action-button="false"
           show-label
           :value="proxyHostname"
@@ -43,7 +45,9 @@
           @keydown.enter="testProxy"
         />
         <FtInput
-          :placeholder="$t('Settings.Proxy Settings.Proxy Port Number')"
+          :icon="['fas', 'network-wired']"
+          :label="$t('Settings.Proxy Settings.Proxy Port Number')"
+          :placeholder="t('Form Inputs.Example', { example: '1080' })"
           :show-action-button="false"
           show-label
           :value="proxyPort"
@@ -56,7 +60,9 @@
         v-if="areCredentialsSupported"
       >
         <FtInput
-          :placeholder="$t('Settings.Proxy Settings.Proxy Username')"
+          :icon="['fas', 'circle-user']"
+          :label="$t('Settings.Proxy Settings.Proxy Username')"
+          :placeholder="t('Form Inputs.Example', { example: 'alex' })"
           :show-action-button="false"
           show-label
           :value="proxyUsername"
@@ -64,7 +70,9 @@
           @keydown.enter="testProxy"
         />
         <FtInput
-          :placeholder="$t('Settings.Proxy Settings.Proxy Password')"
+          :icon="['fas', 'lock']"
+          :label="$t('Settings.Proxy Settings.Proxy Password')"
+          :placeholder="t('Form Inputs.Enter Password Hint')"
           :show-action-button="false"
           show-label
           :value="proxyPassword"
@@ -114,7 +122,9 @@
       class="settingsFlexStart500px"
     >
       <FtInput
-        :placeholder="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
+        :icon="['fas', 'folder-open']"
+        :label="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
+        placeholder="/path/to/script"
         :show-action-button="true"
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'folder-open']"

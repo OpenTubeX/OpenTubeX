@@ -115,16 +115,21 @@ test.describe('OpenTubeX sync server', () => {
     const accountSessionsSupported = capabilities.account_sessions === 1
     let accountPassword = 'local-test-password'
     const bulkRequests = []
+    const playbackSpeedWrites = []
     page.on('request', request => {
       const pathname = new URL(request.url()).pathname
       if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
+      if (['PUT', 'DELETE'].includes(request.method()) && (
+        pathname.includes('/channel_playback_speeds/') ||
+        pathname.endsWith('/encrypted_sync/playbackSpeeds')
+      )) playbackSpeedWrites.push(pathname)
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    const serverUrlInput = syncSection.getByLabel('Server URL')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
     await serverUrlInput.fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     if (enhancedPrivacy) {
       await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     }
@@ -424,7 +429,7 @@ test.describe('OpenTubeX sync server', () => {
 
     await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
     const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })
-    const deleteAccountPassword = deleteAccountPrompt.getByLabel('Password')
+    const deleteAccountPassword = deleteAccountPrompt.getByLabel('Password', { exact: true })
     let finishWrongPasswordDeletion
     let wrongPasswordDeletionStarted
     const wrongPasswordDeletionPending = new Promise(resolve => {
@@ -473,6 +478,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
     expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
+    expect(playbackSpeedWrites).toEqual([])
   })
 
   test('disconnects after revoking the current account session', async ({ page }, testInfo) => {
@@ -485,9 +491,9 @@ test.describe('OpenTubeX sync server', () => {
     const username = `opentubex-session-${randomUUID()}`
     const password = 'local-test-password'
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill(password)
+    await syncSection.getByLabel('Password', { exact: true }).fill(password)
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
@@ -547,9 +553,9 @@ test.describe('OpenTubeX sync server', () => {
     }, theme)
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
@@ -679,9 +685,9 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill(password)
+    await syncSection.getByLabel('Password', { exact: true }).fill(password)
     await syncSection.getByLabel(/Privacy passphrase/).fill('migration-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
@@ -773,9 +779,9 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()
 
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
@@ -834,9 +840,9 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
 
@@ -916,7 +922,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    const serverUrlInput = syncSection.getByLabel('Server URL')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
     // A connection abort waits for network recovery; an HTTP error rejects
     // this endpoint immediately because it is not a sync server.
     await page.route('https://not-a-sync-server.invalid/**', route => route.fulfill({
@@ -928,7 +934,7 @@ test.describe('OpenTubeX sync server', () => {
     await serverUrlInput.press('Tab')
     await expect(syncSection.getByText(/Unable to connect to this sync server/)).toBeVisible()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
-    await expect(syncSection.getByLabel('Password')).toBeDisabled()
+    await expect(syncSection.getByLabel('Password', { exact: true })).toBeDisabled()
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
     await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
 
@@ -942,7 +948,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
     await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
     await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()
 
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()

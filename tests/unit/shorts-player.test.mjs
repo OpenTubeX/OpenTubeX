@@ -247,6 +247,7 @@ test('Shorts navigation resumes a previous position and saves the current one', 
     ],
     videoId: 'current',
     shortsPlaybackCache: cache,
+    $store: { getters: { getThumbnailDataSaver: false } },
     $refs: { player: { hasPlaybackPosition: true, getCurrentTime: () => 12.5 } },
     tabRoute: { query: { shortSource: 'subscriptions' } },
     tabRouter: { push(route) { destination = route } },
@@ -305,7 +306,7 @@ for (const wasPlaying of [false, true]) {
 
 test('an inactive Short ignores fullscreen events and synchronizes when activated', () => {
   const start = playerSource.indexOf('    function fullscreenChangeHandler() {')
-  const source = playerSource.slice(start, playerSource.indexOf('    function exitFullscreenHandler()', start))
+  const source = playerSource.slice(start, playerSource.indexOf('    async function exitPresentationModes()', start))
   const closed = []
   let fullscreen = true
   let activate
@@ -388,7 +389,8 @@ test('evicting an inactive Short does not close the current player panels', () =
     onBeforeUnmount: callback => callback(), sponsorBlockRequestGeneration: 0,
     screenWakeBinding: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null,
     clearTimeout() {}, paidPromotionTimer: null, disableTwitchTsVideoGap: null,
-    fullscreenDockLayoutFrame: null, cancelPendingVolumeUserSet() {}, fullWindowAnimation: null,
+    fullscreenDockLayoutFrame: null, cancelFullscreenDockVideoAnimation() {},
+    cancelPendingVolumeUserSet() {}, fullWindowAnimation: null,
     hasLoaded: ref(true), hasPlaybackPosition: ref(true), shortsNavigationSuspended: ref(true),
     mediaTabId: 'shorts-tab',
     document: { body: { dataset: { playerFullWindowOwner: 'shorts-tab' }, classList: { remove: () => closed.push('fullwindow') } } },
@@ -453,6 +455,8 @@ for (const paused of [true, false]) {
       shortsPaused,
       video,
       hasLoaded: ref(false),
+      videoLayoutReady: ref(false),
+      pendingMetadataSeek: null,
       isLive: ref(false),
       hasMultipleAudioTracks: ref(false),
       togglePlaybackRate: null,

@@ -8,6 +8,7 @@ async function loadPreloadInterface() {
   const ipcRenderer = new EventEmitter()
   ipcRenderer.invoke = () => Promise.resolve()
   ipcRenderer.send = () => {}
+  const userActivation = { isActive: false }
 
   const IpcChannels = new Proxy({}, {
     get: (_target, property) => String(property)
@@ -21,8 +22,9 @@ async function loadPreloadInterface() {
     document: { body: { dataset: {} } },
     globalThis: null,
     IpcChannels,
-    DBActions: {},
+    DBActions: { GENERAL: { UPSERT: 2 } },
     ipcRenderer,
+    navigator: { userActivation },
     process: {
       argv: [],
       env: {},
@@ -32,8 +34,43 @@ async function loadPreloadInterface() {
   })
   context.globalThis = context
   vm.runInContext(source, context)
-  return { api: context.preloadInterface, ipcRenderer, IpcChannels }
+  return { api: context.preloadInterface, ipcRenderer, IpcChannels, userActivation }
 }
+
+test('queued automatic rule writes require activation and authorize only one fixed-setting write', async () => {
+  const { api, ipcRenderer, IpcChannels, userActivation } = await loadPreloadInterface()
+  const writes = []
+  ipcRenderer.invoke = (...args) => {
+    writes.push(JSON.parse(JSON.stringify(args)))
+    return Promise.resolve(null)
+  }
+  assert.equal(api.prepareAutomaticDownloadRulesWrite(), null)
+  assert.equal(await api.dbSettings(2, { _id: 'ytDlpAutomaticDownloadRules', value: '{}' }), null)
+  assert.equal(writes.length, 0)
+
+  userActivation.isActive = true
+  const persist = api.prepareAutomaticDownloadRulesWrite()
+  userActivation.isActive = false
+  await persist('{"channel":{"includeVideos":true}}')
+  assert.deepEqual(writes, [[IpcChannels.DB_SETTINGS, {
+    action: 2,
+    data: { _id: 'ytDlpAutomaticDownloadRules', value: '{"channel":{"includeVideos":true}}' }
+  }]])
+  await assert.rejects(persist('{}'), /already used/)
+  assert.equal(writes.length, 1)
+  assert.equal(api.prepareAutomaticDownloadRulesWrite(), null)
+})
+
+test('queued automatic rule writers reject invalid values without invoking IPC', async () => {
+  const { api, ipcRenderer, userActivation } = await loadPreloadInterface()
+  let writes = 0
+  ipcRenderer.invoke = () => { writes++; return Promise.resolve(null) }
+  userActivation.isActive = true
+  const persist = api.prepareAutomaticDownloadRulesWrite()
+  await assert.rejects(persist({ _id: 'other-setting', value: '{}' }), /must be a string/)
+  await assert.rejects(persist('{}'), /already used/)
+  assert.equal(writes, 0)
+})
 
 test('player IPC subscriptions share one Electron listener per channel', async () => {
   const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()

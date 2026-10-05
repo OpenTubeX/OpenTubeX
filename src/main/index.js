@@ -54,7 +54,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast } from './dlnaCast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
-import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpSearch, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -149,7 +149,8 @@ function runApp() {
           privileges: {
             standard: true,
             secure: true,
-            supportFetchAPI: true
+            supportFetchAPI: true,
+            codeCache: true
           }
         }]
       : []),
@@ -370,14 +371,22 @@ function runApp() {
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
   const faviconPromises = new Map()
+  let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
+  // Menus must not queue a settings read behind unrelated writes on slow storage.
+  const configuredSearchEnginesReady = baseHandlers.settings._findOne('contextMenuSearchEngines')
+    .then(setting => {
+      configuredSearchEngines = parseSearchEngines(setting?.value ?? DEFAULT_SEARCH_ENGINES_SETTING)
+    })
+    .catch(error => {
+      console.warn('Failed to load context-menu search engines:', error)
+    })
 
   /**
    * @returns {Promise<ReturnType<typeof parseSearchEngines>>}
    */
   async function getConfiguredSearchEngines() {
-    const setting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
-      DEFAULT_SEARCH_ENGINES_SETTING
-    return parseSearchEngines(setting)
+    await configuredSearchEnginesReady
+    return configuredSearchEngines
   }
 
   /**
@@ -4624,6 +4633,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
   ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
   ipcMain.handle(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, handleYtDlpGetRecommendations)
+  ipcMain.handle(IpcChannels.YT_DLP_SEARCH, handleYtDlpSearch)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, handleYtDlpPlaybackCacheGet)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, handleYtDlpPlaybackCacheSet)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, handleYtDlpPlaybackCacheDelete)
@@ -4992,6 +5002,9 @@ function runApp() {
             { event: SyncEvents.GENERAL.UPSERT, data }
           )
           switch (data._id) {
+            case 'contextMenuSearchEngines':
+              configuredSearchEngines = parseSearchEngines(data.value)
+              break
             // Update app menu on related setting update
             case 'backendFallback':
               backendFallback = data.value
@@ -5049,6 +5062,9 @@ function runApp() {
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.settings.delete(data)
+          if (data === 'contextMenuSearchEngines') {
+            configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
+          }
           return null
 
         default:

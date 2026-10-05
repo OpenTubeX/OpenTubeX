@@ -25,6 +25,60 @@ import java.util.concurrent.TimeUnit;
 @CapacitorPlugin(name = "AndroidStorage")
 public class AndroidStoragePlugin extends Plugin {
     private volatile boolean pickerOpen;
+    private AndroidRecordStore records;
+
+    @Override
+    public void load() {
+        records = new AndroidRecordStore(getContext());
+    }
+
+    @Override
+    protected void handleOnDestroy() {
+        if (records != null) records.close();
+    }
+
+    @PluginMethod
+    public void readRecords(PluginCall call) {
+        String filename = call.getString("filename");
+        if (filename == null) { call.reject("Missing record filename"); return; }
+        try {
+            JSObject result = new JSObject().put("initialized", records.initialized(filename));
+            if (!call.getBoolean("metadataOnly", false)) result.put("contents", records.read(filename));
+            call.resolve(result);
+        } catch (Exception error) {
+            call.reject("Unable to read app records", error);
+        }
+    }
+
+    @PluginMethod
+    public void importRecords(PluginCall call) { writeRecords(call, true); }
+
+    @PluginMethod
+    public void appendRecords(PluginCall call) { writeRecords(call, false); }
+
+    private void writeRecords(PluginCall call, boolean importing) {
+        String filename = call.getString("filename");
+        String contents = call.getString("contents");
+        if (filename == null || contents == null) { call.reject("Missing app records"); return; }
+        try {
+            records.write(filename, contents, importing);
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Unable to save app records", error);
+        }
+    }
+
+    @PluginMethod
+    public void clearRecords(PluginCall call) {
+        String filename = call.getString("filename");
+        if (filename == null) { call.reject("Missing record filename"); return; }
+        try {
+            records.clear(filename);
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("Unable to clear app records", error);
+        }
+    }
 
     @PluginMethod
     public void chooseDirectory(PluginCall call) {

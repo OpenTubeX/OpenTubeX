@@ -265,6 +265,11 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Svep åt vänster på miniatyrbilder
+      Right: Svep åt höger på miniatyrbilder
+      Description: Svep vågrätt på en videominiatyr och släpp för att utföra den valda åtgärden.
+    Data Saver Thumbnails: "Datasparande miniatyrbilder"
     Use tray icon: "Använd ikon i systemfältet"
     Close to system tray: "Stäng till systemfältet"
     Tray required for background refresh: "Ikonen i systemfältet krävs medan uppdatering av prenumerationer i bakgrunden är aktiverad."
@@ -272,7 +277,9 @@ Settings:
     Swipe to refresh: Svep för att uppdatera
     Blur Thumbnails: Gör miniatyrbilder suddiga
     Navigation:
-      Show Active Subscriptions: Visa aktiva prenumerationer
+      Always Show Navigation Bar: Visa alltid navigeringsfältet när det är längst ned
+      Compact Tab Labels: Kompakt navigeringsfält när det är längst ned
+      Show Active Subscriptions: Visa aktiva prenumerationer i sidofältet
       Navigation: Navigering
       Customize Navigation: Anpassa navigeringen
       Add Item: Lägg till objekt
@@ -354,6 +361,8 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minispelare"
+    Always Show Mobile Search Bar: "Visa alltid sökfältet på mobilen"
     Frosted Glass Player UI: "Spelargränssnitt med frostat glas"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rosenvatten"
@@ -435,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Ljust"
-      OpenTubeX Dark: "OpenTubeX Mörkt"
+      Ocean Light: "Ocean Ljust"
+      Ocean Dark: "Ocean Mörkt"
       Custom: Anpassat
     Light Theme: Ljust tema
     Dark Theme: Mörkt tema
@@ -621,6 +630,8 @@ Settings:
     Preload Upcoming Videos: "Förinläs kommande videor"
     Upcoming Videos to Preload: "Antal videor att förinläsa"
     Concurrent Preloads: "Samtidiga förinläsningar"
+    Ignore System Rotation Lock for Fullscreen: Ignorera systemets rotationslås för helskärm
+    Swipe Left or Right to Seek in Fullscreen: Svep åt vänster eller höger för att spola i helskärm
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -657,9 +668,9 @@ Settings:
     Update Managed Tools: Uppdatera
     Managed Tools Download Error Template: 'Det gick inte att ladda ned de hanterade verktygen: {errors}'
     Download Folder: Nedladdningsmapp
-    Global Additional yt-dlp Arguments: Globala extra argument för yt-dlp
+    Global Additional yt-dlp Arguments: Ytterligare yt-dlp-argument
     Concurrent Downloads: Samtidiga nedladdningar
-    Bandwidth Limit: Bandbreddsgräns (KiB/s, 0 för obegränsat)
+    Bandwidth Limit: Bandbreddsgräns (KiB/s)
     Choose Download Folder: Välj nedladdningsmapp
     Download Templates: Nedladdningsmallar
     Manage Download Templates: Hantera nedladdningsmallar ({templateCount})
@@ -732,8 +743,8 @@ Settings:
       Automatic: Uppdatera automatiskt
       Ask: Fråga före uppdatering
       Manual: Uppdatera endast manuellt
-    yt-dlp Executable Path: Sökväg till yt-dlp-programfilen
-    FFmpeg Executable Path: Sökväg till FFmpeg-programfilen
+    yt-dlp Executable Path: Körbar fil för yt-dlp
+    FFmpeg Executable Path: Körbar fil för FFmpeg
     Restricted Playback Authentication: "yt-dlp-kakor"
     Cookie Source: Källa för kakor
     Cookie Sources:
@@ -968,7 +979,7 @@ Settings:
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
     Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
-    Server URL: Server-URL
+    Server URL: Synkroniseringsserverns URL
     Checking Server: Kontrollerar synkroniseringsservern…
     Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.
     Username: Användarnamn
@@ -1057,7 +1068,7 @@ Settings:
     Open All Tabs Confirmation: "Öppna alla flikar?"
     Server Update Required: "Uppdatera den här servern för att stödja krypterad synkronisering i realtid."
   Proxy Settings:
-    IP Block Recovery Script Path: Sökväg till skript för återställning efter IP-blockering
+    IP Block Recovery Script Path: Skript för återställning efter IP-blockering
     Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering
     Running IP block recovery script: Kör skript för återställning efter IP-blockering
     IP block recovery script failed: 'Skriptet för återställning efter IP-blockering misslyckades (slutkod: {exitCode})'
@@ -1066,7 +1077,7 @@ Settings:
     Failed to select IP block recovery script: Det gick inte att välja skript för återställning efter IP-blockering
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Aktivera inskickning till SponsorBlock
-    SponsorBlock Private User ID (optional): Privat användar-ID för SponsorBlock (valfritt)
+    SponsorBlock Private User ID (optional): Privat användar-ID (valfritt)
     SponsorBlock Private User ID Tooltip: Klistra in ditt privata användar-ID för SponsorBlock från webbläsartillägget. Lämna tomt för att använda ett ID som appen skapar.
     Generated SponsorBlock User ID: Skapat användar-ID för SponsorBlock
     Generated SponsorBlock User ID Tooltip: Detta användar-ID för SponsorBlock har skapats av appen och kan användas i webbläsartillägget eller när du använder appen på en annan dator.
@@ -1078,7 +1089,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktivera Return YouTube Dislike
-    Return YouTube Dislike Url: API-URL för Return YouTube Dislike (standard är https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Password Dialog:
     Incorrect Password: Felaktigt lösenord
     Unlock: Lås upp
@@ -1121,6 +1132,21 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Customization: Anpassning
+  Manage Profile Subscriptions: Hantera profilens prenumerationer
+  Icon Names:
+    Person: Person
+    People: Personer
+    Headphones: Hörlurar
+    Gaming: Spel
+    Film: Film
+    Art: Konst
+    Science: Vetenskap
+    Globe: Jordglob
+    Heart: Hjärta
+    Sun: Sol
+    Moon: Måne
+    Trophy: Pokal
   Profile Icon: Profilikon
   Choose an Emoji: Välj en emoji
   Custom Emoji: Egen emoji
@@ -1307,12 +1333,16 @@ Video:
     Hide: Dölj
     Show: Visa
     Scroll Mini Player:
+      Collapse Controls: "Dölj kontroller"
+      Expand Controls: "Visa kontroller"
       Back to Top: Tillbaka högst upp
       Return to Video Tab: Gå tillbaka till videofliken
       Hide: Dölj minispelare
       Play: Spela upp
       Pause: Pausa
       Drag Handle: Flytta minispelaren
+      Rewind 10 seconds: Spola tillbaka 10 sekunder
+      Forward 10 seconds: Spola framåt 10 sekunder
     SponsorBlock:
       CancelCurrentSegment: Avbryt skapandet av segmentet
       ClearSegments: Rensa segment
@@ -1453,6 +1483,7 @@ Share:
   Share failed: "Kunde inte dela länken"
   Timestamp Link Copied: Länken med tidsstämpeln har kopierats till urklipp
 Context Menu:
+  Open in a Background Tab: "Öppna i en flik i bakgrunden"
   Select Tab: Välj flik
   Close Tabs Before: Stäng föregående flikar
   Close Tabs After: Stäng efterföljande flikar
@@ -1515,6 +1546,8 @@ Context Menu:
   Search With Multiple: Sök med…
   Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
 Tab Organizer:
+  Tab History: "Flikhistorik"
+  Current Page: "Aktuell sida"
   Icon Labels:
     Podcast: 'Podd'
     Clock: 'Klocka'
@@ -1612,6 +1645,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Använd miniatyrbilder med lägre upplösning för att minska dataförbrukningen."
     Use AI Translation Completions: Fyll luckor i mänskliga översättningar med AI-genererad text. Mänskliga översättningar har alltid företräde.
     Update Relative Timestamps: Uppdaterar relativa tidsangivelser i hela appen medan en sida är öppen. När funktionen är inaktiverad uppdateras de först när sidan läses in igen eller besöks på nytt.
     Stream Extraction Method: |
@@ -1655,6 +1689,7 @@ Tooltips:
     Preload Upcoming Videos: "Hämtar och mellanlagrar yt-dlp-adresser för nästa videor. Kön prioriteras före spellistor och rekommendationer."
     Upcoming Videos to Preload: "Det högsta antalet kommande videor vars yt-dlp-adresser hämtas i bakgrunden."
     Concurrent Preloads: "Det högsta antalet yt-dlp-processer som används för att förinläsa videor samtidigt. Högre värden använder mer processor, minne och nätverksbandbredd."
+    Ignore System Rotation Lock for Fullscreen: Rotera enheten fysiskt för att öppna och avsluta helskärm, även när automatisk rotation är avstängd i Android.
   Download Settings:
     Download Folder: Videor sparas i den här mappen. Lämna tomt för att använda systemets nedladdningsmapp.
     Global Additional yt-dlp Arguments: Extra kommandoradsargument som skickas till yt-dlp vid varje nedladdning, exempelvis --cookies-from-browser firefox.
@@ -1820,8 +1855,8 @@ Downloads:
   File Name Template: Filnamnsmall
   File Name Template Help: 'Tillgängliga fält: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsintervall och kapitel
-  Start Time: Starttid (HH:MM:SS)
-  End Time: Sluttid (HH:MM:SS)
+  Start Time: Starttid
+  End Time: Sluttid
   Split by Chapters: Dela upp i separata filer efter kapitel
   Remove Segments: Ta bort segment
   Subtitles and Metadata: Undertexter och metadata
@@ -1910,3 +1945,40 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemfältet"
   Follow App Theme: "Följ appens tema"
+
+Form Inputs:
+  Enter Password Hint: "Ange ditt lösenord"
+  Choose Password Hint: "Välj ett lösenord"
+  Confirm Password Hint: "Upprepa ditt nya lösenord"
+  Encryption Passphrase Hint: "Ange din krypteringslösenfras"
+  Show Password: "Visa lösenord"
+  Hide Password: "Dölj lösenord"
+  Search Text Hint: "Ange sökord"
+  Playlist Description Hint: "Beskriv den här spellistan"
+  Filename Preview: "Förhandsvisning av filnamn"
+  Enter Channels: "Ange kanaler"
+  Enter Text: "Ange text"
+  Video URL: Video- eller spelliste-URL
+  Paste Link: Klistra in en länk till en video eller spellista
+  Example: t.ex. {example}
+  No Minimum: Ingen minimigräns
+  No Maximum: Ingen maxgräns
+  Any Age: Valfri ålder
+  Included Terms Example: t.ex. handledning, recension
+  Excluded Terms Example: t.ex. trailer, förhandsvisning
+  Download Folder Hint: Lämna tomt för att använda mappen Hämtade filer
+  Global Arguments Hint: Valfria argument för varje hämtning
+  Unlimited Hint: 0 för obegränsat
+  Add Argument: Lägg till ett argument
+  Template Name Example: t.ex. Endast ljud
+  Download Arguments Hint: Valfria argument för denna hämtning
+  Generated ID Hint: Lämna tomt för att generera ett ID
+  Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
+
+Storage Startup Error:
+  Title: "Kunde inte läsa in appdata"
+  Message: "Frigör lagringsutrymme på enheten och försök igen. Synkroniseringen är pausad tills dina data har lästs in."
+  Retry: "Försök igen"

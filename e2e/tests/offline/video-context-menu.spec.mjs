@@ -1,4 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -23,6 +24,71 @@ const SEED = {
 }
 
 test.use({ seed: SEED })
+
+test.beforeEach(async ({ page }) => {
+  await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => fulfillVisualFixture(route, 'video-thumbnail'))
+})
+
+for (const iconPack of ['material', 'remix']) {
+  test.describe(`background tab shortcut with ${iconPack} icons`, () => {
+    test.use({ seed: { ...SEED, settings: { ...SEED.settings, iconPack, extraThumbnailAction: 'history' } } })
+
+    test('mobile menu replaces the extra thumbnail action and keeps the current tab active', async ({ page, attachScreenshot }) => {
+      await goTo(page, 'history')
+      const title = page.locator('.ft-list-video .title').first()
+      const extraAction = page.locator('.ft-list-video .extraThumbnailActionIcon').first()
+      await expect(extraAction).toBeAttached()
+      const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+      const menu = page.locator('.mobileLinkActions')
+
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      try {
+        for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
+          await page.setViewportSize(viewport)
+          await expect(extraAction).toHaveCount(0)
+          await title.scrollIntoViewIfNeeded()
+          const titleBounds = await title.boundingBox()
+          expect(titleBounds).not.toBeNull()
+          await session.send('Input.dispatchTouchEvent', {
+            type: 'touchStart', touchPoints: [{ x: titleBounds.x + 8, y: titleBounds.y + 8 }]
+          })
+          await expect(menu).toBeVisible({ timeout: 3000 })
+          await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+          const row = menu.locator('.mobileThumbnailActionRow')
+          const backgroundTab = row.getByRole('menuitem', { name: 'Open in a Background Tab', exact: true })
+          await expect(backgroundTab).toBeVisible()
+          await expect(row.getByRole('menuitem').first()).toHaveAccessibleName('Open in a Background Tab')
+          await expect(row.getByRole('menuitem', { name: /Watched/ })).toHaveCount(0)
+          await expect(menu.getByRole('menuitem', { name: 'Mark As Watched', exact: true })).toHaveCount(1)
+          const bounds = await backgroundTab.boundingBox()
+          expect(bounds).not.toBeNull()
+          expect(bounds.width).toBeGreaterThanOrEqual(48)
+          expect(bounds.height).toBeGreaterThanOrEqual(48)
+          await attachScreenshot(`background tab mobile menu ${iconPack} ${viewport.width}`)
+          const before = await page.evaluate(() => window.ftElectron.tabs.getState())
+          await backgroundTab.click()
+          await expect(menu).toHaveCount(0)
+          await expect(page).toHaveURL(/#\/history/)
+          await expect.poll(async () => (await page.evaluate(() => window.ftElectron.tabs.getState())).tabs.length).toBe(before.tabs.length + 1)
+          const after = await page.evaluate(() => window.ftElectron.tabs.getState())
+          expect(after.activeTabId).toBe(initialState.activeTabId)
+          const created = after.tabs.find(tab => !before.tabs.some(previous => previous.id === tab.id))
+          expect(created.route.path).toBe(`/watch/${VIDEO_ID}`)
+        }
+
+        await page.setViewportSize({ width: 1600, height: 900 })
+        await expect(extraAction).toBeAttached()
+        await goToSettingsSection(page, 'general')
+        await expect(page.getByRole('combobox', { name: /Extra thumbnail action button/i })).toBeVisible()
+        await page.setViewportSize({ width: 375, height: 812 })
+        await expect(page.getByRole('combobox', { name: /Extra thumbnail action button/i })).toHaveCount(0)
+      } finally {
+        await session.detach()
+      }
+    })
+  })
+}
 
 for (const iconPack of ['material', 'remix']) {
   test.describe(`mobile toggle indicators with ${iconPack} icons`, () => {
@@ -81,7 +147,7 @@ test('video thumbnails, titles, and metadata share one menu', async ({ page, app
   await expect(card.getByRole('button', { name: /^More options$/i })).toHaveCount(0)
   const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
 
-  for (const selector of ['.thumbnailImage', '.h3Title', '.videoInfo']) {
+  for (const selector of ['.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)', '.h3Title', '.videoInfo']) {
     await card.locator(selector).first().click({ button: 'right' })
     await expect(menu).toBeVisible()
     for (const label of ['Play Next', 'Add to Queue', 'Mark As Watched', 'Remove From History', 'Copy Link', 'Open in a New Tab', 'Open in a New Window']) {
@@ -154,8 +220,8 @@ for (const uiScale of [100, 125]) {
         for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }, { width: 1024, height: 768 }]) {
           await page.setViewportSize(viewport)
           const card = page.locator('.ft-list-video').first()
-          await card.locator('.thumbnailImage').scrollIntoViewIfNeeded()
-          const bounds = await card.locator('.thumbnailImage').boundingBox()
+          await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').scrollIntoViewIfNeeded()
+          const bounds = await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').boundingBox()
           await session.send('Input.dispatchTouchEvent', {
             type: 'touchStart', touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }]
           })
@@ -396,14 +462,16 @@ for (const playlistType of ['youtube', 'user']) {
 test('retains image and selected-text actions alongside video actions', async ({ page, app }) => {
   await goTo(page, 'history')
   const card = page.locator('.ft-list-video').first()
+  const thumbnail = card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)')
+  await expectImagesLoaded(thumbnail)
   const menu = page.locator('.contextMenu')
-  await card.locator('.thumbnailImage').click({ button: 'right' })
+  await thumbnail.click({ button: 'right' })
   for (const name of ['Copy Image', 'Copy Image Address']) {
     await expect(menu.getByRole('menuitem', { name, exact: true })).toBeVisible()
   }
   await expect(menu.getByRole('menuitem', { name: /^Save Image As/ })).toBeVisible()
   await expect(menu.getByRole('menuitem', { name: 'Add to Queue', exact: true })).toBeVisible()
-  const imageUrl = await card.locator('.thumbnailImage').evaluate(image => image.currentSrc || image.src)
+  const imageUrl = await thumbnail.evaluate(image => image.currentSrc || image.src)
   await menu.getByRole('menuitem', { name: 'Copy Image Address', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(imageUrl)
   await card.locator('.h3Title').evaluate(element => {

@@ -1,8 +1,10 @@
 package org.opentubex.app;
 
+import android.app.PictureInPictureUiState;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
+import android.os.Build;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
@@ -67,6 +69,8 @@ public class MainActivity extends BridgeActivity {
         }
         // Honor viewport widths larger than the device for UI scales below 100%.
         getBridge().getWebView().getSettings().setUseWideViewPort(true);
+        // UI scale owns the page viewport; the custom player handles video pinch zoom.
+        getBridge().getWebView().getSettings().setSupportZoom(false);
         // Capacitor falls back to addJavascriptInterface when the modern,
         // top-frame-only bridge is unavailable. Fail closed instead of
         // exposing native plugins to untrusted subframes.
@@ -105,12 +109,22 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    public void onPictureInPictureUiStateChanged(PictureInPictureUiState state) {
+        super.onPictureInPictureUiStateChanged(state);
+        if (Build.VERSION.SDK_INT >= 35 && state.isTransitioningToPip()) {
+            getBridge().triggerWindowJSEvent("opentubex:android-pip",
+                "{\"active\":true,\"transitioning\":true}");
+            ((AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance()).preparePictureInPictureSurface();
+        }
+    }
+
+    @Override
     public void onPictureInPictureModeChanged(
         boolean isInPictureInPictureMode,
         Configuration newConfig
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-        notifyPictureInPictureState(isInPictureInPictureMode);
+        notifyPictureInPictureState(isInPictureInPictureMode, newConfig);
     }
 
     @Override
@@ -118,15 +132,19 @@ public class MainActivity extends BridgeActivity {
         super.onResume();
         // A PiP exit can happen while Chromium is suspended behind the lock
         // screen. Reconcile both layers with the Activity's current state.
-        notifyPictureInPictureState(isInPictureInPictureMode());
+        notifyPictureInPictureState(isInPictureInPictureMode(), getResources().getConfiguration());
         LauncherActivity.finishReturn();
     }
 
-    private void notifyPictureInPictureState(boolean active) {
-        getBridge().triggerWindowJSEvent(
-            "opentubex:android-pip",
-            "{\"active\":" + active + "}"
-        );
+    private void notifyPictureInPictureState(boolean active, Configuration config) {
+        // The callback's configuration describes the destination on PiP exit,
+        // while WebView's outerWidth still describes the small PiP window.
+        ((AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance()).onPictureInPictureModeChanged(active, () -> {
+            getBridge().triggerWindowJSEvent("opentubex:android-pip",
+                "{\"active\":" + active + ",\"windowWidth\":" + config.screenWidthDp +
+                    ",\"windowHeight\":" + config.screenHeightDp + "}"
+            );
+        });
     }
 
     @Override

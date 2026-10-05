@@ -47,6 +47,7 @@ for (const [operation, run] of [
   ['manifest', client => client.getEncryptedSyncManifest()],
   ['collection download', client => client.getEncryptedSyncCollection('history')],
   ['legacy download', client => client.getLegacyEncryptedSync()],
+  ['activity download', client => client.getSyncEvents()],
   ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024))],
 ]) {
   test(`Android encrypted sync ${operation} can take longer than 30 seconds`, async t => {
@@ -74,6 +75,7 @@ for (const [operation, run] of [
 for (const [operation, run, timeoutMs] of [
   ['health check', client => client.health(), 20_000],
   ['collection download', client => client.getEncryptedSyncCollection('history'), 300_000],
+  ['activity download', client => client.getSyncEvents(), 300_000],
   ['small collection upload', client => client.putEncryptedSyncCollection('history', 1, 'encrypted'), 300_000],
   ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024)), 300_000],
 ]) {

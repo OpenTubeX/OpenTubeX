@@ -7,6 +7,7 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      compactNavigation: compactNavigationLabels,
       capacitorTabs: isCapacitor,
       capacitorPhoneLayout: isCapacitor && !showTabletTabStrip,
       capacitorTabletLayout: showTabletTabStrip,
@@ -39,6 +40,7 @@
     <SideNav
       :inert="isAnyPromptOpen"
       :force-expanded="useWatchSideNavOverlay"
+      :data-watch-return-expanded="sideNavOpenBeforeWatchOverlay"
     />
     <Transition name="fade">
       <button
@@ -458,15 +460,16 @@
             v-if="showTabPreviews"
             class="tabSwitcherPreview"
           >
-            <img
+            <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
               :alt="`${formatTabTitle(tab.title)} preview`"
               draggable="false"
               @error="handleTabSwitcherPreviewError(tab)"
-            >
+            />
             <FtRetryImage
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               :alt="`${formatTabTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
@@ -487,6 +490,7 @@
           <span class="tabSwitcherTitle">
             <FtRetryImage
               v-if="showTabIcons && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               class="tabSwitcherTitleAvatar"
               alt=""
@@ -532,6 +536,7 @@ import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
+import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -562,6 +567,7 @@ import {
 } from './helpers/androidUi'
 import {
   applyThemeToDocument,
+  getThemeBackground,
   handleCustomThemeUpdated,
   loadCustomThemes,
 } from './helpers/customTheme'
@@ -587,7 +593,7 @@ import {
 } from './helpers/mobileLinkActions'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
-import { revealStartupSplash } from './helpers/startupSplash'
+import { cacheStartupAppearance, revealStartupSplash } from './helpers/startupSplash'
 import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
@@ -720,7 +726,7 @@ function startPageSwipe(event) {
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
       pageSwipe.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
-      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer')) return
+      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer, .thumbnailSwipeEnabled')) return
 
   const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
   if (!width) return
@@ -834,6 +840,7 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 
 const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)
@@ -863,29 +870,29 @@ function handleTabletTabStripChange(event) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {
-  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+  return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
 })
 
-let sideNavOpenBeforeWatchOverlay = null
+const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
     disableWatchSideNavTransitionForNextFrame()
-    sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
+    sideNavOpenBeforeWatchOverlay.value = isSideNavOpen.value
     closeSideNav()
-  } else if (sideNavOpenBeforeWatchOverlay !== null) {
+  } else if (sideNavOpenBeforeWatchOverlay.value !== null) {
     // Leaving the overlay brings the sidebar back into normal flow and may
     // reopen it. Suppress its inline-size transition for the reflow so the
     // content snaps to its final position instead of sliding in from the right.
     disableWatchSideNavTransitionForNextFrame()
 
-    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay.value) {
       store.commit('toggleSideNav')
     }
 
-    sideNavOpenBeforeWatchOverlay = null
+    sideNavOpenBeforeWatchOverlay.value = null
   }
 }, { immediate: true })
 
@@ -1599,7 +1606,7 @@ onMounted(async () => {
     await repairSystemThemeSettings(store, themes)
     updateTheme()
   })
-  trayAppearanceReady = true
+  appearanceSettingsReady = true
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
@@ -1745,6 +1752,10 @@ onMounted(async () => {
   }
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('pointermove', handleNumberInputPointer, { passive: true })
+  document.addEventListener('pointerdown', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerup', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
@@ -1812,6 +1823,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
+  document.removeEventListener('pointermove', handleNumberInputPointer)
+  document.removeEventListener('pointerdown', handleNumberInputPointer, true)
+  document.removeEventListener('pointerup', handleNumberInputPointer, true)
+  document.removeEventListener('pointerout', handleNumberInputPointer)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
@@ -1855,7 +1870,7 @@ watch([
   () => store.getters.getActiveTab?.loadState,
   () => store.getters.getTabById(presentedTabId.value)?.route.fullPath,
 ], async ([ready, presented, loadState, fullPath], _, onCleanup) => {
-  if (!isElectron || !ready || (!presented && loadState !== 'unloaded') || !document.getElementById('startup-splash')) return
+  if (!usesLogicalTabs || !ready || (!presented && loadState !== 'unloaded') || !document.getElementById('startup-splash')) return
   let cancelled = false
   let preloadTimeout
   onCleanup(() => {
@@ -2992,6 +3007,8 @@ watch(() => store.getters.getSystemDarkTheme, updateTheme)
 const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
+watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
+watch(() => store.getters.getCustomThemes, cacheCapacitorStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
@@ -3013,11 +3030,11 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 watch(thumbnailSize, updateThumbnailListSize)
 
-let trayAppearanceReady = false
+let appearanceSettingsReady = false
 watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
 
 function refreshTrayIcon() {
-  if (isElectron && trayAppearanceReady) {
+  if (isElectron && appearanceSettingsReady) {
     updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
   }
 }
@@ -3030,8 +3047,25 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+  cacheCapacitorStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()
+}
+
+function cacheCapacitorStartupAppearance() {
+  if (!isCapacitor || !appearanceSettingsReady) return
+  const appearance = (dark) => {
+    const theme = baseTheme.value === 'system'
+      ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+      : baseTheme.value
+    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark)
+    return { background, dark: calculateColorLuminance(background) !== '#000000' }
+  }
+  cacheStartupAppearance({
+    light: appearance(false),
+    dark: appearance(true),
+    hideSplash: store.getters.getHideStartupSplash
+  })
 }
 
 function updateSystemBarsStyle() {
@@ -3219,6 +3253,7 @@ watch(outlinesHidden, hidden => {
   document.documentElement.classList.toggle('hideOutlines', hidden)
 }, { flush: 'sync', immediate: true })
 
+const phoneLayout = usePhoneLayout()
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
@@ -3227,6 +3262,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   store,
   isElectron,
   isCapacitor,
+  phoneLayout: phoneLayout.value,
   hardwareKeyboardAttached: hardwareKeyboardAttached.value,
   navigate: navigateFromCommandPalette,
   openSettingsSection,
@@ -3314,7 +3350,11 @@ function getAndroidBackTarget() {
   const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
   const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
   const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
-  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? focused
+  const phoneSearch = document.querySelector('.topNav.phoneSearchOpen')
+  const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
+  const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
+  const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
+  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
 }
 
 async function handleAndroidBack() {
@@ -3359,7 +3399,7 @@ function shouldInterceptAndroidBack() {
     (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
     isSideNavOpen.value || settingsWindowOpen.value || isAnyPromptOpen.value ||
     mobileContextLink.value || mobileContextActions.value ||
-    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open]') ||
+    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen') ||
     hasVisibleGamepadLayer())
 }
 
@@ -3408,12 +3448,12 @@ function getAndroidBackPreview() {
       getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog)
   }
   if (settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
-    document.fullscreenElement || document.querySelector('dialog[open]')) return null
+    document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
   return getAndroidBackPlayer(presentedTabId.value)
 }
 
 function handleAndroidPictureInPictureChange(event) {
-  setAndroidPictureInPictureDocumentState(event.active === true)
+  setAndroidPictureInPictureDocumentState(event.active === true, event)
 }
 
 function handleHardwareKeyboardChange(event) {
@@ -3445,11 +3485,7 @@ function clearSettingsSearchTarget(target) {
 }
 
 function focusSearchFromCommandPalette() {
-  setTimeout(() => {
-    const input = document.querySelector('.topNav .searchInput .ft-input')
-    input?.focus()
-    input?.select()
-  })
+  window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
 }
 
 function createWindowFromCommandPalette() {
@@ -4288,6 +4324,41 @@ function handleMouseDown() {
   store.dispatch('hideOutlines')
 }
 
+/** @param {PointerEvent} event */
+function handleNumberInputPointer(event) {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || input.type !== 'number') return
+  if (event.type === 'pointerout') {
+    if (event.relatedTarget !== input) {
+      input.style.removeProperty('--number-step-up-color')
+      input.style.removeProperty('--number-step-down-color')
+    }
+    return
+  }
+  if (input.disabled || input.readOnly) return
+
+  // Chromium exposes both native step arrows as one pseudo-element. Split its
+  // paint at the content's center while keeping native stepping and key repeat.
+  const bounds = input.getBoundingClientRect()
+  const style = getComputedStyle(input)
+  const rtl = style.direction === 'rtl'
+  const edge = rtl ? bounds.left + parseFloat(style.paddingLeft) + 4 : bounds.right - parseFloat(style.paddingRight) - 4
+  const middle = bounds.top + (bounds.height + parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
+  let hoveredStep = ''
+  if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
+    hoveredStep = event.clientY < middle ? 'up' : 'down'
+  }
+  const highlight = event.buttons & 1 ? 'var(--primary-color-active)' : 'var(--primary-color)'
+  for (const step of ['up', 'down']) {
+    const property = `--number-step-${step}-color`
+    const color = hoveredStep === step ? highlight : ''
+    if (input.style.getPropertyValue(property) !== color) {
+      if (color) input.style.setProperty(property, color)
+      else input.style.removeProperty(property)
+    }
+  }
+}
+
 const lastExternalLinkToBeOpened = ref('')
 const showExternalLinkOpeningPrompt = ref(false)
 const EXTERNAL_LINK_OPENING_PROMPT_VALUES = ['yes', 'no']
@@ -4715,7 +4786,7 @@ async function enableCapacitorIntegrations() {
   const openUrl = url => {
     if (!url) return
     // iOS URL handling can remove the embedded protocol's colon.
-    const target = url.replace(/^opentubex:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
     return handleYoutubeLink(target)
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'

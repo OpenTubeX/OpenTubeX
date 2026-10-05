@@ -426,6 +426,7 @@ jobs:
   trigger-flatpak:
     name: Trigger Flatpak build
     needs: publish-release
+    if: inputs.publishRelease
     runs-on: ubuntu-latest
 
     permissions:
@@ -433,6 +434,10 @@ jobs:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -444,6 +449,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-linux-(x64|arm64)-portable[.]zip$' 2
 
     - name: Trigger flatpak workflow
       env:
@@ -533,12 +545,17 @@ jobs:
   trigger-aur-update:
     name: Trigger AUR repository update
     needs: publish-release
+    if: inputs.publishRelease
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -550,6 +567,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '_beta_(amd64|arm64)[.]deb$' 2
 
     - name: Trigger AUR repository workflow
       env:
@@ -567,12 +591,17 @@ jobs:
   trigger-rpm-update:
     name: Trigger RPM repository update
     needs: publish-release
+    if: inputs.publishRelease
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -584,6 +613,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.](amd64|arm64)[.]rpm$' 2
 
     - name: Trigger RPM repository workflow
       env:
@@ -601,12 +637,17 @@ jobs:
   trigger-apt-update:
     name: Trigger APT repository update
     needs: publish-release
+    if: inputs.publishRelease
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -618,6 +659,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]deb$' 3
 
     - name: Trigger APT repository workflow
       env:
@@ -635,12 +683,17 @@ jobs:
   trigger-snap-update:
     name: Trigger Snap package update
     needs: publish-release
+    if: inputs.publishRelease
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -652,6 +705,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '_beta_(amd64|arm64)[.]deb$' 2
 
     - name: Trigger Snap package workflow
       env:
@@ -676,6 +736,10 @@ jobs:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -687,6 +751,13 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '[.]apk$' 5
 
     - name: Trigger F-Droid repository workflow
       env:
@@ -701,8 +772,8 @@ jobs:
           -f event_type=opentubex-release \
           -f "client_payload[tag]=$TAG"
 
-  trigger-nix-update:
-    name: Trigger Nix repository update
+  trigger-sidestore-update:
+    name: Trigger SideStore repository update
     needs: publish-release
     if: inputs.publishRelease
     runs-on: ubuntu-latest
@@ -711,6 +782,10 @@ jobs:
       contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
     - name: Resolve release tag
       id: release
       env:
@@ -722,6 +797,59 @@ jobs:
 
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-ios-unsigned[.]ipa$' 1
+
+    - name: Trigger SideStore repository workflow
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh api repos/OpenTubeX/sidestore/dispatches \
+          --method POST \
+          -f event_type=opentubex-release \
+          -f "client_payload[tag]=$TAG"
+
+  trigger-nix-update:
+    name: Trigger Nix repository update
+    needs: publish-release
+    if: inputs.publishRelease
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '(_beta_(amd64|arm64)[.]deb|-mac-(x64|arm64)[.]zip)$' 4
 
     - name: Trigger Nix repository workflow
       env:
@@ -742,9 +870,21 @@ jobs:
     if: inputs.publishRelease
     runs-on: ubuntu-latest
 
-    permissions: {}
+    permissions:
+      contents: read
 
     steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "$RELEASE_ID" '-mac-(x64|arm64)[.]zip$' 2
+
     - name: Trigger Homebrew update workflow
       env:
         GH_TOKEN: ${{ secrets.PUSH_TOKEN }}

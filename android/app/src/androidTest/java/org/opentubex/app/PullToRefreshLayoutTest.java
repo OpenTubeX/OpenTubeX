@@ -25,6 +25,70 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 public class PullToRefreshLayoutTest {
     @Test
+    public void watchPullReloadsThePageWithSubscriptionsRetainedBehindIt() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView web = reference.get();
+            await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"]') && typeof window.__opentubexPullToRefresh === 'function'");
+            await(web, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(web, "document.querySelector('.tutorialActions button')?.click()");
+            await(web, "!document.querySelector('.tutorialOverlay')");
+            evaluate(web, """
+                (() => {
+                    const app = document.querySelector('#app').__vue_app__.config.globalProperties;
+                    window.__pullSettings = { EnablePullToRefresh: app.$store.getters.getEnablePullToRefresh,
+                        FetchSubscriptionsAutomatically: app.$store.getters.getFetchSubscriptionsAutomatically };
+                    app.$store.commit('setEnablePullToRefresh', true);
+                    app.$store.commit('setFetchSubscriptionsAutomatically', false);
+                    window.__pullFetch = window.fetch;
+                    window.fetch = (url, options) => String(url).startsWith('https://localhost/')
+                        ? window.__pullFetch(url, options) : Promise.reject(new Error('Offline pull-to-refresh test'));
+                    app.$router.push('/subscriptions');
+                })()
+                """);
+            try {
+                await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"] .subscriptionsHeaderRefreshWidget')");
+                evaluate(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/jNQXAC9IVRw')");
+                await(web, "!!document.querySelector('.tabContent[aria-hidden=\"false\"] .browsingBehindWatch .subscriptionsHeaderRefreshWidget')");
+                await(web, "!!window.__opentubexPullToRefresh(0.2, 0.2)");
+                evaluate(web, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        window.__pullRevision = store.getters.getPresentedTab.refreshKey;
+                        window.__pullRoute = store.getters.getPresentedTab.route.fullPath;
+                        window.__pullFeedClicks = 0;
+                        const widget = document.querySelector('.browsingBehindWatch .subscriptionsHeaderRefreshWidget').__vueParentComponent;
+                        const click = widget.vnode.props.onClick;
+                        widget.vnode.props.onClick = (...args) => { window.__pullFeedClicks++; return click(...args); };
+                    })()
+                    """);
+                AtomicReference<View> layout = new AtomicReference<>();
+                scenario.onActivity(activity -> layout.set((View) web.getParent()));
+                swipe(layout.get(), false, false, false);
+                await(web, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.refreshKey === window.__pullRevision + 1");
+                assertEquals("Watch route remains current", "true", evaluate(web,
+                    "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.route.fullPath === window.__pullRoute"));
+                assertEquals("The hidden subscriptions widget did not refresh its feed", "0", evaluate(web, "window.__pullFeedClicks"));
+            } finally {
+                evaluate(web, """
+                    (() => {
+                        const app = document.querySelector('#app').__vue_app__.config.globalProperties;
+                        for (const [key, value] of Object.entries(window.__pullSettings)) app.$store.commit('set' + key, value);
+                        window.fetch = window.__pullFetch;
+                        app.$router.push('/subscriptions');
+                        delete window.__pullSettings;
+                        delete window.__pullFetch;
+                        delete window.__pullRevision;
+                        delete window.__pullRoute;
+                        delete window.__pullFeedClicks;
+                    })()
+                    """);
+            }
+        }
+    }
+
+    @Test
     public void pullRequiresAnApprovedVerticalGestureAtThePageTop() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<PullToRefreshLayout> layoutRef = new AtomicReference<>();
@@ -126,11 +190,25 @@ public class PullToRefreshLayoutTest {
         });
     }
 
-    private static void evaluate(WebView web, String script) throws Exception {
+    private static void await(WebView web, String condition) throws Exception {
+        long deadline = SystemClock.uptimeMillis() + 30000;
+        while (SystemClock.uptimeMillis() < deadline) {
+            if ("true".equals(evaluate(web, condition))) return;
+            SystemClock.sleep(100);
+        }
+        assertEquals(condition, "true", evaluate(web, condition));
+    }
+
+    private static String evaluate(WebView web, String script) throws Exception {
+        AtomicReference<String> value = new AtomicReference<>();
         CountDownLatch evaluated = new CountDownLatch(1);
-        onMain(() -> web.evaluateJavascript(script, result -> evaluated.countDown()));
+        onMain(() -> web.evaluateJavascript(script, result -> {
+            value.set(result);
+            evaluated.countDown();
+        }));
         assertTrue(evaluated.await(5, TimeUnit.SECONDS));
         SystemClock.sleep(100);
+        return value.get();
     }
 
     private static void onMain(Runnable action) {

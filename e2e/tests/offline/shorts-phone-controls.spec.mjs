@@ -27,6 +27,114 @@ async function openShort({ app, page }) {
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
 }
 
+async function showShortPoster(page, watch) {
+  // Let pause settle before revealing the retained poster in component state.
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    if (!video.paused) {
+      await new Promise(resolve => {
+        video.addEventListener('pause', resolve, { once: true })
+        video.pause()
+      })
+    }
+  })
+  await watch.evaluate(component => { component.proxy.$refs.player.$.setupState.showPoster = true })
+}
+
+for (const zoom of [1, 1.25]) {
+  test(`Shorts posters match the video crop across presentation modes at ${zoom * 100}% UI scale`, async ({ app, page }) => {
+    await openShort({ app, page })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const poster = 'https://provider.test/landscape-short-poster.jpg'
+    await page.route(poster, route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
+    }))
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate((component, poster) => {
+      component.proxy.thumbnail = poster
+    }, poster)
+    await showShortPoster(page, watch)
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+    const video = player.locator('video')
+    await expect(image).toBeVisible()
+    await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
+    const expectCrop = async crop => {
+      await expect(video).toHaveCSS('object-fit', crop)
+      await expect(image).toHaveCSS('object-fit', crop)
+    }
+    await expectCrop('cover')
+    await page.locator('body').press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await expectCrop('contain')
+    await page.locator('body').press('s')
+    await expectCrop('cover')
+    await player.evaluate(player => player.requestFullscreen())
+    await expectCrop('contain')
+    await page.evaluate(() => document.exitFullscreen())
+    await expectCrop('cover')
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
+    await page.setViewportSize({ width: 1026, height: 461 })
+    await expectCrop('contain')
+    await page.setViewportSize({ width: 390, height: 800 })
+    await expectCrop('cover')
+    await watch.dispose()
+  })
+}
+
+test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
+  await openShort({ app, page })
+  const high = 'https://i.ytimg.com/vi/short-poster/large.jpg'
+  const low = 'https://i.ytimg.com/vi/short-poster/small.jpg'
+  await page.route('https://i.ytimg.com/vi/short-poster/**', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async (component, { high, low }) => {
+    const store = component.proxy.$store
+    const channelId = 'UC-short-poster-test'
+    const profile = JSON.parse(JSON.stringify(store.getters.getActiveProfile))
+    await store.dispatch('updateProfile', { ...profile, subscriptions: [{ id: channelId, name: 'Poster test', thumbnail: '' }] })
+    await store.dispatch('updateSubscriptionShortsCacheByChannel', {
+      channelId,
+      videos: [{ videoId: component.proxy.videoId, title: 'Poster test', authorId: channelId, published: Date.now(), thumbnailUrl: high, lowResolutionThumbnailUrl: low }]
+    })
+    component.proxy.thumbnail = high
+  }, { high, low })
+  await showShortPoster(page, watch)
+  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
+  await expect(image).toBeVisible()
+  await expect(image).toHaveAttribute('src', high)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(image).toHaveAttribute('src', low)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(image).toHaveAttribute('src', high)
+  await watch.dispose()
+})
+
+test('data saver preserves standalone Shorts posters without alternate thumbnails', async ({ app, page }) => {
+  await openShort({ app, page })
+  const poster = 'https://provider.test/short-poster.jpg'
+  await page.route(poster, route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, poster) => {
+    component.proxy.thumbnail = poster
+  }, poster)
+  await showShortPoster(page, watch)
+  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
+  await expect(image).toBeVisible()
+  await expect(image).toHaveAttribute('src', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(image).toHaveAttribute('src', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(image).toHaveAttribute('src', poster)
+  await watch.dispose()
+})
+
 test('phone Shorts options stay inside their menu dialog', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })

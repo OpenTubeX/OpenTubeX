@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url'
+import { readFile } from 'node:fs/promises'
 import { test, expect, setWindowSize, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -49,14 +50,105 @@ async function openVideo({ app, page }) {
   return { video, watch }
 }
 
+for (const dataSaver of [false, true]) {
+  test(`reuses the startup poster and its resolution fallback with data saver ${dataSaver}`, async ({ app, page }) => {
+    await page.evaluate(async dataSaver => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateAutoplayVideos', false)
+      await store.dispatch('updateThumbnailDataSaver', dataSaver)
+    }, dataSaver)
+    await mockPlayableWatchPage(app, page)
+    const requests = []
+    await page.route('https://i.ytimg.com/**', route => {
+      requests.push(route.request().url())
+      if (/\/(?:maxres|sd)default.jpg$/.test(route.request().url())) {
+        return route.fulfill({
+          contentType: 'image/svg+xml',
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>'
+        })
+      }
+      return route.fulfill({
+        path: fileURLToPath(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url)),
+        contentType: 'image/svg+xml'
+      })
+    })
+    await page.evaluate(() => window.ftElectron.tabs.create({ route: '/watch/jNQXAC9IVRw' }))
+    const video = page.locator('.ftVideoPlayer video')
+    const startup = page.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+    await expect(startup).toBeVisible()
+    await expect(startup).toHaveAttribute('src', new RegExp(`/${dataSaver ? 'mq' : 'hq'}default.jpg$`))
+    await expect(video).not.toHaveAttribute('poster', /.+/)
+    if (dataSaver) {
+      expect(requests).toEqual(['https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg'])
+    }
+    const poster = await startup.elementHandle()
+    const startupPoster = await startup.getAttribute('src')
+    await expect.poll(() => video.evaluate(element => element.duration)).toBeGreaterThan(1)
+    await startup.evaluate(image => {
+      window.__posterReloads = 0
+      image.addEventListener('load', () => { window.__posterReloads++ })
+    })
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await endVideo(video)
+      const ended = page.locator('.endedPoster img:not(.retryImagePlaceholder)')
+      await expect(ended).toHaveAttribute('src', startupPoster)
+      expect(await ended.evaluate((image, original) => image === original, poster)).toBe(true)
+      await expect(page.locator('.endedPoster .retryImagePlaceholder')).toHaveCount(0)
+      expect(await page.evaluate(() => window.__posterReloads)).toBe(0)
+      await video.evaluate(element => { element.currentTime = 1 })
+      await expect(page.locator('.endedPoster')).toHaveCount(0)
+    }
+  })
+}
+
+test('shows an already loaded poster without flashing its placeholder on each video end', async ({ app, page }) => {
+  const { video, watch } = await openVideo({ app, page })
+  const svg = await readFile(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url), 'utf8')
+  await watch.evaluate(async (component, svg) => {
+    const src = `data:image/svg+xml,${encodeURIComponent(svg)}`
+    const image = new Image()
+    image.src = src
+    await image.decode()
+    component.proxy.thumbnail = src
+    await component.proxy.$nextTick()
+  }, svg)
+  for (let repeat = 0; repeat < 2; repeat++) {
+    const frames = await page.evaluateHandle(() => {
+      const state = { placeholders: 0, posters: 0 }
+      let frame
+      const sample = () => {
+        const poster = document.querySelector('.endedPoster')
+        if (poster) {
+          state.posters++
+          if (poster.querySelector('.retryImagePlaceholder')) state.placeholders++
+        }
+        frame = requestAnimationFrame(sample)
+      }
+      frame = requestAnimationFrame(sample)
+      return { state, stop: () => cancelAnimationFrame(frame) }
+    })
+    await endVideo(video)
+    await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toBeVisible()
+    const observed = await frames.evaluate(async ({ state, stop }) => {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      stop()
+      return state
+    })
+    expect(observed.posters).toBeGreaterThan(0)
+    expect(observed.placeholders, 'cached posters must be ready at the first painted frame').toBe(0)
+    await video.evaluate(element => { element.currentTime = 1 })
+    await expect(page.locator('.endedPoster')).toHaveCount(0)
+  }
+})
+
 test('restores the poster and hides annotations at the end, then clears it on seek and replay', async ({ app, page }) => {
   const { video } = await openVideo({ app, page })
   await expect(page.locator('.videoAnnotations')).toBeVisible()
   await endVideo(video)
   const poster = page.locator('.endedPoster')
   await expect(poster).toBeVisible()
-  await expect(poster.locator('img')).toHaveCSS('opacity', '0.35')
-  await expect.poll(() => poster.locator('img').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  await expect(poster.locator('img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
+  await expect.poll(() => poster.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   await expect(page.locator('.videoAnnotations')).toHaveCount(0)
   await expect(page.locator('.endedRecommendations')).toHaveCount(0)
   await video.evaluate(element => { element.currentTime = 1 })
@@ -118,10 +210,14 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await expect.poll(() => cards.first().locator('.endedRecommendationTitle').evaluate(titleStyle)).toEqual(annotationTitleStyle)
   await expect(cards.first().locator('.endedRecommendationTitleText')).toBeVisible()
   await expect(cards.first().locator('.endedRecommendationTitleText')).toHaveText('Recommended video 1')
-  await expect(page.locator('.endedPoster img')).toHaveCSS('opacity', '0.35')
+  await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
   await expect(cards.first()).toHaveAttribute('href', '#/watch/video000000')
-  await expect(cards.first().locator('img')).toHaveAttribute('src', /\/vi\/video000000\/mqdefault.jpg$/)
-  await expect.poll(() => cards.first().locator('img').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/maxresdefault.jpg$/)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/mqdefault.jpg$/)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\/vi\/video000000\/maxresdefault.jpg$/)
+  await expect.poll(() => cards.first().locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
   await cards.first().click({ trial: true })
   await attachScreenshot('video ended with recommendations')
   await setPlayerFullscreen(page, true)
@@ -137,19 +233,19 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await expect(cards.first().locator('.endedRecommendationTitleText')).toBeVisible()
   await attachScreenshot('video ended in a narrow player')
   await watch.evaluate(component => component.proxy.$store.dispatch('updateBlurThumbnails', true))
-  await expect(cards.first().locator('img')).toHaveCSS('filter', 'blur(20px)')
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveCSS('filter', 'blur(20px)')
   await expect(cards.first().locator('.endedRecommendationTitle')).toHaveCSS('filter', 'none')
   await watch.evaluate(component => component.proxy.$store.dispatch('updateBlurThumbnails', false))
-  await expect(cards.first().locator('img')).toHaveCSS('filter', 'none')
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveCSS('filter', 'none')
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateThumbnailPreference', 'hidden')
   })
-  await expect(cards.first().locator('img')).toHaveAttribute('src', /thumbnail_placeholder/)
+  await expect(cards.first().locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /thumbnail_placeholder/)
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', true)
   })
   await expect(grid).toHaveCount(0)
-  await expect(page.locator('.endedPoster img')).toHaveCSS('opacity', '0.35')
+  await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
   })
@@ -240,7 +336,7 @@ test('filters hidden and current videos and keeps the poster darkened when none 
   await watch.evaluate(component => { component.proxy.recommendedVideos = [] })
   await expect(page.locator('.endedRecommendations')).toHaveCount(0)
   await expect(page.locator('.endedPoster')).toBeVisible()
-  await expect(page.locator('.endedPoster img')).toHaveCSS('opacity', '0.35')
+  await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toHaveCSS('opacity', '0.35')
 })
 
 test('uses original recommendation titles only for the entire-app preference and handles late replies', async ({ app, page }) => {

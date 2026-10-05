@@ -6,68 +6,76 @@
       search: isSearch,
       forceTextColor,
       showActionButton,
-      showClearTextButton,
-      clearTextButtonVisible: showClearTextButton && (inputDataPresent || showOptions),
-      inputDataPresent,
-      showOptions
+      showPasswordToggle: inputType === 'password',
+      floatingLabel: showLabel,
+      hasValue: inputDataPresent,
+      hasSupportingText: supportingText !== '',
+      outlined: variant === 'outlined' && !isSearch
     }"
   >
-    <label
-      v-if="showLabel"
-      :for="id"
-      class="selectLabel"
-      :class="{ disabled, hasIcon: icon !== null }"
-    >
-      <FtIcon
-        v-if="icon !== null"
-        :icon="icon"
-        class="selectLabelIcon"
-      />
-      <span class="selectLabelText">{{ label || placeholder }}</span>
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        position="bottom"
-        :tooltip="tooltip"
-      />
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
-    </label>
-    <button
-      v-if="showClearTextButton"
-      class="clearInputTextButton"
-      :class="{
-        visible: inputDataPresent || showOptions
-      }"
-      :aria-label="t('Search Bar.Clear Input')"
-      :title="t('Search Bar.Clear Input')"
-      @click="handleClearTextClick"
-    >
-      <FtIcon
-        class="buttonIcon"
-        :icon="['fas', 'times-circle']"
-      />
-    </button>
     <span class="inputWrapper">
-      <input
+      <component
+        :is="multiline ? 'textarea' : 'input'"
         :id="id"
         ref="inputRef"
         :value="inputDataDisplayed"
         class="ft-input"
-        :class="{ disabled }"
+        :class="{ disabled, multiline }"
         :style="inputTextStyle"
         :maxlength="maxlength"
-        :type="inputType"
+        :min="min"
+        :step="step"
+        :type="inputType === 'password' && passwordVisible ? 'text' : inputType"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
         :spellcheck="false"
-        :aria-label="showLabel ? null : placeholder"
+        :aria-describedby="descriptionIds"
+        :aria-label="showLabel ? null : (label || placeholder)"
+        @change="handleChange"
+        @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
+        @click="handleNativeClick"
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
+      />
+      <label
+        v-if="showLabel"
+        :for="id"
+        class="selectLabel"
+        :class="{ disabled, hasIcon: icon !== null }"
       >
+        <FtIcon
+          v-if="icon !== null"
+          :icon="icon"
+          class="selectLabelIcon"
+          aria-hidden="true"
+        />
+        <span
+          class="selectLabelText"
+          :title="label || placeholder"
+        >{{ label || placeholder }}</span>
+      </label>
       <slot name="extraAction" />
+      <button
+        v-if="inputType === 'password'"
+        type="button"
+        class="inputAction passwordVisibilityToggle"
+        :class="{ enabled: !disabled }"
+        :disabled="disabled"
+        :aria-label="passwordVisibilityLabel"
+        :title="passwordVisibilityLabel"
+        :aria-controls="id"
+        @pointerdown.prevent
+        @click="togglePasswordVisibility"
+      >
+        <FtIcon
+          class="buttonIcon"
+          :icon="['fas', passwordVisible ? 'eye-slash' : 'eye']"
+          aria-hidden="true"
+        />
+      </button>
       <button
         v-if="showActionButton"
         class="inputAction"
@@ -82,8 +90,22 @@
         <FtIcon
           class="buttonIcon"
           :icon="actionButtonIconName"
+          aria-hidden="true"
         />
       </button>
+      <span
+        v-if="tooltip !== '' || settingKey !== ''"
+        class="inputIndicators"
+      >
+        <FtTooltip
+          v-if="tooltip !== ''"
+          ref="tooltipRef"
+          class="selectTooltip"
+          position="bottom"
+          :tooltip="tooltip"
+        />
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
+      </span>
     </span>
     <div class="options">
       <ul
@@ -134,6 +156,13 @@
         <!-- skipped -->
       </ul>
     </div>
+    <p
+      v-if="supportingText"
+      :id="`${id}-supporting`"
+      class="supportingText"
+    >
+      {{ supportingText }}
+    </p>
   </div>
 </template>
 
@@ -156,9 +185,23 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const { t } = useI18n()
 
 const props = defineProps({
+  multiline: { type: Boolean, default: false },
+  selectOnClick: { type: Boolean, default: false },
+  changeFilter: { type: Function, default: null },
+  min: { type: [String, Number], default: null },
+  step: { type: [String, Number], default: null },
+  variant: {
+    type: String,
+    default: 'outlined',
+    validator: value => ['filled', 'outlined'].includes(value)
+  },
   inputType: {
     type: String,
     default: 'text'
+  },
+  inputFilter: {
+    type: Function,
+    default: null
   },
   placeholder: {
     type: String,
@@ -167,6 +210,10 @@ const props = defineProps({
   label: {
     type: String,
     default: null
+  },
+  supportingText: {
+    type: String,
+    default: ''
   },
   icon: {
     type: Array,
@@ -192,15 +239,9 @@ const props = defineProps({
     type: Array,
     default: null
   },
-  showClearTextButton: {
-    // Reserved for TopNav autocomplete. Regular search fields use inputType="search"
-    // so Chromium supplies the themed native cancel control.
-    type: Boolean,
-    default: false
-  },
   showLabel: {
     type: Boolean,
-    default: false
+    default: true
   },
   isSearch: {
     type: Boolean,
@@ -248,11 +289,37 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'])
+const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
+const passwordVisible = ref(false)
+const passwordVisibilityLabel = computed(() => passwordVisible.value
+  ? t('Form Inputs.Hide Password')
+  : t('Form Inputs.Show Password'))
+
+watch([() => props.inputType, () => props.disabled], () => {
+  passwordVisible.value = false
+})
+
+async function togglePasswordVisibility() {
+  const input = inputRef.value
+  if (!input || props.disabled) return
+
+  const { selectionStart, selectionEnd, selectionDirection } = input
+  passwordVisible.value = !passwordVisible.value
+  await nextTick()
+  if (selectionStart !== null && selectionEnd !== null) {
+    input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
+  }
+}
+
+const tooltipRef = useTemplateRef('tooltipRef')
+const descriptionIds = computed(() => [
+  tooltipRef.value?.id,
+  props.supportingText ? `${id}-supporting` : null
+].filter(Boolean).join(' ') || undefined)
 const optionsList = useTemplateRef('optionsList')
 
 watch(optionsList, (list, previousList, onCleanup) => {
@@ -309,11 +376,12 @@ const inputTextStyle = computed(() => {
   if (!props.isSearch) return null
 
   const offset = getInputTextAscentOffset(inputDataDisplayed.value)
-  const centeredPadding = (45 - 20) / 2
+  const paddingStart = props.showLabel ? 20 : (45 - 20) / 2
+  const paddingEnd = props.showLabel ? 5 : (45 - 20) / 2
 
   return {
-    '--search-input-padding-block-start': `${centeredPadding - offset}px`,
-    '--search-input-padding-block-end': `${centeredPadding + offset}px`
+    '--search-input-padding-block-start': `${paddingStart - offset}px`,
+    '--search-input-padding-block-end': `${paddingEnd + offset}px`
   }
 })
 
@@ -348,12 +416,44 @@ function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIn
   emit('click', query, { event, dataListIndex })
 }
 
+function handleNativeClick() {
+  if (props.selectOnClick) {
+    inputRef.value?.focus()
+    inputRef.value?.select()
+  }
+}
+
+/**
+ * @param {Event} event
+ */
+function handleChange(event) {
+  const value = props.changeFilter ? String(props.changeFilter(event.target.value)) : event.target.value
+  inputData.value = value
+  event.target.value = value
+  emit('change', value)
+}
+
 /**
  * @param {string | InputEvent} data
  */
 function handleInput(data) {
-  const text = typeof data === 'string' ? data : inputRef.value.value
+  const rawText = typeof data === 'string' ? data : inputRef.value.value
+  const text = props.inputFilter ? props.inputFilter(rawText) : rawText
+  if (text !== rawText && inputRef.value) {
+    const input = inputRef.value
+    const { selectionStart, selectionEnd } = input
+    input.value = text
+    if (selectionStart !== null && selectionEnd !== null) {
+      input.setSelectionRange(
+        props.inputFilter(rawText.slice(0, selectionStart)).length,
+        props.inputFilter(rawText.slice(0, selectionEnd)).length
+      )
+    }
+  }
   inputData.value = text
+
+  // Native cancel can clear a keyboard preview while inputData is already empty.
+  if (text === '') updateVisibleDataList()
 
   if (
     props.isSearch &&
@@ -367,7 +467,7 @@ function handleInput(data) {
   emit('input', text)
 }
 
-function handleClearTextClick() {
+function clearText() {
   // No action if no input text
   if (!inputDataPresent.value) { return }
 
@@ -533,7 +633,7 @@ function handleKeyDown(event) {
   }
 
   // Update Input box value if enter key was pressed and option selected
-  if (event.key === 'Enter' && !event.isComposing) {
+  if (!props.multiline && event.key === 'Enter' && !event.isComposing) {
     if (removeButtonSelectedIndex.value !== -1) {
       handleRemoveClick(removeButtonSelectedIndex.value)
     } else if (searchState.selectedOption !== -1) {
@@ -621,6 +721,7 @@ function handleInputBlur() {
 }
 
 function handleFocus() {
+  emit('focus')
   searchState.showOptions = true
 }
 
@@ -676,9 +777,7 @@ defineExpose({
     inputData.value = text
   },
 
-  clear: () => {
-    handleClearTextClick()
-  }
+  clear: clearText
 })
 </script>
 

@@ -34,16 +34,19 @@
               class="aboutLinkIcon"
               aria-hidden="true"
             >
-              <img
+              <FtRetryImage
                 v-if="link.iconUrl && !failedIcons.has(link.iconUrl)"
+                :fallback-icon="['fas', 'link']"
+                class="aboutLinkImage"
                 :src="link.iconUrl"
                 alt=""
                 loading="lazy"
                 referrerpolicy="no-referrer"
                 @error="failedIcons.add(link.iconUrl)"
-              >
+              />
               <FtIcon
                 v-else
+                class="aboutLinkImage"
                 :icon="['fas', 'link']"
               />
             </span>
@@ -165,6 +168,7 @@ import { computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelBubble from '../../components/FtChannelBubble/FtChannelBubble.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 

@@ -1,5 +1,5 @@
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { activeTab } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { POST_LIVE_AUDIO_URL, POST_LIVE_VIDEO_URL, routePostLiveMedia } from '../../helpers/media.mjs'
 
@@ -77,6 +77,22 @@ ${media}
       await expect.poll(() => player.evaluate(element => (
         element.ui.getControls().getPlayer().getVariantTracks().find(track => track.active)?.language
       ))).toBe('ar')
+
+      if (format === 'audio') {
+        const watch = await page.evaluateHandle(findWatchComponent)
+        for (const nextFormat of ['dash', 'audio', 'dash']) {
+          await watch.evaluate((component, nextFormat) => component.proxy.handleFormatChange(nextFormat), nextFormat)
+          await expect.poll(() => watch.evaluate(component => component.proxy.$refs.player.hasLoaded)).toBe(true)
+          if (nextFormat === 'audio') {
+            await expect(player.locator('video')).toHaveAttribute('poster', /i\.ytimg\.com/)
+            await expect(player.locator('.musicAudioSurface')).toBeVisible()
+          } else {
+            await expect(player.locator('video')).not.toHaveAttribute('poster')
+            await expect(player.locator('.musicAudioSurface')).toHaveCount(0)
+          }
+        }
+        await watch.dispose()
+      }
     })
   })
 }

@@ -263,6 +263,11 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Usap ke kiri pada gambar mini
+      Right: Usap ke kanan pada gambar mini
+      Description: Usap gambar mini video secara horizontal dan lepaskan untuk melakukan tindakan yang dipilih.
+    Data Saver Thumbnails: "Thumbnail hemat data"
     Use tray icon: "Gunakan ikon baki sistem"
     Close to system tray: "Tutup ke baki sistem"
     Tray required for background refresh: "Ikon baki sistem diperlukan selama pembaruan langganan di latar belakang diaktifkan."
@@ -270,7 +275,9 @@ Settings:
     Swipe to refresh: Geser untuk menyegarkan
     Blur Thumbnails: Buramkan gambar mini
     Navigation:
-      Show Active Subscriptions: Tampilkan langganan aktif
+      Always Show Navigation Bar: Selalu tampilkan bilah navigasi saat berada di bagian bawah
+      Compact Tab Labels: Bilah navigasi ringkas saat berada di bagian bawah
+      Show Active Subscriptions: Tampilkan langganan aktif di bilah samping
       Navigation: Navigasi
       Customize Navigation: Sesuaikan navigasi
       Add Item: Tambah item
@@ -352,6 +359,8 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Compact Mobile Mini Player: "Pemutar mini seluler ringkas"
+    Always Show Mobile Search Bar: "Selalu tampilkan bilah pencarian di ponsel"
     Frosted Glass Player UI: "Antarmuka pemutar dengan efek kaca buram"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
@@ -433,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Terang"
-      OpenTubeX Dark: "OpenTubeX Gelap"
+      Ocean Light: "Ocean Terang"
+      Ocean Dark: "Ocean Gelap"
       Custom: Khusus
     Light Theme: Tema terang
     Dark Theme: Tema gelap
@@ -619,6 +628,8 @@ Settings:
     Preload Upcoming Videos: "Pramuat video berikutnya"
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
     Concurrent Preloads: "Prapemuatan serentak"
+    Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
+    Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -655,9 +666,9 @@ Settings:
     Update Managed Tools: Perbarui
     Managed Tools Download Error Template: 'Tidak dapat mengunduh alat terkelola: {errors}'
     Download Folder: Folder Unduhan
-    Global Additional yt-dlp Arguments: Argumen Tambahan Global yt-dlp
+    Global Additional yt-dlp Arguments: Argumen tambahan yt-dlp
     Concurrent Downloads: Unduhan serentak
-    Bandwidth Limit: Batas lebar pita (KiB/dtk, 0 untuk tanpa batas)
+    Bandwidth Limit: Batas lebar pita (KiB/s)
     Choose Download Folder: Pilih Folder Unduhan
     Download Templates: Templat Unduhan
     Manage Download Templates: Kelola Templat Unduhan ({templateCount})
@@ -730,8 +741,8 @@ Settings:
       Automatic: Perbarui otomatis
       Ask: Tanyakan sebelum memperbarui
       Manual: Hanya perbarui secara manual
-    yt-dlp Executable Path: Jalur Program yt-dlp
-    FFmpeg Executable Path: Jalur Program FFmpeg
+    yt-dlp Executable Path: Berkas eksekusi yt-dlp
+    FFmpeg Executable Path: Berkas eksekusi FFmpeg
     Restricted Playback Authentication: "Kuki yt-dlp"
     Cookie Source: Sumber Kuki
     Cookie Sources:
@@ -963,7 +974,7 @@ Settings:
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
     Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
     Description: 'Sinkronkan langganan, profil, daftar putar, histori tontonan, dan pengaturan yang didukung dengan server sinkronisasi OpenTubeX atau LibreTube. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.'
-    Server URL: URL Server
+    Server URL: URL server sinkronisasi
     Checking Server: Memeriksa server sinkronisasi…
     Server Unavailable: Tidak dapat terhubung ke server sinkronisasi ini. Periksa URL lalu coba lagi.
     Username: Nama pengguna
@@ -1053,7 +1064,7 @@ Settings:
     Open All Tabs Confirmation: "Buka semua tab?"
     Server Update Required: "Perbarui server ini untuk mendukung sinkronisasi langsung terenkripsi."
   Proxy Settings:
-    IP Block Recovery Script Path: Jalur Skrip Pemulihan Blokir IP
+    IP Block Recovery Script Path: Skrip pemulihan blokir IP
     Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP
     Running IP block recovery script: Menjalankan skrip pemulihan blokir IP
     IP block recovery script failed: 'Skrip pemulihan blokir IP gagal (kode keluar: {exitCode})'
@@ -1065,7 +1076,7 @@ Settings:
       Excluded Channels: "Saluran yang dikecualikan"
       Tooltip: "Masukkan ID saluran agar segmen SponsorBlock di videonya tidak dilewati. ID harus sama persis dan peka huruf besar-kecil."
     Enable SponsorBlock Submission: Aktifkan Pengiriman SponsorBlock
-    SponsorBlock Private User ID (optional): ID Pengguna Pribadi SponsorBlock (opsional)
+    SponsorBlock Private User ID (optional): ID pengguna pribadi (opsional)
     SponsorBlock Private User ID Tooltip: Tempel ID pengguna pribadi SponsorBlock dari ekstensi peramban. Biarkan kosong untuk menggunakan ID yang dibuat aplikasi.
     Generated SponsorBlock User ID: ID Pengguna SponsorBlock Buatan Aplikasi
     Generated SponsorBlock User ID Tooltip: ID pengguna SponsorBlock buatan aplikasi ini dapat digunakan di ekstensi peramban atau saat Anda menggunakan aplikasi di komputer lain.
@@ -1077,7 +1088,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktifkan Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (Bawaan adalah https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Password Dialog:
     Incorrect Password: Kata sandi salah
     Unlock: Buka kunci
@@ -1118,6 +1129,21 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Customization: Penyesuaian
+  Manage Profile Subscriptions: Kelola langganan profil
+  Icon Names:
+    Person: Orang
+    People: Orang-orang
+    Headphones: Headphone
+    Gaming: Permainan
+    Film: Film
+    Art: Seni
+    Science: Sains
+    Globe: Globe
+    Heart: Hati
+    Sun: Matahari
+    Moon: Bulan
+    Trophy: Trofi
   Profile Icon: Ikon Profil
   Choose an Emoji: Pilih Emoji
   Custom Emoji: Emoji Khusus
@@ -1305,12 +1331,16 @@ Video:
     Hide: Sembunyikan
     Show: Tampilkan
     Scroll Mini Player:
+      Collapse Controls: "Ciutkan kontrol"
+      Expand Controls: "Perluas kontrol"
       Back to Top: Kembali ke atas
       Return to Video Tab: Kembali ke tab video
       Hide: Sembunyikan pemutar mini
       Play: Putar
       Pause: Jeda
       Drag Handle: Pindahkan pemutar mini
+      Rewind 10 seconds: Mundur 10 detik
+      Forward 10 seconds: Maju 10 detik
     SponsorBlock:
       CancelCurrentSegment: Batalkan Pembuatan Segmen
       ClearSegments: Bersihkan Segmen
@@ -1450,6 +1480,7 @@ Share:
   Share failed: "Tidak dapat membagikan tautan"
   Timestamp Link Copied: Tautan stempel waktu disalin ke papan klip
 Context Menu:
+  Open in a Background Tab: "Buka di tab latar belakang"
   Select Tab: Pilih Tab
   Close Tabs Before: Tutup Tab Sebelumnya
   Close Tabs After: Tutup Tab Sesudahnya
@@ -1512,6 +1543,8 @@ Context Menu:
   Search With Multiple: Cari dengan...
   Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
 Tab Organizer:
+  Tab History: "Riwayat tab"
+  Current Page: "Halaman saat ini"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Jam'
@@ -1608,6 +1641,7 @@ Description:
   Games: Gim
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."
     Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
     Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.
     Stream Extraction Method: |
@@ -1651,6 +1685,7 @@ Tooltips:
     Preload Upcoming Videos: "Mengambil dan menyimpan URL yt-dlp untuk video berikutnya. Antrean didahulukan dari daftar putar dan rekomendasi."
     Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
     Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
+    Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.
@@ -1814,8 +1849,8 @@ Downloads:
   File Name Template: Templat Nama Berkas
   File Name Template Help: 'Kolom yang tersedia: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Rentang Waktu dan Bab
-  Start Time: Waktu Mulai (HH:MM:SS)
-  End Time: Waktu Akhir (HH:MM:SS)
+  Start Time: Waktu Mulai
+  End Time: Waktu Akhir
   Split by Chapters: Pisahkan menjadi berkas tersendiri per bab
   Remove Segments: Hapus segmen
   Subtitles and Metadata: Takarir dan Metadata
@@ -1901,3 +1936,40 @@ Tray:
 Tray Icon:
   Title: "Ikon baki sistem"
   Follow App Theme: "Ikuti tema aplikasi"
+
+Form Inputs:
+  Enter Password Hint: "Masukkan kata sandi Anda"
+  Choose Password Hint: "Pilih kata sandi"
+  Confirm Password Hint: "Ulangi kata sandi baru Anda"
+  Encryption Passphrase Hint: "Masukkan frasa sandi enkripsi Anda"
+  Show Password: "Tampilkan kata sandi"
+  Hide Password: "Sembunyikan kata sandi"
+  Search Text Hint: "Masukkan kata pencarian"
+  Playlist Description Hint: "Jelaskan daftar putar ini"
+  Filename Preview: "Pratinjau nama berkas"
+  Enter Channels: "Masukkan channel"
+  Enter Text: "Masukkan teks"
+  Video URL: URL video atau playlist
+  Paste Link: Tempel tautan video atau playlist
+  Example: mis. {example}
+  No Minimum: Tanpa minimum
+  No Maximum: Tanpa maksimum
+  Any Age: Usia berapa pun
+  Included Terms Example: mis. tutorial, ulasan
+  Excluded Terms Example: mis. cuplikan, pratinjau
+  Download Folder Hint: Biarkan kosong untuk memakai folder Unduhan
+  Global Arguments Hint: Argumen opsional untuk setiap unduhan
+  Unlimited Hint: 0 untuk tanpa batas
+  Add Argument: Tambahkan argumen
+  Template Name Example: mis. Hanya audio
+  Download Arguments Hint: Argumen opsional untuk unduhan ini
+  Generated ID Hint: Biarkan kosong untuk membuat ID
+  Default Value: "Default: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."
+
+Storage Startup Error:
+  Title: "Data aplikasi tidak dapat dimuat"
+  Message: "Kosongkan ruang penyimpanan perangkat dan coba lagi. Sinkronisasi dijeda hingga data Anda dimuat."
+  Retry: "Coba lagi"

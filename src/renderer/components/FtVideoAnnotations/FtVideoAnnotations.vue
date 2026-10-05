@@ -36,11 +36,12 @@
             :title="annotation.title"
             :aria-label="annotation.title"
           >
-            <img
+            <FtRetryImage
+              :fallback-icon="['fas', 'circle-user']"
               :src="annotation.thumbnail"
               class="annotationThumbnail"
               alt=""
-            >
+            />
           </RouterLink>
           <div class="channelHovercard">
             <div class="channelHovercardInfo">
@@ -80,11 +81,11 @@
           :title="annotation.title"
           :aria-label="annotation.title"
         >
-          <img
+          <FtRetryImage
             :src="annotation.thumbnail"
             class="annotationThumbnail"
             alt=""
-          >
+          />
           <span
             class="annotationTitle"
             dir="auto"
@@ -102,6 +103,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
