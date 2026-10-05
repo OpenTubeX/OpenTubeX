@@ -3,6 +3,7 @@
     class="newFeed"
     :is-loading="isLoading"
     :video-list="displayedEntries"
+    :data-overrides="newFeedDataOverrides"
     :subscription-feed-type="activeCategory ?? 'videos'"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
@@ -27,6 +28,7 @@
         <h3>{{ $t('Global.Shorts') }}</h3>
         <FtElementList
           :data="newShorts"
+          :data-overrides="newFeedDataOverrides"
           subscription-feed-type="shorts"
           :render-all-items-lazily="isElectron"
           stable-item-keys
@@ -43,6 +45,7 @@
         <h3>{{ $t('Global.Live') }}</h3>
         <FtElementList
           :data="newLive"
+          :data-overrides="newFeedDataOverrides"
           subscription-feed-type="live"
           :render-all-items-lazily="isElectron"
           stable-item-keys
@@ -58,6 +61,7 @@
         <h3>{{ $t('Global.Posts') }}</h3>
         <FtElementList
           :data="newPosts"
+          :data-overrides="newFeedDataOverrides"
           subscription-feed-type="posts"
           :render-all-items-lazily="isElectron"
           display="list"
@@ -79,7 +83,7 @@
 </template>
 
 <script setup>
-import { computed, shallowRef, watch } from 'vue'
+import { computed, shallowRef, toRaw, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
@@ -105,6 +109,10 @@ const props = defineProps({
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
+const newFeedDataOverrides = {
+  hideNewSubscriptionFeedIndicator: true,
+  isInNewSubscriptionFeed: true,
+}
 useKeepAliveEffectScope()
 const {
   activeSubscriptionIds,
@@ -202,10 +210,12 @@ watch(watchedHistoryState, (current, previous) => {
   }
 })
 
-const newVideos = computed(() => newContentByCategory.value.videos)
-const newShorts = computed(() => newContentByCategory.value.shorts)
-const newLive = computed(() => newContentByCategory.value.live)
-const newPosts = computed(() => newContentByCategory.value.posts)
+// The feed builder tracks fields used for selection and ordering. Downstream
+// pagination should scan raw entries and make only rendered cards reactive.
+const newVideos = computed(() => newContentByCategory.value.videos.map(toRaw))
+const newShorts = computed(() => newContentByCategory.value.shorts.map(toRaw))
+const newLive = computed(() => newContentByCategory.value.live.map(toRaw))
+const newPosts = computed(() => newContentByCategory.value.posts.map(toRaw))
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 const showCombinedView = computed(() => props.activeCategory === null)
 const displayedEntries = computed(() => {

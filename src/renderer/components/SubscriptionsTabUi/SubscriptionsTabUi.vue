@@ -55,6 +55,7 @@
     />
     <FtElementList
       :data="activeVideoList"
+      :data-overrides="dataOverrides"
       :subscription-feed-type="subscriptionFeedType ?? refreshTab"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
@@ -121,6 +122,10 @@ const root = useTemplateRef('root')
 useKeepAliveEffectScope()
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
   subscriptionFeedType: {
     type: String,
     default: null

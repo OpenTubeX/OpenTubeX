@@ -2,7 +2,8 @@
   <SubscriptionsTabUi
     ref="tabUi"
     :is-loading="isLoading"
-    :video-list="shortsList"
+    :video-list="videoList"
+    :data-overrides="shortsDataOverrides"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :youtube-style-shorts="useCustomShortsPlayer"
@@ -12,7 +13,7 @@
 </template>
 
 <script setup>
-import { computed, shallowRef, ref, watch, onMounted, useTemplateRef } from 'vue'
+import { computed, shallowRef, ref, toRaw, watch, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -36,7 +37,7 @@ useKeepAliveEffectScope()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
-const shortsList = computed(() => videoList.value.map(video => ({ ...video, isShort: true })))
+const shortsDataOverrides = { isShort: true }
 const errorChannels = ref([])
 const attemptedFetch = ref(false)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
@@ -230,7 +231,7 @@ function loadVideosFromCacheSometimes() {
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
   const videoList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    return cacheEntry.videos ?? []
+    return toRaw(cacheEntry.videos ?? [])
   })
 
   videoList.value = updateVideoListAfterProcessing(videoList_)

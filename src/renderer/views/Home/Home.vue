@@ -652,7 +652,6 @@ const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlp
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
 const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
-  decorateEntries: false,
   feeds: enabledSubscriptionFeeds.value,
   activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
