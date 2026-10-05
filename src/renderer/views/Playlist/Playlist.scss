@@ -157,7 +157,7 @@
     }
   }
 
-  :deep(.ft-list-item.list:has(.playlistIcons:not(.mobileThumbnailActions))) {
+  :deep(.ft-list-item.list:has(.playlistIcons:not(.mobileThumbnailActions) .iconButton)) {
     &:hover,
     &:focus-within,
     &:has(.playlistIcons .iconDropdown, .playlistIcons .iconButton[aria-expanded='true']) {

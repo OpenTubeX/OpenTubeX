@@ -191,6 +191,14 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             for (const badge of await badges.all()) await expect(badge).toBeVisible()
           }
         }
+        await setWindowSize(app, page, { width: 1440, height: 950 })
+        await expect(actions).not.toHaveClass(/mobileThumbnailActions/)
+        // Non-user playlists can render this same toolbar with no enabled actions.
+        await actions.evaluate(element => element.replaceChildren())
+        await thumbnail.hover()
+        for (const badge of await badges.all()) await expect(badge).toBeVisible()
+        await page.locator('.playlistItem .ft-list-video').nth(1).locator('.title').focus()
+        for (const badge of await badges.all()) await expect(badge).toBeVisible()
       })
     }
   })
