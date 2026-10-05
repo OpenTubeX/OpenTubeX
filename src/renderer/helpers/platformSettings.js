@@ -6,6 +6,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'defaultVolume',
   'displayVideoPlayButton',
   'enableClosedAppSubscriptionRefresh',
+  'enableMobileFullscreenSeek',
   'enableMobileFullscreenSwipe',
   'enablePullToRefresh',
   'fullscreenRotationIgnoresSystemLock',
