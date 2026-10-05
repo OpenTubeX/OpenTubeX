@@ -100,6 +100,98 @@ test('honors a newer rules update from another settings writer', async ({ app, p
   })).toEqual({})
 })
 
+test('preserves an intervening unsubscribe cleanup when the editor changes again', async ({ app, page }) => {
+  await page.evaluate(async ({ alphaId, betaId }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({
+      [alphaId]: { includeVideos: true },
+      [betaId]: { includeVideos: true }
+    }))
+  }, { alphaId: ALPHA_CHANNEL_ID, betaId: BETA_CHANNEL_ID })
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (2)' }).click()
+  await delayNextRuleWrite(app)
+  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
+  const beta = page.locator('.channelRule').filter({ hasText: 'Beta Channel' })
+  await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('First edit')
+  try {
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+    await page.evaluate(betaId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.cleanupRuleUpdate = store.dispatch('removeChannelFromProfiles', { channelId: betaId, profileIds: ['allChannels'] })
+    }, BETA_CHANNEL_ID)
+    await expect(beta).toHaveCount(0)
+    await alpha.getByRole('textbox', { name: 'Title excludes', exact: true }).fill('Later edit')
+  } finally {
+    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
+  }
+  await page.evaluate(() => window.cleanupRuleUpdate)
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
+  })).toEqual({
+    [ALPHA_CHANNEL_ID]: expect.objectContaining({ titleIncludes: 'First edit', titleExcludes: 'Later edit' })
+  })
+})
+
+test('does not re-enable a removed rule through a later field edit', async ({ app, page }) => {
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  await delayNextRuleWrite(app)
+  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
+  await alpha.getByText('Alpha Channel', { exact: true }).click()
+  try {
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.externalRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
+    })
+    await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('Later edit')
+  } finally {
+    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
+  }
+  await page.evaluate(() => window.externalRuleUpdate)
+  await expect(alpha.locator('.channelRuleOptions')).toHaveCount(0)
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
+  })).toEqual({})
+})
+
+test('preserves template cleanups between pending editor changes', async ({ app, page }) => {
+  await page.evaluate(async alphaId => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify([{ name: 'Research', options: { mode: 'video' } }]))
+    await store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify({ [alphaId]: { template: 'template:Research' } }))
+  }, ALPHA_CHANNEL_ID)
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (1)' }).click()
+  await delayNextRuleWrite(app)
+  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
+  await alpha.getByRole('textbox', { name: 'Title includes', exact: true }).fill('First edit')
+  try {
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+    await page.evaluate(alphaId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.cleanupRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', value => {
+        const rules = JSON.parse(value)
+        rules[alphaId].template = 'video:best'
+        return JSON.stringify(rules)
+      })
+    }, ALPHA_CHANNEL_ID)
+    await alpha.getByRole('textbox', { name: 'Title excludes', exact: true }).fill('Later edit')
+  } finally {
+    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
+  }
+  await page.evaluate(() => window.cleanupRuleUpdate)
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
+  })).toEqual({
+    [ALPHA_CHANNEL_ID]: expect.objectContaining({ template: 'video:best', titleIncludes: 'First edit', titleExcludes: 'Later edit' })
+  })
+})
+
 test('restores the last saved channel rules when a later edit fails', async ({ app, page }) => {
   await goToSettingsSection(page, 'download')
   await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()

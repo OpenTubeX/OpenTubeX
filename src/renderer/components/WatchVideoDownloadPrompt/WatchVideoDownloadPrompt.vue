@@ -606,8 +606,8 @@ function deleteTemplate() {
   const templates = customTemplates.value.filter(template => template.name !== selectedCustomTemplate.value.name)
   store.dispatch('updateYtDlpDownloadTemplates', JSON.stringify(templates))
   store.dispatch('updateYtDlpSelectedTemplate', 'video:best')
-  store.dispatch('updateYtDlpAutomaticDownloadRules', replaceAutomaticDownloadTemplateReferences(
-    store.getters.getYtDlpAutomaticDownloadRules,
+  store.dispatch('updateYtDlpAutomaticDownloadRules', rules => replaceAutomaticDownloadTemplateReferences(
+    rules,
     deletedValue,
     'video:best'
   ))

@@ -1095,12 +1095,17 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
-  updateYtDlpAutomaticDownloadRules: ({ commit, state }, value) => runSettingUpdate('ytDlpAutomaticDownloadRules', async () => {
-    await DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
-    // Publish successful writes even if a later edit is queued and could fail.
-    commit('setYtDlpAutomaticDownloadRules', value)
-    await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
-  }).catch(error => console.error(error)),
+  updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Apply every mutation to saved rules so later edits preserve intervening cleanups.
+    pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
+      const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
+      await DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
+      // Publish successful writes even if a later edit is queued and could fail.
+      commit('setYtDlpAutomaticDownloadRules', value)
+      await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
+    }).catch(error => console.error(error))
+    return pendingAutomaticDownloadRuleUpdate
+  },
 
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
@@ -1728,6 +1733,7 @@ const getters = {}
 const mutations = {}
 const actions = {}
 const runSettingUpdate = createSettingUpdateQueue()
+let pendingAutomaticDownloadRuleUpdate = Promise.resolve()
 
 // Build default getters, mutations and actions for every setting id
 for (const settingId of Object.keys(state)) {
