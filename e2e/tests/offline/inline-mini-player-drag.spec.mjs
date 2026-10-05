@@ -128,11 +128,16 @@ for (const uiScale of [100, 125]) {
     const bounds = await player.boundingBox()
     const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
     const cdp = await page.context().newCDPSession(page)
+    let endpoint
     try {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
       for (const distance of [30, 80, 150, 250]) {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
       }
+      const overlay = page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay')
+      await expect(overlay).toBeVisible()
+      endpoint = await overlay.boundingBox()
+      expect(endpoint).not.toBeNull()
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     } finally {
       await cdp.detach()
@@ -142,6 +147,11 @@ for (const uiScale of [100, 125]) {
       const nav = document.querySelector('.app > .sideNav').getBoundingClientRect()
       return nav.width > 190 && nav.left >= 0 && element.getBoundingClientRect().left >= nav.right - 2 / devicePixelRatio
     })).toBe(true)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    const settled = await player.boundingBox()
+    // This fixture retains desktop size constraints; Android covers the full
+    // bar geometry. Both must target the final sidebar edge before release.
+    expect(settled.x).toBeCloseTo(endpoint.x, 0)
   })
 }
 
@@ -603,7 +613,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeGreaterThan(0.5)
     await touch('touchEnd')
     await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'contain')
+    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     await player.evaluate(element => {
       element.style.left = '0px'
       element.style.width = `${window.innerWidth}px`

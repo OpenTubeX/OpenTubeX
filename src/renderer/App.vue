@@ -40,6 +40,7 @@
     <SideNav
       :inert="isAnyPromptOpen"
       :force-expanded="useWatchSideNavOverlay"
+      :data-watch-return-expanded="sideNavOpenBeforeWatchOverlay"
     />
     <Transition name="fade">
       <button
@@ -872,26 +873,26 @@ const useWatchSideNavOverlay = computed(() => {
   return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
 })
 
-let sideNavOpenBeforeWatchOverlay = null
+const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
     disableWatchSideNavTransitionForNextFrame()
-    sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
+    sideNavOpenBeforeWatchOverlay.value = isSideNavOpen.value
     closeSideNav()
-  } else if (sideNavOpenBeforeWatchOverlay !== null) {
+  } else if (sideNavOpenBeforeWatchOverlay.value !== null) {
     // Leaving the overlay brings the sidebar back into normal flow and may
     // reopen it. Suppress its inline-size transition for the reflow so the
     // content snaps to its final position instead of sliding in from the right.
     disableWatchSideNavTransitionForNextFrame()
 
-    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay.value) {
       store.commit('toggleSideNav')
     }
 
-    sideNavOpenBeforeWatchOverlay = null
+    sideNavOpenBeforeWatchOverlay.value = null
   }
 }, { immediate: true })
 
