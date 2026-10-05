@@ -168,6 +168,12 @@ test('chapter pill indicates open state in both layouts and player themes', asyn
         await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
         await page.mouse.move(0, 0)
         await expect(button).toHaveAttribute('aria-expanded', 'false')
+        if (!frosted) {
+          expect(await button.evaluate(element => {
+            const style = getComputedStyle(element, '::before')
+            return { content: style.content, position: style.position }
+          })).toEqual({ content: '""', position: 'absolute' })
+        }
         const closedAppearance = await surfaceAppearance()
         const closedBounds = await button.boundingBox()
         const title = await button.locator('.ft-chapters-current-title').textContent()
@@ -190,6 +196,9 @@ test('chapter pill indicates open state in both layouts and player themes', asyn
         expect(openBounds.height).toBeCloseTo(closedBounds.height, 0)
         if (scale === 1 && frosted && width === 1300) {
           await panel.screenshot({ path: testInfo.outputPath('chapters-open.png') })
+        }
+        if (scale === 1 && !frosted && width === 500) {
+          await button.screenshot({ path: testInfo.outputPath('chapters-compact-classic-open.png') })
         }
 
         await button.hover()

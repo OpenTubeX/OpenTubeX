@@ -5741,7 +5741,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   opacity: 1;
 }
 
-.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button)::before {
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button)::before {
   position: absolute;
   inset-block: 8px;
   inset-inline: 0;
