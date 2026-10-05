@@ -481,6 +481,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"
     Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
     Frosted Glass Player UI: "Grotuvo sąsaja su matinio stiklo efektu"
     Move Downloads to App Header: Atsisiuntimus perkelti į programos antraštę
@@ -1699,6 +1700,8 @@ Video:
     You appear to be offline: Panašu, kad neprisijungėte prie interneto.
     Playback will resume automatically when your connection comes back: Atkūrimas bus tęsiamas automatiškai, kai ryšys bus atkurtas.
     Scroll Mini Player:
+      Collapse Controls: "Suskleisti valdiklius"
+      Expand Controls: "Išskleisti valdiklius"
       Back to Top: Grįžti į viršų
       Return to Video Tab: Grįžti į vaizdo įrašo kortelę
       Hide: Slėpti mini leistuvą

@@ -361,6 +361,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
     Frosted Glass Player UI: "Buzlu şüşə effektli pleyer interfeysi"
     Move Downloads to App Header: Yükləmələri tətbiqin başlığına köçür
@@ -1334,6 +1335,8 @@ Video:
     Hide: Gizlət
     Show: Göstər
     Scroll Mini Player:
+      Collapse Controls: "İdarəetməni yığ"
+      Expand Controls: "İdarəetməni genişləndir"
       Back to Top: Yuxarı qayıt
       Return to Video Tab: Video vərəqsinə qayıt
       Hide: Kiçik oynadıcını gizlət

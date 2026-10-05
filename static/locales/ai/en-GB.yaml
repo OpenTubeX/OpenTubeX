@@ -347,6 +347,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Frosted Glass Player UI: "Frosted glass player UI"
     Main Color Theme:
@@ -1302,6 +1303,8 @@ Video:
     Hide: Hide
     Show: Show
     Scroll Mini Player:
+      Collapse Controls: "Collapse controls"
+      Expand Controls: "Expand controls"
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
       Hide: Hide mini player

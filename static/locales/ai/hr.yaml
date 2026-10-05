@@ -361,6 +361,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
     Frosted Glass Player UI: "Sučelje reproduktora s efektom matiranog stakla"
     Main Color Theme:
@@ -1339,6 +1340,8 @@ Video:
     Hide: Sakrij
     Show: Prikaži
     Scroll Mini Player:
+      Collapse Controls: "Sažmi kontrole"
+      Expand Controls: "Proširi kontrole"
       Back to Top: Povratak na vrh
       Return to Video Tab: Povratak na karticu videozapisa
       Hide: Sakrij mini reproduktor

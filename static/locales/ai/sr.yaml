@@ -369,6 +369,7 @@ Settings:
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактни мобилни мини-плејер"
     Always Show Mobile Search Bar: "Увек приказуј траку за претрагу на телефону"
     Frosted Glass Player UI: "Интерфејс плејера са ефектом мат стакла"
     Move Downloads to App Header: Премести преузимања у заглавље апликације
@@ -1380,6 +1381,8 @@ Video:
     Hide: Сакриј
     Show: Прикажи
     Scroll Mini Player:
+      Collapse Controls: "Скупи контроле"
+      Expand Controls: "Прошири контроле"
       Back to Top: Назад на врх
       Return to Video Tab: Назад на картицу видео-снимка
       Hide: Сакриј мини-плејер

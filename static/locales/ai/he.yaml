@@ -363,6 +363,7 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Compact Mobile Mini Player: "נגן קטן קומפקטי לנייד"
     Always Show Mobile Search Bar: "הצגת סרגל החיפוש בנייד תמיד"
     Frosted Glass Player UI: "ממשק נגן עם אפקט זכוכית חלבית"
     Main Color Theme:
@@ -1361,6 +1362,8 @@ Video:
     Hide: הסתרה
     Show: הצגה
     Scroll Mini Player:
+      Collapse Controls: "כיווץ פקדים"
+      Expand Controls: "הרחבת פקדים"
       Back to Top: חזרה למעלה
       Return to Video Tab: חזרה לכרטיסיית הסרטון
       Hide: הסתרת הנגן הממוזער

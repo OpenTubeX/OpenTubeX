@@ -363,6 +363,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
     Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
     Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"
     Main Color Theme:
@@ -1359,6 +1360,8 @@ Video:
     Hide: Piilota
     Show: Näytä
     Scroll Mini Player:
+      Collapse Controls: "Supista säätimet"
+      Expand Controls: "Laajenna säätimet"
       Back to Top: Takaisin ylös
       Return to Video Tab: Palaa videovälilehteen
       Hide: Piilota pienoissoitin

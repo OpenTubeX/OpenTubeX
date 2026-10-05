@@ -363,6 +363,7 @@ Settings:
     Invalid Engine: Введіть назву й дійсну URL-адресу пошуку HTTP або HTTPS, яка містить %s.
     Engine Limit: Можна додати до {count} власних пошукових систем.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактний мобільний мініпрогравач"
     Always Show Mobile Search Bar: "Завжди показувати рядок пошуку на телефоні"
     Frosted Glass Player UI: "Інтерфейс програвача з ефектом матового скла"
     Main Color Theme:
@@ -1354,6 +1355,8 @@ Video:
     Hide: Сховати
     Show: Показати
     Scroll Mini Player:
+      Collapse Controls: "Згорнути керування"
+      Expand Controls: "Розгорнути керування"
       Back to Top: Повернутися нагору
       Return to Video Tab: Повернутися до вкладки з відео
       Hide: Приховати мініпрогравач

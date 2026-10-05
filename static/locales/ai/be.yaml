@@ -377,6 +377,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Compact Mobile Mini Player: "Кампактны мабільны міні-прайгравальнік"
     Always Show Mobile Search Bar: "Заўсёды паказваць радок пошуку на тэлефоне"
     Frosted Glass Player UI: "Інтэрфейс прайгравальніка з эфектам матавага шкла"
     Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
@@ -1398,6 +1399,8 @@ Video:
     Hide: Схаваць
     Show: Паказаць
     Scroll Mini Player:
+      Collapse Controls: "Згарнуць элементы кіравання"
+      Expand Controls: "Разгарнуць элементы кіравання"
       Back to Top: Вярнуцца ўверх
       Return to Video Tab: Вярнуцца на ўкладку відэа
       Hide: Схаваць міні-прайгравальнік

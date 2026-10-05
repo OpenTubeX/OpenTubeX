@@ -359,6 +359,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Compact Mobile Mini Player: "精簡行動迷你播放器"
     Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"
     Main Color Theme:
@@ -1324,6 +1325,8 @@ Video:
     Hide: 隱藏
     Show: 顯示
     Scroll Mini Player:
+      Collapse Controls: "收合控制項"
+      Expand Controls: "展開控制項"
       Back to Top: 返回頂端
       Return to Video Tab: 返回影片分頁
       Hide: 隱藏迷你播放器

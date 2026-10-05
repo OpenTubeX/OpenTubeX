@@ -231,6 +231,7 @@ export const SYNC_SETTING_LABELS = {
   screenshotFormat: 'Settings.Player Settings.Screenshot.Format Label',
   screenshotMode: 'Settings.Player Settings.Screenshot.Mode',
   screenshotQuality: 'Settings.Player Settings.Screenshot.Quality Label',
+  compactMobileMiniPlayer: 'Settings.Theme Settings.Compact Mobile Mini Player',
   scrollMiniPlayerEnabled: 'Settings.Player Settings.Scroll Mini Player.When Scrolling Down',
   scrollMiniPlayerOnAllTabs: 'Settings.Player Settings.Scroll Mini Player.On All Tabs',
   scrollSpeed: 'Settings.Theme Settings.Scroll Speed',

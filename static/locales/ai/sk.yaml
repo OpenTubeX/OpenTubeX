@@ -359,6 +359,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktný mobilný miniprehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"
     Main Color Theme:
@@ -1325,6 +1326,8 @@ Video:
     Hide: Skryť
     Show: Zobraziť
     Scroll Mini Player:
+      Collapse Controls: "Zbaliť ovládanie"
+      Expand Controls: "Rozbaliť ovládanie"
       Back to Top: Späť nahor
       Return to Video Tab: Vrátiť sa na kartu videa
       Hide: Skryť miniatúrny prehrávač

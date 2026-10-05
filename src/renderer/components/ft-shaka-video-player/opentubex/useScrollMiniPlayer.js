@@ -79,6 +79,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const watchNavigation = inject(watchNavigationKey, null)
   const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
+  const compactMobileMiniPlayer = computed(() => store.getters.getCompactMobileMiniPlayer)
+  const mobileMiniBarExpanded = ref(false)
+  const mobileMiniBarCollapsed = computed(() => compactMobileMiniPlayer.value && !mobileMiniBarExpanded.value)
+  const mobileMiniBarHeight = computed(() => compactMobileMiniPlayer.value ? (mobileMiniBarExpanded.value ? 112 : 64) : 108)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation || store.getters.getScrollMiniPlayerOnAllTabs)
   const autoPictureInPictureOnTabChange = computed(
@@ -121,7 +125,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function getMobileMiniBarRect(revealSideNav = false) {
     const insets = getViewportInsets({ includeSideNav: true, revealSideNav })
-    const height = 108
+    const height = mobileMiniBarHeight.value
     const left = Math.max(0, insets.left - MARGIN)
     const right = Math.max(0, insets.right - MARGIN)
     return {
@@ -1851,6 +1855,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   watch(() => props.videoId, () => {
     lastKnownInlinePlayerHeight = 0
+    mobileMiniBarExpanded.value = false
     mobileMiniBarProgress.value = 0
     mobileMiniBarHasSeekRange.value = false
 
@@ -1898,6 +1903,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     { immediate: true }
   )
 
+  watch(compactMobileMiniPlayer, () => { mobileMiniBarExpanded.value = false })
+  watch(mobileMiniBarHeight, () => nextTick(handleScrollMiniWindowResize))
+
   watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
   watch(() => watchNavigation?.detached.value, detached => {
     if (detached) fullWindowEnabled.value = false
@@ -1920,6 +1928,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   return {
     scrollMiniPlayerDragStyle,
     mobileMiniBar,
+    compactMobileMiniPlayer,
+    mobileMiniBarExpanded,
+    mobileMiniBarCollapsed,
     mobileMiniBarCanDismiss,
     mobileMiniBarOverlayStyle,
     mobileMiniBarProgress,

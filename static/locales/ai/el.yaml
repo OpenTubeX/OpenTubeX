@@ -363,6 +363,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Compact Mobile Mini Player: "Συμπαγής μίνι αναπαραγωγέας κινητού"
     Always Show Mobile Search Bar: "Να εμφανίζεται πάντα η γραμμή αναζήτησης στο κινητό"
     Frosted Glass Player UI: "Διεπαφή προγράμματος αναπαραγωγής με εφέ θαμπού γυαλιού"
     Main Color Theme:
@@ -1359,6 +1360,8 @@ Video:
     Hide: Απόκρυψη
     Show: Εμφάνιση
     Scroll Mini Player:
+      Collapse Controls: "Σύμπτυξη χειριστηρίων"
+      Expand Controls: "Ανάπτυξη χειριστηρίων"
       Back to Top: Επιστροφή στην κορυφή
       Return to Video Tab: Επιστροφή στην καρτέλα βίντεο
       Hide: Απόκρυψη μίνι προγράμματος αναπαραγωγής

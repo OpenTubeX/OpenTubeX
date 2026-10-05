@@ -359,6 +359,7 @@ Settings:
     Invalid Engine: Introduce un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Puedes añadir hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Compact Mobile Mini Player: "Minirreproductor móvil compacto"
     Always Show Mobile Search Bar: "Mostrar siempre la barra de búsqueda en el móvil"
     Frosted Glass Player UI: "Interfaz del reproductor con efecto de cristal esmerilado"
     Main Color Theme:
@@ -1324,6 +1325,8 @@ Video:
     Hide: Ocultar
     Show: Mostrar
     Scroll Mini Player:
+      Collapse Controls: "Contraer controles"
+      Expand Controls: "Expandir controles"
       Back to Top: Volver arriba
       Return to Video Tab: Volver a la pestaña del vídeo
       Hide: Ocultar minirreproductor

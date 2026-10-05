@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { test } from 'node:test'
+import { checkCompactMiniPlayer } from '../../e2e/helpers/compact-mini-player.mjs'
+import { checkMiniPlayerSeeking } from '../../e2e/helpers/mini-player-seeking.mjs'
+import { goTo } from '../../e2e/helpers/app.mjs'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint } from '../../e2e/helpers/player.mjs'
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
@@ -27,6 +30,14 @@ test('mobile mini-player animates an opaque backdrop in both directions without 
 test('mobile audio artwork stays visible during mini-player swipes and native picture-in-picture', {
   skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true }))
+
+test('compact mobile strip setting expands controls and restores playback', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { compactOnly: true }))
+
+test('mobile mini-player progress line seeks with touch and expands while held', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { seekingOnly: true }))
 
 // Runs in the WebView for both browser screenshots and native PiP captures.
 async function sampleAudioArtwork({ png, cropToSurface }) {
@@ -71,7 +82,7 @@ test('mobile music artwork placeholder fills the thumbnail and restores its inli
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
 
-async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false } = {}) {
+async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false, compactOnly = false, seekingOnly = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -93,7 +104,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
         UiScale: dismissalOnly ? 125 : 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
-        AmbientMode: true, AlwaysShowNavigationBar: false,
+        AmbientMode: true, AlwaysShowNavigationBar: false, CompactMobileMiniPlayer: false, IconPack: 'material',
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
@@ -250,6 +261,110 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
           await settle()
         })
       }
+      return
+    }
+    if (seekingOnly) {
+      await page.evaluate(() => { location.hash = '#/subscriptions' })
+      await expect(player).toHaveClass(/mobileMiniBar/)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+      for (const scale of [100, 125]) {
+        for (const mode of ['standard', 'compact', 'expanded']) {
+          await page.evaluate(({ scale, mode }) => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setUiScale', scale)
+            store.commit('setCompactMobileMiniPlayer', mode !== 'standard')
+          }, { scale, mode })
+          if (mode === 'expanded') await player.locator('.mobileMiniBarExpand').click()
+          await checkMiniPlayerSeeking(page, player, touch, async state => {
+            if (process.env.ANDROID_ARTIFACT_DIR) {
+              const bounds = await player.boundingBox()
+              await page.screenshot({
+                path: `${process.env.ANDROID_ARTIFACT_DIR}/seek-${mode}-${scale}-${state}.png`,
+                clip: { x: bounds.x, y: bounds.y - 12, width: bounds.width, height: bounds.height + 12 }
+              })
+            }
+          }, { keyboard: false })
+        }
+      }
+      await originalVideo.dispose()
+      return
+    }
+    if (compactOnly) {
+      if (!await page.locator('.settingsWindow').isVisible()) await goTo(page, 'settings')
+      const appearance = page.locator('.settingsContent > [data-section="appearance"]')
+      if (!await appearance.isVisible()) {
+        await page.locator('.settingsMenu [data-section="appearance"]').click()
+        await expect(appearance).toBeVisible()
+      }
+      const setting = appearance.locator('[data-setting-key="compactMobileMiniPlayer"] input')
+      await appearance.locator('[data-setting-key="compactMobileMiniPlayer"] .switch-label').click()
+      await expect(setting).toBeChecked()
+      await page.locator('.settingsCloseButton').click()
+      await page.evaluate(() => {
+        const spacer = document.createElement('div')
+        spacer.id = 'mini-player-test-spacer'
+        spacer.style.height = '2000px'
+        document.body.append(spacer)
+      })
+      for (const scale of [100, 125]) {
+        await page.evaluate(async scale => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setUiScale', scale)
+          await store.dispatch('updateIconPack', scale === 100 ? 'material' : 'remix')
+          await store.dispatch('updateReducedMotion', scale === 100 ? 'off' : 'on')
+        }, scale)
+        await page.evaluate(() => window.scrollTo(0, 1200))
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+        const frames = await player.evaluate(async element => {
+          const button = element.querySelector('.mobileMiniBarExpand')
+          const chevron = element.querySelector('.mobileMiniBarChevron')
+          const samples = []
+          button.click()
+          const started = performance.now()
+          while (performance.now() - started < 500) {
+            await new Promise(requestAnimationFrame)
+            samples.push({ height: element.getBoundingClientRect().height, angle: parseFloat(getComputedStyle(chevron).rotate) || 0 })
+          }
+          return samples
+        })
+        assert.equal(frames.some(frame => frame.height > 65 && frame.height < 111), scale === 100, 'bar slides only with motion enabled')
+        assert.equal(frames.some(frame => frame.angle > 1 && frame.angle < 179), scale === 100, 'chevron rotates only with motion enabled')
+        await player.locator('.mobileMiniBarExpand').click()
+        await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(64, 1)
+        await checkCompactMiniPlayer(page, player, async state => {
+          if (process.env.ANDROID_ARTIFACT_DIR) {
+            const path = `${process.env.ANDROID_ARTIFACT_DIR}/${state}-${scale}.png`
+            if (process.env.ANDROID_SERIAL) {
+              await writeFile(path, execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p']))
+            } else await page.screenshot({ path })
+          }
+        })
+      }
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+      await player.locator('.mobileMiniBarReturn').click()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+      const full = await player.boundingBox()
+      const down = { x: full.x + full.width / 2, y: full.y + full.height / 2 }
+      await touch('touchStart', down)
+      for (const distance of [30, 80, 150]) await touch('touchMove', { ...down, y: down.y + distance })
+      await touch('touchEnd')
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      await expect.poll(() => player.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(64, 1)
+      await player.locator('.mobileMiniBarExpand').click()
+      const bar = await player.boundingBox()
+      const up = { x: bar.x + 30, y: bar.y + 20 }
+      await touch('touchStart', up)
+      for (const distance of [30, 80, 150]) await touch('touchMove', { ...up, y: up.y - distance })
+      await touch('touchEnd')
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      assert.equal(await originalVideo.evaluate(video => video.isConnected), true)
+      await page.evaluate(() => { location.hash = '#/subscriptions' })
+      await player.locator('.mobileMiniBarDismiss').click()
+      await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
+      await originalVideo.dispose()
       return
     }
     if (posterOnly) {
@@ -589,7 +704,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
           if (swipe) {
             const top = await player.locator('.mobileMiniBarReturn').boundingBox()
             // Start near the top so downward samples stay inside the WebView.
-            const down = { ...point, y: top.y + 8 }
+            const down = { ...point, y: top.y + 20 }
             for (const canceled of [false, true]) {
               const before = await player.boundingBox()
               await touch('touchStart', down)
@@ -667,7 +782,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
     await trackDismissal()
     // Cover closing by a downward swipe after verifying the close control.
     const returnBox = await player.locator('.mobileMiniBarReturn').boundingBox()
-    const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 8 }
+    const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 20 }
     await player.evaluate(element => {
       window.__miniDismissRegression = {}
       const recordTransition = event => {
@@ -728,12 +843,17 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       }
     }
     await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
-    await page.evaluate(({ settings, originalRoute }) => {
+    await page.evaluate(({ settings, originalRoute, compactOnly, seekingOnly }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       document.querySelector('.ftVideoPlayer video')?.pause()
       store.commit('setKeepPlayingOnNavigation', false)
       location.hash = originalRoute
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
+      if ((compactOnly || seekingOnly) && settings) {
+        store.dispatch('hideSettingsWindow')
+        store.dispatch('updateCompactMobileMiniPlayer', settings.CompactMobileMiniPlayer)
+        store.dispatch('updateIconPack', settings.IconPack)
+      }
       if (settings) store.dispatch('updateReducedMotion', settings.ReducedMotion)
       if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
@@ -744,7 +864,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       delete window.__miniDismissFrames
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()
-    }, { settings, originalRoute })
+    }, { settings, originalRoute, compactOnly, seekingOnly })
     await watch?.dispose()
     await session.detach()
     if (dismissalOnly) await page.emulateMedia({ reducedMotion: null })

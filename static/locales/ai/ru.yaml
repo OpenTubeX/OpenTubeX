@@ -336,6 +336,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактный мобильный мини-плеер"
     Always Show Mobile Search Bar: "Всегда показывать строку поиска на телефоне"
     Frosted Glass Player UI: "Интерфейс плеера с эффектом матового стекла"
     Main Color Theme:
@@ -1329,6 +1330,8 @@ Video:
     Hide: Скрыть
     Show: Показать
     Scroll Mini Player:
+      Collapse Controls: "Свернуть управление"
+      Expand Controls: "Развернуть управление"
       Back to Top: Наверх
       Return to Video Tab: Вернуться на вкладку с видео
       Hide: Скрыть мини-плеер

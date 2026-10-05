@@ -225,6 +225,7 @@ const state = {
   autoPictureInPictureTriggers: [],
   mobileAutoPictureInPicture: true,
   scrollMiniPlayerEnabled: true,
+  compactMobileMiniPlayer: false,
   scrollMiniPlayerOnAllTabs: false,
   keepPlayingOnNavigation: true,
   scrollMiniPlayerSavedRect: '',

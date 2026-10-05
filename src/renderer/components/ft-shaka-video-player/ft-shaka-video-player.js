@@ -6524,6 +6524,7 @@ export default defineComponent({
     const loadedLocales = new Set(process.env.SHAKA_LOCALES_PREBUNDLED)
     const originalShakaControlLocalizations = new Map()
     const replayLabel = ref('')
+    const mobileMiniBarSeekLabel = ref('')
 
     /**
      * @param {string} locale
@@ -6550,6 +6551,7 @@ export default defineComponent({
 
       localization.changeLocale([shakaLocale])
       replayLabel.value = localization.resolve('REPLAY')
+      mobileMiniBarSeekLabel.value = localization.resolve('SEEK')
 
       // Add the keyboard shortcut to the label for the default Shaka controls
       if (!originalShakaControlLocalizations.has(shakaLocale)) {
@@ -7204,6 +7206,9 @@ export default defineComponent({
     const {
       scrollMiniPlayerDragStyle,
       mobileMiniBar,
+      compactMobileMiniPlayer,
+      mobileMiniBarExpanded,
+      mobileMiniBarCollapsed,
       mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       mobileMiniBarProgress,
@@ -7279,6 +7284,33 @@ export default defineComponent({
 
     const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value || mobileMiniPlayerDismissSettling.value))
     const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
+    const mobileMiniBarSeeking = ref(false)
+    watch([mobileMiniBarSeekDisabled, scrollMiniPlayerActive], ([disabled, active]) => {
+      if (disabled || !active) mobileMiniBarSeeking.value = false
+    })
+    const mobileMiniBarSeekValueText = computed(() => {
+      const range = player?.seekRange()
+      return formatDurationAsTimestamp(range
+        ? range.start + (range.end - range.start) * mobileMiniBarProgress.value
+        : 0)
+    })
+
+    /** @param {Event} event */
+    function handleMobileMiniBarSeekInput(event) {
+      if (mobileMiniBarSeekDisabled.value || !(event.target instanceof HTMLInputElement)) return
+      const fraction = Math.min(1, Math.max(0, event.target.valueAsNumber / 100))
+      if (!Number.isFinite(fraction)) return
+      const range = player.seekRange()
+      seekBySeconds(range.start + (range.end - range.start) * fraction - video.value.currentTime, false, false, false)
+      updateMobileMiniBarProgress()
+    }
+
+    /** @param {PointerEvent} event */
+    function startMobileMiniBarSeek(event) {
+      if (mobileMiniBarSeekDisabled.value || !event.isPrimary || event.button !== 0) return
+      mobileMiniBarSeeking.value = true
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
 
     // The window may have resized while docked. Measure the settled inline
     // player once, after the return animation, rather than its scaled bounds.
@@ -12799,9 +12831,17 @@ export default defineComponent({
 
       scrollMiniPlayerActive,
       mobileMiniBar,
+      compactMobileMiniPlayer,
+      mobileMiniBarExpanded,
+      mobileMiniBarCollapsed,
       mobileMiniBarCanDismiss,
       mobileMiniBarControlsDisabled,
       mobileMiniBarSeekDisabled,
+      mobileMiniBarSeekLabel,
+      mobileMiniBarSeekValueText,
+      mobileMiniBarSeeking,
+      startMobileMiniBarSeek,
+      handleMobileMiniBarSeekInput,
       mobileMiniBarOverlayStyle,
       mobileMiniBarProgress,
       updateMobileMiniBarProgress,

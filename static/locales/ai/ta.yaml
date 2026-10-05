@@ -365,6 +365,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Compact Mobile Mini Player: "சிறிய மொபைல் மினி பிளேயர்"
     Always Show Mobile Search Bar: "மொபைல் தேடல் பட்டியை எப்போதும் காட்டு"
     Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
     Main Color Theme:
@@ -1363,6 +1364,8 @@ Video:
     Hide: மறை
     Show: காட்டு
     Scroll Mini Player:
+      Collapse Controls: "கட்டுப்பாடுகளைச் சுருக்கு"
+      Expand Controls: "கட்டுப்பாடுகளை விரிவாக்கு"
       Back to Top: மேலே செல்
       Return to Video Tab: காணொளித் தாவலுக்குத் திரும்பு
       Hide: சிறு இயக்கியை மறை
