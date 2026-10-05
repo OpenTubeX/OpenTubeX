@@ -641,7 +641,7 @@
   }
 
   .settingsSearch {
-    block-size: 48px;
+    --form-control-height: 48px;
   }
 
   .settingsHeaderButton {

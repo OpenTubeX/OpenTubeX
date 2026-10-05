@@ -379,6 +379,29 @@ test.describe('settings search highlights', () => {
     })
   }
 
+  for (const zoom of [1, 0.95]) {
+    test(`sizes the actual settings search control at the responsive breakpoint at ${zoom} scale`, async ({ page }, testInfo) => {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      await goTo(page, 'settings')
+      const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+      for (const width of [681, 680, 390, 681]) {
+        await page.setViewportSize({ width, height: 800 })
+        const compact = await page.evaluate(() => matchMedia('(any-pointer: coarse), (width <= 680px)').matches)
+        await expect.poll(async () => search.evaluate(input => input.getBoundingClientRect().height))
+          .toBeCloseTo(compact ? 48 : 36, 1)
+        const heights = await search.evaluate(input => ({
+          input: input.getBoundingClientRect().height,
+          wrapper: input.closest('.settingsSearch').getBoundingClientRect().height
+        }))
+        expect(heights.input).toBeCloseTo(heights.wrapper, 1)
+        if (width === 390 && zoom === 1) {
+          await page.screenshot({ path: testInfo.outputPath('settings-search-mobile.png') })
+        }
+      }
+    })
+  }
+
   test('uses the shared search field focus indicator without a second outline', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
