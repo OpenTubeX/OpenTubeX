@@ -78,7 +78,8 @@ for (const uiScale of [100, 95]) {
       await expect.poll(() => organizer.locator('.tabOrganizerSearch').evaluate(element => {
         const bounds = element.getBoundingClientRect()
         const parent = element.parentElement.getBoundingClientRect()
-        return Math.max(Math.abs(bounds.left - parent.left), Math.abs(bounds.right - parent.right))
+        const style = getComputedStyle(element.parentElement)
+        return Math.max(Math.abs(bounds.left - parent.left - parseFloat(style.paddingLeft)), Math.abs(bounds.right - parent.right + parseFloat(style.paddingRight)))
       })).toBeLessThanOrEqual(1)
       await captureAppFramebuffer(app, testInfo, 'tab-organizer-narrow')
     })

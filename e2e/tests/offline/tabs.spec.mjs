@@ -2965,21 +2965,24 @@ test.describe('tab organizer', () => {
       search.boundingBox(),
       organizer.locator('.tabOrganizerSearch .searchIcon').boundingBox()
     ])
-    expect(actionsBox.y - (selectionBox.y + selectionBox.height)).toBeLessThanOrEqual(10)
+    expect(actionsBox.y).toBeCloseTo(selectionBox.y, 0)
     expect(groupSelectLabelBox.y + groupSelectLabelBox.height / 2).toBeCloseTo(groupSelectBox.y, 0)
     expect(groupSelectBox.y + groupSelectBox.height).toBeLessThanOrEqual(selectionBox.y + selectionBox.height + 1)
     const pinBox = await pinButton.boundingBox()
     const closeBox = await bulkActions.getByRole('button', { name: 'Close', exact: true }).boundingBox()
     expect(Math.abs(searchInputBox.y + searchInputBox.height - pinBox.y - pinBox.height)).toBeLessThanOrEqual(1)
     expect(searchContainerBox.x).toBeGreaterThanOrEqual(closeBox.x + closeBox.width + 7)
-    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeLessThanOrEqual(1)
+    expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeCloseTo(18, 0)
     expect(searchIconBox.x).toBeGreaterThan(searchInputBox.x)
     expect(searchIconBox.x + searchIconBox.width).toBeLessThan(searchInputBox.x + searchInputBox.width)
     expect(Math.abs(
       searchIconBox.y + searchIconBox.height / 2 - (searchInputBox.y + searchInputBox.height / 2)
     )).toBeLessThanOrEqual(1)
-    await organizer.getByLabel('Group name').fill('Research')
-    await organizer.getByRole('button', { name: 'Create Group' }).click()
+    await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
+    const createGroupPrompt = page.getByRole('dialog', { name: 'Create Group', exact: true })
+    await createGroupPrompt.getByRole('textbox', { name: 'Group name', exact: true }).fill('Research')
+    await createGroupPrompt.getByRole('button', { name: 'Create Group', exact: true }).click()
+    await expect(createGroupPrompt).toHaveCount(0)
 
     let researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Research' })
     await expect(groupSelect.locator('.optionColorDot, .optionIcon')).toHaveCount(0)
@@ -3065,11 +3068,11 @@ test.describe('tab organizer', () => {
     expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y - 1)
     expect(responsiveLabelBox.y + responsiveLabelBox.height).toBeLessThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height + 1)
     expect(responsiveSearchBox.y).toBeGreaterThanOrEqual(responsiveGroupSelectBox.y + responsiveGroupSelectBox.height)
-    expect(Math.abs(responsiveSearchBox.x - responsiveBulkActionsBox.x)).toBeLessThanOrEqual(1)
+    expect(responsiveSearchBox.x - responsiveBulkActionsBox.x).toBeCloseTo(12, 0)
     expect(Math.abs(
       responsiveBulkActionsBox.x + responsiveBulkActionsBox.width -
       (responsiveSearchBox.x + responsiveSearchBox.width)
-    )).toBeLessThanOrEqual(1)
+    )).toBeCloseTo(12, 0)
     expect(Math.max(...responsiveButtonBoxes.map(box => box.y)) - Math.min(...responsiveButtonBoxes.map(box => box.y)))
       .toBeLessThanOrEqual(1)
     const firstResponsiveActionBox = responsiveButtonBoxes[0]
