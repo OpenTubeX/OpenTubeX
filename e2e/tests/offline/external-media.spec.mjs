@@ -43,6 +43,142 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
   }, executable)
 }
 
+test('external media resumes its last playback position after reopening and restarting', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions') ?? '[]')[0]?.[1]?.seconds ?? 0)).toBeGreaterThan(1)
+  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(12, 0)
+  await goTo(page, 'history')
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(12)
+  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(18, 0)
+  const { page: restartedPage } = await app.relaunch()
+  await routeDemoMedia(restartedPage)
+  await restartedPage.locator(sel.searchInput).fill(mediaUrl)
+  await restartedPage.locator(sel.searchInput).press('Enter')
+  const restartedVideo = await waitForPlayback(restartedPage)
+  await restartedVideo.evaluate(element => element.pause())
+  expect(await restartedVideo.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(18)
+})
+
+test('external media resets completed playback and clears positions with watch history', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+  const open = async () => {
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    return waitForPlayback(page)
+  }
+  let video = await open()
+  await video.evaluate(element => { element.pause(); element.currentTime = 12 })
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions') ?? '[]')[0]?.[1]?.seconds)).toBeCloseTo(12, 0)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('externalMediaPositions'))).toBeNull()
+  await goTo(page, 'history')
+  video = await open()
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+  await video.evaluate(element => { element.currentTime = 12 })
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions') ?? '[]')[0]?.[1]?.seconds)).toBeCloseTo(12, 0)
+  await goTo(page, 'history')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+  expect(await page.evaluate(() => localStorage.getItem('externalMediaPositions'))).toBeNull()
+  video = await open()
+  await video.evaluate(element => element.pause())
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+})
+
+for (const { label, settings, live } of [
+  { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
+  { label: 'progress saving is disabled', settings: { watchedProgressSavingMode: 'never' }, live: false },
+  { label: 'the media is live', settings: {}, live: true },
+]) {
+  test(`external media does not save or restore positions when ${label}`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = live ? 'https://www.twitch.tv/example' : 'https://www.twitch.tv/videos/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, live)
+    await page.evaluate(async ({ settings, mediaUrl }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(settings)) {
+        await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
+      }
+      localStorage.setItem('externalMediaPositions', JSON.stringify([[mediaUrl, { seconds: 12, updatedAt: Date.now() }]]))
+    }, { settings, mediaUrl })
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
+    await video.evaluate(element => { element.currentTime = 18 })
+    await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+    expect(await page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions'))[0][1].seconds)).toBe(12)
+  })
+}
+
+test('external media saves on pause in semi-auto mode without periodically saving', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchedProgressSavingMode', 'semi-auto'))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  expect(await page.evaluate(() => localStorage.getItem('externalMediaPositions'))).toBeNull()
+  await video.evaluate(element => element.pause())
+  const pausedTime = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions') ?? '[]')[0]?.[1]?.seconds)).toBeCloseTo(pausedTime, 1)
+})
+
+test('external media keeps background pause and completion positions after switching tabs', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchedProgressSavingMode', 'semi-auto'))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const video = page.locator('.externalMediaPlayer video')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(3)
+  await video.evaluate(element => element.requestPictureInPicture())
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(`${activeTab} .externalMedia`)).toHaveCount(0)
+  await video.evaluate(element => element.pause())
+  const pausedTime = await video.evaluate(element => element.currentTime)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions') ?? '[]')[0]?.[1]?.seconds)).toBeCloseTo(pausedTime, 1)
+  await video.evaluate(element => { element.currentTime = element.duration - 0.1; return element.play() })
+  await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('externalMediaPositions'))).toBeNull()
+})
+
+test('external media does not overwrite saved positions from a never-presented tab', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(async url => {
+    localStorage.setItem('externalMediaPositions', JSON.stringify([[url, { seconds: 12, updatedAt: Date.now() }]]))
+    await window.ftElectron.tabs.create({ route: '/external-media', query: { url }, makeActive: false })
+  }, mediaUrl)
+  const video = page.locator('.externalMediaPlayer video')
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+  await video.evaluate(element => { element.pause(); element.currentTime = 18 })
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('externalMediaPositions'))[0][1].seconds)).toBe(12)
+})
+
 test('external media honors the hide sidebar on watch pages setting', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

@@ -87,6 +87,7 @@
               :channel-thumbnail="creatorAvatarUrl"
               :thumbnail="thumbnail"
               :is-live="source.isLive"
+              :start-time="startTime"
               :current-playback-rate="defaultPlaybackRate"
               :storyboard-src="source.storyboardSrc"
               :chapters="chapters"
@@ -102,9 +103,9 @@
               @legacy-format-selected="setCompanionFormat"
               @play="playCompanionAudio"
               @playing="playCompanionAudio"
-              @pause="pauseCompanionAudio"
+              @pause="handlePlaybackStopped"
               @waiting="pauseCompanionAudio"
-              @ended="pauseCompanionAudio"
+              @ended="handlePlaybackStopped"
               @volume-updated="setCompanionVolume"
               @playback-rate-updated="setCompanionPlaybackRate"
               @timeupdate="updateCurrentTime"
@@ -328,13 +329,15 @@ import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
-import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
+import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
+import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
 
 const route = useRoute()
 const { t, locale } = useI18n()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
+const { isTabPresented } = useTabContext()
 
 const loading = ref(true)
 const errorMessage = ref('')
@@ -346,6 +349,10 @@ const companionAudioNeeded = ref(false)
 const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
 const currentTime = ref(0)
+const startTime = ref(null)
+let lastPositionSave = 0
+let hasBeenPresented = isTabPresented?.value ?? true
+watch(() => isTabPresented?.value, presented => { if (presented) hasBeenPresented = true })
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -456,6 +463,7 @@ function handleSeeking(time) {
 function handleSeeked(time) {
   currentTime.value = time
   syncCompanionAudio(time)
+  if (store.getters.getWatchedProgressSavingMode === 'auto' || player.value?.isPaused()) savePosition()
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
     seekTimer = null
@@ -464,7 +472,10 @@ function handleSeeked(time) {
   }, 150)
 }
 
-onMounted(() => window.addEventListener('resize', updateWindowWidth))
+onMounted(() => {
+  window.addEventListener('resize', updateWindowWidth)
+  window.addEventListener('beforeunload', savePositionOnExit)
+})
 function safeWebUrl(value) {
   try {
     const url = new URL(value)
@@ -651,12 +662,33 @@ function setCompanionPlaybackRate(rate) {
 function updateCurrentTime(seconds) {
   currentTime.value = seconds
   syncCompanionAudio(seconds)
+  if (store.getters.getWatchedProgressSavingMode === 'auto' && Date.now() - lastPositionSave >= 2000) savePosition()
+}
+
+function savePosition() {
+  if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
+    loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
+    !hasBeenPresented) return
+  const video = getCompanionVideo()
+  const duration = Number.isFinite(video?.duration) ? video.duration : source.value.duration
+  saveExternalMediaPosition(mediaUrl.value, player.value.getCurrentTime(), duration)
+  lastPositionSave = Date.now()
+}
+
+function savePositionOnExit() {
+  if (store.getters.getWatchedProgressSavingMode === 'auto') savePosition()
+}
+
+function handlePlaybackStopped() {
+  pauseCompanionAudio()
+  savePosition()
 }
 function seekTo(seconds) { player.value?.setCurrentTime(seconds) }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
 function handlePlayerError(error) {
   if (loading.value || !source.value) return
+  savePosition()
   drmError.value = error?.code === 6001
   errorMessage.value = drmError.value
     ? t('Video.External DRM Protected')
@@ -664,6 +696,7 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
@@ -681,6 +714,9 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   info.value = null
   source.value = null
   currentTime.value = 0
+  startTime.value = null
+  lastPositionSave = 0
+  hasBeenPresented = isTabPresented?.value ?? true
   showChapters.value = false
   seekCount.value = 0
   seeking.value = false
@@ -703,6 +739,9 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
       return
     }
     info.value = result.info
+    if (store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never' && !result.source?.isLive) {
+      startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.duration)
+    }
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)
     if (creatorAvatarUrl.value) setTabAvatar(creatorAvatarUrl.value)
@@ -716,12 +755,19 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
+useTabLifecycle({
+  beforeNavigate: savePositionOnExit,
+  deactivate: savePositionOnExit,
+  beforeDispose: savePositionOnExit,
+})
 onBeforeUnmount(() => {
+  savePositionOnExit()
   releaseTwitchVodRegistration(source.value)
   theatreModeAnimations.forEach(animation => animation.cancel())
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)
   window.removeEventListener('resize', updateWindowWidth)
+  window.removeEventListener('beforeunload', savePositionOnExit)
 })
 </script>
 
