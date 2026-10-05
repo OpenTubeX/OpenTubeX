@@ -1095,13 +1095,6 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
-  updateYtDlpAutomaticDownloadRules: ({ commit, state }, value) => updateOrderedSetting(
-    commit,
-    state,
-    'ytDlpAutomaticDownloadRules',
-    value
-  ),
-
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)
