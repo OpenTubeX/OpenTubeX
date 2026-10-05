@@ -137,7 +137,7 @@ async function probeQuality(url, fetcher) {
 async function fetchStoryboard(preview, duration, fetcher) {
   if (!Number.isFinite(duration) || duration <= 0) return null
   try {
-    const response = await fetcher(preview.href, { signal: AbortSignal.timeout(10_000) })
+    const response = await fetcher(preview.href, { signal: AbortSignal.timeout(1000) })
     if (!response.ok) return null
     const metadata = await response.json()
     if (!Array.isArray(metadata)) return null

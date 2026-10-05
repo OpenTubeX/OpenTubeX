@@ -81,6 +81,44 @@ test('unavailable or invalid seekbar previews do not prevent Twitch VOD playback
   }
 })
 
+test('stalled seekbar previews have a short deadline without preventing Twitch VOD playback', async t => {
+  for (const stage of ['request', 'body']) {
+    await t.test(stage, async () => {
+      let previewSignal
+      const fetcher = async (url, options) => {
+        if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
+          lengthSeconds: 10,
+          seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/metadata.json'
+        } } })
+        if (url.endsWith('/storyboards/metadata.json')) {
+          previewSignal = options.signal
+          const stalled = () => new Promise((resolve, reject) => {
+            previewSignal.addEventListener('abort', () => reject(previewSignal.reason), { once: true })
+          })
+          return stage === 'request' ? stalled() : { ok: true, json: stalled }
+        }
+        if (url.endsWith('/720p60/index-dvr.m3u8')) return new Response('#EXTM3U\nsegment-1.ts\n')
+        if (url.endsWith('/720p60/segment-1.ts')) return new Response(Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28]))
+        return new Response('', { status: 404 })
+      }
+      let deadline
+      try {
+        const result = await Promise.race([
+          fetchTwitchSubOnlyVod('12345', fetcher),
+          new Promise((resolve, reject) => {
+            deadline = setTimeout(() => reject(new Error('Optional previews delayed playback for two seconds')), 2000)
+          })
+        ])
+        assert.equal(previewSignal.aborted, true)
+        assert.equal(result.storyboardVtt, null)
+        assert.match(result.playlist, /#EXT-X-STREAM-INF/)
+      } finally {
+        clearTimeout(deadline)
+      }
+    })
+  }
+})
+
 test('uses each Twitch transport stream quality’s declared H.264 codec', async () => {
   const segment = (profile, constraints, level) => {
     const bytes = Buffer.alloc(188)
