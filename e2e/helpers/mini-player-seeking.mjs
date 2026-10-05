@@ -44,8 +44,11 @@ export async function checkMiniPlayerSeeking(page, player, touch, capture = asyn
   await expect(page).toHaveURL(route)
   // Touch cancellation must release the enlarged track and keep navigation.
   await touch('touchStart', start)
-  await expect.poll(thickness).toBe(6)
-  await touch('touchCancel')
+  try {
+    await expect.poll(thickness).toBe(6)
+  } finally {
+    await touch('touchCancel')
+  }
   await expect.poll(thickness).toBe(2)
   await expect(page).toHaveURL(route)
   if (keyboard) {
