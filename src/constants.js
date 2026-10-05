@@ -760,8 +760,9 @@ const BUILTIN_BASE_THEMES = [
   { value: 'light', translationKey: 'Light', classification: 'light', background: '#f1f1f1' },
   { value: 'dark', translationKey: 'Dark', classification: 'dark', background: '#0f0f0f' },
   { value: 'black', translationKey: 'Black', classification: 'dark', background: '#000000' },
-  { value: 'openTubeXLight', translationKey: 'OpenTubeX Light', classification: 'light', background: '#e8f2f0', fixedColors: true },
-  { value: 'openTubeXDark', translationKey: 'OpenTubeX Dark', classification: 'dark', background: '#0b1416', fixedColors: true },
+  // Keep the persisted IDs so existing Ocean theme selections remain valid.
+  { value: 'openTubeXLight', translationKey: 'Ocean Light', classification: 'light', background: '#e8f2f0', fixedColors: true },
+  { value: 'openTubeXDark', translationKey: 'Ocean Dark', classification: 'dark', background: '#0b1416', fixedColors: true },
   { value: 'nordic', translationKey: 'Nordic', classification: 'dark', background: '#2b2f3a' },
   { value: 'hotPink', translationKey: 'Hot Pink', classification: 'dark', background: '#ff008a', fixedColors: true },
   { value: 'pastelPink', translationKey: 'Pastel Pink', classification: 'light', background: '#ffeadd' },

@@ -361,7 +361,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text: url('../../_icons/textBlackSmall.svg');
 }
 
-/* Custom, OpenTubeX, and dynamic themes tint the header logo instead of displaying the fixed-color
+/* Custom, Ocean, and dynamic themes tint the header logo instead of displaying the fixed-color
    theme assets. Keeping the assets as masks preserves their sharp edges. */
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoIcon,
 :is(.custom, .openTubeXLight, .openTubeXDark, .dynamicColors) .topNav .logoText {

@@ -1637,15 +1637,15 @@ async function settingsBackgroundVariation(page) {
   }, screenshot.toString('base64'))
 }
 
-test.describe('OpenTubeX homepage themes', () => {
-  test('selects, persists, and follows the system with the homepage palettes', async ({ app, page, attachScreenshot }) => {
+test.describe('Ocean themes', () => {
+  test('selects, persists, and follows the system with the Ocean palettes', async ({ app, page, attachScreenshot }) => {
     await goToSettingsSection(page, 'theme')
     for (const [mode, background, accent] of [
       ['Light', 'rgb(232, 242, 240)', 'rgb(17, 104, 95)'],
       ['Dark', 'rgb(11, 20, 22)', 'rgb(46, 196, 182)'],
     ]) {
       await page.getByRole('combobox', { name: /^Base theme/i }).click()
-      await page.getByRole('option', { name: `OpenTubeX ${mode}`, exact: true }).click()
+      await page.getByRole('option', { name: `Ocean ${mode}`, exact: true }).click()
       await expect(page.locator('body')).toHaveCSS('background-color', background)
       await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeDisabled()
       await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeDisabled()
@@ -1675,7 +1675,7 @@ test.describe('OpenTubeX homepage themes', () => {
       }
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .dispatch('updateUiScale', 100))
-      await attachScreenshot(`OpenTubeX ${mode} settings`)
+      await attachScreenshot(`Ocean ${mode} settings`)
     }
 
     ;({ page } = await app.relaunch())
@@ -1686,8 +1686,8 @@ test.describe('OpenTubeX homepage themes', () => {
     await page.getByRole('option', { name: /^System default$/i }).click()
     for (const [mode, other] of [['Light', 'Dark'], ['Dark', 'Light']]) {
       await page.getByRole('combobox', { name: `${mode} theme`, exact: true }).click()
-      await expect(page.getByRole('option', { name: `OpenTubeX ${other}`, exact: true })).toHaveCount(0)
-      await page.getByRole('option', { name: `OpenTubeX ${mode}`, exact: true }).click()
+      await expect(page.getByRole('option', { name: `Ocean ${other}`, exact: true })).toHaveCount(0)
+      await page.getByRole('option', { name: `Ocean ${mode}`, exact: true }).click()
       await page.emulateMedia({ colorScheme: mode.toLowerCase() })
       await expect(page.locator('body')).toHaveClass(new RegExp(`openTubeX${mode}`))
     }
