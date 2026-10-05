@@ -2283,7 +2283,9 @@ export class TabManager {
       }
 
       try {
-        await this._setTabPreviewCaptureMode(true)
+        if (!await this._setTabPreviewCaptureMode(true)) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
         // Entering capture mode awaits an IPC round-trip, during which the main
         // process stays unblocked and another tab may have been activated. If so,
         // the renderer is now painting a different tab, so capturing here would
@@ -2362,6 +2364,11 @@ export class TabManager {
     const script = enabled
       ? `
         (() => {
+          // Hover handoffs must stay visible even when a scheduled refresh
+          // reaches the renderer. Reuse the cache instead of hiding the tooltip.
+          if (document.querySelector('[data-tab-preview-preserve-visibility]')) {
+            return false
+          }
           let style = document.getElementById(${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)})
           if (!style) {
             style = document.createElement('style')
@@ -2381,7 +2388,7 @@ export class TabManager {
       : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`
 
     try {
-      await this.browserWindow.webContents.executeJavaScript(script, true)
+      return await this.browserWindow.webContents.executeJavaScript(script, true)
     } catch {
       // The shared renderer may be navigating or shutting down.
     }

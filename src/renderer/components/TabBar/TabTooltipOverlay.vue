@@ -1,6 +1,9 @@
 <template>
   <Teleport to="body">
-    <Transition name="tab-tooltip">
+    <Transition
+      name="tab-tooltip"
+      @before-leave="element => element.removeAttribute('data-tab-preview-preserve-visibility')"
+    >
       <div
         v-if="active"
         :id="active.id"
@@ -8,6 +11,7 @@
         class="tabTooltip"
         :class="{ withPreview: content.showPreview, tabGroupTooltip: content.isGroup }"
         data-tab-preview-overlay
+        data-tab-preview-preserve-visibility
         :style="tooltipStyle"
         role="tooltip"
       >
@@ -44,7 +48,6 @@
             >
               <TabTooltipPreview
                 :tab="tab"
-                :capture-live="active.captureLive"
                 show-title
                 :show-icon="content.showIcon"
               />
@@ -53,7 +56,6 @@
           <TabTooltipPreview
             v-else-if="content.tabs[0]"
             :tab="content.tabs[0]"
-            :capture-live="active.captureLive"
           />
           <div
             v-if="content.isGroup && content.tabs.length > previewTabs.length"

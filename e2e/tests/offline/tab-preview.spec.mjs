@@ -77,6 +77,12 @@ test.describe('tab previews', () => {
         }
         sample()
       })
+      // A scheduled refresh of the active page can overlap a hover handoff.
+      // Exercise that capture path explicitly instead of depending on its timer.
+      await page.evaluate(async () => {
+        const { activeTabId } = await window.ftElectron.tabs.getState()
+        await window.ftElectron.tabs.capturePreview(activeTabId)
+      })
       for (const index of [2, 1, 0, 2]) {
         await tabs.nth(index).hover()
         if (index > 0) {
@@ -103,6 +109,27 @@ test.describe('tab previews', () => {
       await expect(tooltip).toHaveCount(0)
     })
   }
+
+  test('waits for an in-flight first capture before showing the next tooltip', async ({ page }) => {
+    await page.evaluate(() => window.ftElectron.tabs.create({
+      title: 'Next preview', makeActive: false, lazyLoad: true
+    }))
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(2)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await tabs.first().hover()
+    await page.clock.runFor(80)
+    // Capture mode is waiting for two renderer frames. Hold those frames while
+    // moving the real pointer to the next anchor.
+    await expect(page.locator('html')).toHaveClass(new RegExp(CAPTURE_CLASS))
+    await tabs.nth(1).hover()
+    await expect(page.locator('.tabTooltip')).toHaveCount(0)
+    await page.clock.resume()
+    await expect(page.locator('.tabTooltipTitle')).toHaveText('Next preview')
+    await expect(page.locator('.tabTooltip')).toHaveCSS('visibility', 'visible')
+    await expect(page.locator('html')).not.toHaveClass(new RegExp(CAPTURE_CLASS))
+  })
 
   for (const position of ['left', 'top']) {
     test(`slides during the initial ${position} tooltip fade`, async ({ page }) => {

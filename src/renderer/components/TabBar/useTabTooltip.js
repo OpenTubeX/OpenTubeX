@@ -7,6 +7,7 @@ export function provideTabTooltip() {
   let pending = null
   let showTimer = null
   let hideTimer = null
+  let capturePromise = Promise.resolve()
 
   function clearTimers() {
     clearTimeout(showTimer)
@@ -22,11 +23,20 @@ export function provideTabTooltip() {
   function show(tooltip) {
     clearTimers()
     if (active.value) {
-      active.value = { ...tooltip, captureLive: false }
+      active.value = tooltip
     } else {
       pending = tooltip
-      showTimer = setTimeout(() => {
-        active.value = { ...tooltip, captureLive: true }
+      showTimer = setTimeout(async () => {
+        // Finish any capture from an earlier anchor before showing its successor.
+        // Live captures hide overlays, so prepare previews before mounting one.
+        capturePromise = capturePromise.then(async () => {
+          if (pending !== tooltip || !tooltip.props.showPreview) return
+          const tabs = tooltip.props.isGroup ? tooltip.props.tabs.slice(0, 6) : tooltip.props.tabs.slice(0, 1)
+          await Promise.all(tabs.map(tab => window.ftElectron.tabs.capturePreview(tab.id)))
+        }).catch(() => {})
+        await capturePromise
+        if (pending !== tooltip) return
+        active.value = tooltip
         pending = null
       }, 80)
     }

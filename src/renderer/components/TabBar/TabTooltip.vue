@@ -74,4 +74,10 @@ watch(() => props.closeTooltipsSignal, hideTooltip)
 watch(() => props.isActive, active => { if (active) hideTooltip() })
 watch(() => props.disableTooltips, disabled => { if (disabled) hideTooltip() })
 watch(() => props.tabBarPosition, hideTooltip)
+watch(() => props.showPreview, enabled => {
+  if (enabled && tooltip.active.value?.id === tooltipId) {
+    hideTooltip()
+    showTooltip()
+  }
+})
 </script>
