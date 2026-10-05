@@ -50,13 +50,22 @@ function scrollbarOptions(initialization) {
   if (initialization === document.body) {
     // The page viewport is always a normal block-flow body. Avoid repeatedly
     // reading all flow-related computed styles while long feeds are changing;
-    // only direction can change at runtime.
+    // only direction can change at runtime. Tab-bar mutations stay inside its
+    // clipped viewport and cannot change the page's scroll range.
     options.update = {
+      debounce: { resize: [0, 33] },
+      ignoreMutation: ignorePageScrollbarMutation,
       flowDirectionStyles: () => ({ direction: document.documentElement.dir })
     }
   }
 
   return options
+}
+
+/** @param {MutationRecord} mutation */
+function ignorePageScrollbarMutation(mutation) {
+  const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
+  return element?.closest('.tabBar') != null
 }
 
 /**
