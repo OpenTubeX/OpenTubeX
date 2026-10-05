@@ -49,6 +49,7 @@ Global:
 Search / Go to URL: Suchen / URL öffnen
   # In Filter Button
 Search Filters:
+  Cookie Search Failed: "Die Suche mit den konfigurierten Cookies ist fehlgeschlagen."
   Search Filters: Suchfilter
   Prioritize:
     Most Relevant: Relevanz
@@ -500,8 +501,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Hell"
-      OpenTubeX Dark: "OpenTubeX Dunkel"
+      Ocean Light: "Ocean Hell"
+      Ocean Dark: "Ocean Dunkel"
       Base Theme: Grundlegendes Farbschema
       Black: Schwarz
       Dark: Dunkel
@@ -940,6 +941,7 @@ Settings:
       Kazakh: Kasachisch
     Parallel Segment Loading: Paralleles Laden von Segmenten
     Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
+    Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -3125,6 +3127,15 @@ SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
 
 Form Inputs:
+  Enter Password Hint: "Gib dein Passwort ein"
+  Choose Password Hint: "Wähle ein Passwort"
+  Confirm Password Hint: "Wiederhole dein neues Passwort"
+  Encryption Passphrase Hint: "Gib deine Verschlüsselungspassphrase ein"
+  Show Password: "Passwort anzeigen"
+  Hide Password: "Passwort verbergen"
+  Search Text Hint: "Suchbegriffe eingeben"
+  Playlist Description Hint: "Beschreibe diese Playlist"
+  Filename Preview: "Vorschau des Dateinamens"
   Enter Channels: "Kanäle eingeben"
   Enter Text: "Text eingeben"
   Video URL: Video- oder Playlist-URL

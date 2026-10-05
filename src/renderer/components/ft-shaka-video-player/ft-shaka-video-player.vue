@@ -170,10 +170,12 @@
       />
       <!-- Keep the decoded poster and its resolution fallback through playback. -->
       <div
-        v-if="!audioPlayerMode && thumbnail"
-        v-show="showPoster || showCountdownOverlay || showEndedScreen"
+        v-if="thumbnail"
+        v-show="audioPlayerMode
+          ? mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)
+          : showPoster || showCountdownOverlay || showEndedScreen"
         class="countdownPoster"
-        :class="{ endedPoster: showEndedScreen }"
+        :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
         aria-hidden="true"
       >
         <FtRetryImage
@@ -946,9 +948,28 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
+      <div
+        v-if="mobileSeekPreview"
+        class="valueChangePopup mobileSeekPreview"
+        role="status"
+      >
+        <div
+          v-if="mobileSeekThumbnailStyle"
+          class="mobileSeekThumbnail"
+          :style="mobileSeekThumbnailStyle"
+          aria-hidden="true"
+        />
+        <div class="mobileSeekPreviewTime">
+          <ft-icon
+            :icon="['fas', mobileSeekPreview.seconds < 0 ? 'arrow-left' : 'arrow-right']"
+            aria-hidden="true"
+          />
+          <span class="valueChangeText">{{ mobileSeekPreviewMessage }}</span>
+        </div>
+      </div>
       <Transition name="fade">
         <div
-          v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup"
+          v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
           class="valueChangePopup"
           :class="{
             'invert-content-order':
@@ -1216,12 +1237,16 @@
                   >
                     {{ $t('Video.Player.SponsorBlock.NowAction') }}
                   </button>
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.StartTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:00' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                    >
+                  </label>
                 </template>
                 <span
                   v-else
@@ -1234,12 +1259,16 @@
                   class="sponsorBlockDraftTimeDivider"
                 >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
                 <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.EndTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:30' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                    >
+                  </label>
                   <button
                     class="sponsorBlockDraftTimeAction"
                     @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"
@@ -1392,7 +1421,7 @@
             class="mobileMiniBarDismiss"
             :disabled="mobileMiniBarControlsDisabled"
             :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
-            @click.stop.prevent="dismissCrossTabMiniPlayer"
+            @click.stop.prevent="dismissMobileMiniPlayer"
           >
             <ft-icon
               :icon="['fas', 'times']"

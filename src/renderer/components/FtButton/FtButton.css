@@ -4,6 +4,8 @@
   --button-radius: calc(var(--button-height) / 2 * var(--ui-roundness));
   --button-base: var(--primary-color);
   --button-on-base: var(--text-with-main-color);
+  --button-hover: var(--primary-color-hover);
+  --button-active: var(--primary-color-active);
   --button-container: var(--button-base);
   --button-foreground: var(--button-on-base);
   --button-border: transparent;
@@ -43,11 +45,15 @@
 .btn.secondary {
   --button-base: var(--accent-color);
   --button-on-base: var(--text-with-accent-color);
+  --button-hover: var(--accent-color-hover);
+  --button-active: var(--accent-color-active);
 }
 
 .btn.destructive {
   --button-base: var(--destructive-color);
   --button-on-base: var(--destructive-text-color);
+  --button-hover: var(--destructive-hover-color);
+  --button-active: var(--destructive-active-color);
 }
 
 .btn.variant-tonal,
@@ -101,6 +107,16 @@
   --button-radius: calc(8px * var(--ui-roundness));
 
   background-color: color-mix(in srgb, var(--button-foreground) 12%, var(--button-container));
+}
+
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):is(:hover, :focus-visible, :active) {
+  --button-foreground: var(--button-on-base);
+
+  background-color: var(--button-hover);
+}
+
+.custom .btn:is(.primary, .secondary, .destructive):not(:disabled):active {
+  background-color: var(--button-active);
 }
 
 .btn:disabled {

@@ -445,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX فاتح"
-      OpenTubeX Dark: "OpenTubeX داكن"
+      Ocean Light: "Ocean فاتح"
+      Ocean Dark: "Ocean داكن"
       Custom: مخصص
     Light Theme: سمة فاتحة
     Dark Theme: سمة داكنة
@@ -636,6 +636,7 @@ Settings:
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
     Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
+    Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1950,6 +1951,15 @@ Tray Icon:
   Follow App Theme: "اتباع سمة التطبيق"
 
 Form Inputs:
+  Enter Password Hint: "أدخل كلمة مرورك"
+  Choose Password Hint: "اختر كلمة مرور"
+  Confirm Password Hint: "كرر كلمة مرورك الجديدة"
+  Encryption Passphrase Hint: "أدخل عبارة مرور التشفير"
+  Show Password: "إظهار كلمة المرور"
+  Hide Password: "إخفاء كلمة المرور"
+  Search Text Hint: "أدخل كلمات البحث"
+  Playlist Description Hint: "صِف قائمة التشغيل هذه"
+  Filename Preview: "معاينة اسم الملف"
   Enter Channels: "أدخل القنوات"
   Enter Text: "أدخل النص"
   Video URL: رابط الفيديو أو قائمة التشغيل
@@ -1968,3 +1978,6 @@ Form Inputs:
   Download Arguments Hint: وسيطات اختيارية لهذا التنزيل
   Generated ID Hint: اتركه فارغًا لإنشاء معرّف
   Default Value: "الافتراضي: {value}"
+
+Search Filters:
+  Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."

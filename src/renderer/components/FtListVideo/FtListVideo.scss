@@ -16,6 +16,8 @@ $grab-bar-padding: 1em;
   cursor: grab;
   text-align: center;
   user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
 
   // Space a bit from the thumbnail.
   padding-block: $grab-bar-padding;

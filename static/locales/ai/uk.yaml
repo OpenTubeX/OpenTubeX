@@ -445,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Світла"
-      OpenTubeX Dark: "OpenTubeX Темна"
+      Ocean Light: "Ocean Світла"
+      Ocean Dark: "Ocean Темна"
       Custom: Власна
     Light Theme: Світла тема
     Dark Theme: Темна тема
@@ -636,6 +636,7 @@ Settings:
     Upcoming Videos to Preload: "Кількість відео для попереднього завантаження"
     Concurrent Preloads: "Одночасне попереднє завантаження"
     Ignore System Rotation Lock for Fullscreen: Ігнорувати системне блокування повороту для повноекранного режиму
+    Swipe Left or Right to Seek in Fullscreen: Проводьте ліворуч або праворуч для перемотування в повноекранному режимі
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1965,6 +1966,15 @@ Tray Icon:
   Follow App Theme: "Використовувати тему застосунку"
 
 Form Inputs:
+  Enter Password Hint: "Введіть свій пароль"
+  Choose Password Hint: "Виберіть пароль"
+  Confirm Password Hint: "Повторіть новий пароль"
+  Encryption Passphrase Hint: "Введіть свою парольну фразу шифрування"
+  Show Password: "Показати пароль"
+  Hide Password: "Приховати пароль"
+  Search Text Hint: "Введіть пошукові слова"
+  Playlist Description Hint: "Опишіть цей список відтворення"
+  Filename Preview: "Попередній перегляд назви файлу"
   Enter Channels: "Введіть канали"
   Enter Text: "Введіть текст"
   Video URL: URL відео або списку відтворення
@@ -1983,3 +1993,6 @@ Form Inputs:
   Download Arguments Hint: Необов’язкові аргументи для цього завантаження
   Generated ID Hint: Залиште порожнім, щоб згенерувати ID
   Default Value: "Типово: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Пошук із налаштованими файлами cookie не вдався."

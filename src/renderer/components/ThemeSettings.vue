@@ -30,12 +30,14 @@
         :icon="['fas', 'message']"
         @change="updateToastPosition"
       />
-      <FtButton
-        class="testToastButton"
-        :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
-        :icon="['fas', 'message']"
-        @click="showTestToast"
-      />
+      <div class="testToastAction">
+        <FtButton
+          class="testToastButton"
+          :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+          :icon="['fas', 'message']"
+          @click="showTestToast"
+        />
+      </div>
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
@@ -1026,9 +1028,10 @@ function handleSmoothScrolling(value) {
 }
 
 .themeSelectRow {
-  flex-flow: row nowrap;
+  align-items: center;
+  flex-flow: row wrap;
   justify-content: center;
-  gap: 12px;
+  column-gap: 12px;
 }
 
 .themeSelectRow :deep(.select) {
@@ -1037,20 +1040,20 @@ function handleSmoothScrolling(value) {
   max-inline-size: calc(200px + var(--select-indicator-space));
 }
 
+.testToastAction {
+  display: flex;
+  justify-content: center;
+}
+
 .testToastButton {
-  margin-block-start: 30px;
+  margin-block: var(--settings-control-margin);
 }
 
 @container settings-content (width <= 760px) {
-  .themeSelectRow {
-    align-items: center;
-    flex-direction: column;
-  }
-
   .tabSettingsRow {
     align-items: center;
     flex-direction: column;
-    gap: 12px;
+    column-gap: 12px;
     justify-content: center;
   }
 
@@ -1059,8 +1062,17 @@ function handleSmoothScrolling(value) {
     inline-size: min(calc(200px + var(--select-indicator-space)), 100%);
   }
 
-  .testToastButton {
-    margin-block-start: 5px;
+}
+
+@container settings-content (width <= 580px) {
+  .testToastAction {
+    inline-size: 100%;
+  }
+}
+
+@container settings-content (width <= 460px) {
+  .themeSelectRow {
+    flex-direction: column;
   }
 }
 

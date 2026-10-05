@@ -443,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Luminoasă"
-      OpenTubeX Dark: "OpenTubeX Întunecată"
+      Ocean Light: "Ocean Luminoasă"
+      Ocean Dark: "Ocean Întunecată"
       Custom: Personalizată
     Light Theme: Temă luminoasă
     Dark Theme: Temă întunecată
@@ -632,6 +632,7 @@ Settings:
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
+    Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1974,6 +1975,15 @@ Tray Icon:
   Follow App Theme: "Urmează tema aplicației"
 
 Form Inputs:
+  Enter Password Hint: "Introdu parola ta"
+  Choose Password Hint: "Alege o parolă"
+  Confirm Password Hint: "Repetă noua parolă"
+  Encryption Passphrase Hint: "Introdu fraza ta de criptare"
+  Show Password: "Afișează parola"
+  Hide Password: "Ascunde parola"
+  Search Text Hint: "Introduceți termeni de căutare"
+  Playlist Description Hint: "Descrieți această listă de redare"
+  Filename Preview: "Previzualizarea numelui fișierului"
   Enter Channels: "Introdu canale"
   Enter Text: "Introdu text"
   Video URL: URL video sau listă de redare
@@ -1992,3 +2002,6 @@ Form Inputs:
   Download Arguments Hint: Argumente opționale pentru această descărcare
   Generated ID Hint: Lasă gol pentru a genera un ID
   Default Value: "Implicit: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."

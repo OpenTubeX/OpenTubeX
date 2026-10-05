@@ -28,8 +28,9 @@
       class="downloadPathInputs settingsFlexStart460px"
     >
       <FtInput
+        :icon="['fas', 'folder-open']"
         :label="t('Settings.Download Settings.Download Folder')"
-        placeholder=""
+        placeholder="/path/to/downloads"
         :supporting-text="t('Form Inputs.Download Folder Hint')"
         :show-action-button="true"
         :action-button-label="t('Settings.Download Settings.Choose Download Folder')"
@@ -44,6 +45,7 @@
       />
       <FtInput
         v-if="!isIos"
+        :icon="['fas', 'terminal']"
         :label="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
         :placeholder="t('Form Inputs.Global Arguments Hint')"
         :show-action-button="false"
@@ -68,6 +70,7 @@
       />
       <FtInput
         input-type="number"
+        :icon="['fas', 'gauge-high']"
         :label="t('Settings.Download Settings.Bandwidth Limit')"
         :placeholder="t('Form Inputs.Unlimited Hint')"
         :show-action-button="false"
@@ -160,14 +163,14 @@ async function chooseDownloadFolder() {
 
 <style scoped>
 .downloadEnable :deep(.switch-ctn.compact) {
-  margin-block: 0;
+  margin-block: var(--settings-control-margin);
 }
 
 .downloadActions {
   align-items: stretch;
   gap: 10px;
   justify-content: center;
-  margin-block: 20px;
+  margin-block: var(--settings-control-margin);
 }
 
 .downloadActions :deep(.btn) {
@@ -193,24 +196,11 @@ async function chooseDownloadFolder() {
 .downloadQueueInputs {
   align-items: flex-end;
   column-gap: 12px;
-  margin-block-start: 16px;
 }
 
 .downloadQueueInputs :deep(.select) {
   inline-size: calc(340px + var(--select-indicator-space));
   margin-inline-end: calc(70px - var(--select-indicator-space));
-}
-
-.downloadQueueInputs :deep(.ft-input-component) {
-  margin-block-start: 30px;
-}
-
-.downloadQueueInputs :deep(.inputWrapper) {
-  margin-block-end: 0;
-}
-
-.downloadQueueInputs :deep(.ft-input) {
-  margin-block-end: 0;
 }
 
 </style>

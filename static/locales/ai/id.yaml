@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Terang"
-      OpenTubeX Dark: "OpenTubeX Gelap"
+      Ocean Light: "Ocean Terang"
+      Ocean Dark: "Ocean Gelap"
       Custom: Khusus
     Light Theme: Tema terang
     Dark Theme: Tema gelap
@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
     Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
+    Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1934,6 +1935,15 @@ Tray Icon:
   Follow App Theme: "Ikuti tema aplikasi"
 
 Form Inputs:
+  Enter Password Hint: "Masukkan kata sandi Anda"
+  Choose Password Hint: "Pilih kata sandi"
+  Confirm Password Hint: "Ulangi kata sandi baru Anda"
+  Encryption Passphrase Hint: "Masukkan frasa sandi enkripsi Anda"
+  Show Password: "Tampilkan kata sandi"
+  Hide Password: "Sembunyikan kata sandi"
+  Search Text Hint: "Masukkan kata pencarian"
+  Playlist Description Hint: "Jelaskan daftar putar ini"
+  Filename Preview: "Pratinjau nama berkas"
   Enter Channels: "Masukkan channel"
   Enter Text: "Masukkan teks"
   Video URL: URL video atau playlist
@@ -1952,3 +1962,6 @@ Form Inputs:
   Download Arguments Hint: Argumen opsional untuk unduhan ini
   Generated ID Hint: Biarkan kosong untuk membuat ID
   Default Value: "Default: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."

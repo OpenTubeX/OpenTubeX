@@ -87,6 +87,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Podnapisi za gluhe in naglušne
 Search Filters:
+  Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
@@ -556,8 +557,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX svetla"
-      OpenTubeX Dark: "OpenTubeX temna"
+      Ocean Light: "Ocean svetla"
+      Ocean Dark: "Ocean temna"
       Custom: Po meri
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -841,6 +842,7 @@ Settings:
     Upcoming Videos to Preload: "Število videov za prednalaganje"
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
+    Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -2520,6 +2522,15 @@ Tray Icon:
   Follow App Theme: "Sledi temi aplikacije"
 
 Form Inputs:
+  Enter Password Hint: "Vnesite svoje geslo"
+  Choose Password Hint: "Izberite geslo"
+  Confirm Password Hint: "Ponovite novo geslo"
+  Encryption Passphrase Hint: "Vnesite svoje šifrirno geslo"
+  Show Password: "Prikaži geslo"
+  Hide Password: "Skrij geslo"
+  Search Text Hint: "Vnesite iskalne izraze"
+  Playlist Description Hint: "Opišite ta seznam predvajanja"
+  Filename Preview: "Predogled imena datoteke"
   Enter Channels: "Vnesite kanale"
   Enter Text: "Vnesite besedilo"
   Video URL: URL videa ali seznama predvajanja

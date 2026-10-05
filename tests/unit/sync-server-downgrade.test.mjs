@@ -168,6 +168,26 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
 
+test('encrypted activity downloads can outlast the ordinary request timeout', async () => {
+  const events = Array.from({ length: 81 }, (_, index) => ({ id: String(index), payload: 'encrypted activity' }))
+  const f = fixture({}, {
+    // Scale deadlines to keep the regression fast: the response takes the
+    // equivalent of 50 seconds, longer than the ordinary 20-second timeout.
+    timer: (callback, delay) => setTimeout(callback, delay / 1000),
+    respond: (_url, options) => new Promise((resolve, reject) => {
+      const response = setTimeout(() => resolve(events), 50)
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(response)
+        reject(new DOMException('Aborted', 'AbortError'))
+      }, { once: true })
+    }),
+  })
+  const client = new f.Client('https://sync.example', 'saved-token')
+  const downloaded = await client.getSyncEvents()
+  assert.equal(downloaded.length, events.length)
+  assert.equal(f.requests.length, 1)
+})
+
 for (const [method, args, path, verb] of [
   ['authenticate', ['login', 'alice', 'password'], '/account/login', 'POST'],
   ['authenticate', ['register', 'alice', 'password'], '/account/register', 'POST'],

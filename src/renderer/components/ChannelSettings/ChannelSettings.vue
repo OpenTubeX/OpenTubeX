@@ -70,7 +70,9 @@
         v-if="channelEntries.length > SEARCH_THRESHOLD || searchQuery !== ''"
         class="channelSearch"
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="value => searchQuery = value"
@@ -80,7 +82,10 @@
         v-overlay-scrollbars
         class="channelListContainer"
       >
-        <div ref="channelListContent">
+        <div
+          ref="channelListContent"
+          class="channelListContent"
+        >
           <p
             v-if="visibleChannelEntries.length === 0"
             class="emptyState"
@@ -236,7 +241,9 @@
               ref="addChannelSearch"
               class="addSubscribedChannelSearch"
               input-type="search"
-              :placeholder="t('Settings.Channel Settings.Search Channels')"
+              :label="t('Settings.Channel Settings.Search Channels')"
+              :icon="['fas', 'search']"
+              :placeholder="t('Form Inputs.Search Text Hint')"
               :show-action-button="false"
               :value="addChannelSearchQuery"
               @input="value => addChannelSearchQuery = value"

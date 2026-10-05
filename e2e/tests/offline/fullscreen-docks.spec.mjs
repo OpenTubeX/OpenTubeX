@@ -35,11 +35,11 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
       const video = player.locator('video')
       await expect(player).not.toHaveClass(/presentationModeChanging/)
       expect(await video.evaluate(element => getComputedStyle(element).transform)).toBe('none')
-      const fade = await player.locator('.shaka-controls-button-panel').evaluate(element => {
+      const fade = await player.locator('.ft-control-glass').first().evaluate(element => {
         const style = getComputedStyle(element)
         return { property: style.transitionProperty, duration: style.transitionDuration }
       })
-      expect(fade.property).toContain('--ft-controls-fade')
+      expect(fade.property).toContain('opacity')
       expect(parseFloat(fade.duration)).toBeGreaterThan(0)
       if (cpuThrottle !== 1) {
         const session = await page.context().newCDPSession(page)

@@ -445,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Φωτεινό"
-      OpenTubeX Dark: "OpenTubeX Σκοτεινό"
+      Ocean Light: "Ocean Φωτεινό"
+      Ocean Dark: "Ocean Σκοτεινό"
       Custom: Προσαρμοσμένο
     Light Theme: Φωτεινό θέμα
     Dark Theme: Σκοτεινό θέμα
@@ -641,6 +641,7 @@ Settings:
     Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
+    Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1972,6 +1973,15 @@ Tray Icon:
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
 
 Form Inputs:
+  Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
+  Choose Password Hint: "Επιλέξτε έναν κωδικό"
+  Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
+  Encryption Passphrase Hint: "Εισαγάγετε τη φράση κρυπτογράφησής σας"
+  Show Password: "Εμφάνιση κωδικού πρόσβασης"
+  Hide Password: "Απόκρυψη κωδικού πρόσβασης"
+  Search Text Hint: "Εισαγάγετε όρους αναζήτησης"
+  Playlist Description Hint: "Περιγράψτε αυτήν τη λίστα αναπαραγωγής"
+  Filename Preview: "Προεπισκόπηση ονόματος αρχείου"
   Enter Channels: "Εισαγάγετε κανάλια"
   Enter Text: "Εισαγάγετε κείμενο"
   Video URL: URL βίντεο ή λίστας αναπαραγωγής
@@ -1990,3 +2000,6 @@ Form Inputs:
   Download Arguments Hint: Προαιρετικά ορίσματα για αυτή τη λήψη
   Generated ID Hint: Αφήστε κενό για δημιουργία ID
   Default Value: "Προεπιλογή: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."

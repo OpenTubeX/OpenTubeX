@@ -1,3 +1,4 @@
+import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -54,6 +55,62 @@ async function expectAligned(page) {
     )
   })).toBeLessThan(2)
 }
+
+async function expectTabScrollRange(tabs) {
+  await expect.poll(() => tabs.evaluate(container => {
+    const viewport = container.getBoundingClientRect()
+    const content = container.querySelector('.tabsContent').getBoundingClientRect()
+    const range = Math.max(0, content.width - viewport.width)
+    const scrollbar = container.querySelector('.os-scrollbar-horizontal')
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+    const tolerance = 2 / devicePixelRatio
+    const progress = range > 0 ? Math.min(1, Math.abs(container.scrollLeft) / range) : 0
+    const rtl = getComputedStyle(container).direction === 'rtl'
+    const thumbOffset = (rtl ? 1 - progress : progress) * (track.width - thumb.width)
+    return {
+      validOffset: Math.abs(container.scrollLeft) <= range + tolerance,
+      noEmptySpace: content.left <= viewport.left + tolerance && content.right >= viewport.right - tolerance,
+      scrollbarMatchesRange: scrollbar.classList.contains('os-scrollbar-unusable') === (range < 1),
+      thumbSizeMatchesRange: range < 1 || Math.abs(thumb.width - track.width * viewport.width / content.width) <= tolerance,
+      thumbPositionMatchesOffset: range < 1 || Math.abs(thumb.left - track.left - thumbOffset) <= tolerance,
+      fullLabels: [...container.querySelectorAll('.tabLabel > span')].every(label => label.scrollWidth <= label.clientWidth + 1)
+    }
+  })).toEqual({
+    validOffset: true,
+    noEmptySpace: true,
+    scrollbarMatchesRange: true,
+    thumbSizeMatchesRange: true,
+    thumbPositionMatchesOffset: true,
+    fullLabels: true
+  })
+}
+
+test('hides channel tab icons before shortening labels when space is limited', async ({ app, page }, testInfo) => {
+  for (const [width, scale] of [[375, 95], [812, 125], [1250, 100], [1600, 95]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+      BrowserWindow.getAllWindows()[0].setSize(width, 900)
+    }, width)
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    if (width === 1600) await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    else await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
+    await expect.poll(() => page.locator('.channelDetails:visible .tabLabel > span').evaluateAll(labels =>
+      labels.every(label => label.scrollWidth <= label.clientWidth + 1 && getComputedStyle(label).textOverflow !== 'ellipsis')
+    )).toBe(true)
+    await expectAligned(page)
+  }
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await Promise.all(['Community', 'Releases', 'Courses'].map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
+    await store.dispatch('updateUiScale', 100)
+  })
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(450, 900))
+  await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
+  await expect.poll(() => page.locator('.channelDetails:visible .tabs').evaluate(container =>
+    container.scrollWidth - container.clientWidth
+  )).toBe(0)
+  await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
+})
 
 test('keeps channel header rows evenly spaced below the banner', async ({ app, page }, testInfo) => {
   for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [750, 900, 100], [1600, 900, 95]]) {
@@ -318,41 +375,76 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
   }
 })
 
-test('keeps all tabs visible without scrolling after labels or available tabs change', async ({ app, page }) => {
+test('scrolls full channel labels and clamps the range after labels or available tabs change', async ({ app, page }) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(375, 812)
   })
   const tabs = page.locator('.channelDetails:visible .tabs')
-  async function expectAllTabsFit() {
+  async function expectFullLabels() {
     await expect.poll(() => tabs.evaluate(container => {
-      const bounds = container.getBoundingClientRect()
       const tabs = [...container.querySelectorAll('[role="tab"]')].map(tab => tab.getBoundingClientRect())
+      const labels = [...container.querySelectorAll('.tabLabel > span')]
       return {
         oneRow: Math.max(...tabs.map(tab => tab.top)) - Math.min(...tabs.map(tab => tab.top)) < 1,
-        fit: tabs.every(tab => tab.left >= bounds.left - 1 && tab.right <= bounds.right + 1),
-        noScroll: container.scrollWidth <= container.clientWidth + 1 && container.scrollLeft === 0
+        fullLabels: labels.every(label => label.scrollWidth <= label.clientWidth + 1),
+        validOffset: Math.abs(container.scrollLeft) <= container.scrollWidth - container.clientWidth + 2 / devicePixelRatio
       }
-    })).toEqual({ oneRow: true, fit: true, noScroll: true })
+    })).toEqual({ oneRow: true, fullLabels: true, validOffset: true })
     await expectAligned(page)
+    await expectTabScrollRange(tabs)
   }
-  await expectAllTabsFit()
+  await expectFullLabels()
+  const scrollbar = tabs.locator(':scope > .os-scrollbar-horizontal')
+  await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await expect.poll(() => tabs.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0)
   await expect.poll(() => tabs.locator('[role="tab"]').evaluateAll(elements =>
     Math.min(...elements.map(element => element.getBoundingClientRect().height))
   )).toBeGreaterThan(47.5)
-  await page.locator('#aboutTab').click()
-  await expectAllTabsFit()
+  await page.locator('#aboutTab').evaluate(tab => tab.click())
+  await expectFullLabels()
+  await expect.poll(() => page.locator('#aboutTab').evaluate(tab => {
+    const bounds = tab.getBoundingClientRect()
+    const viewport = tab.closest('.tabs').getBoundingClientRect()
+    return Math.max(viewport.left - bounds.left, bounds.right - viewport.right)
+  })).toBeLessThan(2)
+  await expect.poll(() => tabs.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
   await page.locator('#videosTab .tabLabel').evaluate(label => {
     label.dataset.label = 'A very long translated video tab label'
     label.firstElementChild.textContent = label.dataset.label
   })
-  await expectAllTabsFit()
-  await expect(page.locator('#videosTab .tabLabel > span')).toHaveCSS('text-overflow', 'ellipsis')
+  await expectFullLabels()
+  await expect(page.locator('#videosTab .tabLabel > span')).toHaveCSS('text-overflow', 'clip')
+  await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
       .map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
   })
-  await expectAllTabsFit()
+  await expectFullLabels()
+  await tabs.evaluate(element => { element.scrollLeft = element.scrollWidth })
+  await page.locator('#videosTab .tabLabel').evaluate(label => {
+    label.dataset.label = 'Videos'
+    label.firstElementChild.textContent = 'Videos'
+  })
+  await expectFullLabels()
+  await expect.poll(() => tabs.evaluate(element => ({
+    range: element.scrollWidth - element.clientWidth,
+    offset: element.scrollLeft
+  }))).toEqual({ range: 0, offset: 0 })
+  await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+})
+
+test('clamps channel tab scrolling after resize and locale changes', async ({ app, page }) => {
+  const tabs = page.locator('.channelDetails:visible .tabs')
+  for (const [width, locale] of [[375, 'de-DE'], [375, 'en-US'], [1600, 'en-US'], [375, 'ar'], [1600, 'ar']]) {
+    await tabs.evaluate(element => { element.scrollLeft = getComputedStyle(element).direction === 'rtl' ? -element.scrollWidth : element.scrollWidth })
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 900), width)
+    await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = locale }, locale)
+    await expectAligned(page)
+    await expectTabScrollRange(tabs)
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThan(2)
+  }
 })
 
 test('handles quick switches, search, background tabs, and reduced motion', async ({ page }) => {
@@ -390,4 +482,22 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
   await expectAligned(page)
   await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'none')
   expect(await page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
+})
+
+test('desktop channel tabs size to their content and show icons in both packs', async ({ app, page }, testInfo) => {
+  for (const pack of ['material', 'remix']) {
+    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+    const tabs = page.locator('.channelDetails:visible [role="tab"]')
+    for (const tab of await tabs.all()) {
+      await expect(tab.locator('.ft-icon__glyph')).toBeVisible()
+      const spacing = await tab.evaluate(element => {
+        const label = element.querySelector('.tabLabel').getBoundingClientRect()
+        const icon = element.querySelector('.ft-icon').getBoundingClientRect()
+        return element.getBoundingClientRect().width - label.width - icon.width
+      })
+      expect(spacing).toBeCloseTo(36, 0)
+    }
+    await expectAligned(page)
+    await captureAppFramebuffer(app, testInfo, `channel-tab-icons-${pack}`)
+  }
 })

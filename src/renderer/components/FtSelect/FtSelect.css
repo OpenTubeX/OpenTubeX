@@ -32,7 +32,14 @@
 
   position: relative;
   inline-size: calc(200px + var(--select-indicator-space));
-  margin-block-start: 30px;
+  margin-block: var(--settings-control-margin, 30px 20px);
+}
+
+.select.contentSized {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) var(--select-indicator-space);
+  inline-size: fit-content;
+  max-inline-size: 100%;
 }
 
 .select:has(.selectIndicators > *) {
@@ -109,6 +116,12 @@
   padding-inline-end: 2.5rem;
 }
 
+.contentSized .select-text {
+  grid-area: 1 / 1;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
 .select-text:not(:disabled):hover {
   border-block-end-color: var(--primary-text-color);
 }
@@ -151,8 +164,9 @@
 }
 
 .optionName {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .selectDropdown {
@@ -163,6 +177,7 @@
   position: fixed;
   z-index: 12;
   box-sizing: border-box;
+  max-inline-size: calc(100vw - 16px);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-block: 8px;
@@ -210,9 +225,8 @@
   isolation: isolate;
   overflow: hidden;
   position: relative;
-  text-overflow: ellipsis;
   user-select: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .selectOption::before {
@@ -348,6 +362,14 @@
   }
 }
 
+.contentSized .select-label {
+  position: relative;
+  grid-area: 1 / 1;
+  place-self: start;
+  max-inline-size: calc(100% - 56px);
+  margin-inline-end: 56px;
+}
+
 /* active state */
 .select-text ~ .select-label {
   color: var(--secondary-text-color);
@@ -372,6 +394,8 @@
   background-color: var(--card-bg-color);
   transform: translateY(-50%);
 }
+
+
 
 .select.outlined .select-text:where(:not(:disabled)):hover {
   border-color: var(--primary-text-color);
@@ -461,11 +485,16 @@
   }
 }
 
+.pickerSearchField {
+  flex: 0 0 auto;
+  margin: 12px;
+}
+
 .pickerSearch {
   flex: 0 0 auto;
   box-sizing: border-box;
   min-block-size: var(--phone-touch-target, 48px);
-  margin: 12px;
+  margin: 0;
   padding: 12px;
   border: 1px solid var(--divider-color);
   background: var(--search-bar-color);

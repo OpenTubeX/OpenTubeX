@@ -55,6 +55,10 @@
     "ri": "list-check-3",
     "material": "checklist-rounded"
   },
+  "book-open": {
+    "ri": "book-open-line",
+    "material": "menu-book-outline"
+  },
   "bookmark": {
     "ri": "bookmark-line",
     "material": "bookmark-outline"

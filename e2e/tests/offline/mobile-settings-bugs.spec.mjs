@@ -48,8 +48,10 @@ for (const uiScale of [100, 125]) {
           const help = el.querySelector('.selectTooltip').getBoundingClientRect()
           const select = el.querySelector('.select-text').getBoundingClientRect()
           const style = getComputedStyle(el)
-          const contentWidth = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-          return Math.abs(select.width - (contentWidth - 70)) < 1 && help.left - select.right >= 15.75 && help.left - select.right <= 17
+          const indicators = el.querySelector('.selectIndicators').getBoundingClientRect()
+          const contentRight = el.getBoundingClientRect().right - parseFloat(style.paddingRight)
+          return help.left - select.right >= 7.75 && help.left - select.right <= 9 &&
+            indicators.right <= contentRight + 1
         }))).toBe(true)
       })
     }
@@ -201,7 +203,10 @@ test.describe('German playback settings on a narrow screen', () => {
     expect(await playback.locator('.switch-label-text').evaluateAll(elements => (
       elements.every(element => getComputedStyle(element).hyphens === 'auto')
     ))).toBe(true)
-    expect(await getMidWordLineBreaks(playback.locator('.quickPlaybackSpeedToggle .switch-label-text'))).toEqual([])
+    // German compounds may hyphenate beside the wider switch track.
+    expect(await playback.locator('.quickPlaybackSpeedToggle .switch-label-text').evaluate(element => (
+      element.scrollWidth <= element.clientWidth + 1
+    ))).toBe(true)
     expect(await getMidWordLineBreaks(customize)).toEqual([])
   })
 })

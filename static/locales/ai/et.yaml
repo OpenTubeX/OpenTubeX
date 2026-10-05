@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Hele"
-      OpenTubeX Dark: "OpenTubeX Tume"
+      Ocean Light: "Ocean Hele"
+      Ocean Dark: "Ocean Tume"
       Custom: Kohandatud
     Light Theme: Hele teema
     Dark Theme: Tume teema
@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1926,6 +1927,15 @@ Tray Icon:
   Follow App Theme: "Järgi rakenduse teemat"
 
 Form Inputs:
+  Enter Password Hint: "Sisesta oma parool"
+  Choose Password Hint: "Vali parool"
+  Confirm Password Hint: "Korda oma uut parooli"
+  Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"
+  Show Password: "Näita parooli"
+  Hide Password: "Peida parool"
+  Search Text Hint: "Sisesta otsingusõnad"
+  Playlist Description Hint: "Kirjelda seda esitusloendit"
+  Filename Preview: "Failinime eelvaade"
   Enter Channels: "Sisesta kanalid"
   Enter Text: "Sisesta tekst"
   Video URL: Video või esitusloendi URL
@@ -1944,3 +1954,6 @@ Form Inputs:
   Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
   Generated ID Hint: Jäta tühjaks, et luua ID
   Default Value: "Vaikimisi: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."

@@ -14,6 +14,7 @@
       v-if="useReturnYoutubeDislikes"
     >
       <FtInput
+        :icon="['fas', 'link']"
         :label="$t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url')"
         placeholder="https://ryd-proxy.kavin.rocks"
         :supporting-text="$t('Form Inputs.Default Value', { value: 'https://ryd-proxy.kavin.rocks' })"

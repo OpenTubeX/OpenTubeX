@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Világos"
-      OpenTubeX Dark: "OpenTubeX Sötét"
+      Ocean Light: "Ocean Világos"
+      Ocean Dark: "Ocean Sötét"
       Custom: Egyéni
     Light Theme: Világos téma
     Dark Theme: Sötét téma
@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Előtöltendő videók száma"
     Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
+    Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1924,6 +1925,15 @@ Tray Icon:
   Follow App Theme: "Alkalmazástéma követése"
 
 Form Inputs:
+  Enter Password Hint: "Add meg a jelszavad"
+  Choose Password Hint: "Válassz jelszót"
+  Confirm Password Hint: "Ismételd meg az új jelszavad"
+  Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"
+  Show Password: "Jelszó megjelenítése"
+  Hide Password: "Jelszó elrejtése"
+  Search Text Hint: "Adjon meg keresési kifejezéseket"
+  Playlist Description Hint: "Írja le ezt a lejátszási listát"
+  Filename Preview: "Fájlnév előnézete"
   Enter Channels: "Csatornák megadása"
   Enter Text: "Szöveg megadása"
   Video URL: Videó vagy lejátszási lista URL-je
@@ -1942,3 +1952,6 @@ Form Inputs:
   Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
   Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
   Default Value: "Alapértelmezett: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."

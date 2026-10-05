@@ -38,6 +38,7 @@
         class="settingsFlexStart460px"
       >
         <FtInput
+          :icon="['fas', 'folder-open']"
           :label="$t('Settings.External Player Settings.Custom External Player Executable')"
           placeholder="/path/to/player"
           :show-action-button="false"

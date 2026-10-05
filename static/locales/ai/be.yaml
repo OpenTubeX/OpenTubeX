@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Толькі для ўдзельнікаў
 Search Filters:
+  Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
@@ -443,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светлая"
-      OpenTubeX Dark: "OpenTubeX Цёмная"
+      Ocean Light: "Ocean Светлая"
+      Ocean Dark: "Ocean Цёмная"
       Custom: Карыстальніцкая
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светлая тэма
@@ -657,6 +658,7 @@ Settings:
     Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
     Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
     Ignore System Rotation Lock for Fullscreen: Ігнараваць сістэмнае блакаванне павароту для поўнаэкраннага рэжыму
+    Swipe Left or Right to Seek in Fullscreen: Праводзьце налева або направа для перамоткі ў поўнаэкранным рэжыме
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -2020,6 +2022,15 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Enter Password Hint: "Увядзіце свой пароль"
+  Choose Password Hint: "Выберыце пароль"
+  Confirm Password Hint: "Паўтарыце новы пароль"
+  Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"
+  Show Password: "Паказаць пароль"
+  Hide Password: "Схаваць пароль"
+  Search Text Hint: "Увядзіце пошукавыя словы"
+  Playlist Description Hint: "Апішыце гэты плэйліст"
+  Filename Preview: "Папярэдні прагляд назвы файла"
   Enter Channels: "Увядзіце каналы"
   Enter Text: "Увядзіце тэкст"
   Video URL: URL відэа або плэйліста

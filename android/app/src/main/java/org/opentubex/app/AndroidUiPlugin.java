@@ -29,6 +29,8 @@ public class AndroidUiPlugin extends Plugin {
     private PictureInPictureSurface pictureInPictureSurface;
     private Rect pictureInPictureSourceRect;
     private boolean pictureInPictureScrollbarsHidden;
+    private boolean fullscreenScrollbarsHidden;
+    private boolean pageScrollbarsHidden;
     private boolean restoreVerticalScrollBar;
     private boolean restoreHorizontalScrollBar;
     private OrientationEventListener deviceRotationListener;
@@ -100,6 +102,16 @@ public class AndroidUiPlugin extends Plugin {
             android.webkit.WebView view = getBridge().getWebView();
             view.setScrollbarFadingEnabled(!enabled);
             view.invalidate();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
+    public void setPageScrollbarsHidden(PluginCall call) {
+        boolean hidden = Boolean.TRUE.equals(call.getBoolean("hidden", false));
+        getActivity().runOnUiThread(() -> {
+            fullscreenScrollbarsHidden = hidden;
+            updatePageScrollbars();
             call.resolve();
         });
     }
@@ -359,17 +371,23 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     private void setPictureInPictureScrollbars(boolean active) {
+        pictureInPictureScrollbarsHidden = active;
+        updatePageScrollbars();
+    }
+
+    private void updatePageScrollbars() {
         android.webkit.WebView view = getBridge().getWebView();
-        if (active && !pictureInPictureScrollbarsHidden) {
+        boolean hidden = fullscreenScrollbarsHidden || pictureInPictureScrollbarsHidden;
+        if (hidden && !pageScrollbarsHidden) {
             restoreVerticalScrollBar = view.isVerticalScrollBarEnabled();
             restoreHorizontalScrollBar = view.isHorizontalScrollBarEnabled();
             view.setVerticalScrollBarEnabled(false);
             view.setHorizontalScrollBarEnabled(false);
-            pictureInPictureScrollbarsHidden = true;
-        } else if (!active && pictureInPictureScrollbarsHidden) {
+            pageScrollbarsHidden = true;
+        } else if (!hidden && pageScrollbarsHidden) {
             view.setVerticalScrollBarEnabled(restoreVerticalScrollBar);
             view.setHorizontalScrollBarEnabled(restoreHorizontalScrollBar);
-            pictureInPictureScrollbarsHidden = false;
+            pageScrollbarsHidden = false;
         }
     }
 

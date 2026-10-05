@@ -285,6 +285,7 @@ const state = {
   fullscreenRotationIgnoresSystemLock: false,
   rotateFullscreenToLandscape: true,
   enableMobileFullscreenSwipe: true,
+  enableMobileFullscreenSeek: true,
   mobileLeftSwipeAction: 'disabled',
   mobileRightSwipeAction: 'disabled',
   mobileFullscreenBrightness: false,
@@ -1097,6 +1098,23 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
+  updateYtDlpAutomaticDownloadRules: ({ commit, state }, update) => {
+    // Capture authorization during the gesture, before earlier saves can delay this one.
+    const persist = process.env.IS_ELECTRON
+      ? window.ftElectron.prepareAutomaticDownloadRulesWrite()
+      : value => DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
+    // Apply every mutation to saved rules so later edits preserve intervening cleanups.
+    pendingAutomaticDownloadRuleUpdate = pendingAutomaticDownloadRuleUpdate.then(async () => {
+      if (persist === null) throw new Error('Automatic download rules require a user action')
+      const value = typeof update === 'function' ? update(state.ytDlpAutomaticDownloadRules) : update
+      await persist(value)
+      // Publish successful writes even if a later edit is queued and could fail.
+      commit('setYtDlpAutomaticDownloadRules', value)
+      await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
+    }).catch(error => console.error(error))
+    return pendingAutomaticDownloadRuleUpdate
+  },
+
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)
@@ -1723,6 +1741,7 @@ const getters = {}
 const mutations = {}
 const actions = {}
 const runSettingUpdate = createSettingUpdateQueue()
+let pendingAutomaticDownloadRuleUpdate = Promise.resolve()
 
 // Build default getters, mutations and actions for every setting id
 for (const settingId of Object.keys(state)) {

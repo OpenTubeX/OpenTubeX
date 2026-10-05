@@ -15,6 +15,7 @@ test('platform-specific settings stay local to every device', () => {
     'defaultVolume',
     'displayVideoPlayButton',
     'enableClosedAppSubscriptionRefresh',
+    'enableMobileFullscreenSeek',
     'enableMobileFullscreenSwipe',
     'enablePullToRefresh',
     'fullscreenRotationIgnoresSystemLock',

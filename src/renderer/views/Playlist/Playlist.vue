@@ -114,7 +114,7 @@
         />
         <AutoScrollWrapper
           v-if="visiblePlaylistItems.length > 0"
-          :hot-zone-enabled="isSortOrderCustom && isVideoDragging"
+          :hot-zone-enabled="isSortOrderCustom && isVideoDragging && !draggedVideo.pointerDragging"
         >
           <FtElementList
             v-if="listType === 'grid'"
@@ -138,7 +138,7 @@
             :video-dragging-possible="videoDraggingPossible"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
-            @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+            @move-dragged-video="onMoveDraggedVideo"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
             @move-video-to-the-top="moveVideoToTheTop"
@@ -173,7 +173,7 @@
               :is-video-dragging="isVideoDragging"
               @drag-video="setDraggedVideo"
               @drag-video-end="onDragVideoEnd"
-              @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+              @move-dragged-video="onMoveDraggedVideo"
               @move-video-up="moveVideoUp"
               @move-video-down="moveVideoDown"
               @move-video-to-the-top="moveVideoToTheTop"
@@ -1481,6 +1481,16 @@ function moveDraggedVideoTemporarily({ videoId, playlistItemId }, { videoId: dro
 // Only fire once per 100ms to prevent items moving up and down repeatedly during transition
 // 100ms is manually tested value (50ms won't work)
 const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
+
+/**
+ * @param {VideoData} video
+ * @param {VideoData} source
+ */
+function onMoveDraggedVideo(video, source) {
+  // Pointer drags already wait for transitions and flush their final target.
+  if (source.pointerDragging) moveDraggedVideoTemporarily(video, source)
+  else moveDraggedVideoTemporarilyThrottled(video, source)
+}
 
 /**
  * @param {string} videoId

@@ -39,6 +39,7 @@ import { LegacyQualitySelection } from './player-components/LegacyQualitySelecti
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
+import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { VideoZoomSelection } from './player-components/VideoZoomSelection'
@@ -150,6 +151,7 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
+import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
@@ -4808,7 +4810,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (!props.liveChatAvailable && (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value))) {
+      if (!props.liveChatAvailable && !props.theatrePossible && props.chapters.length === 0 && (props.externalUrl || !useSponsorBlock.value)) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
@@ -5226,6 +5228,7 @@ export default defineComponent({
     const {
       cancelMobileFullscreenGesture,
       consumeMobileTitleClickSuppression,
+      dismissMobileMiniPlayer,
       finishMobileFullscreenGesture,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
@@ -5233,14 +5236,32 @@ export default defineComponent({
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
       mobileMiniPlayerDismissSettling,
+      mobileSeekPreview,
       moveMobileFullscreenGesture,
       startMobileFullscreenGesture,
     } = useMobileFullscreenGestures({
       getContainer: () => container.value,
       getControls: () => ui?.getControls(),
+      getSeekState: () => {
+        if (!video.value || !canSeek()) return null
+        const { start, end } = player.seekRange()
+        const time = video.value.currentTime
+        return Number.isFinite(start) && Number.isFinite(end) && Number.isFinite(time) && end > start
+          ? { time, start, end }
+          : null
+      },
+      seekToTime: time => {
+        if (!video.value || !canSeek()) return
+        // WebView can mark VOD ended within its last frame, even before duration.
+        const target = !player.isDynamic() && time === video.value.duration
+          ? Math.max(0, time - 0.1)
+          : time
+        seekBySeconds(target - video.value.currentTime, true, false, false)
+      },
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isSeekSwipeEnabled: () => store.getters.getEnableMobileFullscreenSeek,
       isPlaybackEnded: () => video.value?.ended === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
@@ -5270,6 +5291,19 @@ export default defineComponent({
       setShowUiOnPaused,
       showOverlayControls,
       togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
+    })
+
+    const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
+      preview: mobileSeekPreview,
+      getPlayer: () => player,
+      getVideoId: () => props.videoId,
+      loadImageDimensions,
+    })
+
+    watch(mobileSeekPreview, preview => {
+      ui?.getControls().dispatchEvent(new shaka.util.FakeEvent('seekpreviewchange', {
+        time: preview?.time ?? null,
+      }))
     })
 
     function resetMobileAdjustments(preserveGesture = false) {
@@ -5841,7 +5875,7 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function scheduleOverflowMenuLabelTitles(menu) {
-      if (overflowMenuTitleFrame !== null) {
+      if (!isActiveTab.value || menu.classList.contains('shaka-hidden') || overflowMenuTitleFrame !== null) {
         return
       }
 
@@ -5857,6 +5891,9 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function updateOverflowMenuLabelTitles(menu) {
+      if (!menu.isConnected || !isActiveTab.value || menu.classList.contains('shaka-hidden')) {
+        return
+      }
       for (const label of menu.querySelectorAll('.ft-menu-grid button span')) {
         const isVisible = label.clientWidth > 0 && label.clientHeight > 0
         const isClipped = isVisible && (
@@ -6361,8 +6398,9 @@ export default defineComponent({
         spacer.after(rightGlass)
       }
 
+      const timeDisplayGroup = controlPanel.querySelector('.ft-time-display-group')
       controlPanelResizeObserver = new ResizeObserver(entries => {
-        if (entries.some(entry => entry.target === controlPanel)) {
+        if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
           scheduleControlPanelLayout(controlPanel)
         }
         // Chapter width transitions can move these buttons without resizing
@@ -6374,15 +6412,30 @@ export default defineComponent({
       if (chaptersButton) {
         controlPanelResizeObserver.observe(chaptersButton)
       }
+      if (timeDisplayGroup) {
+        // Tabular timestamps usually change text without changing width.
+        // Measure only when the rendered group actually changes size.
+        controlPanelResizeObserver.observe(timeDisplayGroup)
+      }
 
       controlPanelMutationObserver = new MutationObserver(mutations => {
-        if (mutations.some(mutation => mutation.target !== controlPanel)) {
+        if (mutations.some(mutation => {
+          const target = mutation.target
+          if (target === controlPanel || target instanceof SVGElement ||
+            (mutation.type !== 'attributes' && timeDisplayGroup?.contains(target))) {
+            return false
+          }
+          // Shaka replaces icon paths and reapplies classes on media events.
+          // Neither an icon update nor an unchanged class affects geometry.
+          return mutation.type !== 'attributes' || mutation.oldValue !== target.getAttribute('class')
+        })) {
           scheduleControlPanelLayout(controlPanel)
         }
       })
       controlPanelMutationObserver.observe(controlPanel, {
         attributeFilter: ['class'],
         attributes: true,
+        attributeOldValue: true,
         characterData: true,
         childList: true,
         subtree: true
@@ -7214,6 +7267,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,
@@ -7344,7 +7398,7 @@ export default defineComponent({
       )))
       if (mobileFullscreenBrightnessActive.value) mobileAdjustments.setFullscreenBrightness(true)
     })
-    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction], () => {
+    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction, store.getters.getEnableMobileFullscreenSeek], () => {
       cancelMobileFullscreenGesture()
       mobileAdjustments.cancel()
     })
@@ -11467,7 +11521,7 @@ export default defineComponent({
 
       setupAutoPictureInPicture()
 
-      if (container.value && props.format !== 'audio' && typeof IntersectionObserver !== 'undefined') {
+      if (container.value) {
         setupScrollMiniIntersectionObserver()
       }
 
@@ -11584,7 +11638,10 @@ export default defineComponent({
     }
 
     async function performFirstLoad(isCurrentLoad = () => true) {
+      const generation = formatSwitchGeneration
+      const isCurrentInitialLoad = () => generation === formatSwitchGeneration && isCurrentLoad()
       clearSabrBackoffTimer()
+      clearPreRollTimer()
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
         // Longer timeout for receiving larger responses
         player.configure({
@@ -11605,18 +11662,19 @@ export default defineComponent({
         })
       }
 
+      // Online metadata may include a preroll deadline even when playing a download.
       const initialLoadDelayMs = props.delayLoadUntilUnix - Date.now()
-      if (initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
+      if (!props.localFilePlayback && initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
+        if (!ui || !player || !isCurrentInitialLoad()) return
         clearPreRollTimer()
-        if (!ui || !player || !isCurrentLoad()) return
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
           await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
-          if (!ui || !player || !isCurrentLoad()) return
+          if (!ui || !player || !isCurrentInitialLoad()) return
 
           if (props.format === 'dash') {
             // Let shaka-player's ABR pick the variant when auto quality is preferred
@@ -11642,7 +11700,7 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          if (ui && player && isCurrentLoad()) {
+          if (ui && player && isCurrentInitialLoad()) {
             handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
           }
         }
@@ -12575,6 +12633,14 @@ export default defineComponent({
       mobileFullscreenSwiping,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
+      mobileSeekPreview,
+      mobileSeekPreviewMessage: computed(() => {
+        const preview = mobileSeekPreview.value
+        if (!preview) return ''
+        const sign = preview.seconds < 0 ? '−' : '+'
+        return `${formatDurationAsTimestamp(preview.time)} (${sign}${formatDurationAsTimestamp(Math.abs(preview.seconds))})`
+      }),
+      mobileSeekThumbnailStyle,
       resetFullscreenDockHeights,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
@@ -12765,6 +12831,7 @@ export default defineComponent({
       handleScrollMiniControlsPointerMove,
       suppressScrollMiniPlayPausePointerReveal,
       dismissCrossTabMiniPlayer,
+      dismissMobileMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       restoreInlinePlayer,

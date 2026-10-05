@@ -443,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Ljust"
-      OpenTubeX Dark: "OpenTubeX Mörkt"
+      Ocean Light: "Ocean Ljust"
+      Ocean Dark: "Ocean Mörkt"
       Custom: Anpassat
     Light Theme: Ljust tema
     Dark Theme: Mörkt tema
@@ -630,6 +630,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videor att förinläsa"
     Concurrent Preloads: "Samtidiga förinläsningar"
     Ignore System Rotation Lock for Fullscreen: Ignorera systemets rotationslås för helskärm
+    Swipe Left or Right to Seek in Fullscreen: Svep åt vänster eller höger för att spola i helskärm
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -1943,6 +1944,15 @@ Tray Icon:
   Follow App Theme: "Följ appens tema"
 
 Form Inputs:
+  Enter Password Hint: "Ange ditt lösenord"
+  Choose Password Hint: "Välj ett lösenord"
+  Confirm Password Hint: "Upprepa ditt nya lösenord"
+  Encryption Passphrase Hint: "Ange din krypteringslösenfras"
+  Show Password: "Visa lösenord"
+  Hide Password: "Dölj lösenord"
+  Search Text Hint: "Ange sökord"
+  Playlist Description Hint: "Beskriv den här spellistan"
+  Filename Preview: "Förhandsvisning av filnamn"
   Enter Channels: "Ange kanaler"
   Enter Text: "Ange text"
   Video URL: Video- eller spelliste-URL
@@ -1961,3 +1971,6 @@ Form Inputs:
   Download Arguments Hint: Valfria argument för denna hämtning
   Generated ID Hint: Lämna tomt för att generera ett ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."

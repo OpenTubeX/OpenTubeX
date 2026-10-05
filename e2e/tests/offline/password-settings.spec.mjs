@@ -42,6 +42,12 @@ test.describe('password protected settings', () => {
 
     // A wrong password keeps it locked.
     await passwordInput.fill('wrong')
+    const visibilityToggle = page.getByRole('button', { name: 'Show password', exact: true })
+    await visibilityToggle.click()
+    await expect(passwordInput).toHaveAttribute('type', 'text')
+    await expect(unlockButton).toBeEnabled()
+    await page.getByRole('button', { name: 'Hide password', exact: true }).click()
+    await expect(passwordInput).toHaveAttribute('type', 'password')
     await passwordInput.press('Enter')
     await expect(passwordInput).toBeVisible()
     await expect(page.getByRole('alert')).toHaveText('Incorrect password')

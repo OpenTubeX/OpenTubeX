@@ -436,8 +436,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светла"
-      OpenTubeX Dark: "OpenTubeX Тамна"
+      Ocean Light: "Ocean Светла"
+      Ocean Dark: "Ocean Тамна"
       Custom: Прилагођена
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светла тема
@@ -650,6 +650,7 @@ Settings:
     Upcoming Videos to Preload: "Број снимака за учитавање унапред"
     Concurrent Preloads: "Истовремена предучитавања"
     Ignore System Rotation Lock for Fullscreen: Занемари системско закључавање ротације за цео екран
+    Swipe Left or Right to Seek in Fullscreen: Превуците налево или надесно за премотавање преко целог екрана
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -2000,6 +2001,15 @@ Tray Icon:
   Follow App Theme: "Прати тему апликације"
 
 Form Inputs:
+  Enter Password Hint: "Унесите своју лозинку"
+  Choose Password Hint: "Изаберите лозинку"
+  Confirm Password Hint: "Поновите нову лозинку"
+  Encryption Passphrase Hint: "Унесите своју фразу за шифровање"
+  Show Password: "Прикажи лозинку"
+  Hide Password: "Сакриј лозинку"
+  Search Text Hint: "Унесите појмове за претрагу"
+  Playlist Description Hint: "Опишите ову листу за репродукцију"
+  Filename Preview: "Преглед назива датотеке"
   Enter Channels: "Унесите канале"
   Enter Text: "Унесите текст"
   Video URL: URL видеа или плејлисте
@@ -2018,3 +2028,6 @@ Form Inputs:
   Download Arguments Hint: Опциони аргументи за ово преузимање
   Generated ID Hint: Оставите празно да генеришете ID
   Default Value: "Подразумевано: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Претрага са подешеним колачићима није успела."

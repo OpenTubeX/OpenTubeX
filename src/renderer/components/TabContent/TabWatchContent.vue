@@ -175,18 +175,30 @@ function beginRestorePreview() {
   // The retained Watch host follows the browsing page in document flow. Use
   // the tab's origin so a tall page cannot send the returning video offscreen.
   const targetBounds = previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
+  let targetLeft = targetBounds.left
+  let targetWidth = targetBounds.width
+  if (window.innerWidth > 680 && store.getters.getHideSideBarOnWatchPages &&
+    !document.querySelector('.app.watchSideNavOverlay')) {
+    // Returning to Watch removes the sidebar from the content layout. Give the
+    // preview that final width now, so its player does not recenter on release.
+    const sidebar = document.querySelector('.app > .sideNav')?.getBoundingClientRect()
+    if (sidebar) {
+      targetWidth += sidebar.width
+      if (sidebar.left < targetBounds.left) targetLeft -= sidebar.width
+    }
+  }
   previewOrigin = {
-    left: window.scrollX + targetBounds.left - parentBounds.left,
+    left: window.scrollX + targetLeft - parentBounds.left,
     top: window.scrollY + targetBounds.top - parentBounds.top
   }
   previewViewport = {
-    left: window.scrollX + targetBounds.left,
+    left: window.scrollX + targetLeft,
     top: window.scrollY + targetBounds.top
   }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
-    width: `${targetBounds.width}px`,
+    width: `${targetWidth}px`,
     height: `${window.innerHeight - targetBounds.top - window.scrollY}px`
   }
   watchRoot.value.style.opacity = '0'

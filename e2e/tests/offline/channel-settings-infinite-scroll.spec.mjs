@@ -32,7 +32,7 @@ for (const uiScale of [95, 125]) {
         const scroller = page.locator(list.scroller)
         const entries = page.locator(list.entry)
         const loader = scroller.locator('.ft-auto-load-next-page-wrapper')
-        const search = page.getByPlaceholder('Search channels', { exact: true })
+        const search = page.getByLabel('Search channels', { exact: true })
         const searchTop = await search.evaluate(element => element.getBoundingClientRect().top)
 
         await expect(entries).toHaveCount(24)

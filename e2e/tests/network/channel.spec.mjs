@@ -322,7 +322,16 @@ test.describe('channel page', () => {
 })
 
 test.describe('channel route changes', () => {
-  test.use({ seed: { settings: { backendPreference: 'invidious', backendFallback: false } } })
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
 
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
     const videos = [1, 2].map(number => ({
@@ -447,17 +456,17 @@ test.describe('channel route changes', () => {
         await page.locator(sel.searchInput).fill(CHANNEL_URL)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(/#\/channel\//)
+        await expect(page.getByText('Alpha').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(firstId)).toBe(true)
         await expect(page).toHaveURL(new RegExp(`#/channel/${firstId}/${tab}$`))
-        await expect(page.getByText('Alpha').first()).toBeVisible()
 
         await page.locator(sel.searchInput).fill(`https://www.youtube.com/channel/${secondId}`)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(new RegExp(`#/channel/${secondId}`))
+        await expect(page.getByText('Beta').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(secondId)).toBe(true)
-        await expect(page.getByText('Beta').first()).toBeVisible()
         await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
 
         const oldResponse = page.waitForResponse(response => response.url().includes(`/channels/${firstId}/${tab}`))

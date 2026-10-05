@@ -421,7 +421,10 @@ test.describe('seeded playlists', () => {
     await page.getByText('Favorites').click()
 
     await page.getByTitle('Edit Playlist Info').click()
+    expect((await page.getByLabel('Custom emoji').boundingBox()).width).toBeLessThanOrEqual(64)
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCSS('filter', 'grayscale(1)')
     await page.getByLabel('Custom emoji').fill('❤️‍🔥')
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCount(0)
     await page.getByTitle('Save Changes').click()
 
     const quickBookmarkButton = page.getByTitle('Quick Bookmark Enabled')
@@ -682,6 +685,91 @@ test.describe('custom playlist order', () => {
         }
       ]
     }
+  })
+
+  for (const layout of ['list', 'grid']) {
+    for (const scale of [100, 95]) {
+      test(`touch reorders ${layout} playlists without hiding the row at ${scale}% scale`, async ({ app, page }) => {
+        await page.setViewportSize({ width: layout === 'grid' ? 900 : 430, height: 1000 })
+        await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+          BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+        }, scale)
+        await dispatchStoreAction(page, 'updatePlaylistViewType', layout)
+        const session = await page.context().newCDPSession(page)
+        await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+        await goTo(page, 'userplaylists')
+        await page.getByText('Large custom playlist').click()
+
+        const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+        const grip = rows.first().locator('.grabBar')
+        await expect(grip).toBeVisible()
+        const from = await grip.boundingBox()
+        const to = await rows.nth(1).boundingBox()
+        const touch = (type, x, y) => session.send('Input.dispatchTouchEvent', {
+          type,
+          touchPoints: x == null ? [] : [{ x, y, id: 0 }]
+        })
+        await touch('touchStart', from.x + from.width / 2, from.y + from.height / 2)
+        await expect(rows.first()).toHaveClass(/pointerDragging/)
+        await expect(rows.first()).toHaveCSS('opacity', '0.6')
+        await page.waitForTimeout(600)
+        await expect(page.locator('.mobileLinkActionsBackdrop')).toHaveCount(0)
+        await touch('touchMove', to.x + to.width / 2, to.y + to.height / 2)
+        await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+        await touch('touchEnd')
+        await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
+        await expect.poll(() => page.evaluate(() => {
+          return document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            .getters.getPlaylist('large-custom-playlist').videos[0].title
+        })).toBe('Custom playlist video 2')
+
+        // Cancelling a subsequent gesture releases capture and leaves reordering usable.
+        const next = await rows.first().locator('.grabBar').boundingBox()
+        await touch('touchStart', next.x + next.width / 2, next.y + next.height / 2)
+        await touch('touchCancel')
+        await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+        await goTo(page, 'userplaylists')
+        await page.getByText('Large custom playlist').click()
+        await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
+        if (layout === 'list' && scale === 100) {
+          const handle = await rows.first().locator('.grabBar').boundingBox()
+          const initialScroll = await page.evaluate(() => window.scrollY)
+          await touch('touchStart', handle.x + handle.width / 2, handle.y + handle.height / 2)
+          await touch('touchMove', handle.x + handle.width / 2, 990)
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll + 100)
+          await expect.poll(() => rows.evaluateAll(elements => elements.findIndex(element => element.classList.contains('pointerDragging')))).toBeGreaterThan(2)
+          await touch('touchCancel')
+          await expect(page.locator('.pointerDragging, .draggedVideo, .hotZone')).toHaveCount(0)
+          const stoppedScroll = await page.evaluate(() => window.scrollY)
+          await page.waitForTimeout(150)
+          expect(await page.evaluate(() => window.scrollY)).toBe(stoppedScroll)
+        }
+      })
+    }
+  }
+
+  test('touch honors a fast final destination before release', async ({ page }) => {
+    await page.setViewportSize({ width: 430, height: 1000 })
+    await dispatchStoreAction(page, 'updatePlaylistViewType', 'list')
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+    const rows = page.locator('.playlistItemsCard [data-playlist-drag-item]')
+    const from = await rows.first().locator('.grabBar').boundingBox()
+    const second = await rows.nth(1).boundingBox()
+    const third = await rows.nth(2).boundingBox()
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: point ? [{ x: point.x + point.width / 2, y: point.y + point.height / 2, id: 0 }] : []
+    })
+    await touch('touchStart', from)
+    await touch('touchMove', second)
+    await touch('touchMove', third)
+    await touch('touchEnd')
+    await expect(rows.nth(2).locator('.h3Title')).toHaveText('Custom playlist video 1')
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getPlaylist('large-custom-playlist').videos[2].title)).toBe('Custom playlist video 1')
   })
 
   test('keeps the grid grab bars in place during the removal undo period', async ({ page }) => {

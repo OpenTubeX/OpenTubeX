@@ -26,9 +26,9 @@ for (const { name, lastItem, addButton, pickerRole } of [
     if (pickerRole === 'menu') {
       await picker.getByRole('menuitem', { name: lastItem, exact: true }).click()
     } else {
-      await picker.getByPlaceholder('Search settings').fill(lastItem)
+      await picker.getByLabel('Search settings').fill(lastItem)
       await picker.locator('.optionWrapper').filter({ hasText: lastItem }).click()
-      await picker.getByPlaceholder('Search settings').press('Escape')
+      await picker.getByLabel('Search settings').press('Escape')
     }
     await expect(reset).toBeDisabled()
 

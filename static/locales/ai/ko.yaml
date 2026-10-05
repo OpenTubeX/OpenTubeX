@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: 회원 전용
 Search Filters:
+  Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순
@@ -522,8 +523,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 밝은 테마"
-      OpenTubeX Dark: "OpenTubeX 어두운 테마"
+      Ocean Light: "Ocean 밝은 테마"
+      Ocean Dark: "Ocean 어두운 테마"
       Custom: 사용자 지정
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -802,6 +803,7 @@ Settings:
     Upcoming Videos to Preload: "미리 불러올 동영상 수"
     Concurrent Preloads: "동시 미리 로드 수"
     Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
+    Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -2377,6 +2379,15 @@ Tray Icon:
   Follow App Theme: "앱 테마 따르기"
 
 Form Inputs:
+  Enter Password Hint: "비밀번호를 입력하세요"
+  Choose Password Hint: "비밀번호를 설정하세요"
+  Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
+  Encryption Passphrase Hint: "암호화 암호문을 입력하세요"
+  Show Password: "비밀번호 표시"
+  Hide Password: "비밀번호 숨기기"
+  Search Text Hint: "검색어 입력"
+  Playlist Description Hint: "이 재생목록을 설명하세요"
+  Filename Preview: "파일 이름 미리보기"
   Enter Channels: "채널 입력"
   Enter Text: "텍스트 입력"
   Video URL: 동영상 또는 재생목록 URL

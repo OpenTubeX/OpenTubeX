@@ -445,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Vaalea"
-      OpenTubeX Dark: "OpenTubeX Tumma"
+      Ocean Light: "Ocean Vaalea"
+      Ocean Dark: "Ocean Tumma"
       Custom: Mukautettu
     Light Theme: Vaalea teema
     Dark Theme: Tumma teema
@@ -641,6 +641,7 @@ Settings:
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
+    Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1972,6 +1973,15 @@ Tray Icon:
   Follow App Theme: "Seuraa sovelluksen teemaa"
 
 Form Inputs:
+  Enter Password Hint: "Anna salasanasi"
+  Choose Password Hint: "Valitse salasana"
+  Confirm Password Hint: "Toista uusi salasanasi"
+  Encryption Passphrase Hint: "Anna salauksen tunnuslauseesi"
+  Show Password: "Näytä salasana"
+  Hide Password: "Piilota salasana"
+  Search Text Hint: "Kirjoita hakusanat"
+  Playlist Description Hint: "Kuvaile tätä soittolistaa"
+  Filename Preview: "Tiedostonimen esikatselu"
   Enter Channels: "Syötä kanavat"
   Enter Text: "Syötä teksti"
   Video URL: Videon tai soittolistan URL
@@ -1990,3 +2000,6 @@ Form Inputs:
   Download Arguments Hint: Valinnaiset argumentit tälle lataukselle
   Generated ID Hint: Jätä tyhjäksi luodaksesi tunnuksen
   Default Value: "Oletus: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."

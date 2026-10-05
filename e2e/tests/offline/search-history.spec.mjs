@@ -439,6 +439,11 @@ test.describe('search suggestion remove button layout', () => {
       store.commit('setVerticalTabBarWidth', 300)
     })
     await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    // The narrower header may switch to its compact search layout.
+    if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
+      await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
+    }
+    await page.locator(sel.searchInput).focus()
 
     const entry = suggestions(page).first()
     const removeButton = entry.locator('.removeButton')

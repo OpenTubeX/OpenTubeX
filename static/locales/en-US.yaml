@@ -132,6 +132,7 @@ Search Listing:
     Closed Captions: Closed Captions
   # In Filter Button
 Search Filters:
+  Cookie Search Failed: "Search failed with the configured cookies."
   Search Filters: Search Filters
   Prioritize:
     Prioritize: Prioritize
@@ -741,8 +742,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Light"
-      OpenTubeX Dark: "OpenTubeX Dark"
+      Ocean Light: "Ocean Light"
+      Ocean Dark: "Ocean Dark"
       Base Theme: Base Theme
       Black: Black
       Custom: Custom
@@ -1115,6 +1116,7 @@ Settings:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -3142,6 +3144,15 @@ Tray Icon:
   Follow App Theme: "Follow app theme"
 
 Form Inputs:
+  Enter Password Hint: "Enter your password"
+  Choose Password Hint: "Choose a password"
+  Confirm Password Hint: "Repeat your new password"
+  Encryption Passphrase Hint: "Enter your encryption passphrase"
+  Show Password: "Show password"
+  Hide Password: "Hide password"
+  Search Text Hint: "Enter search terms"
+  Playlist Description Hint: "Describe this playlist"
+  Filename Preview: "Filename preview"
   Enter Channels: "Enter channels"
   Enter Text: "Enter text"
   Video URL: Video or playlist URL

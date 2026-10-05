@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Claro"
-      OpenTubeX Dark: "OpenTubeX Oscuro"
+      Ocean Light: "Ocean Claro"
+      Ocean Dark: "Ocean Oscuro"
       Custom: Personalizado
     Light Theme: Tema claro
     Dark Theme: Tema oscuro
@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Vídeos próximos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
+    Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus vídeos.
@@ -1925,6 +1926,15 @@ Tray Icon:
   Follow App Theme: "Seguir el tema de la aplicación"
 
 Form Inputs:
+  Enter Password Hint: "Introduce tu contraseña"
+  Choose Password Hint: "Elige una contraseña"
+  Confirm Password Hint: "Repite tu nueva contraseña"
+  Encryption Passphrase Hint: "Introduce tu frase de cifrado"
+  Show Password: "Mostrar contraseña"
+  Hide Password: "Ocultar contraseña"
+  Search Text Hint: "Introduce términos de búsqueda"
+  Playlist Description Hint: "Describe esta lista de reproducción"
+  Filename Preview: "Vista previa del nombre de archivo"
   Enter Channels: "Introduce canales"
   Enter Text: "Introduce texto"
   Video URL: URL del vídeo o de la lista
@@ -1943,3 +1953,6 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionales para esta descarga
   Generated ID Hint: Déjalo vacío para generar un ID
   Default Value: "Predeterminado: {value}"
+
+Search Filters:
+  Cookie Search Failed: "La búsqueda con las cookies configuradas falló."

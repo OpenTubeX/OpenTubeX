@@ -438,8 +438,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Lys"
-      OpenTubeX Dark: "OpenTubeX Mørk"
+      Ocean Light: "Ocean Lys"
+      Ocean Dark: "Ocean Mørk"
       Custom: Brugerdefineret
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Lyst tema
@@ -652,6 +652,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
+    Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -2009,6 +2010,15 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
+  Enter Password Hint: "Indtast din adgangskode"
+  Choose Password Hint: "Vælg en adgangskode"
+  Confirm Password Hint: "Gentag din nye adgangskode"
+  Encryption Passphrase Hint: "Indtast din krypteringsadgangssætning"
+  Show Password: "Vis adgangskode"
+  Hide Password: "Skjul adgangskode"
+  Search Text Hint: "Indtast søgeord"
+  Playlist Description Hint: "Beskriv denne afspilningsliste"
+  Filename Preview: "Forhåndsvisning af filnavn"
   Enter Channels: "Indtast kanaler"
   Enter Text: "Indtast tekst"
   Video URL: Video- eller afspilningsliste-URL
@@ -2027,3 +2037,6 @@ Form Inputs:
   Download Arguments Hint: Valgfrie argumenter til denne download
   Generated ID Hint: Lad stå tomt for at generere et ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."
