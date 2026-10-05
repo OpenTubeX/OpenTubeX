@@ -143,13 +143,24 @@ export function createAndroidRecordStorage(factory = indexedDB, native = null) {
 async function readShippedRecords(factory, filename) {
   // Read migration sources without creating an empty IndexedDB or writing an
   // import marker: WebView may already be refusing writes under storage pressure.
-  const names = new Set((await factory.databases()).map(database => database.name))
+  const names = typeof factory.databases === 'function'
+    ? new Set((await factory.databases()).map(database => database.name))
+    : null
   async function read(name, operation) {
+    if (names && !names.has(name)) return null
     const database = await new Promise((resolve, reject) => {
+      let missing = false
       const request = factory.open(name)
+      // Without enumeration, probe the known names but roll back an attempted
+      // creation. Never leave an empty database or modify an existing source.
+      request.onupgradeneeded = () => {
+        missing = true
+        request.transaction.abort()
+      }
       request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
+      request.onerror = () => missing ? resolve(null) : reject(request.error)
     })
+    if (!database) return null
     try { return await operation(database) } finally { database.close() }
   }
   function get(database, store, key) {
@@ -160,16 +171,12 @@ async function readShippedRecords(factory, filename) {
       tx.onabort = () => reject(tx.error)
     })
   }
-  const name = `opentubex-records-${filename}`
-  if (names.has(name)) {
-    const contents = await read(name, async database => {
-      if (!database.objectStoreNames.contains('metadata') || !database.objectStoreNames.contains('records')) return null
-      if (!await get(database, 'metadata', 'imported')) return null
-      return (await get(database, 'records')).join('\n')
-    })
-    if (contents !== null) return contents
-  }
-  if (!names.has('NeDB')) return ''
+  const contents = await read(`opentubex-records-${filename}`, async database => {
+    if (!database.objectStoreNames.contains('metadata') || !database.objectStoreNames.contains('records')) return null
+    if (!await get(database, 'metadata', 'imported')) return null
+    return (await get(database, 'records')).join('\n')
+  })
+  if (contents !== null) return contents
   const raw = await read('NeDB', database => database.objectStoreNames.contains('nedbdata')
     ? get(database, 'nedbdata', filename)
     : '')

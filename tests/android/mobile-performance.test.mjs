@@ -300,3 +300,45 @@ test('native migration skips corrupt and non-document legacy lines', async () =>
     assert.deepEqual(result.split('\n').map(JSON.parse), [{ _id: 'retained', value: 42 }])
   } finally { await context.close() }
 })
+
+
+for (const source of ['records', 'legacy', 'empty']) {
+  test(`native migration without IndexedDB enumeration reads ${source} without creating databases`, async () => {
+    const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
+    try {
+      const result = await page.evaluate(async source => {
+        const record = '{"_id":"retained","value":42}'
+        if (source === 'records') {
+          await window.module.createAndroidRecordStorage().appendFileAsync('history.db', record)
+        } else if (source === 'legacy') {
+          const database = await new Promise(resolve => {
+            const request = indexedDB.open('NeDB', 1)
+            request.onupgradeneeded = () => request.result.createObjectStore('nedbdata')
+            request.onsuccess = () => resolve(request.result)
+          })
+          await new Promise(resolve => {
+            const tx = database.transaction('nedbdata', 'readwrite')
+            tx.objectStore('nedbdata').put(record, 'history.db')
+            tx.oncomplete = resolve
+          })
+          database.close()
+        }
+        const names = async () => (await indexedDB.databases()).map(entry => entry.name).sort()
+        const before = await names()
+        const files = new Map()
+        const native = {
+          async readRecords({ filename }) { return { initialized: files.has(filename), contents: files.get(filename) ?? '' } },
+          async importRecords({ filename, contents }) { files.set(filename, contents) },
+        }
+        const factory = { open: indexedDB.open.bind(indexedDB) }
+        const storage = window.module.createAndroidRecordStorage(factory, native)
+        const imported = await storage.readFileAsync('history.db')
+        const absent = await storage.readFileAsync('settings.db')
+        return { imported, absent, before, after: await names() }
+      }, source)
+      assert.equal(result.imported, source === 'empty' ? '' : '{"_id":"retained","value":42}')
+      assert.equal(result.absent, '')
+      assert.deepEqual(result.after, result.before, 'Migration probes must not leave empty IndexedDB databases')
+    } finally { await context.close() }
+  })
+}
