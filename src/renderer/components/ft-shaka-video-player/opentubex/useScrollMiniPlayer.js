@@ -365,6 +365,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring) {
     const element = container.value
     if (!element) return
+    const visibleArtwork = element.querySelector('.musicAudioArtwork.retryImagePlaceholder') ?? element.querySelector('.musicAudioArtwork')
     // Use the inline surface in both directions, so expanding a cropped 16:9
     // thumbnail does not carry its shape all the way to the restored player.
     const interpolate = (start, end) => start + (end - start) * progress
@@ -387,7 +388,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       style.setProperty('--mobile-mini-video-base-width', `${baseVideo.width}px`)
       style.setProperty('--mobile-mini-video-base-height', `${baseVideo.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
-      const artwork = element.querySelector('.musicAudioArtwork.retryImagePlaceholder') ?? element.querySelector('.musicAudioArtwork')
+      const artwork = visibleArtwork
       if (artwork && !artwork.hidden) {
         const bounds = artwork.getBoundingClientRect()
         const surface = artwork.closest('.musicAudioSurface').getBoundingClientRect()
@@ -397,11 +398,22 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
           top: bounds.top - surface.top,
           width: bounds.width,
           height: bounds.height,
-          aspectRatio: artwork.naturalWidth / artwork.naturalHeight || 1,
           radius: Number.parseFloat(getComputedStyle(artwork).borderTopLeftRadius) || 0
         }
+        const morph = mobileMiniMorphBase
+        // Capture runs before FtRetryImage handles load. Redraw next frame,
+        // after Vue replaces the fallback, even when the finger is held still.
+        morph.onImageLoad = () => {
+          if (morph.imageLoadFrame != null) cancelAnimationFrame(morph.imageLoadFrame)
+          morph.imageLoadFrame = requestAnimationFrame(() => {
+            morph.imageLoadFrame = null
+            if (mobileMiniMorphBase === morph) morph.redraw()
+          })
+        }
+        element.addEventListener('load', morph.onImageLoad, true)
       }
     }
+    mobileMiniMorphBase.redraw = () => renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring)
     const { rect: base, video: baseVideo } = mobileMiniMorphBase
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
@@ -433,9 +445,15 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       surface.style.clipPath = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
     }
     const artwork = mobileMiniMorphBase.artwork
-    if (artwork) {
-      const width = Math.min(artwork.width, artwork.height * artwork.aspectRatio)
-      const height = width / artwork.aspectRatio
+    if (artwork && visibleArtwork && !visibleArtwork.hidden) {
+      if (artwork.element !== visibleArtwork) {
+        artwork.element.style.removeProperty('transform')
+        artwork.element.style.removeProperty('border-radius')
+        artwork.element = visibleArtwork
+      }
+      const aspect = visibleArtwork.naturalWidth / visibleArtwork.naturalHeight || 1
+      const width = Math.min(artwork.width, artwork.height * aspect)
+      const height = width / aspect
       const cover = Math.max(videoWidth / width, videoHeight / height) / videoScale
       const scale = 1 + (cover - 1) * minimized
       const x = (baseVideo.width / 2 - artwork.left - artwork.width / 2) * minimized
@@ -454,6 +472,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const element = container.value
     if (!element) return
     const artwork = mobileMiniMorphBase?.artwork?.element
+    if (mobileMiniMorphBase?.onImageLoad) element.removeEventListener('load', mobileMiniMorphBase.onImageLoad, true)
+    if (mobileMiniMorphBase?.imageLoadFrame != null) cancelAnimationFrame(mobileMiniMorphBase.imageLoadFrame)
     artwork?.style.removeProperty('transform')
     artwork?.style.removeProperty('border-radius')
     for (const metadata of element.querySelectorAll('.musicAudioMetadata')) metadata.style.removeProperty('opacity')

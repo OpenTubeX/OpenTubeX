@@ -102,6 +102,9 @@ test('mobile morph keeps player and video layout fixed between animation frames'
 for (const hidden of [false, true]) {
   test(`music morph animates the visible fallback when artwork is ${hidden ? 'failed' : 'loading'}`, () => {
     const attributes = new Set()
+    const listeners = new Map()
+    const frames = new Map()
+    let showPlaceholder = true
     const style = () => ({ setProperty() {}, removeProperty(name) { delete this[name.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] } })
     const rect = { left: 0, top: 0, width: 400, height: 225 }
     const placeholder = {
@@ -117,18 +120,35 @@ for (const hidden of [false, true]) {
       container: { value: {
         style: style(), hasAttribute: name => attributes.has(name),
         setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
-        querySelector: selector => selector === '.musicAudioArtwork.retryImagePlaceholder' ? placeholder : loadingImage,
-        querySelectorAll: () => []
+        querySelector: selector => selector === '.musicAudioArtwork.retryImagePlaceholder' ? (showPlaceholder ? placeholder : null) : loadingImage,
+        querySelectorAll: () => [],
+        addEventListener: (type, listener) => listeners.set(type, listener),
+        removeEventListener: type => listeners.delete(type)
       } },
       video: { value: { videoWidth: 400, videoHeight: 225 } },
       mobileMiniBarOverlay: { value: null }, mobileMiniMorphBase: null,
-      getComputedStyle: () => ({ borderTopLeftRadius: '12px' })
+      getComputedStyle: () => ({ borderTopLeftRadius: '12px' }),
+      requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
+      cancelAnimationFrame: id => frames.delete(id)
     })
     methods.renderMobileMiniMorph(rect, { ...rect, top: 700 }, rect, { left: 8, top: 6, width: 80, height: 45 }, 1, false)
     assert.equal(placeholder.style.transform, 'translate(110px, 42.5px) scale(4)')
     assert.equal(placeholder.style.borderRadius, '0px')
     assert.equal(loadingImage.style.transform, undefined)
+    showPlaceholder = false
+    Object.assign(loadingImage, { hidden: false, naturalWidth: 480, naturalHeight: 270 })
+    // The real image replaces the fallback while the finger is held still.
+    listeners.get('load')?.()
+    const redraw = frames.get(1)
+    frames.delete(1)
+    redraw?.()
+    assert.equal(loadingImage.style.transform, 'translate(110px, 42.5px) scale(4)')
+    assert.equal(placeholder.style.transform, undefined)
+    listeners.get('load')?.()
     methods.clearMobileMiniMorph()
+    assert.equal(listeners.size, 0)
+    assert.equal(frames.size, 0)
+    assert.equal(loadingImage.style.transform, undefined)
     assert.equal(placeholder.style.transform, undefined)
     assert.equal(placeholder.style.borderRadius, undefined)
   })

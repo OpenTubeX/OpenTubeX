@@ -134,7 +134,10 @@ for (const uiScale of [100, 125]) {
       for (const distance of [30, 80, 150, 250]) {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
       }
-      endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
+      const overlay = page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay')
+      await expect(overlay).toBeVisible()
+      endpoint = await overlay.boundingBox()
+      expect(endpoint).not.toBeNull()
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     } finally {
       await cdp.detach()

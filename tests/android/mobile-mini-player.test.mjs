@@ -222,6 +222,30 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
           assert.ok(Math.abs(restored[side] - inline[side]) < 1, `restored ${side}: ${JSON.stringify({ restored, inline })}`)
         }
       }
+      if (artworkUnavailable) {
+        await t.test('artwork loading during a held swipe keeps the animated geometry', async () => {
+          const full = await player.boundingBox()
+          const down = { x: full.x + 12, y: full.y + 12 }
+          await touch('touchStart', down)
+          try {
+            await touch('touchMove', { ...down, y: down.y + 80 })
+            await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+            const fallback = await media.boundingBox()
+            await watch.evaluate(component => {
+              component.proxy.thumbnail = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="lime"/></svg>')
+            })
+            const loaded = player.locator('img.musicAudioArtwork:not(.retryImagePlaceholder)')
+            await expect(media).toHaveCount(0)
+            // No additional touch event: loading itself must repaint the morph.
+            await expect.poll(() => loaded.evaluate(image => image.style.transform)).not.toBe('')
+            const bounds = await loaded.boundingBox()
+            for (const side of ['x', 'y', 'width', 'height']) {
+              assert.ok(Math.abs(bounds[side] - fallback[side]) < 1, `loaded artwork preserves ${side} during the held swipe`)
+            }
+          } finally { await touch('touchEnd') }
+          await settle()
+        })
+      }
       return
     }
     if (posterOnly) {
