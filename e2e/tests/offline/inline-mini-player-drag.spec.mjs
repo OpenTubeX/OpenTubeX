@@ -128,11 +128,13 @@ for (const uiScale of [100, 125]) {
     const bounds = await player.boundingBox()
     const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
     const cdp = await page.context().newCDPSession(page)
+    let endpoint
     try {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
       for (const distance of [30, 80, 150, 250]) {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
       }
+      endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     } finally {
       await cdp.detach()
@@ -142,6 +144,11 @@ for (const uiScale of [100, 125]) {
       const nav = document.querySelector('.app > .sideNav').getBoundingClientRect()
       return nav.width > 190 && nav.left >= 0 && element.getBoundingClientRect().left >= nav.right - 2 / devicePixelRatio
     })).toBe(true)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    const settled = await player.boundingBox()
+    // This fixture retains desktop size constraints; Android covers the full
+    // bar geometry. Both must target the final sidebar edge before release.
+    expect(settled.x).toBeCloseTo(endpoint.x, 0)
   })
 }
 

@@ -7233,6 +7233,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,

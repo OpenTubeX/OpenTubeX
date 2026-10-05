@@ -201,14 +201,14 @@
   white-space: nowrap;
 }
 
-.ftVideoPlayer.scrollMiniPlayer .musicAudioContent {
+.ftVideoPlayer.scrollMiniPlayer:not([data-mobile-mini-morph]) .musicAudioContent {
   justify-content: center;
   inline-size: 100%;
   max-block-size: 76%;
   margin-block-end: 0;
 }
 
-.ftVideoPlayer.scrollMiniPlayer .musicAudioArtwork {
+.ftVideoPlayer.scrollMiniPlayer:not([data-mobile-mini-morph]) .musicAudioArtwork {
   inline-size: auto;
   block-size: 74%;
   max-inline-size: 74%;
@@ -219,7 +219,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   display: none !important;
 }
 
-.ftVideoPlayer.scrollMiniPlayer .musicAudioMetadata,
+.ftVideoPlayer.scrollMiniPlayer:not([data-mobile-mini-morph]) .musicAudioMetadata,
 .ftVideoPlayer.scrollMiniPlayer .musicVisualizerCanvas {
   display: none;
 }
@@ -5375,7 +5375,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   margin: 0 !important;
   border-radius: calc(4px * var(--ui-roundness));
   background: #000;
-  object-fit: contain !important;
+  object-fit: cover !important;
   transform: none !important;
 }
 
@@ -5383,8 +5383,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   overflow: hidden;
 }
 
-.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .countdownPoster img {
-  object-fit: contain;
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar:not([data-mobile-mini-morph]) > .countdownPoster img {
+  object-fit: cover;
+}
+
+.ftVideoPlayer.mobileMiniBar:not([data-mobile-mini-morph]) .musicAudioContent {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+}
+
+.ftVideoPlayer.mobileMiniBar:not([data-mobile-mini-morph]) .musicAudioArtwork {
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  max-block-size: none;
+  border-radius: 0;
+  object-fit: cover;
 }
 
 .ftVideoPlayer[data-mobile-mini-morph],
@@ -5425,7 +5443,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   max-height: none !important;
   margin: 0 !important;
   object-fit: contain !important;
-  transform: none !important;
+  transform: scale(var(--mobile-mini-media-scale, 1)) !important;
+  transform-origin: center;
   transition: none !important;
 }
 /* stylelint-enable no-descending-specificity */

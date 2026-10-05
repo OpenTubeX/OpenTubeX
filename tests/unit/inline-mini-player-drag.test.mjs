@@ -13,20 +13,22 @@ test('mobile morph keeps player and video layout fixed between animation frames'
     setProperty(name, value) { writes.push([name, value]) },
     removeProperty() {},
   }
-  const videoStyle = { removeProperty() { delete this.clipPath } }
-  const posterStyle = { removeProperty() { delete this.clipPath } }
+  const videoStyle = { setProperty(name, value) { this[name] = value }, removeProperty(name) { delete this[name]; if (name === 'clip-path') delete this.clipPath } }
+  const posterStyle = { setProperty(name, value) { this[name] = value }, removeProperty(name) { delete this[name]; if (name === 'clip-path') delete this.clipPath } }
   const overlayStyle = { removeProperty() { delete this.opacity } }
-  const surfaces = [{ style: videoStyle }]
+  const surfaces = [{ style: videoStyle, classList: { contains: () => false } }]
   const attributes = new Set()
+  const video = { style: videoStyle }
   const methods = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function releaseMobileMiniBarTransition('))}\n({ renderMobileMiniMorph, clearMobileMiniMorph })`, {
     container: { value: {
       style,
       hasAttribute: name => attributes.has(name),
       setAttribute: name => attributes.add(name),
       removeAttribute: name => attributes.delete(name),
-      querySelectorAll: () => surfaces,
+      querySelector: () => null,
+      querySelectorAll: selector => selector === '.musicAudioMetadata' ? [] : surfaces,
     } },
-    video: { value: { style: videoStyle } },
+    video: { value: video },
     mobileMiniBarOverlay: { value: { style: overlayStyle } },
     mobileMiniMorphBase: null,
   })
@@ -49,9 +51,12 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   assert.equal(videoStyle.clipPath, 'none', 'matching aspect ratios do not need a clipping layer')
   assert.ok(Math.abs(Number(overlayStyle.opacity) - 0.75) < 0.001)
   // Nonmatching aspect ratios still crop both playback and countdown surfaces.
-  surfaces.push({ style: posterStyle })
+  const posterImage = { naturalWidth: 0, naturalHeight: 0 }
+  surfaces.push({ style: posterStyle, classList: { contains: name => name === 'countdownPoster' }, querySelector: () => posterImage })
   render(from, to, videoFrom, { ...videoTo, height: 112 }, 0.5, false)
-  assert.match(videoStyle.clipPath, /^inset\(0px [\d.]+px\)$/)
+  const crop = videoStyle.clipPath.match(/^inset\((.+)px (.+)px\)$/)
+  assert.ok(Math.abs(Number(crop[1])) < 0.001)
+  assert.ok(Number(crop[2]) > 0)
   assert.notEqual(videoStyle.clipPath, 'inset(0px 0px)')
   assert.equal(posterStyle.clipPath, videoStyle.clipPath)
   methods.clearMobileMiniMorph()
@@ -68,6 +73,28 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   render(to, { ...from, width: 500, height: 375 }, videoTo, { ...videoFrom, width: 500, height: 375 }, 1, true)
   assert.deepEqual(writes.map(([name]) => name), ['transform'], 'resizing keeps the decode surface fixed')
   assert.match(writes[0][1], /scale\(1\.25\)/)
+  assert.equal(videoStyle.clipPath, 'none')
+  methods.clearMobileMiniMorph()
+
+  // A 4:3 picture inside a forced 16:9 inline player must lose its side bars
+  // continuously, reaching the same cover crop as the settled thumbnail.
+  video.videoWidth = 320
+  video.videoHeight = 240
+  render(from, to, videoFrom, videoTo, 0, false)
+  assert.equal(videoStyle['--mobile-mini-media-scale'], '1')
+  render(from, to, videoFrom, videoTo, 1, false)
+  assert.ok(Math.abs(Number(videoStyle['--mobile-mini-media-scale']) - 4 / 3) < 0.001)
+  // A wide thumbnail over that 4:3 video already fills the 16:9 slot and
+  // must not inherit the video's extra zoom before the settled cover crop.
+  posterImage.naturalWidth = 480
+  posterImage.naturalHeight = 270
+  render(from, to, videoFrom, videoTo, 1, false)
+  assert.equal(posterStyle['--mobile-mini-media-scale'], '1')
+  assert.equal(posterStyle.clipPath, 'none')
+  methods.clearMobileMiniMorph()
+  assert.equal(videoStyle['--mobile-mini-media-scale'], undefined)
+  render(to, from, videoTo, videoFrom, 1, true)
+  assert.equal(videoStyle['--mobile-mini-media-scale'], '1')
   assert.equal(videoStyle.clipPath, 'none')
   methods.clearMobileMiniMorph()
 })
@@ -102,6 +129,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     process: { env: { IS_CAPACITOR: false } },
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
+    mobileMiniMorphBase: null,
     usesMobileMiniBar: () => mobile,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
@@ -438,6 +466,33 @@ test('mobile Watch return preview stays at the final viewport position while bro
   assert.equal(-240 + Number.parseFloat(previewStyle.value.top), 60)
   assert.equal(previewStyle.value.height, '740px')
 })
+
+for (const right of [false, true]) {
+  for (const hiddenOnWatch of [false, true]) {
+    test(`landscape restore previews the final width with the ${right ? 'right' : 'left'} sidebar ${hiddenOnWatch ? 'hidden' : 'visible'} on Watch`, () => {
+      const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
+      const beginSource = watchSource.slice(watchSource.indexOf('function beginRestorePreview('), watchSource.indexOf('function updatePreviewPosition('))
+      const previewStyle = { value: null }
+      const bounds = { left: right ? 10 : 210, top: 78, width: 780 }
+      const previewHost = { value: {
+        getBoundingClientRect: () => bounds,
+        closest: () => ({ getBoundingClientRect: () => bounds })
+      } }
+      const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
+        previewActive: { value: false }, detached: { value: true }, previewHost, previewStyle,
+        watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
+        store: { getters: { getHideSideBarOnWatchPages: hiddenOnWatch } },
+        updatePreviewPosition() {},
+        document: { querySelector: selector => selector === '.app > .sideNav'
+          ? { getBoundingClientRect: () => ({ left: right ? 800 : 0, width: 200 }) } : null },
+        window: { scrollX: 0, scrollY: 0, innerWidth: 1000, innerHeight: 450, addEventListener() {} }
+      })
+      assert.equal(started, true)
+      assert.equal(previewStyle.value.width, hiddenOnWatch ? '980px' : '780px')
+      assert.equal(bounds.left + Number.parseFloat(previewStyle.value.left), hiddenOnWatch || right ? 10 : 210)
+    })
+  }
+}
 
 for (const navigatedAway of [false, true]) {
   test(`close ${navigatedAway ? 'disposes a retained page' : 'only hides a player from another tab'}`, () => {
