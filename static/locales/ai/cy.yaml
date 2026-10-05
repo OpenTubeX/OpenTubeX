@@ -1978,3 +1978,6 @@ Form Inputs:
   Download Arguments Hint: Ymresymiadau dewisol ar gyfer y lawrlwythiad hwn
   Generated ID Hint: Gadewch yn wag i gynhyrchu ID
   Default Value: "Diofyn: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."

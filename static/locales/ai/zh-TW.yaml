@@ -1948,3 +1948,6 @@ Form Inputs:
   Download Arguments Hint: 此次下載的選用參數
   Generated ID Hint: 留空以產生 ID
   Default Value: 預設值：{value}
+
+Search Filters:
+  Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"

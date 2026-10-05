@@ -1949,3 +1949,6 @@ Form Inputs:
   Download Arguments Hint: Voliteľné argumenty pre toto sťahovanie
   Generated ID Hint: Nechajte prázdne pre vygenerovanie ID
   Default Value: "Predvolené: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."

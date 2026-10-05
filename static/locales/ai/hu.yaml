@@ -1947,3 +1947,6 @@ Form Inputs:
   Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
   Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
   Default Value: "Alapértelmezett: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."

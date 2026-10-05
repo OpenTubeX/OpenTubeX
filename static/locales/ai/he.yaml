@@ -1997,3 +1997,6 @@ Form Inputs:
   Download Arguments Hint: ארגומנטים אופציונליים להורדה זו
   Generated ID Hint: השאר ריק כדי ליצור מזהה
   Default Value: "ברירת מחדל: {value}"
+
+Search Filters:
+  Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."

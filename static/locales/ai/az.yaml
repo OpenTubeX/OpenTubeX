@@ -1956,3 +1956,6 @@ Form Inputs:
   Download Arguments Hint: Bu yükləmə üçün əlavə arqumentlər
   Generated ID Hint: ID yaratmaq üçün boş saxlayın
   Default Value: "Standart: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."

@@ -1995,3 +1995,6 @@ Form Inputs:
   Download Arguments Hint: Προαιρετικά ορίσματα για αυτή τη λήψη
   Generated ID Hint: Αφήστε κενό για δημιουργία ID
   Default Value: "Προεπιλογή: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."

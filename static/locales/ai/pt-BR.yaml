@@ -1946,3 +1946,6 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionais para este download
   Generated ID Hint: Deixe em branco para gerar um ID
   Default Value: "Padrão: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A pesquisa com os cookies configurados falhou."

@@ -2023,3 +2023,6 @@ Form Inputs:
   Download Arguments Hint: Опциони аргументи за ово преузимање
   Generated ID Hint: Оставите празно да генеришете ID
   Default Value: "Подразумевано: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Претрага са подешеним колачићима није успела."

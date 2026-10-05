@@ -2032,3 +2032,6 @@ Form Inputs:
   Download Arguments Hint: Valgfrie argumenter til denne download
   Generated ID Hint: Lad stå tomt for at generere et ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."

@@ -1949,3 +1949,6 @@ Form Inputs:
   Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
   Generated ID Hint: Jäta tühjaks, et luua ID
   Default Value: "Vaikimisi: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."

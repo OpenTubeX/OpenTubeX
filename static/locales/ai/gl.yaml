@@ -1997,3 +1997,6 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionais para esta descarga
   Generated ID Hint: Déixao baleiro para xerar un ID
   Default Value: "Predeterminado: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Fallou a busca coas cookies configuradas."

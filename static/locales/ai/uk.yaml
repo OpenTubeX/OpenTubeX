@@ -1988,3 +1988,6 @@ Form Inputs:
   Download Arguments Hint: Необов’язкові аргументи для цього завантаження
   Generated ID Hint: Залиште порожнім, щоб згенерувати ID
   Default Value: "Типово: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Пошук із налаштованими файлами cookie не вдався."

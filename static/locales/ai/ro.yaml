@@ -1997,3 +1997,6 @@ Form Inputs:
   Download Arguments Hint: Argumente opționale pentru această descărcare
   Generated ID Hint: Lasă gol pentru a genera un ID
   Default Value: "Implicit: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."

@@ -1964,3 +1964,6 @@ Form Inputs:
   Download Arguments Hint: Aukerako argumentuak deskarga honetarako
   Generated ID Hint: Utzi hutsik ID bat sortzeko
   Default Value: "Lehenetsia: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
