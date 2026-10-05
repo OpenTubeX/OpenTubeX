@@ -7,6 +7,7 @@ import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } f
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 import { shouldHideMembersOnlyContent } from '../helpers/restricted-playback'
+import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { useTabContext } from '../tabs/TabContext'
 
 let cachedCandidates = null
@@ -19,6 +20,7 @@ export function useHomeRecommendations(visible) {
   let rankingGeneration = 0
   let requestController = null
   let initialized = false
+  let restoringCachedFeed = false
   let round = 0
   let limit = 24
   let feedId = crypto.randomUUID()
@@ -134,6 +136,25 @@ export function useHomeRecommendations(visible) {
     authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
     familyFriendly: store.getters.getShowFamilyFriendlyOnly,
   }))
+  const rankingContext = computed(() => JSON.stringify({
+    exploration: exploration.value,
+    blockLists: store.getters.getEnableBlockLists,
+    hideLiveStreams: store.getters.getHideLiveStreams,
+    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+    hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
+    forbiddenTitles: store.getters.getActiveForbiddenTitles,
+    hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
+  }))
+  function nextVisibilityChange() {
+    if (!store.getters.getHideUpcomingPremieres) return Infinity
+    const now = Date.now()
+    let next = Infinity
+    for (const video of candidates) {
+      const timestamp = getUpcomingPremiereTimestamp(video)
+      if (timestamp != null && timestamp > now) next = Math.min(next, timestamp)
+    }
+    return next
+  }
 
   async function refresh(useCache = false, append = false) {
     cancelRequest()
@@ -153,22 +174,41 @@ export function useHomeRecommendations(visible) {
       if (!append) clearFeed()
       return
     }
+    // Restore the completed feed before showing a loader. Reopening Home must
+    // not rebuild the learning profile or rank the same candidates again.
+    const cache = useCache && !append && cachedCandidates && Date.now() - cachedCandidates.at < CACHE_LIFETIME &&
+      cachedCandidates.context === context.value
+      ? cachedCandidates
+      : null
+    if (cache) {
+      candidates = cache.videos; feedId = cache.feedId; round = cache.round; limit = cache.limit
+      if (cache.rankingContext === rankingContext.value && Date.now() < cache.nextVisibilityChange) {
+        ranked.value = cache.ranked
+        initialized = true
+        return
+      }
+    }
+    restoringCachedFeed = Boolean(cache)
     isLoading.value = true
     // Vue's nextTick alone only flushes the DOM; let Chromium paint it before
     // preparing the learning inputs and starting the cooperative batches.
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
     if (requestGeneration !== generation) return
     const requestContext = context.value
+    const requestRankingContext = rankingContext.value
+    if (cache) {
+      // Candidate-only preference changes need a new ranking, not new requests.
+      const visibilityChange = nextVisibilityChange()
+      await rerank()
+      if (requestGeneration !== generation) return
+      cachedCandidates = { ...cache, ranked: ranked.value, rankingContext: requestRankingContext, nextVisibilityChange: visibilityChange }
+      restoringCachedFeed = false
+      isLoading.value = false
+      initialized = true
+      return
+    }
     if (!append) {
       limit = 24
-      if (useCache && cachedCandidates?.context === requestContext && Date.now() - cachedCandidates.at < CACHE_LIFETIME) {
-        candidates = cachedCandidates.videos; feedId = cachedCandidates.feedId; round = cachedCandidates.round
-        await rerank()
-        if (requestGeneration !== generation) return
-        isLoading.value = false
-        initialized = true
-        return
-      }
       candidates = []; ranked.value = []; feedId = crypto.randomUUID(); feedVersion.value++
     } else limit = Math.min(96, limit + 24)
     if (!useCache) round++
@@ -205,12 +245,25 @@ export function useHomeRecommendations(visible) {
     // Publish one completed ranking so each source response cannot reshuffle
     // cards while the user is choosing a video.
     candidates = mergeRecommendationCandidates([...candidates, ...result.videos]).slice(0, 1600)
+    const visibilityChange = nextVisibilityChange()
     await rerank(learned)
     if (generation !== requestGeneration) return
     initialized = true
     hasError.value = result.failedSources > 0
     isLoading.value = false
-    if (!hasError.value) cachedCandidates = { context: requestContext, videos: candidates, feedId, round, at: Date.now() }
+    if (!hasError.value) {
+      cachedCandidates = {
+        context: requestContext,
+        rankingContext: requestRankingContext,
+        videos: candidates,
+        ranked: ranked.value,
+        feedId,
+        round,
+        limit,
+        at: Date.now(),
+        nextVisibilityChange: visibilityChange,
+      }
+    }
     function withFallback(local, invidious, signal) {
       return fetchRecommendationSource(backend === 'local' ? local : invidious,
         fallback ? (backend === 'local' ? invidious : local) : null, signal)
@@ -230,6 +283,7 @@ export function useHomeRecommendations(visible) {
     rankingGeneration++
     requestController?.abort()
     requestController = null
+    restoringCachedFeed = false
     isLoading.value = false
   }
   function clearFeed() {
@@ -274,8 +328,14 @@ export function useHomeRecommendations(visible) {
       clearFeed()
       initialized = available.value
     })
-  watch(exploration, () => rerank())
-  watch(() => store.getters.getEnableBlockLists, () => rerank())
+  function updateRanking() {
+    // Supersede the entire cached restore so a cancelled ranking cannot publish
+    // an empty feed while the replacement ranking is still running.
+    if (restoringCachedFeed) refresh(true)
+    else rerank()
+  }
+  watch(exploration, updateRanking)
+  watch(() => store.getters.getEnableBlockLists, updateRanking)
   onBeforeUnmount(cancelRequest)
   return {
     enabled,
