@@ -3,7 +3,7 @@
     <div
       v-if="loading || errorMessage"
       class="externalMediaLayout"
-      :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
+      :class="{ useTheatreMode, noSidebar: !hasSidebar }"
     >
       <div class="externalMediaVideo">
         <div
@@ -66,7 +66,7 @@
       <div
         ref="videoLayout"
         class="externalMediaLayout"
-        :class="{ ambientModeActive, useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
+        :class="{ ambientModeActive, useTheatreMode, noSidebar: !hasSidebar }"
       >
         <div class="externalMediaVideo">
           <template v-if="source">
@@ -114,7 +114,7 @@
               @seeked="handleSeeked"
               @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
               @toggle-theatre-mode="toggleTheatreMode"
-              @chapters-overlay-change="showChapters = $event"
+              @chapters-overlay-change="handleChaptersOverlayChange"
             />
             <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
             <audio
@@ -247,35 +247,43 @@
             :license="metadata.license"
             @timestamp-event="seekTo"
           />
-          <FtCard
-            v-if="source && chapters.length && showChapters"
-            class="externalMediaChapters"
-          >
-            <div class="chaptersPanelHeader">
-              <h2>{{ t('Chapters.Chapters') }}</h2>
-              <button
-                type="button"
-                class="chaptersPanelClose"
-                :aria-label="t('Chapters.Close Chapters')"
-                :title="t('Chapters.Close Chapters')"
-                @click="showChapters = false"
-              >
-                <FtIcon :icon="['fas', 'xmark']" />
-              </button>
-            </div>
-            <WatchVideoChapters
-              :chapters="chapters"
-              :current-chapter-index="currentChapterIndex"
-              :fallback-thumbnail="thumbnail"
-              @timestamp-event="seekTo"
-              @copy-timestamp="copyChapterTimestamp"
-            />
-          </FtCard>
         </div>
         <aside
-          v-if="chatAvailable && chatOpen"
+          v-if="hasSidebar"
           class="externalMediaSidebar"
         >
+          <FtPhonePanel
+            :enabled="phoneLayout && !fullscreenLiveChatOpen"
+            :open="chaptersPanelOpen"
+            :title="t('Chapters.Chapters')"
+            fill
+            @close="showChapters = false"
+          >
+            <FtCard
+              v-if="chaptersPanelOpen"
+              class="externalMediaChapters watchVideoChaptersPanel"
+            >
+              <div class="chaptersPanelHeader">
+                <h2>{{ t('Chapters.Chapters') }}</h2>
+                <button
+                  type="button"
+                  class="chaptersPanelClose"
+                  :aria-label="t('Chapters.Close Chapters')"
+                  :title="t('Chapters.Close Chapters')"
+                  @click="showChapters = false"
+                >
+                  <FtIcon :icon="['fas', 'xmark']" />
+                </button>
+              </div>
+              <WatchVideoChapters
+                :chapters="chapters"
+                :current-chapter-index="currentChapterIndex"
+                :fallback-thumbnail="thumbnail"
+                @timestamp-event="seekTo"
+                @copy-timestamp="copyChapterTimestamp"
+              />
+            </FtCard>
+          </FtPhonePanel>
           <Teleport
             :to="fullscreenLiveChatTarget || 'body'"
             :disabled="!fullscreenLiveChatOpen"
@@ -306,7 +314,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -316,6 +324,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
@@ -327,6 +336,7 @@ import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
@@ -348,6 +358,11 @@ const player = useTemplateRef('player')
 const companionAudio = useTemplateRef('companionAudio')
 const companionAudioNeeded = ref(false)
 const videoLayout = useTemplateRef('videoLayout')
+const phoneLayout = usePhoneLayout()
+provide('phonePanelPlayer', () => player.value?.$refs.container)
+provide('phonePanelInlinePlayer', () => player.value?.scrollMiniPlayerActive
+  ? player.value.$refs.scrollMiniPlaceholder
+  : player.value?.$refs.container)
 const mediaUrl = ref('')
 const currentTime = ref(0)
 const startTime = ref(null)
@@ -390,7 +405,14 @@ const twitchChatTarget = computed(() => {
 const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarget.value.type === 'replay'
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
-const theatreTogglePossible = computed(() => windowWidth.value > 1350 && Boolean(chatAvailable.value && chatOpen.value))
+const chaptersPanelOpen = computed(() => Boolean(source.value && chapters.value.length && showChapters.value))
+const hasSidebar = computed(() => Boolean(chatAvailable.value && chatOpen.value) || chaptersPanelOpen.value)
+const theatreTogglePossible = computed(() => windowWidth.value > 1350 && hasSidebar.value)
+
+function handleChaptersOverlayChange(open) {
+  if (open && !hasSidebar.value && store.getters.getDefaultViewingMode === 'theatre') useTheatreMode.value = true
+  showChapters.value = open
+}
 
 async function toggleTheatreMode() {
   const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
@@ -454,6 +476,8 @@ function updateWindowWidth() {
 }
 
 function handleSeeking(time) {
+  // A seek takes precedence over a restore still waiting for companion metadata.
+  startTime.value = null
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
   seeking.value = true
@@ -853,7 +877,8 @@ onBeforeUnmount(() => {
   background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
 }
 
-.externalMediaSidebar :deep(.twitchChat) {
+.externalMediaSidebar :deep(.twitchChat),
+.externalMediaSidebar .externalMediaChapters {
   margin-block: 0 16px;
   margin-inline: 8px;
 }
@@ -1175,6 +1200,38 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaChapters :deep(.chaptersWrapper) {
-  max-block-size: 360px;
+  max-block-size: 480px;
+  --scrollbar-color: inherit;
+  --scrollbar-color-hover: inherit;
+}
+
+.externalMediaChapters :deep(.chapter) {
+  border-block-end: 1px solid var(--side-nav-hover-color);
+  background-color: transparent;
+}
+
+.externalMediaChapters :deep(.chapter:hover),
+.externalMediaChapters :deep(.chapter:focus-within) {
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 60%, transparent);
+}
+
+.externalMediaChapters :deep(.chapter.current),
+.externalMediaChapters :deep(.chapter.current:hover),
+.externalMediaChapters :deep(.chapter.current:focus-within) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.externalMediaChapters :deep(.chapterSeek),
+.externalMediaChapters :deep(.copyTimestamp) {
+  color: inherit;
+}
+
+.externalMediaChapters :deep(.copyTimestamp:hover),
+.externalMediaChapters :deep(.copyTimestamp:focus-visible) {
+  background-color: var(--side-nav-hover-color);
+}
+
+.externalMediaChapters :deep(.chapterThumbnail) {
+  background-color: var(--secondary-card-bg-color);
 }
 </style>

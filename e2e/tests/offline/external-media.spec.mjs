@@ -124,72 +124,98 @@ test('external media restarts when its extracted duration is shorter than the sa
   expect(await video.evaluate(element => element.currentTime)).toBeLessThan(2)
 })
 
-test('external media resumes and clears the longer companion-audio timeline', async ({ app, page }) => {
-  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  const mediaUrl = 'https://clips.example.test/clip'
-  const videoUrl = 'https://clips.example.test/video.mp4'
-  const audioUrl = 'https://clips.example.test/audio.m4a'
-  const executable = path.join(app.userDataDir, 'external-resume-audio.sh')
-  const response = JSON.stringify({
-    title: 'Looping video with a longer soundtrack',
-    formats: [
-      { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
-      { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' },
-    ]
-  })
-  await writeFile(executable, ['#!/bin/sh',
-    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
-    `printf '%s\\n' '${response}'`,
-  ].join('\n'))
-  await chmod(executable, 0o755)
-  for (const [url, file, contentType] of [
-    [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
-    [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
-  ]) {
-    const body = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media', file), 'utf8')).replaceAll('\n', ''), 'base64')
-    await page.route(`${url}*`, route => {
-      const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '')
-      const start = range ? Number(range[1]) : 0
-      const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
-      return route.fulfill({
-        status: range ? 206 : 200,
-        contentType,
-        headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {}) },
-        body: body.subarray(start, end + 1)
-      })
+for (const seekBeforeMetadata of [false, true]) {
+  test(seekBeforeMetadata
+    ? 'external media preserves seeks made before companion metadata arrives'
+    : 'external media resumes and clears the longer companion-audio timeline', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = 'https://clips.example.test/clip'
+    const videoUrl = 'https://clips.example.test/video.mp4'
+    const audioUrl = 'https://clips.example.test/audio.m4a'
+    const executable = path.join(app.userDataDir, 'external-resume-audio.sh')
+    const response = JSON.stringify({
+      title: 'Looping video with a longer soundtrack',
+      formats: [
+        { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+        { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' },
+      ]
     })
-  }
-  await page.evaluate(async ytDlpPath => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-    await store.dispatch('updateHideSideBarOnWatchPages', false)
-  }, executable)
-  const open = async () => {
-    await page.locator(sel.searchInput).fill(mediaUrl)
-    await page.locator(sel.searchInput).press('Enter')
-    await waitForPlayback(page)
-    await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(0)
-    await video.evaluate(element => element.pause())
-  }
-  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
-  const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
-  await open()
-  await expect(video).toHaveJSProperty('loop', true)
-  const position = await audio.evaluate(element => element.duration / 2)
-  await audio.evaluate((element, seconds) => { element.currentTime = seconds }, position)
-  await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
-  await video.evaluate(element => element.dispatchEvent(new Event('pause')))
-  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
-  await goTo(page, 'history')
-  await open()
-  expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(position)
-  expect(await video.evaluate(element => element.currentTime)).toBeCloseTo(position % await video.evaluate(element => element.duration), 0)
-  await audio.evaluate(element => { element.currentTime = element.duration - 0.1 })
-  await video.evaluate(element => element.play())
-  await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)
-  await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
-})
+    await writeFile(executable, ['#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`,
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    let releaseAudio
+    const audioReady = new Promise(resolve => { releaseAudio = resolve })
+    for (const [url, file, contentType] of [
+      [videoUrl, 'post-live-video.mp4.b64', 'video/mp4'],
+      [audioUrl, 'post-live-long-audio.m4a.b64', 'audio/mp4'],
+    ]) {
+      const body = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media', file), 'utf8')).replaceAll('\n', ''), 'base64')
+      await page.route(`${url}*`, async route => {
+        if (seekBeforeMetadata && url === audioUrl && route.request().resourceType() === 'media') await audioReady
+        const range = /bytes=(\d+)-(\d*)/.exec(route.request().headers().range ?? '')
+        const start = range ? Number(range[1]) : 0
+        const end = range?.[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+        return route.fulfill({
+          status: range ? 206 : 200,
+          contentType,
+          headers: { 'accept-ranges': 'bytes', 'content-length': String(end - start + 1), ...(range ? { 'content-range': `bytes ${start}-${end}/${body.length}` } : {}) },
+          body: body.subarray(start, end + 1)
+        })
+      })
+    }
+    await page.evaluate(async ytDlpPath => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateHideSideBarOnWatchPages', false)
+    }, executable)
+    const open = async () => {
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      await waitForPlayback(page)
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(0)
+      await video.evaluate(element => element.pause())
+    }
+    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+    if (seekBeforeMetadata) {
+      await page.evaluate(url => localStorage.setItem(`externalMediaPosition:${url}`, JSON.stringify({ seconds: 3, updatedAt: Date.now() })), mediaUrl)
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      await expect.poll(() => video.evaluate(element => element.readyState).catch(() => 0)).toBeGreaterThanOrEqual(2)
+      expect(await audio.evaluate(element => Number.isFinite(element.duration))).toBe(false)
+      await video.evaluate(element => { element.pause(); element.currentTime = 0.75 })
+      await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      releaseAudio()
+      await expect.poll(() => audio.evaluate(element => Number.isFinite(element.duration))).toBe(true)
+      await expect(video).toHaveJSProperty('loop', true)
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeCloseTo(0.75, 1)
+      await video.evaluate(element => element.play())
+      await expect.poll(() => audio.evaluate(element => element.currentTime)).toBeGreaterThan(1)
+      await video.evaluate(element => element.pause())
+      const position = await audio.evaluate(element => element.currentTime)
+      await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
+      return
+    }
+    await open()
+    await expect(video).toHaveJSProperty('loop', true)
+    const position = await audio.evaluate(element => element.duration / 2)
+    await audio.evaluate((element, seconds) => { element.currentTime = seconds }, position)
+    await expect.poll(() => audio.evaluate(element => element.seeking)).toBe(false)
+    await video.evaluate(element => element.dispatchEvent(new Event('pause')))
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(position, 1)
+    await goTo(page, 'history')
+    await open()
+    expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(position)
+    expect(await video.evaluate(element => element.currentTime)).toBeCloseTo(position % await video.evaluate(element => element.duration), 0)
+    await audio.evaluate(element => { element.currentTime = element.duration - 0.1 })
+    await video.evaluate(element => element.play())
+    await expect.poll(() => audio.evaluate(element => element.ended)).toBe(true)
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeNull()
+  })
+}
 
 for (const { label, settings, live } of [
   { label: 'history is disabled', settings: { rememberHistory: false }, live: false },
@@ -304,6 +330,162 @@ test('external media honors the hide sidebar on watch pages setting', async ({ a
   await expect(sideNav).toBeInViewport()
   await expect(sideNav).toHaveClass(/opened/)
   await expect(page.locator('.app')).not.toHaveClass(/watchSideNavOverlay/)
+})
+
+for (const withChat of [false, true]) {
+  test(`external chapters use the watch sidebar${withChat ? ' alongside chat' : ' without chat'}`, async ({ app, page, attachScreenshot }, testInfo) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    await setWindowSize(app, page, { width: 1800, height: 1000 })
+    const mediaUrl = withChat ? 'https://www.twitch.tv/videos/123456789' : 'https://vimeo.com/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A recording with chapters', [
+      { start_time: 0, end_time: 10, title: 'Introduction' },
+      { start_time: 10, end_time: 30, title: 'Main segment' }
+    ])
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const video = await waitForPlayback(page)
+    await video.evaluate(element => element.pause())
+    const externalMedia = page.locator(`${activeTab} .externalMedia`)
+    const player = externalMedia.locator('.externalMediaPlayer')
+    const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
+    const panel = externalMedia.locator('.externalMediaSidebar .externalMediaChapters')
+    await chaptersButton.click({ force: true })
+    await expect(panel).toBeVisible()
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const panelBox = await panel.boundingBox()
+        return panelBox.x >= playerBox.x + playerBox.width - 2 && Math.abs(panelBox.y - playerBox.y) < 2 &&
+          panelBox.x + panelBox.width <= await page.evaluate(() => innerWidth)
+      }).toBe(true)
+      await expect(player.locator('.theatre-button')).toBeVisible()
+      if (withChat) {
+        const panelBox = await panel.boundingBox()
+        const chatBox = await externalMedia.locator('.twitchChat').boundingBox()
+        expect(chatBox.y).toBeGreaterThanOrEqual(panelBox.y + panelBox.height)
+      }
+      if (!withChat && scale === 1) {
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateBaseTheme', 'system')
+          await store.dispatch('updateSystemDarkTheme', 'dark')
+          await store.dispatch('updateSystemLightTheme', 'light')
+          await store.dispatch('updateMainColor', 'Red')
+          await store.dispatch('updateSecColor', 'Blue')
+        })
+        for (const theme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme: theme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+          await expect.poll(() => panel.locator('.chapterSeek').first().evaluate(element =>
+            getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
+          const playerBox = await player.boundingBox()
+          const panelBox = await panel.boundingBox()
+          const screenshotPath = testInfo.outputPath(`external-chapters-${theme}.png`)
+          await page.screenshot({
+            path: screenshotPath,
+            clip: {
+              x: playerBox.x,
+              y: playerBox.y,
+              width: panelBox.x + panelBox.width - playerBox.x,
+              height: Math.max(playerBox.height, panelBox.height)
+            }
+          })
+          await testInfo.attach(`External chapters sidebar (${theme})`, { path: screenshotPath, contentType: 'image/png' })
+        }
+      }
+      await attachScreenshot(`External chapters in the sidebar at ${scale * 100}%${withChat ? ' with chat' : ''}`)
+      await player.locator('.theatre-button').click({ force: true })
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const panelBox = await panel.boundingBox()
+        return panelBox.y >= playerBox.y + playerBox.height - 2
+      }).toBe(true)
+      await player.locator('.theatre-button').click({ force: true })
+    }
+    await panel.getByRole('button', { name: /Main segment/ }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
+    await setWindowSize(app, page, { width: 1200, height: 900 })
+    await expect.poll(async () => {
+      const detailsBox = await externalMedia.locator('.externalMediaInfo').boundingBox()
+      const panelBox = await panel.boundingBox()
+      return panelBox.y >= detailsBox.y + detailsBox.height - 2
+    }).toBe(true)
+    await panel.getByRole('button', { name: 'Close Chapters' }).click()
+    await expect(panel).toHaveCount(0)
+    if (!withChat) await expect(externalMedia.locator('.externalMediaLayout')).toHaveClass(/noSidebar/)
+  })
+}
+
+test('external chapters use a phone sheet and keep valid scrolling after resizing', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://vimeo.com/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', Array.from({ length: 30 }, (_, index) => ({
+    start_time: index, end_time: index + 1, title: `Chapter ${index + 1}`
+  })))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await player.locator('.shaka-overflow-menu-button').click({ force: true })
+  await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
+  const sheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaChapters') })
+  await expect(sheet).toBeVisible()
+  const scroller = page.locator('.externalMediaChapters .chaptersWrapper')
+  const scrollMaximum = () => scroller.evaluate(element => Math.max(0, element.scrollHeight - element.clientHeight))
+  const expectValidScroll = async () => {
+    await expect.poll(() => scroller.evaluate(element => {
+      const content = element.querySelector('.chaptersContent').getBoundingClientRect()
+      const viewport = element.getBoundingClientRect()
+      const maximum = Math.max(0, content.bottom - viewport.top + element.scrollTop - element.clientHeight)
+      const scrollbar = element.querySelector('.os-scrollbar-vertical')
+      const thumb = scrollbar?.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      const track = scrollbar?.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      return element.scrollTop <= maximum + 1 && content.bottom >= viewport.bottom - 1 &&
+        scrollbar.classList.contains('os-scrollbar-visible') &&
+        Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+    })).toBe(true)
+  }
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expectValidScroll()
+  await attachScreenshot('External chapters phone sheet')
+  await setWindowSize(app, page, { width: 850, height: 500 })
+  await expectValidScroll()
+  const unzoomedMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await expect.poll(scrollMaximum).toBeGreaterThan(unzoomedMaximum)
+  await expectValidScroll()
+  const zoomedMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await expect.poll(scrollMaximum).toBeLessThan(zoomedMaximum)
+  await expectValidScroll()
+  const landscapeMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await expect.poll(scrollMaximum).toBeLessThan(landscapeMaximum)
+  await expectValidScroll()
+  const phoneMaximum = await scrollMaximum()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await expect(sheet).toHaveCount(0)
+  // Leaving phone mode closes the sheet, as on the YouTube watch page.
+  await expect(page.locator('.externalMediaChapters')).toHaveCount(0)
+  await player.locator('.shaka-controls-button-panel .ft-chapters-button').click({ force: true })
+  const panel = page.locator(`${activeTab} .externalMediaSidebar .externalMediaChapters`)
+  await expect(panel).toBeVisible()
+  await expect.poll(scrollMaximum).not.toBe(phoneMaximum)
+  await expectValidScroll()
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await setWindowSize(app, page, { width: 375, height: 850 })
+  await expect(sheet).toBeVisible()
+  await expectValidScroll()
+  await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(/noSidebar/)
 })
 
 test('external ambient mode stays behind metadata and chat like the watch page', async ({ app, page, attachScreenshot }) => {
@@ -1399,9 +1581,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(player.locator('.ft-chapter-preview')).toBeVisible()
   await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Copy link at 0:10' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Close Chapters' }).click()
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
-  await expect(player.locator('.theatre-button')).toHaveCount(0)
+  await expect(player.locator('.theatre-button')).toBeHidden()
   const playerBox = await player.boundingBox()
   const mediaBox = await externalMedia.boundingBox()
   const expectedYouTubeWidth = Math.min(mediaBox.width, await page.evaluate(() => window.innerHeight * 0.8 * 1.78))
