@@ -36,27 +36,3 @@
   min-block-size: 44px;
   padding-inline-start: 14px;
 }
-
-.commentTranslationLanguageRemove {
-  align-items: center;
-  align-self: stretch;
-  background: transparent;
-  border: 0;
-  color: var(--tertiary-text-color);
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  min-inline-size: 44px;
-  padding: 0;
-}
-
-.commentTranslationLanguageRemove:hover,
-.commentTranslationLanguageRemove:focus-visible {
-  color: var(--primary-text-color);
-}
-
-.commentTranslationLanguageRemove:disabled {
-  color: var(--tertiary-text-color);
-  cursor: not-allowed;
-  opacity: 0.4;
-}

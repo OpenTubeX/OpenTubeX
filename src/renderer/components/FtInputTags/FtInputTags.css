@@ -1,4 +1,6 @@
 .ft-input-tags-component {
+  --input-label-surface: var(--bg-color);
+
   box-sizing: border-box;
   position: relative;
   background-color: var(--bg-color);
@@ -45,13 +47,6 @@
   word-break: break-all;
   hyphens: auto;
   user-select: text;
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  accent-color: var(--accent-color);
 }
 
 .tag-icon {

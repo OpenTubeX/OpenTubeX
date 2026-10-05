@@ -2,7 +2,7 @@
   <div
     ref="selectRoot"
     class="select"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined' }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
     @focusout="handleFocusOut"
   >
     <select
@@ -126,14 +126,19 @@
         @closed="dropdownShown = false; dropdownRendered = false"
         @close="closeDropdown"
       >
-        <input
+        <label
           v-if="phoneLayout && selectNames.length > 10"
-          v-model="search"
-          class="pickerSearch"
-          type="search"
-          :aria-label="$t('Search Bar.Search')"
-          :placeholder="$t('Search Bar.Search')"
+          class="textInputLabel pickerSearchField"
         >
+          <span class="textInputLabelText">{{ $t('Search Bar.Search') }}</span>
+          <input
+            v-model="search"
+            class="pickerSearch"
+            type="search"
+            :aria-label="$t('Search Bar.Search')"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
+          >
+        </label>
         <!-- Start on the listbox so a long picker does not summon the Android keyboard. -->
         <!-- eslint-disable vuejs-accessibility/no-autofocus -->
         <ul
@@ -237,6 +242,10 @@ const props = defineProps({
     type: String,
     default: 'outlined',
     validator: value => ['filled', 'outlined'].includes(value)
+  },
+  sizeToContent: {
+    type: Boolean,
+    default: false
   },
   placeholder: {
     type: String,
@@ -360,7 +369,6 @@ watch(dropdownShown, (shown) => {
     dropdownRendered.value = true
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
     window.addEventListener('resize', refreshDropdownLayout)
-    window.addEventListener('scroll', updateDropdownPosition, true)
   } else {
     if (!phoneLayout.value) dropdownRendered.value = false
     removeDropdownListeners()
@@ -436,6 +444,14 @@ function updateDropdownPosition() {
   const minimumTop = Math.max(viewportMargin, getTopChromeBottom() + menuGap)
   const maximumBottom = window.innerHeight - viewportMargin
   const buttonRect = button.getBoundingClientRect()
+  // Measure the complete labels, including option visuals and padding, before
+  // constraining the menu. Measuring clipped rows loses their intrinsic width.
+  menu.style.inlineSize = 'max-content'
+  const menuWidth = Math.min(
+    Math.max(buttonRect.width, menu.getBoundingClientRect().width),
+    window.innerWidth - viewportMargin * 2
+  )
+  menu.style.inlineSize = `${menuWidth}px`
   const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
   const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
   const naturalHeight = menu.scrollHeight + menu.offsetHeight - menu.clientHeight
@@ -443,12 +459,6 @@ function updateDropdownPosition() {
   const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
   const menuHeight = Math.min(desiredHeight, availableHeight)
-  const menuChromeWidth = menu.offsetWidth - menu.clientWidth
-  const widestOption = Math.max(
-    buttonRect.width,
-    ...(options.value ?? []).map(option => option.scrollWidth + menuChromeWidth)
-  )
-  const menuWidth = Math.min(widestOption, window.innerWidth - viewportMargin * 2)
   const centeredLeft = buttonRect.left + (buttonRect.width - menuWidth) / 2
   const left = Math.max(
     viewportMargin,
@@ -464,8 +474,8 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    // CSS anchors follow compositor scrolling before JavaScript receives its
-    // scroll event. Keep our measured offsets for viewport edges and rounding.
+    // CSS anchors follow scrolling without JavaScript updates. Keep our
+    // measured offsets for viewport edges and rounding.
     positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
     left: supportsAnchorPositioning
       ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
@@ -710,7 +720,6 @@ function handleDropdownMouseDown(event) {
 function removeDropdownListeners() {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
   window.removeEventListener('resize', refreshDropdownLayout)
-  window.removeEventListener('scroll', updateDropdownPosition, true)
 }
 
 /**

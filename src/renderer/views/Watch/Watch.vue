@@ -924,22 +924,14 @@
             aria-hidden="true"
           />
         </button>
-        <button
+        <PhoneCommentsButton
           v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
-          type="button"
-          class="phonePanelButton phoneCommentsButton watchVideo"
-          @click="openPhonePanel('comments')"
-        >
-          <ft-icon
-            :icon="['fas', 'comment']"
-            aria-hidden="true"
-          />
-          <span class="phoneCommentsLabel">{{ $t('Comments.Comments') }}</span>
-          <ft-icon
-            :icon="['fas', 'angle-down']"
-            aria-hidden="true"
-          />
-        </button>
+          :key="videoId"
+          :comments="commentPreviews"
+          :panel-open="mobilePanel === 'comments'"
+          class="watchVideo"
+          @open="openPhonePanel('comments')"
+        />
         <watch-video-description
           v-if="phonePanelsEnabled && !isLoading && !hideVideoDescription"
           :description="videoDescription"
@@ -1298,6 +1290,7 @@
             :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"
             @loaded="commentsLoaded = $event"
+            @preview-comments="commentPreviews = $event"
             @close-comments="closeFullscreenComments"
             @timestamp-event="changeTimestamp"
           />

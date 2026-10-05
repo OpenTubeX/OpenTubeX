@@ -56,7 +56,7 @@ test('subscription refresh uses YouTube selected Shorts thumbnails', async ({ pa
   }
 
   await expect(short).toBeVisible()
-  const thumbnailUrl = await short.locator('.thumbnailImage').getAttribute('src')
+  const thumbnailUrl = await short.locator('.thumbnailImage:not(.retryImagePlaceholder)').getAttribute('src')
 
   expect(thumbnailUrl).toMatch(/^https:\/\/i\.ytimg\.com\/vi\//)
   expect(thumbnailUrl).not.toMatch(/oardefault\.jpg|thumbnail_placeholder/)

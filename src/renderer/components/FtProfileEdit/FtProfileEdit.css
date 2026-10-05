@@ -71,19 +71,38 @@ h3 {
 }
 
 .customEmojiLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
 }
 
 .customEmojiInput {
-  background: var(--search-bar-color);
-  backdrop-filter: var(--search-bar-blur, none);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(4px * var(--ui-roundness));
-  color: var(--primary-text-color);
+  --input-bottom-spacing: 0;
+
+  inline-size: 64px;
+}
+
+.customEmojiInput :deep(.ft-input) {
+  padding-inline: 6px;
   font-size: 24px;
-  inline-size: 80px;
-  padding: 6px;
   text-align: center;
+}
+
+.customEmojiInput :deep(.ft-input::placeholder) {
+  opacity: 0;
+}
+
+.customEmojiPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  filter: grayscale(1);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .imageInput {

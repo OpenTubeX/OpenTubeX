@@ -37,6 +37,22 @@ export class CaptionSelection extends shaka.ui.TextSelection {
   constructor(events, getSettings, updateSetting, resetSettings, getTranslations, isTranslationSelected, selectTranslation, parent, controls) {
     super(parent, controls)
 
+    if (this.isSubMenu) {
+      // Shaka rebuilds the language choices and tries to focus a hidden item
+      // on every submenu transition. Track and locale events already keep the
+      // choices current; refresh only the custom actions from reactive props.
+      for (const [type, opened] of [['submenuopen', true], ['submenuclose', false]]) {
+        this.eventManager.unlisten(controls, type)
+        this.eventManager.listen(controls, type, () => {
+          this.isSubMenuOpened = opened
+          this.button.classList.toggle('shaka-hidden', opened || this.player.getTextTracks().length === 0)
+          if (opened) {
+            this.addCaptionActions_()
+          }
+        })
+      }
+    }
+
     this.getSettings_ = getSettings
     this.updateSetting_ = updateSetting
     this.resetSettings_ = resetSettings

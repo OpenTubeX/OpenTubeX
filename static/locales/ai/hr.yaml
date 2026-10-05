@@ -265,6 +265,10 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Povlačenje ulijevo po sličicama
+      Right: Povlačenje udesno po sličicama
+      Description: Povucite vodoravno po sličici videozapisa i otpustite za izvođenje odabrane radnje.
     Data Saver Thumbnails: "Sličice za uštedu podataka"
     Use tray icon: "Koristi ikonu u sistemskoj traci"
     Close to system tray: "Zatvori u sistemsku traku"
@@ -357,6 +361,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
     Frosted Glass Player UI: "Sučelje reproduktora s efektom matiranog stakla"
     Main Color Theme:
@@ -439,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Svijetla"
-      OpenTubeX Dark: "OpenTubeX Tamna"
+      Ocean Light: "Ocean Svijetla"
+      Ocean Dark: "Ocean Tamna"
       Custom: Prilagođena
     Light Theme: Svijetla tema
     Dark Theme: Tamna tema
@@ -626,6 +631,7 @@ Settings:
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
+    Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1334,6 +1340,8 @@ Video:
     Hide: Sakrij
     Show: Prikaži
     Scroll Mini Player:
+      Collapse Controls: "Sažmi kontrole"
+      Expand Controls: "Proširi kontrole"
       Back to Top: Povratak na vrh
       Return to Video Tab: Povratak na karticu videozapisa
       Hide: Sakrij mini reproduktor
@@ -1946,6 +1954,15 @@ Tray Icon:
   Follow App Theme: "Prati temu aplikacije"
 
 Form Inputs:
+  Enter Password Hint: "Unesite svoju lozinku"
+  Choose Password Hint: "Odaberite lozinku"
+  Confirm Password Hint: "Ponovite novu lozinku"
+  Encryption Passphrase Hint: "Unesite svoju zaporku za šifriranje"
+  Show Password: "Prikaži lozinku"
+  Hide Password: "Sakrij lozinku"
+  Search Text Hint: "Unesite pojmove za pretraživanje"
+  Playlist Description Hint: "Opišite ovaj popis za reprodukciju"
+  Filename Preview: "Pregled naziva datoteke"
   Enter Channels: "Unesite kanale"
   Enter Text: "Unesite tekst"
   Video URL: URL videozapisa ili popisa
@@ -1964,3 +1981,11 @@ Form Inputs:
   Download Arguments Hint: Neobavezni argumenti za ovo preuzimanje
   Generated ID Hint: Ostavite prazno za generiranje ID-a
   Default Value: "Zadano: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+
+Storage Startup Error:
+  Title: "Nije moguće učitati podatke aplikacije"
+  Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
+  Retry: "Pokušaj ponovno"

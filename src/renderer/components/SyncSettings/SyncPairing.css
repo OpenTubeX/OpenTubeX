@@ -60,38 +60,6 @@
   overflow-wrap: anywhere;
 }
 
-.pairingCodeField {
-  display: grid;
-  gap: 0.5rem;
-  inline-size: min(100%, 32rem);
-  margin-inline: auto;
-  text-align: start;
-}
-
-.pairingCodeField :is(input, textarea) {
-  background: var(--search-bar-color);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(5px * var(--ui-roundness));
-  box-sizing: border-box;
-  color: var(--secondary-text-color);
-  font-family: monospace;
-  font-size: 0.85rem;
-  inline-size: 100%;
-  line-height: 1.4;
-  padding: 0.75rem;
-}
-
-.pairingCodeField input {
-  text-overflow: ellipsis;
-}
-
-.pairingCodeField textarea {
-  field-sizing: content;
-  min-block-size: 8rem;
-  overflow: hidden;
-  resize: none;
-}
-
 .pairingPollStatus {
   align-items: center;
   display: flex;

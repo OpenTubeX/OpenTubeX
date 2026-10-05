@@ -133,7 +133,7 @@ test.describe('channel settings', () => {
     await addChannel.click()
 
     const picker = page.getByRole('dialog', { name: 'Add subscribed channel' })
-    const search = picker.getByPlaceholder('Search channels')
+    const search = picker.getByLabel('Search channels')
     await expect(search).toBeVisible()
     await expect(search).toBeFocused()
     await expect(search).toHaveAttribute('type', 'search')

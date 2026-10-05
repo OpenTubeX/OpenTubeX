@@ -30,6 +30,7 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   await expect(dialog).toBeVisible()
   await expect(input).toBeFocused()
   await expect(input).toHaveAttribute('placeholder', 'Search commands and settings…')
+  await expect(dialog.locator('.textInputLabelText')).toHaveCount(0)
   await expect(dialog.locator('.commandPaletteTitle')).toHaveCount(0)
   const [searchBounds, closeBounds] = await Promise.all([
     dialog.locator('.commandPaletteSearch').boundingBox(),
@@ -163,6 +164,8 @@ test('transfers focus to Find in Page', async ({ page }) => {
   await input.press('Enter')
 
   await expect(page.locator('.findbarInput')).toBeFocused()
+  await expect(page.locator('.findbarInput')).toHaveAttribute('placeholder', 'Find in page')
+  await expect(page.locator('.findbar .textInputLabelText')).toHaveCount(0)
 })
 
 test('restores prior focus when dismissed', async ({ page }) => {

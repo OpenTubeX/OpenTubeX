@@ -263,6 +263,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Balra húzás a bélyegképeken
+      Right: Jobbra húzás a bélyegképeken
+      Description: Húzza vízszintesen a videó bélyegképét, majd engedje el a kiválasztott művelet végrehajtásához.
     Data Saver Thumbnails: "Adattakarékos bélyegképek"
     Use tray icon: "Rendszertálcaikon használata"
     Close to system tray: "Bezárás a rendszertálcára"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
     Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Világos"
-      OpenTubeX Dark: "OpenTubeX Sötét"
+      Ocean Light: "Ocean Világos"
+      Ocean Dark: "Ocean Sötét"
       Custom: Egyéni
     Light Theme: Világos téma
     Dark Theme: Sötét téma
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "Előtöltendő videók száma"
     Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
+    Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1317,6 +1323,8 @@ Video:
     Hide: Elrejtés
     Show: Megjelenítés
     Scroll Mini Player:
+      Collapse Controls: "Vezérlők összecsukása"
+      Expand Controls: "Vezérlők kibontása"
       Back to Top: Vissza a tetejére
       Return to Video Tab: Vissza a videó lapjára
       Hide: Mini lejátszó elrejtése
@@ -1920,6 +1928,15 @@ Tray Icon:
   Follow App Theme: "Alkalmazástéma követése"
 
 Form Inputs:
+  Enter Password Hint: "Add meg a jelszavad"
+  Choose Password Hint: "Válassz jelszót"
+  Confirm Password Hint: "Ismételd meg az új jelszavad"
+  Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"
+  Show Password: "Jelszó megjelenítése"
+  Hide Password: "Jelszó elrejtése"
+  Search Text Hint: "Adjon meg keresési kifejezéseket"
+  Playlist Description Hint: "Írja le ezt a lejátszási listát"
+  Filename Preview: "Fájlnév előnézete"
   Enter Channels: "Csatornák megadása"
   Enter Text: "Szöveg megadása"
   Video URL: Videó vagy lejátszási lista URL-je
@@ -1938,3 +1955,11 @@ Form Inputs:
   Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
   Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
   Default Value: "Alapértelmezett: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+
+Storage Startup Error:
+  Title: "Nem sikerült betölteni az alkalmazás adatait"
+  Message: "Szabadítson fel tárhelyet az eszközön, majd próbálja újra. A szinkronizálás az adatok betöltéséig szünetel."
+  Retry: "Újrapróbálkozás"

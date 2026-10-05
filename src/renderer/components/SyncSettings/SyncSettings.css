@@ -136,6 +136,10 @@
   place-items: center;
 }
 
+.syncOptions {
+  justify-items: start;
+}
+
 .fields :deep(.ft-input-component) {
   inline-size: min(100%, 32rem);
 }

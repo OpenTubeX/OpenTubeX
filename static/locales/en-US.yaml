@@ -132,6 +132,7 @@ Search Listing:
     Closed Captions: Closed Captions
   # In Filter Button
 Search Filters:
+  Cookie Search Failed: "Search failed with the configured cookies."
   Search Filters: Search Filters
   Prioritize:
     Prioritize: Prioritize
@@ -528,6 +529,10 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Swipe left on thumbnails
+      Right: Swipe right on thumbnails
+      Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
@@ -663,6 +668,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Theme Settings: Theme
     Match Top Bar with Main Color: Match Top Bar with Main Color
@@ -737,8 +743,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Light"
-      OpenTubeX Dark: "OpenTubeX Dark"
+      Ocean Light: "Ocean Light"
+      Ocean Dark: "Ocean Dark"
       Base Theme: Base Theme
       Black: Black
       Custom: Custom
@@ -1111,6 +1117,7 @@ Settings:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -2296,6 +2303,8 @@ Video:
     You appear to be offline: You appear to be offline.
     Playback will resume automatically when your connection comes back: Playback will resume automatically when your connection comes back.
     Scroll Mini Player:
+      Collapse Controls: "Collapse controls"
+      Expand Controls: "Expand controls"
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
       Hide: Hide mini player
@@ -3138,6 +3147,15 @@ Tray Icon:
   Follow App Theme: "Follow app theme"
 
 Form Inputs:
+  Enter Password Hint: "Enter your password"
+  Choose Password Hint: "Choose a password"
+  Confirm Password Hint: "Repeat your new password"
+  Encryption Passphrase Hint: "Enter your encryption passphrase"
+  Show Password: "Show password"
+  Hide Password: "Hide password"
+  Search Text Hint: "Enter search terms"
+  Playlist Description Hint: "Describe this playlist"
+  Filename Preview: "Filename preview"
   Enter Channels: "Enter channels"
   Enter Text: "Enter text"
   Video URL: Video or playlist URL
@@ -3156,3 +3174,8 @@ Form Inputs:
   Download Arguments Hint: Optional arguments for this download
   Generated ID Hint: Leave blank to generate an ID
   Default Value: "Default: {value}"
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Retry: "Retry"

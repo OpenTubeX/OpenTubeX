@@ -138,6 +138,7 @@
             <span class="hexInputControl">
               <input
                 v-model="hexInput"
+                :placeholder="allowAlpha ? '#336699ff' : '#336699'"
                 type="text"
                 :maxlength="allowAlpha ? 9 : 7"
                 spellcheck="false"

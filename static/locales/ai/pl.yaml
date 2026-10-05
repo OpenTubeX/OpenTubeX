@@ -103,6 +103,10 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Przesunięcie w lewo na miniaturach
+      Right: Przesunięcie w prawo na miniaturach
+      Description: Przesuń poziomo po miniaturze filmu i puść, aby wykonać wybraną czynność.
     Data Saver Thumbnails: "Miniatury oszczędzające dane"
     Tab Close Focus:
       Last active tab: "Ostatnio aktywna karta"
@@ -143,6 +147,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"
     Always Show Mobile Search Bar: "Zawsze pokazuj pasek wyszukiwania na telefonie"
     Frosted Glass Player UI: "Interfejs odtwarzacza z efektem matowego szkła"
     Main Color Theme:
@@ -178,8 +183,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Jasny"
-      OpenTubeX Dark: "OpenTubeX Ciemny"
+      Ocean Light: "Ocean Jasny"
+      Ocean Dark: "Ocean Ciemny"
     Toast Position:
       Test Toast: Powiadomienie testowe
     Scroll Speed: Szybkość przewijania
@@ -269,6 +274,7 @@ Settings:
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
+    Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
@@ -728,6 +734,8 @@ Video:
       'Off': 'Wyłączone'
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
+      Collapse Controls: "Zwiń sterowanie"
+      Expand Controls: "Rozwiń sterowanie"
       Return to Video Tab: Wróć do karty filmu
       Hide: Ukryj miniodtwarzacz
       Rewind 10 seconds: Przewiń o 10 sekund do tyłu
@@ -1145,6 +1153,15 @@ Stats:
   All devices: Wszystkie urządzenia
 
 Form Inputs:
+  Enter Password Hint: "Wpisz swoje hasło"
+  Choose Password Hint: "Wybierz hasło"
+  Confirm Password Hint: "Powtórz nowe hasło"
+  Encryption Passphrase Hint: "Wpisz swoją frazę szyfrującą"
+  Show Password: "Pokaż hasło"
+  Hide Password: "Ukryj hasło"
+  Search Text Hint: "Wpisz wyszukiwane hasła"
+  Playlist Description Hint: "Opisz tę playlistę"
+  Filename Preview: "Podgląd nazwy pliku"
   Enter Channels: "Wprowadź kanały"
   Enter Text: "Wprowadź tekst"
   Video URL: URL filmu lub playlisty
@@ -1163,3 +1180,11 @@ Form Inputs:
   Download Arguments Hint: Opcjonalne argumenty dla tego pobierania
   Generated ID Hint: Pozostaw puste, aby wygenerować ID
   Default Value: "Domyślnie: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Wyszukiwanie z użyciem skonfigurowanych plików cookie nie powiodło się."
+
+Storage Startup Error:
+  Title: "Nie udało się wczytać danych aplikacji"
+  Message: "Zwolnij miejsce na urządzeniu i spróbuj ponownie. Synchronizacja jest wstrzymana do czasu wczytania danych."
+  Retry: "Spróbuj ponownie"

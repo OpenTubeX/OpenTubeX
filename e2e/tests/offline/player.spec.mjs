@@ -640,19 +640,24 @@ test('smoothly transitions video zoom at fractional UI scale', async ({ app, pag
   const video = await openDemoVideo({ app, page })
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
 
-  await page.locator('body').press('z')
-  const zoomTransition = await video.evaluateHandle((element) => {
-    const transition = element.getAnimations().find(animation =>
-      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
-    )
-
-    if (!transition) {
-      throw new Error('Video zoom transition not found')
+  // Capture and pause the transition in the renderer before a delayed
+  // Playwright round trip can miss its 200ms lifetime.
+  const zoomState = await video.evaluateHandle((element) => {
+    const state = { transition: null }
+    function captureTransition(event) {
+      if (event.target !== element || event.propertyName !== 'transform') return
+      state.transition = element.getAnimations().find(animation =>
+        animation instanceof CSSTransition && animation.transitionProperty === 'transform'
+      )
+      state.transition.pause()
+      element.removeEventListener('transitionrun', captureTransition)
     }
-
-    transition.pause()
-    return transition
+    element.addEventListener('transitionrun', captureTransition)
+    return state
   })
+  await page.locator('body').press('z')
+  await expect.poll(() => zoomState.evaluate(state => state.transition !== null)).toBe(true)
+  const zoomTransition = await zoomState.evaluateHandle(state => state.transition)
 
   expect(await zoomTransition.evaluate(transition => transition.effect.getTiming())).toMatchObject({
     duration: 200,
@@ -666,6 +671,7 @@ test('smoothly transitions video zoom at fractional UI scale', async ({ app, pag
   expect(intermediateScale).toBeLessThan(1.25)
 
   await zoomTransition.dispose()
+  await zoomState.dispose()
 
   // A new choice replaces the in-flight transition and becomes its final state.
   await page.locator('body').press('z')
@@ -1498,6 +1504,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   const surface = player.locator('.shaka-controls-container')
   const playButtons = player.locator('.shaka-big-buttons-container .shaka-play-button')
 
+  await surface.evaluate(element => element.setAttribute('casting', 'true'))
   await expect(playButtons).toHaveCount(1)
   await expect(player.locator('.shaka-controls-button-panel .shaka-play-button')).toBeHidden()
   await expect(player.locator('.shaka-controls-button-panel .shaka-pip-button')).toBeVisible()
@@ -1505,6 +1512,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await expect(player.locator('.shaka-mute-button, .shaka-volume-bar-container')).toHaveCount(0)
   await expect.poll(() => video.evaluate(element => ({ muted: element.muted, volume: element.volume })))
     .toEqual({ muted: false, volume: 1 })
+  await surface.evaluate(element => element.removeAttribute('casting'))
   await video.evaluate(element => element.play())
   await surface.evaluate(element => element.setAttribute('shown', 'true'))
 

@@ -57,7 +57,7 @@ test.describe('subscribed channels', () => {
     await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeVisible()
     await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
 
-    await page.getByPlaceholder('Search Channels').fill('Beta')
+    await page.getByLabel('Search Channels').fill('Beta')
     await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
     await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeHidden()
   })
@@ -389,11 +389,11 @@ test.describe('large subscribed channel lists', () => {
     })
     await expect(page.locator('.navChannel')).toHaveCount(50)
 
-    await page.getByPlaceholder('Search Channels').fill('Channel 899')
+    await page.getByLabel('Search Channels').fill('Channel 899')
     expect(await page.locator('.count').textContent()).toContain('1 channel(s) found.')
     await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
 
-    await page.getByPlaceholder('Search Channels').fill('')
+    await page.getByLabel('Search Channels').fill('')
     await page.getByRole('button', { name: 'Load more channels' }).click()
     await expect(page.locator('.channel')).toHaveCount(100)
   })
@@ -405,7 +405,7 @@ test.describe('large subscribed channel lists', () => {
     }))
     await page.locator(`.tab[data-tab-id="${channelTab.id}"]`).click()
 
-    await expect(page.getByPlaceholder('Search Channels')).toHaveValue('Channel 899')
+    await expect(page.getByLabel('Search Channels')).toHaveValue('Channel 899')
     await expect(page.locator('.count')).toContainText('1 channel(s) found.')
     await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
   })
@@ -440,7 +440,7 @@ test.describe('subscribed channel pagination', () => {
     await expect(channels).toHaveCount(123)
     await expect(loadMore).toHaveCount(0)
 
-    const search = page.getByPlaceholder('Search Channels')
+    const search = page.getByLabel('Search Channels')
     await search.fill('Channel 11')
     await expect(channels).toHaveCount(10)
     await expect(channels.first()).toContainText('Channel 110')

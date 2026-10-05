@@ -84,9 +84,7 @@ export function getNewSubscriptionFeedEntries({
       const source = cacheEntry?.[entriesKey] ?? []
       // Home renders its own shelf cards and needs no indicator overrides.
       // Keep source entries reactive without copying every field in the cache.
-      const newEntries = decorateEntries
-        ? getNewSubscriptionEntriesSnapshot(source)
-        : source.filter(entry => entry.isNewInSubscriptionFeed === true)
+      const newEntries = getNewSubscriptionEntriesSnapshot(source, decorateEntries)
       newEntries.forEach(entry => {
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,

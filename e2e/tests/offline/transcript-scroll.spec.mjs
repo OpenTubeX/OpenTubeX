@@ -36,8 +36,8 @@ for (const zoom of [1, 1.25]) {
     ))).toBeLessThanOrEqual(1)
     const search = card.getByRole('button', { name: 'Search transcript' })
     await search.click()
-    await expect(card.getByPlaceholder('Search transcript')).toBeFocused()
-    await card.getByPlaceholder('Search transcript').fill('Transcript line 250.')
+    await expect(card.getByRole('searchbox', { name: 'Search transcript', exact: true })).toBeFocused()
+    await card.getByRole('searchbox', { name: 'Search transcript', exact: true }).fill('Transcript line 250.')
     await expect(card.locator('.transcriptSegment')).toHaveCount(1)
     await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(0)
     await expect.poll(() => list.evaluate(element => (
@@ -58,7 +58,7 @@ for (const zoom of [1, 1.25]) {
       }
     })
     await search.click()
-    await expect(card.getByPlaceholder('Search transcript')).toHaveCount(0)
+    await expect(card.getByRole('searchbox', { name: 'Search transcript', exact: true })).toHaveCount(0)
     await expect(card.locator('.transcriptSegment')).toHaveCount(300)
     await view.evaluate(view => { view.currentTime = 151 })
     await expect.poll(() => page.evaluate(() => window.transcriptScrollCalls.length)).toBe(1)
@@ -77,8 +77,8 @@ for (const zoom of [1, 1.25]) {
     expect(nextScroll.behavior).toBe('smooth')
     expect(Math.abs(nextScroll.top - nextScroll.from)).toBeLessThan(100)
     await search.click()
-    await expect(card.getByPlaceholder('Search transcript')).toBeFocused()
-    await expect(card.getByPlaceholder('Search transcript')).toHaveValue('')
+    await expect(card.getByRole('searchbox', { name: 'Search transcript', exact: true })).toBeFocused()
+    await expect(card.getByRole('searchbox', { name: 'Search transcript', exact: true })).toHaveValue('')
     await view.dispose()
   })
 }

@@ -267,6 +267,10 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Naar links vegen op miniaturen
+      Right: Naar rechts vegen op miniaturen
+      Description: Veeg horizontaal over een videominiatuur en laat los om de geselecteerde actie uit te voeren.
     Data Saver Thumbnails: "Databesparende miniaturen"
     Use tray icon: "Systeemvakpictogram gebruiken"
     Close to system tray: "Sluiten naar systeemvak"
@@ -359,6 +363,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Compact Mobile Mini Player: "Compacte mobiele minispeler"
     Always Show Mobile Search Bar: "Mobiele zoekbalk altijd tonen"
     Frosted Glass Player UI: "Spelerinterface met matglaseffect"
     Main Color Theme:
@@ -441,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Licht"
-      OpenTubeX Dark: "OpenTubeX Donker"
+      Ocean Light: "Ocean Licht"
+      Ocean Dark: "Ocean Donker"
       Custom: Aangepast
     Light Theme: Licht thema
     Dark Theme: Donker thema
@@ -637,6 +642,7 @@ Settings:
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
     Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
+    Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1362,6 +1368,8 @@ Video:
     Hide: Verbergen
     Show: Tonen
     Scroll Mini Player:
+      Collapse Controls: "Bediening inklappen"
+      Expand Controls: "Bediening uitklappen"
       Back to Top: Terug naar boven
       Return to Video Tab: Terug naar videotabblad
       Hide: Minispeler verbergen
@@ -1979,6 +1987,15 @@ Tray Icon:
   Follow App Theme: "Appthema volgen"
 
 Form Inputs:
+  Enter Password Hint: "Voer je wachtwoord in"
+  Choose Password Hint: "Kies een wachtwoord"
+  Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
+  Encryption Passphrase Hint: "Voer je versleutelingswachtzin in"
+  Show Password: "Wachtwoord tonen"
+  Hide Password: "Wachtwoord verbergen"
+  Search Text Hint: "Voer zoektermen in"
+  Playlist Description Hint: "Beschrijf deze afspeellijst"
+  Filename Preview: "Voorbeeld van bestandsnaam"
   Enter Channels: "Voer kanalen in"
   Enter Text: "Voer tekst in"
   Video URL: Video- of afspeellijst-URL
@@ -1997,3 +2014,11 @@ Form Inputs:
   Download Arguments Hint: Optionele argumenten voor deze download
   Generated ID Hint: Laat leeg om een ID te genereren
   Default Value: "Standaard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
+
+Storage Startup Error:
+  Title: "Appgegevens konden niet worden geladen"
+  Message: "Maak opslagruimte vrij op het apparaat en probeer het opnieuw. Synchronisatie is gepauzeerd totdat je gegevens zijn geladen."
+  Retry: "Opnieuw proberen"

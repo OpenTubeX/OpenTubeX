@@ -12,7 +12,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
   .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
   .replace(/^export /gm, '')
 
-function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null } = {}) {
+function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null, format = 'video' } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const scope = effectScope()
   const mounted = []
@@ -29,7 +29,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
     nextTick() {}, onMounted: callback => mounted.push(callback), onBeforeUnmount: callback => unmounting.push(callback), window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
-    document: { body: { classList: { remove() {}, contains: name => classes.has(name) } } },
+    document: { querySelector: () => null, body: { classList: { remove() {}, contains: name => classes.has(name) } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true, getScrollMiniPlayerEnabled: inlineVisible }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
     getDefaultScrollMiniPlayerRect: () => ({ ...rect }),
@@ -53,7 +53,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const player = scope.run(() => create({
     container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, querySelectorAll: () => [], getBoundingClientRect: () => ({ ...rect }) } : null),
     fullWindowEnabled: ref(false), getUi: () => seekRange ? { getControls: () => ({ getPlayer: () => ({ seekRange: () => seekRange }) }) } : null,
-    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
+    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format, videoId: 'video' }),
     video, mobileMiniBarOverlay: ref(null)
   }))
   for (const callback of mounted) callback()
@@ -183,6 +183,15 @@ test('ending an inline scroll mini player still hides it', t => {
   assert.equal(player.scrollMiniPlayerActive.value, false)
 })
 
+test('a manually minimized mobile video remains available after ending without keep-playing enabled', t => {
+  const { player, video, minimized } = mountMiniPlayer(t, { android: true, keepPlaying: false, detached: true })
+  minimized.value = true
+  video.value.ended = true
+  video.value.paused = true
+  player.updateScrollMiniPlayer()
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+})
+
 test('leaving an already ended video does not open a mini player', t => {
   const { player, video, isActiveTab } = mountMiniPlayer(t)
   player.scrollMiniPlayerActive.value = false
@@ -243,4 +252,12 @@ test('Android restoration returns a visible mini-player inline without its slide
   window.dispatchEvent(new Event('opentubex:android-pip-restored'))
   assert.equal(player.scrollMiniPlayerActive.value, false)
   assert.equal(player.scrollMiniPlayerAnimating.value, false)
+})
+
+test('downloaded audio keeps a visible mobile mini player after leaving Watch', t => {
+  const { player } = mountMiniPlayer(t, { detached: true, android: true, format: 'audio' })
+  player.updateScrollMiniPlayer()
+  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), true)
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+  assert.equal(player.scrollMiniPlayerDetached.value, true)
 })

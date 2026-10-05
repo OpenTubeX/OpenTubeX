@@ -123,20 +123,17 @@
           />
         </div>
       </div>
-      <label
+      <FtInput
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
+        ref="settingsSearchInputRef"
         class="settingsSearch"
-      >
-        <FtIcon :icon="['fas', 'magnifying-glass']" />
-        <input
-          ref="settingsSearchInputRef"
-          v-model="settingsSearchQuery"
-          type="search"
-          :placeholder="t('Settings.Search Settings')"
-          :aria-label="t('Settings.Search Settings')"
-          @input="handleSettingsSearch"
-        >
-      </label>
+        input-type="search"
+        :value="settingsSearchQuery"
+        :placeholder="t('Settings.Search Settings')"
+        :show-label="false"
+        :show-action-button="false"
+        @input="settingsSearchQuery = $event; handleSettingsSearch()"
+      />
       <div class="settingsHeaderActions">
         <button
           v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
@@ -352,6 +349,7 @@
 </template>
 
 <script setup>
+import FtInput from '../../components/FtInput/FtInput.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import {

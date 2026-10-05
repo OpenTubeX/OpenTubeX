@@ -128,6 +128,7 @@
       </button>
     </div>
   </div>
+  <TabTooltipOverlay v-if="isElectron" />
   <div
     v-if="isElectron && vertical"
     v-bind="$attrs"
@@ -160,6 +161,8 @@ import { loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
+import TabTooltipOverlay from './TabTooltipOverlay.vue'
+import { provideTabTooltip } from './useTabTooltip'
 import {
   buildCurrentShiftedTabIds,
   buildShiftedTabIds,
@@ -169,6 +172,8 @@ import {
 } from './tabReorder'
 
 defineOptions({ inheritAttrs: false })
+
+provideTabTooltip()
 
 const { t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(

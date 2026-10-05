@@ -267,6 +267,10 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Σάρωση αριστερά στις μικρογραφίες
+      Right: Σάρωση δεξιά στις μικρογραφίες
+      Description: Σύρετε οριζόντια μια μικρογραφία βίντεο και αφήστε την για να εκτελέσετε την επιλεγμένη ενέργεια.
     Data Saver Thumbnails: "Μικρογραφίες εξοικονόμησης δεδομένων"
     Use tray icon: "Χρήση εικονιδίου περιοχής ειδοποιήσεων"
     Close to system tray: "Κλείσιμο στην περιοχή ειδοποιήσεων"
@@ -359,6 +363,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Compact Mobile Mini Player: "Συμπαγής μίνι αναπαραγωγέας κινητού"
     Always Show Mobile Search Bar: "Να εμφανίζεται πάντα η γραμμή αναζήτησης στο κινητό"
     Frosted Glass Player UI: "Διεπαφή προγράμματος αναπαραγωγής με εφέ θαμπού γυαλιού"
     Main Color Theme:
@@ -441,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Φωτεινό"
-      OpenTubeX Dark: "OpenTubeX Σκοτεινό"
+      Ocean Light: "Ocean Φωτεινό"
+      Ocean Dark: "Ocean Σκοτεινό"
       Custom: Προσαρμοσμένο
     Light Theme: Φωτεινό θέμα
     Dark Theme: Σκοτεινό θέμα
@@ -637,6 +642,7 @@ Settings:
     Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
+    Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1354,6 +1360,8 @@ Video:
     Hide: Απόκρυψη
     Show: Εμφάνιση
     Scroll Mini Player:
+      Collapse Controls: "Σύμπτυξη χειριστηρίων"
+      Expand Controls: "Ανάπτυξη χειριστηρίων"
       Back to Top: Επιστροφή στην κορυφή
       Return to Video Tab: Επιστροφή στην καρτέλα βίντεο
       Hide: Απόκρυψη μίνι προγράμματος αναπαραγωγής
@@ -1968,6 +1976,15 @@ Tray Icon:
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
 
 Form Inputs:
+  Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
+  Choose Password Hint: "Επιλέξτε έναν κωδικό"
+  Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
+  Encryption Passphrase Hint: "Εισαγάγετε τη φράση κρυπτογράφησής σας"
+  Show Password: "Εμφάνιση κωδικού πρόσβασης"
+  Hide Password: "Απόκρυψη κωδικού πρόσβασης"
+  Search Text Hint: "Εισαγάγετε όρους αναζήτησης"
+  Playlist Description Hint: "Περιγράψτε αυτήν τη λίστα αναπαραγωγής"
+  Filename Preview: "Προεπισκόπηση ονόματος αρχείου"
   Enter Channels: "Εισαγάγετε κανάλια"
   Enter Text: "Εισαγάγετε κείμενο"
   Video URL: URL βίντεο ή λίστας αναπαραγωγής
@@ -1986,3 +2003,11 @@ Form Inputs:
   Download Arguments Hint: Προαιρετικά ορίσματα για αυτή τη λήψη
   Generated ID Hint: Αφήστε κενό για δημιουργία ID
   Default Value: "Προεπιλογή: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."
+
+Storage Startup Error:
+  Title: "Δεν ήταν δυνατή η φόρτωση των δεδομένων της εφαρμογής"
+  Message: "Ελευθερώστε χώρο στη συσκευή και δοκιμάστε ξανά. Ο συγχρονισμός έχει τεθεί σε παύση μέχρι να φορτωθούν τα δεδομένα σας."
+  Retry: "Δοκιμή ξανά"

@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   inline-size: 100%;
+  max-inline-size: 380px;
 }
 
 .autoRefreshIntervals > :deep(.select) {
   box-sizing: border-box;
   inline-size: 100%;
-  margin-block: 8px;
 }
 
 .onlyShowLatestFromChannelNumber {

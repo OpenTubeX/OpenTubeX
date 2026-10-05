@@ -50,6 +50,56 @@ for (const uiScale of [95, 125]) {
       }
     })
 
+    test('finishes library sync while the encrypted activity download is still pending', async ({ page }) => {
+      let releaseActivity
+      const pending = new Promise(resolve => { releaseActivity = resolve })
+      let activityStarted
+      const started = new Promise(resolve => { activityStarted = resolve })
+      let eventRequests = 0
+      const payload = await encryptSyncDocument({
+        version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }],
+      }, key, salt)
+      await page.route('https://sync.example/**', async route => {
+        const request = route.request()
+        const pathname = new URL(request.url()).pathname
+        if (pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, account_sessions: 1, live_sync: 1 } } })
+        if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+        if (pathname === '/v1/encrypted_sync') return route.fulfill({ json: { collections: [], legacy_data: false } })
+        if (pathname === '/v1/encrypted_sync/events') {
+          eventRequests++
+          activityStarted()
+          await pending
+          return route.fulfill({ json: [{ id: 'pending-activity', recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 }] })
+        }
+        if (pathname.startsWith('/v1/encrypted_sync/')) {
+          return route.fulfill({ json: { revision: request.method() === 'PUT' ? 1 : 0, payload: null } })
+        }
+        return abortUnmockedRequest(route)
+      })
+      const syncing = page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerEnabled', true)
+        await store.dispatch('syncWithSyncServer')
+        return { status: store.getters.getSyncServerStatus, lastSync: store.state.settings.syncServerLastSyncAt }
+      })
+      try {
+        await started
+        await expect.poll(() => page.evaluate(() =>
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerStatus
+        ), { timeout: 5000 }).toBe('success')
+        const result = await syncing
+        expect(result.lastSync).toBeGreaterThan(0)
+        expect(eventRequests).toBe(1)
+        expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerActivity.length)).toBe(0)
+      } finally {
+        releaseActivity()
+        await syncing
+      }
+      await expect.poll(() => page.evaluate(() =>
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSyncServerActivity.length
+      )).toBe(1)
+    })
+
     test('receives live settings and activity, skips unchanged downloads, and sends and receives videos', async ({ page, app, attachScreenshot }) => {
       const collections = new Map()
       const events = []
@@ -268,7 +318,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       clients.push(client)
       Object.assign(client, await launchApp(userDataDir))
       const { page } = client
-      await page.context().route('**/*', abortUnmockedRequest)
+      await page.context().route(/^https?:\/\//, abortUnmockedRequest)
       await page.route('https://two-devices.example/**', async route => {
         const request = route.request()
         const url = new URL(request.url())

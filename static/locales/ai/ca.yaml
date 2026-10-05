@@ -76,6 +76,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Subtítols
 Search Filters:
+  Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
   Prioritize:
     Prioritize: Prioritza
     Popularity: Popularitat
@@ -393,6 +394,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Lliscar cap a l'esquerra a les miniatures
+      Right: Lliscar cap a la dreta a les miniatures
+      Description: Llisca horitzontalment sobre una miniatura de vídeo i deixa anar per executar l'acció seleccionada.
     Data Saver Thumbnails: "Miniatures amb estalvi de dades"
     Use tray icon: "Utilitza la icona de la safata"
     Close to system tray: "Tanca a la safata del sistema"
@@ -493,6 +498,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Compact Mobile Mini Player: "Minireproductor mòbil compacte"
     Always Show Mobile Search Bar: "Mostra sempre la barra de cerca al mòbil"
     Frosted Glass Player UI: "Interfície del reproductor amb efecte de vidre esmerilat"
     Move Downloads to App Header: Mou les baixades a la capçalera de l'aplicació
@@ -561,8 +567,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Clar"
-      OpenTubeX Dark: "OpenTubeX Fosc"
+      Ocean Light: "Ocean Clar"
+      Ocean Dark: "Ocean Fosc"
       Custom: Personalitzat
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -869,6 +875,7 @@ Settings:
     Upcoming Videos to Preload: "Vídeos següents per precarregar"
     Concurrent Preloads: "Precàrregues simultànies"
     Ignore System Rotation Lock for Fullscreen: Ignora el bloqueig de rotació del sistema per a la pantalla completa
+    Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1790,6 +1797,8 @@ Video:
     You appear to be offline: Sembla que no teniu connexió.
     Playback will resume automatically when your connection comes back: La reproducció es reprendrà automàticament quan torni la connexió.
     Scroll Mini Player:
+      Collapse Controls: "Plega els controls"
+      Expand Controls: "Desplega els controls"
       Back to Top: Torna a dalt
       Return to Video Tab: Torna a la pestanya del vídeo
       Hide: Oculta el reproductor mini
@@ -2566,6 +2575,15 @@ Tray Icon:
   Follow App Theme: "Segueix el tema de l’aplicació"
 
 Form Inputs:
+  Enter Password Hint: "Introduïu la vostra contrasenya"
+  Choose Password Hint: "Trieu una contrasenya"
+  Confirm Password Hint: "Repetiu la vostra contrasenya nova"
+  Encryption Passphrase Hint: "Introduïu la vostra frase de pas de xifratge"
+  Show Password: "Mostra la contrasenya"
+  Hide Password: "Amaga la contrasenya"
+  Search Text Hint: "Introduïu termes de cerca"
+  Playlist Description Hint: "Descriviu aquesta llista de reproducció"
+  Filename Preview: "Previsualització del nom del fitxer"
   Enter Channels: "Introdueix canals"
   Enter Text: "Introdueix text"
   Video URL: URL del vídeo o de la llista
@@ -2584,3 +2602,8 @@ Form Inputs:
   Download Arguments Hint: Arguments opcionals per a aquesta baixada
   Generated ID Hint: Deixeu-ho buit per generar un ID
   Default Value: "Per defecte: {value}"
+
+Storage Startup Error:
+  Title: "No s'han pogut carregar les dades de l'aplicació"
+  Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
+  Retry: "Torna-ho a provar"

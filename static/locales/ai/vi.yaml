@@ -267,6 +267,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Vuốt sang trái trên hình thu nhỏ
+      Right: Vuốt sang phải trên hình thu nhỏ
+      Description: Vuốt ngang trên hình thu nhỏ của video rồi thả tay để thực hiện thao tác đã chọn.
     Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
     Use tray icon: "Sử dụng biểu tượng khay hệ thống"
     Close to system tray: "Đóng vào khay hệ thống"
@@ -359,6 +363,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Compact Mobile Mini Player: "Trình phát mini gọn trên di động"
     Always Show Mobile Search Bar: "Luôn hiển thị thanh tìm kiếm trên điện thoại"
     Frosted Glass Player UI: "Giao diện trình phát với hiệu ứng kính mờ"
     Main Color Theme:
@@ -441,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Sáng"
-      OpenTubeX Dark: "OpenTubeX Tối"
+      Ocean Light: "Ocean Sáng"
+      Ocean Dark: "Ocean Tối"
       Custom: Tùy chỉnh
     Light Theme: Chủ đề sáng
     Dark Theme: Chủ đề tối
@@ -632,6 +637,7 @@ Settings:
     Upcoming Videos to Preload: "Số video cần tải trước"
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
+    Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1346,6 +1352,8 @@ Video:
     Hide: Ẩn
     Show: Hiện
     Scroll Mini Player:
+      Collapse Controls: "Thu gọn điều khiển"
+      Expand Controls: "Mở rộng điều khiển"
       Back to Top: Về đầu trang
       Return to Video Tab: Quay lại thẻ video
       Hide: Ẩn trình phát thu nhỏ
@@ -1958,6 +1966,15 @@ Tray Icon:
   Follow App Theme: "Theo chủ đề ứng dụng"
 
 Form Inputs:
+  Enter Password Hint: "Nhập mật khẩu của bạn"
+  Choose Password Hint: "Chọn mật khẩu"
+  Confirm Password Hint: "Nhập lại mật khẩu mới"
+  Encryption Passphrase Hint: "Nhập cụm mật khẩu mã hóa của bạn"
+  Show Password: "Hiện mật khẩu"
+  Hide Password: "Ẩn mật khẩu"
+  Search Text Hint: "Nhập từ khóa tìm kiếm"
+  Playlist Description Hint: "Mô tả danh sách phát này"
+  Filename Preview: "Xem trước tên tệp"
   Enter Channels: "Nhập kênh"
   Enter Text: "Nhập văn bản"
   Video URL: URL video hoặc danh sách phát
@@ -1976,3 +1993,11 @@ Form Inputs:
   Download Arguments Hint: Đối số tùy chọn cho lượt tải này
   Generated ID Hint: Để trống để tạo ID
   Default Value: "Mặc định: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+
+Storage Startup Error:
+  Title: "Không thể tải dữ liệu ứng dụng"
+  Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
+  Retry: "Thử lại"

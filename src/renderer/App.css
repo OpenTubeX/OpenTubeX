@@ -227,7 +227,10 @@
 }
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface),
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface *) {
   visibility: visible !important;
 }
 
@@ -256,6 +259,7 @@
    the video crop. Keep the original object fit and video element dimensions. */
 /* stylelint-disable selector-max-compound-selectors */
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .musicAudioSurface),
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
   position: absolute !important;
   inset: 0 !important;
@@ -345,9 +349,10 @@
   touch-action: pan-x pan-down;
 }
 
-/* Chromium may claim the first finger as a pan before the second finger lands,
-   cancelling the pointer stream before the player can recognize a pinch. */
-.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled) {
+/* Keep Chromium from cancelling pointer streams for pinch zoom or fullscreen
+   horizontal seeking, even when the other player gestures are disabled. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled),
+.app.capacitorTabs :deep(.ftVideoPlayer:is(:fullscreen, .fullWindow)) {
   touch-action: none;
 }
 
@@ -557,6 +562,8 @@
 
 .findbarInput {
   flex: 1 1 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
   min-inline-size: 90px;
   block-size: 32px;
   padding-block: 0;

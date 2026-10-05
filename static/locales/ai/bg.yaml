@@ -265,6 +265,10 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Плъзгане наляво върху миниатюрите
+      Right: Плъзгане надясно върху миниатюрите
+      Description: Плъзнете хоризонтално върху миниатюра на видео и отпуснете, за да изпълните избраното действие.
     Data Saver Thumbnails: "Миниатюри с икономия на данни"
     Use tray icon: "Използване на икона в системната лента"
     Close to system tray: "Затваряне в системната лента"
@@ -357,6 +361,7 @@ Settings:
     Invalid Engine: Въведете име и валиден HTTP или HTTPS URL адрес за търсене, който съдържа %s.
     Engine Limit: Можете да добавите до {count} персонализирани търсачки.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактен мобилен миниплейър"
     Always Show Mobile Search Bar: "Винаги показвай лентата за търсене на телефона"
     Frosted Glass Player UI: "Интерфейс на плейъра с ефект на матирано стъкло"
     Main Color Theme:
@@ -439,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светла"
-      OpenTubeX Dark: "OpenTubeX Тъмна"
+      Ocean Light: "Ocean Светла"
+      Ocean Dark: "Ocean Тъмна"
       Custom: Персонализирана
     Light Theme: Светла тема
     Dark Theme: Тъмна тема
@@ -626,6 +631,7 @@ Settings:
     Upcoming Videos to Preload: "Брой видеа за предварително зареждане"
     Concurrent Preloads: "Едновременни предварителни зареждания"
     Ignore System Rotation Lock for Fullscreen: Игнориране на системното заключване на завъртането за цял екран
+    Swipe Left or Right to Seek in Fullscreen: Плъзнете наляво или надясно за превъртане на цял екран
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1330,6 +1336,8 @@ Video:
     Hide: Скриване
     Show: Показване
     Scroll Mini Player:
+      Collapse Controls: "Свиване на контролите"
+      Expand Controls: "Разгъване на контролите"
       Back to Top: Обратно в началото
       Return to Video Tab: Връщане в раздела с видеоклипа
       Hide: Скриване на миниплейъра
@@ -1942,6 +1950,15 @@ Tray Icon:
   Follow App Theme: "Следване на темата на приложението"
 
 Form Inputs:
+  Enter Password Hint: "Въведете паролата си"
+  Choose Password Hint: "Изберете парола"
+  Confirm Password Hint: "Повторете новата си парола"
+  Encryption Passphrase Hint: "Въведете фразата си за шифроване"
+  Show Password: "Показване на паролата"
+  Hide Password: "Скриване на паролата"
+  Search Text Hint: "Въведете думи за търсене"
+  Playlist Description Hint: "Опишете този плейлист"
+  Filename Preview: "Преглед на името на файла"
   Enter Channels: "Въведете канали"
   Enter Text: "Въведете текст"
   Video URL: URL на видео или плейлист
@@ -1960,3 +1977,11 @@ Form Inputs:
   Download Arguments Hint: Незадължителни аргументи за това изтегляне
   Generated ID Hint: Оставете празно, за да се генерира ID
   Default Value: "По подразбиране: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
+
+Storage Startup Error:
+  Title: "Данните на приложението не могат да се заредят"
+  Message: "Освободете място на устройството и опитайте отново. Синхронизирането е на пауза, докато данните ви се заредят."
+  Retry: "Опитай отново"

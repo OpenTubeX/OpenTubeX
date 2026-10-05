@@ -80,7 +80,7 @@ for (const uiScale of [95, 125]) {
       const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
       const scroller = picker.locator('.promptContentScroller')
       const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-      const search = picker.getByPlaceholder('Search channels')
+      const search = picker.getByLabel('Search channels')
       const expectShortResults = async () => {
         await expectScrollAtRenderedEnd(scroller)
         // Fractional zoom can leave subpixel overflow even when all results fit.
@@ -184,7 +184,7 @@ for (const uiScale of [95, 125]) {
       await expectAtTop()
       await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
       const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
-      await picker.getByPlaceholder('Search channels').fill('Channel 049')
+      await picker.getByLabel('Search channels').fill('Channel 049')
       await picker.getByRole('button', { name: 'Channel 049', exact: true }).click()
       await expect(picker).toHaveCount(0)
       await expect(page.locator('.channelEntry')).toHaveCount(49)

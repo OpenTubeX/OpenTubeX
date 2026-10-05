@@ -11,13 +11,17 @@
     @close="showManager = false"
   >
     <div class="automaticDownloadsHeader">
-      <p>{{ t('Settings.Download Settings.Automatic Downloads Description') }}</p>
-      <p class="automaticDownloadsHint">
-        {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
-      </p>
+      <div class="automaticDownloadsDescription">
+        <p>{{ t('Settings.Download Settings.Automatic Downloads Description') }}</p>
+        <p class="automaticDownloadsHint">
+          {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
+        </p>
+      </div>
       <FtInput
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="searchQuery = $event"
@@ -108,6 +112,7 @@
               <div class="filterGrid">
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Minimum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
@@ -118,6 +123,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
@@ -128,6 +134,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Minimum File Size MB')"
                   :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
@@ -138,6 +145,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Maximum File Size MB')"
                   :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
@@ -148,6 +156,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Age Days')"
                   :placeholder="t('Form Inputs.Any Age')"
                   :show-label="true"
@@ -159,6 +168,7 @@
               </div>
               <div class="titleFilters">
                 <FtInput
+                  :icon="['fas', 'filter']"
                   :label="t('Settings.Download Settings.Title Includes')"
                   :placeholder="t('Form Inputs.Included Terms Example')"
                   :show-label="true"
@@ -168,6 +178,7 @@
                   @input="value => updateRule(channel.id, 'titleIncludes', value)"
                 />
                 <FtInput
+                  :icon="['fas', 'filter']"
                   :label="t('Settings.Download Settings.Title Excludes')"
                   :placeholder="t('Form Inputs.Excluded Terms Example')"
                   :show-label="true"
@@ -246,7 +257,9 @@ function stopObservingContent() {
   contentResizeObserver = null
 }
 
-const rules = computed(() => parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules))
+const pendingRules = ref(null)
+let ruleUpdateSequence = 0
+const rules = computed(() => parseAutomaticDownloadRules(pendingRules.value ?? store.getters.getYtDlpAutomaticDownloadRules))
 const channels = computed(() => {
   const allChannelsProfile = store.getters.getProfileList[0]
   const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
@@ -283,26 +296,38 @@ function ruleFor(channelId) {
   return normalizeAutomaticDownloadRule(rules.value[channelId])
 }
 
-function saveRules(nextRules) {
-  store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify(nextRules))
+function saveRules(updateRules) {
+  const sequence = ++ruleUpdateSequence
+  // Keep unsaved edits in the editor so background downloads use saved rules.
+  pendingRules.value = JSON.stringify(updateRules(rules.value))
+  store.dispatch('updateYtDlpAutomaticDownloadRules', value => JSON.stringify(updateRules(parseAutomaticDownloadRules(value)))).finally(() => {
+    if (sequence === ruleUpdateSequence) pendingRules.value = null
+  }).catch(error => console.error(error))
 }
 
 function setChannelEnabled(channelId, enabled) {
-  const nextRules = { ...rules.value }
-  if (enabled) {
-    nextRules[channelId] = { ...DEFAULT_AUTOMATIC_DOWNLOAD_RULE, enabledAt: Date.now() }
-  } else {
-    delete nextRules[channelId]
-  }
-  saveRules(nextRules)
+  const enabledAt = Date.now()
+  saveRules(currentRules => {
+    const nextRules = { ...currentRules }
+    if (enabled) {
+      nextRules[channelId] = { ...DEFAULT_AUTOMATIC_DOWNLOAD_RULE, enabledAt }
+    } else {
+      delete nextRules[channelId]
+    }
+    return nextRules
+  })
 }
 
 function updateRule(channelId, key, value) {
-  saveRules({
-    ...rules.value,
-    [channelId]: {
-      ...ruleFor(channelId),
-      [key]: value
+  saveRules(currentRules => {
+    // A field edit must not re-enable a rule removed by another writer.
+    if (currentRules[channelId] === undefined) return currentRules
+    return {
+      ...currentRules,
+      [channelId]: {
+        ...normalizeAutomaticDownloadRule(currentRules[channelId]),
+        [key]: value
+      }
     }
   })
 }
@@ -319,12 +344,22 @@ function displayNumber(value) {
 
 <style scoped>
 .automaticDownloadsHeader {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  gap: 20px;
   flex: none;
-  padding: 16px 20px 8px;
+  padding-block: 0 20px;
+  padding-inline: 20px;
+}
+
+.automaticDownloadsDescription {
+  display: grid;
+  gap: 8px;
 }
 
 .automaticDownloadsHeader p {
-  margin-block: 0 8px;
+  margin: 0;
 }
 
 .automaticDownloadsHint,
@@ -378,21 +413,24 @@ function displayNumber(value) {
 }
 
 .channelRuleOptions {
+  --settings-control-margin: 0;
+  --input-bottom-spacing: 0;
+
   display: grid;
-  gap: 18px;
-  padding-block-start: 18px;
+  gap: 20px;
+  padding-block-start: 20px;
 }
 
 .templateAndTypes,
 .filterGrid,
 .titleFilters {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .templateAndTypes {
-  align-items: end;
-  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(max-content, 1fr));
+  align-items: center;
+  grid-template-columns: minmax(260px, 500px) repeat(3, minmax(0, max-content));
 }
 
 .templateSelect {
@@ -408,17 +446,17 @@ function displayNumber(value) {
 
 .filterGrid,
 .titleFilters {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 340px));
 }
 
 .filterHint {
-  margin: -8px 0 0;
+  margin: 0;
   font-size: 0.9rem;
 }
 
 @container (width <= 760px) {
   .templateAndTypes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, max-content));
   }
 
   .templateSelect {

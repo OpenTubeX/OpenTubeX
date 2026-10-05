@@ -103,7 +103,9 @@
         ref="searchInput"
         input-type="search"
         :value="searchQuery"
-        :placeholder="t('Video.Transcript.Search')"
+        :label="t('Video.Transcript.Search')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         @input="searchQuery = $event"
       />

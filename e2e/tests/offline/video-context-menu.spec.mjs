@@ -1,4 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -23,6 +24,10 @@ const SEED = {
 }
 
 test.use({ seed: SEED })
+
+test.beforeEach(async ({ page }) => {
+  await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => fulfillVisualFixture(route, 'video-thumbnail'))
+})
 
 for (const iconPack of ['material', 'remix']) {
   test.describe(`background tab shortcut with ${iconPack} icons`, () => {
@@ -142,7 +147,7 @@ test('video thumbnails, titles, and metadata share one menu', async ({ page, app
   await expect(card.getByRole('button', { name: /^More options$/i })).toHaveCount(0)
   const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
 
-  for (const selector of ['.thumbnailImage', '.h3Title', '.videoInfo']) {
+  for (const selector of ['.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)', '.h3Title', '.videoInfo']) {
     await card.locator(selector).first().click({ button: 'right' })
     await expect(menu).toBeVisible()
     for (const label of ['Play Next', 'Add to Queue', 'Mark As Watched', 'Remove From History', 'Copy Link', 'Open in a New Tab', 'Open in a New Window']) {
@@ -215,8 +220,8 @@ for (const uiScale of [100, 125]) {
         for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }, { width: 1024, height: 768 }]) {
           await page.setViewportSize(viewport)
           const card = page.locator('.ft-list-video').first()
-          await card.locator('.thumbnailImage').scrollIntoViewIfNeeded()
-          const bounds = await card.locator('.thumbnailImage').boundingBox()
+          await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').scrollIntoViewIfNeeded()
+          const bounds = await card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)').boundingBox()
           await session.send('Input.dispatchTouchEvent', {
             type: 'touchStart', touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }]
           })
@@ -457,14 +462,16 @@ for (const playlistType of ['youtube', 'user']) {
 test('retains image and selected-text actions alongside video actions', async ({ page, app }) => {
   await goTo(page, 'history')
   const card = page.locator('.ft-list-video').first()
+  const thumbnail = card.locator('.thumbnailImage:not(.retryImagePlaceholder):not(.thumbnailPreview)')
+  await expectImagesLoaded(thumbnail)
   const menu = page.locator('.contextMenu')
-  await card.locator('.thumbnailImage').click({ button: 'right' })
+  await thumbnail.click({ button: 'right' })
   for (const name of ['Copy Image', 'Copy Image Address']) {
     await expect(menu.getByRole('menuitem', { name, exact: true })).toBeVisible()
   }
   await expect(menu.getByRole('menuitem', { name: /^Save Image As/ })).toBeVisible()
   await expect(menu.getByRole('menuitem', { name: 'Add to Queue', exact: true })).toBeVisible()
-  const imageUrl = await card.locator('.thumbnailImage').evaluate(image => image.currentSrc || image.src)
+  const imageUrl = await thumbnail.evaluate(image => image.currentSrc || image.src)
   await menu.getByRole('menuitem', { name: 'Copy Image Address', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(imageUrl)
   await card.locator('.h3Title').evaluate(element => {

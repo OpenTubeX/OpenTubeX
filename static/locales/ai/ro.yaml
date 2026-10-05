@@ -265,6 +265,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Glisare la stânga pe miniaturi
+      Right: Glisare la dreapta pe miniaturi
+      Description: Glisați orizontal pe miniatura unui videoclip și eliberați pentru a efectua acțiunea selectată.
     Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
     Use tray icon: "Folosește pictograma din zona de notificare"
     Close to system tray: "Închide în zona de notificare"
@@ -357,6 +361,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Compact Mobile Mini Player: "Mini player mobil compact"
     Always Show Mobile Search Bar: "Afișează mereu bara de căutare pe mobil"
     Frosted Glass Player UI: "Interfață de player cu efect de sticlă mată"
     Main Color Theme:
@@ -439,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Luminoasă"
-      OpenTubeX Dark: "OpenTubeX Întunecată"
+      Ocean Light: "Ocean Luminoasă"
+      Ocean Dark: "Ocean Întunecată"
       Custom: Personalizată
     Light Theme: Temă luminoasă
     Dark Theme: Temă întunecată
@@ -628,6 +633,7 @@ Settings:
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
+    Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1349,6 +1355,8 @@ Video:
     Hide: Ascunde
     Show: Afișează
     Scroll Mini Player:
+      Collapse Controls: "Restrânge comenzile"
+      Expand Controls: "Extinde comenzile"
       Back to Top: Înapoi sus
       Return to Video Tab: Revino la fila videoclipului
       Hide: Ascunde miniplayerul
@@ -1970,6 +1978,15 @@ Tray Icon:
   Follow App Theme: "Urmează tema aplicației"
 
 Form Inputs:
+  Enter Password Hint: "Introdu parola ta"
+  Choose Password Hint: "Alege o parolă"
+  Confirm Password Hint: "Repetă noua parolă"
+  Encryption Passphrase Hint: "Introdu fraza ta de criptare"
+  Show Password: "Afișează parola"
+  Hide Password: "Ascunde parola"
+  Search Text Hint: "Introduceți termeni de căutare"
+  Playlist Description Hint: "Descrieți această listă de redare"
+  Filename Preview: "Previzualizarea numelui fișierului"
   Enter Channels: "Introdu canale"
   Enter Text: "Introdu text"
   Video URL: URL video sau listă de redare
@@ -1988,3 +2005,11 @@ Form Inputs:
   Download Arguments Hint: Argumente opționale pentru această descărcare
   Generated ID Hint: Lasă gol pentru a genera un ID
   Default Value: "Implicit: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."
+
+Storage Startup Error:
+  Title: "Datele aplicației nu au putut fi încărcate"
+  Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
+  Retry: "Încearcă din nou"

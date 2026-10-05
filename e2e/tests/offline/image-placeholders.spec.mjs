@@ -733,10 +733,13 @@ test('uses the menu action icon while its image loads and after failure', async 
 })
 
 test('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
-  await app.electronApp.evaluate(({ ipcMain }, channel) => {
-    ipcMain.removeHandler(channel)
-    ipcMain.handle(channel, () => 'https://tab-previews.test/captured')
-  }, IpcChannels.TABS_CAPTURE_PREVIEW)
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.TABS_CAPTURE_PREVIEW)
+    ipcMain.handle(channels.TABS_CAPTURE_PREVIEW, () => null)
+    ipcMain.removeHandler(channels.TABS_GET_CACHED_PREVIEWS)
+    ipcMain.handle(channels.TABS_GET_CACHED_PREVIEWS, (_event, tabIds) =>
+      Object.fromEntries(tabIds.map(tabId => [tabId, 'https://tab-previews.test/captured'])))
+  }, IpcChannels)
   const pending = []
   let failImages = false
   await page.route('https://tab-previews.test/**', route => {

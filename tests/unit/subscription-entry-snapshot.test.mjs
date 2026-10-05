@@ -44,3 +44,22 @@ test('does not cache non-reactive input that cannot invalidate a snapshot', () =
   entries[0].title = 'New'
   assert.equal(getNewSubscriptionEntriesSnapshot(entries)[0].title, 'New')
 })
+
+test('Home reuses seen-state selection across visits while retaining reactive source entries', () => {
+  let scanned = 0
+  const entries = reactive(Array.from({ length: 30000 }, (_, index) => ({
+    title: `Entry ${index}`,
+    get isNewInSubscriptionFeed() { scanned++; return index === 0 },
+  })))
+  const firstVisit = computed(() => getNewSubscriptionEntriesSnapshot(entries, false))
+  const first = firstVisit.value
+  assert.equal(first[0], entries[0])
+  const initialScans = scanned
+  const secondVisit = computed(() => getNewSubscriptionEntriesSnapshot(entries, false))
+  assert.equal(secondVisit.value, first)
+  assert.equal(scanned, initialScans)
+  entries[0].title = 'Updated'
+  assert.equal(secondVisit.value[0].title, 'Updated')
+  entries.splice(0, 1)
+  assert.equal(secondVisit.value.length, 0)
+})

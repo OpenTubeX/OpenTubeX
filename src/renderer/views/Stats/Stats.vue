@@ -234,24 +234,31 @@
           <p class="estimateNote">
             {{ t('Stats.Estimate note') }}
           </p>
-          <button
+          <FtButton
             type="button"
             class="adjustEstimateButton"
             @click="openHistoricalAdjustment"
           >
-            <FtIcon :icon="['fas', 'clock-rotate-left']" />
+            <FtIcon
+              aria-hidden="true"
+              :icon="['fas', 'clock-rotate-left']"
+            />
             {{ t('Stats.Adjust imported watch time') }}
-          </button>
+          </FtButton>
         </div>
-        <button
+        <FtButton
           v-if="isLocalDeviceSelected"
           type="button"
+          theme="destructive"
           class="resetStatsButton"
           @click="showResetPrompt = true"
         >
-          <FtIcon :icon="['fas', 'trash']" />
+          <FtIcon
+            aria-hidden="true"
+            :icon="['fas', 'trash']"
+          />
           {{ t('Stats.Reset statistics') }}
-        </button>
+        </FtButton>
       </footer>
       <FtPrompt
         v-if="showResetPrompt"

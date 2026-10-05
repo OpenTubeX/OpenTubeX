@@ -14,13 +14,16 @@
       <p class="dropdownHeader">
         {{ t('User Playlists.Save to') }}
       </p>
-      <input
-        v-model="search"
+      <FtInput
         class="playlistSearch"
-        type="search"
-        :aria-label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
+        variant="filled"
+        input-type="search"
+        :value="search"
         :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-      >
+        :show-label="false"
+        :show-action-button="false"
+        @input="search = $event"
+      />
       <div
         ref="listScroller"
         v-overlay-scrollbars
@@ -76,6 +79,7 @@
 </template>
 
 <script setup>
+import FtInput from '../FtInput/FtInput.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, ref, useTemplateRef } from 'vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'

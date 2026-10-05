@@ -545,12 +545,12 @@ const mutations = {
       incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
     } else {
       const foundPlaylist = state.playlists[i]
-      // The update may or may not carry videos. Dropping the old ones and
-      // counting whatever the playlist ends up with covers both cases: an
-      // update that leaves `videos` alone re-adds the very same entries.
-      decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
+      // Playback timestamps and metadata edits leave membership unchanged.
+      // Recount only when the update actually replaces the video list.
+      const replacesVideos = Object.hasOwn(updatedPlaylist, 'videos')
+      if (replacesVideos) decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
       state.playlists.splice(i, 1, Object.assign(foundPlaylist, updatedPlaylist))
-      incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
+      if (replacesVideos) incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
     }
   },
 

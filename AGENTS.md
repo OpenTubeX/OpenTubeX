@@ -24,6 +24,7 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 ## UI
 
+- After completing any visual change or implementation, always show the user a screenshot or short recording of the finished result in the final response. Use screenshots for static appearance and recordings when interaction, animation, or transitions are needed to demonstrate the change.
 - Follow `.github/PULL_REQUEST_TEMPLATE.md` for release-note screenshot and recording instructions.
 - The in-app UI Scale setting changes Electron's zoom factor and can produce legitimate fractional CSS-pixel geometry. Changes involving scrolling, measurements, positioning, reflow, or animation boundaries must also work at non-100% UI scales; do not treat a subpixel difference from integer layout properties as stale or invalid state.
 - Custom Shaka overflow-menu controls must hide while any submenu is open; follow the existing `submenuopen` / `submenuclose` visibility pattern using `isSubMenuOpened` and `shaka-hidden`.

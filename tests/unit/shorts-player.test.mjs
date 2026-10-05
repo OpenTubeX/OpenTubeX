@@ -306,7 +306,7 @@ for (const wasPlaying of [false, true]) {
 
 test('an inactive Short ignores fullscreen events and synchronizes when activated', () => {
   const start = playerSource.indexOf('    function fullscreenChangeHandler() {')
-  const source = playerSource.slice(start, playerSource.indexOf('    function exitFullscreenHandler()', start))
+  const source = playerSource.slice(start, playerSource.indexOf('    async function exitPresentationModes()', start))
   const closed = []
   let fullscreen = true
   let activate

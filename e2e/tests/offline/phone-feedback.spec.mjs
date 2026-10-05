@@ -198,7 +198,7 @@ for (const zoom of [1, 0.95]) {
     })
     const player = page.locator('.ftVideoPlayer')
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await page.locator('.phoneCommentsButton').evaluate(button => button.click())
+    await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
     const sheet = page.locator('.dockedSheet[open]')
     await expect(sheet).toBeVisible()
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
@@ -696,13 +696,38 @@ test('closing an expanded panel resumes the video it paused', async ({ app, page
 for (const picker of [false, true]) {
   test(`fullscreen ${picker ? 'select' : 'quick settings'} animates opening and closing`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
-    await page.locator('.profileTrigger').click()
-    if (picker) await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
-    const sheet = page.locator('.mobileSheet[open]').last()
-    expect(await sheet.evaluate(el => el.getAnimations().some(animation => animation.effect.getTiming().duration > 0))).toBe(true)
-    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
-    expect(await sheet.evaluate(el => el.getAnimations().some(animation => animation.effect.getTiming().duration > 0))).toBe(true)
-    await expect(page.locator('.mobileSheet[open]')).toHaveCount(picker ? 1 : 0)
+    // Record creation in the renderer: short animations can finish before IPC
+    // returns, especially while the rest of the suite is consuming CPU.
+    const recorded = await page.evaluateHandle(() => {
+      const state = { animate: Element.prototype.animate, animations: [] }
+      Element.prototype.animate = function (...args) {
+        const animation = state.animate.apply(this, args)
+        if (this.matches('.mobileSheet')) state.animations.push({ element: this, duration: animation.effect.getTiming().duration })
+        return animation
+      }
+      return state
+    })
+    let sheetElement
+    try {
+      await page.locator('.profileTrigger').click()
+      if (picker) await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
+      const sheet = page.locator('.mobileSheet[open]').last()
+      sheetElement = await sheet.elementHandle()
+      const durations = () => sheetElement.evaluate((element, state) => state.animations
+        .filter(animation => animation.element === element)
+        .map(animation => animation.duration), recorded)
+      await expect(sheet).toBeVisible()
+      expect((await durations()).at(-1)).toBeGreaterThan(0)
+      const openingCount = (await durations()).length
+      await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect.poll(async () => (await durations()).length).toBeGreaterThan(openingCount)
+      expect((await durations()).at(-1)).toBeGreaterThan(0)
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(picker ? 1 : 0)
+    } finally {
+      await sheetElement?.dispose()
+      await recorded.evaluate(state => { Element.prototype.animate = state.animate })
+      await recorded.dispose()
+    }
   })
 }
 

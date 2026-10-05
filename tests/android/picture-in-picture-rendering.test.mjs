@@ -126,7 +126,7 @@ for (const { width, height } of [{ width: 400, height: 225 }, { width: 320.8, he
         assert.equal(geometry.controls, 'none')
         await frame.locator('body').evaluate(body => body.classList.remove('androidPictureInPicture'))
         if (mode === 'mini') {
-          assert.equal(await frame.locator('video').evaluate(video => getComputedStyle(video).width), '112px')
+          assert.equal(await frame.locator('video').evaluate(video => getComputedStyle(video).width), '80px')
         }
       } finally { await handle.evaluate(frame => frame.remove()) }
     })
