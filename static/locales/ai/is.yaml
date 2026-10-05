@@ -910,8 +910,6 @@ Settings:
     Open Profile Directory: Opna möppu notandasniðs
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
-    All settings have been successfully imported: Tókst að flytja inn allar stillingar
-    All settings have been successfully exported: Tókst að flytja út allar stillingar
     Setting object has insufficient data, skipping item: Stillingahlutur inniheldur ekki næg gögn, sleppi atriði
     Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
     Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
@@ -1075,7 +1073,6 @@ Settings:
     Failed to select IP block recovery script: Ekki tókst að velja endurheimtarskriftu fyrir IP-lokun
   SponsorBlock Settings:
     Excluded Channels:
-      Excluded Channels: "Undanskildar rásir"
       Tooltip: "Sláðu inn auðkenni rásar til að koma í veg fyrir að SponsorBlock-hlutum sé sleppt í myndskeiðum hennar. Auðkennið verður að passa nákvæmlega og há- og lágstafir skipta máli."
     Enable SponsorBlock Submission: Virkja innsendingar til SponsorBlock
     SponsorBlock Private User ID (optional): Einkaauðkenni notanda (valfrjálst)
@@ -1252,7 +1249,6 @@ Video:
   Notification unavailable: Kerfistilkynningar eru ekki tiltækar
   Scheduled video starting: Tímasett myndband er að hefjast
   Live notification body: '{videoTitle} hefst núna'
-  Premiere: Frumsýning
   AI: Gervigreind
   AI-generated content: Efni búið til með gervigreind
   Collaborators: Samstarfsaðilar
