@@ -377,9 +377,12 @@ test.describe('tab group previews', () => {
       await expect(tooltip).toHaveCSS('visibility', 'visible')
       const original = await tooltip.elementHandle()
       const groupBox = await group.boundingBox()
-      // Pause in the gap long enough to cross a rendered frame.
+      // Control the grace period so a slow CI worker cannot expire it while
+      // Playwright moves the pointer between anchors.
+      await page.clock.install()
+      await page.clock.pauseAt(new Date(Date.now() + 1000))
       await page.mouse.move(groupBox.x + groupBox.width / 2, groupBox.y + groupBox.height + 1)
-      await page.waitForTimeout(40)
+      await page.clock.runFor(40)
       await expect(tooltip).toHaveCSS('opacity', '1')
       const tab = page.locator(sel.tabs).last()
       await tab.hover()
@@ -389,10 +392,11 @@ test.describe('tab group previews', () => {
       expect(await original.evaluate(element => element.isConnected)).toBe(true)
       await expect(tooltip.locator('.tabTooltipGridItem')).toHaveCount(showPreview ? 4 : 0)
       await page.mouse.down()
+      await page.clock.runFor(200)
       await expect(tooltip).toHaveCount(0)
       await page.mouse.move(700, 500)
       await page.mouse.up()
-      await page.waitForTimeout(150)
+      await page.clock.runFor(150)
       await expect(tooltip).toHaveCount(0)
     })
   }
