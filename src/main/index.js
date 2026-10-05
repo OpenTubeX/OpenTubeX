@@ -149,7 +149,8 @@ function runApp() {
           privileges: {
             standard: true,
             secure: true,
-            supportFetchAPI: true
+            supportFetchAPI: true,
+            codeCache: true
           }
         }]
       : []),
@@ -370,14 +371,22 @@ function runApp() {
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
   const faviconPromises = new Map()
+  let configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
+  // Menus must not queue a settings read behind unrelated writes on slow storage.
+  const configuredSearchEnginesReady = baseHandlers.settings._findOne('contextMenuSearchEngines')
+    .then(setting => {
+      configuredSearchEngines = parseSearchEngines(setting?.value ?? DEFAULT_SEARCH_ENGINES_SETTING)
+    })
+    .catch(error => {
+      console.warn('Failed to load context-menu search engines:', error)
+    })
 
   /**
    * @returns {Promise<ReturnType<typeof parseSearchEngines>>}
    */
   async function getConfiguredSearchEngines() {
-    const setting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
-      DEFAULT_SEARCH_ENGINES_SETTING
-    return parseSearchEngines(setting)
+    await configuredSearchEnginesReady
+    return configuredSearchEngines
   }
 
   /**
@@ -4992,6 +5001,9 @@ function runApp() {
             { event: SyncEvents.GENERAL.UPSERT, data }
           )
           switch (data._id) {
+            case 'contextMenuSearchEngines':
+              configuredSearchEngines = parseSearchEngines(data.value)
+              break
             // Update app menu on related setting update
             case 'backendFallback':
               backendFallback = data.value
@@ -5049,6 +5061,9 @@ function runApp() {
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.settings.delete(data)
+          if (data === 'contextMenuSearchEngines') {
+            configuredSearchEngines = parseSearchEngines(DEFAULT_SEARCH_ENGINES_SETTING)
+          }
           return null
 
         default:

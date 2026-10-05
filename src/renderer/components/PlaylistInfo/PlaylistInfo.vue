@@ -805,7 +805,6 @@ async function savePlaylistInfo() {
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
-    videos: deepCopy(selectedUserPlaylist.value.videos),
     _id: props.id,
   }
   try {
