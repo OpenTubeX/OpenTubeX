@@ -2005,3 +2005,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Fallou a busca coas cookies configuradas."
+
+Storage Startup Error:
+  Title: "Non se puideron cargar os datos da aplicación"
+  Message: "Libera espazo no dispositivo e téntao de novo. A sincronización está en pausa ata que se carguen os teus datos."
+  Retry: "Tentar de novo"

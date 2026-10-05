@@ -1941,3 +1941,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Search failed with the configured cookies."
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Retry: "Retry"

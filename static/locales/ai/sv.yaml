@@ -1974,3 +1974,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
+
+Storage Startup Error:
+  Title: "Kunde inte läsa in appdata"
+  Message: "Frigör lagringsutrymme på enheten och försök igen. Synkroniseringen är pausad tills dina data har lästs in."
+  Retry: "Försök igen"

@@ -2003,3 +2003,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
+
+Storage Startup Error:
+  Title: "Sovelluksen tietoja ei voitu ladata"
+  Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
+  Retry: "Yritä uudelleen"

@@ -1965,3 +1965,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."
+
+Storage Startup Error:
+  Title: "Data aplikasi tidak dapat dimuat"
+  Message: "Kosongkan ruang penyimpanan perangkat dan coba lagi. Sinkronisasi dijeda hingga data Anda dimuat."
+  Retry: "Coba lagi"

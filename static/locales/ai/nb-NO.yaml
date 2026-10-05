@@ -1977,3 +1977,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Søk med de konfigurerte informasjonskapslene mislyktes."
+
+Storage Startup Error:
+  Title: "Kunne ikke laste appdata"
+  Message: "Frigjør lagringsplass på enheten og prøv igjen. Synkronisering er satt på pause til dataene dine er lastet."
+  Retry: "Prøv igjen"

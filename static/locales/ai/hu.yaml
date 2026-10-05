@@ -1955,3 +1955,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+
+Storage Startup Error:
+  Title: "Nem sikerült betölteni az alkalmazás adatait"
+  Message: "Szabadítson fel tárhelyet az eszközön, majd próbálja újra. A szinkronizálás az adatok betöltéséig szünetel."
+  Retry: "Újrapróbálkozás"

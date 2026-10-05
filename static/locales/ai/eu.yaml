@@ -1972,3 +1972,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+
+Storage Startup Error:
+  Title: "Ezin izan dira aplikazioaren datuak kargatu"
+  Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
+  Retry: "Saiatu berriro"

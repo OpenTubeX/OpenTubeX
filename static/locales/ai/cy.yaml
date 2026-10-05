@@ -1986,3 +1986,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."
+
+Storage Startup Error:
+  Title: "Methu llwytho data'r ap"
+  Message: "Rhyddhewch le storio ar y ddyfais a cheisiwch eto. Mae cysoni wedi'i oedi nes bod eich data wedi'i lwytho."
+  Retry: "Ceisio eto"

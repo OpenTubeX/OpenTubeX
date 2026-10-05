@@ -53,7 +53,24 @@ const dynamicColorsReady = process.env.IS_CAPACITOR
     })
   : Promise.resolve()
 
-Promise.all([router.isReady(), dynamicColorsReady]).then(() => {
+Promise.all([router.isReady(), dynamicColorsReady]).then(async () => {
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+    try {
+      const { waitForDatastores } = await import('../datastores/index')
+      await waitForDatastores()
+    } catch (error) {
+      console.error('Android app storage is unavailable:', error)
+      // Use the system locale without reading or writing failed app storage.
+      await store.dispatch('triggerCurrentLocaleSideEffects', 'system')
+      const { setIconPack } = await import('./icons/iconPackState')
+      await setIconPack('material')
+      const { default: StorageStartupError } = await import('./components/StorageStartupError/StorageStartupError.vue')
+      createApp(StorageStartupError).use(i18n).mount('#app')
+      document.getElementById('startup-splash')?.remove()
+      document.getElementById('app')?.removeAttribute('inert')
+      return
+    }
+  }
   app.mount('#app')
   initializeAppScrollbars({ useNativePageScrollbar: process.env.IS_CAPACITOR })
 })

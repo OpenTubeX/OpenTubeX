@@ -1993,3 +1993,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
+
+Storage Startup Error:
+  Title: "Không thể tải dữ liệu ứng dụng"
+  Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
+  Retry: "Thử lại"

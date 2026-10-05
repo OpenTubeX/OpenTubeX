@@ -1956,3 +1956,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"
+
+Storage Startup Error:
+  Title: "無法載入應用程式資料"
+  Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
+  Retry: "重試"

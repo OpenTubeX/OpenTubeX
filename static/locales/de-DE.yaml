@@ -3154,3 +3154,8 @@ Form Inputs:
   Download Arguments Hint: Optionale Argumente für diesen Download
   Generated ID Hint: Leer lassen, um eine ID zu erzeugen
   Default Value: "Standard: {value}"
+
+Storage Startup Error:
+  Title: "App-Daten konnten nicht geladen werden"
+  Message: "Gib Speicherplatz auf dem Gerät frei und versuche es erneut. Die Synchronisierung bleibt pausiert, bis deine Daten geladen sind."
+  Retry: "Erneut versuchen"

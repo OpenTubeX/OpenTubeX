@@ -1964,3 +1964,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."
+
+Storage Startup Error:
+  Title: "Tətbiq məlumatları yüklənmədi"
+  Message: "Cihazda yaddaş sahəsi boşaldın və yenidən cəhd edin. Məlumatlarınız yüklənənədək sinxronizasiya dayandırılıb."
+  Retry: "Yenidən cəhd et"

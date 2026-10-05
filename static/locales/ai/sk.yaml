@@ -1957,3 +1957,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
+
+Storage Startup Error:
+  Title: "Údaje aplikácie sa nepodarilo načítať"
+  Message: "Uvoľnite miesto v zariadení a skúste to znova. Synchronizácia je pozastavená, kým sa údaje nenačítajú."
+  Retry: "Skúsiť znova"
