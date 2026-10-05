@@ -63,7 +63,11 @@ for (const audioOnly of [false, true]) {
   }
 }
 
-async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false } = {}) {
+test('mobile music artwork placeholder fills the thumbnail and restores its inline layout', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
+
+async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -121,7 +125,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       }).toBe(true)
       await watch?.dispose()
       watch = await page.evaluateHandle(findWatchComponent)
-      await watch.evaluate((component, { media, audioOnly, posterOnly }) => {
+      await watch.evaluate((component, { media, audioOnly, posterOnly, artworkUnavailable }) => {
         const watch = component.proxy
         watch.videoLoadGeneration++
         Object.assign(watch, {
@@ -129,13 +133,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
           isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
           videoTitle: 'A long mini-player title with more room after removing the expand arrow', videoLengthSeconds: 60,
           musicMediaType: audioOnly ? 'audioTrack' : 'unknown',
-          thumbnail: audioOnly
+          thumbnail: artworkUnavailable ? 'data:image/png;base64,broken' : audioOnly
             ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Cpath fill='lime' d='M0 0h320v180H0z'/%3E%3C/svg%3E"
             : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#326b8a"/></svg>'),
           legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
             width: 320, height: posterOnly ? 240 : 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
         })
-      }, { media, audioOnly, posterOnly })
+      }, { media, audioOnly, posterOnly, artworkUnavailable })
       await expect(player).toBeVisible()
       await page.evaluate(() => window.scrollTo(0, 0))
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -154,7 +158,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       type, touchPoints: point ? [point] : [],
     })
     if (geometryOnly) {
-      const media = audioOnly ? player.locator('img.musicAudioArtwork:not(.retryImagePlaceholder)') : video
+      const media = audioOnly ? player.locator(artworkUnavailable
+        ? 'img.musicAudioArtwork.retryImagePlaceholder' : 'img.musicAudioArtwork:not(.retryImagePlaceholder)') : video
       const capture = async name => {
         if (process.env.ANDROID_ARTIFACT_DIR) {
           await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/${audioOnly ? 'music' : 'video'}-${landscape ? 'landscape' : 'portrait'}-${name}.png` })

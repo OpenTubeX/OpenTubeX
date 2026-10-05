@@ -610,7 +610,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeGreaterThan(0.5)
     await touch('touchEnd')
     await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'contain')
+    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     await player.evaluate(element => {
       element.style.left = '0px'
       element.style.width = `${window.innerWidth}px`

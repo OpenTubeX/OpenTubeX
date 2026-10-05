@@ -99,6 +99,41 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   methods.clearMobileMiniMorph()
 })
 
+for (const hidden of [false, true]) {
+  test(`music morph animates the visible fallback when artwork is ${hidden ? 'failed' : 'loading'}`, () => {
+    const attributes = new Set()
+    const style = () => ({ setProperty() {}, removeProperty(name) { delete this[name.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] } })
+    const rect = { left: 0, top: 0, width: 400, height: 225 }
+    const placeholder = {
+      style: style(), naturalWidth: 480, naturalHeight: 270,
+      getBoundingClientRect: () => ({ left: 40, top: 20, width: 100, height: 100 }),
+      closest: () => ({ getBoundingClientRect: () => rect })
+    }
+    const loadingImage = {
+      ...placeholder, hidden, style: style(), naturalWidth: 0, naturalHeight: 0,
+      getBoundingClientRect: () => ({ left: 40, top: 20, width: 1, height: 1 })
+    }
+    const methods = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function releaseMobileMiniBarTransition('))}\n({ renderMobileMiniMorph, clearMobileMiniMorph })`, {
+      container: { value: {
+        style: style(), hasAttribute: name => attributes.has(name),
+        setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
+        querySelector: selector => selector === '.musicAudioArtwork.retryImagePlaceholder' ? placeholder : loadingImage,
+        querySelectorAll: () => []
+      } },
+      video: { value: { videoWidth: 400, videoHeight: 225 } },
+      mobileMiniBarOverlay: { value: null }, mobileMiniMorphBase: null,
+      getComputedStyle: () => ({ borderTopLeftRadius: '12px' })
+    })
+    methods.renderMobileMiniMorph(rect, { ...rect, top: 700 }, rect, { left: 8, top: 6, width: 80, height: 45 }, 1, false)
+    assert.equal(placeholder.style.transform, 'translate(110px, 42.5px) scale(4)')
+    assert.equal(placeholder.style.borderRadius, '0px')
+    assert.equal(loadingImage.style.transform, undefined)
+    methods.clearMobileMiniMorph()
+    assert.equal(placeholder.style.transform, undefined)
+    assert.equal(placeholder.style.borderRadius, undefined)
+  })
+}
+
 function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true, format = 'dash', mobile = false } = {}) {
   let reads = 0
   let navigations = 0

@@ -387,7 +387,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       style.setProperty('--mobile-mini-video-base-width', `${baseVideo.width}px`)
       style.setProperty('--mobile-mini-video-base-height', `${baseVideo.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
-      const artwork = element.querySelector('.musicAudioArtwork:not(.retryImagePlaceholder)')
+      const artwork = element.querySelector('.musicAudioArtwork.retryImagePlaceholder') ?? element.querySelector('.musicAudioArtwork')
       if (artwork && !artwork.hidden) {
         const bounds = artwork.getBoundingClientRect()
         const surface = artwork.closest('.musicAudioSurface').getBoundingClientRect()
@@ -419,7 +419,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // properties invalidate styles throughout Shaka's hidden control tree.
     // The same poster surface covers loading, countdown and ended playback.
     for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) {
-      const poster = surface.classList.contains('countdownPoster') ? surface.querySelector('img:not(.retryImagePlaceholder)') : null
+      const poster = surface.classList.contains('countdownPoster')
+        ? surface.querySelector('.retryImagePlaceholder') ?? surface.querySelector('img')
+        : null
       const aspect = poster?.naturalWidth / poster?.naturalHeight || mediaAspect
       const pictureWidth = Math.min(baseVideo.width, baseVideo.height * aspect)
       const pictureHeight = pictureWidth / aspect
