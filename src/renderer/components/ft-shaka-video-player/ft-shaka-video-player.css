@@ -2420,6 +2420,30 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   gap: 2px;
 }
 
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .mobileSeekPreview {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  font-variant-numeric: tabular-nums;
+  z-index: 4;
+}
+
+.mobileSeekPreviewTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobileSeekThumbnail {
+  width: min(240px, 45vw, calc(30dvh * var(--seek-thumbnail-aspect-ratio)));
+  border-radius: 4px;
+  background-repeat: no-repeat;
+}
+
+.ftVideoPlayer:has(.mobileSeekPreview) :deep(.shaka-big-buttons-container) {
+  visibility: hidden;
+}
+
 .valueChangeCustomIcon {
   flex: none;
   width: 1em;

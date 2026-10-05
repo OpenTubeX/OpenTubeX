@@ -349,9 +349,10 @@
   touch-action: pan-x pan-down;
 }
 
-/* Chromium may claim the first finger as a pan before the second finger lands,
-   cancelling the pointer stream before the player can recognize a pinch. */
-.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled) {
+/* Keep Chromium from cancelling pointer streams for pinch zoom or fullscreen
+   horizontal seeking, even when the other player gestures are disabled. */
+.app.capacitorTabs :deep(.ftVideoPlayer.videoZoomTouchEnabled),
+.app.capacitorTabs :deep(.ftVideoPlayer:is(:fullscreen, .fullWindow)) {
   touch-action: none;
 }
 

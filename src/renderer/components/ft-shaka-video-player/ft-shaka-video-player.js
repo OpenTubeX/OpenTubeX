@@ -39,6 +39,7 @@ import { LegacyQualitySelection } from './player-components/LegacyQualitySelecti
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
+import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { VideoZoomSelection } from './player-components/VideoZoomSelection'
@@ -150,6 +151,7 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
+import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
@@ -5234,14 +5236,32 @@ export default defineComponent({
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
       mobileMiniPlayerDismissSettling,
+      mobileSeekPreview,
       moveMobileFullscreenGesture,
       startMobileFullscreenGesture,
     } = useMobileFullscreenGestures({
       getContainer: () => container.value,
       getControls: () => ui?.getControls(),
+      getSeekState: () => {
+        if (!video.value || !canSeek()) return null
+        const { start, end } = player.seekRange()
+        const time = video.value.currentTime
+        return Number.isFinite(start) && Number.isFinite(end) && Number.isFinite(time) && end > start
+          ? { time, start, end }
+          : null
+      },
+      seekToTime: time => {
+        if (!video.value || !canSeek()) return
+        // WebView can mark VOD ended within its last frame, even before duration.
+        const target = !player.isDynamic() && time === video.value.duration
+          ? Math.max(0, time - 0.1)
+          : time
+        seekBySeconds(target - video.value.currentTime, true, false, false)
+      },
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isSeekSwipeEnabled: () => store.getters.getEnableMobileFullscreenSeek,
       isPlaybackEnded: () => video.value?.ended === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
@@ -5271,6 +5291,19 @@ export default defineComponent({
       setShowUiOnPaused,
       showOverlayControls,
       togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
+    })
+
+    const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
+      preview: mobileSeekPreview,
+      getPlayer: () => player,
+      getVideoId: () => props.videoId,
+      loadImageDimensions,
+    })
+
+    watch(mobileSeekPreview, preview => {
+      ui?.getControls().dispatchEvent(new shaka.util.FakeEvent('seekpreviewchange', {
+        time: preview?.time ?? null,
+      }))
     })
 
     function resetMobileAdjustments(preserveGesture = false) {
@@ -7365,7 +7398,7 @@ export default defineComponent({
       )))
       if (mobileFullscreenBrightnessActive.value) mobileAdjustments.setFullscreenBrightness(true)
     })
-    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction], () => {
+    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction, store.getters.getEnableMobileFullscreenSeek], () => {
       cancelMobileFullscreenGesture()
       mobileAdjustments.cancel()
     })
@@ -12600,6 +12633,14 @@ export default defineComponent({
       mobileFullscreenSwiping,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
+      mobileSeekPreview,
+      mobileSeekPreviewMessage: computed(() => {
+        const preview = mobileSeekPreview.value
+        if (!preview) return ''
+        const sign = preview.seconds < 0 ? '−' : '+'
+        return `${formatDurationAsTimestamp(preview.time)} (${sign}${formatDurationAsTimestamp(Math.abs(preview.seconds))})`
+      }),
+      mobileSeekThumbnailStyle,
       resetFullscreenDockHeights,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,

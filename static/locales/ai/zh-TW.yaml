@@ -624,6 +624,7 @@ Settings:
     Upcoming Videos to Preload: "要預先載入的影片數量"
     Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
+    Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。

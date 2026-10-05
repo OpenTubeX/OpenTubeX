@@ -8,9 +8,12 @@ export function isCapacitorMobilePlayer() {
 export function useMobileFullscreenGestures({
   getContainer,
   getControls,
+  getSeekState,
+  seekToTime,
   isFullscreenActive,
   isFullscreenMetadataShown,
   isFullscreenSwipeEnabled,
+  isSeekSwipeEnabled,
   isPlaybackEnded,
   isPlayerSurfaceTarget,
   isScrollMiniPlayerActive,
@@ -27,6 +30,8 @@ export function useMobileFullscreenGestures({
   const mobileFullscreenSwiping = ref(false)
   const mobileFullscreenSwipeSettling = ref(false)
   const mobileFullscreenSwipeOffset = ref(0)
+  /** @type {import('vue').Ref<{ time: number, seconds: number } | null>} */
+  const mobileSeekPreview = ref(null)
   /** @type {import('vue').Ref<number | null>} */
   const mobileMiniPlayerDismissOffset = ref(null)
   const mobileMiniPlayerDismissSettling = ref(false)
@@ -44,7 +49,7 @@ export function useMobileFullscreenGestures({
   /** @type {number | null} */
   let mobileMiniPlayerDismissTimer = null
   let mobileMiniPlayerDismissSequence = 0
-  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number } | null} */
+  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number, width: number, seeking: boolean, seekState: { time: number, start: number, end: number } | null } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
@@ -61,6 +66,7 @@ export function useMobileFullscreenGestures({
   let mobilePlayerSuppressClickUntil = 0
   let mobileControlSuppressClickUntil = 0
   let mobileSurfaceSuppressTouchEndUntil = 0
+  let mobileSeekTouchCancelled = false
   let mobileTitleSuppressClickUntil = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, blocked: boolean } | null} */
   let mobileFullscreenTitleGesture = null
@@ -89,6 +95,8 @@ export function useMobileFullscreenGestures({
     ) {
       return
     }
+
+    mobileSeekTouchCancelled = false
 
     const previousTitleTap = lastMobileFullscreenTitleTap
     const blocksPreviousTitleTap = previousTitleTap !== null &&
@@ -138,6 +146,11 @@ export function useMobileFullscreenGestures({
       action: ['brightness', 'volume', 'speed'].includes(action) ? action : 'disabled',
       adjusting: false,
       height: Math.max(1, bounds?.height ?? 1),
+      width: Math.max(1, bounds?.width ?? 1),
+      seeking: false,
+      seekState: surfaceTap && isSeekSwipeEnabled() && isFullscreenActive() && !shorts && !restoring && !getControls()?.anySettingsMenusAreOpen()
+        ? getSeekState()
+        : null,
     }
   }
 
@@ -159,6 +172,24 @@ export function useMobileFullscreenGestures({
       clearTimeout(mobileSurfaceTapTimer)
       mobileSurfaceTapTimer = null
       lastMobileSideTap = null
+    }
+    // Lock the direction once: horizontal seeking must not turn into a
+    // volume/brightness adjustment or fullscreen exit after sideways drift.
+    if (mobileFullscreenGesture.seekState && !mobileFullscreenGesture.adjusting && !mobileFullscreenSwiping.value &&
+      (mobileFullscreenGesture.seeking || (Math.abs(deltaX) >= 12 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5))) {
+      if (!mobileFullscreenGesture.seeking) {
+        mobileFullscreenGesture.seeking = true
+        clearMobileSeekFeedback()
+        getContainer()?.setPointerCapture(event.pointerId)
+      }
+      const { time: startTime, start, end } = mobileFullscreenGesture.seekState
+      // At most two minutes per player width keeps long videos controllable.
+      const seconds = Math.round(deltaX / mobileFullscreenGesture.width * Math.min(120, end - start))
+      const time = Math.max(start, Math.min(end, startTime + seconds))
+      mobileSeekPreview.value = { time, seconds: time - startTime }
+      event.preventDefault()
+      event.stopPropagation()
+      return true
     }
     const dragDistance = deltaY * (mobileFullscreenGesture.restoring ? -1 : 1)
     if (!mobileFullscreenGesture.fullscreen && mobileFullscreenGesture.restoring && !mobileFullscreenGesture.minimizing &&
@@ -269,6 +300,19 @@ export function useMobileFullscreenGestures({
 
     const gesture = mobileFullscreenGesture
     mobileFullscreenGesture = null
+    if (gesture.seeking) {
+      const preview = mobileSeekPreview.value
+      mobileSeekPreview.value = null
+      const container = getContainer()
+      if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
+      mobilePlayerSuppressClickUntil = performance.now() + 350
+      mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
+      mobileControlSuppressClickUntil = performance.now() + 350
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      if (preview && isFullscreenActive() && isSeekSwipeEnabled()) seekToTime(preview.time)
+      return true
+    }
     if (gesture.minimizing || gesture.dismissing) {
       const container = getContainer()
       if (container?.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId)
@@ -399,7 +443,8 @@ export function useMobileFullscreenGestures({
     lastMobileSideTap = null
     const wasActive = mobileFullscreenGesture !== null || mobileFullscreenSwiping.value
     if (mobileFullscreenGesture?.minimizing) miniPlayerDrag.finish(false)
-    if (mobileFullscreenGesture?.adjusting || mobileFullscreenGesture?.dismissing) {
+    if (mobileFullscreenGesture?.adjusting || mobileFullscreenGesture?.dismissing || mobileFullscreenGesture?.seeking) {
+      if (mobileFullscreenGesture.seeking) mobileSeekTouchCancelled = true
       if (mobileFullscreenGesture.adjusting) adjustments.cancel()
       mobilePlayerSuppressClickUntil = performance.now() + 350
       mobileSurfaceSuppressTouchEndUntil = performance.now() + 350
@@ -409,6 +454,7 @@ export function useMobileFullscreenGestures({
     const pointerId = mobileFullscreenGesture?.pointerId
     if (pointerId !== undefined && container?.hasPointerCapture(pointerId)) container.releasePointerCapture(pointerId)
     mobileFullscreenGesture = null
+    mobileSeekPreview.value = null
     if (mobileFullscreenSwiping.value) settleMobileFullscreenGesture(false, false)
     return wasActive
   }
@@ -497,12 +543,17 @@ export function useMobileFullscreenGestures({
   function handleMobilePlayerTouchEnd(event) {
     if (
       !isCapacitorMobilePlayer() ||
-      performance.now() >= mobileSurfaceSuppressTouchEndUntil
+      (!mobileSeekTouchCancelled && performance.now() >= mobileSurfaceSuppressTouchEndUntil)
     ) {
       return
     }
 
     mobileSurfaceSuppressTouchEndUntil = 0
+    if (mobileSeekTouchCancelled) {
+      mobileSeekTouchCancelled = event.touches?.length > 0
+      mobilePlayerSuppressClickUntil = performance.now() + 350
+      mobileControlSuppressClickUntil = performance.now() + 350
+    }
     event.preventDefault()
     event.stopImmediatePropagation()
     // Shaka's surface-tap handler is on the child controls container. Notify
@@ -551,6 +602,7 @@ export function useMobileFullscreenGestures({
     clearTimeout(mobileFullscreenSettleTimer)
     clearTimeout(mobileSurfaceTapTimer)
     mobileFullscreenGesture = null
+    mobileSeekPreview.value = null
     mobilePlayerSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
     mobileTitleSuppressClickUntil = 0
@@ -569,6 +621,7 @@ export function useMobileFullscreenGestures({
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
     mobileMiniPlayerDismissSettling,
+    mobileSeekPreview,
     moveMobileFullscreenGesture,
     startMobileFullscreenGesture,
   }

@@ -648,6 +648,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
+    Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.

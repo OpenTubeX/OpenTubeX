@@ -637,6 +637,7 @@ Settings:
     Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
+    Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.

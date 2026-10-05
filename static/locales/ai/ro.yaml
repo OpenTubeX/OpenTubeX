@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
+    Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.

@@ -632,6 +632,7 @@ Settings:
     Upcoming Videos to Preload: "Número de vídeos a pré-carregar"
     Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para ecrã inteiro
+    Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou recuar em ecrã inteiro
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.

@@ -215,6 +215,14 @@
       />
       <FtToggleSwitch
         v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Swipe Left or Right to Seek in Fullscreen')"
+        :compact="true"
+        :default-value="store.getters.getEnableMobileFullscreenSeek"
+        setting-key="enableMobileFullscreenSeek"
+        @change="store.dispatch('updateEnableMobileFullscreenSeek', $event)"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
         :label="t('Settings.Player Settings.Continue Playback When Screen Is Locked')"
         :compact="true"
         :default-value="continuePlaybackWhenScreenIsLocked"

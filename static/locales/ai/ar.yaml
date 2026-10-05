@@ -632,6 +632,7 @@ Settings:
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
     Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
+    Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.

@@ -624,6 +624,7 @@ Settings:
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.

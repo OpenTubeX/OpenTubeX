@@ -61,7 +61,8 @@ test('fullscreen swipe controls respect the idle delay and subsequent surface ta
     const video = player.locator('video')
     const controls = player.locator('.shaka-controls-container')
     await expect.poll(() => video.evaluate(video => ({ ready: video.readyState, source: video.currentSrc.slice(0, 80), error: video.error?.message })), { timeout: 15000 }).toMatchObject({ ready: 4 })
-    await video.evaluate(video => { video.loop = true; return video.play() })
+    // A saved position from seek tests can loop this short fixture mid-assertion.
+    await video.evaluate(video => { video.currentTime = 0; video.loop = true; return video.play() })
     await expect.poll(() => video.evaluate(video => video.paused)).toBe(false)
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
 
