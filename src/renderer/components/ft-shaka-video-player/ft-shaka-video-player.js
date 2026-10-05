@@ -5251,7 +5251,12 @@ export default defineComponent({
           : null
       },
       seekToTime: time => {
-        if (video.value && canSeek()) seekBySeconds(time - video.value.currentTime, true, false, false)
+        if (!video.value || !canSeek()) return
+        // WebView can mark VOD ended within its last frame, even before duration.
+        const target = !player.isDynamic() && time === video.value.duration
+          ? Math.max(0, time - 0.1)
+          : time
+        seekBySeconds(target - video.value.currentTime, true, false, false)
       },
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,

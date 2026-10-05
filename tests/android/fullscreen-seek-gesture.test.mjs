@@ -155,7 +155,10 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
       await beginSeek(0.25, 0.2)
       await expect(preview).toHaveText('0:30 (+0:01)')
       await touch('touchEnd')
-      await expect.poll(() => video.evaluate(video => Math.abs(video.currentTime - video.duration))).toBeLessThan(0.05)
+      await expect.poll(() => video.evaluate(video => video.seeking)).toBe(false)
+      await expect.poll(() => video.evaluate(video => video.duration - video.currentTime)).toBeCloseTo(0.1, 4)
+      assert.equal(await video.evaluate(video => video.ended), false, 'Seeking to the end leaves the paused video at its last frame')
+      assert.equal(await video.evaluate(video => video.paused), true)
 
       await resetTime()
       await beginSeek(0.25, 0.2)

@@ -776,3 +776,31 @@ for (const reducedMotion of [false, true]) {
     assert.deepEqual(calls, ['dismiss'])
   })
 }
+
+for (const [name, dynamic, time, duration, end, expected] of [
+  ['VOD end', false, 30, 30, 30, 29.9],
+  ['very short VOD end', false, 0.05, 0.05, 0.05, 0],
+  ['VOD before the end', false, 21, 30, 30, 21],
+  ['live edge', true, 30, 30, 30, 30],
+  ['live DVR edge', true, 30, Infinity, 30, 30],
+  ['restricted VOD range', false, 25, 30, 25, 25],
+]) {
+  test(`fullscreen swipe commit respects the ${name}`, () => {
+    const video = { value: { currentTime: 15, duration, paused: true } }
+    const seekToTimeSource = playerSource.match(/      seekToTime: (time => \{[^]*?\n      \}),/)[1]
+    const seekBySecondsSource = playerSource.match(/    function seekBySeconds\([^]*?\n    }/)[0]
+    const remembered = []
+    const seekToTime = vm.runInNewContext(`${seekBySecondsSource}\n(${seekToTimeSource})`, {
+      video,
+      player: { isDynamic: () => dynamic, seekRange: () => ({ start: 0, end }) },
+      isLive: { value: dynamic },
+      canSeek: () => true,
+      rememberSeekPosition: time => remembered.push(time),
+      accumulatedSeekSeconds: 0,
+    })
+    seekToTime(time)
+    assert.equal(video.value.currentTime, expected)
+    assert.deepEqual(remembered, [expected])
+    assert.equal(video.value.paused, true)
+  })
+}
