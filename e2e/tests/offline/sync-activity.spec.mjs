@@ -188,7 +188,6 @@ test.describe('account activity labels', () => {
     await expect(activity.nth(1).locator('p')).toHaveText(/Laptop removed Sunset from Custom theme creator$/i)
     await expect(activity.nth(2)).toContainText('No feed types')
   })
-
 })
 
 for (const uiScale of [100, 125]) {

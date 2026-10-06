@@ -213,13 +213,9 @@ test.describe('download settings', () => {
     })
   }
 
-  test('folder picker action has an accessible name', async ({ page }) => {
-    await goToSettingsSection(page, 'download')
-    await expect(page.locator('.downloadPathInputs .inputAction')).toHaveAccessibleName('Choose Download Folder')
-  })
-
   test('stores global yt-dlp arguments and centers wrapped download actions', async ({ app, page }) => {
     await goToSettingsSection(page, 'download')
+    await expect(page.locator('.downloadPathInputs .inputAction')).toHaveAccessibleName('Choose Download Folder')
 
     const globalArguments = page.getByRole('textbox', { name: 'Additional yt-dlp arguments' })
     await globalArguments.fill('--cookies-from-browser firefox')

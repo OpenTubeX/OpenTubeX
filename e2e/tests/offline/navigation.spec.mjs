@@ -470,17 +470,6 @@ test.describe('side nav navigation', () => {
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 
-  test('navigation history back and forward work', async ({ page }) => {
-    await goTo(page, 'history')
-    await goTo(page, 'userplaylists')
-
-    await page.locator(sel.backButton).click()
-    await expect(page).toHaveURL(/#\/history/)
-
-    await page.locator(sel.forwardButton).click()
-    await expect(page).toHaveURL(/#\/userplaylists/)
-  })
-
   test('mobile navigation history keeps its own menu sizing', async ({ page }) => {
     await goTo(page, 'history')
     await goTo(page, 'userplaylists')

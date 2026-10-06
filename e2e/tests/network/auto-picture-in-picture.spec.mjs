@@ -65,18 +65,9 @@ test.describe('automatic Picture-in-Picture', () => {
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   })
 
-  // Regression (#492, #265): with several triggers enabled, restoring the
-  // window left the video stranded in the PiP window.
-  test('restoring the window re-embeds the video', async ({ app, page }) => {
-    await setMinimized(app, true)
-    await expect.poll(() => pictureInPictureActive(page)).toBe(true)
-
-    await setMinimized(app, false)
-    await expect.poll(() => pictureInPictureActive(page)).toBe(false)
-  })
-
-  // Regression (#492): the blur the window manager delivers while the closing
-  // PiP window hands focus back reopened PiP right after the restore closed it.
+  // Regression (#492, #265): restoring must re-embed the video, and the stale
+  // blur delivered while the closing PiP window hands focus back must not
+  // immediately reopen it.
   test('a stale blur after restoring does not reopen PiP', async ({ app, page }) => {
     await setMinimized(app, true)
     await expect.poll(() => pictureInPictureActive(page)).toBe(true)
