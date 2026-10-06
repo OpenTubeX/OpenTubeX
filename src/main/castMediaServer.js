@@ -152,15 +152,18 @@ export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
   function registerUrls(urls, contentType) {
     return register(urls.length === 1 ? urls[0] : urls, contentType)
   }
-  function renderAttributes(node, bases, inheritedBases = bases) {
+  function elementXmlBase(node, inheritedXmlBase) {
+    return Object.hasOwn(node.attributes, 'xml:base') ? httpUrl(node.attributes['xml:base'], inheritedXmlBase).href : inheritedXmlBase
+  }
+  function renderAttributes(node, bases, inheritedBases = bases, xmlBase = base) {
     const element = node.name.split(':').at(-1)
-    return Object.entries(node.attributes).map(([name, value]) => {
+    return Object.entries(node.attributes).filter(([name]) => name !== 'xml:base').map(([name, value]) => {
       const attribute = name.split(':').at(-1)
       // Resolve-to-zero tells the DASH client to remove an element without fetching it.
       if (attribute === 'href' && ['Period', 'AdaptationSet', 'SegmentList'].includes(element) && value !== 'urn:mpeg:dash:resolve-to-zero:2013') {
-        // XLinks resolve against the document; imported media inherits the
+        // XLinks resolve against the element's XML base; imported media inherits the
         // containing DASH element's bases when the receiver replaces the node.
-        value = register(httpUrl(value, base).href, 'application/dash+xml', undefined, { rootName: element, bases: inheritedBases })
+        value = register(httpUrl(value, xmlBase).href, 'application/dash+xml', undefined, { rootName: element, bases: inheritedBases })
       } else if (element === 'UTCTiming' && attribute === 'value' &&
           /^urn:mpeg:dash:utc:http-(?:head|xsdate|iso|ntp):(?:2012|2014)$/.test(node.attributes.schemeIdUri ?? '')) {
         value = value.trim().split(/\s+/).map(url => registerUrls(resolveUrls([url], bases))).join(' ')
@@ -173,25 +176,29 @@ export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
       return ` ${name}="${escapeXml(value)}"`
     }).join('')
   }
-  function render(node, inheritedBases) {
+  function render(node, inheritedBases, inheritedXmlBase = base) {
     if (typeof node === 'string') return escapeXml(node)
     const name = node.name.split(':').at(-1)
     // Patch operations need the original MPD context to resolve their URLs.
     // Use full MPD refreshes until the relay supports that context.
     if (name === 'PatchLocation') return ''
+    const xmlBase = elementXmlBase(node, inheritedXmlBase)
+    const localBases = Object.hasOwn(node.attributes, 'xml:base') ? [xmlBase] : inheritedBases
     if (name === 'Location') {
-      // Manifest refreshes resolve against the original document, not media BaseURL.
-      const url = register(httpUrl(node.children.join('').trim(), base).href, 'application/dash+xml')
-      return `<${node.name}${renderAttributes(node, [base])}>${escapeXml(url)}</${node.name}>`
+      // Manifest refreshes use the XML base, independently of media BaseURL.
+      const url = register(httpUrl(node.children.join('').trim(), xmlBase).href, 'application/dash+xml')
+      return `<${node.name}${renderAttributes(node, [xmlBase], [xmlBase], xmlBase)}>${escapeXml(url)}</${node.name}>`
     }
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
-    const effectiveBases = bases.length ? resolveUrls(bases.map(child => child.children.join('').trim()), inheritedBases) : inheritedBases
-    const attributes = renderAttributes(node, effectiveBases, inheritedBases)
+    const baseUrls = new Map(bases.map(child => [child, resolveUrls([child.children.join('').trim()],
+      Object.hasOwn(child.attributes, 'xml:base') ? [elementXmlBase(child, xmlBase)] : localBases)]))
+    const effectiveBases = bases.length ? resolveUrls([...baseUrls.values()].flat(), [undefined]) : localBases
+    const attributes = renderAttributes(node, effectiveBases, localBases, xmlBase)
     const children = node.children.map(child => {
       if (bases.includes(child)) {
-        return `<${child.name}${renderAttributes(child, inheritedBases)}>${escapeXml(registerUrls(resolveUrls([child.children.join('').trim()], inheritedBases)))}</${child.name}>`
+        return `<${child.name}${renderAttributes(child, baseUrls.get(child), localBases, elementXmlBase(child, xmlBase))}>${escapeXml(registerUrls(baseUrls.get(child)))}</${child.name}>`
       }
-      return render(child, effectiveBases)
+      return render(child, effectiveBases, xmlBase)
     }).join('')
     return `<${node.name}${attributes}>${children}</${node.name}>`
   }
@@ -372,7 +379,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
     resource.active++
     const controller = new AbortController()
     response.on('close', () => { resource.active--; controller.abort() })
-    const timeout = setTimeout(() => controller.abort(), 15_000)
+    let timeout = setTimeout(() => controller.abort(), 15_000)
     try {
       let data
       let contentType = resource.contentType
@@ -389,7 +396,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         for (const [index, candidate] of resource.urls.entries()) {
           const attempt = new AbortController()
           const signal = AbortSignal.any([controller.signal, attempt.signal])
-          const attemptTimeout = resource.urls.length > 1 ? setTimeout(() => attempt.abort(), 5000) : null
+          let attemptTimeout
           try {
             url = httpUrl(candidate)
             let path = match[2]
@@ -404,6 +411,18 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
               url = next
             } else if (path !== 'media') throw new Error('Invalid Cast resource path')
             if (reloadQuery !== undefined) applyHlsReloadQuery(url, reloadQuery)
+            const blockingReload = hls && /^\d{1,20}$/.test(url.searchParams.get('_HLS_msn') ?? '') &&
+              (!url.searchParams.has('_HLS_part') || /^\d{1,20}$/.test(url.searchParams.get('_HLS_part')))
+            if (index === 0 && blockingReload) {
+              // Manifest grace covers three target durations and a full media
+              // window. Before the first playlist, only the receiver can cancel
+              // the blocking wait; restore the body deadline once headers arrive.
+              clearTimeout(timeout)
+              timeout = resource.hlsTimingKnown
+                ? setTimeout(() => controller.abort(), Math.min(2_147_483_647, resource.graceMs + 15_000))
+                : undefined
+            }
+            if (resource.urls.length > 1 && !blockingReload) attemptTimeout = setTimeout(() => attempt.abort(), 5000)
             for (let redirects = 0; ; redirects++) {
               const addresses = await isAllowedUrl(url)
               if (!addresses) throw new Error('Unsupported Cast resource destination')
@@ -426,6 +445,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
             if (controller.signal.aborted || index === resource.urls.length - 1) throw error
           } finally { clearTimeout(attemptTimeout) }
         }
+        if (timeout === undefined) timeout = setTimeout(() => controller.abort(), 15_000)
         contentType ??= upstream.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
         if (url.pathname.endsWith('.mpd')) contentType = 'application/dash+xml'
         if (/\.m3u8$/i.test(url.pathname)) contentType = 'application/x-mpegurl'
@@ -459,6 +479,10 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           const graceMs = dash
             ? resource.dashContext ? resource.graceMs : dashResourceGrace(dashAttributes)
             : hlsResourceGrace(data)
+          if (!dash) {
+            resource.graceMs = Math.max(resource.graceMs, graceMs)
+            resource.hlsTimingKnown = true
+          }
           for (const id of references) {
             const child = resources.get(id)
             child.graceMs = Math.max(child.graceMs, graceMs)

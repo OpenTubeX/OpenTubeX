@@ -116,6 +116,63 @@ test('shared DASH XLink URLs retain separate inherited media contexts', async t 
   }
 })
 
+test('DASH XML bases inherit through links, refreshes and media without mixing document and CDN bases', () => {
+  const registered = []
+  const xml = '<MPD xml:base="../root/" xmlns:xlink="http://www.w3.org/1999/xlink"><BaseURL>https://cdn.test/video/</BaseURL><Location xml:base="updates/">next.mpd</Location><Period xml:base="period/" xlink:href="fragment.xml"><AdaptationSet xml:base="../audio/" xml:lang="en"><BaseURL xml:base="tracks/" serviceLocation="A">media/</BaseURL><SegmentTemplate media="chunk-$Number$.m4s" initialization="init.mp4"/></AdaptationSet></Period></MPD>'
+  const rewritten = rewriteCastDash(xml, 'https://instance.test/manifests/start.mpd', (value, type, variables, context) => {
+    registered.push({ value, type, context })
+    return `http://cast.test/${registered.length}`
+  })
+  assert.deepEqual(registered.map(item => item.value), [
+    'https://cdn.test/video/', 'https://instance.test/root/updates/next.mpd',
+    'https://instance.test/root/period/fragment.xml', 'https://instance.test/root/audio/tracks/media/',
+    'https://instance.test/root/audio/tracks/media/chunk-$Number$.m4s', 'https://instance.test/root/audio/tracks/media/init.mp4'
+  ])
+  assert.deepEqual(registered[2].context, { rootName: 'Period', bases: ['https://instance.test/root/period/'] })
+  assert.ok(!rewritten.includes('xml:base='), 'Consumed XML bases must not redirect receiver resolution upstream')
+  assert.match(rewritten, /xml:lang="en"/)
+  assert.match(rewritten, /serviceLocation="A"/)
+  assert.throws(() => rewriteCastDash('<MPD xml:base="file:///secret/"><Period/></MPD>', 'https://instance.test/start.mpd', () => ''), /Unsupported/)
+})
+
+test('DASH XML bases on external fragments use their redirected document URL and scoped credentials', async t => {
+  const requests = []
+  const upstream = createServer((request, response) => {
+    requests.push({ path: request.url, authorization: request.headers.authorization })
+    if (request.url === '/manifest/start.mpd') return response.end('<MPD xml:base="../private/" xmlns:xlink="http://www.w3.org/1999/xlink"><Period xml:base="period/" xlink:href="link"/></MPD>')
+    if (request.url === '/private/period/link') return response.writeHead(302, { location: '/public/fragments/period.xml' }).end()
+    if (request.url === '/public/fragments/period.xml') return response.end('<Period xml:base="../assets/" xmlns:xlink="http://www.w3.org/1999/xlink"><AdaptationSet xml:base="nested/" xlink:href="adaptation.xml"/></Period>')
+    if (request.url === '/public/assets/nested/adaptation.xml') return response.end('<AdaptationSet xml:base="../media/"><SegmentList><Initialization sourceURL="init.mp4"/><SegmentURL media="chunk.m4s"/></SegmentList></AdaptationSet>')
+    if (['/public/assets/media/init.mp4', '/public/assets/media/chunk.m4s'].includes(request.url)) return response.end(request.url)
+    response.writeHead(404).end()
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/manifest/start.mpd`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token',
+    url => new URL(url).pathname.startsWith('/private/') ? { Authorization: 'Bearer private' } : {})
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  let url = media.mediaUrl()
+  for (const name of ['MPD', 'Period', 'AdaptationSet']) {
+    const response = await fetch(url)
+    assert.equal(response.status, 200, name)
+    const body = await response.text()
+    if (name !== 'AdaptationSet') url = body.match(/xlink:href="([^"]+)"/)[1]
+    else {
+      assert.ok(!body.includes('xml:base='))
+      for (const attribute of ['sourceURL', 'media']) {
+        const response = await fetch(body.match(new RegExp(`${attribute}="([^"]+)"`))[1])
+        assert.equal(response.status, 200)
+        assert.match(await response.text(), /^\/public\/assets\/media\//)
+      }
+    }
+  }
+  assert.deepEqual(requests.map(request => request.path), ['/manifest/start.mpd', '/private/period/link', '/public/fragments/period.xml',
+    '/public/assets/nested/adaptation.xml', '/public/assets/media/init.mp4', '/public/assets/media/chunk.m4s'])
+  assert.equal(requests[1].authorization, 'Bearer private')
+  assert.ok(requests.filter((_, index) => index !== 1).every(request => request.authorization === undefined))
+})
+
 for (const fragment of ['<MPD/>', '<!DOCTYPE Period><Period/>', '<Period><BaseURL>file:///secret/</BaseURL></Period>']) {
   test(`external DASH fragments reject invalid content: ${fragment}`, async t => {
     const upstream = createServer((request, response) => response.end(fragment))
@@ -728,6 +785,111 @@ for (const type of ['application/x-mpegurl', 'application/vnd.apple.mpegurl', un
     ])
   })
 }
+
+async function pendingPlaylistRequest(t, query, upstreamQuery = '', targetDuration = 10, prime = true) {
+  let hold = false, release, signal, begin, aborted
+  const started = new Promise(resolve => { begin = resolve })
+  const cancelled = new Promise(resolve => { aborted = resolve })
+  const playlist = `#EXTM3U\n#EXT-X-TARGETDURATION:${targetDuration}\n#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES\n#EXT-X-PART:DURATION=0.5,URI="part.ts"\n`
+  const media = createMediaServer({ url: `https://media.test/live.m3u8${upstreamQuery}`, contentType: 'application/x-mpegurl' }, '127.0.0.1', 'token',
+    () => ({}), () => [{ address: '8.8.8.8', family: 4 }], async (url, options) => {
+      if (!hold) return new Response(playlist)
+      signal = options.signal
+      return new Promise((resolve, reject) => {
+        release = response => resolve(response ?? new Response(playlist))
+        signal.addEventListener('abort', () => { aborted(); reject(signal.reason) }, { once: true })
+        begin()
+      })
+    })
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  if (prime) assert.equal((await fetch(root)).status, 200)
+  hold = true
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  let client
+  const response = new Promise((resolve, reject) => {
+    client = httpRequest(`${root}${query}`, incoming => {
+      let body = ''
+      incoming.on('data', chunk => { body += chunk })
+      incoming.on('end', () => resolve({ status: incoming.statusCode, body }))
+    })
+    client.on('error', reject)
+    client.end()
+  })
+  response.catch(() => {})
+  t.after(() => { release?.(); client.destroy() })
+  await started
+  return { signal, response, release, client, cancelled }
+}
+
+for (const upstreamQuery of ['', '?_HLS_msn=42']) {
+  test(`HLS blocking reload waits beyond 15 seconds with ${upstreamQuery ? 'inherited' : 'receiver'} directives`, async t => {
+    const pending = await pendingPlaylistRequest(t, upstreamQuery ? '?_HLS_part=0' : '?_HLS_msn=42&_HLS_part=0', upstreamQuery)
+    t.mock.timers.tick(31_000)
+    assert.equal(pending.signal.aborted, false)
+    pending.release()
+    const response = await pending.response
+    assert.equal(response.status, 200)
+    assert.match(response.body, /URI="http:\/\/127\.0\.0\.1:\d+\/token\/\d+\/media"/)
+  })
+}
+
+for (const query of ['', '?_HLS_skip=YES']) {
+  test(`non-blocking HLS ${query ? 'delta' : 'ordinary'} requests retain the 15-second deadline`, async t => {
+    const pending = await pendingPlaylistRequest(t, query)
+    t.mock.timers.tick(16_000)
+    assert.equal(pending.signal.aborted, true)
+    assert.equal((await pending.response).status, 502)
+  })
+}
+
+test('HLS blocking reload timeout follows long playlist target durations', async t => {
+  const pending = await pendingPlaylistRequest(t, '?_HLS_msn=42', '', 60)
+  t.mock.timers.tick(181_000)
+  assert.equal(pending.signal.aborted, false)
+  pending.release()
+  assert.equal((await pending.response).status, 200)
+})
+
+test('initial HLS blocking reload waits for headers when playlist timing is not known', async t => {
+  const pending = await pendingPlaylistRequest(t, '?_HLS_msn=42', '', 60, false)
+  t.mock.timers.tick(181_000)
+  assert.equal(pending.signal.aborted, false)
+  pending.release()
+  assert.equal((await pending.response).status, 200)
+})
+
+test('initial HLS blocking reload restores the body deadline after receiving headers', async t => {
+  const pending = await pendingPlaylistRequest(t, '?_HLS_msn=42', '', 60, false)
+  t.mock.timers.tick(181_000)
+  assert.equal(pending.signal.aborted, false)
+  let reading
+  const startedReading = new Promise(resolve => { reading = resolve })
+  const stream = new ReadableStream({
+    start(controller) { pending.signal.addEventListener('abort', () => controller.error(pending.signal.reason), { once: true }) },
+    pull() { reading() }
+  }, { highWaterMark: 0 })
+  pending.release(new Response(stream))
+  await startedReading
+  t.mock.timers.tick(16_000)
+  assert.equal(pending.signal.aborted, true)
+  assert.equal((await pending.response).status, 502)
+})
+
+test('HLS blocking reloads still abort at a finite deadline', async t => {
+  const pending = await pendingPlaylistRequest(t, '?_HLS_msn=42')
+  t.mock.timers.tick(1_000_000)
+  assert.equal(pending.signal.aborted, true)
+  assert.equal((await pending.response).status, 502)
+})
+
+test('HLS blocking reload cancels upstream work when the receiver disconnects', async t => {
+  const pending = await pendingPlaylistRequest(t, '?_HLS_msn=42')
+  pending.client.destroy()
+  await pending.cancelled
+  assert.equal(pending.signal.aborted, true)
+})
 
 test('extensionless HLS child reloads preserve variable imports, redirect authorization and destination checks', async t => {
   const requests = [], destinations = []
