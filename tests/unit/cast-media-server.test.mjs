@@ -50,6 +50,86 @@ test('DASH resolve-to-zero XLinks pass through the relay without an upstream req
   assert.throws(() => rewriteCastDash('<MPD><Period xlink:href="urn:unsupported"/></MPD>', undefined, () => ''), /Unsupported/)
 })
 
+for (const contentType of ['application/dash+xml', 'application/xml']) {
+  test(`external DASH fragments served as ${contentType} retain media bases and nested XLinks`, async t => {
+    const requests = []
+    const upstream = createServer((request, response) => {
+      requests.push({ path: request.url, authorization: request.headers.authorization })
+      const documents = {
+        '/manifest/start.mpd': '<MPD xmlns:xlink="http://www.w3.org/1999/xlink"><BaseURL>../vod/</BaseURL><Period xlink:href="../fragments/period.xml" xlink:actuate="onLoad"/></MPD>',
+        '/fragments/period.xml': '<Period xmlns:xlink="http://www.w3.org/1999/xlink"><BaseURL>period/</BaseURL><AdaptationSet xlink:href="adaptation.xml" xlink:actuate="onLoad"/></Period>',
+        '/fragments/adaptation.xml': '<AdaptationSet xmlns:xlink="http://www.w3.org/1999/xlink"><Representation><SegmentList xlink:href="segments.xml" xlink:actuate="onLoad"/></Representation></AdaptationSet>',
+        '/fragments/segments.xml': '<SegmentList><Initialization sourceURL="init.mp4"/><SegmentURL media="chunk.m4s"/></SegmentList>',
+      }
+      const document = documents[request.url]
+      if (document) response.writeHead(200, { 'content-type': request.url.endsWith('.mpd') ? 'application/dash+xml' : contentType }).end(document)
+      else if (['/vod/period/init.mp4', '/vod/period/chunk.m4s'].includes(request.url)) response.end(request.url)
+      else response.writeHead(404).end()
+    })
+    const upstreamUrl = await listen(upstream)
+    t.after(() => close(upstream))
+    const media = createCastMediaServer({ url: `${upstreamUrl}/manifest/start.mpd`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token',
+      url => new URL(url).origin === upstreamUrl ? { Authorization: 'Bearer scoped-test' } : {})
+    const relayOrigin = await listen(media.server)
+    media.setOrigin(relayOrigin)
+    t.after(() => close(media.server))
+    let url = media.mediaUrl()
+    for (const root of ['MPD', 'Period', 'AdaptationSet', 'SegmentList']) {
+      const response = await fetch(url)
+      assert.equal(response.status, 200, root)
+      const body = await response.text()
+      assert.match(body, new RegExp(`<${root}[ >]`))
+      assert.ok(!body.includes(upstreamUrl), 'All media URLs stay on the relay')
+      if (root !== 'SegmentList') url = body.match(/xlink:href="([^"]+)"/)[1]
+      else {
+        for (const [attribute, expected] of [['sourceURL', '/vod/period/init.mp4'], ['media', '/vod/period/chunk.m4s']]) {
+          const resource = body.match(new RegExp(`${attribute}="([^"]+)"`))[1]
+          assert.equal(await (await fetch(resource)).text(), expected)
+        }
+      }
+    }
+    assert.equal(requests.length, 6)
+    assert.ok(requests.every(request => request.authorization === 'Bearer scoped-test'))
+  })
+}
+
+test('shared DASH XLink URLs retain separate inherited media contexts', async t => {
+  const upstream = createServer((request, response) => {
+    if (request.url === '/shared.xml') response.end('<SegmentList><SegmentURL media="chunk.m4s"/></SegmentList>')
+    else response.end(request.url)
+  })
+  const upstreamUrl = await listen(upstream)
+  t.after(() => close(upstream))
+  const xml = `<MPD xmlns:xlink="http://www.w3.org/1999/xlink">${['first', 'second'].map(path =>
+    `<Period><BaseURL>${upstreamUrl}/${path}/</BaseURL><AdaptationSet><Representation><SegmentList xlink:href="${upstreamUrl}/shared.xml"/></Representation></AdaptationSet></Period>`).join('')}</MPD>`
+  const media = createCastMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const body = await (await fetch(media.mediaUrl())).text()
+  const links = [...body.matchAll(/xlink:href="([^"]+)"/g)].map(match => match[1])
+  assert.equal(links.length, 2)
+  assert.notEqual(links[0], links[1])
+  for (const [index, link] of links.entries()) {
+    const fragment = await (await fetch(link)).text()
+    const segment = fragment.match(/media="([^"]+)"/)[1]
+    assert.equal(await (await fetch(segment)).text(), `/${index === 0 ? 'first' : 'second'}/chunk.m4s`)
+  }
+})
+
+for (const fragment of ['<MPD/>', '<!DOCTYPE Period><Period/>', '<Period><BaseURL>file:///secret/</BaseURL></Period>']) {
+  test(`external DASH fragments reject invalid content: ${fragment}`, async t => {
+    const upstream = createServer((request, response) => response.end(fragment))
+    const upstreamUrl = await listen(upstream)
+    t.after(() => close(upstream))
+    const xml = `<MPD><Period xlink:href="${upstreamUrl}/period.xml"/></MPD>`
+    const media = createCastMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token')
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const body = await (await fetch(media.mediaUrl())).text()
+    assert.equal((await fetch(body.match(/xlink:href="([^"]+)"/)[1])).status, 502)
+  })
+}
+
 test('inline caption resources reject unsupported types, malformed encoding and oversized content', async t => {
   const media = createMediaServer({ url: 'https://media.test/video', contentType: 'video/mp4' }, '127.0.0.1', 'token')
   media.setOrigin(await listen(media.server))

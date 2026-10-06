@@ -99,7 +99,7 @@ function httpUrl(value, base) {
 }
 
 /** Rewrites resource URLs while retaining DASH ranges and segment templates. */
-export function rewriteCastDash(xml, base, register) {
+export function rewriteCastDash(xml, base, register, dashContext) {
   if (xml.length > MAX_MANIFEST_SIZE) throw new Error('Cast manifest is too large')
   const parser = sax.parser(true)
   const root = { children: [] }
@@ -114,7 +114,7 @@ export function rewriteCastDash(xml, base, register) {
   parser.oncdata = parser.ontext
   parser.ondoctype = () => { throw new Error('Unsupported Cast manifest doctype') }
   parser.write(xml).close()
-  if (root.children.find(node => typeof node !== 'string')?.name.split(':').at(-1) !== 'MPD') {
+  if (root.children.find(node => typeof node !== 'string')?.name.split(':').at(-1) !== (dashContext?.rootName ?? 'MPD')) {
     throw new Error('Invalid Cast DASH manifest')
   }
   function resolveUrls(values, bases) {
@@ -130,12 +130,16 @@ export function rewriteCastDash(xml, base, register) {
   function registerUrls(urls, contentType) {
     return register(urls.length === 1 ? urls[0] : urls, contentType)
   }
-  function renderAttributes(node, bases) {
+  function renderAttributes(node, bases, inheritedBases = bases) {
     const element = node.name.split(':').at(-1)
     return Object.entries(node.attributes).map(([name, value]) => {
       const attribute = name.split(':').at(-1)
       // Resolve-to-zero tells the DASH client to remove an element without fetching it.
-      if (['media', 'initialization', 'sourceURL'].includes(attribute) ||
+      if (attribute === 'href' && ['Period', 'AdaptationSet', 'SegmentList'].includes(element) && value !== 'urn:mpeg:dash:resolve-to-zero:2013') {
+        // XLinks resolve against the document; imported media inherits the
+        // containing DASH element's bases when the receiver replaces the node.
+        value = register(httpUrl(value, base).href, 'application/dash+xml', undefined, { rootName: element, bases: inheritedBases })
+      } else if (['media', 'initialization', 'sourceURL'].includes(attribute) ||
           (attribute === 'href' && value !== 'urn:mpeg:dash:resolve-to-zero:2013') ||
           (attribute === 'index' && ['SegmentTemplate', 'SegmentURL'].includes(element)) ||
           (attribute === 'bitstreamSwitching' && element === 'SegmentTemplate')) {
@@ -157,7 +161,7 @@ export function rewriteCastDash(xml, base, register) {
     }
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
     const effectiveBases = bases.length ? resolveUrls(bases.map(child => child.children.join('').trim()), inheritedBases) : inheritedBases
-    const attributes = renderAttributes(node, effectiveBases)
+    const attributes = renderAttributes(node, effectiveBases, inheritedBases)
     const children = node.children.map(child => {
       if (bases.includes(child)) {
         return `<${child.name}${renderAttributes(child, inheritedBases)}>${escapeXml(registerUrls(resolveUrls([child.children.join('').trim()], inheritedBases)))}</${child.name}>`
@@ -166,7 +170,7 @@ export function rewriteCastDash(xml, base, register) {
     }).join('')
     return `<${node.name}${attributes}>${children}</${node.name}>`
   }
-  return root.children.map(node => render(node, [base])).join('')
+  return root.children.map(node => render(node, dashContext?.bases ?? [base])).join('')
 }
 
 export function rewriteCastHls(text, base, register, parentVariables = {}) {
@@ -214,7 +218,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
   const hlsContexts = new Map()
   const hlsContextCache = new WeakMap()
   let origin
-  function register(value, contentType, hlsVariables) {
+  function register(value, contentType, hlsVariables, dashContext) {
     let context
     if (hlsVariables) {
       context = hlsContextCache.get(hlsVariables)
@@ -239,7 +243,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           throw new Error('Unsupported Cast data URL')
         }
       } else httpUrl(value)
-      const template = !hlsVariables && !value.startsWith('data:') && value.includes('$')
+      const template = !hlsVariables && !dashContext && !value.startsWith('data:') && value.includes('$')
       const url = template ? httpUrl(value) : null
       const firstPlaceholder = url?.pathname.indexOf('$') ?? -1
       const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
@@ -248,13 +252,13 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : 'media'
       }
     })
-    const key = JSON.stringify([candidates, context?.id])
+    const key = JSON.stringify([candidates, contentType, context?.id, dashContext])
     let id = resourceIds.get(key)
     if (id === undefined) {
       if (resources.length >= MAX_RESOURCES) throw new Error('Too many Cast resources')
       id = resources.length
       resourceIds.set(key, id)
-      resources.push({ urls: candidates.map(candidate => candidate.url), contentType, hlsVariables: context?.variables })
+      resources.push({ urls: candidates.map(candidate => candidate.url), contentType, hlsVariables: context?.variables, dashContext })
     }
     return `${origin}/${token}/${id}/${candidates[0].suffix}`
   }
@@ -343,7 +347,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         const rewritten = contentType === 'text/vtt'
           ? data
           : contentType === 'application/dash+xml'
-            ? rewriteCastDash(data, url?.href, register)
+            ? rewriteCastDash(data, url?.href, register, resource.dashContext)
             : rewriteCastHls(data, url.href, register, resource.hlsVariables)
         response.writeHead(200, { ...cors, 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
         response.end(request.method === 'HEAD' ? undefined : rewritten)
