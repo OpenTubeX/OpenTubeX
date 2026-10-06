@@ -918,6 +918,7 @@ Settings:
     Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
   Sync Settings:
+    Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
     Show More: "もっと見る"
     Sync Automatically: "自動的に同期"
     Activity: "アカウントのアクティビティ"

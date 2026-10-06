@@ -194,6 +194,7 @@
             : t('Settings.Sync Settings.Revoke Session Warning', { device: sessionToRevoke.deviceInfo.name })
           }}
         </p>
+        <p>{{ t('Settings.Sync Settings.Revoke Session Tabs Warning') }}</p>
         <p
           v-if="promptError"
           class="managementError"
@@ -479,6 +480,9 @@ async function revokeSession() {
   promptError.value = ''
   const requestClient = client()
   try {
+    // Clean up while this login can still retry the operation, including when
+    // revoking the current device. Keep unrelated and shared tab sets intact.
+    if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
     await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
     showToast({

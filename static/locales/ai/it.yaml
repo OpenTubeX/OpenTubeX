@@ -918,6 +918,7 @@ Settings:
     Import playlists formats: 'Formati supportati: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formati supportati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Verranno eliminati anche i gruppi di schede sincronizzati di questo dispositivo."
     Show More: "Mostra altro"
     Sync Automatically: "Sincronizza automaticamente"
     Activity: "Attività dell'account"

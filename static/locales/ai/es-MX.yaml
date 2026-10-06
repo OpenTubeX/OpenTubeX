@@ -1092,6 +1092,7 @@ Settings:
     Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
     Show More: "Mostrar más"
     Sync Automatically: "Sincronizar automáticamente"
     Activity: "Actividad de la cuenta"

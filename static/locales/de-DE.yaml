@@ -1507,6 +1507,7 @@ Settings:
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke
   Sync Settings:
+    Revoke Session Tabs Warning: "Die synchronisierten Tab-Sammlungen dieses Geräts werden ebenfalls gelöscht."
     Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"

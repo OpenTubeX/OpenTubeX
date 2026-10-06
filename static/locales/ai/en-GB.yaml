@@ -899,6 +899,7 @@ Settings:
     Import playlists formats: 'Supported formats: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
     Show More: "Show more"
     Sync Automatically: "Sync automatically"
     Activity: "Account activity"

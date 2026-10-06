@@ -960,6 +960,7 @@ Settings:
     Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
     Show More: "Vis mere"
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"

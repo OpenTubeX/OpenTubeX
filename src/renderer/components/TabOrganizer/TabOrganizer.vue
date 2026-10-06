@@ -505,7 +505,7 @@
                       </button>
                       <button
                         type="button"
-                        class="syncedSessionActionButton iconButton dangerButton"
+                        class="syncedSessionActionButton dangerButton"
                         :aria-label="`${t('Delete')}: ${formatDeviceSessionLabel(activeOtherDeviceSession, t)}`"
                         :title="t('Delete')"
                         @click="sessionToDelete = activeOtherDeviceSession"
@@ -514,6 +514,7 @@
                           :icon="['fas', 'trash']"
                           aria-hidden="true"
                         />
+                        {{ t('Delete') }}
                       </button>
                     </div>
                   </header>

@@ -1154,6 +1154,7 @@ Settings:
     Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db)'
     Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "이 기기의 동기화된 탭 모음도 삭제됩니다."
     Show More: "더 보기"
     Sync Automatically: "자동으로 동기화"
     Activity: "계정 활동"

@@ -310,6 +310,7 @@
                           :icon="['fas', 'trash']"
                           aria-hidden="true"
                         />
+                        {{ t('Delete') }}
                       </button>
                     </header>
                     <div class="capacitorPhoneSyncedTabList">

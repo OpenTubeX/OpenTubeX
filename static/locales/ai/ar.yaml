@@ -937,6 +937,7 @@ Settings:
     Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "ستُحذف أيضًا مجموعات علامات التبويب المتزامنة لهذا الجهاز."
     Show More: "إظهار المزيد"
     Sync Automatically: "المزامنة تلقائيًا"
     Activity: "نشاط الحساب"

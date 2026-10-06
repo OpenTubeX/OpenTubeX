@@ -918,6 +918,7 @@ Settings:
     Import playlists formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
     Show More: "Több megjelenítése"
     Sync Automatically: "Automatikus szinkronizálás"
     Activity: "Fióktevékenység"

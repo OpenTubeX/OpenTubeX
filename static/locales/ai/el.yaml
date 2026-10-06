@@ -942,6 +942,7 @@ Settings:
     Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Τα συγχρονισμένα σύνολα καρτελών αυτής της συσκευής θα διαγραφούν επίσης."
     Show More: "Εμφάνιση περισσότερων"
     Sync Automatically: "Αυτόματος συγχρονισμός"
     Activity: "Δραστηριότητα λογαριασμού"

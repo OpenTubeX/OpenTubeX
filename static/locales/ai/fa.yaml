@@ -965,6 +965,7 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
     Show More: "نمایش بیشتر"
     Sync Automatically: "همگام‌سازی خودکار"
     Activity: "فعالیت حساب"

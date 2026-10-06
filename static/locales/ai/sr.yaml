@@ -957,6 +957,7 @@ Settings:
     Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Синхронизовани скупови картица овог уређаја такође ће бити избрисани."
     Show More: "Прикажи више"
     Watch stats: "Статистика гледања"
     Syncing statistics: Синхронизација статистике гледања…

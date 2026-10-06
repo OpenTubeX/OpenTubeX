@@ -1555,6 +1555,7 @@ Settings:
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
+    Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
     Sync Automatically: "Sync automatically"
     Activity: "Account activity"
     No Activity: "No recent activity"

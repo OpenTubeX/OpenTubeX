@@ -37,7 +37,7 @@ import {
   loadSyncServerDevices,
 } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
-import { getPreviousSyncSessions, getSyncTabRoute, removeSyncSession } from '../../helpers/sync-sessions'
+import { getPreviousSyncSessions, getSyncTabRoute, normalizeSyncSessionsDocument, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   dispatchRemoteSyncAction,
@@ -950,10 +950,18 @@ const actions = {
     return true
   },
 
-  async deleteSyncServerSession({ commit, dispatch, rootState }, session) {
-    const { syncDeviceId, sessionId } = session ?? {}
+  deleteSyncServerSession({ dispatch }, session) {
+    if (typeof session?.sessionId !== 'string') throw new Error('Invalid synced tab set')
+    return dispatch('deleteSyncServerSessions', session)
+  },
+
+  deleteSyncServerDeviceSessions({ dispatch }, syncDeviceId) {
+    return dispatch('deleteSyncServerSessions', { syncDeviceId })
+  },
+
+  async deleteSyncServerSessions({ commit, dispatch, rootState }, { syncDeviceId, sessionId } = {}) {
     const settings = rootState.settings
-    if (typeof syncDeviceId !== 'string' || typeof sessionId !== 'string') {
+    if (typeof syncDeviceId !== 'string' || (sessionId !== undefined && typeof sessionId !== 'string')) {
       throw new Error('Invalid synced tab set')
     }
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
@@ -984,7 +992,11 @@ const actions = {
           }
 
           assertSyncEnabled(rootState, client)
-          const nextSessions = removeSyncSession(remoteValue, syncDeviceId, sessionId)
+          let nextSessions = normalizeSyncSessionsDocument(remoteValue)
+          const sessionIds = sessionId === undefined
+            ? (nextSessions.devices[syncDeviceId]?.sessions ?? []).map(session => session.sessionId)
+            : [sessionId]
+          for (const id of sessionIds) nextSessions = removeSyncSession(nextSessions, syncDeviceId, id)
           const payload = await encryptSyncDocument(
             nextSessions,
             settings.syncServerPrivacyKey,

@@ -922,6 +922,7 @@ Settings:
     Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."
     Show More: "Prikaži više"
     Sync Automatically: "Automatski sinkroniziraj"
     Activity: "Aktivnost računa"

@@ -922,6 +922,7 @@ Settings:
     Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Den här enhetens synkroniserade flikuppsättningar kommer också att raderas."
     Show More: "Visa mer"
     Watch stats: "Visningsstatistik"
     Syncing statistics: Synkroniserar visningsstatistik…
