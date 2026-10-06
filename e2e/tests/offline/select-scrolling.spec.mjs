@@ -57,13 +57,20 @@ for (const uiScale of [100, 125]) {
       const select = await commentsSort({ app, page })
       const dropdown = page.locator('.selectDropdown')
       for (const edge of ['bottom', 'top']) {
-        await select.evaluate((button, edge) => {
+        // Finish focus scrolling before placing the control at the opening edge.
+        await select.focus()
+        const targetTop = await select.evaluate(async (button, edge) => {
           const bounds = button.getBoundingClientRect()
           const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
           const target = edge === 'bottom' ? innerHeight - bounds.height - 24 : chromeBottom + 24
           window.scrollBy({ top: bounds.top - target, behavior: 'instant' })
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+          return target
         }, edge)
-        await select.click()
+        await expect.poll(() => select.evaluate((button, target) => Math.abs(button.getBoundingClientRect().top - target), targetTop)).toBeLessThan(1)
+        await expect(select).toBeFocused()
+        // A pointer click can scroll the control away from the edge again.
+        await page.keyboard.press('Space')
         await expect.poll(() => dropdown.evaluate(menu => {
           const bounds = menu.getBoundingClientRect()
           const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
@@ -87,6 +94,7 @@ for (const uiScale of [100, 125]) {
         }, edge)).toBe(true)
         await expect(dropdown).toHaveAttribute('style', openingStyle)
         await select.press('Escape')
+        await expect(dropdown).toBeHidden()
       }
     })
 

@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 
 for (const uiScale of [100, 125]) {
   test.describe(`landscape sidebar at ${uiScale}% UI scale`, () => {
@@ -9,10 +10,8 @@ for (const uiScale of [100, 125]) {
         BrowserWindow.getAllWindows()[0].setContentSize(Math.round(932 * scale), Math.round(430 * scale))
       }, uiScale / 100)
       await goTo(page, 'history')
+      await mockCapacitorPhoneLayout(page)
       await page.evaluate(() => {
-        const app = document.querySelector('.app')
-        app.classList.remove('topTabs', 'bottomTabs', 'verticalTabs', 'verticalTabsLeft', 'verticalTabsRight')
-        app.classList.add('capacitorTabs', 'capacitorPhoneLayout')
         document.querySelector('.tabBar').style.display = 'none'
         document.querySelector('.app > .routerView').style.minHeight = '3000px'
         document.activeElement?.blur()
@@ -54,9 +53,15 @@ for (const uiScale of [100, 125]) {
       await testInfo.attach('landscape sidebar', { body: await page.screenshot(), contentType: 'image/png' })
 
       await inner.evaluate(element => { element.scrollTop = element.scrollHeight })
+      // Updating keyboard outlines also rerenders Vue-managed layout classes.
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setOutlinesHidden', !store.getters.getOutlinesHidden)
+      })
       await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
         BrowserWindow.getAllWindows()[0].setContentSize(Math.round(932 * scale), Math.round(600 * scale))
       }, uiScale / 100)
+      await expect(page.locator('.app')).toHaveClass(/capacitorPhoneLayout/)
       await expect.poll(() => inner.evaluate(element => element.scrollTop)).toBe(0)
       await expect(inner.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
       await expect.poll(() => sidebar.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight))).toBeLessThan(1)

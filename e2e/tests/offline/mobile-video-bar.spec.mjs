@@ -1,6 +1,7 @@
 import { setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 
 test.use({
   seed: {
@@ -24,8 +25,8 @@ test('mobile video bar follows hidden navigation and stays above the connection 
   await expect(player).toHaveClass(/scrollMiniPlayer/)
   await setWindowSize(app, page, { width: 480, height: 850 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockCapacitorPhoneLayout(page)
   await page.evaluate(() => {
-    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorPhoneLayout')
     const player = document.querySelector('.ftVideoPlayer')
     new MutationObserver(() => {
       if (!player.classList.contains('mobileMiniBar')) player.classList.add('mobileMiniBar')
@@ -62,9 +63,14 @@ test('mobile video bar follows hidden navigation and stays above the connection 
   await page.evaluate(() => { location.hash = '#/home' })
   await expect(page).toHaveURL(/#\/home$/)
   await expect(player).toHaveClass(/scrollMiniPlayer/)
-  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorPhoneLayout'))
+  // Updating keyboard outlines also rerenders Vue-managed layout classes.
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setOutlinesHidden', !store.getters.getOutlinesHidden)
+  })
   await setWindowSize(app, page, { width: 900, height: 1100 })
   await expect.poll(() => page.evaluate(() => innerWidth)).toBeGreaterThan(680)
   await expect.poll(() => page.evaluate(() => innerWidth)).toBeLessThan(768)
+  await expect(page.locator('.app')).toHaveClass(/capacitorPhoneLayout/)
   await expect.poll(() => barGap('viewport')).toBeLessThan(1)
 })
