@@ -221,6 +221,15 @@ test('rewrites DASH resources using their original inherited base and preserves 
   assert.throws(() => rewriteCastDash('<html/>', undefined, () => ''), /Invalid/)
 })
 
+test('rewriting DASH BaseURL text retains playback attributes and escaped values', () => {
+  const xml = '<MPD><BaseURL byteRange="100-200" availabilityTimeOffset="1.5" availabilityTimeComplete="false" serviceLocation="A&amp;B">https://media.test/vod/</BaseURL><Period><BaseURL byteRange="10-20">video.mp4</BaseURL></Period></MPD>'
+  const urls = []
+  const rewritten = rewriteCastDash(xml, undefined, url => { urls.push(url); return `http://cast.test/${urls.length}` })
+  assert.match(rewritten, /<BaseURL byteRange="100-200" availabilityTimeOffset="1.5" availabilityTimeComplete="false" serviceLocation="A&amp;B">http:\/\/cast.test\/1<\/BaseURL>/)
+  assert.match(rewritten, /<BaseURL byteRange="10-20">http:\/\/cast.test\/2<\/BaseURL>/)
+  assert.deepEqual(urls, ['https://media.test/vod/', 'https://media.test/vod/video.mp4'])
+})
+
 test('rewrites HLS variants, segments, initialization maps and keys', () => {
   const urls = []
   const result = rewriteCastHls('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key"\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:5,\nchunk.ts\n', 'https://media.test/live/main.m3u8', url => { urls.push(url); return `http://cast.test/${urls.length}` })

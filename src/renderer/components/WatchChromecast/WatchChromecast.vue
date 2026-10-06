@@ -7,6 +7,7 @@
     :aria-pressed="Boolean(castId)"
     :dropdown-options="options"
     :force-dropdown="true"
+    :disabled="disabled"
     dropdown-position-x="right"
     @dropdown-open="refreshDevices"
     @click="handleChoice"
@@ -28,15 +29,18 @@ const props = defineProps({
   subtitlesEnabled: { type: Boolean, default: false },
   isLive: { type: Boolean, default: false },
   title: { type: String, required: true },
+  disabled: { type: Boolean, default: false },
   getPlayer: { type: Function, required: true },
   getSource: { type: Function, required: true }
 })
-const emit = defineEmits(['casting-change', 'playback-state', 'ended'])
+const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'ended'])
 const { t } = useI18n()
 const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
 const busy = ref(false)
+watch(busy, value => emit('busy-change', value), { flush: 'sync' })
+watch(() => props.disabled, disabled => { if (disabled) button.value?.hideDropdown() })
 const castId = ref(null)
 const deviceName = ref('')
 const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, muted: false, activeTrackIds: [] })
@@ -161,7 +165,7 @@ async function stopCasting(resume = true) {
 }
 
 async function handleChoice(choice) {
-  if (disposed || busy.value) return
+  if (disposed || busy.value || props.disabled) return
   if (choice === 'refresh') return refreshDevices()
   busy.value = true
   let resumePlayer = null
@@ -235,6 +239,7 @@ defineExpose({ stopCasting })
 
 onBeforeUnmount(() => {
   disposed = true
+  emit('busy-change', false)
   emit('casting-change', false)
   clearTimeout(pollTimer)
   stopCasting(false).catch(console.error)

@@ -162,6 +162,54 @@ test('casts a compatible progressive source from the Invidious backend', async (
   await choice(page, 'Return to local playback')
 })
 
+test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.dlnaTest = { starts: [], stops: [] }
+    for (const name of ['dlna-discover', 'dlna-start', 'dlna-stop', 'yt-dlp-get-playback-info']) ipcMain.removeHandler(name)
+    ipcMain.handle('yt-dlp-get-playback-info', () => ({ formats: [] }))
+    ipcMain.handle('dlna-discover', () => [{ id: 'dlna-tv', name: 'DLNA TV' }])
+    ipcMain.handle('dlna-start', async (_, payload) => {
+      globalThis.dlnaTest.starts.push(payload)
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      return { castId: 'dlna-session', deviceName: 'DLNA TV' }
+    })
+    ipcMain.handle('dlna-stop', async (_, id) => {
+      globalThis.dlnaTest.stops.push(id)
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      return true
+    })
+    globalThis.castTest.startDelayMs = 1200
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await watch.evaluate(vm => vm.$refs.player.play())
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  const dlna = page.locator('.dlnaCastControl > button')
+  const googleCast = page.locator('.chromecastControl > button')
+  await dlna.click()
+  await page.getByRole('option', { name: 'DLNA TV', exact: true }).click()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.starts.length)).toBe(1)
+  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
+  await expect(dlna).toHaveAttribute('aria-pressed', 'true')
+  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
+  expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
+  await dlna.click()
+  await page.getByRole('option', { name: 'Stop casting', exact: true }).click()
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stops.length)).toBe(1)
+  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
+  await expect(googleCast).toHaveAttribute('aria-disabled', 'false')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  await choice(page, 'Test TV')
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
+  await expect(dlna).toHaveAttribute('aria-disabled', 'true')
+  await expect(googleCast).toHaveAttribute('aria-pressed', 'true')
+  await expect(dlna).toHaveCount(0)
+  const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(payload.paused).toBe(false)
+  await choice(page, 'Return to local playback')
+  await expect(dlna).toHaveAttribute('aria-disabled', 'false')
+})
+
 test('failed casting preserves local playback and paused casting returns paused', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await watch.evaluate(vm => vm.$refs.player.play())

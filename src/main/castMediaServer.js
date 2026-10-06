@@ -115,19 +115,22 @@ export function rewriteCastDash(xml, base, register) {
   if (root.children.find(node => typeof node !== 'string')?.name.split(':').at(-1) !== 'MPD') {
     throw new Error('Invalid Cast DASH manifest')
   }
+  function renderAttributes(node, base) {
+    return Object.entries(node.attributes).map(([name, value]) => {
+      if (['media', 'initialization', 'sourceURL', 'href'].includes(name.split(':').at(-1))) {
+        value = register(httpUrl(value, base).href)
+      }
+      return ` ${name}="${escapeXml(value)}"`
+    }).join('')
+  }
   function render(node, inheritedBase) {
     if (typeof node === 'string') return escapeXml(node)
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
     const effectiveBase = bases.length ? httpUrl(bases[0].children.join('').trim(), inheritedBase).href : inheritedBase
-    const attributes = Object.entries(node.attributes).map(([name, value]) => {
-      if (['media', 'initialization', 'sourceURL', 'href'].includes(name.split(':').at(-1))) {
-        value = register(httpUrl(value, effectiveBase).href)
-      }
-      return ` ${name}="${escapeXml(value)}"`
-    }).join('')
+    const attributes = renderAttributes(node, effectiveBase)
     const children = node.children.map(child => {
       if (bases.includes(child)) {
-        return `<${child.name}>${escapeXml(register(httpUrl(child.children.join('').trim(), inheritedBase).href))}</${child.name}>`
+        return `<${child.name}${renderAttributes(child, inheritedBase)}>${escapeXml(register(httpUrl(child.children.join('').trim(), inheritedBase).href))}</${child.name}>`
       }
       return render(child, effectiveBase)
     }).join('')

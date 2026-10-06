@@ -7,6 +7,7 @@
     :aria-pressed="Boolean(castId)"
     :dropdown-options="options"
     :force-dropdown="true"
+    :disabled="disabled"
     dropdown-position-x="right"
     @dropdown-open="refreshDevices"
     @click="handleChoice"
@@ -14,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -28,8 +29,10 @@ const props = defineProps({
   formats: { type: Array, required: true },
   title: { type: String, required: true },
   videoId: { type: String, default: null },
+  disabled: { type: Boolean, default: false },
   getPlayer: { type: Function, required: true }
 })
+const emit = defineEmits(['casting-change'])
 
 const { t } = useI18n()
 const store = useStore()
@@ -38,6 +41,8 @@ const devices = ref([])
 const loading = ref(false)
 const busy = ref(false)
 const castId = ref(null)
+watch(() => busy.value || Boolean(castId.value), active => emit('casting-change', active), { flush: 'sync' })
+watch(() => props.disabled, disabled => { if (disabled) button.value?.hideDropdown() })
 const deviceName = ref('')
 let disposed = false
 let resumeLocalPlayback = false
@@ -104,21 +109,28 @@ async function refreshDevices() {
 
 async function stopCasting(resumeLocal = true) {
   if (!castId.value) return
+  const wasBusy = busy.value
+  busy.value = true
   const id = castId.value
   castId.value = null
   deviceName.value = ''
   try {
     await dlnaCast.stop(id)
   } finally {
-    if (resumeLocal && resumeLocalPlayback && !disposed) {
-      try { await props.getPlayer()?.play?.() } catch (error) { console.error(error) }
+    try {
+      if (resumeLocal && resumeLocalPlayback && !disposed) {
+        try { await props.getPlayer()?.play?.() } catch (error) { console.error(error) }
+      }
+    } finally {
+      resumeLocalPlayback = false
+      castPayload = null
+      busy.value = wasBusy
     }
-    resumeLocalPlayback = false
-    castPayload = null
   }
 }
 
 async function handleChoice(choice) {
+  if (disposed || props.disabled) return
   if (choice === 'refresh') {
     await refreshDevices()
     return
@@ -210,5 +222,6 @@ onBeforeUnmount(() => {
   disposed = true
   clearInterval(failureCheck)
   stopCasting(false).catch(console.error)
+  emit('casting-change', false)
 })
 </script>

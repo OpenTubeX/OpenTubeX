@@ -6,12 +6,13 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
+	stdx509 "crypto/x509"
 	_ "embed"
 	"fmt"
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	x509 "github.com/google/certificate-transparency-go/x509"
 	pb "github.com/vishen/go-chromecast/cast/proto"
 )
 
@@ -68,7 +69,7 @@ func (m *authMessage) Reset()         { *m = authMessage{} }
 func (m *authMessage) String() string { return proto.CompactTextString(m) }
 func (*authMessage) ProtoMessage()    {}
 
-func authenticateReceiver(channel *transport, peer *x509.Certificate, roots *x509.CertPool) error {
+func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *x509.CertPool) error {
 	// The ephemeral TLS certificate is the signed challenge's expiration bound.
 	now := time.Now()
 	if now.Before(peer.NotBefore) || now.After(peer.NotAfter) || peer.NotAfter.After(now.Add(4*24*time.Hour)) {
@@ -136,6 +137,9 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 		}
 		intermediates.AddCert(certificate)
 	}
+	// Cast PKI uses SHA-1 certificate signatures, which Go 1.24+ no longer
+	// accepts. This verifier retains path, validity and critical-extension
+	// checks against only the pinned Cast roots. The challenge still uses SHA256.
 	chains, err := device.Verify(x509.VerifyOptions{Roots: roots, Intermediates: intermediates,
 		CurrentTime: now, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageAny}})
 	if err != nil {

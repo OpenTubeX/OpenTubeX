@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	castx509 "github.com/google/certificate-transparency-go/x509"
 	pb "github.com/vishen/go-chromecast/cast/proto"
 )
 
@@ -30,7 +31,20 @@ func issueCertificate(t *testing.T, template, parent *x509.Certificate, publicKe
 	return cert
 }
 
-func authFixture(t *testing.T) (*x509.Certificate, *x509.Certificate, *x509.Certificate, *rsa.PrivateKey, *x509.CertPool) {
+func testCastRoots(t *testing.T, root *x509.Certificate) *castx509.CertPool {
+	t.Helper()
+	roots := castx509.NewCertPool()
+	if !roots.AppendCertsFromPEM(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: root.Raw})) {
+		t.Fatal("invalid test root")
+	}
+	return roots
+}
+
+func authFixture(t *testing.T) (*x509.Certificate, *x509.Certificate, *x509.Certificate, *rsa.PrivateKey, *castx509.CertPool) {
+	return authFixtureAlgorithms(t, x509.SHA256WithRSA, x509.SHA256WithRSA)
+}
+
+func authFixtureAlgorithms(t *testing.T, deviceAlgorithm, intermediateAlgorithm x509.SignatureAlgorithm) (*x509.Certificate, *x509.Certificate, *x509.Certificate, *rsa.PrivateKey, *castx509.CertPool) {
 	t.Helper()
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -43,17 +57,57 @@ func authFixture(t *testing.T) (*x509.Certificate, *x509.Certificate, *x509.Cert
 	intermediateTemplate := *rootTemplate
 	intermediateTemplate.SerialNumber = big.NewInt(2)
 	intermediateTemplate.Subject.CommonName = "Test intermediate"
+	intermediateTemplate.SignatureAlgorithm = intermediateAlgorithm
 	intermediate := issueCertificate(t, &intermediateTemplate, root, &key.PublicKey, key)
 	deviceKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Fatal(err)
 	}
 	deviceTemplate := &x509.Certificate{SerialNumber: big.NewInt(3), Subject: pkix.Name{CommonName: "Test Cast device"},
-		NotBefore: rootTemplate.NotBefore, NotAfter: rootTemplate.NotAfter, KeyUsage: x509.KeyUsageDigitalSignature}
+		NotBefore: rootTemplate.NotBefore, NotAfter: rootTemplate.NotAfter, KeyUsage: x509.KeyUsageDigitalSignature, SignatureAlgorithm: deviceAlgorithm}
 	device := issueCertificate(t, deviceTemplate, intermediate, &deviceKey.PublicKey, key)
-	roots := x509.NewCertPool()
-	roots.AddCert(root)
+	roots := testCastRoots(t, root)
 	return device, intermediate, root, deviceKey, roots
+}
+
+func TestSHA1CastCertificateChains(t *testing.T) {
+	for _, algorithms := range [][2]x509.SignatureAlgorithm{
+		{x509.SHA1WithRSA, x509.SHA256WithRSA},
+		{x509.SHA256WithRSA, x509.SHA1WithRSA},
+		{x509.SHA1WithRSA, x509.SHA1WithRSA},
+	} {
+		t.Run(algorithms[0].String()+"/"+algorithms[1].String(), func(t *testing.T) {
+			device, intermediate, _, key, roots := authFixtureAlgorithms(t, algorithms[0], algorithms[1])
+			nonce, peer := []byte("challenge nonce!"), []byte("TLS certificate DER")
+			if err := verifyReceiver(signedResponse(t, device, intermediate, key, nonce, peer), nonce, peer, roots, time.Now()); err != nil {
+				t.Fatal(err)
+			}
+			for _, scenario := range []string{"expired", "not yet valid", "untrusted", "missing intermediate", "bad certificate signature", "SHA1 challenge"} {
+				t.Run(scenario, func(t *testing.T) {
+					response := signedResponse(t, device, intermediate, key, nonce, peer)
+					pool, now := roots, time.Now()
+					switch scenario {
+					case "expired":
+						now = now.Add(48 * time.Hour)
+					case "not yet valid":
+						now = now.Add(-2 * time.Hour)
+					case "untrusted":
+						pool = castRoots()
+					case "missing intermediate":
+						response.IntermediateCertificate = nil
+					case "bad certificate signature":
+						response.ClientAuthCertificate = append([]byte{}, device.Raw...)
+						response.ClientAuthCertificate[len(response.ClientAuthCertificate)-1] ^= 1
+					case "SHA1 challenge":
+						response.HashAlgorithm = proto.Uint32(0)
+					}
+					if err := verifyReceiver(response, nonce, peer, pool, now); err == nil {
+						t.Fatal("accepted invalid Cast certificate or challenge")
+					}
+				})
+			}
+		})
+	}
 }
 
 func signedResponse(t *testing.T, device, intermediate *x509.Certificate, key *rsa.PrivateKey, nonce, peerDER []byte) *authResponse {
@@ -108,8 +162,7 @@ func TestRejectsAudioOnlyDeviceCertificate(t *testing.T) {
 		NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), IsCA: true,
 		BasicConstraintsValid: true, KeyUsage: x509.KeyUsageCertSign}
 	intermediate := issueCertificate(t, rootTemplate, rootTemplate, &key.PublicKey, key)
-	roots := x509.NewCertPool()
-	roots.AddCert(intermediate)
+	roots := testCastRoots(t, intermediate)
 	audioOnlyPolicy, err := x509.OIDFromInts([]uint64{1, 3, 6, 1, 4, 1, 11129, 2, 5, 2})
 	if err != nil {
 		t.Fatal(err)

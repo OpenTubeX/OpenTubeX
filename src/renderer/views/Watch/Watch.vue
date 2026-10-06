@@ -885,6 +885,8 @@
               :formats="legacyFormats"
               :title="videoTitle"
               :get-player="() => $refs.player"
+              :disabled="chromecastBusy"
+              @casting-change="dlnaCastActive = $event"
             />
             <WatchChromecast
               v-if="isElectron && $store.getters.getShowChromecastButton"
@@ -899,6 +901,8 @@
               :title="videoTitle"
               :get-player="() => $refs.player"
               :get-source="() => getChromecastSource()"
+              :disabled="dlnaCastActive"
+              @busy-change="chromecastBusy = $event"
               @casting-change="handleChromecastChange"
               @playback-state="handleChromecastState"
               @ended="handlePlayerEnded"

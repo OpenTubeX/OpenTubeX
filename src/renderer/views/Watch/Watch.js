@@ -409,6 +409,8 @@ export default defineComponent({
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
       chromecastActive: false,
+      chromecastBusy: false,
+      dlnaCastActive: false,
       chromecastStatus: null,
       captions: [],
       captionTranslations: [],
