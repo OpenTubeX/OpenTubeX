@@ -18,6 +18,36 @@ async function openPhoneVideo(app, page) {
   return button
 }
 
+test('phone comment previews keep rotating while comments open and after focus returns on close', async ({ app, page }) => {
+  await page.clock.install()
+  const button = await openPhoneVideo(app, page)
+  const open = button.getByRole('button', { name: 'Comments', exact: true })
+  const activeDot = () => button.locator('.phoneCommentDot').evaluateAll(dots => dots.findIndex(dot => dot.classList.contains('active')))
+
+  await open.focus()
+  await page.keyboard.press('Enter')
+  const sheet = page.locator('.mobileSheet[open]')
+  await expect(sheet.locator('.comment').first()).toBeVisible()
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(1)
+
+  await sheet.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect(open).toBeFocused()
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(2)
+
+  await button.hover()
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(3)
+  await open.click()
+  await expect(sheet.locator('.comment').first()).toBeVisible()
+  await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(sheet).toHaveCount(0)
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(4)
+})
+
 test('phone comment preview rotates the first five comments and opens the comments sheet', async ({ app, page }, testInfo) => {
   await page.clock.install()
   const button = await openPhoneVideo(app, page)
@@ -48,15 +78,15 @@ test('phone comment preview rotates the first five comments and opens the commen
 
   await expect(button.locator('button')).toHaveCount(1)
   await open.focus()
-  await page.clock.fastForward(10_000)
-  await expect.poll(activeDot).toBe(0)
-  await open.blur()
   await page.clock.fastForward(5000)
   await expect.poll(activeDot).toBe(1)
+  await open.blur()
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(2)
 
   await button.getByRole('button', { name: 'Comments', exact: true }).focus()
-  await page.clock.fastForward(10_000)
-  await expect.poll(activeDot).toBe(1)
+  await page.clock.fastForward(5000)
+  await expect.poll(activeDot).toBe(3)
   await page.keyboard.press('Enter')
   await expect(page.locator('.mobileSheet[open] .comment').first()).toBeVisible()
 
@@ -119,8 +149,8 @@ test('phone comment description stays current during the rotation transition', a
   await expect(button.locator('.phoneCommentRow')).toHaveCount(2)
   await expect(open).toHaveAccessibleDescription(`${comments[1].author} ${comments[1].text.replaceAll(/\s+/g, ' ').trim()}`, { timeout: 1000 })
   await open.focus()
-  await page.clock.fastForward(10_000)
-  await expect(open).toHaveAccessibleDescription(`${comments[1].author} ${comments[1].text.replaceAll(/\s+/g, ' ').trim()}`)
+  await page.clock.fastForward(5000)
+  await expect(open).toHaveAccessibleDescription(`${comments[2].author} ${comments[2].text.replaceAll(/\s+/g, ' ').trim()}`)
 })
 
 test('phone comment avatars respect photo privacy, creator photos and missing or failed images', async ({ app, page }) => {
