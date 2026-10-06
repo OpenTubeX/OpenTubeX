@@ -1,3 +1,4 @@
+import * as releasedClient from '../../tests/helpers/released-sync-sessions.mjs'
 import { expect } from '@playwright/test'
 import { preparePrivacyKey, encryptSyncDocument, decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
@@ -149,7 +150,17 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     }
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken)).toBe('')
     expect(document.deletedSessions[deviceId]).toEqual(sessionIds)
-    expect(document.revokedSessions?.[deviceId]).toEqual(intentionalDeletion ? undefined : sessionIds)
+    expect(document.deletedSessions[`revoked:${deviceId}`]).toEqual(intentionalDeletion ? undefined : sessionIds)
+    // A connected peer still running the released v1 client rewrites the
+    // encrypted collection between revocation and the owning device's login.
+    document = releasedClient.mergeSyncSessions({
+      remoteValue: document,
+      localSessions: document.devices.laptop.sessions,
+      deviceId: 'laptop',
+      platform: 'desktop',
+      preferredMode: 'separate',
+    }).document
+    revision++
     const error = await page.evaluate(async ({ deviceId, passphrase }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       try {
@@ -175,7 +186,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     expect(document.devices[deviceId].sessions.map(session => session.sessionId)).toEqual(intentionalDeletion ? [] : sessionIds)
     expect(document.devices[deviceId].sessions.flatMap(session => session.tabs.map(tab => tab.id))).toEqual(intentionalDeletion ? [] : tabIds)
     expect(document.deletedSessions[deviceId]).toEqual(intentionalDeletion ? sessionIds : undefined)
-    expect(document.revokedSessions?.[deviceId]).toBeUndefined()
+    expect(document.deletedSessions[`revoked:${deviceId}`]).toBeUndefined()
     expect(document.deletedSessions['other-phone']).toEqual(['mobile'])
     expect(document.devices.laptop.sessions).toHaveLength(conflict ? 2 : 1)
     expect(await page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot).reclaimDeviceSessions)).toBeUndefined()
