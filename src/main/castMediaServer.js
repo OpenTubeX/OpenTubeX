@@ -116,8 +116,12 @@ export function rewriteCastDash(xml, base, register) {
     throw new Error('Invalid Cast DASH manifest')
   }
   function renderAttributes(node, base) {
+    const element = node.name.split(':').at(-1)
     return Object.entries(node.attributes).map(([name, value]) => {
-      if (['media', 'initialization', 'sourceURL', 'href'].includes(name.split(':').at(-1))) {
+      const attribute = name.split(':').at(-1)
+      if (['media', 'initialization', 'sourceURL', 'href'].includes(attribute) ||
+          (attribute === 'index' && ['SegmentTemplate', 'SegmentURL'].includes(element)) ||
+          (attribute === 'bitstreamSwitching' && element === 'SegmentTemplate')) {
         value = register(httpUrl(value, base).href)
       }
       return ` ${name}="${escapeXml(value)}"`

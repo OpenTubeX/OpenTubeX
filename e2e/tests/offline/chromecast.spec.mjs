@@ -110,7 +110,7 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
-test('casts a compatible progressive source from the Invidious backend', async ({ app, page }) => {
+test('casts from the current Invidious instance without a saved default', async ({ app, page }) => {
   await mockCast(app)
   await mockPlayableWatchPage(app, page)
   const instanceUrl = 'https://invidious.test'
@@ -144,21 +144,25 @@ test('casts a compatible progressive source from the Invidious backend', async (
       adaptiveFormats: [{ itag: 140, url: `${DEMO_MEDIA_URL}&dur=30`, type: 'audio/mp4; codecs="mp4a.40.2"', bitrate: '128000', init: '0-700', index: '701-800', audioQuality: 'AUDIO_QUALITY_MEDIUM', audioSampleRate: '48000', audioChannels: 2 }]
     }
   }))
-  await page.evaluate(async url => {
+  const defaultInstance = await page.evaluate(async url => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await Promise.all([
       store.dispatch('updateBackendPreference', 'invidious'),
-      store.dispatch('updateDefaultInvidiousInstance', url),
+      store.dispatch('updateDefaultInvidiousInstance', ''),
       store.dispatch('updateDefaultVideoFormat', 'legacy'),
       store.dispatch('updateHideChapters', true)
     ])
+    store.commit('setCurrentInvidiousInstance', url)
+    return store.getters.getDefaultInvidiousInstance
   }, instanceUrl)
+  expect(defaultInstance).toBe('')
   await openMockedVideo(page)
   await expect(page.locator('.infoArea .videoTitle')).toHaveText('Invidious Cast test')
   await choice(page, 'Test TV')
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   const starts = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(starts[0].source).toEqual({ url: `${instanceUrl}/videoplayback`, contentType: 'video/mp4' })
+  expect(starts[0].invidiousInstanceUrl).toBe(instanceUrl)
   await choice(page, 'Return to local playback')
 })
 

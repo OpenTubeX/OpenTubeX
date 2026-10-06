@@ -4681,8 +4681,12 @@ function runApp() {
     }
     let allowedPrivateOrigin = null
     try {
-      const instance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
-      if (typeof instance === 'string' && instance) allowedPrivateOrigin = new URL(instance).origin
+      if (typeof payload?.invidiousInstanceUrl === 'string') {
+        const instance = new URL(payload.invidiousInstanceUrl)
+        if (['http:', 'https:'].includes(instance.protocol) && !instance.username && !instance.password) {
+          allowedPrivateOrigin = instance.origin
+        }
+      }
     } catch { }
     const resolveAddresses = url => resolveCastMediaAddresses(url, allowedPrivateOrigin,
       hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))

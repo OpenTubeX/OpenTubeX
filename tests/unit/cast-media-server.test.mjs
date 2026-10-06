@@ -205,6 +205,26 @@ function close(server) {
   return new Promise(resolve => server.close(resolve))
 }
 
+test('relays DASH index and switching URLs without changing boolean attributes or ranges', () => {
+  const xml = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"><BaseURL>https://instance.test/media/</BaseURL>
+    <Period bitstreamSwitching="true"><AdaptationSet bitstreamSwitching="false">
+      <SegmentTemplate media="video-$Number$.m4s" index="index-$Number%05d$.idx?x=1&amp;y=2" bitstreamSwitching="switch-$RepresentationID$.mp4"/>
+      <Representation><SegmentList><SegmentURL media="video.mp4" index="https://instance.test/index.idx" indexRange="0-100" mediaRange="101-200"/>
+      <BitstreamSwitching sourceURL="switch.mp4" range="0-50"/></SegmentList></Representation>
+    </AdaptationSet></Period></MPD>`
+  const registered = []
+  const result = rewriteCastDash(xml, undefined, url => { registered.push(url); return `http://cast.test/${registered.length}` })
+  assert.deepEqual(registered, [
+    'https://instance.test/media/', 'https://instance.test/media/video-$Number$.m4s',
+    'https://instance.test/media/index-$Number%05d$.idx?x=1&y=2', 'https://instance.test/media/switch-$RepresentationID$.mp4',
+    'https://instance.test/media/video.mp4', 'https://instance.test/index.idx', 'https://instance.test/media/switch.mp4'
+  ])
+  assert.match(result, /<Period bitstreamSwitching="true"><AdaptationSet bitstreamSwitching="false">/)
+  assert.match(result, /index="http:\/\/cast.test\/3" bitstreamSwitching="http:\/\/cast.test\/4"/)
+  assert.match(result, /index="http:\/\/cast.test\/6" indexRange="0-100" mediaRange="101-200"/)
+  assert.match(result, /sourceURL="http:\/\/cast.test\/7" range="0-50"/)
+})
+
 test('rewrites DASH resources using their original inherited base and preserves ranges/templates', () => {
   const registered = []
   const xml = `<MPD><BaseURL>https://media.test/vod/</BaseURL><Period><AdaptationSet>
@@ -384,12 +404,18 @@ test('does not truncate compressed subtitles or advertise compressed byte ranges
   assert.equal(encoding, 'identity')
 })
 
-test('preserves DASH template placeholders in directories and filenames', async t => {
-  const upstream = createServer((request, response) => response.end(request.url))
+test('relays DASH media, index and switching templates with scoped credentials', async t => {
+  const upstream = createServer((request, response) => {
+    if (request.headers.authorization !== 'Bearer scoped-test') return response.writeHead(401).end()
+    response.end(request.url)
+  })
   const upstreamUrl = await listen(upstream)
   t.after(() => close(upstream))
-  const xml = `<MPD><Period><AdaptationSet><SegmentTemplate media="${upstreamUrl}/vod/$RepresentationID$/chunk-$Number$.m4s" initialization="${upstreamUrl}/vod/$RepresentationID$/init.mp4"/></AdaptationSet></Period></MPD>`
-  const media = createCastMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token')
+  const xml = `<MPD><Period><AdaptationSet><SegmentTemplate media="${upstreamUrl}/vod/$RepresentationID$/chunk-$Number$.m4s" initialization="${upstreamUrl}/vod/$RepresentationID$/init.mp4" index="${upstreamUrl}/vod/$RepresentationID$/index-$Number%05d$.idx" bitstreamSwitching="${upstreamUrl}/vod/$RepresentationID$/switch.mp4"/>
+    <Representation><SegmentList><SegmentURL media="${upstreamUrl}/video.mp4" index="${upstreamUrl}/index.idx"/></SegmentList></Representation>
+    </AdaptationSet></Period></MPD>`
+  const media = createCastMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token', url =>
+    new URL(url).origin === upstreamUrl ? { Authorization: 'Bearer scoped-test' } : {})
   media.setOrigin(await listen(media.server))
   t.after(() => close(media.server))
   const body = await (await fetch(media.mediaUrl())).text()
@@ -399,6 +425,13 @@ test('preserves DASH template placeholders in directories and filenames', async 
   assert.equal(await segment.text(), '/vod/video/chunk-7.m4s')
   const initialization = body.match(/initialization="([^"]+)"/)[1]
   assert.equal(await (await fetch(initialization.replace('$RepresentationID$', 'audio'))).text(), '/vod/audio/init.mp4')
+  const index = body.match(/index="([^"]+)"/)[1]
+  assert.match(index, /\$RepresentationID\$\/index-\$Number%05d\$/)
+  assert.equal(await (await fetch(index.replace('$RepresentationID$', 'video').replace('$Number%05d$', '00007'))).text(), '/vod/video/index-00007.idx')
+  const switching = body.match(/bitstreamSwitching="([^"]+)"/)[1]
+  assert.equal(await (await fetch(switching.replace('$RepresentationID$', 'video'))).text(), '/vod/video/switch.mp4')
+  const segmentIndex = body.match(/<SegmentURL[^>]*index="([^"]+)"/)[1]
+  assert.equal(await (await fetch(segmentIndex)).text(), '/index.idx')
 })
 
 test('recalculates Invidious authorization on redirects without leaking it to the media origin', async t => {

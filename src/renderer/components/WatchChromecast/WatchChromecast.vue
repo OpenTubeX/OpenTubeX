@@ -17,6 +17,7 @@
 <script setup>
 import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { selectCastSource } from '../../helpers/player/castSource'
@@ -35,6 +36,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'ended'])
 const { t } = useI18n()
+const store = useStore()
 const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
@@ -209,6 +211,7 @@ async function handleChoice(choice) {
     const startSeconds = player?.getCurrentTime() ?? 0
     const result = await window.ftElectron.chromecast.start({
       deviceId: choice.slice(7),
+      invidiousInstanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
       source: source.value,
       title: props.title,
       startSeconds,
