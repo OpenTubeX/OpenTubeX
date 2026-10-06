@@ -134,7 +134,9 @@ export function rewriteCastDash(xml, base, register) {
     const element = node.name.split(':').at(-1)
     return Object.entries(node.attributes).map(([name, value]) => {
       const attribute = name.split(':').at(-1)
-      if (['media', 'initialization', 'sourceURL', 'href'].includes(attribute) ||
+      // Resolve-to-zero tells the DASH client to remove an element without fetching it.
+      if (['media', 'initialization', 'sourceURL'].includes(attribute) ||
+          (attribute === 'href' && value !== 'urn:mpeg:dash:resolve-to-zero:2013') ||
           (attribute === 'index' && ['SegmentTemplate', 'SegmentURL'].includes(element)) ||
           (attribute === 'bitstreamSwitching' && element === 'SegmentTemplate')) {
         value = registerUrls(resolveUrls([value], bases))

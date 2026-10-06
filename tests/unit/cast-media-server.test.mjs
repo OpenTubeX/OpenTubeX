@@ -32,6 +32,24 @@ test('authenticated WebVTT is served locally for GET and HEAD without upstream c
   assert.equal(await head.text(), '')
 })
 
+test('DASH resolve-to-zero XLinks pass through the relay without an upstream request', async t => {
+  const zero = 'urn:mpeg:dash:resolve-to-zero:2013'
+  const xml = `<MPD xmlns:xlink="http://www.w3.org/1999/xlink"><Period xlink:href="${zero}" xlink:actuate="onLoad"/><Period xlink:href="https://media.test/period.xml"/></MPD>`
+  const media = createMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token',
+    () => assert.fail('Resolve-to-zero does not request headers'), () => assert.fail('Resolve-to-zero does not resolve a destination'),
+    () => assert.fail('Resolve-to-zero does not fetch upstream'))
+  const origin = await listen(media.server)
+  media.setOrigin(origin)
+  t.after(() => close(media.server))
+  const response = await fetch(media.mediaUrl())
+  assert.equal(response.status, 200)
+  const result = await response.text()
+  assert.ok(result.includes(`xlink:href="${zero}" xlink:actuate="onLoad"`))
+  assert.ok(!result.includes('https://media.test/period.xml'))
+  assert.ok(result.includes(`xlink:href="${origin}/token/`))
+  assert.throws(() => rewriteCastDash('<MPD><Period xlink:href="urn:unsupported"/></MPD>', undefined, () => ''), /Unsupported/)
+})
+
 test('inline caption resources reject unsupported types, malformed encoding and oversized content', async t => {
   const media = createMediaServer({ url: 'https://media.test/video', contentType: 'video/mp4' }, '127.0.0.1', 'token')
   media.setOrigin(await listen(media.server))
