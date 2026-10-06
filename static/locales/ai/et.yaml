@@ -1979,5 +1979,3 @@ Storage Startup Error:
   Title: "Rakenduse andmeid ei saanud laadida"
   Message: "Vabasta seadmes salvestusruumi ja proovi uuesti. Sünkroonimine on peatatud, kuni andmed on laaditud."
   Retry: "Proovi uuesti"
-Native Permissions:
-  Local Network: "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel."

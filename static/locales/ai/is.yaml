@@ -1998,5 +1998,3 @@ Storage Startup Error:
   Title: "Ekki tókst að hlaða gögnum forritsins"
   Message: "Losaðu geymslupláss í tækinu og reyndu aftur. Samstilling er í bið þar til gögnin þín hafa verið hlaðin."
   Retry: "Reyna aftur"
-Native Permissions:
-  Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."

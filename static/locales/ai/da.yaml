@@ -2062,5 +2062,3 @@ Storage Startup Error:
   Title: "Appdata kunne ikke indlæses"
   Message: "Frigør lagerplads på enheden, og prøv igen. Synkronisering er sat på pause, indtil dine data er indlæst."
   Retry: "Prøv igen"
-Native Permissions:
-  Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."

@@ -1986,5 +1986,3 @@ Storage Startup Error:
   Title: "Tətbiq məlumatları yüklənmədi"
   Message: "Cihazda yaddaş sahəsi boşaldın və yenidən cəhd edin. Məlumatlarınız yüklənənədək sinxronizasiya dayandırılıb."
   Retry: "Yenidən cəhd et"
-Native Permissions:
-  Local Network: "Yerli şəbəkənizdə cihazları tapın və videoları onlara yayımlayın, cihazlar arasında parametrləri və məlumatları sinxronlaşdırın."
