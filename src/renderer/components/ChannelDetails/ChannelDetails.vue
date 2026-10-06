@@ -341,9 +341,19 @@
           :action-button-label="$t('Search Bar.Search')"
           :value="query"
           class="channelSearch"
+          :class="{ expanded: searchExpanded }"
           :maxlength="255"
           @input="handleSearchInput"
           @click="search"
+        />
+        <FtIconButton
+          v-if="showSearchBar"
+          class="channelSearchToggle"
+          :title="$t('Channel.Search Channel')"
+          :icon="['fas', 'search']"
+          :aria-expanded="searchExpanded"
+          :use-shadow="false"
+          @click="toggleSearch"
         />
       </FtFlexBox>
     </div>
@@ -361,6 +371,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 import store from '../../store/index'
 
@@ -623,12 +634,25 @@ function clearSearch() {
 }
 
 const searchBar = useTemplateRef('searchBar')
+const searchExpanded = ref(false)
+
+function focusSearch() {
+  searchExpanded.value = true
+  nextTick(() => searchBar.value?.focus())
+}
+
+function toggleSearch() {
+  searchExpanded.value = !searchExpanded.value
+  if (searchExpanded.value) focusSearch()
+}
 
 /**
  * @param {KeyboardEvent} event
  */
 function keyboardShortcutHandler(event) {
-  ctrlFHandler(event, searchBar.value)
+  if (props.showSearchBar && !props.hasErrorMessage && (!isTabPresented || isTabPresented.value)) {
+    ctrlFHandler(event, { focus: focusSearch })
+  }
 }
 
 onMounted(() => {
