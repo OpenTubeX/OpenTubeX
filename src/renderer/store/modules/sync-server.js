@@ -955,13 +955,14 @@ const actions = {
     return dispatch('deleteSyncServerSessions', session)
   },
 
-  deleteSyncServerDeviceSessions({ dispatch }, syncDeviceId) {
-    return dispatch('deleteSyncServerSessions', { syncDeviceId })
+  deleteSyncServerDeviceSessions({ dispatch }, { syncDeviceId, accountSessionId }) {
+    return dispatch('deleteSyncServerSessions', { syncDeviceId, accountSessionId })
   },
 
-  async deleteSyncServerSessions({ commit, dispatch, rootState }, { syncDeviceId, sessionId } = {}) {
+  async deleteSyncServerSessions({ commit, dispatch, rootState }, { syncDeviceId, sessionId, accountSessionId } = {}) {
     const settings = rootState.settings
-    if (typeof syncDeviceId !== 'string' || (sessionId !== undefined && typeof sessionId !== 'string')) {
+    if (typeof syncDeviceId !== 'string' || (sessionId !== undefined && typeof sessionId !== 'string') ||
+        (sessionId === undefined && typeof accountSessionId !== 'string')) {
       throw new Error('Invalid synced tab set')
     }
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
@@ -1002,6 +1003,22 @@ const actions = {
             settings.syncServerPrivacyKey,
             settings.syncServerPrivacySalt
           )
+
+          // A reconnect can introduce another login while loading or retrying
+          // the encrypted collection. Preserve its tabs before every upload.
+          if (sessionId === undefined) {
+            const response = await client.getAccountSessions()
+            if (!Array.isArray(response?.sessions)) {
+              throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+            }
+            assertSyncEnabled(rootState, client)
+            if (response.sessions.some(session => (
+              session.id !== accountSessionId && session.device_id === syncDeviceId
+            ))) {
+              commit('setSyncServerStatus', 'idle')
+              return 'preserved'
+            }
+          }
 
           try {
             await client.putEncryptedSyncCollection('sessionsV2', remote.revision, payload)

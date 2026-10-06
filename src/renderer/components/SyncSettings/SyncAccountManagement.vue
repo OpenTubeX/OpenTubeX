@@ -509,8 +509,12 @@ async function revokeSession() {
     // An absent login may have expired independently. Skip repeated cleanup
     // only after it succeeded in this prompt and the login is now absent.
     if (deletesTabs && (sessionActive || !revokeTabsDeleted.value)) {
-      if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
-      revokeTabsDeleted.value = true
+      const result = await store.dispatch('deleteSyncServerDeviceSessions', {
+        syncDeviceId: session.device_id,
+        accountSessionId: session.id,
+      })
+      if (!result) return
+      if (result === true) revokeTabsDeleted.value = true
     }
     if (sessionActive) await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null

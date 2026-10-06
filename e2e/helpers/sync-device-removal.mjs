@@ -5,7 +5,7 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, reconnectDuringCleanup = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
@@ -29,7 +29,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
   let revoked = false
   let revokeAttempts = 0
   let otherLoginExpired = false
-  const preserveTabs = otherLogin && !otherLoginExpires
+  const preserveTabs = (otherLogin && !otherLoginExpires) || reconnectDuringCleanup
   const deviceInfo = await encryptSyncServerDeviceInfo({
     name: 'Previous phone', platform: 'android', architecture: 'arm64', release: '15',
   }, key, oldDeviceId)
@@ -43,7 +43,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     expires_at: now + 86400000,
     encrypted_device_info: deviceInfo,
   }]
-  if (otherLogin || revokeResponseLost || loginDisappears) {
+  if (otherLogin || revokeResponseLost || loginDisappears || reconnectDuringCleanup) {
     const loginDeviceId = otherLogin ? oldDeviceId : currentDeviceId
     accountSessions.push({
       ...accountSessions[0],
@@ -78,7 +78,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       return route.fulfill({ status: 204 })
     }
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
-      if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
+      if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(reconnectDuringCleanup ? 3 : 2)
       else expect(document.devices[oldDeviceId]).toBeUndefined()
       if (revokeFailsOnce && revokeAttempts++ === 0) {
         return route.fulfill({ status: 503, body: 'Fixture revocation failure' })
@@ -93,6 +93,18 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     if (pathname === '/v1/encrypted_sync/sessionsV2') {
       if (request.method() === 'PUT') {
+        if (reconnectDuringCleanup && !accountSessions.some(session => session.id === 'reconnected-login')) {
+          accountSessions.push({
+            ...accountSessions[0],
+            id: 'reconnected-login',
+            encrypted_device_info: await encryptSyncServerDeviceInfo({
+              name: 'Reconnected phone', platform: 'android', architecture: 'arm64', release: '15',
+            }, key, oldDeviceId),
+          })
+          document.devices[oldDeviceId].sessions.push(tabSet('reconnected-tabs', 'Reconnected phone tabs'))
+          revision++
+          return route.fulfill({ status: 409, json: { error: 'Concurrent reconnect upload' } })
+        }
         const body = request.postDataJSON()
         expect(body.revision).toBe(revision)
         document = await decryptSyncDocument(body.payload, key)
@@ -192,10 +204,13 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     expect(revoked).toBe(true)
     if (preserveTabs) {
-      expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs'])
+      expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs', ...(reconnectDuringCleanup ? ['reconnected-tabs'] : [])])
       expect(document.deletedSessions[oldDeviceId]).toBeUndefined()
-      expect(requests).not.toContain('PUT /v1/encrypted_sync/sessionsV2')
+      if (reconnectDuringCleanup) {
+        expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(1)
+      } else expect(requests).not.toContain('PUT /v1/encrypted_sync/sessionsV2')
       await expect(sync.locator('.sessionCard', { hasText: 'Current device' })).toBeVisible()
+      if (capture && reconnectDuringCleanup) await capture('device-reconnect-preserved', sync.locator('.accountManagement'))
     } else {
       expect(document.devices[oldDeviceId]).toBeUndefined()
       expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
@@ -204,7 +219,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     await expect.poll(() => page.evaluate(() => (
       document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .getters.getSyncServerOtherDeviceSessions.map(session => session.sessionId)
-    ))).toEqual(preserveTabs ? ['current-tabs', 'orphan-tabs'] : ['orphan-tabs'])
+    ))).toEqual(reconnectDuringCleanup ? ['old-tabs', 'older-tabs', 'orphan-tabs'] : preserveTabs ? ['current-tabs', 'orphan-tabs'] : ['orphan-tabs'])
 
     await page.locator('.settingsCloseButton').click()
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -218,11 +233,14 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (capture) await capture('orphan-tab-set-delete', organizer.locator(phone ? '.capacitorPhoneSyncedSession' : '.syncedTabsSection'))
     await deleteButton.click()
     await page.getByRole('dialog', { name: 'Delete', exact: true }).getByRole('button', { name: 'Delete', exact: true }).click()
-    await expect(organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })).toHaveCount(preserveTabs ? 1 : 0)
+    await expect(organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })).toHaveCount(!reconnectDuringCleanup && preserveTabs ? 1 : 0)
+    if (reconnectDuringCleanup) {
+      await expect(organizer.getByRole('tab', { name: 'Reconnected phone · 1 tab', exact: true })).toHaveCount(3)
+    }
     expect(document.devices[orphanId]).toBeUndefined()
     expect(document.deletedSessions[orphanId]).toEqual(['orphan-tabs'])
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
-    if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
+    if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(reconnectDuringCleanup ? 3 : 2)
     if (loginDisappears) expect(requests).not.toContain('DELETE /v1/account/sessions/old-login')
     else expect(requests).toContain('DELETE /v1/account/sessions/old-login')
   } finally {

@@ -22,3 +22,7 @@ test('device removal finishes after a lost revocation response without repeating
 test('device removal cleans up tabs when the login disappears before confirmation', async ({ page }) => {
   await verifySyncDeviceRemoval(page, { loginDisappears: true })
 })
+
+test('device removal preserves tabs when another login reconnects during a conflict retry', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { reconnectDuringCleanup: true })
+})
