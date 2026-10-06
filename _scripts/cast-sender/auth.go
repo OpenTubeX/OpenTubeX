@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
 	stdx509 "crypto/x509"
 	_ "embed"
@@ -117,7 +118,7 @@ func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *
 }
 
 func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.CertPool, now time.Time) error {
-	if !bytes.Equal(response.SenderNonce, nonce) || response.HashAlgorithm == nil || *response.HashAlgorithm != 1 ||
+	if !bytes.Equal(response.SenderNonce, nonce) || (response.HashAlgorithm != nil && *response.HashAlgorithm > 1) ||
 		(response.SignatureAlgorithm != nil && *response.SignatureAlgorithm != 1) {
 		return fmt.Errorf("invalid Cast authentication challenge response")
 	}
@@ -139,7 +140,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	}
 	// Cast PKI uses SHA-1 certificate signatures, which Go 1.24+ no longer
 	// accepts. This verifier retains path, validity and critical-extension
-	// checks against only the pinned Cast roots. The challenge still uses SHA256.
+	// checks against only the pinned Cast roots.
 	chains, err := device.Verify(x509.VerifyOptions{Roots: roots, Intermediates: intermediates,
 		CurrentTime: now, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageAny}})
 	if err != nil {
@@ -153,8 +154,14 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 		}
 	}
 	signed := append(append([]byte{}, nonce...), peerDER...)
-	digest := sha256.Sum256(signed)
-	if err := rsa.VerifyPKCS1v15(key, crypto.SHA256, digest[:], response.Signature); err != nil {
+	hash, digest := crypto.SHA256, sha256.New()
+	// Request SHA256, but verify legacy replies using their declared hash.
+	// The protocol defaults an omitted hash_algorithm to SHA1.
+	if response.HashAlgorithm == nil || *response.HashAlgorithm == 0 {
+		hash, digest = crypto.SHA1, sha1.New()
+	}
+	digest.Write(signed)
+	if err := rsa.VerifyPKCS1v15(key, hash, digest.Sum(nil), response.Signature); err != nil {
 		return fmt.Errorf("invalid Cast device authentication signature: %w", err)
 	}
 	return nil

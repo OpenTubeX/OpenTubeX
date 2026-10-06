@@ -125,6 +125,13 @@ export function rewriteCastDash(xml, base, register) {
   }
   function render(node, inheritedBase) {
     if (typeof node === 'string') return escapeXml(node)
+    const name = node.name.split(':').at(-1)
+    if (['Location', 'PatchLocation'].includes(name)) {
+      // Manifest refreshes resolve against the original document, not media BaseURL.
+      const url = register(httpUrl(node.children.join('').trim(), base).href,
+        name === 'Location' ? 'application/dash+xml' : 'application/dash-patch+xml')
+      return `<${node.name}${renderAttributes(node, base)}>${escapeXml(url)}</${node.name}>`
+    }
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
     const effectiveBase = bases.length ? httpUrl(bases[0].children.join('').trim(), inheritedBase).href : inheritedBase
     const attributes = renderAttributes(node, effectiveBase)

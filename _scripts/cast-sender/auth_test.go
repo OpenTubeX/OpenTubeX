@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -82,7 +83,7 @@ func TestSHA1CastCertificateChains(t *testing.T) {
 			if err := verifyReceiver(signedResponse(t, device, intermediate, key, nonce, peer), nonce, peer, roots, time.Now()); err != nil {
 				t.Fatal(err)
 			}
-			for _, scenario := range []string{"expired", "not yet valid", "untrusted", "missing intermediate", "bad certificate signature", "SHA1 challenge"} {
+			for _, scenario := range []string{"expired", "not yet valid", "untrusted", "missing intermediate", "bad certificate signature", "mismatched challenge hash"} {
 				t.Run(scenario, func(t *testing.T) {
 					response := signedResponse(t, device, intermediate, key, nonce, peer)
 					pool, now := roots, time.Now()
@@ -98,7 +99,7 @@ func TestSHA1CastCertificateChains(t *testing.T) {
 					case "bad certificate signature":
 						response.ClientAuthCertificate = append([]byte{}, device.Raw...)
 						response.ClientAuthCertificate[len(response.ClientAuthCertificate)-1] ^= 1
-					case "SHA1 challenge":
+					case "mismatched challenge hash":
 						response.HashAlgorithm = proto.Uint32(0)
 					}
 					if err := verifyReceiver(response, nonce, peer, pool, now); err == nil {
@@ -119,6 +120,49 @@ func signedResponse(t *testing.T, device, intermediate *x509.Certificate, key *r
 	}
 	return &authResponse{Signature: signature, ClientAuthCertificate: device.Raw, IntermediateCertificate: [][]byte{intermediate.Raw},
 		SenderNonce: nonce, HashAlgorithm: proto.Uint32(1), SignatureAlgorithm: proto.Uint32(1)}
+}
+
+func TestLegacySHA1ChallengeResponse(t *testing.T) {
+	device, intermediate, _, key, roots := authFixture(t)
+	nonce, peer := []byte("challenge nonce!"), []byte("TLS certificate DER")
+	for _, scenario := range []string{"explicit SHA1", "default SHA1", "wrong nonce", "missing nonce", "changed TLS certificate", "bad signature", "untrusted", "expired", "unknown hash", "mismatched hash"} {
+		t.Run(scenario, func(t *testing.T) {
+			response := signedResponse(t, device, intermediate, key, nonce, peer)
+			digest := sha1.Sum(append(append([]byte{}, nonce...), peer...))
+			var err error
+			response.Signature, err = rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA1, digest[:])
+			if err != nil {
+				t.Fatal(err)
+			}
+			response.HashAlgorithm = proto.Uint32(0)
+			pool, now, peerDER := roots, time.Now(), peer
+			switch scenario {
+			case "default SHA1":
+				response.HashAlgorithm = nil
+			case "wrong nonce":
+				response.SenderNonce = []byte("other nonce")
+			case "missing nonce":
+				response.SenderNonce = nil
+			case "changed TLS certificate":
+				peerDER = []byte("other TLS certificate")
+			case "bad signature":
+				response.Signature[0] ^= 1
+			case "untrusted":
+				pool = castRoots()
+			case "expired":
+				now = now.Add(48 * time.Hour)
+			case "unknown hash":
+				response.HashAlgorithm = proto.Uint32(2)
+			case "mismatched hash":
+				response.HashAlgorithm = proto.Uint32(1)
+			}
+			err = verifyReceiver(response, nonce, peerDER, pool, now)
+			valid := scenario == "explicit SHA1" || scenario == "default SHA1"
+			if (err == nil) != valid {
+				t.Fatalf("unexpected legacy verification result: %v", err)
+			}
+		})
+	}
 }
 
 func TestDeviceAuthenticationVerification(t *testing.T) {
@@ -198,6 +242,9 @@ func TestAuthenticationExchange(t *testing.T) {
 	}
 	if challenge.Challenge == nil || len(challenge.Challenge.SenderNonce) != 16 {
 		t.Fatal("missing challenge nonce")
+	}
+	if challenge.Challenge.HashAlgorithm == nil || *challenge.Challenge.HashAlgorithm != 1 {
+		t.Fatal("challenge did not request SHA256")
 	}
 	// An intervening heartbeat must be answered while the auth deadline remains.
 	if err := receiver.send("receiver-0", "sender-0", "urn:x-cast:com.google.cast.tp.heartbeat", map[string]string{"type": "PING"}); err != nil {

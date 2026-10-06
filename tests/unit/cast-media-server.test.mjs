@@ -230,6 +230,42 @@ test('rewriting DASH BaseURL text retains playback attributes and escaped values
   assert.deepEqual(urls, ['https://media.test/vod/', 'https://media.test/vod/video.mp4'])
 })
 
+test('rewrites DASH manifest locations against the document URL while preserving attributes', () => {
+  const xml = '<dash:MPD xmlns:dash="urn:mpeg:dash:schema:mpd:2011"><dash:BaseURL>https://media.test/segments/</dash:BaseURL><dash:Location serviceLocation="A&amp;B"> next?x=1&amp;y=2 </dash:Location><dash:Location>https://other.test/updated.mpd</dash:Location><dash:PatchLocation ttl="60">patch.xml</dash:PatchLocation></dash:MPD>'
+  const urls = []
+  const result = rewriteCastDash(xml, 'https://instance.test/live/start.mpd', url => { urls.push(url); return `http://cast.test/${urls.length}` })
+  assert.deepEqual(urls, ['https://media.test/segments/', 'https://instance.test/live/next?x=1&y=2', 'https://other.test/updated.mpd', 'https://instance.test/live/patch.xml'])
+  assert.match(result, /<dash:Location serviceLocation="A&amp;B">http:\/\/cast.test\/2<\/dash:Location>/)
+  assert.match(result, /<dash:PatchLocation ttl="60">http:\/\/cast.test\/4<\/dash:PatchLocation>/)
+  assert.throws(() => rewriteCastDash('<MPD><Location>file:///manifest</Location></MPD>', undefined, () => ''), /Unsupported/)
+})
+
+test('dynamic DASH refreshes keep scoped credentials and rewrite the refreshed manifest', async t => {
+  const requests = []
+  const upstream = createServer((request, response) => {
+    requests.push([request.url, request.headers.authorization])
+    if (request.headers.authorization !== 'Bearer scoped-test') return response.writeHead(401).end()
+    const xml = request.url === '/live/start'
+      ? '<MPD type="dynamic"><BaseURL>https://media.test/segments/</BaseURL><Location>next</Location></MPD>'
+      : '<MPD type="dynamic"><Location>third</Location></MPD>'
+    response.writeHead(200, { 'content-type': 'application/dash+xml' }).end(xml)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/live/start`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token', url =>
+    new URL(url).origin === origin ? { Authorization: 'Bearer scoped-test' } : {})
+  const relayOrigin = await listen(media.server)
+  media.setOrigin(relayOrigin)
+  t.after(() => close(media.server))
+  const initial = await (await fetch(media.mediaUrl())).text()
+  const location = initial.match(/<Location>([^<]+)<\/Location>/)[1]
+  assert.equal(new URL(location).origin, relayOrigin)
+  const refreshed = await fetch(location)
+  assert.equal(refreshed.status, 200)
+  assert.match(await refreshed.text(), new RegExp(`<Location>${relayOrigin}/token/\\d+/media</Location>`))
+  assert.deepEqual(requests, [['/live/start', 'Bearer scoped-test'], ['/live/next', 'Bearer scoped-test']])
+})
+
 test('rewrites HLS variants, segments, initialization maps and keys', () => {
   const urls = []
   const result = rewriteCastHls('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key"\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:5,\nchunk.ts\n', 'https://media.test/live/main.m3u8', url => { urls.push(url); return `http://cast.test/${urls.length}` })
