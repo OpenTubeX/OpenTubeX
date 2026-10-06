@@ -75,7 +75,7 @@ test('nested resize reconciliation clamps an invalid offset without viewport gro
 const clampFunction = source.slice(source.indexOf('export function clampOverlayScrollTop('), source.indexOf('/**\n * Recalculates a nested horizontal scroll'))
 const measurementFunctions = source.slice(source.indexOf('function getMaximumOverlayScrollTop('), source.indexOf('/**\n * `v-overlay-scrollbars`'))
 
-function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow } = {}) {
+function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false } = {}) {
   const writes = []
   let currentOffset = scrollTop
   let currentOverflow = overflow
@@ -87,9 +87,18 @@ function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow
     set scrollTop(value) { writes.push(value); currentOffset = value }
   }
   const content = { offsetTop: 20, offsetHeight: 773, offsetParent: element }
+  const scrollbars = [{ style: { display: '' } }, { style: { display: 'block' } }]
   const instance = {
-    elements: () => ({ scrollOffsetElement: element }),
-    update: () => { if (element.scrollTop === 0) currentOverflow = currentNativeOverflow = 215 },
+    elements: () => ({
+      scrollOffsetElement: element,
+      scrollbarHorizontal: { scrollbar: scrollbars[0] },
+      scrollbarVertical: { scrollbar: scrollbars[1] }
+    }),
+    update: () => {
+      if (element.scrollTop === 0 && (!retainedTracks || scrollbars.every(bar => bar.style.display === 'none'))) {
+        currentOverflow = currentNativeOverflow = 215
+      }
+    },
     state: () => ({ overflowAmount: { y: currentOverflow } })
   }
   const context = vm.createContext({
@@ -99,7 +108,7 @@ function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow
     suspendScrollbarPosition: new WeakMap()
   })
   vm.runInContext(`${boundaryTolerance}\n${measurementFunctions}\n${clampFunction.replace('export ', '')}\nthis.clamp = clampOverlayScrollTop`, context)
-  return { element, writes, overflow: () => currentOverflow, clamp: () => context.clamp(element, content) }
+  return { element, writes, scrollbars, overflow: () => currentOverflow, clamp: () => context.clamp(element, content) }
 }
 
 test('clamping refreshes retained overflow while preserving a valid scroll offset', () => {
@@ -115,6 +124,15 @@ test('clamping discards native overflow even when the library range is already a
   fixture.clamp()
   assert.deepEqual(fixture.writes, [0, 215])
   assert.equal(fixture.element.scrollHeight - fixture.element.clientHeight, 215)
+})
+
+test('clamping discards retained scrollbar track overflow and restores track visibility', () => {
+  const fixture = setupClamp({ scrollTop: 215, retainedTracks: true })
+  fixture.clamp()
+  assert.equal(fixture.element.scrollHeight - fixture.element.clientHeight, 215)
+  assert.equal(fixture.overflow(), 215)
+  assert.equal(fixture.element.scrollTop, 215)
+  assert.deepEqual(fixture.scrollbars.map(bar => bar.style.display), ['', 'block'])
 })
 
 test('clamping leaves an accurate scroll range and valid offset untouched', () => {

@@ -536,8 +536,19 @@ export function clampOverlayScrollTop(element, contentElement = null) {
         // beneath a non-zero offset. Remeasure from the true origin so both the
         // viewport and OverlayScrollbars discard that stale range, then restore
         // the clamped position within the newly measured range.
-        scrollOffsetElement.scrollTop = 0
-        instance.update(true)
+        const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
+        const scrollbars = retainedOverflow ? [scrollbarHorizontal.scrollbar, scrollbarVertical.scrollbar] : []
+        const displays = scrollbars.map(scrollbar => scrollbar.style.display)
+        try {
+          // Transformed tracks can retain their old overflow box in Chromium
+          // even at the origin. Exclude them from this measurement; restoring
+          // them below and updating at the clamped offset happens before paint.
+          scrollbars.forEach(scrollbar => { scrollbar.style.display = 'none' })
+          scrollOffsetElement.scrollTop = 0
+          instance.update(true)
+        } finally {
+          scrollbars.forEach((scrollbar, index) => { scrollbar.style.display = displays[index] })
+        }
         scrollOffsetElement.scrollTop = Math.min(previousScrollTop, maximumScrollTop, instance.state().overflowAmount.y)
         instance.update(true)
       } else {
