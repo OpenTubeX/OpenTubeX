@@ -104,6 +104,63 @@ const commonSettings = {
   useRssFeeds: false
 }
 
+test.describe('Reactive subscription title filtering', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        forbiddenTitles: JSON.stringify(['Blocked']),
+        newSubscriptionFeedView: 'tabbed',
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
+      profiles: [profile()],
+      subscriptionCache: populatedCache.map(channel => ({
+        ...channel,
+        shorts: [newShort, ...Array.from({ length: 100 }, (_, index) => ({
+          ...newShort,
+          videoId: `filter-short-${index + 1}`,
+          title: `Filter short ${index + 1}`,
+          published: newShort.published - (index + 1) * HOUR
+        }))]
+      }))
+    }
+  })
+
+  for (const feed of ['Shorts', 'New']) {
+    test(`removes and restores ${feed} entries after channel-page title updates`, async ({ page }) => {
+      await goTo(page, 'subscriptions')
+      if (feed === 'New') {
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await page.locator('[data-new-feed-tab="shorts"]').click()
+        // Freeze the New selection as during an ongoing subscription refresh.
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setSubscriptionFeedRefreshInProgress', true)
+        })
+      } else {
+        await page.locator('[data-subscription-feed-tab="shorts"]').click()
+      }
+      const entries = page.locator('#subscriptionsPanel [data-feed-item-key]')
+      await expect(page.getByText('New short', { exact: true })).toBeVisible()
+      await expect(entries).toHaveCount(100)
+      for (const title of ['Blocked updated short', 'Allowed updated short']) {
+        await page.evaluate(({ channelId, title }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const entry = store.state.subscriptionCache.shortsCache[channelId].videos[0]
+          store.commit('updateShortsCacheWithChannelPageShorts', {
+            channelId, entries: [{ ...entry, title }]
+          })
+        }, { channelId: CHANNEL_ID, title })
+        // Parent filtering must refill the page, not just hide the blocked card.
+        await expect(entries).toHaveCount(100)
+        await expect(page.locator('#subscriptionsPanel [data-video-id="filter-short-100"]'))
+          .toHaveCount(title.startsWith('Blocked') ? 1 : 0)
+      }
+      await expect(page.getByText('Allowed updated short', { exact: true })).toBeVisible()
+    })
+  }
+})
+
 test.describe('New feed removal animation', () => {
   test.use({
     seed: {

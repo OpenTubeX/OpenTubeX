@@ -267,7 +267,10 @@ const filteredVideoList = computed(() => {
   }
 
   // Subscription feeds intentionally ignore the general hidden-channel list.
-  videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
+  // Active metadata filters must track in-place cache edits before pagination.
+  // Keep the unfiltered scan raw so large feeds avoid unnecessary tracking.
+  const trackMetadata = hideLiveStreams.value || hideUpcomingPremieres.value || forbiddenTitles.value.length > 0
+  videoList = videoList.filter(video => !isVideoHiddenByPreferences(trackMetadata ? reactive(video) : video, {
     hideLiveStreams: hideLiveStreams.value,
     hideUpcomingPremieres: hideUpcomingPremieres.value,
     forbiddenTitles: forbiddenTitles.value
