@@ -23,6 +23,21 @@ async function scrollToBottom(scroller) {
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 }
 
+async function expectActionsFitPlayer(player) {
+  await expect.poll(() => player.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    const actions = element.querySelector('.fullscreenActions')
+    return [...actions.children].every(action => {
+      const button = action.matches('button') ? action : action.querySelector('button')
+      const rect = button.getBoundingClientRect()
+      const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return rect.left >= bounds.left && rect.right <= bounds.right &&
+        rect.top >= bounds.top && rect.bottom <= bounds.bottom &&
+        Math.abs(rect.width - 40) <= 1 && Math.abs(rect.height - 40) <= 1 && button.contains(target)
+    })
+  })).toBe(true)
+}
+
 async function expectUnifiedDockHeader(dock, headerSelector) {
   await expect.poll(() => dock.evaluate((element, selector) => {
     const header = element.querySelector(selector)
@@ -134,6 +149,11 @@ for (const { uiScale, iconPack, colorScheme } of [
         await expect.poll(() => sidebarQueue.evaluate(element => Math.abs(element.scrollTop - 150))).toBeLessThanOrEqual(1)
         await setPlayerFullscreen(page, true)
         const actions = player.locator('.fullscreenActions')
+        const captureDocks = async (name) => {
+          const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+            (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
+          await writeFile(testInfo.outputPath(`${name}-${colorScheme}.png`), Buffer.from(screenshot, 'base64'))
+        }
         await expect(actions.getByRole('button', { name: 'Queue', exact: true })).toBeVisible()
         await expect(player.locator('.fullscreenQueueOverlay.open')).toHaveCount(0)
         await actions.getByRole('button', { name: 'Queue', exact: true }).click()
@@ -149,7 +169,19 @@ for (const { uiScale, iconPack, colorScheme } of [
         await queue.getByRole('button', { name: 'Remove Queued video 2 from queue', exact: true }).click()
         await expect(queue.locator('.queueItem')).toHaveCount(19)
         await scrollToBottom(queueScroller)
-        await setWindowSize(app, page, { width: 480, height: 900 })
+        await setWindowSize(app, page, { width: 480, height: 400 })
+        await expectActionsFitPlayer(player)
+        await expectValidScroll(queueScroller, '.queueItemsContent')
+        await queueScroller.evaluate(element => { element.scrollTop = 0 })
+        await expectImagesLoaded(queue.locator('img:visible'))
+        await captureDocks('wrapped-actions')
+        await scrollToBottom(queueScroller)
+        await actions.getByRole('button', { name: 'Share Video', exact: true }).click()
+        const share = player.locator('.fullscreenDropdownLayer[aria-label="Share Video"]')
+        await expect(share).toBeVisible()
+        await share.press('Escape')
+        await expect(share).toHaveCount(0)
+        await expectActionsFitPlayer(player)
         await expect.poll(() => queue.locator('.queueHeader').evaluate(element => {
           const bounds = element.getBoundingClientRect()
           const title = element.querySelector('.queueTitle').getBoundingClientRect()
@@ -180,6 +212,9 @@ for (const { uiScale, iconPack, colorScheme } of [
         const queuePosition = await queueScroller.evaluate(element => element.scrollTop)
         await queue.getByRole('button', { name: 'Close', exact: true }).click()
         await expect.poll(() => sidebarQueue.evaluate(element => Math.abs(element.scrollTop - 150))).toBeLessThanOrEqual(1)
+        await setWindowSize(app, page, { width: 480, height: 400 })
+        await expectActionsFitPlayer(player)
+        await setWindowSize(app, page, { width: 1360, height: 850 })
         await actions.getByRole('button', { name: 'Queue', exact: true }).click()
         await expect.poll(() => queueScroller.evaluate((element, position) => Math.abs(element.scrollTop - position), queuePosition)).toBeLessThanOrEqual(1)
 
@@ -190,6 +225,9 @@ for (const { uiScale, iconPack, colorScheme } of [
         await page.mouse.move(0, 0)
         await expectUnifiedDockHeader(recommendations, '.recommendationsDockHeader')
         await expect(recommendationsScroller).toHaveAttribute('data-overlayscrollbars-viewport')
+        await setWindowSize(app, page, { width: 480, height: 900 })
+        await expectActionsFitPlayer(player)
+        await setWindowSize(app, page, { width: 1360, height: 850 })
         await expect(queue.getByRole('button', { name: 'Resize dock', exact: true })).toBeVisible()
         await scrollToBottom(queueScroller)
         await queue.getByRole('button', { name: 'Resize dock', exact: true }).press('ArrowUp')
@@ -205,11 +243,6 @@ for (const { uiScale, iconPack, colorScheme } of [
         await expectValidScroll(recommendationsScroller, '.recommendationsContent')
         await expect(recommendationsScroller.locator(':scope > .os-scrollbar-vertical')).toBeVisible()
         await expectImagesLoaded(recommendations.locator('img'))
-        const captureDocks = async (name) => {
-          const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-            (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-          await writeFile(testInfo.outputPath(`${name}-${colorScheme}.png`), Buffer.from(screenshot, 'base64'))
-        }
         await recommendations.getByRole('button', { name: 'Close', exact: true }).click()
         await actions.getByRole('button', { name: 'Comments', exact: true }).click()
         const comments = player.locator('.fullscreenCommentsOverlay.open')

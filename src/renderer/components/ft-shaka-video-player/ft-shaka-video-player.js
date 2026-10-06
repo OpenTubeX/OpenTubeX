@@ -831,6 +831,17 @@ export default defineComponent({
     const shakaControlsShown = ref(false)
     const isSubMenuOpened = ref(false)
     const actionDockFocused = ref(false)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const fullscreenActionsElement = ref(null)
+    const fullscreenActionsBlockSize = ref(50)
+    watch(fullscreenActionsElement, (element, _previous, onCleanup) => {
+      if (!element) return
+      const observer = new ResizeObserver(entries => {
+        fullscreenActionsBlockSize.value = entries[0].borderBoxSize[0].blockSize
+      })
+      observer.observe(element)
+      onCleanup(() => observer.disconnect())
+    })
     /** @type {number|null} */
     let pausedInterfaceRevealTimeout = null
 
@@ -12862,6 +12873,8 @@ export default defineComponent({
       actionDockVisible,
       visibleFullscreenActions,
       actionDockFocused,
+      fullscreenActionsElement,
+      fullscreenActionsBlockSize,
       playerControlsShown,
       lightsOffVisible,
       isSubMenuOpened,

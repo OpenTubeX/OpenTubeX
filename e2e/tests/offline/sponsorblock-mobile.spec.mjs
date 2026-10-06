@@ -83,6 +83,23 @@ for (const uiScale of [100, 95]) {
           return Math.abs(dockBox.y - noticeBox.y - noticeBox.height - 8)
         }).toBeLessThan(1)
 
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('addVideoToWatchQueue', {
+            video: { videoId: 'queued00000', title: 'Queued video', author: 'Queue channel' }
+          })
+        })
+        await player.locator('.fullscreenActions').getByRole('button', { name: 'Queue', exact: true }).click()
+        await expect(player.locator('.fullscreenQueueOverlay.open')).toBeVisible()
+        await expect.poll(() => player.locator('.fullscreenActions').evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(50)
+        await expect.poll(async () => {
+          const noticeBox = await notice.boundingBox()
+          const dockBox = await player.locator('.fullscreenActions').boundingBox()
+          return Math.abs(dockBox.y - noticeBox.y - noticeBox.height - 8)
+        }).toBeLessThan(1)
+        await player.locator('.fullscreenQueueOverlay.open').getByRole('button', { name: 'Close', exact: true }).click()
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('clearWatchQueue'))
+
         // Hidden controls remove the dock offset even while a notice is showing.
         await player.locator('.shaka-controls-container').evaluate(element => element.removeAttribute('shown'))
         await expect(player).toHaveAttribute('data-action-dock-visible', 'false')

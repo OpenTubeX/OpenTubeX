@@ -122,6 +122,7 @@
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
         scrollMiniPlayerDragStyle,
         mobileFullscreenSwipeStyle,
+        { '--mobile-fullscreen-actions-block-size': `${fullscreenActionsBlockSize}px` },
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"
       @mouseenter="handleScrollMiniPlayerEnter"
@@ -475,6 +476,7 @@
       </Transition>
       <div
         v-if="visibleFullscreenActions.length > 0"
+        ref="fullscreenActionsElement"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop

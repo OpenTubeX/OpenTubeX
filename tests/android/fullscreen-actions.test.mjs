@@ -96,11 +96,23 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
           title: `Queued video ${index + 1}`, author: 'Queue channel',
         } })
       }
-      await watch.$store.dispatch('updateFullscreenActions', ['queue', 'download', 'recommendations'])
+      await watch.$store.dispatch('updateFullscreenActions', [
+        'queue', 'download', 'recommendations', 'share', 'sponsorBlock', 'comments', 'addToPlaylist', 'quickBookmark'
+      ])
     })
     await dock.getByRole('button', { name: 'Queue', exact: true }).click()
     const queue = player.locator('.fullscreenQueueOverlay.open')
     await expect(queue).toBeVisible()
+    await expect.poll(() => player.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return [...element.querySelector('.fullscreenActions').children].every(action => {
+        const button = action.matches('button') ? action : action.querySelector('button')
+        const rect = button.getBoundingClientRect()
+        return rect.left >= bounds.left && rect.right <= bounds.right &&
+          rect.top >= bounds.top && rect.bottom <= bounds.bottom &&
+          button.contains(document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2))
+      })
+    })).toBe(true)
     await expect.poll(() => queue.locator('.queueHeader').evaluate(element => {
       const bounds = element.getBoundingClientRect()
       return Array.from(element.children).every(child => {
