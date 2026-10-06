@@ -99,7 +99,7 @@
     "@iconify/vue": "^5.0.3",
     "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
     "@seald-io/nedb": "^4.1.2",
-    "@vot.js/core": "^3.1.4",
+    "@vot.js/core": "^3.1.5",
     "autolinker": "^4.1.5",
     "bgutils-js": "^4.0.3",
     "dbus-native": "^0.16.0",
