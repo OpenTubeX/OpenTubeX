@@ -9,7 +9,7 @@
 /* stylelint-disable liberty/use-logical-spec */
 .ftVideoPlayer {
   /* Width reserved for a docked side panel (chapters / fullscreen comments). */
-  --side-panel-width: clamp(260px, 40%, 440px);
+  --side-panel-width: min(clamp(260px, 40%, 440px), 100%);
 
   display: flex;
   position: relative;
@@ -4015,6 +4015,24 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions,
 .ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .fullscreenActions {
   --fullscreen-actions-inline-end: calc(var(--side-panel-width) + 24px);
+}
+
+/* At high UI scales a dock can fill the viewport; keep actions below its content. */
+@media (width <= 260px) {
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen) {
+    --mobile-fullscreen-actions-block-end: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px);
+  }
+
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen) .fullscreenActions {
+    --fullscreen-actions-inset: 12px;
+
+    inset-block-end: var(--mobile-fullscreen-actions-block-end);
+    max-block-size: 50px;
+  }
+
+  .ftVideoPlayer:is(:fullscreen, .fullWindow):is(.fullscreenQueueOpen, .fullscreenRecommendationsOpen)[data-action-dock-visible='true'] {
+    --fullscreen-actions-footer-space: var(--mobile-fullscreen-actions-block-size, 50px);
+  }
 }
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */

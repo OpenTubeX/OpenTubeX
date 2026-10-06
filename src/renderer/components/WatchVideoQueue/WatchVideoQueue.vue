@@ -32,8 +32,12 @@
           :title="t('Video.Clear Queue')"
           @click="clearQueue"
         >
-          <FtIcon :icon="['fas', 'trash']" />
-          {{ t('Video.Clear Queue') }}
+          <FtIcon
+            class="clearQueueIcon"
+            :icon="['fas', 'trash']"
+            aria-hidden="true"
+          />
+          <span class="clearQueueLabel">{{ t('Video.Clear Queue') }}</span>
         </button>
         <button
           v-if="fullscreenOverlay"

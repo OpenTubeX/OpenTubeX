@@ -1141,11 +1141,17 @@ export default defineComponent({
       return {
         insetBlockStart: index === 0
           ? 'calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)'
-          : `calc(${weightBefore * 100 / totalWeight}% + 6px)`,
+          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightBefore / totalWeight} + 6px)`,
         insetBlockEnd: index === openDocks.length - 1
-          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px)'
-          : `calc(${weightAfter * 100 / totalWeight}% + 6px)`,
+          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px + var(--fullscreen-actions-footer-space, 0px))'
+          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightAfter / totalWeight} + var(--fullscreen-actions-footer-space, 0px) + 6px)`,
       }
+    }
+
+    function getFullscreenDockBounds() {
+      const bounds = container.value.getBoundingClientRect()
+      const footerSpace = parseFloat(getComputedStyle(container.value).getPropertyValue('--fullscreen-actions-footer-space')) || 0
+      return { top: bounds.top, height: Math.max(1, bounds.height - footerSpace) }
     }
 
     function fullscreenDockCanResize(dock) {
@@ -1179,7 +1185,7 @@ export default defineComponent({
         dock,
         fullscreenDockWeights,
         fullscreenDockCollapsedState,
-        container.value.clientHeight
+        getFullscreenDockBounds().height
       )
 
       if (toggled) {
@@ -1201,7 +1207,8 @@ export default defineComponent({
       // it. Dense stacks keep the full header plus a small content sliver so
       // dividers stay useful without clipping the header.
       const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-      const preferredMinimumFits = openDocks.length === 2 && container.value.clientHeight >=
+      const layoutHeight = getFullscreenDockBounds().height
+      const preferredMinimumFits = openDocks.length === 2 && layoutHeight >=
         openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
         FULLSCREEN_DOCK_OUTER_INSET * 2 +
         FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
@@ -1211,7 +1218,7 @@ export default defineComponent({
       const minimumShare = minimumHeight + panelChrome
       const minimumWeight = Math.min(
         pairWeight / 2,
-        minimumShare / container.value.clientHeight * totalWeight
+        minimumShare / layoutHeight * totalWeight
       )
       const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
       fullscreenDockWeights[dock] = clampedWeight
@@ -1234,7 +1241,7 @@ export default defineComponent({
         .reduce((total, name) => total + fullscreenDockWeights[name], 0)
       resizingFullscreenDockTotalWeight = openDocks
         .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockBounds = container.value.getBoundingClientRect()
+      resizingFullscreenDockBounds = getFullscreenDockBounds()
       window.addEventListener('pointermove', handleFullscreenDockResizePointerMove)
       window.addEventListener('pointerup', stopFullscreenDockResize)
       window.addEventListener('pointercancel', stopFullscreenDockResize)
@@ -1265,7 +1272,7 @@ export default defineComponent({
 
       const openDocks = getFullscreenOpenDocks()
       const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const movement = (event.key === 'ArrowUp' ? -20 : 20) / container.value.clientHeight * totalWeight
+      const movement = (event.key === 'ArrowUp' ? -20 : 20) / getFullscreenDockBounds().height * totalWeight
       setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
       event.preventDefault()
     }
@@ -1286,7 +1293,7 @@ export default defineComponent({
 
       fullscreenDockReordering.value = true
       reorderingFullscreenDock = dock
-      reorderingFullscreenDockBounds = container.value.getBoundingClientRect()
+      reorderingFullscreenDockBounds = getFullscreenDockBounds()
       window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
       window.addEventListener('pointerup', stopFullscreenDockReorder)
       window.addEventListener('pointercancel', stopFullscreenDockReorder)
@@ -9107,7 +9114,7 @@ export default defineComponent({
             'metadata',
             fullscreenDockWeights,
             fullscreenDockCollapsedState,
-            container.value.clientHeight
+            getFullscreenDockBounds().height
           )
         }
         setFullscreenMetadata(open)

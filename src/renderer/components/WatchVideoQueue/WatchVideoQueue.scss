@@ -298,3 +298,45 @@
     min-block-size: var(--phone-touch-target, 48px);
   }
 }
+
+@container queue (width <= 200px) {
+  .fullscreenQueue .queueHeader.fullscreenDockHeader {
+    gap: 0 4px;
+    padding-inline-start: 8px;
+  }
+
+  .fullscreenQueue .queueHeading,
+  .fullscreenQueue .queueTitle {
+    gap: 4px;
+  }
+
+  .fullscreenQueue .clearQueue {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  .fullscreenQueue .clearQueueIcon {
+    flex-shrink: 0;
+  }
+
+  .fullscreenQueue .clearQueueLabel {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fullscreenQueue .queueVideo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fullscreenQueue .queueThumbnail {
+    inline-size: min(64px, 100%);
+  }
+
+  .fullscreenQueue .queueActions {
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+  }
+}
