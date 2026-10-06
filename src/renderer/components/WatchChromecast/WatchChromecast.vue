@@ -232,7 +232,6 @@ async function handleChoice(choice) {
       }
       return {
         deviceId: choice.slice(7),
-        invidiousInstanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
         source: source.value,
         title: props.title,
         startSeconds: player?.getCurrentTime() ?? 0,

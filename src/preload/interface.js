@@ -389,9 +389,15 @@ export default {
     start: async preparePayload => {
       // Authorize the click before subtitle preparation can outlive activation.
       if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
-      const payload = await preparePayload()
-      if (!payload) return { error: 'Cast start cancelled' }
-      return ipcRenderer.invoke(IpcChannels.CAST_START, payload)
+      const preparation = await ipcRenderer.invoke(IpcChannels.CAST_PREPARE)
+      if (preparation.error) return preparation
+      try {
+        const payload = await preparePayload()
+        if (!payload) return { error: 'Cast start cancelled' }
+        return await ipcRenderer.invoke(IpcChannels.CAST_START, payload, preparation.preparationId)
+      } finally {
+        ipcRenderer.send(IpcChannels.CAST_CANCEL_PREPARATION, preparation.preparationId)
+      }
     },
     status: castId => ipcRenderer.invoke(IpcChannels.CAST_STATUS, castId),
     control: (castId, action, value) => navigator.userActivation.isActive

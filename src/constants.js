@@ -167,6 +167,8 @@ const IpcChannels = {
   DLNA_HAS_FAILED: 'dlna-has-failed',
   DLNA_RECOVER: 'dlna-recover',
   CAST_DISCOVER: 'cast-discover',
+  CAST_PREPARE: 'cast-prepare',
+  CAST_CANCEL_PREPARATION: 'cast-cancel-preparation',
   CAST_START: 'cast-start',
   CAST_STATUS: 'cast-status',
   CAST_CONTROL: 'cast-control',

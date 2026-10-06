@@ -4662,9 +4662,35 @@ function runApp() {
     try { return await chromecast.discover() } catch { return { error: 'Cast discovery failed' } }
   })
   const castOwners = new WeakSet()
-  ipcMain.handle(IpcChannels.CAST_START, async (event, payload) => {
+  const castPreparations = new Map()
+  ipcMain.handle(IpcChannels.CAST_PREPARE, event => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
     const ownerId = event.sender.id
+    const preparationId = randomUUID()
+    castPreparations.set(ownerId, { preparationId, frameId: event.senderFrame.routingId, frameUrl: event.senderFrame.url })
+    if (!castOwners.has(event.sender)) {
+      castOwners.add(event.sender)
+      event.sender.once('destroyed', () => {
+        castPreparations.delete(ownerId)
+        if (chromecast.active?.ownerId === ownerId) chromecast.stop(ownerId, chromecast.active.castId).catch(console.error)
+      })
+    }
+    return { preparationId }
+  })
+  ipcMain.on(IpcChannels.CAST_CANCEL_PREPARATION, (event, preparationId) => {
+    if (isOpenTubeXUrl(event.senderFrame.url) && castPreparations.get(event.sender.id)?.preparationId === preparationId) {
+      castPreparations.delete(event.sender.id)
+    }
+  })
+  ipcMain.handle(IpcChannels.CAST_START, async (event, payload, preparationId) => {
+    const ownerId = event.sender.id
+    const preparation = castPreparations.get(ownerId)
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !preparation || preparation.preparationId !== preparationId ||
+        preparation.frameId !== event.senderFrame.routingId || preparation.frameUrl !== event.senderFrame.url) {
+      return { error: 'Cast start is not authorized' }
+    }
+    // Consume the focused-window grant once, preserving it across subtitle work.
+    castPreparations.delete(ownerId)
     const getHeaders = mediaUrl => {
       const url = new URL(mediaUrl)
       const headers = { 'User-Agent': session.defaultSession.getUserAgent() }
@@ -4682,9 +4708,10 @@ function runApp() {
     }
     let allowedPrivateOrigin = null
     try {
-      if (typeof payload?.invidiousInstanceUrl === 'string') {
-        const instance = new URL(payload.invidiousInstanceUrl)
-        if (['http:', 'https:'].includes(instance.protocol) && !instance.username && !instance.password) {
+      const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      if (typeof configuredInstance === 'string' && configuredInstance !== '') {
+        const instance = new URL(configuredInstance)
+        if (['http:', 'https:'].includes(instance.protocol)) {
           allowedPrivateOrigin = instance.origin
         }
       }
@@ -4694,15 +4721,10 @@ function runApp() {
     const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
       ...options, proxy: await session.defaultSession.resolveProxy(url)
     })
+    if (event.sender.isDestroyed()) return { error: 'Cast start cancelled' }
     const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia)
     if (result.castId) {
       if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
-      else if (!castOwners.has(event.sender)) {
-        castOwners.add(event.sender)
-        event.sender.once('destroyed', () => {
-          if (chromecast.active?.ownerId === ownerId) chromecast.stop(ownerId, chromecast.active.castId).catch(console.error)
-        })
-      }
     }
     return result
   })

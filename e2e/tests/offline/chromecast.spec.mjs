@@ -25,9 +25,21 @@ async function mockCast(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const state = { currentTime: 5, duration: 30, paused: false, connected: true, volume: 0.5, muted: false, activeTrackIds: [] }
     globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, startDelayMs: 0, startCompletions: 0, failStatus: false, failStop: false, statusCalls: 0 }
-    for (const name of ['cast-discover', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
+    const preparations = new Map()
+    let nextPreparation = 0
+    for (const name of ['cast-discover', 'cast-prepare', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
     ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
-    ipcMain.handle('cast-start', async (_, payload) => {
+    ipcMain.handle('cast-prepare', event => {
+      const preparationId = String(++nextPreparation)
+      preparations.set(event.sender.id, preparationId)
+      return { preparationId }
+    })
+    ipcMain.on('cast-cancel-preparation', (event, preparationId) => {
+      if (preparations.get(event.sender.id) === preparationId) preparations.delete(event.sender.id)
+    })
+    ipcMain.handle('cast-start', async (event, payload, preparationId) => {
+      if (preparations.get(event.sender.id) !== preparationId) return { error: 'Cast start is not authorized' }
+      preparations.delete(event.sender.id)
       globalThis.castTest.starts.push(payload)
       if (globalThis.castTest.holdStart) await new Promise(resolve => { globalThis.castTest.finishStart = resolve })
       await new Promise(resolve => setTimeout(resolve, globalThis.castTest.startDelayMs))
@@ -260,7 +272,7 @@ test('casts from the current Invidious instance without a saved default', async 
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   const starts = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(starts[0].source).toEqual({ url: `${instanceUrl}/videoplayback`, contentType: 'video/mp4' })
-  expect(starts[0].invidiousInstanceUrl).toBe(instanceUrl)
+  expect(starts[0]).not.toHaveProperty('invidiousInstanceUrl')
   await choice(page, 'Return to local playback')
 })
 
@@ -766,36 +778,51 @@ test('an active authenticated Cast caption failure leaves local playback running
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
 })
 
-test('slow authenticated Cast captions outlive transient activation without losing the click', async ({ app, page }) => {
-  const watch = await openCastVideo(app, page)
-  const browserWindow = await app.electronApp.browserWindow(page)
-  const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
-  const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    ipcMain.removeHandler('yt-dlp-get-subtitle')
-    ipcMain.handle('yt-dlp-get-subtitle', () => new Promise(resolve => { globalThis.finishCastSubtitle = resolve }))
+for (const loseFocus of [false, true]) {
+  test(`slow authenticated Cast captions preserve authorization after ${loseFocus ? 'window focus changes' : 'transient activation expires'}`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    const browserWindow = await app.electronApp.browserWindow(page)
+    const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
+    const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-subtitle')
+      ipcMain.handle('yt-dlp-get-subtitle', () => new Promise(resolve => { globalThis.finishCastSubtitle = resolve }))
+    })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await watch.evaluate((vm, url) => {
+      vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
+      vm.$refs.player.play()
+    }, url)
+    await selectLocalEnglishCaption(page, watch)
+    await choice(page, 'Test TV')
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishCastSubtitle)).toBe('function')
+    // Renderer-side Playwright evaluation grants a gesture; inspect through
+    // Electron without userGesture so polling cannot refresh activation.
+    await expect.poll(() => browserWindow.evaluate(window => window.webContents.executeJavaScript('navigator.userActivation.isActive', false)), { timeout: 10_000 }).toBe(false)
+    if (loseFocus) {
+      await app.electronApp.evaluate(async ({ BrowserWindow }) => {
+        globalThis.castOtherWindow = new BrowserWindow({ width: 200, height: 200 })
+        await globalThis.castOtherWindow.loadURL('about:blank')
+        globalThis.castOtherWindow.focus()
+      })
+      await expect.poll(() => browserWindow.evaluate(window => window.isFocused())).toBe(false)
+    }
+    expect(await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").paused', false))).toBe(false)
+    await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").currentTime = 18', false))
+    await app.electronApp.evaluate((_, text) => globalThis.finishCastSubtitle(text), text)
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+    expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
+    expect(started.startSeconds).toBeGreaterThanOrEqual(18)
+    if (loseFocus) {
+      expect(await browserWindow.evaluate(window => window.isFocused())).toBe(false)
+      await app.electronApp.evaluate(() => globalThis.castOtherWindow.close())
+      await browserWindow.evaluate(window => window.focus())
+    }
+    await choice(page, 'Return to local playback')
   })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
-  await watch.evaluate((vm, url) => {
-    vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
-    vm.$refs.player.play()
-  }, url)
-  await selectLocalEnglishCaption(page, watch)
-  await choice(page, 'Test TV')
-  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishCastSubtitle)).toBe('function')
-  // Renderer-side Playwright evaluation grants a gesture; inspect through
-  // Electron without userGesture so polling cannot refresh activation.
-  await expect.poll(() => browserWindow.evaluate(window => window.webContents.executeJavaScript('navigator.userActivation.isActive', false)), { timeout: 10_000 }).toBe(false)
-  expect(await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").paused', false))).toBe(false)
-  await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").currentTime = 18', false))
-  await app.electronApp.evaluate((_, text) => globalThis.finishCastSubtitle(text), text)
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
-  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
-  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
-  expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
-  expect(started.startSeconds).toBeGreaterThanOrEqual(18)
-  await choice(page, 'Return to local playback')
-})
+}
 
 for (const outcome of ['resolved', 'rejected']) {
   test(`refreshes a ${outcome} Cast source lookup superseded by stream recovery`, async ({ app, page }) => {

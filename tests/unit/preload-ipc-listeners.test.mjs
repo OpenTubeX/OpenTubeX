@@ -75,7 +75,12 @@ test('queued automatic rule writers reject invalid values without invoking IPC',
 test('Cast start checks activation before asynchronous payload preparation and invokes IPC once', async () => {
   const { api, ipcRenderer, IpcChannels, userActivation } = await loadPreloadInterface()
   const invocations = []
-  ipcRenderer.invoke = (...args) => { invocations.push(args); return Promise.resolve({ castId: 'cast-1' }) }
+  const cancellations = []
+  ipcRenderer.send = (...args) => cancellations.push(args)
+  ipcRenderer.invoke = (...args) => {
+    invocations.push(args)
+    return Promise.resolve(args[0] === IpcChannels.CAST_PREPARE ? { preparationId: 'grant' } : { castId: 'cast-1' })
+  }
   let complete
   let preparations = 0
   userActivation.isActive = true
@@ -83,24 +88,32 @@ test('Cast start checks activation before asynchronous payload preparation and i
     preparations++
     return new Promise(resolve => { complete = resolve })
   })
+  await new Promise(resolve => setImmediate(resolve))
   assert.equal(preparations, 1)
-  assert.equal(invocations.length, 0)
+  assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE]])
   userActivation.isActive = false
   const payload = { deviceId: 'tv', captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT' }], startSeconds: 18 }
   complete(payload)
   assert.equal((await pending).castId, 'cast-1')
-  assert.deepEqual(invocations, [[IpcChannels.CAST_START, payload]])
+  assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE], [IpcChannels.CAST_START, payload, 'grant']])
+  assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
 })
 
 test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {
-  const { api, ipcRenderer, userActivation } = await loadPreloadInterface()
-  ipcRenderer.invoke = () => assert.fail('Preparation must not start a receiver')
+  const { api, ipcRenderer, IpcChannels, userActivation } = await loadPreloadInterface()
+  const cancellations = []
+  ipcRenderer.send = (...args) => cancellations.push(args)
+  ipcRenderer.invoke = channel => {
+    assert.equal(channel, IpcChannels.CAST_PREPARE, 'Preparation must not start a receiver')
+    return Promise.resolve({ preparationId: 'grant' })
+  }
   let preparations = 0
   assert.match((await api.chromecast.start(() => { preparations++; return {} })).error, /user action/)
   assert.equal(preparations, 0)
   userActivation.isActive = true
   assert.match((await api.chromecast.start(() => null)).error, /cancelled/)
   await assert.rejects(api.chromecast.start(async () => { throw new Error('Caption failed') }), /Caption failed/)
+  assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant'], [IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
 })
 
 test('player IPC subscriptions share one Electron listener per channel', async () => {
