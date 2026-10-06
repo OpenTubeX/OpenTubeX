@@ -668,6 +668,8 @@ export default defineComponent({
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
     const playbackEnded = ref(false)
+    /** @type {number | null} */
+    let shortsEndSeekTarget = null
     const autoplayCanceled = ref(false)
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
@@ -5988,6 +5990,7 @@ export default defineComponent({
       voiceOverTranslation.reset()
       showPoster.value = true
       playbackEnded.value = false
+      shortsEndSeekTarget = null
       sponsorBlockMuteController.reset()
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
@@ -6720,6 +6723,9 @@ export default defineComponent({
         video.value.pause()
         return
       }
+      if (props.shortsPlayer && (playbackEnded.value || isShortsEndSeekPosition())) {
+        setCurrentTime(player.seekRange().start)
+      }
       if (!video.value.paused) initialAutoplayCanceled = false
       if (!temporaryPlaybackRateActive) setShowUiOnPaused(true)
       playerPaused.value = false
@@ -6818,6 +6824,7 @@ export default defineComponent({
 
     function handleEnded() {
       if (shortsNavigationSuspended.value) return
+      shortsEndSeekTarget = null
       clearSabrBackoffTimer({ refreshPreview: true })
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
       if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
@@ -6862,9 +6869,21 @@ export default defineComponent({
       emit('ended', sleepTimerEnded)
     }
 
+    function isShortsEndSeekPosition() {
+      if (shortsEndSeekTarget === null || !video.value) return false
+      const currentTime = video.value.currentTime
+      const backoff = player.getConfiguration().streaming.durationBackoff
+      const backedOffTarget = Math.max(player.seekRange().start, shortsEndSeekTarget - backoff)
+      // Accept Shaka's duration clamp, but discard a superseding timeline or
+      // Media Session seek. Media timestamps can be rounded to milliseconds.
+      return Math.abs(currentTime - shortsEndSeekTarget) < 0.001 ||
+        Math.abs(currentTime - backedOffTarget) < 0.001
+    }
+
     function handleSeeking() {
       if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
+      if (!isShortsEndSeekPosition()) shortsEndSeekTarget = null
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
       cancelSponsorBlockSkipSchedule()
@@ -6876,7 +6895,8 @@ export default defineComponent({
     function handleSeeked() {
       if (shortsNavigationSuspended.value) return
       updateMobileMiniBarProgress()
-      if (video.value?.ended) {
+      if (isShortsEndSeekPosition()) playbackEnded.value = true
+      if (playbackEnded.value || video.value?.ended) {
         syncPlayPauseControlIcons()
       }
       sponsorBlockCurrentTime.value = video.value?.currentTime ?? 0
@@ -10296,6 +10316,7 @@ export default defineComponent({
       if (!(canSeekResult || canSeek())) {
         return
       }
+      shortsEndSeekTarget = null
 
       const seekRange = player.seekRange()
 
@@ -10855,7 +10876,16 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
+            const wasPaused = video_.paused
             setCurrentTime(seekRange.end)
+            if (props.shortsPlayer && wasPaused && !isLive.value && !video_.loop) {
+              // Paused seeks need not fire ended, and Shaka can back off from
+              // the duration. End still means replay, without counting a seek
+              // as a naturally completed Short.
+              shortsEndSeekTarget = seekRange.end
+              playbackEnded.value = !video_.seeking
+              syncPlayPauseControlIcons()
+            }
             showOverlayControls()
           }
           break
@@ -12353,6 +12383,7 @@ export default defineComponent({
      */
     function setCurrentTime(time) {
       if (!seekingIsPossible.value) return
+      shortsEndSeekTarget = null
       accumulatedSeekSeconds = 0
       rememberSeekPosition(time)
       video.value.currentTime = time
@@ -12362,6 +12393,8 @@ export default defineComponent({
      * @param {number} time
      */
     function rememberSeekPosition(time) {
+      // Explicit seeks supersede End even when they match Shaka's backoff.
+      shortsEndSeekTarget = null
       hasPlaybackPosition.value = true
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
