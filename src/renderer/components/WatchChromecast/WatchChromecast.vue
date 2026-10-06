@@ -222,6 +222,7 @@ async function handleChoice(choice) {
       player = props.getPlayer()
       watchPath = route.path
       const paused = player?.isPaused() ?? true
+      const playbackRate = player?.getCurrentPlaybackRate() ?? 1
       if (!paused) {
         resumePlayer = player
         player.pause()
@@ -232,6 +233,7 @@ async function handleChoice(choice) {
         source: source.value,
         title: props.title,
         startSeconds: player?.getCurrentTime() ?? 0,
+        playbackRate,
         paused,
         captions,
         captionIndex,

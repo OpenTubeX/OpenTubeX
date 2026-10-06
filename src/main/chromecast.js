@@ -59,7 +59,8 @@ export class ChromecastManager {
   async start(ownerId, payload, getHeaders, isAllowedUrl, fetchMedia) {
     const device = this.devices.get(payload?.deviceId)
     if (!device || !castSourceAvailable(payload?.source) || typeof payload.title !== 'string' || payload.title.length > 500 ||
-      !Number.isFinite(payload.startSeconds) || payload.startSeconds < 0 || typeof payload.paused !== 'boolean') {
+      !Number.isFinite(payload.startSeconds) || payload.startSeconds < 0 || typeof payload.paused !== 'boolean' ||
+      !Number.isFinite(payload.playbackRate) || payload.playbackRate <= 0) {
       return { error: 'Invalid Cast device or media' }
     }
     if (this.active || this.starting) return { error: 'Another window is already casting' }
@@ -147,6 +148,7 @@ export class ChromecastManager {
       const result = await sender.send(CAST_MEDIA, cast.transportId, {
         type: 'LOAD',
         currentTime: payload.startSeconds,
+        playbackRate: payload.playbackRate,
         autoplay: !payload.paused,
         activeTrackIds,
         media: {

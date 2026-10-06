@@ -112,6 +112,30 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
+for (const paused of [false, true]) {
+  test(`Cast preserves the selected speed on a ${paused ? 'paused' : 'playing'} handoff and return`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate((vm, paused) => {
+      vm.$refs.player.setCurrentTime(5)
+      if (paused) vm.$refs.player.pause()
+      else vm.$refs.player.play()
+    }, paused)
+    const video = page.locator('.ftVideoPlayer video')
+    await expect.poll(() => video.evaluate(video => video.paused)).toBe(paused)
+    await video.evaluate(video => video.ui.getControls().getPlayer().trickPlay(1.5, false))
+    await expect.poll(() => video.evaluate(video => video.playbackRate)).toBe(1.5)
+    await choice(page, 'Test TV')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    const payload = await app.electronApp.evaluate(() => globalThis.castTest.starts[0])
+    expect(payload.playbackRate).toBe(1.5)
+    expect(payload.paused).toBe(paused)
+    await choice(page, 'Return to local playback')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+    await expect.poll(() => video.evaluate(video => video.paused)).toBe(paused)
+    await expect.poll(() => video.evaluate(video => video.playbackRate)).toBe(1.5)
+  })
+}
+
 test('receiver buffering does not accumulate watched time and returns to playing locally', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await watch.evaluate(async vm => {

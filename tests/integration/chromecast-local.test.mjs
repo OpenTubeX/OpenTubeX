@@ -78,7 +78,7 @@ test('authenticated Cast receiver plays MP4, DASH, HLS and shared merged tracks'
     { url: mergedUrl, contentType: 'video/mp4' }
   ]) {
     const requestCount = requests.length
-    const result = await manager.start(1, { deviceId: device.id, source, title: 'OpenTubeX Cast integration test', startSeconds: 1, paused: false,
+    const result = await manager.start(1, { deviceId: device.id, source, title: 'OpenTubeX Cast integration test', startSeconds: 1, paused: false, playbackRate: 1,
       captions: [{ url: `${upstreamUrl}/caption.vtt`, label: 'English', language: 'en' }], captionIndex: null }, () => ({}), url => [upstreamUrl, mergedOrigin].includes(url.origin))
     assert.ok(result.castId, JSON.stringify(result))
     const id = result.castId

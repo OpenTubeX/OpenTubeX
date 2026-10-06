@@ -12772,6 +12772,7 @@ export default defineComponent({
       pause,
       suspendForShortsNavigation,
       getCurrentTime,
+      getCurrentPlaybackRate,
       setCurrentTime,
       getSabrReloadState,
       getActiveCaption,

@@ -66,7 +66,7 @@ lines.on('line', async line=>{
    const fetched=await fetch(p.media.contentId)
    if(!fetched.ok) throw new Error('media endpoint failed')
    await fetched.text()
-   media={mediaSessionId:7,currentTime:p.currentTime,playerState:p.autoplay?'PLAYING':'PAUSED',volume:{level:1,muted:false},activeTrackIds:p.activeTrackIds,media:{...p.media,tracks:undefined,duration:120}}
+   media={mediaSessionId:7,currentTime:p.currentTime,playbackRate:p.playbackRate??1,playerState:p.autoplay?'PLAYING':'PAUSED',volume:{level:1,muted:false},activeTrackIds:p.activeTrackIds,media:{...p.media,tracks:undefined,duration:120}}
   }
   if(p.type==='PLAY') media.playerState='PLAYING'
   if(p.type==='PAUSE') media.playerState='PAUSED'
@@ -93,10 +93,35 @@ async function managerForTest(t, powerSaveBlocker) {
 }
 
 const payload = {
-  deviceId: 'device', title: 'Test video', startSeconds: 12, paused: false,
+  deviceId: 'device', title: 'Test video', startSeconds: 12, paused: false, playbackRate: 1,
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
 }
+
+test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  for (const paused of [false, true]) {
+    for (const playbackRate of [0.5, 1, 1.5, 2]) {
+      const result = await manager.start(42, { ...payload, playbackRate, paused })
+      assert.ok(result.castId, result.error)
+      assert.equal(manager.active.status.playbackRate, playbackRate)
+      assert.equal(result.status.paused, paused)
+      assert.equal(result.status.currentTime, payload.startSeconds)
+      await manager.stop(42, result.castId)
+    }
+  }
+})
+
+test('Cast rejects invalid playback speeds before connecting to a receiver', async () => {
+  const manager = new ChromecastManager('/must-not-run')
+  manager.devices.set('device', { id: 'device', address: '127.0.0.1', port: 8009 })
+  for (const playbackRate of [undefined, null, '1.5', 0, -1, NaN, Infinity]) {
+    assert.match((await manager.start(42, { ...payload, playbackRate })).error, /Invalid Cast device or media/)
+    assert.equal(manager.active, null)
+    assert.equal(manager.starting, false)
+  }
+})
 
 test('Cast accepts authenticated WebVTT without forwarding the original caption URL', async t => {
   const manager = await managerForTest(t)
