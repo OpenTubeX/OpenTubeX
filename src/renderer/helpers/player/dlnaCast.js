@@ -1,4 +1,5 @@
 import { registerPlugin } from '@capacitor/core'
+import { onBeforeUnmount, watch } from 'vue'
 import { isDlnaSourceUrl } from './dlnaSource.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
@@ -124,8 +125,22 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
   return cast
 }
 
+const mobileDlna = process.env.IS_CAPACITOR ? registerPlugin('Dlna') : null
+
+/** Keep iOS's original requests available while their source owner exists. */
+export function retainIosMediaSources(getUrls) {
+  if (!process.env.IS_IOS) return
+  const owner = crypto.randomUUID()
+  const update = urls => mobileDlna.retainMediaRequests({ owner, urls }).catch(console.error)
+  const stop = watch(() => getUrls().filter(url => /^capacitor:\/\/localhost\/_opentubex_media\//.test(url)), update, { immediate: true })
+  onBeforeUnmount(() => {
+    stop()
+    update([])
+  })
+}
+
 export const dlnaCast = process.env.IS_CAPACITOR
-  ? createMobileDlnaCast(registerPlugin('Dlna'))
+  ? createMobileDlnaCast(mobileDlna)
   : {
       discover: () => window.ftElectron.dlna.discover(),
       start: payload => window.ftElectron.dlna.start(payload),
