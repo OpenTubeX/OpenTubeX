@@ -426,6 +426,67 @@ test('rewriting DASH BaseURL text retains playback attributes and escaped values
   assert.deepEqual(urls, ['https://media.test/vod/', 'https://media.test/vod/video.mp4'])
 })
 
+test('DASH HTTP clock sources are relayed while direct and non-HTTP schemes remain intact', () => {
+  const schemes = ['head', 'xsdate', 'iso', 'ntp'].flatMap(kind => ['2012', '2014'].map(year => `urn:mpeg:dash:utc:http-${kind}:${year}`))
+  const urls = []
+  const xml = `<dash:MPD xmlns:dash="urn:mpeg:dash:schema:mpd:2011"><BaseURL>https://media.test/live/</BaseURL>${schemes.map(scheme => `<dash:UTCTiming value="clock?x=1&amp;y=2 https://other.test/time" schemeIdUri="${scheme}"/>`).join('')}<UTCTiming schemeIdUri="urn:mpeg:dash:utc:direct:2014" value="2020-01-01T00:00:00Z"/><UTCTiming schemeIdUri="urn:mpeg:dash:utc:ntp:2014" value="ntp.test"/></dash:MPD>`
+  const result = rewriteCastDash(xml, 'https://instance.test/manifest.mpd', url => { urls.push(url); return `http://cast.test/${urls.length}` })
+  assert.equal(urls.length, 1 + schemes.length * 2)
+  for (let index = 1; index < urls.length; index += 2) {
+    assert.equal(urls[index], 'https://media.test/live/clock?x=1&y=2')
+    assert.equal(urls[index + 1], 'https://other.test/time')
+  }
+  assert.match(result, /value="http:\/\/cast.test\/2 http:\/\/cast.test\/3"/)
+  assert.match(result, /value="2020-01-01T00:00:00Z"/)
+  assert.match(result, /value="ntp.test"/)
+  assert.throws(() => rewriteCastDash('<MPD><UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014" value="file:///clock"/></MPD>', undefined, () => ''), /Unsupported/)
+})
+
+test('DASH clock GET requests retain scoped credentials across redirects', async t => {
+  const requests = []
+  const time = '2020-01-01T00:00:00Z'
+  const upstream = createServer((request, response) => {
+    requests.push({ url: request.url, authorization: request.headers.authorization })
+    if (request.url === '/private/live.mpd') return response.end('<MPD type="dynamic"><UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014" value="clock"/></MPD>')
+    if (request.url === '/private/clock') return response.writeHead(302, { location: '/public-clock' }).end()
+    if (request.url === '/public-clock') return response.end(time)
+    response.writeHead(404).end()
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/private/live.mpd` }, '127.0.0.1', 'token', url =>
+    new URL(url).pathname.startsWith('/private/') ? { Authorization: 'Bearer private' } : {})
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const mpd = await (await fetch(media.mediaUrl())).text()
+  const clock = mpd.match(/value="([^"]+)"/)[1]
+  assert.match(clock, new RegExp(`^${media.mediaUrl().split('/token/')[0]}/token/`))
+  assert.equal(await (await fetch(clock)).text(), time)
+  assert.deepEqual(requests, [
+    { url: '/private/live.mpd', authorization: 'Bearer private' },
+    { url: '/private/clock', authorization: 'Bearer private' },
+    { url: '/public-clock', authorization: undefined }
+  ])
+})
+
+test('relayed HTTP clock HEAD preserves and exposes the upstream Date', async t => {
+  const date = 'Wed, 01 Jan 2020 00:00:00 GMT'
+  const upstream = createServer((request, response) => response.writeHead(200, { Date: date }).end(request.url === '/live.mpd'
+    ? '<MPD type="dynamic"><UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-head:2014" value="clock"/></MPD>' : 'clock'))
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/live.mpd` }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const manifest = await fetch(media.mediaUrl())
+  assert.equal(manifest.headers.get('date'), date)
+  const clock = (await manifest.text()).match(/value="([^"]+)"/)[1]
+  const head = await fetch(clock, { method: 'HEAD' })
+  assert.equal(head.headers.get('date'), date)
+  assert.match(head.headers.get('access-control-expose-headers'), /\bDate\b/i)
+  assert.equal(await head.text(), '')
+})
+
 test('rewrites DASH manifest locations against the document URL while preserving attributes', () => {
   const xml = '<dash:MPD xmlns:dash="urn:mpeg:dash:schema:mpd:2011"><dash:BaseURL>https://media.test/segments/</dash:BaseURL><dash:Location serviceLocation="A&amp;B"> next?x=1&amp;y=2 </dash:Location><dash:Location>https://other.test/updated.mpd</dash:Location><dash:PatchLocation ttl="60">patch.xml</dash:PatchLocation></dash:MPD>'
   const urls = []

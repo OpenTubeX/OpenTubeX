@@ -128,10 +128,10 @@ function releaseLocalPlayer(position, resume) {
 
 async function poll() {
   const id = castId.value
-  if (!id || disposed) return
+  if (!id || disposed || stopPromise) return
   try {
     const result = await window.ftElectron.chromecast.status(id)
-    if (disposed || id !== castId.value) return
+    if (disposed || id !== castId.value || stopPromise) return
     if (!result.connected) {
       castId.value = null
       releaseLocalPlayer(result.currentTime ?? status.value.currentTime, false)
@@ -146,7 +146,7 @@ async function poll() {
       return
     }
   } catch {
-    if (disposed || id !== castId.value) return
+    if (disposed || id !== castId.value || stopPromise) return
     // Stop the remote session and release local controls after a failed poll.
     // stopCasting's finally block also handles a failed stop request.
     await stopCasting(false).catch(() => {})

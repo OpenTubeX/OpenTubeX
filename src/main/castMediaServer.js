@@ -143,6 +143,9 @@ export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
         // XLinks resolve against the document; imported media inherits the
         // containing DASH element's bases when the receiver replaces the node.
         value = register(httpUrl(value, base).href, 'application/dash+xml', undefined, { rootName: element, bases: inheritedBases })
+      } else if (element === 'UTCTiming' && attribute === 'value' &&
+          /^urn:mpeg:dash:utc:http-(?:head|xsdate|iso|ntp):(?:2012|2014)$/.test(node.attributes.schemeIdUri ?? '')) {
+        value = value.trim().split(/\s+/).map(url => registerUrls(resolveUrls([url], bases))).join(' ')
       } else if (['media', 'initialization', 'sourceURL'].includes(attribute) ||
           (attribute === 'href' && value !== 'urn:mpeg:dash:resolve-to-zero:2013') ||
           (attribute === 'index' && ['SegmentTemplate', 'SegmentURL'].includes(element)) ||
@@ -337,7 +340,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET, HEAD, OPTIONS',
       'access-control-allow-headers': 'Range',
-      'access-control-expose-headers': 'Content-Length, Content-Range, Accept-Ranges',
+      'access-control-expose-headers': 'Content-Length, Content-Range, Accept-Ranges, Date',
     }
     const match = new RegExp(`^/${token}/(\\d+)/(.*)$`).exec(request.url ?? '')
     if (request.socket.remoteAddress?.replace(/^::ffff:/, '') !== deviceAddress || !match ||
@@ -414,6 +417,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         }
       }
       clearTimeout(timeout)
+      const date = upstream?.headers.get('date')
       if (data !== undefined) {
         const references = new Set()
         const isManifest = contentType !== 'text/vtt'
@@ -443,11 +447,12 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           resource.references = references
           collectExpiredResources()
         }
-        response.writeHead(200, { ...cors, 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
+        response.writeHead(200, { ...cors, ...(date ? { date } : {}), 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
         response.end(request.method === 'HEAD' ? undefined : rewritten)
         return
       }
       const headers = { ...cors, 'content-type': contentType ?? 'application/octet-stream' }
+      if (date) headers.date = date
       const encoded = upstream.headers.get('content-encoding') && upstream.headers.get('content-encoding') !== 'identity'
       for (const name of encoded || manifest ? [] : ['content-length', 'content-range', 'accept-ranges']) {
         const value = upstream.headers.get(name)
