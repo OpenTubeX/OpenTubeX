@@ -1972,5 +1972,3 @@ Storage Startup Error:
   Title: "Údaje aplikácie sa nepodarilo načítať"
   Message: "Uvoľnite miesto v zariadení a skúste to znova. Synchronizácia je pozastavená, kým sa údaje nenačítajú."
   Retry: "Skúsiť znova"
-Native Permissions:
-  Local Network: "Vyhľadávať zariadenia v miestnej sieti a prenášať do nich videá a synchronizovať nastavenia a údaje medzi zariadeniami."

@@ -2008,5 +2008,3 @@ Storage Startup Error:
   Title: "Không thể tải dữ liệu ứng dụng"
   Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
   Retry: "Thử lại"
-Native Permissions:
-  Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."
