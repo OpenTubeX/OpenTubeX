@@ -1425,6 +1425,10 @@ Video:
       UpvoteSegment: Stem opp
       DownvoteSegment: Stem ned
       VoteFailed: Kunne ikke sende inn SponsorBlock-stemmen.
+      ChangeCategory: Endre kategori
+      CopyAndDownvote: Kopier og stem ned
+      SubmitCategoryVote: Send kategoristemme
+      CategoryVoteSuccess: Kategoristemme sendt.
   Station: Stasjon
   Playlist:
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult

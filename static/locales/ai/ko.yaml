@@ -1755,6 +1755,10 @@ Video:
       UpvoteSegment: 추천
       DownvoteSegment: 비추천
       VoteFailed: SponsorBlock 투표를 제출하지 못했습니다.
+      ChangeCategory: 카테고리 변경
+      CopyAndDownvote: 복사 및 반대 투표
+      SubmitCategoryVote: 카테고리 투표 제출
+      CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'

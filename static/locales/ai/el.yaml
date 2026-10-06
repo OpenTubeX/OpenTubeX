@@ -1449,6 +1449,10 @@ Video:
       UpvoteSegment: Θετική ψήφος
       DownvoteSegment: Αρνητική ψήφος
       VoteFailed: Απέτυχε η υποβολή ψήφου στο SponsorBlock.
+      ChangeCategory: Αλλαγή κατηγορίας
+      CopyAndDownvote: Αντιγραφή και αρνητική ψήφος
+      SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
+      CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

@@ -755,6 +755,8 @@
               @auto-skip-change="handleSponsorBlockAutoSkipToggle"
               @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
               @vote="voteOnSponsorBlockInfoSegment"
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
             />
             <watch-video-transcript
               v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && !shortsPhonePanelsEnabled"
@@ -1106,6 +1108,8 @@
               @auto-skip-change="handleSponsorBlockAutoSkipToggle"
               @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
               @vote="voteOnSponsorBlockInfoSegment"
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
             />
           </transition>
         </FtPhonePanel>

@@ -1420,6 +1420,10 @@ Video:
       UpvoteSegment: Beri suara positif
       DownvoteSegment: Beri suara negatif
       VoteFailed: Gagal mengirim suara SponsorBlock.
+      ChangeCategory: Ubah kategori
+      CopyAndDownvote: Salin dan beri suara negatif
+      SubmitCategoryVote: Kirim suara kategori
+      CategoryVoteSuccess: Suara kategori terkirim.
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'

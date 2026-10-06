@@ -1424,6 +1424,10 @@ Video:
       UpvoteSegment: Müsbət səs ver
       DownvoteSegment: Mənfi səs ver
       VoteFailed: SponsorBlock səsi göndərilə bilmədi.
+      ChangeCategory: Kateqoriyanı dəyiş
+      CopyAndDownvote: Kopyala və mənfi səs ver
+      SubmitCategoryVote: Kateqoriya səsini göndər
+      CategoryVoteSuccess: Kateqoriya səsi göndərildi.
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"

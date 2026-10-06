@@ -1470,6 +1470,10 @@ Video:
       UpvoteSegment: Гласај за
       DownvoteSegment: Гласај против
       VoteFailed: Глас у SponsorBlock-у није могао да се пошаље.
+      ChangeCategory: Промени категорију
+      CopyAndDownvote: Копирај и гласај против
+      SubmitCategoryVote: Пошаљи глас за категорију
+      CategoryVoteSuccess: Глас за категорију је послат.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'

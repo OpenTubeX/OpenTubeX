@@ -759,6 +759,10 @@ Video:
       MuteActionType: Wycisz
       MutePrompt: Wyciszyć segment „{segmentCategory}”?
       SkipActionType: Pomiń
+      ChangeCategory: Zmień kategorię
+      CopyAndDownvote: Kopiuj i zagłosuj przeciw
+      SubmitCategoryVote: Wyślij głos na kategorię
+      CategoryVoteSuccess: Głos na kategorię został wysłany.
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"

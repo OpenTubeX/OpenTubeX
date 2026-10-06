@@ -2393,6 +2393,10 @@ Video:
       UpvoteSegment: Upvote
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
+      ChangeCategory: Change category
+      CopyAndDownvote: Copy & downvote
+      SubmitCategoryVote: Submit category vote
+      CategoryVoteSuccess: Category vote submitted.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

@@ -1412,6 +1412,10 @@ Video:
       UpvoteSegment: Hlasovat pro
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
+      ChangeCategory: Změnit kategorii
+      CopyAndDownvote: Zkopírovat a hlasovat proti
+      SubmitCategoryVote: Odeslat hlas pro kategorii
+      CategoryVoteSuccess: Hlas pro kategorii byl odeslán.
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"

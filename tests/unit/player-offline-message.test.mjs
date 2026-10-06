@@ -8,18 +8,23 @@ const source = await readFile(new URL('../../src/renderer/components/ft-shaka-vi
 const start = source.indexOf('    const showOfflineMessage = computed(')
 const expression = source.slice(start, source.indexOf('\n    // #endregion offline message', start))
 
-test('offline SponsorBlock refresh preserves loaded segments without starting a request', async () => {
+test('SponsorBlock refresh waits for connectivity and pending votes', async () => {
   const start = source.indexOf('    async function refreshSponsorBlockInfo() {')
   const end = source.indexOf('    async function refreshSponsorBlockContributionStats()', start)
   const props = { offline: true }
+  const pendingVote = ref(null)
   let refreshes = 0
   const refresh = vm.runInNewContext(`${source.slice(start, end)}\nrefreshSponsorBlockInfo`, {
-    props, sponsorBlockEnableSubmission: ref(false),
+    props, sponsorBlockEnableSubmission: ref(false), sponsorBlockVotePending: pendingVote,
     setupSponsorBlock: async () => { refreshes++ }
   })
   await refresh()
   assert.equal(refreshes, 0)
   props.offline = false
+  pendingVote.value = 'segment'
+  await refresh()
+  assert.equal(refreshes, 0)
+  pendingVote.value = null
   await refresh()
   assert.equal(refreshes, 1)
 })

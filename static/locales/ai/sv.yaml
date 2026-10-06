@@ -1422,6 +1422,10 @@ Video:
       UpvoteSegment: Rösta upp
       DownvoteSegment: Rösta ned
       VoteFailed: Det gick inte att skicka SponsorBlock-rösten.
+      ChangeCategory: Ändra kategori
+      CopyAndDownvote: Kopiera och rösta ned
+      SubmitCategoryVote: Skicka kategoriröst
+      CategoryVoteSuccess: Kategoriröst skickad.
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

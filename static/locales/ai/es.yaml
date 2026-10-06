@@ -1414,6 +1414,10 @@ Video:
       UpvoteSegment: Votar a favor
       DownvoteSegment: Votar en contra
       VoteFailed: No se pudo enviar el voto a SponsorBlock.
+      ChangeCategory: Cambiar categoría
+      CopyAndDownvote: Copiar y votar en contra
+      SubmitCategoryVote: Enviar voto de categoría
+      CategoryVoteSuccess: Voto de categoría enviado.
   External Media:
     Dislikes: "No me gusta | No me gusta | No me gusta"
     Reposts: "Repost | Reposts | Reposts"

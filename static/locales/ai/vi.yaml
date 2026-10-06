@@ -1441,6 +1441,10 @@ Video:
       UpvoteSegment: Bình chọn tích cực
       DownvoteSegment: Bình chọn tiêu cực
       VoteFailed: Không thể gửi bình chọn SponsorBlock.
+      ChangeCategory: Đổi danh mục
+      CopyAndDownvote: Sao chép và bỏ phiếu phản đối
+      SubmitCategoryVote: Gửi phiếu danh mục
+      CategoryVoteSuccess: Đã gửi phiếu danh mục.
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

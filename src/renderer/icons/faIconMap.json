@@ -410,6 +410,10 @@
     "ri": "pen-nib-line",
     "material": "ink-pen-outline"
   },
+  "pencil": {
+    "ri": "pencil-line",
+    "material": "edit-outline"
+  },
   "photo-film": {
     "ri": "gallery-line",
     "material": "perm-media-outline"

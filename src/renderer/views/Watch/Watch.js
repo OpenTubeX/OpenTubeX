@@ -2050,6 +2050,12 @@ export default defineComponent({
     voteOnSponsorBlockInfoSegment(uuid, vote) {
       this.$refs.player?.voteOnSponsorBlockInfoSegment(uuid, vote)
     },
+    changeSponsorBlockInfoSegmentCategory(uuid, category) {
+      this.$refs.player?.changeSponsorBlockInfoSegmentCategory(uuid, category)
+    },
+    copyAndDownvoteSponsorBlockInfoSegment(uuid) {
+      this.$refs.player?.copyAndDownvoteSponsorBlockInfoSegment(uuid)
+    },
     skipSponsorBlockInfoSegment(uuid) {
       this.$refs.player?.skipSponsorBlockInfoSegment(uuid)
     },

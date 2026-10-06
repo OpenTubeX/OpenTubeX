@@ -1790,6 +1790,10 @@ Video:
       UpvoteSegment: Balsuoti už
       DownvoteSegment: Balsuoti prieš
       VoteFailed: Nepavyko pateikti SponsorBlock balso.
+      ChangeCategory: Keisti kategoriją
+      CopyAndDownvote: Kopijuoti ir balsuoti prieš
+      SubmitCategoryVote: Pateikti balsą už kategoriją
+      CategoryVoteSuccess: Balsas už kategoriją pateiktas.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

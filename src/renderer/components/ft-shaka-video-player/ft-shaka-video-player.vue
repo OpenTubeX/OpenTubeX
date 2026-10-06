@@ -1122,6 +1122,8 @@
           v-for="{ uuid, translatedCategory, color, unskipped, isHighlight } in skippedSponsorBlockSegments"
           :key="uuid"
           class="skippedSegment"
+          :class="{ editing: sponsorBlockToastEditingUuid === uuid }"
+          @click.stop
           @mouseenter="pauseSponsorBlockToastCountdown(uuid)"
           @mouseleave="resumeSponsorBlockToastCountdown(uuid)"
           @focusin="pauseSponsorBlockToastCountdown(uuid)"
@@ -1148,16 +1150,46 @@
                   {{ getSponsorBlockToastTimeLabel(uuid) }}
                 </template>
               </span>
-              <button
+              <FtIconButton
                 class="closeSkippedSegmentButton"
                 :title="$t('Close')"
-                @click.stop.prevent="removeSponsorBlockToast(uuid)"
-              >
-                <ft-icon :icon="['fas', 'xmark']" />
-              </button>
+                :icon="['fas', 'xmark']"
+                :use-shadow="false"
+                :size="16"
+                :padding="8"
+                @click="removeSponsorBlockToast(uuid)"
+              />
+              <FtIconButton
+                v-if="sponsorBlockEnableSubmission"
+                :title="$t('Edit')"
+                :icon="['fas', 'pencil']"
+                :aria-expanded="sponsorBlockToastEditingUuid === uuid"
+                :disabled="sponsorBlockVotePending !== null"
+                :use-shadow="false"
+                :size="16"
+                :padding="8"
+                @click="toggleSponsorBlockToastEditing(uuid)"
+              />
             </div>
           </div>
-          <div class="skippedSegmentActions">
+          <div
+            v-if="sponsorBlockToastEditingSegment?.uuid === uuid"
+            v-overlay-scrollbars
+            class="sponsorBlockToastEditor"
+          >
+            <SponsorBlockSegmentEditor
+              :segment="sponsorBlockToastEditingSegment"
+              :pending="sponsorBlockVotePending !== null"
+              center-wrapped-cancel
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+              @resize="clampSponsorBlockToastEditorScroll"
+            />
+          </div>
+          <div
+            v-else
+            class="skippedSegmentActions"
+          >
             <button
               v-if="unskipped"
               class="unskipButton"

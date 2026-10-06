@@ -1685,6 +1685,10 @@ Video:
       UpvoteSegment: Røyst opp
       DownvoteSegment: Røyst ned
       VoteFailed: Klarte ikkje å sende inn røysta til SponsorBlock.
+      ChangeCategory: Endre kategori
+      CopyAndDownvote: Kopier og røyst ned
+      SubmitCategoryVote: Send kategorirøyst
+      CategoryVoteSuccess: Kategorirøyst sendt.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

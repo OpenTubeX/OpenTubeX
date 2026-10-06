@@ -7,6 +7,7 @@ import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmou
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
@@ -88,6 +89,7 @@ import {
 import {
   addOverlayScrollbars,
   clampOverlayScrollLeft,
+  clampOverlayScrollTop,
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
@@ -138,6 +140,7 @@ import {
 } from '../../helpers/player/abRepeat'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSponsorBlockContributionStats, voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
+import { getSponsorBlockCategoryVoteOptions } from '../../helpers/player/sponsorBlockCategories'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
@@ -277,6 +280,7 @@ export default defineComponent({
     FtPaidPromotionBadge,
     FtRetryImage,
     FtSelect,
+    SponsorBlockSegmentEditor,
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
@@ -2097,6 +2101,10 @@ export default defineComponent({
      * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, isMute: boolean, unskipTime: number|null}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
+    const sponsorBlockToastEditingUuid = ref(null)
+    const sponsorBlockToastEditingSegment = computed(() => {
+      return sponsorBlockInfoSegments.value.find(segment => segment.uuid === sponsorBlockToastEditingUuid.value)
+    })
     const promptSponsorBlockSegments = ref([])
     const sponsorBlockToastNow = ref(Date.now())
     const sponsorBlockCurrentTime = ref(0)
@@ -2124,6 +2132,7 @@ export default defineComponent({
       cancelCurrentSponsorBlockDraft,
       clearSponsorBlockDrafts,
       closeSponsorBlockSubmissionMenu,
+      copySponsorBlockSegmentToDraft,
       deleteSponsorBlockDraft,
       endSponsorBlockDraft,
       getSponsorBlockSubmissionVideoDuration,
@@ -2363,7 +2372,7 @@ export default defineComponent({
     }
 
     function syncSponsorBlockPlaybackState() {
-      if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
+      if (useSponsorBlock.value && canSeek()) {
         const currentTime = video.value?.currentTime ?? 0
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
@@ -2373,7 +2382,7 @@ export default defineComponent({
     }
 
     async function refreshSponsorBlockInfo() {
-      if (props.offline) return
+      if (props.offline || sponsorBlockVotePending.value !== null) return
       const refreshTasks = [setupSponsorBlock()]
       if (sponsorBlockEnableSubmission.value) {
         refreshTasks.push(refreshSponsorBlockContributionStats())
@@ -2484,7 +2493,7 @@ export default defineComponent({
       return 0
     }
 
-    async function voteOnSponsorBlockInfoSegment(uuid, vote) {
+    async function voteOnSponsorBlockInfoSegment(uuid, vote, copyToDraft = false) {
       if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) {
         return
       }
@@ -2495,13 +2504,26 @@ export default defineComponent({
       }
 
       const previousVote = sponsorBlockUserVotes[segment.uuid]
-      const nextVote = previousVote === vote ? null : vote
+      const videoId = props.videoId
+      const nextVote = !copyToDraft && previousVote === vote ? null : vote
       const type = nextVote === null ? 20 : nextVote
       sponsorBlockVotePending.value = segment.uuid
       emitSponsorBlockInfoState()
 
       try {
-        await voteOnSponsorBlockSegment(props.videoId, segment.uuid, type)
+        if (copyToDraft) {
+          if (!await copySponsorBlockSegmentToDraft(segment)) return
+          closeSponsorBlockInfo()
+          removeSponsorBlockToast(uuid)
+          // Keep the original from interrupting inspection and preview of the corrected draft.
+          sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
+          cancelSponsorBlockSkipSchedule()
+          refreshSponsorBlockMarkers()
+          syncSponsorBlockPlaybackState()
+          if (previousVote === 0) return
+        }
+        await voteOnSponsorBlockSegment(videoId, segment.uuid, type)
+        if (props.videoId !== videoId) return
         const currentVotes = Number.isFinite(segment.votes) ? segment.votes : 0
         segment.votes = currentVotes - getSponsorBlockVoteContribution(previousVote) +
           getSponsorBlockVoteContribution(nextVote)
@@ -2518,6 +2540,47 @@ export default defineComponent({
         sponsorBlockVotePending.value = null
         emitSponsorBlockInfoState()
       }
+    }
+
+    async function changeSponsorBlockInfoSegmentCategory(uuid, category) {
+      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) return
+      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
+      if (!segment || segment.category === category ||
+        !getSponsorBlockCategoryVoteOptions(segment.actionType).includes(category)) return
+
+      const videoId = props.videoId
+      sponsorBlockVotePending.value = uuid
+      emitSponsorBlockInfoState()
+      try {
+        await voteOnSponsorBlockSegment(videoId, uuid, category)
+        if (props.videoId !== videoId) return
+        segment.category = category
+        const toast = skippedSponsorBlockSegments.value.find(item => item.uuid === uuid)
+        if (toast) {
+          toast.translatedCategory = translateSponsorBlockCategory(category)
+          toast.color = getSponsorBlockInfoSegmentColor(category)
+        }
+        hasSponsorBlockMusicOfftopicSegment.value = sponsorBlockInfoSegments.value.some(item => item.category === 'music_offtopic')
+        sponsorBlockSegments = sponsorBlockSegments.filter(item => item.uuid !== uuid)
+        if (SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(category)) {
+          sponsorBlockSegments.push(segment)
+          sponsorBlockSegments.sort((a, b) => a.startTime - b.startTime)
+        }
+        cancelSponsorBlockSkipSchedule()
+        refreshSponsorBlockMarkers()
+        syncSponsorBlockPlaybackState()
+        showToast({ message: t('Video.Player.SponsorBlock.CategoryVoteSuccess'), icon: ['fas', 'check'] })
+      } catch (error) {
+        console.error(error)
+        showToast({ message: t('Video.Player.SponsorBlock.VoteFailed'), icon: ['fas', 'circle-exclamation'] })
+      } finally {
+        sponsorBlockVotePending.value = null
+        emitSponsorBlockInfoState()
+      }
+    }
+
+    function copyAndDownvoteSponsorBlockInfoSegment(uuid) {
+      return voteOnSponsorBlockInfoSegment(uuid, 0, true)
     }
 
     function skipSponsorBlockInfoSegment(uuid) {
@@ -2569,6 +2632,7 @@ export default defineComponent({
      * @param {string} uuid
      */
     function removeSponsorBlockToast(uuid) {
+      if (sponsorBlockToastEditingUuid.value === uuid) sponsorBlockToastEditingUuid.value = null
       const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
       if (index !== -1) {
         clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
@@ -3113,10 +3177,25 @@ export default defineComponent({
       toastEntry.countdownPaused = true
     }
 
+    function toggleSponsorBlockToastEditing(uuid) {
+      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) return
+      if (!sponsorBlockInfoSegments.value.some(segment => segment.uuid === uuid)) return
+      sponsorBlockToastEditingUuid.value = sponsorBlockToastEditingUuid.value === uuid ? null : uuid
+      if (sponsorBlockToastEditingUuid.value === uuid) pauseSponsorBlockToastCountdown(uuid)
+    }
+
+    function clampSponsorBlockToastEditorScroll() {
+      nextTick(() => {
+        const scroller = container.value?.querySelector('.sponsorBlockToastEditor')
+        if (scroller) clampOverlayScrollTop(scroller, scroller.querySelector('.sponsorBlockEditActions'))
+      })
+    }
+
     /**
      * @param {string} uuid
      */
     function resumeSponsorBlockToastCountdown(uuid) {
+      if (sponsorBlockToastEditingUuid.value === uuid) return
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
       if (!toastEntry || toastEntry.unskipped || toastEntry.isMute || !toastEntry.countdownPaused) {
         return
@@ -6052,6 +6131,7 @@ export default defineComponent({
     watch(sponsorSkips, scheduleSponsorBlockSkip)
 
     watch(sponsorBlockEnableSubmission, (enabled) => {
+      if (!enabled) sponsorBlockToastEditingUuid.value = null
       if (
         enabled &&
         sponsorBlockInfoOpen.value &&
@@ -12557,6 +12637,8 @@ export default defineComponent({
       refreshSponsorBlockInfo,
       skipSponsorBlockInfoSegment,
       voteOnSponsorBlockInfoSegment,
+      changeSponsorBlockInfoSegmentCategory,
+      copyAndDownvoteSponsorBlockInfoSegment,
       copyChapterTimestamp,
       destroyPlayer
     })
@@ -12787,6 +12869,14 @@ export default defineComponent({
       dismissPromptSponsorBlockSegment,
       skipPromptSponsorBlockSegment,
       skippedSponsorBlockSegments,
+      sponsorBlockEnableSubmission,
+      sponsorBlockVotePending,
+      sponsorBlockToastEditingSegment,
+      sponsorBlockToastEditingUuid,
+      toggleSponsorBlockToastEditing,
+      clampSponsorBlockToastEditorScroll,
+      changeSponsorBlockInfoSegmentCategory,
+      copyAndDownvoteSponsorBlockInfoSegment,
       getSponsorBlockToastTimeLabel,
       isSponsorBlockToastCountdownPaused,
       getSponsorBlockToastActionLabel,

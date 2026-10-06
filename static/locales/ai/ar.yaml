@@ -1444,6 +1444,10 @@ Video:
       UpvoteSegment: التصويت لصالح
       DownvoteSegment: التصويت السلبي
       VoteFailed: فشل إرسال تصويت SponsorBlock.
+      ChangeCategory: تغيير الفئة
+      CopyAndDownvote: نسخ والتصويت سلبًا
+      SubmitCategoryVote: إرسال تصويت الفئة
+      CategoryVoteSuccess: تم إرسال تصويت الفئة.
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة

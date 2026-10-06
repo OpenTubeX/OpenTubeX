@@ -1429,6 +1429,10 @@ Video:
       UpvoteSegment: Glasaj za
       DownvoteSegment: Glasaj protiv
       VoteFailed: Slanje glasa u SponsorBlock nije uspjelo.
+      ChangeCategory: Promijeni kategoriju
+      CopyAndDownvote: Kopiraj i glasaj protiv
+      SubmitCategoryVote: Pošalji glas za kategoriju
+      CategoryVoteSuccess: Glas za kategoriju je poslan.
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

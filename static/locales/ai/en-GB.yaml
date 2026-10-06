@@ -1392,6 +1392,10 @@ Video:
       UpvoteSegment: Upvote
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
+      ChangeCategory: Change category
+      CopyAndDownvote: Copy & downvote
+      SubmitCategoryVote: Submit category vote
+      CategoryVoteSuccess: Category vote submitted.
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden

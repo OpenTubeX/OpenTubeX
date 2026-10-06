@@ -1412,6 +1412,10 @@ Video:
       UpvoteSegment: Pozitív szavazat
       DownvoteSegment: Negatív szavazat
       VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
+      ChangeCategory: Kategória módosítása
+      CopyAndDownvote: Másolás és leszavazás
+      SubmitCategoryVote: Kategóriaszavazat elküldése
+      CategoryVoteSuccess: Kategóriaszavazat elküldve.
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

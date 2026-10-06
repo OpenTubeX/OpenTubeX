@@ -1411,6 +1411,10 @@ Video:
       UpvoteSegment: Voter pour
       DownvoteSegment: Voter contre
       VoteFailed: Échec de l’envoi du vote à SponsorBlock.
+      ChangeCategory: Changer la catégorie
+      CopyAndDownvote: Copier et voter contre
+      SubmitCategoryVote: Envoyer le vote de catégorie
+      CategoryVoteSuccess: Vote de catégorie envoyé.
   External Media:
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"

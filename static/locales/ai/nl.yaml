@@ -1457,6 +1457,10 @@ Video:
       UpvoteSegment: Positieve stem
       DownvoteSegment: Negatieve stem
       VoteFailed: SponsorBlock-stem indienen mislukt.
+      ChangeCategory: Categorie wijzigen
+      CopyAndDownvote: Kopiëren en negatief stemmen
+      SubmitCategoryVote: Categoriestem versturen
+      CategoryVoteSuccess: Categoriestem verstuurd.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'

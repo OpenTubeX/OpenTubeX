@@ -1419,6 +1419,10 @@ Video:
       UpvoteSegment: Нравится
       DownvoteSegment: Не нравится
       VoteFailed: Не удалось отправить оценку в SponsorBlock.
+      ChangeCategory: Изменить категорию
+      CopyAndDownvote: Копировать и оценить отрицательно
+      SubmitCategoryVote: Отправить голос за категорию
+      CategoryVoteSuccess: Голос за категорию отправлен.
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто

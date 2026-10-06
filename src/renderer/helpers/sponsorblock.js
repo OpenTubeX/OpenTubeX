@@ -313,15 +313,15 @@ export async function submitSponsorBlockSegments(videoId, videoDuration, segment
 /**
  * @param {string} videoId
  * @param {string} uuid
- * @param {0|1|20} type
+ * @param {0|1|20|SponsorBlockCategory} vote
  */
-export async function voteOnSponsorBlockSegment(videoId, uuid, type) {
+export async function voteOnSponsorBlockSegment(videoId, uuid, vote) {
   const userID = await getOrCreateSponsorBlockUserId()
   const searchParams = new URLSearchParams({
     UUID: uuid,
     videoID: videoId,
     userID,
-    type: String(type)
+    ...(typeof vote === 'string' ? { category: vote } : { type: String(vote) })
   })
   const requestUrl = `${store.getters.getSponsorBlockUrl}/api/voteOnSponsorTime?${searchParams}`
 

@@ -1488,6 +1488,10 @@ Video:
       UpvoteSegment: Прагаласаваць за
       DownvoteSegment: Прагаласаваць супраць
       VoteFailed: Не ўдалося адправіць голас у SponsorBlock.
+      ChangeCategory: Змяніць катэгорыю
+      CopyAndDownvote: Капіяваць і ацаніць адмоўна
+      SubmitCategoryVote: Адправіць голас за катэгорыю
+      CategoryVoteSuccess: Голас за катэгорыю адпраўлены.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

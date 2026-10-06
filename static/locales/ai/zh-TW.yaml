@@ -1414,6 +1414,10 @@ Video:
       UpvoteSegment: 投贊成票
       DownvoteSegment: 投反對票
       VoteFailed: 無法提交 SponsorBlock 投票。
+      ChangeCategory: 變更類別
+      CopyAndDownvote: 複製並投反對票
+      SubmitCategoryVote: 提交類別投票
+      CategoryVoteSuccess: 類別投票已提交。
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

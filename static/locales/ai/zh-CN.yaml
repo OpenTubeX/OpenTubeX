@@ -1412,6 +1412,10 @@ Video:
       UpvoteSegment: 赞成
       DownvoteSegment: 反对
       VoteFailed: SponsorBlock 投票提交失败。
+      ChangeCategory: 更改类别
+      CopyAndDownvote: 复制并投反对票
+      SubmitCategoryVote: 提交类别投票
+      CategoryVoteSuccess: 类别投票已提交。
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"

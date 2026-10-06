@@ -1453,6 +1453,10 @@ Video:
       UpvoteSegment: ஆதரவு வாக்கு
       DownvoteSegment: எதிர்ப்பு வாக்கு
       VoteFailed: SponsorBlock வாக்கைச் சமர்ப்பிக்க முடியவில்லை.
+      ChangeCategory: வகையை மாற்று
+      CopyAndDownvote: நகலெடுத்து எதிராக வாக்களி
+      SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
+      CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்
