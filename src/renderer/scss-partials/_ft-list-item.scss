@@ -88,7 +88,7 @@ $watched-transition-duration: 0.5s;
     }
 
     &:hover .thumbnailLink::after,
-    &:focus .thumbnailLink::after {
+    .thumbnailLink:focus::after {
       opacity: 0;
       transition-duration: $watched-transition-duration;
     }

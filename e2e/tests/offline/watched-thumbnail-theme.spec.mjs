@@ -27,10 +27,20 @@ test.use({
 
 async function expectOverlay(link, color, opacity = '1') {
   await expect.poll(() => link.evaluate((element, color) => {
-    const expected = document.createElement('span').style
-    expected.backgroundColor = color
+    // Compare rendered RGBA values across hex, color-mix and relative RGB serialization.
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 1
+    const context = canvas.getContext('2d')
+    const rgba = value => {
+      context.clearRect(0, 0, 1, 1)
+      context.fillStyle = value
+      context.fillRect(0, 0, 1, 1)
+      return [...context.getImageData(0, 0, 1, 1).data]
+    }
     const style = getComputedStyle(element, '::after')
-    return { colorMatches: style.backgroundColor === expected.backgroundColor, opacity: style.opacity }
+    const actual = rgba(style.backgroundColor)
+    const expected = rgba(color)
+    return { colorMatches: actual.every((value, index) => value === expected[index]), opacity: style.opacity }
   }, color)).toEqual({ colorMatches: true, opacity })
 }
 
@@ -85,6 +95,10 @@ for (const scheme of ['dark', 'light']) {
     await page.locator('.settingsCloseButton').click()
     await page.mouse.move(0, 0)
     await expectOverlay(link, '#33669980')
+    await link.focus()
+    await expectOverlay(link, '#33669980', '0')
+    await link.evaluate(element => element.blur())
+    await expectOverlay(link, '#33669980')
     await watched.screenshot({ path: testInfo.outputPath(`watched-overlay-${scheme}.png`) })
     await link.hover()
     await expectOverlay(link, '#33669980', '0')
@@ -127,6 +141,16 @@ for (const scheme of ['dark', 'light']) {
       await store.dispatch('updateBaseTheme', 'system')
     })
     expect(await page.locator('body').evaluate(element => element.style.getPropertyValue('--watched-thumbnail-overlay-color'))).toBe('')
-    await expect.poll(() => link.evaluate(element => getComputedStyle(element, '::after').backgroundColor)).not.toBe('rgba(255, 136, 0, 0)')
+    await expectOverlay(link, baseColor)
   })
 }
+
+test('sets the default watched overlay alpha independently of page background transparency', async ({ page }) => {
+  await goTo(page, 'history')
+  const link = page.locator('.ft-list-video.watched .thumbnailLink')
+  await page.mouse.move(0, 0)
+  for (const background of ['#12345680', '#12345600']) {
+    await page.locator('body').evaluate((element, color) => element.style.setProperty('--bg-color', color), background)
+    await expectOverlay(link, '#123456b3')
+  }
+})

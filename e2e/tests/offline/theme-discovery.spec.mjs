@@ -15,11 +15,13 @@ function escape(value) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 }
 
-function entry(number, { updated = oldRevision, color = '#121212', invalid = false, extra = '', images = [screenshot, secondScreenshot], description = number % 2 === 0 ? 'A longer description with additional details about the colors and the appearance of this community theme, taking several lines in a narrow card.' : 'A community theme.' } = {}) {
+function entry(number, { updated = oldRevision, color = '#121212', legacy = false, overlay, invalid = false, extra = '', images = [screenshot, secondScreenshot], description = number % 2 === 0 ? 'A longer description with additional details about the colors and the appearance of this community theme, taking several lines in a narrow card.' : 'A community theme.' } = {}) {
   const theme = cloneDefaultCustomTheme()
   theme.id = 'shared-export-id'
   theme.name = `Community theme ${number}`
   theme.colors.background = color
+  if (legacy) delete theme.colors.watchedThumbnailOverlay
+  else if (overlay) theme.colors.watchedThumbnailOverlay = overlay
   const body = `<h2>Description</h2><p>${escape(description)}</p><h2>Screenshots</h2>
     ${images.map(src => `<img src="${src}">`).join('')}${extra}
     <details><summary>Theme JSON</summary><div class="highlight highlight-source-json"
@@ -199,6 +201,42 @@ test('discovers, installs, persists and updates themes without overwriting local
   expect(saved).toHaveLength(2)
   expect(saved.find(theme => theme.id === 'discussion-1197').discussionThemeHash).toMatch(/^[\da-f]{64}$/)
   expect(saved.find(theme => theme.id === 'discussion-1197').discussionThemeHash).not.toBe(initialHash)
+})
+
+test('preserves local edits to older community themes and detects customized overlay updates', async ({ page, app }) => {
+  const theme = cloneDefaultCustomTheme()
+  theme.id = 'discussion-1197'
+  theme.name = 'Community theme 1197'
+  // Source fingerprint generated before watched overlays existed.
+  theme.discussionThemeHash = '80922530028dd73dc5bee50d1f3ed13ce92dafda0f5bc82f7d729d41affe4097'
+  delete theme.colors.watchedThumbnailOverlay
+  theme.colors.primaryText = '#aabbcc'
+  await page.evaluate(async theme => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const themes = await window.ftElectron.saveCustomTheme(theme)
+    await store.dispatch('updateCustomThemes', themes)
+  }, theme)
+  await mockScreenshots(page)
+  const options = { legacy: true }
+  await page.route(feedUrl, route => route.fulfill({
+    contentType: 'application/atom+xml', body: feed([entry(1197, options)])
+  }))
+  const gallery = await openDiscovery(page)
+  const card = gallery.locator('article')
+  await expect(card.getByRole('button', { name: 'Update and apply', exact: true })).toHaveCount(0)
+  await card.getByRole('button', { name: 'Apply theme', exact: true }).click()
+  await expect(page.locator('body')).toHaveCSS('--primary-text-color', '#aabbcc')
+  await gallery.getByRole('button', { name: 'Refresh', exact: true }).click()
+  await expect(card.getByRole('button', { name: 'Applied', exact: true })).toBeDisabled()
+  expect((await savedThemes(app))[0].colors.primaryText).toBe('#aabbcc')
+
+  options.legacy = false
+  options.overlay = '#ff880080'
+  await gallery.getByRole('button', { name: 'Refresh', exact: true }).click()
+  await card.getByRole('button', { name: 'Update and apply', exact: true }).click()
+  await expect(card.getByRole('button', { name: 'Applied', exact: true })).toBeDisabled()
+  await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#ff880080')
+  expect((await savedThemes(app))[0].discussionThemeHash).not.toBe(theme.discussionThemeHash)
 })
 
 test('retries failures, paginates, skips invalid posts and handles empty feeds', async ({ page }) => {

@@ -230,6 +230,11 @@ export async function customThemeContentHash(value) {
   const theme = normalizeCustomTheme(value)
   delete theme.id
   delete theme.discussionThemeHash
+  // Keep existing community fingerprints when the new overlay only supplies
+  // the default appearance. Customized overlays still count as source edits.
+  if (theme.colors.watchedThumbnailOverlay === deriveWatchedThumbnailOverlayColor(theme.colors.background)) {
+    delete theme.colors.watchedThumbnailOverlay
+  }
   const content = new TextEncoder().encode(JSON.stringify(theme))
   const hash = await globalThis.crypto.subtle.digest('SHA-256', content)
   return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('')
