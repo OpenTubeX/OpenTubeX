@@ -231,23 +231,29 @@ test('connection loss keeps the previous page covered while Watch is scrolled', 
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 })
 
-for (const mode of ['combined', 'merged', 'fallback', 'late-failure']) {
-  const merged = mode !== 'combined'
+for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-extraction']) {
+  const pendingExtraction = mode === 'pending-extraction'
+  const merged = mode !== 'combined' && !pendingExtraction
   const fallback = mode === 'fallback'
   const lateFailure = mode === 'late-failure'
-  test(`casts ${lateFailure ? 'a complete MP4 after a merged stream fails' : fallback ? 'a complete MP4 when FFmpeg is unavailable' : merged ? 'separate high-resolution tracks' : 'a complete MP4 stream'} to a discovered DLNA device and returns to local playback`, async ({ app, page }) => {
-    await app.electronApp.evaluate(({ ipcMain }, { merged, fallback }) => {
+  test(`casts ${lateFailure ? 'a complete MP4 after a merged stream fails' : fallback ? 'a complete MP4 when FFmpeg is unavailable' : pendingExtraction ? 'a complete MP4 while higher-resolution extraction is pending' : merged ? 'separate high-resolution tracks' : 'a complete MP4 stream'} to a discovered DLNA device and returns to local playback`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, { merged, fallback, pendingExtraction }) => {
       globalThis.__dlnaCalls = []
+      globalThis.__dlnaExtractionCalls = 0
       ipcMain.removeHandler('yt-dlp-get-playback-info')
-      ipcMain.handle('yt-dlp-get-playback-info', () => ({
-        isLive: false,
-        formats: merged
-          ? [
-              { url: 'https://example.test/video-1080.mp4', protocol: 'https', ext: 'mp4', vcodec: 'avc1.640028', acodec: 'none', height: 1080 },
-              { url: 'https://example.test/audio.m4a', protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2', formatId: '140' }
-            ]
-          : []
-      }))
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__dlnaExtractionCalls++
+        if (pendingExtraction) return new Promise(() => {})
+        return {
+          isLive: false,
+          formats: merged
+            ? [
+                { url: 'https://example.test/video-1080.mp4', protocol: 'https', ext: 'mp4', vcodec: 'avc1.640028', acodec: 'none', height: 1080 },
+                { url: 'https://example.test/audio.m4a', protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2', formatId: '140' }
+              ]
+            : []
+        }
+      })
       ipcMain.removeHandler('dlna-discover')
       ipcMain.removeHandler('dlna-start')
       ipcMain.removeHandler('dlna-stop')
@@ -259,16 +265,20 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure']) {
       ipcMain.removeHandler('dlna-has-failed')
       ipcMain.handle('dlna-has-failed', () => globalThis.__dlnaFailed ?? false)
       ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
-      ipcMain.handle('dlna-start', (_event, payload) => {
+      ipcMain.handle('dlna-start', async (_event, payload) => {
         globalThis.__dlnaCalls.push({ action: 'start', payload })
-        if (fallback && payload.audioUrl) return { error: 'FFmpeg is unavailable', muxUnavailable: true }
+        if (fallback && payload.audioUrl) {
+          // Slow FFmpeg validation outlasts Chromium's transient user activation.
+          await new Promise(resolve => setTimeout(resolve, 6000))
+          return { error: 'FFmpeg is unavailable', muxUnavailable: true }
+        }
         return { castId: 'test-cast', deviceName: 'Living room TV' }
       })
       ipcMain.handle('dlna-stop', (_event, castId) => {
         globalThis.__dlnaCalls.push({ action: 'stop', castId })
         return true
       })
-    }, { merged, fallback, lateFailure })
+    }, { merged, fallback, pendingExtraction })
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     const view = await watchViewHandle(page)
@@ -298,8 +308,24 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure']) {
       return buttonTop > videoBottom
     }).toBe(true)
     await castButton.click()
+    if (pendingExtraction) {
+      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible({ timeout: 3000 })
+      await castButton.click()
+      await castButton.click()
+      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible()
+      expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
+      await page.screenshot({ path: test.info().outputPath('dlna-devices-while-extracting.png') })
+    }
     await page.getByRole('option', { name: 'Living room TV' }).click()
+    if (fallback) {
+      // Renderer evaluate() calls grant a fresh user gesture in Playwright.
+      // Observe the main process while waiting for the authorized fallback.
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
+    }
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    if (pendingExtraction) {
+      expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
+    }
     if (lateFailure) {
       await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = true })
       await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
@@ -325,6 +351,10 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure']) {
     await video.evaluate(element => element.pause())
     await castButton.click()
     await page.getByRole('option', { name: 'Living room TV' }).click()
+    if (fallback) {
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(4)
+    }
+    await expect(castButton).toHaveAttribute('aria-pressed', 'true')
     await castButton.click()
     await page.getByRole('option', { name: 'Stop casting' }).click()
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
