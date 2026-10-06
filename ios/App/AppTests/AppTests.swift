@@ -306,6 +306,59 @@ final class AppTests: XCTestCase {
         _ = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
     }
 
+    func testDefaultAudioDownloadConvertsOpusForOfflinePlayback() async throws {
+        try await openApplication()
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("default-audio-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let fixture = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
+        let opus = root.appendingPathComponent("source.opus")
+        let encoded = try await Task.detached {
+            try IOSFFmpeg.execute(["ffmpeg", "-v", "error", "-i", fixture.path, "-c:a", "libopus", opus.path])
+        }.value
+        XCTAssertEqual(encoded["returncode"] as? Int, 0, String(describing: encoded))
+        let bytes = try Data(contentsOf: opus)
+        let listener = try await loopbackServer { _, connection in
+            let header = "HTTP/1.1 200 OK\r\nContent-Type: audio/ogg\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n"
+            connection.send(content: Data(header.utf8) + bytes, completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { listener.cancel() }
+        let target = root.appendingPathComponent("exports")
+        try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
+        let bookmark = try target.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": target.lastPathComponent, "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self)]], in: nil, contentWorld: .page)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/source.opus"
+        for (format, extensionName) in [("", "m4a"), ("opus", "opus")] {
+            let response = try await webView.callAsyncJavaScript("""
+                const args = ['--no-playlist', '-x', '--output', 'Offline.%(ext)s'];
+                if (format) args.push('--audio-format', format);
+                args.push(url);
+                return await Capacitor.Plugins.YtDlp.download({payload:{mode:'audio',externalUrl:url},args});
+                """, arguments: ["url": url, "format": format], in: nil, contentWorld: .page) as? [String: Any]
+            let id = try XCTUnwrap(response?["id"] as? Int, String(describing: response))
+            addTeardownBlock { @MainActor [weak self] in
+                _ = try? await self?.webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+            }
+            var record: [String: Any] = [:]
+            for _ in 0..<120 {
+                record = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.list()).downloads.find(download=>download.id===id)", arguments: ["id": id], in: nil, contentWorld: .page) as? [String: Any] ?? [:]
+                if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+                try await Task.sleep(for: .milliseconds(250))
+            }
+            XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+            let file = try XCTUnwrap((record["files"] as? [[String: Any]])?.first)
+            XCTAssertEqual(file["extension"] as? String, extensionName)
+            if format.isEmpty {
+                let asset = AVURLAsset(url: URL(fileURLWithPath: try XCTUnwrap(file["path"] as? String)))
+                let playable = try await asset.load(.isPlayable)
+                XCTAssertTrue(playable, "Default audio exports must be playable by AVFoundation")
+            }
+            _ = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+        }
+    }
+
     func testDownloadsSettingSurvivesCategorySwitch() async throws {
         try await openApplication()
         let saved = try await webView.callAsyncJavaScript(

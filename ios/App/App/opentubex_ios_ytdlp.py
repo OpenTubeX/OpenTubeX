@@ -121,6 +121,24 @@ def _download(request):
         progress_file.write_text(json.dumps(data), encoding='utf-8')
 
     parsed = yt_dlp.parse_options(['--ignore-config', *request['args']])
+    # Inspect the unvalidated options: yt-dlp supplies bestaudio/best itself
+    # for -x, so the parsed selector alone cannot identify a user's -f choice.
+    requested, _ = parsed.parser.parse_args(request['args'])
+    payload = request.get('payload', {})
+    selects_codec = any(field.split(':', 1)[0].lstrip('+-') in
+                        ('codec', 'vcodec', 'acodec', 'ext', 'vext', 'aext')
+                        for field in parsed.ydl_opts['format_sort'])
+    defaults = []
+    if requested.format is None and not selects_codec:
+        if (payload.get('mode') == 'video' and not payload.get('externalUrl')
+                and not requested.extractaudio and not requested.merge_output_format
+                and not requested.remuxvideo and not requested.recodevideo):
+            defaults = ['--format', 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]']
+        elif payload.get('mode') == 'audio' and requested.audioformat == 'best':
+            defaults = ['--format', 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
+                        '--audio-format', 'm4a']
+    if defaults:
+        parsed = yt_dlp.parse_options(['--ignore-config', *defaults, *request['args']])
     options = parsed.ydl_opts
     # Templates may create subdirectories, but all output must remain in this
     # job's staging directory until the security-scoped Files export succeeds.

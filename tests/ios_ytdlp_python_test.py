@@ -62,7 +62,69 @@ class FinishedYoutubeDL(FakeYoutubeDL):
         return result
 
 
+class SelectingYoutubeDL(FakeYoutubeDL):
+    selected = None
+
+    def download(self, _urls):
+        formats = [
+            {'format_id': 'aac', 'ext': 'm4a', 'vcodec': 'none', 'acodec': 'mp4a.40.2', 'abr': 128},
+            {'format_id': 'audio-opus', 'ext': 'webm', 'vcodec': 'none', 'acodec': 'opus', 'abr': 160},
+            {'format_id': 'avc-720', 'ext': 'mp4', 'vcodec': 'avc1.64001f', 'acodec': 'none', 'height': 720},
+            {'format_id': 'avc-1080', 'ext': 'mp4', 'vcodec': 'avc1.640028', 'acodec': 'none', 'height': 1080},
+            {'format_id': 'vp9', 'ext': 'webm', 'vcodec': 'vp9', 'acodec': 'none', 'height': 2160},
+        ]
+        for entry in formats:
+            entry['url'] = f"https://example.org/{entry['format_id']}"
+        SelectingYoutubeDL.selected = self.process_ie_result({
+            'id': 'fixture', 'title': 'Fixture', 'formats': formats,
+        }, download=False)
+        return 0
+
+
 class IOSYtDlpPythonTest(unittest.TestCase):
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', SelectingYoutubeDL)
+    def test_default_downloads_select_ios_playable_tracks(self):
+        for mode, args, expected in [
+            ('video', [], ['avc-1080', 'aac']),
+            ('video', ['-S', 'res:720'], ['avc-720', 'aac']),
+            ('audio', ['--extract-audio'], ['aac']),
+        ]:
+            with self.subTest(mode=mode, args=args), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                bridge._download({
+                    'payload': {'mode': mode, 'videoId': 'abcdefghijk'},
+                    'args': [*args, 'https://www.youtube.com/watch?v=abcdefghijk'],
+                    'staging': str(root), 'progressFile': str(root / 'progress.json'),
+                    'controlFile': str(root / 'control'),
+                })
+                selected = SelectingYoutubeDL.selected
+                tracks = selected.get('requested_formats', [selected])
+                self.assertEqual([track['format_id'] for track in tracks], expected)
+
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', SelectingYoutubeDL)
+    def test_explicit_download_formats_and_codecs_are_preserved(self):
+        for mode, args, expected in [
+            ('video', ['--format=bv+ba'], ['vp9', 'audio-opus']),
+            ('video', ['-S', 'vcodec:vp9'], ['vp9', 'audio-opus']),
+            ('video', ['--merge-output-format', 'mkv'], ['vp9', 'audio-opus']),
+            ('video', ['--remux-video', 'mkv'], ['vp9', 'audio-opus']),
+            ('audio', ['-x', '-f', 'audio-opus'], ['audio-opus']),
+            ('audio', ['-x', '--audio-format', 'opus'], ['audio-opus']),
+            ('audio', ['-x', '-S', 'acodec:opus'], ['audio-opus']),
+            ('custom', [], ['vp9', 'audio-opus']),
+        ]:
+            with self.subTest(mode=mode, args=args), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                bridge._download({
+                    'payload': {'mode': mode, 'videoId': 'abcdefghijk'},
+                    'args': [*args, 'https://www.youtube.com/watch?v=abcdefghijk'],
+                    'staging': str(root), 'progressFile': str(root / 'progress.json'),
+                    'controlFile': str(root / 'control'),
+                })
+                selected = SelectingYoutubeDL.selected
+                tracks = selected.get('requested_formats', [selected])
+                self.assertEqual([track['format_id'] for track in tracks], expected)
+
     def test_bundled_ytdlp_has_trusted_roots_without_system_ca(self):
         packages = Path(__file__).resolve().parents[1] / 'ios/App/python-packages'
         environment = os.environ.copy()
