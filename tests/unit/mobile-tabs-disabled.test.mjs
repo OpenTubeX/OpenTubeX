@@ -62,6 +62,46 @@ for (const disableWhileFetching of [false, true]) {
   })
 }
 
+for (const mobile of [true, false]) {
+  for (const disableDuringApply of [true, false]) {
+    test(`${mobile ? 'mobile' : 'desktop'} session sync ${disableDuringApply ? 'disabling tabs' : 'keeping tabs enabled'} during application`, async () => {
+      let finishApply
+      let markApplying
+      const applying = new Promise(resolve => { markApplying = resolve })
+      const applied = new Promise(resolve => { finishApply = resolve })
+      const writes = []
+      const settingUpdates = []
+      const store = {
+        state: { settings: { enableMobileTabs: true, syncServerSharedTabs: false } },
+        dispatch: (...args) => settingUpdates.push(args)
+      }
+      const merged = { sessionsToApply: [{ id: 'remote' }], document: { mode: 'shared' }, mode: 'shared' }
+      const context = vm.createContext({
+        process: { env: { IS_CAPACITOR: mobile } },
+        getTabSyncAdapter: () => ({
+          getSyncSessions: () => [],
+          applySyncSessions: () => { markApplying(); return applied }
+        }),
+        getTabSessionDeviceIdentity: () => ({ deviceId: 'local', legacyDeviceIds: [] }),
+        mergeSyncSessions: () => merged,
+        metadataEquals: (a, b) => JSON.stringify(a) === JSON.stringify(b)
+      })
+      vm.runInContext(syncFunction, context)
+      const sync = context.syncSessions({
+        getSessions: () => [],
+        putSessions: document => writes.push(document)
+      }, store)
+      await applying
+      store.state.settings.enableMobileTabs = !disableDuringApply
+      finishApply(true)
+      const skipped = mobile && disableDuringApply
+      assert.equal(await sync, skipped ? null : merged)
+      assert.deepEqual(writes, skipped ? [] : [merged.document])
+      assert.deepEqual(settingUpdates, skipped ? [] : [['updateSyncServerSharedTabs', true]])
+    })
+  }
+}
+
 for (const kind of ['Video', 'Playlist']) {
   const source = await readFile(new URL(`../../src/renderer/components/FtList${kind}/FtList${kind}.vue`, import.meta.url), 'utf8')
   const name = kind === 'Video' ? 'videoMenuOptions' : 'playlistMenuItems'
