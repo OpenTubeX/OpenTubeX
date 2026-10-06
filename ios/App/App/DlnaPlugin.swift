@@ -289,11 +289,26 @@ final class DlnaMediaServer {
 public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "DlnaPlugin"
     public let jsName = "Dlna"
-    public let pluginMethods: [CAPPluginMethod] = ["discover", "request", "startMediaServer", "stopMediaServer", "hasFailed"].map {
+    public let pluginMethods: [CAPPluginMethod] = ["discover", "request", "startMediaServer", "stopMediaServer", "hasFailed", "retainMediaRequests"].map {
         CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise)
     }
     private var addresses = Set<String>()
     private var relay: DlnaMediaServer?
+    private var mediaOwners = Set<String>()
+
+    @objc func retainMediaRequests(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let owner = call.getString("owner"), UUID(uuidString: owner) != nil,
+                  let raw = call.getArray("urls") as? [String], raw.count <= 200 else {
+                call.reject("Invalid DLNA media registration")
+                return
+            }
+            IOSNetwork.shared.retainMediaRequests(owner: owner, urls: raw.compactMap { URL(string: $0) })
+            if raw.isEmpty { self.mediaOwners.remove(owner) }
+            else { self.mediaOwners.insert(owner) }
+            call.resolve()
+        }
+    }
 
     @objc func discover(_ call: CAPPluginCall) {
         // Blocking UDP reads run separately from the relay's Network callbacks.
@@ -425,6 +440,10 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     deinit {
+        let owners = mediaOwners
+        DispatchQueue.main.async {
+            for owner in owners { IOSNetwork.shared.retainMediaRequests(owner: owner, urls: []) }
+        }
         let server = relay
         dlnaQueue.async { server?.close() }
     }

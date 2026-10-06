@@ -101,6 +101,33 @@ final class AppTests: XCTestCase {
         return listener
     }
 
+    func testDlnaRegisteredRequestsSurviveExpiryUntilTheirLastOwnerReleases() throws {
+        let network = IOSNetwork()
+        var original = URLRequest(url: URL(string: "https://media.example/video.mp4")!)
+        original.setValue("retained", forHTTPHeaderField: "X-Media-Token")
+        let id = network.prepareExternal(original)
+        let url = URL(string: "capacitor://localhost/_opentubex_media/\(id)")!
+        let page = UUID().uuidString
+        let control = UUID().uuidString
+        network.retainMediaRequests(owner: page, urls: [url])
+        network.retainMediaRequests(owner: control, urls: [url])
+        network.expireExternal(id)
+        XCTAssertEqual(network.registeredMediaRequest(url), original)
+        network.retainMediaRequests(owner: page, urls: [])
+        XCTAssertEqual(network.registeredMediaRequest(url)?.value(forHTTPHeaderField: "X-Media-Token"), "retained")
+        let nextID = network.prepareExternal(URLRequest(url: URL(string: "https://media.example/next.mp4")!))
+        let nextURL = URL(string: "capacitor://localhost/_opentubex_media/\(nextID)")!
+        network.retainMediaRequests(owner: control, urls: [nextURL])
+        XCTAssertNil(network.registeredMediaRequest(url), "Replacing a source releases its expired registration")
+        network.expireExternal(nextID)
+        XCTAssertNotNil(network.registeredMediaRequest(nextURL))
+        network.retainMediaRequests(owner: control, urls: [])
+        XCTAssertNil(network.registeredMediaRequest(nextURL))
+        let unused = network.prepareExternal(original)
+        network.expireExternal(unused)
+        XCTAssertNil(network.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(unused)")!), "Unowned registrations retain normal expiry")
+    }
+
     func testDlnaRelayStreamsRangesAndHeadAndStops() async throws {
         let upstream = try await loopbackServer { header, connection in
             XCTAssertTrue(header.contains("User-Agent: OpenTubeX DLNA test"), header)
@@ -440,7 +467,9 @@ final class AppTests: XCTestCase {
             {url:audioSource, format_id:'140', protocol:'http', ext:'m4a', vcodec:'none', acodec:'mp4a.40.2'}
         ] : [];
         """, arguments: ["merged": merged, "videoSource": "capacitor://localhost/_opentubex_media/\(id)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
-        let cleanup = "document.querySelector('video')?.pause(); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
+        // Navigation preserves cached Watch state. Discard the fixture source
+        // too, so neither the cached page nor its cast control retains it.
+        let cleanup = "document.querySelector('video')?.pause(); watchFixture.legacyFormats=[]; await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
         do {
             try await wait("!!findWatch(document.querySelector('#app').__vue_app__._container._vnode)")
             _ = try await webView.callAsyncJavaScript("""
@@ -449,9 +478,16 @@ final class AppTests: XCTestCase {
             Object.assign(watchFixture, {isLoading:false, ytDlpStreamsPending:false, errorMessage:null,
                 isUpcoming:false, videoTitle:'Local DLNA MP4', videoLengthSeconds:2, activeFormat:'legacy',
                 legacyFormats:[{itag:18,url,mimeType:'video/mp4',height:dlnaMergedUi?360:1080,qualityLabel:'1080p'}]});
-            await testStore.dispatch('updateShowDlnaCastButton', true);
+            await testStore.dispatch('updateShowDlnaCastButton', false);
             """, arguments: ["url": "capacitor://localhost/_opentubex_media/\(id)"], in: nil, contentWorld: .page)
-            try await wait("!!document.querySelector('.dlnaCastControl button') && !!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
+            try await wait("!!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
+            // Execute the same expiry callback as the two-hour timer while the
+            // Watch page owns this source, before the cast control is enabled.
+            IOSNetwork.shared.expireExternal(id)
+            let retained = try XCTUnwrap(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!), "A visible Watch source must survive registration expiry")
+            XCTAssertEqual(retained.url?.absoluteString, "http://127.0.0.1:\(port)/real.mp4")
+            _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', true)", arguments: [:], in: nil, contentWorld: .page)
+            try await wait("!!document.querySelector('.dlnaCastControl button')")
             // Begin waiting only once the player is ready; CI startup can exceed the UDP timeout.
             DispatchQueue.global().async {
                 var buffer = [UInt8](repeating: 0, count: 8192)
@@ -484,6 +520,10 @@ final class AppTests: XCTestCase {
             let paused = try await evaluate("document.querySelector('video').paused") as? Bool
             XCTAssertEqual(paused, true)
             try await waitForNative { UIApplication.shared.isIdleTimerDisabled }
+            IOSNetwork.shared.expireExternal(audioId)
+            if merged {
+                XCTAssertNotNil(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(audioId)")!), "Merged sources remain registered for the casting control lifetime")
+            }
             let received = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-received-\(UUID().uuidString).mp4")
             defer { try? FileManager.default.removeItem(at: received) }
             try XCTUnwrap(receivedVideo).write(to: received)
@@ -511,6 +551,10 @@ final class AppTests: XCTestCase {
             throw error
         }
         _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+        try await waitForNative {
+            IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!) == nil &&
+                IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(audioId)")!) == nil
+        }
     }
 
     func testDlnaPluginAndOptInSettingAreAvailable() async throws {
