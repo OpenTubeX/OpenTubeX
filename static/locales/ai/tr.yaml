@@ -1977,3 +1977,5 @@ Storage Startup Error:
   Title: "Uygulama verileri yüklenemedi"
   Message: "Cihazda depolama alanı açıp tekrar deneyin. Verileriniz yüklenene kadar eşitleme duraklatılır."
   Retry: "Tekrar dene"
+Search Bar:
+  Use Suggestion: Öneriyi kullan

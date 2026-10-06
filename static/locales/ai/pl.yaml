@@ -1202,3 +1202,5 @@ Storage Startup Error:
   Title: "Nie udało się wczytać danych aplikacji"
   Message: "Zwolnij miejsce na urządzeniu i spróbuj ponownie. Synchronizacja jest wstrzymana do czasu wczytania danych."
   Retry: "Spróbuj ponownie"
+Search Bar:
+  Use Suggestion: Użyj sugestii

@@ -73,6 +73,7 @@ Global:
     Comment Count: 1 komentar | {count} komentarja | {count} komentarji | {count} komentarjev
     Watching Count: 1 gledalec | {count} gledalca | {count} gledalci | {count} gledalcev
 Search Bar:
+  Use Suggestion: Uporabi predlog
   Remove: Odstrani
   Open Search Container: Odpri iskalno polje
   Search: Iskanje

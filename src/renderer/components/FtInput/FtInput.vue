@@ -12,6 +12,7 @@
       hasSupportingText: supportingText !== '',
       outlined: variant === 'outlined' && !isSearch
     }"
+    @focusout="handleFocusOut"
   >
     <span class="inputWrapper">
       <component
@@ -140,6 +141,20 @@
             />
             <bdi>{{ getDataListProperty(index)?.displayText ?? entry }}</bdi>
           </component>
+          <button
+            v-if="showSuggestionFillButton"
+            type="button"
+            class="acceptSuggestionButton"
+            :aria-label="`${t('Search Bar.Use Suggestion')}: ${getDataListProperty(index)?.displayText ?? entry}`"
+            :title="t('Search Bar.Use Suggestion')"
+            @pointerdown.prevent
+            @click.stop="handleAcceptSuggestion(index)"
+          >
+            <FtIcon
+              :icon="['fas', 'arrow-up-left']"
+              aria-hidden="true"
+            />
+          </button>
           <a
             v-if="getDataListProperty(index)?.isRemoveable"
             class="removeButton"
@@ -244,6 +259,10 @@ const props = defineProps({
     default: true
   },
   isSearch: {
+    type: Boolean,
+    default: false
+  },
+  showSuggestionFillButton: {
     type: Boolean,
     default: false
   },
@@ -451,6 +470,7 @@ function handleInput(data) {
     }
   }
   inputData.value = text
+  searchState.showOptions = true
 
   // Native cancel can clear a keyboard preview while inputData is already empty.
   if (text === '') updateVisibleDataList()
@@ -598,6 +618,22 @@ function resetSelectedOption() {
 /**
  * @param {number} index
  */
+function handleAcceptSuggestion(index) {
+  const selectedValue = visibleDataList.value[index]
+  if (selectedValue == null) return
+
+  resetSelectedOption()
+  searchState.keyboardSelectedOptionIndex = -1
+  handleInput(selectedValue)
+  searchState.isPointerInList = false
+  inputRef.value.focus()
+  inputRef.value.setSelectionRange(selectedValue.length, selectedValue.length)
+  searchState.showOptions = false
+}
+
+/**
+ * @param {number} index
+ */
 function handleRemoveClick(index) {
   if (!getDataListProperty(index)?.isRemoveable) { return }
 
@@ -713,10 +749,13 @@ onBeforeUnmount(() => {
   if (process.env.IS_IOS) document.removeEventListener('pointerdown', handleOutsideTouch, true)
 })
 
-function handleInputBlur() {
-  if (!searchState.isPointerInList) {
+function handleFocusOut(event) {
+  if (!searchState.isPointerInList && !event.currentTarget.contains(event.relatedTarget)) {
     searchState.showOptions = false
   }
+}
+
+function handleInputBlur() {
   emit('blur', inputData.value)
 }
 

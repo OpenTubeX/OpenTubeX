@@ -525,6 +525,7 @@
   flex-shrink: 0;
 }
 
+.acceptSuggestionButton,
 .removeButton {
   display: flex;
   align-items: center;
@@ -537,6 +538,18 @@
   opacity: 0.65;
 }
 
+.acceptSuggestionButton {
+  justify-content: center;
+  inline-size: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.acceptSuggestionButton:hover,
+.acceptSuggestionButton:focus-visible,
 .removeButton:hover,
 .removeButtonSelected {
   opacity: 1;
@@ -547,6 +560,7 @@
     min-block-size: 48px;
   }
 
+  .search .acceptSuggestionButton,
   .search .removeButton {
     min-inline-size: 48px;
     justify-content: center;

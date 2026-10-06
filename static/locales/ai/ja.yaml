@@ -1976,3 +1976,5 @@ Storage Startup Error:
   Title: "アプリのデータを読み込めませんでした"
   Message: "端末の空き容量を増やしてから、もう一度お試しください。データの読み込みが完了するまで同期は一時停止されます。"
   Retry: "再試行"
+Search Bar:
+  Use Suggestion: 候補を入力

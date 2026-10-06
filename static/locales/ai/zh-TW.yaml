@@ -1978,3 +1978,5 @@ Storage Startup Error:
   Title: "無法載入應用程式資料"
   Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
   Retry: "重試"
+Search Bar:
+  Use Suggestion: 使用建議

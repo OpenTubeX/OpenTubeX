@@ -2544,6 +2544,7 @@ Open New Window: Neues Fenster öffnen
 Default Invidious instance has been cleared: Standardmäßige Invidious-Instanz wurde gelöscht
 Default Invidious instance has been set to {instance}: Standardmäßige Invidious-Instanz wurde auf {instance} festgelegt
 Search Bar:
+  Use Suggestion: Vorschlag übernehmen
   Clear Input: Eingabe löschen
   Remove: Entfernen
   Open Search Container: Suchcontainer öffnen
