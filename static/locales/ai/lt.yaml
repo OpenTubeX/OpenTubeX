@@ -2057,7 +2057,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
-    Enable Tabs: "Išjungus šią parinktį uždaromi visi kiti skirtukai, o dabartinis puslapis lieka atvertas."
+    Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
     Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.

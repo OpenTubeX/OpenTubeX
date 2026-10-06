@@ -56,6 +56,7 @@ export class CapacitorTabService {
     this.flushOnPageHide = () => this.flushPersistence()
     this.sessionGeneration = 0
     this.activationHistory = []
+    this.disabledSession = null
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
   }
@@ -109,8 +110,9 @@ export class CapacitorTabService {
       })
     })
     this.removeStoreSubscription = this.store.subscribe((mutation) => {
-      if (mutation.type === 'setEnableMobileTabs' && !this.tabsEnabled) {
-        this.disableTabs().catch(error => console.error('Failed to disable mobile tabs:', error))
+      if (mutation.type === 'setEnableMobileTabs') {
+        if (this.tabsEnabled) this.enableTabs()
+        else this.disableTabs().catch(error => console.error('Failed to disable mobile tabs:', error))
       }
       if (mutation.type === 'setRememberTabNavigationHistory') this.persist()
       else if (PERSISTED_MUTATIONS.has(mutation.type)) this.schedulePersistence()
@@ -412,10 +414,37 @@ export class CapacitorTabService {
   }
 
   async disableTabs() {
+    if (this.disabledSession) return
     // Keep the page actually on screen, even if another tab is still mounting.
-    const session = singleTabSession(this.currentSession(), this.store.getters.getPresentedTabId)
+    const previous = this.currentSession()
+    const session = singleTabSession(previous, this.store.getters.getPresentedTabId)
+    // Other tab components unmount while disabled. Retain their navigation in
+    // memory, but reload them on demand if tabs are enabled again this session.
+    this.disabledSession = { ...previous, activationHistory: [...this.activationHistory] }
+    for (const tab of previous.tabs) {
+      if (tab.id !== session.activeTabId) {
+        this.disabledSession = unloadCapacitorTab(this.disabledSession, tab.id)
+      }
+    }
     this.commitSession(session, session.activeTabId)
+    this.persist()
     await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+  }
+
+  enableTabs() {
+    if (!this.disabledSession) return
+    const current = this.currentSession()
+    const previous = this.disabledSession
+    this.disabledSession = null
+    this.activationHistory = previous.activationHistory
+    this.commitSession({
+      ...current,
+      tabs: previous.tabs.map(tab => tab.id === current.activeTabId
+        ? { ...current.tabs[0], isPinned: tab.isPinned, placementOpenerTabId: tab.placementOpenerTabId }
+        : tab),
+      closedTabs: previous.closedTabs,
+      selectionRevision: current.selectionRevision + 1
+    })
     this.persist()
   }
 
@@ -501,6 +530,7 @@ export class CapacitorTabService {
     globalThis.window?.removeEventListener?.('pagehide', this.flushOnPageHide)
     this.removeRouterHook()
     this.removeStoreSubscription()
+    this.disabledSession = null
     this.initialized = false
   }
 }

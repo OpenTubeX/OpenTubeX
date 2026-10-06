@@ -483,6 +483,7 @@ final class AppTests: XCTestCase {
             XCTAssertEqual(actions, merged ? ["SetAVTransportURI", "Play"] : ["SetAVTransportURI", "Play", "Seek"])
             let paused = try await evaluate("document.querySelector('video').paused") as? Bool
             XCTAssertEqual(paused, true)
+            try await waitForNative { UIApplication.shared.isIdleTimerDisabled }
             let received = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-received-\(UUID().uuidString).mp4")
             defer { try? FileManager.default.removeItem(at: received) }
             try XCTUnwrap(receivedVideo).write(to: received)
@@ -502,6 +503,8 @@ final class AppTests: XCTestCase {
                 _ = try await URLSession.shared.data(from: XCTUnwrap(castUri))
                 XCTFail("Cast relay still listening after Stop casting")
             } catch { /* Stop must close the native media server. */ }
+            _ = try await evaluate("document.querySelector('video').pause();true")
+            try await waitForNative { !UIApplication.shared.isIdleTimerDisabled }
             print("DLNA UI \(merged ? "streaming merge" : "complete MP4"): discovered renderer, Play/Stop, decoded frame, resumed local playback, closed relay")
         } catch {
             _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)

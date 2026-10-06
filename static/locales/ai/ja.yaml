@@ -1647,7 +1647,7 @@ Description:
   Games: ゲーム
 Tooltips:
   General Settings:
-    Enable Tabs: "オフにすると他のすべてのタブが閉じられ、現在のページは開いたままになります。"
+    Enable Tabs: "現在のページは開いたままになります。他のタブはアプリを再起動するまで保持されます。タブを再度有効にすると復元できます。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"
     Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。
     Update Relative Timestamps: ページを開いている間、アプリ内の相対日時を更新します。無効にすると、ページを再読み込みするか開き直したときにのみ更新されます。

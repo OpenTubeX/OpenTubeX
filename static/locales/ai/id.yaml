@@ -1658,7 +1658,7 @@ Description:
   Games: Gim
 Tooltips:
   General Settings:
-    Enable Tabs: "Menonaktifkan ini akan menutup semua tab lain dan membiarkan halaman saat ini tetap terbuka."
+    Enable Tabs: "Halaman saat ini tetap terbuka. Tab lain disimpan hingga aplikasi dimulai ulang; aktifkan tab lagi untuk memulihkannya."
     Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."
     Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
     Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.

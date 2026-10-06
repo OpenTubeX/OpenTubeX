@@ -1667,7 +1667,7 @@ Description:
   Games: Leikir
 Tooltips:
   General Settings:
-    Enable Tabs: "Ef slökkt er á þessu lokast allir aðrir flipar og núverandi síða helst opin."
+    Enable Tabs: "Heldur núverandi síðu opinni. Aðrir flipar eru geymdir þar til forritið er endurræst; virkjaðu flipa aftur til að endurheimta þá."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
     Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.
