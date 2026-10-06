@@ -75,21 +75,28 @@
           />
           <div
             v-if="languageMenuOpen"
+            ref="languageMenu"
+            v-overlay-scrollbars
             class="transcriptLanguageMenu"
           >
-            <button
-              v-for="(caption, index) in captions"
-              :key="index"
-              type="button"
-              :class="{ selected: selectedCaptionIndex === String(index) }"
-              @click="selectCaptionLanguage(index)"
+            <div
+              ref="languageList"
+              class="transcriptLanguages"
             >
-              <span>{{ caption.label }}</span>
-              <FtIcon
-                v-if="selectedCaptionIndex === String(index)"
-                :icon="['fas', 'check']"
-              />
-            </button>
+              <button
+                v-for="(caption, index) in captions"
+                :key="index"
+                type="button"
+                :class="{ selected: selectedCaptionIndex === String(index) }"
+                @click="selectCaptionLanguage(index)"
+              >
+                <span>{{ caption.label }}</span>
+                <FtIcon
+                  v-if="selectedCaptionIndex === String(index)"
+                  :icon="['fas', 'check']"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -163,7 +170,7 @@ import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 import { findActiveTranscriptSegmentIndex } from './activeTranscriptSegment.js'
 
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
@@ -204,6 +211,8 @@ const { t } = useI18n()
 
 const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
 const languageMenuOpen = ref(false)
+const languageMenu = useTemplateRef('languageMenu')
+const languageList = useTemplateRef('languageList')
 const searchOpen = ref(false)
 const searchQuery = ref('')
 const segments = ref([])
@@ -292,11 +301,15 @@ watch(() => props.offline, offline => {
   if (offline) languageMenuOpen.value = false
 })
 
-watch(() => props.captions, (captions) => {
+watch(() => props.captions, async (captions) => {
   if (Number(selectedCaptionIndex.value) >= captions.length) {
     selectedCaptionIndex.value = '0'
   }
-})
+  await nextTick()
+  if (languageMenu.value) {
+    clampOverlayScrollTop(languageMenu.value, languageList.value)
+  }
+}, { deep: true })
 
 let appliedPreferredCaptionIndex = props.preferredCaptionIndex
 watch([() => props.preferredCaptionIndex, () => props.offline], ([index]) => {
