@@ -12,7 +12,7 @@ const component = [
   slice(playlistsSource, 'export function getPlaylistSkipAvailability(', 'export function videoDurationPresent(').replace('export function', 'function'),
   slice(source, 'function findIndexOfCurrentVideoInPlaylist(', 'function getPlaylistInfoWithDelay('),
   slice(source, 'const currentVideoIndexZeroBased =', 'const upcomingVideos ='),
-  slice(source, 'function shufflePlaylistItems() {', 'const playlistItemsWrapper ='),
+  slice(source, 'function shuffleItems(', 'const playlistItemsWrapper ='),
   slice(source, 'function playNextVideo() {', 'function playPreviousVideo() {'),
   slice(source, 'watch(() => props.videoId, (newId, oldId) => {', 'watch(() => props.playlistItemId,'),
   slice(source, 'watch(\n  [() => props.autoSkipUnavailable,', '// The watch view owns the skip actions'),

@@ -317,6 +317,54 @@ for (const defaultInterval of [0, 1]) {
   })
 }
 
+for (const continuationState of ['pending', 'failed']) {
+  test(`YouTube playlist autoplay advances with a ${continuationState} continuation request`, async ({ app, page }) => {
+    const { watch } = await openVideo({ app, page })
+    let requested = false
+    let releaseContinuation
+    const continuationGate = new Promise(resolve => { releaseContinuation = resolve })
+    await page.route('**/youtubei/v1/browse**', async route => {
+      if (route.request().postDataJSON()?.continuation !== 'autoplay-continuation') return route.fallback()
+      requested = true
+      if (continuationState === 'pending') await continuationGate
+      await route.fulfill({ status: 500, body: 'Continuation failed' })
+    })
+    try {
+      await watch.evaluate(async component => {
+        const view = component.proxy
+        await view.$store.dispatch('updateDefaultInterval', 3)
+        view.$store.commit('setCachedPlaylist', {
+          tabId: view.tabId,
+          value: {
+            id: 'youtube-autoplay',
+            title: 'YouTube autoplay regression',
+            totalVideoCount: 100,
+            channelName: 'Test',
+            channelId: '',
+            items: [{ videoId: 'jNQXAC9IVRw', title: 'First video' }, { videoId: 'video000000', title: 'Second video' }],
+            continuationData: JSON.stringify({
+              context: { client: { clientName: 'WEB', clientVersion: '2.20261006.00.00' }, user: {}, request: {} },
+              path: '/browse',
+              payload: { continuation: 'autoplay-continuation' }
+            })
+          }
+        })
+        await view.tabRouter.push({ path: '/watch/jNQXAC9IVRw', query: { playlistId: 'youtube-autoplay' } })
+      })
+      await expect.poll(() => requested).toBe(true)
+      const video = await waitForPlayback(page)
+      await watch.evaluate(component => { component.proxy.autoplayNextPlaylistVideo = true })
+      await endVideo(video)
+      await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
+      await expect(page.locator('.autoplayTitle')).toHaveText('Second video')
+      await expect(page).toHaveURL(/#\/watch\/video000000\?playlistId=youtube-autoplay/)
+      await waitForPlayback(page)
+    } finally {
+      releaseContinuation()
+    }
+  })
+}
+
 test('filters hidden and current videos and keeps the poster darkened when none remain', async ({ app, page }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {

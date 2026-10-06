@@ -1039,10 +1039,9 @@ function playPreviousVideo() {
 }
 
 /**
- * @param {{ id: string, title: string, channelName: string, channelId: string, items: any[], continuationData: string | null }} cachedPlaylist
+ * @param {{ id: string, title: string, channelName: string, channelId: string, items: VideoData[], continuationData: string | null }} cachedPlaylist
  */
 async function loadCachedPlaylistInformation(cachedPlaylist) {
-  isLoading.value = true
   getPlaylistInfoRun = true
   store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
 
@@ -1051,21 +1050,30 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious' || cachedPlaylist.continuationData === null) {
-    playlistItems.value = applyReversePlaylistState(cachedPlaylist.items)
-  } else {
-    const videos = cachedPlaylist.items
-
-    const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    videos.push(...parseLocalPlaylistVideos(continuationData.items))
-
-    await untilEndOfLocalPlayList(continuationData, (p) => {
-      videos.push(...parseLocalPlaylistVideos(p.items))
-    }, { runCallbackOnceFirst: false })
-
-    playlistItems.value = applyReversePlaylistState(videos)
-  }
+  // Playback must not wait for later pages when the next video is already cached.
+  const videos = cachedPlaylist.items.slice()
+  playlistItems.value = applyReversePlaylistState(videos.slice())
   isLoading.value = false
+
+  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious' || cachedPlaylist.continuationData === null) return
+
+  try {
+    const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
+    await untilEndOfLocalPlayList(continuationData, (p) => {
+      if (props.playlistId !== cachedPlaylist.id) return
+      const newVideos = parseLocalPlaylistVideos(p.items)
+      videos.push(...newVideos)
+      playlistItems.value = applyReversePlaylistState(videos.slice())
+      if (shuffleEnabled.value) {
+        // Keep the established shuffle order, including entries already played.
+        randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
+      }
+    })
+  } catch (err) {
+    if (props.playlistId !== cachedPlaylist.id) return
+    console.error(err)
+    showApiErrorToast(t('Local API Error (Click to copy)'), err)
+  }
 }
 
 async function getPlaylistInformationLocal() {
@@ -1156,6 +1164,18 @@ function parseUserPlaylist(playlist) {
   isLoading.value = false
 }
 
+/** @param {VideoData[]} items */
+function shuffleItems(items) {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+
+    const temp = items[i]
+    items[i] = items[j]
+    items[j] = temp
+  }
+  return items
+}
+
 function shufflePlaylistItems() {
   // Prevents the array from affecting the original object
   const items = playlistItems.value.slice()
@@ -1168,13 +1188,7 @@ function shufflePlaylistItems() {
     // If current video is absent in (removed from) the playlist, nothing should be changed
   }
 
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-
-    const temp = items[i]
-    items[i] = items[j]
-    items[j] = temp
-  }
+  shuffleItems(items)
 
   if (cachedCurrentVideos && cachedCurrentVideos.length > 0) {
     items.unshift(cachedCurrentVideos[0])
