@@ -1442,6 +1442,7 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Allow Private Instance: "Dopustiti ovom emitiranju čitanje medija s privatne instance Invidious {instance}?"
       Cast: "Emitiraj na uređaj Google Cast"
       Connected: "Emitiranje na {device}"
       Rewind: "Natrag 10 sekundi"

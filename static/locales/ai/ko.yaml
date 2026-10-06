@@ -1768,6 +1768,7 @@ Video:
       SubmitCategoryVote: 카테고리 투표 제출
       CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
     Google Cast:
+      Allow Private Instance: "이 전송이 비공개 Invidious 인스턴스 {instance}에서 미디어를 읽도록 허용할까요?"
       Cast: "Google Cast 기기로 전송"
       Connected: "{device}(으)로 전송 중"
       Rewind: "10초 뒤로"

@@ -1425,6 +1425,7 @@ Video:
       SubmitCategoryVote: Odeslat hlas pro kategorii
       CategoryVoteSuccess: Hlas pro kategorii byl odeslán.
     Google Cast:
+      Allow Private Instance: "Povolit tomuto přenosu číst média ze soukromé instance Invidious {instance}?"
       Cast: "Odeslat do zařízení Google Cast"
       Connected: "Odesílání do {device}"
       Rewind: "Zpět o 10 sekund"

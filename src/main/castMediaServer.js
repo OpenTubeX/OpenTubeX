@@ -14,13 +14,13 @@ const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<'
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
 /** Resolve once; the transport must connect only to this validated address set. */
-export async function resolveCastMediaAddresses(url, allowedPrivateOrigin, resolveHost) {
+export async function resolveCastMediaAddresses(url, authorizePrivateUrl, resolveHost) {
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null
   const hostname = url.hostname.replaceAll(/^\[|\]$/g, '')
   try {
     const endpoints = isIP(hostname) ? [{ address: hostname }] : (await resolveHost(hostname)).endpoints
-    if (!endpoints.length || endpoints.some(({ address }) => !isIP(address) ||
-      (url.origin !== allowedPrivateOrigin && isNonPublicNetworkAddress(address)))) return null
+    if (!endpoints.length || endpoints.some(({ address }) => !isIP(address))) return null
+    if (endpoints.some(({ address }) => isNonPublicNetworkAddress(address)) && !await authorizePrivateUrl?.(url)) return null
     return endpoints.map(({ address }) => ({ address, family: isIP(address) }))
   } catch { return null }
 }

@@ -1462,6 +1462,7 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Allow Private Instance: "Sallitaanko tämän lähetyksen lukea mediaa yksityisestä Invidious-palvelusta {instance}?"
       Cast: "Lähetä Google Cast -laitteeseen"
       Connected: "Lähetetään laitteeseen {device}"
       Rewind: "Kelaa 10 sekuntia taaksepäin"

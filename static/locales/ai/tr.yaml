@@ -1425,6 +1425,7 @@ Video:
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
     Google Cast:
+      Allow Private Instance: "Bu yayının özel Invidious örneği {instance} üzerinden medya okumasına izin verilsin mi?"
       Cast: "Google Cast cihazına yayınla"
       Connected: "{device} cihazına yayınlanıyor"
       Rewind: "10 saniye geri"

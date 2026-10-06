@@ -1437,6 +1437,7 @@ Video:
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
     Google Cast:
+      Allow Private Instance: "Bu yayıma şəxsi Invidious instansiyası {instance} ünvanından media oxumağa icazə verilsin?"
       Cast: "Google Cast cihazına yayımla"
       Connected: "{device} cihazına yayımlanır"
       Rewind: "10 saniyə geri"

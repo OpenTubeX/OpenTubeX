@@ -1433,6 +1433,7 @@ Video:
       SubmitCategoryVote: Kirim suara kategori
       CategoryVoteSuccess: Suara kategori terkirim.
     Google Cast:
+      Allow Private Instance: "Izinkan transmisi ini membaca media dari instans Invidious pribadi {instance}?"
       Cast: "Transmisikan ke perangkat Google Cast"
       Connected: "Mentransmisikan ke {device}"
       Rewind: "Mundur 10 detik"

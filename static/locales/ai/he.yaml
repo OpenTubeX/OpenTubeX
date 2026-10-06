@@ -1464,6 +1464,7 @@ Video:
       SubmitCategoryVote: שליחת הצבעה על קטגוריה
       CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
+      Allow Private Instance: "לאפשר לשידור הזה לקרוא מדיה ממופע Invidious הפרטי {instance}?"
       Cast: "שידור למכשיר Google Cast"
       Connected: "משדר אל {device}"
       Rewind: "10 שניות אחורה"

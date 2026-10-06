@@ -1489,6 +1489,7 @@ Video:
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
     Google Cast:
+      Allow Private Instance: "Tillad denne casting at læse medier fra den private Invidious-instans {instance}?"
       Cast: "Cast til en Google Cast-enhed"
       Connected: "Caster til {device}"
       Rewind: "Spol 10 sekunder tilbage"

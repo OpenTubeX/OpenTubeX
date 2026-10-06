@@ -1438,6 +1438,7 @@ Video:
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
+      Allow Private Instance: "Да се разреши ли на това предаване да чете медия от частната инстанция на Invidious {instance}?"
       Cast: "Предаване към устройство Google Cast"
       Connected: "Предаване към {device}"
       Rewind: "Назад с 10 секунди"

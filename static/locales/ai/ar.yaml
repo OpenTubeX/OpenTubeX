@@ -1457,6 +1457,7 @@ Video:
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
+      Allow Private Instance: "هل تسمح لهذا البث بقراءة الوسائط من مثيل Invidious الخاص {instance}؟"
       Cast: "البث إلى جهاز Google Cast"
       Connected: "جارٍ البث إلى {device}"
       Rewind: "الرجوع 10 ثوانٍ"

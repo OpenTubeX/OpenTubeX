@@ -101,21 +101,27 @@ async function refreshDevices() {
   if (loading.value || disposed || castId.value) return
   loading.value = true
   try {
-    const discovery = window.ftElectron.chromecast.discover()
-    while (true) {
-      const inputs = { formats: props.formats, url: props.manifestUrl, type: props.manifestType }
-      const [selectedSource, discovered] = await Promise.allSettled([props.getSource(), discovery])
-      if (disposed) return
-      if (discovered.status === 'rejected') throw discovered.reason
-      const result = discovered.value
-      if (!Array.isArray(result)) throw new Error('Cast discovery failed')
-      if (inputs.formats !== props.formats || inputs.url !== props.manifestUrl || inputs.type !== props.manifestType) continue
-      if (selectedSource.status === 'rejected') throw selectedSource.reason
-      resolvedSource.value = selectedSource.value
-      devices.value = result
-      return
-    }
+    refreshSource().catch(reportError)
+    const result = await window.ftElectron.chromecast.discover()
+    if (disposed) return
+    if (!Array.isArray(result)) throw new Error('Cast discovery failed')
+    devices.value = result
   } catch { reportError() } finally { loading.value = false }
+}
+
+let sourceLookup = 0
+async function refreshSource() {
+  const lookup = ++sourceLookup
+  if (disposed || castId.value) return
+  while (true) {
+    const inputs = { formats: props.formats, url: props.manifestUrl, type: props.manifestType }
+    const [selected] = await Promise.allSettled([props.getSource()])
+    if (disposed || castId.value || lookup !== sourceLookup) return
+    if (inputs.formats !== props.formats || inputs.url !== props.manifestUrl || inputs.type !== props.manifestType) continue
+    if (selected.status === 'fulfilled') resolvedSource.value = selected.value
+    else if (!source.value) throw selected.reason
+    return
+  }
 }
 
 function releaseLocalPlayer(position, resume) {

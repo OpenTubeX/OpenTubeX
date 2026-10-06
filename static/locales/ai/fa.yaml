@@ -1495,6 +1495,7 @@ Video:
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
     Google Cast:
+      Allow Private Instance: "به این پخش اجازه داده شود رسانه را از نمونهٔ خصوصی Invidious در {instance} بخواند؟"
       Cast: "پخش روی دستگاه Google Cast"
       Connected: "در حال پخش روی {device}"
       Rewind: "۱۰ ثانیه عقب"

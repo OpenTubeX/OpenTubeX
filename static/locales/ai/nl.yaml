@@ -1470,6 +1470,7 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Allow Private Instance: "Deze cast toestaan media te lezen van de privé-Invidious-instantie {instance}?"
       Cast: "Casten naar een Google Cast-apparaat"
       Connected: "Casten naar {device}"
       Rewind: "10 seconden terug"

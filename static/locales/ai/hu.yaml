@@ -1425,6 +1425,7 @@ Video:
       SubmitCategoryVote: Kategóriaszavazat elküldése
       CategoryVoteSuccess: Kategóriaszavazat elküldve.
     Google Cast:
+      Allow Private Instance: "Engedélyezi, hogy ez az átküldés médiát olvasson a privát Invidious-példányról: {instance}?"
       Cast: "Átküldés Google Cast-eszközre"
       Connected: "Átküldés ide: {device}"
       Rewind: "Vissza 10 másodpercet"

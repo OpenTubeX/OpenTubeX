@@ -368,7 +368,7 @@ for (const proxy of ['PROXY proxy.test:8080', 'SOCKS5 proxy.test:1080', 'PROXY p
   })
 }
 
-test('destination resolution rejects non-public results except the configured instance origin', async () => {
+test('destination resolution rejects non-public results without explicit authorization', async () => {
   const publicUrl = new URL('https://media.test/video')
   const endpoints = [{ address: '8.8.8.8' }, { address: '2606:4700:4700::1111' }]
   const resolve = async hostname => { assert.equal(hostname, 'media.test'); return { endpoints } }
@@ -378,8 +378,9 @@ test('destination resolution rejects non-public results except the configured in
   endpoints.push({ address: '127.0.0.1' })
   assert.equal(await resolveCastMediaAddresses(publicUrl, null, resolve), null)
   assert.equal(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), null, resolve), null)
-  assert.deepEqual(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), 'http://127.0.0.1', resolve), [{ address: '127.0.0.1', family: 4 }])
-  assert.equal(await resolveCastMediaAddresses(publicUrl, 'http://127.0.0.1', async () => ({ endpoints: [] })), null)
+  assert.deepEqual(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), async url => url.href === 'http://127.0.0.1/video', resolve), [{ address: '127.0.0.1', family: 4 }])
+  assert.equal(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), async () => false, resolve), null)
+  assert.equal(await resolveCastMediaAddresses(publicUrl, async () => true, async () => ({ endpoints: [] })), null)
   assert.equal(await resolveCastMediaAddresses(publicUrl, null, async () => { throw new Error('DNS failed') }), null)
 })
 

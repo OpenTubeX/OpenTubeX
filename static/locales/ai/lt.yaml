@@ -1803,6 +1803,7 @@ Video:
       SubmitCategoryVote: Pateikti balsą už kategoriją
       CategoryVoteSuccess: Balsas už kategoriją pateiktas.
     Google Cast:
+      Allow Private Instance: "Leisti šiam perdavimui skaityti mediją iš privataus „Invidious“ egzemplioriaus {instance}?"
       Cast: "Perduoti į Google Cast įrenginį"
       Connected: "Perduodama į {device}"
       Rewind: "Atgal 10 sekundžių"

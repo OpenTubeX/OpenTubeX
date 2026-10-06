@@ -1425,6 +1425,7 @@ Video:
       SubmitCategoryVote: カテゴリ変更の投票を送信
       CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
     Google Cast:
+      Allow Private Instance: "このキャストによる非公開の Invidious インスタンス {instance} からのメディアの読み取りを許可しますか？"
       Cast: "Google Castデバイスにキャスト"
       Connected: "{device}にキャスト中"
       Rewind: "10秒戻る"

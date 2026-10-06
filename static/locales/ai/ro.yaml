@@ -1457,6 +1457,7 @@ Video:
       SubmitCategoryVote: Trimite votul pentru categorie
       CategoryVoteSuccess: Votul pentru categorie a fost trimis.
     Google Cast:
+      Allow Private Instance: "Permiteți acestei transmisii să citească fișiere media din instanța privată Invidious {instance}?"
       Cast: "Transmite către un dispozitiv Google Cast"
       Connected: "Se transmite către {device}"
       Rewind: "Înapoi 10 secunde"

@@ -4706,21 +4706,47 @@ function runApp() {
       if (cookies !== null) headers.Cookie = cookies
       return headers
     }
-    let allowedPrivateOrigin = null
+    let privateInstance = null
     try {
       const configuredInstance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
       if (typeof configuredInstance === 'string' && configuredInstance !== '') {
         const instance = new URL(configuredInstance)
         if (['http:', 'https:'].includes(instance.protocol)) {
-          allowedPrivateOrigin = instance.origin
+          privateInstance = instance.origin + instance.pathname
         }
       }
     } catch { }
-    const resolveAddresses = url => resolveCastMediaAddresses(url, allowedPrivateOrigin,
+    let privateApproval = null
+    const authorizePrivateUrl = async url => {
+      if (!privateInstance || !isInvidiousInstanceUrl(url.href, privateInstance) ||
+          /%(?:25)*(?:2e|2f|5c)/i.test(url.pathname) || event.sender.isDestroyed()) return false
+      // Settings can be written by the renderer. Only a native dialog grants
+      // access, for this session and this instance's origin and path.
+      privateApproval ??= (async () => {
+        const t = await createMainTranslator()
+        if (event.sender.isDestroyed()) return false
+        const { response } = await dialog.showMessageBox(BrowserWindow.fromWebContents(event.sender), {
+          type: 'question',
+          title: t('Video.Player.Google Cast.Cast'),
+          message: t('Video.Player.Google Cast.Allow Private Instance', { instance: privateInstance }),
+          buttons: [t('Cancel'), t('Yes')],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true
+        })
+        return response === 1
+      })()
+      return await privateApproval && !event.sender.isDestroyed()
+    }
+    const resolveAddresses = url => resolveCastMediaAddresses(url, authorizePrivateUrl,
       hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
     const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
       ...options, proxy: await session.defaultSession.resolveProxy(url)
     })
+    // Ask before launching the receiver, so a private source's native consent
+    // dialog does not consume the receiver's media-loading timeout.
+    if (privateInstance && isInvidiousInstanceUrl(payload?.source?.url, privateInstance) &&
+        !await resolveAddresses(new URL(payload.source.url))) return { error: 'Private Cast media was not authorized' }
     if (event.sender.isDestroyed()) return { error: 'Cast start cancelled' }
     const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia)
     if (result.castId) {

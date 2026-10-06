@@ -1440,6 +1440,7 @@ Video:
       SubmitCategoryVote: Bidali kategoriaren botoa
       CategoryVoteSuccess: Kategoriaren botoa bidali da.
     Google Cast:
+      Allow Private Instance: "Baimendu igorpen honi {instance} Invidious instantzia pribatuko multimedia irakurtzea?"
       Cast: "Igorri Google Cast gailu batera"
       Connected: "{device} gailura igortzen"
       Rewind: "10 segundo atzera"

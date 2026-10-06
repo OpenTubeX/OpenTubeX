@@ -1425,6 +1425,7 @@ Video:
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
     Google Cast:
+      Allow Private Instance: "Permitir que esta transmissão leia mídia da instância privada do Invidious {instance}?"
       Cast: "Transmitir para um dispositivo Google Cast"
       Connected: "Transmitindo para {device}"
       Rewind: "Voltar 10 segundos"

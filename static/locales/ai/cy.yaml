@@ -1447,6 +1447,7 @@ Video:
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
+      Allow Private Instance: "Caniatáu i’r darllediad hwn ddarllen cyfryngau o’r enghraifft breifat Invidious {instance}?"
       Cast: "Castio i ddyfais Google Cast"
       Connected: "Yn castio i {device}"
       Rewind: "Yn ôl 10 eiliad"

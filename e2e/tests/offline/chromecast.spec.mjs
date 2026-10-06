@@ -824,6 +824,23 @@ for (const loseFocus of [false, true]) {
   })
 }
 
+test('Cast discovery publishes receivers while source extraction is stalled', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => {
+    vm.manifestSrc = 'https://cast-media.test/stalled.sabr'
+    vm.manifestMimeType = 'application/sabr+json'
+    vm.getChromecastSource = () => new Promise(resolve => { window.finishCastLookup = resolve })
+  })
+  await page.locator('.chromecastControl > button').click()
+  await expect.poll(() => page.evaluate(() => typeof window.finishCastLookup)).toBe('function')
+  await page.getByRole('option', { name: 'Test TV', exact: true }).click({ timeout: 5000 })
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.source).toEqual({ url: 'https://cast-media.test/video.mp4', contentType: 'video/mp4' })
+  await page.evaluate(() => window.finishCastLookup({ url: 'https://cast-media.test/extracted.mpd', contentType: 'application/dash+xml' }))
+  await choice(page, 'Return to local playback')
+})
+
 for (const outcome of ['resolved', 'rejected']) {
   test(`refreshes a ${outcome} Cast source lookup superseded by stream recovery`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)

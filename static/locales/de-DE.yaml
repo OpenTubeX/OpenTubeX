@@ -2096,6 +2096,7 @@ Video:
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
     Google Cast:
+      Allow Private Instance: "Darf diese Übertragung Medien von der privaten Invidious-Instanz {instance} lesen?"
       Cast: "Auf ein Google-Cast-Gerät übertragen"
       Connected: "Übertragung an {device}"
       Rewind: "10 Sekunden zurück"

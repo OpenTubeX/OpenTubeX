@@ -1443,6 +1443,7 @@ Video:
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
+      Allow Private Instance: "Leyfa þessari sendingu að lesa miðla frá einkatilviki Invidious {instance}?"
       Cast: "Senda í Google Cast-tæki"
       Connected: "Sendir í {device}"
       Rewind: "Til baka um 10 sekúndur"

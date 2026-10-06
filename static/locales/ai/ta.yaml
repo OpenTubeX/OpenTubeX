@@ -1466,6 +1466,7 @@ Video:
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
+      Allow Private Instance: "இந்த ஒளிபரப்பு தனிப்பட்ட Invidious சேவையான {instance} இலிருந்து ஊடகத்தைப் படிக்க அனுமதிக்கவா?"
       Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
       Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
       Rewind: "10 வினாடிகள் பின்னால்"

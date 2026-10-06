@@ -1427,6 +1427,7 @@ Video:
       SubmitCategoryVote: 提交類別投票
       CategoryVoteSuccess: 類別投票已提交。
     Google Cast:
+      Allow Private Instance: "允許此次投放從私人 Invidious 實例 {instance} 讀取媒體嗎？"
       Cast: "投放到 Google Cast 裝置"
       Connected: "正在投放到 {device}"
       Rewind: "倒退 10 秒"

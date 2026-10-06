@@ -1457,6 +1457,7 @@ Video:
       SubmitCategoryVote: Надіслати голос за категорію
       CategoryVoteSuccess: Голос за категорію надіслано.
     Google Cast:
+      Allow Private Instance: "Дозволити цій трансляції читати медіа з приватного екземпляра Invidious {instance}?"
       Cast: "Транслювати на пристрій Google Cast"
       Connected: "Трансляція на {device}"
       Rewind: "Назад на 10 секунд"

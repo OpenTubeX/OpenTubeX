@@ -1454,6 +1454,7 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Allow Private Instance: "Cho phép phiên truyền này đọc nội dung đa phương tiện từ máy chủ Invidious riêng tư {instance}?"
       Cast: "Truyền tới thiết bị Google Cast"
       Connected: "Đang truyền tới {device}"
       Rewind: "Lùi 10 giây"

@@ -1427,6 +1427,7 @@ Video:
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
     Google Cast:
+      Allow Private Instance: "Kas lubada sellel edastusel lugeda meediat privaatsest Invidiousi instantsist {instance}?"
       Cast: "Edasta Google Casti seadmesse"
       Connected: "Edastamine seadmesse {device}"
       Rewind: "10 sekundit tagasi"

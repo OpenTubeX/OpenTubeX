@@ -1462,6 +1462,7 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Allow Private Instance: "Να επιτραπεί σε αυτή τη μετάδοση να διαβάζει πολυμέσα από την ιδιωτική εγκατάσταση Invidious {instance};"
       Cast: "Μετάδοση σε συσκευή Google Cast"
       Connected: "Μετάδοση στο {device}"
       Rewind: "Πίσω 10 δευτερόλεπτα"

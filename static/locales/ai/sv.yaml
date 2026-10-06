@@ -1435,6 +1435,7 @@ Video:
       SubmitCategoryVote: Skicka kategoriröst
       CategoryVoteSuccess: Kategoriröst skickad.
     Google Cast:
+      Allow Private Instance: "Tillåta att denna casting läser media från den privata Invidious-instansen {instance}?"
       Cast: "Casta till en Google Cast-enhet"
       Connected: "Castar till {device}"
       Rewind: "Spola tillbaka 10 sekunder"

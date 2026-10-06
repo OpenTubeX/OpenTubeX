@@ -1405,6 +1405,7 @@ Video:
       SubmitCategoryVote: Submit category vote
       CategoryVoteSuccess: Category vote submitted.
     Google Cast:
+      Allow Private Instance: "Allow this cast to read media from the private Invidious instance {instance}?"
       Cast: "Cast to a Google Cast device"
       Connected: "Casting to {device}"
       Rewind: "Rewind 10 seconds"

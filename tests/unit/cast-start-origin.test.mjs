@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import { randomUUID } from 'node:crypto'
 import { createCastMediaServer, resolveCastMediaAddresses } from '../../src/main/castMediaServer.js'
 import { applyTwitchPlaylistOrigin } from '../../src/twitchPlaylistOrigin.js'
+import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
 
 async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
   const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
@@ -18,6 +19,9 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
   const userActivation = { isActive: true }
   const resolvers = new Map()
   const headers = new Map()
+  const prompts = []
+  let allowPrivate = true
+  let pendingConsent
   const context = vm.createContext({
     URL, randomUUID, IpcChannels: { CAST_START: 'start', CAST_PREPARE: 'prepare', CAST_CANCEL_PREPARATION: 'cancel' },
     ipcMain: { handle: (channel, handler) => handlers.set(channel, handler), on: (channel, handler) => listeners.set(channel, handler) },
@@ -27,7 +31,10 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
     isOpenTubeXUrl: url => url === 'app://opentubex/index.html',
     baseHandlers: { settings: { _findOne: async () => ({ value: defaultInstance }) } },
     invidiousAuthorizations: new Map(),
-    resolveCastMediaAddresses, applyTwitchPlaylistOrigin,
+    resolveCastMediaAddresses, applyTwitchPlaylistOrigin, isInvidiousInstanceUrl,
+    BrowserWindow: { fromWebContents: () => ({}) },
+    createMainTranslator: async () => (key, values) => values?.instance ?? key,
+    dialog: { showMessageBox: async (_window, options) => { prompts.push(options); return pendingConsent ? await pendingConsent : { response: allowPrivate ? 1 : 0 } } },
     getYtDlpExternalStreamHeaders: () => ({}),
     getYtDlpExternalStreamCookieHeader: () => null,
     session: { defaultSession: { getUserAgent: () => 'Cast test', resolveHost: async () => ({ endpoints: [{ address: '192.168.1.10', family: 'ipv4' }] }) } },
@@ -41,6 +48,9 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
   vm.runInContext(preload, context)
   return {
     api: context.preloadInterface.chromecast,
+    prompts,
+    setConsent(value) { allowPrivate = value },
+    holdConsent(value) { pendingConsent = value },
     setDefault(value) { defaultInstance = value },
     destroy() { destroyed = true; onDestroyed?.() },
     prepare: () => handlers.get('prepare')(event),
@@ -141,6 +151,75 @@ test('renderer payload cannot replace the configured private Cast origin', async
   await f.start('http://192.168.1.10:3000')
   assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/video'), null)
   assert.ok(await f.resolve(1, 'http://192.168.1.2:3000/video'))
+})
+
+test('writing a private instance setting cannot authorize Cast without native consent', async () => {
+  const f = await fixture('')
+  f.setDefault('http://192.168.1.10:3000/invidious')
+  f.setConsent(false)
+  await f.start(undefined)
+  assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/invidious/video'), null)
+  assert.equal(f.prompts.length, 1)
+})
+
+test('declining private source consent stops startup before the receiver is launched', async () => {
+  const f = await fixture('http://192.168.1.10:3000/invidious')
+  f.setConsent(false)
+  const result = await f.api.start(() => ({ source: { url: 'http://192.168.1.10:3000/invidious/video' } }))
+  assert.match(result.error, /not authorized/)
+  assert.equal(f.resolvers.size, 0)
+})
+
+test('approved private Cast access stays inside the configured instance path', async () => {
+  const f = await fixture('http://user:secret@192.168.1.10:3000/invidious/')
+  await f.start(undefined)
+  assert.ok(await f.resolve(1, 'http://192.168.1.10:3000/invidious/video'))
+  assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/admin'), null)
+  assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/invidious-other/video'), null)
+  for (const path of ['invidious/%2e%2e%2fadmin', 'invidious/%252e%252e%252fadmin', 'invidious/%5c..%5cadmin']) {
+    assert.equal(await f.resolve(1, `http://192.168.1.10:3000/${path}`), null)
+  }
+  assert.equal(f.prompts.length, 1)
+  assert.ok(!f.prompts[0].message.includes('secret'))
+})
+
+test('private approval is shared by concurrent requests but not later Cast sessions', async () => {
+  const f = await fixture('http://192.168.1.10:3000/invidious')
+  let answer
+  f.holdConsent(new Promise(resolve => { answer = resolve }))
+  await f.start(undefined)
+  const first = f.resolve(1, 'http://192.168.1.10:3000/invidious/video')
+  const second = f.resolve(1, 'http://192.168.1.10:3000/invidious/audio')
+  while (!f.prompts.length) await new Promise(resolve => setImmediate(resolve))
+  answer({ response: 1 })
+  assert.ok(await first)
+  assert.ok(await second)
+  assert.equal(f.prompts.length, 1)
+  f.holdConsent(null)
+  f.setConsent(false)
+  await f.start(undefined)
+  assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/invidious/video'), null)
+  assert.equal(f.prompts.length, 2)
+})
+
+test('a destroyed Cast owner cannot accept an outstanding private-network prompt', async () => {
+  const f = await fixture('http://192.168.1.10:3000/invidious')
+  let answer
+  f.holdConsent(new Promise(resolve => { answer = resolve }))
+  await f.api.start(() => ({}))
+  const resolving = f.resolve(1, 'http://192.168.1.10:3000/invidious/video')
+  while (!f.prompts.length) await new Promise(resolve => setImmediate(resolve))
+  f.destroy()
+  answer({ response: 1 })
+  assert.equal(await resolving, null)
+})
+
+test('public media and private resources outside the instance path never request private consent', async () => {
+  const f = await fixture('http://192.168.1.10:3000/invidious')
+  await f.start(undefined)
+  assert.ok(await f.resolve(1, 'http://8.8.8.8/video'))
+  assert.equal(await f.resolve(1, 'http://192.168.1.10:3000/other/video'), null)
+  assert.equal(f.prompts.length, 0)
 })
 
 

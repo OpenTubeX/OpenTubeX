@@ -1428,6 +1428,7 @@ Video:
       SubmitCategoryVote: Odoslať hlas za kategóriu
       CategoryVoteSuccess: Hlas za kategóriu bol odoslaný.
     Google Cast:
+      Allow Private Instance: "Povoliť tomuto prenosu čítať médiá zo súkromnej inštancie Invidious {instance}?"
       Cast: "Odoslať do zariadenia Google Cast"
       Connected: "Odosielanie do {device}"
       Rewind: "Späť o 10 sekúnd"
