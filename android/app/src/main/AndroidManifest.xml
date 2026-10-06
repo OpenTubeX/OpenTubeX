@@ -27,6 +27,11 @@
             tools:node="merge" />
 
         <service
+            android:name=".DlnaCastService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <service
             android:name=".AndroidMediaSessionService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback"

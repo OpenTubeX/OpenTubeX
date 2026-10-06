@@ -101,6 +101,69 @@ final class AppTests: XCTestCase {
         return listener
     }
 
+    func testDlnaPrivateAuthorizationStaysInScopeAcrossRedirects() async throws {
+        var port: UInt16 = 0
+        let upstream = try await loopbackServer { header, connection in
+            let request = header.components(separatedBy: " ")[1]
+            if request == "/private/start" {
+                XCTAssertTrue(header.contains("Authorization: Basic fixture"))
+                let next = "http://127.0.0.1:\(port)/private/final"
+                connection.send(content: Data("HTTP/1.1 302 Found\r\nLocation: \(next)\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".utf8), completion: .contentProcessed { _ in connection.cancel() })
+            } else if request == "/private/final" {
+                XCTAssertTrue(header.contains("Authorization: Basic fixture"))
+                let next = "http://127.0.0.1:\(port)/outside"
+                connection.send(content: Data("HTTP/1.1 302 Found\r\nLocation: \(next)\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".utf8), completion: .contentProcessed { _ in connection.cancel() })
+            } else {
+                XCTAssertEqual(request, "/outside")
+                XCTAssertFalse(header.lowercased().contains("authorization:"))
+                connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nmedia".utf8), completion: .contentProcessed { _ in connection.cancel() })
+            }
+        }
+        defer { upstream.cancel() }
+        port = try XCTUnwrap(upstream.port).rawValue
+        let authorization = try XCTUnwrap(DlnaAuthorization(["url": "http://127.0.0.1:\(port)/private", "value": "Basic fixture"]))
+        XCTAssertFalse(authorization.contains(URL(string: "http://127.0.0.1:\(port)/private-other")))
+        XCTAssertFalse(authorization.contains(URL(string: "http://127.0.0.1:\(port + 1)/private")))
+        let ready = expectation(description: "Private relay ready")
+        let relay = try DlnaMediaServer(media: URLRequest(url: URL(string: "http://127.0.0.1:\(port)/private/start")!), authorization: authorization, address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
+        defer { relay.close() }
+        await fulfillment(of: [ready], timeout: 10)
+        let url = try XCTUnwrap(URL(string: relay.mediaUrl))
+        let (data, response) = try await URLSession.shared.data(from: url)
+        XCTAssertEqual(data, Data("media".utf8))
+        XCTAssertNil((response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Authorization"))
+        relay.expire()
+        try await waitForNative { relay.muxFailed }
+        do { _ = try await URLSession.shared.data(from: url); XCTFail("Expired cast relay still serves media") }
+        catch { /* Expiration closes the listener before suspension. */ }
+    }
+
+    func testDlnaCastLifetimeReleasesOnStopExpirationAndDeniedAssertion() throws {
+        var expiration: (() -> Void)?
+        var ended = [UIBackgroundTaskIdentifier]()
+        var denied = false
+        let lifetime = DlnaCastLifetime(begin: { _, handler in
+            expiration = handler
+            return denied ? .invalid : UIBackgroundTaskIdentifier(rawValue: 123)
+        }, finish: { ended.append($0) })
+        var expired = 0
+        XCTAssertTrue(lifetime.acquire { complete in expired += 1; complete() })
+        XCTAssertNotEqual(lifetime.task, .invalid)
+        lifetime.release()
+        lifetime.release()
+        XCTAssertEqual(ended.count, 1)
+        XCTAssertEqual(expired, 0)
+        XCTAssertTrue(lifetime.acquire { complete in expired += 1; complete() })
+        expiration?()
+        XCTAssertEqual(lifetime.task, .invalid)
+        XCTAssertEqual(ended.count, 2)
+        XCTAssertEqual(expired, 1)
+        denied = true
+        XCTAssertFalse(lifetime.acquire { complete in expired += 1; complete() })
+        lifetime.release()
+        XCTAssertEqual(ended.count, 2)
+    }
+
     func testDlnaRegisteredRequestsSurviveExpiryUntilTheirLastOwnerReleases() throws {
         let network = IOSNetwork()
         var original = URLRequest(url: URL(string: "https://media.example/video.mp4")!)
@@ -373,7 +436,11 @@ final class AppTests: XCTestCase {
         try await verifyDlnaCastMenu(merged: true)
     }
 
-    private func verifyDlnaCastMenu(merged: Bool) async throws {
+    func testDlnaPrivateInstanceAndFallbackThroughTheCastMenu() async throws {
+        try await verifyDlnaCastMenu(merged: true, privateInstance: true)
+    }
+
+    private func verifyDlnaCastMenu(merged: Bool, privateInstance: Bool = false) async throws {
         try await openApplication()
         let media = try Data(contentsOf: XCTUnwrap(Bundle(for: AppTests.self).url(forResource: "fixture", withExtension: "mp4")))
         let encodedAudio = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
@@ -389,12 +456,18 @@ final class AppTests: XCTestCase {
                 let response = "HTTP/1.1 \(status)\r\nContent-Length: \(body.count)\r\nAccess-Control-Allow-Origin: *\r\n\(extra)Connection: close\r\n\r\n"
                 connection.send(content: Data(response.utf8) + (header.hasPrefix("HEAD ") ? Data() : body), completion: .contentProcessed { _ in connection.cancel() })
             }
+            let isMedia = header.contains(" /real.mp4 ") || header.contains(" /audio.m4a ")
+            if privateInstance && isMedia && !header.lowercased().contains("authorization: basic zml4dhvyztpzZWNyZXQ=".lowercased()) {
+                reply(Data(), status: "401 Unauthorized")
+                return
+            }
+            if !isMedia { XCTAssertFalse(header.lowercased().contains("authorization:"), "Receiver control must never receive instance credentials") }
             if header.contains(" /real.mp4 ") {
                 let ranged = header.lowercased().contains("range: bytes=0-")
                 reply(media, status: ranged ? "206 Partial Content" : "200 OK",
                       extra: "Content-Type: video/mp4\r\nAccept-Ranges: bytes\r\n" + (ranged ? "Content-Range: bytes 0-\(media.count - 1)/\(media.count)\r\n" : ""))
             } else if header.contains(" /audio.m4a ") {
-                reply(audio, extra: "Content-Type: audio/mp4\r\n")
+                reply(privateInstance ? Data([0]) : audio, extra: "Content-Type: audio/mp4\r\n")
             } else if header.hasPrefix("POST ") {
                 let action = header.components(separatedBy: "\r\n").first(where: { $0.lowercased().hasPrefix("soapaction:") })?
                     .components(separatedBy: "#").last?.replacingOccurrences(of: "\"", with: "").trimmingCharacters(in: .whitespaces) ?? ""
@@ -410,7 +483,11 @@ final class AppTests: XCTestCase {
                     request.setValue("bytes=0-", forHTTPHeaderField: "Range")
                     URLSession.shared.dataTask(with: request) { data, response, error in
                         XCTAssertNil(error)
-                        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, merged ? 200 : 206)
+                        if privateInstance && (response as? HTTPURLResponse)?.statusCode == 502 {
+                            reply(Data("<ok/>".utf8))
+                            return
+                        }
+                        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, merged && !privateInstance ? 200 : 206)
                         lock.lock(); receivedVideo = data; lock.unlock()
                         transferred.fulfill()
                         reply(Data("<ok/>".utf8))
@@ -440,8 +517,11 @@ final class AppTests: XCTestCase {
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         let responded = expectation(description: "SSDP fixture responds")
         // Use iOS's registered source URL, as yt-dlp does, and the real casting UI.
-        let id = IOSNetwork.shared.prepareExternal(URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/real.mp4"))))
+        var localRequest = URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/real.mp4")))
+        if privateInstance { localRequest.setValue("Basic Zml4dHVyZTpzZWNyZXQ=", forHTTPHeaderField: "Authorization") }
+        let id = IOSNetwork.shared.prepareExternal(localRequest)
         let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
+        let originalInstance = try await evaluate("testStore.getters.getCurrentInvidiousInstance") as? String ?? ""
         _ = try await evaluate("""
         window.findWatch = vnode => {
             if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy;
@@ -469,7 +549,7 @@ final class AppTests: XCTestCase {
         """, arguments: ["merged": merged, "videoSource": "capacitor://localhost/_opentubex_media/\(id)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
         // Navigation preserves cached Watch state. Discard the fixture source
         // too, so neither the cached page nor its cast control retains it.
-        let cleanup = "document.querySelector('video')?.pause(); watchFixture.legacyFormats=[]; await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
+        let cleanup = "document.querySelector('video')?.pause(); watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
         do {
             try await wait("!!findWatch(document.querySelector('#app').__vue_app__._container._vnode)")
             _ = try await webView.callAsyncJavaScript("""
@@ -486,6 +566,13 @@ final class AppTests: XCTestCase {
             IOSNetwork.shared.expireExternal(id)
             let retained = try XCTUnwrap(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!), "A visible Watch source must survive registration expiry")
             XCTAssertEqual(retained.url?.absoluteString, "http://127.0.0.1:\(port)/real.mp4")
+            if privateInstance {
+                _ = try await webView.callAsyncJavaScript("""
+                testStore.commit('setCurrentInvidiousInstance', instance);
+                watchFixture.legacyFormats=watchFixture.legacyFormats.map(format=>({...format,url:videoSource}));
+                window.dlnaExtractionFormats=dlnaExtractionFormats.map(format=>({...format,url:format.acodec==='none'?videoSource:audioSource}));
+                """, arguments: ["instance": "http://fixture:secret@127.0.0.1:\(port)", "videoSource": "http://127.0.0.1:\(port)/real.mp4", "audioSource": "http://127.0.0.1:\(port)/audio.m4a"], in: nil, contentWorld: .page)
+            }
             _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', true)", arguments: [:], in: nil, contentWorld: .page)
             try await wait("!!document.querySelector('.dlnaCastControl button')")
             // Begin waiting only once the player is ready; CI startup can exceed the UDP timeout.
@@ -515,19 +602,23 @@ final class AppTests: XCTestCase {
             _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='iOS test TV').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'")
             await fulfillment(of: [responded, transferred], timeout: 12)
-            if !merged { XCTAssertEqual(receivedVideo, media) }
-            XCTAssertEqual(actions, merged ? ["SetAVTransportURI", "Play"] : ["SetAVTransportURI", "Play", "Seek"])
+            if !merged || privateInstance { XCTAssertEqual(receivedVideo, media) }
+            if privateInstance { XCTAssertEqual(actions, ["SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play"]) }
+            else { XCTAssertEqual(actions, merged ? ["SetAVTransportURI", "Play"] : ["SetAVTransportURI", "Play", "Seek"]) }
             let paused = try await evaluate("document.querySelector('video').paused") as? Bool
             XCTAssertEqual(paused, true)
             try await waitForNative { UIApplication.shared.isIdleTimerDisabled }
+            let controller = try XCTUnwrap(webView.window?.rootViewController as? OpenTubeXViewController)
+            let nativeCast = try XCTUnwrap(controller.bridge?.plugin(withName: "Dlna") as? DlnaPlugin)
+            XCTAssertNotEqual(nativeCast.castLifetime.task, .invalid, "A paused local video must leave a native cast background assertion")
             IOSNetwork.shared.expireExternal(audioId)
-            if merged {
+            if merged && !privateInstance {
                 XCTAssertNotNil(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(audioId)")!), "Merged sources remain registered for the casting control lifetime")
             }
             let received = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-received-\(UUID().uuidString).mp4")
             defer { try? FileManager.default.removeItem(at: received) }
             try XCTUnwrap(receivedVideo).write(to: received)
-            if merged { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
+            if merged && !privateInstance { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
             let asset = AVURLAsset(url: received)
             let duration = try await asset.load(.duration)
             XCTAssertEqual(duration.seconds, 2, accuracy: 0.05)
@@ -539,6 +630,7 @@ final class AppTests: XCTestCase {
             _ = try await evaluate("Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused")
             XCTAssertEqual(actions.last, "Stop")
+            XCTAssertEqual(nativeCast.castLifetime.task, .invalid, "Stop releases the cast background assertion")
             do {
                 _ = try await URLSession.shared.data(from: XCTUnwrap(castUri))
                 XCTFail("Cast relay still listening after Stop casting")
@@ -547,10 +639,10 @@ final class AppTests: XCTestCase {
             try await waitForNative { !UIApplication.shared.isIdleTimerDisabled }
             print("DLNA UI \(merged ? "streaming merge" : "complete MP4"): discovered renderer, Play/Stop, decoded frame, resumed local playback, closed relay")
         } catch {
-            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original, "originalInstance": originalInstance], in: nil, contentWorld: .page)
             throw error
         }
-        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original, "originalInstance": originalInstance], in: nil, contentWorld: .page)
         try await waitForNative {
             IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(id)")!) == nil &&
                 IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/_opentubex_media/\(audioId)")!) == nil

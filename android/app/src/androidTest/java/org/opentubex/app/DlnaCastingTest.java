@@ -35,7 +35,13 @@ public class DlnaCastingTest {
         verifyCastMenu(true);
     }
 
-    private void verifyCastMenu(boolean merged) throws Exception {
+    @Test public void privateInstanceCredentialsSurviveMuxFallbackWithoutReachingTheReceiver() throws Exception {
+        verifyCastMenu(true, true);
+    }
+
+    private void verifyCastMenu(boolean merged) throws Exception { verifyCastMenu(merged, false); }
+
+    private void verifyCastMenu(boolean merged, boolean privateInstance) throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         InetAddress local = null;
@@ -92,7 +98,9 @@ public class DlnaCastingTest {
                             boolean range = false;
                             int contentLength = 0;
                             String action = null;
+                            String authorization = null;
                             for (String line; (line = reader.readLine()) != null && !line.isEmpty();) {
+                                if (line.toLowerCase(java.util.Locale.ROOT).startsWith("authorization:")) authorization = line.substring(14).trim();
                                 if (line.equalsIgnoreCase("Range: bytes=2-5")) range = true;
                                 if (line.toLowerCase(java.util.Locale.ROOT).startsWith("content-length:")) contentLength = Integer.parseInt(line.substring(15).trim());
                                 if (line.toLowerCase(java.util.Locale.ROOT).startsWith("soapaction:")) action = line.substring(line.indexOf('#') + 1).replace("\"", "").trim();
@@ -113,8 +121,11 @@ public class DlnaCastingTest {
                                         stream.setConnectTimeout(5000);
                                         stream.setReadTimeout(5000);
                                         stream.setRequestProperty("Range", "bytes=0-");
-                                        assertEquals(200, stream.getResponseCode());
-                                        receivedVideo.set(readBody(stream.getInputStream()));
+                                        int status = stream.getResponseCode();
+                                        if (!(privateInstance && status == 502)) {
+                                            assertEquals(200, status);
+                                            receivedVideo.set(readBody(stream.getInputStream()));
+                                        }
                                     } finally { stream.disconnect(); }
                                 }
                             }
@@ -127,7 +138,13 @@ public class DlnaCastingTest {
                             String body = request.contains("/otx-dlna-")
                                 ? "<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>Android test TV</friendlyName><serviceList><service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType><controlURL>/control</controlURL></service></serviceList></device></root>"
                                 : "GetPositionInfo".equals(action) ? "<GetPositionInfoResponse><RelTime>00:00:08</RelTime></GetPositionInfoResponse>" : request.startsWith("POST ") ? "<ok/>" : range ? "cdef" : "abcdefghij";
-                            byte[] bytes = request.contains("/audio.m4a") ? audio : request.contains("/real.mp4") ? video : body.getBytes(StandardCharsets.US_ASCII);
+                            boolean isMedia = request.contains("/real.mp4") || request.contains("/audio.m4a");
+                            if (!isMedia) assertNull("Receiver control must not receive instance credentials", authorization);
+                            if (privateInstance && isMedia && !"Basic Zml4dHVyZTpzZWNyZXQ=".equals(authorization)) {
+                                socket.getOutputStream().write("HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                                return;
+                            }
+                            byte[] bytes = request.contains("/audio.m4a") ? (privateInstance ? new byte[]{0} : audio) : request.contains("/real.mp4") ? video : body.getBytes(StandardCharsets.US_ASCII);
                             String headers = "HTTP/1.1 " + (range ? "206 Partial Content" : "200 OK") +
                                 "\r\nContent-Length: " + bytes.length + "\r\nContent-Type: " + (request.contains("/real.mp4") ? "video/mp4" : "text/xml") + "\r\nAccess-Control-Allow-Origin: *\r\n" +
                                 (range ? "Content-Range: bytes 2-5/10\r\nAccept-Ranges: bytes\r\n" : "") +
@@ -238,6 +255,7 @@ public class DlnaCastingTest {
                 window.testStore = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
                 window.testRouter = document.querySelector('#app').__vue_app__.config.globalProperties.$router;
                 window.originalCastSetting = testStore.getters.getShowDlnaCastButton;
+                window.originalInstance = testStore.getters.getCurrentInvidiousInstance;
                 window.findWatch = vnode => {
                     if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy;
                     const inner = vnode?.component?.subTree && findWatch(vnode.component.subTree);
@@ -248,6 +266,7 @@ public class DlnaCastingTest {
                 };
                 window.dlnaOriginalNativePromise = window.Capacitor.nativePromise;
                 window.Capacitor.nativePromise = function(plugin, method, options) {
+                    if (plugin === 'Dlna' && method === 'startMediaServer') window.dlnaStartedOptions=options;
                     if (plugin === 'YtDlp' && method === 'extract' && options.args?.some(arg => arg.includes('DlnaTest001'))) {
                         return Promise.resolve({stdout: JSON.stringify({id:'DlnaTest001', formats:window.dlnaExtractionFormats, is_live:false})});
                     }
@@ -270,19 +289,42 @@ public class DlnaCastingTest {
                 // Local playback uses the same bytes without WebView HTTP restrictions;
                 // casting reads the actual HTTP source through the native relay.
                 evaluate(webView, String.format(java.util.Locale.ROOT, "watchFixture.legacyFormats=watchFixture.legacyFormats.map(format=>({...format,url:'http://%s:%d/real.mp4'}));true", host, fixture.getLocalPort()));
+                if (privateInstance) evaluate(webView, "testStore.commit('setCurrentInvidiousInstance','http://fixture:secret@" + host + ":" + fixture.getLocalPort() + "');true");
                 evaluate(webView, "document.querySelector('video').loop=true;document.querySelector('video').play();document.querySelector('.dlnaCastControl button').click();true");
                 await(webView, "Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Android test TV')");
                 evaluate(webView, "document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Android test TV').click();true");
                 await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'");
+                if (privateInstance) await(webView, "window.dlnaStartedOptions && !window.dlnaStartedOptions.audioUrl && document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'");
+                if (privateInstance) {
+                    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+                    while (receivedVideo.get() == null && System.nanoTime() < deadline) Thread.sleep(50);
+                    assertArrayEquals("Private MP4 fallback reaches the receiver", video, receivedVideo.get());
+                }
                 assertNull("Local renderer failed", rendererError.get());
                 if (!merged) assertArrayEquals("Renderer received the complete MP4 through the phone relay", video, receivedVideo.get());
-                assertEquals(merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek"), actions);
+                assertEquals(privateInstance ? Arrays.asList("SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play", "Seek") : merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek"), actions);
                 assertEquals("true", evaluate(webView, "document.querySelector('video').paused"));
                 awaitScreenWake(scenario, true);
+                try (android.os.ParcelFileDescriptor state = InstrumentationRegistry.getInstrumentation().getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand("dumpsys power")) {
+                    String power = new String(readBody(new android.os.ParcelFileDescriptor.AutoCloseInputStream(state)), StandardCharsets.UTF_8);
+                    assertTrue("Paused local playback must leave a cast-owned CPU wake lock", power.contains(context.getPackageName() + ":dlna-cast"));
+                }
+                if (privateInstance) {
+                    scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED);
+                    Thread.sleep(16_000);
+                    try (android.os.ParcelFileDescriptor state = InstrumentationRegistry.getInstrumentation().getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand("dumpsys power")) {
+                        String power = new String(readBody(new android.os.ParcelFileDescriptor.AutoCloseInputStream(state)), StandardCharsets.UTF_8);
+                        assertTrue("Background cast retains CPU wake after the local playback grace expires", power.contains(context.getPackageName() + ":dlna-cast"));
+                    }
+                    HttpURLConnection background = (HttpURLConnection) new URL(castUri.get()).openConnection(Proxy.NO_PROXY);
+                    try { assertEquals(200, background.getResponseCode()); assertArrayEquals(video, readBody(background.getInputStream())); }
+                    finally { background.disconnect(); }
+                    scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED);
+                }
                 File received = File.createTempFile("dlna-received-", ".mp4", context.getCacheDir());
                 try {
                     try (OutputStream output = new FileOutputStream(received)) { output.write(receivedVideo.get()); }
-                    if (merged) {
+                    if (merged && !privateInstance) {
                         MediaExtractor extractor = new MediaExtractor();
                         try { extractor.setDataSource(received.getAbsolutePath()); assertEquals(2, extractor.getTrackCount()); }
                         finally { extractor.release(); }
@@ -304,9 +346,14 @@ public class DlnaCastingTest {
                 catch (IOException expected) {} finally { finished.disconnect(); }
                 evaluate(webView, "document.querySelector('video').pause();true");
                 awaitScreenWake(scenario, false);
+                try (android.os.ParcelFileDescriptor state = InstrumentationRegistry.getInstrumentation().getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand("dumpsys power")) {
+                    String power = new String(readBody(new android.os.ParcelFileDescriptor.AutoCloseInputStream(state)), StandardCharsets.UTF_8);
+                    assertFalse("Stop casting releases CPU wake", power.contains(context.getPackageName() + ":dlna-cast"));
+                }
                 System.out.println("DLNA UI " + (merged ? "streaming merge" : "complete MP4") + ": discovered renderer, Play/Stop, received " + receivedVideo.get().length + " MP4 bytes, decoded frame, resumed local playback, closed relay");
             } finally {
-                evaluate(webView, "document.querySelector('video')?.pause();testRouter.push('/subscriptions');testStore.dispatch('updateShowDlnaCastButton', originalCastSetting);URL.revokeObjectURL(window.dlnaLocalUrl);window.Capacitor.nativePromise=dlnaOriginalNativePromise;true");
+                try { evaluate(webView, "document.querySelector('video')?.pause();testStore.commit('setCurrentInvidiousInstance',originalInstance);testRouter.push('/subscriptions');testStore.dispatch('updateShowDlnaCastButton', originalCastSetting);URL.revokeObjectURL(window.dlnaLocalUrl);window.Capacitor.nativePromise=dlnaOriginalNativePromise;true"); }
+                catch (AssertionError cleanupError) { System.err.println("DLNA fixture cleanup: " + cleanupError.getMessage()); }
             }
         } finally {
             clients.shutdownNow();
@@ -365,7 +412,7 @@ public class DlnaCastingTest {
                 audioUrl = HttpUrl.get(metadata.getString("audioUrl"));
 
             }
-            try (DlnaMediaServer relay = new DlnaMediaServer(context, videoUrl, audioUrl, "127.0.0.1", InetAddress.getByName("127.0.0.1"), 0)) {
+            try (DlnaMediaServer relay = new DlnaMediaServer(context, videoUrl, audioUrl, "127.0.0.1", InetAddress.getByName("127.0.0.1"), 0, null)) {
                 HttpURLConnection range = (HttpURLConnection) new URL(relay.mediaUrl()).openConnection(Proxy.NO_PROXY);
                 try {
                     range.setRequestProperty("Range", "bytes=100-");
