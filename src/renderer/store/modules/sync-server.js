@@ -1001,7 +1001,9 @@ const actions = {
           const sessionIds = sessionId === undefined
             ? (nextSessions.devices[syncDeviceId]?.sessions ?? []).map(session => session.sessionId)
             : [sessionId]
-          for (const id of sessionIds) nextSessions = removeSyncSession(nextSessions, syncDeviceId, id)
+          for (const id of sessionIds) {
+            nextSessions = removeSyncSession(nextSessions, syncDeviceId, id, { revoked: sessionId === undefined })
+          }
           const payload = await encryptSyncDocument(
             nextSessions,
             settings.syncServerPrivacyKey,
@@ -1078,7 +1080,7 @@ const actions = {
     await dispatch('updateSyncServerDeviceName', deviceName, { root: true })
     await dispatch('updateSyncServerResumeAutoSync', false, { root: true })
     await dispatch('updateSyncServerSnapshot', JSON.stringify(
-      process.env.IS_CAPACITOR ? { reclaimDeviceSessions: deviceId } : {}
+      { reclaimDeviceSessions: deviceId }
     ), { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
     await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
@@ -1193,9 +1195,9 @@ const actions = {
       await updateWhileEnabled('updateSyncServerUsername', trimmedUsername)
       await updateWhileEnabled('updateSyncServerDeviceId', deviceId)
       await updateWhileEnabled('updateSyncServerDeviceName', deviceName)
-      if (!resumesExpiredSession || (process.env.IS_CAPACITOR && privacySupported)) {
+      if (!resumesExpiredSession || privacySupported) {
         const snapshot = resumesExpiredSession ? parseSnapshot(rootState.settings.syncServerSnapshot) : {}
-        if (process.env.IS_CAPACITOR && privacySupported) snapshot.reclaimDeviceSessions = deviceId
+        if (privacySupported) snapshot.reclaimDeviceSessions = deviceId
         await updateWhileEnabled('updateSyncServerSnapshot', JSON.stringify(snapshot))
       }
       if (!resumesExpiredSession) await updateWhileEnabled('updateSyncServerLastSyncAt', 0)

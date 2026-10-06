@@ -45,6 +45,17 @@ function normalizeDeletedSessions(value) {
   return deletedSessions
 }
 
+// Revocation markers are a subset of deletions. Explicit Delete actions remain
+// permanent even when the owning device signs in again.
+function normalizeRevokedSessions(value, deletedSessions) {
+  const revokedSessions = normalizeDeletedSessions(value)
+  for (const [deviceId, sessionIds] of Object.entries(revokedSessions)) {
+    revokedSessions[deviceId] = sessionIds.filter(id => deletedSessions[deviceId]?.includes(id))
+    if (revokedSessions[deviceId].length === 0) delete revokedSessions[deviceId]
+  }
+  return Object.keys(revokedSessions).length > 0 ? { revokedSessions } : {}
+}
+
 function withoutDeletedSessions(sessions, deletedSessionIds = []) {
   const deleted = new Set(deletedSessionIds)
   return sessions.filter(session => !deleted.has(session?.sessionId))
@@ -84,6 +95,7 @@ export function normalizeSyncSessionsDocument(value) {
     devices,
     shared: normalizeSessions(value?.shared),
     deletedSessions,
+    ...normalizeRevokedSessions(value?.revokedSessions, deletedSessions),
   }
 }
 
@@ -99,13 +111,22 @@ export function getOtherDeviceSessions(value, deviceId, legacyDeviceIds = []) {
     })))
 }
 
-export function removeSyncSession(value, deviceId, sessionId) {
+export function removeSyncSession(value, deviceId, sessionId, { revoked = false } = {}) {
   const document = normalizeSyncSessionsDocument(value)
   const device = document.devices[deviceId]
+  const alreadyDeleted = document.deletedSessions[deviceId]?.includes(sessionId)
+  const revokedSessions = document.revokedSessions ?? {}
+  if (revoked && !alreadyDeleted) {
+    revokedSessions[deviceId] = [...(revokedSessions[deviceId] ?? []), sessionId]
+  } else if (!revoked && revokedSessions[deviceId]) {
+    revokedSessions[deviceId] = revokedSessions[deviceId].filter(id => id !== sessionId)
+  }
   document.deletedSessions[deviceId] = Array.from(new Set([
     ...(document.deletedSessions[deviceId] ?? []),
     sessionId,
   ]))
+  delete document.revokedSessions
+  Object.assign(document, normalizeRevokedSessions(revokedSessions, document.deletedSessions))
   if (!device) return document
 
   device.sessions = device.sessions.filter(session => session.sessionId !== sessionId)
@@ -142,6 +163,24 @@ export function formatDeviceSessionLabel(session, t) {
   return `${name} · ${t('Tab Organizer.Tab Count', { count }, count)}`
 }
 
+function claimDeletedSessions(document, sourceId, deviceId) {
+  if (!document.deletedSessions[sourceId]) return
+  const revokedSessions = document.revokedSessions ?? {}
+  const explicitDeletions = new Set([sourceId, deviceId].flatMap(id => (
+    (document.deletedSessions[id] ?? []).filter(sessionId => !revokedSessions[id]?.includes(sessionId))
+  )))
+  document.deletedSessions[deviceId] = Array.from(new Set([
+    ...(document.deletedSessions[deviceId] ?? []), ...document.deletedSessions[sourceId],
+  ]))
+  revokedSessions[deviceId] = Array.from(new Set([
+    ...(revokedSessions[deviceId] ?? []), ...(revokedSessions[sourceId] ?? []),
+  ])).filter(id => !explicitDeletions.has(id))
+  delete document.deletedSessions[sourceId]
+  delete revokedSessions[sourceId]
+  delete document.revokedSessions
+  Object.assign(document, normalizeRevokedSessions(revokedSessions, document.deletedSessions))
+}
+
 function claimLegacyDeviceSessions(document, deviceId, legacyDeviceIds) {
   const claimed = clone(document)
   for (const legacyDeviceId of legacyDeviceIds) {
@@ -162,13 +201,7 @@ function claimLegacyDeviceSessions(document, deviceId, legacyDeviceIds) {
       claimed.devices[deviceId] = legacyDevice
     }
     delete claimed.devices[legacyDeviceId]
-    if (claimed.deletedSessions[legacyDeviceId]) {
-      claimed.deletedSessions[deviceId] = Array.from(new Set([
-        ...(claimed.deletedSessions[deviceId] ?? []),
-        ...claimed.deletedSessions[legacyDeviceId],
-      ]))
-      delete claimed.deletedSessions[legacyDeviceId]
-    }
+    claimDeletedSessions(claimed, legacyDeviceId, deviceId)
   }
   return claimed
 }
@@ -182,13 +215,7 @@ function claimLegacyDesktopSessions(document, deviceId, platform) {
   if (legacy && (!current || current.sessions.length === 0)) {
     claimed.devices[deviceId] = legacy
     delete claimed.devices['legacy-desktop']
-    if (claimed.deletedSessions['legacy-desktop']) {
-      claimed.deletedSessions[deviceId] = Array.from(new Set([
-        ...(claimed.deletedSessions[deviceId] ?? []),
-        ...claimed.deletedSessions['legacy-desktop'],
-      ]))
-      delete claimed.deletedSessions['legacy-desktop']
-    }
+    claimDeletedSessions(claimed, 'legacy-desktop', deviceId)
   }
   return claimed
 }
@@ -235,9 +262,12 @@ export function mergeSyncSessions({
         deviceId,
         legacyDeviceIds
       )
-  if (reclaimDeviceSessions && remote.deletedSessions[deviceId]) {
-    delete remote.deletedSessions[deviceId]
-    // Revocation removed the remote session, not the phone's local tabs.
+  const reclaimedSessionIds = new Set(reclaimDeviceSessions ? remote.revokedSessions?.[deviceId] : [])
+  if (reclaimedSessionIds.size > 0) {
+    remote.deletedSessions[deviceId] = remote.deletedSessions[deviceId].filter(id => !reclaimedSessionIds.has(id))
+    if (remote.deletedSessions[deviceId].length === 0) delete remote.deletedSessions[deviceId]
+    delete remote.revokedSessions[deviceId]
+    // Revocation removed the remote sessions, not this device's local tabs.
     // A fresh login must publish those tabs instead of inferring a deletion.
     if (previous) delete previous.devices[deviceId]
   }
@@ -264,6 +294,15 @@ export function mergeSyncSessions({
     remoteDeviceSessions,
     previousDeviceSessions
   )
+  // A concurrent login may already have published another window. Keep that
+  // window and append the local sets whose revocation we are reclaiming.
+  const mergedSessionIds = new Set(deviceSessions.map(session => session?.sessionId))
+  for (const session of localDeviceSessions) {
+    if (reclaimedSessionIds.has(session?.sessionId) && !mergedSessionIds.has(session?.sessionId)) {
+      deviceSessions.push(clone(session))
+      mergedSessionIds.add(session.sessionId)
+    }
+  }
   const devices = {
     ...remote.devices,
     [deviceId]: { platform, sessions: clone(deviceSessions) },
@@ -290,6 +329,7 @@ export function mergeSyncSessions({
     devices,
     shared: clone(shared),
     deletedSessions,
+    ...normalizeRevokedSessions(remote.revokedSessions, deletedSessions),
   }
   const otherDeviceSessions = getOtherDeviceSessions(document, deviceId)
 

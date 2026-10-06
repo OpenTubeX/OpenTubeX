@@ -1,4 +1,5 @@
 import { test } from '../../helpers/app.mjs'
+import { verifySyncDeviceReconnection } from '../../helpers/sync-device-reconnection.mjs'
 import { verifySyncDeviceRemoval } from '../../helpers/sync-device-removal.mjs'
 
 for (const otherLogin of [false, true]) {
@@ -25,4 +26,14 @@ test('device removal cleans up tabs when the login disappears before confirmatio
 
 test('device removal preserves tabs when another login reconnects during a conflict retry', async ({ page }) => {
   await verifySyncDeviceRemoval(page, { reconnectDuringCleanup: true })
+})
+
+for (const conflict of [false, true]) {
+  test(`desktop reauthentication reclaims revoked tab sets after ${conflict ? 'a conflict' : 'a failed upload'}`, async ({ page }) => {
+    await verifySyncDeviceReconnection(page, { conflict })
+  })
+}
+
+test('desktop reauthentication preserves intentional tab-set deletion', async ({ page }) => {
+  await verifySyncDeviceReconnection(page, { intentionalDeletion: true })
 })

@@ -212,6 +212,7 @@ for (const current of [false, true]) {
     assert.equal(result.revoked, true)
     assert.equal(result.remote.devices['old-phone'], undefined)
     assert.deepEqual(result.remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
+    assert.deepEqual(result.remote.revokedSessions['old-phone'], ['old-tabs', 'older-tabs'])
     assert.deepEqual(result.remote.devices['new-phone'].sessions, [tabSet('new-tabs')])
     assert.deepEqual(result.remote.devices.laptop.sessions, [tabSet('laptop-tabs')])
     assert.deepEqual(result.remote.shared, [tabSet('shared-tabs')])

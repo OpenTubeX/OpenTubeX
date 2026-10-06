@@ -1566,10 +1566,10 @@ test('a new live device message is delivered after an older activity response fi
   }
 })
 
-for (const resumed of [false, true]) {
-  test(`a new phone login persists tab reclamation before publishing its token${resumed ? ' when resuming an expired session' : ''}`, async () => {
+for (const capacitor of [false, true]) for (const resumed of [false, true]) {
+  test(`a new ${capacitor ? 'phone' : 'desktop'} login persists tab reclamation before publishing its token${resumed ? ' when resuming an expired session' : ''}`, async () => {
     const snapshot = { subscriptions: ['private-channel'], sessionsV2: { devices: {} } }
-    const f = fixture({ syncServerSyncSubscriptions: false, syncServerSnapshot: JSON.stringify(snapshot) }, { encrypted: true, capacitor: true })
+    const f = fixture({ syncServerSyncSubscriptions: false, syncServerSnapshot: JSON.stringify(snapshot) }, { encrypted: true, capacitor })
     f.context.state.syncServerSessionExpired = resumed
     await f.actions.authenticateSyncServer(f.context, { ...credentials, privacyPassphrase: 'separate-privacy-passphrase' })
     const saved = JSON.parse(f.settings.syncServerSnapshot)
@@ -1589,7 +1589,7 @@ for (const conflict of [false, true]) {
       [deviceId]: { platform: 'mobile', sessions: local },
       laptop: { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'laptop' }] },
     } })
-    let remote = sessions.removeSyncSession(previous, deviceId, 'mobile')
+    let remote = sessions.removeSyncSession(previous, deviceId, 'mobile', { revoked: true })
     let revision = 1
     let puts = 0
     const f = fixture({
@@ -1603,6 +1603,7 @@ for (const conflict of [false, true]) {
         if (puts === 1) {
           if (conflict) {
             remote.devices.laptop.sessions.push({ ...local[0], sessionId: 'new-laptop' })
+            remote.devices[deviceId] = { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'new-window', updatedAt: 3 }] }
             revision++
           }
           return new Response('Retry', { status: conflict ? 409 : 503 })
@@ -1617,14 +1618,15 @@ for (const conflict of [false, true]) {
       assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, deviceId)
     }
     await f.actions.syncWithSyncServer(f.context)
-    assert.deepEqual(remote.devices[deviceId].sessions, local)
+    assert.deepEqual(remote.devices[deviceId].sessions.filter(session => session.sessionId === 'mobile'), local)
+    if (conflict) assert.equal(remote.devices[deviceId].sessions.length, 2)
     assert.equal(remote.deletedSessions[deviceId], undefined)
     assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, undefined)
     if (conflict) assert.equal(remote.devices.laptop.sessions.length, 2)
     remote = sessions.removeSyncSession(remote, deviceId, 'mobile')
     revision++
     await f.actions.syncWithSyncServer(f.context)
-    assert.deepEqual(remote.devices[deviceId].sessions, [])
+    assert.ok(remote.devices[deviceId].sessions.every(session => session.sessionId !== 'mobile'))
     assert.deepEqual(remote.deletedSessions[deviceId], ['mobile'])
   })
 }
@@ -1637,7 +1639,7 @@ for (const capacitor of [false, true]) {
       privacyKey: f.settings.syncServerPrivacyKey, privacySalt: f.settings.syncServerPrivacySalt,
       deviceId: credentials.deviceId, deviceName: credentials.deviceName,
     })
-    assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, capacitor ? credentials.deviceId : undefined)
+    assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, credentials.deviceId)
     assert.ok(f.dispatched.findIndex(([action]) => action === 'updateSyncServerSnapshot') <
       f.dispatched.findIndex(([action]) => action === 'replaceSyncServerToken'))
   })
