@@ -317,6 +317,98 @@ for (const defaultInterval of [0, 1]) {
   })
 }
 
+for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop', 'boundary-empty', 'boundary-failed']) {
+  test(`YouTube playlist autoplay advances with a ${continuationState} continuation request`, async ({ app, page }) => {
+    const { watch } = await openVideo({ app, page })
+    const endsAtBoundary = continuationState.startsWith('boundary-')
+    const atBoundary = continuationState.startsWith('delayed') || endsAtBoundary
+    let requested = false
+    let releaseContinuation
+    const continuationGate = new Promise(resolve => { releaseContinuation = resolve })
+    await page.route('**/youtubei/v1/browse**', async route => {
+      if (route.request().postDataJSON()?.continuation !== 'autoplay-continuation') return route.fallback()
+      requested = true
+      if (continuationState !== 'failed') await continuationGate
+      if (continuationState === 'boundary-failed') return route.fulfill({ status: 500, body: 'Continuation failed' })
+      if (atBoundary) {
+        await route.fulfill({
+          json: {
+            onResponseReceivedActions: [{
+              appendContinuationItemsAction: {
+                continuationItems: continuationState === 'boundary-empty'
+                  ? []
+                  : [{
+                      playlistVideoRenderer: {
+                        videoId: 'video000000',
+                        title: { simpleText: 'Second video', accessibility: { accessibilityData: { label: 'Second video' } } },
+                        index: { simpleText: '2' },
+                        shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
+                        thumbnail: { thumbnails: [] },
+                        isPlayable: true,
+                        lengthSeconds: '10',
+                        lengthText: { simpleText: '0:10' },
+                        navigationEndpoint: { watchEndpoint: { videoId: 'video000000' } }
+                      }
+                    }]
+              }
+            }]
+          }
+        })
+      } else {
+        await route.fulfill({ status: 500, body: 'Continuation failed' })
+      }
+    })
+    try {
+      await watch.evaluate(async (component, atBoundary) => {
+        const view = component.proxy
+        await view.$store.dispatch('updateDefaultInterval', 3)
+        view.$store.commit('setCachedPlaylist', {
+          tabId: view.tabId,
+          value: {
+            id: 'youtube-autoplay',
+            title: 'YouTube autoplay regression',
+            totalVideoCount: 100,
+            channelName: 'Test',
+            channelId: '',
+            items: [{ videoId: 'jNQXAC9IVRw', title: 'First video', lengthSeconds: 10 }, ...(atBoundary ? [] : [{ videoId: 'video000000', title: 'Second video', lengthSeconds: 10 }])],
+            continuationData: JSON.stringify({
+              context: { client: { clientName: 'WEB', clientVersion: '2.20261006.00.00' }, user: {}, request: {} },
+              path: '/browse',
+              payload: { continuation: 'autoplay-continuation' }
+            })
+          }
+        })
+        await view.tabRouter.push({ path: '/watch/jNQXAC9IVRw', query: { playlistId: 'youtube-autoplay' } })
+      }, atBoundary)
+      await expect.poll(() => requested).toBe(true)
+      const video = await waitForPlayback(page)
+      await watch.evaluate(component => { component.proxy.autoplayNextPlaylistVideo = true })
+      if (continuationState === 'delayed-loop') await page.getByRole('button', { name: 'Loop Playlist', exact: true }).click()
+      await expect(page.locator('.watchVideoPlaylist p').filter({ hasText: 'unavailable' })).toHaveCount(0)
+      await endVideo(video)
+      if (atBoundary) {
+        await expect.poll(() => watch.evaluate(component => component.proxy.waitingForPlaylistContinuation)).toBe(true)
+        await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+        await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?playlistId=youtube-autoplay/)
+        releaseContinuation()
+      }
+      if (endsAtBoundary) {
+        await expect.poll(() => watch.evaluate(component => component.proxy.waitingForPlaylistContinuation)).toBe(false)
+        await expect(page.getByText(/The playlist has ended\.\s+Enable loop to continue playing/)).toBeVisible()
+        await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+        await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?playlistId=youtube-autoplay/)
+        return
+      }
+      await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
+      await expect(page.locator('.autoplayTitle')).toHaveText('Second video')
+      await expect(page).toHaveURL(/#\/watch\/video000000\?playlistId=youtube-autoplay/)
+      await waitForPlayback(page)
+    } finally {
+      releaseContinuation()
+    }
+  })
+}
+
 test('filters hidden and current videos and keeps the poster darkened when none remain', async ({ app, page }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {
