@@ -5,6 +5,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { setImmediate as nextTurn } from 'node:timers/promises'
 import { createMuxedMediaServer } from '../../src/main/dlnaMux.js'
 
 const ffmpeg = process.env.FFMPEG_PATH ?? 'ffmpeg'
@@ -13,7 +14,7 @@ const available = spawnSync(ffmpeg, ['-version'], { stdio: 'ignore' }).status ==
 const listen = server => new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
 const close = server => { server.closeAllConnections(); return new Promise(resolve => server.close(resolve)) }
 
-test('streams a playable H.264/AAC merge before the source downloads finish', { skip: !available }, async t => {
+async function createTracks(t) {
   const directory = await mkdtemp(join(tmpdir(), 'otx-dlna-mux-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   execFileSync(ffmpeg, ['-v', 'error', '-f', 'lavfi', '-i', 'testsrc2=size=160x90:rate=30', '-t', '20',
@@ -21,6 +22,11 @@ test('streams a playable H.264/AAC merge before the source downloads finish', { 
   execFileSync(ffmpeg, ['-v', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440', '-t', '20',
     '-c:a', 'aac', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', join(directory, 'audio.m4a')])
   const [video, audio] = await Promise.all([readFile(join(directory, 'video.mp4')), readFile(join(directory, 'audio.m4a'))])
+  return { directory, video, audio }
+}
+
+test('streams a playable H.264/AAC merge before the source downloads finish', { skip: !available }, async t => {
+  const { directory, video, audio } = await createTracks(t)
   let downloadsFinished = 0
   const timers = new Set()
   const upstream = createServer((request, response) => {
@@ -54,6 +60,50 @@ test('streams a playable H.264/AAC merge before the source downloads finish', { 
   assert.deepEqual(probe.streams.map(stream => stream.codec_name).sort(), ['aac', 'h264'])
   assert.equal(probe.streams.find(stream => stream.codec_name === 'h264').height, 90)
   execFileSync(ffmpeg, ['-v', 'error', '-i', join(directory, 'merged.mp4'), '-map', '0:v:0', '-map', '0:a:0', '-f', 'null', '-'])
+})
+
+test('a merged stream that stalls after its first output reports failure and closes', { skip: !available }, async t => {
+  const { video, audio } = await createTracks(t)
+  const upstream = createServer((request, response) => {
+    const bytes = request.url === '/video' ? video : audio
+    response.writeHead(200, { 'content-length': bytes.length })
+    response.write(bytes.subarray(0, Math.floor(bytes.length / 2)))
+    // Both tracks stop delivering data after enough fragments to begin playback.
+  })
+  await listen(upstream)
+  t.after(() => close(upstream))
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const base = `http://127.0.0.1:${upstream.address().port}`
+  const relay = await createMuxedMediaServer(`${base}/video`, `${base}/audio`, '127.0.0.1', 'secret', { ffmpegPath: ffmpeg })
+  await listen(relay)
+  t.after(() => close(relay))
+  let resumeRenderer
+  relay.on('request', (_request, response) => {
+    const write = response.write.bind(response)
+    let backedUp = true
+    // Deliver the initial bytes, then hold the pipe's drain event as a paused TV would.
+    response.write = (...args) => {
+      const written = write(...args)
+      return backedUp ? false : written
+    }
+    resumeRenderer = () => { backedUp = false; response.emit('drain') }
+  })
+  const response = await fetch(`http://127.0.0.1:${relay.address().port}/secret/video.mp4`)
+  assert.equal(response.status, 200)
+  const reader = response.body.getReader()
+  assert.ok((await reader.read()).value.length > 0)
+  await nextTurn()
+  t.mock.timers.tick(30_000)
+  assert.equal(relay.muxFailed, false, 'Renderer backpressure must not trigger upstream recovery')
+  resumeRenderer()
+  await nextTurn()
+  t.mock.timers.tick(14_999)
+  assert.equal(relay.muxFailed, false)
+  t.mock.timers.tick(1)
+  assert.equal(relay.muxFailed, true, 'An idle mux requests complete-source recovery after initial playback')
+  await assert.rejects(async () => {
+    while (!(await reader.read()).done) { /* Drain bytes received before the timeout. */ }
+  })
 })
 
 test('a missing mux executable produces an HTTP error and can be stopped', async t => {
