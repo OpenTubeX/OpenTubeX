@@ -59,12 +59,6 @@ function normalizeDeletedSessions(value) {
       : []
     if (deletedSessions[key].length === 0) delete deletedSessions[key]
   }
-  for (const key of Object.keys(deletedSessions)) {
-    if (key.startsWith(REVOCATION_LOGIN_KEY_PREFIX) &&
-        !deletedSessions[revocationKey(key.slice(REVOCATION_LOGIN_KEY_PREFIX.length))]) {
-      delete deletedSessions[key]
-    }
-  }
   return deletedSessions
 }
 
@@ -142,7 +136,6 @@ export function removeSyncSession(value, deviceId, sessionId, { revokedAccountSe
     document.deletedSessions[key] = document.deletedSessions[key].filter(id => id !== sessionId)
     if (document.deletedSessions[key].length === 0) {
       delete document.deletedSessions[key]
-      delete document.deletedSessions[loginKey]
     }
   }
   document.deletedSessions[deviceId] = Array.from(new Set([
@@ -165,6 +158,11 @@ export function removeSyncDeviceSessions(value, deviceId, accountSessionId) {
   for (const sessionId of sessionIds) {
     document = removeSyncSession(document, deviceId, sessionId, { revokedAccountSessionId: accountSessionId })
   }
+  // A login with no saved sets can still open a new window before its DELETE.
+  const loginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`
+  document.deletedSessions[loginKey] = Array.from(new Set([
+    ...(document.deletedSessions[loginKey] ?? []), accountSessionId,
+  ]))
   return document
 }
 
@@ -199,26 +197,27 @@ export function formatDeviceSessionLabel(session, t) {
 
 function claimDeletedSessions(document, sourceId, deviceId) {
   const deleted = document.deletedSessions
-  if (!deleted[sourceId]) return
   const sourceKey = revocationKey(sourceId)
   const targetKey = revocationKey(deviceId)
   const explicitDeletions = new Set([sourceId, deviceId].flatMap(id => (
     (deleted[id] ?? []).filter(sessionId => !deleted[revocationKey(id)]?.includes(sessionId))
   )))
-  deleted[deviceId] = Array.from(new Set([...(deleted[deviceId] ?? []), ...deleted[sourceId]]))
+  if (deleted[sourceId]) {
+    deleted[deviceId] = Array.from(new Set([...(deleted[deviceId] ?? []), ...deleted[sourceId]]))
+  }
   const revoked = Array.from(new Set([
     ...(deleted[targetKey] ?? []), ...(deleted[sourceKey] ?? []),
   ])).filter(id => !explicitDeletions.has(id))
   const sourceLoginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${sourceId}`
   const targetLoginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`
+  const pendingLogins = Array.from(new Set([
+    ...(deleted[targetLoginKey] ?? []), ...(deleted[sourceLoginKey] ?? []),
+  ]))
+  if (pendingLogins.length > 0) deleted[targetLoginKey] = pendingLogins
   if (revoked.length > 0) {
     deleted[targetKey] = revoked
-    deleted[targetLoginKey] = Array.from(new Set([
-      ...(deleted[targetLoginKey] ?? []), ...(deleted[sourceLoginKey] ?? []),
-    ]))
   } else {
     delete deleted[targetKey]
-    delete deleted[targetLoginKey]
   }
   delete deleted[sourceLoginKey]
   delete deleted[sourceId]
@@ -285,6 +284,7 @@ export function mergeSyncSessions({
   preferredMode,
   legacyDeviceIds = [],
   reclaimDeviceSessions = false,
+  activeRevokedLogins = [],
 }) {
   const remote = claimLegacyDeviceSessions(
     claimLegacyDesktopSessions(
@@ -312,10 +312,14 @@ export function mergeSyncSessions({
     remote.deletedSessions[deviceId] = remote.deletedSessions[deviceId].filter(id => !reclaimedSessionIds.has(id))
     if (remote.deletedSessions[deviceId].length === 0) delete remote.deletedSessions[deviceId]
     delete remote.deletedSessions[key]
-    delete remote.deletedSessions[`${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`]
     // Revocation removed the remote sessions, not this device's local tabs.
     // A fresh login must publish those tabs instead of inferring a deletion.
     if (previous) delete previous.devices[deviceId]
+  }
+  if (reclaimDeviceSessions) {
+    const loginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`
+    if (activeRevokedLogins.length > 0) remote.deletedSessions[loginKey] = clone(activeRevokedLogins)
+    else delete remote.deletedSessions[loginKey]
   }
   const localMode = preferredMode === 'shared' ? 'shared' : 'separate'
   const localModeChanged = previous !== null && previous.mode !== localMode

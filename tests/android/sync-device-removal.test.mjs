@@ -27,8 +27,8 @@ for (const options of [{ otherLogin: false }, { otherLogin: true }, { otherLogin
   })
 }
 
-for (const { conflict, intentionalDeletion, olderLogin } of [{ conflict: false }, { conflict: true }, { intentionalDeletion: true }, { olderLogin: true }]) {
-  test(olderLogin ? 'Android upgrade reclaims tabs after an older client signs back in' : intentionalDeletion ? 'Android reauthentication preserves intentional tab-set deletion' : `Android revoked phone reconnects with its persisted device ID after ${conflict ? 'a conflict' : 'a failed upload'}`, {
+for (const { conflict, intentionalDeletion, olderLogin, pendingRevocation } of [{ conflict: false }, { conflict: true }, { intentionalDeletion: true }, { olderLogin: true }, { pendingRevocation: true }]) {
+  test(pendingRevocation ? 'Android pending revocation blocks sync while preserving local tabs' : olderLogin ? 'Android upgrade reclaims tabs after an older client signs back in' : intentionalDeletion ? 'Android reauthentication preserves intentional tab-set deletion' : `Android revoked phone reconnects with its persisted device ID after ${conflict ? 'a conflict' : 'a failed upload'}`, {
     skip: !process.env.ANDROID_CDP_URL,
   }, async () => {
     const { verifySyncDeviceReconnection } = await import('../../e2e/helpers/sync-device-reconnection.mjs')
@@ -37,7 +37,7 @@ for (const { conflict, intentionalDeletion, olderLogin } of [{ conflict: false }
     try {
       const page = browser.contexts()[0].pages()[0]
       await page.reload()
-      await verifySyncDeviceReconnection(page, { conflict, intentionalDeletion, olderLogin, phone: true })
+      await verifySyncDeviceReconnection(page, { conflict, intentionalDeletion, olderLogin, pendingRevocation, phone: true })
     } finally {
       clearTimeout(keepAlive)
       await browser.close()

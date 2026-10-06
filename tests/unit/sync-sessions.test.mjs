@@ -525,3 +525,19 @@ test('revocation classification is discarded when the primary tombstone is gone'
   } })
   assert.deepEqual(document.deletedSessions, { phone: ['mobile'], 'revoked:phone': ['mobile'], 'revoked-login:phone': ['old-login'] })
 })
+
+for (const explicitDeletion of [false, true]) {
+  test(`claiming legacy metadata preserves pending logins ${explicitDeletion ? 'alongside intentional deletion' : 'without tab tombstones'}`, () => {
+    const document = mergeSyncSessions({ localSessions: [], remoteValue: {
+      devices: { legacy: { platform: 'desktop', sessions: [] } },
+      deletedSessions: {
+        ...(explicitDeletion ? { legacy: ['deleted'] } : {}),
+        'revoked-login:legacy': ['target-login'],
+        'revoked-login:desktop': ['other-login'],
+      },
+    }, deviceId: 'desktop', legacyDeviceIds: ['legacy'], platform: 'desktop' }).document
+    assert.deepEqual(document.deletedSessions['revoked-login:desktop'], ['other-login', 'target-login'])
+    assert.equal(document.deletedSessions['revoked-login:legacy'], undefined)
+    if (explicitDeletion) assert.deepEqual(document.deletedSessions.desktop, undefined)
+  })
+}

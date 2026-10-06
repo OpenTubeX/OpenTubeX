@@ -41,3 +41,7 @@ test('desktop reauthentication preserves intentional tab-set deletion', async ({
 test('desktop upgrade reclaims tabs after an older client signs back in', async ({ page }) => {
   await verifySyncDeviceReconnection(page, { olderLogin: true })
 })
+
+test('pending revocation blocks a desktop window opened after cleanup', async ({ page }) => {
+  await verifySyncDeviceReconnection(page, { pendingRevocation: true })
+})

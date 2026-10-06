@@ -5,7 +5,7 @@ import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/rend
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { goToSettingsSection } from './app.mjs'
 
-export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false } = {}) {
+export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false, pendingRevocation = false } = {}) {
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
   await expect.poll(() => page.evaluate(() => (
     document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length
@@ -40,6 +40,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
   let signedIn = false
   let loginDeviceId
   let reconnectPuts = 0
+  let sessionPuts = 0
   let deviceInfo = await encryptSyncServerDeviceInfo({ name: 'Fixture phone', platform: 'android', architecture: 'x64', release: '15' }, key, deviceId)
   const request = async options => {
     const path = new URL(options.url).pathname
@@ -67,6 +68,28 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       }
     } else if (path === '/v1/account/sessions/old-login' && options.method === 'DELETE') {
       expect(document.devices[deviceId]).toBeUndefined()
+      if (pendingRevocation) {
+        const cleaned = structuredClone(document)
+        const previousPuts = sessionPuts
+        const originalPages = page.context().pages()
+        if (!phone) {
+          await page.evaluate(() => window.ftElectron.openInNewWindow('/subscriptions'))
+          await expect.poll(async () => {
+            const sessions = await page.evaluate(() => window.ftElectron.tabs.getSyncSessions())
+            return sessions.some(session => !sessionIds.includes(session.sessionId))
+          }).toBe(true)
+        }
+        try {
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+          expect(sessionPuts).toBe(previousPuts)
+          expect(document).toEqual(cleaned)
+          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length)).toBeGreaterThan(0)
+        } finally {
+          for (const extraPage of page.context().pages().filter(candidate => !originalPages.includes(candidate))) {
+            await extraPage.close()
+          }
+        }
+      }
       revoked = true
       status = 204
     } else if (path === '/v1/account/sessions/current' || options.method === 'PATCH') {
@@ -77,6 +100,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     else if (path === '/v1/encrypted_sync/sessions') data = { revision: 0, payload: null }
     else if (path === '/v1/encrypted_sync/sessionsV2') {
       if (options.method === 'PUT') {
+        sessionPuts++
         if (signedIn && !intentionalDeletion && ++reconnectPuts === 1) {
           if (conflict) {
             document.devices.laptop.sessions.push({ sessionId: 'concurrent-laptop', tabs: [{ id: 'new-laptop-tab', url: '/history' }] })

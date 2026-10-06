@@ -1689,7 +1689,59 @@ test('a reclamation conflict rechecks login identity against refreshed revocatio
   })
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(reads, 2)
-  assert.deepEqual(remote.devices[deviceId].sessions, [])
+  assert.equal(remote.devices[deviceId], undefined)
   assert.deepEqual(remote.deletedSessions[deviceId], ['mobile'])
   assert.deepEqual(remote.deletedSessions[`revoked-login:${deviceId}`], ['new-login'])
 })
+
+for (const initiallyEmpty of [false, true]) {
+  test(`pending revocation blocks new windows ${initiallyEmpty ? 'without existing tab sets' : 'after cleanup'} and survives another login reconnecting`, async () => {
+    const deviceId = Buffer.alloc(16, 11).toString('base64url')
+    const original = { sessionId: 'original', tabs: [{ id: 'original-tab', url: '/subscriptions' }] }
+    const newlyOpened = { sessionId: 'new-window', tabs: [{ id: 'new-tab', url: '/history' }] }
+    let remote = sessions.removeSyncDeviceSessions(initiallyEmpty ? {} : {
+      devices: { [deviceId]: { platform: 'desktop', sessions: [original] } },
+    }, deviceId, 'target-login')
+    let currentLogin = 'target-login'
+    let targetActive = true
+    let revision = 1
+    let puts = 0
+    const local = [original, newlyOpened]
+    const f = fixture({ syncServerDeviceId: deviceId, syncServerSyncSubscriptions: false,
+      syncServerSyncSessions: true }, { encrypted: true,
+      desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true }, respond: async (url, options) => {
+        if (url.endsWith('/v1/account/sessions')) return { sessions: [
+          { id: currentLogin, device_id: deviceId, current: true },
+          ...(targetActive && currentLogin !== 'target-login'
+            ? [{ id: 'target-login', device_id: deviceId, current: false }] : []),
+        ] }
+        if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
+        if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
+        if (options.method === 'PUT') {
+          puts++
+          remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          revision++
+        }
+        return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+      } })
+    const cleaned = structuredClone(remote)
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(puts, 0)
+    assert.deepEqual(remote, cleaned)
+    currentLogin = 'reconnected-login'
+    await f.actions.syncWithSyncServer(f.context)
+    assert.deepEqual(remote.devices[deviceId].sessions, local)
+    assert.deepEqual(remote.deletedSessions[`revoked-login:${deviceId}`], ['target-login'])
+    const reconnected = structuredClone(remote)
+    currentLogin = 'target-login'
+    local.push({ sessionId: 'another-window', tabs: [{ id: 'another-tab', url: '/' }] })
+    const previousPuts = puts
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(puts, previousPuts)
+    assert.deepEqual(remote, reconnected)
+    currentLogin = 'reconnected-login'
+    targetActive = false
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(remote.deletedSessions[`revoked-login:${deviceId}`], undefined)
+  })
+}

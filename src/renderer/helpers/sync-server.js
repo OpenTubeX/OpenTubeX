@@ -1268,18 +1268,21 @@ export async function syncSessions(client, store, previous = null, { accountClie
   const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
   const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)
   let reclaimDeviceSessions = false
+  let activeRevokedLogins = []
   if (revokedLogins.length > 0) {
     const response = await accountClient.getAccountSessions()
     const current = Array.isArray(response?.sessions)
       ? response.sessions.filter(session => session?.current === true)
       : []
     if (current.length !== 1 || current[0].device_id !== deviceId ||
-        typeof current[0].id !== 'string' || current[0].id.length === 0) {
+        response.sessions.some(session => typeof session?.id !== 'string' || session.id.length === 0)) {
       throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
     }
-    // The cleanup's login may still be active until its DELETE finishes. Only
-    // a different authenticated login may restore the revoked tab sets.
-    reclaimDeviceSessions = !revokedLogins.includes(current[0].id)
+    // Block this login's entire upload, including windows opened after cleanup.
+    // Keep local tabs intact while the account-session DELETE is pending.
+    if (revokedLogins.includes(current[0].id)) return null
+    activeRevokedLogins = revokedLogins.filter(id => response.sessions.some(session => session.id === id))
+    reclaimDeviceSessions = true
   }
   const merged = mergeSyncSessions({
     localSessions: local,
@@ -1290,6 +1293,7 @@ export async function syncSessions(client, store, previous = null, { accountClie
     preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
     legacyDeviceIds,
     reclaimDeviceSessions,
+    activeRevokedLogins,
   })
 
   if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
