@@ -182,10 +182,19 @@ test.describe('New feed removal animation', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     const retained = page.locator('.newFeed [data-video-id="move-video-1"]')
     await expect(retained).toBeVisible()
-    await expect(page.locator('.feed-enter-active, .feed-move-suppressed')).toHaveCount(0)
-    // Initial grid sizing suppresses movement for 100 ms; sample a list edit
-    // only after that unrelated resize suppression has expired.
-    await page.waitForTimeout(150)
+    await expect(page.locator('.feed-enter-active')).toHaveCount(0)
+    // Suppression is a TransitionGroup prop, not a class on idle cards.
+    await expect.poll(() => page.locator('.newFeed .autoGrid').evaluate(element => {
+      const movementEnabled = vnode => {
+        if (!vnode) return false
+        if (vnode.el === element && vnode.props?.name === 'feed') {
+          return vnode.component.props.moveClass !== 'feed-move-suppressed'
+        }
+        return movementEnabled(vnode.component?.subTree) ||
+          (Array.isArray(vnode.children) && vnode.children.some(movementEnabled))
+      }
+      return movementEnabled(document.querySelector('#app')._vnode)
+    })).toBe(true)
     await page.evaluate(() => {
       window.__retainedCardMoved = false
       window.__moveObserver = new MutationObserver(records => {
