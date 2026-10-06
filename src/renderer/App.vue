@@ -748,13 +748,14 @@ function startPageSwipe(event) {
     y: event.clientY,
     time: event.timeStamp,
     width,
-    dragging: false
+    dragging: false,
+    cancelled: false
   }
 }
 
 function movePageSwipe(event) {
   const pointer = pageSwipePointer
-  if (!pointer || pointer.id !== event.pointerId) return
+  if (!pointer || pointer.id !== event.pointerId || pointer.cancelled) return
 
   const distance = event.clientX - pointer.x
   const verticalDistance = Math.abs(event.clientY - pointer.y)
@@ -764,7 +765,9 @@ function movePageSwipe(event) {
   }
 
   if (isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
-    cancelPageSwipe()
+    // Keep tracking the release so cancellation cannot turn a drag into a click.
+    pointer.cancelled = true
+    pageSwipe.value = null
     return
   }
 

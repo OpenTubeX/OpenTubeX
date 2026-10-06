@@ -121,6 +121,45 @@ test('release keeps immediate click suppression and does not expire a newer drag
   assert.equal(suppressed, true, 'cleanup from an earlier release must not affect a new drag')
 })
 
+for (const interruptedBy of ['activeTabId', 'presentedTabId', 'isAnyPromptOpen']) {
+  test(`a drag interrupted by ${interruptedBy} suppresses release and cannot resume`, async () => {
+    const { context, event, swipe, timers } = headerGesture()
+    context.startPageSwipe(event)
+    context.movePageSwipe({ ...event, clientX: 150 })
+    assert.equal(swipe()?.toId, 'second')
+    context[interruptedBy].value = interruptedBy === 'isAnyPromptOpen' ? true : 'second'
+    context.movePageSwipe({ ...event, clientX: 140 })
+    assert.equal(swipe(), null, 'interruption removes the swipe preview')
+    for (const timer of [...timers.values()]) timer()
+    context[interruptedBy].value = interruptedBy === 'isAnyPromptOpen' ? false : 'first'
+    context.movePageSwipe({ ...event, clientX: 130 })
+    assert.equal(swipe(), null, 'an interrupted drag cannot resume')
+    await context.finishPageSwipe(event)
+    let suppressed = false
+    const click = { pointerId: 1, detail: 1, preventDefault() { suppressed = true }, stopPropagation() {} }
+    context.suppressPageSwipeClick(click)
+    assert.equal(suppressed, true, 'interruption must retain suppression until release')
+    context.startPageSwipe(event)
+    suppressed = false
+    context.suppressPageSwipeClick(click)
+    assert.equal(suppressed, false, 'a subsequent tap remains available')
+  })
+
+  test(`a drag interrupted by ${interruptedBy} clears suppression after release without a click`, async () => {
+    const { context, event, timers } = headerGesture()
+    context.startPageSwipe(event)
+    context.movePageSwipe({ ...event, clientX: 150 })
+    context[interruptedBy].value = interruptedBy === 'isAnyPromptOpen' ? true : 'second'
+    context.movePageSwipe({ ...event, clientX: 140 })
+    await context.finishPageSwipe(event)
+    assert.equal(timers.size, 1, 'cleanup must be scheduled on release, not during interruption')
+    for (const timer of [...timers.values()]) timer()
+    let suppressed = false
+    context.suppressPageSwipeClick({ pointerId: 1, detail: 1, preventDefault() { suppressed = true }, stopPropagation() {} })
+    assert.equal(suppressed, false, 'release without a click must not leave a stale pointer ID')
+  })
+}
+
 function iconGesture(disabled = false) {
   const iconSource = readFileSync(new URL('../../src/renderer/components/FtIconButton/FtIconButton.vue', import.meta.url), 'utf8')
   const handlerNames = ['handleIconPointerDown', 'clearLongPress', 'cancelMovedLongPress', 'finishLongPress', 'clearLongPressClick', 'cancelLongPressClick', 'suppressLongPressClick']
