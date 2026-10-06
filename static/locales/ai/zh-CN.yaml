@@ -1632,7 +1632,7 @@ Description:
   Games: 游戏
 Tooltips:
   General Settings:
-    Enable Tabs: "关闭此选项会关闭所有其他标签页，并保留当前页面。"
+    Enable Tabs: "保持当前页面打开。其他标签页会保留到应用重启，再次启用标签页即可恢复。"
     Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"
     Use AI Translation Completions: 使用 AI 生成的文本补全人工翻译中的缺失内容。始终优先使用人工翻译。
     Update Relative Timestamps: 页面保持打开时，持续更新应用各处的相对时间戳。禁用后，仅在重新加载或再次访问页面时更新。

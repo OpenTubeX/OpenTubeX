@@ -1685,7 +1685,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
-    Enable Tabs: "Als je dit uitschakelt, worden alle andere tabbladen gesloten en blijft de huidige pagina open."
+    Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."
     Use AI Translation Completions: Vul ontbrekende menselijke vertalingen aan met door AI gegenereerde tekst. Menselijke vertalingen krijgen altijd voorrang.
     Update Relative Timestamps: Werkt relatieve tijdsaanduidingen in de hele app bij zolang een pagina geopend blijft. Als dit is uitgeschakeld, worden ze alleen bijgewerkt nadat je de pagina opnieuw laadt of bezoekt.

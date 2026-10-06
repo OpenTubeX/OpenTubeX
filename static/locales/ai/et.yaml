@@ -1635,7 +1635,7 @@ Description:
   Games: Mängud
 Tooltips:
   General Settings:
-    Enable Tabs: "Selle väljalülitamine sulgeb kõik teised vahekaardid ja jätab praeguse lehe avatuks."
+    Enable Tabs: "Praegune leht jääb avatuks. Muud kaardid säilitatakse rakenduse taaskäivitamiseni; nende taastamiseks luba kaardid uuesti."
     Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
     Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.
     Update Relative Timestamps: Uuendab suhtelisi ajamärke kogu rakenduses, kuni leht on avatud. Kui see on välja lülitatud, uuendatakse neid alles pärast lehe uuesti laadimist või sellele naasmist.

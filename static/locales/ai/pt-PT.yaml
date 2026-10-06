@@ -1665,7 +1665,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
-    Enable Tabs: "Desativar esta opção fecha todos os outros separadores e mantém a página atual aberta."
+    Enable Tabs: "Mantém a página atual aberta. Os outros separadores são guardados até reiniciar a aplicação; volte a ativar os separadores para os restaurar."
     Data Saver Thumbnails: "Utilizar miniaturas de menor resolução para reduzir o consumo de dados."
     Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.
     Update Relative Timestamps: Atualiza as marcas temporais relativas em toda a aplicação enquanto uma página permanece aberta. Quando esta opção está desativada, só são atualizadas após recarregar ou voltar a visitar a página.

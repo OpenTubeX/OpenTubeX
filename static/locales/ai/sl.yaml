@@ -2121,7 +2121,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
-    Enable Tabs: "Izklop zapre vse druge zavihke in pusti trenutno stran odprto."
+    Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.
     Update Relative Timestamps: Posodablja relativne časovne žige po vsej aplikaciji, dokler je stran odprta. Če je možnost izklopljena, se posodobijo šele po ponovnem nalaganju ali obisku strani.

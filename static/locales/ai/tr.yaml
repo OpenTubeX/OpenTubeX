@@ -1633,7 +1633,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
-    Enable Tabs: "Bu seçeneği kapatmak diğer tüm sekmeleri kapatır ve geçerli sayfayı açık tutar."
+    Enable Tabs: "Geçerli sayfa açık kalır. Diğer sekmeler uygulama yeniden başlatılana kadar saklanır; onları geri yüklemek için sekmeleri yeniden etkinleştirin."
     Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."
     Use AI Translation Completions: İnsan çevirilerindeki eksikleri yapay zekâ tarafından oluşturulan metinlerle tamamlar. İnsan çevirileri her zaman önceliklidir.
     Update Relative Timestamps: Sayfa açık kaldığı sürece uygulamadaki göreli zaman damgalarını günceller. Devre dışı bırakıldığında yalnızca sayfa yeniden yüklendiğinde veya ziyaret edildiğinde güncellenir.

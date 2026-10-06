@@ -1674,7 +1674,7 @@ Description:
   Games: Pelit
 Tooltips:
   General Settings:
-    Enable Tabs: "Tämän poistaminen käytöstä sulkee kaikki muut välilehdet ja pitää nykyisen sivun avoinna."
+    Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
     Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.
     Update Relative Timestamps: Päivittää suhteellisia aikaleimoja kaikkialla sovelluksessa sivun ollessa avoinna. Jos asetus on poistettu käytöstä, ne päivittyvät vasta, kun sivu ladataan uudelleen tai sillä käydään uudelleen.

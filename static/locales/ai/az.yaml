@@ -1645,7 +1645,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
-    Enable Tabs: "Bunu söndürmək bütün digər vərəqləri bağlayır və cari səhifəni açıq saxlayır."
+    Enable Tabs: "Cari səhifə açıq qalır. Digər vərəqlər tətbiq yenidən başladılana qədər saxlanılır; onları bərpa etmək üçün vərəqləri yenidən aktivləşdirin."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
     Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.

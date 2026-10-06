@@ -1647,7 +1647,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
-    Enable Tabs: "Om du stänger av detta stängs alla andra flikar och den aktuella sidan hålls öppen."
+    Enable Tabs: "Håller den aktuella sidan öppen. Andra flikar behålls tills appen startas om; aktivera flikar igen för att återställa dem."
     Data Saver Thumbnails: "Använd miniatyrbilder med lägre upplösning för att minska dataförbrukningen."
     Use AI Translation Completions: Fyll luckor i mänskliga översättningar med AI-genererad text. Mänskliga översättningar har alltid företräde.
     Update Relative Timestamps: Uppdaterar relativa tidsangivelser i hela appen medan en sida är öppen. När funktionen är inaktiverad uppdateras de först när sidan läses in igen eller besöks på nytt.

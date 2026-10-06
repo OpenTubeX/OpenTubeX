@@ -737,6 +737,64 @@ for (const behavior of ['loadAllTabs', 'restoreTabLoadState', 'loadLastActiveTab
   })
 }
 
+test('re-enabling mobile tabs restores the previous tabs within the same app session', async t => {
+  const storage = globalThis.localStorage
+  let saved = createThreeTabSession()
+  saved.tabs[1].isPinned = true
+  saved.tabs.unshift(saved.tabs.splice(1, 1)[0])
+  saved.closedTabs = [createCapacitorTab(WATCH_ROUTE, 'Closed video', 'closed')]
+  globalThis.localStorage = {
+    getItem: () => JSON.stringify(saved),
+    setItem: (_key, value) => { saved = JSON.parse(value) }
+  }
+  t.after(() => { globalThis.localStorage = storage })
+  const store = createStore(createLoadedSession())
+  store.getters.getRememberTabNavigationHistory = true
+  const router = createRouter()
+  router.afterEach = () => () => {}
+  const navigation = createNavigation(store, true)
+  navigation.projectRoute = async route => { router.currentRoute.value = route }
+  navigation.restoreScroll = () => {}
+  const service = new CapacitorTabService(router, store, navigation)
+  t.after(() => service.dispose())
+  await service.initialize(HOME_ROUTE)
+  const ids = store.getters.getTabs.map(tab => tab.id)
+  const activeId = store.getters.getActiveTabId
+
+  for (let cycle = 0; cycle < 2; cycle++) {
+    store.commit('setEnableMobileTabs', false)
+    assert.deepEqual(store.getters.getTabs.map(tab => tab.id), [activeId])
+    assert.deepEqual(saved.tabs.map(tab => tab.id), [activeId])
+    assert.equal(saved.closedTabs.length, 0)
+    const current = service.currentSession()
+    const tab = current.tabs[0]
+    const route = router.resolve(cycle === 0 ? '/settings' : '/history')
+    tab.route = route
+    tab.history.push({ route, title: route.fullPath, scroll: { left: 0, top: 120 } })
+    tab.historyIndex = tab.history.length - 1
+    service.commitSession(current)
+    store.commit('setEnableMobileTabs', true)
+    assert.deepEqual(store.getters.getTabs.map(tab => tab.id), ids)
+    assert.equal(store.getters.getActiveTabId, activeId)
+    assert.equal(store.getters.getPresentedTabId, activeId)
+    assert.equal(store.getters.getActiveTab.route.fullPath, route.fullPath)
+    assert.equal(store.getters.getActiveTab.history.at(-1).scroll.top, 120)
+    assert.equal(store.getters.getActiveTab.isPinned, true)
+    assert.ok(store.getters.getTabs.filter(tab => tab.id !== activeId).every(tab => tab.loadState === 'unloaded'))
+    assert.deepEqual(store.getters.getClosedTabs.map(tab => tab.id), ['closed'])
+    assert.deepEqual(saved.tabs.map(tab => tab.id), ids)
+  }
+
+  store.commit('setEnableMobileTabs', false)
+  service.dispose()
+  const restarted = new CapacitorTabService(router, store, navigation)
+  t.after(() => restarted.dispose())
+  await restarted.initialize(HOME_ROUTE)
+  store.commit('setEnableMobileTabs', true)
+  assert.deepEqual(store.getters.getTabs.map(tab => tab.id), [activeId])
+  assert.equal(store.getters.getClosedTabs.length, 0)
+})
+
 test('disabling mobile tabs preserves the presented page and history during a pending activation', async t => {
   const store = createStore(createLoadedSession())
   const router = createRouter()
@@ -766,4 +824,8 @@ test('disabling mobile tabs preserves the presented page and history during a pe
   assert.equal(store.getters.getActiveTabId, presented.id)
   assert.deepEqual(store.getters.getActiveTab.history, history)
   assert.equal(store.getters.getClosedTabs.length, 0)
+  store.commit('setEnableMobileTabs', true)
+  assert.equal(store.getters.getTabs.length, 2)
+  assert.equal(store.getters.getActiveTabId, presented.id)
+  assert.equal(store.getters.getTabs[1].loadState, 'unloaded')
 })

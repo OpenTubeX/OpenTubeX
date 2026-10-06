@@ -1632,7 +1632,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
-    Enable Tabs: "Desativar esta opção fecha todas as outras abas e mantém a página atual aberta."
+    Enable Tabs: "Mantém a página atual aberta. As outras abas são mantidas até reiniciar o aplicativo; ative as abas novamente para restaurá-las."
     Data Saver Thumbnails: "Use miniaturas de menor resolução para reduzir o consumo de dados."
     Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.
     Update Relative Timestamps: Atualiza as marcas temporais relativas em todo o aplicativo enquanto uma página permanece aberta. Quando esta opção está desativada, só são atualizadas após recarregar ou voltar a visitar a página.
