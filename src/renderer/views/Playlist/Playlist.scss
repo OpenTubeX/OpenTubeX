@@ -109,9 +109,108 @@
 
 .playlistItem {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 40px minmax(0, 1fr);
   column-gap: 8px;
   align-items: center;
+
+  :deep(.ft-list-item.list) {
+    align-items: center;
+  }
+
+  :deep(.videoIndexArea) {
+    align-self: stretch;
+    block-size: auto;
+    display: grid;
+    margin-block: 0;
+    place-content: center;
+  }
+
+  :deep(.ft-list-item.list .videoThumbnail) {
+    margin-block: 0;
+    margin-inline-end: 12px;
+  }
+
+  :deep(.ft-list-item.list .thumbnailImage),
+  :deep(.ft-list-item.list .thumbnailLink),
+  :deep(.ft-list-item.list .videoThumbnail) {
+    inline-size: calc(var(--thumbnail-list-size, 336px) * 0.6);
+  }
+
+  :deep(.ft-list-item.list .thumbnailImage) {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  // Small thumbnails fit two rows of desktop actions without changing their size.
+  :deep(.ft-list-item.list .videoThumbnail .playlistIcons:not(.mobileThumbnailActions)) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-inline-size: calc(100% - 8px);
+    margin: 4px;
+    opacity: 0;
+    pointer-events: none;
+
+    .iconButton {
+      // Override the shared button's inline padding for this compact toolbar.
+      padding: 3px !important;
+    }
+  }
+
+  :deep(.ft-list-item.list:has(.playlistIcons:not(.mobileThumbnailActions) .iconButton)) {
+    &:hover,
+    &:focus-within,
+    &:has(.playlistIcons .iconDropdown, .playlistIcons .iconButton[aria-expanded='true']) {
+      .playlistIcons {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      // Show controls in place of passive badges during interaction.
+      .videoWatched,
+      .sponsorBlockVideoLabel,
+      .videoDuration {
+        visibility: hidden;
+      }
+    }
+  }
+
+  :deep(.ft-list-item .info) {
+    block-size: auto;
+
+    .restArea {
+      display: none;
+    }
+
+    .title {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .infoLine {
+      flex-direction: column;
+      align-items: start;
+      gap: 4px;
+      margin-block-start: 4px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .channelNameText {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .videoInfo::before {
+      content: none;
+    }
+  }
 }
 
 .playlistItem-move,
@@ -149,11 +248,21 @@
   margin-inline: auto 20px;
 }
 
-:deep(.videoThumbnail) {
-  margin-block: auto;
-}
-
 @media only screen and (width <= 850px) {
+  .playlistItems {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .playlistItem :deep(.ft-list-video) {
+    padding-block: 4px;
+  }
+
+  .playlistItem :deep(.restArea) {
+    display: none;
+  }
+
   .routerView {
     flex-direction: column;
 
@@ -175,6 +284,13 @@
         inline-size: 100%;
       }
     }
+  }
+}
+
+@media only screen and (width <= 680px) {
+  .playlistItem {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 4px;
   }
 }
 

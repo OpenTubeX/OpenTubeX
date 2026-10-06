@@ -19,7 +19,7 @@ import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
 import { BooleanSettingButton } from './player-components/BooleanSettingButton'
-import { KeyboardShortcuts } from '../../../constants'
+import { KeyboardShortcuts, PlayerIcons } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
@@ -39,6 +39,7 @@ import { LegacyQualitySelection } from './player-components/LegacyQualitySelecti
 import { LoopButton, setLoopButtonContext } from './player-components/LoopButton'
 import { MusicVisualizerButton } from './player-components/MusicVisualizerButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
+import './player-components/SeekPreviewBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { VideoZoomSelection } from './player-components/VideoZoomSelection'
@@ -150,6 +151,7 @@ import {
   isCapacitorMobilePlayer,
   useMobileFullscreenGestures,
 } from './opentubex/useMobileFullscreenGestures'
+import { useSeekPreviewThumbnail } from './opentubex/useSeekPreviewThumbnail'
 import { useMusicVisualizer } from './opentubex/useMusicVisualizer'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
@@ -666,6 +668,8 @@ export default defineComponent({
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
     const playbackEnded = ref(false)
+    /** @type {number | null} */
+    let shortsEndSeekTarget = null
     const autoplayCanceled = ref(false)
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
@@ -704,7 +708,6 @@ export default defineComponent({
       thumbnail: getRecommendationThumbnail(video.videoId)
     })))
     const showPoster = ref(true)
-    const showAndroidPoster = computed(() => process.env.IS_CAPACITOR && showPoster.value)
     const showPaidPromotion = ref(false)
     let paidPromotionTimer = null
 
@@ -1276,6 +1279,8 @@ export default defineComponent({
     /** @type {number|null} */
     let pendingMetadataSeek = null
     let seekBarMouseDown = false
+    let resumeAutoplayAfterSeek = false
+    let initialAutoplayCanceled = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -4807,7 +4812,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (!props.liveChatAvailable && (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value))) {
+      if (!props.liveChatAvailable && !props.theatrePossible && props.chapters.length === 0 && (props.externalUrl || !useSponsorBlock.value)) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
@@ -5057,7 +5062,7 @@ export default defineComponent({
         // stop shaka-player's click handler firing
         event.stopPropagation()
 
-        player.cancelTrickPlay()
+        setPlaybackRate(getDefaultPlaybackRateForVideo())
 
         showValueChange(`${getDefaultPlaybackRateForVideo()}x`, 'gauge')
       }
@@ -5225,6 +5230,7 @@ export default defineComponent({
     const {
       cancelMobileFullscreenGesture,
       consumeMobileTitleClickSuppression,
+      dismissMobileMiniPlayer,
       finishMobileFullscreenGesture,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
@@ -5232,14 +5238,32 @@ export default defineComponent({
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
       mobileMiniPlayerDismissSettling,
+      mobileSeekPreview,
       moveMobileFullscreenGesture,
       startMobileFullscreenGesture,
     } = useMobileFullscreenGestures({
       getContainer: () => container.value,
       getControls: () => ui?.getControls(),
+      getSeekState: () => {
+        if (!video.value || !canSeek()) return null
+        const { start, end } = player.seekRange()
+        const time = video.value.currentTime
+        return Number.isFinite(start) && Number.isFinite(end) && Number.isFinite(time) && end > start
+          ? { time, start, end }
+          : null
+      },
+      seekToTime: time => {
+        if (!video.value || !canSeek()) return
+        // WebView can mark VOD ended within its last frame, even before duration.
+        const target = !player.isDynamic() && time === video.value.duration
+          ? Math.max(0, time - 0.1)
+          : time
+        seekBySeconds(target - video.value.currentTime, true, false, false)
+      },
       isFullscreenActive: () => isNativeFullscreenActive(),
       isFullscreenMetadataShown: () => showFullscreenMetadata.value,
       isFullscreenSwipeEnabled: () => enableMobileFullscreenSwipe.value,
+      isSeekSwipeEnabled: () => store.getters.getEnableMobileFullscreenSeek,
       isPlaybackEnded: () => video.value?.ended === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
@@ -5269,6 +5293,19 @@ export default defineComponent({
       setShowUiOnPaused,
       showOverlayControls,
       togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
+    })
+
+    const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
+      preview: mobileSeekPreview,
+      getPlayer: () => player,
+      getVideoId: () => props.videoId,
+      loadImageDimensions,
+    })
+
+    watch(mobileSeekPreview, preview => {
+      ui?.getControls().dispatchEvent(new shaka.util.FakeEvent('seekpreviewchange', {
+        time: preview?.time ?? null,
+      }))
     })
 
     function resetMobileAdjustments(preserveGesture = false) {
@@ -5571,16 +5608,42 @@ export default defineComponent({
       accumulatedSeekSeconds = 0
       if (event.type === 'pointerdown' || event.type === 'keydown') return
       if (!event.target.matches('.shaka-seek-bar') || event.target.disabled) return
+      if (event.type === 'blur' && !seekBarMouseDown && !resumeAutoplayAfterSeek) return
       // Shaka's range control writes currentTime directly. A newer timeline
       // action must supersede a chapter seek queued before metadata was ready.
       if (event.type === 'mousedown') seekBarMouseDown = true
+      if (event.type === 'mousedown' || event.type === 'touchstart') {
+        // Shaka pauses while scrubbing, which cancels native autoplay before
+        // the first frame. Remember that intent until the interaction ends.
+        resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value && !initialAutoplayCanceled
+      }
       rememberSeekPosition(Number(event.target.value))
+      if (event.type === 'touchend' || event.type === 'touchcancel' || event.type === 'blur') {
+        seekBarMouseDown = false
+        restoreSeekAutoplay()
+      }
     }
 
     function handleSeekBarMouseChange(event) {
       if (!seekBarMouseDown) return
       if (event.type === 'mouseup') seekBarMouseDown = false
       rememberSeekPosition(ui.getControls().getDisplayTime())
+      if (event.type === 'mouseup') restoreSeekAutoplay()
+    }
+
+    function restoreSeekAutoplay() {
+      const shouldResume = resumeAutoplayAfterSeek
+      resumeAutoplayAfterSeek = false
+      const mediaElement = video.value
+      if (shouldResume && !initialAutoplayCanceled && mediaElement?.autoplay && mediaElement.paused) {
+        mediaElement.play().catch(() => {})
+      }
+    }
+
+    function handleSeekBarWindowBlur() {
+      if (!seekBarMouseDown) return
+      // End Shaka's drag even when the mouse release happens outside the window.
+      container.value?.querySelector('.shaka-seek-bar')?.blur()
     }
 
     function setupChapterPreview() {
@@ -5596,7 +5659,7 @@ export default defineComponent({
       const seekBar = seekBarContainer.querySelector('.shaka-seek-bar')
       if (seekBar) {
         // Run after Shaka updates its value; it stops propagation for these events.
-        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'blur']) {
           seekBar.removeEventListener(event, handleSeekBarInput)
           seekBar.addEventListener(event, handleSeekBarInput)
         }
@@ -5814,7 +5877,7 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function scheduleOverflowMenuLabelTitles(menu) {
-      if (overflowMenuTitleFrame !== null) {
+      if (!isActiveTab.value || menu.classList.contains('shaka-hidden') || overflowMenuTitleFrame !== null) {
         return
       }
 
@@ -5830,6 +5893,9 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function updateOverflowMenuLabelTitles(menu) {
+      if (!menu.isConnected || !isActiveTab.value || menu.classList.contains('shaka-hidden')) {
+        return
+      }
       for (const label of menu.querySelectorAll('.ft-menu-grid button span')) {
         const isVisible = label.clientWidth > 0 && label.clientHeight > 0
         const isClipped = isVisible && (
@@ -5924,6 +5990,7 @@ export default defineComponent({
       voiceOverTranslation.reset()
       showPoster.value = true
       playbackEnded.value = false
+      shortsEndSeekTarget = null
       sponsorBlockMuteController.reset()
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
@@ -6334,8 +6401,9 @@ export default defineComponent({
         spacer.after(rightGlass)
       }
 
+      const timeDisplayGroup = controlPanel.querySelector('.ft-time-display-group')
       controlPanelResizeObserver = new ResizeObserver(entries => {
-        if (entries.some(entry => entry.target === controlPanel)) {
+        if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
           scheduleControlPanelLayout(controlPanel)
         }
         // Chapter width transitions can move these buttons without resizing
@@ -6347,15 +6415,30 @@ export default defineComponent({
       if (chaptersButton) {
         controlPanelResizeObserver.observe(chaptersButton)
       }
+      if (timeDisplayGroup) {
+        // Tabular timestamps usually change text without changing width.
+        // Measure only when the rendered group actually changes size.
+        controlPanelResizeObserver.observe(timeDisplayGroup)
+      }
 
       controlPanelMutationObserver = new MutationObserver(mutations => {
-        if (mutations.some(mutation => mutation.target !== controlPanel)) {
+        if (mutations.some(mutation => {
+          const target = mutation.target
+          if (target === controlPanel || target instanceof SVGElement ||
+            (mutation.type !== 'attributes' && timeDisplayGroup?.contains(target))) {
+            return false
+          }
+          // Shaka replaces icon paths and reapplies classes on media events.
+          // Neither an icon update nor an unchanged class affects geometry.
+          return mutation.type !== 'attributes' || mutation.oldValue !== target.getAttribute('class')
+        })) {
           scheduleControlPanelLayout(controlPanel)
         }
       })
       controlPanelMutationObserver.observe(controlPanel, {
         attributeFilter: ['class'],
         attributes: true,
+        attributeOldValue: true,
         characterData: true,
         childList: true,
         subtree: true
@@ -6444,6 +6527,7 @@ export default defineComponent({
     const loadedLocales = new Set(process.env.SHAKA_LOCALES_PREBUNDLED)
     const originalShakaControlLocalizations = new Map()
     const replayLabel = ref('')
+    const mobileMiniBarSeekLabel = ref('')
 
     /**
      * @param {string} locale
@@ -6470,6 +6554,7 @@ export default defineComponent({
 
       localization.changeLocale([shakaLocale])
       replayLabel.value = localization.resolve('REPLAY')
+      mobileMiniBarSeekLabel.value = localization.resolve('SEEK')
 
       // Add the keyboard shortcut to the label for the default Shaka controls
       if (!originalShakaControlLocalizations.has(shakaLocale)) {
@@ -6510,12 +6595,17 @@ export default defineComponent({
     function registerMediaSessionHandlers() {
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
         play: () => video.value?.play(),
-        pause: () => video.value?.pause(),
+        pause: () => {
+          // pause() need not emit an event while native autoplay is pending.
+          initialAutoplayCanceled = true
+          video.value?.pause()
+        },
         stop: () => {
           const videoElement = video.value
           if (!videoElement) return
           const wasPaused = videoElement.paused
           mediaSessionStopped = true
+          initialAutoplayCanceled = true
           videoElement.pause()
           if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
             setCurrentTime(0)
@@ -6633,6 +6723,10 @@ export default defineComponent({
         video.value.pause()
         return
       }
+      if (props.shortsPlayer && (playbackEnded.value || isShortsEndSeekPosition())) {
+        setCurrentTime(player.seekRange().start)
+      }
+      if (!video.value.paused) initialAutoplayCanceled = false
       if (!temporaryPlaybackRateActive) setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
@@ -6674,10 +6768,7 @@ export default defineComponent({
     function handlePlaying() {
       if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
-      // Chromium can briefly paint a video's poster across the compositor
-      // surface while detaching it into native PiP on Windows. Once a real
-      // frame is available the poster is no longer needed, so remove it before
-      // a later blur-triggered PiP transition.
+      // A decoded video frame replaces the retained startup/format-switch poster.
       showPoster.value = false
       startPaidPromotionTimer()
 
@@ -6697,6 +6788,9 @@ export default defineComponent({
 
     function handlePause() {
       if (shortsNavigationSuspended.value) return
+      if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
+        initialAutoplayCanceled = true
+      }
       if (!preserveControlsOnTemporaryPause) setShowUiOnPaused(true)
       preserveControlsOnTemporaryPause = false
       playerPaused.value = true
@@ -6730,6 +6824,7 @@ export default defineComponent({
 
     function handleEnded() {
       if (shortsNavigationSuspended.value) return
+      shortsEndSeekTarget = null
       clearSabrBackoffTimer({ refreshPreview: true })
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
       if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
@@ -6774,9 +6869,21 @@ export default defineComponent({
       emit('ended', sleepTimerEnded)
     }
 
+    function isShortsEndSeekPosition() {
+      if (shortsEndSeekTarget === null || !video.value) return false
+      const currentTime = video.value.currentTime
+      const backoff = player.getConfiguration().streaming.durationBackoff
+      const backedOffTarget = Math.max(player.seekRange().start, shortsEndSeekTarget - backoff)
+      // Accept Shaka's duration clamp, but discard a superseding timeline or
+      // Media Session seek. Media timestamps can be rounded to milliseconds.
+      return Math.abs(currentTime - shortsEndSeekTarget) < 0.001 ||
+        Math.abs(currentTime - backedOffTarget) < 0.001
+    }
+
     function handleSeeking() {
       if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
+      if (!isShortsEndSeekPosition()) shortsEndSeekTarget = null
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
       cancelSponsorBlockSkipSchedule()
@@ -6788,7 +6895,8 @@ export default defineComponent({
     function handleSeeked() {
       if (shortsNavigationSuspended.value) return
       updateMobileMiniBarProgress()
-      if (video.value?.ended) {
+      if (isShortsEndSeekPosition()) playbackEnded.value = true
+      if (playbackEnded.value || video.value?.ended) {
         syncPlayPauseControlIcons()
       }
       sponsorBlockCurrentTime.value = video.value?.currentTime ?? 0
@@ -7118,6 +7226,9 @@ export default defineComponent({
     const {
       scrollMiniPlayerDragStyle,
       mobileMiniBar,
+      compactMobileMiniPlayer,
+      mobileMiniBarExpanded,
+      mobileMiniBarCollapsed,
       mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       mobileMiniBarProgress,
@@ -7181,6 +7292,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,
@@ -7192,6 +7304,33 @@ export default defineComponent({
 
     const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value || mobileMiniPlayerDismissSettling.value))
     const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
+    const mobileMiniBarSeeking = ref(false)
+    watch([mobileMiniBarSeekDisabled, scrollMiniPlayerActive], ([disabled, active]) => {
+      if (disabled || !active) mobileMiniBarSeeking.value = false
+    })
+    const mobileMiniBarSeekValueText = computed(() => {
+      const range = player?.seekRange()
+      return formatDurationAsTimestamp(range
+        ? range.start + (range.end - range.start) * mobileMiniBarProgress.value
+        : 0)
+    })
+
+    /** @param {Event} event */
+    function handleMobileMiniBarSeekInput(event) {
+      if (mobileMiniBarSeekDisabled.value || !(event.target instanceof HTMLInputElement)) return
+      const fraction = Math.min(1, Math.max(0, event.target.valueAsNumber / 100))
+      if (!Number.isFinite(fraction)) return
+      const range = player.seekRange()
+      seekBySeconds(range.start + (range.end - range.start) * fraction - video.value.currentTime, false, false, false)
+      updateMobileMiniBarProgress()
+    }
+
+    /** @param {PointerEvent} event */
+    function startMobileMiniBarSeek(event) {
+      if (mobileMiniBarSeekDisabled.value || !event.isPrimary || event.button !== 0) return
+      mobileMiniBarSeeking.value = true
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
 
     // The window may have resized while docked. Measure the settled inline
     // player once, after the return animation, rather than its scaled bounds.
@@ -7311,7 +7450,7 @@ export default defineComponent({
       )))
       if (mobileFullscreenBrightnessActive.value) mobileAdjustments.setFullscreenBrightness(true)
     })
-    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction], () => {
+    watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction, store.getters.getEnableMobileFullscreenSeek], () => {
       cancelMobileFullscreenGesture()
       mobileAdjustments.cancel()
     })
@@ -9576,10 +9715,7 @@ export default defineComponent({
           return
         }
 
-        playbackRateUserSet = true
-        queuePlaybackRateRestore(playbackRate)
-        emit('playback-rate-updated', playbackRate)
-        emit('playback-rate-user-set', playbackRate)
+        setPlaybackRate(playbackRate)
       })
 
       events.addEventListener('removeChannelPlaybackSpeed', () => {
@@ -9595,9 +9731,7 @@ export default defineComponent({
         removeQuickPlaybackRateBarContext?.()
         removeQuickPlaybackRateBarContext = setQuickPlaybackRateBarContext(controls, {
           getPlaybackRateOptions: () => quickPlaybackSpeedBarOptions.value,
-          getDisplayedPlaybackRate: () => hasLoaded.value
-            ? getCurrentPlaybackRate()
-            : pendingPlaybackRateRestore ?? getInitialPlaybackRate(),
+          getDisplayedPlaybackRate: getCurrentPlaybackRate,
           getSavedChannelPlaybackRate: () => savedChannelPlaybackRate.value,
           getCanSaveChannelPlaybackSpeed: () => canManuallySaveChannelPlaybackRate.value,
           events
@@ -9777,7 +9911,7 @@ export default defineComponent({
      */
     function normalizePlaybackRate(rate) {
       const parsedRate = typeof rate === 'number' ? rate : Number(rate)
-      return Number.isFinite(parsedRate) && parsedRate > 0.07 ? parsedRate : null
+      return Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : null
     }
 
     const isMusicVideoDetected = computed(() => {
@@ -9798,12 +9932,16 @@ export default defineComponent({
      * @returns {number}
      */
     function getInitialPlaybackRate() {
+      if (playbackRateUserSet && pendingPlaybackRateRestore !== null) {
+        return pendingPlaybackRateRestore
+      }
+
       const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadState?.playbackRate)
       if (sabrReloadPlaybackRate !== null) {
         return sabrReloadPlaybackRate
       }
 
-      if (shouldUseNormalPlaybackRateByDefault.value) {
+      if (!playbackRateUserSet && shouldUseNormalPlaybackRateByDefault.value) {
         return NORMAL_PLAYBACK_RATE
       }
 
@@ -9859,6 +9997,10 @@ export default defineComponent({
      * @returns {number | null}
      */
     function getCurrentPlaybackRate() {
+      if (!hasLoaded.value) {
+        return pendingPlaybackRateRestore ?? getInitialPlaybackRate()
+      }
+
       if (temporaryPlaybackRateActive && playbackRateBeforeTemporaryPlayback !== null) {
         return playbackRateBeforeTemporaryPlayback
       }
@@ -10037,9 +10179,7 @@ export default defineComponent({
 
         queuePlaybackRateRestore(getInitialPlaybackRate())
 
-        if (video.value) {
-          video.value.playbackRate = getInitialPlaybackRate()
-        }
+        setVideoPlaybackRate(getInitialPlaybackRate())
       }
     )
 
@@ -10074,6 +10214,46 @@ export default defineComponent({
     /**
      * @param {number} rate
      */
+    function setVideoPlaybackRate(rate) {
+      if (!video.value) return
+      try {
+        video.value.playbackRate = rate
+      } catch (error) {
+        // Shaka can emulate speeds outside the browser's native range once loaded.
+        if (!(error instanceof DOMException) || error.name !== 'NotSupportedError') throw error
+      }
+    }
+
+    /**
+     * @param {number} rate
+     */
+    function setPlaybackRate(rate) {
+      playbackRateUserSet = true
+
+      // A replacement source may be waiting for availability while the current
+      // one is still loaded. Keep its queued restore synced with newer choices.
+      if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
+        queuePlaybackRateRestore(rate)
+      }
+
+      if (!hasLoaded.value) {
+        // Shaka's rate controller may not exist yet. Preserve the choice for
+        // handleLoaded and update the media element and quick bar immediately.
+        setVideoPlaybackRate(rate)
+        updatePendingPlaybackRateMenu()
+      } else if (Math.abs(rate - getDefaultPlaybackRateForVideo()) < 0.01) {
+        player.cancelTrickPlay()
+      } else {
+        player.trickPlay(rate, false)
+      }
+
+      emit('playback-rate-updated', rate)
+      emit('playback-rate-user-set', rate)
+    }
+
+    /**
+     * @param {number} rate
+     */
     function applyPlaybackRate(rate) {
       const newPlaybackRateString = rate.toFixed(2)
       const newPlaybackRate = parseFloat(newPlaybackRateString)
@@ -10081,14 +10261,7 @@ export default defineComponent({
       // The following error is thrown if you go below 0.07:
       // The provided playback rate (0.05) is not in the supported playback range.
       if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
-        playbackRateUserSet = true
-
-        if (Math.abs(newPlaybackRate - getDefaultPlaybackRateForVideo()) < 0.01) {
-          player.cancelTrickPlay()
-        } else {
-          player.trickPlay(newPlaybackRate, false)
-        }
-
+        setPlaybackRate(newPlaybackRate)
         showValueChange(`${newPlaybackRateString}x`, 'gauge')
       }
     }
@@ -10143,6 +10316,7 @@ export default defineComponent({
       if (!(canSeekResult || canSeek())) {
         return
       }
+      shortsEndSeekTarget = null
 
       const seekRange = player.seekRange()
 
@@ -10489,6 +10663,23 @@ export default defineComponent({
           }
           blurTooltipButtons()
           break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
+          // Decrease playback rate by user configured interval
+          event.preventDefault()
+          changePlayBackRate(-videoPlaybackRateInterval.value)
+          break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
+          // Increase playback rate by user configured interval
+          event.preventDefault()
+          changePlayBackRate(videoPlaybackRateInterval.value)
+          break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
+          // Toggle between 1x and the previous playback speed
+          event.preventDefault()
+          toggleNormalPlaybackRate()
+          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE): {
           event.preventDefault()
           const isMuted = !video_.muted
@@ -10575,23 +10766,6 @@ export default defineComponent({
           seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
         }
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED):
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
-          // Decrease playback rate by user configured interval
-          event.preventDefault()
-          changePlayBackRate(-videoPlaybackRateInterval.value)
-          break
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
-          // Increase playback rate by user configured interval
-          event.preventDefault()
-          changePlayBackRate(videoPlaybackRateInterval.value)
-          break
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
-          // Toggle between 1x and the previous playback speed
-          event.preventDefault()
-          toggleNormalPlaybackRate()
-          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS): {
           // Toggle caption/subtitles
           if (toggleCaptions()) {
@@ -10702,7 +10876,16 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
+            const wasPaused = video_.paused
             setCurrentTime(seekRange.end)
+            if (props.shortsPlayer && wasPaused && !isLive.value && !video_.loop) {
+              // Paused seeks need not fire ended, and Shaka can back off from
+              // the duration. End still means replay, without counting a seek
+              // as a naturally completed Short.
+              shortsEndSeekTarget = seekRange.end
+              playbackEnded.value = !video_.seeking
+              syncPlayPauseControlIcons()
+            }
             showOverlayControls()
           }
           break
@@ -11071,14 +11254,21 @@ export default defineComponent({
       nextTick(showOverlayControls)
     }
 
-    function exitFullscreenHandler() {
-      if (!process.env.IS_ELECTRON || !ui) return
+    async function exitPresentationModes() {
+      if (!ui) return
 
       try {
         const controls = ui.getControls()
         // Exit fullscreen if enabled
         if (controls && controls.isFullScreenEnabled && controls.isFullScreenEnabled()) {
-          controls.toggleFullScreen()
+          const documentFullscreen = document.fullscreenElement !== null
+          await controls.toggleFullScreen()
+          // The exit promise can resolve before fullscreenchange closes the docks.
+          if (documentFullscreen && isFullscreen.value) {
+            await new Promise(resolve => {
+              document.addEventListener('fullscreenchange', resolve, { once: true })
+            })
+          }
         }
 
         // Exit fullwindow if enabled
@@ -11087,9 +11277,43 @@ export default defineComponent({
             detail: false
           }))
         }
+        // The full-window listener creates its exit animation after rendering.
+        // Cancel it before navigation relocates the container into the mini-player.
+        await nextTick()
+        fullWindowAnimation?.cancel()
+        fullWindowAnimation = null
       } catch (error) {
         // Silently ignore errors if component is not fully initialized
-        console.error('Error exiting fullscreen on tab switch:', error)
+        console.error('Error exiting player presentation modes:', error)
+      }
+    }
+
+    /**
+     * Keep Shaka's menu selection in sync while its playback controller is unavailable.
+     */
+    function updatePendingPlaybackRateMenu() {
+      if (hasLoaded.value || !container.value) return
+      const rate = getCurrentPlaybackRate()
+      for (const menu of container.value.querySelectorAll('.shaka-playback-rates')) {
+        menu.querySelector('.shaka-ui-icon.shaka-chosen-item')?.remove()
+        for (const button of menu.querySelectorAll('button:not(.shaka-back-to-overflow-button)')) {
+          const label = button.querySelector('span')
+          const selected = Math.abs(Number.parseFloat(label.textContent) - rate) < 0.01
+          button.ariaSelected = String(selected)
+          label.classList.toggle('shaka-chosen-item', selected)
+          if (selected) {
+            const icon = new shaka.ui.Icon(null, PlayerIcons.DONE_FILLED).getSvgElement()
+            icon.classList.add('shaka-chosen-item')
+            icon.ariaHidden = 'true'
+            button.appendChild(icon)
+          }
+        }
+      }
+      for (const button of container.value.querySelectorAll('.shaka-playbackrate-button')) {
+        button.setAttribute('shaka-status', `${rate}x`)
+        for (const label of button.querySelectorAll('.shaka-current-selection-span, .shaka-overflow-playback-rate-mark')) {
+          label.textContent = `${rate}x`
+        }
       }
     }
 
@@ -11107,6 +11331,16 @@ export default defineComponent({
         const button = target.closest('button')
 
         if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
+          if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
+            const rate = normalizePlaybackRate(Number.parseFloat(button.querySelector('span')?.textContent ?? ''))
+            if (rate !== null) {
+              event.preventDefault()
+              event.stopPropagation()
+              setPlaybackRate(rate)
+              ui.getControls().hideSettingsMenus()
+            }
+            return
+          }
           playbackRateUserSet = true
           setTimeout(() => {
             if (!player) {
@@ -11201,7 +11435,7 @@ export default defineComponent({
 
       const initialPlaybackRate = getInitialPlaybackRate()
       queuePlaybackRateRestore(initialPlaybackRate)
-      videoElement.playbackRate = initialPlaybackRate
+      setVideoPlaybackRate(initialPlaybackRate)
       videoElement.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
 
       // check if the component is already getting destroyed
@@ -11341,7 +11575,7 @@ export default defineComponent({
       // Only set up after UI is fully initialized
       if (process.env.IS_ELECTRON && ui && window.ftElectron?.tabs?.onExitFullscreen) {
         try {
-          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitFullscreenHandler, tabId)
+          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitPresentationModes, tabId)
         } catch (error) {
           console.error('Failed to set up exit fullscreen listener:', error)
         }
@@ -11349,13 +11583,14 @@ export default defineComponent({
 
       setupAutoPictureInPicture()
 
-      if (container.value && props.format !== 'audio' && typeof IntersectionObserver !== 'undefined') {
+      if (container.value) {
         setupScrollMiniIntersectionObserver()
       }
 
       window.addEventListener('scroll', handleScrollMiniWindowScroll, { passive: true })
       window.addEventListener('resize', handleScrollMiniWindowResize)
       window.addEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      window.addEventListener('blur', handleSeekBarWindowBlur)
 
       player.addEventListener('loading', () => {
         silenceSkipping.reset()
@@ -11465,7 +11700,10 @@ export default defineComponent({
     }
 
     async function performFirstLoad(isCurrentLoad = () => true) {
+      const generation = formatSwitchGeneration
+      const isCurrentInitialLoad = () => generation === formatSwitchGeneration && isCurrentLoad()
       clearSabrBackoffTimer()
+      clearPreRollTimer()
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
         // Longer timeout for receiving larger responses
         player.configure({
@@ -11486,18 +11724,19 @@ export default defineComponent({
         })
       }
 
+      // Online metadata may include a preroll deadline even when playing a download.
       const initialLoadDelayMs = props.delayLoadUntilUnix - Date.now()
-      if (initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
+      if (!props.localFilePlayback && initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
+        if (!ui || !player || !isCurrentInitialLoad()) return
         clearPreRollTimer()
-        if (!ui || !player || !isCurrentLoad()) return
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
           await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
-          if (!ui || !player || !isCurrentLoad()) return
+          if (!ui || !player || !isCurrentInitialLoad()) return
 
           if (props.format === 'dash') {
             // Let shaka-player's ABR pick the variant when auto quality is preferred
@@ -11523,7 +11762,7 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          if (ui && player && isCurrentLoad()) {
+          if (ui && player && isCurrentInitialLoad()) {
             handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
           }
         }
@@ -11537,7 +11776,6 @@ export default defineComponent({
      * if this was triggered by a format change and the user had the captions enabled.
      */
     async function handleLoaded() {
-      togglePlaybackRate = null
       hasLoaded.value = true
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
@@ -11675,6 +11913,7 @@ export default defineComponent({
       // player dimensions filled with the thumbnail until the new format has
       // produced a frame of its own.
       showPoster.value = true
+      video.value?.removeAttribute('poster')
 
       try {
         await player.unload()
@@ -11690,7 +11929,6 @@ export default defineComponent({
      * @type {{
      *   oldFormat: 'dash'|'audio'|'legacy',
      *   wasPaused: boolean,
-     *   playbackRate: number|null,
      *   playbackPosition: number,
      *   useAutoQuality: boolean,
      *   audioBandwidth: number|undefined,
@@ -11749,10 +11987,12 @@ export default defineComponent({
             : player.getVariantTracks().find(track => track.active)
           const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
 
+          // Queue the current speed before unloading so later user choices
+          // replace it instead of being overwritten by a pre-switch snapshot.
+          queuePlaybackRateRestore()
           pendingFormatSwitchState = {
             oldFormat,
             wasPaused: video_.paused,
-            playbackRate: getCurrentPlaybackRate(),
             playbackPosition: video_.currentTime,
             // The legacy formats don't have an ABR configuration to carry over,
             // so fall back to the user's preference when switching away from them.
@@ -11792,7 +12032,6 @@ export default defineComponent({
         const {
           oldFormat: sourceFormat,
           wasPaused,
-          playbackRate,
           playbackPosition,
           useAutoQuality,
           audioBandwidth,
@@ -11825,7 +12064,6 @@ export default defineComponent({
           }
 
           ignoreErrors = false
-          queuePlaybackRateRestore(playbackRate)
 
           player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
@@ -11882,7 +12120,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          await setLegacyQuality(playbackPosition, previousQuality, playbackRate)
+          await setLegacyQuality(playbackPosition, previousQuality)
           if (!isCurrentFormatSwitch()) return
         }
 
@@ -11928,6 +12166,8 @@ export default defineComponent({
       hasPlaybackPosition.value = false
       pendingMetadataSeek = null
       seekBarMouseDown = false
+      resumeAutoplayAfterSeek = false
+      initialAutoplayCanceled = false
       if (!shortsNavigationSuspended.value) {
         closeFullscreenMetadata()
         closeFullscreenTranscript()
@@ -11955,6 +12195,7 @@ export default defineComponent({
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      window.removeEventListener('blur', handleSeekBarWindowBlur)
       player?.removeEventListener('textchanged', syncShortsCaptionsEnabled)
 
       cancelTemporaryPlaybackRateHolds()
@@ -12125,6 +12366,7 @@ export default defineComponent({
     }
 
     function pause() {
+      initialAutoplayCanceled = true
       video.value.pause()
     }
 
@@ -12141,6 +12383,7 @@ export default defineComponent({
      */
     function setCurrentTime(time) {
       if (!seekingIsPossible.value) return
+      shortsEndSeekTarget = null
       accumulatedSeekSeconds = 0
       rememberSeekPosition(time)
       video.value.currentTime = time
@@ -12150,6 +12393,8 @@ export default defineComponent({
      * @param {number} time
      */
     function rememberSeekPosition(time) {
+      // Explicit seeks supersede End even when they match Shaka's backoff.
+      shortsEndSeekTarget = null
       hasPlaybackPosition.value = true
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
@@ -12286,6 +12531,7 @@ export default defineComponent({
       hasLoaded,
       hasPlaybackPosition,
       scrollMiniPlayerActive,
+      exitPresentationModes,
 
       isPaused,
       play,
@@ -12378,7 +12624,6 @@ export default defineComponent({
       closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
-      showAndroidPoster,
       showEndedScreen,
       useFrostedGlassPlayerUi,
       endedRecommendations,
@@ -12453,6 +12698,14 @@ export default defineComponent({
       mobileFullscreenSwiping,
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
+      mobileSeekPreview,
+      mobileSeekPreviewMessage: computed(() => {
+        const preview = mobileSeekPreview.value
+        if (!preview) return ''
+        const sign = preview.seconds < 0 ? '−' : '+'
+        return `${formatDurationAsTimestamp(preview.time)} (${sign}${formatDurationAsTimestamp(Math.abs(preview.seconds))})`
+      }),
+      mobileSeekThumbnailStyle,
       resetFullscreenDockHeights,
       handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
@@ -12611,9 +12864,17 @@ export default defineComponent({
 
       scrollMiniPlayerActive,
       mobileMiniBar,
+      compactMobileMiniPlayer,
+      mobileMiniBarExpanded,
+      mobileMiniBarCollapsed,
       mobileMiniBarCanDismiss,
       mobileMiniBarControlsDisabled,
       mobileMiniBarSeekDisabled,
+      mobileMiniBarSeekLabel,
+      mobileMiniBarSeekValueText,
+      mobileMiniBarSeeking,
+      startMobileMiniBarSeek,
+      handleMobileMiniBarSeekInput,
       mobileMiniBarOverlayStyle,
       mobileMiniBarProgress,
       updateMobileMiniBarProgress,
@@ -12643,6 +12904,7 @@ export default defineComponent({
       handleScrollMiniControlsPointerMove,
       suppressScrollMiniPlayPausePointerReveal,
       dismissCrossTabMiniPlayer,
+      dismissMobileMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       restoreInlinePlayer,

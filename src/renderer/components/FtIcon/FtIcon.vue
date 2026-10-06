@@ -23,6 +23,8 @@
       draggable="false"
       @load="loadedCustomImage = customImageSource"
       @error="loadedCustomImage = null"
+      @vue:mounted="checkCachedImage"
+      @vue:updated="checkCachedImage"
     >
     <Icon
       v-if="!customImageLoaded"
@@ -126,6 +128,11 @@ const customImageSource = computed(() => getCustomIconImageSource(props.icon))
 const loadedCustomImage = ref(null)
 const customImageLoaded = computed(() => loadedCustomImage.value === customImageSource.value)
 watch(customImageSource, () => { loadedCustomImage.value = null })
+function checkCachedImage({ el: image, props: imageProps }) {
+  if (image.complete && image.naturalWidth) {
+    loadedCustomImage.value = imageProps.src
+  }
+}
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 // Preserve the stable semantic metadata used by existing styling and consumers,

@@ -112,6 +112,24 @@ export function keyboardShortcutsOverlap(firstShortcut, secondShortcut) {
 }
 
 /**
+ * Compares complete bindings rather than any intersection between their keys.
+ * @param {string} firstShortcut
+ * @param {string} secondShortcut
+ * @returns {boolean}
+ */
+export function keyboardShortcutsEqual(firstShortcut, secondShortcut) {
+  if (!firstShortcut || !secondShortcut) return firstShortcut === secondShortcut
+  const first = getShortcutDescriptor(firstShortcut)
+  const second = getShortcutDescriptor(secondShortcut)
+  if (first.modifiers !== second.modifiers) return false
+  const firstRange = getNumericShortcutRange(first.key)
+  const secondRange = getNumericShortcutRange(second.key)
+  return firstRange && secondRange
+    ? firstRange.start === secondRange.start && firstRange.end === secondRange.end
+    : first.key === second.key
+}
+
+/**
  * @param {string} shortcut
  * @returns {{ key: string, modifiers: string }}
  */

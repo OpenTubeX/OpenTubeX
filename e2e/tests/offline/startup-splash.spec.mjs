@@ -143,7 +143,7 @@ test('shows a new window before its renderer loads and respects hiding during st
   }
 })
 
-test.describe('startup splash with a system-selected OpenTubeX theme', () => {
+test.describe('startup splash with a system-selected Ocean theme', () => {
   test.use({
     seed: {
       settings: {

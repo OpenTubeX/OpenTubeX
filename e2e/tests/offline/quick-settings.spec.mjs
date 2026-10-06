@@ -31,6 +31,71 @@ const ADDITIONAL_QUICK_SETTINGS = [
 ]
 
 for (const uiScale of [100, 125]) {
+  test.describe(`quick settings select interactions at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale, baseTheme: 'dark', alwaysShowScrollbars: true } } })
+
+    test('keeps the select and quick settings open while dragging the dropdown scrollbar', async ({ page }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.getByRole('dialog', { name: 'Quick settings' })
+      const select = menu.getByRole('combobox', { name: 'Language preference' })
+      await select.click()
+      const dropdown = page.locator('.selectDropdown')
+      const scrollbar = dropdown.locator('.os-scrollbar-vertical')
+      await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+      const thumb = scrollbar.locator('.os-scrollbar-handle')
+      const bounds = await thumb.boundingBox()
+      expect(bounds).not.toBeNull()
+      const initialScrollTop = await dropdown.evaluate(element => element.scrollTop)
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+      await page.mouse.down()
+      try {
+        await expect(dropdown).toBeVisible()
+        await expect(menu).toBeVisible()
+        await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2 + 80, { steps: 8 })
+        await expect.poll(() => dropdown.evaluate(element => element.scrollTop)).toBeGreaterThan(initialScrollTop)
+      } finally {
+        await page.mouse.up()
+      }
+      await expect(dropdown).toBeVisible()
+      await expect(menu).toBeVisible()
+      await expect(select).toBeFocused()
+      await dropdown.locator('[aria-selected="true"]').click()
+      await expect(dropdown).toBeHidden()
+      await expect(menu).toBeVisible()
+    })
+
+    test('shows the selected option accent consistently before and after hovering other options', async ({ page, attachScreenshot }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.getByRole('dialog', { name: 'Quick settings' })
+      await menu.getByRole('combobox', { name: 'Base Theme' }).click()
+      await page.mouse.move(0, 0)
+      const dropdown = page.locator('.selectDropdown')
+      const selected = dropdown.locator('[aria-selected="true"]')
+      const selectedColors = () => selected.evaluate(element => ({
+        background: getComputedStyle(element).backgroundColor,
+        overlay: getComputedStyle(element, '::before').backgroundColor,
+      }))
+      const initialColors = await selectedColors()
+      expect(initialColors.overlay).toBe('rgba(0, 0, 0, 0)')
+      const expectedAccent = await dropdown.evaluate(menu => {
+        const sample = document.createElement('span')
+        sample.style.backgroundColor = 'color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface))'
+        menu.append(sample)
+        const color = getComputedStyle(sample).backgroundColor
+        sample.remove()
+        return color
+      })
+      expect(initialColors.background).toBe(expectedAccent)
+      await attachScreenshot('selected option accent immediately after opening')
+      await dropdown.locator('[aria-selected="false"]').first().hover()
+      expect(await selectedColors()).toEqual(initialColors)
+      await selected.hover()
+      expect(await selectedColors()).toEqual(initialColors)
+    })
+  })
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`compact quick settings at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale } } })
 
@@ -224,7 +289,7 @@ for (const uiScale of [100, 95]) {
             return [...section.querySelectorAll('.quickSettingControl')].map(control => {
               const caption = control.querySelector('.labelRow')
               const track = control.querySelector('.sliderControl')
-              const switchLabel = control.querySelector('.switch-label')
+              const switchLabel = control.querySelector('.switch-label-text')
               return {
                 setting: control.dataset.settingId,
                 left,
@@ -354,7 +419,7 @@ for (const uiScale of [100, 95]) {
           }))
           expect.soft(bounds.input.top, `${width}×${height}: input does not overlap caption`).toBeGreaterThanOrEqual(bounds.caption.bottom - 0.1)
         }
-        const tracks = await menu.locator('.switch-label').evaluateAll(labels => labels.map(label => {
+        const tracks = await menu.locator('.switch-label-text').evaluateAll(labels => labels.map(label => {
           const bounds = label.getBoundingClientRect()
           const height = Number.parseFloat(getComputedStyle(label, '::before').blockSize)
           return { top: bounds.top + (bounds.height - height) / 2, bottom: bounds.top + (bounds.height + height) / 2 }
@@ -500,7 +565,7 @@ test.describe('quick system themes', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const search = page.getByPlaceholder('Search settings')
+    const search = page.getByLabel('Search settings')
     for (const label of ['Light theme', 'Dark theme']) {
       await search.fill(label)
       await page.locator('.settingPicker .optionWrapper').getByText(label, { exact: true }).click()
@@ -616,7 +681,7 @@ test.describe('additional quick settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const search = page.getByPlaceholder('Search settings')
+    const search = page.getByLabel('Search settings')
     for (const [, label] of ADDITIONAL_QUICK_SETTINGS) {
       await search.fill(label)
       await page.locator('.settingPicker .optionWrapper').getByText(new RegExp(`^${label}$`, 'i')).click()
@@ -1230,11 +1295,13 @@ test.describe('customizable quick settings', () => {
     await expect(selectedSettings).not.toContainText('Hide Comments')
 
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPicker = page.getByLabel('Search settings')
     const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
     await expect(settingPopover).toBeVisible()
     await expect(settingPopover).toHaveCSS('position', 'absolute')
     await expect(settingPicker).toHaveAttribute('type', 'search')
+    await expect(settingPicker).toHaveAttribute('placeholder', 'Search settings')
+    await expect(settingPopover.locator('.selectLabel')).toHaveCount(0)
     await expect(settingPopover.locator('.clearInputTextButton')).toHaveCount(0)
     await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('cursor', 'pointer')
     await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('user-select', 'none')
@@ -1327,7 +1394,7 @@ test.describe('quick settings customization at fractional UI scale', () => {
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
 
-    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPicker = page.getByLabel('Search settings')
     const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
     const options = page.locator('.settingPicker .list')
     const scrollbar = options.locator('.os-scrollbar-vertical')

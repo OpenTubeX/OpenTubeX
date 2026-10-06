@@ -16,6 +16,8 @@ $grab-bar-padding: 1em;
   cursor: grab;
   text-align: center;
   user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
 
   // Space a bit from the thumbnail.
   padding-block: $grab-bar-padding;
@@ -70,6 +72,85 @@ $grab-bar-padding: 1em;
 
 .thumbnailPreview.active.loaded {
   opacity: 1;
+}
+
+.videoSwipeFrame {
+  flex: 1;
+  min-inline-size: 0;
+  position: relative;
+}
+
+.thumbnailSwipeEnabled {
+  touch-action: pan-y pinch-zoom;
+}
+
+.videoSwipeActive {
+  isolation: isolate;
+  overflow: clip;
+
+  > .ft-list-video {
+    background-color: var(--bg-color);
+    position: relative;
+    transition: translate 200ms cubic-bezier(0.2, 0, 0, 1);
+    translate: var(--video-swipe-offset) 0;
+    z-index: 1;
+  }
+}
+
+.thumbnailSwipeFeedback {
+  align-items: center;
+  block-size: 64px;
+  color: var(--primary-color);
+  // Swipe directions follow the finger's physical movement, including in RTL.
+  direction: ltr;
+  display: flex;
+  font-size: 28px;
+  inline-size: 64px;
+  inset-block-start: 50%;
+  inset-inline-start: 8px;
+  isolation: isolate;
+  justify-content: center;
+  opacity: min(1, calc(var(--video-swipe-progress) * 2));
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 200ms;
+  translate: 0 -50%;
+
+  &::before {
+    animation: thumbnail-swipe-ripple 350ms cubic-bezier(0.2, 0, 0, 1) both;
+    background-color: currentcolor;
+    border-radius: 50%;
+    content: '';
+    inset: -4px;
+    opacity: calc(0.06 + 0.1 * var(--video-swipe-progress));
+    position: absolute;
+    z-index: -1;
+  }
+}
+
+@keyframes thumbnail-swipe-ripple {
+  from {
+    scale: 0;
+  }
+
+  to {
+    scale: 1;
+  }
+}
+
+.thumbnailSwipeLeft {
+  inset-inline: auto 8px;
+}
+
+.videoSwipeDragging {
+  > .ft-list-video,
+  .thumbnailSwipeFeedback {
+    transition: none;
+  }
+}
+
+:global(:root[data-reduced-motion='reduce'] .thumbnailSwipeFeedback::before) {
+  animation: none;
 }
 
 .youtubeShort.grid {

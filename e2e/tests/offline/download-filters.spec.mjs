@@ -140,12 +140,13 @@ test.describe('completed download filters', () => {
     await updateInputWithoutScrolling(search, '')
     await page.getByRole('combobox', { name: 'Format' }).click()
     await scrollDown()
-    await page.getByRole('option', { name: 'WEBM', exact: true }).click()
+    // Keep the bottom offset under test instead of scrolling back to the filter.
+    await page.getByRole('option', { name: 'WEBM', exact: true }).evaluate(option => option.click())
     await expectClamped()
     await select(page, 'Format', 'All formats')
     await page.getByRole('combobox', { name: 'Time' }).click()
     await scrollDown()
-    await page.getByRole('option', { name: 'This week', exact: true }).click()
+    await page.getByRole('option', { name: 'This week', exact: true }).evaluate(option => option.click())
     await expectThumbAtEnd()
 
     await select(page, 'Time', 'Any time')

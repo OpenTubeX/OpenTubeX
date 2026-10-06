@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Толькі для ўдзельнікаў
 Search Filters:
+  Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
@@ -279,6 +280,10 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Правесці ўлева па мініяцюрах
+      Right: Правесці ўправа па мініяцюрах
+      Description: Правядзіце гарызантальна па мініяцюры відэа і адпусціце, каб выканаць выбраную дзею.
     Data Saver Thumbnails: "Эканомныя мініяцюры"
     Use tray icon: "Выкарыстоўваць значок у трэі"
     Close to system tray: "Згортваць у трэй пры закрыцці"
@@ -372,6 +377,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Compact Mobile Mini Player: "Кампактны мабільны міні-прайгравальнік"
     Always Show Mobile Search Bar: "Заўсёды паказваць радок пошуку на тэлефоне"
     Frosted Glass Player UI: "Інтэрфейс прайгравальніка з эфектам матавага шкла"
     Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
@@ -439,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светлая"
-      OpenTubeX Dark: "OpenTubeX Цёмная"
+      Ocean Light: "Ocean Светлая"
+      Ocean Dark: "Ocean Цёмная"
       Custom: Карыстальніцкая
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светлая тэма
@@ -653,6 +659,7 @@ Settings:
     Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
     Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
     Ignore System Rotation Lock for Fullscreen: Ігнараваць сістэмнае блакаванне павароту для поўнаэкраннага рэжыму
+    Swipe Left or Right to Seek in Fullscreen: Праводзьце налева або направа для перамоткі ў поўнаэкранным рэжыме
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1392,6 +1399,8 @@ Video:
     Hide: Схаваць
     Show: Паказаць
     Scroll Mini Player:
+      Collapse Controls: "Згарнуць элементы кіравання"
+      Expand Controls: "Разгарнуць элементы кіравання"
       Back to Top: Вярнуцца ўверх
       Return to Video Tab: Вярнуцца на ўкладку відэа
       Hide: Схаваць міні-прайгравальнік
@@ -2016,6 +2025,15 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Enter Password Hint: "Увядзіце свой пароль"
+  Choose Password Hint: "Выберыце пароль"
+  Confirm Password Hint: "Паўтарыце новы пароль"
+  Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"
+  Show Password: "Паказаць пароль"
+  Hide Password: "Схаваць пароль"
+  Search Text Hint: "Увядзіце пошукавыя словы"
+  Playlist Description Hint: "Апішыце гэты плэйліст"
+  Filename Preview: "Папярэдні прагляд назвы файла"
   Enter Channels: "Увядзіце каналы"
   Enter Text: "Увядзіце тэкст"
   Video URL: URL відэа або плэйліста
@@ -2034,3 +2052,8 @@ Form Inputs:
   Download Arguments Hint: Неабавязковыя аргументы для гэтага спампоўвання
   Generated ID Hint: Пакіньце пустым, каб згенераваць ID
   Default Value: "Прадвызначана: {value}"
+
+Storage Startup Error:
+  Title: "Не ўдалося загрузіць даныя праграмы"
+  Message: "Вызваліце месца на прыладзе і паспрабуйце яшчэ раз. Сінхранізацыя прыпынена, пакуль вашы даныя не загрузяцца."
+  Retry: "Паспрабаваць яшчэ раз"

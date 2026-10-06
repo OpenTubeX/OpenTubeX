@@ -315,7 +315,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         : await window.ftElectron.twitchSubOnlyVod(videoId)
       if (!result) throw error
 
-      const { playlist, video } = result
+      const { playlist, video, storyboardVtt } = result
       let twitchVodRegistrationId = null
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
         const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
@@ -350,7 +350,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
           legacyFormats: [],
           captions: [],
           captionTranslations: [],
-          storyboardSrc: null,
+          storyboardSrc: storyboardVtt ? `data:text/vtt;charset=utf-8,${encodeURIComponent(storyboardVtt)}` : null,
           isLive: false,
           twitchSubOnlyVod: true,
           twitchVodRegistrationId

@@ -65,6 +65,7 @@ Search Listing:
   Label:
     Members Only: Solo para miembros
 Search Filters:
+  Cookie Search Failed: "La búsqueda con las cookies configuradas falló."
   Features:
     360 Video: Video 360
     VR180: VR180
@@ -283,6 +284,10 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Deslizar a la izquierda en las miniaturas
+      Right: Deslizar a la derecha en las miniaturas
+      Description: Deslizá horizontalmente sobre la miniatura de un video y soltá para realizar la acción seleccionada.
     Data Saver Thumbnails: "Miniaturas con ahorro de datos"
     Use tray icon: "Usar icono de la bandeja"
     Close to system tray: "Cerrar a la bandeja del sistema"
@@ -376,6 +381,7 @@ Settings:
     Invalid Engine: Ingresá un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Podés agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Compact Mobile Mini Player: "Minirreproductor móvil compacto"
     Always Show Mobile Search Bar: "Mostrar siempre la barra de búsqueda en el móvil"
     Frosted Glass Player UI: "Interfaz del reproductor con efecto de vidrio esmerilado"
     Move Downloads to App Header: Mover Descargas al encabezado de la aplicación
@@ -443,8 +449,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Claro"
-      OpenTubeX Dark: "OpenTubeX Oscuro"
+      Ocean Light: "Ocean Claro"
+      Ocean Dark: "Ocean Oscuro"
       Custom: Personalizado
       Catppuccin Latte: Capuchino con leche
       Gruvbox Dark: Gruvbox oscuro
@@ -707,6 +713,7 @@ Settings:
     Upcoming Videos to Preload: "Vídeos próximos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
+    Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1680,6 +1687,8 @@ Video:
     You appear to be offline: Parece que no tenés conexión.
     Playback will resume automatically when your connection comes back: La reproducción se reanudará automáticamente cuando se restablezca la conexión.
     Scroll Mini Player:
+      Collapse Controls: "Contraer controles"
+      Expand Controls: "Expandir controles"
       Back to Top: Volver arriba
       Return to Video Tab: Volver a la pestaña del video
       Hide: Ocultar minirreproductor
@@ -2483,6 +2492,15 @@ Tray Icon:
   Follow App Theme: "Seguir el tema de la aplicación"
 
 Form Inputs:
+  Enter Password Hint: "Ingresá tu contraseña"
+  Choose Password Hint: "Elegí una contraseña"
+  Confirm Password Hint: "Repetí tu nueva contraseña"
+  Encryption Passphrase Hint: "Ingresá tu frase de cifrado"
+  Show Password: "Mostrar contraseña"
+  Hide Password: "Ocultar contraseña"
+  Search Text Hint: "Ingresá términos de búsqueda"
+  Playlist Description Hint: "Describí esta lista de reproducción"
+  Filename Preview: "Vista previa del nombre de archivo"
   Enter Channels: "Ingresá canales"
   Enter Text: "Ingresá texto"
   Video URL: URL del vídeo o de la lista
@@ -2501,3 +2519,8 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionales para esta descarga
   Generated ID Hint: Déjalo vacío para generar un ID
   Default Value: "Predeterminado: {value}"
+
+Storage Startup Error:
+  Title: "No se pudieron cargar los datos de la aplicación"
+  Message: "Liberá espacio en el dispositivo e intentá de nuevo. La sincronización está pausada hasta que se carguen tus datos."
+  Retry: "Reintentar"

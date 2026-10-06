@@ -2,7 +2,7 @@
   <div
     ref="selectRoot"
     class="select"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined' }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined', contentSized: sizeToContent }"
     @focusout="handleFocusOut"
   >
     <select
@@ -43,6 +43,7 @@
       :disabled="disabled"
       :dir="isLocaleSelector ? 'auto' : null"
       :lang="selectedLocale"
+      :style="{ anchorName: dropdownAnchor }"
       @click="toggleDropdown"
       @keydown="handleButtonKeydown"
     >
@@ -125,14 +126,19 @@
         @closed="dropdownShown = false; dropdownRendered = false"
         @close="closeDropdown"
       >
-        <input
+        <label
           v-if="phoneLayout && selectNames.length > 10"
-          v-model="search"
-          class="pickerSearch"
-          type="search"
-          :aria-label="$t('Search Bar.Search')"
-          :placeholder="$t('Search Bar.Search')"
+          class="textInputLabel pickerSearchField"
         >
+          <span class="textInputLabelText">{{ $t('Search Bar.Search') }}</span>
+          <input
+            v-model="search"
+            class="pickerSearch"
+            type="search"
+            :aria-label="$t('Search Bar.Search')"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
+          >
+        </label>
         <!-- Start on the listbox so a long picker does not summon the Android keyboard. -->
         <!-- eslint-disable vuejs-accessibility/no-autofocus -->
         <ul
@@ -148,6 +154,7 @@
           :aria-labelledby="`${id}-label`"
           :style="phoneLayout ? null : dropdownStyle"
           @pointerdown="handleDropdownPointerDown"
+          @mousedown="handleDropdownMouseDown"
           @keydown="handlePickerKeydown"
         >
           <template
@@ -236,6 +243,10 @@ const props = defineProps({
     default: 'outlined',
     validator: value => ['filled', 'outlined'].includes(value)
   },
+  sizeToContent: {
+    type: Boolean,
+    default: false
+  },
   placeholder: {
     type: String,
     required: true
@@ -313,6 +324,8 @@ const props = defineProps({
 const emit = defineEmits(['change', 'open', 'reset'])
 
 const id = useId()
+const dropdownAnchor = `--select-${id}`
+const supportsAnchorPositioning = CSS.supports('position-anchor', dropdownAnchor)
 const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
@@ -356,7 +369,6 @@ watch(dropdownShown, (shown) => {
     dropdownRendered.value = true
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
     window.addEventListener('resize', refreshDropdownLayout)
-    window.addEventListener('scroll', updateDropdownPosition, true)
   } else {
     if (!phoneLayout.value) dropdownRendered.value = false
     removeDropdownListeners()
@@ -432,6 +444,14 @@ function updateDropdownPosition() {
   const minimumTop = Math.max(viewportMargin, getTopChromeBottom() + menuGap)
   const maximumBottom = window.innerHeight - viewportMargin
   const buttonRect = button.getBoundingClientRect()
+  // Measure the complete labels, including option visuals and padding, before
+  // constraining the menu. Measuring clipped rows loses their intrinsic width.
+  menu.style.inlineSize = 'max-content'
+  const menuWidth = Math.min(
+    Math.max(buttonRect.width, menu.getBoundingClientRect().width),
+    window.innerWidth - viewportMargin * 2
+  )
+  menu.style.inlineSize = `${menuWidth}px`
   const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
   const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
   const naturalHeight = menu.scrollHeight + menu.offsetHeight - menu.clientHeight
@@ -439,12 +459,6 @@ function updateDropdownPosition() {
   const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
   const menuHeight = Math.min(desiredHeight, availableHeight)
-  const menuChromeWidth = menu.offsetWidth - menu.clientWidth
-  const widestOption = Math.max(
-    buttonRect.width,
-    ...(options.value ?? []).map(option => option.scrollWidth + menuChromeWidth)
-  )
-  const menuWidth = Math.min(widestOption, window.innerWidth - viewportMargin * 2)
   const centeredLeft = buttonRect.left + (buttonRect.width - menuWidth) / 2
   const left = Math.max(
     viewportMargin,
@@ -460,8 +474,15 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    left: `${snapToDevicePixels(left)}px`,
-    top: `${snapToDevicePixels(top)}px`,
+    // CSS anchors follow scrolling without JavaScript updates. Keep our
+    // measured offsets for viewport edges and rounding.
+    positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
+    left: supportsAnchorPositioning
+      ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
+      : `${snapToDevicePixels(left)}px`,
+    top: supportsAnchorPositioning
+      ? `calc(anchor(top) + ${snapToDevicePixels(top) - buttonRect.top}px)`
+      : `${snapToDevicePixels(top)}px`,
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
     zIndex: props.dropdownZIndex
   }
@@ -690,10 +711,15 @@ function handleDropdownPointerDown() {
   }, 0)
 }
 
+function handleDropdownMouseDown(event) {
+  // Desktop lists use aria-activedescendant on the button. Keep that focus
+  // when grabbing a scrollbar, including inside a popup that closes on blur.
+  if (!phoneLayout.value) event.preventDefault()
+}
+
 function removeDropdownListeners() {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
   window.removeEventListener('resize', refreshDropdownLayout)
-  window.removeEventListener('scroll', updateDropdownPosition, true)
 }
 
 /**

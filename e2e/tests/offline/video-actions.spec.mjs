@@ -893,7 +893,7 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: currentTitle })
     await expect(downloadRow).toBeVisible()
     await expect(downloadRow.locator('.downloadWarning')).toHaveCount(0)
-    await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute('src', currentThumbnail)
+    await expect(downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute('src', currentThumbnail)
   })
 
   test('clears a stale feed thumbnail when yt-dlp finds none', async ({ app, page }) => {
@@ -1015,7 +1015,7 @@ test.describe('video downloads', () => {
     await expect.poll(async () => {
       const [mainBounds, thumbnailBounds] = await Promise.all([
         downloadRow.locator('.downloadMain').boundingBox(),
-        downloadRow.locator('.downloadThumbnail').boundingBox()
+        downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)').boundingBox()
       ])
       return thumbnailBounds.x + thumbnailBounds.width / 2 - (mainBounds.x + mainBounds.width / 2)
     }).toBeCloseTo(0, 0)
@@ -1664,12 +1664,12 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
   })
 
   const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Finished download' })
-  await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute(
+  await expect(downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute(
     'src',
-    'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg'
+    'https://i.ytimg.com/vi/eeeeeeeeeee/maxresdefault.jpg'
   )
   const rowLayout = await downloadRow.evaluate((row) => ({
-    thumbnailRight: row.querySelector('.downloadThumbnail').getBoundingClientRect().right,
+    thumbnailRight: row.querySelector('.downloadThumbnail:not(.retryImagePlaceholder)').getBoundingClientRect().right,
     detailsLeft: row.querySelector('.downloadDetails').getBoundingClientRect().left
   }))
   expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
@@ -1865,7 +1865,7 @@ test.describe('list video actions', () => {
       label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
       labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity
     }))
-    expect(opacity).toEqual({ label: '1', labelText: '0.4' })
+    expect(opacity).toEqual({ label: '1', labelText: '0.38' })
     await expect(tooltip).toHaveCSS('opacity', '1')
     for (const fullWindow of [false, true]) {
       await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)
@@ -1961,7 +1961,7 @@ test.describe('list video actions', () => {
     await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
 
     // The toast shows the video's thumbnail, not just the message
-    await expect(page.locator('.toast.hasImage .image')).toHaveAttribute('src', /eeeeeeeeeee/)
+    await expect(page.locator('.toast.hasImage .image:not(.retryImagePlaceholder)')).toHaveAttribute('src', /eeeeeeeeeee/)
     await expect.poll(async () => {
       const favorites = await readPlaylist(app, 'favorites')
       return favorites?.videos?.map((entry) => entry.videoId)

@@ -263,6 +263,10 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Potiahnutie doľava po náhľadoch
+      Right: Potiahnutie doprava po náhľadoch
+      Description: Potiahnite vodorovne po náhľade videa a uvoľnením vykonajte vybranú akciu.
     Data Saver Thumbnails: "Úsporné náhľady"
     Use tray icon: "Používať ikonu v systémovej lište"
     Close to system tray: "Pri zatvorení skryť do systémovej lišty"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktný mobilný miniprehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Svetlá"
-      OpenTubeX Dark: "OpenTubeX Tmavá"
+      Ocean Light: "Ocean Svetlá"
+      Ocean Dark: "Ocean Tmavá"
       Custom: Vlastný
     Light Theme: Svetlý motív
     Dark Theme: Tmavý motív
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
     Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
+    Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1320,6 +1326,8 @@ Video:
     Hide: Skryť
     Show: Zobraziť
     Scroll Mini Player:
+      Collapse Controls: "Zbaliť ovládanie"
+      Expand Controls: "Rozbaliť ovládanie"
       Back to Top: Späť nahor
       Return to Video Tab: Vrátiť sa na kartu videa
       Hide: Skryť miniatúrny prehrávač
@@ -1922,6 +1930,15 @@ Tray Icon:
   Follow App Theme: "Použiť motív aplikácie"
 
 Form Inputs:
+  Enter Password Hint: "Zadajte svoje heslo"
+  Choose Password Hint: "Zvoľte heslo"
+  Confirm Password Hint: "Zopakujte nové heslo"
+  Encryption Passphrase Hint: "Zadajte svoju šifrovaciu prístupovú frázu"
+  Show Password: "Zobraziť heslo"
+  Hide Password: "Skryť heslo"
+  Search Text Hint: "Zadajte hľadané výrazy"
+  Playlist Description Hint: "Opíšte tento zoznam videí"
+  Filename Preview: "Ukážka názvu súboru"
   Enter Channels: "Zadajte kanály"
   Enter Text: "Zadajte text"
   Video URL: URL videa alebo playlistu
@@ -1940,3 +1957,11 @@ Form Inputs:
   Download Arguments Hint: Voliteľné argumenty pre toto sťahovanie
   Generated ID Hint: Nechajte prázdne pre vygenerovanie ID
   Default Value: "Predvolené: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
+
+Storage Startup Error:
+  Title: "Údaje aplikácie sa nepodarilo načítať"
+  Message: "Uvoľnite miesto v zariadení a skúste to znova. Synchronizácia je pozastavená, kým sa údaje nenačítajú."
+  Retry: "Skúsiť znova"

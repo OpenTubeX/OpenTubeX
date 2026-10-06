@@ -19,13 +19,16 @@ function fixture() {
     valueChangeTimeout: null,
     maxVideoPlaybackRate: { value: 4 },
     playbackRateUserSet: false,
+    hasLoaded: { value: true },
+    pendingPlaybackRateRestore: null,
+    emit() {},
     player: { cancelTrickPlay() {}, trickPlay() {} },
     getDefaultPlaybackRateForVideo: () => 1,
     showOverlayControls() {},
     setTimeout() {},
     clearTimeout() {},
   }
-  const names = ['applyPlaybackRate', 'handleControlsContainerClick', 'showValueChange']
+  const names = ['setPlaybackRate', 'applyPlaybackRate', 'handleControlsContainerClick', 'showValueChange']
   const functions = names.map(name => {
     const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
     assert.ok(match, `missing ${name}`)

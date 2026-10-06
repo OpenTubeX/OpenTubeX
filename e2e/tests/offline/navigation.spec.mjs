@@ -76,6 +76,11 @@ for (const uiScale of [100, 125]) {
         await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')
       })
       await expect(page.locator('.fixedNavigationOptions')).toContainText('Navigationsleiste')
+      // Use a verbose translated label so the language switch actually reduces
+      // the scroll range even when the standard captions fit the same rows.
+      await page.locator('.fixedNavigationOptions .switch-label-text').first().evaluate(element => {
+        element.textContent = 'Navigationsleiste auch während der Wiedergabe und beim Scrollen immer anzeigen'
+      })
       await scrollToEnd()
       const germanHeight = await content.evaluate(element => element.getBoundingClientRect().height)
       const germanThumb = await thumb.evaluate(element => element.getBoundingClientRect().height)

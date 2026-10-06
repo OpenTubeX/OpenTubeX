@@ -71,9 +71,9 @@ let requestId = 0
 watch(() => props.tab.id, async tabId => {
   const currentRequestId = ++requestId
   previewUrl.value = null
-  if (!process.env.IS_ELECTRON || typeof window.ftElectron?.tabs?.capturePreview !== 'function') return
+  if (!process.env.IS_ELECTRON || typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function') return
   try {
-    const dataUrl = await window.ftElectron.tabs.capturePreview(tabId)
+    const dataUrl = (await window.ftElectron.tabs.getCachedPreviews([tabId]))[tabId]
     if (currentRequestId === requestId) {
       previewUrl.value = typeof dataUrl === 'string' && dataUrl.length > 0 ? dataUrl : null
     }

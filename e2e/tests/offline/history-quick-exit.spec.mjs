@@ -222,9 +222,27 @@ for (const position of [0, 5, 15]) {
   })
 }
 
-for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']) {
-  test(action === 'first timeline' ? 'a first timeline seek during buffering takes precedence over saved progress' : `a newer ${action} seek during buffering replaces a chapter seek before metadata`, async ({ app, page }) => {
+for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline', 'first mouse timeline before data', 'paused mouse timeline before data', 'blurred mouse timeline before data']) {
+  const title = action.startsWith('blurred')
+    ? 'autoplays when the window loses focus during a startup seek'
+    : action.endsWith('before data')
+      ? action.startsWith('paused')
+        ? 'preserves a Media Session pause before seeking during startup'
+        : 'autoplays at a timeline seek made before the first frame'
+      : action === 'first timeline'
+        ? 'a first timeline seek during buffering takes precedence over saved progress'
+        : `a newer ${action} seek during buffering replaces a chapter seek before metadata`
+  test(title, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    if (action.startsWith('paused')) {
+      await page.evaluate(() => {
+        const register = navigator.mediaSession.setActionHandler.bind(navigator.mediaSession)
+        navigator.mediaSession.setActionHandler = (name, handler) => {
+          if (name === 'pause' && handler) window.startupMediaPause = handler
+          register(name, handler)
+        }
+      })
+    }
     let release
     const pending = new Promise(resolve => { release = resolve })
     let reached
@@ -242,8 +260,12 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']
       await watch.evaluate((component, action) => {
         const video = component.proxy.$el.querySelector('video')
         window.firstPlaybackPosition = null
-        video.addEventListener('playing', () => { window.firstPlaybackPosition = video.currentTime }, { once: true })
-        video.addEventListener('loadeddata', () => {
+        window.mouseTimelineTarget = null
+        video.addEventListener('playing', () => {
+          if (!video.paused) window.firstPlaybackPosition = video.currentTime
+        }, { once: true })
+        video.addEventListener(action.endsWith('before data') ? 'loadedmetadata' : 'loadeddata', () => {
+          if (action.startsWith('paused')) window.startupMediaPause()
           if (action === 'chapter') {
             component.refs.player.setCurrentTime(5)
           } else {
@@ -252,24 +274,39 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']
             range.min = '0'
             range.max = '30'
             range.value = '5'
-            if (action === 'mouse timeline') {
+            if (action.includes('mouse timeline')) {
               const rect = range.getBoundingClientRect()
               const point = seconds => rect.left + 6 + (rect.width - 12) * seconds / 30
               range.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: point(15) }))
-              range.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: point(5) }))
+              if (action.startsWith('blurred')) {
+                // Window focus loss need not blur its focused range input.
+                window.dispatchEvent(new Event('blur'))
+              } else {
+                range.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: point(5) }))
+              }
               window.mouseTimelineTarget = Number(range.value)
             } else {
               range.dispatchEvent(new Event('input', { bubbles: true }))
             }
           }
         }, { once: true })
-        if (action !== 'first timeline') component.refs.player.setCurrentTime(15)
+        if (!action.startsWith('first ') && !action.startsWith('paused') && !action.startsWith('blurred')) component.refs.player.setCurrentTime(15)
       }, action)
       release()
+      if (action.startsWith('paused')) {
+        const video = page.locator('.ftVideoPlayer video')
+        await expect.poll(() => page.evaluate(() => window.mouseTimelineTarget)).not.toBeNull()
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(3)
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 0)
+        await page.waitForTimeout(200)
+        expect(await video.evaluate(element => element.paused)).toBe(true)
+        expect(await page.evaluate(() => window.firstPlaybackPosition)).toBeNull()
+        return
+      }
       await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
       const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
-      const target = action === 'mouse timeline' ? await page.evaluate(() => window.mouseTimelineTarget) : 5
-      expect(target).toBeCloseTo(5, 0)
+      const target = action.includes('mouse timeline') ? await page.evaluate(() => window.mouseTimelineTarget) : 5
+      expect(target).toBeCloseTo(action.startsWith('blurred') ? 15 : 5, 0)
       // Media timestamps can round a fractional pointer target down slightly.
       expect(firstPosition).toBeGreaterThanOrEqual(target - 0.001)
       expect(firstPosition).toBeLessThan(target + 1)

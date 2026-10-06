@@ -449,6 +449,43 @@ test('shows an image icon for an undecodable quick bookmark image', async ({ pag
   }
 })
 
+test('reveals cached custom bookmark images before the next painted frame', async ({ page }) => {
+  await goTo(page, 'userplaylists')
+  await page.getByText('Favorites', { exact: true }).click()
+  const bookmark = page.getByTitle('Quick Bookmark Enabled')
+  const src = await page.evaluate(async () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 24
+    const context = canvas.getContext('2d')
+    context.fillStyle = 'teal'
+    context.fillRect(0, 0, 24, 24)
+    const src = canvas.toDataURL()
+    const image = new Image()
+    image.src = src
+    await image.decode()
+    return src
+  })
+  for (const pack of ['material', 'remix']) {
+    const painted = await bookmark.evaluate(async (button, { src, pack }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateIconPack', pack)
+      const playlist = store.getters.getPlaylist('favorites')
+      playlist.quickBookmarkIcon = 'bookmark'
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      playlist.quickBookmarkIcon = { type: 'image', value: src }
+      return new Promise(resolve => requestAnimationFrame(() => {
+        const image = button.querySelector('img')
+        if (!image) {
+          resolve({ missingImage: true })
+          return
+        }
+        resolve({ complete: image.complete, visibility: getComputedStyle(image).visibility, placeholder: !!button.querySelector('.customImagePlaceholder') })
+      }))
+    }, { src, pack })
+    expect(painted).toEqual({ complete: true, visibility: 'visible', placeholder: false })
+  }
+})
+
 test('keeps inline post emoji images hidden until loaded and after failure', async ({ page }, testInfo) => {
   const pending = []
   await page.route('https://images.test/**', route => { pending.push(route) })
@@ -696,10 +733,13 @@ test('uses the menu action icon while its image loads and after failure', async 
 })
 
 test('protects captured tab previews while loading and after failure', async ({ app, page }, testInfo) => {
-  await app.electronApp.evaluate(({ ipcMain }, channel) => {
-    ipcMain.removeHandler(channel)
-    ipcMain.handle(channel, () => 'https://tab-previews.test/captured')
-  }, IpcChannels.TABS_CAPTURE_PREVIEW)
+  await app.electronApp.evaluate(({ ipcMain }, channels) => {
+    ipcMain.removeHandler(channels.TABS_CAPTURE_PREVIEW)
+    ipcMain.handle(channels.TABS_CAPTURE_PREVIEW, () => null)
+    ipcMain.removeHandler(channels.TABS_GET_CACHED_PREVIEWS)
+    ipcMain.handle(channels.TABS_GET_CACHED_PREVIEWS, (_event, tabIds) =>
+      Object.fromEntries(tabIds.map(tabId => [tabId, 'https://tab-previews.test/captured'])))
+  }, IpcChannels)
   const pending = []
   let failImages = false
   await page.route('https://tab-previews.test/**', route => {

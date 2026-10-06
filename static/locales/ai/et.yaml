@@ -263,6 +263,10 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Pisipiltidel vasakule pühkimine
+      Right: Pisipiltidel paremale pühkimine
+      Description: Valitud toimingu tegemiseks pühi video pisipildil horisontaalselt ja tõsta sõrm.
     Data Saver Thumbnails: "Andmesäästlikud pisipildid"
     Use tray icon: "Kasuta süsteemisalve ikooni"
     Close to system tray: "Sulge süsteemisalve"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktne mobiilne minipleier"
     Always Show Mobile Search Bar: "Kuva mobiili otsinguriba alati"
     Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Hele"
-      OpenTubeX Dark: "OpenTubeX Tume"
+      Ocean Light: "Ocean Hele"
+      Ocean Dark: "Ocean Tume"
       Custom: Kohandatud
     Light Theme: Hele teema
     Dark Theme: Tume teema
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1319,6 +1325,8 @@ Video:
     Hide: Peida
     Show: Näita
     Scroll Mini Player:
+      Collapse Controls: "Ahenda juhtnupud"
+      Expand Controls: "Laienda juhtnupud"
       Back to Top: Tagasi üles
       Return to Video Tab: Naase video vahekaardile
       Hide: Peida minipleier
@@ -1922,6 +1930,15 @@ Tray Icon:
   Follow App Theme: "Järgi rakenduse teemat"
 
 Form Inputs:
+  Enter Password Hint: "Sisesta oma parool"
+  Choose Password Hint: "Vali parool"
+  Confirm Password Hint: "Korda oma uut parooli"
+  Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"
+  Show Password: "Näita parooli"
+  Hide Password: "Peida parool"
+  Search Text Hint: "Sisesta otsingusõnad"
+  Playlist Description Hint: "Kirjelda seda esitusloendit"
+  Filename Preview: "Failinime eelvaade"
   Enter Channels: "Sisesta kanalid"
   Enter Text: "Sisesta tekst"
   Video URL: Video või esitusloendi URL
@@ -1940,3 +1957,11 @@ Form Inputs:
   Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
   Generated ID Hint: Jäta tühjaks, et luua ID
   Default Value: "Vaikimisi: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+
+Storage Startup Error:
+  Title: "Rakenduse andmeid ei saanud laadida"
+  Message: "Vabasta seadmes salvestusruumi ja proovi uuesti. Sünkroonimine on peatatud, kuni andmed on laaditud."
+  Retry: "Proovi uuesti"

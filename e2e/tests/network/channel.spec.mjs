@@ -12,15 +12,27 @@ const GLITCH_CHANNEL_URL = 'https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-m
 test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
-  test('loads the GLITCH channel home and playlists tabs', async ({ page }) => {
+  test('loads the GLITCH channel home and playlists tabs', async ({ app, page }) => {
     await page.locator(sel.searchInput).fill(GLITCH_CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
 
     await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
     await page.getByRole('tab', { name: 'Home' }).click()
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.channelDetails .tabsIndicator')).toBeVisible()
+
+    for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+        BrowserWindow.getAllWindows()[0].setSize(width, height)
+      }, { width, height })
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
+        return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+      }), { message: `20px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(20)
+    }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
+    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'transform')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -83,8 +95,14 @@ test.describe('channel page', () => {
       await page.evaluate(value => {
         document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
       }, roundness)
-      await expect.poll(() => page.locator('.channelDetails .selectedTab').evaluate(element =>
-        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+      await expect.poll(() => page.locator('.channelDetails .tabsIndicator').evaluate(element => {
+        const style = getComputedStyle(element)
+        const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
+        return {
+          horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
+          vertical
+        }
+      })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
     }
 
     await page.locator('body').evaluate(element => {
@@ -98,13 +116,14 @@ test.describe('channel page', () => {
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
 
     const selectedTab = page.locator('.channelDetails .selectedTab')
-    const selectedIndicatorColor = await selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    const selectedIndicator = page.locator('.channelDetails .tabsIndicator')
+    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element).backgroundColor)
     const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
     expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
     await page.keyboard.press('Tab')
     await selectedTab.focus()
     await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-    await expect.poll(() => selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(selectedIndicatorColor)
+    await expect(selectedIndicator).toHaveCSS('background-color', selectedIndicatorColor)
     await page.mouse.move(0, 0)
     await aboutTab.focus()
     await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
@@ -303,7 +322,16 @@ test.describe('channel page', () => {
 })
 
 test.describe('channel route changes', () => {
-  test.use({ seed: { settings: { backendPreference: 'invidious', backendFallback: false } } })
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
 
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
     const videos = [1, 2].map(number => ({
@@ -428,17 +456,17 @@ test.describe('channel route changes', () => {
         await page.locator(sel.searchInput).fill(CHANNEL_URL)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(/#\/channel\//)
+        await expect(page.getByText('Alpha').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(firstId)).toBe(true)
         await expect(page).toHaveURL(new RegExp(`#/channel/${firstId}/${tab}$`))
-        await expect(page.getByText('Alpha').first()).toBeVisible()
 
         await page.locator(sel.searchInput).fill(`https://www.youtube.com/channel/${secondId}`)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(new RegExp(`#/channel/${secondId}`))
+        await expect(page.getByText('Beta').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(secondId)).toBe(true)
-        await expect(page.getByText('Beta').first()).toBeVisible()
         await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
 
         const oldResponse = page.waitForResponse(response => response.url().includes(`/channels/${firstId}/${tab}`))

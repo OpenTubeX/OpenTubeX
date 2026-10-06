@@ -545,6 +545,8 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, currentVideoId)
   },
 
+  ytDlpSearch: (query, params, page) => ipcRenderer.invoke(IpcChannels.YT_DLP_SEARCH, query, params, page),
+
   ytDlpGetSubtitle: (url) => {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_SUBTITLE, url)
   },
@@ -638,6 +640,24 @@ export default {
    */
   resolveFavicon: (url) => {
     return ipcRenderer.invoke(IpcChannels.RESOLVE_FAVICON, url)
+  },
+
+  /**
+   * Authorizes one queued rule write while its initiating user action is active.
+   * @returns {((value: string) => Promise<null>) | null}
+   */
+  prepareAutomaticDownloadRulesWrite: () => {
+    if (!navigator.userActivation.isActive) return null
+    let used = false
+    return value => {
+      if (used) return Promise.reject(new Error('Automatic download rule writer already used'))
+      used = true
+      if (typeof value !== 'string') return Promise.reject(new Error('Automatic download rules must be a string'))
+      return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, {
+        action: DBActions.GENERAL.UPSERT,
+        data: { _id: 'ytDlpAutomaticDownloadRules', value }
+      })
+    }
   },
 
   /**

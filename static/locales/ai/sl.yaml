@@ -87,6 +87,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Podnapisi za gluhe in naglušne
 Search Filters:
+  Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
@@ -385,6 +386,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Podrsanje levo po sličicah
+      Right: Podrsanje desno po sličicah
+      Description: Podrsajte vodoravno po sličici videoposnetka in spustite za izvedbo izbranega dejanja.
     Data Saver Thumbnails: "Sličice za varčevanje s podatki"
     Use tray icon: "Uporabi ikono v sistemski vrstici"
     Close to system tray: "Zapri v sistemsko vrstico"
@@ -485,6 +490,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakten mobilni mini predvajalnik"
     Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
     Frosted Glass Player UI: "Vmesnik predvajalnika z učinkom motnega stekla"
     Move Downloads to App Header: Premakni prenose v glavo aplikacije
@@ -552,8 +558,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX svetla"
-      OpenTubeX Dark: "OpenTubeX temna"
+      Ocean Light: "Ocean svetla"
+      Ocean Dark: "Ocean temna"
       Custom: Po meri
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -837,6 +843,7 @@ Settings:
     Upcoming Videos to Preload: "Število videov za prednalaganje"
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
+    Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1768,6 +1775,8 @@ Video:
     You appear to be offline: Videti je, da niste povezani.
     Playback will resume automatically when your connection comes back: Predvajanje se bo samodejno nadaljevalo, ko bo povezava znova vzpostavljena.
     Scroll Mini Player:
+      Collapse Controls: "Strni kontrolnike"
+      Expand Controls: "Razširi kontrolnike"
       Back to Top: Nazaj na vrh
       Return to Video Tab: Nazaj na zavihek videoposnetka
       Hide: Skrij mini predvajalnik
@@ -2516,6 +2525,15 @@ Tray Icon:
   Follow App Theme: "Sledi temi aplikacije"
 
 Form Inputs:
+  Enter Password Hint: "Vnesite svoje geslo"
+  Choose Password Hint: "Izberite geslo"
+  Confirm Password Hint: "Ponovite novo geslo"
+  Encryption Passphrase Hint: "Vnesite svoje šifrirno geslo"
+  Show Password: "Prikaži geslo"
+  Hide Password: "Skrij geslo"
+  Search Text Hint: "Vnesite iskalne izraze"
+  Playlist Description Hint: "Opišite ta seznam predvajanja"
+  Filename Preview: "Predogled imena datoteke"
   Enter Channels: "Vnesite kanale"
   Enter Text: "Vnesite besedilo"
   Video URL: URL videa ali seznama predvajanja
@@ -2534,3 +2552,8 @@ Form Inputs:
   Download Arguments Hint: Izbirni argumenti za ta prenos
   Generated ID Hint: Pustite prazno za ustvarjanje ID-ja
   Default Value: "Privzeto: {value}"
+
+Storage Startup Error:
+  Title: "Podatkov aplikacije ni bilo mogoče naložiti"
+  Message: "Sprostite prostor v napravi in poskusite znova. Sinhronizacija je začasno ustavljena, dokler se podatki ne naložijo."
+  Retry: "Poskusi znova"

@@ -7,9 +7,9 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
-import { initializePageScrollbar } from './pageScrollbar'
+import { initializePageScrollbar, observePageScrollbarVisibility } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
-import { setAndroidAlwaysShowScrollbars } from './androidUi'
+import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from './androidUi'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -50,13 +50,22 @@ function scrollbarOptions(initialization) {
   if (initialization === document.body) {
     // The page viewport is always a normal block-flow body. Avoid repeatedly
     // reading all flow-related computed styles while long feeds are changing;
-    // only direction can change at runtime.
+    // only direction can change at runtime. Tab-bar mutations stay inside its
+    // clipped viewport and cannot change the page's scroll range.
     options.update = {
+      debounce: { resize: [0, 33] },
+      ignoreMutation: ignorePageScrollbarMutation,
       flowDirectionStyles: () => ({ direction: document.documentElement.dir })
     }
   }
 
   return options
+}
+
+/** @param {MutationRecord} mutation */
+function ignorePageScrollbarMutation(mutation) {
+  const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
+  return element?.closest('.tabBar') != null
 }
 
 /**
@@ -387,6 +396,14 @@ function optimizeBodyScrollbarDrag(instance) {
  */
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
   initializePageScrollbar(document, useNativePageScrollbar, create)
+
+  if (useNativePageScrollbar) {
+    observePageScrollbarVisibility(document, hidden => {
+      setAndroidPageScrollbarsHidden(hidden).catch(error => {
+        console.warn('Could not update Android fullscreen scrollbar visibility', error)
+      })
+    })
+  }
 
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),

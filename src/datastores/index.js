@@ -29,6 +29,11 @@ function createDatastore(name) {
   const datastore = new Datastore({
     filename: dbPath(name),
     autoload: !process.env.IS_ELECTRON_MAIN,
+    // Android's startup gate presents a recoverable error instead of an
+    // unhandled autoload rejection or an apparently empty installation.
+    onload: process.env.IS_CAPACITOR && !process.env.IS_IOS
+      ? error => { if (error) console.error('Unable to load app datastore:', name, error) }
+      : undefined,
     // Automatically clean up corrupted data, instead of crashing
     corruptAlertThreshold: 1
   })
@@ -72,3 +77,12 @@ export function removeLegacySubscriptionCache() {
 export const tabSession = createDatastore('tab-session')
 export const liveReminders = createDatastore('live-reminders')
 export const videoMetadataCache = createDatastore('video-metadata-cache')
+
+export async function waitForDatastores() {
+  const results = await Promise.allSettled([
+    settings, profiles, playlists, history, watchStats, recommendations,
+    searchHistory, tabSession, liveReminders, videoMetadataCache,
+  ].map(datastore => datastore.autoloadPromise))
+  const failure = results.find(result => result.status === 'rejected')
+  if (failure) throw failure.reason
+}

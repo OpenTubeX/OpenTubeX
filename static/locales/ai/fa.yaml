@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: فقط اعضا
 Search Filters:
+  Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
   Prioritize:
     Prioritize: اولویت‌بندی
     Popularity: محبوبیت
@@ -280,6 +281,10 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: کشیدن به چپ روی تصاویر بندانگشتی
+      Right: کشیدن به راست روی تصاویر بندانگشتی
+      Description: تصویر بندانگشتی ویدیو را افقی بکشید و رها کنید تا عمل انتخاب‌شده انجام شود.
     Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
     Use tray icon: "استفاده از نماد سینی سیستم"
     Close to system tray: "بستن به سینی سیستم"
@@ -372,6 +377,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Compact Mobile Mini Player: "پخش‌کننده کوچک و فشرده موبایل"
     Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
     Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
     Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
@@ -439,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX روشن"
-      OpenTubeX Dark: "OpenTubeX تاریک"
+      Ocean Light: "Ocean روشن"
+      Ocean Dark: "Ocean تاریک"
       Custom: سفارشی
       Catppuccin Latte: Catppuccin Latte
     Light Theme: زمینهٔ روشن
@@ -653,6 +659,7 @@ Settings:
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
+    Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1386,6 +1393,8 @@ Video:
     Hide: پنهان کردن
     Show: نمایش
     Scroll Mini Player:
+      Collapse Controls: "جمع کردن کنترل‌ها"
+      Expand Controls: "باز کردن کنترل‌ها"
       Back to Top: بازگشت به بالا
       Return to Video Tab: بازگشت به زبانهٔ ویدیو
       Hide: پنهان‌کردن پخش‌کنندهٔ کوچک
@@ -2007,6 +2016,15 @@ Tray Icon:
   Follow App Theme: "پیروی از زمینهٔ برنامه"
 
 Form Inputs:
+  Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Choose Password Hint: "یک گذرواژه انتخاب کنید"
+  Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
+  Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"
+  Show Password: "نمایش گذرواژه"
+  Hide Password: "پنهان کردن گذرواژه"
+  Search Text Hint: "عبارت‌های جستجو را وارد کنید"
+  Playlist Description Hint: "این فهرست پخش را توصیف کنید"
+  Filename Preview: "پیش‌نمایش نام فایل"
   Enter Channels: "کانال‌ها را وارد کنید"
   Enter Text: "متن را وارد کنید"
   Video URL: نشانی ویدیو یا فهرست پخش
@@ -2025,3 +2043,8 @@ Form Inputs:
   Download Arguments Hint: آرگومان‌های اختیاری برای این بارگیری
   Generated ID Hint: برای ایجاد شناسه خالی بگذارید
   Default Value: "پیش‌فرض: {value}"
+
+Storage Startup Error:
+  Title: "داده‌های برنامه بارگیری نشد"
+  Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
+  Retry: "تلاش دوباره"

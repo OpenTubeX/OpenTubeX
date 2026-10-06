@@ -30,7 +30,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, connectionChanges } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -51,6 +51,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     syncServerSyncSubscriptions: true,
     ...overrides,
   }
+  const storedReceipts = new Map()
   const common = {
     ...syncLive,
     ...(connectionChanges ? {
@@ -82,9 +83,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     AUTO_SYNC_INTERVAL_MS: 5 * 60 * 1000,
     getConnectionState: () => network.state,
     navigator: { get onLine() { return network.online },
-      ...(deferLock ? { locks: { request: (name, callback) => Promise.resolve().then(callback) } } : {}) },
+      ...(locks ? { locks } : deferLock ? { locks: { request: (name, options, callback) => Promise.resolve().then(() => (callback ?? options)({ name })) } } : {}) },
     connectionEvents,
     ...(browser ? { window: new EventTarget(), document: new EventTarget(), isAppHidden: () => false } : {}),
+    ...(desktopTabs ? { window: { ftElectron: { tabs: desktopTabs } }, localStorage: { getItem: key => storedReceipts.get(key) ?? null, setItem: (key, value) => storedReceipts.set(key, value) } } : {}),
     crypto,
     Date,
     URL,
@@ -96,7 +98,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     structuredClone,
     TextEncoder,
     TextDecoder,
-    process: { env: { IS_ELECTRON: Boolean(reminderService) } },
+    process: { env: { IS_ELECTRON: Boolean(reminderService || desktopTabs) } },
     packageDetails: { version: 'test' },
     MAIN_PROFILE_ID: 'main',
     deepCopy: structuredClone,
@@ -176,6 +178,60 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
 }
+
+for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
+  for (const cached of [false, true]) {
+  test(`${cached ? 'cached' : 'completed'} library sync does not wait for ${refreshAction}`, async () => {
+    const f = liveFixture()
+    if (cached) await f.actions.syncWithSyncServer(f.context)
+    let releaseRefresh
+    const refreshPending = new Promise(resolve => { releaseRefresh = resolve })
+    let refreshStarted
+    const started = new Promise(resolve => { refreshStarted = resolve })
+    const originalDispatch = f.context.dispatch
+    f.context.dispatch = (action, ...args) => {
+      if (action === refreshAction) {
+        refreshStarted()
+        return refreshPending
+      }
+      return originalDispatch(action, ...args)
+    }
+    let completed = false
+    const syncing = f.actions.syncWithSyncServer(f.context, { remoteOnly: cached }).then(() => { completed = true })
+    try {
+      await started
+      await new Promise(resolve => setImmediate(resolve))
+      assert.equal(completed, true, 'Account metadata must not hold library sync open')
+      assert.equal(f.context.state.syncServerStatus, 'success')
+      assert.equal(f.context.state.syncServerProgress, null)
+      assert.ok(f.settings.syncServerLastSyncAt > 0)
+    } finally {
+      releaseRefresh()
+      await syncing
+    }
+  })
+  }
+}
+
+test('encrypted activity downloads can outlast the ordinary request timeout', async () => {
+  const events = Array.from({ length: 81 }, (_, index) => ({ id: String(index), payload: 'encrypted activity' }))
+  const f = fixture({}, {
+    // Scale deadlines to keep the regression fast: the response takes the
+    // equivalent of 50 seconds, longer than the ordinary 20-second timeout.
+    timer: (callback, delay) => setTimeout(callback, delay / 1000),
+    respond: (_url, options) => new Promise((resolve, reject) => {
+      const response = setTimeout(() => resolve(events), 50)
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(response)
+        reject(new DOMException('Aborted', 'AbortError'))
+      }, { once: true })
+    }),
+  })
+  const client = new f.Client('https://sync.example', 'saved-token')
+  const downloaded = await client.getSyncEvents()
+  assert.equal(downloaded.length, events.length)
+  assert.equal(f.requests.length, 1)
+})
 
 for (const [method, args, path, verb] of [
   ['authenticate', ['login', 'alice', 'password'], '/account/login', 'POST'],
@@ -1348,3 +1404,158 @@ for (const syncServerPrivacyMode of ['enhanced', 'legacy']) {
     assert.ok(f.requests.every(request => request.url.endsWith('/health')))
   })
 }
+
+
+test('activity refresh shares an in-flight download and retries after failure', async () => {
+  let fail = true
+  let release
+  let pending = new Promise(resolve => { release = resolve })
+  const f = fixture({}, { encrypted: true, respond: async url => {
+    if (new URL(url).pathname !== '/v1/encrypted_sync/events') return
+    await pending
+    if (fail) throw new Error('Activity unavailable')
+    return []
+  } })
+  const first = f.actions.refreshSyncServerEvents(f.context)
+  const second = f.actions.refreshSyncServerEvents(f.context)
+  const settled = Promise.allSettled([first, second])
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(f.requests.length, 1)
+  release()
+  assert.ok((await settled).every(result => result.status === 'rejected'))
+  fail = false
+  pending = Promise.resolve()
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.equal(f.requests.length, 2)
+})
+
+for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
+  test(`failure of ${refreshAction} cannot turn a saved library sync into an error`, async () => {
+    const f = liveFixture()
+    const originalDispatch = f.context.dispatch
+    f.context.dispatch = (action, ...args) => action === refreshAction
+      ? Promise.reject(new Error('Account metadata unavailable'))
+      : originalDispatch(action, ...args)
+    await f.actions.syncWithSyncServer(f.context)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(f.context.state.syncServerStatus, 'success')
+    assert.equal(f.context.state.syncServerError, '')
+    assert.ok(f.settings.syncServerLastSyncAt > 0)
+  })
+}
+
+
+test('background activity skips another renderer download while explicit refresh waits for the lock', async () => {
+  const lockOptions = []
+  const f = fixture({}, { encrypted: true, locks: {
+    request(name, options, callback) {
+      lockOptions.push(options)
+      return Promise.resolve(callback(options.ifAvailable ? null : { name }))
+    },
+  } })
+  await f.actions.refreshSyncServerEvents(f.context, { background: true })
+  assert.equal(f.requests.length, 0)
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.equal(f.requests.length, 1)
+  assert.equal(lockOptions[0].ifAvailable, true)
+  assert.equal(lockOptions[1].ifAvailable, false)
+})
+
+
+test('the live listener retries failed message refresh independently of completed library sync', async () => {
+  const f = liveFixture()
+  const dispatch = f.context.dispatch
+  let refreshes = 0
+  f.context.dispatch = (action, value) => {
+    if (action === 'refreshSyncServerEvents' && !value?.background) {
+      refreshes++
+      if (refreshes === 1) return Promise.reject(new Error('Messages unavailable'))
+      f.actions.stopSyncServerLive(f.context)
+      return Promise.resolve()
+    }
+    return dispatch(action, value)
+  }
+  await f.actions.startSyncServerLive(f.context)
+  assert.equal(refreshes, 2)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerError, '')
+})
+
+
+test('an explicit activity refresh still downloads when a concurrent background refresh skipped a busy renderer', async () => {
+  const f = fixture({}, { encrypted: true, locks: {
+    async request(name, options, callback) {
+      await new Promise(resolve => setImmediate(resolve))
+      return callback(options.ifAvailable ? null : { name })
+    },
+  } })
+  await Promise.all([
+    f.actions.refreshSyncServerEvents(f.context, { background: true }),
+    f.actions.refreshSyncServerEvents(f.context),
+  ])
+  assert.equal(f.requests.length, 1)
+})
+
+
+test('a new live device message is delivered after an older activity response finishes', async () => {
+  const recipient = 'test-device'
+  let releaseOldResponse
+  const oldResponse = new Promise(resolve => { releaseOldResponse = resolve })
+  let firstStarted
+  const started = new Promise(resolve => { firstStarted = resolve })
+  let notified
+  const notification = new Promise(resolve => { notified = resolve })
+  let downloads = 0
+  const opened = []
+  const f = fixture({ syncServerDeviceId: recipient }, {
+    encrypted: true,
+    desktopTabs: { async create(route) {
+      opened.push(route.route)
+      f.actions.stopSyncServerLive(f.context)
+      return true
+    } },
+    respond: async url => {
+      const path = new URL(url).pathname
+      if (path === '/v1/encrypted_sync/changes') {
+        await new Promise(resolve => setImmediate(resolve))
+        notified()
+        return { cursor: 'new-message-cursor' }
+      }
+      if (path !== '/v1/encrypted_sync/events') return
+      if (++downloads === 1) {
+        firstStarted()
+        await oldResponse
+        return [] // Snapshotted before the newer device message existed.
+      }
+      return [{ id: 'new-message', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
+    },
+  })
+  const payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'openVideo', recipient, videoId: 'jNQXAC9IVRw', title: 'Local fixture', position: 12,
+    expiresAt: Date.now() + 60000,
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  const dispatch = f.context.dispatch
+  f.context.dispatch = (action, value) => action === 'refreshSyncServerEvents'
+    ? f.actions.refreshSyncServerEvents(f.context, value)
+    : dispatch(action, value)
+  const refreshing = f.actions.refreshSyncServerEvents(f.context)
+  await started
+  const listening = f.actions.startSyncServerLive(f.context)
+  try {
+    await notification
+    const deadline = Date.now() + 1000
+    while (f.context.state.syncServerStatus !== 'success' && Date.now() < deadline) {
+      await new Promise(resolve => setImmediate(resolve))
+    }
+    assert.equal(f.context.state.syncServerStatus, 'success')
+    releaseOldResponse()
+    await refreshing
+    await new Promise(resolve => setTimeout(resolve, 100))
+    assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?t=12'])
+    assert.equal(downloads, 2)
+  } finally {
+    releaseOldResponse()
+    f.actions.stopSyncServerLive(f.context)
+    await listening
+  }
+})

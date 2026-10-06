@@ -267,6 +267,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Pyyhkäisy vasemmalle pikkukuvissa
+      Right: Pyyhkäisy oikealle pikkukuvissa
+      Description: Pyyhkäise videon pikkukuvaa vaakasuunnassa ja vapauta suorittaaksesi valitun toiminnon.
     Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
     Use tray icon: "Käytä ilmoitusalueen kuvaketta"
     Close to system tray: "Sulje ilmoitusalueelle"
@@ -359,6 +363,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
     Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
     Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"
     Main Color Theme:
@@ -441,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Vaalea"
-      OpenTubeX Dark: "OpenTubeX Tumma"
+      Ocean Light: "Ocean Vaalea"
+      Ocean Dark: "Ocean Tumma"
       Custom: Mukautettu
     Light Theme: Vaalea teema
     Dark Theme: Tumma teema
@@ -637,6 +642,7 @@ Settings:
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
+    Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1354,6 +1360,8 @@ Video:
     Hide: Piilota
     Show: Näytä
     Scroll Mini Player:
+      Collapse Controls: "Supista säätimet"
+      Expand Controls: "Laajenna säätimet"
       Back to Top: Takaisin ylös
       Return to Video Tab: Palaa videovälilehteen
       Hide: Piilota pienoissoitin
@@ -1968,6 +1976,15 @@ Tray Icon:
   Follow App Theme: "Seuraa sovelluksen teemaa"
 
 Form Inputs:
+  Enter Password Hint: "Anna salasanasi"
+  Choose Password Hint: "Valitse salasana"
+  Confirm Password Hint: "Toista uusi salasanasi"
+  Encryption Passphrase Hint: "Anna salauksen tunnuslauseesi"
+  Show Password: "Näytä salasana"
+  Hide Password: "Piilota salasana"
+  Search Text Hint: "Kirjoita hakusanat"
+  Playlist Description Hint: "Kuvaile tätä soittolistaa"
+  Filename Preview: "Tiedostonimen esikatselu"
   Enter Channels: "Syötä kanavat"
   Enter Text: "Syötä teksti"
   Video URL: Videon tai soittolistan URL
@@ -1986,3 +2003,11 @@ Form Inputs:
   Download Arguments Hint: Valinnaiset argumentit tälle lataukselle
   Generated ID Hint: Jätä tyhjäksi luodaksesi tunnuksen
   Default Value: "Oletus: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
+
+Storage Startup Error:
+  Title: "Sovelluksen tietoja ei voitu ladata"
+  Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
+  Retry: "Yritä uudelleen"

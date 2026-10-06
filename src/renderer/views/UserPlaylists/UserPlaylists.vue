@@ -27,7 +27,9 @@
           <FtInput
             ref="searchBar"
             input-type="search"
-            :placeholder="$t('User Playlists.Search bar placeholder')"
+            :label="$t('User Playlists.Search bar placeholder')"
+            :icon="['fas', 'search']"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
             :value="query"
             :show-action-button="false"
             :maxlength="255"

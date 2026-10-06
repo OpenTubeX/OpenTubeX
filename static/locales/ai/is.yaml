@@ -265,6 +265,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Strjúka til vinstri á smámyndum
+      Right: Strjúka til hægri á smámyndum
+      Description: Strjúktu lárétt yfir smámynd myndskeiðs og slepptu til að framkvæma valda aðgerð.
     Data Saver Thumbnails: "Gagnasparandi smámyndir"
     Use tray icon: "Nota tákn í kerfisbakka"
     Close to system tray: "Loka í kerfisbakka"
@@ -357,6 +361,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Compact Mobile Mini Player: "Þéttur smáspilari í farsíma"
     Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
     Frosted Glass Player UI: "Viðmót spilara með mattgleráhrifum"
     Main Color Theme:
@@ -439,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Ljóst"
-      OpenTubeX Dark: "OpenTubeX Dökkt"
+      Ocean Light: "Ocean Ljóst"
+      Ocean Dark: "Ocean Dökkt"
       Custom: Sérsniðið
     Light Theme: Ljóst þema
     Dark Theme: Dökkt þema
@@ -628,6 +633,7 @@ Settings:
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
+    Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -910,8 +916,6 @@ Settings:
     Open Profile Directory: Opna möppu notandasniðs
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
-    All settings have been successfully imported: Tókst að flytja inn allar stillingar
-    All settings have been successfully exported: Tókst að flytja út allar stillingar
     Setting object has insufficient data, skipping item: Stillingahlutur inniheldur ekki næg gögn, sleppi atriði
     Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
     Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
@@ -1075,7 +1079,6 @@ Settings:
     Failed to select IP block recovery script: Ekki tókst að velja endurheimtarskriftu fyrir IP-lokun
   SponsorBlock Settings:
     Excluded Channels:
-      Excluded Channels: "Undanskildar rásir"
       Tooltip: "Sláðu inn auðkenni rásar til að koma í veg fyrir að SponsorBlock-hlutum sé sleppt í myndskeiðum hennar. Auðkennið verður að passa nákvæmlega og há- og lágstafir skipta máli."
     Enable SponsorBlock Submission: Virkja innsendingar til SponsorBlock
     SponsorBlock Private User ID (optional): Einkaauðkenni notanda (valfrjálst)
@@ -1252,7 +1255,6 @@ Video:
   Notification unavailable: Kerfistilkynningar eru ekki tiltækar
   Scheduled video starting: Tímasett myndband er að hefjast
   Live notification body: '{videoTitle} hefst núna'
-  Premiere: Frumsýning
   AI: Gervigreind
   AI-generated content: Efni búið til með gervigreind
   Collaborators: Samstarfsaðilar
@@ -1339,6 +1341,8 @@ Video:
     Hide: Fela
     Show: Sýna
     Scroll Mini Player:
+      Collapse Controls: "Fella saman stýringar"
+      Expand Controls: "Stækka stýringar"
       Back to Top: Efst á síðu
       Return to Video Tab: Til baka á myndbandsflipa
       Hide: Fela smáspilara
@@ -1945,6 +1949,15 @@ Tray Icon:
   Follow App Theme: "Fylgja þema forritsins"
 
 Form Inputs:
+  Enter Password Hint: "Sláðu inn lykilorðið þitt"
+  Choose Password Hint: "Veldu lykilorð"
+  Confirm Password Hint: "Endurtaktu nýja lykilorðið þitt"
+  Encryption Passphrase Hint: "Sláðu inn dulkóðunarlykilsetninguna þína"
+  Show Password: "Sýna lykilorð"
+  Hide Password: "Fela lykilorð"
+  Search Text Hint: "Sláðu inn leitarorð"
+  Playlist Description Hint: "Lýstu þessum spilunarlista"
+  Filename Preview: "Forskoðun skráarheitis"
   Enter Channels: "Sláðu inn rásir"
   Enter Text: "Sláðu inn texta"
   Video URL: Slóð myndskeiðs eða spilunarlista
@@ -1963,3 +1976,11 @@ Form Inputs:
   Download Arguments Hint: Valfrjáls viðföng fyrir þetta niðurhal
   Generated ID Hint: Skildu eftir autt til að búa til auðkenni
   Default Value: "Sjálfgefið: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."
+
+Storage Startup Error:
+  Title: "Ekki tókst að hlaða gögnum forritsins"
+  Message: "Losaðu geymslupláss í tækinu og reyndu aftur. Samstilling er í bið þar til gögnin þín hafa verið hlaðin."
+  Retry: "Reyna aftur"

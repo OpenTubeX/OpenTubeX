@@ -197,6 +197,7 @@ for (const uiScale of [100, 95]) {
       await trigger.click()
       const transcript = page.locator('dialog[open] .transcriptCard')
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
+      await expect(transcript.locator('.transcriptControls input')).toBeFocused()
       await transcript.locator('.transcriptControls input').fill('elephant')
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(page.locator('dialog[open]')).toHaveCount(0)
@@ -204,6 +205,7 @@ for (const uiScale of [100, 95]) {
       await trigger.click()
       await expect(transcript).toBeVisible()
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
+      await expect(transcript.locator('.transcriptControls input')).toBeFocused()
       await expect(transcript.locator('.transcriptControls input')).toHaveValue('')
     })
 
@@ -273,8 +275,14 @@ for (const uiScale of [100, 95]) {
       await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
       const picker = page.locator('.phonePlaylistPicker')
       await expect(picker).toBeVisible()
+      const insets = await picker.locator('.playlistSearch input').evaluate(input => {
+        const field = input.getBoundingClientRect()
+        const picker = input.closest('.phonePlaylistPicker').getBoundingClientRect()
+        return [field.left - picker.left, picker.right - field.right]
+      })
+      for (const inset of insets) expect(inset).toBeGreaterThanOrEqual(9)
       await picker.locator('.playlistList').evaluate(element => { element.scrollTop = 100000 })
-      await picker.locator('.playlistSearch').fill('Phone playlist 23')
+      await picker.locator('.playlistSearch input').fill('Phone playlist 23')
       await expect(picker.locator('li')).toHaveCount(1)
       await expectNoScrollbarOverflow(picker.locator('.playlistList'))
       await picker.locator('li').click()

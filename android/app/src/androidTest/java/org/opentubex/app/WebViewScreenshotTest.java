@@ -61,8 +61,8 @@ public class WebViewScreenshotTest {
                             const input = document.querySelector('.downloadPathInputs input');
                             const select = document.querySelector('.downloadQueueInputs .select-text');
                             const label = document.querySelector('[data-setting-key="enableDownloads"] .switch-label');
-                            const track = getComputedStyle(label, '::before');
-                            const thumb = getComputedStyle(label, '::after');
+                            const track = getComputedStyle(label.querySelector('.switch-label-text'), '::before');
+                            const thumb = getComputedStyle(label.querySelector('.switch-label-text'), '::after');
                             const hint = input.closest('.ft-input-component').querySelector('.supportingText');
                             return {
                                 inputHeight: parseFloat(getComputedStyle(input).height),

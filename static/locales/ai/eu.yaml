@@ -263,6 +263,10 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Irudi txikietan ezkerrera irristatu
+      Right: Irudi txikietan eskuinera irristatu
+      Description: Irristatu horizontalki bideo baten irudi txikian eta askatu hautatutako ekintza egiteko.
     Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
     Use tray icon: "Erabili sistemaren erretiluko ikonoa"
     Close to system tray: "Itxi sistemaren erretilura"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
     Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
     Frosted Glass Player UI: "Beira esmerilatu efektuko erreproduzigailuaren interfazea"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Argia"
-      OpenTubeX Dark: "OpenTubeX Iluna"
+      Ocean Light: "Ocean Argia"
+      Ocean Dark: "Ocean Iluna"
       Custom: Pertsonalizatua
     Light Theme: Gai argia
     Dark Theme: Gai iluna
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
     Concurrent Preloads: "Aldibereko aurrekargak"
     Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
+    Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1332,6 +1338,8 @@ Video:
     Hide: Ezkutatu
     Show: Erakutsi
     Scroll Mini Player:
+      Collapse Controls: "Tolestu kontrolak"
+      Expand Controls: "Zabaldu kontrolak"
       Back to Top: Itzuli goialdera
       Return to Video Tab: Itzuli bideoaren fitxara
       Hide: Ezkutatu minierreproduzigailua
@@ -1937,6 +1945,15 @@ Tray Icon:
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
 
 Form Inputs:
+  Enter Password Hint: "Sartu zure pasahitza"
+  Choose Password Hint: "Aukeratu pasahitz bat"
+  Confirm Password Hint: "Errepikatu zure pasahitz berria"
+  Encryption Passphrase Hint: "Sartu zure zifratze-pasaesaldia"
+  Show Password: "Erakutsi pasahitza"
+  Hide Password: "Ezkutatu pasahitza"
+  Search Text Hint: "Sartu bilaketa-hitzak"
+  Playlist Description Hint: "Deskribatu erreprodukzio-zerrenda hau"
+  Filename Preview: "Fitxategi-izenaren aurrebista"
   Enter Channels: "Sartu kanalak"
   Enter Text: "Sartu testua"
   Video URL: Bideoaren edo erreprodukzio-zerrendaren URLa
@@ -1955,3 +1972,11 @@ Form Inputs:
   Download Arguments Hint: Aukerako argumentuak deskarga honetarako
   Generated ID Hint: Utzi hutsik ID bat sortzeko
   Default Value: "Lehenetsia: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+
+Storage Startup Error:
+  Title: "Ezin izan dira aplikazioaren datuak kargatu"
+  Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
+  Retry: "Saiatu berriro"

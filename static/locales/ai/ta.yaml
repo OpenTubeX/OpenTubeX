@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: உறுப்பினர்களுக்கு மட்டும்
 Search Filters:
+  Cookie Search Failed: "கட்டமைக்கப்பட்ட குக்கிகளுடன் தேடல் தோல்வியடைந்தது."
   Prioritize:
     Prioritize: முன்னுரிமை அளி
 Stats:
@@ -268,6 +269,10 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: சிறுபடங்களில் இடதுபுறம் ஸ்வைப் செய்
+      Right: சிறுபடங்களில் வலதுபுறம் ஸ்வைப் செய்
+      Description: தேர்ந்தெடுத்த செயலைச் செய்ய காணொளியின் சிறுபடத்தில் கிடைமட்டமாக ஸ்வைப் செய்து விடவும்.
     Data Saver Thumbnails: "தரவைச் சேமிக்கும் சிறுபடங்கள்"
     Use tray icon: "கணினித் தட்டு சின்னத்தைப் பயன்படுத்து"
     Close to system tray: "கணினித் தட்டிற்கு மூடு"
@@ -360,6 +365,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Compact Mobile Mini Player: "சிறிய மொபைல் மினி பிளேயர்"
     Always Show Mobile Search Bar: "மொபைல் தேடல் பட்டியை எப்போதும் காட்டு"
     Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
     Main Color Theme:
@@ -442,8 +448,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX ஒளி"
-      OpenTubeX Dark: "OpenTubeX இருண்ட"
+      Ocean Light: "Ocean ஒளி"
+      Ocean Dark: "Ocean இருண்ட"
       Custom: தனிப்பயன்
     Light Theme: வெளிர் அலங்காரம்
     Dark Theme: கருமை அலங்காரம்
@@ -636,6 +642,7 @@ Settings:
     Upcoming Videos to Preload: "முன்பே ஏற்ற வேண்டிய காணொளிகளின் எண்ணிக்கை"
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
     Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
+    Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1357,6 +1364,8 @@ Video:
     Hide: மறை
     Show: காட்டு
     Scroll Mini Player:
+      Collapse Controls: "கட்டுப்பாடுகளைச் சுருக்கு"
+      Expand Controls: "கட்டுப்பாடுகளை விரிவாக்கு"
       Back to Top: மேலே செல்
       Return to Video Tab: காணொளித் தாவலுக்குத் திரும்பு
       Hide: சிறு இயக்கியை மறை
@@ -1973,6 +1982,15 @@ Tray Icon:
   Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
 
 Form Inputs:
+  Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
+  Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
+  Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
+  Encryption Passphrase Hint: "உங்கள் குறியாக்கக் கடவுச்சொற்றொடரை உள்ளிடவும்"
+  Show Password: "கடவுச்சொல்லைக் காட்டு"
+  Hide Password: "கடவுச்சொல்லை மறை"
+  Search Text Hint: "தேடல் சொற்களை உள்ளிடவும்"
+  Playlist Description Hint: "இந்த இயக்கப்பட்டியலை விவரிக்கவும்"
+  Filename Preview: "கோப்புப் பெயர் முன்னோட்டம்"
   Enter Channels: "சேனல்களை உள்ளிடவும்"
   Enter Text: "உரையை உள்ளிடவும்"
   Video URL: வீடியோ அல்லது இயக்கப்பட்டியல் URL
@@ -1991,3 +2009,8 @@ Form Inputs:
   Download Arguments Hint: இந்தப் பதிவிறக்கத்திற்கான விருப்ப வாதங்கள்
   Generated ID Hint: ID உருவாக்க காலியாக விடவும்
   Default Value: "இயல்புநிலை: {value}"
+
+Storage Startup Error:
+  Title: "செயலித் தரவை ஏற்ற முடியவில்லை"
+  Message: "சாதனத்தில் சேமிப்பிடத்தை விடுவித்து மீண்டும் முயற்சிக்கவும். உங்கள் தரவு ஏற்றப்படும் வரை ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது."
+  Retry: "மீண்டும் முயற்சி"

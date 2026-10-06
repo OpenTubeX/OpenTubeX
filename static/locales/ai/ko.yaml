@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: 회원 전용
 Search Filters:
+  Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순
@@ -351,6 +352,10 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 썸네일에서 왼쪽으로 스와이프
+      Right: 썸네일에서 오른쪽으로 스와이프
+      Description: 동영상 썸네일을 가로로 스와이프한 후 손을 떼면 선택한 작업이 실행됩니다.
     Data Saver Thumbnails: "데이터 절약 썸네일"
     Use tray icon: "트레이 아이콘 사용"
     Close to system tray: "닫을 때 시스템 트레이로 보내기"
@@ -451,6 +456,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
     Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
     Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
     Move Downloads to App Header: 다운로드를 앱 헤더로 이동
@@ -518,8 +524,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 밝은 테마"
-      OpenTubeX Dark: "OpenTubeX 어두운 테마"
+      Ocean Light: "Ocean 밝은 테마"
+      Ocean Dark: "Ocean 어두운 테마"
       Custom: 사용자 지정
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -798,6 +804,7 @@ Settings:
     Upcoming Videos to Preload: "미리 불러올 동영상 수"
     Concurrent Preloads: "동시 미리 로드 수"
     Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
+    Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1658,6 +1665,8 @@ Video:
     You appear to be offline: 오프라인 상태인 것 같습니다.
     Playback will resume automatically when your connection comes back: 연결이 복구되면 자동으로 재생을 계속합니다.
     Scroll Mini Player:
+      Collapse Controls: "컨트롤 접기"
+      Expand Controls: "컨트롤 펼치기"
       Back to Top: 맨 위로
       Return to Video Tab: 동영상 탭으로 돌아가기
       Hide: 미니 플레이어 숨기기
@@ -2373,6 +2382,15 @@ Tray Icon:
   Follow App Theme: "앱 테마 따르기"
 
 Form Inputs:
+  Enter Password Hint: "비밀번호를 입력하세요"
+  Choose Password Hint: "비밀번호를 설정하세요"
+  Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
+  Encryption Passphrase Hint: "암호화 암호문을 입력하세요"
+  Show Password: "비밀번호 표시"
+  Hide Password: "비밀번호 숨기기"
+  Search Text Hint: "검색어 입력"
+  Playlist Description Hint: "이 재생목록을 설명하세요"
+  Filename Preview: "파일 이름 미리보기"
   Enter Channels: "채널 입력"
   Enter Text: "텍스트 입력"
   Video URL: 동영상 또는 재생목록 URL
@@ -2391,3 +2409,8 @@ Form Inputs:
   Download Arguments Hint: 이 다운로드에 사용할 선택적 인수
   Generated ID Hint: 비워 두면 ID 생성
   Default Value: "기본값: {value}"
+
+Storage Startup Error:
+  Title: "앱 데이터를 불러올 수 없습니다"
+  Message: "기기의 저장 공간을 확보한 후 다시 시도하세요. 데이터를 불러올 때까지 동기화가 일시 중지됩니다."
+  Retry: "다시 시도"

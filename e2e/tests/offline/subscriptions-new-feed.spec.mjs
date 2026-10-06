@@ -104,6 +104,118 @@ const commonSettings = {
   useRssFeeds: false
 }
 
+test.describe('Reactive subscription title filtering', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        forbiddenTitles: JSON.stringify(['Blocked']),
+        newSubscriptionFeedView: 'tabbed',
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
+      profiles: [profile()],
+      subscriptionCache: populatedCache.map(channel => ({
+        ...channel,
+        shorts: [newShort, ...Array.from({ length: 100 }, (_, index) => ({
+          ...newShort,
+          videoId: `filter-short-${index + 1}`,
+          title: `Filter short ${index + 1}`,
+          published: newShort.published - (index + 1) * HOUR
+        }))]
+      }))
+    }
+  })
+
+  for (const feed of ['Shorts', 'New']) {
+    test(`removes and restores ${feed} entries after channel-page title updates`, async ({ page }) => {
+      await goTo(page, 'subscriptions')
+      if (feed === 'New') {
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await page.locator('[data-new-feed-tab="shorts"]').click()
+        // Freeze the New selection as during an ongoing subscription refresh.
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setSubscriptionFeedRefreshInProgress', true)
+        })
+      } else {
+        await page.locator('[data-subscription-feed-tab="shorts"]').click()
+      }
+      const entries = page.locator('#subscriptionsPanel [data-feed-item-key]')
+      await expect(page.getByText('New short', { exact: true })).toBeVisible()
+      await expect(entries).toHaveCount(100)
+      for (const title of ['Blocked updated short', 'Allowed updated short']) {
+        await page.evaluate(({ channelId, title }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const entry = store.state.subscriptionCache.shortsCache[channelId].videos[0]
+          store.commit('updateShortsCacheWithChannelPageShorts', {
+            channelId, entries: [{ ...entry, title }]
+          })
+        }, { channelId: CHANNEL_ID, title })
+        // Parent filtering must refill the page, not just hide the blocked card.
+        await expect(entries).toHaveCount(100)
+        await expect(page.locator('#subscriptionsPanel [data-video-id="filter-short-100"]'))
+          .toHaveCount(title.startsWith('Blocked') ? 1 : 0)
+      }
+      await expect(page.getByText('Allowed updated short', { exact: true })).toBeVisible()
+    })
+  }
+})
+
+test.describe('New feed removal animation', () => {
+  test.use({
+    seed: {
+      settings: { ...commonSettings, uiScale: 125, newSubscriptionFeedView: 'tabbed' },
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: Array.from({ length: 8 }, (_, index) => video(
+          `move-video-${index}`, `Moving video ${index}`, now - index * HOUR,
+          { isNewInSubscriptionFeed: true }
+        )),
+        videosTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('preserves retained-card movement after marking a video seen at fractional scale', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const retained = page.locator('.newFeed [data-video-id="move-video-1"]')
+    await expect(retained).toBeVisible()
+    await expect(page.locator('.feed-enter-active')).toHaveCount(0)
+    // Suppression is a TransitionGroup prop, not a class on idle cards.
+    await expect.poll(() => page.locator('.newFeed .autoGrid').evaluate(element => {
+      const movementEnabled = vnode => {
+        if (!vnode) return false
+        if (vnode.el === element && vnode.props?.name === 'feed') {
+          return vnode.component.props.moveClass !== 'feed-move-suppressed'
+        }
+        return movementEnabled(vnode.component?.subTree) ||
+          (Array.isArray(vnode.children) && vnode.children.some(movementEnabled))
+      }
+      return movementEnabled(document.querySelector('#app')._vnode)
+    })).toBe(true)
+    await page.evaluate(() => {
+      window.__retainedCardMoved = false
+      window.__moveObserver = new MutationObserver(records => {
+        if (records.some(({ target }) => target.dataset.videoId === 'move-video-1' && target.classList.contains('feed-move'))) {
+          window.__retainedCardMoved = true
+        }
+      })
+      window.__moveObserver.observe(document.querySelector('.newFeed .autoGrid'), {
+        subtree: true, attributes: true, attributeFilter: ['class']
+      })
+    })
+    await page.locator('.newFeed [data-video-id="move-video-0"] .title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.__retainedCardMoved)).toBe(true)
+    await expect(page.locator('.feed-leave-active, .feed-move')).toHaveCount(0)
+    await expect(retained).toBeVisible()
+    await expect(page.locator('.newFeed [data-video-id="move-video-0"]')).toHaveCount(0)
+    await page.evaluate(() => window.__moveObserver.disconnect())
+  })
+})
+
 test.describe('new subscriptions feed', () => {
   test.use({
     seed: {
@@ -442,9 +554,10 @@ test.describe('new subscriptions feed', () => {
     await expect(short).toBeVisible()
     await expect(short.locator('.videoDuration')).toHaveText('2:00')
     await expect(short.locator('.uploadedTime')).not.toBeEmpty()
-    await expect(short.locator('.thumbnailImage')).toHaveAttribute('src', newShort.thumbnailUrl)
+    const thumbnail = short.locator('.thumbnailImage:not([aria-hidden="true"])')
+    await expect(thumbnail).toHaveAttribute('src', newShort.thumbnailUrl)
 
-    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+    const aspectRatio = await thumbnail.evaluate(element => {
       return getComputedStyle(element).aspectRatio
     })
     expect(aspectRatio).toBe('2 / 3')
@@ -477,6 +590,51 @@ test.describe('new subscriptions feed', () => {
 
     await expect(page.locator('.contextMenu')).toBeVisible()
     await expect(video).toBeVisible()
+  })
+
+  test('keeps display metadata reactive in New and Shorts without copying the full cache', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.getByText('New video', { exact: true })).toBeVisible()
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const video = store.state.subscriptionCache.videoCache[channelId].videos[0]
+      video.title = 'Updated new video'
+      video.viewCount = 42
+    }, CHANNEL_ID)
+    await expect(page.getByText('Updated new video', { exact: true })).toBeVisible()
+    await expect(page.locator('.ft-list-video').filter({ hasText: 'Updated new video' }).locator('.viewCount')).toContainText('42')
+
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+    await expect(page.getByText('New short', { exact: true })).toBeVisible()
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.state.subscriptionCache.shortsCache[channelId].videos[0].title = 'Updated short'
+    }, CHANNEL_ID)
+    await expect(page.getByText('Updated short', { exact: true })).toBeVisible()
+  })
+
+  test('finishes rapid New category changes with normal card layout at fractional UI scale', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 125)
+      await store.dispatch('updateNewSubscriptionFeedView', 'tabbed')
+    })
+    await expect(page.locator('[data-new-feed-tab="shorts"]')).toBeVisible()
+    await page.evaluate(async () => {
+      for (const category of ['shorts', 'videos', 'shorts', 'videos']) {
+        document.querySelector(`[data-new-feed-tab="${category}"]`).click()
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
+    })
+    await expect(page.locator('.feed-leave-active, .feed-enter-active')).toHaveCount(0)
+    const card = page.locator('.newFeed .ft-list-video').filter({ hasText: 'New video' })
+    await expect(card).toHaveCount(1)
+    await expect(card).toBeVisible()
+    expect(await card.evaluate(element => getComputedStyle(element.parentElement).position)).not.toBe('absolute')
+    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
   })
 
   test('marks a dotted video as seen from its options menu', async ({ page }) => {
@@ -1067,7 +1225,7 @@ test.describe('new feed settings and seen state', () => {
     await expect(short).toContainClass('grid')
     await expect(short).not.toContainClass('list')
 
-    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+    const aspectRatio = await short.locator('.thumbnailImage:not([aria-hidden="true"])').evaluate(element => {
       return getComputedStyle(element).aspectRatio
     })
     expect(aspectRatio).toBe('2 / 3')
@@ -1433,9 +1591,6 @@ test.describe('large combined new feed', () => {
 
     const metrics = await page.evaluate(async () => {
       const scroller = document.scrollingElement
-      const cards = () => document.querySelectorAll(
-        '.tabContent[aria-hidden="false"] #subscriptionsPanel:not(.newFeed) .ft-list-video'
-      ).length
       let steps = 0
       for (let y = 0; y < scroller.scrollHeight - innerHeight && steps < 200; y += 350, steps++) {
         scroller.scrollTo(0, y)
@@ -1446,11 +1601,13 @@ test.describe('large combined new feed', () => {
       )].some(card => card.textContent.includes('New video 99'))
       scroller.scrollTo(0, 0)
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      return { afterReturning: cards(), reachedLastVideo, steps }
+      return { reachedLastVideo, steps }
     })
     expect(metrics.steps).toBeGreaterThan(5)
     expect(metrics.reachedLastVideo).toBe(true)
-    expect(metrics.afterReturning).toBeLessThan(40)
+    // Intersection delivery, the release frame and Vue's patch can take more
+    // than two frames. Wait for actual eviction rather than sampling mid-update.
+    await expect.poll(() => panel.locator('.ft-list-video').count()).toBeLessThan(40)
     await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
   })
 

@@ -263,6 +263,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 在縮圖上向左滑動
+      Right: 在縮圖上向右滑動
+      Description: 在影片縮圖上水平滑動並放開，即可執行所選操作。
     Data Saver Thumbnails: "節省流量的縮圖"
     Use tray icon: "使用系統匣圖示"
     Close to system tray: "關閉時縮小至系統匣"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Compact Mobile Mini Player: "精簡行動迷你播放器"
     Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 淺色"
-      OpenTubeX Dark: "OpenTubeX 深色"
+      Ocean Light: "Ocean 淺色"
+      Ocean Dark: "Ocean 深色"
       Custom: 自訂
     Light Theme: 淺色主題
     Dark Theme: 深色主題
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "要預先載入的影片數量"
     Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
+    Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1319,6 +1325,8 @@ Video:
     Hide: 隱藏
     Show: 顯示
     Scroll Mini Player:
+      Collapse Controls: "收合控制項"
+      Expand Controls: "展開控制項"
       Back to Top: 返回頂端
       Return to Video Tab: 返回影片分頁
       Hide: 隱藏迷你播放器
@@ -1921,6 +1929,15 @@ Tray Icon:
   Follow App Theme: "跟隨應用程式主題"
 
 Form Inputs:
+  Enter Password Hint: "輸入你的密碼"
+  Choose Password Hint: "設定密碼"
+  Confirm Password Hint: "再次輸入新密碼"
+  Encryption Passphrase Hint: "輸入你的加密通關密語"
+  Show Password: "顯示密碼"
+  Hide Password: "隱藏密碼"
+  Search Text Hint: "輸入搜尋詞"
+  Playlist Description Hint: "描述此播放清單"
+  Filename Preview: "檔案名稱預覽"
   Enter Channels: "輸入頻道"
   Enter Text: "輸入文字"
   Video URL: 影片或播放清單 URL
@@ -1939,3 +1956,11 @@ Form Inputs:
   Download Arguments Hint: 此次下載的選用參數
   Generated ID Hint: 留空以產生 ID
   Default Value: 預設值：{value}
+
+Search Filters:
+  Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"
+
+Storage Startup Error:
+  Title: "無法載入應用程式資料"
+  Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
+  Retry: "重試"

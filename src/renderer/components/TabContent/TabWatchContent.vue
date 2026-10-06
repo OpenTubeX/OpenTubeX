@@ -30,6 +30,7 @@ import { resolveRouteComponent } from '../../router/index'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
+import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const props = defineProps({
@@ -91,6 +92,9 @@ const unregister = tabLifecycleService.register(props.tabId, {
     retained.value = Boolean(player) && !context.to.path.startsWith('/watch/') &&
       (minimized.value || enabled.value)
     if (retained.value) {
+      // Finish leaving fullscreen while Watch is still presented, so its
+      // docked panels close before the mini-player takes ownership.
+      await player.exitPresentationModes()
       const tab = store.getters.getTabById(props.tabId)
       const entry = tab?.history[tab.historyIndex]
       watchTitle = entry?.title || ''
@@ -142,6 +146,7 @@ async function minimize() {
 function beginMinimizePreview() {
   if (previewActive.value) return
   previewRestoring = false
+  if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const bounds = watchRoot.value.getBoundingClientRect()
@@ -170,18 +175,30 @@ function beginRestorePreview() {
   // The retained Watch host follows the browsing page in document flow. Use
   // the tab's origin so a tall page cannot send the returning video offscreen.
   const targetBounds = previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
+  let targetLeft = targetBounds.left
+  let targetWidth = targetBounds.width
+  if (window.innerWidth > 680 && store.getters.getHideSideBarOnWatchPages &&
+    !document.querySelector('.app.watchSideNavOverlay')) {
+    // Returning to Watch removes the sidebar from the content layout. Give the
+    // preview that final width now, so its player does not recenter on release.
+    const sidebar = document.querySelector('.app > .sideNav')?.getBoundingClientRect()
+    if (sidebar) {
+      targetWidth += sidebar.width
+      if (sidebar.left < targetBounds.left) targetLeft -= sidebar.width
+    }
+  }
   previewOrigin = {
-    left: window.scrollX + targetBounds.left - parentBounds.left,
+    left: window.scrollX + targetLeft - parentBounds.left,
     top: window.scrollY + targetBounds.top - parentBounds.top
   }
   previewViewport = {
-    left: window.scrollX + targetBounds.left,
+    left: window.scrollX + targetLeft,
     top: window.scrollY + targetBounds.top
   }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
-    width: `${targetBounds.width}px`,
+    width: `${targetWidth}px`,
     height: `${window.innerHeight - targetBounds.top - window.scrollY}px`
   }
   watchRoot.value.style.opacity = '0'
@@ -250,6 +267,7 @@ async function finishMinimizePreview(commit) {
 }
 
 function clearMinimizePreview() {
+  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   previewActive.value = false
   previewStyle.value = null
   previewViewport = null
@@ -312,6 +330,7 @@ watch(enabled, value => {
 }, { flush: 'sync' })
 
 onBeforeUnmount(() => {
+  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   window.removeEventListener('scroll', updatePreviewPosition)
   unregister()
   dispose()

@@ -73,6 +73,7 @@ let syncCapabilities = null
 let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
+let eventsRefresh = null
 let activeSyncPromise = null
 let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
@@ -109,6 +110,18 @@ function cancelActiveSyncClients() {
 function assertSyncEnabled(rootState, client) {
   if (!rootState.settings.syncServerEnabled || client.cancelled) {
     throw new SyncServerCancelledError()
+  }
+}
+
+function refreshSyncServerAccount({ dispatch }) {
+  // Account activity and device metadata do not determine whether library data
+  // was saved. Keep them fresh without holding the sync lock or progress open.
+  for (const action of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
+    dispatch(action, action === 'refreshSyncServerEvents' ? { background: true } : undefined).catch(error => {
+      if (!(error instanceof SyncServerCancelledError)) {
+        console.warn('Failed to refresh sync account information:', error)
+      }
+    })
   }
 }
 
@@ -536,9 +549,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
       if (unchanged) {
-        await dispatch('refreshSyncServerEvents')
-        await dispatch('refreshSyncServerDevices')
         finishProgress()
+        refreshSyncServerAccount(context)
         return null
       }
       client = new EncryptedSyncAdapter(document)
@@ -649,15 +661,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       collectionCache.markSynced(Object.keys(encryptedCollections.remote)
         .filter(collection => !skippedCollections.has(collection)))
     }
-    if (liveSupported) {
-      await dispatch('refreshSyncServerEvents')
-      await dispatch('refreshSyncServerDevices')
-    }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
     if (progressStarted) commit('setSyncServerLastResult', result)
     finishProgress()
+    if (liveSupported) refreshSyncServerAccount(context)
     return result
   } catch (error) {
     if (error instanceof SyncServerCancelledError) {
@@ -724,6 +733,11 @@ const actions = {
       await watchSyncChanges(client, async () => {
         if (generation !== liveGeneration) return
         await dispatch('syncWithSyncServer', { automatic: true, remoteOnly: true })
+        if (generation !== liveGeneration) return
+        // Device messages must succeed before advancing the live cursor. This
+        // wait belongs to the listener, not the completed library sync. A fresh
+        // request also covers messages newer than an already downloading response.
+        await dispatch('refreshSyncServerEvents', { fresh: true })
       }, async error => {
         if (error instanceof SyncServerUnsupportedError) {
           commit('setSyncServerError', error.message)
@@ -784,11 +798,23 @@ const actions = {
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
   },
 
-  async refreshSyncServerEvents({ commit, rootState, state }) {
+  async refreshSyncServerEvents({ commit, dispatch, rootState, state }, { background = false, fresh = false } = {}) {
     const settings = { ...rootState.settings }
     if (!settings.syncServerEnabled || !settings.syncServerToken || !settings.syncServerPrivacyKey) return
+    const identity = JSON.stringify([settings.syncServerUrl, settings.syncServerToken,
+      settings.syncServerPrivacyKey, settings.syncServerDeviceId])
+    if (eventsRefresh?.identity === identity) {
+      const refreshed = await eventsRefresh.promise
+      if (fresh || (!background && refreshed === false)) {
+        return actions.refreshSyncServerEvents({ commit, dispatch, rootState, state })
+      }
+      return
+    }
     const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
     const stillCurrent = () => rootState.settings.syncServerEnabled &&
+      rootState.settings.syncServerUrl === settings.syncServerUrl &&
+      rootState.settings.syncServerPrivacyKey === settings.syncServerPrivacyKey &&
+      rootState.settings.syncServerDeviceId === settings.syncServerDeviceId &&
       rootState.settings.syncServerToken === settings.syncServerToken && !client.cancelled
     const refresh = async () => {
       const events = await client.getSyncEvents(eventsSince)
@@ -854,12 +880,31 @@ const actions = {
         eventsSince = nextEventsSince
       }
     }
+    const promise = (async () => {
+      try {
+        if (typeof navigator !== 'undefined' && navigator.locks) {
+          // Other renderer tabs skip background refreshes rather than queueing
+          // another full activity download. Explicit UI refreshes still wait.
+          return await navigator.locks.request('opentubex-sync-server-events', { ifAvailable: background }, async lock => {
+            if (!lock) return false
+            await refresh()
+            return true
+          })
+        }
+        await refresh()
+        return true
+      } catch (error) {
+        if (stillCurrent() && isSessionExpiredError(error)) await dispatch('expireSyncServerSession')
+        throw error
+      } finally {
+        releaseSyncClient(client)
+      }
+    })()
+    eventsRefresh = { identity, promise }
     try {
-      if (typeof navigator !== 'undefined' && navigator.locks) {
-        await navigator.locks.request('opentubex-sync-server-events', refresh)
-      } else await refresh()
+      await promise
     } finally {
-      releaseSyncClient(client)
+      if (eventsRefresh?.promise === promise) eventsRefresh = null
     }
   },
 

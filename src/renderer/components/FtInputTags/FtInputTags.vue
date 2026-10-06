@@ -20,6 +20,7 @@
       ref="tagNameInput"
       :disabled="disabled || isUpdating"
       :placeholder="tagNamePlaceholder"
+      :icon="areChannelTags ? ['fas', 'users'] : ['fas', 'hashtag']"
       :label="entryLabel || (areChannelTags ? t('Form Inputs.Enter Channels') : t('Form Inputs.Enter Text'))"
       :setting-key="settingKey"
       :min-input-length="minInputLength"
@@ -31,20 +32,13 @@
       :force-action-button-icon-name="['fas', 'arrow-right']"
       @click="updateTags"
     />
-    <div
+    <FtCheckboxList
       v-if="tagList.length >= 1"
-      class="checkbox-container"
-    >
-      <input
-        :id="id"
-        type="checkbox"
-        :checked="showTags"
-        @change="toggleShowTags"
-      >
-      <label :for="id">
-        {{ t('Settings.Distraction Free Settings.Show Added Items') }}
-      </label>
-    </div>
+      :labels="[t('Settings.Distraction Free Settings.Show Added Items')]"
+      :values="['show']"
+      :model-value="showTags ? ['show'] : []"
+      @update:model-value="toggleShowTags"
+    />
     <div
       v-if="showTags"
       class="ft-tag-box"
@@ -100,6 +94,7 @@
 </template>
 
 <script setup>
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { useId, useTemplateRef, ref } from 'vue'

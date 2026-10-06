@@ -274,6 +274,10 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Stryg til venstre på miniaturebilleder
+      Right: Stryg til højre på miniaturebilleder
+      Description: Stryg vandret på et videos miniaturebillede, og slip for at udføre den valgte handling.
     Data Saver Thumbnails: "Databesparende miniaturebilleder"
     Use tray icon: "Brug ikon i systembakken"
     Close to system tray: "Luk til systembakken"
@@ -367,6 +371,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil miniafspiller"
     Always Show Mobile Search Bar: "Vis altid søgefeltet på mobilen"
     Frosted Glass Player UI: "Afspillergrænseflade med matteret glas"
     Move Downloads to App Header: Flyt Downloads til appens toplinje
@@ -434,8 +439,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Lys"
-      OpenTubeX Dark: "OpenTubeX Mørk"
+      Ocean Light: "Ocean Lys"
+      Ocean Dark: "Ocean Mørk"
       Custom: Brugerdefineret
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Lyst tema
@@ -648,6 +653,7 @@ Settings:
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
+    Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1381,6 +1387,8 @@ Video:
     Hide: Skjul
     Show: Vis
     Scroll Mini Player:
+      Collapse Controls: "Skjul betjening"
+      Expand Controls: "Udvid betjening"
       Back to Top: Tilbage til toppen
       Return to Video Tab: Gå tilbage til videofanen
       Hide: Skjul miniafspilleren
@@ -2005,6 +2013,15 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
+  Enter Password Hint: "Indtast din adgangskode"
+  Choose Password Hint: "Vælg en adgangskode"
+  Confirm Password Hint: "Gentag din nye adgangskode"
+  Encryption Passphrase Hint: "Indtast din krypteringsadgangssætning"
+  Show Password: "Vis adgangskode"
+  Hide Password: "Skjul adgangskode"
+  Search Text Hint: "Indtast søgeord"
+  Playlist Description Hint: "Beskriv denne afspilningsliste"
+  Filename Preview: "Forhåndsvisning af filnavn"
   Enter Channels: "Indtast kanaler"
   Enter Text: "Indtast tekst"
   Video URL: Video- eller afspilningsliste-URL
@@ -2023,3 +2040,11 @@ Form Inputs:
   Download Arguments Hint: Valgfrie argumenter til denne download
   Generated ID Hint: Lad stå tomt for at generere et ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."
+
+Storage Startup Error:
+  Title: "Appdata kunne ikke indlæses"
+  Message: "Frigør lagerplads på enheden, og prøv igen. Synkronisering er sat på pause, indtil dine data er indlæst."
+  Retry: "Prøv igen"

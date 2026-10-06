@@ -65,6 +65,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   container: import('vue').Ref<HTMLDivElement | null>,
  *   mobileMiniBarOverlay: import('vue').Ref<HTMLDivElement | null>,
  *   fullWindowEnabled: import('vue').Ref<boolean>,
+ *   inlineSixteenByNine: import('vue').ComputedRef<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
  *   isPlayerSuspended?: import('vue').Ref<boolean> | null,
@@ -74,10 +75,14 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
   const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
+  const compactMobileMiniPlayer = computed(() => store.getters.getCompactMobileMiniPlayer)
+  const mobileMiniBarExpanded = ref(false)
+  const mobileMiniBarCollapsed = computed(() => compactMobileMiniPlayer.value && !mobileMiniBarExpanded.value)
+  const mobileMiniBarHeight = computed(() => compactMobileMiniPlayer.value ? (mobileMiniBarExpanded.value ? 112 : 64) : 108)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation || store.getters.getScrollMiniPlayerOnAllTabs)
   const autoPictureInPictureOnTabChange = computed(
@@ -118,13 +123,15 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     return Boolean(process.env.IS_CAPACITOR || document.querySelector('.app.capacitorTabs'))
   }
 
-  function getMobileMiniBarRect() {
-    const insets = getViewportInsets()
-    const height = 108
+  function getMobileMiniBarRect(revealSideNav = false) {
+    const insets = getViewportInsets({ includeSideNav: true, revealSideNav })
+    const height = mobileMiniBarHeight.value
+    const left = Math.max(0, insets.left - MARGIN)
+    const right = Math.max(0, insets.right - MARGIN)
     return {
-      left: 0,
+      left,
       top: window.innerHeight - height - Math.max(0, insets.bottom - MARGIN),
-      width: getViewportWidth(),
+      width: Math.max(0, getViewportWidth() - left - right),
       height,
       dock: 'left',
     }
@@ -137,7 +144,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // block for fixed children. Measure in the same layer as the settled bar.
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
-    const { top, width, height } = getMobileMiniBarRect()
+    const { left, top, width, height } = getMobileMiniBarRect(true)
     element.classList.add('scrollMiniPlayer', 'mobileMiniBar')
     element.removeAttribute('id')
     element.removeAttribute('style')
@@ -146,10 +153,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     videoElement.removeAttribute('poster')
     element.append(videoElement)
     element.style.setProperty('transition', 'none', 'important')
-    // Leaving Watch resets hidden navigation, so dock above the visible nav.
-    element.style.setProperty('translate', 'none', 'important')
+    // Keep the CSS translation for hidden navigation: it is also the settled
+    // bar's position after the browsing page has been restored.
     Object.assign(element.style, {
-      position: 'fixed', left: '0px', top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
+      position: 'fixed', left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
     })
     layer.append(element)
     const bounds = element.getBoundingClientRect()
@@ -179,16 +186,20 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
     element.classList.remove('scrollMiniPlayer', 'mobileMiniBar', 'scrollMiniPlayerAnimating')
+    element.classList.toggle('sixteenByNine', inlineSixteenByNine.value)
     element.style.removeProperty('transform')
     element.removeAttribute('data-mobile-mini-morph')
-    Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%' })
+    Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%', height: 'auto' })
     element.removeAttribute('id')
     videoElement.removeAttribute('id')
     videoElement.removeAttribute('src')
     videoElement.removeAttribute('poster')
     videoElement.width = video.value.videoWidth
     videoElement.height = video.value.videoHeight
-    videoElement.style.height = 'auto'
+    if (!inlineSixteenByNine.value && videoElement.width > 0 && videoElement.height > 0) {
+      videoElement.style.aspectRatio = `${videoElement.width} / ${videoElement.height}`
+    }
+    videoElement.style.height = inlineSixteenByNine.value ? '100%' : 'auto'
     videoElement.style.setProperty('transition', 'none', 'important')
     element.append(videoElement)
     placeholder.append(element)
@@ -226,6 +237,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   /** @type {IntersectionObserver | null} */
   let scrollMiniIntersectionObserver = null
+  let mobileMiniBarLayoutObserver = null
   /** @type {number | null} */
   let scrollMiniPlayPauseHideTimeout = null
   /** @type {number | null} */
@@ -254,10 +266,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   // most once per frame.
   const scrollMiniPlayerDragStyle = ref(null)
   const mobileMiniBarOverlayStyle = ref(null)
+  let mobileMiniMorphBase = null
   const mobileMiniBar = computed(() => Boolean(process.env.IS_CAPACITOR ||
     ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
-  const mobileMiniBarCanDismiss = computed(() => scrollMiniPlayerActive.value &&
-    (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value)))
+  const mobileMiniBarCanDismiss = computed(() => Boolean(scrollMiniPlayerDragStyle.value) ||
+    (scrollMiniPlayerActive.value && (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value))))
   let inlineDrag = null
   let inlineDragFrame = null
   let scrollRestoreDrag = false
@@ -331,7 +344,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       drag.ready = nextTick(() => {
         if (inlineDrag !== drag) return
         const bounds = scrollMiniPlaceholder.value.getBoundingClientRect()
-        drag.to = { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }
+        const layout = usesMobileMiniBar() ? measureInlinePlayer() : null
+        drag.to = layout?.rect ?? { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }
+        if (layout) {
+          drag.videoTo = {
+            left: layout.videoRect.left - drag.to.left,
+            top: layout.videoRect.top - drag.to.top,
+            width: layout.videoRect.width,
+            height: layout.videoRect.height
+          }
+        }
         renderScrollMiniPlayerDrag()
       })
     } else {
@@ -340,53 +362,133 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     element.style.transformOrigin = 'top left'
     element.style.willChange = 'transform'
     element.setAttribute('data-inline-mini-drag', '')
-    if (usesMobileMiniBar()) renderInlineDragProgress(0)
+    if (usesMobileMiniBar() && !restoring) renderInlineDragProgress(0)
     return true
   }
 
   function renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring) {
     const element = container.value
     if (!element) return
+    const visibleArtwork = element.querySelector('.musicAudioArtwork.retryImagePlaceholder') ?? element.querySelector('.musicAudioArtwork')
+    // Use the inline surface in both directions, so expanding a cropped 16:9
+    // thumbnail does not carry its shape all the way to the restored player.
     const interpolate = (start, end) => start + (end - start) * progress
     const style = element.style
     if (!element.hasAttribute('data-mobile-mini-morph')) {
+      const baseRect = restoring ? to : from
+      mobileMiniMorphBase = {
+        rect: { left: baseRect.left, top: baseRect.top, width: baseRect.width, height: baseRect.height },
+        video: { ...(restoring ? videoTo : videoFrom) }
+      }
+      const { rect: base, video: baseVideo } = mobileMiniMorphBase
       // Fix both layout boxes before the first frame. Android WebView otherwise
       // resizes the video surface and lays out the player on every frame.
-      style.setProperty('--mobile-mini-left', `${from.left}px`)
-      style.setProperty('--mobile-mini-top', `${from.top}px`)
-      style.setProperty('--mobile-mini-width', `${from.width}px`)
-      style.setProperty('--mobile-mini-height', `${from.height}px`)
-      style.setProperty('--mobile-mini-video-base-left', `${videoFrom.left}px`)
-      style.setProperty('--mobile-mini-video-base-top', `${videoFrom.top}px`)
-      style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
-      style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
+      style.setProperty('--mobile-mini-left', `${base.left}px`)
+      style.setProperty('--mobile-mini-top', `${base.top}px`)
+      style.setProperty('--mobile-mini-width', `${base.width}px`)
+      style.setProperty('--mobile-mini-height', `${base.height}px`)
+      style.setProperty('--mobile-mini-video-base-left', `${baseVideo.left}px`)
+      style.setProperty('--mobile-mini-video-base-top', `${baseVideo.top}px`)
+      style.setProperty('--mobile-mini-video-base-width', `${baseVideo.width}px`)
+      style.setProperty('--mobile-mini-video-base-height', `${baseVideo.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
+      const artwork = visibleArtwork
+      if (artwork && !artwork.hidden) {
+        const bounds = artwork.getBoundingClientRect()
+        const surface = artwork.closest('.musicAudioSurface').getBoundingClientRect()
+        mobileMiniMorphBase.artwork = {
+          element: artwork,
+          left: bounds.left - surface.left,
+          top: bounds.top - surface.top,
+          width: bounds.width,
+          height: bounds.height,
+          radius: Number.parseFloat(getComputedStyle(artwork).borderTopLeftRadius) || 0
+        }
+        const morph = mobileMiniMorphBase
+        // Capture runs before FtRetryImage handles load. Redraw next frame,
+        // after Vue replaces the fallback, even when the finger is held still.
+        morph.onImageLoad = () => {
+          if (morph.imageLoadFrame != null) cancelAnimationFrame(morph.imageLoadFrame)
+          morph.imageLoadFrame = requestAnimationFrame(() => {
+            morph.imageLoadFrame = null
+            if (mobileMiniMorphBase === morph) morph.redraw()
+          })
+        }
+        element.addEventListener('load', morph.onImageLoad, true)
+      }
     }
+    mobileMiniMorphBase.redraw = () => renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring)
+    const { rect: base, video: baseVideo } = mobileMiniMorphBase
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
-    const videoScale = Math.max(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
+    const videoScale = Math.max(videoWidth / baseVideo.width, videoHeight / baseVideo.height)
     const videoLeft = interpolate(from.left + videoFrom.left, to.left + videoTo.left) +
-      (videoWidth - videoFrom.width * videoScale) / 2
+      (videoWidth - baseVideo.width * videoScale) / 2
     const videoTop = interpolate(from.top + videoFrom.top, to.top + videoTo.top) +
-      (videoHeight - videoFrom.height * videoScale) / 2
-    const x = videoLeft - from.left - videoFrom.left * videoScale
-    const y = videoTop - from.top - videoFrom.top * videoScale
+      (videoHeight - baseVideo.height * videoScale) / 2
+    const x = videoLeft - base.left - baseVideo.left * videoScale
+    const y = videoTop - base.top - baseVideo.top * videoScale
     style.setProperty('transform', `translate(${x}px, ${y}px) scale(${videoScale})`, 'important')
-    const cropX = Math.max(0, (videoFrom.width * videoScale - videoWidth) / (2 * videoScale))
-    const cropY = Math.max(0, (videoFrom.height * videoScale - videoHeight) / (2 * videoScale))
-    style.setProperty('--mobile-mini-video-clip', `inset(${cropY}px ${cropX}px)`)
+    const minimized = restoring ? 1 - progress : progress
+    const mediaAspect = video.value.videoWidth / video.value.videoHeight || baseVideo.width / baseVideo.height
+    // Keep animated properties local to their surfaces. Inherited custom
+    // properties invalidate styles throughout Shaka's hidden control tree.
+    // The same poster surface covers loading, countdown and ended playback.
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) {
+      const poster = surface.classList.contains('countdownPoster')
+        ? surface.querySelector('.retryImagePlaceholder') ?? surface.querySelector('img')
+        : null
+      const aspect = poster?.naturalWidth / poster?.naturalHeight || mediaAspect
+      const pictureWidth = Math.min(baseVideo.width, baseVideo.height * aspect)
+      const pictureHeight = pictureWidth / aspect
+      const coverScale = Math.max(videoWidth / pictureWidth, videoHeight / pictureHeight) / videoScale
+      const scale = surface.classList.contains('musicAudioSurface') ? 1 : 1 + (coverScale - 1) * minimized
+      const cropX = Math.max(0, (baseVideo.width - videoWidth / (videoScale * scale)) / 2)
+      const cropY = Math.max(0, (baseVideo.height - videoHeight / (videoScale * scale)) / 2)
+      surface.style.setProperty('--mobile-mini-media-scale', String(scale))
+      surface.style.clipPath = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
+    }
+    const artwork = mobileMiniMorphBase.artwork
+    if (artwork && visibleArtwork && !visibleArtwork.hidden) {
+      if (artwork.element !== visibleArtwork) {
+        artwork.element.style.removeProperty('transform')
+        artwork.element.style.removeProperty('border-radius')
+        artwork.element = visibleArtwork
+      }
+      const aspect = visibleArtwork.naturalWidth / visibleArtwork.naturalHeight || 1
+      const width = Math.min(artwork.width, artwork.height * aspect)
+      const height = width / aspect
+      const cover = Math.max(videoWidth / width, videoHeight / height) / videoScale
+      const scale = 1 + (cover - 1) * minimized
+      const x = (baseVideo.width / 2 - artwork.left - artwork.width / 2) * minimized
+      const y = (baseVideo.height / 2 - artwork.top - artwork.height / 2) * minimized
+      artwork.element.style.transform = `translate(${x}px, ${y}px) scale(${scale})`
+      artwork.element.style.borderRadius = `${artwork.radius * (1 - minimized)}px`
+      for (const metadata of element.querySelectorAll('.musicAudioMetadata')) metadata.style.opacity = String(1 - minimized)
+    }
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
-    mobileMiniBarOverlay.value?.style.setProperty('--mobile-mini-bar-opacity', String(opacity))
+    if (mobileMiniBarOverlay.value) mobileMiniBarOverlay.value.style.opacity = String(opacity)
   }
 
   function clearMobileMiniMorph() {
     const element = container.value
     if (!element) return
+    const artwork = mobileMiniMorphBase?.artwork?.element
+    if (mobileMiniMorphBase?.onImageLoad) element.removeEventListener('load', mobileMiniMorphBase.onImageLoad, true)
+    if (mobileMiniMorphBase?.imageLoadFrame != null) cancelAnimationFrame(mobileMiniMorphBase.imageLoadFrame)
+    artwork?.style.removeProperty('transform')
+    artwork?.style.removeProperty('border-radius')
+    for (const metadata of element.querySelectorAll('.musicAudioMetadata')) metadata.style.removeProperty('opacity')
+    mobileMiniMorphBase = null
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    element.style.removeProperty('--mobile-mini-video-clip')
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) {
+      surface.style.removeProperty('clip-path')
+      surface.style.removeProperty('--mobile-mini-media-scale')
+    }
+    mobileMiniBarOverlay.value?.style.removeProperty('opacity')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
       '--mobile-mini-video-base-left', '--mobile-mini-video-base-top',
@@ -408,9 +510,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const fade = Math.min(1, progress * getInlineDragDistance(inlineDrag) / 96)
     watchNavigation.updateMinimizePreview(restoring ? 1 - progress : fade)
     if (usesMobileMiniBar()) {
-      const videoTo = restoring
-        ? { left: 0, top: 0, width: to.width, height: to.height }
-        : inlineDrag.videoTo
+      const videoTo = inlineDrag.videoTo ?? { left: 0, top: 0, width: to.width, height: to.height }
       renderMobileMiniMorph(from, to, inlineDrag.videoFrom, videoTo, progress, restoring)
     } else {
       const x = (to.left - from.x) * progress
@@ -818,18 +918,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     togglePlayerFullScreen()
   }
 
-  function canUseScrollMiniPlayerBase(allowPhonePanel = false) {
+  function canUseScrollMiniPlayerBase(explicitGesture = false) {
     if (playerSuspended.value) return false
-    // Panels prevent automatic docking, but an explicit swipe can minimize.
-    if (!allowPhonePanel && container.value?.hasAttribute('data-phone-panel-video')) return false
-    if (props.format === 'audio') return false
+    // An explicit swipe can minimize through panels and after playback ends.
+    if (!explicitGesture && container.value?.hasAttribute('data-phone-panel-video')) return false
+    if (props.format === 'audio' && !usesMobileMiniBar()) return false
     if (fullWindowEnabled.value) return false
     if (isNativeFullscreenActive()) return false
     if (isNativePipActive()) return false
     const videoElement = video.value
     if (!videoElement) return false
-    if (videoElement.ended && !(scrollMiniPlayerDetached.value &&
-      store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
+    if (videoElement.ended &&
+      !(usesMobileMiniBar() && (explicitGesture || watchNavigation?.minimized?.value)) &&
+      !(scrollMiniPlayerDetached.value && store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
     return true
   }
 
@@ -1135,7 +1236,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       scrollMiniIntersectionObserver = null
     }
 
-    if (props.format === 'audio' || typeof IntersectionObserver === 'undefined') {
+    if ((props.format === 'audio' && !usesMobileMiniBar()) || typeof IntersectionObserver === 'undefined') {
       return
     }
 
@@ -1207,7 +1308,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   function restoreScrollMiniPlayerPosition() {
-    if (process.env.IS_CAPACITOR) {
+    if (usesMobileMiniBar()) {
       scrollMiniPlayerRect.value = getMobileMiniBarRect()
       return
     }
@@ -1342,7 +1443,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    */
   function resnapScrollMiniPlayerToEdge() {
     if (!scrollMiniPlayerActive.value) return
-    if (process.env.IS_CAPACITOR) {
+    if (usesMobileMiniBar()) {
       scrollMiniPlayerRect.value = getMobileMiniBarRect()
       return
     }
@@ -1421,11 +1522,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     if (!scrollMiniPlayerDetached.value && !(usesMobileMiniBar() && watchNavigation?.detached.value)) return
 
+    // Disposal awaits playback cleanup; keep the player hidden while it runs.
+    scrollMiniPlayerDismissed.value = true
     if (watchNavigation?.detached.value) {
       watchNavigation.dismiss()
-      return
     }
-    scrollMiniPlayerDismissed.value = true
   }
 
   async function scrollMiniTogglePlayPause(event) {
@@ -1681,6 +1782,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function teardownScrollMiniPlayer() {
     unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+    mobileMiniBarLayoutObserver?.disconnect()
+    mobileMiniBarLayoutObserver = null
 
     if (scrollMiniIntersectionObserver) {
       scrollMiniIntersectionObserver.disconnect()
@@ -1708,6 +1811,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   let unregisterAndroidBackPlayer = null
   onMounted(() => {
+    const sideNav = document.querySelector('.sideNav')
+    if (sideNav) {
+      mobileMiniBarLayoutObserver = new ResizeObserver(() => {
+        if (scrollMiniPlayerActive.value && usesMobileMiniBar()) handleScrollMiniWindowResize()
+      })
+      mobileMiniBarLayoutObserver.observe(sideNav)
+    }
     if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
     window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
     window.addEventListener('opentubex:android-pip-restored', handleAndroidPictureInPictureRestored)
@@ -1745,6 +1855,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   watch(() => props.videoId, () => {
     lastKnownInlinePlayerHeight = 0
+    mobileMiniBarExpanded.value = false
     mobileMiniBarProgress.value = 0
     mobileMiniBarHasSeekRange.value = false
 
@@ -1792,6 +1903,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     { immediate: true }
   )
 
+  watch(compactMobileMiniPlayer, () => { mobileMiniBarExpanded.value = false })
+  watch(mobileMiniBarHeight, () => nextTick(handleScrollMiniWindowResize))
+
   watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
   watch(() => watchNavigation?.detached.value, detached => {
     if (detached) fullWindowEnabled.value = false
@@ -1814,6 +1928,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   return {
     scrollMiniPlayerDragStyle,
     mobileMiniBar,
+    compactMobileMiniPlayer,
+    mobileMiniBarExpanded,
+    mobileMiniBarCollapsed,
     mobileMiniBarCanDismiss,
     mobileMiniBarOverlayStyle,
     mobileMiniBarProgress,

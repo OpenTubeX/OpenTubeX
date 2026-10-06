@@ -58,6 +58,7 @@
       <FtFlexBox>
         <FtInput
           ref="sponsorBlockUrlInput"
+          :icon="['fas', 'link']"
           :label="$t('Settings.SponsorBlock Settings[\'SponsorBlock API Url (Default is https://sponsor.ajay.app)\']')"
           placeholder="https://sponsor.ajay.app"
           :supporting-text="$t('Form Inputs.Default Value', { value: 'https://sponsor.ajay.app' })"
@@ -90,7 +91,10 @@
       >
         <div class="sponsorBlockUserIdSection">
           <FtInput
+            class="centeredSettingsInput"
+            :icon="['fas', 'circle-user']"
             :label="$t('Settings.SponsorBlock Settings.SponsorBlock Private User ID (optional)')"
+            input-type="password"
             :placeholder="t('Form Inputs.Generated ID Hint')"
             :show-action-button="false"
             :show-label="true"
@@ -147,6 +151,7 @@
       >
         <FtInput
           ref="deArrowThumbnailGeneratorUrl"
+          :icon="['fas', 'link']"
           :label="$t('Settings.SponsorBlock Settings[\'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)\']')"
           placeholder="https://dearrow-thumb.ajay.app"
           :supporting-text="$t('Form Inputs.Default Value', { value: 'https://dearrow-thumb.ajay.app' })"
@@ -160,6 +165,7 @@
 
       <FtFlexBox
         v-if="useSponsorBlock"
+        class="sponsorBlockCategories"
       >
         <FtSponsorBlockCategory
           v-for="category in CATEGORIES"
@@ -438,6 +444,13 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, s
 </script>
 
 <style scoped>
+.sponsorBlockCategories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 30px 20px;
+  margin-block-start: 30px;
+}
+
 .sponsorBlockExcludedChannels {
   margin-block-end: 16px;
 }
@@ -445,7 +458,7 @@ watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, s
 .sponsorBlockUserIdSection {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   width: min(100%, 600px);
 }
 

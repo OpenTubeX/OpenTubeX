@@ -121,6 +121,72 @@ async function enablePhoneHeader(page) {
 }
 
 for (const zoom of [1, 1.25]) {
+  test(`phone logo uses available space at ${zoom} scale`, async ({ app, page }, testInfo) => {
+    await enablePhoneHeader(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setEnableDownloads', true)
+      store.commit('setMoveDownloadsToAppHeader', true)
+      store.commit('setMoveSettingsToAppHeader', true)
+    })
+    await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom), zoom)
+    const header = page.locator('.topNav')
+    for (const width of [450, 430, 414, 390, 375, 360, ...(zoom === 1.25 ? [320] : []), 430]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), ...size })
+      }, { width: Math.round(width * zoom), height: 850 * zoom })
+      await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+      if (width >= 430) {
+        await expect(header.locator('.logoText')).toBeVisible()
+        await expect.poll(() => header.locator('.logoText').evaluate(text => text.getBoundingClientRect().width)).toBeGreaterThanOrEqual(100)
+      } else {
+        await expect(header.locator('.logoText')).toBeHidden()
+      }
+      await expect(header.locator('.downloadsButton')).toBeVisible()
+      await expect(header.locator('.settingsButton')).toBeVisible()
+      await expect.poll(() => header.evaluate(element => {
+        const logo = element.querySelector('.logo').getBoundingClientRect()
+        const actions = element.querySelector('.profiles').getBoundingClientRect()
+        return actions.left - logo.right
+      })).toBeGreaterThanOrEqual(8)
+      if (zoom === 1 && width !== 430) {
+        await testInfo.attach(`phone header ${width}px`, { body: await header.screenshot(), contentType: 'image/png' })
+      }
+    }
+    // Removing an action should restore the name without a window resize.
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setBounds({ ...window.getBounds(), width })
+    }, 375 * zoom)
+    await expect(header.locator('.logoText')).toBeHidden()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setMoveDownloadsToAppHeader', false))
+    await expect(header.locator('.logoText')).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setMoveDownloadsToAppHeader', true))
+    await expect(header.locator('.logoText')).toBeHidden()
+    if (zoom === 1.25) {
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setMoveDownloadsToAppHeader', false)
+        store.commit('setMoveSettingsToAppHeader', false)
+      })
+      for (const width of [300, 302, 304, 306, 320]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), width })
+        }, Math.round(width * zoom))
+        await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+        if (width === 320) await expect(header.locator('.logoText')).toBeVisible()
+        await expect.poll(() => header.evaluate(element => {
+          const logo = element.querySelector('.logo').getBoundingClientRect()
+          return element.querySelector('.profiles').getBoundingClientRect().left - logo.right
+        })).toBeGreaterThanOrEqual(8)
+      }
+    }
+  })
+}
+
+for (const zoom of [1, 1.25]) {
   test(`phone header actions have equal spacing at ${zoom} scale`, async ({ app, page }) => {
     await enablePhoneHeader(page)
     await page.evaluate(() => {

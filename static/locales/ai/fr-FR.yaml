@@ -263,6 +263,10 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Balayer à gauche sur les miniatures
+      Right: Balayer à droite sur les miniatures
+      Description: Balayez horizontalement une miniature de vidéo et relâchez pour effectuer l'action sélectionnée.
     Data Saver Thumbnails: "Miniatures économes en données"
     Use tray icon: "Utiliser l’icône de notification"
     Close to system tray: "Fermer dans la zone de notification"
@@ -355,6 +359,7 @@ Settings:
     Invalid Engine: Saisissez un nom et une URL de recherche HTTP ou HTTPS valide contenant %s.
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
+    Compact Mobile Mini Player: "Mini-lecteur mobile compact"
     Always Show Mobile Search Bar: "Toujours afficher la barre de recherche sur mobile"
     Frosted Glass Player UI: "Interface du lecteur avec effet verre dépoli"
     Main Color Theme:
@@ -437,8 +442,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Clair"
-      OpenTubeX Dark: "OpenTubeX Sombre"
+      Ocean Light: "Ocean Clair"
+      Ocean Dark: "Ocean Sombre"
       Custom: Personnalisé
     Light Theme: Thème clair
     Dark Theme: Thème sombre
@@ -624,6 +629,7 @@ Settings:
     Upcoming Videos to Preload: "Nombre de vidéos à précharger"
     Concurrent Preloads: "Préchargements simultanés"
     Ignore System Rotation Lock for Fullscreen: Ignorer le verrouillage de rotation du système pour le plein écran
+    Swipe Left or Right to Seek in Fullscreen: Balayer vers la gauche ou la droite pour avancer ou reculer en plein écran
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -1316,6 +1322,8 @@ Video:
     Hide: Masquer
     Show: Afficher
     Scroll Mini Player:
+      Collapse Controls: "Réduire les commandes"
+      Expand Controls: "Développer les commandes"
       Back to Top: Retour en haut
       Return to Video Tab: Revenir à l’onglet de la vidéo
       Hide: Masquer le mini-lecteur
@@ -1918,6 +1926,15 @@ Tray Icon:
   Follow App Theme: "Suivre le thème de l’application"
 
 Form Inputs:
+  Enter Password Hint: "Saisissez votre mot de passe"
+  Choose Password Hint: "Choisissez un mot de passe"
+  Confirm Password Hint: "Répétez votre nouveau mot de passe"
+  Encryption Passphrase Hint: "Saisissez votre phrase de chiffrement"
+  Show Password: "Afficher le mot de passe"
+  Hide Password: "Masquer le mot de passe"
+  Search Text Hint: "Saisissez des termes de recherche"
+  Playlist Description Hint: "Décrivez cette liste de lecture"
+  Filename Preview: "Aperçu du nom de fichier"
   Enter Channels: "Saisir des chaînes"
   Enter Text: "Saisir du texte"
   Video URL: URL de la vidéo ou de la playlist
@@ -1936,3 +1953,11 @@ Form Inputs:
   Download Arguments Hint: Arguments facultatifs pour ce téléchargement
   Generated ID Hint: Laissez vide pour générer un ID
   Default Value: "Par défaut : {value}"
+
+Search Filters:
+  Cookie Search Failed: "La recherche avec les cookies configurés a échoué."
+
+Storage Startup Error:
+  Title: "Impossible de charger les données de l’application"
+  Message: "Libérez de l’espace sur l’appareil et réessayez. La synchronisation est suspendue jusqu’au chargement de vos données."
+  Retry: "Réessayer"

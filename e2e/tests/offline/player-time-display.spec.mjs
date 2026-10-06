@@ -31,6 +31,35 @@ test('autoplay keeps its original compact switch geometry', async ({ app, page }
   }
 })
 
+test('autoplay track and thumb keep their synchronized transitions', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  const button = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    const transitions = await button.evaluate(element => {
+      const duration = (selector, property) => {
+        const style = getComputedStyle(element.querySelector(selector))
+        const index = style.transitionProperty.split(',').map(value => value.trim()).indexOf(property)
+        return index < 0 ? 0 : Number.parseFloat(style.transitionDuration.split(',')[index])
+      }
+      return {
+        track: duration('.ft-autoplay-switch', 'background-color'),
+        thumb: duration('.ft-autoplay-switch-thumb', 'transform'),
+      }
+    })
+    expect(transitions.track).toBeGreaterThan(0)
+    expect(transitions.track).toBe(transitions.thumb)
+    const checked = await button.getAttribute('aria-pressed') === 'true'
+    await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', String(!checked))
+  }
+})
+
 test('download options fit horizontally and its Cancel button retains a border', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -496,7 +525,8 @@ test('player controls share pill surfaces and the time display toggles together'
 
   const background = await group.evaluate(element => getComputedStyle(element).backgroundImage)
   const glassBackground = await group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)
-  expect(background).not.toBe('none')
+  expect(background).toBe('none')
+  expect(glassBackground).not.toBe('none')
   await adjusted.hover()
   await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(glassBackground)
   const hoveredPillColor = await group.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
@@ -517,7 +547,7 @@ test('player controls share pill surfaces and the time display toggles together'
   await regular.click()
   await expect(regular).toHaveText(initial)
   await page.mouse.move(1, 1)
-  await expect.poll(() => group.evaluate(element => getComputedStyle(element).backgroundImage), { timeout: 3000 }).toBe(background)
+  await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage), { timeout: 3000 }).toBe(glassBackground)
   await page.keyboard.press('Tab')
   await regular.focus()
   await expect.poll(() => regular.evaluate(element => element.matches(':focus-visible'))).toBe(true)
@@ -553,7 +583,7 @@ test('player controls share pill surfaces and the time display toggles together'
     return (icon.left + icon.right) / 2 - group.left - 24
   })
   expect(Math.abs(expandedIconOffset)).toBeLessThan(1)
-  await expect.poll(() => volumeGroup.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')
+  await expect.poll(() => volumeGroup.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')
   const volumeIconGap = await volumeGroup.evaluate(element => {
     const icon = element.querySelector('.shaka-mute-button .shaka-ui-icon').getBoundingClientRect()
     const slider = element.querySelector('.shaka-volume-bar-container').getBoundingClientRect()
@@ -575,8 +605,8 @@ test('player controls share pill surfaces and the time display toggles together'
   expect(rightHoverColors.length).toBeGreaterThan(1)
   expect(rightHoverColors[0]).not.toBe(rightHoverColors[1])
   expect(new Set(rightHoverColors.slice(1)).size).toBe(1)
-  const rightHoverPillSize = /^17px 34px, calc\(100% - 34px\) 34px, 17px 34px, /
-  await expect(page.locator('.shaka-controls-button-panel > .autoplay-toggle')).toHaveCSS('background-size', rightHoverPillSize)
+  await expect(page.locator('.autoplay-toggle > .ft-control-glass')).toHaveCSS('border-radius', '17px')
+  await expect(page.locator('.autoplay-toggle > .ft-control-glass')).toHaveCSS('height', '34px')
   const rightBaseColors = await page.locator('.shaka-controls-button-panel > .shaka-spacer ~ button:not(.shaka-hidden)').evaluateAll(buttons =>
     buttons.map(button => getComputedStyle(button).getPropertyValue('--ft-control-pill-color').trim())
   )
@@ -605,8 +635,8 @@ test('player controls share pill surfaces and the time display toggles together'
   expect(settingsHoverColors[1]).not.toBe(settingsHoverColors[0])
   expect(new Set(settingsHoverColors.filter((_, index) => index !== 1)).size).toBe(1)
   await expect(page.locator('.shaka-overflow-menu-button > .ft-control-glass')).toHaveCSS('opacity', '1')
-  await expect(page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')).toHaveCSS('background-size', rightHoverPillSize)
-  await expect(page.locator('.shaka-controls-button-panel > .shaka-fullscreen-button')).toHaveCSS('background-size', rightHoverPillSize)
+  await expect(page.locator('.shaka-overflow-menu-button > .ft-control-glass')).toHaveCSS('border-radius', '17px')
+  await expect(page.locator('.shaka-fullscreen-button > .ft-control-glass')).toHaveCSS('height', '34px')
   const rightPillOpacitiesOnHover = await page.locator('.shaka-controls-button-panel > .shaka-spacer ~ button:not(.shaka-hidden)').evaluateAll(buttons =>
     buttons.map(button => getComputedStyle(button).opacity)
   )
@@ -636,6 +666,41 @@ test('player controls share pill surfaces and the time display toggles together'
     const alignment = await measureRightGlassAlignment()
     return Math.max(Math.abs(alignment.start), Math.abs(alignment.end))
   }).toBeLessThan(1)
+})
+
+test('right control highlights respond immediately while retaining the row fade', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const button = page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')
+  const glass = button.locator('.ft-control-glass')
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await button.hover()
+  // Hover/focus opacity must switch immediately; only row visibility fades.
+  const transition = await glass.evaluate(element => getComputedStyle(element).transitionProperty)
+  expect(transition.split(',').map(property => property.trim())).not.toContain('opacity')
+  await expect(glass).toHaveCSS('opacity', '1')
+  await expect(glass).toHaveCSS('filter', 'opacity(1)')
+  const fade = await page.locator('.shaka-controls-container').evaluate(element => {
+    element.removeAttribute('casting')
+    element.removeAttribute('shown')
+    for (const animation of element.getAnimations({ subtree: true })) {
+      if (!(animation instanceof CSSTransition)) continue
+      animation.pause()
+      animation.currentTime = 300
+    }
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const highlight = panel.querySelector('.shaka-overflow-menu-button > .ft-control-glass')
+    return {
+      highlightOpacity: Number(getComputedStyle(highlight).filter.match(/opacity\(([^)]+)\)/)[1]),
+      rowOpacity: Number(getComputedStyle(panel.querySelector('.ft-right-control-glass')).opacity),
+    }
+  })
+  expect(fade.highlightOpacity).toBeGreaterThan(0)
+  expect(fade.highlightOpacity).toBeLessThan(1)
+  expect(fade.highlightOpacity).toBeCloseTo(fade.rowOpacity, 2)
+  await page.mouse.move(1, 1)
+  await expect(glass).toHaveCSS('opacity', '0')
 })
 
 test('control glass stays blurred throughout the row fade', async ({ app, page }) => {
@@ -711,6 +776,50 @@ test('reduced motion hides control glass without a fade', async ({ app, page }) 
   })
   expect(hidden).toEqual({ transition: 'none', visibility: 'hidden', glassOpacity: '0' })
 })
+
+for (const scale of [1, 1.25]) {
+  test(`hiding a shorter stacked timestamp restores the full layout at ${scale * 100}% UI scale`, async ({ app, page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => {
+      element.pause()
+      element.playbackRate = 10
+    })
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    const panel = page.locator('.shaka-controls-button-panel')
+    await panel.evaluate(element => {
+      // Model a long video whose regular timestamp is wider than its
+      // speed-adjusted timestamp, without depending on the fixture duration.
+      const regular = element.querySelector('.shaka-current-time:not(.ft-playback-adjusted-time)')
+      const adjusted = element.querySelector('.ft-playback-adjusted-time')
+      regular.style.inlineSize = '240px'
+      adjusted.style.inlineSize = '120px'
+    })
+
+    const setWidth = width => panel.evaluate(async (element, width) => {
+      element.style.width = `${width}px`
+      // Let resize observation and the scheduled layout finish even under load.
+      for (let frame = 0; frame < 3; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
+      return element.classList.contains('ft-controls-stack-times')
+    }, width)
+    let compactWidth = 100
+    let fullWidth = 2000
+    for (let index = 0; index < 12; index++) {
+      const width = (compactWidth + fullWidth) / 2
+      if (await setWidth(width)) compactWidth = width
+      else fullWidth = width
+    }
+    // Avoid landing on the fractional-pixel boundary found by the search.
+    await setWidth(compactWidth - 4)
+    await expect(panel).toHaveClass(/ft-controls-stack-times/)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
+    await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
+    await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
+  })
+}
 
 test('volume pill collapses after dragging its slider and leaving', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
