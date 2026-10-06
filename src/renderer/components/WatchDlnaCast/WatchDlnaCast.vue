@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast } from '../../helpers/utils'
-import { dlnaCast } from '../../helpers/player/dlnaCast'
+import { dlnaCast, retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import { selectDlnaSource, selectDlnaTracks } from '../../helpers/player/dlnaSource'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { ytDlp } from '../../helpers/ytDlp'
@@ -44,6 +44,7 @@ let resumeLocalPlayback = false
 let castPayload = null
 let sourceLoading = false
 const mergedSource = ref(null)
+retainIosMediaSources(() => [mergedSource.value?.url, mergedSource.value?.audioUrl])
 
 const source = computed(() => {
   const combined = selectDlnaSource(props.formats)
