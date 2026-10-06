@@ -3040,6 +3040,9 @@ function refreshTrayIcon() {
 }
 
 function updateTheme() {
+  // Keep Android's cached native background until the saved theme is known.
+  // Applying the store's temporary system default can otherwise flash white.
+  if (isCapacitor && Capacitor.getPlatform() === 'android' && !appearanceSettingsReady) return
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
     : baseTheme.value
@@ -3076,7 +3079,7 @@ function updateSystemBarsStyle() {
   const backgroundColor = bodyStyle.getPropertyValue('--bg-color').trim() || bodyStyle.backgroundColor
   const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
   Promise.all([
-    setAndroidSystemBarsBackground(backgroundColor),
+    setAndroidSystemBarsBackground(backgroundColor, ['system', 'dynamic'].includes(baseTheme.value)),
     SystemBars.setStyle({
       style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
     })
