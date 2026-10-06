@@ -477,6 +477,7 @@ export default defineComponent({
       playNextTimeout: null,
       playNextCountDownIntervalId: null,
       autoplayCountdown: null,
+      waitingForPlaylistContinuation: false,
       blockVideoAutoplay: false,
       autoplayInterruptionTimeout: null,
       playabilityStatus: '',
@@ -1526,6 +1527,10 @@ export default defineComponent({
     },
     handleUpcomingPlaylistVideosChange(videos) {
       this.upcomingPlaylistVideos = Array.isArray(videos) ? videos : []
+      if (this.waitingForPlaylistContinuation && this.upcomingPlaylistVideos.length > 0) {
+        this.waitingForPlaylistContinuation = false
+        this.handleVideoEnded()
+      }
     },
     preloadUpcomingYtDlpPlaybackSources(videoIds) {
       if (videoIds.length === 0) return
@@ -4621,9 +4626,11 @@ export default defineComponent({
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
     handleVideoPlay() {
+      this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
     },
     handlePlayerSeeking() {
+      this.waitingForPlaylistContinuation = false
       this.liveChatSeekRequest = { seconds: this.$refs.player.getCurrentTime() }
 
       if (!this.customShortsPlayerActive) {
@@ -5208,6 +5215,11 @@ export default defineComponent({
         return
       }
 
+      if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.isWaitingForNextVideo) {
+        this.waitingForPlaylistContinuation = true
+        return
+      }
+
       if (this.watchingPlaylist && this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd) {
         // Let `watchVideoPlaylist` handle end of playlist, no countdown needed
         this.$refs.watchVideoPlaylist.playNextVideo()
@@ -5334,6 +5346,7 @@ export default defineComponent({
     },
 
     abortAutoplayCountdown: function (hideToast = false) {
+      this.waitingForPlaylistContinuation = false
       clearTimeout(this.playNextTimeout)
       clearInterval(this.playNextCountDownIntervalId)
       this.playNextTimeout = null
@@ -6323,6 +6336,7 @@ export default defineComponent({
     },
 
     toggleAutoplay: function() {
+      this.waitingForPlaylistContinuation = false
       if (this.isShort) {
         return
       }

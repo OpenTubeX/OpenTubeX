@@ -347,6 +347,8 @@ const playlistCacheTabId = tabId ?? 'web'
 const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
+const isFetchingPlaylistContinuation = ref(false)
+const hasUnloadedPlaylistVideos = ref(false)
 const isCollapsed = ref(false)
 const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay && !props.phonePanel)
 let savedScrollTop = 0
@@ -460,7 +462,9 @@ const currentVideo = computed(() => playlistItems.value[currentVideoIndexZeroBas
 
 const playlistVideoCount = computed(() => playlistItems.value.length)
 
-const playlistUnavailableVideoCount = computed(() => playlistTotalVideoCount.value - playlistVideoCount.value)
+const playlistUnavailableVideoCount = computed(() => hasUnloadedPlaylistVideos.value
+  ? 0
+  : playlistTotalVideoCount.value - playlistVideoCount.value)
 
 const videoIndexInPlaylistItems = computed(() => {
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
@@ -473,7 +477,10 @@ const videoIsLastPlaylistItem = computed(() => {
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
 
+const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value && videoIsLastPlaylistItem.value)
+
 const nextVideo = computed(() => {
+  if (isWaitingForNextVideo.value) return null
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
     ? 0
@@ -488,14 +495,14 @@ const upcomingVideos = computed(() => {
   const startIndex = currentIndex === -1 ? 0 : currentIndex + 1
   const remainingVideos = targetList.slice(startIndex)
 
-  return loopEnabled.value && currentIndex !== -1
+  return loopEnabled.value && !isFetchingPlaylistContinuation.value && currentIndex !== -1
     ? remainingVideos.concat(targetList.slice(0, startIndex))
     : remainingVideos
 })
 
 watch(upcomingVideos, videos => {
   emit('upcoming-videos-change', videos)
-}, { immediate: true })
+}, { immediate: true, flush: 'post' })
 
 const playlistPageLinkTo = computed(() => ({
   path: `/playlist/${props.playlistId}`,
@@ -639,6 +646,8 @@ if (isTabPresented != null) {
 }
 
 watch(() => props.playlistId, () => {
+  isFetchingPlaylistContinuation.value = false
+  hasUnloadedPlaylistVideos.value = false
   resetUnavailableSkipChain()
   reversePlaylist.value = storedReversePlaylist.value
 
@@ -950,6 +959,7 @@ function onMoveDraggedVideo(video, source) {
 }
 
 function playNextVideo() {
+  if (isWaitingForNextVideo.value) return
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
 
@@ -1050,12 +1060,15 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelName.value = cachedPlaylist.channelName
   channelId.value = cachedPlaylist.channelId
 
+  hasUnloadedPlaylistVideos.value = process.env.SUPPORTS_LOCAL_API && backendPreference.value !== 'invidious' && cachedPlaylist.continuationData !== null
+  isFetchingPlaylistContinuation.value = hasUnloadedPlaylistVideos.value
+
   // Playback must not wait for later pages when the next video is already cached.
   const videos = cachedPlaylist.items.slice()
   playlistItems.value = applyReversePlaylistState(videos.slice())
   isLoading.value = false
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious' || cachedPlaylist.continuationData === null) return
+  if (!isFetchingPlaylistContinuation.value) return
 
   try {
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
@@ -1069,10 +1082,13 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
         randomizedPlaylistItems.value = randomizedPlaylistItems.value.concat(shuffleItems(newVideos.slice()))
       }
     })
+    if (props.playlistId === cachedPlaylist.id) hasUnloadedPlaylistVideos.value = false
   } catch (err) {
     if (props.playlistId !== cachedPlaylist.id) return
     console.error(err)
     showApiErrorToast(t('Local API Error (Click to copy)'), err)
+  } finally {
+    if (props.playlistId === cachedPlaylist.id) isFetchingPlaylistContinuation.value = false
   }
 }
 
@@ -1408,7 +1424,7 @@ const videoIsLastInInPlaylistItems = computed(() => {
 
 const shouldStopDueToPlaylistEnd = computed(() => {
   // Loop enabled = should not stop
-  return videoIsLastInInPlaylistItems.value && !loopEnabled.value
+  return videoIsLastInInPlaylistItems.value && !loopEnabled.value && !isFetchingPlaylistContinuation.value
 })
 
 /**
@@ -1433,7 +1449,7 @@ const skipAvailability = computed(() => {
   return getPlaylistSkipAvailability({
     itemCount: items.length,
     currentIndex: videoIndexInPlaylistItems.value,
-    loopEnabled: loopEnabled.value,
+    loopEnabled: loopEnabled.value && !isFetchingPlaylistContinuation.value,
     previousVideoSourceIndex: previousVideoSourceIndex.value
   })
 })
@@ -1474,6 +1490,7 @@ defineExpose({
   playPreviousVideo,
   nextVideo,
   shouldStopDueToPlaylistEnd,
+  isWaitingForNextVideo,
   getState: () => ({
     index: reversePlaylist.value
       ? playlistItems.value.length - currentVideoIndexOneBased.value

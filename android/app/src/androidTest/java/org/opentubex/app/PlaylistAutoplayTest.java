@@ -32,7 +32,21 @@ public class PlaylistAutoplayTest {
         verifyAutoplay(true, true);
     }
 
+    @Test
+    public void playlistBoundaryWaitsForContinuationWithoutLoop() throws Exception {
+        verifyAutoplay(true, false, true, false);
+    }
+
+    @Test
+    public void playlistBoundaryWaitsForContinuationWithLoop() throws Exception {
+        verifyAutoplay(true, false, true, true);
+    }
+
     private void verifyAutoplay(boolean youtube, boolean failContinuation) throws Exception {
+        verifyAutoplay(youtube, failContinuation, false, false);
+    }
+
+    private void verifyAutoplay(boolean youtube, boolean failContinuation, boolean atBoundary, boolean loop) throws Exception {
         String media;
         try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("demo.webm")) {
             media = android.util.Base64.encodeToString(YtDlpFiles.read(input, 1024 * 1024), android.util.Base64.NO_WRAP);
@@ -102,7 +116,7 @@ public class PlaylistAutoplayTest {
                             tabId: store.getters.getActiveTab.id,
                             value: { id: 'youtube-autoplay', title: 'YouTube autoplay regression', totalVideoCount: 100,
                                 channelName: 'Test', channelId: '',
-                                items: store.getters.getPlaylist('autoplay-regression').videos,
+                                items: store.getters.getPlaylist('autoplay-regression').videos.slice(0, AT_BOUNDARY ? 1 : 2),
                                 continuationData: JSON.stringify({ context: {
                                     client: { clientName: 'WEB', clientVersion: '2.20261006.00.00' }, user: {}, request: {}
                                 }, path: '/browse', payload: { continuation: 'autoplay-continuation' } })
@@ -113,9 +127,11 @@ public class PlaylistAutoplayTest {
                         await window.__playlistRouter.push('/watch/jNQXAC9IVRw?playlistId=autoplay-regression&playlistType=user&playlistItemId=autoplay-0');
                     }
                 })()
-                """.replace("YOUTUBE", String.valueOf(youtube)).replace("FAIL_CONTINUATION", String.valueOf(failContinuation)));
+                """.replace("YOUTUBE", String.valueOf(youtube)).replace("FAIL_CONTINUATION", String.valueOf(failContinuation))
+                    .replace("AT_BOUNDARY", String.valueOf(atBoundary)));
             try {
                 await(view, "!!window.__playlistWatch() && window.__playlistWatch().onMountedRun && window.__playlistWatch().preparingVideoLoadGeneration === null");
+                if (loop) evaluate(view, "document.querySelector('.watchVideoPlaylist button[aria-label=\"Loop Playlist\"]').click()");
                 loadMedia(view, media, "Playlist video 1");
                 await(view, "document.querySelector('.ftVideoPlayer video')?.readyState >= 2");
                 if (youtube) await(view, "window.__playlistContinuationRequested === true");
@@ -127,6 +143,27 @@ public class PlaylistAutoplayTest {
                     "window.__playlistEnded = false; window.__playlistVideo.addEventListener('ended', () => window.__playlistEnded = true);" +
                     "window.__playlistVideo.currentTime = window.__playlistVideo.duration - 0.3; window.__playlistVideo.play()");
                 await(view, "window.__playlistEnded");
+                if (atBoundary) {
+                    await(view, "window.__playlistWatch().waitingForPlaylistContinuation === true");
+                    assertEquals("Pending pages cannot wrap or start a countdown", "true", evaluate(view,
+                        "window.__playlistRouter.currentRoute.value.params.id === 'jNQXAC9IVRw' && !document.querySelector('.autoplayCountdownOverlay')"));
+                    evaluate(view, """
+                        window.__playlistFinishContinuation({ status: 200, headers: { 'Content-Type': 'application/json' },
+                            url: 'https://www.youtube.com/youtubei/v1/browse', data: {
+                                onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [{
+                                    playlistVideoRenderer: {
+                                        videoId: 'abcdefghijk',
+                                        title: { simpleText: 'Playlist video 2', accessibility: { accessibilityData: { label: 'Playlist video 2' } } },
+                                        index: { simpleText: '2' },
+                                        shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
+                                        thumbnail: { thumbnails: [] }, isPlayable: true, lengthSeconds: '10',
+                                        lengthText: { simpleText: '0:10' }, navigationEndpoint: { watchEndpoint: { videoId: 'abcdefghijk' } }
+                                    }
+                                }] } }]
+                            }
+                        });
+                        """);
+                }
                 await(view, "!!document.querySelector('.autoplayCountdownOverlay')");
                 await(view, "window.__playlistRouter.currentRoute.value.params.id === 'abcdefghijk'");
                 assertEquals("Advance preserves playlist identity", "true", evaluate(view,
@@ -136,7 +173,7 @@ public class PlaylistAutoplayTest {
                 loadMedia(view, media, "Playlist video 2");
                 await(view, "document.querySelector('.ftVideoPlayer video')?.readyState >= 2 && !document.querySelector('.ftVideoPlayer video').paused && document.querySelector('.ftVideoPlayer video').currentTime > 0.1");
             } finally {
-                evaluate(view, """
+                String cleanup = """
                     (async () => {
                         window.fetch = window.__playlistFetch;
                         if (window.__playlistNativePromise) window.Capacitor.nativePromise = window.__playlistNativePromise;
@@ -147,7 +184,8 @@ public class PlaylistAutoplayTest {
                         await store.dispatch('removePlaylist', 'autoplay-regression');
                         window.__playlistRestored = true;
                     })()
-                    """);
+                    """;
+                InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.evaluateJavascript(cleanup, null));
                 await(view, "window.__playlistRestored === true");
             }
         }

@@ -39,6 +39,8 @@ function setup(t, items = ['A', 'B', 'C'].map(id => ({ videoId: id, playlistItem
     shuffleEnabled: ref(true),
     loopEnabled: ref(true),
     isLoading: ref(false),
+    isFetchingPlaylistContinuation: ref(false),
+    hasUnloadedPlaylistVideos: ref(false),
     canPlayNextVideo: ref(true),
     router: { push(payload) { navigations.push(payload) } },
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
