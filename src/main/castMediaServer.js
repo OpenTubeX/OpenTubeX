@@ -1,34 +1,87 @@
 import { createServer } from 'node:http'
-import { Readable } from 'node:stream'
+import { isIP } from 'node:net'
+import { Readable, pipeline } from 'node:stream'
+import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
 import sax from 'sax'
+import { isNonPublicNetworkAddress } from './utils.js'
 
 const MAX_MANIFEST_SIZE = 2_000_000
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
-/** Chromium networking with manual redirects and explicitly scoped credentials. */
-export function fetchCastMedia(network, url, { method, headers, signal }) {
+/** Resolve once; the transport must connect only to this validated address set. */
+export async function resolveCastMediaAddresses(url, allowedPrivateOrigin, resolveHost) {
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null
+  const hostname = url.hostname.replaceAll(/^\[|\]$/g, '')
+  try {
+    const endpoints = isIP(hostname) ? [{ address: hostname }] : (await resolveHost(hostname)).endpoints
+    if (!endpoints.length || endpoints.some(({ address }) => !isIP(address) ||
+      (url.origin !== allowedPrivateOrigin && isNonPublicNetworkAddress(address)))) return null
+    return endpoints.map(({ address }) => ({ address, family: isIP(address) }))
+  } catch { return null }
+}
+
+/** Node HTTP(S) with pinned DNS, manual redirects and explicitly scoped credentials. */
+export function fetchCastMedia(network, url, { method, headers, signal, addresses, proxy = 'DIRECT' }) {
   return new Promise((resolve, reject) => {
-    const request = network.request({ url, method, redirect: 'manual', credentials: 'omit' })
+    // Node cannot enforce this pin through Chromium's proxy transport. Fail closed
+    // instead of silently bypassing the user's configured/system proxy.
+    if (proxy !== 'DIRECT') throw new Error('Cast media requires a direct route for validated DNS')
+    const parsedUrl = httpUrl(url)
+    const hostname = parsedUrl.hostname.replaceAll(/^\[|\]$/g, '')
+    if (!Array.isArray(addresses) || !addresses.length || addresses.some(({ address, family }) => !isIP(address) || isIP(address) !== family) ||
+      (isIP(hostname) && !addresses.some(({ address }) => address === hostname))) {
+      throw new Error('Missing validated Cast destination')
+    }
+    signal.throwIfAborted()
+    const destinations = addresses.map(({ address, family }) => ({ address, family }))
+    const request = network.request({
+      protocol: parsedUrl.protocol,
+      hostname,
+      port: parsedUrl.port,
+      path: parsedUrl.pathname + parsedUrl.search,
+      method,
+      // A fresh socket cannot reuse a connection from a previous DNS validation.
+      agent: false,
+      autoSelectFamily: true,
+      lookup(_hostname, options, callback) {
+        const candidates = options.family ? destinations.filter(endpoint => endpoint.family === options.family) : destinations
+        if (!candidates.length) callback(new Error('No validated Cast destination for this address family'))
+        else if (options.all) callback(null, candidates)
+        else callback(null, candidates[0].address, candidates[0].family)
+      }
+    })
     for (const [name, value] of headers) request.setHeader(name, value)
     const cleanup = () => signal.removeEventListener('abort', abort)
-    const abort = () => { request.abort(); reject(signal.reason) }
+    const abort = () => { request.destroy(); reject(signal.reason) }
     request.on('error', error => { cleanup(); reject(error) })
-    request.on('redirect', (status, _method, location) => {
-      cleanup()
-      resolve(new Response(null, { status, headers: { location } }))
-      request.abort()
-    })
     request.on('response', incoming => {
       incoming.once('close', cleanup)
       incoming.once('end', cleanup)
       incoming.once('error', error => { cleanup(); reject(error) })
       try {
-        const body = method === 'HEAD' || [204, 205, 304].includes(incoming.statusCode)
-          ? null
-          : Readable.toWeb(incoming)
-        if (body === null) incoming.resume()
-        resolve(new Response(body, { status: incoming.statusCode, headers: incoming.headers }))
+        const responseHeaders = new Headers()
+        for (const [name, value] of Object.entries(incoming.headers)) {
+          for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) responseHeaders.append(name, item)
+        }
+        if (method === 'HEAD' || [204, 205, 304].includes(incoming.statusCode) ||
+          ([301, 302, 303, 307, 308].includes(incoming.statusCode) && responseHeaders.has('location'))) {
+          resolve(new Response(null, { status: incoming.statusCode, headers: responseHeaders }))
+          incoming.destroy()
+          cleanup()
+          return
+        }
+        let stream = incoming
+        // Preserve fetch's decoded-body behavior even when a server ignores identity.
+        const decoders = { gzip: createGunzip, deflate: createInflate, br: createBrotliDecompress }
+        const encodings = (responseHeaders.get('content-encoding') ?? '').split(',').map(value => value.trim()).filter(value => value && value !== 'identity')
+        for (const encoding of encodings.reverse()) {
+          if (!Object.hasOwn(decoders, encoding)) throw new Error('Unsupported Cast content encoding')
+          const decoder = decoders[encoding]()
+          pipeline(stream, decoder, () => {})
+          stream = decoder
+        }
+        resolve(new Response(Readable.toWeb(stream), { status: incoming.statusCode, headers: responseHeaders }))
       } catch (error) { incoming.destroy(); cleanup(); reject(error) }
     })
     signal.addEventListener('abort', abort, { once: true })
@@ -156,11 +209,12 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           url = next
         } else if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
         for (let redirects = 0; ; redirects++) {
-          if (!await isAllowedUrl(url)) throw new Error('Unsupported Cast resource destination')
+          const addresses = await isAllowedUrl(url)
+          if (!addresses) throw new Error('Unsupported Cast resource destination')
           const headers = new Headers(getHeaders(url.href) ?? {})
           headers.set('Accept-Encoding', 'identity')
           if (request.headers.range) headers.set('Range', request.headers.range)
-          upstream = await fetchMedia(url.href, { headers, signal: controller.signal, redirect: 'manual', method: request.method })
+          upstream = await fetchMedia(url.href, { headers, signal: controller.signal, redirect: 'manual', method: request.method, addresses })
           const location = upstream.headers.get('location')
           if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
           if (redirects >= 5) throw new Error('Too many Cast media redirects')

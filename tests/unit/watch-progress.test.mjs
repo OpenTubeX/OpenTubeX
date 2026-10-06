@@ -10,6 +10,27 @@ const { _saveWatchProgress, addToHistory } = runInNewContext(`({
   ${source.slice(source.indexOf('    addToHistory:'), source.indexOf('    keepHistoryEntryAlive('))}
 })`, { isHistoryEntryWatched })
 
+const timestampMethods = runInNewContext(`({
+  ${source.slice(source.indexOf('    getWatchedProgress:'), source.indexOf('    getPlaylistState:'))}
+})`)
+
+test('timestamp actions use the active receiver position and return to local playback', () => {
+  const view = {
+    ...timestampMethods, isLoading: false, chromecastActive: true, chromecastStatus: { currentTime: 28.75 },
+    $refs: { player: { hasLoaded: true, getCurrentTime: () => 5.5 } },
+  }
+  assert.equal(view.getWatchedProgress(), 28.75)
+  assert.equal(view.getTimestamp(), 28)
+  view.chromecastStatus = { currentTime: 0 }
+  assert.equal(view.getTimestamp(), 0)
+  view.chromecastActive = false
+  view.chromecastStatus = null
+  assert.equal(view.getWatchedProgress(), 5.5)
+  assert.equal(view.getTimestamp(), 5)
+  view.isLoading = true
+  assert.equal(view.getTimestamp(), 0)
+})
+
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const seekingHandler = playerSource.slice(playerSource.indexOf('    function isShortsEndSeekPosition()'), playerSource.indexOf('    function handleSeeked()'))
 

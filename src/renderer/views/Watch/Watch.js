@@ -6265,6 +6265,9 @@ export default defineComponent({
     },
 
     getWatchedProgress: function () {
+      if (!this.isLoading && this.chromecastActive && this.chromecastStatus) {
+        return this.chromecastStatus.currentTime
+      }
       const player = this.$refs.player
 
       if (!this.isLoading && player?.hasLoaded) {

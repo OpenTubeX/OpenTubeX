@@ -98,6 +98,8 @@ test('casts the current video, controls the receiver and returns to its remote p
   await choice(page, 'English')
   await choice(page, 'Play')
   await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
+  await expect.poll(() => watch.evaluate(vm => vm.getTimestamp())).toBe(18)
+  expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeLessThan(10)
   await choice(page, 'Return to local playback')
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(18)

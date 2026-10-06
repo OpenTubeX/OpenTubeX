@@ -10,6 +10,8 @@ import { isPortableBuild } from './applicationDataPaths'
 import path from 'path'
 import { createDesktopShareHandler, loadWindowsShare } from './desktopShare'
 import cp from 'child_process'
+import * as http from 'node:http'
+import * as https from 'node:https'
 import { randomUUID } from 'crypto'
 import { load as loadYaml } from 'js-yaml'
 import { getFonts } from 'font-list'
@@ -53,7 +55,7 @@ import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
 import { ChromecastManager } from './chromecast'
-import { fetchCastMedia } from './castMediaServer'
+import { fetchCastMedia, resolveCastMediaAddresses } from './castMediaServer'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpSearch, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -4651,7 +4653,7 @@ function runApp() {
     const ownerId = event.sender.id
     const getHeaders = mediaUrl => {
       const url = new URL(mediaUrl)
-      const headers = {}
+      const headers = { 'User-Agent': session.defaultSession.getUserAgent() }
       if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
         headers.Referer = 'https://www.youtube.com/'
         headers.Origin = 'https://www.youtube.com'
@@ -4668,7 +4670,12 @@ function runApp() {
       const instance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
       if (typeof instance === 'string' && instance) allowedPrivateOrigin = new URL(instance).origin
     } catch { }
-    const result = await chromecast.start(ownerId, payload, getHeaders, url => isAllowedNetworkMediaUrl(url, allowedPrivateOrigin), (url, options) => fetchCastMedia(net, url, options))
+    const resolveAddresses = url => resolveCastMediaAddresses(url, allowedPrivateOrigin,
+      hostname => session.defaultSession.resolveHost(hostname, { cacheUsage: 'disallowed' }))
+    const fetchMedia = async (url, options) => fetchCastMedia(new URL(url).protocol === 'https:' ? https : http, url, {
+      ...options, proxy: await session.defaultSession.resolveProxy(url)
+    })
+    const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia)
     if (result.castId) {
       if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
       else if (!castOwners.has(event.sender)) {

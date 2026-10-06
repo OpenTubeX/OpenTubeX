@@ -1,42 +1,98 @@
 import assert from 'node:assert/strict'
-import { createServer } from 'node:http'
+import { createServer, request as httpRequest } from 'node:http'
 import test from 'node:test'
 import { gzipSync } from 'node:zlib'
 import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
-import { createCastMediaServer as createMediaServer, fetchCastMedia, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
+import { createCastMediaServer as createMediaServer, fetchCastMedia, resolveCastMediaAddresses, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
 
 // Trust only the loopback HTTP fixtures in these unit tests.
 function createCastMediaServer(source, address, token, headers, allowed = url => url.hostname === '127.0.0.1') {
-  return createMediaServer(source, address, token, headers, allowed)
+  return createMediaServer(source, address, token, headers, async url => await allowed(url) ? [{ address: '127.0.0.1', family: 4 }] : null,
+    (url, options) => fetchCastMedia({ request: httpRequest }, url, options))
 }
 
-test('Chromium requests expose redirects for policy checks and omit ambient credentials', async () => {
-  let aborted = false
+test('relay connections use only the addresses returned by destination validation', async () => {
   const network = {
     request(options) {
-      assert.equal(options.credentials, 'omit')
-      assert.equal(options.redirect, 'manual')
+      assert.equal(options.agent, false)
+      assert.equal(options.hostname, 'media.test')
+      assert.equal(typeof options.lookup, 'function')
+      options.lookup('media.test', { all: true }, (error, addresses) => {
+        assert.equal(error, null)
+        assert.deepEqual(addresses, [{ address: '8.8.8.8', family: 4 }])
+      })
+      const request = new EventEmitter()
+      request.setHeader = () => {}
+      request.end = () => queueMicrotask(() => {
+        const incoming = Readable.from([Buffer.from('media')])
+        incoming.statusCode = 200
+        incoming.headers = {}
+        request.emit('response', incoming)
+      })
+      request.destroy = () => {}
+      return request
+    }
+  }
+  const response = await fetchCastMedia(network, 'https://media.test/video', {
+    method: 'GET', headers: new Headers(), signal: new AbortController().signal, addresses: [{ address: '8.8.8.8', family: 4 }]
+  })
+  assert.equal(await response.text(), 'media')
+})
+
+test('each relay redirect passes its own validated addresses to the transport', async t => {
+  const source = { url: 'https://first.test/video', contentType: 'video/mp4' }
+  const first = [{ address: '8.8.8.8', family: 4 }]
+  const second = [{ address: '1.1.1.1', family: 4 }]
+  const requests = []
+  const media = createMediaServer(source, '127.0.0.1', 'token', () => ({}), url =>
+    url.hostname === 'first.test' ? first : second, async (url, options) => {
+    requests.push([url, options.addresses])
+    return url === source.url
+      ? new Response(null, { status: 302, headers: { location: 'https://second.test/video' } })
+      : new Response('media')
+  })
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  assert.equal(await (await fetch(media.mediaUrl())).text(), 'media')
+  assert.deepEqual(requests, [[source.url, first], ['https://second.test/video', second]])
+})
+
+test('HTTP requests expose redirects for policy checks with only explicit credentials', async () => {
+  let destroyed = false
+  const network = {
+    request(options) {
+      assert.equal(options.hostname, 'instance.test')
+      assert.equal(options.protocol, 'https:')
+      assert.equal(options.agent, false)
       const request = new EventEmitter()
       request.setHeader = (name, value) => {
         assert.equal(name, 'range')
         assert.equal(value, 'bytes=0-3')
       }
-      request.end = () => queueMicrotask(() => request.emit('redirect', 302, 'GET', 'https://media.test/video'))
-      request.abort = () => { aborted = true; request.emit('error', new Error('Redirect cancelled')) }
+      request.end = () => queueMicrotask(() => {
+        const incoming = Readable.from([])
+        incoming.statusCode = 302
+        incoming.headers = { location: 'https://media.test/video' }
+        incoming.destroy = () => { destroyed = true }
+        request.emit('response', incoming)
+      })
+      request.destroy = () => {}
       return request
     }
   }
   const response = await fetchCastMedia(network, 'https://instance.test/video', {
-    method: 'GET', headers: new Headers({ Range: 'bytes=0-3' }), signal: new AbortController().signal
+    method: 'GET', headers: new Headers({ Range: 'bytes=0-3' }), signal: new AbortController().signal,
+    addresses: [{ address: '8.8.8.8', family: 4 }]
   })
   assert.equal(response.status, 302)
   assert.equal(response.headers.get('location'), 'https://media.test/video')
-  assert.equal(aborted, true)
+  assert.equal(response.body, null)
+  assert.equal(destroyed, true)
 })
 
-test('Chromium requests stream media responses and abort with their caller', async () => {
+test('HTTP requests stream media responses and abort with their caller', async () => {
   let aborted = false
   const network = {
     request() {
@@ -48,24 +104,26 @@ test('Chromium requests stream media responses and abort with their caller', asy
         incoming.headers = { 'content-type': 'video/mp4' }
         request.emit('response', incoming)
       })
-      request.abort = () => { aborted = true }
+      request.destroy = () => { aborted = true }
       return request
     }
   }
   const controller = new AbortController()
-  const response = await fetchCastMedia(network, 'https://media.test/video', { method: 'GET', headers: new Headers(), signal: controller.signal })
+  const response = await fetchCastMedia(network, 'https://media.test/video', {
+    method: 'GET', headers: new Headers(), signal: controller.signal, addresses: [{ address: '8.8.8.8', family: 4 }]
+  })
   assert.equal(response.status, 206)
   controller.abort()
   assert.equal(aborted, true)
   assert.equal(await response.text(), 'video')
 })
 
-test('Chromium HEAD responses handle transport errors after their headers', async () => {
+test('HTTP HEAD responses handle transport errors after their headers', async () => {
   const network = {
     request() {
       const request = new EventEmitter()
       request.setHeader = () => {}
-      request.abort = () => {}
+      request.destroy = () => {}
       request.end = () => queueMicrotask(() => {
         const incoming = Readable.from([])
         incoming.statusCode = 200
@@ -76,9 +134,66 @@ test('Chromium HEAD responses handle transport errors after their headers', asyn
       return request
     }
   }
-  const response = await fetchCastMedia(network, 'https://media.test/video', { method: 'HEAD', headers: new Headers(), signal: new AbortController().signal })
+  const response = await fetchCastMedia(network, 'https://media.test/video', {
+    method: 'HEAD', headers: new Headers(), signal: new AbortController().signal, addresses: [{ address: '8.8.8.8', family: 4 }]
+  })
   assert.equal(response.status, 200)
   assert.equal(response.body, null)
+})
+
+test('aborting a streamed HTTP response closes the upstream socket', async t => {
+  let closed
+  const upstreamClosed = new Promise(resolve => { closed = resolve })
+  const upstream = createServer((request, response) => {
+    request.once('close', closed)
+    response.writeHead(200, { 'content-type': 'video/mp4' })
+    response.write('first chunk')
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const controller = new AbortController()
+  const response = await fetchCastMedia({ request: httpRequest }, `${origin}/video`, {
+    method: 'GET', headers: new Headers(), signal: controller.signal, addresses: [{ address: '127.0.0.1', family: 4 }]
+  })
+  const reader = response.body.getReader()
+  assert.equal(new TextDecoder().decode((await reader.read()).value), 'first chunk')
+  controller.abort()
+  await assert.rejects(reader.read())
+  await upstreamClosed
+})
+
+for (const addresses of [undefined, [], [{ address: 'not-an-address', family: 4 }], [{ address: '8.8.8.8', family: 6 }]]) {
+  test(`rejects missing or invalid validated destinations: ${JSON.stringify(addresses)}`, async () => {
+    const network = { request() { assert.fail('Invalid destinations cannot reach the transport') } }
+    await assert.rejects(fetchCastMedia(network, 'https://media.test/video', {
+      method: 'GET', headers: new Headers(), signal: new AbortController().signal, addresses
+    }), /validated Cast destination/)
+  })
+}
+
+for (const proxy of ['PROXY proxy.test:8080', 'SOCKS5 proxy.test:1080', 'PROXY proxy.test:8080; DIRECT']) {
+  test(`does not bypass a ${proxy} route with a direct connection`, async () => {
+    const network = { request() { assert.fail('No direct request may bypass the proxy') } }
+    await assert.rejects(fetchCastMedia(network, 'https://media.test/video', {
+      method: 'GET', headers: new Headers(), signal: new AbortController().signal,
+      addresses: [{ address: '8.8.8.8', family: 4 }], proxy
+    }), /direct route/)
+  })
+}
+
+test('destination resolution rejects non-public results except the configured instance origin', async () => {
+  const publicUrl = new URL('https://media.test/video')
+  const endpoints = [{ address: '8.8.8.8' }, { address: '2606:4700:4700::1111' }]
+  const resolve = async hostname => { assert.equal(hostname, 'media.test'); return { endpoints } }
+  assert.deepEqual(await resolveCastMediaAddresses(publicUrl, null, resolve), [
+    { address: '8.8.8.8', family: 4 }, { address: '2606:4700:4700::1111', family: 6 }
+  ])
+  endpoints.push({ address: '127.0.0.1' })
+  assert.equal(await resolveCastMediaAddresses(publicUrl, null, resolve), null)
+  assert.equal(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), null, resolve), null)
+  assert.deepEqual(await resolveCastMediaAddresses(new URL('http://127.0.0.1/video'), 'http://127.0.0.1', resolve), [{ address: '127.0.0.1', family: 4 }])
+  assert.equal(await resolveCastMediaAddresses(publicUrl, 'http://127.0.0.1', async () => ({ endpoints: [] })), null)
+  assert.equal(await resolveCastMediaAddresses(publicUrl, null, async () => { throw new Error('DNS failed') }), null)
 })
 
 async function listen(server) {
