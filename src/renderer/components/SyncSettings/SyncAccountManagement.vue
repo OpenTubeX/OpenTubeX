@@ -134,7 +134,7 @@
             :padding="11"
             :size="20"
             theme="base-no-default"
-            @click="sessionToRevoke = session"
+            @click="openRevokePrompt(session)"
           />
         </div>
       </li>
@@ -194,7 +194,7 @@
             : t('Settings.Sync Settings.Revoke Session Warning', { device: sessionToRevoke.deviceInfo.name })
           }}
         </p>
-        <p v-if="!hasOtherDeviceLogins(sessionToRevoke, sessions)">
+        <p v-if="revokeDeletesTabs">
           {{ t('Settings.Sync Settings.Revoke Session Tabs Warning') }}
         </p>
         <p
@@ -289,6 +289,7 @@ const sessions = ref([])
 const sessionToRename = ref(null)
 const renamedDeviceName = ref('')
 const sessionToRevoke = ref(null)
+const revokeDeletesTabs = ref(false)
 const promptError = ref('')
 
 function client(token = props.token) {
@@ -469,6 +470,12 @@ async function renameDevice() {
   }
 }
 
+function openRevokePrompt(session) {
+  promptError.value = ''
+  revokeDeletesTabs.value = !hasOtherDeviceLogins(session, sessions.value)
+  sessionToRevoke.value = session
+}
+
 function closeRevokePrompt() {
   if (actionBusy.value) return
   sessionToRevoke.value = null
@@ -487,10 +494,14 @@ async function revokeSession() {
   const requestClient = client()
   try {
     const { sessions: accountSessions } = await requestClient.getAccountSessions()
+    const deletesTabs = !hasOtherDeviceLogins(session, accountSessions)
+    if (deletesTabs && !revokeDeletesTabs.value) {
+      revokeDeletesTabs.value = true
+      return
+    }
     // Clean up while this login can still retry the operation, including when
     // revoking the current device. Another login may still use the same tabs.
-    if (!hasOtherDeviceLogins(session, accountSessions) &&
-        !await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
+    if (deletesTabs && !await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
     await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
     showToast({

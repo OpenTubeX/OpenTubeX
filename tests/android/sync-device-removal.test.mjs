@@ -2,8 +2,11 @@ import { test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { verifySyncDeviceRemoval } from '../../e2e/helpers/sync-device-removal.mjs'
 
-for (const otherLogin of [false, true]) {
-  test(`Android device removal ${otherLogin ? 'preserves tabs used by another login' : 'cleans up synced tabs'} and orphaned sets can be deleted`, {
+for (const options of [{ otherLogin: false }, { otherLogin: true }, { otherLogin: true, otherLoginExpires: true }]) {
+  const behavior = options.otherLoginExpires
+    ? 'reconfirms tab deletion when another login expires'
+    : `${options.otherLogin ? 'preserves tabs used by another login' : 'cleans up synced tabs'} and orphaned sets can be deleted`
+  test(`Android device removal ${behavior}`, {
     skip: !process.env.ANDROID_CDP_URL,
   }, async () => {
     const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
@@ -13,7 +16,7 @@ for (const otherLogin of [false, true]) {
       await page.reload()
       const skip = page.getByRole('button', { name: 'Skip', exact: true })
       if (await skip.isVisible()) await skip.click()
-      await verifySyncDeviceRemoval(page, { phone: true, otherLogin })
+      await verifySyncDeviceRemoval(page, { phone: true, ...options })
     } finally {
       clearTimeout(keepAlive)
       await browser.close()

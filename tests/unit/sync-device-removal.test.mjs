@@ -7,14 +7,14 @@ import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/hel
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
 const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
-const revokeSource = component.slice(component.indexOf('function closeRevokePrompt()'), component.indexOf('\ndefineExpose'))
+const revokeSource = component.slice(component.indexOf('function openRevokePrompt('), component.indexOf('\ndefineExpose'))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const deleteStart = storeSource.indexOf('  deleteSyncServerSession(')
 const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async completeSyncServerPairing', deleteStart))
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false } = {}) {
+async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -59,14 +59,16 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     SyncServerCancelledError: class extends Error {}, isSessionExpiredError: () => false,
   })
   const prompt = { value: { id: 'login-id', device_id: 'old-phone', current } }
+  const sessions = { value: [prompt.value, ...(otherLogin ? [{ id: 'remaining-login', device_id: 'old-phone' }] : [])] }
+  const revokeDeletesTabs = { value: false }
   const promptError = { value: '' }
   const emitted = []
   const componentContext = vm.createContext({
-    sessionToRevoke: prompt, promptError, actionBusy: { value: false },
+    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs,
     client: () => ({
       token: 'token',
       async getAccountSessions() {
-        return { sessions: [prompt.value, ...(otherLogin ? [{ id: 'remaining-login', device_id: 'old-phone' }] : [])] }
+        return { sessions: sessions.value.filter(session => !otherLoginExpires || session.id === 'login-id') }
       },
       async revokeAccountSession() { revoked = true },
       cancel() {},
@@ -76,9 +78,10 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     handleRequestError: async (error, token, target) => { target.value = error.message },
   })
   vm.runInContext(revokeSource, componentContext)
+  componentContext.openRevokePrompt(prompt.value)
   return {
     revoke: () => componentContext.revokeSession(),
-    state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted }),
+    state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value }),
   }
 }
 
@@ -95,6 +98,20 @@ for (const current of [false, true]) {
     assert.deepEqual(result.remote.shared, [tabSet('shared-tabs')])
     assert.ok(result.visible.every(session => session.syncDeviceId !== 'old-phone'))
     assert.deepEqual(result.emitted, current ? ['current-revoked'] : [])
+  })
+  test(`requires another confirmation when the other login expires before revoking a ${current ? 'current' : 'previous'} login`, async () => {
+    const app = await fixture({ current, otherLogin: true, otherLoginExpires: true })
+    assert.equal(app.state().tabsWarning, false)
+    await app.revoke()
+    const result = app.state()
+    assert.equal(result.revoked, false)
+    assert.equal(result.puts, 0)
+    assert.equal(result.tabsWarning, true)
+    assert.equal(result.prompt.device_id, 'old-phone')
+    assert.deepEqual(result.remote.devices['old-phone'].sessions, [tabSet('old-tabs'), tabSet('older-tabs')])
+    await app.revoke()
+    assert.equal(app.state().revoked, true)
+    assert.equal(app.state().remote.devices['old-phone'], undefined)
   })
 }
 

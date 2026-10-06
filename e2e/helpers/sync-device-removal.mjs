@@ -5,12 +5,12 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
   const currentDeviceId = Buffer.alloc(16, 4).toString('base64url')
-  const activeDeviceId = otherLogin ? oldDeviceId : currentDeviceId
+  const activeDeviceId = otherLogin && !otherLoginExpires ? oldDeviceId : currentDeviceId
   const orphanId = 'phone-before-app-data-reset'
   const tabSet = (sessionId, title) => ({
     sessionId,
@@ -27,6 +27,8 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
   })
   let revision = 1
   let revoked = false
+  let otherLoginExpired = false
+  const preserveTabs = otherLogin && !otherLoginExpires
   const deviceInfo = await encryptSyncServerDeviceInfo({
     name: 'Previous phone', platform: 'android', architecture: 'arm64', release: '15',
   }, key, oldDeviceId)
@@ -44,7 +46,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     accountSessions.push({
       ...accountSessions[0],
       id: 'current-login',
-      current: true,
+      current: !otherLoginExpires,
       encrypted_device_info: await encryptSyncServerDeviceInfo({
         name: 'Current phone', platform: 'android', architecture: 'arm64', release: '15',
       }, key, oldDeviceId),
@@ -62,7 +64,9 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       return route.fulfill({
         json: {
           password_login: true,
-          sessions: accountSessions.filter(session => !revoked || session.id !== 'old-login')
+          sessions: accountSessions.filter(session => (
+            (!revoked || session.id !== 'old-login') && (!otherLoginExpired || session.id !== 'current-login')
+          ))
         }
       })
     }
@@ -71,7 +75,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       return route.fulfill({ status: 204 })
     }
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
-      if (otherLogin) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
+      if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
       else expect(document.devices[oldDeviceId]).toBeUndefined()
       revoked = true
       return route.fulfill({ status: 204 })
@@ -146,11 +150,21 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (otherLogin) await expect(prompt).not.toContainText("This device's synced tab sets will also be deleted.")
     else await expect(prompt).toContainText("This device's synced tab sets will also be deleted.")
     if (capture) await capture(otherLogin ? 'shared-device-login-confirmation' : 'device-removal-confirmation', prompt)
+    if (otherLoginExpires) {
+      otherLoginExpired = true
+      await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+      await expect(prompt).toContainText("This device's synced tab sets will also be deleted.")
+      await expect(prompt.getByRole('button', { name: 'Revoke session', exact: true })).toBeEnabled()
+      expect(revoked).toBe(false)
+      expect(requests).not.toContain('PUT /v1/encrypted_sync/sessionsV2')
+      expect(requests).not.toContain('DELETE /v1/account/sessions/old-login')
+      if (capture) await capture('device-removal-reconfirmation', prompt)
+    }
     await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
     expect(revoked).toBe(true)
-    if (otherLogin) {
+    if (preserveTabs) {
       expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs'])
       expect(document.deletedSessions[oldDeviceId]).toBeUndefined()
       expect(requests).not.toContain('PUT /v1/encrypted_sync/sessionsV2')
@@ -163,7 +177,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     await expect.poll(() => page.evaluate(() => (
       document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .getters.getSyncServerOtherDeviceSessions.map(session => session.sessionId)
-    ))).toEqual(otherLogin ? ['current-tabs', 'orphan-tabs'] : ['orphan-tabs'])
+    ))).toEqual(preserveTabs ? ['current-tabs', 'orphan-tabs'] : ['orphan-tabs'])
 
     await page.locator('.settingsCloseButton').click()
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -177,11 +191,11 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (capture) await capture('orphan-tab-set-delete', organizer.locator(phone ? '.capacitorPhoneSyncedSession' : '.syncedTabsSection'))
     await deleteButton.click()
     await page.getByRole('dialog', { name: 'Delete', exact: true }).getByRole('button', { name: 'Delete', exact: true }).click()
-    await expect(organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })).toHaveCount(otherLogin ? 1 : 0)
+    await expect(organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })).toHaveCount(preserveTabs ? 1 : 0)
     expect(document.devices[orphanId]).toBeUndefined()
     expect(document.deletedSessions[orphanId]).toEqual(['orphan-tabs'])
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
-    if (otherLogin) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
+    if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
     expect(requests).toContain('DELETE /v1/account/sessions/old-login')
   } finally {
     await page.evaluate(async saved => {
