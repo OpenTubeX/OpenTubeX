@@ -375,20 +375,7 @@ export default {
       : Promise.resolve([]),
     start: async payload => {
       if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
-      const result = await ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
-      if (result.muxUnavailable && payload?.audioUrl && typeof payload.fallbackMediaUrl === 'string') {
-        // Both attempts belong to the original user-authorized start call.
-        return {
-          ...await ipcRenderer.invoke(IpcChannels.DLNA_START, {
-            deviceId: payload.deviceId,
-            mediaUrl: payload.fallbackMediaUrl,
-            title: payload.title,
-            startSeconds: payload.startSeconds
-          }),
-          usedFallback: true
-        }
-      }
-      return result
+      return ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
     },
     stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId),
     hasFailed: castId => ipcRenderer.invoke(IpcChannels.DLNA_HAS_FAILED, castId),
