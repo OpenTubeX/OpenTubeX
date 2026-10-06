@@ -1969,5 +1969,3 @@ Storage Startup Error:
   Title: "Data aplikace se nepodařilo načíst"
   Message: "Uvolněte místo v zařízení a zkuste to znovu. Synchronizace je pozastavena, dokud se data nenačtou."
   Retry: "Zkusit znovu"
-Native Permissions:
-  Local Network: "Vyhledávat zařízení v místní síti a přenášet do nich videa a synchronizovat nastavení a data mezi zařízeními."

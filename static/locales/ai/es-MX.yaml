@@ -2404,5 +2404,3 @@ Storage Startup Error:
   Title: "No se pudieron cargar los datos de la aplicación"
   Message: "Libera espacio en el dispositivo e inténtalo de nuevo. La sincronización está pausada hasta que se carguen tus datos."
   Retry: "Reintentar"
-Native Permissions:
-  Local Network: "Detectar dispositivos en tu red local y transmitirles videos, y sincronizar la configuración y los datos entre dispositivos."

@@ -1970,5 +1970,3 @@ Storage Startup Error:
   Title: "Nem sikerült betölteni az alkalmazás adatait"
   Message: "Szabadítson fel tárhelyet az eszközön, majd próbálja újra. A szinkronizálás az adatok betöltéséig szünetel."
   Retry: "Újrapróbálkozás"
-Native Permissions:
-  Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."

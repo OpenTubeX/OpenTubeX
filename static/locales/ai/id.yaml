@@ -1980,5 +1980,3 @@ Storage Startup Error:
   Title: "Data aplikasi tidak dapat dimuat"
   Message: "Kosongkan ruang penyimpanan perangkat dan coba lagi. Sinkronisasi dijeda hingga data Anda dimuat."
   Retry: "Coba lagi"
-Native Permissions:
-  Local Network: "Temukan perangkat di jaringan lokal Anda dan transmisikan video ke perangkat tersebut, serta sinkronkan pengaturan dan data antarperangkat."

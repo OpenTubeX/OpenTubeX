@@ -1969,5 +1969,3 @@ Storage Startup Error:
   Title: "无法加载应用数据"
   Message: "请释放设备存储空间后重试。在数据加载完成前，同步将暂停。"
   Retry: "重试"
-Native Permissions:
-  Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"

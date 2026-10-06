@@ -1987,5 +1987,3 @@ Storage Startup Error:
   Title: "Ezin izan dira aplikazioaren datuak kargatu"
   Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
   Retry: "Saiatu berriro"
-Native Permissions:
-  Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."
