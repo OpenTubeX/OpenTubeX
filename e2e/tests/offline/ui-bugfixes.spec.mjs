@@ -1234,6 +1234,8 @@ test('keeps Android player notices and end cards clear of visible controls', asy
     const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
     return dockBounds.top - noticeBounds.bottom
   })
+  // Allow DOMRect floating-point rounding at fractional UI scales.
+  const minimumGap = 8 - 0.01
   const noticeBottom = () => player.evaluate((element) => {
     const playerBounds = element.getBoundingClientRect()
     const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
@@ -1262,7 +1264,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
   await expect(notice).toHaveCSS('bottom', '164px')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await expect.poll(() => player.evaluate((element) => {
     const playerBounds = element.getBoundingClientRect()
     const dockBounds = element.querySelector('.fullscreenActions').getBoundingClientRect()
@@ -1316,7 +1318,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
     await setWindowSize(app, page, { width, height })
     await player.evaluate((element, dir) => { element.dir = dir }, direction)
     await alignEndCardWithSeekBar()
-    await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+    await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
     await expect.poll(async () => {
       const ownership = await hitOwnership()
       return {
@@ -1355,7 +1357,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(player).toHaveAttribute('data-submenu-opened', 'false')
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await moreOptions.click()
   await expect(overflowMenu).toBeHidden()
   await alignEndCardWithSeekBar()
@@ -1400,7 +1402,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await dockFocusAction.focus()
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await dockFocusAction.evaluate(element => element.blur())
   await expect(actionDock).toHaveCSS('opacity', '0')
   await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)

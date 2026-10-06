@@ -3209,7 +3209,7 @@ for (const { defaultViewingMode, currentTheatreMode } of [
         }]
         await view.$nextTick()
       }, currentTheatreMode)
-      const lazyRecommendation = page.locator('.watchVideoRecommendations > div').nth(1)
+      const lazyRecommendation = page.locator('.watchVideoRecommendations .recommendationsContent > div')
       await lazyRecommendation.evaluate(element => { element.style.minHeight = '1px' })
       await lazyRecommendation.scrollIntoViewIfNeeded()
       const recommendation = page.locator('.watchVideoRecommendations .title', {

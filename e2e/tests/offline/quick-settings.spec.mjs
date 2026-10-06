@@ -1264,8 +1264,9 @@ test.describe('customizable quick settings', () => {
     const launcher = appearance.locator('.customizerLaunchers')
     await expect(launcher).toBeVisible()
     await expect(customizeButton).toBeVisible()
-    await expect(launcher.getByRole('button')).toHaveCount(2)
+    await expect(launcher.getByRole('button')).toHaveCount(3)
     await expect(launcher.getByRole('button', { name: 'Customize navigation' })).toBeVisible()
+    await expect(launcher.getByRole('button', { name: 'Customize fullscreen actions' })).toBeVisible()
     await customizeButton.click()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Customize quick settings')
 
