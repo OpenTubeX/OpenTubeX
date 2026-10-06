@@ -22,6 +22,9 @@
       :aria-expanded="ariaExpanded ?? dropdownShown"
       :aria-pressed="ariaPressed"
       @pointerdown="handleIconPointerDown"
+      @pointermove="cancelMovedLongPress"
+      @pointerup="clearLongPress"
+      @pointercancel="clearLongPress"
       @contextmenu.prevent
       @click="handleIconClick"
     >
@@ -314,6 +317,7 @@ const useModal = computed(() => props.dropdownModalOnMobile && modalLayout.value
 
 let blockLeftClick = false
 let longPressTimer = null
+let longPressStart = null
 let dropdownViewportUpdateFrame = null
 let fullscreenTargetObserver = null
 
@@ -359,6 +363,7 @@ watch(fullscreenDropdownTarget, (target) => {
 })
 
 onBeforeUnmount(() => {
+  clearLongPress()
   removeDropdownViewportListeners()
   fullscreenTargetObserver?.disconnect()
   document.removeEventListener('fullscreenchange', syncFullscreenDropdownTarget)
@@ -378,10 +383,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
     return
   }
 
-  if (longPressTimer != null) {
-    clearTimeout(longPressTimer)
-    longPressTimer = null
-  }
+  clearLongPress()
 
   if ((!props.openOnRightOrLongClick || (props.openOnRightOrLongClick && isRightOrLongClick)) &&
     (props.forceDropdown || props.dropdownOptions.length > 0)) {
@@ -416,7 +418,10 @@ function handleIconPointerDown(event) {
   if (event.button === 2) { // right button click
     handleIconClick(null, true)
   } else if (event.button === 0) { // left button click
+    clearLongPress()
+    longPressStart = { x: event.clientX, y: event.clientY }
     longPressTimer = setTimeout(() => {
+      clearLongPress()
       handleIconClick(null, true)
 
       // prevent a long press that ends on the icon button from firing the handleIconClick handler
@@ -425,6 +430,18 @@ function handleIconPointerDown(event) {
         window.removeEventListener('pointerup', preventButtonClickAfterLongPress)
       }, { once: true })
     }, LONG_CLICK_BOUNDARY_MS)
+  }
+}
+
+function clearLongPress() {
+  clearTimeout(longPressTimer)
+  longPressTimer = null
+  longPressStart = null
+}
+
+function cancelMovedLongPress(event) {
+  if (longPressStart && Math.hypot(event.clientX - longPressStart.x, event.clientY - longPressStart.y) >= 10) {
+    clearLongPress()
   }
 }
 
