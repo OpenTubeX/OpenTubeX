@@ -9,6 +9,7 @@ const handlers = source.slice(source.indexOf('const pageSwipe ='), source.indexO
 
 function headerGesture(targetSelector = 'button') {
   const captures = []
+  const activations = []
   const timers = new Map()
   let sequence = 0
   const context = vm.createContext({
@@ -16,8 +17,9 @@ function headerGesture(targetSelector = 'button') {
     isAnyPromptOpen: { value: false }, activeTabId: { value: 'first' }, presentedTabId: { value: 'first' },
     store: { getters: { getTabs: [{ id: 'first', loadState: 'loaded' }, { id: 'second', loadState: 'loaded' }] } },
     findSwipeTab, shouldFinishPageSwipe,
-    window: { setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
-    document: { querySelector: () => ({ getBoundingClientRect: () => ({ width: 375 }) }) },
+    nextTick: async () => {}, capacitorTabService: { activateTab: async id => activations.push(id) },
+    window: { matchMedia: () => ({ matches: false }), setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id) },
+    document: { documentElement: { dataset: { reducedMotion: 'reduce' } }, querySelector: () => ({ getBoundingClientRect: () => ({ width: 375 }) }) },
   })
   vm.runInContext(handlers, context)
   const event = {
@@ -25,7 +27,7 @@ function headerGesture(targetSelector = 'button') {
     target: { closest: selector => selector === '.topNavInner' || selector.split(',').some(part => part.trim() === targetSelector) ? {} : null },
     currentTarget: { setPointerCapture: id => captures.push(id) }, preventDefault() {},
   }
-  return { context, event, captures, timers, swipe: () => vm.runInContext('pageSwipe.value', context) }
+  return { context, event, captures, timers, activations, swipe: () => vm.runInContext('pageSwipe.value', context) }
 }
 
 for (const target of ['button', 'a', '[role="button"]']) {
@@ -159,6 +161,28 @@ for (const interruptedBy of ['activeTabId', 'presentedTabId', 'isAnyPromptOpen']
     assert.equal(suppressed, false, 'release without a click must not leave a stale pointer ID')
   })
 }
+
+for (const opensDuringSettlement of [false, true]) {
+  test(`a prompt opening ${opensDuringSettlement ? 'during settlement' : 'before release'} prevents tab activation`, async () => {
+    const { context, event, activations, swipe } = headerGesture()
+    context.startPageSwipe(event)
+    context.movePageSwipe({ ...event, clientX: 100 })
+    if (opensDuringSettlement) context.nextTick = async () => { context.isAnyPromptOpen.value = true }
+    else context.isAnyPromptOpen.value = true
+    await context.finishPageSwipe({ ...event, timeStamp: 250 })
+    assert.deepEqual(activations, [], 'a swipe must not activate a tab behind a prompt')
+    assert.equal(swipe(), null, 'the interrupted preview must be removed')
+  })
+}
+
+test('an uninterrupted swipe still activates the neighboring tab on release', async () => {
+  const { context, event, activations, swipe } = headerGesture()
+  context.startPageSwipe(event)
+  context.movePageSwipe({ ...event, clientX: 100 })
+  await context.finishPageSwipe({ ...event, timeStamp: 250 })
+  assert.deepEqual(activations, ['second'])
+  assert.equal(swipe(), null)
+})
 
 function iconGesture(disabled = false) {
   const iconSource = readFileSync(new URL('../../src/renderer/components/FtIconButton/FtIconButton.vue', import.meta.url), 'utf8')

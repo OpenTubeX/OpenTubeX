@@ -809,7 +809,7 @@ async function finishPageSwipe(event, cancelled = false) {
   const swipe = pageSwipe.value
   if (!swipe) return
 
-  const commit = !cancelled && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
+  const commit = !cancelled && !isAnyPromptOpen.value && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
     findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
   const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -848,7 +848,7 @@ async function finishPageSwipe(event, cancelled = false) {
   }
   if (pageSwipe.value !== settledSwipe) return
   try {
-    if (commit && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
+    if (commit && !isAnyPromptOpen.value && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
         findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
       await capacitorTabService.activateTab(swipe.toId)
     }
