@@ -152,6 +152,8 @@ test('casts from the current Invidious instance without a saved default', async 
       store.dispatch('updateDefaultVideoFormat', 'legacy'),
       store.dispatch('updateHideChapters', true)
     ])
+    // Startup can choose another instance after its background refresh finishes.
+    store.commit('setInvidiousInstancesList', [url])
     store.commit('setCurrentInvidiousInstance', url)
     return store.getters.getDefaultInvidiousInstance
   }, instanceUrl)
