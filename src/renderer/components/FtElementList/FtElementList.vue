@@ -3,13 +3,16 @@
     :appear="appear"
     :grid="effectiveDisplayValue !== 'list'"
     :item-count="data.length"
+    :item-keys="resultKeys"
     :youtube-style-shorts="youtubeStyleShorts"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
-      :key="getResultKey(result, index)"
+      :key="resultKeys[index]"
+      :data-feed-item-key="resultKeys[index]"
       :appearance="youtubeStyleShorts ? 'youtubeShort' : 'result'"
-      :data="result"
+      :data="reactive(result)"
+      :data-overrides="dataOverrides"
       :data-type="dataType || result.type"
       :first-screen="!renderAllItemsLazily && index < 16"
       :layout="effectiveDisplayValue"
@@ -43,7 +46,7 @@
 </template>
 
 <script setup>
-import { computed, provide } from 'vue'
+import { computed, provide, reactive } from 'vue'
 import { subscriptionFeedTypeKey } from '../../composables/useHideSubscriptionFeedType'
 
 import FtAutoGrid from '../FtAutoGrid/FtAutoGrid.vue'
@@ -52,6 +55,10 @@ import FtListLazyWrapper from '../FtListLazyWrapper/FtListLazyWrapper.vue'
 import store from '../../store/index'
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
   subscriptionFeedType: {
     type: String,
     default: null
@@ -191,6 +198,8 @@ function getResultKey(result, index) {
 
   return `${type}-${id}-${occurrence}-${result.lastUpdatedAt || 0}`
 }
+
+const resultKeys = computed(() => props.data.map(getResultKey))
 
 /**
  * @param {string} videoId

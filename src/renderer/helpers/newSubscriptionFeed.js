@@ -48,7 +48,6 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * @param {number} options.onlyShowLatestFromChannelNumber
  * @param {boolean} options.restrictedPlaybackConfigured
  * @param {'newest' | 'oldest'} options.sortBy
- * @param {boolean} [options.decorateEntries] whether cards need the New feed's indicator overrides
  */
 export function getNewSubscriptionFeedEntries({
   feeds,
@@ -61,7 +60,6 @@ export function getNewSubscriptionFeedEntries({
   onlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured,
   sortBy,
-  decorateEntries = true,
 }) {
   const entries = {
     videos: [],
@@ -82,9 +80,7 @@ export function getNewSubscriptionFeedEntries({
       }
 
       const source = cacheEntry?.[entriesKey] ?? []
-      // Home renders its own shelf cards and needs no indicator overrides.
-      // Keep source entries reactive without copying every field in the cache.
-      const newEntries = getNewSubscriptionEntriesSnapshot(source, decorateEntries)
+      const newEntries = getNewSubscriptionEntriesSnapshot(source)
       newEntries.forEach(entry => {
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,
