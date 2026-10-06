@@ -14,7 +14,7 @@ const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
+async function fixture({ current = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -43,7 +43,7 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
       async getEncryptedSyncCollection() { return { revision: puts, payload: await encryptSyncDocument(remote, key, salt) } }
       async putEncryptedSyncCollection(collection, revision, payload) {
         puts++
-        if (cleanupFails) throw new Error('Offline')
+        if (cleanupFails || (cleanupFailsOnce && puts === 1)) throw new Error('Offline')
         if (conflict && puts === 1) {
           remote.devices['old-phone'].sessions.push(tabSet('concurrent-tabs'))
           throw Object.assign(new Error('Conflict'), { status: 409 })
@@ -62,11 +62,12 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
   const prompt = { value: { id: 'login-id', device_id: 'old-phone', current } }
   const sessions = { value: [prompt.value, ...(otherLogin ? [{ id: 'remaining-login', device_id: 'old-phone' }] : [])] }
   const revokeDeletesTabs = { value: false }
+  const revokeTabsDeleted = { value: false }
   const promptError = { value: '' }
   const emitted = []
   let reloads = 0
   const componentContext = vm.createContext({
-    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs,
+    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs, revokeTabsDeleted,
     client: () => ({
       token: 'token',
       async getAccountSessions() {
@@ -98,6 +99,7 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
   componentContext.openRevokePrompt(prompt.value)
   return {
     revoke: () => componentContext.revokeSession(),
+    disappear: () => { revoked = true },
     state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value, revokeAttempts, reloads }),
   }
 }
@@ -116,14 +118,51 @@ test('finishes revocation after a lost response without repeating deletion reque
   assert.equal(app.state().reloads, 1)
 })
 
-test('does not delete tabs or send a DELETE when the refreshed login is already absent', async () => {
+test('cleans up orphaned tabs without a DELETE when the refreshed login is already absent', async () => {
   const app = await fixture({ accountResponse: { sessions: [] } })
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().puts, 1)
+  assert.equal(app.state().revokeAttempts, 0)
+  assert.equal(app.state().reloads, 1)
+  assert.equal(app.state().remote.devices['old-phone'], undefined)
+  assert.deepEqual(app.state().remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
+})
+
+test('retries failed cleanup even when the login disappears before retry', async () => {
+  const app = await fixture({ cleanupFailsOnce: true })
+  await app.revoke()
+  assert.equal(app.state().error, 'Offline')
+  assert.ok(app.state().remote.devices['old-phone'])
+  app.disappear()
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().puts, 2)
+  assert.equal(app.state().revokeAttempts, 0)
+  assert.equal(app.state().remote.devices['old-phone'], undefined)
+})
+
+test('preserves tabs when an absent login still shares its device ID with another login', async () => {
+  const app = await fixture({ otherLogin: true })
+  app.disappear()
   await app.revoke()
   assert.equal(app.state().prompt, null)
   assert.equal(app.state().puts, 0)
   assert.equal(app.state().revokeAttempts, 0)
-  assert.equal(app.state().reloads, 1)
   assert.deepEqual(app.state().remote.devices['old-phone'].sessions, [tabSet('old-tabs'), tabSet('older-tabs')])
+})
+
+test('reconfirms cleanup if both logins disappear before confirmation', async () => {
+  const app = await fixture({ otherLogin: true, accountResponse: { sessions: [] } })
+  await app.revoke()
+  assert.equal(app.state().tabsWarning, true)
+  assert.ok(app.state().prompt)
+  assert.equal(app.state().puts, 0)
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().puts, 1)
+  assert.equal(app.state().revokeAttempts, 0)
+  assert.equal(app.state().remote.devices['old-phone'], undefined)
 })
 
 for (const [label, accountResponse] of [['null', null], ['missing sessions', {}], ['non-array sessions', { sessions: {} }]]) {

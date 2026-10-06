@@ -5,7 +5,7 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
@@ -43,7 +43,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     expires_at: now + 86400000,
     encrypted_device_info: deviceInfo,
   }]
-  if (otherLogin || revokeResponseLost) {
+  if (otherLogin || revokeResponseLost || loginDisappears) {
     const loginDeviceId = otherLogin ? oldDeviceId : currentDeviceId
     accountSessions.push({
       ...accountSessions[0],
@@ -161,6 +161,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (otherLogin) await expect(prompt).not.toContainText("This device's synced tab sets will also be deleted.")
     else await expect(prompt).toContainText("This device's synced tab sets will also be deleted.")
     if (capture) await capture(otherLogin ? 'shared-device-login-confirmation' : 'device-removal-confirmation', prompt)
+    if (loginDisappears) revoked = true
     if (otherLoginExpires) {
       otherLoginExpired = true
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
@@ -183,8 +184,8 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
-    if (revokeResponseLost) {
-      expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(1)
+    if (revokeResponseLost || loginDisappears) {
+      expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(loginDisappears ? 0 : 1)
       expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(1)
       await expect(sync.locator('.sessionCard', { hasText: 'Current device' })).toBeVisible()
       if (capture) await capture('device-removal-completed', sync.locator('.accountManagement'))
@@ -222,7 +223,8 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     expect(document.deletedSessions[orphanId]).toEqual(['orphan-tabs'])
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
     if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
-    expect(requests).toContain('DELETE /v1/account/sessions/old-login')
+    if (loginDisappears) expect(requests).not.toContain('DELETE /v1/account/sessions/old-login')
+    else expect(requests).toContain('DELETE /v1/account/sessions/old-login')
   } finally {
     await page.evaluate(async saved => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

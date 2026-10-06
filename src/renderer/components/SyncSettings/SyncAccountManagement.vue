@@ -290,6 +290,7 @@ const sessionToRename = ref(null)
 const renamedDeviceName = ref('')
 const sessionToRevoke = ref(null)
 const revokeDeletesTabs = ref(false)
+const revokeTabsDeleted = ref(false)
 const promptError = ref('')
 
 function client(token = props.token) {
@@ -472,6 +473,7 @@ async function renameDevice() {
 
 function openRevokePrompt(session) {
   promptError.value = ''
+  revokeTabsDeleted.value = false
   revokeDeletesTabs.value = !hasOtherDeviceLogins(session, sessions.value)
   sessionToRevoke.value = session
 }
@@ -492,22 +494,23 @@ async function revokeSession() {
   actionBusy.value = true
   promptError.value = ''
   const requestClient = client()
-  let tabsDeleted = false
   try {
     const response = await requestClient.getAccountSessions()
     if (!Array.isArray(response?.sessions)) throw new Error(t('Settings.Sync Settings.Account Management Failed'))
     const accountSessions = response.sessions
     const sessionActive = accountSessions.some(other => other.id === session.id)
-    const deletesTabs = sessionActive && !hasOtherDeviceLogins(session, accountSessions)
+    const deletesTabs = !hasOtherDeviceLogins(session, accountSessions)
     if (deletesTabs && !revokeDeletesTabs.value) {
       revokeDeletesTabs.value = true
       return
     }
     // Clean up while this login can still retry the operation, including when
     // revoking the current device. Another login may still use the same tabs.
-    if (deletesTabs) {
+    // An absent login may have expired independently. Skip repeated cleanup
+    // only after it succeeded in this prompt and the login is now absent.
+    if (deletesTabs && (sessionActive || !revokeTabsDeleted.value)) {
       if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
-      tabsDeleted = true
+      revokeTabsDeleted.value = true
     }
     if (sessionActive) await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
@@ -522,7 +525,7 @@ async function revokeSession() {
     await loadSessions()
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token, promptError)
-    if (tabsDeleted && promptError.value) {
+    if (revokeTabsDeleted.value && promptError.value) {
       promptError.value = t('Settings.Sync Settings.Revoke Session Partial Failure')
     }
   } finally {

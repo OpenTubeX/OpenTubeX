@@ -18,3 +18,7 @@ test('device removal reports partial completion when revocation fails and can be
 test('device removal finishes after a lost revocation response without repeating deletion', async ({ page }) => {
   await verifySyncDeviceRemoval(page, { revokeResponseLost: true })
 })
+
+test('device removal cleans up tabs when the login disappears before confirmation', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { loginDisappears: true })
+})
