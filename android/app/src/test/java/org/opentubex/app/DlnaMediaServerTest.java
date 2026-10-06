@@ -23,6 +23,29 @@ public class DlnaMediaServerTest {
     private final OkHttpClient client = new OkHttpClient.Builder().proxy(Proxy.NO_PROXY)
         .callTimeout(3, TimeUnit.SECONDS).build();
 
+    @Test public void privateAuthorizationIsScopedOnEveryRelayRedirect() throws Exception {
+        try (MockWebServer upstream = new MockWebServer(); MockWebServer otherOrigin = new MockWebServer()) {
+            upstream.start();
+            otherOrigin.start();
+            DlnaAuthorization authorization = new DlnaAuthorization(new com.getcapacitor.JSObject()
+                .put("url", upstream.url("/private/").toString()).put("value", "Basic fixture"));
+            for (String destination : new String[]{upstream.url("/private/final").toString(), upstream.url("/outside").toString(), otherOrigin.url("/private/final").toString()}) {
+                upstream.enqueue(new MockResponse().setResponseCode(302).addHeader("Location", destination));
+                MockWebServer target = destination.startsWith(otherOrigin.url("/").toString()) ? otherOrigin : upstream;
+                target.enqueue(new MockResponse().setBody("media"));
+                try (DlnaMediaServer relay = new DlnaMediaServer(upstream.url("/private/video"), "127.0.0.1", InetAddress.getLoopbackAddress(), authorization);
+                     Response response = client.newCall(new Request.Builder().url(relay.mediaUrl()).build()).execute()) {
+                    assertEquals("media", response.body().string());
+                    assertNull("Receiver response never exposes credentials", response.header("Authorization"));
+                    assertEquals("Basic fixture", upstream.takeRequest(2, TimeUnit.SECONDS).getHeader("Authorization"));
+                    String forwarded = target.takeRequest(2, TimeUnit.SECONDS).getHeader("Authorization");
+                    if (authorization.contains(HttpUrl.get(destination))) assertEquals("Basic fixture", forwarded);
+                    else assertNull("Out-of-scope redirect drops authorization", forwarded);
+                }
+            }
+        }
+    }
+
     @Test public void stalledMergeAfterFirstBytesIsDestroyedAndRequestsRecovery() throws Exception {
         CountDownLatch destroyed = new CountDownLatch(1);
         InputStream input = new InputStream() {
