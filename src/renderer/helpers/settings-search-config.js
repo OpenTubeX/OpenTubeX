@@ -297,6 +297,8 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
       'Download Settings',
       'Enable Downloads',
       'Download Folder',
+      'Concurrent Downloads',
+      'Bandwidth Limit',
       'Global Additional yt-dlp Arguments'
     ]
   },

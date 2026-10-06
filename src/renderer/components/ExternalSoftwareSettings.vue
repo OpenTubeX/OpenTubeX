@@ -94,7 +94,6 @@
       </section>
 
       <section
-        v-if="!IS_IOS"
         class="externalSoftwareTool"
         aria-labelledby="ffmpeg-settings-heading"
       >

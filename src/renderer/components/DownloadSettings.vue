@@ -20,7 +20,7 @@
         :icon="['fas', 'download']"
         @click="openDownloads"
       />
-      <DownloadTemplateSettings v-if="!isIos" />
+      <DownloadTemplateSettings />
       <AutomaticDownloadSettings v-if="!isIos" />
     </FtFlexBox>
     <FtFlexBox
@@ -44,7 +44,6 @@
         @click="chooseDownloadFolder"
       />
       <FtInput
-        v-if="!isIos"
         :icon="['fas', 'terminal']"
         :label="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
         :placeholder="t('Form Inputs.Global Arguments Hint')"
@@ -56,7 +55,7 @@
       />
     </FtFlexBox>
     <FtFlexBox
-      v-if="enableDownloads && !isIos"
+      v-if="enableDownloads"
       class="downloadQueueInputs settingsFlexStart460px"
     >
       <FtSelect

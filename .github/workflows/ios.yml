@@ -62,7 +62,8 @@ jobs:
     - run: pnpm run capacitor:sync:ios
       env:
         GH_TOKEN: ${{ github.token }}
-    - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p ios_ytdlp_python_test.py
+    - run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
+    - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p 'ios_*python_test.py'
     - name: Boot an installed simulator
       timeout-minutes: 5
       env:

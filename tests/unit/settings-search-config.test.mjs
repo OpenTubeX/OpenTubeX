@@ -57,6 +57,21 @@ test('iOS settings search omits unavailable native services', () => {
   assert.equal(labels.includes('Mobile layout'), true)
 })
 
+test('iOS settings search includes supported download options', () => {
+  const entries = createSettingsSearchIndex({
+    sections: [{ type: 'download', title: 'Downloads', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getEnableDownloads: true } },
+    isCapacitor: true,
+    isIos: true,
+    usingElectron: false,
+  }).get('download').map(entry => entry.label)
+  for (const label of ['Concurrent downloads', 'Bandwidth limit (KiB/s)', 'Additional yt-dlp arguments']) {
+    assert.ok(entries.includes(label), label)
+  }
+  assert.equal(entries.includes('Automatic Downloads'), false)
+})
+
 test('fullscreen rotation lock override is searchable only on Android', () => {
   for (const [isCapacitor, isIos] of [[true, false], [true, true], [false, false]]) {
     const entries = createSettingsSearchIndex({

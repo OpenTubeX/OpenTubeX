@@ -5,6 +5,7 @@ packages="$CODESIGNING_FOLDER_PATH/python-packages"
 mkdir -p "$packages"
 rsync -a --delete --exclude '__pycache__/' --exclude '*.pyc' "$PROJECT_DIR/python-packages/" "$packages/"
 cp "$PROJECT_DIR/App/opentubex_ios_ytdlp.py" "$packages/"
+cp "$PROJECT_DIR/App/opentubex_ios_ffmpeg.py" "$packages/"
 
 # The unsigned IPA and simulator still need loadable extension frameworks.
 if [[ -z "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then

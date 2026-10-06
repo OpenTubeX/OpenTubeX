@@ -3,19 +3,26 @@
 import json
 from pathlib import Path
 import re
+import subprocess
+
+from opentubex_ios_ffmpeg import set_control_file
 
 import yt_dlp
+from yt_dlp.postprocessor.common import PostProcessor
 
 
 class _QuietLogger:
+    def __init__(self):
+        self.last_error = ''
+
     def debug(self, _message):
         pass
 
     def warning(self, _message):
         pass
 
-    def error(self, _message):
-        pass
+    def error(self, message):
+        self.last_error = message
 
 
 def _option(args, name, default=None):
@@ -76,11 +83,30 @@ def _extract(request):
 
 
 def _download(request):
-    payload = request['payload']
     folder = Path(request['staging'])
     folder.mkdir(parents=True, exist_ok=True)
     progress_file = Path(request['progressFile'])
     control_file = Path(request['controlFile'])
+    saved_files = set()
+
+    def collect(info):
+        paths = [info.get('filepath')]
+        paths.extend(download.get('filepath') for download in info.get('requested_downloads') or [])
+        paths.extend(target or source for source, target in info.get('__files_to_move', {}).items())
+        paths.extend(chapter.get('filepath') for chapter in info.get('chapters') or [])
+        saved_files.update(Path(path) for path in paths if path)
+
+    def processed(progress):
+        report({'status': 'finished'})
+        if progress['status'] == 'finished' and progress['postprocessor'] == 'MoveFiles':
+            collect(progress['info_dict'])
+
+    class CollectPlaylistFilesPP(PostProcessor):
+        def run(self, info):
+            # Progress hooks receive a copy from before concatenation. Collect
+            # the actual result after the playlist post-processors instead.
+            collect(info)
+            return [], info
 
     def report(progress):
         if control_file.exists():
@@ -94,73 +120,79 @@ def _download(request):
                 'eta': None if processing else progress.get('eta')}
         progress_file.write_text(json.dumps(data), encoding='utf-8')
 
-    mode = payload.get('mode', 'video')
-    is_youtube_video = mode == 'video' and not payload.get('externalUrl')
-    if mode == 'audio':
-        selection = 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio'
-    elif mode == 'subtitles':
-        selection = 'best'
-    elif is_youtube_video:
-        # yt-dlp's comma selector saves both tracks without invoking ffmpeg.
-        # AVFoundation combines them after the Python worker returns.
-        selection = 'bestvideo[vcodec^=avc1][ext=mp4],bestaudio[ext=m4a]'
-    else:
-        selection = 'best[ext=mp4]/best'
-    quality = payload.get('quality')
-    if is_youtube_video and str(quality).isdigit():
-        selection = (f'bestvideo[vcodec^=avc1][ext=mp4][height<={quality}],'
-                     'bestaudio[ext=m4a]')
-    elif mode == 'video' and str(quality).isdigit():
-        selection = f'best[ext=mp4][height<={quality}]/best[height<={quality}]/' + selection
-    options = {
-        'ignoreconfig': True,
-        'noplaylist': not payload.get('isPlaylist', False),
-        'outtmpl': str(folder / '%(title).180B [%(id)s].f%(format_id)s.%(ext)s'
-                       if is_youtube_video else folder / '%(title).180B [%(id)s].%(ext)s'),
-        'format': selection,
-        'continuedl': True,
-        'overwrites': False,
-        'quiet': True,
-        'no_warnings': True,
-        'logger': _QuietLogger(),
+    parsed = yt_dlp.parse_options(['--ignore-config', *request['args']])
+    # Inspect the unvalidated options: yt-dlp supplies bestaudio/best itself
+    # for -x, so the parsed selector alone cannot identify a user's -f choice.
+    requested, _ = parsed.parser.parse_args(request['args'])
+    payload = request.get('payload', {})
+    selects_codec = any(field.split(':', 1)[0].lstrip('+-') in
+                        ('codec', 'vcodec', 'acodec', 'ext', 'vext', 'aext')
+                        for field in parsed.ydl_opts['format_sort'])
+    defaults = []
+    if requested.format is None and not selects_codec:
+        if (payload.get('mode') == 'video' and not payload.get('externalUrl')
+                and not requested.extractaudio and not requested.merge_output_format
+                and not requested.remuxvideo and not requested.recodevideo):
+            defaults = ['--format', 'bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/best[vcodec^=avc1][ext=mp4]']
+        elif payload.get('mode') == 'audio' and requested.audioformat == 'best':
+            defaults = ['--format', 'bestaudio[ext=m4a]/bestaudio[ext=mp3]/bestaudio/best',
+                        '--audio-format', 'm4a']
+    if defaults:
+        parsed = yt_dlp.parse_options(['--ignore-config', *defaults, *request['args']])
+    options = parsed.ydl_opts
+    # Templates may create subdirectories, but all output must remain in this
+    # job's staging directory until the security-scoped Files export succeeds.
+    for template in options['outtmpl'].values():
+        if template and (Path(template).is_absolute() or '..' in Path(template).parts):
+            raise ValueError('Output template must stay inside the download folder')
+    logger = _QuietLogger()
+    options.update({
+        'paths': {'home': str(folder), 'temp': str(folder)},
+        'quiet': True, 'no_warnings': True, 'logger': logger,
+        'forceprint': {}, 'print_to_file': {},
         'progress_hooks': [report],
-        'skip_download': mode == 'subtitles',
-        'writesubtitles': mode == 'subtitles',
-        'writeautomaticsub': mode == 'subtitles',
-        'subtitlesformat': 'vtt',
-        'subtitleslangs': [language.strip() for language in
-                           payload.get('subtitleLanguages', 'en').split(',') if language.strip()],
-    }
+        'postprocessor_hooks': [processed],
+    })
     if request.get('cookies'):
         options['cookiefile'] = request['cookies']
-    external = payload.get('externalUrl')
-    if external:
-        urls = [external]
-    elif payload.get('playlistId'):
-        urls = [f"https://www.youtube.com/playlist?list={payload['playlistId']}"]
-    else:
-        ids = payload.get('videoIds') or [payload['videoId']]
-        urls = [f'https://www.youtube.com/watch?v={video_id}' for video_id in ids]
-    with yt_dlp.YoutubeDL(options) as ydl:
-        result = ydl.download(urls)
-    if result != 0:
-        raise ValueError('yt-dlp could not download this media')
-    files = [path.name for path in folder.iterdir() if path.is_file()
-             and path.name not in ('control', 'progress.json')
-             and not path.name.endswith(('.part', '.ytdl'))]
-    if is_youtube_video:
-        pairs = {}
-        for name in files:
-            prefix, marker, suffix = name.rpartition('.f')
-            if marker and suffix.rpartition('.')[0]:
-                pairs.setdefault(prefix, {})[Path(name).suffix.lower()] = name
-        if not pairs or any('.mp4' not in pair or '.m4a' not in pair
-                            for pair in pairs.values()):
-            raise ValueError('Compatible video and audio tracks are unavailable')
-        return {'merges': [{'video': pair['.mp4'], 'audio': pair['.m4a'],
-                            'output': prefix + '.mp4'}
-                           for prefix, pair in pairs.items()]}
-    return {'files': files}
+    if request.get('bandwidth'):
+        bandwidth = yt_dlp.utils.parse_bytes(str(request['bandwidth']) + 'K') or 0
+        if bandwidth > 0:
+            options['ratelimit'] = max(1, min(bandwidth, 10_000_000 * 1024) // max(1, request.get('concurrency', 1)))
+    set_control_file(str(control_file))
+    try:
+        if control_file.exists():
+            raise yt_dlp.utils.DownloadError('Download interrupted')
+        with yt_dlp.YoutubeDL(options) as ydl:
+            ydl.add_post_processor(CollectPlaylistFilesPP(ydl), when='playlist')
+            result = ydl.download(parsed.urls)
+        if result != 0:
+            raise ValueError(logger.last_error or 'yt-dlp could not download this media')
+        files = []
+        for path in sorted(saved_files):
+            if not path.is_file():
+                continue
+            if not path.resolve().is_relative_to(folder.resolve()):
+                raise ValueError('Downloaded file escapes the download folder')
+            files.append(str(path.relative_to(folder)))
+        return {'files': files}
+    finally:
+        set_control_file('')
+
+
+def _version():
+    tools = {}
+    for name in ('ffmpeg', 'ffprobe'):
+        try:
+            stdout, stderr, code = yt_dlp.utils.Popen.run(
+                [name, '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            match = re.search(r'version\s+(\S+)', stdout + stderr)
+            version = match.group(1) if code == 0 and match else None
+        except OSError:
+            version = None
+        tools[name] = {'source': 'managed', 'available': version is not None,
+                       'path': '', 'version': version}
+    return {'version': yt_dlp.version.__version__, 'tools': tools}
 
 
 def handle(request_path, result_path):
@@ -172,7 +204,7 @@ def handle(request_path, result_path):
         elif operation == 'download':
             result = _download(request)
         elif operation == 'version':
-            result = {'version': yt_dlp.version.__version__}
+            result = _version()
         else:
             raise ValueError('Unsupported yt-dlp operation')
     except Exception as error:
