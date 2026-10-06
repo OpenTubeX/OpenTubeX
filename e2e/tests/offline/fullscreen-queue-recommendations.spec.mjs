@@ -24,18 +24,25 @@ async function scrollToBottom(scroller) {
 }
 
 async function expectActionsFitPlayer(player) {
+  const actions = player.locator('.fullscreenActions')
   await expect.poll(() => player.evaluate(element => {
-    const bounds = element.getBoundingClientRect()
-    const actions = element.querySelector('.fullscreenActions')
-    return [...actions.children].every(action => {
-      const button = action.matches('button') ? action : action.querySelector('button')
-      const rect = button.getBoundingClientRect()
-      const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
-      return rect.left >= bounds.left && rect.right <= bounds.right &&
-        rect.top >= bounds.top && rect.bottom <= bounds.bottom &&
-        Math.abs(rect.width - 40) <= 1 && Math.abs(rect.height - 40) <= 1 && button.contains(target)
-    })
+    const player = element.getBoundingClientRect()
+    const actions = element.querySelector('.fullscreenActions').getBoundingClientRect()
+    return actions.left >= player.left && actions.right <= player.right &&
+      actions.top >= player.top && actions.bottom <= player.bottom
   })).toBe(true)
+  const buttons = actions.locator('.fullscreenActionsContent > button, .fullscreenActionsContent > div > button')
+  for (const button of await buttons.all()) {
+    await button.scrollIntoViewIfNeeded()
+    await expect.poll(() => button.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      const viewport = element.closest('.fullscreenActions').getBoundingClientRect()
+      const target = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return rect.left >= viewport.left && rect.right <= viewport.right &&
+        rect.top >= viewport.top && rect.bottom <= viewport.bottom &&
+        Math.abs(rect.width - 40) <= 1 && Math.abs(rect.height - 40) <= 1 && element.contains(target)
+    })).toBe(true)
+  }
 }
 
 async function expectUnifiedDockHeader(dock, headerSelector) {
@@ -160,6 +167,32 @@ for (const { uiScale, iconPack, colorScheme } of [
         const queue = player.locator('.fullscreenQueueOverlay.open')
         const queueScroller = queue.locator('.queueItems')
         await expect(queue).toBeVisible()
+        await setWindowSize(app, page, { width: 340, height: 380 })
+        await expectActionsFitPlayer(player)
+        await expect(actions).toHaveAttribute('data-overlayscrollbars-viewport')
+        await expectValidScroll(actions, '.fullscreenActionsContent')
+        await expect(actions.locator(':scope > .os-scrollbar-vertical')).toBeVisible()
+        await actions.evaluate(element => { element.scrollTop = 0 })
+        await expectImagesLoaded(queue.locator('img:visible'))
+        await captureDocks('scrolling-actions')
+        await scrollToBottom(actions)
+        await watch.evaluate(component => { component.proxy.$store.commit('setEnableDownloads', false) })
+        await expect(actions.getByRole('button', { name: 'Download Video', exact: true })).toHaveCount(0)
+        await expectValidScroll(actions, '.fullscreenActionsContent')
+        await watch.evaluate(component => { component.proxy.$store.commit('setEnableDownloads', true) })
+        await expect(actions.getByRole('button', { name: 'Download Video', exact: true })).toBeVisible()
+        await scrollToBottom(actions)
+        const selectedActions = await watch.evaluate(component => component.proxy.$store.getters.getFullscreenActions)
+        await watch.evaluate(component => component.proxy.$store.dispatch('updateFullscreenActions', ['queue', 'share']))
+        await expect(actions.locator('.fullscreenActionsContent > *')).toHaveCount(2)
+        await expectValidScroll(actions, '.fullscreenActionsContent')
+        await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateFullscreenActions', value), selectedActions)
+        await expect(actions.getByRole('button', { name: 'Download Video', exact: true })).toBeVisible()
+        await scrollToBottom(actions)
+        await setWindowSize(app, page, { width: 480, height: 400 })
+        await expectValidScroll(actions, '.fullscreenActionsContent')
+        await setWindowSize(app, page, { width: 1360, height: 850 })
+        await expectValidScroll(actions, '.fullscreenActionsContent')
         await page.mouse.move(0, 0)
         await expectUnifiedDockHeader(queue, '.queueHeader')
         await expect(queueScroller).toHaveAttribute('data-overlayscrollbars-viewport')
@@ -181,6 +214,11 @@ for (const { uiScale, iconPack, colorScheme } of [
         await expect(share).toBeVisible()
         await share.press('Escape')
         await expect(share).toHaveCount(0)
+        await actions.getByRole('button', { name: 'Add to playlist', exact: true }).click()
+        const playlist = page.getByRole('dialog', { name: 'Save to…', exact: true })
+        await expect(playlist).toBeVisible()
+        await playlist.press('Escape')
+        await expect(playlist).toHaveCount(0)
         await expectActionsFitPlayer(player)
         await expect.poll(() => queue.locator('.queueHeader').evaluate(element => {
           const bounds = element.getBoundingClientRect()
@@ -310,17 +348,24 @@ for (const { uiScale, iconPack, colorScheme } of [
         await watch.evaluate(component => { component.proxy.recommendedVideos = component.proxy.recommendedVideos.slice(0, 2) })
         await expectValidScroll(recommendationsScroller, '.recommendationsContent')
         await expect.poll(() => recommendationsScroller.evaluate(element => element.scrollTop)).toBe(0)
+        await setWindowSize(app, page, { width: 340, height: 380 })
+        await scrollToBottom(actions)
         await queue.getByRole('button', { name: 'Clear Queue', exact: true }).click()
+        await expectValidScroll(actions, '.fullscreenActionsContent')
         await expect(queue).toHaveCount(0)
         await expect(actions.getByRole('button', { name: 'Queue', exact: true })).toHaveCount(0)
+        await scrollToBottom(actions)
         await watch.evaluate(component => {
           component.proxy.$store.commit('setForbiddenTitles', JSON.stringify(['Recommended video']))
         })
+        await expectValidScroll(actions, '.fullscreenActionsContent')
         await expect(recommendations).toHaveCount(0)
         await expect(actions.getByRole('button', { name: 'Recommended videos', exact: true })).toHaveCount(0)
         await watch.evaluate(component => { component.proxy.$store.commit('setForbiddenTitles', '[]') })
         await expect(actions.getByRole('button', { name: 'Recommended videos', exact: true })).toBeVisible()
         await expect(recommendations).toHaveCount(0)
+        await setWindowSize(app, page, { width: 1450, height: 950 })
+        await expectValidScroll(actions, '.fullscreenActionsContent')
 
         await actions.getByRole('button', { name: 'Download Video', exact: true }).click()
         const download = player.locator('.downloadPromptCard')

@@ -3145,18 +3145,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .fullscreenActions {
   --fullscreen-actions-inline-end: 24px;
+  --fullscreen-actions-min-inline-size: calc(54px + var(--scrollbar-track-width));
+  --fullscreen-actions-inset: min(
+    var(--fullscreen-actions-inline-end),
+    calc(100% - var(--fullscreen-actions-min-inline-size) - 4px)
+  );
 
   display: none;
   position: absolute;
-  z-index: 2;
-  inset-inline-end: var(--fullscreen-actions-inline-end);
+  z-index: 4;
+  inset-inline-end: var(--fullscreen-actions-inset);
   inset-block-end: 82px;
   box-sizing: border-box;
-  max-inline-size: calc(100% - var(--fullscreen-actions-inline-end) - 4px);
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+  min-inline-size: var(--fullscreen-actions-min-inline-size);
+  max-inline-size: calc(100% - var(--fullscreen-actions-inset) - 4px);
+  min-block-size: 50px;
+  max-block-size: calc(100% - var(--mobile-fullscreen-actions-block-end, 82px) - max(52px, var(--sponsorblock-notice-block-size, 0px) + 16px));
+  align-items: flex-start;
   padding: 4px;
+  padding-inline-end: calc(var(--scrollbar-track-width) + 8px);
+  overflow: hidden auto;
   color: #fff;
   background-color: rgb(0 0 0 / 25%);
   backdrop-filter: blur(6px);
@@ -3169,7 +3177,15 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     inset-inline-end 250ms ease;
 }
 
-.fullscreenActions > :is(.fullscreenAction, .fullscreenShareAction, .fullscreenPlaylistAction) {
+.fullscreenActionsContent {
+  display: flex;
+  flex: 0 0 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.fullscreenActionsContent > :is(.fullscreenAction, .fullscreenShareAction, .fullscreenPlaylistAction) {
   flex: 0 0 40px;
 }
 
@@ -3291,12 +3307,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset-block-end: var(--mobile-fullscreen-actions-block-end);
 }
 
-/* Keep SponsorBlock notices above the mobile action dock while it is visible. */
-:global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow)[data-action-dock-visible='true'] > .skippedSegmentsWrapper) {
+/* Keep SponsorBlock notices above the action dock while it is visible. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegmentsWrapper {
+  max-inline-size: calc(100% - 16px);
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) .skippedSegment {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow)[data-action-dock-visible='true'] > .skippedSegmentsWrapper {
   --sponsorblock-notice-bottom: calc(
-    var(--mobile-fullscreen-actions-block-end) +
+    var(--mobile-fullscreen-actions-block-end, 82px) +
     var(--mobile-fullscreen-actions-block-size) +
-    var(--mobile-fullscreen-overlay-gap)
+    var(--mobile-fullscreen-overlay-gap, 8px)
   );
 }
 
@@ -3998,6 +4023,13 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
 .ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .fullscreenQueueOpen, .fullscreenRecommendationsOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow).fullscreenDockLayoutOpen .skippedSegmentsWrapper {
+  inset-inline-end: min(
+    calc(var(--side-panel-width) + 2%),
+    calc(100% - var(--sponsorblock-notice-inline-size, 0px) - 8px)
+  );
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),

@@ -123,6 +123,10 @@
         scrollMiniPlayerDragStyle,
         mobileFullscreenSwipeStyle,
         { '--mobile-fullscreen-actions-block-size': `${fullscreenActionsBlockSize}px` },
+        {
+          '--sponsorblock-notice-inline-size': `${sponsorBlockNoticeSize.inline}px`,
+          '--sponsorblock-notice-block-size': `${sponsorBlockNoticeSize.block}px`
+        },
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"
       @mouseenter="handleScrollMiniPlayerEnter"
@@ -477,6 +481,7 @@
       <div
         v-if="visibleFullscreenActions.length > 0"
         ref="fullscreenActionsElement"
+        v-overlay-scrollbars
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
@@ -484,150 +489,156 @@
         @focusin="actionDockFocused = true"
         @focusout="actionDockFocused = $event.currentTarget.contains($event.relatedTarget)"
       >
-        <template
-          v-for="action in visibleFullscreenActions"
-          :key="action"
+        <div
+          ref="fullscreenActionsContent"
+          class="fullscreenActionsContent"
         >
-          <button
-            v-if="action === 'queue'"
-            type="button"
-            class="fullscreenAction fullscreenQueueToggle"
-            :class="{ open: showFullscreenQueue }"
-            :aria-label="$t('Video.Queue')"
-            :title="$t('Video.Queue')"
-            :aria-expanded="String(showFullscreenQueue)"
-            @click="setFullscreenQueue(!showFullscreenQueue)"
+          <template
+            v-for="action in visibleFullscreenActions"
+            :key="action"
           >
-            <FtIcon :icon="['fas', 'list']" />
-          </button>
-          <button
-            v-else-if="action === 'recommendations'"
-            type="button"
-            class="fullscreenAction fullscreenRecommendationsToggle"
-            :class="{ open: showFullscreenRecommendations }"
-            :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
-            :title="$t('Settings.Fullscreen Actions.Recommended Videos')"
-            :aria-expanded="String(showFullscreenRecommendations)"
-            @click="setFullscreenRecommendations(!showFullscreenRecommendations)"
-          >
-            <FtIcon :icon="['fas', 'circle-play']" />
-          </button>
-          <button
-            v-else-if="action === 'download'"
-            type="button"
-            class="fullscreenAction fullscreenDownloadAction"
-            :aria-label="$t('Downloads.Download Video')"
-            :title="$t('Downloads.Download Video')"
-            @click="openDownload"
-          >
-            <FtIcon :icon="['fas', 'download']" />
-          </button>
-          <button
-            v-else-if="action === 'playlist'"
-            type="button"
-            class="fullscreenAction fullscreenPlaylistToggle"
-            :class="{ open: showFullscreenPlaylist }"
-            :aria-label="$t('Playlist.Playlist')"
-            :title="$t('Playlist.Playlist')"
-            :aria-expanded="String(showFullscreenPlaylist)"
-            @click="shortsPhonePanels ? requestShortsPhonePanel('playlist') : setFullscreenPlaylist(!showFullscreenPlaylist)"
-          >
-            <FtIcon :icon="['fas', 'list']" />
-          </button>
-          <button
-            v-else-if="action === 'liveChat'"
-            type="button"
-            class="fullscreenAction fullscreenLiveChatToggle"
-            :class="{ open: showFullscreenLiveChat }"
-            :aria-label="$t('Video.Live Chat')"
-            :title="$t('Video.Live Chat')"
-            :aria-expanded="String(showFullscreenLiveChat)"
-            @click="shortsPhonePanels ? requestShortsPhonePanel('chat') : setFullscreenLiveChat(!showFullscreenLiveChat)"
-          >
-            <FtIcon :icon="['fas', 'message']" />
-          </button>
-          <button
-            v-else-if="action === 'comments'"
-            type="button"
-            class="fullscreenAction fullscreenCommentsToggle"
-            :class="{ open: showFullscreenComments }"
-            :aria-label="$t('Comments.Comments')"
-            :title="$t('Comments.Comments')"
-            :aria-expanded="String(showFullscreenComments)"
-            @click="shortsPhonePanels ? requestShortsPhonePanel('comments') : setFullscreenComments(!showFullscreenComments)"
-          >
-            <FtIcon :icon="['fas', 'comment']" />
-          </button>
-          <button
-            v-else-if="action === 'sponsorBlock'"
-            type="button"
-            class="fullscreenAction fullscreenSponsorBlockToggle"
-            :class="{ open: showFullscreenSponsorBlock }"
-            :aria-label="showFullscreenSponsorBlock
-              ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
-              : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
-            :title="showFullscreenSponsorBlock
-              ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
-              : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
-            :aria-expanded="String(showFullscreenSponsorBlock)"
-            @click="toggleFullscreenSponsorBlock"
-          >
-            <FtIcon :icon="['fas', 'shield-halved']" />
-          </button>
-          <button
-            v-else-if="action === 'transcript'"
-            type="button"
-            class="fullscreenAction fullscreenTranscriptToggle"
-            :class="{ open: showFullscreenTranscript }"
-            :aria-label="showFullscreenTranscript
-              ? $t('Video.Transcript.Hide')
-              : $t('Video.Transcript.Show')"
-            :title="showFullscreenTranscript
-              ? $t('Video.Transcript.Hide')
-              : $t('Video.Transcript.Show')"
-            :aria-expanded="String(showFullscreenTranscript)"
-            @click="toggleFullscreenTranscript"
-          >
-            <FtIcon :icon="['fas', 'file-lines']" />
-          </button>
-          <FtShareButton
-            v-else-if="action === 'share'"
-            :id="videoId"
-            :external-url="externalUrl"
-            class="fullscreenShareAction"
-            :playlist-id="playlistId"
-            :get-timestamp="getShareTimestamp"
-            dropdown-position-y="top"
-          />
-          <FtIconButton
-            v-else-if="action === 'addToPlaylist'"
-            class="fullscreenPlaylistAction"
-            :class="{ open: isInAnyPlaylist }"
-            :title="$t('User Playlists.Add to Playlist')"
-            :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
-            :use-shadow="false"
-            force-dropdown
-            mobile-sheet
-            dropdown-position-x="left"
-            dropdown-position-y="top"
-          >
-            <FtAddToPlaylistDropdown
-              :video-data="playlistVideoData"
-              :below-player="false"
+            <button
+              v-if="action === 'queue'"
+              type="button"
+              class="fullscreenAction fullscreenQueueToggle"
+              :class="{ open: showFullscreenQueue }"
+              :aria-label="$t('Video.Queue')"
+              :title="$t('Video.Queue')"
+              :aria-expanded="String(showFullscreenQueue)"
+              @click="setFullscreenQueue(!showFullscreenQueue)"
+            >
+              <FtIcon :icon="['fas', 'list']" />
+            </button>
+            <button
+              v-else-if="action === 'recommendations'"
+              type="button"
+              class="fullscreenAction fullscreenRecommendationsToggle"
+              :class="{ open: showFullscreenRecommendations }"
+              :aria-label="$t('Settings.Fullscreen Actions.Recommended Videos')"
+              :title="$t('Settings.Fullscreen Actions.Recommended Videos')"
+              :aria-expanded="String(showFullscreenRecommendations)"
+              @click="setFullscreenRecommendations(!showFullscreenRecommendations)"
+            >
+              <FtIcon :icon="['fas', 'circle-play']" />
+            </button>
+            <button
+              v-else-if="action === 'download'"
+              type="button"
+              class="fullscreenAction fullscreenDownloadAction"
+              :aria-label="$t('Downloads.Download Video')"
+              :title="$t('Downloads.Download Video')"
+              @click="openDownload"
+            >
+              <FtIcon :icon="['fas', 'download']" />
+            </button>
+            <button
+              v-else-if="action === 'playlist'"
+              type="button"
+              class="fullscreenAction fullscreenPlaylistToggle"
+              :class="{ open: showFullscreenPlaylist }"
+              :aria-label="$t('Playlist.Playlist')"
+              :title="$t('Playlist.Playlist')"
+              :aria-expanded="String(showFullscreenPlaylist)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('playlist') : setFullscreenPlaylist(!showFullscreenPlaylist)"
+            >
+              <FtIcon :icon="['fas', 'list']" />
+            </button>
+            <button
+              v-else-if="action === 'liveChat'"
+              type="button"
+              class="fullscreenAction fullscreenLiveChatToggle"
+              :class="{ open: showFullscreenLiveChat }"
+              :aria-label="$t('Video.Live Chat')"
+              :title="$t('Video.Live Chat')"
+              :aria-expanded="String(showFullscreenLiveChat)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('chat') : setFullscreenLiveChat(!showFullscreenLiveChat)"
+            >
+              <FtIcon :icon="['fas', 'message']" />
+            </button>
+            <button
+              v-else-if="action === 'comments'"
+              type="button"
+              class="fullscreenAction fullscreenCommentsToggle"
+              :class="{ open: showFullscreenComments }"
+              :aria-label="$t('Comments.Comments')"
+              :title="$t('Comments.Comments')"
+              :aria-expanded="String(showFullscreenComments)"
+              @click="shortsPhonePanels ? requestShortsPhonePanel('comments') : setFullscreenComments(!showFullscreenComments)"
+            >
+              <FtIcon :icon="['fas', 'comment']" />
+            </button>
+            <button
+              v-else-if="action === 'sponsorBlock'"
+              type="button"
+              class="fullscreenAction fullscreenSponsorBlockToggle"
+              :class="{ open: showFullscreenSponsorBlock }"
+              :aria-label="showFullscreenSponsorBlock
+                ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+                : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :title="showFullscreenSponsorBlock
+                ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+                : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :aria-expanded="String(showFullscreenSponsorBlock)"
+              @click="toggleFullscreenSponsorBlock"
+            >
+              <FtIcon :icon="['fas', 'shield-halved']" />
+            </button>
+            <button
+              v-else-if="action === 'transcript'"
+              type="button"
+              class="fullscreenAction fullscreenTranscriptToggle"
+              :class="{ open: showFullscreenTranscript }"
+              :aria-label="showFullscreenTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :title="showFullscreenTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :aria-expanded="String(showFullscreenTranscript)"
+              @click="toggleFullscreenTranscript"
+            >
+              <FtIcon :icon="['fas', 'file-lines']" />
+            </button>
+            <FtShareButton
+              v-else-if="action === 'share'"
+              :id="videoId"
+              :external-url="externalUrl"
+              class="fullscreenShareAction"
+              :playlist-id="playlistId"
+              :get-timestamp="getShareTimestamp"
+              dropdown-position-y="top"
             />
-          </FtIconButton>
-          <button
-            v-else-if="action === 'quickBookmark'"
-            type="button"
-            class="fullscreenAction fullscreenQuickBookmarkAction"
-            :class="{ open: quickBookmarked }"
-            :aria-label="quickBookmarkTitle"
-            :title="quickBookmarkTitle"
-            @click="toggleQuickBookmark"
-          >
-            <FtIcon :icon="quickBookmarkIcon" />
-          </button>
-        </template>
+            <FtIconButton
+              v-else-if="action === 'addToPlaylist'"
+              class="fullscreenPlaylistAction"
+              :class="{ open: isInAnyPlaylist }"
+              :title="$t('User Playlists.Add to Playlist')"
+              :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+              :use-shadow="false"
+              force-dropdown
+              dropdown-modal-on-mobile
+              mobile-sheet
+              dropdown-position-x="left"
+              dropdown-position-y="top"
+            >
+              <FtAddToPlaylistDropdown
+                :video-data="playlistVideoData"
+                :below-player="false"
+              />
+            </FtIconButton>
+            <button
+              v-else-if="action === 'quickBookmark'"
+              type="button"
+              class="fullscreenAction fullscreenQuickBookmarkAction"
+              :class="{ open: quickBookmarked }"
+              :aria-label="quickBookmarkTitle"
+              :title="quickBookmarkTitle"
+              @click="toggleQuickBookmark"
+            >
+              <FtIcon :icon="quickBookmarkIcon" />
+            </button>
+          </template>
+        </div>
       </div>
       <!--
       VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
@@ -1183,6 +1194,7 @@
       </Transition>
       <div
         v-if="sponsorBlockShowSkippedToast && (promptSponsorBlockSegments.length > 0 || skippedSponsorBlockSegments.length > 0)"
+        ref="sponsorBlockNoticesElement"
         class="skippedSegmentsWrapper shaka-no-propagation"
         @pointerdown.stop
         @touchstart.stop

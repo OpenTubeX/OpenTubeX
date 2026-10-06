@@ -2,7 +2,7 @@ import { setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-async function openSponsorBlockPrompt(app, page) {
+async function openSponsorBlockPrompt(app, page, mobile = true) {
   await mockPlayableWatchPage(app, page)
   await page.route('**/api/skipSegments/**', route => route.fulfill({
     body: JSON.stringify([{
@@ -20,17 +20,19 @@ async function openSponsorBlockPrompt(app, page) {
     }]),
     contentType: 'application/json'
   }))
-  await page.evaluate(() => {
+  await page.evaluate(mobile => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setUseSponsorBlock', true)
     store.commit('setSponsorBlockSponsor', { color: '#00d400', skip: 'promptToSkip' })
-    const app = document.querySelector('.app')
-    const applyMobileClass = () => {
-      if (!app.classList.contains('capacitorTabs')) app.classList.add('capacitorTabs')
+    if (mobile) {
+      const app = document.querySelector('.app')
+      const applyMobileClass = () => {
+        if (!app.classList.contains('capacitorTabs')) app.classList.add('capacitorTabs')
+      }
+      new MutationObserver(applyMobileClass).observe(app, { attributeFilter: ['class'] })
+      applyMobileClass()
     }
-    new MutationObserver(applyMobileClass).observe(app, { attributeFilter: ['class'] })
-    applyMobileClass()
-  })
+  }, mobile)
   await openMockedVideo(page)
   const player = page.locator('.ftVideoPlayer')
   await expect(player.locator('.sponsorBlockMarker')).toHaveCount(1)
@@ -132,4 +134,55 @@ for (const uiScale of [100, 95]) {
       await expect(action).toHaveText('Unskip')
     })
   })
+}
+
+for (const uiScale of [100, 125]) {
+  for (const mobile of [false, true]) {
+    test.describe(`minimum fullscreen with SponsorBlock at ${uiScale}% (${mobile ? 'mobile' : 'desktop'})`, () => {
+      test.use({
+        seed: {
+          settings: {
+            uiScale,
+            videoPlaybackEngine: 'built-in',
+            ytDlpPlaybackEngineDefaultMigration: true,
+            showFullscreenActionsWhenPaused: true,
+            alwaysShowScrollbars: true,
+          }
+        }
+      })
+
+      test('keeps the notice and scrollable actions inside the player', async ({ app, page }) => {
+        const player = await openSponsorBlockPrompt(app, page, mobile)
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('addVideoToWatchQueue', { video: { videoId: 'queued00000', title: 'Queue test' } })
+          store.commit('setFullscreenActions', ['queue', 'sponsorBlock', 'comments', 'share', 'addToPlaylist', 'quickBookmark'])
+        })
+        await setWindowSize(app, page, { width: 340, height: 380 })
+        await setPlayerFullscreen(page, true)
+        await player.locator('.fullscreenActions').getByRole('button', { name: 'Queue', exact: true }).click()
+        const actions = player.locator('.fullscreenActions')
+        const notice = player.locator('.skippedSegmentsWrapper')
+        await expect.poll(() => player.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          const notice = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
+          const actions = element.querySelector('.fullscreenActions').getBoundingClientRect()
+          return notice.top >= bounds.top && notice.left >= bounds.left && notice.right <= bounds.right &&
+            actions.top >= notice.bottom + 7 && actions.bottom <= bounds.bottom
+        })).toBe(true)
+        await actions.getByRole('button', { name: 'Comments', exact: true }).scrollIntoViewIfNeeded()
+        await notice.getByRole('button', { name: 'Skip (Enter)', exact: true }).click()
+        await expect(notice.getByRole('button', { name: 'Unskip (Enter)', exact: true })).toBeVisible()
+        await actions.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSponsorBlockShowSkippedToast', false))
+        await expect(notice).toHaveCount(0)
+        await expect.poll(() => actions.evaluate(element => {
+          const contentEnd = element.querySelector('.fullscreenActionsContent').getBoundingClientRect().bottom
+          const viewportEnd = element.getBoundingClientRect().bottom - parseFloat(getComputedStyle(element).paddingBottom)
+          return element.scrollTop === 0 || contentEnd >= viewportEnd - 2 / devicePixelRatio
+        })).toBe(true)
+        await expect(actions.getByRole('button', { name: 'Queue', exact: true })).toBeVisible()
+      })
+    })
+  }
 }

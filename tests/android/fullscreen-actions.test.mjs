@@ -75,7 +75,8 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
     const dock = player.locator('.fullscreenActions')
     await expect(dock).toBeVisible()
-    await expect.poll(() => dock.locator(':scope > *').evaluateAll(elements => elements.map(element => (
+    await expect(dock).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect.poll(() => dock.locator('.fullscreenActionsContent > *').evaluateAll(elements => elements.map(element => (
       element.classList.contains('fullscreenSponsorBlockToggle') ? 'sponsorBlock' : 'share'
     )))).toEqual(['sponsorBlock', 'share'])
     await dock.locator('.fullscreenSponsorBlockToggle').click()
@@ -105,7 +106,7 @@ test('Android customizes fullscreen actions and removes the empty bubble', {
     await expect(queue).toBeVisible()
     await expect.poll(() => player.evaluate(element => {
       const bounds = element.getBoundingClientRect()
-      return [...element.querySelector('.fullscreenActions').children].every(action => {
+      return [...element.querySelector('.fullscreenActionsContent').children].every(action => {
         const button = action.matches('button') ? action : action.querySelector('button')
         const rect = button.getBoundingClientRect()
         return rect.left >= bounds.left && rect.right <= bounds.right &&

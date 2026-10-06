@@ -833,7 +833,24 @@ export default defineComponent({
     const actionDockFocused = ref(false)
     /** @type {import('vue').Ref<HTMLElement|null>} */
     const fullscreenActionsElement = ref(null)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const fullscreenActionsContent = ref(null)
     const fullscreenActionsBlockSize = ref(50)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const sponsorBlockNoticesElement = ref(null)
+    const sponsorBlockNoticeSize = ref({ inline: 0, block: 0 })
+    watch(sponsorBlockNoticesElement, (element, _previous, onCleanup) => {
+      if (!element) {
+        sponsorBlockNoticeSize.value = { inline: 0, block: 0 }
+        return
+      }
+      const observer = new ResizeObserver(entries => {
+        const size = entries[0].borderBoxSize[0]
+        sponsorBlockNoticeSize.value = { inline: size.inlineSize, block: size.blockSize }
+      })
+      observer.observe(element)
+      onCleanup(() => observer.disconnect())
+    })
     watch(fullscreenActionsElement, (element, _previous, onCleanup) => {
       if (!element) return
       const observer = new ResizeObserver(entries => {
@@ -842,6 +859,14 @@ export default defineComponent({
       observer.observe(element)
       onCleanup(() => observer.disconnect())
     })
+    watch(fullscreenActionsContent, (content, _previous, onCleanup) => {
+      const scroller = fullscreenActionsElement.value
+      if (!content || !scroller) return
+      const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, content))
+      observer.observe(content)
+      observer.observe(scroller)
+      onCleanup(() => observer.disconnect())
+    }, { flush: 'post' })
     /** @type {number|null} */
     let pausedInterfaceRevealTimeout = null
 
@@ -12874,7 +12899,10 @@ export default defineComponent({
       visibleFullscreenActions,
       actionDockFocused,
       fullscreenActionsElement,
+      fullscreenActionsContent,
       fullscreenActionsBlockSize,
+      sponsorBlockNoticesElement,
+      sponsorBlockNoticeSize,
       playerControlsShown,
       lightsOffVisible,
       isSubMenuOpened,

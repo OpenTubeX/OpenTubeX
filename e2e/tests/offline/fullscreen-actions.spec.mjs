@@ -47,7 +47,7 @@ for (const { uiScale, width, height, colorScheme } of [
       await player.locator('video').evaluate(element => element.pause())
       const dock = player.locator('.fullscreenActions')
       await expect(dock).toBeVisible()
-      await expect.poll(() => dock.locator(':scope > *').evaluateAll(elements => elements.map(element => (
+      await expect.poll(() => dock.locator('.fullscreenActionsContent > *').evaluateAll(elements => elements.map(element => (
         element.classList.contains('fullscreenCommentsToggle') ? 'comments' : 'share'
       )))).toEqual(['comments', 'share'])
       await player.hover({ position: { x: 20, y: 20 } })
