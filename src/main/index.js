@@ -4613,9 +4613,23 @@ function runApp() {
     }
     return result
   }
-  ipcMain.handle(IpcChannels.DLNA_START, (event, payload) => {
+  ipcMain.handle(IpcChannels.DLNA_START, async (event, payload) => {
     if (!event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
-    return startDlnaForWindow(event, payload)
+    const result = await startDlnaForWindow(event, payload)
+    if (result.muxUnavailable && payload?.audioUrl && typeof payload.fallbackMediaUrl === 'string') {
+      // Validation can outlast activation and focus. Retry within the same
+      // authorized operation, using the normal source and owner checks.
+      return {
+        ...await startDlnaForWindow(event, {
+          deviceId: payload.deviceId,
+          mediaUrl: payload.fallbackMediaUrl,
+          title: payload.title,
+          startSeconds: payload.startSeconds
+        }),
+        usedFallback: true
+      }
+    }
+    return result
   })
   ipcMain.handle(IpcChannels.DLNA_RECOVER, async (event, castId, payload) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string' ||

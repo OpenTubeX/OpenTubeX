@@ -270,7 +270,17 @@ for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-e
         if (fallback && payload.audioUrl) {
           // Slow FFmpeg validation outlasts Chromium's transient user activation.
           await new Promise(resolve => setTimeout(resolve, 6000))
-          return { error: 'FFmpeg is unavailable', muxUnavailable: true }
+          // The main-process start now owns the authorized complete-MP4 retry.
+          globalThis.__dlnaCalls.push({
+            action: 'start',
+            payload: {
+              deviceId: payload.deviceId,
+              mediaUrl: payload.fallbackMediaUrl,
+              title: payload.title,
+              startSeconds: payload.startSeconds
+            }
+          })
+          return { castId: 'test-cast', deviceName: 'Living room TV', usedFallback: true }
         }
         return { castId: 'test-cast', deviceName: 'Living room TV' }
       })
