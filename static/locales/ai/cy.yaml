@@ -222,6 +222,13 @@ History:
   Custom: Personol
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Fideos a argymhellir"
+    Title: "Gweithredoedd sgrin lawn"
+    Customize: "Addasu gweithredoedd sgrin lawn"
+    Add Action: "Ychwanegu gweithred"
+    Empty: "Dim gweithredoedd sgrin lawn wedi’u dewis"
+    Quick Bookmark: "Nod tudalen cyflym"
   Quick Settings:
     Quick Settings: Gosodiadau cyflym
     Customize Quick Settings: Addasu gosodiadau cyflym

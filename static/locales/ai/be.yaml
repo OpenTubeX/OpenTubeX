@@ -237,6 +237,13 @@ History:
   Custom: Уласны перыяд
   History Older Than Days Removed: Гісторыя прагляду, старэйшая за 1 дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Рэкамендаваныя відэа"
+    Title: "Дзеянні ў поўнаэкранным рэжыме"
+    Customize: "Наладзіць поўнаэкранныя дзеянні"
+    Add Action: "Дадаць дзеянне"
+    Empty: "Поўнаэкранныя дзеянні не выбраны"
+    Quick Bookmark: "Хуткая закладка"
   Quick Settings:
     Quick Settings: Хуткія налады
     Customize Quick Settings: Наладзіць хуткія налады

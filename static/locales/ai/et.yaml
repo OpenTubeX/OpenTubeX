@@ -220,6 +220,13 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Soovitatud videod"
+    Title: "Täisekraani toimingud"
+    Customize: "Kohanda täisekraani toiminguid"
+    Add Action: "Lisa toiming"
+    Empty: "Täisekraani toiminguid pole valitud"
+    Quick Bookmark: "Kiirjärjehoidja"
   Quick Settings:
     Quick Settings: Kiirseaded
     Customize Quick Settings: Kiirseadete kohandamine

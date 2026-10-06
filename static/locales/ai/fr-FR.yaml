@@ -220,6 +220,13 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Vidéos recommandées"
+    Title: "Actions en plein écran"
+    Customize: "Personnaliser les actions en plein écran"
+    Add Action: "Ajouter une action"
+    Empty: "Aucune action en plein écran sélectionnée"
+    Quick Bookmark: "Marque-page rapide"
   Quick Settings:
     Quick Settings: Paramètres rapides
     Customize Quick Settings: Personnaliser les paramètres rapides

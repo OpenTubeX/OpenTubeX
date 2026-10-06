@@ -15,6 +15,7 @@ import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
+import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
@@ -172,6 +173,7 @@ export default defineComponent({
     PhoneCommentsButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchDlnaCast,
+    WatchVideoDownloadPrompt,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
     WatchVideoSummary,
@@ -250,6 +252,8 @@ export default defineComponent({
       startNextVideoWithFullscreenComments: false,
       startNextVideoWithFullscreenLiveChat: false,
       startNextVideoWithFullscreenPlaylist: false,
+      startNextVideoWithFullscreenQueue: false,
+      startNextVideoWithFullscreenRecommendations: false,
       isLoading: true,
       firstLoad: true,
       // Whether this tab has been presented while showing the current video. A
@@ -438,6 +442,15 @@ export default defineComponent({
       fullscreenLiveChatOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenLiveChatTarget: null,
+      showDownloadPrompt: false,
+      fullscreenQueueOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenQueueTarget: null,
+      queueScrollPositions: { sidebar: 0, fullscreen: 0 },
+      fullscreenRecommendationsOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenRecommendationsTarget: null,
+      recommendationsScrollTop: 0,
       fullscreenPlaylistOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenPlaylistTarget: null,
@@ -894,7 +907,7 @@ export default defineComponent({
         this.fullscreenSponsorBlockOpen ||
         this.fullscreenCommentsOpen ||
         this.fullscreenLiveChatOpen ||
-        this.fullscreenPlaylistOpen
+        this.fullscreenPlaylistOpen || this.fullscreenQueueOpen || this.fullscreenRecommendationsOpen
       )
     },
     shortsActionSkeletonCount: function () {
@@ -1044,6 +1057,20 @@ export default defineComponent({
     },
     autoplayNextPlaylistVideoByDefault: function () {
       return this.$store.getters.getAutoplayPlaylists
+    },
+    downloadAvailable() {
+      return !this.isOffline && !this.isUpcoming && supportsYtDlp && this.$store.getters.getEnableDownloads
+    },
+    fullscreenRecommendationsAvailable() {
+      if (this.isLoading || this.hideRecommendedVideos || (this.isFamilyFriendly === false && this.showFamilyFriendlyOnly)) return false
+      if (this.recommendedVideos.length === 0) {
+        return this.isOffline && this.localFilePlayback && this.offlineDownloadSuggestions.length > 0
+      }
+      return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
+        hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
+        forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
+        hideChannelsBasedOnText: false,
+      }))
     },
     hideRecommendedVideos: function () {
       return this.$store.getters.getHideRecommendedVideos
@@ -1240,6 +1267,12 @@ export default defineComponent({
     }
   },
   watch: {
+    downloadAvailable(available) {
+      if (!available) this.showDownloadPrompt = false
+    },
+    videoId() {
+      this.showDownloadPrompt = false
+    },
     '$store.getters.getThumbnailDataSaver'() {
       const short = this.currentSubscriptionShort
       if (short?.thumbnailUrl && short.lowResolutionThumbnailUrl) {
@@ -1811,6 +1844,33 @@ export default defineComponent({
         return
       }
       this.shortsCommentsOpen = false
+    },
+    openVideoDownloadPrompt() {
+      if (this.downloadAvailable) this.showDownloadPrompt = true
+    },
+    handleFullscreenQueueChange({ open, target }) {
+      const queue = this.$refs.watchVideoQueue
+      const sourceLayout = this.fullscreenQueueOpen ? 'fullscreen' : 'sidebar'
+      const destinationLayout = open && target !== null ? 'fullscreen' : 'sidebar'
+      this.queueScrollPositions[sourceLayout] = queue?.getScrollTop() ?? 0
+      this.fullscreenQueueTarget = target
+      this.fullscreenQueueOpen = open && target !== null
+      this.$nextTick(() => queue?.restoreScrollTop(this.queueScrollPositions[destinationLayout]))
+    },
+    closeFullscreenQueue() {
+      this.$refs.player?.closeFullscreenQueue()
+    },
+    handleFullscreenRecommendationsChange({ open, target }) {
+      const recommendations = this.$refs.watchVideoRecommendations
+      if (this.fullscreenRecommendationsOpen) this.recommendationsScrollTop = recommendations?.getScrollTop() ?? 0
+      this.fullscreenRecommendationsTarget = target
+      this.fullscreenRecommendationsOpen = open && target !== null
+      if (this.fullscreenRecommendationsOpen) {
+        this.$nextTick(() => recommendations?.restoreScrollTop(this.recommendationsScrollTop))
+      }
+    },
+    closeFullscreenRecommendations() {
+      this.$refs.player?.closeFullscreenRecommendations()
     },
     handleFullscreenPlaylistChange({ open, target }) {
       const playlist = this.$refs.watchVideoPlaylist
@@ -6526,6 +6586,8 @@ export default defineComponent({
         this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
         this.startNextVideoWithFullscreenLiveChat = uiState.startNextVideoWithFullscreenLiveChat
         this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
+        this.startNextVideoWithFullscreenQueue = uiState.startNextVideoWithFullscreenQueue
+        this.startNextVideoWithFullscreenRecommendations = uiState.startNextVideoWithFullscreenRecommendations
       } finally {
         this.playerTeardownInProgress = false
       }

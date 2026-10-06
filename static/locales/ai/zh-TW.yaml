@@ -220,6 +220,13 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "推薦影片"
+    Title: "全螢幕操作"
+    Customize: "自訂全螢幕操作"
+    Add Action: "新增操作"
+    Empty: "未選擇全螢幕操作"
+    Quick Bookmark: "快速書籤"
   Quick Settings:
     Quick Settings: 快速設定
     Customize Quick Settings: 自訂快速設定

@@ -231,6 +231,13 @@ History:
   Custom: Brugerdefineret
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Anbefalede videoer"
+    Title: "Handlinger i fuld skærm"
+    Customize: "Tilpas handlinger i fuld skærm"
+    Add Action: "Tilføj handling"
+    Empty: "Ingen handlinger i fuld skærm valgt"
+    Quick Bookmark: "Hurtigt bogmærke"
   Quick Settings:
     Quick Settings: Hurtigindstillinger
     Customize Quick Settings: Tilpas hurtigindstillinger

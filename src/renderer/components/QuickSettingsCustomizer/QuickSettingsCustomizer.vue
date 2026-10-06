@@ -1,6 +1,6 @@
 <template>
   <FtSettingsSection
-    :title="`${t('Settings.General Settings.Navigation.Navigation')} / ${t('Settings.Quick Settings.Quick Settings')}`"
+    :title="`${t('Settings.General Settings.Navigation.Navigation')} / ${t('Settings.Quick Settings.Quick Settings')} / ${t('Settings.Fullscreen Actions.Title')}`"
   >
     <div class="customizerLaunchers">
       <div class="settingButtonWithSync">
@@ -12,6 +12,7 @@
         <FtSyncedSettingIndicator setting-key="quickSettings" />
       </div>
       <NavigationCustomizer />
+      <FullscreenActionsCustomizer />
     </div>
   </FtSettingsSection>
 
@@ -169,6 +170,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import NavigationCustomizer from '../NavigationCustomizer/NavigationCustomizer.vue'
+import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/FullscreenActionsCustomizer.vue'
 
 import store from '../../store/index'
 import { moveItemByVisibleOffset } from '../../../orderedItems'

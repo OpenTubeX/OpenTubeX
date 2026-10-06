@@ -233,6 +233,13 @@ History:
   Custom: Eigendefinert
   History Older Than Days Removed: Sjåhistorikk eldre enn 1 dag er fjerna | Sjåhistorikk eldre enn {days} dagar er fjerna
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Tilrådde videoar"
+    Title: "Fullskjermhandlingar"
+    Customize: "Tilpass fullskjermhandlingar"
+    Add Action: "Legg til handling"
+    Empty: "Ingen fullskjermhandlingar valde"
+    Quick Bookmark: "Snøggbokmerke"
   Quick Settings:
     Quick Settings: Snøgginnstillingar
     Customize Quick Settings: Tilpass snøgginnstillingar

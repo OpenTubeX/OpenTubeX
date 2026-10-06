@@ -200,6 +200,7 @@ export const SYNC_SETTING_LABELS = {
   preferredCaptionLocale: 'Settings.Player Settings.Caption Appearance.Preferred Language',
   quickBookmarkTargetPlaylistId: 'User Playlists.Quick Bookmark Icon',
   quickPlaybackSpeedBarOptions: 'Settings.Player Settings.Quick Playback Speed Bar Manager',
+  fullscreenActions: 'Settings.Fullscreen Actions.Title',
   quickSettings: 'Settings.Quick Settings.Quick Settings',
   recommendationExploration: 'Home Page.Discovery',
   reducedMotion: 'Settings.General Settings.Reduced Motion.Reduced Motion',

@@ -224,6 +224,13 @@ History:
   Custom: Tùy chỉnh
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Video được đề xuất"
+    Title: "Thao tác toàn màn hình"
+    Customize: "Tùy chỉnh thao tác toàn màn hình"
+    Add Action: "Thêm thao tác"
+    Empty: "Chưa chọn thao tác toàn màn hình nào"
+    Quick Bookmark: "Dấu trang nhanh"
   Quick Settings:
     Quick Settings: Cài đặt nhanh
     Customize Quick Settings: Tùy chỉnh cài đặt nhanh

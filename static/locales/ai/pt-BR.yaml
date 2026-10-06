@@ -220,6 +220,13 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Vídeos recomendados"
+    Title: "Ações de tela cheia"
+    Customize: "Personalizar ações de tela cheia"
+    Add Action: "Adicionar ação"
+    Empty: "Nenhuma ação de tela cheia selecionada"
+    Quick Bookmark: "Favorito rápido"
   Quick Settings:
     Quick Settings: Configurações rápidas
     Customize Quick Settings: Personalizar configurações rápidas

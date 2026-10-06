@@ -350,6 +350,13 @@ History:
   Custom: Personalitzat
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Vídeos recomanats"
+    Title: "Accions de pantalla completa"
+    Customize: "Personalitza les accions de pantalla completa"
+    Add Action: "Afegeix una acció"
+    Empty: "No s’ha seleccionat cap acció de pantalla completa"
+    Quick Bookmark: "Marcador ràpid"
   Quick Settings:
     Quick Settings: Configuració ràpida
     Customize Quick Settings: Personalitza la configuració ràpida
