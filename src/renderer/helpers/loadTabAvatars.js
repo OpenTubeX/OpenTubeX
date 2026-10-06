@@ -15,6 +15,26 @@ import {
 import { getLocalVideoAvatarUrl } from './video-collaborators'
 
 const TAB_AVATAR_LOAD_CONCURRENCY = 4
+let activeAvatarLoads = 0
+const avatarLoadWaiters = []
+
+async function loadQueuedTabAvatar(tab) {
+  if (activeAvatarLoads >= TAB_AVATAR_LOAD_CONCURRENCY) {
+    await new Promise(resolve => avatarLoadWaiters.push(resolve))
+  } else {
+    activeAvatarLoads++
+  }
+
+  try {
+    return await loadTabAvatar(tab)
+  } finally {
+    // Hand the occupied slot directly to a waiter, keeping overlapping calls
+    // within the same limit through metadata, image download, and caching.
+    const next = avatarLoadWaiters.shift()
+    if (next) next()
+    else activeAvatarLoads--
+  }
+}
 
 function normalizeAvatarUrl(url) {
   return typeof url === 'string' && url.startsWith('//') ? `https:${url}` : url
@@ -98,7 +118,7 @@ export async function loadMissingTabAvatars(tabs) {
     TAB_AVATAR_LOAD_CONCURRENCY,
     async tab => {
       try {
-        return { status: 'fulfilled', value: await loadTabAvatar(tab) }
+        return { status: 'fulfilled', value: await loadQueuedTabAvatar(tab) }
       } catch (reason) {
         return { status: 'rejected', reason }
       }

@@ -290,6 +290,52 @@ test.describe('loading missing tab icons', () => {
     })
   }
 
+  test('limits avatar downloads across separately opened background tabs', async ({ page }) => {
+    let metadataRequests = 0
+    let activeDownloads = 0
+    let maximumDownloads = 0
+    const downloads = []
+    await page.route('https://invidious.test/api/v1/channels/UCburst*', route => {
+      metadataRequests++
+      const channelId = new URL(route.request().url()).pathname.split('/').at(-1)
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ authorThumbnails: [{ url: `https://images.test/${channelId}.png` }], tabs: [] })
+      })
+    })
+    await page.route('https://images.test/UCburst*.png', route => {
+      activeDownloads++
+      maximumDownloads = Math.max(maximumDownloads, activeDownloads)
+      downloads.push(route)
+    })
+    const activeTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId)
+    const tabIds = []
+    for (let index = 0; index < 6; index++) {
+      const tab = await page.evaluate(index => window.ftElectron.tabs.create({
+        route: `/channel/UCburst${index}`, makeActive: false, lazyLoad: true
+      }), index)
+      tabIds.push(tab.id)
+      await expect(page.locator(`.tab[data-tab-id="${tab.id}"]`)).toBeVisible()
+      if (index < 4) await expect.poll(() => downloads.length).toBe(index + 1)
+    }
+    expect(metadataRequests).toBe(4)
+
+    for (let index = 0; index < 6; index++) {
+      await expect.poll(() => downloads.length).toBeGreaterThan(index)
+      activeDownloads--
+      await downloads[index].fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
+    }
+    await expect.poll(() => page.evaluate(async tabIds => {
+      const state = await window.ftElectron.tabs.getState()
+      return {
+        activeTabId: state.activeTabId,
+        avatarsLoaded: tabIds.every(id => state.tabs.some(tab => tab.id === id && tab.avatarUrl && tab.isUnloaded))
+      }
+    }, tabIds)).toEqual({ activeTabId, avatarsLoaded: true })
+    expect(metadataRequests).toBe(6)
+    expect(maximumDownloads).toBe(4)
+  })
+
   test('leaves foreground avatar loading to the channel page', async ({ page }) => {
     let metadataRequests = 0
     await page.route('https://invidious.test/api/v1/channels/UCforeground?*', route => {
