@@ -220,3 +220,25 @@ test('starting and cancelling a swipe discards an in-flight partial screenshot',
   await new Promise(setImmediate)
   assert.equal(getCapacitorTabPreview(state.tab), null)
 })
+
+test('capture resumes when an invalidated screenshot outlasts the post-swipe timer', async t => {
+  const state = setup(t)
+  let resolve
+  let calls = 0
+  t.mock.method(Capacitor, 'nativePromise', () => {
+    calls += 1
+    return calls === 1
+      ? new Promise(done => { resolve = done })
+      : Promise.resolve({ dataUrl: state.preview })
+  })
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+  state.pageSwipe.value = { fromId: 'tab', toId: 'neighbor' }
+  state.pageSwipe.value = null
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+  resolve({ dataUrl: 'partial swipe screenshot' })
+  await new Promise(setImmediate)
+  assert.equal(calls, 2, 'the stable page needs a fresh native capture')
+  assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+})

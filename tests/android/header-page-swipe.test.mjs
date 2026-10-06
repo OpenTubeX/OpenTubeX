@@ -58,6 +58,7 @@ test('Android header swipes include controls and preserve taps and long presses'
         CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
         EnableDownloads: true, MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
         AlwaysShowMobileSearchBar: false, ShowTabPreviews: true, UiScale: 100, ReducedMotion: 'off',
+        NewTabPosition: 'afterCurrent',
         BaseTheme: 'system', SystemDarkTheme: 'dark', SystemLightTheme: 'light', MainColor: 'Red', SecColor: 'Blue',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
@@ -86,10 +87,17 @@ test('Android header swipes include controls and preserve taps and long presses'
       window.headerSwipeCaptures = []
       window.restoreHeaderSwipeCapture = () => { window.Capacitor.nativePromise = original }
       window.Capacitor.nativePromise = function (plugin, method, options) {
+        let delay = false
         if (plugin === 'Screenshot' && method === 'take') {
           window.headerSwipeCaptures.push({ swiping: !!document.querySelector('.pageSwipeFrom, .pageSwipeTo') })
+          delay = window.delayNextHeaderSwipeCapture
+          window.delayNextHeaderSwipeCapture = false
         }
-        return original.call(this, plugin, method, options)
+        const result = original.call(this, plugin, method, options)
+        return delay ? result.then(async image => {
+          await new Promise(resolve => { window.releaseHeaderSwipeCapture = resolve })
+          return image
+        }) : result
       }
     })
     for (const scale of [100, 125]) {
@@ -115,10 +123,31 @@ test('Android header swipes include controls and preserve taps and long presses'
         assert.ok(await page.evaluate(() => window.headerSwipeCaptures.every(capture => !capture.swiping)), 'captures resume only after the swipe settles')
       }
     }
+    // Keep a real native request pending beyond the post-cancellation timer.
+    await selectTab(first)
+    await page.waitForTimeout(900)
+    await page.evaluate(() => {
+      window.headerSwipeCaptures = []
+      window.delayNextHeaderSwipeCapture = true
+      window.dispatchEvent(new Event('resize'))
+    })
+    await expect.poll(() => page.evaluate(() => typeof window.releaseHeaderSwipeCapture)).toBe('function')
+    const delayedPoint = await pointFor('.profileTrigger')
+    await touch('touchStart', delayedPoint)
+    await touch('touchMove', { ...delayedPoint, x: delayedPoint.x - 100 })
+    await expect(page.locator('.pageSwipeTo')).toBeVisible()
+    await touch('touchCancel')
+    await expect(page.locator('.pageSwipeFrom, .pageSwipeTo')).toHaveCount(0)
+    await page.waitForTimeout(900)
+    await page.evaluate(() => window.releaseHeaderSwipeCapture())
+    await expect.poll(() => page.evaluate(() => window.headerSwipeCaptures.length)).toBeGreaterThan(1)
+    await expect.poll(presented).toBe(first)
     await page.evaluate(() => {
       window.restoreHeaderSwipeCapture()
       delete window.restoreHeaderSwipeCapture
       delete window.headerSwipeCaptures
+      delete window.releaseHeaderSwipeCapture
+      delete window.delayNextHeaderSwipeCapture
     })
 
     for (const [scale, reducedMotion] of [[100, 'off'], [125, 'off'], [125, 'on']]) {
@@ -262,9 +291,12 @@ test('Android header swipes include controls and preserve taps and long presses'
   } finally {
     await touch('touchCancel').catch(() => {})
     await page.evaluate(() => {
+      window.releaseHeaderSwipeCapture?.()
       window.restoreHeaderSwipeCapture?.()
       delete window.restoreHeaderSwipeCapture
       delete window.headerSwipeCaptures
+      delete window.releaseHeaderSwipeCapture
+      delete window.delayNextHeaderSwipeCapture
     }).catch(() => {})
     const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
     if (await close.isVisible()) await close.click()
