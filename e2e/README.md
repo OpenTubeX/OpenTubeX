@@ -11,8 +11,9 @@ Offline metadata tests may use Invidious when they mock every request.
 pnpm exec playwright install --only-shell chromium  # required for browser checks
 pnpm run test:e2e:pack      # build dist-e2e/ (required once per code change)
 pnpm run test:e2e:offline   # fast suite, no YouTube network needed
+pnpm run test:e2e:browser   # isolated Chromium checks, no Electron build needed
 pnpm run test:e2e:network   # talks to the real YouTube servers
-pnpm run test:e2e           # both
+pnpm run test:e2e           # all suites
 ```
 
 The tests run a production build from `dist-e2e/`, separate from `dist/`,
@@ -32,7 +33,8 @@ mobile layout and breaks selectors.
 - `helpers/media.mjs` – the offline demo video and the fake player response
   that serves it (see below).
 - `helpers/watch.mjs` – a fully mocked watch page, playable or unplayable.
-- `tests/offline/` – must pass without any external network.
+- `tests/offline/` – Electron tests that must pass without any external network.
+- `tests/browser/` – isolated Chromium checks without Electron or external network.
 - `tests/network/` – requires YouTube. Runs nightly and via workflow dispatch.
 - `fixtures/innertube/` – gzipped recorded Innertube responses, committed to git.
 - `fixtures/media/demo.webm` – 30s VP9/Opus clip with a burnt-in timecode.
@@ -113,12 +115,14 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 `.github/workflows/e2e.yml`:
 
 - **Pull requests** → changed test files and tests importing changed helpers.
-- **Nightly** → full offline and network suites.
+- **Nightly** → full offline, browser, and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
-The selected tests are split across four CI jobs. Each job still uses one
-Playwright worker and its own X server, avoiding interference between Electron
-windows while substantially reducing the suite's wall-clock time.
+The Electron projects use up to 16 CI shards each, with one Playwright worker
+and a private X server per shard to avoid interference between windows.
+Isolated Chromium checks run in one separate job, so only that runner installs
+Chromium. The offline command and dispatch selection include both offline
+Electron tests and browser checks.
 
 Pull requests without changed or affected E2E tests pass without running tests.
 Network tests use the fixture fallback on retry.

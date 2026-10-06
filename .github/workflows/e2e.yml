@@ -19,7 +19,7 @@ on:
         required: false
         default: 'all'
         type: choice
-        options: [ all, offline, network ]
+        options: [ all, offline, browser, network ]
 
 permissions: {}
 
@@ -104,8 +104,10 @@ jobs:
             visit(JSON.parse(input).suites)
 
             const projects = process.env.SELECTED_PROJECT === "all"
-              ? ["offline", "network"]
-              : [process.env.SELECTED_PROJECT]
+              ? ["offline", "browser", "network"]
+              : process.env.SELECTED_PROJECT === "offline"
+                ? ["offline", "browser"]
+                : [process.env.SELECTED_PROJECT]
             // Keep full-suite runs short without sharing an X server between workers.
             const testsPerShard = 100
             const maxShards = 16
@@ -113,7 +115,7 @@ jobs:
               const testCount = counts[project]
               if (!testCount) throw new Error(`No tests found for project ${project}`)
 
-              const shardTotal = Math.min(maxShards, Math.ceil(testCount / testsPerShard))
+              const shardTotal = project === "browser" ? 1 : Math.min(maxShards, Math.ceil(testCount / testsPerShard))
               return Array.from({ length: shardTotal }, (_, index) => ({
                 project,
                 shard: index + 1,
@@ -209,10 +211,12 @@ jobs:
 
     - name: Get Electron version
       id: electron
+      if: ${{ matrix.project != 'browser' }}
       run: printf 'version=%s\n' "$(node -p "require('./node_modules/electron/package.json').version")" >> "$GITHUB_OUTPUT"
       shell: bash
 
     - name: Restore Electron binary
+      if: ${{ matrix.project != 'browser' }}
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         key: ${{ format('electron-{0}-{1}-{2}', runner.os, runner.arch, steps.electron.outputs.version) }}
@@ -221,13 +225,14 @@ jobs:
           node_modules/.pnpm/electron@*/node_modules/electron/path.txt
 
     - name: Download E2E build
+      if: ${{ matrix.project != 'browser' }}
       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: dist-e2e
         path: dist-e2e
 
     - name: Install Chromium for browser integration tests
-      if: ${{ matrix.project == 'offline' }}
+      if: ${{ matrix.project == 'browser' }}
       run: pnpm exec playwright install --with-deps --only-shell chromium
       shell: bash
 
@@ -245,7 +250,7 @@ jobs:
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
         fi
 
-        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ matrix.project }} "${test_args[@]}"
+        xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm exec playwright test -c e2e/playwright.config.mjs --project=${{ matrix.project }} "${test_args[@]}"
       shell: bash
 
     - name: Stop sync server
