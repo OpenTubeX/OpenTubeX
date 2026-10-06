@@ -256,3 +256,58 @@ test('private instance credentials reach only the scoped native relay, including
     await setup.cast.stop('cast-1')
   }
 })
+
+test('native mux startup rejection retries a complete source with its scoped credentials and seek', async () => {
+  const setup = fixture()
+  await setup.cast.discover()
+  const start = setup.native.startMediaServer
+  setup.native.startMediaServer = async options => {
+    if (options.audioUrl) { setup.calls.push({ start: options }); throw new Error('FFmpeg initialization failed') }
+    return start(options)
+  }
+  const authorization = { url: 'https://private.example/invidious', value: 'Basic fixture' }
+  const fallbackMediaUrl = authorization.url + '/complete.mp4'
+  assert.deepEqual(await setup.cast.start({ ...payload, audioUrl: 'https://media.example/audio', fallbackMediaUrl, authorization }), { castId: 'cast-1', deviceName: 'Living room TV', usedFallback: true })
+  const attempts = setup.calls.filter(call => call.start)
+  assert.equal(attempts.length, 2)
+  assert.equal(attempts[0].start.authorization, undefined)
+  assert.deepEqual(attempts[1].start, { mediaUrl: fallbackMediaUrl, address: '192.168.1.7', authorization })
+  assert.deepEqual(actions(setup.calls), ['SetAVTransportURI', 'Play', 'Seek'])
+  assert.match(setup.calls.find(call => call.body?.includes('CurrentURIMetaData')).body, /DLNA.ORG_OP=01/)
+  assert.match(setup.calls.at(-1).body, /<Target>00:01:05<\/Target>/)
+  await setup.cast.stop('cast-1')
+})
+
+test('startup fallback keeps serialization and failed retries leave no active cast', async () => {
+  const setup = fixture()
+  await setup.cast.discover()
+  let release
+  const blocked = new Promise(resolve => { release = resolve })
+  const start = setup.native.startMediaServer
+  setup.native.startMediaServer = async options => {
+    await blocked
+    if (options.audioUrl) throw new Error('mux unavailable')
+    throw new Error('fallback unavailable')
+  }
+  const pending = setup.cast.start({ ...payload, audioUrl: 'https://media.example/audio', fallbackMediaUrl: payload.mediaUrl })
+  assert.match((await setup.cast.start(payload)).error, /already casting/)
+  release()
+  assert.match((await pending).error, /fallback unavailable/)
+  setup.native.startMediaServer = start
+  assert.ok((await setup.cast.start(payload)).castId)
+  await setup.cast.stop('cast-1')
+})
+
+test('an explicit native stop cannot be recovered as a mux failure', async () => {
+  let released = 0
+  const setup = fixture({ acquire: () => () => { released++ } })
+  await setup.cast.discover()
+  await setup.cast.start({ ...payload, audioUrl: 'https://media.example/audio' })
+  setup.native.hasFailed = async () => ({ failed: true, stopped: true })
+  assert.equal(await setup.cast.hasStopped('cast-1'), true)
+  assert.equal(await setup.cast.hasFailed('cast-1'), false)
+  assert.ok((await setup.cast.recover('cast-1', payload)).error)
+  assert.equal(setup.calls.filter(call => call.start).length, 1)
+  await setup.cast.stop('cast-1')
+  assert.equal(released, 1)
+})

@@ -41,7 +41,19 @@ public class DlnaCastingTest {
 
     private void verifyCastMenu(boolean merged) throws Exception { verifyCastMenu(merged, false); }
 
-    private void verifyCastMenu(boolean merged, boolean privateInstance) throws Exception {
+    @Test public void notificationStopDoesNotRecoverOrRestartMergedCasting() throws Exception {
+        verifyCastMenu(true, false, true);
+    }
+
+    private void verifyCastMenu(boolean merged, boolean privateInstance) throws Exception { verifyCastMenu(merged, privateInstance, false); }
+
+    @Test public void nativeMuxStartupFailureUsesTheCompleteSourceFromTheWatchMenu() throws Exception {
+        verifyCastMenu(true, false, false, true);
+    }
+
+    private void verifyCastMenu(boolean merged, boolean privateInstance, boolean notificationStop) throws Exception { verifyCastMenu(merged, privateInstance, notificationStop, false); }
+
+    private void verifyCastMenu(boolean merged, boolean privateInstance, boolean notificationStop, boolean startupFailure) throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         InetAddress local = null;
@@ -250,7 +262,7 @@ public class DlnaCastingTest {
                 formats.put(new JSONObject().put("url", "http://" + host + ":" + fixture.getLocalPort() + "/audio.m4a")
                     .put("format_id", "140").put("protocol", "http").put("ext", "m4a").put("vcodec", "none").put("acodec", "mp4a.40.2"));
             }
-            evaluate(webView, "window.dlnaExtractionFormats=" + formats + ";window.dlnaMergedUi=" + merged + ";true");
+            evaluate(webView, "window.dlnaExtractionFormats=" + formats + ";window.dlnaMergedUi=" + merged + ";window.dlnaStartupFailure=" + startupFailure + ";true");
             evaluate(webView, """
                 window.testStore = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
                 window.testRouter = document.querySelector('#app').__vue_app__.config.globalProperties.$router;
@@ -266,7 +278,11 @@ public class DlnaCastingTest {
                 };
                 window.dlnaOriginalNativePromise = window.Capacitor.nativePromise;
                 window.Capacitor.nativePromise = function(plugin, method, options) {
-                    if (plugin === 'Dlna' && method === 'startMediaServer') window.dlnaStartedOptions=options;
+                    if (plugin === 'Dlna' && method === 'startMediaServer') {
+                        window.dlnaStartedOptions=options;
+                        (window.dlnaStartAttempts ??= []).push(options);
+                        if (window.dlnaStartupFailure && options.audioUrl) return Promise.reject(new Error('Fixture native mux startup failure'));
+                    }
                     if (plugin === 'YtDlp' && method === 'extract' && options.args?.some(arg => arg.includes('DlnaTest001'))) {
                         return Promise.resolve({stdout: JSON.stringify({id:'DlnaTest001', formats:window.dlnaExtractionFormats, is_live:false})});
                     }
@@ -301,7 +317,11 @@ public class DlnaCastingTest {
                     assertArrayEquals("Private MP4 fallback reaches the receiver", video, receivedVideo.get());
                 }
                 assertNull("Local renderer failed", rendererError.get());
-                if (!merged) assertArrayEquals("Renderer received the complete MP4 through the phone relay", video, receivedVideo.get());
+                if (!merged || startupFailure) assertArrayEquals("Renderer received the complete MP4 through the phone relay", video, receivedVideo.get());
+                if (startupFailure) {
+                    assertEquals("Native mux startup falls back in the same cast", "2", evaluate(webView, "window.dlnaStartAttempts.length"));
+                    assertEquals("true", evaluate(webView, "!!dlnaStartAttempts[0].audioUrl && !dlnaStartAttempts[1].audioUrl"));
+                }
                 assertEquals(privateInstance ? Arrays.asList("SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play", "Seek") : merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek"), actions);
                 assertEquals("true", evaluate(webView, "document.querySelector('video').paused"));
                 awaitScreenWake(scenario, true);
@@ -324,7 +344,7 @@ public class DlnaCastingTest {
                 File received = File.createTempFile("dlna-received-", ".mp4", context.getCacheDir());
                 try {
                     try (OutputStream output = new FileOutputStream(received)) { output.write(receivedVideo.get()); }
-                    if (merged && !privateInstance) {
+                    if (merged && !privateInstance && !startupFailure) {
                         MediaExtractor extractor = new MediaExtractor();
                         try { extractor.setDataSource(received.getAbsolutePath()); assertEquals(2, extractor.getTrackCount()); }
                         finally { extractor.release(); }
@@ -335,10 +355,28 @@ public class DlnaCastingTest {
                         assertNotNull("Received MP4 decodes to a video frame", decoder.getFrameAtTime());
                     } finally { decoder.release(); }
                 } finally { received.delete(); }
-                evaluate(webView, "document.querySelector('.dlnaCastControl button').click();true");
-                await(webView, "Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Stop casting')");
-                evaluate(webView, "Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true");
-                await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused");
+                if (notificationStop) {
+                    android.app.NotificationManager notifications = context.getSystemService(android.app.NotificationManager.class);
+                    android.app.PendingIntent stop = null;
+                    for (android.service.notification.StatusBarNotification notification : notifications.getActiveNotifications()) {
+                        if (notification.getId() != 0x444c4e41) continue;
+                        for (android.app.Notification.Action action : notification.getNotification().actions) {
+                            if (context.getString(R.string.media_stop).contentEquals(action.title)) stop = action.actionIntent;
+                        }
+                    }
+                    assertNotNull("Cast foreground notification exposes Stop", stop);
+                    int starts = java.util.Collections.frequency(actions, "SetAVTransportURI");
+                    stop.send();
+                    Thread.sleep(3000);
+                    assertEquals("Notification Stop must not restart casting through fallback", starts, java.util.Collections.frequency(actions, "SetAVTransportURI"));
+                    await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false'");
+                    assertEquals("Notification Stop must leave local playback paused", "true", evaluate(webView, "document.querySelector('video').paused"));
+                } else {
+                    evaluate(webView, "document.querySelector('.dlnaCastControl button').click();true");
+                    await(webView, "Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Stop casting')");
+                    evaluate(webView, "Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true");
+                    await(webView, "document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused");
+                }
                 assertEquals("Stop", actions.get(actions.size() - 1));
                 HttpURLConnection finished = (HttpURLConnection) new URL(castUri.get()).openConnection(Proxy.NO_PROXY);
                 finished.setConnectTimeout(1000);

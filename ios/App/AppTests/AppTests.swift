@@ -440,7 +440,11 @@ final class AppTests: XCTestCase {
         try await verifyDlnaCastMenu(merged: true, privateInstance: true)
     }
 
-    private func verifyDlnaCastMenu(merged: Bool, privateInstance: Bool = false) async throws {
+    func testDlnaNativeMuxStartupFailureUsesCompleteSourceThroughTheCastMenu() async throws {
+        try await verifyDlnaCastMenu(merged: true, startupFailure: true)
+    }
+
+    private func verifyDlnaCastMenu(merged: Bool, privateInstance: Bool = false, startupFailure: Bool = false) async throws {
         try await openApplication()
         let media = try Data(contentsOf: XCTUnwrap(Bundle(for: AppTests.self).url(forResource: "fixture", withExtension: "mp4")))
         let encodedAudio = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
@@ -487,7 +491,7 @@ final class AppTests: XCTestCase {
                             reply(Data("<ok/>".utf8))
                             return
                         }
-                        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, merged && !privateInstance ? 200 : 206)
+                        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, merged && !privateInstance && !startupFailure ? 200 : 206)
                         lock.lock(); receivedVideo = data; lock.unlock()
                         transferred.fulfill()
                         reply(Data("<ok/>".utf8))
@@ -532,6 +536,10 @@ final class AppTests: XCTestCase {
             }
         }; window.dlnaOriginalNativePromise = window.Capacitor.nativePromise;
                 window.Capacitor.nativePromise = function(plugin, method, options) {
+                    if (plugin === 'Dlna' && method === 'startMediaServer') {
+                        (window.dlnaStartAttempts ??= []).push(options);
+                        if (window.dlnaStartupFailure && options.audioUrl) return Promise.reject(new Error('Fixture native mux startup failure'));
+                    }
                     if (plugin === 'YtDlp' && method === 'extract' && options.args?.some(arg => arg.includes('DlnaTest001'))) {
                         return Promise.resolve({stdout: JSON.stringify({id:'DlnaTest001', formats:window.dlnaExtractionFormats ?? [], is_live:false})});
                     }
@@ -542,11 +550,13 @@ final class AppTests: XCTestCase {
         let audioId = IOSNetwork.shared.prepareExternal(URLRequest(url: URL(string: "http://127.0.0.1:\(port)/audio.m4a")!))
         _ = try await webView.callAsyncJavaScript("""
         window.dlnaMergedUi = merged;
+        window.dlnaStartupFailure = startupFailure;
+        window.dlnaStartAttempts = [];
         window.dlnaExtractionFormats = merged ? [
             {url:videoSource, format_id:'299', protocol:'http', ext:'mp4', vcodec:'avc1.640028', acodec:'none', height:1080},
             {url:audioSource, format_id:'140', protocol:'http', ext:'m4a', vcodec:'none', acodec:'mp4a.40.2'}
         ] : [];
-        """, arguments: ["merged": merged, "videoSource": "capacitor://localhost/_opentubex_media/\(id)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
+        """, arguments: ["merged": merged, "startupFailure": startupFailure, "videoSource": "capacitor://localhost/_opentubex_media/\(id)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
         // Navigation preserves cached Watch state. Discard the fixture source
         // too, so neither the cached page nor its cast control retains it.
         let cleanup = "document.querySelector('video')?.pause(); watchFixture.legacyFormats=[]; testStore.commit('setCurrentInvidiousInstance', originalInstance); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
@@ -602,7 +612,13 @@ final class AppTests: XCTestCase {
             _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='iOS test TV').click();true")
             try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'")
             await fulfillment(of: [responded, transferred], timeout: 12)
-            if !merged || privateInstance { XCTAssertEqual(receivedVideo, media) }
+            if !merged || privateInstance || startupFailure { XCTAssertEqual(receivedVideo, media) }
+            if startupFailure {
+                let attempts = try await evaluate("dlnaStartAttempts.length") as? Int
+                let retriedCompleteSource = try await evaluate("!!dlnaStartAttempts[0].audioUrl && !dlnaStartAttempts[1].audioUrl") as? Bool
+                XCTAssertEqual(attempts, 2)
+                XCTAssertEqual(retriedCompleteSource, true)
+            }
             if privateInstance { XCTAssertEqual(actions, ["SetAVTransportURI", "Play", "GetPositionInfo", "Stop", "SetAVTransportURI", "Play"]) }
             else { XCTAssertEqual(actions, merged ? ["SetAVTransportURI", "Play"] : ["SetAVTransportURI", "Play", "Seek"]) }
             let paused = try await evaluate("document.querySelector('video').paused") as? Bool
@@ -618,7 +634,7 @@ final class AppTests: XCTestCase {
             let received = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-received-\(UUID().uuidString).mp4")
             defer { try? FileManager.default.removeItem(at: received) }
             try XCTUnwrap(receivedVideo).write(to: received)
-            if merged && !privateInstance { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
+            if merged && !privateInstance && !startupFailure { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
             let asset = AVURLAsset(url: received)
             let duration = try await asset.load(.duration)
             XCTAssertEqual(duration.seconds, 2, accuracy: 0.05)
