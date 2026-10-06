@@ -95,15 +95,20 @@ const capacitor = {
     // their payload. Rebuild their arguments with the shared parser on resume.
     if (process.env.IS_IOS) {
       const resumeArguments = {}
+      const failedResumeArguments = {}
       for (const download of downloads) {
         if (!download.args && download.retryPayload && download.status !== 'completed') {
           try {
             resumeArguments[download.id] = buildYtDlpDownloadArguments(download.retryPayload, store.getters.getYtDlpDownloadCustomArgs).args
-          } catch (error) { console.warn('Could not restore download arguments', error) }
+          } catch (error) {
+            console.warn('Could not restore download arguments', error)
+            if (['queued', 'paused'].includes(download.status)) failedResumeArguments[download.id] = error.message
+          }
         }
       }
-      if (Object.keys(resumeArguments).length > 0) {
-        await native.configure({ configuration: configuration(), resumeArguments })
+      if (Object.keys(resumeArguments).length > 0 || Object.keys(failedResumeArguments).length > 0) {
+        await native.configure({ configuration: configuration(), resumeArguments, failedResumeArguments })
+        return (await native.list()).downloads
       }
     }
     return downloads

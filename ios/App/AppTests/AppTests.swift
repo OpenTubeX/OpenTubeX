@@ -1,4 +1,5 @@
 import XCTest
+import Capacitor
 import AVFoundation
 import WebKit
 import MediaPlayer
@@ -396,6 +397,90 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(active, 1)
         let named = try await evaluate("Array.from(document.querySelectorAll('.capacitorTabletTabTarget, .capacitorTabletTabClose')).every(el=>el.getAttribute('aria-label')?.trim())") as? Bool
         XCTAssertEqual(named, true)
+    }
+
+    func testYtDlpArgumentRestorationFailuresArePublishedAndPersisted() throws {
+        let key = "iosYtDlpDownloads"
+        let saved = UserDefaults.standard.data(forKey: key)
+        defer { UserDefaults.standard.set(saved, forKey: key) }
+        let records: [String: [String: Any]] = [
+            "1": ["id": 1, "status": "queued"],
+            "2": ["id": 2, "status": "paused"],
+            "3": ["id": 3, "status": "completed"],
+            "4": ["id": 4, "status": "cancelled"],
+            "5": ["id": 5, "status": "queued", "args": ["existing"]],
+            "6": ["id": 6, "status": "paused"],
+        ]
+        UserDefaults.standard.set(try JSONSerialization.data(withJSONObject: ["records": records, "nextId": 6]), forKey: key)
+        let plugin = IOSYtDlpPlugin()
+        plugin.eventListeners = NSMutableDictionary()
+        plugin.load()
+        var published: [[String: Any]] = []
+        plugin.addEventListener("downloadStatus", listener: CAPPluginCall(callbackId: "fixture-listener", methodName: "addListener", options: [:], success: { result, _ in
+            if let data = result?.data { published.append(data) }
+        }, error: { _ in XCTFail("Status listener failed") }))
+        let options = try XCTUnwrap(JSTypes.coerceDictionaryToJSObject([
+            "configuration": ["enabled": false],
+            "resumeArguments": ["6": ["restored"]],
+            "failedResumeArguments": ["1": "invalid-video-id", "2": "unsupported-custom-argument", "3": "ignored", "4": "ignored", "5": "ignored", "99": "ignored"],
+        ] as NSDictionary))
+        plugin.configure(CAPPluginCall(callbackId: "fixture", methodName: "configure", options: options,
+                                       success: { _, _ in }, error: { _ in XCTFail("Configuration failed") }))
+        let persisted = try XCTUnwrap(try JSONSerialization.jsonObject(with: XCTUnwrap(UserDefaults.standard.data(forKey: key))) as? [String: Any])
+        let updated = try XCTUnwrap(persisted["records"] as? [String: [String: Any]])
+        XCTAssertEqual(updated["1"]?["status"] as? String, "failed")
+        XCTAssertEqual(updated["1"]?["errorMessage"] as? String, "invalid-video-id")
+        XCTAssertEqual(updated["2"]?["status"] as? String, "failed")
+        XCTAssertEqual(updated["2"]?["errorMessage"] as? String, "unsupported-custom-argument")
+        XCTAssertEqual(updated["3"]?["status"] as? String, "completed")
+        XCTAssertEqual(updated["4"]?["status"] as? String, "cancelled")
+        XCTAssertEqual(updated["5"]?["status"] as? String, "queued")
+        XCTAssertEqual(updated["6"]?["args"] as? [String], ["restored"])
+        XCTAssertEqual(Set(published.compactMap { $0["id"] as? Int }), [1, 2])
+    }
+
+    func testYtDlpExportsThroughPrivatePathAliases() throws {
+        #if targetEnvironment(simulator)
+        // Simulator app containers live under /Users, which has no /private alias.
+        let privatePath = "/private/var/tmp"
+        #else
+        let temporary = FileManager.default.temporaryDirectory.resolvingSymlinksInPath().path
+        let privatePath = temporary.hasPrefix("/private/") ? temporary : "/private" + temporary
+        #endif
+        let root = URL(fileURLWithPath: privatePath).appendingPathComponent("private-export-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let staging = root.appendingPathComponent("staging")
+        let target = root.appendingPathComponent("target")
+        let names = ["first.mp4", "Playlist/second.mp4"]
+        try FileManager.default.createDirectory(at: staging.appendingPathComponent("Playlist"), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
+        for name in names { try Data(name.utf8).write(to: staging.appendingPathComponent(name)) }
+        let result = try IOSYtDlpExporter.copy(names, from: staging, to: target, videoId: "fixture")
+        XCTAssertEqual(result.files.compactMap { $0["relativePath"] as? String }, names)
+        for (index, name) in names.enumerated() {
+            XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: result.destinations[index])), Data(name.utf8))
+        }
+    }
+
+    func testYtDlpExportRejectsSymlinksOutsideItsRoots() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("symlink-export-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let staging = root.appendingPathComponent("staging")
+        let target = root.appendingPathComponent("target")
+        let outside = root.appendingPathComponent("outside")
+        for directory in [staging, target, outside] {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+        try Data("private".utf8).write(to: outside.appendingPathComponent("secret.mp4"))
+        try FileManager.default.createSymbolicLink(at: staging.appendingPathComponent("source"), withDestinationURL: outside)
+        try FileManager.default.createSymbolicLink(at: target.appendingPathComponent("destination"), withDestinationURL: outside)
+        try FileManager.default.createDirectory(at: staging.appendingPathComponent("destination"), withIntermediateDirectories: true)
+        try Data("downloaded".utf8).write(to: staging.appendingPathComponent("destination/first.mp4"))
+        for name in ["source/secret.mp4", "destination/first.mp4"] {
+            XCTAssertThrowsError(try IOSYtDlpExporter.copy([name], from: staging, to: target, videoId: "fixture"))
+        }
+        XCTAssertEqual(try Data(contentsOf: outside.appendingPathComponent("secret.mp4")), Data("private".utf8))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: outside.appendingPathComponent("first.mp4").path))
     }
 
     func testYtDlpExportRollsBackEarlierFilesOnFailure() throws {

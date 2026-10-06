@@ -35,6 +35,49 @@ test('iOS restores arguments for saved paused downloads without changing complet
   assert.equal(downloads[1].files[0].path, '/saved.m4a')
 })
 
+test('iOS reports argument restoration failures and returns the updated native status', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpListDownloads()')
+  const end = source.indexOf('  ytDlpClearDownloads:', start)
+  for (const customArgs of ['', '--exec command']) {
+    const downloads = [
+      { id: 1, status: 'queued', retryPayload: { mode: 'video', videoId: 'invalid' } },
+      { id: 2, status: 'paused', retryPayload: { mode: 'audio', videoId: 'abcdefghijk' } },
+      { id: 3, status: 'completed', retryPayload: { mode: 'video', videoId: 'invalid' } },
+      { id: 4, status: 'cancelled', retryPayload: { mode: 'video', videoId: 'invalid' } },
+    ]
+    let updated = downloads
+    const calls = []
+    const context = vm.createContext({
+      process: { env: { IS_IOS: true } },
+      console: { warn() {} },
+      native: {
+        list: async () => ({ downloads: updated }),
+        configure: async value => {
+          calls.push(value)
+          updated = downloads.map(download => value.failedResumeArguments?.[download.id]
+            ? { ...download, status: 'failed', errorMessage: value.failedResumeArguments[download.id] }
+            : download)
+        },
+      },
+      store: { getters: { getYtDlpDownloadCustomArgs: customArgs } },
+      configuration: () => ({ enabled: true }),
+      buildYtDlpDownloadArguments,
+    })
+    vm.runInContext(`globalThis.list = ({${source.slice(start, end)}}).ytDlpListDownloads`, context)
+    const result = await context.list()
+    assert.equal(calls.length, 1)
+    assert.deepEqual(Object.keys(calls[0].failedResumeArguments), customArgs ? ['1', '2'] : ['1'])
+    assert.equal(result[0].status, 'failed')
+    assert.equal(result[0].errorMessage, 'invalid-video-id')
+    assert.equal(result[1].status, customArgs ? 'failed' : 'paused')
+    assert.equal(result[1].errorMessage, customArgs ? 'unsupported-custom-argument' : undefined)
+    assert.equal(result[2].status, 'completed')
+    assert.equal(result[3].status, 'cancelled')
+    assert.deepEqual(Object.keys(calls[0].resumeArguments), customArgs ? [] : ['2'])
+  }
+})
+
 test('iOS media byte-range probes send a Range header through the native proxy', async () => {
   const source = await read('src/renderer/helpers/player/streamByteRanges.js')
   const start = source.indexOf('export async function probeStreamByteRanges(')

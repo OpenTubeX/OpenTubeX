@@ -139,6 +139,24 @@ private func iosFFmpegExecute(_ input: UnsafePointer<CChar>, _ output: UnsafePoi
 }
 
 enum IOSYtDlpExporter {
+    private static func canonicalURL(_ url: URL) throws -> URL {
+        var existing = url.standardizedFileURL
+        var suffix: [String] = []
+        while !FileManager.default.fileExists(atPath: existing.path) && existing.path != "/" {
+            suffix.append(existing.lastPathComponent)
+            existing = existing.deletingLastPathComponent()
+        }
+        guard let resolved = realpath(existing.path, nil) else {
+            throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+        }
+        defer { free(resolved) }
+        // Foundation can strip /private only for existing paths. realpath plus
+        // the missing suffix keeps roots and new export paths in the same form.
+        return suffix.reversed().reduce(URL(fileURLWithPath: String(cString: resolved))) {
+            $0.appendingPathComponent($1)
+        }
+    }
+
     static func copy(_ names: [String], from staging: URL, to target: URL, videoId: String) throws
         -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64, createdDirectories: [String]) {
         var destinations: [String] = []
@@ -146,11 +164,11 @@ enum IOSYtDlpExporter {
         var files: [[String: Any]] = []
         var size: Int64 = 0
         do {
+            let sourceRoot = try canonicalURL(staging).path + "/"
+            let targetRoot = try canonicalURL(target).path + "/"
             for name in names {
-                let source = staging.appendingPathComponent(name).standardizedFileURL.resolvingSymlinksInPath()
-                var destination = target.appendingPathComponent(name).standardizedFileURL.resolvingSymlinksInPath()
-                let sourceRoot = staging.standardizedFileURL.resolvingSymlinksInPath().path + "/"
-                let targetRoot = target.standardizedFileURL.resolvingSymlinksInPath().path + "/"
+                let source = try canonicalURL(staging.appendingPathComponent(name))
+                var destination = try canonicalURL(target.appendingPathComponent(name))
                 guard !name.isEmpty, !name.hasPrefix("/"), !name.split(separator: "/").contains(".."),
                       source.path.hasPrefix(sourceRoot), destination.path.hasPrefix(targetRoot) else {
                     throw NSError(domain: "IOSYtDlp", code: 8,
@@ -370,6 +388,15 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 }
             }
             persist()
+        }
+        if let failures = call.getObject("failedResumeArguments") as? [String: String] {
+            for (key, message) in failures {
+                guard let id = Int(key), let record = records[id], record["args"] == nil,
+                      ["queued", "paused"].contains(record["status"] as? String ?? "") else { continue }
+                records[id]?["status"] = "failed"
+                records[id]?["errorMessage"] = message
+                publish(id)
+            }
         }
         call.resolve()
         startNext()
