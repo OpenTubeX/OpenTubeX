@@ -1996,3 +1996,6 @@ Storage Startup Error:
   Retry: "Saiatu berriro"
 Search Bar:
   Use Suggestion: Erabili iradokizuna
+
+Native Permissions:
+  Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."

@@ -2476,3 +2476,5 @@ Storage Startup Error:
   Title: "Nepavyko įkelti programėlės duomenų"
   Message: "Atlaisvinkite vietos įrenginyje ir bandykite dar kartą. Sinchronizavimas pristabdytas, kol bus įkelti jūsų duomenys."
   Retry: "Bandyti dar kartą"
+Native Permissions:
+  Local Network: "Aptikti įrenginius vietiniame tinkle ir perduoti į juos vaizdo įrašus bei sinchronizuoti nustatymus ir duomenis tarp įrenginių."

@@ -33,6 +33,7 @@ import okhttp3.Response;
 @CapacitorPlugin(name = "Dlna")
 public final class DlnaPlugin extends Plugin {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
+    private final ExecutorService discoveryWorker = Executors.newSingleThreadExecutor();
     private final ExecutorService requestWorker = Executors.newFixedThreadPool(4);
     private final Set<String> addresses = ConcurrentHashMap.newKeySet();
     private DlnaMediaServer relay;
@@ -50,7 +51,8 @@ public final class DlnaPlugin extends Plugin {
     }
 
     @PluginMethod public void discover(PluginCall call) {
-        worker.execute(() -> {
+        if (destroyed) { call.reject("DLNA plugin closed"); return; }
+        discoveryWorker.execute(() -> {
             WifiManager wifi = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiManager.MulticastLock lock = wifi.createMulticastLock("OpenTubeX DLNA discovery");
             lock.setReferenceCounted(false);
@@ -161,6 +163,7 @@ public final class DlnaPlugin extends Plugin {
         destroyed = true;
         DatagramSocket socket = discoverySocket;
         if (socket != null) socket.close();
+        discoveryWorker.shutdownNow();
         requestWorker.shutdownNow();
         worker.execute(() -> { if (relay != null) { relay.close(); relay = null; } });
         worker.shutdown();

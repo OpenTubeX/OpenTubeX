@@ -1204,3 +1204,6 @@ Storage Startup Error:
   Retry: "Spróbuj ponownie"
 Search Bar:
   Use Suggestion: Użyj sugestii
+
+Native Permissions:
+  Local Network: "Wykrywanie urządzeń w sieci lokalnej i przesyłanie do nich filmów oraz synchronizowanie ustawień i danych między urządzeniami."
