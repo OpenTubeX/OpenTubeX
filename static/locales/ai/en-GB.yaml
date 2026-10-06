@@ -1964,5 +1964,3 @@ Storage Startup Error:
   Title: "Could not load app data"
   Message: "Free up device storage and try again. Sync is paused until your data is loaded."
   Retry: "Retry"
-Native Permissions:
-  Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."

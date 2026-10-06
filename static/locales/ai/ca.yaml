@@ -2622,5 +2622,3 @@ Storage Startup Error:
   Title: "No s'han pogut carregar les dades de l'aplicació"
   Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
   Retry: "Torna-ho a provar"
-Native Permissions:
-  Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."

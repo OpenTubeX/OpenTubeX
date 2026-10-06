@@ -2026,5 +2026,3 @@ Storage Startup Error:
   Title: "Sovelluksen tietoja ei voitu ladata"
   Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
   Retry: "Yritä uudelleen"
-Native Permissions:
-  Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."

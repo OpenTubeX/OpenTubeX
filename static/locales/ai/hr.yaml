@@ -2004,5 +2004,3 @@ Storage Startup Error:
   Title: "Nije moguće učitati podatke aplikacije"
   Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
   Retry: "Pokušaj ponovno"
-Native Permissions:
-  Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."
