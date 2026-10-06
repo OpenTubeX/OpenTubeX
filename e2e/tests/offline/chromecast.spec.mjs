@@ -623,7 +623,68 @@ for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies
   })
 }
 
-test('an authenticated Cast caption failure leaves local playback running', async ({ app, page }) => {
+test('Cast skips a failed optional authenticated caption and remaps the selected track', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
+  await app.electronApp.evaluate(({ ipcMain }, text) => {
+    globalThis.castSubtitleRequests = []
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', (_, url) => {
+      globalThis.castSubtitleRequests.push(url)
+      return new URL(url).searchParams.get('lang') === 'de' ? { error: 'Optional caption unavailable' } : text
+    })
+  }, text)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await watch.evaluate(vm => {
+    vm.captions = [['de', 'German'], ['en', 'English'], ['ja', 'Japanese']].map(([language, label]) => ({
+      url: `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=${language}&fmt=vtt`, language, label, mimeType: 'text/vtt'
+    }))
+    vm.currentSubtitlesState = true
+    vm.$refs.player.play()
+  })
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    const player = video.ui.getControls().getPlayer()
+    const english = await player.addTextTrackAsync('https://cast-media.test/en.vtt', 'en', 'captions', 'text/vtt', undefined, 'English')
+    player.selectTextTrack(english)
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.captions.map(caption => caption.language)).toEqual(['en', 'ja'])
+  expect(started.captionIndex).toBe(0)
+  expect(started.captions.every(caption => caption.url === `data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)).toBe(true)
+  expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests.length)).toBe(3)
+  await page.locator('.chromecastControl > button').click()
+  await expect(page.getByRole('option', { name: 'German', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('option', { name: 'English', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await choice(page, 'Return to local playback')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+})
+
+test('Cast starts without captions when all failed tracks were unselected', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Optional caption unavailable' }))
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await watch.evaluate(vm => {
+    vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
+    vm.currentSubtitlesState = false
+    vm.$refs.player.play()
+  })
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.captions).toEqual([])
+  expect(started.captionIndex).toBe(null)
+  await choice(page, 'Return to local playback')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+})
+
+test('an active authenticated Cast caption failure leaves local playback running', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('yt-dlp-get-subtitle')
@@ -632,8 +693,15 @@ test('an authenticated Cast caption failure leaves local playback running', asyn
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
   await watch.evaluate(vm => {
     vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
+    vm.currentSubtitlesState = true
     vm.$refs.player.play()
   })
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    const player = video.ui.getControls().getPlayer()
+    const english = await player.addTextTrackAsync('https://cast-media.test/en.vtt', 'en', 'captions', 'text/vtt', undefined, 'English')
+    player.selectTextTrack(english)
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   await choice(page, 'Test TV')
   await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()

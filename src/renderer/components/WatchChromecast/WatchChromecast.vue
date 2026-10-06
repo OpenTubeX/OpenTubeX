@@ -212,12 +212,17 @@ async function handleChoice(choice) {
     if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
-    const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
+    let captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
     let player
     const result = await window.ftElectron.chromecast.start(async () => {
-      captions = await Promise.all(captions.map(async caption => ({
+      const prepared = await Promise.allSettled(captions.map(async caption => ({
         ...caption, url: await getSubtitleRequestUrl(caption.url, store.getters)
       })))
+      const activeCaption = prepared[captionIndex]
+      if (activeCaption?.status === 'rejected') throw activeCaption.reason
+      const available = prepared.filter(result => result.status === 'fulfilled')
+      captionIndex = captionIndex === null ? null : available.indexOf(activeCaption)
+      captions = available.map(result => result.value)
       if (disposed) return null
       player = props.getPlayer()
       watchPath = route.path
