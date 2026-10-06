@@ -327,6 +327,7 @@ export class SyncLiveConnectionState {
 // desktop and Android. The durable server cursor handles missed notifications.
 export async function watchSyncChanges(client, onChange, onError, {
   prepare = async () => true,
+  waitForPendingSync = async () => false,
   onConnectionChange = () => {},
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
 } = {}) {
@@ -340,10 +341,18 @@ export async function watchSyncChanges(client, onChange, onError, {
           if (!await prepare() || client.cancelled) return
           prepared = true
         }
-        const response = await client.waitForSyncChanges(cursor)
+        let response = await client.waitForSyncChanges(cursor)
         if (client.cancelled) return
         if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
         if (response.cursor !== cursor) {
+          if (await waitForPendingSync()) {
+            // The first upload can wake a poll before the remaining collections
+            // are saved. Read the latest cursor before checking their revisions.
+            // Use the old cursor so an already observed change returns promptly.
+            response = await client.waitForSyncChanges(cursor)
+            if (client.cancelled) return
+            if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
+          }
           await onChange()
           // Advance only after successful processing; failures retry the same change.
           cursor = response.cursor

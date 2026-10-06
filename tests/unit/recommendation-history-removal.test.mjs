@@ -10,6 +10,7 @@ import * as externalMediaPositions from '../../src/renderer/helpers/externalMedi
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
 import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { buildRecommendationProfile } from '../../src/renderer/helpers/recommendations.js'
+import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -38,6 +39,7 @@ function fixture () {
     history,
     recommendations,
     createStore,
+    getProfileSyncSignature,
     settings: {
       state: {},
       actions: {

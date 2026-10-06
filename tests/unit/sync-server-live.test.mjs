@@ -107,6 +107,53 @@ test('live sync stops retrying expired authentication and exponentially backs of
   assert.deepEqual(delays, [1000, 2000, 4000, 8000])
 })
 
+test('live sync coalesces notifications received during an upload without losing a concurrent peer change', async () => {
+  const cursors = []
+  const processed = []
+  let serverCursor = 'first-upload'
+  let pending = true
+  const client = {
+    cancelled: false,
+    async waitForSyncChanges(cursor) {
+      cursors.push(cursor)
+      if (cursors.length >= 5) this.cancelled = true
+      if (cursor === 'last-upload') serverCursor = 'peer-change'
+      if (cursor === 'peer-change') this.cancelled = true
+      return { cursor: serverCursor }
+    },
+  }
+  await watchSyncChanges(client, async () => processed.push(serverCursor), error => { throw error }, {
+    waitForPendingSync: async () => {
+      if (!pending) return false
+      pending = false
+      serverCursor = 'last-upload'
+      return true
+    },
+  })
+  assert.deepEqual(processed, ['last-upload', 'peer-change'])
+  assert.deepEqual(cursors, ['', '', 'last-upload', 'peer-change'])
+})
+
+test('live sync retries the old cursor if the coalesced notification fails', async () => {
+  const cursors = []
+  let changes = 0
+  const client = {
+    cancelled: false,
+    async waitForSyncChanges(cursor) {
+      cursors.push(cursor)
+      if (cursors.length === 2) throw new Error('Refresh failed')
+      if (cursor === 'latest') this.cancelled = true
+      return { cursor: 'latest' }
+    },
+  }
+  await watchSyncChanges(client, async () => { changes++ }, () => true, {
+    waitForPendingSync: async () => cursors.length === 1,
+    sleep: async () => {},
+  })
+  assert.deepEqual(cursors, ['', '', '', 'latest'])
+  assert.equal(changes, 1)
+})
+
 test('live sync retries discovery before polling and stops when unsupported or cancelled', async () => {
   const delays = []
   let attempts = 0

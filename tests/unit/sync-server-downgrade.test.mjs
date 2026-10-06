@@ -30,7 +30,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -54,6 +54,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const storedReceipts = new Map()
   const common = {
     ...syncLive,
+    ...(connectionChanges ? {
+      SyncLiveConnectionState: class extends syncLive.SyncLiveConnectionState {
+        setConnected(value) {
+          connectionChanges.push(value)
+          super.setConnected(value)
+        }
+      },
+    } : {}),
     ...(reminderService ? {
       syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
       SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
@@ -80,6 +88,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     ...(browser ? { window: new EventTarget(), document: new EventTarget(), isAppHidden: () => false } : {}),
     ...(desktopTabs ? { window: { ftElectron: { tabs: desktopTabs } }, localStorage: { getItem: key => storedReceipts.get(key) ?? null, setItem: (key, value) => storedReceipts.set(key, value) } } : {}),
     crypto,
+    Date,
     URL,
     Headers,
     Response,
@@ -258,6 +267,39 @@ for (const [collection, idKey, setting, capability] of [
   ['seenVideos', 'videoId', 'subscriptionSeenVideos', 'seen_videos'],
   ['seenPosts', 'postId', 'subscriptionSeenPosts', 'seen_posts'],
 ]) {
+  test(`a live check discovers newly supported ${collection} before consuming its revision`, async () => {
+    let supported = false
+    const f = fixture({
+      syncServerSyncSubscriptions: false,
+      syncServerSyncHistory: true,
+      [setting]: '[]',
+    }, {
+      encrypted: true,
+      respond: async url => {
+        if (url.endsWith('/health')) return { capabilities: {
+          encrypted_sync: 1, live_sync: 1, seen_videos: 1, seen_posts: 1,
+          [capability]: supported ? 1 : 0,
+        } }
+        if (url.endsWith('/encrypted_sync')) return {
+          collections: supported ? [{ collection, revision: 1 }] : [], legacy_data: false,
+        }
+        if (supported && url.endsWith(`/encrypted_sync/${collection}`)) return {
+          revision: 1,
+          payload: await privacy.encryptSyncDocument([{ [idKey]: 'peer-entry', seenAt: 1000 }],
+            f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        }
+      },
+    })
+    await f.actions.syncWithSyncServer(f.context)
+    supported = true
+    await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+    assert.equal(JSON.parse(f.settings[setting])[0]?.[idKey], 'peer-entry')
+    assert.equal(f.requests.filter(request => request.url.endsWith('/health')).length, 2)
+    await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+    assert.equal(f.requests.filter(request => request.url.endsWith('/health')).length, 2,
+      'positive capabilities remain reusable after the upgrade')
+  })
+
   for (const historyEnabled of [false, true]) {
     for (const supported of [false, true]) {
       test(`${collection} sync requires history enabled=${historyEnabled} and server support=${supported}`, async () => {
@@ -846,6 +888,151 @@ test('startup and its own live notifications produce only one visible sync', asy
   assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 1)
   assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
   assert.equal(f.dispatched.filter(([action]) => action === 'updateSyncServerSnapshot').length, 1)
+  assert.equal(f.requests.filter(request => request.url.endsWith('/health')).length, 2,
+    'discover support once for the full sync and once for the live listener')
+})
+
+test('a failed pending local sync does not back off or skip the live change check', async () => {
+  let releaseFailure
+  let reachedSync
+  let reachedPoll
+  let polls = 0
+  let manifests = 0
+  const connectionChanges = []
+  const syncReached = new Promise(resolve => { reachedSync = resolve })
+  const pollReached = new Promise(resolve => { reachedPoll = resolve })
+  const f = fixture({ syncServerSyncSubscriptions: false }, {
+    encrypted: true,
+    connectionChanges,
+    respond: url => {
+      const path = new URL(url).pathname
+      if (path === '/v1/encrypted_sync' && ++manifests === 1) {
+        reachedSync()
+        return new Promise(resolve => { releaseFailure = resolve })
+      }
+      if (path === '/v1/encrypted_sync/changes') {
+        reachedPoll()
+        if (++polls === 3) queueMicrotask(() => f.actions.stopSyncServerLive())
+        return { cursor: 'peer-change' }
+      }
+    },
+  })
+  const syncing = f.actions.syncWithSyncServer(f.context)
+  const failed = assert.rejects(syncing, /Local sync unavailable/)
+  await syncReached
+  const listening = f.actions.startSyncServerLive(f.context)
+  try {
+    await pollReached
+    // Let the listener capture the still-pending local sync before it fails.
+    await new Promise(resolve => setImmediate(resolve))
+    releaseFailure(new Response('Local sync unavailable', { status: 503 }))
+    await failed
+    await listening
+    assert.deepEqual(connectionChanges, [true, false], 'the live poll disconnects only when stopped')
+    assert.equal(manifests, 2, 'the peer change is checked immediately after the local failure')
+    assert.equal(f.dispatched.filter(([action, options]) =>
+      action === 'syncWithSyncServer' && options?.remoteOnly).length, 1)
+  } finally {
+    f.actions.stopSyncServerLive()
+    releaseFailure(new Response('Local sync unavailable', { status: 503 }))
+    await failed
+    await listening
+  }
+})
+
+test('a full sync refreshes capabilities reused by subsequent live checks', async () => {
+  let upgraded = false
+  let releasePoll
+  let reachedPoll
+  const pollReached = new Promise(resolve => { reachedPoll = resolve })
+  const f = fixture({ syncServerSyncSubscriptions: false }, {
+    encrypted: true,
+    respond: (url) => {
+      if (url.endsWith('/health')) return { capabilities: {
+        encrypted_sync: 1, live_sync: 1, watch_stats: upgraded ? 1 : 0, live_reminders: upgraded ? 1 : 0,
+      } }
+      if (new URL(url).pathname === '/v1/encrypted_sync/changes') {
+        reachedPoll()
+        return new Promise(resolve => { releasePoll = resolve })
+      }
+    },
+  })
+  const listening = f.actions.startSyncServerLive(f.context)
+  try {
+    await pollReached
+    upgraded = true
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.state.syncServerWatchStatsSupported, true)
+    assert.equal(f.context.state.syncServerLiveRemindersSupported, true)
+    await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+    assert.equal(f.context.state.syncServerWatchStatsSupported, true)
+    assert.equal(f.context.state.syncServerLiveRemindersSupported, true)
+    assert.equal(f.requests.filter(request => request.url.endsWith('/health')).length, 2)
+  } finally {
+    f.actions.stopSyncServerLive()
+    releasePoll({ cursor: 'latest' })
+    await listening
+  }
+})
+
+test('remote capability discovery expires and remains isolated by server and token', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 1000000 })
+  const f = fixture({ syncServerSyncSubscriptions: false }, { encrypted: true })
+  const check = () => f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  const discoveries = () => f.requests.filter(request => request.url.endsWith('/health')).length
+  await check()
+  await check()
+  assert.equal(discoveries(), 1)
+  t.mock.timers.tick(5 * 60 * 1000)
+  await check()
+  assert.equal(discoveries(), 2)
+  f.settings.syncServerToken = 'another-token'
+  await check()
+  assert.equal(discoveries(), 3)
+  f.settings.syncServerUrl = 'https://another-sync.example'
+  await check()
+  assert.equal(discoveries(), 4)
+})
+
+test('an older live discovery cannot overwrite a newer full-sync capability result', async () => {
+  let discoveries = 0
+  let releaseDiscovery
+  let reachedDiscovery
+  let releasePoll
+  let reachedPoll
+  const discoveryReached = new Promise(resolve => { reachedDiscovery = resolve })
+  const pollReached = new Promise(resolve => { reachedPoll = resolve })
+  const f = fixture({ syncServerSyncSubscriptions: false }, {
+    encrypted: true,
+    respond: url => {
+      if (url.endsWith('/health')) {
+        if (++discoveries === 1) {
+          reachedDiscovery()
+          return new Promise(resolve => { releaseDiscovery = resolve })
+        }
+        return { capabilities: { encrypted_sync: 1, live_sync: 1, watch_stats: 1, live_reminders: 1 } }
+      }
+      if (new URL(url).pathname === '/v1/encrypted_sync/changes') {
+        reachedPoll()
+        return new Promise(resolve => { releasePoll = resolve })
+      }
+    },
+  })
+  const listening = f.actions.startSyncServerLive(f.context)
+  try {
+    await discoveryReached
+    await f.actions.syncWithSyncServer(f.context)
+    releaseDiscovery({ capabilities: { encrypted_sync: 1, live_sync: 1 } })
+    await pollReached
+    await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+    assert.equal(f.context.state.syncServerWatchStatsSupported, true)
+    assert.equal(f.context.state.syncServerLiveRemindersSupported, true)
+    assert.equal(discoveries, 2)
+  } finally {
+    f.actions.stopSyncServerLive()
+    releasePoll?.({ cursor: 'latest' })
+    await listening
+  }
 })
 
 test('an automatic check with no net local change neither uploads nor displays a sync cycle', async () => {
