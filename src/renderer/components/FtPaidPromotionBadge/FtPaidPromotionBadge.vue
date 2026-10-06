@@ -4,7 +4,7 @@
     class="paidPromotionBadge"
     @click.stop="openPaidPromotionHelp"
     @dblclick.stop
-    @keydown.space.stop
+    @keydown.enter.space.stop
   >
     <ft-icon
       :icon="['fas', 'money-check-dollar']"

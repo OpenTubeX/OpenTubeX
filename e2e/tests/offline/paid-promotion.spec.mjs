@@ -8,14 +8,38 @@ test.use({
   seed: {
     settings: {
       currentLocale: 'en-US',
+      videoPlaybackEngine: 'built-in',
+      ytDlpPlaybackEngineDefaultMigration: true,
       externalLinkHandling: 'openLinkAfterPrompt',
       holdToDoublePlaybackSpeed: true
     }
   }
 })
 
-async function openPaidPromotionVideo(app, page) {
+async function openPaidPromotionVideo(app, page, { sponsorBlock = false } = {}) {
   await mockPlayableWatchPage(app, page)
+  if (sponsorBlock) {
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'paid-promotion-sponsor',
+          actionType: 'skip',
+          category: 'sponsor',
+          segment: [15, 20],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }])
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      store.commit('setSponsorBlockSponsor', { color: '#00d400', skip: 'promptToSkip' })
+      store.commit('setSponsorBlockSkippedToastDuration', 15)
+    })
+  }
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
   const watch = await page.evaluateHandle(findWatchComponent)
@@ -82,6 +106,52 @@ test('paid promotion badge respects every external link opening policy', async (
   await expect(prompt).toBeHidden()
   await expect(video).toHaveJSProperty('paused', true)
 })
+
+for (const noticeType of ['prompt', 'toast']) {
+  test(`Enter activates paid promotion confirmation with an active SponsorBlock ${noticeType}`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.paidPromotionExternalUrls = []
+      shell.openExternal = async url => {
+        globalThis.paidPromotionExternalUrls.push(url)
+      }
+    })
+    const openedUrls = () => app.electronApp.evaluate(() => globalThis.paidPromotionExternalUrls)
+    const video = await openPaidPromotionVideo(app, page, { sponsorBlock: true })
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player.locator('.sponsorBlockMarker')).toHaveCount(1)
+    await video.evaluate(element => {
+      element.currentTime = 16
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    const noticeAction = player.locator('.unskipButton')
+    await expect(noticeAction).toHaveText('Skip (Enter)')
+    if (noticeType === 'toast') {
+      await noticeAction.click()
+      await expect(noticeAction).toHaveText('Unskip (Enter)')
+    }
+    const playbackTime = noticeType === 'prompt' ? 16 : 20
+    const actionLabel = noticeType === 'prompt' ? 'Skip (Enter)' : 'Unskip (Enter)'
+    const badge = page.locator('.paidPromotionBadge')
+    const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+
+    await badge.click()
+    await expect(prompt).toBeVisible()
+    await prompt.getByRole('button', { name: 'No', exact: true }).press('Enter')
+    await expect(prompt).toBeHidden({ timeout: 3000 })
+    expect(await openedUrls()).toEqual([])
+    await expect(video).toHaveJSProperty('currentTime', playbackTime)
+    await expect(noticeAction).toHaveText(actionLabel)
+
+    await badge.press('Enter')
+    await expect(prompt).toBeVisible()
+    await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).press('Enter')
+    await expect(prompt).toBeHidden()
+    await expect.poll(openedUrls).toEqual([helpUrl])
+    await expect(video).toHaveJSProperty('currentTime', playbackTime)
+    await expect(video).toHaveJSProperty('paused', true)
+    await expect(noticeAction).toHaveText(actionLabel)
+  })
+}
 
 test('releasing held Space over the paid promotion badge or prompt restores playback speed', async ({ app, page }) => {
   const video = await openPaidPromotionVideo(app, page)
