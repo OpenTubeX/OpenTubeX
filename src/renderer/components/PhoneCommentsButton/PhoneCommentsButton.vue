@@ -1,10 +1,6 @@
 <template>
   <div
     class="phonePanelButton phoneCommentsButton"
-    @focusin="focused = true"
-    @focusout="focused = $event.currentTarget.contains($event.relatedTarget)"
-    @pointerenter="hovered = $event.pointerType === 'mouse'"
-    @pointerleave="hovered = false"
   >
     <button
       type="button"
@@ -101,8 +97,6 @@ const previews = computed(() => props.comments.slice(0, 5))
 const currentIndex = ref(0)
 const currentComment = computed(() => previews.value[currentIndex.value])
 const hideCommentPhotos = computed(() => store.getters.getHideCommentPhotos)
-const focused = ref(false)
-const hovered = ref(false)
 const documentVisible = ref(!document.hidden)
 const { isTabPresented } = useTabContext()
 const systemReducedMotion = usePhoneLayout('(prefers-reduced-motion: reduce)')
@@ -119,8 +113,8 @@ watch(previewIds, () => {
   currentIndex.value = 0
 })
 
-watch([previewIds, () => previews.value.length > 1 && !focused.value && !hovered.value &&
-  !props.panelOpen && !reducedMotion.value && documentVisible.value && isTabPresented?.value !== false],
+watch([previewIds, () => previews.value.length > 1 && !reducedMotion.value &&
+  documentVisible.value && isTabPresented?.value !== false],
 ([, rotate], _, onCleanup) => {
   if (!rotate) return
   const timer = setInterval(() => {
