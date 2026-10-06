@@ -132,7 +132,7 @@
         :placeholder="t('Settings.Search Settings')"
         :show-label="false"
         :show-action-button="false"
-        @input="settingsSearchQuery = $event; handleSettingsSearch()"
+        @input="handleSettingsSearch"
       />
       <div class="settingsHeaderActions">
         <button
@@ -1190,9 +1190,9 @@ function getSearchTargetText(element) {
   return normalizeSearchText(clone.textContent.trim())
 }
 
-function handleSettingsSearch(event) {
-  // Search uncommitted text too: Android keyboards compose until a word ends.
-  settingsSearchQuery.value = event.target.value
+function handleSettingsSearch(value) {
+  // FtInput emits the current text even while the keyboard is composing.
+  settingsSearchQuery.value = value
   closeSubpage?.()
   subpageTitle.value = ''
   subpageIcon.value = null
