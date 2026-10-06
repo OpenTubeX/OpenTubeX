@@ -155,7 +155,12 @@ for (const zoom of [1, 0.95]) {
     await page.setViewportSize({ width: Math.round(480 / zoom), height: Math.round(800 / zoom) })
     await watch.evaluate(vm => { vm.videoDescription = 'Description line\n'.repeat(30); vm.videoDescriptionHtml = '' })
     const preview = page.locator('.phoneDescriptionPreview')
-    await expect.poll(() => preview.evaluate(el => el.getBoundingClientRect().height)).toBeLessThan(110)
+    await expect(preview).toHaveClass(/short/)
+    const descriptionScroll = preview.locator('.descriptionScroll')
+    await expect.poll(() => preview.locator('.description').evaluate(el =>
+      el.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(el).lineHeight)
+    )).toBeCloseTo(5, 1)
+    expect(await descriptionScroll.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
     await expect(page.locator('.watchVideoPlaylist')).toBeHidden()
     await page.locator('.phonePlaylistButton').click()
     const sheet = page.locator('.dockedSheet[open]')
