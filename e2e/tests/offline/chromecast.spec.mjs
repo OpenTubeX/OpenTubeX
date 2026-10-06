@@ -110,6 +110,38 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
+test('receiver buffering does not accumulate watched time and returns to playing locally', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(async vm => {
+    await vm.$store.dispatch('updateEnableWatchStats', true)
+    await vm.$store.dispatch('updateRememberHistory', true)
+    vm.$refs.player.play()
+  })
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  await app.electronApp.evaluate(() => { globalThis.castTest.state.buffering = true })
+  await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(true)
+  await watch.evaluate(vm => { vm.pendingWatchTimeByDate = {}; vm.watchTimeLastTick = null })
+  const before = await app.electronApp.evaluate(() => globalThis.castTest.statusCalls)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.statusCalls)).toBeGreaterThanOrEqual(before + 2)
+  expect(await watch.evaluate(vm => Object.values(vm.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0))).toBe(0)
+  expect(await watch.evaluate(vm => vm.watchTimeLastTick)).toBe(null)
+  expect(await watch.evaluate(vm => vm.chromecastStatus.paused)).toBe(false)
+
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.state.buffering = false
+    globalThis.castTest.state.currentTime = 18
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(false)
+  await expect.poll(() => watch.evaluate(vm => Object.values(vm.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0))).toBeGreaterThan(0)
+  await app.electronApp.evaluate(() => { globalThis.castTest.state.buffering = true })
+  await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus?.buffering)).toBe(true)
+  await choice(page, 'Return to local playback')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(18)
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+})
+
 for (const outcome of ['playing', 'paused', 'stop failure']) {
   test(`removing the Cast control restores local playback after ${outcome}`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)

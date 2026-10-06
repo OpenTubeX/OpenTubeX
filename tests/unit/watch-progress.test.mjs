@@ -14,6 +14,47 @@ const timestampMethods = runInNewContext(`({
   ${source.slice(source.indexOf('    getWatchedProgress:'), source.indexOf('    getPlaylistState:'))}
 })`)
 
+test('receiver buffering resets watched-time accounting without changing pause state', () => {
+  let now = Date.now()
+  class Clock extends Date {
+    static now() { return now }
+  }
+  const methods = runInNewContext(`({
+    ${source.slice(source.indexOf('    isPlaybackPaused()'), source.indexOf('    handleChromecastState('))}
+    ${source.slice(source.indexOf('    trackWatchTime()'), source.indexOf('    async flushWatchTime()'))}
+  })`, { Date: Clock })
+  const view = {
+    ...methods, rememberHistory: true, enableWatchStats: true,
+    chromecastStatus: { paused: false, buffering: false },
+    watchTimeLastTick: null, pendingWatchTimeByDate: {}, flushWatchTime() {},
+  }
+  const total = () => Object.values(view.pendingWatchTimeByDate).reduce((sum, value) => sum + value, 0)
+  view.trackWatchTime()
+  now += 1000
+  view.trackWatchTime()
+  assert.equal(total(), 1000)
+  view.chromecastStatus.buffering = true
+  assert.equal(view.isPlaybackPaused(), false)
+  for (let i = 0; i < 6; i++) {
+    now += 1000
+    view.trackWatchTime()
+    assert.equal(view.watchTimeLastTick, null)
+    assert.equal(total(), 1000)
+  }
+  view.chromecastStatus.buffering = false
+  now += 1000
+  view.trackWatchTime()
+  assert.equal(total(), 1000, 'Resuming does not count the stalled interval')
+  now += 1000
+  view.trackWatchTime()
+  assert.equal(total(), 2000)
+  view.chromecastStatus.paused = true
+  now += 1000
+  view.trackWatchTime()
+  assert.equal(total(), 2000)
+  assert.equal(view.watchTimeLastTick, null)
+})
+
 test('timestamp actions use the active receiver position and return to local playback', () => {
   const view = {
     ...timestampMethods, isLoading: false, chromecastActive: true, chromecastStatus: { currentTime: 28.75 },

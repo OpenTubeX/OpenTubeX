@@ -4668,7 +4668,7 @@ export default defineComponent({
       }
     },
     trackWatchTime() {
-      if (!this.rememberHistory || !this.enableWatchStats || this.isPlaybackPaused()) {
+      if (!this.rememberHistory || !this.enableWatchStats || this.isPlaybackPaused() || this.chromecastStatus?.buffering) {
         this.watchTimeLastTick = null
         return
       }

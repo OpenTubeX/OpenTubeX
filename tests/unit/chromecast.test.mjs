@@ -132,6 +132,23 @@ test('Cast owns a suspension blocker only during receiver playback and buffering
   assert.deepEqual(stops, [0, 1])
 })
 
+test('Cast exposes buffering separately from the receiver pause state', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const result = await manager.start(42, payload)
+  assert.ok(result.castId)
+  const cast = manager.active
+  cast.sender.send = async () => ({})
+  for (const [playerState, paused, buffering] of [
+    ['PLAYING', false, false], ['BUFFERING', false, true], ['PAUSED', true, false]
+  ]) {
+    cast.sender.emit('message', CAST_MEDIA, { type: 'MEDIA_STATUS', status: [{ mediaSessionId: cast.mediaSessionId, playerState }] })
+    const status = await manager.status(42, result.castId)
+    assert.equal(status.paused, paused, playerState)
+    assert.equal(status.buffering, buffering, playerState)
+  }
+})
+
 for (const cleanup of ['stop', 'disconnect', 'empty status', 'replaced media', 'status timeout']) {
   test(`Cast releases its suspension blocker once on ${cleanup}`, async t => {
     const ids = new Set()

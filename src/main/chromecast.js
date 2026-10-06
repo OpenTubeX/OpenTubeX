@@ -21,6 +21,7 @@ function mediaState(status) {
     currentTime: Number.isFinite(status.currentTime) ? status.currentTime : 0,
     duration: Number.isFinite(status.media?.duration) ? status.media.duration : 0,
     paused: status.playerState === 'PAUSED' || status.playerState === 'IDLE',
+    buffering: status.playerState === 'BUFFERING',
     ended: status.playerState === 'IDLE' && status.idleReason === 'FINISHED',
     volume: status.volume?.level ?? 1,
     muted: status.volume?.muted ?? false,
