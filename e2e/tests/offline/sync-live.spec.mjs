@@ -98,7 +98,14 @@ test.describe('automatic sync efficiency', () => {
       }
       return route.fulfill({ json: saved ?? collections.get(collection) ?? { revision: 0, payload: null } })
     })
+    const advanceDebounce = async () => {
+      await page.clock.fastForward(2000)
+      // Timer callbacks can enqueue an async sync. Wait behind its lock so the
+      // request assertions also cover that work, rather than just the timer.
+      await page.evaluate(() => navigator.locks.request('opentubex-sync-server', () => {}))
+    }
     try {
+      await page.clock.install()
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
       await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
@@ -113,7 +120,7 @@ test.describe('automatic sync efficiency', () => {
       await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .getters.getProfileList.find(profile => profile._id === 'allChannels').subscriptions[0].name)).toBe('Refreshed channel')
       // Observe beyond the 1.5-second scheduling debounce to catch unwanted work.
-      await page.waitForTimeout(2000)
+      await advanceDebounce()
       expect(requests.filter(request => request.path !== '/v1/encrypted_sync/changes')).toEqual([])
 
       holdUploads = true
@@ -146,7 +153,7 @@ test.describe('automatic sync efficiency', () => {
         discoveries: requests.filter(request => request.path === '/health').length,
       })).toEqual({ uploads: 2, manifests: 2, discoveries: 1 })
       // Once the expected work finishes, watch for an extra scheduled check.
-      await page.waitForTimeout(2000)
+      await advanceDebounce()
       expect(requests.filter(request => request.method === 'PUT').map(request => request.path)).toEqual([
         '/v1/encrypted_sync/subscriptions', '/v1/encrypted_sync/settings',
       ])
