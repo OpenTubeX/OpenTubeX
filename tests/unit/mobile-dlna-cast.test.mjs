@@ -229,6 +229,25 @@ test('recovery uses the renderer position plus the merged source offset', async 
   assert.match(setup.calls.at(-1).body, /<Target>00:01:13<\/Target>/)
 })
 
+test('recovery uses the native keyframe base rather than the requested start', async () => {
+  for (const baseSeconds of [60, 0]) {
+    const setup = fixture()
+    const request = setup.native.request
+    setup.native.request = async options => {
+      const result = await request(options)
+      return options.headers?.SOAPACTION?.includes('#GetPositionInfo')
+        ? { ...result, body: '<response><RelTime>00:00:10</RelTime></response>' }
+        : result
+    }
+    await setup.cast.discover()
+    await setup.cast.start({ ...payload, startSeconds: 65, audioUrl: 'https://media.example/audio.m4a' })
+    setup.native.hasFailed = async () => ({ failed: true, baseSeconds })
+    assert.ok((await setup.cast.recover('cast-1', { ...payload, startSeconds: 65 })).castId)
+    assert.match(setup.calls.at(-1).body, new RegExp(`<Target>00:${baseSeconds === 60 ? '01:10' : '00:10'}<\\/Target>`))
+    await setup.cast.stop('cast-1')
+  }
+})
+
 
 test('renderer position parsing accepts valid SOAP time and rejects unavailable or malformed values', () => {
   assert.equal(parseDlnaPosition('<response><RelTime>01:02:03.5</RelTime></response>'), 3723.5)
