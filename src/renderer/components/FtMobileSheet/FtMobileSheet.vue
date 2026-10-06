@@ -255,10 +255,12 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       }
       measurePlayer()
       element.show()
-      animation = applyAnimationSpeed(element.animate([
-        { transform: 'translateY(100%)' },
-        { transform: 'translateY(0)' }
-      ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, easing: 'ease-out' }))
+      if (!presentationSuspended) {
+        animation = applyAnimationSpeed(element.animate([
+          { transform: 'translateY(100%)' },
+          { transform: 'translateY(0)' }
+        ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, easing: 'ease-out' }))
+      }
       resize = new ResizeObserver(measurePlayer)
       if (player) resize.observe(player)
       observeInlinePlayer()

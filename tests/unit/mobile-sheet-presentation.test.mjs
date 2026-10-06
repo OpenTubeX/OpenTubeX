@@ -322,6 +322,50 @@ for (const mode of ['browser', 'fullwindow']) {
   })
 }
 
+for (const expanded of [false, true]) {
+  test(`returning to the app restores ${expanded ? 'an expanded' : 'a docked'} sheet without replaying its entry animation`, async t => {
+    const sheet = mountSheet(t)
+    sheet.props.open = true
+    await sheet.settle()
+    sheet.state.expanded.value = expanded
+    const count = sheet.animations.length
+    for (let cycle = 0; cycle < 2; cycle++) {
+      sheet.document.hidden = true
+      sheet.document.dispatchEvent(new Event('visibilitychange'))
+      await sheet.settle()
+      assert.equal(sheet.element.open, false)
+      sheet.document.hidden = false
+      sheet.document.dispatchEvent(new Event('visibilitychange'))
+      await sheet.settle()
+      assert.equal(sheet.element.open, true)
+      assert.equal(sheet.state.expanded.value, expanded)
+      assert.equal(sheet.animations.length, count, 'resuming must not start another entry animation')
+    }
+    assert.deepEqual(sheet.events.map(([event]) => event), ['suspend', 'resume', 'suspend', 'resume'])
+    sheet.props.open = false
+    await sheet.settle()
+    sheet.props.open = true
+    await sheet.settle()
+    assert.equal(sheet.animations.length, count + 2, 'explicitly closing and reopening must still animate')
+  })
+}
+
+test('a sheet first opened while the app is hidden animates when the app returns', async t => {
+  const sheet = mountSheet(t)
+  sheet.document.hidden = true
+  sheet.document.dispatchEvent(new Event('visibilitychange'))
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.element.open, false)
+  assert.equal(sheet.animations.length, 0)
+  sheet.document.hidden = false
+  sheet.document.dispatchEvent(new Event('visibilitychange'))
+  await sheet.settle()
+  assert.equal(sheet.element.open, true)
+  assert.equal(sheet.animations.length, 1)
+  assert.deepEqual(sheet.events, [])
+})
+
 test('a transient landscape viewport while hidden does not maximize the returning panel', async t => {
   const sheet = mountSheet(t)
   sheet.props.open = true
