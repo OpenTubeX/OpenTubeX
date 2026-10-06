@@ -13,6 +13,8 @@
 .streamPlaceholder {
   background-color: #000;
   display: grid;
+  // Thumbnails with a taller aspect ratio must not grow the row past the player.
+  grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
   place-items: center;
 
