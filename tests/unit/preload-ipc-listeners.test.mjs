@@ -72,6 +72,37 @@ test('queued automatic rule writers reject invalid values without invoking IPC',
   assert.equal(writes, 0)
 })
 
+test('Cast start checks activation before asynchronous payload preparation and invokes IPC once', async () => {
+  const { api, ipcRenderer, IpcChannels, userActivation } = await loadPreloadInterface()
+  const invocations = []
+  ipcRenderer.invoke = (...args) => { invocations.push(args); return Promise.resolve({ castId: 'cast-1' }) }
+  let complete
+  let preparations = 0
+  userActivation.isActive = true
+  const pending = api.chromecast.start(() => {
+    preparations++
+    return new Promise(resolve => { complete = resolve })
+  })
+  assert.equal(preparations, 1)
+  assert.equal(invocations.length, 0)
+  userActivation.isActive = false
+  const payload = { deviceId: 'tv', captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT' }], startSeconds: 18 }
+  complete(payload)
+  assert.equal((await pending).castId, 'cast-1')
+  assert.deepEqual(invocations, [[IpcChannels.CAST_START, payload]])
+})
+
+test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {
+  const { api, ipcRenderer, userActivation } = await loadPreloadInterface()
+  ipcRenderer.invoke = () => assert.fail('Preparation must not start a receiver')
+  let preparations = 0
+  assert.match((await api.chromecast.start(() => { preparations++; return {} })).error, /user action/)
+  assert.equal(preparations, 0)
+  userActivation.isActive = true
+  assert.match((await api.chromecast.start(() => null)).error, /cancelled/)
+  await assert.rejects(api.chromecast.start(async () => { throw new Error('Caption failed') }), /Caption failed/)
+})
+
 test('player IPC subscriptions share one Electron listener per channel', async () => {
   const { api, ipcRenderer, IpcChannels } = await loadPreloadInterface()
   const calls = []

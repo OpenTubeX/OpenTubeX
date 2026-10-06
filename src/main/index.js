@@ -4675,6 +4675,7 @@ function runApp() {
       const authorization = invidiousAuthorizations.get(ownerId)
       if (authorization && isInvidiousInstanceUrl(mediaUrl, authorization.url)) headers.Authorization = authorization.authorization
       Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
+      applyTwitchPlaylistOrigin(url, headers)
       const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
       if (cookies !== null) headers.Cookie = cookies
       return headers

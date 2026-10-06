@@ -8,7 +8,7 @@ import { isNonPublicNetworkAddress } from './utils.js'
 const MAX_MANIFEST_SIZE = 2_000_000
 export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
 const MAX_RESOURCES = 65_536
-const HLS_RESOURCE_GRACE_MS = 120_000
+const MIN_RESOURCE_GRACE_MS = 120_000
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
@@ -100,7 +100,7 @@ function httpUrl(value, base) {
 }
 
 /** Rewrites resource URLs while retaining DASH ranges and segment templates. */
-export function rewriteCastDash(xml, base, register, dashContext) {
+export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
   if (xml.length > MAX_MANIFEST_SIZE) throw new Error('Cast manifest is too large')
   const parser = sax.parser(true)
   const root = { children: [] }
@@ -115,9 +115,11 @@ export function rewriteCastDash(xml, base, register, dashContext) {
   parser.oncdata = parser.ontext
   parser.ondoctype = () => { throw new Error('Unsupported Cast manifest doctype') }
   parser.write(xml).close()
-  if (root.children.find(node => typeof node !== 'string')?.name.split(':').at(-1) !== (dashContext?.rootName ?? 'MPD')) {
+  const documentRoot = root.children.find(node => typeof node !== 'string')
+  if (documentRoot?.name.split(':').at(-1) !== (dashContext?.rootName ?? 'MPD')) {
     throw new Error('Invalid Cast DASH manifest')
   }
+  onRoot?.(documentRoot.attributes)
   function resolveUrls(values, bases) {
     const urls = new Set()
     for (const value of values) {
@@ -231,8 +233,21 @@ function hlsResourceGrace(text) {
   }
   // Include a full playlist plus a segment, and at least three target durations
   // for partial segments. The minimum also covers delayed receiver requests.
-  const graceMs = Math.max(HLS_RESOURCE_GRACE_MS, (duration + longest) * 1000, target * 3000)
+  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS, (duration + longest) * 1000, target * 3000)
   if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast HLS duration')
+  return graceMs
+}
+
+function dashResourceGrace(attributes) {
+  function duration(value) {
+    const match = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value ?? '')
+    // Calendar units use their longest duration to keep retirement conservative.
+    const seconds = [366 * 86400, 31 * 86400, 86400, 3600, 60, 1]
+    return match ? match.slice(1).reduce((total, part, index) => total + Number(part ?? 0) * seconds[index], 0) * 1000 : 0
+  }
+  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS,
+    duration(attributes.timeShiftBufferDepth) + duration(attributes.maxSegmentDuration) + 2 * duration(attributes.minimumUpdatePeriod))
+  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast DASH duration')
   return graceMs
 }
 
@@ -241,12 +256,13 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
   const resources = new Map()
   const resourceIds = new Map()
   let nextResourceId = 0
+  let currentDashManifest = null
   let origin
   function collectExpiredResources() {
     // Follow session roots and active requests. Rendition-report cycles also
     // become unreachable when their parent playlist drops them.
     const reachable = new Set()
-    const pending = [...resources.values()].filter(resource => resource.persistent || resource.active).map(resource => resource.id)
+    const pending = [...resources.values()].filter(resource => resource.persistent || resource.active || resource === currentDashManifest).map(resource => resource.id)
     while (pending.length) {
       const id = pending.pop()
       if (reachable.has(id)) continue
@@ -304,7 +320,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         hlsVariables,
         dashContext,
         references: new Set(),
-        graceMs: HLS_RESOURCE_GRACE_MS,
+        graceMs: MIN_RESOURCE_GRACE_MS,
         active: 0,
         persistent: false
       })
@@ -397,18 +413,29 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       clearTimeout(timeout)
       if (data !== undefined) {
         const references = new Set()
-        const hls = contentType !== 'text/vtt' && contentType !== 'application/dash+xml'
-        if (hls) collectExpiredResources()
+        const isManifest = contentType !== 'text/vtt'
+        const dash = contentType === 'application/dash+xml'
+        let dashAttributes
+        const registerResource = (value, type, variables, context) => register(value, type, variables, context, references)
+        if (isManifest) collectExpiredResources()
         const rewritten = contentType === 'text/vtt'
           ? data
-          : contentType === 'application/dash+xml'
-            ? rewriteCastDash(data, url?.href, register, resource.dashContext)
-            : rewriteCastHls(data, url.href, (value, type, variables) => register(value, type, variables, undefined, references), resource.hlsVariables)
-        if (hls) {
-          const graceMs = hlsResourceGrace(data)
+          : dash
+            ? rewriteCastDash(data, url?.href, registerResource, resource.dashContext, attributes => { dashAttributes = attributes })
+            : rewriteCastHls(data, url.href, registerResource, resource.hlsVariables)
+        if (isManifest) {
+          const graceMs = dash
+            ? resource.dashContext ? resource.graceMs : dashResourceGrace(dashAttributes)
+            : hlsResourceGrace(data)
           for (const id of references) {
             const child = resources.get(id)
             child.graceMs = Math.max(child.graceMs, graceMs)
+          }
+          if (dash && !resource.dashContext) {
+            // Location advances the full MPD rather than keeping a chain of
+            // obsolete manifests and all their old segment windows reachable.
+            if (currentDashManifest && currentDashManifest !== resource) currentDashManifest.references.clear()
+            currentDashManifest = resource
           }
           resource.references = references
           collectExpiredResources()

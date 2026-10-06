@@ -213,28 +213,30 @@ async function handleChoice(choice) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
     const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
-    captions = await Promise.all(captions.map(async caption => ({
-      ...caption, url: await getSubtitleRequestUrl(caption.url, store.getters)
-    })))
-    if (disposed) return
-    const player = props.getPlayer()
-    watchPath = route.path
-    const paused = player?.isPaused() ?? true
-    if (!paused) {
-      resumePlayer = player
-      player.pause()
-    }
-    const startSeconds = player?.getCurrentTime() ?? 0
-    const result = await window.ftElectron.chromecast.start({
-      deviceId: choice.slice(7),
-      invidiousInstanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
-      source: source.value,
-      title: props.title,
-      startSeconds,
-      paused,
-      captions,
-      captionIndex,
-      isLive: props.isLive
+    let player
+    const result = await window.ftElectron.chromecast.start(async () => {
+      captions = await Promise.all(captions.map(async caption => ({
+        ...caption, url: await getSubtitleRequestUrl(caption.url, store.getters)
+      })))
+      if (disposed) return null
+      player = props.getPlayer()
+      watchPath = route.path
+      const paused = player?.isPaused() ?? true
+      if (!paused) {
+        resumePlayer = player
+        player.pause()
+      }
+      return {
+        deviceId: choice.slice(7),
+        invidiousInstanceUrl: store.getters.getCurrentInvidiousInstanceUrl,
+        source: source.value,
+        title: props.title,
+        startSeconds: player?.getCurrentTime() ?? 0,
+        paused,
+        captions,
+        captionIndex,
+        isLive: props.isLive
+      }
     })
     if (result.error) throw new Error(result.error)
     if (disposed || route.path !== watchPath || props.getPlayer() !== player) {

@@ -603,6 +603,69 @@ test('live HLS refreshes reclaim retired parts beyond the session resource budge
   assert.equal(await (await fetch(third)).text(), '/part-2-0')
 })
 
+test('dynamic DASH Location refreshes retire old media windows beyond the session budget', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  const upstream = createServer((request, response) => {
+    const generation = request.url.match(/^\/manifests\/(\d+)\.mpd$/)?.[1]
+    if (generation !== undefined) {
+      const segments = Array.from({ length: 32_740 }, (_, index) => `<SegmentURL media="segment-${index}.m4s"/>`).join('')
+      return response.end(`<MPD type="dynamic" timeShiftBufferDepth="PT10S" maxSegmentDuration="PT1S"><Location>${Number(generation) + 1}.mpd</Location><BaseURL>/media/${generation}/</BaseURL><Period><AdaptationSet><Representation><SegmentList>${segments}</SegmentList></Representation></AdaptationSet></Period></MPD>`)
+    }
+    response.end(request.url)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/manifests/0.mpd`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  async function refresh(url) {
+    const response = await fetch(url)
+    assert.equal(response.status, 200)
+    const xml = await response.text()
+    return { next: xml.match(/<Location>([^<]+)<\/Location>/)[1], segment: xml.match(/<SegmentURL media="([^"]+)"/)[1] }
+  }
+  const first = await refresh(media.mediaUrl())
+  t.mock.timers.setTime(121_000)
+  const second = await refresh(first.next)
+  assert.equal(await (await fetch(first.segment)).text(), '/media/0/segment-0.m4s')
+  t.mock.timers.setTime(242_000)
+  const third = await refresh(second.next)
+  assert.equal((await fetch(first.segment)).status, 404)
+  assert.equal(await (await fetch(second.segment)).text(), '/media/1/segment-0.m4s')
+  assert.equal(await (await fetch(third.segment)).text(), '/media/2/segment-0.m4s')
+  t.mock.timers.setTime(363_000)
+  await refresh(third.next)
+  assert.equal((await fetch(first.next)).status, 404, 'obsolete Location registrations retire too')
+})
+
+test('DASH fragments inherit the MPD time-shift window and update grace', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  let generation = 0
+  const upstream = createServer((request, response) => {
+    if (request.url === '/live.mpd') return response.end(`<MPD xmlns:xlink="http://www.w3.org/1999/xlink" type="dynamic" timeShiftBufferDepth="PT2M30S" maxSegmentDuration="PT1.5S" minimumUpdatePeriod="PT2S"><Period xlink:href="period-${generation}.xml"/></MPD>`)
+    const period = request.url.match(/^\/period-(\d+)\.xml$/)?.[1]
+    if (period !== undefined) return response.end(`<Period><BaseURL>media-${period}/</BaseURL><SegmentList><SegmentURL media="segment.m4s"/></SegmentList></Period>`)
+    response.end(request.url)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/live.mpd` }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  const fragment = (await (await fetch(root)).text()).match(/xlink:href="([^"]+)"/)[1]
+  const segment = (await (await fetch(fragment)).text()).match(/<SegmentURL media="([^"]+)"/)[1]
+  generation++
+  await (await fetch(root)).text()
+  t.mock.timers.setTime(121_000)
+  await (await fetch(root)).text()
+  assert.equal(await (await fetch(segment)).text(), '/media-0/segment.m4s', 'old fragments retain the MPD window beyond minimum grace')
+  t.mock.timers.setTime(156_000)
+  await (await fetch(root)).text()
+  assert.equal((await fetch(fragment)).status, 404)
+  assert.equal((await fetch(segment)).status, 404)
+})
+
 test('HLS retirement preserves shared references, long windows, VOD, captions and active downloads', async t => {
   t.mock.timers.enable({ apis: ['Date'], now: 0 })
   let includeShared = true

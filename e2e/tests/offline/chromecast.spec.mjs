@@ -599,6 +599,36 @@ test('an authenticated Cast caption failure leaves local playback running', asyn
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
 })
 
+test('slow authenticated Cast captions outlive transient activation without losing the click', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  const browserWindow = await app.electronApp.browserWindow(page)
+  const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
+  const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', () => new Promise(resolve => { globalThis.finishCastSubtitle = resolve }))
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await watch.evaluate((vm, url) => {
+    vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
+    vm.$refs.player.play()
+  }, url)
+  await choice(page, 'Test TV')
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishCastSubtitle)).toBe('function')
+  // Renderer-side Playwright evaluation grants a gesture; inspect through
+  // Electron without userGesture so polling cannot refresh activation.
+  await expect.poll(() => browserWindow.evaluate(window => window.webContents.executeJavaScript('navigator.userActivation.isActive', false)), { timeout: 10_000 }).toBe(false)
+  expect(await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").paused', false))).toBe(false)
+  await browserWindow.evaluate(window => window.webContents.executeJavaScript('document.querySelector(".ftVideoPlayer video").currentTime = 18', false))
+  await app.electronApp.evaluate((_, text) => globalThis.finishCastSubtitle(text), text)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
+  expect(started.startSeconds).toBeGreaterThanOrEqual(18)
+  await choice(page, 'Return to local playback')
+})
+
 for (const outcome of ['resolved', 'rejected']) {
   test(`refreshes a ${outcome} Cast source lookup superseded by stream recovery`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)
