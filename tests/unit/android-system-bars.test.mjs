@@ -9,7 +9,7 @@ const updateSource = source.slice(start, source.indexOf('\nfunction updateAppFon
 
 test('Android keeps its native startup surface while temporary settings load', () => {
   const start = source.indexOf('function updateTheme() {')
-  const updateSource = source.slice(start, source.indexOf('\nfunction updateSystemBarsStyle', start))
+  const updateSource = source.slice(start, source.indexOf('\n}\n', start) + 2)
   const applied = []
   const context = vm.createContext({
     isCapacitor: true,
@@ -20,6 +20,7 @@ test('Android keeps its native startup surface while temporary settings load', (
     mainColor: { value: 'Red' }, secColor: { value: 'Blue' },
     store: { getters: { getSystemLightTheme: 'light', getCustomThemes: [] } },
     applyThemeToDocument: theme => applied.push(theme),
+    cacheCapacitorStartupAppearance: () => {},
     updateSystemBarsStyle: () => {}
   })
   const update = vm.runInContext(`${updateSource}\nupdateTheme`, context)
