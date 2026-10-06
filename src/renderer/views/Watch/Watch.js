@@ -17,6 +17,7 @@ import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-
 import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
 import { selectCastSource } from '../../helpers/player/castSource'
 import WatchChromecast from '../../components/WatchChromecast/WatchChromecast.vue'
+import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
@@ -1381,6 +1382,7 @@ export default defineComponent({
     },
   },
   created: function () {
+    retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
     this.isShort = this.tabRoute.query.short === 'true'

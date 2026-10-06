@@ -157,7 +157,7 @@ import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
-import { loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
+import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
@@ -265,7 +265,7 @@ const vertical = computed(() => isVerticalTabBarPosition(tabBarPosition.value))
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
 const migratingAvatarTabIds = new Set()
-let attemptedAutomaticAvatarLoad = false
+const attemptedAutomaticAvatarRoutes = new Map()
 
 watch(showTabPreviews, enabled => {
   if (isElectron) {
@@ -277,12 +277,28 @@ watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
   if (!isElectron) return
 
   window.ftElectron.tabs.setAvatarsEnabled(enabled)
-  if (!enabled) return
-
-  if (!attemptedAutomaticAvatarLoad && currentTabs.length > 0) {
-    attemptedAutomaticAvatarLoad = true
-    loadMissingTabAvatars(currentTabs)
+  if (!enabled) {
+    attemptedAutomaticAvatarRoutes.clear()
+    return
   }
+
+  const currentTabIds = new Set(currentTabs.map(tab => tab.id))
+  for (const tabId of attemptedAutomaticAvatarRoutes.keys()) {
+    if (!currentTabIds.has(tabId)) attemptedAutomaticAvatarRoutes.delete(tabId)
+  }
+
+  // Try each unloaded tab route once, including tabs opened after startup.
+  // Loaded pages fetch and publish their own avatars. Record the
+  // attempt before loading so state updates cannot duplicate pending requests
+  // or repeatedly retry a failed icon; the settings action can retry it.
+  const missingTabs = getMissingTabAvatarTabs(currentTabs).filter(tab => {
+    if (!tab.isUnloaded) return false
+    const routePath = tab.route.path
+    if (attemptedAutomaticAvatarRoutes.get(tab.id) === routePath) return false
+    attemptedAutomaticAvatarRoutes.set(tab.id, routePath)
+    return true
+  })
+  if (missingTabs.length > 0) loadMissingTabAvatars(missingTabs)
 
   for (const tab of currentTabs) {
     const avatarUrl = getTabAvatarUrl(tab)
