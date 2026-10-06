@@ -10,11 +10,13 @@ private final class DlnaTrackReader: NSObject, URLSessionDataDelegate {
     private var session: URLSession!
     private var task: URLSessionDataTask!
     private let offset: UInt64
+    private let authorization: DlnaAuthorization?
 
-    init(_ media: URLRequest, offset: UInt64 = 0) {
+    init(_ media: URLRequest, offset: UInt64 = 0, authorization: DlnaAuthorization? = nil) {
         self.offset = offset
+        self.authorization = authorization?.contains(media.url) == true ? authorization : nil
         super.init()
-        var request = media
+        var request = self.authorization?.apply(media) ?? media
         request.httpMethod = "GET"
         request.setValue("identity", forHTTPHeaderField: "Accept-Encoding")
         request.setValue(offset == 0 ? nil : "bytes=\(offset)-", forHTTPHeaderField: "Range")
@@ -101,7 +103,7 @@ private final class DlnaTrackReader: NSObject, URLSessionDataDelegate {
                 next.setValue(nil, forHTTPHeaderField: name)
             }
         }
-        completionHandler(next)
+        completionHandler(authorization?.apply(next) ?? next)
     }
 }
 
@@ -148,6 +150,7 @@ private struct DlnaBox {
 
 private final class DlnaTrack {
     var reader: DlnaTrackReader
+    let authorization: DlnaAuthorization?
     let request: URLRequest
     var ftyp: DlnaBox!
     var moov: DlnaBox!
@@ -156,7 +159,11 @@ private final class DlnaTrack {
     var index = [(offset: UInt64, time: Double)]()
     private var position: UInt64 = 0
 
-    init(_ request: URLRequest) { self.request = request; reader = DlnaTrackReader(request) }
+    init(_ request: URLRequest, authorization: DlnaAuthorization?) {
+        self.request = request
+        self.authorization = authorization
+        reader = DlnaTrackReader(request, authorization: authorization)
+    }
 
     func box() throws -> DlnaBox? {
         guard let header = try reader.read(8, allowEnd: true) else { return nil }
@@ -253,7 +260,7 @@ final class DlnaMuxer {
         defer { lock.unlock() }
         guard !cancelled else { throw URLError(.cancelled) }
         track.reader.cancel()
-        track.reader = DlnaTrackReader(track.request, offset: offset)
+        track.reader = DlnaTrackReader(track.request, offset: offset, authorization: track.authorization)
     }
 
     private func trimAudio(_ fragment: (DlnaBox, DlnaBox, Double), track: DlnaTrack, base: Double) throws -> (DlnaBox, DlnaBox)? {
@@ -308,11 +315,11 @@ final class DlnaMuxer {
         return (.container("moof", boxes), mdat)
     }
 
-    func stream(video: URLRequest, audio: URLRequest, startSeconds: Double, send: (Data) -> Bool) throws {
+    func stream(video: URLRequest, audio: URLRequest, startSeconds: Double, authorization: DlnaAuthorization? = nil, send: (Data) -> Bool) throws {
         lock.lock()
         guard !cancelled else { lock.unlock(); throw URLError(.cancelled) }
-        let videoTrack = DlnaTrack(video)
-        let audioTrack = DlnaTrack(audio)
+        let videoTrack = DlnaTrack(video, authorization: authorization)
+        let audioTrack = DlnaTrack(audio, authorization: authorization)
         tracks = [videoTrack, audioTrack]
         lock.unlock()
         defer { cancel() }

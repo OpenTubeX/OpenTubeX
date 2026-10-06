@@ -4,6 +4,22 @@ import { isDlnaSourceUrl } from './dlnaSource.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
 
+function scopedAuthorization(payload) {
+  const authorization = payload.authorization
+  if (typeof authorization?.value !== 'string') return undefined
+  try {
+    const instance = new URL(authorization.url)
+    const path = instance.pathname.replace(/\/+$/, '')
+    if (![payload.mediaUrl, payload.audioUrl].some(raw => {
+      if (!raw) return false
+      const source = new URL(raw)
+      return ['http:', 'https:'].includes(source.protocol) && source.origin === instance.origin &&
+        (source.pathname === path || source.pathname.startsWith(`${path}/`))
+    })) return undefined
+    return authorization
+  } catch { return undefined }
+}
+
 /** Native networking keeps multicast and streaming bytes outside the WebView. */
 export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
   const devices = new Map()
@@ -60,9 +76,11 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
       let relay
       let didSetUri = false
       try {
+        const authorization = scopedAuthorization(payload)
         relay = await native.startMediaServer({
           mediaUrl: payload.mediaUrl,
           address: device.address,
+          ...(authorization ? { authorization } : {}),
           ...(payload.audioUrl ? { audioUrl: payload.audioUrl, startSeconds: payload.startSeconds } : {})
         })
         const metadata = createDlnaMetadata(payload.title, relay.mediaUrl, Boolean(payload.audioUrl))

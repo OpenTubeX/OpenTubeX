@@ -41,11 +41,16 @@ final class DlnaMediaServer implements AutoCloseable {
     private List<DlnaMediaServer> sources = List.of();
     private double startSeconds;
     volatile boolean muxFailed;
+    volatile Runnable onFailure;
+
+    private void reportFailure() {
+        muxFailed = true;
+    }
     private final Set<Process> processes = ConcurrentHashMap.newKeySet();
     private final ScheduledThreadPoolExecutor timers = new ScheduledThreadPoolExecutor(1);
 
-    DlnaMediaServer(Context context, HttpUrl media, HttpUrl audio, String address, InetAddress local, double startSeconds) throws Exception {
-        this(media, address, local);
+    DlnaMediaServer(Context context, HttpUrl media, HttpUrl audio, String address, InetAddress local, double startSeconds, DlnaAuthorization authorization) throws Exception {
+        this(media, address, local, authorization);
         this.context = context;
         this.startSeconds = Double.isFinite(startSeconds) ? Math.max(0, startSeconds) : 0;
         if (audio != null) {
@@ -53,7 +58,7 @@ final class DlnaMediaServer implements AutoCloseable {
             try {
                 YtDlpRuntime.initialize(context);
                 for (HttpUrl source : new HttpUrl[]{media, audio}) {
-                    inputs.add(new DlnaMediaServer(source, "127.0.0.1", InetAddress.getByName("127.0.0.1")));
+                    inputs.add(new DlnaMediaServer(source, "127.0.0.1", InetAddress.getByName("127.0.0.1"), authorization));
                 }
                 sources = inputs;
             } catch (Exception error) {
@@ -65,6 +70,10 @@ final class DlnaMediaServer implements AutoCloseable {
     }
 
     DlnaMediaServer(HttpUrl media, String address, InetAddress local) throws IOException {
+        this(media, address, local, null);
+    }
+
+    DlnaMediaServer(HttpUrl media, String address, InetAddress local, DlnaAuthorization authorization) throws IOException {
         timers.setRemoveOnCancelPolicy(true);
         this.media = media;
         this.address = address;
@@ -76,6 +85,7 @@ final class DlnaMediaServer implements AutoCloseable {
                 for (String name : new String[]{"Cookie", "Authorization", "Origin", "Referer"}) request.removeHeader(name);
                 var headers = ExternalStreamRequestRegistry.shared().headersForRedirect(media.url(), chain.request().url().url());
                 if (headers != null) headers.forEach(request::header);
+                if (authorization != null) authorization.apply(request, media, chain.request().url());
                 return chain.proceed(request.build());
             }).build();
         server = new ServerSocket(0, 4, local);
@@ -186,30 +196,32 @@ final class DlnaMediaServer implements AutoCloseable {
             byte[] buffer = new byte[32 * 1024];
             int first = readMerged(process, merged, buffer, 15_000);
             if (first < 0) {
-                muxFailed = true;
+                reportFailure();
                 output.write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
                 return;
             }
             output.write(headers);
             output.write(buffer, 0, first);
             for (int count; (count = readMerged(process, merged, buffer, 15_000)) != -1;) output.write(buffer, 0, count);
-            if (!process.waitFor(15, TimeUnit.SECONDS) || process.exitValue() != 0) muxFailed = true;
+            if (!process.waitFor(15, TimeUnit.SECONDS) || process.exitValue() != 0) reportFailure();
         } catch (Exception error) {
-            if (process == null) muxFailed = true;
+            if (process == null) reportFailure();
             throw new IOException("DLNA stream merge failed", error);
         }
         finally {
             if (process != null) { process.destroy(); processes.remove(process); }
+            Runnable handler = onFailure;
+            if (muxFailed && handler != null) handler.run();
         }
     }
 
     int readMerged(Process process, InputStream input, byte[] buffer, long timeoutMillis) throws IOException {
         var timeout = timers.schedule(() -> {
-            muxFailed = true;
+            reportFailure();
             process.destroyForcibly();
         }, timeoutMillis, TimeUnit.MILLISECONDS);
         try { return input.read(buffer); }
-        catch (IOException error) { muxFailed = true; throw error; }
+        catch (IOException error) { reportFailure(); throw error; }
         finally { timeout.cancel(false); }
     }
 

@@ -36,6 +36,9 @@ const emit = defineEmits(['casting-change'])
 
 const { t } = useI18n()
 const store = useStore()
+const mobileAuthorization = () => process.env.IS_CAPACITOR && store.getters.getCurrentInvidiousInstanceAuthorization
+  ? { authorization: { url: store.getters.getCurrentInvidiousInstanceUrl, value: store.getters.getCurrentInvidiousInstanceAuthorization } }
+  : {}
 const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
@@ -153,6 +156,7 @@ async function handleChoice(choice) {
     const wasPlaying = !props.getPlayer()?.isPaused?.()
     const combined = selectDlnaSource(props.formats)
     const payload = {
+      ...mobileAuthorization(),
       deviceId: choice,
       mediaUrl: source.value.url,
       ...(source.value.audioUrl ? { audioUrl: source.value.audioUrl } : {}),
@@ -184,7 +188,7 @@ async function handleChoice(choice) {
 
 // Relay failures happen when the TV fetches media, after Play has returned.
 const failureCheck = setInterval(async () => {
-  if (disposed || busy.value || !castId.value || !castPayload?.audioUrl) return
+  if (disposed || busy.value || !castId.value) return
   const id = castId.value
   try {
     if (!await dlnaCast.hasFailed(id) || disposed || castId.value !== id || busy.value) return
@@ -194,10 +198,15 @@ const failureCheck = setInterval(async () => {
   const payload = castPayload
   try {
     if (disposed) return
+    if (!payload?.audioUrl) throw new Error('The native cast relay stopped')
     const combined = selectDlnaSource(props.formats)
     if (!combined) throw new Error('No complete MP4 fallback is available')
     const result = await dlnaCast.recover(id, {
-      deviceId: payload.deviceId, mediaUrl: combined.url, title: props.title, startSeconds: payload.startSeconds
+      ...mobileAuthorization(),
+      deviceId: payload.deviceId,
+      mediaUrl: combined.url,
+      title: props.title,
+      startSeconds: payload.startSeconds
     })
     if (result.error) throw new Error(result.error)
     if (disposed) { await dlnaCast.stop(result.castId); return }

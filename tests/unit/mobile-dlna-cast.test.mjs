@@ -237,3 +237,22 @@ test('renderer position parsing accepts valid SOAP time and rejects unavailable 
   assert.equal(parseDlnaPosition('<response><RelTime>00:64:00</RelTime></response>'), null)
   assert.equal(parseDlnaPosition('<response><RelTime>12</RelTime>'), null)
 })
+
+test('private instance credentials reach only the scoped native relay, including recovery', async () => {
+  const setup = fixture()
+  await setup.cast.discover()
+  const authorization = { url: 'https://private.example/invidious', value: 'Basic fixture' }
+  const privatePayload = { ...payload, mediaUrl: authorization.url + '/video', audioUrl: authorization.url + '/audio', authorization }
+  await setup.cast.start(privatePayload)
+  assert.deepEqual(setup.calls.find(call => call.start).start.authorization, authorization)
+  assert.equal(setup.calls.filter(call => call.method).some(call => JSON.stringify(call).includes(authorization.value)), false)
+  setup.failStream()
+  await setup.cast.recover('cast-1', { ...privatePayload, mediaUrl: authorization.url + '/complete.mp4', audioUrl: undefined })
+  assert.deepEqual(setup.calls.filter(call => call.start).at(-1).start.authorization, authorization)
+  await setup.cast.stop('cast-1')
+  for (const mediaUrl of ['https://private.example.evil/invidious/video', 'https://private.example/invidious-other/video', 'http://private.example/invidious/video', payload.mediaUrl]) {
+    await setup.cast.start({ ...payload, mediaUrl, authorization })
+    assert.equal(setup.calls.filter(call => call.start).at(-1).start.authorization, undefined)
+    await setup.cast.stop('cast-1')
+  }
+})

@@ -2,6 +2,7 @@ import Capacitor
 import Darwin
 import Foundation
 import Network
+import UIKit
 
 private let dlnaQueue = DispatchQueue(label: "org.opentubex.dlna")
 
@@ -19,6 +20,71 @@ private func addressString(_ address: in_addr) -> String {
     var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
     inet_ntop(AF_INET, &address, &buffer, socklen_t(buffer.count))
     return String(cString: buffer)
+}
+
+// UIKit grants bounded background time. Expiration stops the relay rather than
+// leaving an unprotected listener and an unfinished assertion behind.
+final class DlnaCastLifetime {
+    private(set) var task = UIBackgroundTaskIdentifier.invalid
+    private let begin: (String, @escaping () -> Void) -> UIBackgroundTaskIdentifier
+    private let finish: (UIBackgroundTaskIdentifier) -> Void
+
+    init(begin: @escaping (String, @escaping () -> Void) -> UIBackgroundTaskIdentifier = {
+        UIApplication.shared.beginBackgroundTask(withName: $0, expirationHandler: $1)
+    }, finish: @escaping (UIBackgroundTaskIdentifier) -> Void = { UIApplication.shared.endBackgroundTask($0) }) {
+        self.begin = begin
+        self.finish = finish
+    }
+
+    func acquire(expired: @escaping (@escaping () -> Void) -> Void) -> Bool {
+        precondition(Thread.isMainThread)
+        release()
+        task = begin("OpenTubeX DLNA cast") { [weak self] in
+            guard let self else { return }
+            let previous = self.task
+            expired { [weak self] in
+                if self?.task == previous { self?.release() }
+            }
+        }
+        return task != .invalid
+    }
+
+    func release() {
+        precondition(Thread.isMainThread)
+        guard task != .invalid else { return }
+        let previous = task
+        task = .invalid
+        finish(previous)
+    }
+}
+
+struct DlnaAuthorization {
+    let url: URL
+    let value: String
+    private var path: String { url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")) }
+
+    init?(_ options: JSObject?) {
+        guard let raw = options?["url"] as? String, let url = URL(string: raw),
+              ["http", "https"].contains(url.scheme), url.host != nil, url.user == nil, url.password == nil,
+              let value = options?["value"] as? String, !value.isEmpty, value.utf8.count <= 4096,
+              !value.contains("\r"), !value.contains("\n") else { return nil }
+        self.url = url
+        self.value = value
+    }
+
+    func contains(_ source: URL?) -> Bool {
+        guard let source else { return false }
+        let port = { (url: URL) in url.port ?? (url.scheme == "https" ? 443 : 80) }
+        let prefix = path.isEmpty ? "" : "/" + path
+        return source.scheme == url.scheme && source.host?.lowercased() == url.host?.lowercased() && port(source) == port(url) &&
+            (source.path == prefix || source.path.hasPrefix(prefix + "/"))
+    }
+
+    func apply(_ request: URLRequest) -> URLRequest {
+        var request = request
+        request.setValue(contains(request.url) ? value : nil, forHTTPHeaderField: "Authorization")
+        return request
+    }
 }
 
 // Never redirect local control requests or send application cookies to a TV.
@@ -66,6 +132,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private let connection: NWConnection
     private let media: URLRequest
     private let audio: URLRequest?
+    private let authorization: DlnaAuthorization?
     private let startSeconds: Double
     private let muxer = DlnaMuxer()
     private var started = false
@@ -79,9 +146,10 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private var finished = false
     private var sentHeaders = false
 
-    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, failure: @escaping () -> Void, complete: @escaping () -> Void) {
+    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, authorization: DlnaAuthorization? = nil, failure: @escaping () -> Void, complete: @escaping () -> Void) {
         self.connection = connection
         self.media = media
+        self.authorization = authorization
         self.audio = audio
         self.startSeconds = startSeconds
         self.path = path
@@ -133,7 +201,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
             }
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
-                    try self.muxer.stream(video: self.media, audio: audio, startSeconds: self.startSeconds) { data in
+                    try self.muxer.stream(video: self.media, audio: audio, startSeconds: self.startSeconds, authorization: self.authorization) { data in
                         let sent = self.send(data)
                         self.sentHeaders = self.sentHeaders || sent
                         return sent
@@ -147,6 +215,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
             return
         }
         var request = media
+        if let authorization, authorization.contains(media.url) { request = authorization.apply(media) }
         request.httpMethod = first[0]
         request.setValue("identity", forHTTPHeaderField: "Accept-Encoding")
         if request.value(forHTTPHeaderField: "User-Agent") == nil {
@@ -207,6 +276,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
                 next.setValue(nil, forHTTPHeaderField: name)
             }
         }
+        if let authorization, authorization.contains(media.url) { next = authorization.apply(next) }
         completionHandler(next)
     }
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -237,7 +307,11 @@ final class DlnaMediaServer {
     private(set) var mediaUrl = ""
     private(set) var muxFailed = false
 
-    init(media: URLRequest, audio: URLRequest? = nil, startSeconds: Double = 0, address: String, localAddress: String, ready: @escaping (Result<Void, Error>) -> Void) throws {
+    func expire(_ complete: (() -> Void)? = nil) {
+        dlnaQueue.async { self.muxFailed = true; self.close(complete) }
+    }
+
+    init(media: URLRequest, audio: URLRequest? = nil, startSeconds: Double = 0, authorization: DlnaAuthorization? = nil, address: String, localAddress: String, failure: (() -> Void)? = nil, ready: @escaping (Result<Void, Error>) -> Void) throws {
         let parameters = NWParameters.tcp
         parameters.requiredLocalEndpoint = .hostPort(host: NWEndpoint.Host(localAddress), port: .any)
         listener = try NWListener(using: parameters)
@@ -258,8 +332,8 @@ final class DlnaMediaServer {
                   case .hostPort(let host, _) = connection.endpoint,
                   host == NWEndpoint.Host(address) else { connection.cancel(); return }
             let id = UUID()
-            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4", failure: { [weak self] in
-                dlnaQueue.async { self?.muxFailed = true }
+            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4", authorization: authorization, failure: { [weak self] in
+                dlnaQueue.async { self?.muxFailed = true; failure?() }
             }) { [weak self] in
                 self?.transfers.removeValue(forKey: id)
             }
@@ -295,6 +369,7 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     private var addresses = Set<String>()
     private var relay: DlnaMediaServer?
     private var mediaOwners = Set<String>()
+    let castLifetime = DlnaCastLifetime()
 
     @objc func retainMediaRequests(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
@@ -396,11 +471,13 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
                 guard let url = audio?.url, ["http", "https"].contains(url.scheme), url.host != nil,
                       url.user == nil, url.password == nil else { call.reject("Invalid DLNA audio"); return }
             }
-            dlnaQueue.async { self.startRelay(call, media: media, audio: audio) }
+            let authorization = DlnaAuthorization(call.getObject("authorization"))
+            if call.getObject("authorization") != nil && authorization == nil { call.reject("Invalid DLNA authorization"); return }
+            dlnaQueue.async { self.startRelay(call, media: media, audio: audio, authorization: authorization) }
         }
     }
 
-    private func startRelay(_ call: CAPPluginCall, media: URLRequest, audio: URLRequest?) {
+    private func startRelay(_ call: CAPPluginCall, media: URLRequest, audio: URLRequest?, authorization: DlnaAuthorization?) {
         guard self.relay == nil, let url = media.url,
               ["http", "https"].contains(url.scheme), url.host != nil, url.user == nil, url.password == nil,
               let address = call.getString("address"), self.addresses.contains(address) else {
@@ -424,12 +501,25 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
                 pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { getsockname(fd, $0, &length) }
             }
             guard found == 0 else { throw URLError(.cannotConnectToHost) }
-            self.relay = try DlnaMediaServer(media: media, audio: audio, startSeconds: max(0, call.getDouble("startSeconds") ?? 0), address: address, localAddress: addressString(local.sin_addr)) { [weak self] result in
+            self.relay = try DlnaMediaServer(media: media, audio: audio, startSeconds: max(0, call.getDouble("startSeconds") ?? 0), authorization: authorization, address: address, localAddress: addressString(local.sin_addr), failure: { [weak self] in
+                DispatchQueue.main.async { self?.castLifetime.release() }
+            }) { [weak self] result in
                 guard let self else { call.reject("DLNA plugin closed"); return }
                 switch result {
                 case .success:
                     guard let relay = self.relay else { call.reject("DLNA relay closed"); return }
-                    call.resolve(["castId": relay.castId, "mediaUrl": relay.mediaUrl])
+                    DispatchQueue.main.async {
+                        guard self.castLifetime.acquire(expired: { complete in
+                            relay.expire { DispatchQueue.main.async(execute: complete) }
+                        }) else {
+                            dlnaQueue.async {
+                                if self.relay === relay { self.relay = nil }
+                                relay.close { call.reject("Unable to protect DLNA cast lifetime") }
+                            }
+                            return
+                        }
+                        call.resolve(["castId": relay.castId, "mediaUrl": relay.mediaUrl])
+                    }
                 case .failure(let error):
                     self.relay?.close()
                     self.relay = nil
@@ -441,7 +531,9 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
 
     deinit {
         let owners = mediaOwners
+        let lifetime = castLifetime
         DispatchQueue.main.async {
+            lifetime.release()
             for owner in owners { IOSNetwork.shared.retainMediaRequests(owner: owner, urls: []) }
         }
         let server = relay
@@ -457,7 +549,9 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func stopMediaServer(_ call: CAPPluginCall) {
         dlnaQueue.async {
             if self.relay?.castId == call.getString("castId") {
-                self.relay?.close { call.resolve() }
+                self.relay?.close {
+                    DispatchQueue.main.async { self.castLifetime.release(); call.resolve() }
+                }
                 self.relay = nil
             } else { call.resolve() }
         }
