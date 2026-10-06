@@ -68,16 +68,21 @@
   z-index: 4;
   inset-block-start: calc(100% + 8px);
   inset-inline-end: 40px;
-  display: flex;
-  flex-direction: column;
   inline-size: 260px;
   max-inline-size: calc(100vw - 48px);
+  max-block-size: min(320px, 50dvh);
+  overflow-y: auto;
   padding: 6px;
   color: var(--primary-text-color);
   background-color: var(--side-nav-color);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.transcriptLanguages {
+  display: flex;
+  flex-direction: column;
 }
 
 .transcriptLanguageMenu button {
