@@ -52,6 +52,10 @@ public final class DlnaCastService extends Service {
             .setCategory(Notification.CATEGORY_TRANSPORT).setOngoing(true)
             .addAction(new Notification.Action.Builder(android.R.drawable.ic_media_pause, getString(R.string.media_stop), stop).build()).build());
         synchronized (DlnaCastService.class) { relay = pendingRelay; }
+        if (relay != null && intent != null && ACTION_STOP.equals(intent.getAction())) {
+            relay.stoppedByUser = true;
+            relay.muxFailed = false;
+        }
         if (relay == null || intent == null || ACTION_STOP.equals(intent.getAction())) stopSelf(startId);
         return START_NOT_STICKY;
     }
@@ -60,7 +64,7 @@ public final class DlnaCastService extends Service {
         synchronized (DlnaCastService.class) {
             if (pendingRelay == relay) pendingRelay = null;
         }
-        if (relay != null) { relay.muxFailed = true; relay.close(); relay = null; }
+        if (relay != null) { if (!relay.stoppedByUser) relay.muxFailed = true; relay.close(); relay = null; }
         if (wifi != null && wifi.isHeld()) wifi.release();
         if (cpu != null && cpu.isHeld()) cpu.release();
         stopForeground(STOP_FOREGROUND_REMOVE);

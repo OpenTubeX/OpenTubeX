@@ -41,10 +41,11 @@ final class DlnaMediaServer implements AutoCloseable {
     private List<DlnaMediaServer> sources = List.of();
     private double startSeconds;
     volatile boolean muxFailed;
+    volatile boolean stoppedByUser;
     volatile Runnable onFailure;
 
     private void reportFailure() {
-        muxFailed = true;
+        if (!stoppedByUser) muxFailed = true;
     }
     private final Set<Process> processes = ConcurrentHashMap.newKeySet();
     private final ScheduledThreadPoolExecutor timers = new ScheduledThreadPoolExecutor(1);

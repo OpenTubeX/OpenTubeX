@@ -68,6 +68,7 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
       const device = devices.get(payload?.deviceId)
       if (!device || !isDlnaSourceUrl(payload?.mediaUrl) ||
           (payload?.audioUrl !== undefined && !isDlnaSourceUrl(payload.audioUrl)) ||
+          (payload?.fallbackMediaUrl !== undefined && !isDlnaSourceUrl(payload.fallbackMediaUrl)) ||
           typeof payload?.title !== 'string' || payload.title.length > 500) {
         return { error: 'Device or media is unavailable' }
       }
@@ -75,27 +76,37 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
       starting = true
       let relay
       let didSetUri = false
-      try {
-        const authorization = scopedAuthorization(payload)
-        relay = await native.startMediaServer({
-          mediaUrl: payload.mediaUrl,
+      let source = payload
+      let usedFallback = false
+      const startRelay = source => {
+        const authorization = scopedAuthorization(source)
+        return native.startMediaServer({
+          mediaUrl: source.mediaUrl,
           address: device.address,
           ...(authorization ? { authorization } : {}),
-          ...(payload.audioUrl ? { audioUrl: payload.audioUrl, startSeconds: payload.startSeconds } : {})
+          ...(source.audioUrl ? { audioUrl: source.audioUrl, startSeconds: source.startSeconds } : {})
         })
-        const metadata = createDlnaMetadata(payload.title, relay.mediaUrl, Boolean(payload.audioUrl))
+      }
+      try {
+        try { relay = await startRelay(source) } catch (error) {
+          if (!source.audioUrl || !source.fallbackMediaUrl) throw error
+          source = { ...payload, mediaUrl: payload.fallbackMediaUrl, audioUrl: undefined }
+          relay = await startRelay(source)
+          usedFallback = true
+        }
+        const metadata = createDlnaMetadata(payload.title, relay.mediaUrl, Boolean(source.audioUrl))
         await send(device, 'SetAVTransportURI', {
           InstanceID: 0, CurrentURI: relay.mediaUrl, CurrentURIMetaData: metadata
         })
         didSetUri = true
         await send(device, 'Play', { InstanceID: 0, Speed: 1 })
-        if (!payload.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
+        if (!source.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
           try {
             await send(device, 'Seek', { InstanceID: 0, Unit: 'REL_TIME', Target: formatDlnaTime(payload.startSeconds) })
           } catch { /* Seeking is optional on DLNA renderers. */ }
         }
         activeCast = { device, castId: relay.castId, releaseWake: screenWake?.acquire() }
-        return { castId: relay.castId, deviceName: device.name }
+        return { castId: relay.castId, deviceName: device.name, ...(usedFallback ? { usedFallback: true } : {}) }
       } catch (error) {
         if (didSetUri) {
           try { await send(device, 'Stop', { InstanceID: 0 }) } catch { /* Preserve the start error. */ }
@@ -122,7 +133,12 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
     },
 
     async hasFailed(castId) {
-      return (await native.hasFailed({ castId })).failed
+      const result = await native.hasFailed({ castId })
+      return result.failed && !result.stopped
+    },
+
+    async hasStopped(castId) {
+      return Boolean((await native.hasFailed({ castId })).stopped)
     },
 
     async stop(castId) {

@@ -178,14 +178,17 @@ async function handleChoice(choice) {
 const failureCheck = setInterval(async () => {
   if (disposed || busy.value || !castId.value) return
   const id = castId.value
+  let stopped
   try {
-    if (!await dlnaCast.hasFailed(id) || disposed || castId.value !== id || busy.value) return
+    stopped = process.env.IS_CAPACITOR && await dlnaCast.hasStopped(id)
+    if ((!stopped && !await dlnaCast.hasFailed(id)) || disposed || castId.value !== id || busy.value) return
   } catch { return }
   busy.value = true
   const wasPlaying = resumeLocalPlayback
   const payload = castPayload
   try {
     if (disposed) return
+    if (stopped) { await stopCasting(false); return }
     if (!payload?.audioUrl) throw new Error('The native cast relay stopped')
     const combined = selectDlnaSource(props.formats)
     if (!combined) throw new Error('No complete MP4 fallback is available')
