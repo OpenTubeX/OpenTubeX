@@ -2,12 +2,19 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import { gunzipSync } from 'node:zlib'
 
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { mockUnplayableWatchPage } from '../../helpers/watch.mjs'
 
 // A 1x1 PNG, small enough to stay well inside the avatar download limit
 const AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
 const OTHER_AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+
+test.beforeEach(async ({ page }) => {
+  // Keep the startup test's local server reachable; mock every remote service.
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1[:/])/, abortUnmockedRequest)
+})
 
 /**
  * The cached files added since `baseline`, with a digest of their contents so
@@ -144,14 +151,18 @@ test.describe('loading missing tab icons', () => {
     }
   })
 
-  test('caches an unloaded tab icon without activating the tab', async ({ page }) => {
-    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        authorThumbnails: [{ url: 'https://images.test/avatar.png' }],
-        tabs: []
+  test('manually retries an unloaded tab icon after automatic loading fails', async ({ page }) => {
+    let metadataRequests = 0
+    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => {
+      metadataRequests++
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          authorThumbnails: metadataRequests === 1 ? [] : [{ url: 'https://images.test/avatar.png' }],
+          tabs: []
+        })
       })
-    }))
+    })
     await page.route('https://images.test/avatar.png', route => route.fulfill({
       contentType: 'image/png',
       body: Buffer.from(AVATAR_PNG, 'base64')
@@ -166,6 +177,7 @@ test.describe('loading missing tab icons', () => {
       })
       return { tabId: tab.id, activeTabId }
     })
+    await expect.poll(() => metadataRequests).toBe(1)
 
     const themeSection = await goToSettingsSection(page, 'theme')
     const loadButton = themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })
@@ -192,16 +204,26 @@ test.describe('loading missing tab icons', () => {
   })
 
   test('shows an error icon when an icon cannot be loaded', async ({ page }) => {
-    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ authorThumbnails: [], tabs: [] })
-    }))
+    let metadataRequests = 0
+    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => {
+      metadataRequests++
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ authorThumbnails: [], tabs: [] })
+      })
+    })
 
-    await page.evaluate(() => window.ftElectron.tabs.create({
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/channel/UCmissing',
       makeActive: false,
       lazyLoad: true
     }))
+    await expect.poll(() => metadataRequests).toBe(1)
+
+    // Updating unrelated tab metadata must not keep retrying a failed icon.
+    await page.evaluate(tabId => window.ftElectron.tabs.updateTitle('Missing channel', tabId), tab.id)
+    await expect(page.locator(`.tab[data-tab-id="${tab.id}"] .tabTitleText`)).toHaveText('Missing channel')
+    expect(metadataRequests).toBe(1)
 
     const themeSection = await goToSettingsSection(page, 'theme')
     await themeSection.getByRole('button', { name: 'Load Missing Tab Icons' }).click()
@@ -209,8 +231,129 @@ test.describe('loading missing tab icons', () => {
     const toast = page.locator('.toast', { hasText: 'Loaded 0 tab icons; 1 could not be loaded' })
     await expect(toast).toBeVisible()
     await expect(toast.locator('.icon[data-prefix="fas"][data-icon="circle-exclamation"]')).toBeVisible()
+    expect(metadataRequests).toBe(2)
+  })
+
+  for (const [path, endpoint] of [
+    ['/watch/background-video', '/videos/background-video'],
+    ['/channel/UCbackground', '/channels/UCbackground']
+  ]) {
+    test(`automatically caches a newly opened unloaded ${path.startsWith('/watch/') ? 'video' : 'channel'} tab icon`, async ({ page }) => {
+      let metadataRequests = 0
+      let avatarRequest
+      await page.route(`https://invidious.test/api/v1${endpoint}*`, route => {
+        metadataRequests++
+        return route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify({
+            authorThumbnails: [{ url: 'https://images.test/background-avatar.png' }],
+            tabs: []
+          })
+        })
+      })
+      await page.route('https://images.test/background-avatar.png', route => {
+        avatarRequest = route
+      })
+
+      const { tabId, activeTabId } = await page.evaluate(async path => {
+        const activeTabId = (await window.ftElectron.tabs.getState()).activeTabId
+        const tab = await window.ftElectron.tabs.create({ route: path, makeActive: false, lazyLoad: true })
+        return { tabId: tab.id, activeTabId }
+      }, path)
+      await expect.poll(() => avatarRequest != null).toBe(true)
+
+      // A pending download must survive tab state changes without restarting.
+      for (const isLoading of [true, false]) {
+        await page.evaluate(({ tabId, isLoading }) => {
+          window.ftElectron.tabs.setLoading(isLoading, tabId)
+        }, { tabId, isLoading })
+        await expect.poll(() => page.evaluate(async tabId => {
+          return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.isLoading
+        }, tabId)).toBe(isLoading)
+      }
+      await avatarRequest.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
+
+      await expect.poll(() => page.evaluate(async tabId => {
+        const state = await window.ftElectron.tabs.getState()
+        const tab = state.tabs.find(candidate => candidate.id === tabId)
+        return {
+          activeTabId: state.activeTabId,
+          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
+          isUnloaded: tab?.isUnloaded
+        }
+      }, tabId), { timeout: 5000 }).toEqual({ activeTabId, avatarLoaded: true, isUnloaded: true })
+
+      const avatar = page.locator(`.tab[data-tab-id="${tabId}"] img.tabAvatar:not(.retryImagePlaceholder)`)
+      await expect(avatar).toBeVisible()
+      await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+      expect(metadataRequests).toBe(1)
+    })
+  }
+
+  test('leaves foreground avatar loading to the channel page', async ({ page }) => {
+    let metadataRequests = 0
+    await page.route('https://invidious.test/api/v1/channels/UCforeground?*', route => {
+      metadataRequests++
+      return route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          author: 'Foreground channel',
+          authorId: 'UCforeground',
+          authorThumbnails: [{ url: 'https://images.test/foreground-avatar.png' }],
+          authorBanners: [],
+          description: '',
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          tabs: [],
+          latestVideos: [],
+          relatedChannels: []
+        })
+      })
+    })
+    await page.route('https://images.test/foreground-avatar.png', route => route.fulfill({
+      contentType: 'image/png',
+      body: Buffer.from(AVATAR_PNG, 'base64')
+    }))
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/channel/UCforeground',
+      makeActive: true
+    }))
+    await expect.poll(() => page.evaluate(async tabId => {
+      const state = await window.ftElectron.tabs.getState()
+      const tab = state.tabs.find(candidate => candidate.id === tabId)
+      return { activeTabId: state.activeTabId, avatarLoaded: Boolean(tab?.avatarUrl), isUnloaded: tab?.isUnloaded }
+    }, tab.id)).toEqual({ activeTabId: tab.id, avatarLoaded: true, isUnloaded: false })
+    expect(metadataRequests).toBe(1)
   })
 })
+
+for (const routePath of ['/watch/jNQXAC9IVRw', '/channel/UCn_FAXem2-e3HQvmK-mOH4g']) {
+  test(`automatically caches an unloaded ${routePath.startsWith('/watch/') ? 'video' : 'channel'} avatar with the Local backend`, async ({ app, page }) => {
+    await mockUnplayableWatchPage(app, page)
+    if (routePath.startsWith('/channel/')) {
+      const response = gunzipSync(await readFile(new URL('../../fixtures/innertube/channel/loads-the-glitch-channel-home-and-playlists-tabs/browse-4f0ffb6cfdfa.0.json.gz', import.meta.url)))
+      await page.route('**/youtubei/v1/browse*', route => route.fulfill({ contentType: 'application/json', body: response }))
+    }
+    await page.route(/https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => route.fulfill({
+      contentType: 'image/png',
+      body: Buffer.from(AVATAR_PNG, 'base64')
+    }))
+    const { tabId, activeTabId } = await page.evaluate(async routePath => {
+      const activeTabId = (await window.ftElectron.tabs.getState()).activeTabId
+      const tab = await window.ftElectron.tabs.create({ route: routePath, makeActive: false, lazyLoad: true })
+      return { tabId: tab.id, activeTabId }
+    }, routePath)
+    await expect.poll(() => page.evaluate(async tabId => {
+      const state = await window.ftElectron.tabs.getState()
+      const tab = state.tabs.find(candidate => candidate.id === tabId)
+      return { activeTabId: state.activeTabId, avatarLoaded: Boolean(tab?.avatarUrl), isUnloaded: tab?.isUnloaded }
+    }, tabId)).toEqual({ activeTabId, avatarLoaded: true, isUnloaded: true })
+    const avatar = page.locator(`.tab[data-tab-id="${tabId}"] img.tabAvatar:not(.retryImagePlaceholder)`)
+    await expect(avatar).toBeVisible()
+    await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+  })
+}
 
 test.describe('automatic missing tab icons', () => {
   const server = createServer()
