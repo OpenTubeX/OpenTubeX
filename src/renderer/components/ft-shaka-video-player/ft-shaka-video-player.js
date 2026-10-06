@@ -10446,7 +10446,7 @@ export default defineComponent({
       }
     })
 
-    watch(musicMode, () => {
+    function applyMusicModePlaybackRate() {
       cancelTemporaryPlaybackRateHolds()
       playbackRateUserSet = false
       togglePlaybackRate = null
@@ -10459,8 +10459,12 @@ export default defineComponent({
       } else {
         setVideoPlaybackRate(rate)
       }
-      emit('playback-rate-updated', rate)
-    })
+      if (!shortsNavigationSuspended.value) {
+        emit('playback-rate-updated', rate)
+      }
+    }
+
+    watch(musicMode, applyMusicModePlaybackRate)
 
     /**
      * @param {number} rate
@@ -11905,7 +11909,7 @@ export default defineComponent({
 
       player?.addEventListener('ratechange', () => {
         const playbackRate = player.getPlaybackRate()
-        if (!temporaryPlaybackRateActive) {
+        if (!temporaryPlaybackRateActive && !shortsNavigationSuspended.value) {
           emit('playback-rate-updated', playbackRate)
         }
         scheduleSponsorBlockSkip()
@@ -12586,6 +12590,10 @@ export default defineComponent({
       shortsNavigationSuspended.value = false
       const resume = resumeShortsAfterActivation
       resumeShortsAfterActivation = false
+      if (musicMode.value) {
+        setCurrentTime(0)
+        applyMusicModePlaybackRate()
+      }
       registerMediaSessionHandlers()
       if (suspendedShortsSabrReload) {
         suspendedShortsSabrReload = false

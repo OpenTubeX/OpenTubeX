@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
@@ -13,6 +13,7 @@ test.use({
       hideRecommendedVideos: false,
       rememberPlaybackSpeedPerChannel: true,
       autoUpdateChannelPlaybackSpeeds: false,
+      useCustomShortsPlayer: true,
       baseTheme: 'system',
       systemDarkTheme: 'dark',
       systemLightTheme: 'light',
@@ -129,6 +130,56 @@ test('music mode stays with its tab and resets after restarting the app', async 
   const restarted = await app.relaunch()
   await restarted.page.locator('.profileTrigger').click()
   await expect(restarted.page.locator('.quickSettingsMenu').getByRole('checkbox', { name: /^Music Mode/ })).not.toBeChecked()
+})
+
+async function openShort(page, id) {
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/shorts/${id}`)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`#/watch/${id}\\?short=true$`))
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
+  return expectPlayback(page, 0, 1)
+}
+
+test('music mode restarts a retained Short at zero and normal speed', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setMusicMode(page, true)
+  const firstVideo = await openShort(page, 'jNQXAC9IVRw')
+  const retainedVideo = await firstVideo.elementHandle()
+  const watch = await watchViewHandle(page)
+  await page.locator('body').press('p')
+  await page.locator('body').press('p')
+  await firstVideo.evaluate(element => { element.currentTime = 5 })
+  await expectPlayback(page, 5, 1.5)
+  await firstVideo.evaluate(element => element.pause())
+  await openShort(page, 'musicvideo1')
+  await openShort(page, 'jNQXAC9IVRw')
+  expect(await retainedVideo.evaluate(element => element === document.querySelector('.ftVideoPlayer video'))).toBe(true)
+  expect(await watch.evaluate(view => view.currentPlaybackRate)).toBe(1)
+})
+
+test('inactive Shorts cannot overwrite the active channel speed when music mode changes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await setMusicMode(page, true)
+  await openShort(page, 'jNQXAC9IVRw')
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async view => {
+    await view.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({ first: 2.5, second: 3 }))
+    view.channelId = 'first'
+    await view.$nextTick()
+  })
+  await openShort(page, 'musicvideo1')
+  await watch.evaluate(async view => {
+    view.channelId = 'second'
+    await view.$nextTick()
+  })
+  await openShort(page, 'jNQXAC9IVRw')
+  await watch.evaluate(async view => {
+    view.channelId = 'first'
+    await view.$nextTick()
+  })
+  await setMusicMode(page, false)
+  await expectPlayback(page, 0, 2.5)
+  await expect.poll(() => watch.evaluate(view => view.currentPlaybackRate)).toBe(2.5)
 })
 
 test('music mode remains accessible in narrow Quick Settings', async ({ app, page }) => {
