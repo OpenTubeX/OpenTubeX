@@ -305,17 +305,15 @@
 }
 
 .settingsSearchResultHeading {
+  margin: 0;
   padding: 4px;
-  border: 0;
   display: flex;
   align-items: center;
   gap: 9px;
   color: var(--primary-text-color);
-  background: transparent;
   font: inherit;
   font-weight: 600;
   text-align: start;
-  cursor: pointer;
 }
 
 .settingsSearchResultHeading > svg {
@@ -338,8 +336,6 @@
   cursor: pointer;
 }
 
-.settingsSearchResultHeading:hover,
-.settingsSearchResultHeading:focus-visible,
 .settingsSearchResultMatch:hover,
 .settingsSearchResultMatch:focus-visible {
   color: var(--primary-text-color);
@@ -671,7 +667,6 @@
     flex-shrink: 0;
   }
 
-  .settingsSearchResultHeading:active,
   .settingsSearchResultMatch:active {
     color: var(--primary-text-color);
     background: var(--side-nav-hover-color);
