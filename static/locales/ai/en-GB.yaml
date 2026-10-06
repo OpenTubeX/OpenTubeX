@@ -221,6 +221,13 @@ History:
   Custom: Custom
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Recommended videos"
+    Title: "Fullscreen actions"
+    Customize: "Customise fullscreen actions"
+    Add Action: "Add action"
+    Empty: "No fullscreen actions selected"
+    Quick Bookmark: "Quick bookmark"
   Quick Settings:
     Quick Settings: Quick settings
     Customize Quick Settings: Customise quick settings

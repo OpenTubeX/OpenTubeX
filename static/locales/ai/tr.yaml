@@ -220,6 +220,13 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Önerilen videolar"
+    Title: "Tam ekran eylemleri"
+    Customize: "Tam ekran eylemlerini özelleştir"
+    Add Action: "Eylem ekle"
+    Empty: "Tam ekran eylemi seçilmedi"
+    Quick Bookmark: "Hızlı yer imi"
   Quick Settings:
     Quick Settings: Hızlı ayarlar
     Customize Quick Settings: Hızlı ayarları özelleştir

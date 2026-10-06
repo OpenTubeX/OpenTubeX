@@ -224,6 +224,13 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Vídeos recomendados"
+    Title: "Accións de pantalla completa"
+    Customize: "Personalizar as accións de pantalla completa"
+    Add Action: "Engadir acción"
+    Empty: "Non se seleccionaron accións de pantalla completa"
+    Quick Bookmark: "Marcador rápido"
   Quick Settings:
     Quick Settings: Configuración rápida
     Customize Quick Settings: Personalizar a configuración rápida

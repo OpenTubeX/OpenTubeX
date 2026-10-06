@@ -45,6 +45,7 @@ import { isSettingSyncableOnPlatform } from '../../helpers/platformSettings.js'
 import { SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY } from '../../helpers/subscription-settings-sync'
 import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
+import { DEFAULT_FULLSCREEN_ACTIONS, normalizeFullscreenActions } from '../../helpers/fullscreenActions.js'
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
 import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
@@ -411,6 +412,7 @@ const state = {
   listType: 'grid',
   playlistViewType: 'grid',
   quickSettings: [...DEFAULT_QUICK_SETTINGS],
+  fullscreenActions: [...DEFAULT_FULLSCREEN_ACTIONS],
   navigationItems: [...DEFAULT_NAVIGATION_ITEMS],
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,
@@ -919,6 +921,7 @@ const customGetters = {
   // A synchronized preference must not expose a service absent on this device.
   getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
 
+  getFullscreenActions: (state) => normalizeFullscreenActions(state.fullscreenActions),
   getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),
 
   getNavigationItems: (state) => normalizeNavigationItems(state.navigationItems),
@@ -1085,6 +1088,12 @@ const customActions = {
   },
   recordSyncSettingEdit: ({ commit, state }, settingId) => (
     recordSettingSyncTimestamp(commit, state, settingId)
+  ),
+  updateFullscreenActions: ({ commit, state }, value) => updateOrderedSetting(
+    commit,
+    state,
+    'fullscreenActions',
+    normalizeFullscreenActions(value)
   ),
   updateQuickSettings: ({ commit, state }, value) => updateOrderedSetting(
     commit,

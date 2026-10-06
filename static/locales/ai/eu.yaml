@@ -220,6 +220,13 @@ History:
   Custom: Pertsonalizatua
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Gomendatutako bideoak"
+    Title: "Pantaila osoko ekintzak"
+    Customize: "Pertsonalizatu pantaila osoko ekintzak"
+    Add Action: "Gehitu ekintza"
+    Empty: "Ez da pantaila osoko ekintzarik hautatu"
+    Quick Bookmark: "Laster-marka azkarra"
   Quick Settings:
     Quick Settings: Ezarpen azkarrak
     Customize Quick Settings: Pertsonalizatu ezarpen azkarrak

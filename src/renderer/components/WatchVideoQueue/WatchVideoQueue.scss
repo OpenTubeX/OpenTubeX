@@ -11,6 +11,16 @@
   border-block-end: 1px solid var(--side-nav-hover-color);
 }
 
+.queueHeading {
+  flex: 1;
+}
+
+.queueItemsContent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .queueTitle {
   margin: 0;
   font-size: 18px;
@@ -164,6 +174,91 @@
 .queueActions button:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+.fullscreenQueue {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  container-name: queue;
+  container-type: inline-size;
+
+  .queueHeading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-inline-size: 0;
+  }
+
+  .queueTitle {
+    min-inline-size: 0;
+  }
+
+  .queueTitleIcon {
+    flex-shrink: 0;
+  }
+
+  .queueLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .queueCount {
+    white-space: nowrap;
+  }
+
+  .clearQueue {
+    padding: 6px;
+    border-radius: 6px;
+    color: inherit;
+    font-size: 13px;
+
+    &:hover,
+    &:focus-visible {
+      background-color: rgb(255 255 255 / 20%);
+    }
+  }
+
+  .queueItems {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    max-block-size: none;
+    margin-inline: 16px 4px;
+    padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
+  }
+
+  .queueVideo {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .queueThumbnail {
+    inline-size: 64px;
+  }
+}
+
+@container queue (width <= 320px) {
+  .fullscreenQueue .queueHeader.fullscreenDockHeader {
+    flex: 0 0 auto;
+    min-block-size: 52px;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    padding-block: 0;
+  }
+
+  .fullscreenQueue .queueHeading {
+    flex: 1 1 100%;
+  }
+
+  /* Keep both rows within the collapsed dock's 60px height, including its borders. */
+  .fullscreenQueue .queueTitle {
+    line-height: 20px;
+  }
+
+  .fullscreenQueue .clearQueue {
+    min-block-size: 36px;
+    margin-inline-start: auto;
+  }
 }
 
 @media (width <= 600px), (pointer: coarse) {

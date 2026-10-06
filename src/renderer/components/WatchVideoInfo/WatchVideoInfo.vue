@@ -286,7 +286,7 @@
             :title="t('Downloads.Download Video')"
             :icon="['fas', 'download']"
             theme="secondary"
-            @click="showDownloadPrompt = true"
+            @click="emit('open-download')"
           />
           <FtIconButton
             v-if="!offline && USING_ELECTRON && externalPlayer !== ''"
@@ -331,13 +331,6 @@
       @use-online-source="emit('use-online-source')"
       @close="showFormatPrompt = false"
     />
-    <WatchVideoDownloadPrompt
-      v-if="!offline && enableDownloads && showDownloadPrompt"
-      :video-id="id"
-      :title="title"
-      :thumbnail="videoThumbnail"
-      @close="showDownloadPrompt = false"
-    />
     <WatchVideoMetadataHistory
       v-if="metadataHistory && showMetadataHistory"
       :history="metadataHistory"
@@ -361,7 +354,6 @@ import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPromp
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
-import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
 
@@ -606,6 +598,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
+  'open-download',
   'change-format',
   'change-playback-engine',
   'use-local-source',
@@ -627,7 +620,6 @@ const { locale, t } = useI18n()
 const relativeTimeNow = useRelativeTimeClock()
 
 const showCollaboratorsPrompt = ref(false)
-const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
 const showMetadataHistory = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
@@ -642,13 +634,8 @@ const liveChatToggleTitle = computed(() => {
 
 watch(() => props.offline, offline => {
   if (offline) {
-    showDownloadPrompt.value = false
     if (props.localPlaybackDownloads.length === 0) showFormatPrompt.value = false
   }
-})
-
-watch(enableDownloads, (enabled) => {
-  if (!enabled) showDownloadPrompt.value = false
 })
 
 watch(() => props.metadataHistory, history => {

@@ -222,6 +222,13 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Tövsiyə olunan videolar"
+    Title: "Tam ekran əməliyyatları"
+    Customize: "Tam ekran əməliyyatlarını fərdiləşdir"
+    Add Action: "Əməliyyat əlavə et"
+    Empty: "Tam ekran əməliyyatı seçilməyib"
+    Quick Bookmark: "Sürətli əlfəcin"
   Quick Settings:
     Quick Settings: Cəld tənzimləmələr
     Customize Quick Settings: Cəld tənzimləmələri fərdiləşdir

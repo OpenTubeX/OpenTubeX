@@ -1,13 +1,25 @@
 <template>
-  <FtCard class="watchQueue">
+  <FtCard
+    class="watchQueue"
+    :class="{ fullscreenQueue: fullscreenOverlay }"
+  >
     <Teleport
       :to="phonePanelHeader || 'body'"
       :disabled="!phonePanelHeader"
     >
-      <header class="queueHeader">
-        <div>
+      <header
+        class="queueHeader"
+        :class="{ fullscreenDockHeader: fullscreenOverlay }"
+      >
+        <div class="queueHeading">
           <h3 class="queueTitle">
-            {{ t('Video.Queue') }}
+            <FtIcon
+              v-if="fullscreenOverlay"
+              class="queueTitleIcon"
+              :icon="['fas', 'list']"
+              aria-hidden="true"
+            />
+            <span class="queueLabel">{{ t('Video.Queue') }}</span>
           </h3>
           <span class="queueCount">
             {{ t('Video.Queue Video Count', { count: items.length }, items.length) }}
@@ -23,6 +35,16 @@
           <FtIcon :icon="['fas', 'trash']" />
           {{ t('Video.Clear Queue') }}
         </button>
+        <button
+          v-if="fullscreenOverlay"
+          type="button"
+          class="fullscreenDockClose"
+          :aria-label="t('Close')"
+          :title="t('Close')"
+          @click="emit('close')"
+        >
+          <FtIcon :icon="['fas', 'xmark']" />
+        </button>
       </header>
     </Teleport>
 
@@ -32,106 +54,111 @@
     >
       {{ t('Video.Reorder Queue Item Instructions') }}
     </p>
-    <TransitionGroup
+    <div
       ref="queueItems"
       v-overlay-scrollbars
-      name="queueItem"
-      tag="ol"
       class="queueItems"
     >
-      <li
-        v-for="(item, index) in items"
-        :key="item.queueItemId"
-        class="queueItem"
-        :data-queue-item-id="String(item.queueItemId)"
-        :class="{
-          dragging: draggedQueueItemId === item.queueItemId || pointerDraggedId === String(item.queueItemId),
-          dropBefore: dropTarget?.id === String(item.queueItemId) && !dropTarget.after,
-          dropAfter: dropTarget?.id === String(item.queueItemId) && dropTarget.after
-        }"
-        :aria-posinset="index + 1"
-        :aria-setsize="items.length"
-        @dragover.prevent
-        @drop.prevent="dropDraggedItem(item.queueItemId)"
+      <TransitionGroup
+        ref="queueContent"
+        name="queueItem"
+        tag="ol"
+        class="queueItemsContent"
       >
-        <button
-          :ref="element => setQueueDragHandle(item.queueItemId, element)"
-          type="button"
-          class="queueDragHandle"
-          draggable="true"
-          :aria-label="t('Video.Reorder Queue Item', { title: item.title })"
-          :aria-describedby="reorderInstructionsId"
-          aria-keyshortcuts="ArrowUp ArrowDown"
-          :title="t('Video.Drag to Reorder Queue', { title: item.title })"
-          @dragstart="startDrag($event, item.queueItemId)"
-          @dragend="endDrag"
-          @pointerdown="startPointerDrag($event, String(item.queueItemId))"
-          @pointermove="movePointerDrag"
-          @pointerup="endPointerDrag"
-          @pointercancel="cancelPointerDrag"
-          @lostpointercapture="cancelPointerDrag"
-          @keydown.up.prevent="moveWithKeyboard(item.queueItemId, -1)"
-          @keydown.down.prevent="moveWithKeyboard(item.queueItemId, 1)"
+        <li
+          v-for="(item, index) in items"
+          :key="item.queueItemId"
+          class="queueItem"
+          :data-queue-item-id="String(item.queueItemId)"
+          :class="{
+            dragging: draggedQueueItemId === item.queueItemId || pointerDraggedId === String(item.queueItemId),
+            dropBefore: dropTarget?.id === String(item.queueItemId) && !dropTarget.after,
+            dropAfter: dropTarget?.id === String(item.queueItemId) && dropTarget.after
+          }"
+          :aria-posinset="index + 1"
+          :aria-setsize="items.length"
+          @dragover.prevent
+          @drop.prevent="dropDraggedItem(item.queueItemId)"
         >
-          <FtIcon :icon="['fas', 'bars']" />
-        </button>
-        <RouterLink
-          class="queueVideo"
-          :to="item.route ?? `/watch/${item.videoId}`"
-          @click="playQueuedVideo(item.queueItemId, $event)"
-        >
-          <FtRetryImage
-            class="queueThumbnail"
-            :src="item.thumbnail || thumbnailUrl(item.videoId)"
-            alt=""
-          />
-          <span class="queueDetails">
-            <strong
-              class="queueVideoTitle"
-              dir="auto"
-            >{{ item.title }}</strong>
-            <span
-              class="queueAuthor"
-              dir="auto"
-            >{{ item.author }}</span>
-          </span>
-        </RouterLink>
-        <div class="queueActions">
           <button
+            :ref="element => setQueueDragHandle(item.queueItemId, element)"
             type="button"
-            class="queueMoveButton"
-            :aria-label="t('Video.Move Queue Item Up', { title: item.title })"
-            :disabled="index === 0"
-            @click="moveWithKeyboard(item.queueItemId, -1)"
+            class="queueDragHandle"
+            draggable="true"
+            :aria-label="t('Video.Reorder Queue Item', { title: item.title })"
+            :aria-describedby="reorderInstructionsId"
+            aria-keyshortcuts="ArrowUp ArrowDown"
+            :title="t('Video.Drag to Reorder Queue', { title: item.title })"
+            @dragstart="startDrag($event, item.queueItemId)"
+            @dragend="endDrag"
+            @pointerdown="startPointerDrag($event, String(item.queueItemId))"
+            @pointermove="movePointerDrag"
+            @pointerup="endPointerDrag"
+            @pointercancel="cancelPointerDrag"
+            @lostpointercapture="cancelPointerDrag"
+            @keydown.up.prevent="moveWithKeyboard(item.queueItemId, -1)"
+            @keydown.down.prevent="moveWithKeyboard(item.queueItemId, 1)"
           >
-            <FtIcon
-              :icon="['fas', 'arrow-up']"
-              aria-hidden="true"
+            <FtIcon :icon="['fas', 'bars']" />
+          </button>
+          <RouterLink
+            class="queueVideo"
+            :to="item.route ?? `/watch/${item.videoId}`"
+            @click="playQueuedVideo(item.queueItemId, $event)"
+          >
+            <FtRetryImage
+              class="queueThumbnail"
+              :src="item.thumbnail || thumbnailUrl(item.videoId)"
+              alt=""
             />
-          </button>
-          <button
-            type="button"
-            class="queueMoveButton"
-            :aria-label="t('Video.Move Queue Item Down', { title: item.title })"
-            :disabled="index === items.length - 1"
-            @click="moveWithKeyboard(item.queueItemId, 1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-down']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
-            :aria-label="t('Video.Remove from Queue', { title: item.title })"
-            :title="t('Video.Remove from Queue', { title: item.title })"
-            @click="remove(item.queueItemId)"
-          >
-            <FtIcon :icon="['fas', 'trash']" />
-          </button>
-        </div>
-      </li>
-    </TransitionGroup>
+            <span class="queueDetails">
+              <strong
+                class="queueVideoTitle"
+                dir="auto"
+              >{{ item.title }}</strong>
+              <span
+                class="queueAuthor"
+                dir="auto"
+              >{{ item.author }}</span>
+            </span>
+          </RouterLink>
+          <div class="queueActions">
+            <button
+              type="button"
+              class="queueMoveButton"
+              :aria-label="t('Video.Move Queue Item Up', { title: item.title })"
+              :disabled="index === 0"
+              @click="moveWithKeyboard(item.queueItemId, -1)"
+            >
+              <FtIcon
+                :icon="['fas', 'arrow-up']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              class="queueMoveButton"
+              :aria-label="t('Video.Move Queue Item Down', { title: item.title })"
+              :disabled="index === items.length - 1"
+              @click="moveWithKeyboard(item.queueItemId, 1)"
+            >
+              <FtIcon
+                :icon="['fas', 'arrow-down']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              :aria-label="t('Video.Remove from Queue', { title: item.title })"
+              :title="t('Video.Remove from Queue', { title: item.title })"
+              @click="remove(item.queueItemId)"
+            >
+              <FtIcon :icon="['fas', 'trash']" />
+            </button>
+          </div>
+        </li>
+      </TransitionGroup>
+    </div>
     <p
       class="queueReorderStatus"
       role="status"
@@ -145,18 +172,20 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { inject, computed, nextTick, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
+import { useScrollClamp } from '../../composables/useScrollClamp'
 import FtCard from '../ft-card/ft-card.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { getVideoThumbnailUrl } from '../../helpers/utils'
 import store from '../../store/index'
-import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const phonePanelHeader = inject('phonePanelHeader', null)
-const emit = defineEmits(['pause-player'])
+defineProps({ fullscreenOverlay: { type: Boolean, default: false } })
+const emit = defineEmits(['pause-player', 'close'])
 const { t } = useI18n()
 
 const items = computed(() => store.getters.getWatchQueue)
@@ -164,39 +193,25 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 const invidiousUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 const draggedQueueItemId = ref(null)
 const queueItems = useTemplateRef('queueItems')
+const queueContent = useTemplateRef('queueContent')
+const contentElement = computed(() => queueContent.value?.$el ?? null)
+const clampScroll = useScrollClamp(queueItems, contentElement)
 const reorderInstructionsId = useId()
 const queueReorderStatus = ref('')
 const queueDragHandles = new Map()
-let queueObserver = null
-let queueResizeObserver = null
-let queueClampFrame = null
 let queueAnnouncementSequence = 0
 
-onMounted(() => {
-  const container = queueItems.value?.$el ?? queueItems.value
-  const scheduleClamp = () => {
-    queueClampFrame ??= requestAnimationFrame(() => {
-      queueClampFrame = null
-      clampOverlayScrollTop(
-        container,
-        container.querySelector(':scope > .queueItem:last-of-type')
-      )
-    })
-  }
-  queueObserver = new MutationObserver(scheduleClamp)
-  queueObserver.observe(container, { childList: true })
-  queueResizeObserver = new ResizeObserver(scheduleClamp)
-  queueResizeObserver.observe(container)
-})
+function getScrollTop() {
+  return queueItems.value?.scrollTop ?? 0
+}
 
-onBeforeUnmount(() => {
-  queueObserver?.disconnect()
-  queueResizeObserver?.disconnect()
-  if (queueClampFrame !== null) {
-    cancelAnimationFrame(queueClampFrame)
-    queueClampFrame = null
-  }
-})
+function restoreScrollTop(position) {
+  if (!queueItems.value) return
+  restoreOverlayScrollTop(queueItems.value, position)
+  clampScroll()
+}
+
+defineExpose({ getScrollTop, restoreScrollTop })
 
 const {
   draggedItemId: pointerDraggedId, dropTarget,

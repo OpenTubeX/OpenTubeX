@@ -220,6 +220,13 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Doporučená videa"
+    Title: "Akce na celé obrazovce"
+    Customize: "Přizpůsobit akce na celé obrazovce"
+    Add Action: "Přidat akci"
+    Empty: "Nejsou vybrány žádné akce na celé obrazovce"
+    Quick Bookmark: "Rychlá záložka"
   Quick Settings:
     Quick Settings: Rychlé nastavení
     Customize Quick Settings: Přizpůsobit rychlé nastavení

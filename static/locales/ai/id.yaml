@@ -220,6 +220,13 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Video yang direkomendasikan"
+    Title: "Tindakan layar penuh"
+    Customize: "Sesuaikan tindakan layar penuh"
+    Add Action: "Tambahkan tindakan"
+    Empty: "Tidak ada tindakan layar penuh yang dipilih"
+    Quick Bookmark: "Markah cepat"
   Quick Settings:
     Quick Settings: Pengaturan cepat
     Customize Quick Settings: Sesuaikan pengaturan cepat

@@ -108,6 +108,15 @@ export const SETTINGS_SEARCH_SOURCES = {
     include: GENERAL_APPEARANCE_KEYS,
     exclude: new Set(['Navigation'])
   }, {
+    type: 'fullscreen-actions',
+    key: 'Settings.Fullscreen Actions',
+    include: new Set(['Title', 'Customize'])
+  }, {
+    type: 'fullscreen-actions',
+    key: 'Settings.Fullscreen Actions',
+    include: new Set(['Add Action', 'Quick Bookmark']),
+    subpage: 'fullscreen-actions'
+  }, {
     type: 'navigation',
     key: 'Settings.General Settings.Navigation',
     include: new Set(['Navigation', 'Customize Navigation'])

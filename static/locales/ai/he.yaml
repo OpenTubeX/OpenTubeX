@@ -224,6 +224,13 @@ History:
   Custom: בהתאמה אישית
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "סרטונים מומלצים"
+    Title: "פעולות במסך מלא"
+    Customize: "התאמה אישית של פעולות במסך מלא"
+    Add Action: "הוספת פעולה"
+    Empty: "לא נבחרו פעולות במסך מלא"
+    Quick Bookmark: "סימנייה מהירה"
   Quick Settings:
     Quick Settings: הגדרות מהירות
     Customize Quick Settings: התאמה אישית של ההגדרות המהירות

@@ -222,6 +222,13 @@ History:
   Custom: По избор
   History Older Than Days Removed: Историята на гледане отпреди повече от 1 ден е премахната | Историята на гледане отпреди повече от {days} дни е премахната
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Препоръчани видеоклипове"
+    Title: "Действия на цял екран"
+    Customize: "Персонализиране на действията на цял екран"
+    Add Action: "Добавяне на действие"
+    Empty: "Няма избрани действия на цял екран"
+    Quick Bookmark: "Бърза отметка"
   Quick Settings:
     Quick Settings: Бързи настройки
     Customize Quick Settings: Персонализиране на бързите настройки
