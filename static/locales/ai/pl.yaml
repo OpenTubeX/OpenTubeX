@@ -1195,3 +1195,5 @@ Storage Startup Error:
   Title: "Nie udało się wczytać danych aplikacji"
   Message: "Zwolnij miejsce na urządzeniu i spróbuj ponownie. Synchronizacja jest wstrzymana do czasu wczytania danych."
   Retry: "Spróbuj ponownie"
+Native Permissions:
+  Local Network: "Wykrywanie urządzeń w sieci lokalnej i przesyłanie do nich filmów oraz synchronizowanie ustawień i danych między urządzeniami."

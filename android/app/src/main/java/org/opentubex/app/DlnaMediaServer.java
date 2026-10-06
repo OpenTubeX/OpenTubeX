@@ -4,7 +4,7 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ final class DlnaMediaServer implements AutoCloseable {
     private double startSeconds;
     volatile boolean muxFailed;
     private final Set<Process> processes = ConcurrentHashMap.newKeySet();
-    private final ScheduledExecutorService timers = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledThreadPoolExecutor timers = new ScheduledThreadPoolExecutor(1);
 
     DlnaMediaServer(Context context, HttpUrl media, HttpUrl audio, String address, InetAddress local, double startSeconds) throws Exception {
         this(media, address, local);
@@ -65,6 +65,7 @@ final class DlnaMediaServer implements AutoCloseable {
     }
 
     DlnaMediaServer(HttpUrl media, String address, InetAddress local) throws IOException {
+        timers.setRemoveOnCancelPolicy(true);
         this.media = media;
         this.address = address;
         client = new OkHttpClient.Builder().cookieJar(CookieJar.NO_COOKIES)
@@ -181,12 +182,9 @@ final class DlnaMediaServer implements AutoCloseable {
                 "+frag_keyframe+empty_moov+default_base_moof", "-f", "mp4", "pipe:1"));
             process = YtDlpRuntime.startDlnaFfmpeg(context, args);
             processes.add(process);
-            Process running = process;
-            var timeout = timers.schedule(running::destroy, 15, TimeUnit.SECONDS);
             InputStream merged = process.getInputStream();
             byte[] buffer = new byte[32 * 1024];
-            int first = readMerged(merged, buffer);
-            timeout.cancel(false);
+            int first = readMerged(process, merged, buffer, 15_000);
             if (first < 0) {
                 muxFailed = true;
                 output.write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
@@ -194,8 +192,8 @@ final class DlnaMediaServer implements AutoCloseable {
             }
             output.write(headers);
             output.write(buffer, 0, first);
-            for (int count; (count = readMerged(merged, buffer)) != -1;) output.write(buffer, 0, count);
-            if (process.waitFor() != 0) muxFailed = true;
+            for (int count; (count = readMerged(process, merged, buffer, 15_000)) != -1;) output.write(buffer, 0, count);
+            if (!process.waitFor(15, TimeUnit.SECONDS) || process.exitValue() != 0) muxFailed = true;
         } catch (Exception error) {
             if (process == null) muxFailed = true;
             throw new IOException("DLNA stream merge failed", error);
@@ -205,9 +203,14 @@ final class DlnaMediaServer implements AutoCloseable {
         }
     }
 
-    private int readMerged(InputStream input, byte[] buffer) throws IOException {
+    int readMerged(Process process, InputStream input, byte[] buffer, long timeoutMillis) throws IOException {
+        var timeout = timers.schedule(() -> {
+            muxFailed = true;
+            process.destroyForcibly();
+        }, timeoutMillis, TimeUnit.MILLISECONDS);
         try { return input.read(buffer); }
         catch (IOException error) { muxFailed = true; throw error; }
+        finally { timeout.cancel(false); }
     }
 
     @Override public void close() {
