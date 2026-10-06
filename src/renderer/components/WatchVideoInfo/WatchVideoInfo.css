@@ -75,6 +75,20 @@
   vertical-align: middle;
 }
 
+.channelThumbnailLink {
+  display: flex;
+  border-radius: 50%;
+  margin-inline-end: 10px;
+}
+
+.channelThumbnailLink:focus-visible {
+  outline-offset: 2px;
+}
+
+.channelThumbnailLink .channelThumbnail {
+  margin-inline-end: 0;
+}
+
 .collaboratorThumbnail {
   display: block;
   border: 2px solid var(--card-bg-color);

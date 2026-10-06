@@ -93,10 +93,14 @@ body:where(:has(.app.capacitorTabs)) {
   background-color: var(--selection-background-color);
 }
 
+/* Use fallback corners only when the control does not define its own shape. */
+:where(:root:not(.hideOutlines) :focus-visible:not(:disabled)) {
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
 :where(:root:not(.hideOutlines)) :focus-visible:not(:disabled) {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
-  border-radius: calc(4px * var(--ui-roundness));
   box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
 }
 
