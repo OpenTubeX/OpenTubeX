@@ -121,18 +121,20 @@ test('release keeps immediate click suppression and does not expire a newer drag
   assert.equal(suppressed, true, 'cleanup from an earlier release must not affect a new drag')
 })
 
-function iconGesture() {
+function iconGesture(disabled = false) {
   const iconSource = readFileSync(new URL('../../src/renderer/components/FtIconButton/FtIconButton.vue', import.meta.url), 'utf8')
   const handlerNames = ['handleIconPointerDown', 'clearLongPress', 'cancelMovedLongPress', 'finishLongPress', 'clearLongPressClick', 'cancelLongPressClick', 'suppressLongPressClick']
+  if (disabled) handlerNames.push('handleIconClick')
   const iconHandlers = handlerNames.map(name => iconSource.match(new RegExp(`function ${name}\\(.*?\\) \\{[\\s\\S]*?\\n\\}`))[0]).join('\n')
   const timers = new Map()
   const listeners = new Map()
   let sequence = 0
   let opened = 0
+  const emitted = []
   const context = vm.createContext({
-    props: { openOnRightOrLongClick: true }, LONG_CLICK_BOUNDARY_MS: 500,
+    props: { openOnRightOrLongClick: true, disabled }, LONG_CLICK_BOUNDARY_MS: 500,
     setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id),
-    handleIconClick: () => opened++,
+    handleIconClick: () => opened++, emit: event => emitted.push(event),
     window: {
       addEventListener: (type, fn) => { if (!listeners.has(type)) listeners.set(type, new Set()); listeners.get(type).add(fn) },
       removeEventListener: (type, fn) => listeners.get(type)?.delete(fn),
@@ -141,7 +143,7 @@ function iconGesture() {
   vm.runInContext(`let longPressTimer = null; let longPressStart = null; let longPressClickPointerId = null; ${iconHandlers}`, context)
   const event = { button: 0, pointerId: 1, clientX: 20, clientY: 20 }
   return {
-    context, event, timers, opened: () => opened,
+    context, event, timers, emitted, opened: () => opened,
     dispatch: (type, event) => { for (const listener of [...listeners.get(type) ?? []]) listener(event) },
     listenerCount: () => [...listeners.values()].reduce((total, set) => total + set.size, 0),
   }
@@ -206,4 +208,19 @@ test('a long hold suppresses a delayed release click and preserves keyboard and 
   dispatch('pointercancel', event)
   assert.equal(context.suppressLongPressClick(click), false)
   assert.equal(listenerCount(), 0)
+})
+
+test('a disabled icon hold emits once and preserves subsequent tap and keyboard activation', () => {
+  const { context, event, timers, emitted, dispatch, listenerCount } = iconGesture(true)
+  context.handleIconPointerDown(event)
+  for (const timer of [...timers.values()]) timer()
+  assert.deepEqual(emitted, ['disabled-click'])
+  context.handleIconClick({ pointerId: event.pointerId, detail: 1 })
+  assert.deepEqual(emitted, ['disabled-click'], 'release must not emit a second disabled-click')
+  assert.equal(listenerCount(), 0, 'the release click must consume suppression')
+  context.handleIconClick({ detail: 0 })
+  assert.equal(emitted.length, 2, 'keyboard activation still emits disabled-click')
+  dispatch('pointerdown', event)
+  context.handleIconClick({ pointerId: event.pointerId, detail: 1 })
+  assert.equal(emitted.length, 3, 'a subsequent tap still emits disabled-click')
 })

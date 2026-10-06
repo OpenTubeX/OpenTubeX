@@ -372,12 +372,12 @@ onBeforeUnmount(() => {
  * @param {boolean} isRightOrLongClick
  */
 function handleIconClick(e, isRightOrLongClick = false) {
-  if (props.disabled) {
-    emit('disabled-click')
+  if (suppressLongPressClick(e)) {
     return
   }
 
-  if (suppressLongPressClick(e)) {
+  if (props.disabled) {
+    emit('disabled-click')
     return
   }
 
