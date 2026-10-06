@@ -162,13 +162,6 @@
       margin-inline-end: 0;
     }
 
-    :deep(.switch-ctn.containsTooltip) {
-      inset-inline-start: 0;
-      margin-inline: 7px;
-      padding-block: 0;
-      padding-inline: 10px;
-    }
-
     :deep(.switchColumn .switch-label-main > .tooltip),
     :deep(.switchFlowGrid .switch-label-main > .tooltip) {
       position: static;
@@ -197,6 +190,7 @@
     :deep(.switch-ctn) {
       box-sizing: border-box;
       min-inline-size: 0;
+      inline-size: calc(100% - 14px);
       max-inline-size: calc(100% - 14px);
       margin-inline: 7px;
     }

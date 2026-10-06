@@ -33,6 +33,53 @@ for (const uiScale of [100, 95]) {
       await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
     })
 
+    test('switch help stays beside wrapped labels and all tracks align', async ({ app, page }, testInfo) => {
+      const section = await goToSettingsSection(page, 'general')
+      const grid = section.locator('.switchFlowGrid')
+      for (const locale of ['en-US', 'de-DE']) {
+        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        for (const viewportWidth of [480, 1600]) {
+          await resize(app, page, viewportWidth, uiScale)
+          for (const width of [400, 300, 650, 400]) {
+            await section.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
+            const geometry = await grid.evaluate(element => [...element.querySelectorAll('.switch-ctn')].map(toggle => {
+              const text = toggle.querySelector('.switch-label-text')
+              const bounds = text.getBoundingClientRect()
+              const track = getComputedStyle(text, '::before')
+              const help = toggle.querySelector('.tooltip')?.getBoundingClientRect()
+              return {
+                trackStart: bounds.left + parseFloat(track.left),
+                helpOffset: help ? help.top + help.height / 2 - bounds.top - bounds.height / 2 : null,
+                helpWidth: help?.width,
+                overflow: toggle.scrollWidth - toggle.clientWidth
+              }
+            }))
+            expect.soft(Math.max(...geometry.map(item => item.trackStart)) - Math.min(...geometry.map(item => item.trackStart)), `${locale} ${viewportWidth}/${width}px track alignment`).toBeLessThanOrEqual(1)
+            for (const item of geometry) {
+              expect.soft(item.overflow).toBeLessThanOrEqual(1)
+              if (item.helpOffset !== null) {
+                expect.soft(Math.abs(item.helpOffset), `${locale} ${viewportWidth}/${width}px help alignment`).toBeLessThanOrEqual(1)
+                // Fractional zoom can round a 24px control slightly below 24.
+                expect.soft(item.helpWidth).toBeGreaterThanOrEqual(23.9)
+              }
+            }
+          }
+        }
+      }
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateCurrentLocale', 'en-US')
+        await store.dispatch('updateBaseTheme', 'system')
+      })
+      await resize(app, page, 480, uiScale)
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await grid.scrollIntoViewIfNeeded()
+        await captureAppFramebuffer(app, testInfo, `switch-labels-${colorScheme}`)
+      }
+    })
+
     test('download controls keep equal empty space after buttons and helper text', async ({ app, page }, testInfo) => {
       const section = await goToSettingsSection(page, 'download')
       for (const width of [1000, 450]) {

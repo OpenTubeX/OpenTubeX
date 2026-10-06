@@ -56,18 +56,16 @@ for (const uiScale of [100, 125]) {
       })
     }
 
-    test('lets caption help follow a multiline switch label', async ({ page }) => {
+    test('keeps caption help beside a multiline switch label', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 })
       const captions = await goToSettingsSection(page, 'playback')
       const label = captions.locator('.captionControls .switch-label').filter({ has: page.locator('.tooltip') }).first()
       await label.locator('.switch-label-text').evaluate(el => { el.textContent = 'A long translated switch label that takes several lines' })
       expect(await label.evaluate(el => {
-        const range = document.createRange()
-        range.selectNodeContents(el.querySelector('.switch-label-text'))
-        const lastLineTop = Math.max(...Array.from(range.getClientRects(), rect => rect.top))
+        const text = el.querySelector('.switch-label-text').getBoundingClientRect()
         const help = el.querySelector('.tooltip').getBoundingClientRect()
-        return help.top + help.height / 2 - lastLineTop
-      })).toBeGreaterThanOrEqual(-1)
+        return Math.abs(help.top + help.height / 2 - text.top - text.height / 2)
+      })).toBeLessThanOrEqual(1)
     })
 
     test('wraps long storage size descriptions while loading and after loading', async ({ page }) => {
