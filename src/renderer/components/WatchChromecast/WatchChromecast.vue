@@ -22,7 +22,7 @@ import { useRoute } from 'vue-router'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { selectCastSource } from '../../helpers/player/castSource'
-import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
+import { getSubtitleRequestUrl, shouldUseSubtitleCookies } from '../../helpers/player/subtitleCookies'
 
 const props = defineProps({
   formats: { type: Array, required: true },
@@ -212,17 +212,15 @@ async function handleChoice(choice) {
     if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
-    let captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
     let player
     const result = await window.ftElectron.chromecast.start(async () => {
-      const prepared = await Promise.allSettled(captions.map(async caption => ({
-        ...caption, url: await getSubtitleRequestUrl(caption.url, store.getters)
-      })))
-      const activeCaption = prepared[captionIndex]
-      if (activeCaption?.status === 'rejected') throw activeCaption.reason
-      const available = prepared.filter(result => result.status === 'fulfilled')
-      captionIndex = captionIndex === null ? null : available.indexOf(activeCaption)
-      captions = available.map(result => result.value)
+      // Optional authenticated tracks would each launch an unused yt-dlp process.
+      captions = captions.filter(item => item.url === caption?.url || !shouldUseSubtitleCookies(item.url, store.getters))
+      const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
+      if (captionIndex !== null && captionIndex >= 0) {
+        const selected = captions[captionIndex]
+        captions[captionIndex] = { ...selected, url: await getSubtitleRequestUrl(selected.url, store.getters) }
+      }
       if (disposed) return null
       player = props.getPlayer()
       watchPath = route.path

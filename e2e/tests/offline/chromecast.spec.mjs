@@ -80,6 +80,16 @@ async function choice(page, name) {
   await page.getByRole('option', { name, exact: true }).click()
 }
 
+async function selectLocalEnglishCaption(page, watch) {
+  await watch.evaluate(vm => { vm.currentSubtitlesState = true })
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    const player = video.ui.getControls().getPlayer()
+    const english = await player.addTextTrackAsync('https://cast-media.test/en.vtt', 'en', 'captions', 'text/vtt', undefined, 'English')
+    player.selectTextTrack(english)
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
+}
+
 test('casts the current video, controls the receiver and returns to its remote position', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await watch.evaluate(vm => { vm.$refs.player.setCurrentTime(5); vm.$refs.player.play() })
@@ -614,6 +624,7 @@ for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies
     }, text)
     await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(`update${setting}`, true), setting)
     await watch.evaluate((vm, url) => { vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }] }, url)
+    await selectLocalEnglishCaption(page, watch)
     await choice(page, 'Test TV')
     await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
     const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
@@ -623,7 +634,49 @@ for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies
   })
 }
 
-test('Cast skips a failed optional authenticated caption and remaps the selected track', async ({ app, page }) => {
+for (const selected of [false, true]) {
+  test(`Cast starts without downloading stalled optional captions ${selected ? 'with' : 'without'} a selected track`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.castSubtitleRequests = []
+      ipcMain.removeHandler('yt-dlp-get-subtitle')
+      ipcMain.handle('yt-dlp-get-subtitle', (_, url) => {
+        globalThis.castSubtitleRequests.push(url)
+        if (new URL(url).searchParams.get('lang') === 'en') return 'WEBVTT\n\nSelected caption\n'
+        return new Promise(() => {})
+      })
+    })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+    await watch.evaluate((vm, selected) => {
+      vm.captions = Array.from({ length: 40 }, (_, index) => ({
+        url: `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=optional-${index}&fmt=vtt`,
+        label: `Optional ${index}`,
+        language: `optional-${index}`,
+        mimeType: 'text/vtt'
+      }))
+      if (selected) vm.captions.push({ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' })
+      vm.currentSubtitlesState = selected
+      vm.$refs.player.play()
+    }, selected)
+    if (selected) {
+      await page.locator('.ftVideoPlayer video').evaluate(async video => {
+        const player = video.ui.getControls().getPlayer()
+        const english = await player.addTextTrackAsync('https://cast-media.test/en.vtt', 'en', 'captions', 'text/vtt', undefined, 'English')
+        player.selectTextTrack(english)
+      })
+      await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
+    }
+    await choice(page, 'Test TV')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests.map(url => new URL(url).searchParams.get('lang')))).toEqual(selected ? ['en'] : [])
+    const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+    expect(started.captions.map(caption => caption.language)).toEqual(selected ? ['en'] : [])
+    expect(started.captionIndex).toBe(selected ? 0 : null)
+    await choice(page, 'Return to local playback')
+  })
+}
+
+test('Cast prepares selected authenticated captions and retains public optional tracks', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
   await app.electronApp.evaluate(({ ipcMain }, text) => {
@@ -637,7 +690,7 @@ test('Cast skips a failed optional authenticated caption and remaps the selected
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
   await watch.evaluate(vm => {
     vm.captions = [['de', 'German'], ['en', 'English'], ['ja', 'Japanese']].map(([language, label]) => ({
-      url: `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=${language}&fmt=vtt`, language, label, mimeType: 'text/vtt'
+      url: language === 'ja' ? 'https://cast-media.test/ja.vtt' : `https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=${language}&fmt=vtt`, language, label, mimeType: 'text/vtt'
     }))
     vm.currentSubtitlesState = true
     vm.$refs.player.play()
@@ -653,12 +706,15 @@ test('Cast skips a failed optional authenticated caption and remaps the selected
   const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(started.captions.map(caption => caption.language)).toEqual(['en', 'ja'])
   expect(started.captionIndex).toBe(0)
-  expect(started.captions.every(caption => caption.url === `data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)).toBe(true)
-  expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests.length)).toBe(3)
+  expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
+  expect(started.captions[1].url).toBe('https://cast-media.test/ja.vtt')
+  expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests.length)).toBe(1)
   await page.locator('.chromecastControl > button').click()
   await expect(page.getByRole('option', { name: 'German', exact: true })).toHaveCount(0)
   await expect(page.getByRole('option', { name: 'English', exact: true })).toBeVisible()
   await page.keyboard.press('Escape')
+  await choice(page, 'Japanese')
+  expect((await app.electronApp.evaluate(() => globalThis.castTest.controls)).at(-1)).toEqual({ id: 'session-id', action: 'caption', value: 2 })
   await choice(page, 'Return to local playback')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
 })
@@ -724,6 +780,7 @@ test('slow authenticated Cast captions outlive transient activation without losi
     vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }]
     vm.$refs.player.play()
   }, url)
+  await selectLocalEnglishCaption(page, watch)
   await choice(page, 'Test TV')
   await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishCastSubtitle)).toBe('function')
   // Renderer-side Playwright evaluation grants a gesture; inspect through
