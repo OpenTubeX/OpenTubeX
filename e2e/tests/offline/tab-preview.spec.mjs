@@ -427,6 +427,8 @@ async function createCollapsedPreviewGroup(page, count = 4) {
 test.describe('tab group previews', () => {
   for (const showPreview of [true, false]) {
     test(`keeps the tooltip across tab and group gaps with previews ${showPreview}`, async ({ page }) => {
+      // Install before tab and tooltip setup can start asynchronous preview work.
+      await page.clock.install()
       await page.evaluate(showPreview => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('setTabBarPosition', 'left')
@@ -445,7 +447,6 @@ test.describe('tab group previews', () => {
       const groupBox = await group.boundingBox()
       // Control the grace period so a slow CI worker cannot expire it while
       // Playwright moves the pointer between anchors.
-      await page.clock.install()
       await page.clock.pauseAt(new Date(Date.now() + 1000))
       await page.mouse.move(groupBox.x + groupBox.width / 2, groupBox.y + groupBox.height + 1)
       await page.clock.runFor(40)
