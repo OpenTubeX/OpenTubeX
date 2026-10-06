@@ -1,11 +1,12 @@
 import { expect } from '@playwright/test'
+import * as releasedClient from '../../tests/helpers/released-sync-sessions.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src/renderer/helpers/sync-sessions.js'
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, reconnectDuringCleanup = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, reconnectDuringCleanup = false, postCleanupFailsOnce = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
@@ -29,6 +30,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
   let revoked = false
   let revokeAttempts = 0
   let otherLoginExpired = false
+  let postCleanupFailed = false
   const preserveTabs = (otherLogin && !otherLoginExpires) || reconnectDuringCleanup
   const deviceInfo = await encryptSyncServerDeviceInfo({
     name: 'Previous phone', platform: 'android', architecture: 'arm64', release: '15',
@@ -80,6 +82,15 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
       if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(reconnectDuringCleanup ? 3 : 2)
       else expect(document.devices[oldDeviceId]).toBeUndefined()
+      if (postCleanupFailsOnce) {
+        document = releasedClient.mergeSyncSessions({
+          remoteValue: document,
+          localSessions: [tabSet('released-window', 'Window opened by the released client')],
+          deviceId: oldDeviceId,
+          platform: 'desktop',
+        }).document
+        revision++
+      }
       if (revokeFailsOnce && revokeAttempts++ === 0) {
         return route.fulfill({ status: 503, body: 'Fixture revocation failure' })
       }
@@ -93,6 +104,10 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     if (pathname === '/v1/encrypted_sync/sessionsV2') {
       if (request.method() === 'PUT') {
+        if (postCleanupFailsOnce && revoked && !postCleanupFailed) {
+          postCleanupFailed = true
+          return route.fulfill({ status: 503, body: 'Sync server is temporarily unavailable' })
+        }
         if (reconnectDuringCleanup && !accountSessions.some(session => session.id === 'reconnected-login')) {
           accountSessions.push({
             ...accountSessions[0],
@@ -121,7 +136,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     // same deterministic server responses at that transport boundary.
     await page.exposeBinding('__syncDeviceRemovalRequest', async (_source, options) => routeHandler({
       request: () => ({ url: () => options.url, method: () => options.method, postDataJSON: () => JSON.parse(options.data) }),
-      fulfill: async ({ status = 200, json }) => ({ status, data: json ? JSON.stringify(json) : '', headers: {}, url: options.url }),
+      fulfill: async ({ status = 200, json, body = '' }) => ({ status, data: json ? JSON.stringify(json) : body, headers: {}, url: options.url }),
     }))
     await page.evaluate(() => {
       const capacitor = window.Capacitor
@@ -194,11 +209,19 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       if (capture) await capture('device-removal-partial-failure', prompt)
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
     }
+    if (postCleanupFailsOnce) {
+      await expect(prompt.getByRole('alert')).toContainText('Session revoked:')
+      expect(revoked).toBe(true)
+      expect(document.devices[oldDeviceId].sessions[0].sessionId).toBe('released-window')
+      if (capture) await capture('device-removal-post-revocation-failure', prompt)
+      await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+      expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(1)
+    }
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
     if (revokeResponseLost || loginDisappears) {
       expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(loginDisappears ? 0 : 1)
-      expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(1)
+      expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(loginDisappears ? 1 : 2)
       await expect(sync.locator('.sessionCard', { hasText: 'Current device' })).toBeVisible()
       if (capture) await capture('device-removal-completed', sync.locator('.accountManagement'))
     }
@@ -213,7 +236,8 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       if (capture && reconnectDuringCleanup) await capture('device-reconnect-preserved', sync.locator('.accountManagement'))
     } else {
       expect(document.devices[oldDeviceId]).toBeUndefined()
-      expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
+      // The released owner garbage-collects markers for its closed old windows.
+      expect(document.deletedSessions[oldDeviceId]).toEqual(postCleanupFailsOnce ? ['released-window'] : ['old-tabs', 'older-tabs'])
     }
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
     await expect.poll(() => page.evaluate(() => (

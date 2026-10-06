@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 
 import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDeviceSessions, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
@@ -14,7 +15,7 @@ const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, alreadyRevoked = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
+async function fixture({ current = false, alreadyRevoked = false, releasedUploadDuringRevoke = false, postCleanupFailsOnce = false, otherLoginAfterRevoke = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -54,7 +55,7 @@ async function fixture({ current = false, alreadyRevoked = false, conflict = fal
       }
       async putEncryptedSyncCollection(collection, revision, payload) {
         puts++
-        if (cleanupFails || (cleanupFailsOnce && puts === 1)) throw new Error('Offline')
+        if (cleanupFails || (cleanupFailsOnce && puts === 1) || (postCleanupFailsOnce && puts === 2)) throw new Error('Offline')
         if ((conflict || otherLoginAfterConflict) && puts === 1) {
           if (otherLoginAfterConflict) addLogin()
           remote.devices['old-phone'].sessions.push(tabSet('concurrent-tabs'))
@@ -87,16 +88,23 @@ async function fixture({ current = false, alreadyRevoked = false, conflict = fal
   }
   const revokeDeletesTabs = { value: false }
   const revokeTabsDeleted = { value: false }
+  const revokeAccessRevoked = { value: false }
   const promptError = { value: '' }
   const emitted = []
   let reloads = 0
   const componentContext = vm.createContext({
-    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs, revokeTabsDeleted,
+    sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs, revokeTabsDeleted, revokeAccessRevoked,
     client: () => ({
       token: 'token',
       async getAccountSessions() { return accountSessions() },
       async revokeAccountSession() {
         revokeAttempts++
+        if (releasedUploadDuringRevoke) {
+          remote = releasedClient.mergeSyncSessions({ remoteValue: remote,
+            localSessions: [tabSet('new-window')], deviceId: 'old-phone', platform: 'desktop',
+          }).document
+        }
+        if (otherLoginAfterRevoke) addLogin()
         if (revokeResponseLost) {
           if (revoked) throw new Error('Not found')
           revoked = true
@@ -123,7 +131,7 @@ async function fixture({ current = false, alreadyRevoked = false, conflict = fal
   }
 }
 
-test('finishes revocation after a lost response without repeating deletion requests', async () => {
+test('finishes cleanup after a lost revocation response without repeating the DELETE', async () => {
   const app = await fixture({ revokeResponseLost: true })
   await app.revoke()
   assert.equal(app.state().revoked, true)
@@ -132,7 +140,7 @@ test('finishes revocation after a lost response without repeating deletion reque
   assert.equal(app.state().puts, 1)
   await app.revoke()
   assert.equal(app.state().prompt, null)
-  assert.equal(app.state().puts, 1)
+  assert.equal(app.state().puts, 2)
   assert.equal(app.state().revokeAttempts, 1)
   assert.equal(app.state().reloads, 1)
 })
@@ -242,7 +250,7 @@ for (const current of [false, true]) {
 test('retries cleanup against the latest tab sets after a concurrent upload', async () => {
   const app = await fixture({ conflict: true })
   await app.revoke()
-  assert.equal(app.state().puts, 2)
+  assert.equal(app.state().puts, 3)
   assert.equal(app.state().remote.devices['old-phone'], undefined)
   assert.ok(app.state().remote.deletedSessions['old-phone'].includes('concurrent-tabs'))
 })
@@ -310,4 +318,32 @@ test('revoking a subsequent login updates classified tombstones while preserving
   assert.deepEqual(remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
   assert.deepEqual(remote.deletedSessions['revoked:old-phone'], ['old-tabs'])
   assert.deepEqual(remote.deletedSessions['revoked-login:old-phone'], ['former-login', 'login-id'])
+})
+
+test('cleans up a released client window uploaded between initial cleanup and revocation', async () => {
+  const app = await fixture({ releasedUploadDuringRevoke: true })
+  await app.revoke()
+  assert.equal(app.state().remote.devices['old-phone'], undefined)
+  assert.ok(app.state().remote.deletedSessions['old-phone'].includes('new-window'))
+})
+
+test('retries cleanup after confirmed revocation without another DELETE', async () => {
+  const app = await fixture({ releasedUploadDuringRevoke: true, postCleanupFailsOnce: true })
+  await app.revoke()
+  assert.equal(app.state().revoked, true)
+  assert.equal(app.state().error, 'Settings.Sync Settings.Session Revoked: Offline')
+  assert.ok(app.state().prompt)
+  assert.equal(app.state().remote.devices['old-phone'].sessions[0].sessionId, 'new-window')
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().revokeAttempts, 1)
+  assert.equal(app.state().remote.devices['old-phone'], undefined)
+})
+
+test('preserves a reconnect while finishing released-client cleanup after revocation', async () => {
+  const app = await fixture({ releasedUploadDuringRevoke: true, otherLoginAfterRevoke: true })
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().revoked, true)
+  assert.equal(app.state().remote.devices['old-phone'].sessions[0].sessionId, 'new-window')
 })

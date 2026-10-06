@@ -291,6 +291,7 @@ const renamedDeviceName = ref('')
 const sessionToRevoke = ref(null)
 const revokeDeletesTabs = ref(false)
 const revokeTabsDeleted = ref(false)
+const revokeAccessRevoked = ref(false)
 const promptError = ref('')
 
 function client(token = props.token) {
@@ -474,6 +475,7 @@ async function renameDevice() {
 function openRevokePrompt(session) {
   promptError.value = ''
   revokeTabsDeleted.value = false
+  revokeAccessRevoked.value = false
   revokeDeletesTabs.value = !hasOtherDeviceLogins(session, sessions.value)
   sessionToRevoke.value = session
 }
@@ -506,9 +508,7 @@ async function revokeSession() {
     }
     // Clean up while this login can still retry the operation, including when
     // revoking the current device. Another login may still use the same tabs.
-    // An absent login may have expired independently. Skip repeated cleanup
-    // only after it succeeded in this prompt and the login is now absent.
-    if (deletesTabs && (sessionActive || !revokeTabsDeleted.value)) {
+    if (deletesTabs && sessionActive && !revokeAccessRevoked.value) {
       const result = await store.dispatch('deleteSyncServerDeviceSessions', {
         syncDeviceId: session.device_id,
         accountSessionId: session.id,
@@ -516,7 +516,19 @@ async function revokeSession() {
       if (!result) return
       if (result === true) revokeTabsDeleted.value = true
     }
-    if (sessionActive) await requestClient.revokeAccountSession(session.id)
+    if (sessionActive && !revokeAccessRevoked.value) await requestClient.revokeAccountSession(session.id)
+    revokeAccessRevoked.value = true
+    // Released clients cannot honor pending upload blocks. With another
+    // login's credentials, remove anything they uploaded before their DELETE.
+    // Also finish cleanup when revocation succeeded but its response was lost.
+    if (deletesTabs && (!session.current || !revokeTabsDeleted.value)) {
+      const result = await store.dispatch('deleteSyncServerDeviceSessions', {
+        syncDeviceId: session.device_id,
+        accountSessionId: session.id,
+      })
+      if (!result) return
+      if (result === true) revokeTabsDeleted.value = true
+    }
     sessionToRevoke.value = null
     showToast({
       message: t('Settings.Sync Settings.Session Revoked'),
@@ -529,7 +541,9 @@ async function revokeSession() {
     await loadSessions()
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token, promptError)
-    if (revokeTabsDeleted.value && promptError.value) {
+    if (revokeAccessRevoked.value && promptError.value) {
+      promptError.value = `${t('Settings.Sync Settings.Session Revoked')}: ${promptError.value}`
+    } else if (revokeTabsDeleted.value && promptError.value) {
       promptError.value = t('Settings.Sync Settings.Revoke Session Partial Failure')
     }
   } finally {

@@ -45,3 +45,7 @@ test('desktop upgrade reclaims tabs after an older client signs back in', async 
 test('pending revocation blocks a desktop window opened after cleanup', async ({ page }) => {
   await verifySyncDeviceReconnection(page, { pendingRevocation: true })
 })
+
+test('finishes released-client cleanup after revocation and retries without another DELETE', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { postCleanupFailsOnce: true })
+})
