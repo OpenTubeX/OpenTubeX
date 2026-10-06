@@ -10,6 +10,7 @@ import {
 import {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
@@ -67,6 +68,7 @@ function syncServerFetch(input, init, timeoutMs) {
 export {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
@@ -1280,7 +1282,9 @@ export async function syncSessions(client, store, previous = null, { accountClie
     }
     // Block this login's entire upload, including windows opened after cleanup.
     // Keep local tabs intact while the account-session DELETE is pending.
-    if (revokedLogins.includes(current[0].id)) return null
+    if (revokedLogins.includes(current[0].id)) {
+      throw new SyncServerTabRevocationPendingError(i18n.global.t('Settings.Sync Settings.Tab Sync Revocation Pending'))
+    }
     activeRevokedLogins = revokedLogins.filter(id => response.sessions.some(session => session.id === id))
     reclaimDeviceSessions = true
   }

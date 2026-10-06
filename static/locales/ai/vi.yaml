@@ -939,6 +939,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Các bộ thẻ đã đồng bộ của thiết bị này cũng sẽ bị xóa."
     Revoke Session Partial Failure: "Các bộ thẻ đã đồng bộ đã bị xóa, nhưng không thể xác nhận việc thu hồi. Hãy thử thu hồi quyền truy cập lần nữa."
+    Tab Sync Revocation Pending: "Đồng bộ thẻ đang tạm dừng trong khi chờ thu hồi quyền truy cập của lần đăng nhập này. Thử thu hồi lại trong Cài đặt đồng bộ."
     Show More: "Hiển thị thêm"
     Watch stats: "Thống kê xem"
     Syncing statistics: Đang đồng bộ thống kê xem…

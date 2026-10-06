@@ -6,12 +6,12 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, reconnectDuringCleanup = false, postCleanupFailsOnce = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, current = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, loginDisappears = false, reconnectDuringCleanup = false, postCleanupFailsOnce = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
   const currentDeviceId = Buffer.alloc(16, 4).toString('base64url')
-  const activeDeviceId = otherLogin && !otherLoginExpires ? oldDeviceId : currentDeviceId
+  const activeDeviceId = current || (otherLogin && !otherLoginExpires) ? oldDeviceId : currentDeviceId
   const orphanId = 'phone-before-app-data-reset'
   const tabSet = (sessionId, title) => ({
     sessionId,
@@ -39,7 +39,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
   const accountSessions = [{
     id: 'old-login',
     device_id: oldDeviceId,
-    current: false,
+    current,
     created_at: now,
     last_active_at: now,
     expires_at: now + 86400000,
@@ -51,7 +51,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       ...accountSessions[0],
       id: 'current-login',
       device_id: loginDeviceId,
-      current: !otherLoginExpires,
+      current: !current && !otherLoginExpires,
       encrypted_device_info: await encryptSyncServerDeviceInfo({
         name: 'Current phone', platform: 'android', architecture: 'arm64', release: '15',
       }, key, loginDeviceId),
@@ -62,6 +62,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     const request = route.request()
     const pathname = new URL(request.url()).pathname
     requests.push(`${request.method()} ${pathname}`)
+    if (current && revoked) return route.fulfill({ status: 401 })
     if (pathname === '/health') {
       return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
     }
@@ -75,8 +76,10 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
         }
       })
     }
-    if (pathname === '/v1/account/sessions/current-login' && request.method() === 'PATCH') {
-      accountSessions[1].encrypted_device_info = request.postDataJSON().encrypted_device_info
+    if (pathname.startsWith('/v1/account/sessions/') && request.method() === 'PATCH') {
+      const session = accountSessions.find(session => pathname === `/v1/account/sessions/${session.id}`)
+      if (!session) return route.fulfill({ status: 404 })
+      session.encrypted_device_info = request.postDataJSON().encrypted_device_info
       return route.fulfill({ status: 204 })
     }
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
@@ -112,6 +115,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
           accountSessions.push({
             ...accountSessions[0],
             id: 'reconnected-login',
+            current: false,
             encrypted_device_info: await encryptSyncServerDeviceInfo({
               name: 'Reconnected phone', platform: 'android', architecture: 'arm64', release: '15',
             }, key, oldDeviceId),
@@ -182,7 +186,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       store.commit('setSyncServerOtherDeviceSessions', sessions)
     }, { key, salt, currentDeviceId: activeDeviceId, sessions: getOtherDeviceSessions(document, activeDeviceId), snapshot: document, phone })
     const sync = await goToSettingsSection(page, 'sync')
-    const device = sync.locator('.sessionCard', { hasText: 'Previous phone' })
+    const device = sync.locator('.sessionCard', { hasText: current ? 'Current device' : 'Previous phone' })
     await device.getByRole('button', { name: 'Revoke access' }).click()
     const prompt = page.getByRole('dialog', { name: 'Revoke this session?' })
     if (otherLogin) await expect(prompt).not.toContainText("This device's synced tab sets will also be deleted.")
@@ -219,6 +223,17 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
+    if (current) {
+      expect(revoked).toBe(true)
+      expect(requests.slice(requests.indexOf('DELETE /v1/account/sessions/old-login') + 1)).toEqual([])
+      expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs', 'reconnected-tabs'])
+      expect(document.deletedSessions[oldDeviceId]).toBeUndefined()
+      await expect.poll(() => page.evaluate(() => {
+        const settings = document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings
+        return [settings.syncServerToken, settings.syncServerUsername, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt, settings.syncServerSnapshot]
+      })).toEqual(['', '', '', '', '{}'])
+      return
+    }
     if (revokeResponseLost || loginDisappears) {
       expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(loginDisappears ? 0 : 1)
       expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(loginDisappears ? 1 : 2)

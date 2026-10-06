@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Os conjuntos de abas sincronizados deste dispositivo também serão excluídos."
     Revoke Session Partial Failure: "Os conjuntos de abas sincronizadas foram excluídos, mas não foi possível confirmar a revogação. Tente revogar o acesso novamente."
+    Tab Sync Revocation Pending: "A sincronização de abas está pausada enquanto a revogação deste login está pendente. Tente novamente a revogação nas configurações de sincronização."
     Show More: "Mostrar mais"
     Watch stats: "Estatísticas de exibição"
     Syncing statistics: Sincronizando estatísticas de visualização…

@@ -50,6 +50,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
         return accountSessions()
       }
       async getEncryptedSyncCollection() {
+        if (current && revoked) throw Object.assign(new Error('Session expired'), { status: 401 })
         if (otherLoginDuringCleanup) addLogin()
         return { revision: puts, payload: await encryptSyncDocument(remote, key, salt) }
       }
@@ -276,18 +277,21 @@ for (const current of [false, true]) {
   })
 }
 
-for (const otherLoginAfterConflict of [false, true]) {
-  test(`preserves tabs when another login appears ${otherLoginAfterConflict ? 'during a conflict retry' : 'during cleanup'}`, async () => {
-    const app = await fixture({ otherLoginDuringCleanup: !otherLoginAfterConflict, otherLoginAfterConflict })
-    await app.revoke()
-    assert.equal(app.state().revoked, true)
-    assert.equal(app.state().prompt, null)
-    assert.equal(app.state().puts, otherLoginAfterConflict ? 1 : 0)
-    assert.deepEqual(app.state().remote.devices['old-phone'].sessions, [
-      tabSet('old-tabs'), tabSet('older-tabs'), ...(otherLoginAfterConflict ? [tabSet('concurrent-tabs')] : []),
-    ])
-    assert.deepEqual(app.state().remote.deletedSessions, {})
-  })
+for (const current of [false, true]) {
+  for (const otherLoginAfterConflict of [false, true]) {
+    test(`revoking a ${current ? 'current' : 'previous'} login preserves tabs when another login appears ${otherLoginAfterConflict ? 'during a conflict retry' : 'during cleanup'}`, async () => {
+      const app = await fixture({ current, otherLoginDuringCleanup: !otherLoginAfterConflict, otherLoginAfterConflict })
+      await app.revoke()
+      assert.equal(app.state().revoked, true)
+      assert.equal(app.state().prompt, null)
+      assert.equal(app.state().puts, otherLoginAfterConflict ? 1 : 0)
+      assert.deepEqual(app.state().remote.devices['old-phone'].sessions, [
+        tabSet('old-tabs'), tabSet('older-tabs'), ...(otherLoginAfterConflict ? [tabSet('concurrent-tabs')] : []),
+      ])
+      assert.deepEqual(app.state().remote.deletedSessions, {})
+      assert.deepEqual(app.state().emitted, current ? ['current-revoked'] : [])
+    })
+  }
 }
 
 test('keeps cleanup retryable if the account response becomes malformed during cleanup', async () => {

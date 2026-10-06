@@ -508,7 +508,7 @@ async function revokeSession() {
     }
     // Clean up while this login can still retry the operation, including when
     // revoking the current device. Another login may still use the same tabs.
-    if (deletesTabs && sessionActive && !revokeAccessRevoked.value) {
+    if (deletesTabs && (sessionActive || session.current) && !revokeAccessRevoked.value) {
       const result = await store.dispatch('deleteSyncServerDeviceSessions', {
         syncDeviceId: session.device_id,
         accountSessionId: session.id,
@@ -521,7 +521,7 @@ async function revokeSession() {
     // Released clients cannot honor pending upload blocks. With another
     // login's credentials, remove anything they uploaded before their DELETE.
     // Also finish cleanup when revocation succeeded but its response was lost.
-    if (deletesTabs && (!session.current || !revokeTabsDeleted.value)) {
+    if (deletesTabs && !session.current) {
       const result = await store.dispatch('deleteSyncServerDeviceSessions', {
         syncDeviceId: session.device_id,
         accountSessionId: session.id,

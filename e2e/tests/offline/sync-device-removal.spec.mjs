@@ -28,6 +28,10 @@ test('device removal preserves tabs when another login reconnects during a confl
   await verifySyncDeviceRemoval(page, { reconnectDuringCleanup: true })
 })
 
+test('current device revocation disconnects when cleanup preserves a reconnected login', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { current: true, reconnectDuringCleanup: true })
+})
+
 for (const conflict of [false, true]) {
   test(`desktop reauthentication reclaims revoked tab sets after ${conflict ? 'a conflict' : 'a failed upload'}`, async ({ page }) => {
     await verifySyncDeviceReconnection(page, { conflict })
@@ -44,6 +48,10 @@ test('desktop upgrade reclaims tabs after an older client signs back in', async 
 
 test('pending revocation blocks a desktop window opened after cleanup', async ({ page }) => {
   await verifySyncDeviceReconnection(page, { pendingRevocation: true })
+})
+
+test('cancelled failed revocation reports paused tab sync and can be completed', async ({ page }) => {
+  await verifySyncDeviceReconnection(page, { abandonRevocation: true })
 })
 
 test('finishes released-client cleanup after revocation and retries without another DELETE', async ({ page }) => {

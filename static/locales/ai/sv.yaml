@@ -924,6 +924,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Den här enhetens synkroniserade flikuppsättningar kommer också att raderas."
     Revoke Session Partial Failure: "Synkroniserade flikuppsättningar raderades, men återkallelsen kunde inte bekräftas. Försök återkalla åtkomsten igen."
+    Tab Sync Revocation Pending: "Synkronisering av flikar är pausad medan återkallelsen av denna inloggning väntar. Försök återkalla igen i synkroniseringsinställningarna."
     Show More: "Visa mer"
     Watch stats: "Visningsstatistik"
     Syncing statistics: Synkroniserar visningsstatistik…

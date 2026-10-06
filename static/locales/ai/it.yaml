@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Verranno eliminati anche i gruppi di schede sincronizzati di questo dispositivo."
     Revoke Session Partial Failure: "I gruppi di schede sincronizzati sono stati eliminati, ma non è stato possibile confermare la revoca. Riprova a revocare l’accesso."
+    Tab Sync Revocation Pending: "La sincronizzazione delle schede è sospesa mentre la revoca di questo accesso è in attesa. Riprova la revoca nelle impostazioni di sincronizzazione."
     Show More: "Mostra altro"
     Sync Automatically: "Sincronizza automaticamente"
     Activity: "Attività dell'account"

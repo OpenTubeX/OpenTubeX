@@ -933,6 +933,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."
     Revoke Session Partial Failure: "Seturile de file sincronizate au fost șterse, dar revocarea nu a putut fi confirmată. Încercați din nou să revocați accesul."
+    Tab Sync Revocation Pending: "Sincronizarea filelor este întreruptă cât timp revocarea acestei autentificări este în așteptare. Reîncercați revocarea în setările de sincronizare."
     Show More: "Afișează mai mult"
     Watch stats: "Statistici de vizionare"
     Syncing statistics: Se sincronizează statisticile de vizionare…

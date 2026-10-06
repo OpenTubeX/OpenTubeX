@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
     Revoke Session Partial Failure: "A szinkronizált lapkészletek törlődtek, de a hozzáférés visszavonását nem sikerült megerősíteni. Próbáld újra visszavonni a hozzáférést."
+    Tab Sync Revocation Pending: "A lapok szinkronizálása szünetel, amíg ennek a bejelentkezésnek a visszavonása függőben van. Próbáld újra a visszavonást a szinkronizálási beállításokban."
     Show More: "Több megjelenítése"
     Sync Automatically: "Automatikus szinkronizálás"
     Activity: "Fióktevékenység"

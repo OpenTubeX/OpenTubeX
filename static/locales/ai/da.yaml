@@ -962,6 +962,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
     Revoke Session Partial Failure: "De synkroniserede fanesæt blev slettet, men tilbagekaldelsen kunne ikke bekræftes. Prøv at tilbagekalde adgangen igen."
+    Tab Sync Revocation Pending: "Synkronisering af faner er sat på pause, mens tilbagekaldelse af dette login afventer. Prøv tilbagekaldelsen igen i synkroniseringsindstillingerne."
     Show More: "Vis mere"
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"

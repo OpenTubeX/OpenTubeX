@@ -5,7 +5,7 @@ import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/rend
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { goToSettingsSection } from './app.mjs'
 
-export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false, pendingRevocation = false } = {}) {
+export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false, pendingRevocation = false, abandonRevocation = false } = {}) {
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
   await expect.poll(() => page.evaluate(() => (
     document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length
@@ -41,7 +41,37 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
   let loginDeviceId
   let reconnectPuts = 0
   let sessionPuts = 0
+  let revocationFailed = false
   let deviceInfo = await encryptSyncServerDeviceInfo({ name: 'Fixture phone', platform: 'android', architecture: 'x64', release: '15' }, key, deviceId)
+  async function verifyPendingTabSync() {
+    const cleaned = structuredClone(document)
+    const previousPuts = sessionPuts
+    const originalPages = page.context().pages()
+    if (!phone) {
+      await page.evaluate(() => window.ftElectron.openInNewWindow('/subscriptions'))
+      await expect.poll(async () => {
+        const sessions = await page.evaluate(() => window.ftElectron.tabs.getSyncSessions())
+        return sessions.some(session => !sessionIds.includes(session.sessionId))
+      }).toBe(true)
+    }
+    try {
+      const error = await page.evaluate(async () => {
+        try {
+          await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
+          return ''
+        } catch (error) { return error.message }
+      })
+      expect(error).toBe('Tab syncing is paused while revocation of this login is pending. Retry revocation in Sync Settings.')
+      await expect(page.locator('.settingsContent > [data-section="sync"]').getByText(error, { exact: true })).toBeVisible()
+      expect(sessionPuts).toBe(previousPuts)
+      expect(document).toEqual(cleaned)
+      expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length)).toBeGreaterThan(0)
+    } finally {
+      for (const extraPage of page.context().pages().filter(candidate => !originalPages.includes(candidate))) {
+        await extraPage.close()
+      }
+    }
+  }
   const request = async options => {
     const path = new URL(options.url).pathname
     const body = options.data ? JSON.parse(options.data) : null
@@ -68,28 +98,11 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       }
     } else if (path === '/v1/account/sessions/old-login' && options.method === 'DELETE') {
       expect(document.devices[deviceId]).toBeUndefined()
-      if (pendingRevocation) {
-        const cleaned = structuredClone(document)
-        const previousPuts = sessionPuts
-        const originalPages = page.context().pages()
-        if (!phone) {
-          await page.evaluate(() => window.ftElectron.openInNewWindow('/subscriptions'))
-          await expect.poll(async () => {
-            const sessions = await page.evaluate(() => window.ftElectron.tabs.getSyncSessions())
-            return sessions.some(session => !sessionIds.includes(session.sessionId))
-          }).toBe(true)
-        }
-        try {
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
-          expect(sessionPuts).toBe(previousPuts)
-          expect(document).toEqual(cleaned)
-          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length)).toBeGreaterThan(0)
-        } finally {
-          for (const extraPage of page.context().pages().filter(candidate => !originalPages.includes(candidate))) {
-            await extraPage.close()
-          }
-        }
+      if (abandonRevocation && !revocationFailed) {
+        revocationFailed = true
+        return { status: 503, data: 'Fixture revocation failure', headers: {}, url: options.url }
       }
+      if (pendingRevocation) await verifyPendingTabSync()
       revoked = true
       status = 204
     } else if (path === '/v1/account/sessions/current' || options.method === 'PATCH') {
@@ -169,6 +182,15 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       await sync.locator('.sessionCard', { hasText: 'Current device' }).getByRole('button', { name: 'Revoke access' }).click()
       const prompt = page.getByRole('dialog', { name: 'Revoke this session?' })
       await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+      if (abandonRevocation) {
+        await expect(prompt.getByRole('alert')).toContainText('revocation could not be confirmed')
+        await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+        await expect(prompt).toBeHidden()
+        expect(revoked).toBe(false)
+        await verifyPendingTabSync()
+        await sync.locator('.sessionCard', { hasText: 'Current device' }).getByRole('button', { name: 'Revoke access' }).click()
+        await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+      }
       await expect(prompt).toBeHidden()
       expect(revoked).toBe(true)
     }

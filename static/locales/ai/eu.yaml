@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
     Revoke Session Partial Failure: "Sinkronizatutako fitxa multzoak ezabatu dira, baina ezin izan da sarbidea kentzea berretsi. Saiatu berriro sarbidea kentzen."
+    Tab Sync Revocation Pending: "Fitxen sinkronizazioa pausatuta dago saio-hasiera honen baliogabetzea zain dagoen bitartean. Saiatu berriro baliogabetzen sinkronizazio-ezarpenetan."
     Show More: "Erakutsi gehiago"
     Sync Automatically: "Sinkronizatu automatikoki"
     Activity: "Kontuaren jarduera"

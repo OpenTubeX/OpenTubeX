@@ -944,6 +944,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "גם קבוצות הכרטיסיות המסונכרנות של המכשיר הזה יימחקו."
     Revoke Session Partial Failure: "קבוצות הכרטיסיות המסונכרנות נמחקו, אך לא ניתן היה לאשר את ביטול הגישה. יש לנסות שוב לבטל את הגישה."
+    Tab Sync Revocation Pending: "סנכרון הלשוניות מושהה כל עוד ביטול הגישה של התחברות זו ממתין. יש לנסות שוב לבטל את הגישה בהגדרות הסנכרון."
     Show More: "הצג עוד"
     Sync Automatically: "סנכרון אוטומטי"
     Activity: "פעילות החשבון"

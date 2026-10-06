@@ -939,6 +939,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Tamén se eliminarán os conxuntos de lapelas sincronizados deste dispositivo."
     Revoke Session Partial Failure: "Elimináronse os conxuntos de lapelas sincronizados, pero non se puido confirmar a revogación. Tenta revogar o acceso de novo."
+    Tab Sync Revocation Pending: "A sincronización de lapelas está pausada mentres a revogación deste inicio de sesión está pendente. Tenta de novo a revogación nos axustes de sincronización."
     Show More: "Amosar máis"
     Sync Automatically: "Sincronizar automaticamente"
     Activity: "Actividade da conta"

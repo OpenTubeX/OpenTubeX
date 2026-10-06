@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."
     Revoke Session Partial Failure: "Synchronizované súpravy kariet boli odstránené, ale odobratie prístupu sa nepodarilo potvrdiť. Skúste prístup odobrať znova."
+    Tab Sync Revocation Pending: "Synchronizácia kariet je pozastavená, kým sa čaká na odvolanie tohto prihlásenia. Skúste odvolanie znova v nastaveniach synchronizácie."
     Show More: "Zobraziť viac"
     Watch stats: "Štatistiky sledovania"
     Syncing statistics: Synchronizujú sa štatistiky sledovania…

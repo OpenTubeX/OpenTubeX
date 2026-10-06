@@ -6,6 +6,7 @@ import { connectionEvents, getConnectionState } from '../../helpers/networkRecov
 import {
   SyncServerClient,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
@@ -244,6 +245,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const next = { ...previous }
   const result = {}
   const skippedCollections = new Set()
+  let tabRevocationError = null
   const store = {
     state: rootState,
     getters: rootGetters,
@@ -408,12 +410,24 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.settings = Object.keys(next.settings).length
         break
       case 'sessionsV2': {
-        const sessions = await syncSessions(
-          targetClient,
-          store,
-          getPreviousSyncSessions(previous),
-          { accountClient: networkClient }
-        )
+        let sessions
+        try {
+          sessions = await syncSessions(
+            targetClient,
+            store,
+            getPreviousSyncSessions(previous),
+            { accountClient: networkClient }
+          )
+        } catch (error) {
+          if (!(error instanceof SyncServerTabRevocationPendingError)) throw error
+          // Finish the other collections before reporting paused tab sync.
+          skippedCollections.add(collection)
+          tabRevocationError = error
+          if ('sessionsV2' in previous) next.sessionsV2 = previous.sessionsV2
+          else delete next.sessionsV2
+          delete result.sessions
+          break
+        }
         if (sessions !== null) {
           next.sessionsV2 = sessions.document
           result.sessions = sessions.sessionsToApply.reduce(
@@ -666,6 +680,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       await dispatch('setSyncServerAutoSync', true)
     }
     if (progressStarted) commit('setSyncServerLastResult', result)
+    if (tabRevocationError) throw tabRevocationError
     finishProgress()
     if (liveSupported) refreshSyncServerAccount(context)
     return result

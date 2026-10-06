@@ -1557,6 +1557,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "This device's synced tab sets will also be deleted."
     Revoke Session Partial Failure: "Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access."
+    Tab Sync Revocation Pending: "Tab syncing is paused while revocation of this login is pending. Retry revocation in Sync Settings."
     Sync Automatically: "Sync automatically"
     Activity: "Account activity"
     No Activity: "No recent activity"

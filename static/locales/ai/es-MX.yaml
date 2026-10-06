@@ -1094,6 +1094,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
     Revoke Session Partial Failure: "Se eliminaron los conjuntos de pestañas sincronizados, pero no se pudo confirmar la revocación. Vuelve a intentar revocar el acceso."
+    Tab Sync Revocation Pending: "La sincronización de pestañas está pausada mientras se revoca este inicio de sesión. Vuelve a intentar la revocación en los ajustes de sincronización."
     Show More: "Mostrar más"
     Sync Automatically: "Sincronizar automáticamente"
     Activity: "Actividad de la cuenta"

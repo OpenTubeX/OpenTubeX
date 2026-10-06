@@ -1509,6 +1509,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Die synchronisierten Tab-Sammlungen dieses Geräts werden ebenfalls gelöscht."
     Revoke Session Partial Failure: "Die synchronisierten Tab-Sammlungen wurden gelöscht, aber der Zugriffsentzug konnte nicht bestätigt werden. Versuche erneut, den Zugriff zu entziehen."
+    Tab Sync Revocation Pending: "Die Tab-Synchronisierung ist pausiert, solange der Zugriffsentzug für diese Anmeldung aussteht. Versuche erneut, den Zugriff in den Sync-Einstellungen zu entziehen."
     Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"

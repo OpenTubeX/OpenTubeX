@@ -1173,6 +1173,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
     Revoke Session Partial Failure: "Sinchronizuoti skirtukų rinkiniai buvo ištrinti, tačiau prieigos atšaukimo patvirtinti nepavyko. Bandykite dar kartą atšaukti prieigą."
+    Tab Sync Revocation Pending: "Skirtukų sinchronizavimas pristabdytas, kol laukiama šio prisijungimo prieigos atšaukimo. Bandykite atšaukti dar kartą sinchronizavimo nustatymuose."
     Show More: "Rodyti daugiau"
     Sync Automatically: "Sinchronizuoti automatiškai"
     Activity: "Paskyros veikla"

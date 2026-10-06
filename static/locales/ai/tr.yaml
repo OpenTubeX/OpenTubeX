@@ -920,6 +920,7 @@ Settings:
   Sync Settings:
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."
     Revoke Session Partial Failure: "Eşitlenen sekme kümeleri silindi ancak erişimin iptali doğrulanamadı. Erişimi iptal etmeyi yeniden deneyin."
+    Tab Sync Revocation Pending: "Bu oturumun erişiminin iptali beklenirken sekme eşitlemesi duraklatıldı. Eşitleme Ayarları’nda iptali yeniden deneyin."
     Show More: "Daha fazla göster"
     Watch stats: "İzleme istatistikleri"
     Syncing statistics: İzleme istatistikleri eşitleniyor…
