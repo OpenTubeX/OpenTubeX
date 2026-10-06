@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Capacitor } from '@capacitor/core'
+import { shallowRef } from 'vue'
 
 // Register the plugins against a native bridge so their real proxies call our mocks.
 globalThis.androidBridge = {}
@@ -86,13 +87,14 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
     assert.fail(`Unexpected native call: ${plugin}.${method}`)
   })
   const warn = t.mock.method(console, 'warn', () => {})
-  const dispose = initializeCapacitorTabPreviews(store)
+  const pageSwipe = shallowRef(null)
+  const dispose = initializeCapacitorTabPreviews(store, pageSwipe)
   t.after(() => {
     dispose()
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, drawImage,
+  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe,
     setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
 }
 
@@ -183,5 +185,38 @@ test('a scheduled capture rechecks whether previews are enabled', async t => {
   t.mock.timers.tick(600)
   await new Promise(setImmediate)
   assert.equal(state.take.mock.callCount(), 0)
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+})
+
+test('a held header swipe cannot cache a partial page preview', async t => {
+  const state = setup(t)
+  state.pageSwipe.value = { fromId: 'tab', toId: 'neighbor', settling: false }
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+  assert.equal(state.take.mock.callCount(), 0)
+  assert.equal(getCapacitorTabPreview(state.tab), null)
+
+  state.pageSwipe.value = { ...state.pageSwipe.value, settling: true }
+  await captureBeforeTabOrganizer()
+  assert.equal(state.take.mock.callCount(), 0, 'settling pages must not enter the organizer cache')
+
+  state.pageSwipe.value = null
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+  assert.equal(state.take.mock.callCount(), 1, 'capture resumes after the page is stable')
+  assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+})
+
+test('starting and cancelling a swipe discards an in-flight partial screenshot', async t => {
+  const state = setup(t)
+  let resolve
+  t.mock.method(Capacitor, 'nativePromise', () => new Promise(done => { resolve = done }))
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+  assert.equal(typeof resolve, 'function')
+  state.pageSwipe.value = { fromId: 'tab', toId: 'neighbor' }
+  state.pageSwipe.value = null
+  resolve({ dataUrl: state.preview })
+  await new Promise(setImmediate)
   assert.equal(getCapacitorTabPreview(state.tab), null)
 })

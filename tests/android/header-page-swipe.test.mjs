@@ -57,7 +57,7 @@ test('Android header swipes include controls and preserve taps and long presses'
       const values = {
         CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
         EnableDownloads: true, MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
-        AlwaysShowMobileSearchBar: false, UiScale: 100, ReducedMotion: 'off',
+        AlwaysShowMobileSearchBar: false, ShowTabPreviews: true, UiScale: 100, ReducedMotion: 'off',
         BaseTheme: 'system', SystemDarkTheme: 'dark', SystemLightTheme: 'light', MainColor: 'Red', SecColor: 'Blue',
       }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
@@ -78,6 +78,48 @@ test('Android header swipes include controls and preserve taps and long presses'
     await goTo(page, 'history')
     const second = await presented()
     assert.notEqual(first, second)
+
+    // A slow drag can outlast the preview timer while both pages are visible.
+    // Observe real native screenshot requests rather than replacing their images.
+    await page.evaluate(() => {
+      const original = window.Capacitor.nativePromise
+      window.headerSwipeCaptures = []
+      window.restoreHeaderSwipeCapture = () => { window.Capacitor.nativePromise = original }
+      window.Capacitor.nativePromise = function (plugin, method, options) {
+        if (plugin === 'Screenshot' && method === 'take') {
+          window.headerSwipeCaptures.push({ swiping: !!document.querySelector('.pageSwipeFrom, .pageSwipeTo') })
+        }
+        return original.call(this, plugin, method, options)
+      }
+    })
+    for (const scale of [100, 125]) {
+      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      for (const commit of [false, true]) {
+        await selectTab(first)
+        await page.waitForTimeout(900)
+        const point = await pointFor('.profileTrigger')
+        const width = await page.evaluate(() => document.querySelector('.app > .routerView').getBoundingClientRect().width)
+        await page.evaluate(() => {
+          window.headerSwipeCaptures = []
+          window.dispatchEvent(new Event('resize'))
+        })
+        await touch('touchStart', point)
+        await touch('touchMove', { ...point, x: point.x - width * 0.4 })
+        await expect(page.locator('.pageSwipeTo')).toBeVisible()
+        await page.waitForTimeout(900)
+        assert.deepEqual(await page.evaluate(() => window.headerSwipeCaptures), [], 'partial swipe pages must never be captured')
+        await touch(commit ? 'touchEnd' : 'touchCancel')
+        await expect(page.locator('.pageSwipeFrom, .pageSwipeTo')).toHaveCount(0)
+        await expect.poll(presented).toBe(commit ? second : first)
+        await expect.poll(() => page.evaluate(() => window.headerSwipeCaptures.length)).toBeGreaterThan(0)
+        assert.ok(await page.evaluate(() => window.headerSwipeCaptures.every(capture => !capture.swiping)), 'captures resume only after the swipe settles')
+      }
+    }
+    await page.evaluate(() => {
+      window.restoreHeaderSwipeCapture()
+      delete window.restoreHeaderSwipeCapture
+      delete window.headerSwipeCaptures
+    })
 
     for (const [scale, reducedMotion] of [[100, 'off'], [125, 'off'], [125, 'on']]) {
       await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
@@ -219,6 +261,11 @@ test('Android header swipes include controls and preserve taps and long presses'
     await expect(page).toHaveURL(/#\/userplaylists/)
   } finally {
     await touch('touchCancel').catch(() => {})
+    await page.evaluate(() => {
+      window.restoreHeaderSwipeCapture?.()
+      delete window.restoreHeaderSwipeCapture
+      delete window.headerSwipeCaptures
+    }).catch(() => {})
     const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
     if (await close.isVisible()) await close.click()
     if (saved) await page.evaluate(async saved => {
