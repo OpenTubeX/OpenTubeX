@@ -75,19 +75,21 @@ test('nested resize reconciliation clamps an invalid offset without viewport gro
 const clampFunction = source.slice(source.indexOf('export function clampOverlayScrollTop('), source.indexOf('/**\n * Recalculates a nested horizontal scroll'))
 const measurementFunctions = source.slice(source.indexOf('function getMaximumOverlayScrollTop('), source.indexOf('/**\n * `v-overlay-scrollbars`'))
 
-function setupClamp({ scrollTop = 211, overflow = 426 } = {}) {
+function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow } = {}) {
   const writes = []
   let currentOffset = scrollTop
   let currentOverflow = overflow
+  let currentNativeOverflow = nativeOverflow
   const element = {
     clientHeight: 598, offsetTop: 0, offsetParent: null,
+    get scrollHeight() { return this.clientHeight + currentNativeOverflow },
     get scrollTop() { return currentOffset },
     set scrollTop(value) { writes.push(value); currentOffset = value }
   }
   const content = { offsetTop: 20, offsetHeight: 773, offsetParent: element }
   const instance = {
     elements: () => ({ scrollOffsetElement: element }),
-    update: () => { if (element.scrollTop === 0) currentOverflow = 215 },
+    update: () => { if (element.scrollTop === 0) currentOverflow = currentNativeOverflow = 215 },
     state: () => ({ overflowAmount: { y: currentOverflow } })
   }
   const context = vm.createContext({
@@ -106,6 +108,13 @@ test('clamping refreshes retained overflow while preserving a valid scroll offse
   assert.deepEqual(fixture.writes, [0, 211])
   assert.equal(fixture.overflow(), 215)
   assert.equal(fixture.element.scrollTop, 211)
+})
+
+test('clamping discards native overflow even when the library range is already accurate', () => {
+  const fixture = setupClamp({ scrollTop: 215, overflow: 215, nativeOverflow: 426 })
+  fixture.clamp()
+  assert.deepEqual(fixture.writes, [0, 215])
+  assert.equal(fixture.element.scrollHeight - fixture.element.clientHeight, 215)
 })
 
 test('clamping leaves an accurate scroll range and valid offset untouched', () => {

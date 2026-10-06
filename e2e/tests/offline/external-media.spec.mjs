@@ -1309,6 +1309,9 @@ test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page,
   await setWindowSize(app, page, { width: 1800, height: 1000 })
   await expect.poll(() => scroller.locator('.liveChatCommentList').evaluate(element => element.scrollHeight))
     .toBeLessThan(beforeReflowHeight)
+  await expect.poll(() => scroller.evaluate(element => Math.abs(
+    element.scrollHeight - element.querySelector('.liveChatCommentList').offsetHeight
+  ))).toBeLessThan(2)
   await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
   await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
