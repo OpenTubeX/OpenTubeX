@@ -18,13 +18,13 @@
       @touchstart.stop
       @touchend.stop
     >
+      <!-- Only filters post-drag clicks; the controls handle keyboard activation. -->
+      <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
       <header
         v-if="enabled"
         class="mobileSheetHeader"
         @pointerdown="startDrag"
-        @pointermove="moveDrag"
-        @pointerup="endDrag"
-        @pointercancel="cancelDrag"
+        @click.capture="handleHeaderClick"
       >
         <button
           v-if="back"
@@ -140,6 +140,7 @@ const sheetStyle = computed(() => {
 let resize
 let observedInlinePlayer = null
 let drag = null
+let suppressDragClick = false
 let animation
 let closing = false
 let resumePlayback = null
@@ -307,22 +308,39 @@ watch(landscape, (value) => {
 })
 
 function startDrag(event) {
-  if (!docked.value || event.button !== 0 || event.target.closest('button, input, a, [role="button"]')) return
-  cancelBackGesture()
-  animation?.cancel()
-  drag = { id: event.pointerId, y: event.clientY, start: performance.now(), distance: 0 }
-  event.currentTarget.setPointerCapture(event.pointerId)
+  if (!docked.value || event.button !== 0 || event.isPrimary === false || drag) return
+  suppressDragClick = false
+  drag = { id: event.pointerId, x: event.clientX, y: event.clientY, start: performance.now(), distance: 0, active: false, header: event.currentTarget }
+  // A mouse can leave the header before crossing the drag threshold.
+  window.addEventListener('pointermove', moveDrag, true)
+  window.addEventListener('pointerup', endDrag, true)
+  window.addEventListener('pointercancel', cancelDrag, true)
 }
 function moveDrag(event) {
   if (drag?.id !== event.pointerId) return
   drag.distance = event.clientY - drag.y
+  if (!drag.active) {
+    const horizontalDistance = Math.abs(event.clientX - drag.x)
+    if (Math.max(Math.abs(drag.distance), horizontalDistance) < 8) return
+    if (horizontalDistance > Math.abs(drag.distance)) {
+      cancelDrag()
+      return
+    }
+    cancelBackGesture()
+    animation?.cancel()
+    drag.active = true
+    suppressDragClick = true
+    // Keep taps targeted at the control; capture only after a vertical drag.
+    drag.header.setPointerCapture(event.pointerId)
+  }
   dragOffset.value = drag.distance
   dialog.value.style.transform = `translateY(${Math.max(0, drag.distance)}px)`
 }
 function endDrag(event) {
   if (drag?.id !== event.pointerId) return
-  const { distance, start } = drag
-  drag = null
+  const { distance, start, active } = drag
+  clearDrag()
+  if (!active) return
   const expand = !expanded.value && distance < -60
   const collapse = expanded.value && !shortsPlayer.value && distance > 80
   const close = !collapse && (distance > 80 || (distance > 20 && distance / (performance.now() - start) > 0.6))
@@ -349,10 +367,24 @@ function endDrag(event) {
     ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180, easing: 'ease-out' }))
   })
 }
-function cancelDrag() {
-  dragOffset.value = 0
+function clearDrag() {
   drag = null
+  window.removeEventListener('pointermove', moveDrag, true)
+  window.removeEventListener('pointerup', endDrag, true)
+  window.removeEventListener('pointercancel', cancelDrag, true)
+}
+function cancelDrag(event) {
+  if (event && drag?.id !== event.pointerId) return
+  dragOffset.value = 0
+  clearDrag()
   if (dialog.value) dialog.value.style.transform = ''
+}
+
+function handleHeaderClick(event) {
+  if (!suppressDragClick || event.detail === 0) return
+  suppressDragClick = false
+  event.preventDefault()
+  event.stopPropagation()
 }
 
 function dismiss() {

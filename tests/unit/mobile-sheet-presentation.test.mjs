@@ -74,7 +74,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     applyAnimationSpeed: animation => animation, lockBodyScroll() {}, unlockBodyScroll() {},
     matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1 })
   }
-  scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag };', context))
+  scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag, cancelDrag, handleHeaderClick };', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
   t.after(unmount)
   return { ...context, element, player, inlinePlayer, inlineElement, props, landscape, observed, activeObservers, events, animations, unmount,
@@ -252,6 +252,85 @@ test('a Shorts sheet keeps playback running while it opens and closes', async t 
   sheet.props.open = false
   await sheet.settle()
   assert.equal(resumes, 0)
+})
+
+test('sheet header controls allow dragging without capturing ordinary taps', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const captures = []
+  const event = {
+    button: 0, pointerId: 1, clientX: 100, clientY: 400,
+    target: { closest: selector => selector.includes('button') ? {} : null },
+    currentTarget: { setPointerCapture: id => captures.push(id) }
+  }
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 403 })
+  sheet.state.endDrag(event)
+  assert.deepEqual(captures, [], 'tap jitter must leave the control as the click target')
+  assert.deepEqual(sheet.events, [])
+
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 430 })
+  assert.equal(sheet.element.style.transform, 'translateY(30px)')
+  assert.deepEqual(captures, [1], 'a vertical drag on a button must capture on the header')
+  sheet.state.moveDrag({ ...event, clientY: 500 })
+  sheet.state.endDrag(event)
+  assert.deepEqual(sheet.events.map(([name]) => name), ['close'])
+})
+
+test('sheet drags suppress control clicks while horizontal gestures and keyboard activation still work', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const event = {
+    button: 0, pointerId: 1, clientX: 100, clientY: 400,
+    currentTarget: { setPointerCapture() {} }
+  }
+  let clicksBlocked = 0
+  const click = { detail: 1, preventDefault() { clicksBlocked++ }, stopPropagation() {} }
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientX: 150, clientY: 402 })
+  sheet.state.endDrag(event)
+  sheet.state.handleHeaderClick(click)
+  assert.equal(clicksBlocked, 0, 'horizontal movements must not become sheet drags')
+
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 430 })
+  sheet.state.endDrag(event)
+  sheet.state.handleHeaderClick({ ...click, detail: 0 })
+  assert.equal(clicksBlocked, 0, 'keyboard activation must remain available')
+  sheet.state.handleHeaderClick(click)
+  assert.equal(clicksBlocked, 1, 'a completed drag must not activate its control')
+
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 430 })
+  sheet.state.cancelDrag()
+  assert.equal(sheet.element.style.transform, '')
+  sheet.state.startDrag(event)
+  sheet.state.endDrag(event)
+  sheet.state.handleHeaderClick(click)
+  assert.equal(clicksBlocked, 1, 'the next tap must work after a cancelled drag')
+})
+
+test('a pointer leaving the header before capture can still expand the sheet', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const captures = []
+  sheet.state.startDrag({
+    button: 0, pointerId: 1, clientX: 100, clientY: 400,
+    currentTarget: { setPointerCapture: id => captures.push(id) }
+  })
+  // The first mouse move can land outside the header and only reach window.
+  sheet.window.dispatchEvent(Object.assign(new Event('pointermove'), { pointerId: 1, clientX: 100, clientY: 300 }))
+  sheet.window.dispatchEvent(Object.assign(new Event('pointerup'), { pointerId: 1 }))
+  await sheet.settle()
+  assert.deepEqual(captures, [1])
+  assert.equal(sheet.state.expanded.value, true)
+  const transform = sheet.element.style.transform
+  sheet.window.dispatchEvent(Object.assign(new Event('pointermove'), { pointerId: 1, clientX: 100, clientY: 500 }))
+  assert.equal(sheet.element.style.transform, transform, 'finishing the drag removes the window listeners')
 })
 
 test('rotating an open Shorts sheet to landscape leaves playback alone', async t => {

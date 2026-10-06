@@ -4,6 +4,56 @@ import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { animationSpeed: 0, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
+for (const zoom of [1, 0.95]) {
+  test(`phone sheet header controls preserve taps and allow touch drags at ${zoom} UI scale`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const watch = await watchViewHandle(page)
+    const sheet = page.locator('.dockedSheet[open]')
+    const hide = sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Hide Comments', exact: true })
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    async function gesture(target, distance = 0) {
+      await expect(sheet).toHaveCSS('transform', 'none')
+      const bounds = await target.boundingBox()
+      const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+      if (distance) {
+        for (let step = 1; step <= 5; step++) {
+          await page.waitForTimeout(50)
+          await session.send('Input.dispatchTouchEvent', {
+            type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance * step / 5 }]
+          })
+        }
+      }
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    }
+    await watch.evaluate(vm => vm.openPhonePanel('comments'))
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await gesture(hide, 2)
+    await expect(sheet.getByText('Click to View Comments', { exact: true })).toBeVisible()
+    await gesture(sheet.getByText('Click to View Comments', { exact: true }))
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+
+    const top = (await sheet.boundingBox()).y
+    await gesture(hide, 30)
+    await expect(sheet.locator('.comment').first()).toBeVisible()
+    await expect.poll(async () => (await sheet.boundingBox()).y).toBeCloseTo(top, 0)
+
+    for (const target of [sheet.locator('.mobileSheetHeader h3'), hide, sheet.locator('.mobileSheetHeader > button').last()]) {
+      await gesture(target, 110)
+      await expect(sheet).toHaveCount(0)
+      await watch.evaluate(vm => vm.openPhonePanel('comments'))
+      await expect(sheet.locator('.comment').first()).toBeVisible()
+    }
+    await gesture(sheet.locator('.mobileSheetHeader > button').last())
+    await expect(sheet).toHaveCount(0)
+    await session.detach()
+  })
+}
+
 test('portrait Shorts actions open phone sheets instead of side panels', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
   await openMockedVideo(page)
