@@ -1,8 +1,154 @@
-import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+
+async function seedActivity(page, count = 30) {
+  await page.evaluate(count => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setSyncServerToken', 'test-token')
+    store.commit('setSyncServerActivity', Array.from({ length: count }, (_, index) => ({
+      id: String(index),
+      deviceName: 'Laptop',
+      collection: 'subscriptions',
+      action: 'added',
+      item: `Channel ${index + 1}`,
+      createdAt: Date.now() - index * 60000,
+    })))
+    store.commit('setSyncServerLiveSupported', true)
+    store.commit('setSyncServerEnabled', true)
+  }, count)
+}
+
+async function scrollActivityToBottom(scroller) {
+  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+}
+
+async function expectActivityScrollbarGap(scroller) {
+  await expect.poll(() => scroller.evaluate(element => {
+    const card = element.querySelector('.activityList li').getBoundingClientRect()
+    const track = element.querySelector('.os-scrollbar-vertical').getBoundingClientRect()
+    return track.left - card.right
+  })).toBeGreaterThanOrEqual(4)
+}
+
+async function expectActivityRange(scroller, atEnd = true) {
+  await expect.poll(() => scroller.evaluate((element, atEnd) => {
+    const list = element.querySelector('.activityList')
+    const viewport = element.getBoundingClientRect()
+    const content = list.getBoundingClientRect()
+    const maximum = Math.max(0, content.height - element.clientHeight)
+    const scrollbar = element.querySelector('.os-scrollbar-vertical')
+    if (!scrollbar || element.scrollTop < 0 || element.scrollTop > maximum + 2 / devicePixelRatio) return false
+    if (maximum <= 1) {
+      return element.scrollTop === 0 && scrollbar.classList.contains('os-scrollbar-unusable')
+    }
+    const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+    const handle = scrollbar.querySelector('.os-scrollbar-handle')
+    const thumb = handle.getBoundingClientRect()
+    const minimumThumbHeight = Number.parseFloat(getComputedStyle(handle).minHeight) || 0
+    const expectedThumbHeight = Math.max(minimumThumbHeight, track.height * element.clientHeight / content.height)
+    return !scrollbar.classList.contains('os-scrollbar-unusable') &&
+      content.bottom >= viewport.bottom - 2 / devicePixelRatio &&
+      Math.abs(thumb.height - expectedThumbHeight) * devicePixelRatio <= 2 &&
+      (!atEnd || (Math.abs(content.bottom - viewport.bottom) * devicePixelRatio <= 2 &&
+        Math.abs(track.bottom - thumb.bottom) * devicePixelRatio <= 2))
+  }, atEnd)).toBe(true)
+}
 
 for (const uiScale of [100, 125]) {
   test.describe(`account activity at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, syncServerUrl: '' } } })
+
+    test('keeps expanded activity in its own bounded themed scroll area', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await seedActivity(page)
+      const card = sync.locator('.syncActivity')
+      await card.locator('.activityDisclosure').click()
+      await expect(card.locator('.activityList li')).toHaveCount(30)
+      const scroller = card.locator('.activityScroller')
+      await expect(scroller).toBeVisible()
+      await expect.poll(() => scroller.evaluate(element =>
+        element.clientHeight <= window.innerHeight * 0.5 + 1 && element.scrollHeight > element.clientHeight
+      )).toBe(true)
+      await expect(scroller.locator('.os-scrollbar-vertical')).toHaveCount(1)
+      await expectActivityScrollbarGap(scroller)
+      await expect(card.locator('.activityList li').nth(3)).toBeFocused()
+      await card.scrollIntoViewIfNeeded()
+      const pageScroller = page.locator('.settingsContent')
+      const pageScrollTop = await pageScroller.evaluate(element => element.scrollTop)
+      const headerTop = await card.locator('.activityHeader').evaluate(element => element.getBoundingClientRect().top)
+      const disclosureTop = await card.locator('.activityDisclosure').evaluate(element => element.getBoundingClientRect().top)
+      await scroller.hover()
+      const initialTop = await scroller.evaluate(element => element.scrollTop)
+      await page.mouse.wheel(0, 400)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(initialTop)
+      expect(await pageScroller.evaluate(element => element.scrollTop)).toBe(pageScrollTop)
+      expect(await card.locator('.activityHeader').evaluate(element => element.getBoundingClientRect().top)).toBe(headerTop)
+      expect(await card.locator('.activityDisclosure').evaluate(element => element.getBoundingClientRect().top)).toBe(disclosureTop)
+      await scrollActivityToBottom(scroller)
+      await expectActivityRange(scroller)
+      await page.mouse.wheel(0, 400)
+      // Wheel dispatch can finish before Chromium applies scrolling.
+      await page.evaluate(() => new Promise(resolve => {
+        requestAnimationFrame(() => requestAnimationFrame(resolve))
+      }))
+      expect(await pageScroller.evaluate(element => element.scrollTop)).toBe(pageScrollTop)
+      await card.locator('.activityDisclosure').click()
+      await pageScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      const collapsedPageScrollTop = await pageScroller.evaluate(element => element.scrollTop)
+      await scroller.hover()
+      await page.mouse.wheel(0, -400)
+      await expect.poll(() => pageScroller.evaluate(element => element.scrollTop)).toBeLessThan(collapsedPageScrollTop)
+    })
+
+    test('clamps activity after resize, replacement, removal, collapse and refresh', async ({ app, page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await seedActivity(page)
+      const card = sync.locator('.syncActivity')
+      const disclosure = card.locator('.activityDisclosure')
+      await disclosure.click()
+      const scroller = card.locator('.activityScroller')
+      await page.evaluate(() => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', 20)
+      })
+      for (const [width, height] of [[480, 700], [1000, 1000], [1580, 1080]]) {
+        await scrollActivityToBottom(scroller)
+        await setWindowSize(app, page, { width, height })
+        await expectActivityRange(scroller, width !== 480)
+        await expectActivityScrollbarGap(scroller)
+        expect(await scroller.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      }
+      await scrollActivityToBottom(scroller)
+      await seedActivity(page, 8)
+      await expectActivityRange(scroller)
+      await scrollActivityToBottom(scroller)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerActivity', store.getters.getSyncServerActivity.slice(0, 2))
+      })
+      await expectActivityRange(scroller)
+      await expect(disclosure).toBeHidden()
+
+      await seedActivity(page)
+      await scrollActivityToBottom(scroller)
+      await disclosure.click()
+      await expect(card.locator('.activityList li')).toHaveCount(3)
+      await expectActivityRange(scroller)
+      await disclosure.click()
+      await scrollActivityToBottom(scroller)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const dispatch = store.dispatch.bind(store)
+        store.dispatch = (...args) => args[0] === 'refreshSyncServerEvents'
+          ? new Promise(resolve => setTimeout(() => {
+              store.commit('setSyncServerActivity', store.getters.getSyncServerActivity.slice(0, 2))
+              resolve()
+            }, 100))
+          : dispatch(...args)
+      })
+      await card.locator('.activityAction').click()
+      await expect(card.locator('.activityList li')).toHaveCount(2)
+      await expectActivityRange(scroller)
+    })
 
     test('shows named changes across synced collections and settings', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
@@ -166,7 +312,7 @@ for (const uiScale of [100, 125]) {
       await expect(card.locator('.activityList li')).toHaveCount(3)
       await expectScrollAtRenderedEnd(scroller)
       await expect.poll(() => scroller.evaluate(element => {
-        const scrollbar = element.querySelector('.os-scrollbar-vertical')
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
         if (scrollbar.classList.contains('os-scrollbar-unusable')) return element.scrollTop === 0
         const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
         const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
