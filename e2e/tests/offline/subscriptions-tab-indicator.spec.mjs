@@ -1,4 +1,5 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { sampleColors } from '../../helpers/colors.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -59,6 +60,72 @@ test.use({
 })
 
 test.describe('subscriptions feed tab indicator', () => {
+  test.describe('fractional device pixel ratio', () => {
+    test.use({ launchArgs: ['--force-device-scale-factor=2.625'] })
+
+    test('paints both underlines within the selected tab edges', async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await page.getByRole('button', { name: 'Show tabbed view' }).click()
+      await app.electronApp.evaluate(({ BrowserWindow }) => {
+        BrowserWindow.getAllWindows()[0].setSize(375, 900)
+      })
+      await page.evaluate(() => {
+        document.querySelector('.subscriptionsHeader').style.setProperty('--primary-color', '#ff0000')
+      })
+
+      for (const selector of ['.newFeedTab.selectedTab', '[data-subscription-feed-tab="videos"]']) {
+        const tab = page.locator(selector)
+        await tab.click()
+        const { width } = await tab.boundingBox()
+        const underlineY = await tab.evaluate(element => {
+          const indicator = element.parentElement.querySelector('.tabsIndicator').getBoundingClientRect()
+          return (indicator.top + indicator.bottom) / 2 - element.getBoundingClientRect().top
+        })
+        const colors = await sampleColors(app, tab, [
+          [2, underlineY],
+          [width - 2, underlineY],
+          [width + 2, underlineY]
+        ])
+        // DOM bounds can be correct while a scaled strip paints too short.
+        // Allow slight antialiasing at the rounded ends of the actual pixels.
+        for (const color of colors.slice(0, 2)) {
+          expect(color[0]).toBeGreaterThan(247)
+          expect(Math.max(...color.slice(1))).toBeLessThan(8)
+        }
+        expect(Math.max(...colors[2].slice(1))).toBeGreaterThan(8)
+      }
+    })
+  })
+
+  test('rounds both feed indicators without stretching their end caps', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    for (const width of [1600, 375]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        BrowserWindow.getAllWindows()[0].setSize(width, 900)
+      }, width)
+      for (const roundness of [0, 50, 100, 200]) {
+        await page.evaluate(value => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        }, roundness)
+        for (const selector of ['.tabsIndicator:not(.newFeedTabsIndicator)', '.newFeedTabsIndicator']) {
+          await expect.poll(() => page.locator(selector).evaluate(element => {
+            const style = getComputedStyle(element)
+            const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
+            const scale = new DOMMatrixReadOnly(style.transform).a
+            return {
+              horizontal: Math.round(horizontal * scale * 100) / 100,
+              vertical
+            }
+          })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+        }
+      }
+    }
+  })
+
   test('falls back when the persisted tab is hidden on startup', async ({ page }) => {
     await page.evaluate(async () => {
       localStorage.setItem('Subscriptions/currentTab', 'videos')

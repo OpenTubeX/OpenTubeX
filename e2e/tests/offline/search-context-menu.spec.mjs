@@ -400,6 +400,19 @@ test.describe('with the maximum custom search engines configured', () => {
     }
   })
 
+  test('custom engine delete buttons identify and remove their own engine', async ({ page }) => {
+    const section = await goToSettingsSection(page, 'context-menu-search')
+    for (const index of [0, 1]) {
+      const button = section.locator('.removeEngine').nth(index)
+      await expect(button).toHaveText('Delete')
+      await expect(button).toHaveAccessibleName(`Remove Engine ${index}`)
+    }
+    await section.getByRole('button', { name: 'Remove Engine 0', exact: true }).click()
+    await expect(section.locator('.removeEngine')).toHaveCount(19)
+    await expect(section.getByRole('button', { name: 'Remove Engine 0', exact: true })).toHaveCount(0)
+    await expect(section.getByRole('button', { name: 'Remove Engine 1', exact: true })).toBeVisible()
+  })
+
   test('rejects another engine without clearing its inputs', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
     const addRow = general.locator('.settingsSection').filter({

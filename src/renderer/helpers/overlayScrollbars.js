@@ -7,8 +7,9 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
-import { initializePageScrollbar } from './pageScrollbar'
+import { initializePageScrollbar, observePageScrollbarVisibility } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
+import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from './androidUi'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -49,13 +50,22 @@ function scrollbarOptions(initialization) {
   if (initialization === document.body) {
     // The page viewport is always a normal block-flow body. Avoid repeatedly
     // reading all flow-related computed styles while long feeds are changing;
-    // only direction can change at runtime.
+    // only direction can change at runtime. Tab-bar mutations stay inside its
+    // clipped viewport and cannot change the page's scroll range.
     options.update = {
+      debounce: { resize: [0, 33] },
+      ignoreMutation: ignorePageScrollbarMutation,
       flowDirectionStyles: () => ({ direction: document.documentElement.dir })
     }
   }
 
   return options
+}
+
+/** @param {MutationRecord} mutation */
+function ignorePageScrollbarMutation(mutation) {
+  const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
+  return element?.closest('.tabBar') != null
 }
 
 /**
@@ -387,6 +397,14 @@ function optimizeBodyScrollbarDrag(instance) {
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
   initializePageScrollbar(document, useNativePageScrollbar, create)
 
+  if (useNativePageScrollbar) {
+    observePageScrollbarVisibility(document, hidden => {
+      setAndroidPageScrollbarsHidden(hidden).catch(error => {
+        console.warn('Could not update Android fullscreen scrollbar visibility', error)
+      })
+    })
+  }
+
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),
     () => {
@@ -409,9 +427,14 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   )
 
   // Cancel pending hides in place; retained tabs can have many live scrollers.
-  watch(() => store.getters.getAlwaysShowScrollbars, () => {
+  watch(() => store.getters.getAlwaysShowScrollbars, enabled => {
     for (const instance of instances.keys()) updateAutoHideHandler(instance)
-  })
+    if (useNativePageScrollbar) {
+      setAndroidAlwaysShowScrollbars(enabled).catch(error => {
+        console.warn('Could not update Android scrollbar visibility', error)
+      })
+    }
+  }, { immediate: true })
 }
 
 /**
@@ -500,7 +523,10 @@ export function clampOverlayScrollTop(element, contentElement = null) {
     const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
     instance?.update(true)
     const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
-    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop)) {
+    const previousScrollTop = scrollOffsetElement.scrollTop
+    const retainedOverflow = contentElement && instance &&
+      instance.state().overflowAmount.y > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
+    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || retainedOverflow) {
       if (instance) {
         // Chromium can preserve the old overflow range when content shrinks
         // beneath a non-zero offset. Remeasure from the true origin so both the
@@ -508,7 +534,7 @@ export function clampOverlayScrollTop(element, contentElement = null) {
         // the clamped position within the newly measured range.
         scrollOffsetElement.scrollTop = 0
         instance.update(true)
-        scrollOffsetElement.scrollTop = Math.min(maximumScrollTop, instance.state().overflowAmount.y)
+        scrollOffsetElement.scrollTop = Math.min(previousScrollTop, maximumScrollTop, instance.state().overflowAmount.y)
         instance.update(true)
       } else {
         scrollOffsetElement.scrollTop = maximumScrollTop

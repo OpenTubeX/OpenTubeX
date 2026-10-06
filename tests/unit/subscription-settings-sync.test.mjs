@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
+import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
@@ -243,6 +244,7 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
   let persistedChannel
   const persistenceContext = vm.createContext({
     MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
+    DEFAULT_PROFILE_ICON,
     deepCopy: structuredClone,
     console: { error() {} },
     DBProfileHandlers: { async updateChannelSettings(channel, ids) {

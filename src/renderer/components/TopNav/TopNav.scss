@@ -48,11 +48,15 @@
   display: flex;
   block-size: 100%;
   inline-size: 100%;
+}
 
-  @container top-nav (width >= 961px) {
-    display: grid;
-    grid-template-columns: 1fr 440px 1fr;
-  }
+.topNav:not(.phoneLayout) .topNavInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(440px, max(0px, calc(100% - 2 * var(--header-side-space)))) minmax(0, 1fr);
+}
+
+.phoneLayout .logoText {
+  display: none;
 }
 
 /* Only the top tab bar sits above the navigation. */
@@ -75,11 +79,11 @@
 
 // The header sits above the tab bar, so continue its edge shadow here.
 .app.verticalTabsLeft .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset 3px 0 8px -3px rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset 2px 0 1px 0 var(--primary-shadow-color);
 }
 
 .app.verticalTabsRight .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset -3px 0 8px -3px rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset -2px 0 1px 0 var(--primary-shadow-color);
 }
 
 /* These settings name physical window edges, independent of text direction. */
@@ -156,8 +160,6 @@
 
 .downloadsButton,
 .settingsButton {
-  margin-inline-end: 8px;
-
   &.active {
     color: var(--primary-color);
     background-color: var(--side-nav-hover-color);
@@ -165,7 +167,6 @@
 }
 
 .minimizedUtilityButton {
-  margin-inline-end: 8px;
   color: var(--primary-color);
   background-color: var(--side-nav-hover-color);
 }
@@ -226,7 +227,7 @@
 
   &.profiles {
     justify-content: flex-end;
-    margin-inline-end: calc(var(--scrollbar-track-width) + 6px);
+    margin-inline: auto calc(var(--scrollbar-track-width) + 6px);
   }
 
   .navSearchButton {
@@ -297,8 +298,26 @@
   }
 }
 
+.phoneLayout .profiles {
+  gap: 4px;
+}
+
+.topNav:not(.phoneLayout) .side {
+  inline-size: max-content;
+  justify-self: start;
+
+  &.profiles {
+    justify-self: end;
+  }
+}
+
+.compactLogo:not(.phoneLayout) .logoText {
+  display: none;
+}
+
 .middle {
   flex: 1;
+  min-inline-size: 0;
   max-inline-size: 440px;
 
   .searchContainer {
@@ -309,6 +328,7 @@
 
     .searchInput {
       flex: 1;
+      min-inline-size: 0;
 
       :deep(.ft-input) {
         padding-inline-end: 84px;
@@ -325,6 +345,15 @@
 
 // Phone search occupies the header's own row, including in native landscape.
 .phoneLayout {
+  .profiles > .navButton,
+  .profiles :deep(.profileTrigger) {
+    box-sizing: border-box;
+    flex: 0 0 48px;
+    inline-size: 48px;
+    block-size: 48px;
+    padding: 0;
+  }
+
   .pinnedSearchTrigger {
     display: flex;
     align-items: center;
@@ -499,7 +528,7 @@
 
   .logoText {
     display: block;
-    flex: 0 1 100px;
+    flex: 0 0 100px;
     min-inline-size: 0;
     background-position: left center;
     background-size: contain;
@@ -510,12 +539,6 @@
     inline-size: 48px;
     block-size: 48px;
     padding: 0;
-  }
-
-  .downloadsButton,
-  .settingsButton,
-  .minimizedUtilityButton {
-    margin-inline-end: 0;
   }
 
   &.phoneSearchOpen {
@@ -554,8 +577,15 @@
   }
 }
 
-@container top-nav (width < 560px) {
-  .app.capacitorTabs .phoneLayout .topNavInner:has(.downloadsButton, .settingsButton, .minimizedUtilityButton, .syncIndicator) .logoText {
+.app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+  container: phone-logo / inline-size;
+  // Together with the header's 4px gap, leave 8px before the next control.
+  padding-inline-end: 4px;
+}
+
+@container phone-logo (width < 138px) {
+  // The full logo needs its 25px icon, 100px name, 5px internal gap and 8px padding.
+  .app.capacitorTabs .phoneLayout .logoText {
     display: none;
   }
 }
@@ -600,6 +630,10 @@
     &.phoneSearchOpen .topNavInner {
       padding-inline: 0;
     }
+  }
+
+  .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+    padding-inline-end: 8px;
   }
 }
 

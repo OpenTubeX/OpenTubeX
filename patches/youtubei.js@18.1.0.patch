@@ -96,6 +96,47 @@ index 66690de..df9ebfe 100644
          ]);
          this.panel_identifier = data.panelIdentifier;
          if ('identifier' in data) {
+diff --git a/dist/src/parser/classes/LinearLayoutView.d.ts b/dist/src/parser/classes/LinearLayoutView.d.ts
+new file mode 100644
+index 0000000..aa18326
+--- /dev/null
++++ b/dist/src/parser/classes/LinearLayoutView.d.ts
+@@ -0,0 +1,12 @@
++import type { ObservedArray } from '../helpers.js';
++import type { RawNode } from '../types/RawResponse.js';
++import { YTNode } from '../helpers.js';
++import ListView from './ListView.js';
++import SectionHeaderView from './SectionHeaderView.js';
++import RendererContext from './misc/RendererContext.js';
++export default class LinearLayoutView extends YTNode {
++    static type: string;
++    items: ObservedArray<SectionHeaderView | ListView>;
++    renderer_context?: RendererContext;
++    constructor(data: RawNode);
++}
+diff --git a/dist/src/parser/classes/LinearLayoutView.js b/dist/src/parser/classes/LinearLayoutView.js
+new file mode 100644
+index 0000000..43e3d10
+--- /dev/null
++++ b/dist/src/parser/classes/LinearLayoutView.js
+@@ -0,0 +1,17 @@
++import { YTNode } from '../helpers.js';
++import { Parser } from '../index.js';
++import ListView from './ListView.js';
++import SectionHeaderView from './SectionHeaderView.js';
++import RendererContext from './misc/RendererContext.js';
++export default class LinearLayoutView extends YTNode {
++    static type = 'LinearLayoutView';
++    items;
++    renderer_context;
++    constructor(data) {
++        super();
++        this.items = Parser.parseArray(data.items, [SectionHeaderView, ListView]);
++        if ('rendererContext' in data) {
++            this.renderer_context = new RendererContext(data.rendererContext);
++        }
++    }
++}
 diff --git a/dist/src/parser/classes/RecognitionShelf.js b/dist/src/parser/classes/RecognitionShelf.js
 index 1c35823..44cfd97 100644
 --- a/dist/src/parser/classes/RecognitionShelf.js
@@ -317,40 +358,42 @@ index 0000000..45748bd
 +    }
 +}
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.d.ts b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
-index 29052ff..5410c11 100644
+index 29052ff..eee9c5c 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.d.ts
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
-@@ -14,8 +14,10 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+@@ -14,8 +14,11 @@ import ExpandableMetadata from './ExpandableMetadata.js';
  import MerchandiseShelf from './MerchandiseShelf.js';
  import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
  import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
 +import VideoTitleHeaderView from './VideoTitleHeaderView.js';
 +import Shelf from './Shelf.js';
++import ItemSection from './ItemSection.js';
  export default class StructuredDescriptionContent extends YTNode {
      static type: string;
 -    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView>;
-+    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | VideoTitleHeaderView | Shelf>;
++    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | VideoTitleHeaderView | Shelf | ItemSection>;
      constructor(data: RawNode);
  }
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.js b/dist/src/parser/classes/StructuredDescriptionContent.js
-index dc4ba3a..acf6064 100644
+index dc4ba3a..a65274a 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.js
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.js
-@@ -14,6 +14,8 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+@@ -14,6 +14,9 @@ import ExpandableMetadata from './ExpandableMetadata.js';
  import MerchandiseShelf from './MerchandiseShelf.js';
  import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
  import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
 +import VideoTitleHeaderView from './VideoTitleHeaderView.js';
 +import Shelf from './Shelf.js';
++import ItemSection from './ItemSection.js';
  export default class StructuredDescriptionContent extends YTNode {
      static type = 'StructuredDescriptionContent';
      items;
-@@ -23,7 +25,7 @@ export default class StructuredDescriptionContent extends YTNode {
+@@ -23,7 +26,7 @@ export default class StructuredDescriptionContent extends YTNode {
              VideoDescriptionHeader, ExpandableVideoDescriptionBody, VideoDescriptionMusicSection,
              VideoDescriptionInfocardsSection, VideoDescriptionCourseSection, VideoDescriptionTranscriptSection,
              VideoDescriptionYouchatSectionView, HorizontalCardList, ReelShelf, VideoAttributesSectionView,
 -            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView
-+            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView, VideoTitleHeaderView, Shelf
++            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView, VideoTitleHeaderView, Shelf, ItemSection
          ]);
      }
  }
@@ -387,7 +430,7 @@ index f310e85..f1c1acb 100644
          this.overflow_menu_a11y_label = data.overflowMenuA11yLabel;
      }
 diff --git a/dist/src/parser/nodes.d.ts b/dist/src/parser/nodes.d.ts
-index 475cb14..0a30fee 100644
+index 475cb14..4f6720a 100644
 --- a/dist/src/parser/nodes.d.ts
 +++ b/dist/src/parser/nodes.d.ts
 @@ -83,6 +83,7 @@ export { default as RunAttestationCommand } from './classes/commands/RunAttestat
@@ -406,7 +449,15 @@ index 475cb14..0a30fee 100644
  export { default as ContentMetadataView } from './classes/ContentMetadataView.js';
  export { default as ContentPreviewImageView } from './classes/ContentPreviewImageView.js';
  export { default as ContinuationItem } from './classes/ContinuationItem.js';
-@@ -449,6 +451,10 @@ export { default as SharePanelTitleV15 } from './classes/SharePanelTitleV15.js';
+@@ -230,6 +232,7 @@ export { default as LikeButton } from './classes/LikeButton.js';
+ export { default as LikeButtonView } from './classes/LikeButtonView.js';
+ export { default as ListItemView } from './classes/ListItemView.js';
+ export { default as ListView } from './classes/ListView.js';
++export { default as LinearLayoutView } from './classes/LinearLayoutView.js';
+ export { default as LiveChat } from './classes/LiveChat.js';
+ export { default as AddBannerToLiveChatCommand } from './classes/livechat/AddBannerToLiveChatCommand.js';
+ export { default as AddChatItemAction } from './classes/livechat/AddChatItemAction.js';
+@@ -449,6 +452,10 @@ export { default as SharePanelTitleV15 } from './classes/SharePanelTitleV15.js';
  export { default as ShareTarget } from './classes/ShareTarget.js';
  export { default as SheetView } from './classes/SheetView.js';
  export { default as Shelf } from './classes/Shelf.js';
@@ -418,7 +469,7 @@ index 475cb14..0a30fee 100644
  export { default as ShowCustomThumbnail } from './classes/ShowCustomThumbnail.js';
  export { default as ShowingResultsFor } from './classes/ShowingResultsFor.js';
 diff --git a/dist/src/parser/nodes.js b/dist/src/parser/nodes.js
-index 6e745fb..4928685 100644
+index 6e745fb..5067c6a 100644
 --- a/dist/src/parser/nodes.js
 +++ b/dist/src/parser/nodes.js
 @@ -85,6 +85,7 @@ export { default as RunAttestationCommand } from './classes/commands/RunAttestat
@@ -437,7 +488,15 @@ index 6e745fb..4928685 100644
  export { default as ContentMetadataView } from './classes/ContentMetadataView.js';
  export { default as ContentPreviewImageView } from './classes/ContentPreviewImageView.js';
  export { default as ContinuationItem } from './classes/ContinuationItem.js';
-@@ -451,6 +453,10 @@ export { default as SharePanelTitleV15 } from './classes/SharePanelTitleV15.js';
+@@ -232,6 +234,7 @@ export { default as LikeButton } from './classes/LikeButton.js';
+ export { default as LikeButtonView } from './classes/LikeButtonView.js';
+ export { default as ListItemView } from './classes/ListItemView.js';
+ export { default as ListView } from './classes/ListView.js';
++export { default as LinearLayoutView } from './classes/LinearLayoutView.js';
+ export { default as LiveChat } from './classes/LiveChat.js';
+ export { default as AddBannerToLiveChatCommand } from './classes/livechat/AddBannerToLiveChatCommand.js';
+ export { default as AddChatItemAction } from './classes/livechat/AddChatItemAction.js';
+@@ -451,6 +454,10 @@ export { default as SharePanelTitleV15 } from './classes/SharePanelTitleV15.js';
  export { default as ShareTarget } from './classes/ShareTarget.js';
  export { default as SheetView } from './classes/SheetView.js';
  export { default as Shelf } from './classes/Shelf.js';

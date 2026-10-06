@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: உறுப்பினர்களுக்கு மட்டும்
 Search Filters:
+  Cookie Search Failed: "கட்டமைக்கப்பட்ட குக்கிகளுடன் தேடல் தோல்வியடைந்தது."
   Prioritize:
     Prioritize: முன்னுரிமை அளி
 Stats:
@@ -268,6 +269,11 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Enable Tabs: "தாவல்களை இயக்கு"
+    Thumbnail Swipe Gestures:
+      Left: சிறுபடங்களில் இடதுபுறம் ஸ்வைப் செய்
+      Right: சிறுபடங்களில் வலதுபுறம் ஸ்வைப் செய்
+      Description: தேர்ந்தெடுத்த செயலைச் செய்ய காணொளியின் சிறுபடத்தில் கிடைமட்டமாக ஸ்வைப் செய்து விடவும்.
     Data Saver Thumbnails: "தரவைச் சேமிக்கும் சிறுபடங்கள்"
     Use tray icon: "கணினித் தட்டு சின்னத்தைப் பயன்படுத்து"
     Close to system tray: "கணினித் தட்டிற்கு மூடு"
@@ -276,7 +282,9 @@ Settings:
     Swipe to refresh: புதுப்பிக்க ஸ்வைப் செய்யவும்
     Blur Thumbnails: சிறுபடங்களை மங்கலாக்கு
     Navigation:
-      Show Active Subscriptions: செயலில் உள்ள சந்தாக்களைக் காட்டு
+      Always Show Navigation Bar: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது எப்போதும் காட்டு
+      Compact Tab Labels: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது சுருக்கமாகக் காட்டு
+      Show Active Subscriptions: பக்கப்பட்டியில் செயலில் உள்ள சந்தாக்களைக் காட்டு
       Navigation: வழிசெலுத்தல்
       Customize Navigation: வழிசெலுத்தலைத் தனிப்பயனாக்கு
       Add Item: உருப்படியைச் சேர்
@@ -358,6 +366,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Compact Mobile Mini Player: "சிறிய மொபைல் மினி பிளேயர்"
     Always Show Mobile Search Bar: "மொபைல் தேடல் பட்டியை எப்போதும் காட்டு"
     Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
     Main Color Theme:
@@ -440,8 +449,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX ஒளி"
-      OpenTubeX Dark: "OpenTubeX இருண்ட"
+      Ocean Light: "Ocean ஒளி"
+      Ocean Dark: "Ocean இருண்ட"
       Custom: தனிப்பயன்
     Light Theme: வெளிர் அலங்காரம்
     Dark Theme: கருமை அலங்காரம்
@@ -476,6 +485,7 @@ Settings:
       Unable to Delete: தனிப்பயன் அலங்காரத்தை நீக்க முடியவில்லை
       Invalid Theme File: தவறான தனிப்பயன் அலங்காரக் கோப்பு
       Colors:
+        Watched thumbnail overlay: "பார்த்த காணொளிகளின் சிறுபட மேலடுக்கு"
         Main text: முதன்மை உரை
         Secondary text: இரண்டாம் நிலை உரை
         Subtle text: மெல்லிய உரை
@@ -633,6 +643,8 @@ Settings:
     Preload Upcoming Videos: "அடுத்த காணொளிகளை முன்பே ஏற்று"
     Upcoming Videos to Preload: "முன்பே ஏற்ற வேண்டிய காணொளிகளின் எண்ணிக்கை"
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
+    Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
+    Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
     Show Google Cast Button: "Google Cast பொத்தானைக் காட்டு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
@@ -670,9 +682,9 @@ Settings:
     Update Managed Tools: புதுப்பி
     Managed Tools Download Error Template: 'நிர்வகிக்கப்பட்ட கருவிகளைப் பதிவிறக்க முடியவில்லை: {errors}'
     Download Folder: பதிவிறக்கக் கோப்புறை
-    Global Additional yt-dlp Arguments: பொதுவான கூடுதல் yt-dlp அளவுருக்கள்
+    Global Additional yt-dlp Arguments: கூடுதல் yt-dlp வாதங்கள்
     Concurrent Downloads: ஒரேநேரப் பதிவிறக்கங்கள்
-    Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s, வரம்பில்லாமல் இருக்க 0)
+    Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s)
     Choose Download Folder: பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடு
     Download Templates: பதிவிறக்க வார்ப்புருக்கள்
     Manage Download Templates: பதிவிறக்க வார்ப்புருக்களை நிர்வகி ({templateCount})
@@ -745,8 +757,8 @@ Settings:
       Automatic: தானாகப் புதுப்பி
       Ask: புதுப்பிக்கும் முன் கேள்
       Manual: கைமுறையாக மட்டும் புதுப்பி
-    yt-dlp Executable Path: yt-dlp இயக்கக்கூடிய கோப்பின் பாதை
-    FFmpeg Executable Path: FFmpeg இயக்கக்கூடிய கோப்பின் பாதை
+    yt-dlp Executable Path: yt-dlp இயக்கக்கூடிய கோப்பு
+    FFmpeg Executable Path: FFmpeg இயக்கக்கூடிய கோப்பு
     Restricted Playback Authentication: "yt-dlp குக்கீகள்"
     Cookie Source: குக்கீ மூலம்
     Cookie Sources:
@@ -990,7 +1002,7 @@ Settings:
     Enhanced Privacy Enabled: மேம்பட்ட தனியுரிமை இயக்கப்பட்டுள்ளது. சேவையகம் மறையாக்கப்பட்ட ஒத்திசைவுத் தரவை மட்டுமே சேமிக்கும்.
     Enhanced Privacy Unsupported: 'எச்சரிக்கை: இந்தச் சேவையகம் மேம்பட்ட தனியுரிமையை ஆதரிக்காது. ஒத்திசைத்த தரவை அதன் இயக்குநர் பார்க்க முடியும்.'
     Description: 'OpenTubeX அல்லது LibreTube ஒத்திசைவு சேவையகத்துடன் சந்தாக்கள், சுயவிவரங்கள், இயக்கப்பட்டியல்கள், பார்த்த வரலாறு மற்றும் ஆதரிக்கப்படும் அமைப்புகளை ஒத்திசைக்கவும். LibreTube சேவையகங்கள் எல்லா ஒத்திசைவு அம்சங்களையும் ஆதரிக்காமல் இருக்கலாம்.'
-    Server URL: சேவையக URL
+    Server URL: ஒத்திசைவு சேவையக URL
     Checking Server: ஒத்திசைவுச் சேவையகம் சரிபார்க்கப்படுகிறது…
     Server Unavailable: இந்த ஒத்திசைவுச் சேவையகத்துடன் இணைக்க முடியவில்லை. URL-ஐச் சரிபார்த்து மீண்டும் முயலவும்.
     Username: பயனர்பெயர்
@@ -1079,7 +1091,7 @@ Settings:
     Open All Tabs Confirmation: "எல்லா தாவல்களையும் திறக்கவா?"
     Server Update Required: "மறையாக்கப்பட்ட நேரடி ஒத்திசைவை ஆதரிக்க இந்தச் சேவையகத்தைப் புதுப்பிக்கவும்."
   Proxy Settings:
-    IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரலாக்கப் பாதை
+    IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரல்
     Select IP Block Recovery Script File: IP தடுப்பு மீட்பு நிரலாக்கக் கோப்பைத் தேர்ந்தெடு
     Running IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கம் இயங்குகிறது
     IP block recovery script failed: 'IP தடுப்பு மீட்பு நிரலாக்கம் தோல்வியடைந்தது (வெளியேற்றக் குறியீடு: {exitCode})'
@@ -1091,7 +1103,7 @@ Settings:
       Excluded Channels: "விலக்கப்பட்ட சேனல்கள்"
       Tooltip: "அந்தச் சேனலின் காணொளிகளில் SponsorBlock பகுதிகள் தவிர்க்கப்படாமல் இருக்க சேனல் ID-ஐ உள்ளிடவும். ID எழுத்து வடிவத்துடன் துல்லியமாகப் பொருந்த வேண்டும்."
     Enable SponsorBlock Submission: SponsorBlock சமர்ப்பிப்பை இயக்கு
-    SponsorBlock Private User ID (optional): SponsorBlock தனிப்பட்ட பயனர் ID (விருப்பத்தேர்வு)
+    SponsorBlock Private User ID (optional): தனிப்பட்ட பயனர் ID (விருப்பம்)
     SponsorBlock Private User ID Tooltip: உலாவி நீட்சியிலிருந்து தனிப்பட்ட SponsorBlock பயனர் ID-ஐ ஒட்டவும். செயலி உருவாக்கிய ID-ஐப் பயன்படுத்த இதைக் காலியாக விடவும்.
     Generated SponsorBlock User ID: உருவாக்கிய SponsorBlock பயனர் ID
     Generated SponsorBlock User ID Tooltip: செயலி உருவாக்கிய இந்த SponsorBlock பயனர் ID-ஐ உலாவி நீட்சியிலும் மற்றொரு கணினியில் செயலியைப் பயன்படுத்தும்போதும் பயன்படுத்தலாம்.
@@ -1103,7 +1115,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike-ஐ இயக்கு
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (இயல்புநிலை https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Disable Channel Links: சேனல் இணைப்புகளை முடக்கு
   Password Dialog:
@@ -1148,6 +1160,21 @@ About:
   Matrix: Matrix
   Email: மின்னஞ்சல்
 Profile:
+  Customization: தனிப்பயனாக்கம்
+  Manage Profile Subscriptions: சுயவிவரச் சந்தாக்களை நிர்வகி
+  Icon Names:
+    Person: நபர்
+    People: மக்கள்
+    Headphones: தலைக்கேட்பிகள்
+    Gaming: விளையாட்டு
+    Film: திரைப்படம்
+    Art: கலை
+    Science: அறிவியல்
+    Globe: புவிக்கோளம்
+    Heart: இதயம்
+    Sun: சூரியன்
+    Moon: நிலவு
+    Trophy: கோப்பை
   Profile Icon: சுயவிவரப் படவுரு
   Choose an Emoji: ஈமோஜியைத் தேர்ந்தெடுக்கவும்
   Custom Emoji: தனிப்பயன் ஈமோஜி
@@ -1340,12 +1367,16 @@ Video:
     Hide: மறை
     Show: காட்டு
     Scroll Mini Player:
+      Collapse Controls: "கட்டுப்பாடுகளைச் சுருக்கு"
+      Expand Controls: "கட்டுப்பாடுகளை விரிவாக்கு"
       Back to Top: மேலே செல்
       Return to Video Tab: காணொளித் தாவலுக்குத் திரும்பு
       Hide: சிறு இயக்கியை மறை
       Play: இயக்கு
       Pause: இடைநிறுத்து
       Drag Handle: சிறிய இயக்கியை நகர்த்து
+      Rewind 10 seconds: 10 விநாடிகள் பின்னோக்கி
+      Forward 10 seconds: 10 விநாடிகள் முன்னோக்கி
     SponsorBlock:
       CancelCurrentSegment: பகுதியை உருவாக்குவதை ரத்துசெய்
       ClearSegments: பகுதிகளை அழி
@@ -1423,6 +1454,10 @@ Video:
       UpvoteSegment: ஆதரவு வாக்கு
       DownvoteSegment: எதிர்ப்பு வாக்கு
       VoteFailed: SponsorBlock வாக்கைச் சமர்ப்பிக்க முடியவில்லை.
+      ChangeCategory: வகையை மாற்று
+      CopyAndDownvote: நகலெடுத்து எதிராக வாக்களி
+      SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
+      CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
       Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
       Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
@@ -1498,6 +1533,7 @@ Share:
   Share failed: "இணைப்பைப் பகிர முடியவில்லை"
   Timestamp Link Copied: நேரக் குறிப்பு இணைப்பு இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
 Context Menu:
+  Open in a Background Tab: "பின்னணித் தாவலில் திற"
   Select Tab: தாவலைத் தேர்ந்தெடு
   Close Tabs Before: முந்தைய தாவல்களை மூடு
   Close Tabs After: பின்வரும் தாவல்களை மூடு
@@ -1659,6 +1695,7 @@ Description:
   Games: விளையாட்டுகள்
 Tooltips:
   General Settings:
+    Enable Tabs: "இதை முடக்குவது மற்ற எல்லாத் தாவல்களையும் மூடி, தற்போதைய பக்கத்தைத் திறந்தே வைத்திருக்கும்."
     Data Saver Thumbnails: "தரவுப் பயன்பாட்டைக் குறைக்க குறைந்த தெளிவுத்திறன் கொண்ட சிறுபடங்களைப் பயன்படுத்தவும்."
     Use AI Translation Completions: மனித மொழிபெயர்ப்புகளில் உள்ள இடைவெளிகளை AI உருவாக்கிய உரையால் நிரப்பும். மனித மொழிபெயர்ப்புகளுக்கே எப்போதும் முன்னுரிமை.
     Update Relative Timestamps: ஒரு பக்கம் திறந்திருக்கும் வரை செயலி முழுவதும் சார்புநேரக் குறிப்புகளைப் புதுப்பிக்கும். முடக்கியிருந்தால், பக்கத்தை மீண்டும் ஏற்றிய அல்லது பார்வையிட்ட பிறகே அவை புதுப்பிக்கப்படும்.
@@ -1703,6 +1740,7 @@ Tooltips:
     Preload Upcoming Videos: "அடுத்த காணொளிகளின் yt-dlp முகவரிகளைப் பெற்று தற்காலிகமாக சேமிக்கிறது. வரிசைக்கு இயக்கப்பட்டியல் மற்றும் பரிந்துரைகளை விட முன்னுரிமை உண்டு."
     Upcoming Videos to Preload: "பின்னணியில் yt-dlp முகவரிகள் பெறப்படும் அடுத்த காணொளிகளின் அதிகபட்ச எண்ணிக்கை."
     Concurrent Preloads: "ஒரே நேரத்தில் காணொளிகளை முன் ஏற்றப் பயன்படுத்தப்படும் yt-dlp செயல்முறைகளின் அதிகபட்ச எண்ணிக்கை. அதிக மதிப்புகள் கூடுதல் CPU, நினைவகம் மற்றும் பிணைய அலைவரிசையைப் பயன்படுத்தும்."
+    Ignore System Rotation Lock for Fullscreen: Android தானியங்கிச் சுழற்சி முடக்கப்பட்டிருந்தாலும், சாதனத்தைச் சுழற்றி முழுத்திரைக்குச் செல்லவும் அதிலிருந்து வெளியேறவும் முடியும்.
   Download Settings:
     Download Folder: காணொளிகள் இந்தக் கோப்புறையில் சேமிக்கப்படும். உங்கள் கணினியின் பதிவிறக்கங்கள் கோப்புறையைப் பயன்படுத்தக் காலியாக விடவும்.
     Global Additional yt-dlp Arguments: ஒவ்வொரு பதிவிறக்கத்திற்கும் yt-dlp-க்குக் கொடுக்கப்படும் கூடுதல் கட்டளைவரி அளவுருக்கள். எடுத்துக்காட்டு, --cookies-from-browser firefox.
@@ -1870,8 +1908,8 @@ Downloads:
   File Name Template: கோப்புப் பெயர் வார்ப்புரு
   File Name Template Help: 'கிடைக்கும் புலங்கள்: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: நேர வரம்பும் அத்தியாயங்களும்
-  Start Time: தொடக்க நேரம் (HH:MM:SS)
-  End Time: முடிவு நேரம் (HH:MM:SS)
+  Start Time: தொடக்க நேரம்
+  End Time: முடிவு நேரம்
   Split by Chapters: அத்தியாயம் வாரியாகத் தனிக் கோப்புகளாகப் பிரி
   Remove Segments: பகுதிகளை அகற்று
   Subtitles and Metadata: துணைத்தலைப்புகளும் மெட்டாதரவும்
@@ -1960,5 +1998,39 @@ Tray:
 Tray Icon:
   Title: "கணினித் தட்டு சின்னம்"
   Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
+
+Form Inputs:
+  Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
+  Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
+  Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
+  Encryption Passphrase Hint: "உங்கள் குறியாக்கக் கடவுச்சொற்றொடரை உள்ளிடவும்"
+  Show Password: "கடவுச்சொல்லைக் காட்டு"
+  Hide Password: "கடவுச்சொல்லை மறை"
+  Search Text Hint: "தேடல் சொற்களை உள்ளிடவும்"
+  Playlist Description Hint: "இந்த இயக்கப்பட்டியலை விவரிக்கவும்"
+  Filename Preview: "கோப்புப் பெயர் முன்னோட்டம்"
+  Enter Channels: "சேனல்களை உள்ளிடவும்"
+  Enter Text: "உரையை உள்ளிடவும்"
+  Video URL: வீடியோ அல்லது இயக்கப்பட்டியல் URL
+  Paste Link: வீடியோ அல்லது இயக்கப்பட்டியல் இணைப்பை ஒட்டவும்
+  Example: எ.கா. {example}
+  No Minimum: குறைந்தபட்சம் இல்லை
+  No Maximum: அதிகபட்சம் இல்லை
+  Any Age: எந்த வயதும்
+  Included Terms Example: எ.கா. பயிற்சி, விமர்சனம்
+  Excluded Terms Example: எ.கா. முன்னோட்டம், அறிமுகம்
+  Download Folder Hint: பதிவிறக்கக் கோப்புறையைப் பயன்படுத்த காலியாக விடவும்
+  Global Arguments Hint: ஒவ்வொரு பதிவிறக்கத்திற்கும் விருப்ப வாதங்கள்
+  Unlimited Hint: வரம்பற்றதற்கு 0
+  Add Argument: ஒரு வாதத்தைச் சேர்க்கவும்
+  Template Name Example: எ.கா. ஒலி மட்டும்
+  Download Arguments Hint: இந்தப் பதிவிறக்கத்திற்கான விருப்ப வாதங்கள்
+  Generated ID Hint: ID உருவாக்க காலியாக விடவும்
+  Default Value: "இயல்புநிலை: {value}"
+
+Storage Startup Error:
+  Title: "செயலித் தரவை ஏற்ற முடியவில்லை"
+  Message: "சாதனத்தில் சேமிப்பிடத்தை விடுவித்து மீண்டும் முயற்சிக்கவும். உங்கள் தரவு ஏற்றப்படும் வரை ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது."
+  Retry: "மீண்டும் முயற்சி"
 Native Permissions:
   Local Network: "உங்கள் உள்ளூர் வலையமைப்பில் சாதனங்களைக் கண்டறிந்து அவற்றுக்கு காணொளிகளை அனுப்பவும், சாதனங்களுக்கு இடையே அமைப்புகள் மற்றும் தரவை ஒத்திசைக்கவும்."

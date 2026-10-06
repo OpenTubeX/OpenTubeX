@@ -76,6 +76,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Subtítols
 Search Filters:
+  Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
   Prioritize:
     Prioritize: Prioritza
     Popularity: Popularitat
@@ -393,6 +394,11 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Enable Tabs: "Activa les pestanyes"
+    Thumbnail Swipe Gestures:
+      Left: Lliscar cap a l'esquerra a les miniatures
+      Right: Lliscar cap a la dreta a les miniatures
+      Description: Llisca horitzontalment sobre una miniatura de vídeo i deixa anar per executar l'acció seleccionada.
     Data Saver Thumbnails: "Miniatures amb estalvi de dades"
     Use tray icon: "Utilitza la icona de la safata"
     Close to system tray: "Tanca a la safata del sistema"
@@ -401,7 +407,9 @@ Settings:
     Swipe to refresh: Llisca per actualitzar
     Blur Thumbnails: Difumina les miniatures
     Navigation:
-      Show Active Subscriptions: Mostra les subscripcions actives
+      Always Show Navigation Bar: Mostra sempre la barra de navegació quan és a la part inferior
+      Compact Tab Labels: Barra de navegació compacta quan és a la part inferior
+      Show Active Subscriptions: Mostra les subscripcions actives a la barra lateral
       Navigation: Navegació
       Customize Navigation: Personalitza la navegació
       Add Item: Afegeix un element
@@ -491,6 +499,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Compact Mobile Mini Player: "Minireproductor mòbil compacte"
     Always Show Mobile Search Bar: "Mostra sempre la barra de cerca al mòbil"
     Frosted Glass Player UI: "Interfície del reproductor amb efecte de vidre esmerilat"
     Move Downloads to App Header: Mou les baixades a la capçalera de l'aplicació
@@ -559,8 +568,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Clar"
-      OpenTubeX Dark: "OpenTubeX Fosc"
+      Ocean Light: "Ocean Clar"
+      Ocean Dark: "Ocean Fosc"
       Custom: Personalitzat
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -611,6 +620,7 @@ Settings:
       Unable to Delete: No s'ha pogut suprimir el tema personalitzat
       Invalid Theme File: El fitxer de tema personalitzat no és vàlid
       Colors:
+        Watched thumbnail overlay: "Superposició de les miniatures dels vídeos vistos"
         Main text: Text principal
         Secondary text: Text secundari
         Subtle text: Text discret
@@ -810,7 +820,7 @@ Settings:
       On Navigation: Continua la reproducció en sortir de la pàgina del vídeo
     Skip by Scrolling Over Video Player: Salta desplaçant la roda sobre el reproductor de vídeo
     Multiply Seek Interval by Playback Rate: Multiplica l'interval de salt per la velocitat de reproducció
-    Enter Fullscreen on Display Rotate: Entra a pantalla completa en girar la pantalla
+    Enter Fullscreen on Display Rotate: Entra a pantalla completa quan la pantalla giri a horitzontal
     Show Playback Rate Adjusted Timestamp: Mostra la marca de temps ajustada a la velocitat de reproducció
     Use YouTube-style Shorts: Utilitza vídeos curts a l'estil de YouTube
     Loop Shorts: Reprodueix els vídeos curts en bucle
@@ -866,6 +876,8 @@ Settings:
     Preload Upcoming Videos: "Precarrega els vídeos següents"
     Upcoming Videos to Preload: "Vídeos següents per precarregar"
     Concurrent Preloads: "Precàrregues simultànies"
+    Ignore System Rotation Lock for Fullscreen: Ignora el bloqueig de rotació del sistema per a la pantalla completa
+    Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
     Show Google Cast Button: "Mostra el botó de Google Cast"
   Channel Settings:
     Channel Settings: Configuració dels canals
@@ -908,9 +920,9 @@ Settings:
     Update Managed Tools: Actualitza
     Managed Tools Download Error Template: 'No s''han pogut baixar les eines gestionades: {errors}'
     Download Folder: Carpeta de baixades
-    Global Additional yt-dlp Arguments: Arguments addicionals globals de yt-dlp
+    Global Additional yt-dlp Arguments: Arguments addicionals de yt-dlp
     Concurrent Downloads: Baixades simultànies
-    Bandwidth Limit: Límit d'amplada de banda (KiB/s, 0 perquè sigui il·limitat)
+    Bandwidth Limit: Límit d'amplada de banda (KiB/s)
     Choose Download Folder: Tria la carpeta de baixades
     Download Templates: Plantilles de baixada
     Manage Download Templates: Gestiona les plantilles de baixada ({templateCount})
@@ -983,8 +995,8 @@ Settings:
       Automatic: Actualitza automàticament
       Ask: Pregunta abans d'actualitzar
       Manual: Actualitza només manualment
-    yt-dlp Executable Path: Camí de l'executable yt-dlp
-    FFmpeg Executable Path: Camí de l'executable FFmpeg
+    yt-dlp Executable Path: Executable de yt-dlp
+    FFmpeg Executable Path: Executable de FFmpeg
     Restricted Playback Authentication: "Galetes de yt-dlp"
     Cookie Source: Origen de les galetes
     Cookie Sources:
@@ -1287,7 +1299,7 @@ Settings:
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
     Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
     Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
-    Server URL: URL del servidor
+    Server URL: URL del servidor de sincronització
     Checking Server: S'està comprovant el servidor de sincronització…
     Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.
     Username: Nom d'usuari
@@ -1380,7 +1392,7 @@ Settings:
     Proxy Warning: L'OpenTubeX no té cap servidor intermediari integrat, però es pot connectar a un d'extern, com ara Tor executant-se al vostre ordinador o un servidor intermediari SOCKS5 proporcionat per algunes VPN. Si l'activeu, assegureu-vos que el servidor intermediari o Tor estigui ben configurat; altrament, l'OpenTubeX no podrà obtenir dades.
     Proxy Username: Nom d'usuari del servidor intermediari
     Proxy Password: Contrasenya del servidor intermediari
-    IP Block Recovery Script Path: Camí de l'script de recuperació del bloqueig d'IP
+    IP Block Recovery Script Path: Script de recuperació del bloqueig d'IP
     Select IP Block Recovery Script File: Seleccioneu el fitxer de l'script de recuperació del bloqueig d'IP
     Running IP block recovery script: S'està executant l'script de recuperació del bloqueig d'IP
     IP block recovery script failed: 'Ha fallat l''script de recuperació del bloqueig d''IP (codi de sortida: {exitCode})'
@@ -1392,7 +1404,7 @@ Settings:
       Excluded Channels: "Canals exclosos"
       Tooltip: "Introduïu un ID de canal perquè no se saltin els segments de SponsorBlock als seus vídeos. L’ID ha de coincidir exactament i distingeix majúscules i minúscules."
     Enable SponsorBlock Submission: Activa l'enviament a SponsorBlock
-    SponsorBlock Private User ID (optional): ID d'usuari privat de SponsorBlock (opcional)
+    SponsorBlock Private User ID (optional): ID d'usuari privat (opcional)
     SponsorBlock Private User ID Tooltip: Enganxeu l'ID d'usuari privat de SponsorBlock de l'extensió del navegador. Deixeu-ho buit per utilitzar un ID generat per l'aplicació.
     Generated SponsorBlock User ID: ID d'usuari de SponsorBlock generat
     Generated SponsorBlock User ID Tooltip: Aquest ID d'usuari de SponsorBlock generat per l'aplicació es pot utilitzar a l'extensió del navegador o en un altre ordinador on utilitzeu l'aplicació.
@@ -1402,7 +1414,7 @@ Settings:
     Skip notification timeout: Temps d'espera de la notificació d'omissió
     UseDeArrowTitles: Utilitza els títols de vídeo de DeArrow
     UseDeArrowThumbnails: Utilitza DeArrow per a les miniatures
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL de l'API del generador de miniatures de DeArrow (el predeterminat és https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL de l’API de miniatures de DeArrow
     Skip Options:
       Skip Option: Opció d'omissió
       Auto Skip: Omet automàticament
@@ -1414,7 +1426,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activa Return YouTube Dislike
-    Return YouTube Dislike Url: URL de l'API de Return YouTube Dislike (el predeterminat és https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL de l'API
   Parental Control Settings:
     Parental Control Settings: Control parental
     Hide Unsubscribe Button: Oculta el botó de baixa
@@ -1479,6 +1491,21 @@ About:
   Please read the {roomRulesLink}: Llegiu les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: L'OpenTubeX és possible gràcies a {creditsPageLink}
 Profile:
+  Customization: Personalització
+  Manage Profile Subscriptions: Gestiona les subscripcions del perfil
+  Icon Names:
+    Person: Persona
+    People: Persones
+    Headphones: Auriculars
+    Gaming: Jocs
+    Film: Pel·lícula
+    Art: Art
+    Science: Ciència
+    Globe: Globus terraqüi
+    Heart: Cor
+    Sun: Sol
+    Moon: Lluna
+    Trophy: Trofeu
   Toggle Profile List: Commuta la llista de perfils
   Edit Profile Name: Edita el nom del perfil
   Create Profile Name: Crea un nom de perfil
@@ -1773,12 +1800,16 @@ Video:
     You appear to be offline: Sembla que no teniu connexió.
     Playback will resume automatically when your connection comes back: La reproducció es reprendrà automàticament quan torni la connexió.
     Scroll Mini Player:
+      Collapse Controls: "Plega els controls"
+      Expand Controls: "Desplega els controls"
       Back to Top: Torna a dalt
       Return to Video Tab: Torna a la pestanya del vídeo
       Hide: Oculta el reproductor mini
       Play: Reprodueix
       Pause: Pausa
       Drag Handle: Mou el minireproductor
+      Rewind 10 seconds: Retrocedeix 10 segons
+      Forward 10 seconds: Avança 10 segons
     Skipped segment: 'S''ha omès: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Cancel·la la creació del segment
@@ -1857,6 +1888,10 @@ Video:
       UpvoteSegment: Vot positiu
       DownvoteSegment: Vot negatiu
       VoteFailed: No s'ha pogut enviar el vot a SponsorBlock.
+      ChangeCategory: Canvia la categoria
+      CopyAndDownvote: Copia i vota en contra
+      SubmitCategoryVote: Envia el vot de categoria
+      CategoryVoteSuccess: S’ha enviat el vot de categoria.
     Google Cast:
       Cast: "Transmet a un dispositiu Google Cast"
       Connected: "S’està transmetent a {device}"
@@ -1953,6 +1988,7 @@ Clipboard:
   Copy failed: No s'ha pogut copiar al porta-retalls
   Cannot access clipboard without a secure connection: No es pot accedir al porta-retalls sense una connexió segura
 Context Menu:
+  Open in a Background Tab: "Obre en una pestanya en segon pla"
   Select Tab: Selecciona la pestanya
   Close Tabs Before: Tanca les pestanyes anteriors
   Close Tabs After: Tanca les pestanyes posteriors
@@ -2138,6 +2174,7 @@ Description:
   Games: Jocs
 Tooltips:
   General Settings:
+    Enable Tabs: "Si desactives aquesta opció, es tanquen totes les altres pestanyes i la pàgina actual es manté oberta."
     Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
     Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.
@@ -2195,6 +2232,7 @@ Tooltips:
     Preload Upcoming Videos: "Obté i desa a la memòria cau els URL de yt-dlp dels vídeos següents. La cua té prioritat sobre les llistes i les recomanacions."
     Upcoming Videos to Preload: "Nombre màxim de vídeos següents els URL de yt-dlp dels quals s’obtenen en segon pla."
     Concurrent Preloads: "El nombre màxim de processos yt-dlp que s'utilitzen per precàrregar vídeos alhora. Els valors més alts utilitzen més CPU, memòria i amplada de banda de xarxa."
+    Ignore System Rotation Lock for Fullscreen: Gira físicament el dispositiu per entrar i sortir de la pantalla completa encara que la rotació automàtica d'Android estigui desactivada.
   External Player Settings:
     External Player: En triar un reproductor extern, es mostrarà a la miniatura una icona per obrir-hi el vídeo o, si s'admet, la llista de reproducció. La configuració d'Invidious no afecta els reproductors externs.
     Custom External Player Executable: De manera predeterminada, l'OpenTubeX suposa que el reproductor extern triat es pot trobar mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
@@ -2468,8 +2506,8 @@ Downloads:
   File Name Template: Plantilla del nom de fitxer
   File Name Template Help: 'Camps disponibles: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Interval de temps i capítols
-  Start Time: Hora inicial (HH:MM:SS)
-  End Time: Hora final (HH:MM:SS)
+  Start Time: Hora inicial
+  End Time: Hora final
   Split by Chapters: Divideix en fitxers separats per capítol
   Remove Segments: Suprimeix segments
   Subtitles and Metadata: Subtítols i metadades
@@ -2553,5 +2591,39 @@ Tray:
 Tray Icon:
   Title: "Icona de la safata"
   Follow App Theme: "Segueix el tema de l’aplicació"
+
+Form Inputs:
+  Enter Password Hint: "Introduïu la vostra contrasenya"
+  Choose Password Hint: "Trieu una contrasenya"
+  Confirm Password Hint: "Repetiu la vostra contrasenya nova"
+  Encryption Passphrase Hint: "Introduïu la vostra frase de pas de xifratge"
+  Show Password: "Mostra la contrasenya"
+  Hide Password: "Amaga la contrasenya"
+  Search Text Hint: "Introduïu termes de cerca"
+  Playlist Description Hint: "Descriviu aquesta llista de reproducció"
+  Filename Preview: "Previsualització del nom del fitxer"
+  Enter Channels: "Introdueix canals"
+  Enter Text: "Introdueix text"
+  Video URL: URL del vídeo o de la llista
+  Paste Link: Enganxeu un enllaç de vídeo o de llista
+  Example: p. ex. {example}
+  No Minimum: Sense mínim
+  No Maximum: Sense màxim
+  Any Age: Qualsevol antiguitat
+  Included Terms Example: p. ex. tutorial, ressenya
+  Excluded Terms Example: p. ex. tràiler, avanç
+  Download Folder Hint: Deixeu-ho buit per utilitzar la carpeta de baixades
+  Global Arguments Hint: Arguments opcionals per a cada baixada
+  Unlimited Hint: 0 per a il·limitat
+  Add Argument: Afegiu un argument
+  Template Name Example: p. ex. Només àudio
+  Download Arguments Hint: Arguments opcionals per a aquesta baixada
+  Generated ID Hint: Deixeu-ho buit per generar un ID
+  Default Value: "Per defecte: {value}"
+
+Storage Startup Error:
+  Title: "No s'han pogut carregar les dades de l'aplicació"
+  Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
+  Retry: "Torna-ho a provar"
 Native Permissions:
   Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."

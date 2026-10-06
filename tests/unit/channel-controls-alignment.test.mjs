@@ -5,14 +5,14 @@ import test from 'node:test'
 const styles = readFileSync(new URL('../../src/renderer/views/Channel/Channel.css', import.meta.url), 'utf8')
 const component = readFileSync(new URL('../../src/renderer/views/Channel/Channel.vue', import.meta.url), 'utf8')
 
-test('places View All left of the right-aligned sort dropdown', () => {
+test('centers View All beside the right-aligned sort dropdown', () => {
   const selectContainerRule = styles.match(/\.select-container\s*{(?<declarations>[^}]*)}/)?.groups?.declarations
   const viewAllRule = styles.match(/\.select-container\s*>\s*:deep\(\.btn\)\s*{(?<declarations>[^}]*)}/)?.groups?.declarations
 
-  assert.match(selectContainerRule ?? '', /align-items:\s*flex-end;/)
+  assert.match(selectContainerRule ?? '', /align-items:\s*center;/)
   assert.match(selectContainerRule ?? '', /justify-content:\s*flex-end;/)
   assert.match(viewAllRule ?? '', /margin-inline-end:\s*auto;/)
-  assert.match(viewAllRule ?? '', /margin-block-end:\s*9px;/)
+  assert.match(viewAllRule ?? '', /margin-block:\s*0 9px;/)
   assert.doesNotMatch(viewAllRule ?? '', /align-self:/)
 })
 

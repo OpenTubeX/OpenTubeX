@@ -267,6 +267,11 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Enable Tabs: "הפעלת לשוניות"
+    Thumbnail Swipe Gestures:
+      Left: החלקה שמאלה על תמונות ממוזערות
+      Right: החלקה ימינה על תמונות ממוזערות
+      Description: החליקו אופקית על תמונה ממוזערת של סרטון ושחררו לביצוע הפעולה שנבחרה.
     Data Saver Thumbnails: "תמונות ממוזערות לחיסכון בנתונים"
     Use tray icon: "שימוש בסמל במגש המערכת"
     Close to system tray: "סגירה למגש המערכת"
@@ -275,7 +280,9 @@ Settings:
     Swipe to refresh: החלקה לרענון
     Blur Thumbnails: טשטוש תמונות ממוזערות
     Navigation:
-      Show Active Subscriptions: הצגת מינויים פעילים
+      Always Show Navigation Bar: הצגת סרגל הניווט תמיד כשהוא בתחתית
+      Compact Tab Labels: סרגל ניווט קומפקטי כשהוא בתחתית
+      Show Active Subscriptions: הצגת מינויים פעילים בסרגל הצד
       Navigation: ניווט
       Customize Navigation: התאמה אישית של הניווט
       Add Item: הוספת פריט
@@ -357,6 +364,7 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Compact Mobile Mini Player: "נגן קטן קומפקטי לנייד"
     Always Show Mobile Search Bar: "הצגת סרגל החיפוש בנייד תמיד"
     Frosted Glass Player UI: "ממשק נגן עם אפקט זכוכית חלבית"
     Main Color Theme:
@@ -439,8 +447,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX בהירה"
-      OpenTubeX Dark: "OpenTubeX כהה"
+      Ocean Light: "Ocean בהירה"
+      Ocean Dark: "Ocean כהה"
       Custom: מותאמת אישית
     Light Theme: ערכת נושא בהירה
     Dark Theme: ערכת נושא כהה
@@ -475,6 +483,7 @@ Settings:
       Unable to Delete: לא ניתן למחוק את ערכת הנושא המותאמת אישית
       Invalid Theme File: קובץ ערכת הנושא המותאמת אישית אינו תקין
       Colors:
+        Watched thumbnail overlay: "שכבת כיסוי לתמונות ממוזערות של סרטונים שנצפו"
         Main text: טקסט ראשי
         Secondary text: טקסט משני
         Subtle text: טקסט מעודן
@@ -634,6 +643,8 @@ Settings:
     Preload Upcoming Videos: "טעינה מראש של הסרטונים הבאים"
     Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
     Concurrent Preloads: "טעינות מראש במקביל"
+    Ignore System Rotation Lock for Fullscreen: התעלמות מנעילת סיבוב המערכת עבור מסך מלא
+    Swipe Left or Right to Seek in Fullscreen: החלקה שמאלה או ימינה כדי לדלג במסך מלא
     Show Google Cast Button: "הצגת כפתור Google Cast"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
@@ -671,9 +682,9 @@ Settings:
     Update Managed Tools: עדכון
     Managed Tools Download Error Template: 'לא ניתן להוריד את הכלים המנוהלים: {errors}'
     Download Folder: תיקיית הורדות
-    Global Additional yt-dlp Arguments: ארגומנטים נוספים כלליים של yt-dlp
+    Global Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
     Concurrent Downloads: הורדות במקביל
-    Bandwidth Limit: מגבלת רוחב פס (KiB/s, 0 ללא הגבלה)
+    Bandwidth Limit: מגבלת רוחב פס (KiB/s)
     Choose Download Folder: בחירת תיקיית הורדות
     Download Templates: תבניות הורדה
     Manage Download Templates: ניהול תבניות הורדה ({templateCount})
@@ -746,8 +757,8 @@ Settings:
       Automatic: עדכון אוטומטי
       Ask: לשאול לפני עדכון
       Manual: עדכון ידני בלבד
-    yt-dlp Executable Path: נתיב קובץ ההפעלה של yt-dlp
-    FFmpeg Executable Path: נתיב קובץ ההפעלה של FFmpeg
+    yt-dlp Executable Path: קובץ ההפעלה של yt-dlp
+    FFmpeg Executable Path: קובץ ההפעלה של FFmpeg
     Restricted Playback Authentication: "עוגיות yt-dlp"
     Cookie Source: מקור העוגיות
     Cookie Sources:
@@ -990,7 +1001,7 @@ Settings:
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
     Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.
     Description: 'סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה והגדרות נתמכות עם שרת סנכרון של OpenTubeX או LibreTube. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.'
-    Server URL: כתובת ה-URL של השרת
+    Server URL: כתובת שרת הסנכרון
     Checking Server: שרת הסנכרון נבדק…
     Server Unavailable: לא ניתן להתחבר לשרת הסנכרון. בדקו את כתובת ה-URL ונסו שוב.
     Username: שם משתמש
@@ -1080,7 +1091,7 @@ Settings:
     Open All Tabs Confirmation: "לפתוח את כל הכרטיסיות?"
     Server Update Required: "יש לעדכן שרת זה כדי לתמוך בסנכרון מוצפן בזמן אמת."
   Proxy Settings:
-    IP Block Recovery Script Path: נתיב לסקריפט התאוששות מחסימת IP
+    IP Block Recovery Script Path: סקריפט שחזור מחסימת IP
     Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP
     Running IP block recovery script: סקריפט ההתאוששות מחסימת IP פועל
     IP block recovery script failed: 'סקריפט ההתאוששות מחסימת IP נכשל (קוד יציאה: {exitCode})'
@@ -1092,7 +1103,7 @@ Settings:
       Excluded Channels: "ערוצים מוחרגים"
       Tooltip: "יש להזין מזהה ערוץ כדי למנוע דילוג על מקטעי SponsorBlock בסרטונים שלו. המזהה חייב להתאים בדיוק, כולל אותיות גדולות וקטנות."
     Enable SponsorBlock Submission: הפעלת שליחה ל-SponsorBlock
-    SponsorBlock Private User ID (optional): מזהה משתמש פרטי של SponsorBlock (לא חובה)
+    SponsorBlock Private User ID (optional): מזהה משתמש פרטי (אופציונלי)
     SponsorBlock Private User ID Tooltip: הדביקו את מזהה המשתמש הפרטי של SponsorBlock מהרחבת הדפדפן. השאירו שדה זה ריק כדי להשתמש במזהה שיצרה האפליקציה.
     Generated SponsorBlock User ID: מזהה משתמש של SponsorBlock שיצרה האפליקציה
     Generated SponsorBlock User ID Tooltip: אפשר להשתמש במזהה המשתמש של SponsorBlock שיצרה האפליקציה בהרחבת הדפדפן או באפליקציה במחשב אחר.
@@ -1104,7 +1115,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: הפעלת Return YouTube Dislike
-    Return YouTube Dislike Url: כתובת ה-API של Return YouTube Dislike (ברירת המחדל היא https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: כתובת API
   Parental Control Settings:
     Disable Channel Links: השבתת קישורים לערוצים
   Password Dialog:
@@ -1149,6 +1160,21 @@ About:
   Matrix: Matrix
   Email: דוא״ל
 Profile:
+  Customization: התאמה אישית
+  Manage Profile Subscriptions: ניהול המינויים של הפרופיל
+  Icon Names:
+    Person: אדם
+    People: אנשים
+    Headphones: אוזניות
+    Gaming: משחקים
+    Film: סרט
+    Art: אמנות
+    Science: מדע
+    Globe: גלובוס
+    Heart: לב
+    Sun: שמש
+    Moon: ירח
+    Trophy: גביע
   Profile Icon: סמל הפרופיל
   Choose an Emoji: בחירת אמוג׳י
   Custom Emoji: אמוג׳י מותאם אישית
@@ -1339,12 +1365,16 @@ Video:
     Hide: הסתרה
     Show: הצגה
     Scroll Mini Player:
+      Collapse Controls: "כיווץ פקדים"
+      Expand Controls: "הרחבת פקדים"
       Back to Top: חזרה למעלה
       Return to Video Tab: חזרה לכרטיסיית הסרטון
       Hide: הסתרת הנגן הממוזער
       Play: הפעלה
       Pause: השהיה
       Drag Handle: הזזת הנגן הממוזער
+      Rewind 10 seconds: חזרה 10 שניות אחורה
+      Forward 10 seconds: מעבר 10 שניות קדימה
     SponsorBlock:
       CancelCurrentSegment: ביטול יצירת הקטע
       ClearSegments: ניקוי הקטעים
@@ -1422,6 +1452,10 @@ Video:
       UpvoteSegment: הצבעה בעד
       DownvoteSegment: הצבעה נגד
       VoteFailed: שליחת ההצבעה אל SponsorBlock נכשלה.
+      ChangeCategory: שינוי קטגוריה
+      CopyAndDownvote: העתקה והצבעה נגד
+      SubmitCategoryVote: שליחת הצבעה על קטגוריה
+      CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
       Cast: "שידור למכשיר Google Cast"
       Connected: "משדר אל {device}"
@@ -1495,6 +1529,7 @@ Share:
   Share failed: "לא ניתן לשתף את הקישור"
   Timestamp Link Copied: הקישור לנקודת הזמן הועתק ללוח
 Context Menu:
+  Open in a Background Tab: "פתיחה בלשונית ברקע"
   Select Tab: בחירת כרטיסייה
   Close Tabs Before: סגירת הכרטיסיות הקודמות
   Close Tabs After: סגירת הכרטיסיות הבאות
@@ -1656,6 +1691,7 @@ Description:
   Games: משחקים
 Tooltips:
   General Settings:
+    Enable Tabs: "כיבוי האפשרות סוגר את כל הלשוניות האחרות ומשאיר את הדף הנוכחי פתוח."
     Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."
     Use AI Translation Completions: השלמת פערים בתרגומים אנושיים באמצעות טקסט שנוצר בבינה מלאכותית. תרגומים אנושיים תמיד מקבלים עדיפות.
     Update Relative Timestamps: עדכון חותמות הזמן היחסיות בכל היישום כל עוד הדף פתוח. כשהאפשרות מושבתת, הן מתעדכנות רק לאחר טעינה מחדש או חזרה לדף.
@@ -1700,6 +1736,7 @@ Tooltips:
     Preload Upcoming Videos: "אחזור ושמירה במטמון של כתובות yt-dlp לסרטונים הבאים. לתור יש עדיפות על רשימות השמעה והמלצות."
     Upcoming Videos to Preload: "המספר המרבי של סרטונים הבאים שכתובות yt-dlp שלהם יאוחזרו ברקע."
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
+    Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.
@@ -1867,8 +1904,8 @@ Downloads:
   File Name Template: תבנית שם קובץ
   File Name Template Help: 'שדות זמינים: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: טווח זמן ופרקים
-  Start Time: זמן התחלה (HH:MM:SS)
-  End Time: זמן סיום (HH:MM:SS)
+  Start Time: זמן התחלה
+  End Time: זמן סיום
   Split by Chapters: פיצול לקובץ נפרד לכל פרק
   Remove Segments: הסרת מקטעים
   Subtitles and Metadata: כתוביות ומטא-נתונים
@@ -1957,5 +1994,42 @@ Tray:
 Tray Icon:
   Title: "סמל במגש המערכת"
   Follow App Theme: "התאמה לערכת הנושא של היישום"
+
+Form Inputs:
+  Enter Password Hint: "הזן את הסיסמה שלך"
+  Choose Password Hint: "בחר סיסמה"
+  Confirm Password Hint: "הזן שוב את הסיסמה החדשה שלך"
+  Encryption Passphrase Hint: "הזן את ביטוי הסיסמה להצפנה שלך"
+  Show Password: "הצג סיסמה"
+  Hide Password: "הסתר סיסמה"
+  Search Text Hint: "הזן מונחי חיפוש"
+  Playlist Description Hint: "תאר את רשימת ההשמעה הזו"
+  Filename Preview: "תצוגה מקדימה של שם הקובץ"
+  Enter Channels: "הזנת ערוצים"
+  Enter Text: "הזנת טקסט"
+  Video URL: כתובת סרטון או רשימת השמעה
+  Paste Link: הדבק קישור לסרטון או לרשימת השמעה
+  Example: למשל {example}
+  No Minimum: ללא מינימום
+  No Maximum: ללא מקסימום
+  Any Age: כל גיל
+  Included Terms Example: למשל מדריך, סקירה
+  Excluded Terms Example: למשל קדימון, תצוגה מקדימה
+  Download Folder Hint: השאר ריק כדי להשתמש בתיקיית ההורדות
+  Global Arguments Hint: ארגומנטים אופציונליים לכל הורדה
+  Unlimited Hint: 0 ללא הגבלה
+  Add Argument: הוסף ארגומנט
+  Template Name Example: למשל שמע בלבד
+  Download Arguments Hint: ארגומנטים אופציונליים להורדה זו
+  Generated ID Hint: השאר ריק כדי ליצור מזהה
+  Default Value: "ברירת מחדל: {value}"
+
+Search Filters:
+  Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."
+
+Storage Startup Error:
+  Title: "לא ניתן לטעון את נתוני האפליקציה"
+  Message: "יש לפנות שטח אחסון במכשיר ולנסות שוב. הסנכרון מושהה עד לטעינת הנתונים שלך."
+  Retry: "ניסיון חוזר"
 Native Permissions:
   Local Network: "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים."

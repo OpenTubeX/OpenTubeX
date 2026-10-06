@@ -9,20 +9,47 @@
 
 .channelDetails {
   padding: 0;
+  margin-block-end: 0;
+}
+
+.channelContent {
+  padding-block-start: 0;
 }
 
 .select-container {
+  --channel-sort-label-space: 7px;
+
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-end;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   margin-block-end: 10px;
 }
 
+.select-container:empty {
+  display: none;
+}
+
 .select-container > :deep(.btn) {
-  margin-block-end: 9px;
+  margin-block: 0 9px;
   margin-inline-end: auto;
+}
+
+.select-container > :deep(.select) {
+  /* Reserve only the half-height of the floating label above its outline. */
+  margin-block-start: var(--channel-sort-label-space);
+}
+
+.select-container:has(> .select) > :deep(.btn) {
+  /* Match the select's margins so their visible controls share a center. */
+  margin-block: var(--channel-sort-label-space) 20px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .select-container {
+    --channel-sort-label-space: 8px;
+  }
 }
 
 @media (width <= 800px) {
@@ -64,7 +91,7 @@
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   padding-block: 7px;
   padding-inline: 14px;
   cursor: pointer;
@@ -89,6 +116,10 @@
   color: var(--tertiary-text-color);
 }
 
+.elementList .message {
+  margin-block-start: 0;
+}
+
 .getNextPage {
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
@@ -98,12 +129,6 @@
   text-align: center;
   cursor: pointer;
   margin-block-start: 16px;
-}
-
-@media only screen and (width <= 800px) {
-  .communityPanel {
-    margin-block-start: 1rem;
-  }
 }
 
 @media only screen and (width <= 680px) {

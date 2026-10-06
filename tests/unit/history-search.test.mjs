@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import { compileFunction } from 'node:vm'
+import { nextTick, ref, watch } from 'vue'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 
 const videos = [
@@ -33,3 +36,43 @@ test('history normalizes case and accents for the default search', () => {
   assert.deepEqual(filterVideosWithQuery(records, 'VIDEO resume'), records)
   assert.deepEqual(filterVideosWithQuery(records, 'resume', true), [])
 })
+
+test('batched search preserves matches and order for a large library', async () => {
+  const { filterVideosWithQueryAsync } = await import('../../src/renderer/helpers/historySearch.js')
+  const library = Array.from({ length: 5000 }, (_, index) => ({
+    title: `Night city tour ${index}`, author: index % 2 ? 'Example Channel' : 'Other Channel',
+  }))
+  for (const [query, caseSensitive, locale] of [['night exmaple', false, 'en-US'], ['Night', true, 'en-US'], ['tour', false, 'de-DE']]) {
+    assert.deepEqual(
+      await filterVideosWithQueryAsync(library, query, caseSensitive, locale),
+      filterVideosWithQuery(library, query, caseSensitive, locale),
+    )
+  }
+  let cancellationChecks = 0
+  assert.equal(await filterVideosWithQueryAsync(library, 'exmaple', false, 'en-US', () => ++cancellationChecks > 1), null)
+})
+
+const historySource = await readFile(new URL('../../src/renderer/views/History/History.vue', import.meta.url), 'utf8')
+const watcherStart = historySource.indexOf('watch(doCaseSensitiveSearch,')
+const caseSensitiveWatcher = historySource.slice(watcherStart, historySource.indexOf('/**', watcherStart))
+
+for (const queryText of ['', '   ', 'City tour']) {
+  test(`history case sensitivity only refreshes results for an active query (${JSON.stringify(queryText)})`, async t => {
+    const query = ref(queryText)
+    const doCaseSensitiveSearch = ref(false)
+    let scheduledSearches = 0
+    let savedStates = 0
+    const stop = compileFunction(`return ${caseSensitiveWatcher}`, ['watch', 'doCaseSensitiveSearch', 'query', 'scheduleHistorySearch', 'saveStateInRouter'])(
+      watch, doCaseSensitiveSearch, query,
+      () => { scheduledSearches++ }, () => { savedStates++ },
+    )
+    t.after(stop)
+
+    for (const enabled of [true, false]) {
+      doCaseSensitiveSearch.value = enabled
+      await nextTick()
+      assert.equal(scheduledSearches, queryText.trim() ? savedStates : 0)
+    }
+    assert.equal(savedStates, 2)
+  })
+}

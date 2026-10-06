@@ -50,7 +50,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://opentubex.org/privacy/">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 
 > [!NOTE]
 > OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
@@ -70,7 +70,7 @@ appears in your feed, how videos play and how the app looks.
 - **Set playback preferences once.** Save speed and quality preferences per channel, customize keyboard shortcuts, skip silence or repeat a section of a video. SponsorBlock lets you choose which segments to skip and which channels to exempt.
 - **Keep watching while you browse.** Open videos in tabs, build a queue and keep the mini-player playing as you switch tabs. Restore your desktop session when you return.
 - **Make the interface fit you.** Choose or create a theme, rearrange navigation and put the controls you use in Quick Settings. Customize your Home page with subscriptions, unfinished videos, playlists and more.
-- **Decide where your library lives.** Keep your data local or enable sync across devices. End-to-end encryption is available with enhanced-privacy sync on a compatible server. See the [privacy guide](PRIVACY.md) for what each option shares.
+- **Decide where your library lives.** Keep your data local or enable sync across devices. End-to-end encryption is available with enhanced-privacy sync on a compatible server. See the [privacy policy](https://opentubex.org/privacy/#desktop-and-mobile-apps) for what each option shares.
 - **Keep track of your viewing.** See your watch time in daily and weekly charts, search your watch history and choose how long to keep it.
 
 <a id="screenshots"></a>
@@ -122,7 +122,7 @@ appears in your feed, how videos play and how the app looks.
 ## ⚙️ How does it work?
 OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
 
-OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
+OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See the [privacy policy](https://opentubex.org/privacy/#privacy-and-threat-model) for the complete threat model.
 
 By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
 
@@ -178,12 +178,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/) [![AUR version](https://img.shields.io/aur/version/opentubex-bin?label=AUR)](https://aur.archlinux.org/packages/opentubex-bin/)
 * Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
   OpenTubeX supports [Keep Android Open](https://keepandroidopen.org/) and will never be available on the Google Play Store.
-* iOS / iPadOS (experimental): requires 17.4 or later. Download the unsigned `opentubex-<version>-ios-unsigned.ipa` from [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases). Sign and install it with your Apple Account using one of the tools below. Opening the IPA in Files does not install it.
-  * **SideStore.** SideStore is recommended for regular use because it can refresh apps on the device through its local VPN. Follow the [official setup guide](https://docs.sidestore.io/docs/installation/prerequisites), then import the OpenTubeX IPA. Initial setup needs a computer. With a free Apple Account, refresh both SideStore and OpenTubeX within seven days, before either expires. You may need the computer again if the pairing file expires or SideStore stops opening.
-  * **iloader.** OpenTubeX has been tested with [iloader](https://iloader.app/) on a physical iPad. Install iloader on Linux, macOS, or Windows. Connect and trust your device, sign in with your Apple Account, and import the IPA. With a free account, reconnect to the computer and reinstall before the seven-day signature expires. For updates, use the same Apple Account and install over the existing app to keep its data.
-  * **AltStore Classic.** You can also use AltStore Classic, but refreshing requires [AltServer on a computer](https://faq.altstore.io/altstore-classic/altserver), over Wi-Fi or USB. AltStore PAL uses a different distribution method and cannot install this IPA.
-  * **After signing.** Trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**. Restart when prompted. A free Apple Account allows three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership allows longer signing periods but is optional.
-  * **Player limitation.** Silence skipping is unavailable on iOS/iPadOS because WebKit does not reliably provide decoded streaming audio to its analyser.
+* iOS / iPadOS (experimental): requires 17.4 or later. See the [installation and update instructions](https://opentubex.org/docs/installing/#ios--ipados-experimental).
 
 <a href="https://snapcraft.io/opentubex">
   <picture>
@@ -216,20 +211,6 @@ The first build with a green check mark is the latest build.
 * Snap: [Edge channel](https://snap.opentubex.org/#development-builds) (`sudo snap install opentubex --edge`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 * Android: [OpenTubeX Nightly on F-Droid](https://fdroid.opentubex.org/#release-channels), [OpenTubeX Nightly through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.nightly%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Nightly%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22nightly%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22android-%28arm64-v8a%7Carmeabi-v7a%7Cx86_64%7Cx86%7Cuniversal%29%5B.%5Dapk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D), or an APK for your device’s architecture from the build artifacts
-
-
-<a id="project-activity"></a>
-## 📈 Project activity
-
-![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
-
-<a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
- </picture>
-</a>
 
 <a id="contributing"></a>
 ## 🤝 Contributing
@@ -276,4 +257,17 @@ OpenTubeX is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
 [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) as
 published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.  
+(at your option) any later version.
+
+<a id="project-activity"></a>
+## 📈 Project activity
+
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
+
+<a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
+ </picture>
+</a>

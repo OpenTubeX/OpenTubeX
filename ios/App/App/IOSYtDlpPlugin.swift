@@ -1,4 +1,6 @@
 import Capacitor
+import Darwin
+import ffmpegkit
 import AVFoundation
 import AVKit
 import Foundation
@@ -70,146 +72,141 @@ private enum IOSYtDlpRuntime {
         setenv("SSL_CERT_FILE", certificates.path, 1)
         setenv("XDG_CACHE_HOME", FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].path, 1)
         pyInitialize()
+        FFmpegKitConfig.setLogRedirectionStrategy(.neverPrintLogs)
+        FFmpegKitConfig.setSessionHistorySize(64)
+        let callback: @convention(c) (UnsafePointer<CChar>, UnsafePointer<CChar>) -> Int32 = iosFFmpegExecute
+        let address = unsafeBitCast(callback, to: UInt.self)
+        let code = "import opentubex_ios_ffmpeg; opentubex_ios_ffmpeg.install(\(address))"
+        guard code.withCString({ pyRun($0, nil) }) == 0 else {
+            _ = pySaveThread()
+            throw NSError(domain: "IOSYtDlp", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Bundled FFmpeg bridge failed to initialize"])
+        }
         _ = pySaveThread()
         ready = true
     }
 }
 
-enum IOSYtDlpMerger {
-    private static func sampleEndTime(in asset: AVAsset, track: AVAssetTrack) throws -> CMTime {
-        // Fragmented MP4 initialization durations can be counted twice by
-        // AVFoundation. Read sample timing without loading or decoding media data.
-        let reader = try AVAssetReader(asset: asset)
-        let output = AVAssetReaderSampleReferenceOutput(track: track)
-        guard reader.canAdd(output) else {
-            throw NSError(domain: "IOSYtDlp", code: 13,
-                          userInfo: [NSLocalizedDescriptionKey: "Could not read downloaded video timing"])
+// FFmpegKit runs commands on its own workers. Waiting here releases Python's GIL
+// through ctypes, and cancellation targets only this download's native session.
+enum IOSFFmpeg {
+    static func execute(_ args: [String], controlFile: String = "", timeout: Double? = nil) throws -> [String: Any] {
+        guard let tool = args.first, ["ffmpeg", "ffprobe"].contains(tool) else {
+            throw NSError(domain: "IOSYtDlp", code: 8)
         }
-        reader.add(output)
-        guard reader.startReading() else {
-            throw reader.error ?? NSError(domain: "IOSYtDlp", code: 13)
+        if !controlFile.isEmpty && FileManager.default.fileExists(atPath: controlFile) {
+            return ["returncode": 255, "stdout": "", "stderr": "Download interrupted"]
         }
-        defer { if reader.status == .reading { reader.cancelReading() } }
-        var end = CMTime.zero
-        while let sample = output.copyNextSampleBuffer() {
-            // Boundary markers have no samples and may carry the inflated end time.
-            guard CMSampleBufferGetNumSamples(sample) > 0 else { continue }
-            let start = CMSampleBufferGetOutputPresentationTimeStamp(sample)
-            let duration = CMSampleBufferGetOutputDuration(sample)
-            guard start.isNumeric, duration.isNumeric, duration >= .zero else {
-                throw NSError(domain: "IOSYtDlp", code: 13,
-                              userInfo: [NSLocalizedDescriptionKey: "Invalid downloaded video timing"])
+        let completed = DispatchSemaphore(value: 0)
+        let arguments = Array(args.dropFirst())
+        let session: AbstractSession
+        if tool == "ffprobe" {
+            session = FFprobeKit.execute(withArgumentsAsync: arguments, withCompleteCallback: { _ in completed.signal() })
+        } else {
+            session = FFmpegKit.execute(withArgumentsAsync: arguments, withCompleteCallback: { _ in completed.signal() })
+        }
+        let deadline = timeout.map { Date().addingTimeInterval($0) }
+        var timedOut = false
+        while completed.wait(timeout: .now() + 0.1) == .timedOut {
+            timedOut = deadline.map { Date() >= $0 } ?? false
+            if timedOut || (!controlFile.isEmpty && FileManager.default.fileExists(atPath: controlFile)) {
+                session.cancel()
             }
-            end = CMTimeMaximum(end, CMTimeAdd(start, duration))
         }
-        guard reader.status == .completed, end > .zero else {
-            throw reader.error ?? NSError(domain: "IOSYtDlp", code: 13,
-                                           userInfo: [NSLocalizedDescriptionKey: "Downloaded video has no readable samples"])
+        var stdout = ""
+        var stderr = ""
+        for case let log as Log in session.getAllLogs() ?? [] {
+            // FFmpegKit routes the tools' printf output through this special level;
+            // diagnostic av_log messages retain their normal severity levels.
+            if log.getLevel() == -16 { stdout += log.getMessage() ?? "" }
+            else { stderr += log.getMessage() ?? "" }
         }
-        return end
-    }
-
-    static func run(_ value: [String: Any], in folder: URL,
-                    completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        guard let merges = value["merges"] as? [[String: String]] else {
-            completion(.success(value))
-            return
-        }
-        Task.detached {
-            do {
-                var files: [String] = []
-                for merge in merges {
-                    let root = folder.standardizedFileURL.resolvingSymlinksInPath()
-                    guard let videoName = merge["video"], let audioName = merge["audio"],
-                          let outputName = merge["output"],
-                          [videoName, audioName, outputName].allSatisfy({ name in
-                              !name.isEmpty && name != "." && name != ".." &&
-                                  URL(fileURLWithPath: name).lastPathComponent == name &&
-                                  folder.appendingPathComponent(name).standardizedFileURL
-                                      .resolvingSymlinksInPath().deletingLastPathComponent() == root
-                          }) else {
-                        throw NSError(domain: "IOSYtDlp", code: 8, userInfo: [NSLocalizedDescriptionKey: "Invalid media track names"])
-                    }
-                    let videoURL = folder.appendingPathComponent(videoName)
-                    let audioURL = folder.appendingPathComponent(audioName)
-                    let outputURL = folder.appendingPathComponent(outputName)
-                    let videoAsset = AVURLAsset(url: videoURL)
-                    let audioAsset = AVURLAsset(url: audioURL)
-                    guard let videoTrack = try await videoAsset.loadTracks(withMediaType: .video).first,
-                          let audioTrack = try await audioAsset.loadTracks(withMediaType: .audio).first else {
-                        throw NSError(domain: "IOSYtDlp", code: 9, userInfo: [NSLocalizedDescriptionKey: "Downloaded media tracks are missing"])
-                    }
-                    let composition = AVMutableComposition()
-                    guard let compositionVideo = composition.addMutableTrack(withMediaType: .video,
-                                                                               preferredTrackID: kCMPersistentTrackID_Invalid),
-                          let compositionAudio = composition.addMutableTrack(withMediaType: .audio,
-                                                                               preferredTrackID: kCMPersistentTrackID_Invalid) else {
-                        throw NSError(domain: "IOSYtDlp", code: 10, userInfo: [NSLocalizedDescriptionKey: "Could not combine media tracks"])
-                    }
-                    let videoDuration = try sampleEndTime(in: videoAsset, track: videoTrack)
-                    let audioDuration = try await audioAsset.load(.duration)
-                    try compositionVideo.insertTimeRange(CMTimeRange(start: .zero, duration: videoDuration),
-                                                         of: videoTrack, at: .zero)
-                    try compositionAudio.insertTimeRange(CMTimeRange(start: .zero, duration: CMTimeMinimum(videoDuration, audioDuration)),
-                                                         of: audioTrack, at: .zero)
-                    compositionVideo.preferredTransform = try await videoTrack.load(.preferredTransform)
-                    guard let exporter = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
-                        throw NSError(domain: "IOSYtDlp", code: 11, userInfo: [NSLocalizedDescriptionKey: "Media export is unavailable"])
-                    }
-                    if FileManager.default.fileExists(atPath: outputURL.path) {
-                        try FileManager.default.removeItem(at: outputURL)
-                    }
-                    exporter.outputURL = outputURL
-                    exporter.outputFileType = .mp4
-                    await withCheckedContinuation { continuation in
-                        exporter.exportAsynchronously { continuation.resume() }
-                    }
-                    guard exporter.status == .completed else {
-                        throw exporter.error ?? NSError(domain: "IOSYtDlp", code: 12,
-                                                        userInfo: [NSLocalizedDescriptionKey: "Could not export merged media"])
-                    }
-                    try FileManager.default.removeItem(at: videoURL)
-                    try FileManager.default.removeItem(at: audioURL)
-                    files.append(outputName)
-                }
-                completion(.success(["files": files]))
-            } catch { completion(.failure(error)) }
-        }
+        return ["returncode": Int(session.getReturnCode()?.getValue() ?? 1),
+                "stdout": stdout, "stderr": stderr, "timedOut": timedOut]
     }
 }
 
+@_cdecl("opentubex_ios_ffmpeg_execute")
+private func iosFFmpegExecute(_ input: UnsafePointer<CChar>, _ output: UnsafePointer<CChar>) -> Int32 {
+    do {
+        let request = try JSONSerialization.jsonObject(with: Data(contentsOf: URL(fileURLWithPath: String(cString: input))))
+        guard let value = request as? [String: Any], let args = value["args"] as? [String] else { return 1 }
+        let result = try IOSFFmpeg.execute(args, controlFile: value["controlFile"] as? String ?? "",
+                                          timeout: value["timeout"] as? Double)
+        try JSONSerialization.data(withJSONObject: result).write(to: URL(fileURLWithPath: String(cString: output)), options: .atomic)
+        return 0
+    } catch { return 1 }
+}
+
 enum IOSYtDlpExporter {
+    private static func canonicalURL(_ url: URL) throws -> URL {
+        var existing = url.standardizedFileURL
+        var suffix: [String] = []
+        while !FileManager.default.fileExists(atPath: existing.path) && existing.path != "/" {
+            suffix.append(existing.lastPathComponent)
+            existing = existing.deletingLastPathComponent()
+        }
+        guard let resolved = realpath(existing.path, nil) else {
+            throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+        }
+        defer { free(resolved) }
+        // Foundation can strip /private only for existing paths. realpath plus
+        // the missing suffix keeps roots and new export paths in the same form.
+        return suffix.reversed().reduce(URL(fileURLWithPath: String(cString: resolved))) {
+            $0.appendingPathComponent($1)
+        }
+    }
+
     static func copy(_ names: [String], from staging: URL, to target: URL, videoId: String) throws
-        -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64) {
+        -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64, createdDirectories: [String]) {
         var destinations: [String] = []
+        var createdDirectories: [String] = []
         var files: [[String: Any]] = []
         var size: Int64 = 0
         do {
+            let sourceRoot = try canonicalURL(staging).path + "/"
+            let targetRoot = try canonicalURL(target).path + "/"
             for name in names {
-                guard !name.isEmpty, name != ".", name != "..",
-                      URL(fileURLWithPath: name).lastPathComponent == name else {
+                let source = try canonicalURL(staging.appendingPathComponent(name))
+                var destination = try canonicalURL(target.appendingPathComponent(name))
+                guard !name.isEmpty, !name.hasPrefix("/"), !name.split(separator: "/").contains(".."),
+                      source.path.hasPrefix(sourceRoot), destination.path.hasPrefix(targetRoot) else {
                     throw NSError(domain: "IOSYtDlp", code: 8,
                                   userInfo: [NSLocalizedDescriptionKey: "Invalid downloaded file name"])
                 }
-                let source = staging.appendingPathComponent(name)
-                var destination = target.appendingPathComponent(name)
+                var parent = destination.deletingLastPathComponent()
+                var missingParents: [String] = []
+                while parent.path.hasPrefix(targetRoot) && !FileManager.default.fileExists(atPath: parent.path) {
+                    missingParents.append(parent.path)
+                    parent = parent.deletingLastPathComponent()
+                }
+                createdDirectories.append(contentsOf: missingParents.reversed())
+                try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                 var duplicate = 2
                 while FileManager.default.fileExists(atPath: destination.path) {
                     let suffix = source.pathExtension.isEmpty ? "" : ".\(source.pathExtension)"
-                    destination = target.appendingPathComponent("\(source.deletingPathExtension().lastPathComponent) (\(duplicate))\(suffix)")
+                    destination = destination.deletingLastPathComponent().appendingPathComponent("\(source.deletingPathExtension().lastPathComponent) (\(duplicate))\(suffix)")
                     duplicate += 1
                 }
                 try FileManager.default.copyItem(at: source, to: destination)
                 size += Int64((try? source.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
                 destinations.append(destination.path)
-                files.append(["path": destination.path, "videoId": videoId,
+                files.append(["path": destination.path, "relativePath": String(destination.path.dropFirst(targetRoot.count)), "videoId": videoId,
                               "extension": destination.pathExtension, "available": true])
             }
         } catch {
-            for path in destinations { try? FileManager.default.removeItem(atPath: path) }
+            rollback(destinations, createdDirectories: createdDirectories)
             throw error
         }
-        return (destinations, files, size)
+        return (destinations, files, size, createdDirectories)
+    }
+
+    static func rollback(_ destinations: [String], createdDirectories: [String]) {
+        for path in destinations { try? FileManager.default.removeItem(atPath: path) }
+        for path in createdDirectories.reversed() {
+            // Remove only empty folders; preserve files added during the export.
+            path.withCString { _ = rmdir($0) }
+        }
     }
 }
 
@@ -266,7 +263,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 if let reference = record["folder"] as? String,
                    let target = try? directory(reference),
                    let saved = record["destinations"] as? [String], !saved.isEmpty {
-                    let destinations = saved.map { target.appendingPathComponent(URL(fileURLWithPath: $0).lastPathComponent).path }
+                    let savedFiles = record["files"] as? [[String: Any]] ?? []
+                    let destinations = saved.enumerated().map { index, path in
+                        let relative = index < savedFiles.count ? savedFiles[index]["relativePath"] as? String : nil
+                        return target.appendingPathComponent(relative ?? URL(fileURLWithPath: path).lastPathComponent).path
+                    }
                     record["destinations"] = destinations
                     record["destination"] = destinations.last
                     if var files = record["files"] as? [[String: Any]] {
@@ -317,7 +318,6 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     private func progressFile(for id: Int) -> URL { folder(for: id).appendingPathComponent("progress.json") }
 
     @objc func info(_ call: CAPPluginCall) {
-        let unavailable: [String: Any] = ["source": "managed", "available": false, "path": "", "version": NSNull()]
         IOSYtDlpRuntime.run(["operation": "version"]) { result in
             DispatchQueue.main.async {
                 let version: String?
@@ -327,7 +327,9 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 }
                 let binary: [String: Any] = ["source": "managed", "available": version != nil,
                                               "path": "", "version": (version as Any?) ?? NSNull(), "supportedBrowsers": []]
-                call.resolve(["ytDlp": binary, "ffmpeg": unavailable, "ffprobe": unavailable])
+                let tools = (try? result.get()["tools"]) as? [String: [String: Any]] ?? [:]
+                let unavailable: [String: Any] = ["source": "managed", "available": false, "path": "", "version": NSNull()]
+                call.resolve(["ytDlp": binary, "ffmpeg": tools["ffmpeg"] ?? unavailable, "ffprobe": tools["ffprobe"] ?? unavailable])
             }
         }
     }
@@ -379,6 +381,23 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func configure(_ call: CAPPluginCall) {
         if onMain({ self.configure(call) }) { return }
         configuration = call.getObject("configuration") as? [String: Any] ?? [:]
+        if let restored = call.getObject("resumeArguments") as? [String: [String]] {
+            for (key, args) in restored {
+                if let id = Int(key), records[id] != nil, records[id]?["args"] == nil {
+                    records[id]?["args"] = args
+                }
+            }
+            persist()
+        }
+        if let failures = call.getObject("failedResumeArguments") as? [String: String] {
+            for (key, message) in failures {
+                guard let id = Int(key), let record = records[id], record["args"] == nil,
+                      ["queued", "paused"].contains(record["status"] as? String ?? "") else { continue }
+                records[id]?["status"] = "failed"
+                records[id]?["errorMessage"] = message
+                publish(id)
+            }
+        }
         call.resolve()
         startNext()
     }
@@ -386,7 +405,8 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func download(_ call: CAPPluginCall) {
         if onMain({ self.download(call) }) { return }
         guard let payload = call.getObject("payload") as? [String: Any],
-              let mode = payload["mode"] as? String, ["video", "audio", "subtitles"].contains(mode) else {
+              let mode = payload["mode"] as? String, ["video", "audio", "subtitles", "custom"].contains(mode),
+              let args = call.getArray("args") as? [String] else {
             call.resolve(["error": "downloads-disabled"])
             return
         }
@@ -409,7 +429,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         if running.contains(id) { call.resolve(["error": "download-active"]); return }
         var record: [String: Any] = [
             "id": id, "status": "queued", "percent": 0, "started": false,
-            "retryPayload": payload, "mode": mode, "title": payload["title"] ?? "",
+            "retryPayload": payload, "args": args, "mode": mode, "title": payload["title"] ?? "",
             "thumbnail": payload["thumbnail"] ?? "", "videoId": payload["videoId"] ?? "",
             "playlistId": payload["playlistId"] ?? "", "playlistKey": payload["playlistKey"] ?? "",
             "template": payload["template"] ?? "", "folder": reference,
@@ -423,10 +443,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func startNext() {
-        let limit = min(2, max(1, configuration["concurrency"] as? Int ?? 1))
+        let limit = min(10, max(1, configuration["concurrency"] as? Int ?? 1))
         guard running.count < limit,
-              let id = queueIDs(with: ["queued"]).first(where: { !running.contains($0) }),
-              let payload = records[id]?["retryPayload"] as? [String: Any] else { return }
+              let id = queueIDs(with: ["queued"]).first(where: { !running.contains($0) && records[$0]?["args"] != nil }),
+              let payload = records[id]?["retryPayload"] as? [String: Any],
+              let args = records[id]?["args"] as? [String] else { return }
         running.insert(id)
         let staging = folder(for: id)
         try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
@@ -438,7 +459,10 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         records[id]?["eta"] = NSNull()
         records[id]?["started"] = true
         publish(id)
-        IOSYtDlpRuntime.run(["operation": "download", "payload": payload,
+        IOSYtDlpRuntime.run(["operation": "download", "payload": payload, "args": args,
+                             "cookies": configuration["useCookies"] as? Bool == true ? configuration["cookies"] ?? "" : "",
+                             "bandwidth": configuration["bandwidth"] ?? "",
+                             "concurrency": limit,
                              "staging": staging.path, "progressFile": progressFile(for: id).path,
                              "controlFile": controlFile(for: id).path]) { [weak self] result in
             switch result {
@@ -455,9 +479,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                     self.records[id]?["speed"] = NSNull()
                     self.records[id]?["eta"] = NSNull()
                     self.publish(id)
-                    IOSYtDlpMerger.run(value, in: staging) { [weak self] merged in
-                        DispatchQueue.main.async { self?.finish(id, result: merged) }
-                    }
+                    self.finish(id, result: .success(value))
                 }
             case .failure:
                 DispatchQueue.main.async { self?.finish(id, result: result) }
@@ -524,7 +546,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                         completed = true
                     }
                     if !completed {
-                        for path in exported.destinations { try? FileManager.default.removeItem(atPath: path) }
+                        IOSYtDlpExporter.rollback(exported.destinations, createdDirectories: exported.createdDirectories)
                     }
                 } catch { failure = error }
             }

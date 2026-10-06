@@ -57,7 +57,7 @@ export function findSettingsSearchTab(match) {
 }
 
 function getSettingsSearchSourceValues(source, options) {
-  if (options.isIos && ['external-software', 'download', 'yt-dlp-streaming', 'proxy'].includes(source.type)) return []
+  if (options.isIos && ['external-software', 'yt-dlp-streaming', 'proxy'].includes(source.type)) return []
   if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
   if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []
   return flattenSettingsSearchMessageValues(
@@ -86,6 +86,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     store,
     usingElectron,
     isCapacitor = false,
+    phoneLayout = false,
     isIos = false,
     supportsLocalApi,
     isLinuxWayland,
@@ -128,8 +129,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'general') {
+    if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
+    if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
     if (group === 'Stream Extraction Method') return usingElectron || isCapacitor
-    if (['Mobile Layout', 'Swipe to refresh'].includes(group)) {
+    if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
     }
     if (['Use tray icon', 'Close to system tray'].includes(group)) return usingElectron
@@ -347,6 +350,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     'Scroll Volume Over Video Player',
   ].includes(group)) {
     return false
+  }
+
+  if (sectionType === 'player' && group === 'Ignore System Rotation Lock for Fullscreen') {
+    return isCapacitor && !isIos
   }
 
   if (sectionType === 'player' && !isCapacitor && [

@@ -277,7 +277,9 @@ for (const theme of ['openTubeXLight', 'openTubeXDark']) {
         const info = page.locator('.channelDetails .infoContainer')
         await expect(page.locator('#aboutPanel')).toBeVisible()
         const infoWidth = await info.evaluate(element => element.getBoundingClientRect().width)
-        await expectContinuousBackground(app, info, [[infoWidth - 60, -4], [infoWidth - 60, 4]])
+        // The banner above has its own image; compare the info surface with
+        // its parent card at the same pixels instead of crossing that boundary.
+        await expectPanelOwnsBackground(app, info, [[infoWidth - 60, 4], [infoWidth - 60, 20]])
         const about = page.locator('#aboutPanel')
         const aboutWidth = await about.evaluate(element => element.getBoundingClientRect().width)
         await expectContinuousBackground(app, about, [[aboutWidth - 5, 40], [aboutWidth + 5, 40]])

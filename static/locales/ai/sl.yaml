@@ -87,6 +87,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Podnapisi za gluhe in naglušne
 Search Filters:
+  Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
@@ -385,6 +386,11 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Enable Tabs: "Omogoči zavihke"
+    Thumbnail Swipe Gestures:
+      Left: Podrsanje levo po sličicah
+      Right: Podrsanje desno po sličicah
+      Description: Podrsajte vodoravno po sličici videoposnetka in spustite za izvedbo izbranega dejanja.
     Data Saver Thumbnails: "Sličice za varčevanje s podatki"
     Use tray icon: "Uporabi ikono v sistemski vrstici"
     Close to system tray: "Zapri v sistemsko vrstico"
@@ -393,7 +399,9 @@ Settings:
     Swipe to refresh: Povlecite za osvežitev
     Blur Thumbnails: Zamegli sličice
     Navigation:
-      Show Active Subscriptions: Prikaži aktivne naročnine
+      Always Show Navigation Bar: Vedno prikaži navigacijsko vrstico, ko je na dnu
+      Compact Tab Labels: Strnjena navigacijska vrstica, ko je na dnu
+      Show Active Subscriptions: Prikaži aktivne naročnine v stranski vrstici
       Navigation: Krmarjenje
       Customize Navigation: Prilagodi krmarjenje
       Add Item: Dodaj element
@@ -483,6 +491,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakten mobilni mini predvajalnik"
     Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
     Frosted Glass Player UI: "Vmesnik predvajalnika z učinkom motnega stekla"
     Move Downloads to App Header: Premakni prenose v glavo aplikacije
@@ -550,8 +559,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX svetla"
-      OpenTubeX Dark: "OpenTubeX temna"
+      Ocean Light: "Ocean svetla"
+      Ocean Dark: "Ocean temna"
       Custom: Po meri
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -601,6 +610,7 @@ Settings:
       Unable to Delete: Teme po meri ni mogoče izbrisati
       Invalid Theme File: Neveljavna datoteka s temo po meri
       Colors:
+        Watched thumbnail overlay: "Prekrivanje sličic ogledanih videoposnetkov"
         Main text: Glavno besedilo
         Secondary text: Sekundarno besedilo
         Subtle text: Pridušeno besedilo
@@ -834,6 +844,8 @@ Settings:
     Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"
     Upcoming Videos to Preload: "Število videov za prednalaganje"
     Concurrent Preloads: "Sočasno prednalaganje"
+    Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
+    Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
     Show Google Cast Button: "Prikaži gumb Google Cast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
@@ -862,8 +874,8 @@ Settings:
     Volume: Glasnost
   External Player Settings:
     Ignore Default Arguments: Prezri privzete argumente
-    Custom External Player Executable: Izvedljiva datoteka zunanjega predvajalnika po meri
-    Custom External Player Arguments: Argumenti zunanjega predvajalnika po meri
+    Custom External Player Executable: Pot do izvedljive datoteke
+    Custom External Player Arguments: Dodatni argumenti
   Download Settings:
     Download Settings: Prenosi
     Enable Downloads: Omogoči prenose
@@ -875,9 +887,9 @@ Settings:
     Update Managed Tools: Posodobi
     Managed Tools Download Error Template: 'Upravljanih orodij ni bilo mogoče prenesti: {errors}'
     Download Folder: Mapa za prenose
-    Global Additional yt-dlp Arguments: Splošni dodatni argumenti za yt-dlp
+    Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
     Concurrent Downloads: Sočasni prenosi
-    Bandwidth Limit: Omejitev pasovne širine (KiB/s, 0 pomeni neomejeno)
+    Bandwidth Limit: Omejitev pasovne širine (KiB/s)
     Choose Download Folder: Izberi mapo za prenose
     Download Templates: Predloge za prenos
     Manage Download Templates: Upravljaj predloge za prenos ({templateCount})
@@ -950,8 +962,8 @@ Settings:
       Automatic: Posodobi samodejno
       Ask: Vprašaj pred posodobitvijo
       Manual: Posodobi samo ročno
-    yt-dlp Executable Path: Pot do izvedljive datoteke yt-dlp
-    FFmpeg Executable Path: Pot do izvedljive datoteke FFmpeg
+    yt-dlp Executable Path: Izvršljiva datoteka yt-dlp
+    FFmpeg Executable Path: Izvršljiva datoteka FFmpeg
     Restricted Playback Authentication: "Piškotki yt-dlp"
     Cookie Source: Vir piškotkov
     Cookie Sources:
@@ -1252,7 +1264,7 @@ Settings:
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
     Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.
     Description: 'Sinhronizirajte naročnine, profile, sezname predvajanja, zgodovino ogledov in podprte nastavitve s sinhronizacijskim strežnikom OpenTubeX ali LibreTube. Strežniki LibreTube morda ne podpirajo vseh funkcij sinhronizacije.'
-    Server URL: URL strežnika
+    Server URL: URL strežnika za sinhronizacijo
     Checking Server: Preverjanje sinhronizacijskega strežnika …
     Server Unavailable: Povezava s tem sinhronizacijskim strežnikom ni mogoča. Preverite URL in poskusite znova.
     Username: Uporabniško ime
@@ -1344,7 +1356,7 @@ Settings:
     Proxy Warning: OpenTubeX nima vgrajenega posredniškega strežnika, vendar se lahko poveže z zunanjim posredniškim strežnikom, na primer s storitvijo Tor v vašem računalniku ali strežnikom SOCKS5, ki ga ponujajo nekatera navidezna zasebna omrežja. Če ga omogočite, preverite, ali je posredniški strežnik oziroma Tor pravilno nastavljen, sicer OpenTubeX ne bo mogel pridobiti podatkov.
     Proxy Username: Uporabniško ime posredniškega strežnika
     Proxy Password: Geslo posredniškega strežnika
-    IP Block Recovery Script Path: Pot do skripta za obnovitev po blokadi IP-ja
+    IP Block Recovery Script Path: Skript za obnovitev po blokadi IP
     Select IP Block Recovery Script File: Izberi datoteko skripta za obnovitev po blokadi IP-ja
     Running IP block recovery script: Izvajanje skripta za obnovitev po blokadi IP-ja
     IP block recovery script failed: 'Skript za obnovitev po blokadi IP-ja ni uspel (izhodna koda: {exitCode})'
@@ -1358,8 +1370,8 @@ Settings:
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Omogoči SponsorBlock
     Enable SponsorBlock Submission: Omogoči prispevanje v SponsorBlock
-    SponsorBlock API Url (Default is https://sponsor.ajay.app): URL API-ja SponsorBlock (privzeto je https://sponsor.ajay.app)
-    SponsorBlock Private User ID (optional): Zasebni uporabniški ID za SponsorBlock (izbirno)
+    SponsorBlock API Url (Default is https://sponsor.ajay.app): URL API-ja SponsorBlock
+    SponsorBlock Private User ID (optional): Zasebni ID uporabnika (izbirno)
     SponsorBlock Private User ID Tooltip: Prilepite zasebni uporabniški ID za SponsorBlock iz razširitve brskalnika. Če želite uporabiti ID, ki ga ustvari aplikacija, pustite polje prazno.
     Generated SponsorBlock User ID: Ustvarjeni uporabniški ID za SponsorBlock
     Generated SponsorBlock User ID Tooltip: Uporabniški ID za SponsorBlock, ki ga je ustvarila aplikacija, lahko uporabite v razširitvi brskalnika ali v aplikaciji v drugem računalniku.
@@ -1370,7 +1382,7 @@ Settings:
     Skip notification timeout: Čas do izginotja obvestila o preskoku
     UseDeArrowTitles: Uporabi naslove videoposnetkov DeArrow
     UseDeArrowThumbnails: Uporabi DeArrow za sličice
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL API-ja ustvarjalnika sličic DeArrow (privzeto je https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL API-ja sličic DeArrow
     Skip Options:
       Skip Option: Možnost preskoka
       Auto Skip: Samodejno preskoči
@@ -1382,7 +1394,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Omogoči Return YouTube Dislike
-    Return YouTube Dislike Url: URL API-ja Return YouTube Dislike (privzeto je https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API-ja
   Parental Control Settings:
     Parental Control Settings: Starševski nadzor
     Hide Unsubscribe Button: Skrij gumb za odjavo
@@ -1447,6 +1459,21 @@ About:
   Please read the {roomRulesLink}: Preberite {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX omogočajo {creditsPageLink}
 Profile:
+  Customization: Prilagoditev
+  Manage Profile Subscriptions: Upravljaj naročnine profila
+  Icon Names:
+    Person: Oseba
+    People: Ljudje
+    Headphones: Slušalke
+    Gaming: Igre
+    Film: Film
+    Art: Umetnost
+    Science: Znanost
+    Globe: Globus
+    Heart: Srce
+    Sun: Sonce
+    Moon: Luna
+    Trophy: Pokal
   Toggle Profile List: Preklopi seznam profilov
   Edit Profile Name: Uredi ime profila
   Create Profile Name: Ustvari ime profila
@@ -1751,12 +1778,16 @@ Video:
     You appear to be offline: Videti je, da niste povezani.
     Playback will resume automatically when your connection comes back: Predvajanje se bo samodejno nadaljevalo, ko bo povezava znova vzpostavljena.
     Scroll Mini Player:
+      Collapse Controls: "Strni kontrolnike"
+      Expand Controls: "Razširi kontrolnike"
       Back to Top: Nazaj na vrh
       Return to Video Tab: Nazaj na zavihek videoposnetka
       Hide: Skrij mini predvajalnik
       Play: Predvajaj
       Pause: Začasno ustavi
       Drag Handle: Premakni mali predvajalnik
+      Rewind 10 seconds: Previj 10 sekund nazaj
+      Forward 10 seconds: Previj 10 sekund naprej
     Skipped segment: 'Preskočeno: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Prekliči ustvarjanje odseka
@@ -1835,6 +1866,10 @@ Video:
       UpvoteSegment: Glasuj za
       DownvoteSegment: Glasuj proti
       VoteFailed: Glasu za SponsorBlock ni bilo mogoče oddati.
+      ChangeCategory: Spremeni kategorijo
+      CopyAndDownvote: Kopiraj in glasuj proti
+      SubmitCategoryVote: Pošlji glas za kategorijo
+      CategoryVoteSuccess: Glas za kategorijo je poslan.
     Google Cast:
       Cast: "Predvajaj na napravi Google Cast"
       Connected: "Predvajanje na {device}"
@@ -1928,6 +1963,7 @@ Clipboard:
   Copy failed: Kopiranje v odložišče ni uspelo
   Cannot access clipboard without a secure connection: Brez varne povezave dostop do odložišča ni mogoč
 Context Menu:
+  Open in a Background Tab: "Odpri v zavihku v ozadju"
   Select Tab: Izberi zavihek
   Close Tabs Before: Zapri prejšnje zavihke
   Close Tabs After: Zapri naslednje zavihke
@@ -2100,6 +2136,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Enable Tabs: "Izklop zapre vse druge zavihke in pusti trenutno stran odprto."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.
     Update Relative Timestamps: Posodablja relativne časovne žige po vsej aplikaciji, dokler je stran odprta. Če je možnost izklopljena, se posodobijo šele po ponovnem nalaganju ali obisku strani.
@@ -2155,6 +2192,7 @@ Tooltips:
     Preload Upcoming Videos: "Pridobi in predpomni naslove yt-dlp naslednjih videov. Čakalna vrsta ima prednost pred seznami in priporočili."
     Upcoming Videos to Preload: "Največje število naslednjih videov, katerih naslovi yt-dlp se pridobijo v ozadju."
     Concurrent Preloads: "Največje število procesov yt-dlp, ki se uporabljajo za sočasno prednalaganje videov. Višje vrednosti porabijo več procesorske moči, pomnilnika in omrežne pasovne širine."
+    Ignore System Rotation Lock for Fullscreen: Fizično obrnite napravo za vstop in izstop iz celotnega zaslona, tudi ko je samodejno vrtenje v Androidu izklopljeno.
   External Player Settings:
     External Player: Če izberete zunanji predvajalnik, se na sličici prikaže ikona za odpiranje videoposnetka oziroma seznama predvajanja, če je podprt, v zunanjem predvajalniku. Nastavitve Invidious ne vplivajo na zunanje predvajalnike.
     Custom External Player Executable: OpenTubeX privzeto predvideva, da je izbrani zunanji predvajalnik mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
@@ -2416,8 +2454,8 @@ Downloads:
   File Name Template: Predloga imena datoteke
   File Name Template Help: 'Razpoložljiva polja: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Časovni razpon in poglavja
-  Start Time: Začetni čas (HH:MM:SS)
-  End Time: Končni čas (HH:MM:SS)
+  Start Time: Začetni čas
+  End Time: Končni čas
   Split by Chapters: Razdeli v ločene datoteke po poglavjih
   Remove Segments: Odstrani odseke
   Subtitles and Metadata: Podnapisi in metapodatki
@@ -2503,5 +2541,39 @@ Tray:
 Tray Icon:
   Title: "Ikona v sistemski vrstici"
   Follow App Theme: "Sledi temi aplikacije"
+
+Form Inputs:
+  Enter Password Hint: "Vnesite svoje geslo"
+  Choose Password Hint: "Izberite geslo"
+  Confirm Password Hint: "Ponovite novo geslo"
+  Encryption Passphrase Hint: "Vnesite svoje šifrirno geslo"
+  Show Password: "Prikaži geslo"
+  Hide Password: "Skrij geslo"
+  Search Text Hint: "Vnesite iskalne izraze"
+  Playlist Description Hint: "Opišite ta seznam predvajanja"
+  Filename Preview: "Predogled imena datoteke"
+  Enter Channels: "Vnesite kanale"
+  Enter Text: "Vnesite besedilo"
+  Video URL: URL videa ali seznama predvajanja
+  Paste Link: Prilepite povezavo do videa ali seznama predvajanja
+  Example: npr. {example}
+  No Minimum: Brez minimuma
+  No Maximum: Brez maksimuma
+  Any Age: Poljubna starost
+  Included Terms Example: npr. vodič, recenzija
+  Excluded Terms Example: npr. napovednik, predogled
+  Download Folder Hint: Pustite prazno za uporabo mape Prenosi
+  Global Arguments Hint: Izbirni argumenti za vsak prenos
+  Unlimited Hint: 0 za neomejeno
+  Add Argument: Dodajte argument
+  Template Name Example: npr. Samo zvok
+  Download Arguments Hint: Izbirni argumenti za ta prenos
+  Generated ID Hint: Pustite prazno za ustvarjanje ID-ja
+  Default Value: "Privzeto: {value}"
+
+Storage Startup Error:
+  Title: "Podatkov aplikacije ni bilo mogoče naložiti"
+  Message: "Sprostite prostor v napravi in poskusite znova. Sinhronizacija je začasno ustavljena, dokler se podatki ne naložijo."
+  Retry: "Poskusi znova"
 Native Permissions:
   Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."

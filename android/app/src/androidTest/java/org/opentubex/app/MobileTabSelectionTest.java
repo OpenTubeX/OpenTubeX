@@ -21,6 +21,127 @@ public class MobileTabSelectionTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
 
     @Test
+    public void tabHistoryContextMenuRequiresAnotherNavigationEntry() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, """
+                (() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const tab = store.getters.getPresentedTab;
+                    window.tabHistoryOriginal = {
+                        layout: store.getters.getCapacitorLayoutMode,
+                        scale: store.getters.getUiScale,
+                        state: { ...store.state.tabs, tabs: store.state.tabs.tabs.map(tab => ({ ...tab })) },
+                        tabId: tab.id, route: tab.route, history: tab.history, historyIndex: tab.historyIndex
+                    };
+                    store.commit('setCapacitorLayoutMode', 'phone');
+                    store.commit('setTabsState', {
+                        ...store.state.tabs,
+                        tabs: [tab, { ...tab, id: 'tab-history-neighbor', isUnloaded: true, loadState: 'unloaded' }]
+                    });
+                })()
+                """);
+            try {
+                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                await(view, "!!document.querySelector('.capacitorPhoneTabDialog')");
+                for (int scale : new int[] {100, 95}) {
+                    evaluate(view, STORE + ".commit('setUiScale', " + scale + ")");
+                    await(view, "Math.abs(visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    for (int[] state : new int[][] {{1, 0}, {2, 1}, {2, 0}, {1, 0}}) {
+                        evaluate(view, String.format("""
+                            (() => {
+                                const saved = window.tabHistoryOriginal;
+                                const entry = saved.history[saved.historyIndex];
+                                %s.commit('setTabNavigation', {
+                                    tabId: saved.tabId, route: saved.route,
+                                    history: Array.from({ length: %d }, () => entry), historyIndex: %d
+                                });
+                            })()
+                            """, STORE, state[0], state[1]));
+                        boolean visible = state[0] > 1;
+                        assertEquals("Tab cards have no history button", "false",
+                            evaluate(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')"));
+                        if (state[0] == 1) {
+                            evaluate(view, """
+                                (() => {
+                                    const neighbor = document.querySelector('.capacitorPhoneTabTarget[data-tab-id="tab-history-neighbor"]')
+                                        .closest('.capacitorPhoneTabRow');
+                                    window.tabHistoryCardHeight = neighbor.getBoundingClientRect().height;
+                                    window.tabHistoryNeighborTitleHeight = neighbor.getBoundingClientRect().bottom -
+                                        neighbor.querySelector('.capacitorTabPreview').getBoundingClientRect().bottom;
+                                })()
+                                """);
+                        } else {
+                            assertEquals("Cards stay equally tall without stretching the neighboring title area at " + scale + "%", "true",
+                                evaluate(view, """
+                                    (() => {
+                                        const historyCard = document.querySelector('.capacitorPhoneTabTarget[data-tab-id="' +
+                                            window.tabHistoryOriginal.tabId + '"]').closest('.capacitorPhoneTabRow');
+                                        const neighborCard = document.querySelector('.capacitorPhoneTabTarget[data-tab-id="tab-history-neighbor"]')
+                                            .closest('.capacitorPhoneTabRow');
+                                        const history = historyCard.getBoundingClientRect();
+                                        const neighbor = neighborCard.getBoundingClientRect();
+                                        const preview = neighborCard.querySelector('.capacitorTabPreview').getBoundingClientRect();
+                                        return Math.abs(history.height - window.tabHistoryCardHeight) < 0.5 &&
+                                            Math.abs(history.top - neighbor.top) < 0.5 &&
+                                            Math.abs(history.height - neighbor.height) < 0.5 &&
+                                            Math.abs(neighbor.bottom - preview.bottom - window.tabHistoryNeighborTitleHeight) < 0.5 &&
+                                            Math.abs(preview.height - historyCard.querySelector('.capacitorTabPreview').getBoundingClientRect().height) < 0.5;
+                                    })()
+                                    """));
+                        }
+                        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[data-tab-id=\"' + " +
+                            "window.tabHistoryOriginal.tabId + '\"]').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                        await(view, "!!document.querySelector('.capacitorTabActions')");
+                        String historyAction = "[...document.querySelectorAll('.capacitorTabActions [role=menuitem]')]" +
+                            ".find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Tab Organizer.Tab History'))";
+                        assertEquals("History is available only with another navigation entry", "true",
+                            evaluate(view, "!!(" + historyAction + ") === " + visible));
+                        if (visible) {
+                            clickText(view, ".capacitorTabActions button", "Tab Organizer.Tab History");
+                            await(view, "document.querySelectorAll('.capacitorPhoneTabHistoryEntry').length === 2 && " +
+                                "!document.querySelector('.capacitorTabActionsBackdrop')");
+                            evaluate(view, "document.querySelector('.capacitorPhoneTabHeaderButton').click()");
+                            await(view, "!!document.querySelector('.capacitorPhoneOpenTabs')");
+                            assertEquals("Back restores focus to the current tab card", "true", evaluate(view,
+                                "document.activeElement === document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')"));
+                        } else {
+                            evaluate(view, "document.querySelector('.capacitorTabActionsBackdrop').click()");
+                            await(view, "!document.querySelector('.capacitorTabActionsBackdrop')");
+                        }
+                        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[data-tab-id=\"tab-history-neighbor\"]')" +
+                            ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                        await(view, "!!document.querySelector('.capacitorTabActions')");
+                        assertEquals("Background tabs keep their existing history availability", "false",
+                            evaluate(view, "!!(" + historyAction + ")"));
+                        evaluate(view, "document.querySelector('.capacitorTabActionsBackdrop').click()");
+                        await(view, "!document.querySelector('.capacitorTabActionsBackdrop')");
+                    }
+                }
+            } finally {
+                evaluate(view, "document.querySelector('.capacitorPhoneTabHeaderButton:last-of-type')?.click();" +
+                    STORE + ".commit('setTabsState', window.tabHistoryOriginal.state);" +
+                    STORE + ".commit('setTabNavigation', window.tabHistoryOriginal);" +
+                    STORE + ".commit('setUiScale', window.tabHistoryOriginal.scale);" +
+                    STORE + ".commit('setCapacitorLayoutMode', window.tabHistoryOriginal.layout)");
+                assertEquals("The original navigation history is restored", "true", evaluate(view,
+                    "(() => { const saved = window.tabHistoryOriginal; const tab = " + STORE +
+                    ".getters.getTabById(saved.tabId); return tab.history.length === saved.history.length && " +
+                    "tab.historyIndex === saved.historyIndex; })()"));
+                evaluate(view, "delete window.tabHistoryOriginal; delete window.tabHistoryCardHeight; delete window.tabHistoryNeighborTitleHeight");
+            }
+        }
+    }
+
+    @Test
     public void nativeHeaderPreservesHistoryControlsInAutoLandscapeAndForcedTabletMode() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> reference = new AtomicReference<>();
@@ -234,9 +355,7 @@ public class MobileTabSelectionTest {
                 await(view, "location.hash.includes('/history')");
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
                 await(view, "location.hash.includes('/userplaylists')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry[aria-current=\"page\"]')");
                 evaluate(view, "window.dispatchEvent(new CustomEvent('opentubex:focus-search'))");
                 await(view, "document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
@@ -245,13 +364,16 @@ public class MobileTabSelectionTest {
                 await(view, "!!document.querySelector('.capacitorPhoneOpenTabs')");
                 assertEquals("Android Back returns from foreground history before closing background search", "true", evaluate(view,
                     "document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
-                evaluate(view, "document.querySelector('.capacitorPhoneTabRow').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
-                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
-                evaluate(view, "document.querySelector('.capacitorTabActions .closeMenuTrigger').click()");
+                evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+                    ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                String closeTabsAction = "[...document.querySelectorAll('.capacitorTabActions [role=menuitem]')]" +
+                    ".find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Context Menu.Close Tabs'))";
+                await(view, "!!(" + closeTabsAction + ")");
+                clickText(view, ".capacitorTabActions button", "Context Menu.Close Tabs");
                 await(view, "!!document.querySelector('.capacitorTabActions .submenuBack') && " +
                     "document.querySelector('.capacitorTabActions').contains(document.activeElement)");
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
-                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
+                await(view, "!!(" + closeTabsAction + ")");
                 assertEquals("Android Back closes only the nested tab-actions submenu", "true", evaluate(view,
                     "!!document.querySelector('.capacitorPhoneTabDialog') && document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
@@ -264,15 +386,11 @@ public class MobileTabSelectionTest {
                 await(view, "!document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
                 assertEquals("Closing the layered header UI does not navigate the tab", "true", evaluate(view,
                     STORE + ".getters.getActiveTab.historyIndex === window.mobileHeaderHistoryIndex"));
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry').click()");
                 await(view, STORE + ".getters.getActiveTab.historyIndex === 0 && !document.querySelector('.capacitorPhoneTabDialog')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry:last-child')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry:last-child').click()");
                 await(view, "location.hash.includes('/userplaylists') && !document.querySelector('.capacitorPhoneTabDialog')");
@@ -675,6 +793,120 @@ public class MobileTabSelectionTest {
                     """, STORE, STORE, STORE));
             }
         }
+    }
+
+    @Test
+    public void disablingTabsKeepsOnePageAndRemovesMobileTabActions() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            String saved = evaluate(view, """
+                JSON.stringify((() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    return { tabs: store.state.tabs, enabled: store.getters.getEnableMobileTabs,
+                        layout: store.getters.getCapacitorLayoutMode, scale: store.getters.getUiScale };
+                })())
+                """);
+            try {
+                evaluate(view, STORE + ".dispatch('updateEnableMobileTabs', true);" +
+                    STORE + ".commit('setCapacitorLayoutMode', 'phone');" + STORE + ".commit('setUiScale', 100)");
+                await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton')");
+                // Exercise the actual long-press link menu and tab creation path.
+                evaluate(view, """
+                    (() => {
+                        const link = document.createElement('a');
+                        link.id = 'disable-tabs-link';
+                        link.href = location.href.split('#')[0] + '#/history';
+                        link.textContent = 'History';
+                        document.querySelector('.app').append(link);
+                        link.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+                    })()
+                    """);
+                await(view, "!!document.querySelector('.mobileLinkActions')");
+                clickText(view, ".mobileLinkActions button", "Context Menu.Open in a New Tab");
+                await(view, STORE + ".getters.getActiveTab?.route.path === '/history' && " +
+                    STORE + ".getters.getActiveTab?.loadState === 'loaded' && " + STORE + ".getters.getTabs.length > 1");
+                String currentId = evaluate(view, STORE + ".getters.getPresentedTabId");
+                evaluate(view, STORE + ".dispatch('showSettingsWindow')");
+                await(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
+                evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                await(view, "!!document.querySelector('[data-setting-key=enableMobileTabs] .switch-label')");
+                evaluate(view, "document.querySelector('[data-setting-key=enableMobileTabs] .switch-label').click()");
+                await(view, STORE + ".getters.getEnableMobileTabs === false && " + STORE + ".getters.getTabs.length === 1");
+                assertEquals("The current page survives", currentId, evaluate(view, STORE + ".getters.getPresentedTabId"));
+                assertEquals("No hidden background page or closed-tab history survives", "true", evaluate(view,
+                    "document.querySelectorAll('.tabContent').length === 1 && " + STORE + ".getters.getClosedTabs.length === 0"));
+                evaluate(view, STORE + ".dispatch('hideSettingsWindow')");
+                await(view, "!document.querySelector('.settingsWindow')");
+                for (String layout : new String[] {"phone", "tablet"}) {
+                    for (int scale : new int[] {100, 125}) {
+                        evaluate(view, STORE + ".commit('setCapacitorLayoutMode', '" + layout + "');" +
+                            STORE + ".commit('setUiScale', " + scale + ")");
+                        await(view, "!document.querySelector('.capacitorPhoneTabSwitcher, .capacitorTabletTabBar') && " +
+                            "document.querySelector('.app').classList.contains('capacitor" +
+                            (layout.equals("phone") ? "Phone" : "Tablet") + "Layout')");
+                        assertEquals("No empty tab-strip space", "false", evaluate(view,
+                            "document.querySelector('.app').classList.contains('topTabs')"));
+                        assertEquals("Content clears the fixed header in " + layout + " layout at scale " + scale,
+                            "true", evaluate(view, """
+                                (() => {
+                                    const header = document.querySelector('.topNav').getBoundingClientRect();
+                                    const content = document.querySelector('.app > .routerView').getBoundingClientRect();
+                                    return content.top >= header.bottom - 1 && content.top <= header.bottom + 19;
+                                })()
+                                """));
+                    }
+                }
+                evaluate(view, "document.querySelector('#disable-tabs-link').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                await(view, "!!document.querySelector('.mobileLinkActions')");
+                assertEquals("Long press cannot open a new tab", "false", evaluate(view, """
+                    [...document.querySelectorAll('.mobileLinkActions button')].some(button =>
+                        button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Context Menu.Open in a New Tab'))
+                    """));
+                clickText(view, ".mobileLinkActions button", "Share.Open Link");
+                await(view, "!document.querySelector('.mobileLinkActions')");
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
+                await(view, STORE + ".getters.getPresentedTab.route.path === '/userplaylists'");
+                assertEquals("Ordinary navigation stays in the current page", currentId, evaluate(view, STORE + ".getters.getPresentedTabId"));
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, STORE + ".getters.getPresentedTab.route.path === '/history'");
+                evaluate(view, "location.reload()");
+                await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+                assertEquals("The preference survives restarting the renderer", "true", evaluate(view,
+                    STORE + ".getters.getEnableMobileTabs === false && " + STORE + ".getters.getTabs.length === 1 && " +
+                    "!document.querySelector('.capacitorPhoneTabSwitcher, .capacitorTabletTabBar')"));
+                evaluate(view, STORE + ".dispatch('updateEnableMobileTabs', true);" + STORE + ".commit('setCapacitorLayoutMode', 'phone')");
+                await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton')");
+                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                await(view, "!!document.querySelector('.capacitorPhoneTabDialog')");
+                evaluate(view, "[...document.querySelectorAll('.capacitorPhoneTabDialog button')].find(button => button.title === document.querySelector('#app').__vue_app__.config.globalProperties.$t('New Tab')).click()");
+                await(view, STORE + ".getters.getTabs.length === 2");
+            } finally {
+                evaluate(view, "document.querySelector('#disable-tabs-link')?.remove();" +
+                    "(async () => { const saved = JSON.parse(" + saved + "); const store = " + STORE + ";" +
+                    "await store.dispatch('updateEnableMobileTabs', true); store.commit('setTabsState', saved.tabs);" +
+                    "store.commit('setPresentedTab', saved.tabs.presentedTabId);" +
+                    "store.commit('setCapacitorLayoutMode', saved.layout); store.commit('setUiScale', saved.scale);" +
+                    "await store.dispatch('updateEnableMobileTabs', saved.enabled); window.disableTabsRestored = true; })()");
+                await(view, "window.disableTabsRestored === true");
+            }
+        }
+    }
+
+    private static void openPhoneTabHistory(WebView view) throws Exception {
+        evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+        await(view, "!!document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')");
+        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+            ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+        await(view, "!!document.querySelector('.capacitorTabActions')");
+        clickText(view, ".capacitorTabActions button", "Tab Organizer.Tab History");
+        await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry') && " +
+            "!document.querySelector('.capacitorTabActionsBackdrop')");
     }
 
     private static void clickText(WebView view, String selector, String text) throws Exception {

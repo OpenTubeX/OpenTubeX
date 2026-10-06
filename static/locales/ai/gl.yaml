@@ -267,6 +267,11 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Enable Tabs: "Activar as lapelas"
+    Thumbnail Swipe Gestures:
+      Left: Deslizar á esquerda nas miniaturas
+      Right: Deslizar á dereita nas miniaturas
+      Description: Desliza horizontalmente sobre a miniatura dun vídeo e solta para realizar a acción seleccionada.
     Data Saver Thumbnails: "Miniaturas con aforro de datos"
     Use tray icon: "Usar a icona da bandexa"
     Close to system tray: "Pechar na bandexa do sistema"
@@ -275,7 +280,9 @@ Settings:
     Swipe to refresh: Esvarar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
     Navigation:
-      Show Active Subscriptions: Amosar as subscricións activas
+      Always Show Navigation Bar: Amosar sempre a barra de navegación cando está na parte inferior
+      Compact Tab Labels: Barra de navegación compacta cando está na parte inferior
+      Show Active Subscriptions: Amosar as subscricións activas na barra lateral
       Navigation: Navegación
       Customize Navigation: Personalizar a navegación
       Add Item: Engadir elemento
@@ -357,6 +364,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Compact Mobile Mini Player: "Minirreprodutor móbil compacto"
     Always Show Mobile Search Bar: "Amosar sempre a barra de busca no móbil"
     Frosted Glass Player UI: "Interface do reprodutor con efecto de vidro esmerilado"
     Main Color Theme:
@@ -439,8 +447,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Claro"
-      OpenTubeX Dark: "OpenTubeX Escuro"
+      Ocean Light: "Ocean Claro"
+      Ocean Dark: "Ocean Escuro"
       Custom: Personalizado
     Light Theme: Tema claro
     Dark Theme: Tema escuro
@@ -475,6 +483,7 @@ Settings:
       Unable to Delete: Non se puido eliminar o tema personalizado
       Invalid Theme File: O ficheiro do tema personalizado non é válido
       Colors:
+        Watched thumbnail overlay: "Superposición das miniaturas dos vídeos vistos"
         Main text: Texto principal
         Secondary text: Texto secundario
         Subtle text: Texto discreto
@@ -629,6 +638,8 @@ Settings:
     Preload Upcoming Videos: "Precargar os seguintes vídeos"
     Upcoming Videos to Preload: "Número de vídeos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
+    Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueo de rotación do sistema para pantalla completa
+    Swipe Left or Right to Seek in Fullscreen: Deslizar á esquerda ou á dereita para avanzar ou retroceder a pantalla completa
     Show Google Cast Button: "Amosar o botón de Google Cast"
   Channel Settings:
     Channel Settings: Configuración das canles
@@ -666,9 +677,9 @@ Settings:
     Update Managed Tools: Actualizar
     Managed Tools Download Error Template: 'Non se puideron descargar as ferramentas xestionadas: {errors}'
     Download Folder: Cartafol de descargas
-    Global Additional yt-dlp Arguments: Argumentos adicionais globais de yt-dlp
+    Global Additional yt-dlp Arguments: Argumentos adicionais de yt-dlp
     Concurrent Downloads: Descargas simultáneas
-    Bandwidth Limit: Límite de largura de banda (KiB/s, 0 para ilimitada)
+    Bandwidth Limit: Límite de largura de banda (KiB/s)
     Choose Download Folder: Escolle o cartafol de descargas
     Download Templates: Modelos de descarga
     Manage Download Templates: Xestionar os modelos de descarga ({templateCount})
@@ -741,8 +752,8 @@ Settings:
       Automatic: Actualizar automaticamente
       Ask: Preguntar antes de actualizar
       Manual: Actualizar só manualmente
-    yt-dlp Executable Path: Ruta do executable de yt-dlp
-    FFmpeg Executable Path: Ruta do executable de FFmpeg
+    yt-dlp Executable Path: Executable de yt-dlp
+    FFmpeg Executable Path: Executable de FFmpeg
     Restricted Playback Authentication: "Cookies de yt-dlp"
     Cookie Source: Orixe das cookies
     Cookie Sources:
@@ -985,7 +996,7 @@ Settings:
     Enhanced Privacy Enabled: A privacidade mellorada está activada. O servidor só garda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Aviso: este servidor non admite a privacidade mellorada. Quen o xestiona pode ver os datos sincronizados.'
     Description: 'Sincroniza subscricións, perfís, listas de reprodución, historial de visualización e axustes compatibles cun servidor de sincronización de OpenTubeX ou LibreTube. É posible que os servidores de LibreTube non admitan todas as funcións de sincronización.'
-    Server URL: URL do servidor
+    Server URL: URL do servidor de sincronización
     Checking Server: Comprobando o servidor de sincronización…
     Server Unavailable: Non se puido conectar a este servidor de sincronización. Comproba a URL e téntao de novo.
     Username: Nome de usuario
@@ -1075,7 +1086,7 @@ Settings:
     Open All Tabs Confirmation: "Abrir todas as lapelas?"
     Server Update Required: "Actualiza este servidor para admitir a sincronización cifrada en tempo real."
   Proxy Settings:
-    IP Block Recovery Script Path: Ruta do script de recuperación dun bloqueo de IP
+    IP Block Recovery Script Path: Script de recuperación do bloqueo de IP
     Select IP Block Recovery Script File: Escolle o ficheiro do script de recuperación dun bloqueo de IP
     Running IP block recovery script: Executando o script de recuperación dun bloqueo de IP
     IP block recovery script failed: 'Fallou o script de recuperación dun bloqueo de IP (código de saída: {exitCode})'
@@ -1087,7 +1098,7 @@ Settings:
       Excluded Channels: "Canles excluídas"
       Tooltip: "Introduce o ID dunha canle para impedir que se omitan os segmentos de SponsorBlock nos seus vídeos. O ID debe coincidir exactamente e distingue maiúsculas de minúsculas."
     Enable SponsorBlock Submission: Activar o envío de datos a SponsorBlock
-    SponsorBlock Private User ID (optional): ID de usuario privado de SponsorBlock (opcional)
+    SponsorBlock Private User ID (optional): ID de usuario privado (opcional)
     SponsorBlock Private User ID Tooltip: Pega o ID de usuario privado de SponsorBlock da extensión do navegador. Déixao baleiro para usar un ID xerado pola aplicación.
     Generated SponsorBlock User ID: ID de usuario de SponsorBlock xerado
     Generated SponsorBlock User ID Tooltip: Este ID de usuario de SponsorBlock xerado pola aplicación pódese usar na extensión do navegador ou noutro computador onde uses a aplicación.
@@ -1099,7 +1110,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activar Return YouTube Dislike
-    Return YouTube Dislike Url: URL da API de Return YouTube Dislike (a predeterminada é https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL da API
   Parental Control Settings:
     Disable Channel Links: Desactivar as ligazóns das canles
   Password Dialog:
@@ -1144,6 +1155,21 @@ About:
   Matrix: Matrix
   Email: Correo electrónico
 Profile:
+  Customization: Personalización
+  Manage Profile Subscriptions: Xestionar as subscricións do perfil
+  Icon Names:
+    Person: Persoa
+    People: Persoas
+    Headphones: Auriculares
+    Gaming: Xogos
+    Film: Película
+    Art: Arte
+    Science: Ciencia
+    Globe: Globo terráqueo
+    Heart: Corazón
+    Sun: Sol
+    Moon: Lúa
+    Trophy: Trofeo
   Profile Icon: Icona do perfil
   Choose an Emoji: Escolle un emoji
   Custom Emoji: Emoji personalizado
@@ -1341,12 +1367,16 @@ Video:
     Hide: Ocultar
     Show: Amosar
     Scroll Mini Player:
+      Collapse Controls: "Contraer controis"
+      Expand Controls: "Expandir controis"
       Back to Top: Volver ao principio
       Return to Video Tab: Volver á lapela do vídeo
       Hide: Ocultar o minirreprodutor
       Play: Reproducir
       Pause: Pausar
       Drag Handle: Mover o minirreprodutor
+      Rewind 10 seconds: Retroceder 10 segundos
+      Forward 10 seconds: Avanzar 10 segundos
     SponsorBlock:
       CancelCurrentSegment: Cancelar a creación do segmento
       ClearSegments: Borrar os segmentos
@@ -1424,6 +1454,10 @@ Video:
       UpvoteSegment: Valorar positivamente
       DownvoteSegment: Valorar negativamente
       VoteFailed: Non se puido enviar o voto a SponsorBlock.
+      ChangeCategory: Cambiar categoría
+      CopyAndDownvote: Copiar e votar en contra
+      SubmitCategoryVote: Enviar voto de categoría
+      CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
       Cast: "Transmitir a un dispositivo Google Cast"
       Connected: "Transmitindo a {device}"
@@ -1497,6 +1531,7 @@ Share:
   Share failed: "Non se puido compartir a ligazón"
   Timestamp Link Copied: Copiouse no portapapeis a ligazón coa marca de tempo
 Context Menu:
+  Open in a Background Tab: "Abrir nunha lapela en segundo plano"
   Select Tab: Seleccionar lapela
   Close Tabs Before: Pechar as lapelas anteriores
   Close Tabs After: Pechar as lapelas posteriores
@@ -1658,6 +1693,7 @@ Description:
   Games: Xogos
 Tooltips:
   General Settings:
+    Enable Tabs: "Ao desactivar esta opción péchanse todas as demais lapelas e mantense aberta a páxina actual."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir o consumo de datos."
     Use AI Translation Completions: Completa as lagoas das traducións humanas con texto xerado por IA. As traducións humanas sempre teñen prioridade.
     Update Relative Timestamps: Actualiza as marcas de tempo relativas en toda a aplicación mentres a páxina permaneza aberta. Se se desactiva, só se actualizan ao recargar ou volver visitar a páxina.
@@ -1702,6 +1738,7 @@ Tooltips:
     Preload Upcoming Videos: "Obtén e garda na caché os URL de yt-dlp dos seguintes vídeos. A cola ten prioridade sobre as listas e as recomendacións."
     Upcoming Videos to Preload: "Número máximo de vídeos seguintes cuxos URL de yt-dlp se obteñen en segundo plano."
     Concurrent Preloads: "Número máximo de procesos de yt-dlp utilizados para precargar vídeos ao mesmo tempo. Os valores máis altos usan máis CPU, memoria e largura de banda da rede."
+    Ignore System Rotation Lock for Fullscreen: Xira fisicamente o dispositivo para entrar e saír de pantalla completa aínda que a rotación automática de Android estea desactivada.
   Download Settings:
     Download Folder: Os vídeos gárdanse neste cartafol. Déixao en branco para usar o cartafol Descargas do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da liña de ordes que se pasan a yt-dlp en todas as descargas, por exemplo --cookies-from-browser firefox.
@@ -1867,8 +1904,8 @@ Downloads:
   File Name Template: Modelo do nome de ficheiro
   File Name Template Help: 'Campos dispoñibles: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervalo de tempo e capítulos
-  Start Time: Tempo de inicio (HH:MM:SS)
-  End Time: Tempo de fin (HH:MM:SS)
+  Start Time: Tempo de inicio
+  End Time: Tempo de fin
   Split by Chapters: Dividir en ficheiros separados por capítulo
   Remove Segments: Retirar segmentos
   Subtitles and Metadata: Subtítulos e metadatos
@@ -1957,5 +1994,42 @@ Tray:
 Tray Icon:
   Title: "Icona da bandexa"
   Follow App Theme: "Seguir o tema da aplicación"
+
+Form Inputs:
+  Enter Password Hint: "Introduce o teu contrasinal"
+  Choose Password Hint: "Escolle un contrasinal"
+  Confirm Password Hint: "Repite o teu novo contrasinal"
+  Encryption Passphrase Hint: "Introduce a túa frase de cifrado"
+  Show Password: "Amosar contrasinal"
+  Hide Password: "Agochar contrasinal"
+  Search Text Hint: "Introduce termos de busca"
+  Playlist Description Hint: "Describe esta lista de reprodución"
+  Filename Preview: "Vista previa do nome do ficheiro"
+  Enter Channels: "Introduce canles"
+  Enter Text: "Introduce texto"
+  Video URL: URL do vídeo ou da lista
+  Paste Link: Pega unha ligazón de vídeo ou de lista
+  Example: p. ex. {example}
+  No Minimum: Sen mínimo
+  No Maximum: Sen máximo
+  Any Age: Calquera antigüidade
+  Included Terms Example: p. ex. tutorial, recensión
+  Excluded Terms Example: p. ex. tráiler, avance
+  Download Folder Hint: Déixao baleiro para usar o cartafol de descargas
+  Global Arguments Hint: Argumentos opcionais para cada descarga
+  Unlimited Hint: 0 para ilimitado
+  Add Argument: Engade un argumento
+  Template Name Example: p. ex. Só son
+  Download Arguments Hint: Argumentos opcionais para esta descarga
+  Generated ID Hint: Déixao baleiro para xerar un ID
+  Default Value: "Predeterminado: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Fallou a busca coas cookies configuradas."
+
+Storage Startup Error:
+  Title: "Non se puideron cargar os datos da aplicación"
+  Message: "Libera espazo no dispositivo e téntao de novo. A sincronización está en pausa ata que se carguen os teus datos."
+  Retry: "Tentar de novo"
 Native Permissions:
   Local Network: "Descubrir dispositivos na túa rede local e enviarlles vídeos, e sincronizar a configuración e os datos entre dispositivos."

@@ -77,12 +77,12 @@
         </button>
         <RouterLink
           class="queueVideo"
-          :to="`/watch/${item.videoId}`"
+          :to="item.route ?? `/watch/${item.videoId}`"
           @click="playQueuedVideo(item.queueItemId, $event)"
         >
           <FtRetryImage
             class="queueThumbnail"
-            :src="thumbnailUrl(item.videoId)"
+            :src="item.thumbnail || thumbnailUrl(item.videoId)"
             alt=""
           />
           <span class="queueDetails">

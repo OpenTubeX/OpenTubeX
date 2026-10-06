@@ -4,16 +4,18 @@
     :class="iconClass"
     aria-hidden="true"
   >
-    <img
+    <FtRetryImage
       v-if="hasImageIcon"
+      :fallback-icon="icon"
       class="itemImageIcon"
       :src="item.icon"
       alt=""
       referrerpolicy="no-referrer"
       @error="failedImageIcon = item.icon"
-    >
+    />
     <FtIcon
       v-else-if="item.groupColor == null"
+      :class="{ itemImageIcon: failedImageIcon }"
       :icon="icon"
     />
     <span
@@ -31,6 +33,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
+import FtRetryImage from '../FtRetryImage.vue'
 import { computed, ref } from 'vue'
 
 import { getTabAccentColor } from '../../constants/tabColors'

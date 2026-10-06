@@ -41,6 +41,86 @@ test.describe('large channel playback settings', () => {
 })
 
 for (const uiScale of [95, 125]) {
+  test.describe(`channel settings scroll layout at ${uiScale}% scale`, () => {
+    const seed = channelSettingsSeed(49, uiScale)
+    seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
+    seed.settings.alwaysShowScrollbars = true
+    seed.profiles[0].subscriptions = subscriptions.slice(0, 99)
+    test.use({ seed })
+
+    test('keeps the playback scrollbar clear of channel card borders', async ({ app, page, attachScreenshot }) => {
+      await goToSettingsSection(page, 'playback')
+      await page.getByRole('button', { name: 'Manage Saved Channels (49)', exact: true }).click()
+      const scroller = page.locator('.channelListContainer')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+
+      for (const size of [{ width: 1500, height: 700 }, { width: 650, height: 500 }]) {
+        await setWindowSize(app, page, size)
+        await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        for (const thumbWidth of [6, 18]) {
+          await page.evaluate(async width => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            await store.dispatch('updateScrollbarThumbWidth', width)
+          }, thumbWidth)
+          await expect.poll(() => scroller.evaluate(element => {
+            const track = element.querySelector(':scope > .os-scrollbar-vertical').getBoundingClientRect()
+            const cardEnd = Math.max(...Array.from(element.querySelectorAll('.channelEntry'), card => card.getBoundingClientRect().right))
+            return track.left - cardEnd
+          })).toBeGreaterThanOrEqual(2)
+        }
+        await attachScreenshot(`Playback scrollbar spacing at ${size.width}px`)
+      }
+    })
+
+    test('keeps the subscribed channel search above scrolling results and clamps shorter lists', async ({ app, page, attachScreenshot }) => {
+      await goToSettingsSection(page, 'playback')
+      await page.getByRole('button', { name: 'Manage Saved Channels (49)', exact: true }).click()
+      await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
+      const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
+      const scroller = picker.locator('.promptContentScroller')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      const search = picker.getByLabel('Search channels')
+      const expectShortResults = async () => {
+        await expectScrollAtRenderedEnd(scroller)
+        // Fractional zoom can leave subpixel overflow even when all results fit.
+        await expect.poll(() => scroller.evaluate(element => (
+          Math.max(element.scrollTop, element.scrollHeight - element.clientHeight) * devicePixelRatio
+        ))).toBeLessThanOrEqual(2)
+        await expect.poll(() => scrollbar.evaluate(element => {
+          const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return (track.height - handle.height) * devicePixelRatio
+        })).toBeLessThanOrEqual(2)
+      }
+
+      for (const size of [{ width: 1500, height: 800 }, { width: 650, height: 400 }]) {
+        await setWindowSize(app, page, size)
+        await search.fill('')
+        await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(50)
+        const searchTop = await search.evaluate(element => element.getBoundingClientRect().top)
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+        await expect(search).toBeInViewport()
+        expect(await search.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(searchTop, 1)
+        const searchBottom = await search.evaluate(element => element.getBoundingClientRect().bottom)
+        expect(await scroller.evaluate(element => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(searchBottom)
+        await attachScreenshot(`Fixed channel search at ${size.width}px`)
+        await search.fill('Channel 098')
+        await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(1)
+        await expectShortResults()
+        await search.fill('No matching channel')
+        await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(0)
+        await expectShortResults()
+      }
+
+      await search.fill('')
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await setWindowSize(app, page, { width: 1600, height: 1000 })
+      await expectScrollAtRenderedEnd(scroller)
+    })
+  })
+
   test.describe(`saved channel incremental loading at ${uiScale}% scale`, () => {
     const seed = channelSettingsSeed(49, uiScale)
     seed.settings.generalAutoLoadMorePaginatedItemsEnabled = false
@@ -104,7 +184,7 @@ for (const uiScale of [95, 125]) {
       await expectAtTop()
       await page.getByRole('button', { name: 'Add subscribed channel', exact: true }).click()
       const picker = page.getByRole('dialog', { name: 'Add subscribed channel', exact: true })
-      await picker.getByPlaceholder('Search channels').fill('Channel 049')
+      await picker.getByLabel('Search channels').fill('Channel 049')
       await picker.getByRole('button', { name: 'Channel 049', exact: true }).click()
       await expect(picker).toHaveCount(0)
       await expect(page.locator('.channelEntry')).toHaveCount(49)

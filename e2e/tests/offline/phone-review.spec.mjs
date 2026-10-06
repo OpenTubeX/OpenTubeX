@@ -116,6 +116,49 @@ test('description preview exposes links and a separate expansion control', async
   await expect(page.locator('.mobileSheet[open]')).toContainText('Description')
 })
 
+test('description preview preserves its five-line height on phones', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  const description = Array.from({ length: 8 }, (_, index) => `Description line ${index + 1}`).join('\n')
+  await watch.evaluate(async (vm, description) => {
+    vm.videoDescription = description
+    vm.videoDescriptionHtml = ''
+    vm.videoTags = []
+    vm.videoGames = []
+    vm.license = null
+    await vm.$nextTick()
+  }, description)
+
+  const preview = page.locator('.phoneDescriptionPreview')
+  await setWindowSize(app, page, { width: 375, height: 800 })
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    for (const width of [375, 480]) {
+      await page.setViewportSize({ width, height: 800 })
+      await expect(preview).toContainClass('short')
+      const scroller = preview.locator('.descriptionScroll')
+      const lineHeight = await scroller.evaluate(element => {
+        const line = document.createElement('span')
+        line.style.position = 'absolute'
+        line.style.height = '1lh'
+        element.append(line)
+        const height = line.getBoundingClientRect().height
+        line.remove()
+        return height
+      })
+      expect(await scroller.evaluate(element => element.getBoundingClientRect().height))
+        .toBeCloseTo(5 * lineHeight, 0)
+      await preview.getByRole('button', { name: '...more', exact: true }).click()
+      const sheet = page.locator('.mobileSheet[open]')
+      await expect(sheet.locator('.description')).toHaveText(description)
+      await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(sheet).toHaveCount(0)
+      await expect(preview).toContainClass('short')
+    }
+  }
+})
+
 test('description preview shows metadata without description text', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

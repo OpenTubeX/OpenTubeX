@@ -38,7 +38,9 @@
         class="settingsFlexStart460px"
       >
         <FtInput
-          :placeholder="$t('Settings.External Player Settings.Custom External Player Executable')"
+          :icon="['fas', 'folder-open']"
+          :label="$t('Settings.External Player Settings.Custom External Player Executable')"
+          placeholder="/path/to/player"
           :show-action-button="false"
           :show-label="true"
           :value="externalPlayerExecutable"
@@ -49,7 +51,8 @@
       <FtFlexBox>
         <FtInputTags
           :label="$t('Settings.External Player Settings.Custom External Player Arguments')"
-          :tag-name-placeholder="$t('Settings.External Player Settings.Custom External Player Arguments')"
+          :entry-label="t('Form Inputs.Add Argument')"
+          tag-name-placeholder=""
           :tag-list="externalPlayerCustomArgs"
           :tooltip="externalPlayerCustomArgsTooltip"
           :show-tags="showAddedExternalPlayerCustomArgs"

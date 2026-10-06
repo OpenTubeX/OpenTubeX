@@ -7,9 +7,10 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      compactNavigation: compactNavigationLabels,
       capacitorTabs: isCapacitor,
-      capacitorPhoneLayout: isCapacitor && !showTabletTabStrip,
-      capacitorTabletLayout: showTabletTabStrip,
+      capacitorPhoneLayout: isCapacitor && !capacitorTabletLayout,
+      capacitorTabletLayout,
       verticalTabs: useVerticalTabBar,
       verticalTabsLeft: tabBarPosition === 'left',
       verticalTabsRight: tabBarPosition === 'right',
@@ -24,7 +25,7 @@
       :inert="isAnyPromptOpen"
     />
     <CapacitorTabletTabBar
-      v-if="isCapacitor"
+      v-if="isCapacitor && store.getters.getTabsEnabled"
       :inert="isAnyPromptOpen"
       @request-exit="requestAndroidAppExit"
     />
@@ -39,6 +40,7 @@
     <SideNav
       :inert="isAnyPromptOpen"
       :force-expanded="useWatchSideNavOverlay"
+      :data-watch-return-expanded="sideNavOpenBeforeWatchOverlay"
     />
     <Transition name="fade">
       <button
@@ -458,15 +460,16 @@
             v-if="showTabPreviews"
             class="tabSwitcherPreview"
           >
-            <img
+            <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
               :alt="`${formatTabTitle(tab.title)} preview`"
               draggable="false"
               @error="handleTabSwitcherPreviewError(tab)"
-            >
+            />
             <FtRetryImage
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               :alt="`${formatTabTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
@@ -487,6 +490,7 @@
           <span class="tabSwitcherTitle">
             <FtRetryImage
               v-if="showTabIcons && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               class="tabSwitcherTitleAvatar"
               alt=""
@@ -532,6 +536,7 @@ import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
+import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -721,7 +726,7 @@ function startPageSwipe(event) {
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
       pageSwipe.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
-      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer')) return
+      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer, .thumbnailSwipeEnabled')) return
 
   const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
   if (!width) return
@@ -835,6 +840,7 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 
 const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)
@@ -843,9 +849,10 @@ const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(
 const tabletTabStripQuery = window.matchMedia('(min-width: 768px)')
 const automaticTabletTabStrip = ref(tabletTabStripQuery.matches)
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
-const showTabletTabStrip = computed(() => isCapacitor && (
+const capacitorTabletLayout = computed(() => isCapacitor && (
   usesCapacitorTabletLayout(capacitorLayoutMode.value, automaticTabletTabStrip.value)
 ))
+const showTabletTabStrip = computed(() => capacitorTabletLayout.value && store.getters.getTabsEnabled)
 tabletTabStripQuery.addEventListener('change', handleTabletTabStripChange)
 
 const appStyle = computed(() => {
@@ -867,26 +874,26 @@ const useWatchSideNavOverlay = computed(() => {
   return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
 })
 
-let sideNavOpenBeforeWatchOverlay = null
+const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
     disableWatchSideNavTransitionForNextFrame()
-    sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
+    sideNavOpenBeforeWatchOverlay.value = isSideNavOpen.value
     closeSideNav()
-  } else if (sideNavOpenBeforeWatchOverlay !== null) {
+  } else if (sideNavOpenBeforeWatchOverlay.value !== null) {
     // Leaving the overlay brings the sidebar back into normal flow and may
     // reopen it. Suppress its inline-size transition for the reflow so the
     // content snaps to its final position instead of sliding in from the right.
     disableWatchSideNavTransitionForNextFrame()
 
-    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay.value) {
       store.commit('toggleSideNav')
     }
 
-    sideNavOpenBeforeWatchOverlay = null
+    sideNavOpenBeforeWatchOverlay.value = null
   }
 }, { immediate: true })
 
@@ -1085,6 +1092,7 @@ watch(() => mobileContextMenuStack.value.length, (depth) => {
   }
 })
 const mobileContextLinkCanOpenInTab = computed(() => {
+  if (!store.getters.getTabsEnabled) return false
   const href = mobileContextLink.value?.href ?? ''
   return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
     /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)
@@ -1746,6 +1754,10 @@ onMounted(async () => {
   }
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('pointermove', handleNumberInputPointer, { passive: true })
+  document.addEventListener('pointerdown', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerup', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
@@ -1813,6 +1825,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
+  document.removeEventListener('pointermove', handleNumberInputPointer)
+  document.removeEventListener('pointerdown', handleNumberInputPointer, true)
+  document.removeEventListener('pointerup', handleNumberInputPointer, true)
+  document.removeEventListener('pointerout', handleNumberInputPointer)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
@@ -3026,6 +3042,9 @@ function refreshTrayIcon() {
 }
 
 function updateTheme() {
+  // Keep Android's cached native background until the saved theme is known.
+  // Applying the store's temporary system default can otherwise flash white.
+  if (isCapacitor && Capacitor.getPlatform() === 'android' && !appearanceSettingsReady) return
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
     : baseTheme.value
@@ -3062,7 +3081,7 @@ function updateSystemBarsStyle() {
   const backgroundColor = bodyStyle.getPropertyValue('--bg-color').trim() || bodyStyle.backgroundColor
   const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
   Promise.all([
-    setAndroidSystemBarsBackground(backgroundColor),
+    setAndroidSystemBarsBackground(backgroundColor, ['system', 'dynamic'].includes(baseTheme.value)),
     SystemBars.setStyle({
       style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
     })
@@ -3239,6 +3258,7 @@ watch(outlinesHidden, hidden => {
   document.documentElement.classList.toggle('hideOutlines', hidden)
 }, { flush: 'sync', immediate: true })
 
+const phoneLayout = usePhoneLayout()
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
@@ -3247,6 +3267,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   store,
   isElectron,
   isCapacitor,
+  phoneLayout: phoneLayout.value,
   hardwareKeyboardAttached: hardwareKeyboardAttached.value,
   navigate: navigateFromCommandPalette,
   openSettingsSection,
@@ -3437,7 +3458,7 @@ function getAndroidBackPreview() {
 }
 
 function handleAndroidPictureInPictureChange(event) {
-  setAndroidPictureInPictureDocumentState(event.active === true)
+  setAndroidPictureInPictureDocumentState(event.active === true, event)
 }
 
 function handleHardwareKeyboardChange(event) {
@@ -4308,6 +4329,41 @@ function handleMouseDown() {
   store.dispatch('hideOutlines')
 }
 
+/** @param {PointerEvent} event */
+function handleNumberInputPointer(event) {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || input.type !== 'number') return
+  if (event.type === 'pointerout') {
+    if (event.relatedTarget !== input) {
+      input.style.removeProperty('--number-step-up-color')
+      input.style.removeProperty('--number-step-down-color')
+    }
+    return
+  }
+  if (input.disabled || input.readOnly) return
+
+  // Chromium exposes both native step arrows as one pseudo-element. Split its
+  // paint at the content's center while keeping native stepping and key repeat.
+  const bounds = input.getBoundingClientRect()
+  const style = getComputedStyle(input)
+  const rtl = style.direction === 'rtl'
+  const edge = rtl ? bounds.left + parseFloat(style.paddingLeft) + 4 : bounds.right - parseFloat(style.paddingRight) - 4
+  const middle = bounds.top + (bounds.height + parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
+  let hoveredStep = ''
+  if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
+    hoveredStep = event.clientY < middle ? 'up' : 'down'
+  }
+  const highlight = event.buttons & 1 ? 'var(--primary-color-active)' : 'var(--primary-color)'
+  for (const step of ['up', 'down']) {
+    const property = `--number-step-${step}-color`
+    const color = hoveredStep === step ? highlight : ''
+    if (input.style.getPropertyValue(property) !== color) {
+      if (color) input.style.setProperty(property, color)
+      else input.style.removeProperty(property)
+    }
+  }
+}
+
 const lastExternalLinkToBeOpened = ref('')
 const showExternalLinkOpeningPrompt = ref(false)
 const EXTERNAL_LINK_OPENING_PROMPT_VALUES = ['yes', 'no']
@@ -4551,6 +4607,8 @@ function handleExternalLink(href) {
   }
 }
 
+provide('handleExternalLink', handleExternalLink)
+
 /**
  * @param {PointerEvent} event
  * @param {HTMLAnchorElement} link
@@ -4735,7 +4793,7 @@ async function enableCapacitorIntegrations() {
   const openUrl = url => {
     if (!url) return
     // iOS URL handling can remove the embedded protocol's colon.
-    const target = url.replace(/^opentubex:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
     return handleYoutubeLink(target)
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'

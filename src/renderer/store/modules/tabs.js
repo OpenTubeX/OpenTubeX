@@ -31,6 +31,7 @@ const state = {
 }
 
 const getters = {
+  getTabsEnabled: (_state, getters) => !process.env.IS_CAPACITOR || getters.getEnableMobileTabs !== false,
   getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,
   getTabGroups: (state) => state.groups,

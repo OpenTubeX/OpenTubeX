@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
@@ -183,16 +183,42 @@ test.describe('watch history', () => {
     }).toBeGreaterThanOrEqual(10)
   })
 
-  test('keeps space between the history actions and search field', async ({ page }) => {
-    await page.setViewportSize({ width: 520, height: 900 })
+  test('keeps equal space above and below the history actions in portrait and landscape', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'history')
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [375, 732]) {
+        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 550 })
+        await expect.poll(() => page.locator('.headingActions').evaluate(element => {
+          const actions = element.getBoundingClientRect()
+          const heading = element.closest('.headingRow').querySelector('h2').getBoundingClientRect()
+          const search = element.closest('.card').querySelector('.historySearch').getBoundingClientRect()
+          const above = actions.top - heading.bottom
+          const below = search.top - actions.bottom
+          return above >= 11.9 && below >= 11.9 && Math.abs(above - below) < 0.2
+        })).toBe(true)
+        if (zoom === 1) await attachScreenshot(`history actions at ${width}px`)
+      }
+    }
+  })
 
-    const actions = page.locator('.headingActions')
-    const search = page.locator('.historySearch')
-    await expect.poll(async () => {
-      const [actionsBox, searchBox] = await Promise.all([actions.boundingBox(), search.boundingBox()])
-      return searchBox.y - actionsBox.y - actionsBox.height
-    }).toBeGreaterThanOrEqual(12)
+  test('history actions start with cleanup and wrap from the left', async ({ page }) => {
+    await goTo(page, 'history')
+    for (const width of [375, 520, 850, 1280]) {
+      await page.setViewportSize({ width, height: 900 })
+      const actions = page.locator('.headingActions')
+      await expect(actions.getByRole('button').first()).toHaveText('Delete Old History')
+      await expect.poll(() => actions.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const rows = new Map()
+        for (const button of element.querySelectorAll('button')) {
+          const rect = button.getBoundingClientRect()
+          if (!rows.has(rect.top)) rows.set(rect.top, rect.left)
+          if (rect.right > bounds.right + 1) return false
+        }
+        return [...rows.values()].every(left => Math.abs(left - bounds.left) < 1)
+      })).toBe(true)
+    }
   })
 
   test('keeps thumbnail actions inset and separated on narrow desktop layouts', async ({ page }) => {
@@ -255,6 +281,7 @@ test.describe('watch history', () => {
     const durationIndicator = watchedVideo.locator('.videoDuration')
     await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
     await expect(watchedIndicator).toHaveText('Watched')
+    await expect(watchedVideo).toHaveCSS('border-radius', '24px')
     await expect(watchedIndicator).toHaveCSS('border-radius', '10px')
     await expect(watchedIndicator).toHaveCSS('font-size', '15px')
     await expect(durationIndicator).toHaveCSS('border-radius', '10px')
@@ -395,6 +422,32 @@ test.describe('history search pagination', () => {
         historyEntry('betacase000', 'beta match lowercase', now - 2500),
         ...matchingHistoryEntries('Gamma', 20, 3000)
       ]
+    }
+  })
+
+  test('keeps unfiltered history visible when toggling case sensitivity', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const caseSensitive = page.getByRole('checkbox', { name: 'Case Sensitive Search' })
+    await expect(videos).toHaveCount(100)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(200)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    for (const query of ['', '   ']) {
+      await input.fill(query)
+      await page.clock.runFor(600)
+      await expect(videos).toHaveCount(200)
+      for (const enabled of [true, false]) {
+        await caseSensitive.evaluate(element => element.click())
+        await expect(caseSensitive).toBeChecked({ checked: enabled })
+        await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+        await expect(videos).toHaveCount(200)
+        await page.clock.runFor(600)
+        await expect(videos).toHaveCount(200)
+      }
     }
   })
 

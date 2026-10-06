@@ -1,10 +1,21 @@
 .ft-input-tags-component {
+  --input-label-surface: var(--bg-color);
+
+  box-sizing: border-box;
   position: relative;
   background-color: var(--bg-color);
   padding: 20px;
   border-radius: calc(5px * var(--ui-roundness));
   display: block;
   inline-size: 60%;
+}
+
+.tagInputHeading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .disabledMsg {
@@ -38,14 +49,9 @@
   user-select: text;
 }
 
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  accent-color: var(--accent-color);
-}
-
 .tag-icon {
+  block-size: 24px;
+  inline-size: 24px;
   border-radius: 50%;
   vertical-align: middle;
 }
@@ -70,11 +76,46 @@
   cursor: pointer;
 }
 
-:deep(.ft-input-component .ft-input) {
+:deep(.ft-input-component) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+:deep(.ft-input-component:has(.inputIndicators > *)) {
+  margin-inline-end: 0;
+}
+
+:deep(.ft-input-component .inputWrapper) {
   margin-block-start: 10px;
 }
 
+:deep(.inputWrapper:has(.inputIndicators)) {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  column-gap: 8px;
+}
+
+:deep(.inputAction) {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+:deep(.inputIndicators) {
+  grid-area: 1 / 2;
+  position: static;
+  transform: none;
+}
+
+:deep(.changedSettingIndicatorPlaceholder) {
+  display: none;
+}
+
 @media only screen and (width <= 576px) {
+  .ft-input-tags-component {
+    inline-size: 100%;
+  }
+}
+
+@container settings-content (width <= 680px) {
   .ft-input-tags-component {
     inline-size: 100%;
   }

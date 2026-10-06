@@ -1,6 +1,17 @@
 const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
 
 /**
+ * Preserve missing DVR metadata instead of coercing it to false, as YouTube.js does.
+ * @param {object | null | undefined} videoDetails
+ * @returns {boolean | undefined}
+ */
+export function getLiveDvrEnabled(videoDetails) {
+  return typeof videoDetails?.isLiveDvrEnabled === 'boolean'
+    ? videoDetails.isLiveDvrEnabled
+    : undefined
+}
+
+/**
  * @param {string | null} url
  * @returns {boolean}
  */
@@ -29,7 +40,7 @@ export function getAndroidLiveHlsManifestUrl(response) {
 }
 
 /**
- * Android can provide a rewindable DASH stream when WEB HLS only has 30 seconds.
+ * Android can supply a DASH fallback for recently ended streams.
  * @param {unknown} response
  * @returns {string | null}
  */

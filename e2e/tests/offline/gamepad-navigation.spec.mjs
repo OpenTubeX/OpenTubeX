@@ -283,7 +283,7 @@ test('keeps a changed quick settings slider focused', async ({ attachScreenshot,
 
   await expect(slider).not.toHaveValue(initialValue)
   await expect(slider).toBeFocused()
-  await expect(slider.locator('..')).toHaveCSS('box-shadow', /inset/)
+  await expect(slider.locator('..').locator('..')).toHaveCSS('box-shadow', /inset/)
   await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
   await expect(menu).not.toBeFocused()
   await attachScreenshot('active quick settings gamepad slider')
@@ -309,7 +309,7 @@ test.describe('quick settings changed-setting controls', () => {
 
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
     const slider = menu.locator('.thumbnailSizeSlider').getByRole('slider')
-    const reset = slider.locator('..').getByRole('button', {
+    const reset = slider.locator('..').locator('..').getByRole('button', {
       name: 'Reset this setting to its default'
     })
     await reset.focus()
@@ -364,7 +364,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await expect(switchInput).toBeFocused()
     await expect(switchInput).toHaveCSS('outline-style', 'none')
     await expect(switchLabel).toHaveCSS('outline-style', 'solid')
-    await expect(switchLabel).toHaveCSS('border-radius', '8px')
+    await expect(switchLabel).toHaveCSS('border-radius', '4px')
     await expect(switchSetting).toHaveCSS('border-left-width', '3px')
     const focusedSwitchPositions = await switchLabel.evaluate(element => ({
       ringStartPadding: Number.parseFloat(getComputedStyle(element, '::after').insetInlineStart),
@@ -382,7 +382,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await slider.focus()
     await pressGamepadButton(page, 'primary')
     await expect(slider).toHaveAttribute('data-gamepad-active', 'true')
-    await expect(slider.locator('..')).toHaveCSS('border-radius', '8px')
+    await expect(slider.locator('..').locator('..')).toHaveCSS('border-radius', '8px')
   })
 })
 

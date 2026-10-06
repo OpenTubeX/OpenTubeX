@@ -24,11 +24,13 @@ test.use({
 async function mockCast(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const state = { currentTime: 5, duration: 30, paused: false, connected: true, volume: 0.5, muted: false, activeTrackIds: [] }
-    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, failStatus: false, failStop: false, statusCalls: 0 }
+    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, startDelayMs: 0, failStatus: false, failStop: false, statusCalls: 0 }
     for (const name of ['cast-discover', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
     ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
-    ipcMain.handle('cast-start', (_, payload) => {
+    ipcMain.handle('cast-start', async (_, payload) => {
       globalThis.castTest.starts.push(payload)
+      await new Promise(resolve => setTimeout(resolve, globalThis.castTest.startDelayMs))
+      if (globalThis.castTest.failStart === 'throw') throw new Error('Receiver connection failed')
       if (globalThis.castTest.failStart) return { error: 'Receiver rejected media' }
       state.currentTime = payload.startSeconds
       state.paused = payload.paused
@@ -173,6 +175,33 @@ test('failed casting preserves local playback and paused casting returns paused'
   await choice(page, 'Return to local playback')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
 })
+
+for (const outcome of ['success', 'reported failure', 'thrown failure']) {
+  test(`a delayed Cast ${outcome} snapshots playback at the paused handoff`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate(vm => { vm.$refs.player.setCurrentTime(5); vm.$refs.player.play() })
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    await app.electronApp.evaluate((_, outcome) => {
+      globalThis.castTest.startDelayMs = 1800
+      globalThis.castTest.failStart = outcome === 'thrown failure' ? 'throw' : outcome === 'reported failure'
+    }, outcome)
+    await choice(page, 'Test TV')
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
+    const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+    expect(payload.paused).toBe(false)
+    expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    await page.waitForTimeout(500)
+    expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeCloseTo(payload.startSeconds, 1)
+    if (outcome === 'success') {
+      await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+      await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBeCloseTo(payload.startSeconds, 1)
+    } else {
+      await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+      await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+      await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    }
+  })
+}
 
 test('Cast controls fit a narrow window at fractional UI scale and stop on navigation', async ({ app, page }) => {
   await openCastVideo(app, page)

@@ -263,6 +263,11 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Enable Tabs: "Aktiver faner"
+    Thumbnail Swipe Gestures:
+      Left: Sveip til venstre på miniatyrbilder
+      Right: Sveip til høyre på miniatyrbilder
+      Description: Sveip vannrett på et videominiatyrbilde og slipp for å utføre den valgte handlingen.
     Data Saver Thumbnails: "Databesparende miniatyrbilder"
     Use tray icon: "Bruk ikon i systemstatusfeltet"
     Close to system tray: "Lukk til systemstatusfeltet"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Sveip for å oppdatere
     Blur Thumbnails: Gjør miniatyrbilder uskarpe
     Navigation:
-      Show Active Subscriptions: Vis aktive abonnementer
+      Always Show Navigation Bar: Vis alltid navigasjonslinjen når den er nederst
+      Compact Tab Labels: Kompakt navigasjonslinje når den er nederst
+      Show Active Subscriptions: Vis aktive abonnementer i sidepanelet
       Navigation: Navigasjon
       Customize Navigation: Tilpass navigasjon
       Add Item: Legg til element
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: Skriv inn et navn og en gyldig HTTP- eller HTTPS-søke-URL som inneholder %s.
     Engine Limit: Du kan legge til opptil {count} egendefinerte søkemotorer.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minispiller"
     Always Show Mobile Search Bar: "Vis alltid søkefeltet på mobil"
     Frosted Glass Player UI: "Spillergrensesnitt med frostet glass"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Lys"
-      OpenTubeX Dark: "OpenTubeX Mørk"
+      Ocean Light: "Ocean Lys"
+      Ocean Dark: "Ocean Mørk"
       Custom: Egendefinert
     Light Theme: Lyst tema
     Dark Theme: Mørkt tema
@@ -471,6 +479,7 @@ Settings:
       Unable to Delete: Kunne ikke slette det egendefinerte temaet
       Invalid Theme File: Ugyldig fil for egendefinert tema
       Colors:
+        Watched thumbnail overlay: "Overlegg på miniatyrbilder av sette videoer"
         Main text: Hovedtekst
         Secondary text: Sekundærtekst
         Subtle text: Diskré tekst
@@ -621,6 +630,8 @@ Settings:
     Preload Upcoming Videos: "Forhåndslast kommende videoer"
     Upcoming Videos to Preload: "Antall videoer som skal forhåndslastes"
     Concurrent Preloads: "Samtidige forhåndslastinger"
+    Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotasjonslås for fullskjerm
+    Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høyre for å spole i fullskjerm
     Show Google Cast Button: "Vis Google Cast-knapp"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
@@ -658,9 +669,9 @@ Settings:
     Update Managed Tools: Oppdater
     Managed Tools Download Error Template: 'Kunne ikke laste ned de administrerte verktøyene: {errors}'
     Download Folder: Nedlastingsmappe
-    Global Additional yt-dlp Arguments: Globale tilleggsargumenter for yt-dlp
+    Global Additional yt-dlp Arguments: Ekstra yt-dlp-argumenter
     Concurrent Downloads: Samtidige nedlastinger
-    Bandwidth Limit: Båndbreddegrense (KiB/s, 0 for ubegrenset)
+    Bandwidth Limit: Båndbreddegrense (KiB/s)
     Choose Download Folder: Velg nedlastingsmappe
     Download Templates: Nedlastingsmaler
     Manage Download Templates: Administrer nedlastingsmaler ({templateCount})
@@ -733,8 +744,8 @@ Settings:
       Automatic: Oppdater automatisk
       Ask: Spør før oppdatering
       Manual: Oppdater bare manuelt
-    yt-dlp Executable Path: Bane til kjørbar yt-dlp-fil
-    FFmpeg Executable Path: Bane til kjørbar FFmpeg-fil
+    yt-dlp Executable Path: yt-dlp-programfil
+    FFmpeg Executable Path: FFmpeg-programfil
     Restricted Playback Authentication: "yt-dlp-informasjonskapsler"
     Cookie Source: Kilde for informasjonskapsler
     Cookie Sources:
@@ -968,7 +979,7 @@ Settings:
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.
     Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
-    Server URL: Server-URL
+    Server URL: URL til synkroniseringsserver
     Checking Server: Kontrollerer synkroniseringsserveren…
     Server Unavailable: Kan ikke koble til denne synkroniseringsserveren. Kontroller URL-en og prøv på nytt.
     Username: Brukernavn
@@ -1058,7 +1069,7 @@ Settings:
     Open All Tabs Confirmation: "Åpne alle faner?"
     Server Update Required: "Oppdater denne serveren for å støtte kryptert synkronisering i sanntid."
   Proxy Settings:
-    IP Block Recovery Script Path: Bane til skript for gjenoppretting etter IP-blokkering
+    IP Block Recovery Script Path: Skript for gjenoppretting etter IP-blokkering
     Select IP Block Recovery Script File: Velg skriptfil for gjenoppretting etter IP-blokkering
     Running IP block recovery script: Kjører skriptet for gjenoppretting etter IP-blokkering
     IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislyktes (avslutningskode: {exitCode})'
@@ -1070,7 +1081,7 @@ Settings:
       Excluded Channels: "Unntatte kanaler"
       Tooltip: "Skriv inn en kanal-ID for å hindre at SponsorBlock-segmenter hoppes over i kanalens videoer. ID-en må samsvare nøyaktig og skiller mellom store og små bokstaver."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
-    SponsorBlock Private User ID (optional): Privat SponsorBlock-bruker-ID (valgfritt)
+    SponsorBlock Private User ID (optional): Privat bruker-ID (valgfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-bruker-ID-en fra nettleserutvidelsen. La feltet stå tomt for å bruke en ID som programmet oppretter.
     Generated SponsorBlock User ID: Generert SponsorBlock-bruker-ID
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-bruker-ID-en, som programmet har opprettet, kan brukes i nettleserutvidelsen eller hvis du bruker programmet på en annen datamaskin.
@@ -1082,7 +1093,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
-    Return YouTube Dislike Url: API-URL for Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Password Dialog:
     Incorrect Password: Feil passord
     Unlock: Lås opp
@@ -1125,6 +1136,21 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Customization: Tilpasning
+  Manage Profile Subscriptions: Administrer profilens abonnementer
+  Icon Names:
+    Person: Person
+    People: Personer
+    Headphones: Hodetelefoner
+    Gaming: Spill
+    Film: Film
+    Art: Kunst
+    Science: Vitenskap
+    Globe: Globus
+    Heart: Hjerte
+    Sun: Sol
+    Moon: Måne
+    Trophy: Pokal
   Profile Icon: Profilikon
   Choose an Emoji: Velg en emoji
   Custom Emoji: Egendefinert emoji
@@ -1313,12 +1339,16 @@ Video:
     Hide: Skjul
     Show: Vis
     Scroll Mini Player:
+      Collapse Controls: "Skjul kontroller"
+      Expand Controls: "Utvid kontroller"
       Back to Top: Tilbake til toppen
       Return to Video Tab: Gå tilbake til videofanen
       Hide: Skjul minispilleren
       Play: Spill av
       Pause: Sett på pause
       Drag Handle: Flytt minispilleren
+      Rewind 10 seconds: Spol 10 sekunder tilbake
+      Forward 10 seconds: Spol 10 sekunder frem
     SponsorBlock:
       CancelCurrentSegment: Avbryt oppretting av segmentet
       ClearSegments: Fjern segmenter
@@ -1396,6 +1426,10 @@ Video:
       UpvoteSegment: Stem opp
       DownvoteSegment: Stem ned
       VoteFailed: Kunne ikke sende inn SponsorBlock-stemmen.
+      ChangeCategory: Endre kategori
+      CopyAndDownvote: Kopier og stem ned
+      SubmitCategoryVote: Send kategoristemme
+      CategoryVoteSuccess: Kategoristemme sendt.
     Google Cast:
       Cast: "Cast til en Google Cast-enhet"
       Connected: "Caster til {device}"
@@ -1469,6 +1503,7 @@ Share:
   Share failed: "Kunne ikke dele lenken"
   Timestamp Link Copied: Lenken med tidsstempel er kopiert til utklippstavlen
 Context Menu:
+  Open in a Background Tab: "Åpne i en fane i bakgrunnen"
   Select Tab: Velg fane
   Close Tabs Before: Lukk foregående faner
   Close Tabs After: Lukk etterfølgende faner
@@ -1630,6 +1665,7 @@ Description:
   Games: Spill
 Tooltips:
   General Settings:
+    Enable Tabs: "Hvis du slår av dette, lukkes alle andre faner, og den gjeldende siden holdes åpen."
     Data Saver Thumbnails: "Bruk miniatyrbilder med lavere oppløsning for å redusere databruken."
     Use AI Translation Completions: Fyll ut mangler i menneskelige oversettelser med KI-generert tekst. Menneskelige oversettelser prioriteres alltid.
     Update Relative Timestamps: Oppdaterer relative tidsstempler i hele appen mens en side er åpen. Når dette er slått av, oppdateres de først når siden lastes inn på nytt eller åpnes igjen.
@@ -1674,6 +1710,7 @@ Tooltips:
     Preload Upcoming Videos: "Henter og mellomlagrer yt-dlp-adresser for de neste videoene. Køen prioriteres foran spillelister og anbefalinger."
     Upcoming Videos to Preload: "Maksimalt antall kommende videoer som får yt-dlp-adressene hentet i bakgrunnen."
     Concurrent Preloads: "Det høyeste antallet yt-dlp-prosesser som brukes til å forhåndslaste videoer samtidig. Høyere verdier bruker mer prosessorkraft, minne og nettverksbåndbredde."
+    Ignore System Rotation Lock for Fullscreen: Roter enheten fysisk for å åpne og avslutte fullskjerm, selv når automatisk rotasjon er slått av i Android.
   Download Settings:
     Download Folder: Videoer lagres i denne mappen. La feltet stå tomt for å bruke systemets nedlastingsmappe.
     Global Additional yt-dlp Arguments: Ekstra kommandolinjeargumenter som sendes til yt-dlp for hver nedlasting, for eksempel --cookies-from-browser firefox.
@@ -1839,8 +1876,8 @@ Downloads:
   File Name Template: Filnavnmal
   File Name Template Help: 'Tilgjengelige felt: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsområde og kapitler
-  Start Time: Starttid (HH:MM:SS)
-  End Time: Sluttid (HH:MM:SS)
+  Start Time: Starttid
+  End Time: Sluttid
   Split by Chapters: Del i separate filer etter kapittel
   Remove Segments: Fjern segmenter
   Subtitles and Metadata: Undertekster og metadata
@@ -1929,5 +1966,42 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemstatusfeltet"
   Follow App Theme: "Følg appens tema"
+
+Form Inputs:
+  Enter Password Hint: "Skriv inn passordet ditt"
+  Choose Password Hint: "Velg et passord"
+  Confirm Password Hint: "Gjenta det nye passordet ditt"
+  Encryption Passphrase Hint: "Skriv inn krypteringspassfrasen din"
+  Show Password: "Vis passord"
+  Hide Password: "Skjul passord"
+  Search Text Hint: "Skriv inn søkeord"
+  Playlist Description Hint: "Beskriv denne spillelisten"
+  Filename Preview: "Forhåndsvisning av filnavn"
+  Enter Channels: "Skriv inn kanaler"
+  Enter Text: "Skriv inn tekst"
+  Video URL: Video- eller spilleliste-URL
+  Paste Link: Lim inn en lenke til en video eller spilleliste
+  Example: f.eks. {example}
+  No Minimum: Ingen minimumsgrense
+  No Maximum: Ingen maksimumsgrense
+  Any Age: Uansett alder
+  Included Terms Example: f.eks. veiledning, anmeldelse
+  Excluded Terms Example: f.eks. trailer, forhåndsvisning
+  Download Folder Hint: La stå tomt for å bruke Nedlastinger-mappen
+  Global Arguments Hint: Valgfrie argumenter for hver nedlasting
+  Unlimited Hint: 0 for ubegrenset
+  Add Argument: Legg til et argument
+  Template Name Example: f.eks. Bare lyd
+  Download Arguments Hint: Valgfrie argumenter for denne nedlastingen
+  Generated ID Hint: La stå tomt for å generere en ID
+  Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søk med de konfigurerte informasjonskapslene mislyktes."
+
+Storage Startup Error:
+  Title: "Kunne ikke laste appdata"
+  Message: "Frigjør lagringsplass på enheten og prøv igjen. Synkronisering er satt på pause til dataene dine er lastet."
+  Retry: "Prøv igjen"
 Native Permissions:
   Local Network: "Finn enheter på det lokale nettverket og cast videoer til dem, og synkroniser innstillinger og data mellom enheter."

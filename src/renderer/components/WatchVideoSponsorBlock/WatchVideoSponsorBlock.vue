@@ -17,7 +17,7 @@
         <div class="sponsorBlockHeaderActions">
           <button
             type="button"
-            :disabled="offline || loading || (submissionEnabled && contributionStatsLoading)"
+            :disabled="offline || loading || pendingUuid !== null || (submissionEnabled && contributionStatsLoading)"
             :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
             :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
             @click="$emit('refresh')"
@@ -182,6 +182,22 @@
               <ft-icon :icon="['fas', 'thumbs-down']" />
             </button>
             <button
+              v-if="submissionEnabled && SPONSORBLOCK_SUBMISSION_CATEGORIES.includes(segment.category)"
+              type="button"
+              class="sponsorBlockVoteButton"
+              :class="{ active: editingUuid === segment.uuid }"
+              :aria-label="$t('Edit')"
+              :title="$t('Edit')"
+              :aria-expanded="editingUuid === segment.uuid"
+              :disabled="pendingUuid !== null || offline"
+              @click="toggleSegmentEditing(segment.uuid)"
+            >
+              <ft-icon
+                :icon="['fas', 'pencil']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
               v-if="!isSponsorBlockFullVideoSegment(segment)"
               type="button"
               class="sponsorBlockVoteButton sponsorBlockSkipButton"
@@ -196,6 +212,14 @@
               <ft-icon :icon="['fas', segment.actionType === 'mute' ? 'volume-xmark' : 'forward-fast']" />
             </button>
           </div>
+          <SponsorBlockSegmentEditor
+            v-if="editingUuid === segment.uuid && selectedUuid === segment.uuid && submissionEnabled"
+            :segment="segment"
+            :pending="pendingUuid !== null || offline"
+            @category-vote="(uuid, category) => $emit('category-vote', uuid, category)"
+            @copy-and-downvote="$emit('copy-and-downvote', $event)"
+            @resize="scheduleScrollClamp"
+          />
         </div>
       </div>
       <footer
@@ -276,7 +300,9 @@
 <script setup>
 import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import SponsorBlockSegmentEditor from './SponsorBlockSegmentEditor.vue'
 import { isSponsorBlockFullVideoSegment } from '../../helpers/player/sponsorBlockFullVideo'
+import { SPONSORBLOCK_SUBMISSION_CATEGORIES } from '../../helpers/player/sponsorBlockCategories'
 import { formatNumber } from '../../helpers/utils'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
@@ -308,9 +334,10 @@ const props = defineProps({
   submissionEnabled: Boolean
 })
 
-defineEmits(['auto-skip-change', 'channel-whitelist-change', 'close', 'refresh', 'skip', 'vote'])
+defineEmits(['auto-skip-change', 'category-vote', 'channel-whitelist-change', 'close', 'copy-and-downvote', 'refresh', 'skip', 'vote'])
 
 const selectedUuid = ref(null)
+const editingUuid = ref(null)
 const { t } = useI18n()
 const phonePanelHeader = inject('phonePanelHeader', null)
 const contentScroller = useTemplateRef('contentScroller')
@@ -347,6 +374,7 @@ watch(
     props.contributionStatsLoading,
     props.submissionEnabled,
     selectedUuid.value,
+    editingUuid.value,
   ],
   scheduleScrollClamp
 )
@@ -379,7 +407,12 @@ function formatMinutesSaved(minutes) {
 }
 
 function selectSegment(uuid) {
+  editingUuid.value = null
   selectedUuid.value = selectedUuid.value === uuid ? null : uuid
+}
+
+function toggleSegmentEditing(uuid) {
+  editingUuid.value = editingUuid.value === uuid ? null : uuid
 }
 
 function isSegmentPassed(segment) {
@@ -404,7 +437,7 @@ function isSegmentPassed(segment) {
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
@@ -552,6 +585,10 @@ function isSegmentPassed(segment) {
 
 .sponsorBlockSegment {
   border-radius: calc(6px * var(--ui-roundness));
+}
+
+.sponsorBlockSegment:has(.sponsorBlockEditActions) {
+  padding-block-end: 8px;
 }
 
 .sponsorBlockSegment:hover,

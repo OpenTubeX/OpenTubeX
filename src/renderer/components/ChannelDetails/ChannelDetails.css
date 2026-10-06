@@ -15,14 +15,18 @@
 }
 
 .infoContainer {
+  --channel-header-gap: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--channel-header-gap);
   position: relative;
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: 0 0 calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness));
-  margin-block-start: 10px;
-  padding-block: 0;
+  padding-block: var(--channel-header-gap);
   padding-inline: 16px;
 }
 
@@ -31,10 +35,7 @@
   flex-flow: row wrap;
   inline-size: 100%;
   justify-content: space-between;
-}
-
-.infoHasError {
-  padding-block-end: 10px;
+  gap: var(--channel-header-gap);
 }
 
 .thumbnail {
@@ -46,6 +47,12 @@
 
 .ft-icon.thumbnail {
   font-size: 100px;
+}
+
+.thumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
 }
 
 .name {
@@ -67,17 +74,32 @@
   align-items: center;
 }
 
+.infoActionsContainer:empty {
+  display: none;
+}
+
 .shareIcon {
   align-self: center;
 }
 
+.infoActionsContainer :deep(.buttonList) {
+  margin-block: 0;
+}
+
 .channelSearch {
-  margin-block-start: 10px;
   max-inline-size: 250px;
   inline-size: 220px;
   margin-inline-start: auto;
   align-self: flex-end;
   flex: 1 1 0%;
+}
+
+.channelSearch :deep(.inputWrapper) {
+  margin-block-end: 0;
+}
+
+.channelSearchToggle {
+  display: none;
 }
 
 .infoTabs {
@@ -86,35 +108,99 @@
   block-size: auto;
   justify-content: unset;
   gap: 32px;
-  padding-block: 0.3em;
+  padding-block: 0;
   padding-inline: 0;
   flex-wrap: nowrap;
 }
 
 .tabs {
+  position: relative;
   display: flex;
-  flex: 0 1 66%;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex: 1 1 66%;
+  min-inline-size: 0;
+  overflow: auto hidden;
+}
+
+.tabsContent {
+  position: relative;
+  display: flex;
+  flex: none;
+  inline-size: max-content;
+  min-inline-size: 100%;
+}
+
+.tabsIndicator {
+  position: absolute;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  top: 0;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  left: 0;
+  block-size: 3px;
+
+  /* A wider base avoids magnifying subpixel rounding at fractional UI scales. */
+  inline-size: 100px;
+  border-radius: calc(1.5px * var(--ui-roundness) / var(--tab-indicator-scale)) / calc(1.5px * var(--ui-roundness));
+  background-color: var(--primary-color);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.2s ease;
+  will-change: transform;
 }
 
 .tab {
-  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  flex: none;
+  gap: 6px;
+  padding-block: 15px;
+  padding-inline: 15px;
   font-size: 15px;
   cursor: pointer;
   align-self: flex-end;
   text-align: center;
+  white-space: nowrap;
   color: var(--tertiary-text-color);
   border-block-end: 3px solid transparent;
+}
+
+.channelTabIcon {
+  flex: none;
+  font-size: 16px;
+}
+
+.hideTabIcons .channelTabIcon {
+  display: none;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -3px;
+  block-size: 3px;
+  border-radius: calc(1.5px * var(--ui-roundness));
+  background-color: transparent;
 }
 
 .tab:focus-visible,
 .tab:hover:not(.selectedTab) {
   font-weight: bold;
-  border-block-end: 3px solid var(--border-color);
+}
+
+.tab:focus-visible:not(.selectedTab)::before,
+.tab:hover:not(.selectedTab)::before {
+  background-color: var(--border-color);
 }
 
 .tabLabel {
   display: inline-grid;
+  white-space: nowrap;
 }
 
 .tabLabel::after {
@@ -130,9 +216,7 @@
 
 .selectedTab {
   color: var(--primary-text-color);
-  border-block-end: 3px solid var(--primary-color);
   font-weight: bold;
-  box-sizing: border-box;
 }
 
 .thumbnailContainer {
@@ -154,13 +238,25 @@
 @media only screen and (width <=800px) {
   .infoTabs {
     block-size: auto;
-    flex-flow: column-reverse;
-    gap: 0;
+    flex-flow: row wrap;
+    gap: var(--channel-header-gap);
   }
 
   .channelSearch {
+    flex-basis: 100%;
+    order: -1;
     inline-size: 100%;
     max-inline-size: none;
+  }
+
+  .channelSearch:not(.expanded) {
+    display: none;
+  }
+
+  .channelSearchToggle {
+    display: block;
+    flex: none;
+    align-self: center;
   }
 
   .tabs {
@@ -168,28 +264,35 @@
   }
 
   .tab {
-    flex: 1 1 0%;
+    flex: 1 0 auto;
+    min-block-size: 48px;
+    padding-block: 4px;
+    padding-inline: 4px;
+    font-size: 0.9em;
   }
 }
 
 @media only screen and (width <=680px) {
   .info {
     flex-direction: column;
-    margin-block: 20px 10px;
   }
 
   .infoActionsContainer {
     flex-direction: row-reverse;
     justify-content: left;
     gap: 10px;
-    margin-block-start: 5px;
+  }
+}
+
+@media only screen and (300px < width <=680px) {
+  .infoActionsContainer:has(> .shareIcon):has(> .ftSubscribeButton) {
+    justify-content: space-between;
   }
 }
 
 @media only screen and (width <=400px) {
   .info {
     justify-content: center;
-    gap: 10px;
   }
 
   .infoActionsContainer {

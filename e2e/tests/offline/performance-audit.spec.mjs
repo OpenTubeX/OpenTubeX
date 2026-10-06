@@ -1,11 +1,162 @@
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { IpcChannels } from '../../../src/constants.js'
 
 test.use({
-  seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } },
+  seed: {
+    settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true },
+    history: [{
+      _id: 'jNQXAC9IVRw',
+      videoId: 'jNQXAC9IVRw',
+      title: 'Progress animation fixture',
+      author: 'Test channel',
+      lengthSeconds: 60,
+      timeWatched: 1000,
+      watchProgress: 0,
+      type: 'video',
+    }],
+  },
 })
+
+for (const zoom of [1, 0.95]) {
+  test(`download progress animates without changing layout width at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await goTo(page, 'downloads')
+    const setProgress = percent => page.evaluate(percent => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', { id: 42, videoId: 'jNQXAC9IVRw', title: 'Progress animation fixture', status: 'downloading', percent, mode: 'video' })
+    }, percent)
+    await setProgress(10)
+    const row = page.locator('.downloadRow').filter({ hasText: 'Progress animation fixture' })
+    const fill = row.locator('.progressFill')
+    const track = row.locator('.progressTrack')
+    const layoutWidth = await track.evaluate(element => element.clientWidth)
+    await expect.poll(() => fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+    for (const direction of ['ltr', 'rtl']) {
+      await row.evaluate((element, direction) => { element.dir = direction }, direction)
+      await setProgress(90)
+      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.9, 2)
+      expect(await fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+      const bounds = await fill.boundingBox()
+      const parent = await track.boundingBox()
+      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+      await setProgress(0)
+      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width)).toBe(0)
+    }
+    await page.getByRole('dialog', { name: 'Downloads', exact: true }).press('Escape')
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Download Video', exact: true }).click()
+    const prompt = page.locator('.activeDownloadCard')
+    const promptFill = prompt.locator('.downloadProgressBarFill')
+    const promptTrack = prompt.locator('.downloadProgressBarTrack')
+    const promptLayoutWidth = await promptTrack.evaluate(element => element.clientWidth)
+    for (const direction of ['ltr', 'rtl']) {
+      await prompt.evaluate((element, direction) => { element.dir = direction }, direction)
+      await setProgress(50)
+      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.5, 2)
+      expect(await promptFill.evaluate(element => element.clientWidth)).toBe(promptLayoutWidth)
+      const bounds = await promptFill.boundingBox()
+      const parent = await promptTrack.boundingBox()
+      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+      await setProgress(142)
+      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(1, 2)
+    }
+  })
+
+  test(`color picker batches theme previews and preserves release position at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
+    const surface = page.locator('.colorPickerPopover .saturationValue')
+    await expect(surface).toBeVisible()
+    const metrics = await surface.evaluate(async element => {
+      const original = element.getBoundingClientRect
+      const bounds = original.call(element)
+      let reads = 0
+      element.getBoundingClientRect = function () { reads++; return original.call(this) }
+      const pointer = (type, x, y, pointerId = 7) => new PointerEvent(type, {
+        bubbles: true, button: 0, pointerId, clientX: x, clientY: y
+      })
+      try {
+        element.dispatchEvent(pointer('pointerdown', bounds.left + 1, bounds.top + 1))
+        reads = 0
+        for (let index = 0; index < 50; index++) {
+          window.dispatchEvent(pointer('pointermove', bounds.left + bounds.width * index / 100, bounds.top + 10))
+        }
+        element.dispatchEvent(pointer('pointerdown', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointermove', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointerup', bounds.right, bounds.bottom, 8))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const burstReads = reads
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(pointer('pointerup', bounds.right + 1, bounds.top + bounds.height / 2))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const releaseValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(pointer('pointercancel', 0, 0))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const cancelReads = reads
+        const cancelValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(new Event('blur'))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        return { burstReads, releaseValue, cancelReads, cancelValue, blurReads: reads, blurValue: element.getAttribute('aria-valuetext') }
+      } finally {
+        element.getBoundingClientRect = original
+      }
+    })
+    console.log('Rendered color picker pointer work:', metrics)
+    expect.soft(metrics.burstReads).toBe(1)
+    expect(metrics.releaseValue).toBe('100%, 50%')
+    expect(metrics.cancelReads).toBe(0)
+    expect(metrics.cancelValue).toBe('100%, 50%')
+    expect(metrics.blurReads).toBe(0)
+    expect(metrics.blurValue).toBe('100%, 50%')
+    await surface.press('ArrowUp')
+    await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
+    await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
+    await expect(surface).toHaveCount(0)
+  })
+
+  test(`select focus underline animates with transforms at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(async zoom => {
+      window.ftElectron.setZoomFactor(zoom)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateReducedMotion', 'off')
+    }, zoom)
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const select = appearance.locator('.select').first()
+    // Exercise the supported filled variant, including its focus underline.
+    await select.evaluate(element => { element.classList.remove('outlined') })
+    const button = select.locator('.select-text')
+    await button.focus()
+    const result = await select.locator('.select-bar').evaluate(element => {
+      const before = getComputedStyle(element, '::before')
+      const after = getComputedStyle(element, '::after')
+      return { before: before.transitionProperty, after: after.transitionProperty }
+    })
+    expect(result).toEqual({ before: 'transform', after: 'transform' })
+    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+      getComputedStyle(element, '::before').transform
+    ))).toBe('matrix(1, 0, 0, 1, 0, 0)')
+    await button.evaluate(element => element.blur())
+    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+      getComputedStyle(element, '::before').transform
+    ))).toBe('matrix(0, 0, 0, 1, 0, 0)')
+  })
+}
 
 test.describe('large bookmark playlist', () => {
   test.use({
@@ -93,6 +244,74 @@ test.describe('large bookmark playlist', () => {
   })
 })
 
+test('player visibility and playback changes avoid repeated layout work', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const controls = page.locator('.ftVideoPlayer .shaka-controls-container')
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await page.waitForTimeout(1000)
+
+  const session = await page.context().newCDPSession(page)
+  await session.send('Performance.enable')
+  await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+  await page.evaluate(() => {
+    const original = window.getComputedStyle
+    window.__playerLayoutReads = 0
+    window.getComputedStyle = function (element, pseudo) {
+      if (element.parentElement?.matches('.shaka-controls-button-panel')) window.__playerLayoutReads++
+      return original.call(this, element, pseudo)
+    }
+  })
+
+  const metrics = async () => Object.fromEntries((await session.send('Performance.getMetrics')).metrics.map(metric => [metric.name, metric.value]))
+  const before = await metrics()
+  const fadeTransitions = []
+  for (const shown of [false, true]) {
+    await controls.evaluate((element, shown) => {
+      if (shown) element.setAttribute('shown', 'true')
+      else element.removeAttribute('shown')
+    }, shown)
+    fadeTransitions.push(...await controls.evaluate(element => (
+      element.querySelector('.shaka-controls-button-panel').getAnimations().map(animation => animation.transitionProperty)
+    )))
+    await page.waitForTimeout(750)
+  }
+  const after = await metrics()
+  const visibility = {
+    styleRecalculations: after.RecalcStyleCount - before.RecalcStyleCount,
+    styleMilliseconds: (after.RecalcStyleDuration - before.RecalcStyleDuration) * 1000,
+    layoutReads: await page.evaluate(() => window.__playerLayoutReads),
+  }
+
+  const playback = await page.evaluate(async () => {
+    const video = document.querySelector('.ftVideoPlayer video')
+    const button = document.querySelector('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+    window.__playerLayoutReads = 0
+    const toggles = []
+    for (let index = 0; index < 4; index++) {
+      document.querySelector('.ftVideoPlayer .shaka-controls-container').setAttribute('shown', 'true')
+      const wasPaused = video.paused
+      button.click()
+      toggles.push(video.paused !== wasPaused)
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+    return { paused: video.paused, layoutReads: window.__playerLayoutReads, toggles }
+  })
+  await session.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+  await testInfo.attach('player interaction work at 6x CPU slowdown', {
+    body: JSON.stringify({ visibility, playback }), contentType: 'application/json',
+  })
+  console.log('Player interaction work at 6x CPU slowdown:', { visibility, playback })
+  // Keep timings diagnostic: machine load must not turn this into a CI flake.
+  // Animating the inherited fade value forces descendant styles every frame.
+  expect.soft(fadeTransitions).not.toContain('--ft-controls-fade')
+  expect.soft(visibility.layoutReads).toBe(0)
+  expect(playback.paused).toBe(true)
+  expect(playback.toggles).toEqual([true, true, true, true])
+  expect(playback.layoutReads).toBe(0)
+})
+
 test('default-speed button transitions do not query animations in JavaScript', async ({ page }) => {
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -114,6 +333,35 @@ test('default-speed button transitions do not query animations in JavaScript', a
   const metrics = await page.evaluate(() => window.__buttonAnimationWork)
   console.log('Default-speed button animation work:', metrics)
   expect(metrics.queries).toBe(0)
+})
+
+test('hidden player menus do not measure labels after playback option changes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.waitForTimeout(1000)
+  const measurements = await page.evaluate(async () => {
+    const menu = document.querySelector('.ftVideoPlayer .shaka-overflow-menu')
+    const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')
+    let reads = 0
+    Object.defineProperty(Element.prototype, 'clientWidth', {
+      ...descriptor,
+      get() {
+        if (menu.contains(this)) reads++
+        return descriptor.get.call(this)
+      },
+    })
+    try {
+      const video = document.querySelector('.ftVideoPlayer video')
+      video.loop = !video.loop
+      await new Promise(resolve => setTimeout(resolve, 300))
+      return reads
+    } finally {
+      Object.defineProperty(Element.prototype, 'clientWidth', descriptor)
+    }
+  })
+  console.log('Hidden player menu label measurements:', measurements)
+  expect(measurements).toBe(0)
 })
 
 test.describe('history progress direction', () => {

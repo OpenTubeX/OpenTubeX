@@ -16,3 +16,17 @@ export function downloadWatchRoute(download, videoId) {
 
   return { path: `/watch/${videoId}`, query }
 }
+
+export function downloadQueueVideos(download) {
+  return (download.files ?? [])
+    .filter(file => file.videoId && isPlayableDownloadFile(file))
+    .map(file => ({
+      videoId: file.videoId,
+      title: file.title || (download.videoId === file.videoId ? download.title : '') ||
+        file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId,
+      author: file.author || download.author || '',
+      authorId: file.authorId || download.authorId || '',
+      thumbnail: download.thumbnail,
+      route: downloadWatchRoute(download, file.videoId)
+    }))
+}

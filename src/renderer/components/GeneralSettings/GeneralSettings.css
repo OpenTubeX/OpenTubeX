@@ -1,59 +1,66 @@
 .generalSelectGrid.generalSelectGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  justify-content: stretch;
-  column-gap: 40px;
-  inline-size: min(100%, 700px);
+  grid-template-columns: repeat(2, minmax(0, max-content) max-content);
+  justify-content: center;
+  column-gap: 0;
+  inline-size: min(100%, 1000px);
   margin-inline: auto;
 }
 
-.generalSelectGrid :deep(.select) {
+.generalSelectGrid :deep(.select:nth-child(odd)) {
+  margin-inline-end: 40px;
+}
+
+.generalSelectGrid :deep(.select.contentSized) {
+  grid-column: span 2;
+  grid-template-columns: subgrid;
+  inline-size: auto;
   min-inline-size: 0;
-  inline-size: 100%;
+  max-inline-size: 100%;
+  justify-self: stretch;
   box-sizing: border-box;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip) {
-  --general-select-indicator-space: 40px;
-
-  margin-inline-end: 0;
+/* Reserve the same marker gutter even when highlighting is switched off. */
+:where(.generalSelectGrid) :deep(.select) {
+  padding-inline-start: 12px;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip:has(
-  .syncedSettingIndicator,
-  .changedSettingIndicator
-)) {
-  --general-select-indicator-space: 74px;
+.generalSelectGrid :deep(.select-text) {
+  min-inline-size: 200px;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip:has(
-  .syncedSettingIndicator
-):has(
-  .changedSettingIndicator
-)) {
-  --general-select-indicator-space: 84px;
+.generalSelectGrid :deep(.selectIndicators) {
+  grid-area: 1 / 2;
+  position: relative;
+  inset: auto;
+  transform: none;
+  align-self: center;
+  box-sizing: border-box;
+  inline-size: var(--select-indicator-space);
 }
 
-.generalSelectGrid :deep(.select.containsTooltip .select-text),
-.generalSelectGrid :deep(.select.containsTooltip .nativeSelect),
-.generalSelectGrid :deep(.select.containsTooltip .select-bar) {
-  inline-size: calc(100% - var(--general-select-indicator-space));
+.generalSelectGrid :deep(.selectIndicators:not(:empty)) {
+  inline-size: calc(var(--select-indicator-space) - 8px);
+  margin-inline-start: 8px;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip .iconSelect) {
-  inset-inline-end: calc(var(--general-select-indicator-space) + 10px);
+.generalSelectGrid :deep(.select-label) {
+  column-gap: 4px;
+  max-inline-size: calc(100% - 24px);
+  margin-inline-end: 24px;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip .selectIndicators) {
-  inset-inline: auto 8px;
+.generalSelectGrid :deep(.iconSelect),
+.generalSelectGrid :deep(.selectSearchHighlightFrame) {
+  grid-area: 1 / 1 / 2 / 2;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip .changedSettingIndicatorPlaceholder) {
-  display: none;
+.generalSelectGrid :deep(.iconSelect) {
+  inset-inline-end: 10px;
 }
 
 .switchGrid {
-  gap: 10px;
-  margin-block-end: 12px;
+  row-gap: 0;
 }
 
 .appearanceSwitchGrid.appearanceSwitchGrid {
@@ -61,10 +68,15 @@
   justify-content: center;
 }
 
-@container settings-content (width <= 680px) {
+@container settings-content (width <= 800px) {
   .generalSelectGrid.generalSelectGrid {
-    grid-template-columns: minmax(0, 1fr);
-    inline-size: min(100%, 330px);
+    grid-template-columns: minmax(0, max-content) max-content;
+    justify-content: center;
+    inline-size: min(100%, 500px);
+  }
+
+  .generalSelectGrid :deep(.select:nth-child(odd)) {
+    margin-inline-end: 0;
   }
 }
 

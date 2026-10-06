@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: 회원 전용
 Search Filters:
+  Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순
@@ -351,6 +352,11 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Enable Tabs: "탭 활성화"
+    Thumbnail Swipe Gestures:
+      Left: 썸네일에서 왼쪽으로 스와이프
+      Right: 썸네일에서 오른쪽으로 스와이프
+      Description: 동영상 썸네일을 가로로 스와이프한 후 손을 떼면 선택한 작업이 실행됩니다.
     Data Saver Thumbnails: "데이터 절약 썸네일"
     Use tray icon: "트레이 아이콘 사용"
     Close to system tray: "닫을 때 시스템 트레이로 보내기"
@@ -359,7 +365,9 @@ Settings:
     Swipe to refresh: 스와이프하여 새로고침
     Blur Thumbnails: 썸네일 흐리게 표시
     Navigation:
-      Show Active Subscriptions: 활성 구독 표시
+      Always Show Navigation Bar: 탐색 막대가 하단에 있을 때 항상 표시
+      Compact Tab Labels: 탐색 막대가 하단에 있을 때 간소화
+      Show Active Subscriptions: 사이드바에 활성 구독 표시
       Navigation: 탐색
       Customize Navigation: 탐색 맞춤 설정
       Add Item: 항목 추가
@@ -449,6 +457,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
     Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
     Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
     Move Downloads to App Header: 다운로드를 앱 헤더로 이동
@@ -516,8 +525,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 밝은 테마"
-      OpenTubeX Dark: "OpenTubeX 어두운 테마"
+      Ocean Light: "Ocean 밝은 테마"
+      Ocean Dark: "Ocean 어두운 테마"
       Custom: 사용자 지정
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -567,6 +576,7 @@ Settings:
       Unable to Delete: 사용자 지정 테마를 삭제할 수 없습니다
       Invalid Theme File: 올바르지 않은 사용자 지정 테마 파일
       Colors:
+        Watched thumbnail overlay: "시청한 동영상 썸네일 오버레이"
         Main text: 기본 텍스트
         Secondary text: 보조 텍스트
         Subtle text: 흐린 텍스트
@@ -795,6 +805,8 @@ Settings:
     Preload Upcoming Videos: "다음 동영상 미리 불러오기"
     Upcoming Videos to Preload: "미리 불러올 동영상 수"
     Concurrent Preloads: "동시 미리 로드 수"
+    Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
+    Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
     Show Google Cast Button: "Google Cast 버튼 표시"
   Channel Settings:
     Channel Settings: 채널 설정
@@ -834,9 +846,9 @@ Settings:
     Update Managed Tools: 업데이트
     Managed Tools Download Error Template: '관리되는 도구를 다운로드할 수 없습니다: {errors}'
     Download Folder: 다운로드 폴더
-    Global Additional yt-dlp Arguments: 전역 추가 yt-dlp 인수
+    Global Additional yt-dlp Arguments: 추가 yt-dlp 인수
     Concurrent Downloads: 동시 다운로드 수
-    Bandwidth Limit: 대역폭 제한 (KiB/s, 0은 무제한)
+    Bandwidth Limit: 대역폭 제한 (KiB/s)
     Choose Download Folder: 다운로드 폴더 선택
     Download Templates: 다운로드 템플릿
     Manage Download Templates: '다운로드 템플릿 관리 ({templateCount})'
@@ -909,8 +921,8 @@ Settings:
       Automatic: 자동 업데이트
       Ask: 업데이트 전 확인
       Manual: 수동으로만 업데이트
-    yt-dlp Executable Path: yt-dlp 실행 파일 경로
-    FFmpeg Executable Path: FFmpeg 실행 파일 경로
+    yt-dlp Executable Path: yt-dlp 실행 파일
+    FFmpeg Executable Path: FFmpeg 실행 파일
     Restricted Playback Authentication: "yt-dlp 쿠키"
     Cookie Source: 쿠키 소스
     Cookie Sources:
@@ -1201,7 +1213,7 @@ Settings:
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
     Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.
     Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
-    Server URL: 서버 URL
+    Server URL: 동기화 서버 URL
     Checking Server: 동기화 서버 확인 중…
     Server Unavailable: 이 동기화 서버에 연결할 수 없습니다. URL을 확인하고 다시 시도하세요.
     Username: 사용자 이름
@@ -1294,7 +1306,7 @@ Settings:
     Proxy Warning: OpenTubeX에는 내장 프록시가 없지만 기기에서 실행 중인 Tor나 일부 VPN에서 제공하는 SOCKS5 프록시 같은 외부 프록시에 연결할 수 있습니다. 활성화한 경우 프록시 또는 Tor를 올바르게 설정해야 합니다. 그렇지 않으면 OpenTubeX에서 데이터를 가져올 수 없습니다.
     Proxy Username: 프록시 사용자 이름
     Proxy Password: 프록시 비밀번호
-    IP Block Recovery Script Path: IP 차단 복구 스크립트 경로
+    IP Block Recovery Script Path: IP 차단 복구 스크립트
     Select IP Block Recovery Script File: IP 차단 복구 스크립트 파일 선택
     Running IP block recovery script: IP 차단 복구 스크립트 실행 중
     IP block recovery script failed: 'IP 차단 복구 스크립트 실패 (종료 코드: {exitCode})'
@@ -1306,7 +1318,7 @@ Settings:
       Excluded Channels: "제외된 채널"
       Tooltip: "해당 채널의 동영상에서 SponsorBlock 구간을 건너뛰지 않으려면 채널 ID를 입력하세요. ID는 대소문자를 구분하여 정확히 일치해야 합니다."
     Enable SponsorBlock Submission: SponsorBlock 제출 활성화
-    SponsorBlock Private User ID (optional): SponsorBlock 비공개 사용자 ID (선택 사항)
+    SponsorBlock Private User ID (optional): 비공개 사용자 ID (선택 사항)
     SponsorBlock Private User ID Tooltip: 브라우저 확장 프로그램의 비공개 SponsorBlock 사용자 ID를 붙여 넣으세요. 앱에서 생성한 ID를 사용하려면 비워 두세요.
     Generated SponsorBlock User ID: 생성된 SponsorBlock 사용자 ID
     Generated SponsorBlock User ID Tooltip: 앱에서 생성한 SponsorBlock 사용자 ID를 브라우저 확장 프로그램이나 다른 컴퓨터의 앱에서 사용할 수 있습니다.
@@ -1316,12 +1328,12 @@ Settings:
     Skip notification timeout: 건너뛰기 알림 표시 시간
     UseDeArrowTitles: DeArrow 동영상 제목 사용
     UseDeArrowThumbnails: 썸네일에 DeArrow 사용
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 생성기 API URL (기본값 https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 API URL
     Custom Color: 사용자 지정 색상
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike 활성화
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (기본값 https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Hide Uploader on Watch page: 시청 페이지에서 업로더 숨기기
     Disable Channel Links: 채널 링크 비활성화
@@ -1372,6 +1384,21 @@ About:
   Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
 Profile:
+  Customization: 맞춤 설정
+  Manage Profile Subscriptions: 프로필 구독 관리
+  Icon Names:
+    Person: 사람
+    People: 사람들
+    Headphones: 헤드폰
+    Gaming: 게임
+    Film: 영화
+    Art: 예술
+    Science: 과학
+    Globe: 지구본
+    Heart: 하트
+    Sun: 태양
+    Moon: 달
+    Trophy: 트로피
   Toggle Profile List: 프로필 목록 전환
   Edit Profile Name: 프로필 이름 편집
   Create Profile Name: 프로필 이름 만들기
@@ -1641,12 +1668,16 @@ Video:
     You appear to be offline: 오프라인 상태인 것 같습니다.
     Playback will resume automatically when your connection comes back: 연결이 복구되면 자동으로 재생을 계속합니다.
     Scroll Mini Player:
+      Collapse Controls: "컨트롤 접기"
+      Expand Controls: "컨트롤 펼치기"
       Back to Top: 맨 위로
       Return to Video Tab: 동영상 탭으로 돌아가기
       Hide: 미니 플레이어 숨기기
       Play: 재생
       Pause: 일시 정지
       Drag Handle: 미니 플레이어 이동
+      Rewind 10 seconds: 10초 뒤로
+      Forward 10 seconds: 10초 앞으로
     Skipped segment: '{segmentCategory} 건너뜀'
     SponsorBlock:
       CancelCurrentSegment: 구간 만들기 취소
@@ -1725,6 +1756,10 @@ Video:
       UpvoteSegment: 추천
       DownvoteSegment: 비추천
       VoteFailed: SponsorBlock 투표를 제출하지 못했습니다.
+      ChangeCategory: 카테고리 변경
+      CopyAndDownvote: 복사 및 반대 투표
+      SubmitCategoryVote: 카테고리 투표 제출
+      CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
     Google Cast:
       Cast: "Google Cast 기기로 전송"
       Connected: "{device}(으)로 전송 중"
@@ -1815,6 +1850,7 @@ Share:
   Share Post: 게시물 공유
   Timestamp Link Copied: 타임스탬프 링크를 클립보드에 복사했습니다
 Context Menu:
+  Open in a Background Tab: "백그라운드 탭에서 열기"
   Select Tab: 탭 선택
   Close Tabs Before: 이전 탭 닫기
   Close Tabs After: 이후 탭 닫기
@@ -1984,6 +2020,7 @@ Description:
   Games: 게임
 Tooltips:
   General Settings:
+    Enable Tabs: "이 옵션을 끄면 다른 모든 탭이 닫히고 현재 페이지는 열린 상태로 유지됩니다."
     Data Saver Thumbnails: "낮은 해상도의 썸네일을 사용하여 데이터 사용량을 줄입니다."
     Use AI Translation Completions: 사람이 번역하지 않은 부분을 AI 생성 텍스트로 채웁니다. 사람의 번역을 항상 우선합니다.
     Update Relative Timestamps: 페이지가 열려 있는 동안 앱 전체의 상대 시간 표시를 업데이트합니다. 비활성화하면 페이지를 다시 불러오거나 다시 방문할 때만 업데이트합니다.
@@ -2029,6 +2066,7 @@ Tooltips:
     Preload Upcoming Videos: "다음에 재생할 동영상의 yt-dlp URL을 가져와 캐시합니다. 대기열이 재생목록과 추천보다 우선합니다."
     Upcoming Videos to Preload: "백그라운드에서 yt-dlp URL을 가져올 다음 동영상의 최대 개수입니다."
     Concurrent Preloads: "동시에 동영상을 미리 로드하는 데 사용할 yt-dlp 프로세스의 최대 개수입니다. 값이 높을수록 CPU, 메모리 및 네트워크 대역폭을 더 많이 사용합니다."
+    Ignore System Rotation Lock for Fullscreen: Android 자동 회전이 꺼져 있어도 기기를 직접 회전하여 전체 화면으로 전환하거나 종료합니다.
   External Player Settings:
     Ignore Default Arguments: 동영상 URL 외의 기본 인수를 외부 플레이어에 보내지 않습니다. 예를 들어 재생 속도와 재생목록 URL이 해당됩니다. 사용자 지정 인수는 계속 전달됩니다.
   Download Settings:
@@ -2270,8 +2308,8 @@ Downloads:
   File Name Template: 파일 이름 템플릿
   File Name Template Help: '사용 가능한 필드: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: 시간 범위 및 챕터
-  Start Time: 시작 시간 (HH:MM:SS)
-  End Time: 종료 시간 (HH:MM:SS)
+  Start Time: 시작 시간
+  End Time: 종료 시간
   Split by Chapters: 챕터별로 별도 파일로 분할
   Remove Segments: 구간 제거
   Subtitles and Metadata: 자막 및 메타데이터
@@ -2360,5 +2398,39 @@ Tray:
 Tray Icon:
   Title: "트레이 아이콘"
   Follow App Theme: "앱 테마 따르기"
+
+Form Inputs:
+  Enter Password Hint: "비밀번호를 입력하세요"
+  Choose Password Hint: "비밀번호를 설정하세요"
+  Confirm Password Hint: "새 비밀번호를 다시 입력하세요"
+  Encryption Passphrase Hint: "암호화 암호문을 입력하세요"
+  Show Password: "비밀번호 표시"
+  Hide Password: "비밀번호 숨기기"
+  Search Text Hint: "검색어 입력"
+  Playlist Description Hint: "이 재생목록을 설명하세요"
+  Filename Preview: "파일 이름 미리보기"
+  Enter Channels: "채널 입력"
+  Enter Text: "텍스트 입력"
+  Video URL: 동영상 또는 재생목록 URL
+  Paste Link: 동영상 또는 재생목록 링크 붙여넣기
+  Example: "예: {example}"
+  No Minimum: 최솟값 없음
+  No Maximum: 최댓값 없음
+  Any Age: 게시 시기 무관
+  Included Terms Example: "예: 튜토리얼, 리뷰"
+  Excluded Terms Example: "예: 예고편, 미리보기"
+  Download Folder Hint: 비워 두면 다운로드 폴더 사용
+  Global Arguments Hint: 모든 다운로드에 사용할 선택적 인수
+  Unlimited Hint: 0은 무제한
+  Add Argument: 인수 추가
+  Template Name Example: "예: 오디오만"
+  Download Arguments Hint: 이 다운로드에 사용할 선택적 인수
+  Generated ID Hint: 비워 두면 ID 생성
+  Default Value: "기본값: {value}"
+
+Storage Startup Error:
+  Title: "앱 데이터를 불러올 수 없습니다"
+  Message: "기기의 저장 공간을 확보한 후 다시 시도하세요. 데이터를 불러올 때까지 동기화가 일시 중지됩니다."
+  Retry: "다시 시도"
 Native Permissions:
   Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."

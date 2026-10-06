@@ -12,15 +12,27 @@ const GLITCH_CHANNEL_URL = 'https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-m
 test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
-  test('loads the GLITCH channel home and playlists tabs', async ({ page }) => {
+  test('loads the GLITCH channel home and playlists tabs', async ({ app, page }) => {
     await page.locator(sel.searchInput).fill(GLITCH_CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
 
     await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
     await page.getByRole('tab', { name: 'Home' }).click()
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.channelDetails .tabsIndicator')).toBeVisible()
+
+    for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+        BrowserWindow.getAllWindows()[0].setSize(width, height)
+      }, { width, height })
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
+        return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+      }), { message: `20px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(20)
+    }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
+    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'transform')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -35,7 +47,13 @@ test.describe('channel page', () => {
     await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
   })
 
-  test('shows channel info and videos', async ({ page }) => {
+  test('shows channel info and videos', async ({ page }, testInfo) => {
+    const pendingLinkIcons = []
+    let failLinkIcons = false
+    await page.route('https://encrypted-tbn2.gstatic.com/favicon-tbn**', route => {
+      if (failLinkIcons) return route.abort()
+      pendingLinkIcons.push(route)
+    })
     let releaseVideos
     const heldVideos = new Promise(resolve => { releaseVideos = resolve })
     let videosRequested = false
@@ -73,6 +91,19 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect.poll(() => page.locator('.channelDetails .tabsIndicator').evaluate(element => {
+        const style = getComputedStyle(element)
+        const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
+        return {
+          horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
+          vertical
+        }
+      })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+    }
 
     await page.locator('body').evaluate(element => {
       element.style.fontFamily = 'Arial, sans-serif'
@@ -83,6 +114,20 @@ test.describe('channel page', () => {
     const widthBeforeHover = (await aboutTab.boundingBox()).width
     await aboutTab.hover()
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
+
+    const selectedTab = page.locator('.channelDetails .selectedTab')
+    const selectedIndicator = page.locator('.channelDetails .tabsIndicator')
+    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element).backgroundColor)
+    const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
+    await page.keyboard.press('Tab')
+    await selectedTab.focus()
+    await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect(selectedIndicator).toHaveCSS('background-color', selectedIndicatorColor)
+    await page.mouse.move(0, 0)
+    await aboutTab.focus()
+    await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(() => aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(unselectedIndicatorColor)
 
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).
@@ -148,6 +193,18 @@ test.describe('channel page', () => {
     await expect(websiteLink).toHaveAttribute('href', 'https://www.blender.org/')
     await expect(aboutPanel.locator('.aboutLinks a')).toHaveCount(8)
     await expect(aboutPanel.locator('.aboutLinkIcon')).toHaveCount(8)
+    await expect.poll(() => pendingLinkIcons.length).toBeGreaterThan(0)
+    const linkIcon = websiteLink.locator('.aboutLinkIcon')
+    await expect(linkIcon.locator('img')).toBeHidden()
+    await expect(linkIcon.locator('.retryImagePlaceholder[data-icon="link"]')).toBeVisible()
+    const iconBounds = await linkIcon.locator('.retryImagePlaceholder').boundingBox()
+    expect(iconBounds.width).toBe(24)
+    expect(iconBounds.height).toBe(24)
+    await aboutPanel.locator('.aboutLinks').screenshot({ path: testInfo.outputPath('channel-link-placeholders.png') })
+    failLinkIcons = true
+    while (pendingLinkIcons.length) await pendingLinkIcons.shift().abort()
+    await expect(linkIcon.locator('img')).toHaveCount(0)
+    await expect(linkIcon.locator('[data-icon="link"]')).toBeVisible()
     const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
     await page.setViewportSize({ width: 375, height: 812 })
     const longLink = aboutPanel.locator('.aboutLinks a').first()
@@ -265,7 +322,16 @@ test.describe('channel page', () => {
 })
 
 test.describe('channel route changes', () => {
-  test.use({ seed: { settings: { backendPreference: 'invidious', backendFallback: false } } })
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        enableSearchSuggestions: false,
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
 
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
     const videos = [1, 2].map(number => ({
@@ -390,17 +456,17 @@ test.describe('channel route changes', () => {
         await page.locator(sel.searchInput).fill(CHANNEL_URL)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(/#\/channel\//)
+        await expect(page.getByText('Alpha').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(firstId)).toBe(true)
         await expect(page).toHaveURL(new RegExp(`#/channel/${firstId}/${tab}$`))
-        await expect(page.getByText('Alpha').first()).toBeVisible()
 
         await page.locator(sel.searchInput).fill(`https://www.youtube.com/channel/${secondId}`)
         await page.locator(sel.searchInput).press('Enter')
         await expect(page).toHaveURL(new RegExp(`#/channel/${secondId}`))
+        await expect(page.getByText('Beta').first()).toBeVisible()
         if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
         await expect.poll(() => releaseVideos.has(secondId)).toBe(true)
-        await expect(page.getByText('Beta').first()).toBeVisible()
         await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
 
         const oldResponse = page.waitForResponse(response => response.url().includes(`/channels/${firstId}/${tab}`))

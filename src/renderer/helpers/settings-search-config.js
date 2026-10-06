@@ -7,6 +7,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Confirm Before',
   'Confirmation Options',
   'Default Landing Page',
+  'Enable Tabs',
   'Extra Thumbnail Action Button',
   'Locale Preference',
   'Minimize to system tray',
@@ -18,6 +19,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Region for Trending',
   'Startup Behavior',
   'Swipe to refresh',
+  'Thumbnail Swipe Gestures',
   'System Default',
   'Tab Close Focus',
   'Update Relative Timestamps',
@@ -112,7 +114,7 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'navigation',
     key: 'Settings.General Settings.Navigation',
-    include: new Set(['Show Active Subscriptions', 'Add Item']),
+    include: new Set(['Show Active Subscriptions', 'Add Item', 'Always Show Navigation Bar', 'Compact Tab Labels']),
     subpage: 'navigation'
   }],
   playback: [{
@@ -228,6 +230,22 @@ export const SETTINGS_SEARCH_SOURCES = {
 }
 
 export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
+  sync: {
+    '': [
+      'Sync Settings', 'Enable Sync', 'Server URL', 'Username', 'Privacy Passphrase',
+      'Log In', 'Register', 'Privacy Policy', 'Pair Another Device', 'Pair With Existing Device',
+      'Device Name', 'Pairing Code', 'Create Pairing Code', 'Use Text Pairing Code',
+      'Show QR Code', 'Enter Pairing Code', 'Check Pairing Code', 'Scan QR Code',
+      'Pairing Codes Match', 'Approve Pairing', 'Try Again', 'Scan Again',
+      'Turn Flashlight On', 'Turn Flashlight Off', 'Confirm Data Loss',
+      'Sync Automatically', 'Watch stats', 'Profiles', 'Open Tabs', 'Use Shared Tabs',
+      'Open All Tabs', 'Open On Device', 'Sync Now', 'Disconnect', 'Delete Account', 'Confirm Delete Account',
+      'Devices', 'Activity', 'Show More', 'Refresh Devices', 'Revoke Session',
+      'Confirm Revoke Session', 'Rename Device', 'Save Device Name',
+      'Change Password', 'Current Password', 'New Password', 'Confirm New Password',
+      'Save New Password', 'Enable Automatic Sync'
+    ]
+  },
   general: {
     'Stream Extraction Method': ['Stream Extraction Method'],
     'Mobile Layout': ['Mobile Layout'],
@@ -279,6 +297,8 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
       'Download Settings',
       'Enable Downloads',
       'Download Folder',
+      'Concurrent Downloads',
+      'Bandwidth Limit',
       'Global Additional yt-dlp Arguments'
     ]
   },

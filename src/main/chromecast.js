@@ -235,12 +235,12 @@ export class ChromecastManager {
     if (!cast) return { connected: false }
     let state = mediaState(cast.status)
     try {
-      try {
-        await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'GET_STATUS' })
-        state = mediaState(cast.status)
-      } catch { /* Still attempt STOP when only the final status request fails. */ }
+      // A failed status request goes straight to cleanup instead of waiting
+      // through another response timeout from the same unresponsive receiver.
+      await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'GET_STATUS' })
+      state = mediaState(cast.status)
       if (this.active === cast) await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'STOP', mediaSessionId: cast.mediaSessionId })
-    } catch { /* Preserve the last known playback position when disconnected. */ } finally { this.cleanup(cast) }
+    } catch { /* Preserve the last known position when disconnected or unresponsive. */ } finally { this.cleanup(cast) }
     return { ...state, connected: false }
   }
 }

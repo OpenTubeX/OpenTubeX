@@ -262,6 +262,11 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Enable Tabs: "Enable Tabs"
+    Thumbnail Swipe Gestures:
+      Left: Swipe left on thumbnails
+      Right: Swipe right on thumbnails
+      Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
@@ -270,7 +275,9 @@ Settings:
     Swipe to refresh: Swipe to refresh
     Blur Thumbnails: Blur thumbnails
     Navigation:
-      Show Active Subscriptions: Show Active Subscriptions
+      Always Show Navigation Bar: Always show navigation bar when it's at the bottom
+      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customise navigation
       Add Item: Add item
@@ -341,6 +348,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Frosted Glass Player UI: "Frosted glass player UI"
     Main Color Theme:
@@ -422,8 +430,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Light"
-      OpenTubeX Dark: "OpenTubeX Dark"
+      Ocean Light: "Ocean Light"
+      Ocean Dark: "Ocean Dark"
       Custom: Custom
     Light Theme: Light theme
     Dark Theme: Dark theme
@@ -458,6 +466,7 @@ Settings:
       Unable to Delete: Unable to delete the custom theme
       Invalid Theme File: Invalid custom theme file
       Colors:
+        Watched thumbnail overlay: "Watched thumbnail overlay"
         Main text: Main text
         Secondary text: Secondary text
         Subtle text: Subtle text
@@ -608,6 +617,8 @@ Settings:
     Preload Upcoming Videos: "Preload Upcoming Videos"
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
     Concurrent Preloads: "Concurrent Preloads"
+    Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Google Cast Button: "Show Google Cast button"
   Channel Settings:
     Channel Settings: Channel Settings
@@ -645,9 +656,9 @@ Settings:
     Update Managed Tools: Update
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
-    Global Additional yt-dlp Arguments: Global Additional yt-dlp Arguments
+    Global Additional yt-dlp Arguments: Additional yt-dlp arguments
     Concurrent Downloads: Concurrent downloads
-    Bandwidth Limit: Bandwidth limit (KiB/s, 0 for unlimited)
+    Bandwidth Limit: Bandwidth limit (KiB/s)
     Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: Manage Download Templates ({templateCount})
@@ -720,8 +731,8 @@ Settings:
       Automatic: Update automatically
       Ask: Ask before updating
       Manual: Only update manually
-    yt-dlp Executable Path: yt-dlp Executable Path
-    FFmpeg Executable Path: FFmpeg Executable Path
+    yt-dlp Executable Path: yt-dlp executable
+    FFmpeg Executable Path: FFmpeg executable
     Restricted Playback Authentication: "yt-dlp Cookies"
     Cookie Source: Cookie Source
     Cookie Sources:
@@ -947,7 +958,7 @@ Settings:
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
     Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.'
-    Server URL: Server URL
+    Server URL: Sync server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
     Username: Username
@@ -1037,7 +1048,7 @@ Settings:
     Open All Tabs Confirmation: "Open all tabs?"
     Server Update Required: "Update this server to support encrypted live sync."
   Proxy Settings:
-    IP Block Recovery Script Path: IP Block Recovery Script Path
+    IP Block Recovery Script Path: IP block recovery script
     Select IP Block Recovery Script File: Select IP Block Recovery Script File
     Running IP block recovery script: Running IP block recovery script
     IP block recovery script failed: 'IP block recovery script failed (exit code: {exitCode})'
@@ -1049,7 +1060,7 @@ Settings:
       Excluded Channels: "Excluded channels"
       Tooltip: "Enter a channel ID to stop SponsorBlock skipping segments in its videos. IDs must match exactly and are case-sensitive."
     Enable SponsorBlock Submission: Enable SponsorBlock Submission
-    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID (optional): Private user ID (optional)
     SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
     Generated SponsorBlock User ID: Generated SponsorBlock User ID
     Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
@@ -1060,7 +1071,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: Incorrect password
     Unlock: Unlock
@@ -1103,6 +1114,21 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Customization: Customisation
+  Manage Profile Subscriptions: Manage profile subscriptions
+  Icon Names:
+    Person: Person
+    People: People
+    Headphones: Headphones
+    Gaming: Gaming
+    Film: Film
+    Art: Art
+    Science: Science
+    Globe: Globe
+    Heart: Heart
+    Sun: Sun
+    Moon: Moon
+    Trophy: Trophy
   Profile Icon: Profile Icon
   Choose an Emoji: Choose an Emoji
   Custom Emoji: Custom Emoji
@@ -1280,12 +1306,16 @@ Video:
     Hide: Hide
     Show: Show
     Scroll Mini Player:
+      Collapse Controls: "Collapse controls"
+      Expand Controls: "Expand controls"
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
       Hide: Hide mini player
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
+      Rewind 10 seconds: Rewind 10 seconds
+      Forward 10 seconds: Forward 10 seconds
     SponsorBlock:
       CancelCurrentSegment: Cancel Creating Segment
       ClearSegments: Clear Segments
@@ -1363,6 +1393,10 @@ Video:
       UpvoteSegment: Upvote
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
+      ChangeCategory: Change category
+      CopyAndDownvote: Copy & downvote
+      SubmitCategoryVote: Submit category vote
+      CategoryVoteSuccess: Category vote submitted.
     Google Cast:
       Cast: "Cast to a Google Cast device"
       Connected: "Casting to {device}"
@@ -1436,6 +1470,7 @@ Share:
   Share failed: "Could not share the link"
   Timestamp Link Copied: Timestamp link copied to clipboard
 Context Menu:
+  Open in a Background Tab: "Open in a Background Tab"
   Select Tab: Select Tab
   Close Tabs Before: Close Tabs Before
   Close Tabs After: Close Tabs After
@@ -1597,6 +1632,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Enable Tabs: "Turning this off closes all other tabs and keeps the current page open."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
@@ -1641,6 +1677,7 @@ Tooltips:
     Preload Upcoming Videos: "Fetches and caches yt-dlp stream URLs for the videos that can play next. The queue takes priority over playlists and recommendations."
     Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
+    Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.
@@ -1805,8 +1842,8 @@ Downloads:
   File Name Template: File Name Template
   File Name Template Help: 'Available fields: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Time Range and Chapters
-  Start Time: Start Time (HH:MM:SS)
-  End Time: End Time (HH:MM:SS)
+  Start Time: Start time
+  End Time: End time
   Split by Chapters: Split into separate files by chapter
   Remove Segments: Remove segments
   Subtitles and Metadata: Subtitles and Metadata
@@ -1893,5 +1930,42 @@ Tray:
 Tray Icon:
   Title: "Tray icon"
   Follow App Theme: "Follow app theme"
+
+Form Inputs:
+  Enter Password Hint: "Enter your password"
+  Choose Password Hint: "Choose a password"
+  Confirm Password Hint: "Repeat your new password"
+  Encryption Passphrase Hint: "Enter your encryption passphrase"
+  Show Password: "Show password"
+  Hide Password: "Hide password"
+  Search Text Hint: "Enter search terms"
+  Playlist Description Hint: "Describe this playlist"
+  Filename Preview: "Filename preview"
+  Enter Channels: "Enter channels"
+  Enter Text: "Enter text"
+  Video URL: Video or playlist URL
+  Paste Link: Paste a video or playlist link
+  Example: e.g. {example}
+  No Minimum: No minimum
+  No Maximum: No maximum
+  Any Age: Any age
+  Included Terms Example: e.g. tutorial, review
+  Excluded Terms Example: e.g. trailer, preview
+  Download Folder Hint: Leave blank to use your Downloads folder
+  Global Arguments Hint: Optional arguments for every download
+  Unlimited Hint: 0 for unlimited
+  Add Argument: Add an argument
+  Template Name Example: e.g. Audio only
+  Download Arguments Hint: Optional arguments for this download
+  Generated ID Hint: Leave blank to generate an ID
+  Default Value: "Default: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Search failed with the configured cookies."
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Retry: "Retry"
 Native Permissions:
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."

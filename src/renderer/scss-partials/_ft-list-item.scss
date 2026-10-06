@@ -67,6 +67,7 @@ $watched-transition-duration: 0.5s;
 
 .ft-list-item {
   padding: 6px;
+  border-radius: calc(12px * var(--ui-roundness));
 
   &.watched {
     background-color: var(--bg-color);
@@ -77,15 +78,19 @@ $watched-transition-duration: 0.5s;
 
     @include low-contrast-when-watched(var(--primary-text-color));
 
-    .thumbnailImage {
-      opacity: 0.3;
+    .thumbnailLink::after {
+      background-color: var(--watched-thumbnail-overlay-color);
+      content: '';
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
       /* stylelint-disable-next-line declaration-property-value-no-unknown */
       transition: opacity $watched-transition-duration;
     }
 
-    &:hover .thumbnailImage,
-    &:focus .thumbnailImage {
-      opacity: 1;
+    &:hover .thumbnailLink::after,
+    .thumbnailLink:focus::after {
+      opacity: 0;
       transition-duration: $watched-transition-duration;
     }
   }
@@ -234,10 +239,15 @@ $watched-transition-duration: 0.5s;
       .channelImage {
         border-radius: 50%;
         block-size: 130px;
+        inline-size: 130px;
+        vertical-align: middle;
       }
 
       .gameImage {
         block-size: 130px;
+        inline-size: calc(130px * 5 / 7);
+        object-fit: contain;
+        vertical-align: middle;
       }
     }
   }

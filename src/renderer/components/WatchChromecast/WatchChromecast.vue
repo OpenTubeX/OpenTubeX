@@ -164,6 +164,7 @@ async function handleChoice(choice) {
   if (disposed || busy.value) return
   if (choice === 'refresh') return refreshDevices()
   busy.value = true
+  let resumePlayer = null
   try {
     if (choice === 'stop') {
       await stopCasting()
@@ -195,18 +196,26 @@ async function handleChoice(choice) {
     if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
+    const player = props.getPlayer()
+    const paused = player?.isPaused() ?? true
+    if (!paused) {
+      resumePlayer = player
+      player.pause()
+    }
+    const startSeconds = player?.getCurrentTime() ?? 0
     const result = await window.ftElectron.chromecast.start({
       deviceId: choice.slice(7),
       source: source.value,
       title: props.title,
-      startSeconds: props.getPlayer()?.getCurrentTime() ?? 0,
-      paused: props.getPlayer()?.isPaused() ?? true,
+      startSeconds,
+      paused,
       captions,
       captionIndex: caption ? captions.findIndex(item => item.url === caption.url) : null,
       isLive: props.isLive
     })
     if (result.error) throw new Error(result.error)
     if (disposed) { await window.ftElectron.chromecast.stop(result.castId); return }
+    resumePlayer = null
     castId.value = result.castId
     deviceName.value = result.deviceName
     status.value = result.status
@@ -216,7 +225,10 @@ async function handleChoice(choice) {
     props.getPlayer()?.pause()
     button.value?.hideDropdown()
     pollTimer = setTimeout(poll, 1000)
-  } catch { reportError() } finally { busy.value = false }
+  } catch {
+    if (!disposed && resumePlayer && props.getPlayer() === resumePlayer) resumePlayer.play()?.catch(() => {})
+    reportError()
+  } finally { busy.value = false }
 }
 
 defineExpose({ stopCasting })

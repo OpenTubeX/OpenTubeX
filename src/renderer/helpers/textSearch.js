@@ -13,20 +13,23 @@ export function normalizeSearchText(value, locale) {
     .trim()
 }
 
-function editDistance(first, second) {
-  const rows = Array.from(
-    { length: first.length + 1 },
-    (_, row) => Array(second.length + 1).fill(row === 0 ? 0 : row)
-  )
-  for (let column = 0; column <= second.length; column++) rows[0][column] = column
-
+function editDistance(first, second, maximum) {
+  // A match can never leave the diagonal band allowed by the edit budget.
+  // Three rows retain adjacent transpositions without a full quadratic matrix.
+  let previousPrevious = Array(second.length + 1).fill(Infinity)
+  let previous = Array.from({ length: second.length + 1 }, (_, column) => column)
+  let current = Array(second.length + 1).fill(Infinity)
   for (let row = 1; row <= first.length; row++) {
-    for (let column = 1; column <= second.length; column++) {
+    const start = Math.max(1, row - maximum)
+    const end = Math.min(second.length, row + maximum)
+    current[start - 1] = start === 1 ? row : Infinity
+    let minimum = current[start - 1]
+    for (let column = start; column <= end; column++) {
       const substitutionCost = first[row - 1] === second[column - 1] ? 0 : 1
-      rows[row][column] = Math.min(
-        rows[row - 1][column] + 1,
-        rows[row][column - 1] + 1,
-        rows[row - 1][column - 1] + substitutionCost
+      current[column] = Math.min(
+        previous[column] + 1,
+        current[column - 1] + 1,
+        previous[column - 1] + substitutionCost
       )
       if (
         row > 1 &&
@@ -34,12 +37,19 @@ function editDistance(first, second) {
         first[row - 1] === second[column - 2] &&
         first[row - 2] === second[column - 1]
       ) {
-        rows[row][column] = Math.min(rows[row][column], rows[row - 2][column - 2] + 1)
+        current[column] = Math.min(current[column], previousPrevious[column - 2] + 1)
       }
+      minimum = Math.min(minimum, current[column])
     }
+    if (minimum > maximum) return Infinity
+    current[end + 1] = Infinity
+    const spare = previousPrevious
+    previousPrevious = previous
+    previous = current
+    current = spare
   }
 
-  return rows[first.length][second.length]
+  return previous[second.length]
 }
 
 export function findSubsequenceIndexes(query, candidate) {
@@ -71,7 +81,7 @@ function subsequenceScore(query, candidate) {
 export function fuzzyWordScore(query, candidate) {
   const allowedEdits = query.length >= 7 ? 2 : query.length >= 4 ? 1 : 0
   if (allowedEdits > 0 && Math.abs(query.length - candidate.length) <= allowedEdits) {
-    const distance = editDistance(query, candidate)
+    const distance = editDistance(query, candidate, allowedEdits)
     if (distance <= allowedEdits) return 8 + distance * 2 + Math.abs(query.length - candidate.length) / 4
   }
   return subsequenceScore(query, candidate)

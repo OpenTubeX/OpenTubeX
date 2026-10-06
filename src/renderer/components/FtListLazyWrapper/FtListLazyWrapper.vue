@@ -10,9 +10,14 @@
       grid: layout === 'grid',
       list: layout === 'list',
       draggable: isDraggable,
+      pointerDragging,
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
-    :draggable="isDraggable"
+    :draggable="isDraggable && !pointerDragging"
+    :data-playlist-drag-item="isDraggable ? '' : null"
+    :data-video-id="data.videoId"
+    :data-playlist-item-id="playlistItemId"
+    @pointerdown.capture="isDraggable && startPointerDrag($event, videoData)"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -21,7 +26,7 @@
       <FtListVideo
         v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
         :playlist-id="playlistId"
         :playlist-type="playlistType"
         :playlist-item-id="playlistItemId"
@@ -44,34 +49,34 @@
       <FtListChannel
         v-else-if="finalDataType === 'channel'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
       <FtListPlaylist
         v-else-if="finalDataType === 'playlist'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
         :search-query-text="searchQueryText"
       />
       <FtCommunityPost
         v-else-if="finalDataType === 'community'"
         :hide-forbidden-titles="hideForbiddenTitles"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
       <FtListHashtag
         v-else-if="data.type === 'hashtag'"
         :appearance="appearance"
-        :data="data"
+        :data="displayedData"
       />
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, useTemplateRef, watch } from 'vue'
 import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
 
-import { handleDragAndDrop } from '../../helpers/dragAndDrop'
+import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import {
@@ -85,6 +90,10 @@ import store from '../../store/index'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
+  dataOverrides: {
+    type: Object,
+    default: null
+  },
   data: {
     type: Object,
     required: true
@@ -190,7 +199,7 @@ const emit = defineEmits([
 const inUserPlaylist = props.playlistType === 'user'
 const showGrabBar = computed(() => inUserPlaylist && props.videoDraggingPossible)
 const isDraggable = computed(() => showGrabBar.value && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag } = handleDragAndDrop(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -298,6 +307,11 @@ const showResult = computed(() => {
 })
 
 const visible = ref(props.firstScreen)
+// Evaluate only when the card mounts. Metadata edits remain reactive without
+// copying every cached entry before pagination or lazy rendering.
+const displayedData = computed(() => props.dataOverrides
+  ? { ...reactive(props.data), ...props.dataOverrides }
+  : props.data)
 // Community cards contain expandable text/media whose local state must survive scrolling.
 const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
 const deferWindowing = process.env.IS_ELECTRON

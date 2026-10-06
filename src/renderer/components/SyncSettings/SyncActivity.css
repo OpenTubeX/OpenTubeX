@@ -18,11 +18,23 @@
   margin-block-end: 1rem;
 }
 
+.activityScroller {
+  margin-block-end: 1rem;
+  overflow-y: auto;
+}
+
+.activityExpanded {
+  margin-inline-end: -0.5rem;
+  max-block-size: min(24rem, 50vh);
+  overscroll-behavior-y: contain;
+  padding-inline-end: calc(var(--scrollbar-track-width) + 0.5rem);
+}
+
 .activityList {
   display: grid;
   gap: 0.75rem;
   list-style: none;
-  margin-block: 0 1rem;
+  margin: 0;
   padding: 0;
 }
 

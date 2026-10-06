@@ -148,22 +148,26 @@ test('failed loads release resources and allow a subsequent cast', async t => {
 })
 
 
-test('attempts receiver STOP even if the final status request fails', async t => {
+test('a final status timeout releases the session without a second response timeout', async t => {
   const manager = await managerForTest(t)
   if (!manager) return
   const cast = await manager.start(42, payload)
   const sender = manager.active.sender
   const originalSend = sender.send.bind(sender)
-  let stopped = false
   sender.send = (namespace, destination, message, wait) => {
     if (message.type === 'GET_STATUS') return Promise.reject(new Error('Status timed out'))
-    if (message.type === 'STOP') stopped = true
+    if (message.type === 'STOP') return new Promise((resolve, reject) => setTimeout(() => reject(new Error('Stop timed out')), 500))
     return originalSend(namespace, destination, message, wait)
   }
-  const result = await manager.stop(42, cast.castId)
-  assert.equal(stopped, true)
+  const result = await Promise.race([
+    manager.stop(42, cast.castId),
+    new Promise(resolve => setTimeout(() => resolve('unsettled'), 100))
+  ])
+  assert.notEqual(result, 'unsettled')
   assert.equal(result.connected, false)
   assert.equal(result.currentTime, 12)
+  assert.equal(manager.active, null)
+  assert.equal(sender.closed, true)
 })
 
 

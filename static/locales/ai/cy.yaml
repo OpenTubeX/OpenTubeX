@@ -265,6 +265,11 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Enable Tabs: "Galluogi tabiau"
+    Thumbnail Swipe Gestures:
+      Left: Llithro i'r chwith ar fân-luniau
+      Right: Llithro i'r dde ar fân-luniau
+      Description: Llithrwch yn llorweddol ar fân-lun fideo a rhyddhewch i gyflawni'r weithred a ddewiswyd.
     Data Saver Thumbnails: "Mân-luniau arbed data"
     Use tray icon: "Defnyddio eicon hambwrdd"
     Close to system tray: "Cau i hambwrdd y system"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Sychwch i adnewyddu
     Blur Thumbnails: Niwlio mân-luniau
     Navigation:
-      Show Active Subscriptions: Dangos tanysgrifiadau gweithredol
+      Always Show Navigation Bar: Dangos y bar llywio bob amser pan fydd ar y gwaelod
+      Compact Tab Labels: Bar llywio cryno pan fydd ar y gwaelod
+      Show Active Subscriptions: Dangos tanysgrifiadau gweithredol yn y bar ochr
       Navigation: Llywio
       Customize Navigation: Addasu'r llywio
       Add Item: Ychwanegu eitem
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Compact Mobile Mini Player: "Chwaraewr bach cryno ar ffôn symudol"
     Always Show Mobile Search Bar: "Dangos y bar chwilio symudol bob amser"
     Frosted Glass Player UI: "Rhyngwyneb chwaraewr gwydr barugog"
     Main Color Theme:
@@ -437,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Golau"
-      OpenTubeX Dark: "OpenTubeX Tywyll"
+      Ocean Light: "Ocean Golau"
+      Ocean Dark: "Ocean Tywyll"
       Custom: Personol
     Light Theme: Thema olau
     Dark Theme: Thema dywyll
@@ -473,6 +481,7 @@ Settings:
       Unable to Delete: Nid oedd modd dileu'r thema bersonol
       Invalid Theme File: Ffeil thema bersonol annilys
       Colors:
+        Watched thumbnail overlay: "Troshaen mân-luniau fideos a wyliwyd"
         Main text: Prif destun
         Secondary text: Testun eilaidd
         Subtle text: Testun cynnil
@@ -623,6 +632,8 @@ Settings:
     Preload Upcoming Videos: "Rhaglwytho fideos nesaf"
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
+    Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
+    Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
     Show Google Cast Button: "Dangos botwm Google Cast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
@@ -660,9 +671,9 @@ Settings:
     Update Managed Tools: Diweddaru
     Managed Tools Download Error Template: 'Nid oedd modd lawrlwytho''r offer a reolir: {errors}'
     Download Folder: Ffolder lawrlwytho
-    Global Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol byd-eang
+    Global Additional yt-dlp Arguments: Ymresymiadau yt-dlp ychwanegol
     Concurrent Downloads: Lawrlwythiadau cydamserol
-    Bandwidth Limit: Terfyn lled band (KiB/s, 0 am ddiderfyn)
+    Bandwidth Limit: Terfyn lled band (KiB/s)
     Choose Download Folder: Dewis ffolder lawrlwytho
     Download Templates: Templedi lawrlwytho
     Manage Download Templates: Rheoli templedi lawrlwytho ({templateCount})
@@ -735,8 +746,8 @@ Settings:
       Automatic: Diweddaru'n awtomatig
       Ask: Gofyn cyn diweddaru
       Manual: Diweddaru â llaw yn unig
-    yt-dlp Executable Path: Llwybr gweithredadwy yt-dlp
-    FFmpeg Executable Path: Llwybr gweithredadwy FFmpeg
+    yt-dlp Executable Path: Ffeil weithredadwy yt-dlp
+    FFmpeg Executable Path: Ffeil weithredadwy FFmpeg
     Restricted Playback Authentication: "Cwcis yt-dlp"
     Cookie Source: Ffynhonnell cwcis
     Cookie Sources:
@@ -970,7 +981,7 @@ Settings:
     Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
     Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'
     Description: 'Cydweddwch danysgrifiadau, proffiliau, rhestrau chwarae, hanes gwylio a gosodiadau a gynhelir â gweinydd cydweddu OpenTubeX neu LibreTube. Efallai na fydd gweinyddion LibreTube yn cynnal pob nodwedd gydweddu.'
-    Server URL: URL y gweinydd
+    Server URL: URL y gweinydd cysoni
     Checking Server: Wrthi'n gwirio'r gweinydd cysoni…
     Server Unavailable: Nid oedd modd cysylltu â'r gweinydd cysoni hwn. Gwiriwch yr URL a rhowch gynnig arall arni.
     Username: Enw defnyddiwr
@@ -1060,7 +1071,7 @@ Settings:
     Open All Tabs Confirmation: "Agor pob tab?"
     Server Update Required: "Diweddarwch y gweinydd hwn i gefnogi cysoni byw wedi’i amgryptio."
   Proxy Settings:
-    IP Block Recovery Script Path: Llwybr sgript adfer ar ôl rhwystr IP
+    IP Block Recovery Script Path: Sgript adfer bloc IP
     Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP
     Running IP block recovery script: Wrthi'n rhedeg y sgript adfer ar ôl rhwystr IP
     IP block recovery script failed: 'Methodd y sgript adfer ar ôl rhwystr IP (cod gadael: {exitCode})'
@@ -1072,7 +1083,7 @@ Settings:
       Excluded Channels: "Sianeli wedi’u heithrio"
       Tooltip: "Rhowch ID sianel i atal hepgor segmentau SponsorBlock yn ei fideos. Rhaid i’r ID gyfateb yn union ac mae priflythrennau’n cyfrif."
     Enable SponsorBlock Submission: Galluogi cyflwyno i SponsorBlock
-    SponsorBlock Private User ID (optional): ID defnyddiwr preifat SponsorBlock (dewisol)
+    SponsorBlock Private User ID (optional): ID defnyddiwr preifat (dewisol)
     SponsorBlock Private User ID Tooltip: Gludwch yr ID defnyddiwr preifat SponsorBlock o estyniad y porwr. Gadewch hwn yn wag i ddefnyddio ID a gynhyrchir gan yr ap.
     Generated SponsorBlock User ID: ID defnyddiwr SponsorBlock a gynhyrchwyd
     Generated SponsorBlock User ID Tooltip: Gellir defnyddio'r ID defnyddiwr SponsorBlock hwn a gynhyrchwyd gan yr ap yn estyniad y porwr neu os ydych yn defnyddio'r ap ar gyfrifiadur arall.
@@ -1084,7 +1095,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Galluogi Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (y rhagosodiad yw https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL yr API
   Password Dialog:
     Incorrect Password: Cyfrinair anghywir
     Unlock: Datgloi
@@ -1127,6 +1138,21 @@ About:
   Matrix: Matrix
   Email: E-bost
 Profile:
+  Customization: Addasu
+  Manage Profile Subscriptions: Rheoli tanysgrifiadau proffil
+  Icon Names:
+    Person: Person
+    People: Pobl
+    Headphones: Clustffonau
+    Gaming: Gemau
+    Film: Ffilm
+    Art: Celf
+    Science: Gwyddoniaeth
+    Globe: Glôb
+    Heart: Calon
+    Sun: Haul
+    Moon: Lleuad
+    Trophy: Tlws
   Profile Icon: Eicon proffil
   Choose an Emoji: Dewis emoji
   Custom Emoji: Emoji personol
@@ -1322,12 +1348,16 @@ Video:
     Hide: Cuddio
     Show: Dangos
     Scroll Mini Player:
+      Collapse Controls: "Cau rheolyddion"
+      Expand Controls: "Ehangu rheolyddion"
       Back to Top: Yn ôl i'r brig
       Return to Video Tab: Dychwelyd i dab y fideo
       Hide: Cuddio'r chwaraewr bach
       Play: Chwarae
       Pause: Oedi
       Drag Handle: Symud y chwaraewr bach
+      Rewind 10 seconds: Ailddirwyn 10 eiliad
+      Forward 10 seconds: Ymlaen 10 eiliad
     SponsorBlock:
       CancelCurrentSegment: Canslo creu'r segment
       ClearSegments: Clirio segmentau
@@ -1405,6 +1435,10 @@ Video:
       UpvoteSegment: Pleidleisio o blaid
       DownvoteSegment: Pleidleisio yn erbyn
       VoteFailed: Methodd cyflwyno pleidlais SponsorBlock.
+      ChangeCategory: Newid categori
+      CopyAndDownvote: Copïo a phleidleisio yn erbyn
+      SubmitCategoryVote: Cyflwyno pleidlais categori
+      CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
       Cast: "Castio i ddyfais Google Cast"
       Connected: "Yn castio i {device}"
@@ -1478,6 +1512,7 @@ Share:
   Share failed: "Methu rhannu’r ddolen"
   Timestamp Link Copied: Wedi copïo dolen y stamp amser i'r clipfwrdd
 Context Menu:
+  Open in a Background Tab: "Agor mewn tab yn y cefndir"
   Select Tab: Dewis tab
   Close Tabs Before: Cau tabiau blaenorol
   Close Tabs After: Cau tabiau dilynol
@@ -1639,6 +1674,7 @@ Description:
   Games: Gemau
 Tooltips:
   General Settings:
+    Enable Tabs: "Mae diffodd hwn yn cau pob tab arall ac yn cadw'r dudalen bresennol ar agor."
     Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."
     Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
     Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.
@@ -1683,6 +1719,7 @@ Tooltips:
     Preload Upcoming Videos: "Mae’n nôl ac yn storio URLau yt-dlp y fideos nesaf. Mae’r ciw yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
     Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
+    Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.
@@ -1848,8 +1885,8 @@ Downloads:
   File Name Template: Templed enw ffeil
   File Name Template Help: 'Meysydd sydd ar gael: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Ystod amser a phenodau
-  Start Time: Amser dechrau (HH:MM:SS)
-  End Time: Amser gorffen (HH:MM:SS)
+  Start Time: Amser dechrau
+  End Time: Amser gorffen
   Split by Chapters: Rhannu'n ffeiliau ar wahân fesul pennod
   Remove Segments: Tynnu segmentau
   Subtitles and Metadata: Isdeitlau a metadata
@@ -1938,5 +1975,42 @@ Tray:
 Tray Icon:
   Title: "Eicon hambwrdd"
   Follow App Theme: "Dilyn thema’r ap"
+
+Form Inputs:
+  Enter Password Hint: "Rhowch eich cyfrinair"
+  Choose Password Hint: "Dewiswch gyfrinair"
+  Confirm Password Hint: "Ailadroddwch eich cyfrinair newydd"
+  Encryption Passphrase Hint: "Rhowch eich ymadrodd cyfrinachol amgryptio"
+  Show Password: "Dangos cyfrinair"
+  Hide Password: "Cuddio cyfrinair"
+  Search Text Hint: "Rhowch dermau chwilio"
+  Playlist Description Hint: "Disgrifiwch y rhestr chwarae hon"
+  Filename Preview: "Rhagolwg o enw'r ffeil"
+  Enter Channels: "Rhowch sianeli"
+  Enter Text: "Rhowch destun"
+  Video URL: URL fideo neu restr chwarae
+  Paste Link: Gludwch ddolen fideo neu restr chwarae
+  Example: e.e. {example}
+  No Minimum: Dim lleiafswm
+  No Maximum: Dim uchafswm
+  Any Age: Unrhyw oedran
+  Included Terms Example: e.e. tiwtorial, adolygiad
+  Excluded Terms Example: e.e. trelar, rhagolwg
+  Download Folder Hint: Gadewch yn wag i ddefnyddio eich ffolder Lawrlwythiadau
+  Global Arguments Hint: Ymresymiadau dewisol ar gyfer pob lawrlwythiad
+  Unlimited Hint: 0 am ddiderfyn
+  Add Argument: Ychwanegu ymresymiad
+  Template Name Example: e.e. Sain yn unig
+  Download Arguments Hint: Ymresymiadau dewisol ar gyfer y lawrlwythiad hwn
+  Generated ID Hint: Gadewch yn wag i gynhyrchu ID
+  Default Value: "Diofyn: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."
+
+Storage Startup Error:
+  Title: "Methu llwytho data'r ap"
+  Message: "Rhyddhewch le storio ar y ddyfais a cheisiwch eto. Mae cysoni wedi'i oedi nes bod eich data wedi'i lwytho."
+  Retry: "Ceisio eto"
 Native Permissions:
   Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."

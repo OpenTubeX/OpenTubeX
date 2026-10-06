@@ -205,12 +205,14 @@
 }
 
 .menuSection {
+  --quick-settings-label-overhang: 7px;
+
   border-block-start: 1px solid var(--divider-color);
-  column-gap: 12px;
+  gap: 16px 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding-block: 10px 12px;
-  padding-inline: 18px;
+  padding-block: 10px 16px;
+  padding-inline: 12px;
 }
 
 .menuSection h3 {
@@ -222,7 +224,7 @@
   gap: 6px;
   grid-column: 1 / -1;
   line-height: 1.2;
-  margin-block: 0 10px;
+  margin-block: 0;
   margin-inline: 0;
   text-transform: uppercase;
 }
@@ -241,58 +243,125 @@
   grid-column: auto;
 }
 
+.quickSettingControl:first-of-type,
+.quickSettingsMenu:not(.phoneQuickSettings) .pairedQuickSetting:first-of-type + .pairedQuickSetting {
+  /* Keep the first caption seven pixels below its section heading. */
+  margin-block-start: -9px;
+}
+
+.quickSettingControl:has(.quickSelect) {
+  /* Include the floating label in the row's footprint. */
+  padding-block-start: var(--quick-settings-label-overhang);
+}
+
 .menuSection :deep(.pure-material-slider),
 .menuSection :deep(.switch-ctn) {
-  margin-block: 4px;
+  margin-block: 0;
   inline-size: 100%;
 }
 
 .menuSection :deep(.quickSelect) {
+  /* stylelint-disable length-zero-no-unit */
+  --select-indicator-space: 0px;
+  --select-reset-space: 0px;
+  /* stylelint-enable length-zero-no-unit */
+
   inline-size: 100%;
-  margin-block: 26px 6px;
+  margin-block: 0;
 }
 
-.menuSection :deep(.quickSelect + .quickSelect) {
-  margin-block-start: 28px;
+.menuSection :deep(.quickSelect:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
+  --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
 }
 
-.menuSection :deep(.quickSelect .select-text),
-.menuSection :deep(.quickSelect .nativeSelect) {
-  block-size: 38px;
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator):has(.changedSettingIndicator)) {
+  --select-indicator-space: calc(14px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+}
+
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator)) {
+  --select-sync-space: 1em;
+}
+
+.menuSection :deep(.quickSelect:has(.changedSettingIndicator)) {
+  --select-reset-space: 1em;
+}
+
+.menuSection :deep(.quickSelect .changedSettingIndicatorPlaceholder) {
+  display: none;
 }
 
 .menuSection :deep(.pure-material-slider) {
-  padding-block: 2px;
+  margin-inline: 0;
+  padding: 0;
+
+  /* Leave clearance for native input hit testing at fractional zoom. */
+  row-gap: 2px;
+}
+
+.menuSection :deep(.sliderControl) {
+  --quick-settings-slider-input-height: 36px;
+
+  /* Count the visible handle while keeping the input below its caption. */
+  margin-block-end: max(-8px, calc((var(--slider-handle-height) - var(--quick-settings-slider-input-height)) / 2));
+}
+
+.menuSection :deep(.sliderControl .input) {
+  block-size: var(--quick-settings-slider-input-height);
+}
+
+/* Align the visible track, which has a built-in six-pixel inset. */
+.menuSection :deep(.switch-ctn) {
+  margin-inline-start: -6px;
 }
 
 .sliderGroup {
   display: grid;
   gap: 8px;
-  margin-block-start: 6px;
 }
 
 .sliderGroup :deep(.pure-material-slider) {
   display: grid;
-  grid-template-rows: auto 24px;
-  margin: 0;
-  padding-block: 0;
 }
 
-.sliderGroup :deep(.input) {
-  block-size: 24px;
+.sliderGroup :deep(.sliderControl) {
+  --quick-settings-slider-input-height: 24px;
+  --slider-track-height: 8px;
+  --slider-handle-height: 20px;
+  --slider-handle-gap: 3px;
+  --slider-stop-size: 2px;
 }
 
-.sliderGroup :deep(.pure-material-slider .input::-webkit-slider-runnable-track) {
-  margin-block: 11px;
-}
+@media (any-pointer: coarse), (width <= 680px) {
+  .menuSection {
+    --quick-settings-label-overhang: 8px;
+  }
 
-.sliderGroup :deep(.pure-material-slider .input::-moz-range-track) {
-  margin-block: 11px;
-  margin-inline: 0;
+  .menuSection :deep(.sliderControl) {
+    --quick-settings-slider-input-height: 48px;
+  }
+
+  .sliderGroup :deep(.sliderControl) {
+    --slider-track-height: 16px;
+    --slider-handle-height: 44px;
+    --slider-handle-gap: 6px;
+    --slider-stop-size: 4px;
+  }
 }
 
 .menuSection :deep(.switch-label) {
   padding-block: 6px;
+}
+
+/* Compact mouse-only switches in both popup and full-screen layouts. */
+@media (any-pointer: fine) and (not (any-pointer: coarse)) {
+  .menuSection :deep(.switch-input) {
+    block-size: var(--switch-touch-height);
+  }
+
+  .menuSection :deep(.switch-label) {
+    min-block-size: var(--switch-track-height);
+    padding-block: 0;
+  }
 }
 
 .menuLinks {
@@ -383,13 +452,16 @@
   block-size: var(--phone-touch-target, 48px);
 }
 
-.phoneQuickSettings .menuSection :deep(.select-text),
-.phoneQuickSettings .sliderGroup :deep(.input) {
-  block-size: var(--phone-touch-target, 48px);
+.phoneQuickSettings .menuSection :deep(.select-text) {
+  block-size: max(var(--form-control-height), var(--phone-touch-target, 48px));
 }
 
-.phoneQuickSettings .sliderGroup :deep(.pure-material-slider) {
-  grid-template-rows: auto var(--phone-touch-target, 48px);
+.phoneQuickSettings :deep(.sliderControl) {
+  --quick-settings-slider-input-height: var(--phone-touch-target, 48px);
+  --slider-track-height: 16px;
+  --slider-handle-height: 44px;
+  --slider-handle-gap: 6px;
+  --slider-stop-size: 4px;
 }
 
 .phoneQuickHeaderActions {

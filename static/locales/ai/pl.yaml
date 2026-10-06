@@ -103,6 +103,11 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Enable Tabs: "Włącz karty"
+    Thumbnail Swipe Gestures:
+      Left: Przesunięcie w lewo na miniaturach
+      Right: Przesunięcie w prawo na miniaturach
+      Description: Przesuń poziomo po miniaturze filmu i puść, aby wykonać wybraną czynność.
     Data Saver Thumbnails: "Miniatury oszczędzające dane"
     Tab Close Focus:
       Last active tab: "Ostatnio aktywna karta"
@@ -115,7 +120,9 @@ Settings:
     Swipe to refresh: Przeciągnij, aby odświeżyć
     Blur Thumbnails: Rozmyj miniatury
     Navigation:
-      Show Active Subscriptions: Pokaż aktywne subskrypcje
+      Always Show Navigation Bar: Zawsze pokazuj pasek nawigacji, gdy jest na dole
+      Compact Tab Labels: Kompaktowy pasek nawigacji, gdy jest na dole
+      Show Active Subscriptions: Pokaż aktywne subskrypcje na pasku bocznym
       Navigation: Nawigacja
       Customize Navigation: Dostosuj nawigację
       Add Item: Dodaj element
@@ -141,6 +148,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"
     Always Show Mobile Search Bar: "Zawsze pokazuj pasek wyszukiwania na telefonie"
     Frosted Glass Player UI: "Interfejs odtwarzacza z efektem matowego szkła"
     Main Color Theme:
@@ -176,8 +184,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Jasny"
-      OpenTubeX Dark: "OpenTubeX Ciemny"
+      Ocean Light: "Ocean Jasny"
+      Ocean Dark: "Ocean Ciemny"
     Toast Position:
       Test Toast: Powiadomienie testowe
     Scroll Speed: Szybkość przewijania
@@ -190,6 +198,7 @@ Settings:
       Share Screenshots Prompt: "Przeciągnij tutaj co najmniej jeden zrzut ekranu. Pozostaw tę sekcję pustą, a bot doda trzy podglądy z przykładową zawartością, bez Twoich danych osobowych."
       Unable to Share: Nie udało się udostępnić własnego motywu
       Colors:
+        Watched thumbnail overlay: "Nakładka na miniatury obejrzanych filmów"
         Logo hover: Logo po najechaniu
         Logo pressed: Logo po naciśnięciu
         Page background: Tło strony
@@ -266,13 +275,15 @@ Settings:
     Preload Upcoming Videos: "Wstępnie wczytuj następne filmy"
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
+    Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
+    Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
     Show Google Cast Button: "Pokaż przycisk Google Cast"
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
-    Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
+    Bandwidth Limit: Limit przepustowości (KiB/s)
   External Software Settings:
     Create YouTube session: "Utwórz sesję YouTube"
     YouTube session hint: "Zaloguj się w razie potrzeby i zapisz sesję. W ustawieniach wybierz, czy używać jej do pobierania, odtwarzania lub napisów."
@@ -591,6 +602,21 @@ About:
   Fluxer: Dołącz do naszej społeczności na Fluxerze
   Matrix: Matrix
 Profile:
+  Customization: Dostosowanie
+  Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu
+  Icon Names:
+    Person: Osoba
+    People: Ludzie
+    Headphones: Słuchawki
+    Gaming: Gry
+    Film: Film
+    Art: Sztuka
+    Science: Nauka
+    Globe: Globus
+    Heart: Serce
+    Sun: Słońce
+    Moon: Księżyc
+    Trophy: Trofeum
   Profile Icon: Ikona profilu
   Choose an Emoji: Wybierz emoji
   Custom Emoji: Własne emoji
@@ -711,8 +737,12 @@ Video:
       'Off': 'Wyłączone'
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
+      Collapse Controls: "Zwiń sterowanie"
+      Expand Controls: "Rozwiń sterowanie"
       Return to Video Tab: Wróć do karty filmu
       Hide: Ukryj miniodtwarzacz
+      Rewind 10 seconds: Przewiń o 10 sekund do tyłu
+      Forward 10 seconds: Przewiń o 10 sekund do przodu
     SponsorBlock:
       ActionTypeLabel: Typ segmentu
       MutedSegment: 'Wyciszono: {segmentCategory}'
@@ -730,6 +760,10 @@ Video:
       MuteActionType: Wycisz
       MutePrompt: Wyciszyć segment „{segmentCategory}”?
       SkipActionType: Pomiń
+      ChangeCategory: Zmień kategorię
+      CopyAndDownvote: Kopiuj i zagłosuj przeciw
+      SubmitCategoryVote: Wyślij głos na kategorię
+      CategoryVoteSuccess: Głos na kategorię został wysłany.
     Google Cast:
       Cast: "Przesyłaj na urządzenie Google Cast"
       Connected: "Przesyłanie na {device}"
@@ -786,6 +820,7 @@ Change Format:
   yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
+  Open in a Background Tab: "Otwórz w karcie w tle"
   Select Tab: Zaznacz kartę
   Close Tabs Before: Zamknij poprzednie karty
   Close Tabs After: Zamknij następne karty
@@ -889,6 +924,7 @@ Description:
   Games: Gry
 Tooltips:
   General Settings:
+    Enable Tabs: "Wyłączenie zamyka wszystkie pozostałe karty i pozostawia bieżącą stronę otwartą."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."
     Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
     Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.
@@ -912,6 +948,7 @@ Tooltips:
     Preload Upcoming Videos: "Pobiera i zapisuje w pamięci podręcznej adresy yt-dlp następnych filmów. Kolejka ma pierwszeństwo przed playlistami i rekomendacjami."
     Upcoming Videos to Preload: "Maksymalna liczba następnych filmów, których adresy yt-dlp są pobierane w tle."
     Concurrent Preloads: "Maksymalna liczba procesów yt-dlp używanych do jednoczesnego wstępnego ładowania filmów. Wyższe wartości zużywają więcej procesora, pamięci i przepustowości sieci."
+    Ignore System Rotation Lock for Fullscreen: Obróć fizycznie urządzenie, aby włączyć lub wyłączyć pełny ekran, nawet gdy automatyczne obracanie w Androidzie jest wyłączone.
   Download Settings:
     Global Additional yt-dlp Arguments: Dodatkowe argumenty wiersza poleceń przekazywane do yt-dlp przy każdym pobieraniu, na przykład --cookies-from-browser firefox.
     Concurrent Downloads: Maksymalna liczba zadań yt-dlp wykonywanych jednocześnie.
@@ -1032,8 +1069,8 @@ Downloads:
   File Name Template: Szablon nazwy pliku
   File Name Template Help: 'Dostępne pola: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zakres czasu i rozdziały
-  Start Time: Czas rozpoczęcia (HH:MM:SS)
-  End Time: Czas zakończenia (HH:MM:SS)
+  Start Time: Czas rozpoczęcia
+  End Time: Czas zakończenia
   Split by Chapters: Podziel rozdziały na osobne pliki
   Remove Segments: Usuń segmenty
   Subtitles and Metadata: Napisy i metadane
@@ -1132,5 +1169,42 @@ Tray Icon:
 
 Stats:
   All devices: Wszystkie urządzenia
+
+Form Inputs:
+  Enter Password Hint: "Wpisz swoje hasło"
+  Choose Password Hint: "Wybierz hasło"
+  Confirm Password Hint: "Powtórz nowe hasło"
+  Encryption Passphrase Hint: "Wpisz swoją frazę szyfrującą"
+  Show Password: "Pokaż hasło"
+  Hide Password: "Ukryj hasło"
+  Search Text Hint: "Wpisz wyszukiwane hasła"
+  Playlist Description Hint: "Opisz tę playlistę"
+  Filename Preview: "Podgląd nazwy pliku"
+  Enter Channels: "Wprowadź kanały"
+  Enter Text: "Wprowadź tekst"
+  Video URL: URL filmu lub playlisty
+  Paste Link: Wklej link do filmu lub playlisty
+  Example: np. {example}
+  No Minimum: Bez minimum
+  No Maximum: Bez maksimum
+  Any Age: Dowolny wiek
+  Included Terms Example: np. poradnik, recenzja
+  Excluded Terms Example: np. zwiastun, podgląd
+  Download Folder Hint: Pozostaw puste, aby użyć folderu Pobrane
+  Global Arguments Hint: Opcjonalne argumenty dla każdego pobierania
+  Unlimited Hint: 0 oznacza brak limitu
+  Add Argument: Dodaj argument
+  Template Name Example: np. Tylko dźwięk
+  Download Arguments Hint: Opcjonalne argumenty dla tego pobierania
+  Generated ID Hint: Pozostaw puste, aby wygenerować ID
+  Default Value: "Domyślnie: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Wyszukiwanie z użyciem skonfigurowanych plików cookie nie powiodło się."
+
+Storage Startup Error:
+  Title: "Nie udało się wczytać danych aplikacji"
+  Message: "Zwolnij miejsce na urządzeniu i spróbuj ponownie. Synchronizacja jest wstrzymana do czasu wczytania danych."
+  Retry: "Spróbuj ponownie"
 Native Permissions:
   Local Network: "Wykrywanie urządzeń w sieci lokalnej i przesyłanie do nich filmów oraz synchronizowanie ustawień i danych między urządzeniami."

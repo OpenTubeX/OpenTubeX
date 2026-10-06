@@ -16,6 +16,7 @@ import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
 import watchQueue from './modules/watch-queue'
 import syncServer from './modules/sync-server'
+import { getProfileSyncSignature } from '../helpers/profile-sync'
 import {
   SYNC_ACTION_REASONS,
   SYNC_MUTATION_REASONS,
@@ -26,6 +27,7 @@ function syncOnLocalChanges(store) {
   const revisions = new Map()
   const actionRevisions = new WeakMap()
   const remoteActions = new WeakSet()
+  let profileValue = getProfileSyncSignature(store.state.profiles?.profileList ?? [])
   const settingValues = new Map(Object.entries(store.state.settings).map(([key, value]) => {
     return [key, JSON.stringify(value)]
   }))
@@ -36,7 +38,11 @@ function syncOnLocalChanges(store) {
 
   store.subscribe((mutation, state) => {
     const reason = SYNC_MUTATION_REASONS.get(mutation.type)
-    if (reason) incrementRevision(reason)
+    if (reason === 'profiles' || reason === 'profilesOrSubscriptions' || mutation.type === 'setProfileList') {
+      const value = getProfileSyncSignature(state.profiles?.profileList ?? [])
+      if (reason && value !== profileValue) incrementRevision(reason)
+      profileValue = value
+    } else if (reason) incrementRevision(reason)
 
     if (mutation.type.startsWith('set')) {
       const setting = mutation.type.charAt(3).toLowerCase() + mutation.type.slice(4)

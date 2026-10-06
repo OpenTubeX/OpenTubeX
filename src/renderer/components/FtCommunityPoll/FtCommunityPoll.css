@@ -41,9 +41,20 @@
   margin-block-end: 10px;
 }
 
-.option > img {
+.option > .pollImage {
   margin-inline-start: 10px;
   block-size: 125px;
+}
+
+.pollImage.retryImagePlaceholder {
+  display: grid;
+  place-items: center;
+  color: var(--secondary-text-color);
+}
+
+.pollImage.retryImagePlaceholder :deep(.ft-icon__glyph) {
+  block-size: 48px;
+  inline-size: 48px;
 }
 
 .correct-option {

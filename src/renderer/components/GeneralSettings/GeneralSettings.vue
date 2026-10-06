@@ -7,6 +7,15 @@
       :class="{ appearanceSwitchGrid: mode === 'appearance' }"
     >
       <FtToggleSwitch
+        v-if="mode === 'general' && IS_CAPACITOR"
+        :label="t('Settings.General Settings.Enable Tabs')"
+        :tooltip="t('Tooltips.General Settings.Enable Tabs')"
+        :default-value="store.getters.getEnableMobileTabs"
+        setting-key="enableMobileTabs"
+        compact
+        @change="store.dispatch('updateEnableMobileTabs', $event)"
+      />
+      <FtToggleSwitch
         v-if="mode === 'general'"
         :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
         compact
@@ -144,6 +153,7 @@
     <div class="switchGrid generalSelectGrid">
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.Privacy Settings.Week Starts On')"
         :value="statsWeekStartsOn"
         setting-key="statsWeekStartsOn"
@@ -155,6 +165,7 @@
       />
       <FtSelect
         v-if="mode === 'providers' && supportsYtDlp"
+        size-to-content
         :placeholder="t('Settings.General Settings.Stream Extraction Method.Stream Extraction Method')"
         :value="videoPlaybackEngine"
         setting-key="videoPlaybackEngine"
@@ -166,6 +177,7 @@
       />
       <FtSelect
         v-if="mode === 'providers'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Preferred API Backend.Preferred API Backend')"
         :value="backendPreference"
         :select-names="backendNames"
@@ -176,6 +188,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Default Landing Page')"
         :value="landingPage"
         setting-key="landingPage"
@@ -186,9 +199,11 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
         :value="newTabPosition"
         setting-key="newTabPosition"
+        :disabled="!store.getters.getTabsEnabled"
         :select-names="newTabPositionNames"
         :select-values="NEW_TAB_POSITION_VALUES"
         :icon="['fas', 'plus']"
@@ -196,9 +211,11 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Tab Close Focus.Tab Close Focus')"
         :value="tabCloseFocus"
         setting-key="tabCloseFocus"
+        :disabled="!store.getters.getTabsEnabled"
         :select-names="tabCloseFocusNames"
         :select-values="TAB_CLOSE_FOCUS_VALUES"
         :icon="['fas', 'xmark']"
@@ -206,6 +223,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
         :value="startupBehavior"
         setting-key="startupBehavior"
@@ -217,6 +235,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
         setting-key="listType"
@@ -227,6 +246,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
         :value="playlistViewType"
         setting-key="playlistViewType"
@@ -237,6 +257,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
         setting-key="thumbnailPreference"
@@ -249,7 +270,8 @@
         @reset="resetThumbnailPreference"
       />
       <FtSelect
-        v-if="mode === 'general'"
+        v-if="mode === 'general' && !IS_CAPACITOR && !phoneLayout"
+        size-to-content
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"
@@ -259,7 +281,32 @@
         @change="updateExtraThumbnailAction"
       />
       <FtSelect
+        v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Left')"
+        :value="getThumbnailSwipeValue(store.getters.getThumbnailLeftSwipeAction)"
+        setting-key="thumbnailLeftSwipeAction"
+        :select-names="thumbnailSwipeActionNames"
+        :select-values="thumbnailSwipeActionValues"
+        :tooltip="t('Settings.General Settings.Thumbnail Swipe Gestures.Description')"
+        :icon="getThumbnailSwipeIcon(store.getters.getThumbnailLeftSwipeAction)"
+        @change="store.dispatch('updateThumbnailLeftSwipeAction', $event)"
+      />
+      <FtSelect
+        v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
+        size-to-content
+        :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Right')"
+        :value="getThumbnailSwipeValue(store.getters.getThumbnailRightSwipeAction)"
+        setting-key="thumbnailRightSwipeAction"
+        :select-names="thumbnailSwipeActionNames"
+        :select-values="thumbnailSwipeActionValues"
+        :tooltip="t('Settings.General Settings.Thumbnail Swipe Gestures.Description')"
+        :icon="getThumbnailSwipeIcon(store.getters.getThumbnailRightSwipeAction)"
+        @change="store.dispatch('updateThumbnailRightSwipeAction', $event)"
+      />
+      <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
         setting-key="currentLocale"
@@ -271,6 +318,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Date Format')"
         :value="dateFormat"
         setting-key="dateFormat"
@@ -281,6 +329,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Time Format')"
         :value="timeFormat"
         setting-key="timeFormat"
@@ -291,6 +340,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
         :value="reducedMotion"
         setting-key="reducedMotion"
@@ -301,6 +351,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
         setting-key="avoidTranslation"
@@ -312,6 +363,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && regionDataLoaded"
+        size-to-content
         :placeholder="t('Settings.General Settings.Region for Trending')"
         :value="region"
         setting-key="region"
@@ -327,7 +379,9 @@
     >
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
-          :placeholder="t('Settings.General Settings.Current Invidious Instance')"
+          :icon="['fas', 'link']"
+          :label="t('Settings.General Settings.Current Invidious Instance')"
+          placeholder="https://your-instance.example"
           :show-action-button="false"
           :show-label="true"
           :value="currentInvidiousInstance"
@@ -410,6 +464,7 @@ import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import {
   DATE_FORMAT_OPTIONS,
   TIME_FORMAT_OPTIONS,
@@ -422,6 +477,7 @@ import {
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const phoneLayout = usePhoneLayout()
 const enablePullToRefresh = computed(() => store.getters.getEnablePullToRefresh)
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']
@@ -854,6 +910,39 @@ const extraThumbnailActionNames = computed(() => [
  */
 function updateExtraThumbnailAction(value) {
   store.dispatch('updateExtraThumbnailAction', value)
+}
+
+const thumbnailSwipeActions = computed(() => [
+  ['disabled', t('Settings.Player Settings.Swipe Gestures.Disabled')],
+  ['addToPlaylist', t('User Playlists.Add to Playlist')],
+  ['history', t('Video.Mark As Watched')],
+  ['markAsFullySeen', t('Video.Mark As Fully Watched')],
+  ['quickBookmark', t('Tab Organizer.Icon Labels.Bookmark')],
+  ['addToQueue', t('Video.Add to Queue')],
+  ['playNext', t('Video.Play Next')],
+  ['copyYoutube', t('Video.Copy YouTube Link')],
+  ...(IS_CAPACITOR ? [['share', t('Share.Share Link')]] : []),
+  ...(supportsYtDlp && enableDownloads.value ? [['download', t('Downloads.Download Video')]] : []),
+])
+function getThumbnailSwipeIcon(action) {
+  return {
+    addToPlaylist: ['fac', 'playlist-add'],
+    history: ['fas', 'eye'],
+    markAsFullySeen: ['fas', 'flag-checkered'],
+    quickBookmark: ['fas', 'bookmark'],
+    addToQueue: ['fas', 'add-to-queue'],
+    playNext: ['fas', 'step-forward'],
+    copyYoutube: ['fas', 'link'],
+    share: ['fas', 'share-alt'],
+    download: ['fas', 'download'],
+  }[getThumbnailSwipeValue(action)] ?? ['fas', 'xmark']
+}
+
+const thumbnailSwipeActionValues = computed(() => thumbnailSwipeActions.value.map(([value]) => value))
+const thumbnailSwipeActionNames = computed(() => thumbnailSwipeActions.value.map(([, name]) => name))
+
+function getThumbnailSwipeValue(action) {
+  return thumbnailSwipeActionValues.value.includes(action) ? action : 'disabled'
 }
 
 const LOCALE_VALUES = ['system', ...allLocales]

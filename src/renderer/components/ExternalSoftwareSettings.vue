@@ -39,7 +39,9 @@
           <FtInput
             v-else-if="!IS_IOS"
             class="externalSoftwarePath"
-            :placeholder="t('Settings.External Software Settings.yt-dlp Executable Path')"
+            :icon="['fas', 'folder-open']"
+            :label="t('Settings.External Software Settings.yt-dlp Executable Path')"
+            placeholder="/path/to/yt-dlp"
             :show-action-button="true"
             :allow-action-button-when-empty="true"
             :force-action-button-icon-name="['fas', 'folder-open']"
@@ -92,7 +94,6 @@
       </section>
 
       <section
-        v-if="!IS_IOS"
         class="externalSoftwareTool"
         aria-labelledby="ffmpeg-settings-heading"
       >
@@ -117,7 +118,9 @@
           <FtInput
             v-if="ytDlpFfmpegSource === 'system'"
             class="externalSoftwarePath"
-            :placeholder="t('Settings.External Software Settings.FFmpeg Executable Path')"
+            :icon="['fas', 'folder-open']"
+            :label="t('Settings.External Software Settings.FFmpeg Executable Path')"
+            placeholder="/path/to/ffmpeg"
             :show-action-button="true"
             :allow-action-button-when-empty="true"
             :force-action-button-icon-name="['fas', 'folder-open']"
@@ -270,11 +273,13 @@
       >
         <FtInput
           v-if="ytDlpPlaybackAuthMode === 'file'"
-          :placeholder="t('Settings.External Software Settings.Cookie File')"
+          :label="t('Settings.External Software Settings.Cookie File')"
+          placeholder="/path/to/cookies.txt"
+          :action-button-label="t('Settings.External Software Settings.Cookie File')"
           :show-action-button="true"
           :allow-action-button-when-empty="true"
           :force-action-button-icon-name="['fas', 'folder-open']"
-          :icon="['fas', 'folder-open']"
+          :icon="['fas', 'file-lines']"
           :show-label="true"
           :value="ytDlpPlaybackCookiesPath"
           setting-key="ytDlpPlaybackCookiesPath"
@@ -847,7 +852,6 @@ async function chooseBrowserProfilePath() {
 <style scoped>
 .externalSoftwareTools {
   --external-software-select-gutter: 70px;
-  --external-software-help-width: 32px;
 
   align-items: stretch;
   display: grid;
@@ -888,16 +892,15 @@ async function chooseBrowserProfilePath() {
 }
 
 .externalSoftwareSelect {
-  inline-size: calc(100% - var(--external-software-select-gutter));
-  max-inline-size: 340px;
+  inline-size: calc(100% - var(--external-software-select-gutter) + var(--select-indicator-space));
+  max-inline-size: calc(340px + var(--select-indicator-space));
 }
 
 .externalSoftwarePath {
-  inline-size: calc(
-    100% - var(--external-software-select-gutter) + var(--external-software-help-width)
-  );
+  inline-size: calc(100% - var(--external-software-select-gutter));
   margin-block-start: 24px;
-  max-inline-size: calc(340px + var(--external-software-help-width));
+  min-inline-size: 0;
+  max-inline-size: 340px;
 }
 
 .externalSoftwareToolStatus {
@@ -920,13 +923,21 @@ async function chooseBrowserProfilePath() {
 }
 
 .managedSoftwareControls .externalSoftwareSelect {
-  inline-size: 250px;
-  margin-inline-start: 70px;
+  inline-size: calc(250px + var(--select-indicator-space));
+  margin-inline-start: var(--select-indicator-space);
+}
+
+.managedSoftwareControls .externalSoftwareSelect:has(.changedSettingIndicator),
+.settingsContent.highlightChangedSettings .managedSoftwareControls .externalSoftwareSelect {
+  /* Center the field while accounting for the marker's 3px border and 9px padding. */
+  margin-inline-start: calc(var(--select-indicator-space) - 12px);
 }
 
 .restrictedPlaybackAuthControls {
+  align-items: flex-end;
   column-gap: 12px;
   justify-content: center;
+  margin-block-end: 16px;
 }
 
 .restrictedPlaybackAuthControl {
@@ -940,18 +951,20 @@ async function chooseBrowserProfilePath() {
   justify-content: flex-end;
 }
 
-.restrictedPlaybackAuthControl > :deep(.select),
 .restrictedPlaybackAuthControl > :deep(.ft-input-component) {
+  box-sizing: border-box;
   inline-size: 340px;
-  max-inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px);
+  margin-inline-end: 70px;
 }
 
-.restrictedPlaybackAuthControl > :deep(.ft-input-component) {
-  margin-block-start: 14px;
-}
-
-.restrictedPlaybackAuthDetail > :deep(.select) {
-  margin-inline-end: 0;
+.restrictedPlaybackAuthControl > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: calc(340px + var(--select-indicator-space));
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px + var(--select-indicator-space));
+  margin-inline-end: calc(70px - var(--select-indicator-space));
 }
 
 .restrictedPlaybackBrowserProfile {
@@ -959,8 +972,16 @@ async function chooseBrowserProfilePath() {
 }
 
 .restrictedPlaybackBrowserProfile > :deep(.ft-input-component) {
+  box-sizing: border-box;
   inline-size: 340px;
-  max-inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px);
+}
+
+.restrictedPlaybackBrowserProfile > :deep(.ft-input-component:only-child:has(.inputIndicators > *)) {
+  margin-inline: 0 70px;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px);
 }
 
 @container settings-content (width <= 860px) {
@@ -1036,25 +1057,12 @@ async function chooseBrowserProfilePath() {
 }
 
 @container settings-content (width <= 460px) {
-  .externalSoftwareTools {
-    --external-software-select-gutter: 32px;
-  }
-
   .externalSoftwareTool {
     padding-inline: 14px;
   }
 
-  .externalSoftwareSelect,
   .managedSoftwareControls .externalSoftwareSelect {
-    margin-inline: 0 28px;
-  }
-
-  .externalSoftwareSelect {
-    inline-size: calc(100% - var(--external-software-select-gutter));
-  }
-
-  .managedSoftwareControls .externalSoftwareSelect {
-    inline-size: calc(100% - 28px);
+    inline-size: min(calc(250px + var(--select-indicator-space)), calc(100% - var(--select-indicator-space)));
   }
 }
 </style>

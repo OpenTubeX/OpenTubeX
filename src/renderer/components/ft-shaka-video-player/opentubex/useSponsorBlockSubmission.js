@@ -2,6 +2,7 @@ import { computed, reactive, ref } from 'vue'
 
 import store from '../../../store/index'
 import { submitSponsorBlockSegments } from '../../../helpers/sponsorblock'
+import { SPONSORBLOCK_SUBMISSION_CATEGORIES } from '../../../helpers/player/sponsorBlockCategories'
 import {
   getSponsorBlockSubmissionSegmentTimes,
   isSponsorBlockFullVideoCategory,
@@ -10,20 +11,6 @@ import {
 } from '../../../helpers/player/sponsorBlockFullVideo'
 import { translateSponsorBlockCategory } from '../../../helpers/player/utils'
 import { openExternalLink, showToast } from '../../../helpers/utils'
-
-const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
-  'sponsor',
-  'selfpromo',
-  'interaction',
-  'intro',
-  'outro',
-  'preview',
-  'hook',
-  'music_offtopic',
-  'filler',
-  'poi_highlight',
-  'exclusive_access'
-])
 
 const SPONSORBLOCK_PREVIEW_SECONDS = 2
 const SPONSORBLOCK_TIMESTAMP_PRECISION_MS = 1
@@ -382,6 +369,23 @@ export function useSponsorBlockSubmission({
   function closeSponsorBlockSubmissionMenu() {
     sponsorBlockSubmissionMenuOpen.value = false
     sponsorBlockSubmissionError.value = ''
+  }
+
+  async function copySponsorBlockSegmentToDraft(segment) {
+    if (!sponsorBlockSubmissionAvailable.value || sponsorBlockSubmissionPending.value ||
+      !SPONSORBLOCK_SUBMISSION_CATEGORIES.includes(segment.category)) {
+      return false
+    }
+
+    const videoId = props.videoId
+    const draft = normalizeSponsorBlockDraftSegment({ ...segment, id: createSponsorBlockDraftId(), previewed: false })
+    sponsorBlockDraftSegments.value.push(draft)
+    setSponsorBlockDraftEditValue(draft)
+    setSponsorBlockDraftEditing(draft.id, true)
+    await persistSponsorBlockDrafts()
+    if (props.videoId !== videoId) return false
+    openSponsorBlockSubmissionMenu()
+    return true
   }
 
   async function startSponsorBlockDraft() {
@@ -873,6 +877,7 @@ export function useSponsorBlockSubmission({
     cancelCurrentSponsorBlockDraft,
     clearSponsorBlockDrafts,
     closeSponsorBlockSubmissionMenu,
+    copySponsorBlockSegmentToDraft,
     deleteSponsorBlockDraft,
     endSponsorBlockDraft,
     getSponsorBlockSubmissionVideoDuration,

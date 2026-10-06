@@ -21,3 +21,9 @@
 .channelAvatarFallback {
   font-size: 24px;
 }
+
+.channelAvatarFallback :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}

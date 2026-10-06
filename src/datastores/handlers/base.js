@@ -1,13 +1,15 @@
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
-import { PlaylistVideoAddResult } from '../../constants'
+import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 import { resolveSearchHistoryEntry } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
+import { createIdQuery } from '../idQuery'
 import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -185,7 +187,11 @@ class History {
 
   static async find() {
     await this.migrateWatchedStatus()
-    return db.history.findAsync({}).sort({ timeWatched: -1 })
+    const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
+    // Prepare the index once the datastore is loaded, before playback and bulk
+    // edits start writing by video ID. Seen-mark merging is not always enabled.
+    await db.history.ensureIndexAsync({ fieldName: 'videoId' })
+    return records
   }
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata }) {
@@ -278,7 +284,7 @@ class History {
 
     if (deletions.length > 0) {
       await recommendations.remove(deletions)
-      await db.history.removeAsync({ videoId: { $in: deletions } }, { multi: true })
+      await db.history.removeAsync(createIdQuery('videoId', deletions), { multi: true })
     }
     for (const record of migratedUpdates) {
       await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
@@ -357,7 +363,7 @@ class History {
   static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
     return db.history.updateAsync(
       {
-        videoId: { $in: videoIds },
+        ...createIdQuery('videoId', videoIds),
         lastViewedPlaylistId: lastViewedPlaylistId
       },
       { $unset: { lastViewedPlaylistId: '', lastViewedPlaylistType: '', lastViewedPlaylistItemId: '' } },
@@ -391,7 +397,7 @@ class History {
 
     if (videoIds.length > 0) {
       await recommendations.remove(videoIds)
-      await db.history.removeAsync({ videoId: { $in: videoIds } }, { multi: true })
+      await db.history.removeAsync(createIdQuery('videoId', videoIds), { multi: true })
     }
 
     return videoIds
@@ -656,6 +662,14 @@ class Profiles {
 
   static async find() {
     await loadProfilesDatastore()
+    try {
+      await db.profiles.updateAsync(
+        { _id: MAIN_PROFILE_ID, $or: [{ icon: null }, { icon: { $exists: false } }] },
+        { $set: { icon: { ...DEFAULT_PROFILE_ICON } } }
+      )
+    } catch (error) {
+      console.error(error)
+    }
     return db.profiles.findAsync({})
   }
 
@@ -809,7 +823,7 @@ class Playlists {
     return db.playlists.updateAsync(
       { _id },
       {
-        $pull: { videos: { playlistItemId: { $in: playlistItemIds } } },
+        $pull: { videos: createIdQuery('playlistItemId', playlistItemIds) },
         $set: { lastUpdatedAt }
       },
       { upsert: true }

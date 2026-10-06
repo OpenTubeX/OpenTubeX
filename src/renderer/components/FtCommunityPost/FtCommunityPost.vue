@@ -19,6 +19,7 @@
           aria-hidden="true"
         >
           <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="authorThumbnail"
             class="communityThumbnail"
             alt=""
@@ -26,6 +27,7 @@
         </component>
         <FtRetryImage
           v-else
+          :fallback-icon="['fas', 'circle-user']"
           :src="authorThumbnail"
           class="communityThumbnail"
           alt=""
@@ -71,23 +73,23 @@
         :key="index"
         lazy="true"
       >
-        <img
+        <FtRetryImage
           :src="getBestQualityImage(img, { preserveYouTubeCrop: true })"
           class="communityImage"
           alt=""
           loading="lazy"
           @error="removeImagePreloader"
-        >
+        />
       </swiper-slide>
     </swiper-container>
     <div
       v-else-if="postType === 'image' && postContent.content.length > 0"
     >
-      <img
+      <FtRetryImage
         :src="getBestQualityImage(postContent.content)"
         class="communityImage"
         alt=""
-      >
+      />
     </div>
     <div
       v-else-if="postType === 'video'"

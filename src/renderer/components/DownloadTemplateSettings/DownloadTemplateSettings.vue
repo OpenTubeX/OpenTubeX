@@ -20,7 +20,9 @@
         @change="loadTemplateSource"
       />
       <FtInput
-        :placeholder="t('Downloads.Template Name')"
+        :icon="['fas', 'hashtag']"
+        :label="t('Downloads.Template Name')"
+        :placeholder="t('Form Inputs.Template Name Example')"
         :show-label="true"
         :show-action-button="false"
         :maxlength="100"
@@ -67,7 +69,9 @@
 
       <section class="optionSection">
         <FtInput
-          :placeholder="t('Downloads.File Name Template')"
+          :icon="['fas', 'file-lines']"
+          :label="t('Downloads.File Name Template')"
+          placeholder="{title}.{ext}"
           :tooltip="fileNameTemplateHelp"
           :show-action-button="false"
           :show-label="true"
@@ -78,17 +82,27 @@
 
       <section class="optionSection">
         <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
-        <div class="optionGrid">
+        <div class="segmentGrid">
           <FtInput
-            :placeholder="t('Downloads.Start Time')"
+            :icon="['fas', 'clock']"
+            :label="t('Downloads.Start Time')"
+            :input-filter="filterDownloadTimeInput"
+            placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
             :show-label="true"
             :value="options.startTime"
             @input="setOption('startTime', $event)"
           />
+          <span
+            class="timeRangeSeparator"
+            aria-hidden="true"
+          />
           <FtInput
-            :placeholder="t('Downloads.End Time')"
+            :icon="['fas', 'clock']"
+            :label="t('Downloads.End Time')"
+            :input-filter="filterDownloadTimeInput"
+            placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
             :show-label="true"
@@ -96,7 +110,7 @@
             @input="setOption('endTime', $event)"
           />
         </div>
-        <div class="toggleGrid">
+        <div class="centeredToggle">
           <FtToggleSwitch
             compact
             :label="t('Downloads.Split by Chapters')"
@@ -109,7 +123,7 @@
 
       <section class="optionSection">
         <h3>{{ t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
-        <div class="toggleGrid">
+        <div class="centeredToggle">
           <FtToggleSwitch
             compact
             :label="t('Downloads.Remove Segments')"
@@ -166,7 +180,9 @@
         </div>
         <FtInput
           class="subtitleLanguages"
-          :placeholder="t('Downloads.Subtitle Languages')"
+          :icon="['fas', 'language']"
+          :label="t('Downloads.Subtitle Languages')"
+          placeholder="en.*,de.*"
           :tooltip="t('Downloads.Subtitle Languages Help')"
           :disabled="!subtitlesOnly && !options.includeSubtitles"
           :show-action-button="false"
@@ -178,7 +194,9 @@
 
       <section class="optionSection">
         <FtInput
-          :placeholder="t('Downloads.Additional yt-dlp Arguments')"
+          :icon="['fas', 'terminal']"
+          :label="t('Downloads.Additional yt-dlp Arguments')"
+          :placeholder="t('Form Inputs.Download Arguments Hint')"
           :show-action-button="false"
           :show-label="true"
           :value="options.customArgs"
@@ -236,6 +254,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import {
   DEFAULT_DOWNLOAD_TEMPLATES,
+  filterDownloadTimeInput,
   getDownloadTemplateOptions,
   replaceAutomaticDownloadTemplateReferences
 } from '../../helpers/downloadTemplates'
@@ -414,8 +433,8 @@ function updateReferences(oldValue, replacementValue) {
   if (store.getters.getYtDlpSelectedTemplate === oldValue) {
     store.dispatch('updateYtDlpSelectedTemplate', replacementValue)
   }
-  store.dispatch('updateYtDlpAutomaticDownloadRules', replaceAutomaticDownloadTemplateReferences(
-    store.getters.getYtDlpAutomaticDownloadRules,
+  store.dispatch('updateYtDlpAutomaticDownloadRules', rules => replaceAutomaticDownloadTemplateReferences(
+    rules,
     oldValue,
     replacementValue
   ))
@@ -459,13 +478,19 @@ function deleteTemplate() {
 </script>
 
 <style scoped>
+.templateManagerHeader,
+.templateOptions {
+  --settings-control-margin: 7px 0;
+  --input-bottom-spacing: 0;
+}
+
 .templateManagerHeader {
   flex: none;
   display: grid;
   align-items: start;
   grid-template-columns: minmax(240px, 1fr) minmax(280px, 2fr);
   gap: 16px;
-  padding: 16px 20px;
+  padding: 8px 20px 16px;
 }
 
 .templateOptions {
@@ -475,12 +500,7 @@ function deleteTemplate() {
 }
 
 .optionSection {
-  border-block-start: 1px solid var(--side-nav-color);
-  padding-block: 16px;
-}
-
-.optionSection:first-child {
-  border-block-start: 0;
+  padding-block: 10px;
 }
 
 .optionSection h3 {
@@ -493,7 +513,7 @@ function deleteTemplate() {
   display: grid;
   align-items: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  gap: 16px;
 }
 
 .optionGrid > :deep(.select),
@@ -501,31 +521,59 @@ function deleteTemplate() {
   inline-size: 100%;
 }
 
-.templateManagerHeader > :deep(.ft-input-component) {
-  margin-block-start: 30px;
+.templateManagerHeader > :deep(.ft-input-component),
+.optionSection > :deep(.ft-input-component) {
+  min-inline-size: 0;
+  inline-size: 100%;
 }
 
-.templateManagerHeader :deep(.selectLabel) {
-  position: absolute;
-  inset-block-start: -20px;
-  inset-inline-start: 0;
-  color: var(--accent-color);
-  font-size: 14px;
-  line-height: 1;
+.templateOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: calc(100% - 40px);
+  margin-inline-end: 40px;
 }
 
-.templateManagerHeader :deep(.ft-input) {
-  margin-block-end: 0;
+.segmentGrid {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  inline-size: min(500px, 100%);
+  margin-inline: auto;
 }
 
-.toggleGrid {
-  margin-block-start: 10px;
+.segmentGrid > :deep(.ft-input-component) {
+  min-inline-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.timeRangeSeparator {
+  margin-block-start: 7px;
+}
+
+.timeRangeSeparator::before {
+  content: '–';
+}
+
+.centeredToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 16px;
+}
+
+.centeredToggle > :deep(.switch-ctn) {
+  inline-size: auto;
 }
 
 .sponsorCategories {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, max-content));
   gap: 2px 18px;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-inline: auto;
 }
 
 .disabledOptions {
@@ -533,12 +581,11 @@ function deleteTemplate() {
 }
 
 .subtitleLanguages {
-  margin-block-start: 12px;
+  margin-block-start: 23px;
 }
 
 .templateManagerFooter {
   flex: none;
-  border-block-start: 1px solid var(--side-nav-color);
   padding: 10px 20px;
 }
 

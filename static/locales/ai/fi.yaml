@@ -267,6 +267,11 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Enable Tabs: "Ota välilehdet käyttöön"
+    Thumbnail Swipe Gestures:
+      Left: Pyyhkäisy vasemmalle pikkukuvissa
+      Right: Pyyhkäisy oikealle pikkukuvissa
+      Description: Pyyhkäise videon pikkukuvaa vaakasuunnassa ja vapauta suorittaaksesi valitun toiminnon.
     Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
     Use tray icon: "Käytä ilmoitusalueen kuvaketta"
     Close to system tray: "Sulje ilmoitusalueelle"
@@ -275,7 +280,9 @@ Settings:
     Swipe to refresh: Päivitä pyyhkäisemällä
     Blur Thumbnails: Sumenna pikkukuvat
     Navigation:
-      Show Active Subscriptions: Näytä aktiiviset tilaukset
+      Always Show Navigation Bar: Näytä navigointipalkki aina, kun se on alareunassa
+      Compact Tab Labels: Tiivis navigointipalkki, kun se on alareunassa
+      Show Active Subscriptions: Näytä aktiiviset tilaukset sivupalkissa
       Navigation: Navigointi
       Customize Navigation: Mukauta navigointia
       Add Item: Lisää kohde
@@ -357,6 +364,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
     Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
     Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"
     Main Color Theme:
@@ -439,8 +447,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Vaalea"
-      OpenTubeX Dark: "OpenTubeX Tumma"
+      Ocean Light: "Ocean Vaalea"
+      Ocean Dark: "Ocean Tumma"
       Custom: Mukautettu
     Light Theme: Vaalea teema
     Dark Theme: Tumma teema
@@ -475,6 +483,7 @@ Settings:
       Unable to Delete: Mukautettua teemaa ei voitu poistaa
       Invalid Theme File: Virheellinen mukautettu teematiedosto
       Colors:
+        Watched thumbnail overlay: "Katsottujen videoiden pikkukuvien peite"
         Main text: Pääteksti
         Secondary text: Toissijainen teksti
         Subtle text: Hillitty teksti
@@ -634,6 +643,8 @@ Settings:
     Preload Upcoming Videos: "Esilataa seuraavat videot"
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
+    Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
+    Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
     Show Google Cast Button: "Näytä Google Cast -painike"
   Channel Settings:
     Channel Settings: Kanava-asetukset
@@ -671,9 +682,9 @@ Settings:
     Update Managed Tools: Päivitä
     Managed Tools Download Error Template: 'Hallittuja työkaluja ei voitu ladata: {errors}'
     Download Folder: Latauskansio
-    Global Additional yt-dlp Arguments: Yleiset yt-dlp-lisäargumentit
+    Global Additional yt-dlp Arguments: Ylimääräiset yt-dlp-argumentit
     Concurrent Downloads: Samanaikaiset lataukset
-    Bandwidth Limit: Kaistanleveysrajoitus (KiB/s, 0 = rajoittamaton)
+    Bandwidth Limit: Kaistanleveysrajoitus (KiB/s)
     Choose Download Folder: Valitse latauskansio
     Download Templates: Latausmallit
     Manage Download Templates: Hallitse latausmalleja ({templateCount})
@@ -746,8 +757,8 @@ Settings:
       Automatic: Päivitä automaattisesti
       Ask: Kysy ennen päivittämistä
       Manual: Päivitä vain manuaalisesti
-    yt-dlp Executable Path: yt-dlp:n suoritustiedoston polku
-    FFmpeg Executable Path: FFmpeg-suoritustiedoston polku
+    yt-dlp Executable Path: yt-dlp-ohjelmatiedosto
+    FFmpeg Executable Path: FFmpeg-ohjelmatiedosto
     Restricted Playback Authentication: "yt-dlp-evästeet"
     Cookie Source: Evästeiden lähde
     Cookie Sources:
@@ -990,7 +1001,7 @@ Settings:
     Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
     Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.
     Description: 'Synkronoi tilaukset, profiilit, soittolistat, katseluhistoria ja tuetut asetukset OpenTubeX- tai LibreTube-synkronointipalvelimen kanssa. LibreTube-palvelimet eivät välttämättä tue kaikkia synkronointiominaisuuksia.'
-    Server URL: Palvelimen URL-osoite
+    Server URL: Synkronointipalvelimen URL
     Checking Server: Tarkistetaan synkronointipalvelinta…
     Server Unavailable: Synkronointipalvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja yritä uudelleen.
     Username: Käyttäjänimi
@@ -1080,7 +1091,7 @@ Settings:
     Open All Tabs Confirmation: "Avataanko kaikki välilehdet?"
     Server Update Required: "Päivitä tämä palvelin tukemaan salattua reaaliaikaista synkronointia."
   Proxy Settings:
-    IP Block Recovery Script Path: IP-eston palautuskomentosarjan polku
+    IP Block Recovery Script Path: IP-eston palautusskripti
     Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto
     Running IP block recovery script: Suoritetaan IP-eston palautuskomentosarjaa
     IP block recovery script failed: 'IP-eston palautuskomentosarja epäonnistui (poistumiskoodi: {exitCode})'
@@ -1092,7 +1103,7 @@ Settings:
       Excluded Channels: "Poissuljetut kanavat"
       Tooltip: "Anna kanavan tunnus, jotta SponsorBlock-jaksoja ei ohiteta sen videoissa. Tunnuksen on vastattava täsmälleen, kirjainkoko mukaan lukien."
     Enable SponsorBlock Submission: Ota SponsorBlock-ilmoitusten lähetys käyttöön
-    SponsorBlock Private User ID (optional): SponsorBlockin yksityinen käyttäjätunnus (valinnainen)
+    SponsorBlock Private User ID (optional): Yksityinen käyttäjätunnus (valinnainen)
     SponsorBlock Private User ID Tooltip: Liitä selainlaajennuksen yksityinen SponsorBlock-käyttäjätunnus. Jätä kenttä tyhjäksi, jos haluat käyttää sovelluksen luomaa tunnusta.
     Generated SponsorBlock User ID: Luotu SponsorBlock-käyttäjätunnus
     Generated SponsorBlock User ID Tooltip: Sovelluksen luomaa SponsorBlock-käyttäjätunnusta voi käyttää selainlaajennuksessa tai toisella tietokoneella käytettävässä sovelluksessa.
@@ -1104,7 +1115,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ota Return YouTube Dislike käyttöön
-    Return YouTube Dislike Url: Return YouTube Dislike -API:n URL-osoite (oletus on https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Parental Control Settings:
     Disable Channel Links: Poista kanavalinkit käytöstä
   Password Dialog:
@@ -1149,6 +1160,21 @@ About:
   Matrix: Matrix
   Email: Sähköposti
 Profile:
+  Customization: Mukauttaminen
+  Manage Profile Subscriptions: Hallitse profiilin tilauksia
+  Icon Names:
+    Person: Henkilö
+    People: Ihmiset
+    Headphones: Kuulokkeet
+    Gaming: Pelaaminen
+    Film: Elokuva
+    Art: Taide
+    Science: Tiede
+    Globe: Maapallo
+    Heart: Sydän
+    Sun: Aurinko
+    Moon: Kuu
+    Trophy: Pokaali
   Profile Icon: Profiilikuvake
   Choose an Emoji: Valitse emoji
   Custom Emoji: Mukautettu emoji
@@ -1337,12 +1363,16 @@ Video:
     Hide: Piilota
     Show: Näytä
     Scroll Mini Player:
+      Collapse Controls: "Supista säätimet"
+      Expand Controls: "Laajenna säätimet"
       Back to Top: Takaisin ylös
       Return to Video Tab: Palaa videovälilehteen
       Hide: Piilota pienoissoitin
       Play: Toista
       Pause: Keskeytä
       Drag Handle: Siirrä minisoitinta
+      Rewind 10 seconds: Kelaa 10 sekuntia taaksepäin
+      Forward 10 seconds: Kelaa 10 sekuntia eteenpäin
     SponsorBlock:
       CancelCurrentSegment: Peru osuuden luominen
       ClearSegments: Tyhjennä osuudet
@@ -1420,6 +1450,10 @@ Video:
       UpvoteSegment: Äänestä puolesta
       DownvoteSegment: Äänestä vastaan
       VoteFailed: SponsorBlock-äänen lähettäminen epäonnistui.
+      ChangeCategory: Vaihda luokkaa
+      CopyAndDownvote: Kopioi ja anna miinusääni
+      SubmitCategoryVote: Lähetä luokkaääni
+      CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
       Cast: "Lähetä Google Cast -laitteeseen"
       Connected: "Lähetetään laitteeseen {device}"
@@ -1493,6 +1527,7 @@ Share:
   Share failed: "Linkin jakaminen epäonnistui"
   Timestamp Link Copied: Aikaleiman sisältävä linkki kopioitiin leikepöydälle
 Context Menu:
+  Open in a Background Tab: "Avaa taustavälilehdessä"
   Select Tab: Valitse välilehti
   Close Tabs Before: Sulje edeltävät välilehdet
   Close Tabs After: Sulje seuraavat välilehdet
@@ -1654,6 +1689,7 @@ Description:
   Games: Pelit
 Tooltips:
   General Settings:
+    Enable Tabs: "Tämän poistaminen käytöstä sulkee kaikki muut välilehdet ja pitää nykyisen sivun avoinna."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
     Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.
     Update Relative Timestamps: Päivittää suhteellisia aikaleimoja kaikkialla sovelluksessa sivun ollessa avoinna. Jos asetus on poistettu käytöstä, ne päivittyvät vasta, kun sivu ladataan uudelleen tai sillä käydään uudelleen.
@@ -1698,6 +1734,7 @@ Tooltips:
     Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
     Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
+    Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.
@@ -1865,8 +1902,8 @@ Downloads:
   File Name Template: Tiedostonimen mallipohja
   File Name Template Help: 'Käytettävissä olevat kentät: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Aikaväli ja luvut
-  Start Time: Aloitusaika (HH:MM:SS)
-  End Time: Lopetusaika (HH:MM:SS)
+  Start Time: Aloitusaika
+  End Time: Lopetusaika
   Split by Chapters: Jaa luvut erillisiksi tiedostoiksi
   Remove Segments: Poista segmenttejä
   Subtitles and Metadata: Tekstitykset ja metatiedot
@@ -1955,5 +1992,42 @@ Tray:
 Tray Icon:
   Title: "Ilmoitusalueen kuvake"
   Follow App Theme: "Seuraa sovelluksen teemaa"
+
+Form Inputs:
+  Enter Password Hint: "Anna salasanasi"
+  Choose Password Hint: "Valitse salasana"
+  Confirm Password Hint: "Toista uusi salasanasi"
+  Encryption Passphrase Hint: "Anna salauksen tunnuslauseesi"
+  Show Password: "Näytä salasana"
+  Hide Password: "Piilota salasana"
+  Search Text Hint: "Kirjoita hakusanat"
+  Playlist Description Hint: "Kuvaile tätä soittolistaa"
+  Filename Preview: "Tiedostonimen esikatselu"
+  Enter Channels: "Syötä kanavat"
+  Enter Text: "Syötä teksti"
+  Video URL: Videon tai soittolistan URL
+  Paste Link: Liitä videon tai soittolistan linkki
+  Example: esim. {example}
+  No Minimum: Ei vähimmäisrajaa
+  No Maximum: Ei enimmäisrajaa
+  Any Age: Mikä tahansa ikä
+  Included Terms Example: esim. ohje, arvostelu
+  Excluded Terms Example: esim. traileri, esikatselu
+  Download Folder Hint: Jätä tyhjäksi käyttääksesi Lataukset-kansiota
+  Global Arguments Hint: Valinnaiset argumentit jokaiselle lataukselle
+  Unlimited Hint: 0 tarkoittaa rajoittamatonta
+  Add Argument: Lisää argumentti
+  Template Name Example: esim. Vain ääni
+  Download Arguments Hint: Valinnaiset argumentit tälle lataukselle
+  Generated ID Hint: Jätä tyhjäksi luodaksesi tunnuksen
+  Default Value: "Oletus: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
+
+Storage Startup Error:
+  Title: "Sovelluksen tietoja ei voitu ladata"
+  Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
+  Retry: "Yritä uudelleen"
 Native Permissions:
   Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."

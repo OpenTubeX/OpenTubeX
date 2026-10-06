@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { test } from 'node:test'
-import { computed, effectScope, nextTick, ref, watch } from 'vue'
+import { computed, effectScope, nextTick, reactive, ref, watch } from 'vue'
 import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
 import { createMobilePlayerAdjustments } from '../../src/renderer/helpers/mobilePlayerAdjustments.js'
 
@@ -33,14 +33,18 @@ test('fullscreen brightness follows Android visibility when Chromium remains vis
     onError: error => { throw error },
   })
   const isFullscreen = ref(false)
+  const miniPlayerActive = ref(false)
+  const dismissing = ref(false)
+  const props = reactive({ videoId: 'test' })
+  const resets = []
   scope.run(() => vm.runInNewContext(lifecycle, {
     ref, computed, watch, document, isAppHidden,
     process: { env: { IS_CAPACITOR: true } },
-    isActiveTab: ref(true), scrollMiniPlayerActive: ref(false), scrollMiniPlayerDragStyle: ref(null), isFullscreen,
-    props: { videoId: 'test' },
+    isActiveTab: ref(true), scrollMiniPlayerActive: miniPlayerActive, scrollMiniPlayerDragStyle: ref(null), isFullscreen,
+    mobileMiniPlayerDismissSettling: dismissing, props,
     store: { getters: { getMobileFullscreenBrightness: true } },
     mobileAdjustments,
-    resetMobileAdjustments: () => mobileAdjustments.reset(),
+    resetMobileAdjustments: preserve => { resets.push(preserve); mobileAdjustments.reset() },
     cancelMobileFullscreenGesture() {},
     onMounted: callback => callback(),
     onBeforeUnmount: callback => unmount.push(callback),
@@ -58,4 +62,17 @@ test('fullscreen brightness follows Android visibility when Chromium remains vis
   await nextTick()
   await mobileAdjustments.settled()
   assert.equal(brightness, 1, 'returning to fullscreen reapplies the preference')
+  isFullscreen.value = false
+  miniPlayerActive.value = true
+  dismissing.value = true
+  await nextTick()
+  setAndroidAppVisible(false)
+  await nextTick()
+  assert.equal(resets.at(-1), true, 'hiding preserves a committed dismissal')
+  setAndroidAppVisible(true)
+  await nextTick()
+  assert.equal(resets.at(-1), true, 'returning preserves the same pending close')
+  props.videoId = 'replacement'
+  await nextTick()
+  assert.equal(resets.at(-1), false, 'changing video cancels the pending close')
 })

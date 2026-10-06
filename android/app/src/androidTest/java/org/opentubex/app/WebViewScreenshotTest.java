@@ -26,6 +26,68 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 public class WebViewScreenshotTest {
     @Test
+    public void materialFieldsAndSwitchesKeepNativeTouchSizingAcrossLayoutsAndZoom() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app.capacitorTabs')");
+            evaluate(webView, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+            evaluate(webView, """
+                (async () => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    await store.dispatch('updateEnableDownloads', true);
+                    await store.dispatch('showSettingsWindow');
+                })()
+                """);
+            awaitCondition(webView, "!!document.querySelector('.settingsMenu [data-section=\"download\"]')");
+            evaluate(webView, "document.querySelector('.settingsMenu [data-section=\"download\"]').click()");
+            awaitCondition(webView, "!!document.querySelector('.downloadPathInputs input') && !document.querySelector('.settings-window-enter-active')");
+            for (String layout : new String[] {"phone", "tablet"}) {
+                for (int scale : new int[] {100, 95}) {
+                    evaluate(webView, """
+                        (async () => {
+                            window.__materialSizingReady = false;
+                            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                            await store.dispatch('updateCapacitorLayoutMode', '%s');
+                            await store.dispatch('updateUiScale', %d);
+                            requestAnimationFrame(() => requestAnimationFrame(() => { window.__materialSizingReady = true; }));
+                        })()
+                        """.formatted(layout, scale));
+                    awaitCondition(webView, "window.__materialSizingReady");
+                    JSONObject geometry = new JSONObject((String) new JSONTokener(evaluate(webView, """
+                        JSON.stringify((() => {
+                            const input = document.querySelector('.downloadPathInputs input');
+                            const select = document.querySelector('.downloadQueueInputs .select-text');
+                            const label = document.querySelector('[data-setting-key="enableDownloads"] .switch-label');
+                            const track = getComputedStyle(label.querySelector('.switch-label-text'), '::before');
+                            const thumb = getComputedStyle(label.querySelector('.switch-label-text'), '::after');
+                            const hint = input.closest('.ft-input-component').querySelector('.supportingText');
+                            return {
+                                inputHeight: parseFloat(getComputedStyle(input).height),
+                                selectHeight: parseFloat(getComputedStyle(select).height),
+                                switchHeight: parseFloat(getComputedStyle(label).minHeight),
+                                trackWidth: parseFloat(track.width), trackHeight: parseFloat(track.height),
+                                thumbWidth: parseFloat(thumb.width),
+                                hintOverflow: hint.scrollWidth - hint.clientWidth
+                            };
+                        })())
+                        """)).nextValue());
+                    String context = layout + " at " + scale + "%: " + geometry;
+                    assertEquals(context, 56, geometry.getDouble("inputHeight"), 0.1);
+                    assertEquals(context, 56, geometry.getDouble("selectHeight"), 0.1);
+                    assertTrue(context, geometry.getDouble("switchHeight") >= 48);
+                    assertEquals(context, 52, geometry.getDouble("trackWidth"), 0.1);
+                    assertEquals(context, 32, geometry.getDouble("trackHeight"), 0.1);
+                    assertEquals(context, 24, geometry.getDouble("thumbWidth"), 0.1);
+                    assertTrue(context, geometry.getDouble("hintOverflow") <= 1);
+                }
+            }
+        }
+    }
+
+    @Test
     public void longFeedReleasesCardsAndPreservesGeometryThroughLayoutAndFiltering() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> view = new AtomicReference<>();

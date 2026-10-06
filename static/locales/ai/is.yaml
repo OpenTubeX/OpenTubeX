@@ -265,6 +265,11 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Enable Tabs: "Virkja flipa"
+    Thumbnail Swipe Gestures:
+      Left: Strjúka til vinstri á smámyndum
+      Right: Strjúka til hægri á smámyndum
+      Description: Strjúktu lárétt yfir smámynd myndskeiðs og slepptu til að framkvæma valda aðgerð.
     Data Saver Thumbnails: "Gagnasparandi smámyndir"
     Use tray icon: "Nota tákn í kerfisbakka"
     Close to system tray: "Loka í kerfisbakka"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Strjúktu til að endurhlaða
     Blur Thumbnails: Þoka smámyndir
     Navigation:
-      Show Active Subscriptions: Sýna virkar áskriftir
+      Always Show Navigation Bar: Sýna alltaf leiðsögustikuna þegar hún er neðst
+      Compact Tab Labels: Þétt leiðsögustika þegar hún er neðst
+      Show Active Subscriptions: Sýna virkar áskriftir í hliðarstikunni
       Navigation: Leiðsögn
       Customize Navigation: Sérsníða leiðsögn
       Add Item: Bæta við atriði
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Compact Mobile Mini Player: "Þéttur smáspilari í farsíma"
     Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
     Frosted Glass Player UI: "Viðmót spilara með mattgleráhrifum"
     Main Color Theme:
@@ -437,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Ljóst"
-      OpenTubeX Dark: "OpenTubeX Dökkt"
+      Ocean Light: "Ocean Ljóst"
+      Ocean Dark: "Ocean Dökkt"
       Custom: Sérsniðið
     Light Theme: Ljóst þema
     Dark Theme: Dökkt þema
@@ -473,6 +481,7 @@ Settings:
       Unable to Delete: Ekki tókst að eyða sérsniðna þemanu
       Invalid Theme File: Ógild sérsniðin þemaskrá
       Colors:
+        Watched thumbnail overlay: "Yfirlag á smámyndir áhorfðra myndskeiða"
         Main text: Aðaltexti
         Secondary text: Aukatexti
         Subtle text: Daufur texti
@@ -625,6 +634,8 @@ Settings:
     Preload Upcoming Videos: "Forhlaða næstu myndskeið"
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
     Concurrent Preloads: "Samtímis forhleðslur"
+    Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
+    Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
     Show Google Cast Button: "Sýna Google Cast-hnapp"
   Channel Settings:
     Channel Settings: Rásarstillingar
@@ -662,9 +673,9 @@ Settings:
     Update Managed Tools: Uppfæra
     Managed Tools Download Error Template: 'Ekki tókst að hlaða niður verkfærunum í umsjón OpenTubeX: {errors}'
     Download Folder: Niðurhalsmappa
-    Global Additional yt-dlp Arguments: Almenn viðbótarviðföng fyrir yt-dlp
+    Global Additional yt-dlp Arguments: Viðbótarviðföng yt-dlp
     Concurrent Downloads: Samtímis niðurhöl
-    Bandwidth Limit: Bandbreiddarmörk (KiB/s, 0 merkir ótakmarkað)
+    Bandwidth Limit: Bandbreiddarmörk (KiB/s)
     Choose Download Folder: Velja niðurhalsmöppu
     Download Templates: Niðurhalssniðmát
     Manage Download Templates: Stjórna niðurhalssniðmátum ({templateCount})
@@ -737,8 +748,8 @@ Settings:
       Automatic: Uppfæra sjálfkrafa
       Ask: Spyrja áður en uppfært er
       Manual: Aðeins uppfæra handvirkt
-    yt-dlp Executable Path: Slóð að keyrsluskrá yt-dlp
-    FFmpeg Executable Path: Slóð að keyrsluskrá FFmpeg
+    yt-dlp Executable Path: Keyrsluskrá yt-dlp
+    FFmpeg Executable Path: Keyrsluskrá FFmpeg
     Restricted Playback Authentication: "yt-dlp-vafrakökur"
     Cookie Source: Uppruni vafrakaka
     Cookie Sources:
@@ -908,8 +919,6 @@ Settings:
     Open Profile Directory: Opna möppu notandasniðs
     Settings Tooltip: Ekki er hægt að flytja út eða inn stillingar sem eru sértækar fyrir stýrikerfi eða notanda eða eru á tilraunastigi, svo sem milliþjón, ytri spilara og möppu skjámynda.
     Invalid JSON row, skipping item: Ógilt JSON í línu {row}, sleppi atriði
-    All settings have been successfully imported: Tókst að flytja inn allar stillingar
-    All settings have been successfully exported: Tókst að flytja út allar stillingar
     Setting object has insufficient data, skipping item: Stillingahlutur inniheldur ekki næg gögn, sleppi atriði
     Import subscriptions formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), öryggisafrit LibreTube eða útflutningur úr FreeTube (.json)'
     Import history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), öryggisafrit LibreTube (.json)'
@@ -974,7 +983,7 @@ Settings:
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
     Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.
     Description: 'Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil og studdar stillingar við OpenTubeX- eða LibreTube-samstillingarþjón. LibreTube-þjónar styðja hugsanlega ekki alla samstillingareiginleika.'
-    Server URL: Vefslóð þjóns
+    Server URL: Slóð samstillingarþjóns
     Checking Server: Athuga samstillingarþjón…
     Server Unavailable: Ekki tókst að tengjast þessum samstillingarþjóni. Athugaðu vefslóðina og reyndu aftur.
     Username: Notandanafn
@@ -1064,7 +1073,7 @@ Settings:
     Open All Tabs Confirmation: "Opna alla flipa?"
     Server Update Required: "Uppfærðu þennan þjón til að styðja dulkóðaða samstillingu í rauntíma."
   Proxy Settings:
-    IP Block Recovery Script Path: Slóð að endurheimtarskriftu fyrir IP-lokun
+    IP Block Recovery Script Path: Skrifta fyrir endurheimt eftir IP-lokun
     Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun
     Running IP block recovery script: Keyri endurheimtarskriftu fyrir IP-lokun
     IP block recovery script failed: 'Endurheimtarskrifta fyrir IP-lokun mistókst (lokakóði: {exitCode})'
@@ -1073,10 +1082,9 @@ Settings:
     Failed to select IP block recovery script: Ekki tókst að velja endurheimtarskriftu fyrir IP-lokun
   SponsorBlock Settings:
     Excluded Channels:
-      Excluded Channels: "Undanskildar rásir"
       Tooltip: "Sláðu inn auðkenni rásar til að koma í veg fyrir að SponsorBlock-hlutum sé sleppt í myndskeiðum hennar. Auðkennið verður að passa nákvæmlega og há- og lágstafir skipta máli."
     Enable SponsorBlock Submission: Virkja innsendingar til SponsorBlock
-    SponsorBlock Private User ID (optional): Einkaauðkenni SponsorBlock-notanda (valfrjálst)
+    SponsorBlock Private User ID (optional): Einkaauðkenni notanda (valfrjálst)
     SponsorBlock Private User ID Tooltip: Límdu einkaauðkenni SponsorBlock-notandans úr vafraviðbótinni. Skildu reitinn eftir auðan til að nota auðkenni sem forritið býr til.
     Generated SponsorBlock User ID: SponsorBlock-notandaauðkenni sem forritið bjó til
     Generated SponsorBlock User ID Tooltip: Hægt er að nota SponsorBlock-notandaauðkennið sem forritið bjó til í vafraviðbótinni eða þegar forritið er notað á annarri tölvu.
@@ -1088,7 +1096,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Virkja Return YouTube Dislike
-    Return YouTube Dislike Url: Vefslóð Return YouTube Dislike API (sjálfgefið er https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-slóð
   Password Dialog:
     Incorrect Password: Rangt aðgangsorð
     Unlock: Aflæsa
@@ -1129,6 +1137,21 @@ About:
   Matrix: Matrix
   Email: Netfang
 Profile:
+  Customization: Sérsnið
+  Manage Profile Subscriptions: Stjórna áskriftum prófíls
+  Icon Names:
+    Person: Manneskja
+    People: Fólk
+    Headphones: Heyrnartól
+    Gaming: Leikir
+    Film: Kvikmynd
+    Art: List
+    Science: Vísindi
+    Globe: Hnöttur
+    Heart: Hjarta
+    Sun: Sól
+    Moon: Tungl
+    Trophy: Bikar
   Profile Icon: Tákn notandasniðs
   Choose an Emoji: Velja tjákn
   Custom Emoji: Sérsniðið tjákn
@@ -1235,7 +1258,6 @@ Video:
   Notification unavailable: Kerfistilkynningar eru ekki tiltækar
   Scheduled video starting: Tímasett myndband er að hefjast
   Live notification body: '{videoTitle} hefst núna'
-  Premiere: Frumsýning
   AI: Gervigreind
   AI-generated content: Efni búið til með gervigreind
   Collaborators: Samstarfsaðilar
@@ -1322,12 +1344,16 @@ Video:
     Hide: Fela
     Show: Sýna
     Scroll Mini Player:
+      Collapse Controls: "Fella saman stýringar"
+      Expand Controls: "Stækka stýringar"
       Back to Top: Efst á síðu
       Return to Video Tab: Til baka á myndbandsflipa
       Hide: Fela smáspilara
       Play: Spila
       Pause: Gera hlé
       Drag Handle: Færa smáspilarann
+      Rewind 10 seconds: Spóla 10 sekúndur til baka
+      Forward 10 seconds: Spóla 10 sekúndur áfram
     SponsorBlock:
       CancelCurrentSegment: Hætta við að búa til kafla
       ClearSegments: Hreinsa kafla
@@ -1405,6 +1431,10 @@ Video:
       UpvoteSegment: Gefa jákvætt atkvæði
       DownvoteSegment: Gefa neikvætt atkvæði
       VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
+      ChangeCategory: Breyta flokki
+      CopyAndDownvote: Afrita og greiða atkvæði gegn
+      SubmitCategoryVote: Senda atkvæði um flokk
+      CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
       Cast: "Senda í Google Cast-tæki"
       Connected: "Sendir í {device}"
@@ -1476,6 +1506,7 @@ Share:
   Share failed: "Ekki tókst að deila tenglinum"
   Timestamp Link Copied: Tengill með tímamerki afritaður á klippispjald
 Context Menu:
+  Open in a Background Tab: "Opna í flipa í bakgrunni"
   Select Tab: Velja flipa
   Close Tabs Before: Loka fyrri flipum
   Close Tabs After: Loka síðari flipum
@@ -1636,6 +1667,7 @@ Description:
   Games: Leikir
 Tooltips:
   General Settings:
+    Enable Tabs: "Ef slökkt er á þessu lokast allir aðrir flipar og núverandi síða helst opin."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
     Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.
@@ -1680,6 +1712,7 @@ Tooltips:
     Preload Upcoming Videos: "Sækir og vistar yt-dlp-slóðir næstu myndskeiða. Biðröðin hefur forgang fram yfir spilunarlista og tillögur."
     Upcoming Videos to Preload: "Hámarksfjöldi næstu myndskeiða sem yt-dlp-slóðir eru sóttar fyrir í bakgrunni."
     Concurrent Preloads: "Hámarksfjöldi yt-dlp-ferla sem eru notaðir til að forhlaða myndskeiðum samtímis. Hærri gildi nota meira örgjörvaafl, minni og netbandvídd."
+    Ignore System Rotation Lock for Fullscreen: Snúðu tækinu til að opna og loka öllum skjánum, jafnvel þótt slökkt sé á sjálfvirkum snúningi í Android.
   Download Settings:
     Download Folder: Myndbönd vistast í þessa möppu. Skildu reitinn eftir auðan til að nota niðurhalsmöppu kerfisins.
     Global Additional yt-dlp Arguments: Viðbótarviðföng skipanalínu sem eru send til yt-dlp við hvert niðurhal, til dæmis --cookies-from-browser firefox.
@@ -1845,8 +1878,8 @@ Downloads:
   File Name Template: Sniðmát skráarheitis
   File Name Template Help: 'Tiltækir reitir: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tímamörk og kaflar
-  Start Time: Upphafstími (HH:MM:SS)
-  End Time: Lokatími (HH:MM:SS)
+  Start Time: Upphafstími
+  End Time: Lokatími
   Split by Chapters: Skipta í aðskildar skrár eftir köflum
   Remove Segments: Fjarlægja hluta
   Subtitles and Metadata: Skjátextar og lýsigögn
@@ -1932,5 +1965,42 @@ Tray:
 Tray Icon:
   Title: "Tákn í kerfisbakka"
   Follow App Theme: "Fylgja þema forritsins"
+
+Form Inputs:
+  Enter Password Hint: "Sláðu inn lykilorðið þitt"
+  Choose Password Hint: "Veldu lykilorð"
+  Confirm Password Hint: "Endurtaktu nýja lykilorðið þitt"
+  Encryption Passphrase Hint: "Sláðu inn dulkóðunarlykilsetninguna þína"
+  Show Password: "Sýna lykilorð"
+  Hide Password: "Fela lykilorð"
+  Search Text Hint: "Sláðu inn leitarorð"
+  Playlist Description Hint: "Lýstu þessum spilunarlista"
+  Filename Preview: "Forskoðun skráarheitis"
+  Enter Channels: "Sláðu inn rásir"
+  Enter Text: "Sláðu inn texta"
+  Video URL: Slóð myndskeiðs eða spilunarlista
+  Paste Link: Límdu tengil á myndskeið eða spilunarlista
+  Example: t.d. {example}
+  No Minimum: Ekkert lágmark
+  No Maximum: Ekkert hámark
+  Any Age: Hvaða aldur sem er
+  Included Terms Example: t.d. leiðbeiningar, umsögn
+  Excluded Terms Example: t.d. stikla, forskoðun
+  Download Folder Hint: Skildu eftir autt til að nota niðurhalsmöppuna
+  Global Arguments Hint: Valfrjáls viðföng fyrir hvert niðurhal
+  Unlimited Hint: 0 fyrir ótakmarkað
+  Add Argument: Bæta við viðfangi
+  Template Name Example: t.d. Aðeins hljóð
+  Download Arguments Hint: Valfrjáls viðföng fyrir þetta niðurhal
+  Generated ID Hint: Skildu eftir autt til að búa til auðkenni
+  Default Value: "Sjálfgefið: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."
+
+Storage Startup Error:
+  Title: "Ekki tókst að hlaða gögnum forritsins"
+  Message: "Losaðu geymslupláss í tækinu og reyndu aftur. Samstilling er í bið þar til gögnin þín hafa verið hlaðin."
+  Retry: "Reyna aftur"
 Native Permissions:
   Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."

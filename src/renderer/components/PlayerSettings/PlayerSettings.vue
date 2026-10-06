@@ -196,6 +196,16 @@
         @change="updateEnterFullscreenOnDisplayRotate"
       />
       <FtToggleSwitch
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :label="t('Settings.Player Settings.Ignore System Rotation Lock for Fullscreen')"
+        :tooltip="t('Tooltips.Player Settings.Ignore System Rotation Lock for Fullscreen')"
+        :compact="true"
+        :disabled="!enterFullscreenOnDisplayRotate"
+        :default-value="fullscreenRotationIgnoresSystemLock"
+        setting-key="fullscreenRotationIgnoresSystemLock"
+        @change="updateFullscreenRotationIgnoresSystemLock"
+      />
+      <FtToggleSwitch
         v-if="IS_CAPACITOR"
         :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
         :compact="true"
@@ -210,6 +220,14 @@
         :default-value="enableMobileFullscreenSwipe"
         setting-key="enableMobileFullscreenSwipe"
         @change="updateEnableMobileFullscreenSwipe"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Swipe Left or Right to Seek in Fullscreen')"
+        :compact="true"
+        :default-value="store.getters.getEnableMobileFullscreenSeek"
+        setting-key="enableMobileFullscreenSeek"
+        @change="store.dispatch('updateEnableMobileFullscreenSeek', $event)"
       />
       <FtToggleSwitch
         v-if="IS_CAPACITOR"
@@ -414,7 +432,6 @@
         @change="updateMaxVideoPlaybackRate"
       />
     </FtSliderGrid>
-    <br>
     <FtFlexBox>
       <FtToggleSwitch
         class="quickPlaybackSpeedToggle"
@@ -436,7 +453,6 @@
         <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
       </div>
     </FtFlexBox>
-    <br>
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Screenshot.Enable')"
@@ -483,14 +499,13 @@
         v-if="(USING_ELECTRON || IS_CAPACITOR) && screenshotMode === 'default_folder'"
         class="screenshotFolderContainer"
       >
-        <p class="screenshotFolderLabel">
-          {{ t('Settings.Player Settings.Screenshot.Folder Label') }}
-        </p>
         <FtInput
           class="screenshotFolderPath"
-          :placeholder="displayAndroidPath(screenshotFolder)"
+          :label="t('Settings.Player Settings.Screenshot.Folder Label')"
+          :icon="['fas', 'folder-open']"
+          placeholder="/path/to/screenshots"
+          :value="displayAndroidPath(screenshotFolder)"
           :show-action-button="false"
-          :show-label="false"
           :disabled="true"
         />
         <FtButton
@@ -504,31 +519,26 @@
         v-if="screenshotMode !== 'clipboard'"
         class="screenshotFolderContainer"
       >
-        <p class="screenshotFilenamePatternTitle labelRow">
-          {{ t('Settings.Player Settings.Screenshot.File Name Label') }}
-          <FtTooltip
-            class="selectTooltip"
-            position="bottom"
-            :tooltip="t('Settings.Player Settings.Screenshot.File Name Tooltip')"
-          />
-        </p>
         <FtInput
           class="screenshotFilenamePatternInput"
-          placeholder=""
+          :tooltip="t('Settings.Player Settings.Screenshot.File Name Tooltip')"
+          :label="t('Settings.Player Settings.Screenshot.File Name Label')"
+          :icon="['fas', 'file-lines']"
+          placeholder="%Y-%M-%D_%H-%N-%S"
           :value="screenshotFilenamePattern"
           :show-action-button="false"
-          :show-label="false"
           @input="handleScreenshotFilenamePatternChanged"
         />
         <FtInput
           class="screenshotFilenamePatternExample"
-          :placeholder="screenshotFilenameExample"
+          :label="t('Form Inputs.Filename Preview')"
+          :icon="['fas', 'file-image']"
+          placeholder="2026-10-04_12-30-00.png"
+          :value="screenshotFilenameExample"
           :show-action-button="false"
-          :show-label="false"
           :disabled="true"
         />
       </FtFlexBox>
-      <br>
     </div>
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
@@ -537,6 +547,9 @@
       grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >
+      <template #breadcrumb-action>
+        <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
+      </template>
       <div class="quickPlaybackSpeedToolbar">
         <FtFlexBox class="quickPlaybackSpeedToolbarActions">
           <FtButton
@@ -584,15 +597,14 @@
               <span class="quickPlaybackSpeedName">
                 {{ getQuickPlaybackSpeedDisplayName(option) }}
               </span>
-              <button
+              <FtIconButton
                 class="quickPlaybackSpeedIconButton"
-                type="button"
                 :title="t('Settings.Player Settings.Edit Playback Speed Name')"
-                :aria-label="t('Settings.Player Settings.Edit Playback Speed Name')"
+                :icon="['fas', 'edit']"
+                :use-shadow="false"
+                theme="base"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
-              >
-                <FtIcon :icon="['fas', 'edit']" />
-              </button>
+              />
             </div>
             <div
               v-else
@@ -600,42 +612,45 @@
             >
               <FtInput
                 class="quickPlaybackSpeedNameInput"
+                :label="t('Settings.Player Settings.Playback Speed Name')"
+                :icon="['fas', 'font']"
                 :placeholder="getAutomaticQuickPlaybackSpeedName(option.speed)"
                 :value="option.name"
                 :show-action-button="false"
-                :show-label="false"
                 @input="(value) => updateQuickPlaybackSpeedName(option.id, value)"
               />
-              <button
+              <FtIconButton
                 class="quickPlaybackSpeedIconButton"
-                type="button"
                 :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
-                :aria-label="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
+                :icon="['fas', 'undo']"
+                :use-shadow="false"
+                theme="base"
                 @click="resetQuickPlaybackSpeedName(option.id)"
-              >
-                <FtIcon :icon="['fas', 'undo']" />
-              </button>
+              />
             </div>
           </div>
-          <input
-            class="quickPlaybackSpeedInput"
-            type="number"
+          <FtInput
+            class="quickPlaybackSpeedValueField"
+            :change-filter="normalizeQuickPlaybackSpeed"
+            :icon="['fas', 'gauge-high']"
+            input-type="number"
+            :label="t('Settings.Player Settings.Playback Speed')"
+            :placeholder="t('Form Inputs.Example', { example: '1.25' })"
             min="0.01"
             step="0.01"
-            :aria-label="t('Settings.Player Settings.Playback Speed')"
-            :value="option.speed"
-            @change="(event) => updateQuickPlaybackSpeed(option.id, event.target.value)"
-          >
-          <button
+            :value="String(option.speed)"
+            :show-action-button="false"
+            @change="updateQuickPlaybackSpeed(option.id, $event)"
+          />
+          <FtIconButton
             class="quickPlaybackSpeedIconButton delete"
-            type="button"
             :disabled="quickPlaybackSpeedBarEntries.length <= 1"
             :title="t('Delete')"
-            :aria-label="t('Delete')"
+            :icon="['fas', 'trash']"
+            :use-shadow="false"
+            theme="base"
             @click="deleteQuickPlaybackSpeed(option.id)"
-          >
-            <FtIcon :icon="['fas', 'trash']" />
-          </button>
+          />
         </div>
       </div>
     </FtSettingsSubpage>
@@ -643,6 +658,7 @@
 </template>
 
 <script setup>
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { displayAndroidPath, chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -658,7 +674,6 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtInput from '../FtInput/FtInput.vue'
-import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
@@ -903,6 +918,15 @@ const enterFullscreenOnDisplayRotate = computed(() => store.getters.getEnterFull
  */
 function updateEnterFullscreenOnDisplayRotate(value) {
   store.dispatch('updateEnterFullscreenOnDisplayRotate', value)
+}
+
+const fullscreenRotationIgnoresSystemLock = computed(() => store.getters.getFullscreenRotationIgnoresSystemLock)
+
+/**
+ * @param {boolean} value
+ */
+function updateFullscreenRotationIgnoresSystemLock(value) {
+  store.dispatch('updateFullscreenRotationIgnoresSystemLock', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -1327,7 +1351,7 @@ function normalizeQuickPlaybackSpeed(speed) {
     return 1
   }
 
-  return Number.parseFloat(parsedSpeed.toFixed(2))
+  return Number.parseFloat(parsedSpeed.toFixed(2)) || 1
 }
 
 /**

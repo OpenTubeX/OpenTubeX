@@ -30,7 +30,7 @@ const getChannelMetadataLayout = locator => locator.evaluate(element => {
 
 for (const uiScale of [100, 125]) {
   test.describe(`mobile search and settings at ${uiScale}%`, () => {
-    test.use({ seed: { settings: { uiScale, useDeArrowTitles: true } } })
+    test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, useDeArrowTitles: true } } })
 
     test('settings categories and search matches have roomy touch targets', async ({ page, app }) => {
       await setWindowSize(app, page, { width: 460, height: 850 })
@@ -49,12 +49,12 @@ for (const uiScale of [100, 125]) {
       await category.click({ position: { x: 12, y: 4 } })
       await expect(page.locator('.settingsContent > [data-section="appearance"]')).toBeVisible()
       const search = page.getByRole('searchbox', { name: 'Search settings' })
-      await search.fill('SponsorBlock API')
+      await search.fill('Display Titles Without')
       const buttons = page.locator('.settingsSearchResultHeading, .settingsSearchResultMatch')
       await expect(buttons.first()).toBeVisible()
       expect(await buttons.evaluateAll(elements => Math.min(...elements.map(el => el.getBoundingClientRect().height)))).toBeGreaterThanOrEqual(47.99)
       expect(await buttons.evaluateAll(elements => elements.every(el => el.scrollWidth <= el.clientWidth + 1))).toBe(true)
-      const longLabel = page.locator('.settingsSearchResultMatch').filter({ hasText: 'SponsorBlock API Url' })
+      const longLabel = page.locator('.settingsSearchResultMatch').filter({ hasText: 'Display Titles Without Excessive Capitalisation And Punctuation' })
       await expect(longLabel).toHaveCount(1)
       expect(await longLabel.evaluate(element => {
         const range = document.createRange()

@@ -27,6 +27,61 @@ async function openShort({ app, page }) {
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
 }
 
+async function showShortPoster(page, watch) {
+  // Let pause settle before revealing the retained poster in component state.
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    if (!video.paused) {
+      await new Promise(resolve => {
+        video.addEventListener('pause', resolve, { once: true })
+        video.pause()
+      })
+    }
+  })
+  await watch.evaluate(component => { component.proxy.$refs.player.$.setupState.showPoster = true })
+}
+
+for (const zoom of [1, 1.25]) {
+  test(`Shorts posters match the video crop across presentation modes at ${zoom * 100}% UI scale`, async ({ app, page }) => {
+    await openShort({ app, page })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const poster = 'https://provider.test/landscape-short-poster.jpg'
+    await page.route(poster, route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
+    }))
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate((component, poster) => {
+      component.proxy.thumbnail = poster
+    }, poster)
+    await showShortPoster(page, watch)
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+    const video = player.locator('video')
+    await expect(image).toBeVisible()
+    await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
+    const expectCrop = async crop => {
+      await expect(video).toHaveCSS('object-fit', crop)
+      await expect(image).toHaveCSS('object-fit', crop)
+    }
+    await expectCrop('cover')
+    await page.locator('body').press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await expectCrop('contain')
+    await page.locator('body').press('s')
+    await expectCrop('cover')
+    await player.evaluate(player => player.requestFullscreen())
+    await expectCrop('contain')
+    await page.evaluate(() => document.exitFullscreen())
+    await expectCrop('cover')
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
+    await page.setViewportSize({ width: 1026, height: 461 })
+    await expectCrop('contain')
+    await page.setViewportSize({ width: 390, height: 800 })
+    await expectCrop('cover')
+    await watch.dispose()
+  })
+}
+
 test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
   await openShort({ app, page })
   const high = 'https://i.ytimg.com/vi/short-poster/large.jpg'
@@ -46,15 +101,15 @@ test('data saver updates the poster of an already-open Short', async ({ app, pag
       videos: [{ videoId: component.proxy.videoId, title: 'Poster test', authorId: channelId, published: Date.now(), thumbnailUrl: high, lowResolutionThumbnailUrl: low }]
     })
     component.proxy.thumbnail = high
-    document.querySelector('.ftVideoPlayer video').pause()
-    component.proxy.$refs.player.showPoster = true
   }, { high, low })
-  const video = page.locator('.ftVideoPlayer video').first()
-  await expect(video).toHaveAttribute('poster', high)
+  await showShortPoster(page, watch)
+  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
+  await expect(image).toBeVisible()
+  await expect(image).toHaveAttribute('src', high)
   await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
-  await expect(video).toHaveAttribute('poster', low)
+  await expect(image).toHaveAttribute('src', low)
   await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
-  await expect(video).toHaveAttribute('poster', high)
+  await expect(image).toHaveAttribute('src', high)
   await watch.dispose()
 })
 
@@ -68,15 +123,15 @@ test('data saver preserves standalone Shorts posters without alternate thumbnail
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate((component, poster) => {
     component.proxy.thumbnail = poster
-    document.querySelector('.ftVideoPlayer video').pause()
-    component.proxy.$refs.player.showPoster = true
   }, poster)
-  const video = page.locator('.ftVideoPlayer video').first()
-  await expect(video).toHaveAttribute('poster', poster)
+  await showShortPoster(page, watch)
+  const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
+  await expect(image).toBeVisible()
+  await expect(image).toHaveAttribute('src', poster)
   await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
-  await expect(video).toHaveAttribute('poster', poster)
+  await expect(image).toHaveAttribute('src', poster)
   await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
-  await expect(video).toHaveAttribute('poster', poster)
+  await expect(image).toHaveAttribute('src', poster)
   await watch.dispose()
 })
 
@@ -679,4 +734,147 @@ test('Shorts fullscreen control opens fullscreen and only the top control shows 
     video.dispatchEvent(new Event('ended'))
   })
   await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
+})
+
+for (const durationBackoff of [0, 0.5, 60]) {
+  test(`End on a paused Short reaches replay with ${durationBackoff}s seek backoff`, async ({ app, page }) => {
+    await openShort({ app, page })
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate(async component => {
+      await component.proxy.$store.dispatch('updateLoopShorts', false)
+    })
+    await watch.dispose()
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const video = player.locator('video')
+    await expect.poll(() => video.evaluate(video => Number.isFinite(video.duration) && video.duration > 0)).toBe(true)
+    await video.evaluate(video => {
+      video.pause()
+      video.currentTime = video.duration / 2
+    })
+    await expect.poll(() => video.evaluate(video => video.seeking)).toBe(false)
+    if (durationBackoff) {
+      await video.evaluate((video, backoff) => {
+        // Reproduce Shaka's MSE duration clamp using the real media element.
+        video.ui.getControls().getPlayer().configure('streaming.durationBackoff', backoff)
+        video.addEventListener('seeking', () => {
+          video.currentTime = video.duration - backoff
+        }, { once: true })
+      }, durationBackoff)
+    }
+    await page.locator('body').press('End')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
+    await expect.poll(() => video.evaluate(video => video.paused && !video.seeking)).toBe(true)
+    const remaining = await video.evaluate(video => video.duration - video.currentTime)
+    const duration = await video.evaluate(video => video.duration)
+    expect(remaining).toBeCloseTo(Math.min(durationBackoff, duration), 3)
+    if (durationBackoff) {
+      await player.locator('.shortsTopControl').first().click()
+    } else {
+      await page.locator('body').press('k')
+    }
+    await expect.poll(() => video.evaluate(video => !video.paused && video.currentTime < video.duration / 2)).toBe(true)
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+
+    // Seeking away from replay must leave the chosen position paused.
+    await video.evaluate(video => video.pause())
+    await page.locator('body').press('End')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
+    await page.locator('body').press('Home')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+    await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(0)
+    await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+  })
+}
+
+test('End on a paused looping Short keeps the loop behavior', async ({ app, page }) => {
+  await openShort({ app, page })
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await expect.poll(() => video.evaluate(video => video.loop)).toBe(true)
+  await video.evaluate(video => video.pause())
+  await page.locator('body').press('End')
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused && video.currentTime < video.duration / 2)).toBe(true)
+})
+
+test('a timeline seek superseding End on a paused Short cancels replay', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateLoopShorts', false)
+  })
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(video => {
+    video.pause()
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    // Shaka's timeline and Media Session write currentTime directly.
+    video.currentTime = video.duration / 2
+  })
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsReplayIcon')).toBeHidden()
+  expect(await video.evaluate(video => video.currentTime)).toBeCloseTo(15, 0)
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused)).toBe(true)
+  expect(await video.evaluate(video => video.currentTime)).toBeGreaterThan(14)
+})
+
+test('a timeline selection at the End backoff position cancels replay', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateLoopShorts', false))
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(video => {
+    video.pause()
+    video.ui.getControls().getPlayer().configure('streaming.durationBackoff', 5)
+  })
+  await page.locator('body').press('End')
+  await expect(player.locator('.shortsReplayIcon')).toBeVisible()
+  const target = await video.evaluate(video => video.duration - 5)
+  await player.locator('.shaka-seek-bar').evaluate((input, target) => {
+    // Shorts hide Shaka's regular controls; exercise its actual range handlers.
+    input.disabled = false
+    input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    input.value = String(target)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.blur()
+  }, target)
+  await expect.poll(() => video.evaluate(video => video.currentTime)).toBeCloseTo(target, 3)
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsReplayIcon')).toBeHidden()
+  await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused)).toBe(true)
+  expect(await video.evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(target)
+})
+
+test('End on a playing Short keeps playing through Shaka backoff to its ended event', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateLoopShorts', false)
+  })
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(async video => {
+    video.currentTime = video.duration / 2
+    await video.play()
+  })
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await video.evaluate(video => {
+    video.ui.getControls().getPlayer().configure('streaming.durationBackoff', 1)
+    video.addEventListener('seeking', () => {
+      video.currentTime = video.duration - 1
+    }, { once: true })
+    video.addEventListener('ended', () => { video.dataset.naturallyEnded = 'true' }, { once: true })
+  })
+  await page.locator('body').press('End')
+  await expect(video).toHaveAttribute('data-naturally-ended', 'true', { timeout: 5_000 })
+  await expect(player.locator('.shortsReplayIcon')).toBeVisible()
 })

@@ -16,17 +16,25 @@
 }
 
 .channelSettingsHeader {
+  display: grid;
   flex: none;
-  padding-block: 16px 8px;
+  gap: 12px;
+  padding-block: 16px 12px;
   padding-inline: 20px;
 }
 
 
 
+.channelSettingsHeader :deep(.ft-input-component) {
+  --input-bottom-spacing: 0;
+
+  inline-size: 100%;
+  margin-block: 0;
+}
+
 .channelSelectionToolbar {
   border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));
-  margin-block-end: 12px;
   padding: 12px;
 }
 
@@ -124,7 +132,7 @@
   flex: 1;
   min-block-size: 0;
   overflow-y: auto;
-  padding-block: 2px 20px;
+  padding-block: 0 20px;
   padding-inline: 20px;
 }
 
@@ -146,8 +154,9 @@
 .channelSettings {
   border: 1px solid var(--border-color);
   border-radius: calc(4px * var(--ui-roundness));
+  container-type: inline-size;
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-inline-size: 0;
   padding: 16px;
 }
@@ -292,9 +301,7 @@
 
 .feedTypeOption > span {
   min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .feedTypeCheck {
@@ -316,7 +323,15 @@
 
 .dailyLimitSelect {
   inline-size: 100%;
-  margin-block-start: 27px;
+
+  /* Reserve the outlined label's overhang above the control border. */
+  margin-block: 7px 0;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .dailyLimitSelect {
+    margin-block-start: 8px;
+  }
 }
 
 @container (width <= 560px) {

@@ -265,6 +265,11 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Enable Tabs: "Включване на разделите"
+    Thumbnail Swipe Gestures:
+      Left: Плъзгане наляво върху миниатюрите
+      Right: Плъзгане надясно върху миниатюрите
+      Description: Плъзнете хоризонтално върху миниатюра на видео и отпуснете, за да изпълните избраното действие.
     Data Saver Thumbnails: "Миниатюри с икономия на данни"
     Use tray icon: "Използване на икона в системната лента"
     Close to system tray: "Затваряне в системната лента"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Плъзнете за опресняване
     Blur Thumbnails: Замъгляване на миниатюрите
     Navigation:
-      Show Active Subscriptions: Показване на активните абонаменти
+      Always Show Navigation Bar: Винаги показвай навигационната лента, когато е отдолу
+      Compact Tab Labels: Компактна навигационна лента, когато е отдолу
+      Show Active Subscriptions: Показване на активните абонаменти в страничната лента
       Navigation: Навигация
       Customize Navigation: Персонализиране на навигацията
       Add Item: Добавяне на елемент
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Въведете име и валиден HTTP или HTTPS URL адрес за търсене, който съдържа %s.
     Engine Limit: Можете да добавите до {count} персонализирани търсачки.
   Theme Settings:
+    Compact Mobile Mini Player: "Компактен мобилен миниплейър"
     Always Show Mobile Search Bar: "Винаги показвай лентата за търсене на телефона"
     Frosted Glass Player UI: "Интерфейс на плейъра с ефект на матирано стъкло"
     Main Color Theme:
@@ -437,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светла"
-      OpenTubeX Dark: "OpenTubeX Тъмна"
+      Ocean Light: "Ocean Светла"
+      Ocean Dark: "Ocean Тъмна"
       Custom: Персонализирана
     Light Theme: Светла тема
     Dark Theme: Тъмна тема
@@ -473,6 +481,7 @@ Settings:
       Unable to Delete: Персонализираната тема не може да бъде изтрита
       Invalid Theme File: Невалиден файл с персонализирана тема
       Colors:
+        Watched thumbnail overlay: "Наслагване върху миниатюрите на гледаните видеоклипове"
         Main text: Основен текст
         Secondary text: Вторичен текст
         Subtle text: Приглушен текст
@@ -623,6 +632,8 @@ Settings:
     Preload Upcoming Videos: "Предварително зареждане на следващите видеа"
     Upcoming Videos to Preload: "Брой видеа за предварително зареждане"
     Concurrent Preloads: "Едновременни предварителни зареждания"
+    Ignore System Rotation Lock for Fullscreen: Игнориране на системното заключване на завъртането за цял екран
+    Swipe Left or Right to Seek in Fullscreen: Плъзнете наляво или надясно за превъртане на цял екран
     Show Google Cast Button: "Показване на бутона Google Cast"
   Channel Settings:
     Channel Settings: Настройки за каналите
@@ -660,9 +671,9 @@ Settings:
     Update Managed Tools: Обновяване
     Managed Tools Download Error Template: 'Управляваните инструменти не можаха да бъдат изтеглени: {errors}'
     Download Folder: Папка за изтегляния
-    Global Additional yt-dlp Arguments: Общи допълнителни аргументи за yt-dlp
+    Global Additional yt-dlp Arguments: Допълнителни аргументи на yt-dlp
     Concurrent Downloads: Едновременни изтегляния
-    Bandwidth Limit: Ограничение на пропускателната способност (KiB/s, 0 за неограничена)
+    Bandwidth Limit: Ограничение на пропускателната способност (KiB/s)
     Choose Download Folder: Избор на папка за изтегляния
     Download Templates: Шаблони за изтегляне
     Manage Download Templates: Управление на шаблоните за изтегляне ({templateCount})
@@ -735,8 +746,8 @@ Settings:
       Automatic: Автоматично обновяване
       Ask: Питане преди обновяване
       Manual: Само ръчно обновяване
-    yt-dlp Executable Path: Път до изпълнимия файл на yt-dlp
-    FFmpeg Executable Path: Път до изпълнимия файл на FFmpeg
+    yt-dlp Executable Path: Изпълним файл на yt-dlp
+    FFmpeg Executable Path: Изпълним файл на FFmpeg
     Restricted Playback Authentication: "Бисквитки на yt-dlp"
     Cookie Source: Източник на бисквитките
     Cookie Sources:
@@ -970,7 +981,7 @@ Settings:
     Enhanced Privacy Enabled: Подобрената поверителност е включена. Сървърът съхранява само шифровани синхронизирани данни.
     Enhanced Privacy Unsupported: Предупреждение — този сървър не поддържа подобрена поверителност. Операторът му има достъп до синхронизираните данни.
     Description: 'Синхронизирайте абонаменти, профили, плейлисти, история на гледане и поддържани настройки със сървър за синхронизация на OpenTubeX или LibreTube. Сървърите на LibreTube може да не поддържат всички функции за синхронизация.'
-    Server URL: URL адрес на сървъра
+    Server URL: URL на сървъра за синхронизиране
     Checking Server: Проверка на сървъра за синхронизиране…
     Server Unavailable: Няма връзка с този сървър за синхронизиране. Проверете URL адреса и опитайте отново.
     Username: Потребителско име
@@ -1060,7 +1071,7 @@ Settings:
     Open All Tabs Confirmation: "Отваряне на всички раздели?"
     Server Update Required: "Обновете този сървър за поддръжка на шифрована синхронизация в реално време."
   Proxy Settings:
-    IP Block Recovery Script Path: Път до скрипта за възстановяване след блокиране на IP адреса
+    IP Block Recovery Script Path: Скрипт за възстановяване при блокиран IP
     Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса
     Running IP block recovery script: Изпълнение на скрипта за възстановяване след блокиране на IP адреса
     IP block recovery script failed: 'Скриптът за възстановяване след блокиране на IP адреса е неуспешен (код за изход: {exitCode})'
@@ -1072,7 +1083,7 @@ Settings:
       Excluded Channels: "Изключени канали"
       Tooltip: "Въведете идентификатор на канал, за да не се пропускат сегментите на SponsorBlock във видеоклиповете му. Идентификаторът трябва да съвпада точно и различава главни от малки букви."
     Enable SponsorBlock Submission: Включване на изпращането към SponsorBlock
-    SponsorBlock Private User ID (optional): Частен потребителски идентификатор на SponsorBlock (по избор)
+    SponsorBlock Private User ID (optional): Частен потребителски ID (незадължително)
     SponsorBlock Private User ID Tooltip: Поставете частния потребителски идентификатор на SponsorBlock от разширението за браузъра. Оставете полето празно, за да се използва идентификатор, създаден от приложението.
     Generated SponsorBlock User ID: Създаден потребителски идентификатор на SponsorBlock
     Generated SponsorBlock User ID Tooltip: Този създаден от приложението потребителски идентификатор на SponsorBlock може да се използва в разширението за браузъра или при използване на приложението на друг компютър.
@@ -1084,7 +1095,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Включване на Return YouTube Dislike
-    Return YouTube Dislike Url: URL адрес на API на Return YouTube Dislike (по подразбиране https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL на API
   Password Dialog:
     Incorrect Password: Неправилна парола
     Unlock: Отключване
@@ -1127,6 +1138,21 @@ About:
   Matrix: Matrix
   Email: Имейл
 Profile:
+  Customization: Персонализиране
+  Manage Profile Subscriptions: Управление на абонаментите на профила
+  Icon Names:
+    Person: Човек
+    People: Хора
+    Headphones: Слушалки
+    Gaming: Игри
+    Film: Филм
+    Art: Изкуство
+    Science: Наука
+    Globe: Глобус
+    Heart: Сърце
+    Sun: Слънце
+    Moon: Луна
+    Trophy: Купа
   Profile Icon: Икона на профила
   Choose an Emoji: Избор на емоджи
   Custom Emoji: Емоджи по избор
@@ -1313,12 +1339,16 @@ Video:
     Hide: Скриване
     Show: Показване
     Scroll Mini Player:
+      Collapse Controls: "Свиване на контролите"
+      Expand Controls: "Разгъване на контролите"
       Back to Top: Обратно в началото
       Return to Video Tab: Връщане в раздела с видеоклипа
       Hide: Скриване на миниплейъра
       Play: Възпроизвеждане
       Pause: Пауза
       Drag Handle: Преместване на миниплейъра
+      Rewind 10 seconds: Превъртане 10 секунди назад
+      Forward 10 seconds: Превъртане 10 секунди напред
     SponsorBlock:
       CancelCurrentSegment: Отмяна на създаването на сегмент
       ClearSegments: Изчистване на сегментите
@@ -1396,6 +1426,10 @@ Video:
       UpvoteSegment: Гласуване „за“
       DownvoteSegment: Гласуване „против“
       VoteFailed: Гласът в SponsorBlock не можа да бъде изпратен.
+      ChangeCategory: Промяна на категорията
+      CopyAndDownvote: Копиране и отрицателен вот
+      SubmitCategoryVote: Изпращане на вот за категория
+      CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
       Cast: "Предаване към устройство Google Cast"
       Connected: "Предаване към {device}"
@@ -1469,6 +1503,7 @@ Share:
   Share failed: "Връзката не можа да бъде споделена"
   Timestamp Link Copied: Връзката към времевия маркер е копирана в системния буфер
 Context Menu:
+  Open in a Background Tab: "Отваряне в раздел на заден план"
   Select Tab: Избиране на раздел
   Close Tabs Before: Затваряне на предишните раздели
   Close Tabs After: Затваряне на следващите раздели
@@ -1630,6 +1665,7 @@ Description:
   Games: Игри
 Tooltips:
   General Settings:
+    Enable Tabs: "Изключването затваря всички други раздели и оставя текущата страница отворена."
     Data Saver Thumbnails: "Използвайте миниатюри с по-ниска разделителна способност, за да намалите потреблението на данни."
     Use AI Translation Completions: Попълва липсващите части в човешките преводи с текст, създаден от ИИ. Човешките преводи винаги са с предимство.
     Update Relative Timestamps: Обновява относителните времеви отметки в цялото приложение, докато страницата е отворена. Когато е изключено, те се обновяват само след презареждане или повторно отваряне на страницата.
@@ -1674,6 +1710,7 @@ Tooltips:
     Preload Upcoming Videos: "Извлича и кешира yt-dlp адресите за следващите видеа. Опашката е с приоритет пред плейлистите и препоръките."
     Upcoming Videos to Preload: "Максималният брой предстоящи видеа, чиито yt-dlp адреси се извличат във фонов режим."
     Concurrent Preloads: "Максималният брой процеси на yt-dlp, използвани за предварително зареждане на видеоклипове едновременно. По-високите стойности използват повече процесор, памет и мрежова пропускателна способност."
+    Ignore System Rotation Lock for Fullscreen: Завъртайте физически устройството за влизане и излизане от цял екран, дори когато автоматичното завъртане в Android е изключено.
   Download Settings:
     Download Folder: Видеоклиповете се запазват в тази папка. Оставете празно, за да използвате системната папка за изтегляния.
     Global Additional yt-dlp Arguments: Допълнителни аргументи от командния ред, подавани на yt-dlp при всяко изтегляне, например --cookies-from-browser firefox.
@@ -1839,8 +1876,8 @@ Downloads:
   File Name Template: Шаблон за име на файла
   File Name Template Help: 'Налични полета: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Времеви диапазон и глави
-  Start Time: Начален час (HH:MM:SS)
-  End Time: Краен час (HH:MM:SS)
+  Start Time: Начален час
+  End Time: Краен час
   Split by Chapters: Разделяне в отделни файлове по глави
   Remove Segments: Премахване на сегменти
   Subtitles and Metadata: Субтитри и метаданни
@@ -1929,5 +1966,42 @@ Tray:
 Tray Icon:
   Title: "Икона в системната област"
   Follow App Theme: "Следване на темата на приложението"
+
+Form Inputs:
+  Enter Password Hint: "Въведете паролата си"
+  Choose Password Hint: "Изберете парола"
+  Confirm Password Hint: "Повторете новата си парола"
+  Encryption Passphrase Hint: "Въведете фразата си за шифроване"
+  Show Password: "Показване на паролата"
+  Hide Password: "Скриване на паролата"
+  Search Text Hint: "Въведете думи за търсене"
+  Playlist Description Hint: "Опишете този плейлист"
+  Filename Preview: "Преглед на името на файла"
+  Enter Channels: "Въведете канали"
+  Enter Text: "Въведете текст"
+  Video URL: URL на видео или плейлист
+  Paste Link: Поставете връзка към видео или плейлист
+  Example: напр. {example}
+  No Minimum: Без минимум
+  No Maximum: Без максимум
+  Any Age: Без ограничение за възрастта
+  Included Terms Example: напр. урок, ревю
+  Excluded Terms Example: напр. трейлър, преглед
+  Download Folder Hint: Оставете празно, за да използвате папката за изтегляния
+  Global Arguments Hint: Незадължителни аргументи за всяко изтегляне
+  Unlimited Hint: 0 за неограничено
+  Add Argument: Добавете аргумент
+  Template Name Example: напр. Само аудио
+  Download Arguments Hint: Незадължителни аргументи за това изтегляне
+  Generated ID Hint: Оставете празно, за да се генерира ID
+  Default Value: "По подразбиране: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
+
+Storage Startup Error:
+  Title: "Данните на приложението не могат да се заредят"
+  Message: "Освободете място на устройството и опитайте отново. Синхронизирането е на пауза, докато данните ви се заредят."
+  Retry: "Опитай отново"
 Native Permissions:
   Local Network: "Откриване на устройства в локалната мрежа и предаване на видеоклипове към тях, както и синхронизиране на настройки и данни между устройства."

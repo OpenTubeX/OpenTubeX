@@ -4,20 +4,22 @@
       class="card"
     >
       <div class="heading">
-        <h2 class="headingText">
-          <FtIcon
-            :icon="['fas', 'bookmark']"
-            class="headingIcon"
+        <div class="headingRow">
+          <h2 class="headingText">
+            <FtIcon
+              :icon="['fas', 'bookmark']"
+              class="headingIcon"
+            />
+            {{ $t("User Playlists.Your Playlists") }}
+          </h2>
+          <FtIconButton
+            :title="$t('User Playlists.Create New Playlist')"
+            :icon="['fas', 'plus']"
+            theme="secondary"
+            class="newPlaylistButton"
+            @click="createNewPlaylist"
           />
-          {{ $t("User Playlists.Your Playlists") }}
-        </h2>
-        <FtIconButton
-          :title="$t('User Playlists.Create New Playlist')"
-          :icon="['fas', 'plus']"
-          theme="secondary"
-          class="newPlaylistButton"
-          @click="createNewPlaylist"
-        />
+        </div>
         <div
           v-if="fullData.length > 1"
           class="searchInputsRow"
@@ -25,7 +27,9 @@
           <FtInput
             ref="searchBar"
             input-type="search"
-            :placeholder="$t('User Playlists.Search bar placeholder')"
+            :label="$t('User Playlists.Search bar placeholder')"
+            :icon="['fas', 'search']"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
             :value="query"
             :show-action-button="false"
             :maxlength="255"

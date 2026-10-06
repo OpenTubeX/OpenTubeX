@@ -132,6 +132,7 @@ Search Listing:
     Closed Captions: Closed Captions
   # In Filter Button
 Search Filters:
+  Cookie Search Failed: "Search failed with the configured cookies."
   Search Filters: Search Filters
   Prioritize:
     Prioritize: Prioritize
@@ -528,6 +529,11 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Enable Tabs: "Enable Tabs"
+    Thumbnail Swipe Gestures:
+      Left: Swipe left on thumbnails
+      Right: Swipe right on thumbnails
+      Description: Swipe a video thumbnail horizontally and release to perform the selected action.
     Data Saver Thumbnails: "Data saver thumbnails"
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
@@ -537,7 +543,9 @@ Settings:
     Blur Thumbnails: Blur thumbnails
     General Settings: General
     Navigation:
-      Show Active Subscriptions: Show Active Subscriptions
+      Always Show Navigation Bar: Always show navigation bar when it's at the bottom
+      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customize navigation
       Add Item: Add item
@@ -634,7 +642,7 @@ Settings:
       Mark as Watched: Mark as Watched
       Copy YouTube Link: Copy YouTube Link
       Open in YouTube: Open in YouTube
-    Current Invidious Instance: Current Invidious Instance
+    Current Invidious Instance: Invidious instance
     The currently set default instance is {instance}: The currently set default instance is {instance}
     No default instance has been set: No default instance has been set
     Current instance will be randomized on startup: Current instance will be randomized on startup
@@ -661,6 +669,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Theme Settings: Theme
     Match Top Bar with Main Color: Match Top Bar with Main Color
@@ -735,8 +744,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Light"
-      OpenTubeX Dark: "OpenTubeX Dark"
+      Ocean Light: "Ocean Light"
+      Ocean Dark: "Ocean Dark"
       Base Theme: Base Theme
       Black: Black
       Custom: Custom
@@ -793,6 +802,7 @@ Settings:
       Unable to Delete: Unable to delete the custom theme
       Invalid Theme File: Invalid custom theme file
       Colors:
+        Watched thumbnail overlay: "Watched thumbnail overlay"
         Main text: Main text
         Secondary text: Secondary text
         Subtle text: Subtle text
@@ -1025,7 +1035,7 @@ Settings:
     Skip by Scrolling Over Video Player: Skip by Scrolling Over Video Player
     Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
     Display Play Button In Video Player: Display Play Button In Video Player
-    Enter Fullscreen on Display Rotate: Enter Fullscreen on Display Rotate
+    Enter Fullscreen on Display Rotate: Enter fullscreen when the screen rotates to landscape
     Rotate Wide Videos to Landscape in Fullscreen: Rotate wide videos to landscape in fullscreen
     Swipe Up or Down to Enter or Exit Fullscreen: Swipe up or down to enter or exit fullscreen
     Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
@@ -1108,6 +1118,8 @@ Settings:
       Error:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
+    Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
     Show Google Cast Button: "Show Google Cast button"
   Channel Settings:
     Channel Settings: Channel Settings
@@ -1139,8 +1151,8 @@ Settings:
     External Player: External Player
     Ignore Unsupported Action Warnings: Ignore Unsupported Action Warnings
     Ignore Default Arguments: Ignore Default Arguments
-    Custom External Player Executable: Custom External Player Executable
-    Custom External Player Arguments: Custom External Player Arguments
+    Custom External Player Executable: Executable path
+    Custom External Player Arguments: Custom arguments
     Players:
       None:
         Name: None
@@ -1155,9 +1167,9 @@ Settings:
     Update Managed Tools: Update
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
-    Global Additional yt-dlp Arguments: Global Additional yt-dlp Arguments
+    Global Additional yt-dlp Arguments: Additional yt-dlp arguments
     Concurrent Downloads: Concurrent downloads
-    Bandwidth Limit: Bandwidth limit (KiB/s, 0 for unlimited)
+    Bandwidth Limit: Bandwidth limit (KiB/s)
     Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: 'Manage Download Templates ({templateCount})'
@@ -1230,8 +1242,8 @@ Settings:
       Automatic: Update automatically
       Ask: Ask before updating
       Manual: Only update manually
-    yt-dlp Executable Path: yt-dlp Executable Path
-    FFmpeg Executable Path: FFmpeg Executable Path
+    yt-dlp Executable Path: yt-dlp executable
+    FFmpeg Executable Path: FFmpeg executable
     Restricted Playback Authentication: "yt-dlp Cookies"
     Cookie Source: Cookie Source
     Cookie Sources:
@@ -1572,7 +1584,7 @@ Settings:
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
     Description: Synchronize subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.
-    Server URL: Server URL
+    Server URL: Sync server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
     Username: Username
@@ -1697,10 +1709,10 @@ Settings:
     Enable Tor / Proxy: Enable Tor / Proxy
     Proxy Protocol: Proxy Protocol
     Proxy Host: Proxy Host
-    Proxy Port Number: Proxy Port Number
+    Proxy Port Number: Proxy port
     Proxy Username: Proxy Username
     Proxy Password: Proxy Password
-    IP Block Recovery Script Path: IP Block Recovery Script Path
+    IP Block Recovery Script Path: IP block recovery script
     Select IP Block Recovery Script File: Select IP Block Recovery Script File
     Clicking on Test Proxy will send a request to: Clicking on Test Proxy will send a request to
     Test Proxy: Test Proxy
@@ -1719,8 +1731,8 @@ Settings:
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Enable SponsorBlock
     Enable SponsorBlock Submission: Enable SponsorBlock Submission
-    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API Url (Default is https://sponsor.ajay.app)
-    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API URL
+    SponsorBlock Private User ID (optional): Private user ID (optional)
     SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
     Generated SponsorBlock User ID: Generated SponsorBlock User ID
     Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
@@ -1731,7 +1743,7 @@ Settings:
     Skip notification timeout: Skip notification timeout
     UseDeArrowTitles: Use DeArrow Video Titles
     UseDeArrowThumbnails: Use DeArrow for thumbnails
-    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': 'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)'
+    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow thumbnail API URL
     Skip Options:
       Skip Option: Skip Option
       Auto Skip: Auto Skip
@@ -1746,7 +1758,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Parental Control Settings: Parental Control
     Hide Unsubscribe Button: Hide Unsubscribe Button
@@ -1832,6 +1844,21 @@ About:
   Donate: Donate
 
 Profile:
+  Customization: Customization
+  Manage Profile Subscriptions: Manage profile subscriptions
+  Icon Names:
+    Person: Person
+    People: People
+    Headphones: Headphones
+    Gaming: Gaming
+    Film: Film
+    Art: Art
+    Science: Science
+    Globe: Globe
+    Heart: Heart
+    Sun: Sun
+    Moon: Moon
+    Trophy: Trophy
   Profile Settings: Profile
   Toggle Profile List: Toggle Profile List
   Profile Select: Profile Select
@@ -2279,12 +2306,16 @@ Video:
     You appear to be offline: You appear to be offline.
     Playback will resume automatically when your connection comes back: Playback will resume automatically when your connection comes back.
     Scroll Mini Player:
+      Collapse Controls: "Collapse controls"
+      Expand Controls: "Expand controls"
       Back to Top: Back to top
       Return to Video Tab: Return to video tab
       Hide: Hide mini player
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
+      Rewind 10 seconds: Rewind 10 seconds
+      Forward 10 seconds: Forward 10 seconds
     Skipped segment: '{segmentCategory} Skipped'
     SponsorBlock:
       CancelCurrentSegment: Cancel Creating Segment
@@ -2363,6 +2394,10 @@ Video:
       UpvoteSegment: Upvote
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
+      ChangeCategory: Change category
+      CopyAndDownvote: Copy & downvote
+      SubmitCategoryVote: Submit category vote
+      CategoryVoteSuccess: Category vote submitted.
     Google Cast:
       Cast: "Cast to a Google Cast device"
       Connected: "Casting to {device}"
@@ -2467,6 +2502,7 @@ Clipboard:
   Cannot access clipboard without a secure connection: Cannot access clipboard without a secure connection
 
 Context Menu:
+  Open in a Background Tab: "Open in a Background Tab"
   Select Tab: Select Tab
   Close Tabs Before: Close Tabs Before
   Close Tabs After: Close Tabs After
@@ -2659,6 +2695,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Enable Tabs: "Turning this off closes all other tabs and keeps the current page open."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
@@ -2732,6 +2769,7 @@ Tooltips:
     Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
     Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
     Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
+    Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.
@@ -3040,8 +3078,8 @@ Downloads:
   File Name Template: File Name Template
   File Name Template Help: 'Available fields: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Time Range and Chapters
-  Start Time: Start Time (HH:MM:SS)
-  End Time: End Time (HH:MM:SS)
+  Start Time: Start time
+  End Time: End time
   Split by Chapters: Split into separate files by chapter
   Remove Segments: Remove segments
   Subtitles and Metadata: Subtitles and Metadata
@@ -3125,5 +3163,39 @@ Tray:
 Tray Icon:
   Title: "Tray icon"
   Follow App Theme: "Follow app theme"
+
+Form Inputs:
+  Enter Password Hint: "Enter your password"
+  Choose Password Hint: "Choose a password"
+  Confirm Password Hint: "Repeat your new password"
+  Encryption Passphrase Hint: "Enter your encryption passphrase"
+  Show Password: "Show password"
+  Hide Password: "Hide password"
+  Search Text Hint: "Enter search terms"
+  Playlist Description Hint: "Describe this playlist"
+  Filename Preview: "Filename preview"
+  Enter Channels: "Enter channels"
+  Enter Text: "Enter text"
+  Video URL: Video or playlist URL
+  Paste Link: Paste a video or playlist link
+  Example: e.g. {example}
+  No Minimum: No minimum
+  No Maximum: No maximum
+  Any Age: Any age
+  Included Terms Example: e.g. tutorial, review
+  Excluded Terms Example: e.g. trailer, preview
+  Download Folder Hint: Leave blank to use your Downloads folder
+  Global Arguments Hint: Optional arguments for every download
+  Unlimited Hint: 0 for unlimited
+  Add Argument: Add an argument
+  Template Name Example: e.g. Audio only
+  Download Arguments Hint: Optional arguments for this download
+  Generated ID Hint: Leave blank to generate an ID
+  Default Value: "Default: {value}"
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Retry: "Retry"
 Native Permissions:
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."

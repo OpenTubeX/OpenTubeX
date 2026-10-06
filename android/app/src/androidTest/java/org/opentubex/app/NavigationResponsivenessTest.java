@@ -21,6 +21,15 @@ import org.junit.runner.RunWith;
 public class NavigationResponsivenessTest {
     @Test
     public void returningToSubscriptionsReusesTheProcessedFeed() throws Exception {
+        assertFeedNavigation("subscriptions", "#subscriptionsPanel .ft-list-video");
+    }
+
+    @Test
+    public void homeShelvesMountOnlyTheVisibleCards() throws Exception {
+        assertFeedNavigation("home", "[data-home-section=\"newSinceLastVisit\"] .mediaGrid li");
+    }
+
+    private static void assertFeedNavigation(String route, String contentSelector) throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> reference = new AtomicReference<>();
             scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
@@ -28,6 +37,8 @@ public class NavigationResponsivenessTest {
             await(view, "!!document.querySelector('.sideNav a[href=\"#/userplaylists\"]')");
             evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
             await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
+            await(view, "!!document.querySelector('.newPlaylistButton')");
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
@@ -67,11 +78,25 @@ public class NavigationResponsivenessTest {
                 """);
             try {
                 await(view, "!!document.querySelector('.newPlaylistButton')");
-                tap(view, "subscriptions");
-                await(view, "!!document.querySelector('#subscriptionsPanel .ft-list-video')");
+                if (route.equals("home")) {
+                    evaluate(view, """
+                        window.navigationHomeOverflow = false;
+                        window.navigationHomeObserver = new MutationObserver(() => {
+                            const shelf = document.querySelector('[data-home-section="newSinceLastVisit"] [data-home-shelf]');
+                            if (shelf === null) return;
+                            // Bound a full row using fractional CSS width; controls reduce its capacity further.
+                            const capacity = Math.max(1, Math.floor((shelf.getBoundingClientRect().width + 12) / (260 + 12)));
+                            if (shelf.querySelectorAll('.mediaGrid li').length > capacity) window.navigationHomeOverflow = true;
+                        });
+                        window.navigationHomeObserver.observe(document.querySelector('#app'), { childList: true, subtree: true });
+                        """);
+                }
+                tap(view, route);
+                await(view, "!!document.querySelector('" + contentSelector + "')");
                 evaluate(view, "document.querySelector('.sideNav .inner > a[href=\"#/userplaylists\"]').click()");
                 await(view, "!!document.querySelector('.newPlaylistButton')");
-                evaluate(view, """
+                evaluate(view, String.format("""
+                    window.navigationContentSelector = '%s';
                     window.navigationSort = Array.prototype.sort;
                     window.navigationSorts = 0;
                     window.navigationElapsed = null;
@@ -79,28 +104,34 @@ public class NavigationResponsivenessTest {
                         if (this.length >= 10000) window.navigationSorts++;
                         return window.navigationSort.apply(this, args);
                     };
-                    document.querySelector('.sideNav .inner > a[href="#/subscriptions"]').addEventListener('pointerup', () => {
+                    document.querySelector('.sideNav .inner > a[href="#/%s"]').addEventListener('pointerup', () => {
                         const start = performance.now();
                         function rendered() {
-                            if (document.querySelector('#subscriptionsPanel .ft-list-video')) {
+                            if (document.querySelector(window.navigationContentSelector)) {
                                 window.navigationElapsed = performance.now() - start;
                             } else requestAnimationFrame(rendered);
                         }
                         requestAnimationFrame(rendered);
                     }, { once: true });
-                    """);
-                tap(view, "subscriptions");
+                    """, contentSelector, route));
+                tap(view, route);
                 await(view, "window.navigationElapsed !== null");
-                Log.i("NavigationResponsiveness", "tap-to-render ms: " + evaluate(view, "window.navigationElapsed"));
-                assertEquals("An unchanged feed must not sort its entire cache after a tab switch", "0",
-                    evaluate(view, "window.navigationSorts"));
+                Log.i("NavigationResponsiveness", route + " tap-to-render ms: " + evaluate(view, "window.navigationElapsed"));
+                if (route.equals("home")) {
+                    assertEquals("Home must not mount more than a row of cards before measuring its width", "false",
+                        evaluate(view, "window.navigationHomeOverflow"));
+                } else {
+                    assertEquals("An unchanged feed must not sort its entire cache after a tab switch", "0",
+                        evaluate(view, "window.navigationSorts"));
+                }
             } finally {
                 evaluate(view, """
                     if (window.navigationSort) Array.prototype.sort = window.navigationSort;
+                    window.navigationHomeObserver?.disconnect();
                     document.querySelector('#app').__vue_app__.config.globalProperties.$store.replaceState(window.navigationSavedState);
                     if (window.navigationSavedFeed === null) localStorage.removeItem('Subscriptions/currentTab');
                     else localStorage.setItem('Subscriptions/currentTab', window.navigationSavedFeed);
-                    for (const key of ['navigationSort', 'navigationSorts', 'navigationElapsed', 'navigationSavedState', 'navigationSavedFeed']) delete window[key];
+                    for (const key of ['navigationSort', 'navigationSorts', 'navigationElapsed', 'navigationSavedState', 'navigationSavedFeed', 'navigationContentSelector', 'navigationHomeObserver', 'navigationHomeOverflow']) delete window[key];
                     """);
             }
             assertEquals("Restored playlist counts retain their Map type", "true", evaluate(view,

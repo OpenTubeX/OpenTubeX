@@ -30,12 +30,14 @@
         :icon="['fas', 'message']"
         @change="updateToastPosition"
       />
-      <FtButton
-        class="testToastButton"
-        :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
-        :icon="['fas', 'message']"
-        @click="showTestToast"
-      />
+      <div class="testToastAction">
+        <FtButton
+          class="testToastButton"
+          :label="t('Settings.Theme Settings.Toast Position.Test Toast')"
+          :icon="['fas', 'message']"
+          @click="showTestToast"
+        />
+      </div>
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
@@ -159,6 +161,14 @@
       <div class="switchColumn">
         <FtToggleSwitch
           v-if="IS_CAPACITOR"
+          :label="t('Settings.Theme Settings.Compact Mobile Mini Player')"
+          compact
+          :default-value="compactMobileMiniPlayer"
+          setting-key="compactMobileMiniPlayer"
+          @change="store.dispatch('updateCompactMobileMiniPlayer', $event)"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
           compact
           :default-value="alwaysShowMobileSearchBar"
@@ -261,6 +271,7 @@
           compact
           :default-value="showTabIcons"
           setting-key="showTabIcons"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateShowTabIcons"
         />
         <FtToggleSwitch
@@ -269,6 +280,7 @@
           compact
           :default-value="showTabPreviews"
           setting-key="showTabPreviews"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateShowTabPreviews"
         />
         <FtToggleSwitch
@@ -278,6 +290,7 @@
           compact
           :default-value="useFixedTabWidth"
           setting-key="useFixedTabWidth"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateUseFixedTabWidth"
         />
         <FtToggleSwitch
@@ -315,7 +328,7 @@
             :min-value="MIN_FIXED_TAB_WIDTH"
             :max-value="MAX_FIXED_TAB_WIDTH"
             :step="FIXED_TAB_WIDTH_STEP"
-            :disabled="!useFixedTabWidth"
+            :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
             value-extension="px"
             @input="previewFixedTabWidth"
             @change="updateFixedTabWidth"
@@ -475,6 +488,7 @@ const { locale, t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
+const compactMobileMiniPlayer = computed(() => store.getters.getCompactMobileMiniPlayer)
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
 const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
 const capacitorLayoutModeNames = computed(() => [
@@ -1026,41 +1040,51 @@ function handleSmoothScrolling(value) {
 }
 
 .themeSelectRow {
-  flex-flow: row nowrap;
+  align-items: center;
+  flex-flow: row wrap;
   justify-content: center;
-  gap: 12px;
+  column-gap: 12px;
 }
 
 .themeSelectRow :deep(.select) {
-  flex: 1 1 200px;
+  flex: 1 1 calc(200px + var(--select-indicator-space));
   min-inline-size: 0;
-  max-inline-size: 200px;
+  max-inline-size: calc(200px + var(--select-indicator-space));
+}
+
+.testToastAction {
+  display: flex;
+  justify-content: center;
 }
 
 .testToastButton {
-  margin-block-start: 30px;
+  margin-block: var(--settings-control-margin);
 }
 
 @container settings-content (width <= 760px) {
-  .themeSelectRow {
-    align-items: center;
-    flex-direction: column;
-  }
-
   .tabSettingsRow {
     align-items: center;
     flex-direction: column;
-    gap: 12px;
+    column-gap: 12px;
     justify-content: center;
   }
 
   .themeSelectRow :deep(.select) {
     flex: 0 0 auto;
-    inline-size: min(200px, 100%);
+    inline-size: min(calc(200px + var(--select-indicator-space)), 100%);
   }
 
-  .testToastButton {
-    margin-block-start: 5px;
+}
+
+@container settings-content (width <= 580px) {
+  .testToastAction {
+    inline-size: 100%;
+  }
+}
+
+@container settings-content (width <= 460px) {
+  .themeSelectRow {
+    flex-direction: column;
   }
 }
 

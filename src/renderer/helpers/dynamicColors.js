@@ -36,7 +36,8 @@ export function dynamicThemeColors(palette, dark) {
   const text = tone('neutral1', 900, 100)
   const secondaryText = tone('neutral2', 700, 200)
   const surface = tone('neutral1', 50, 900)
-  const raised = tone('neutral1', 100, 800)
+  // Keep pure-black page backgrounds while giving cards subtle elevation.
+  const raised = dark && surface === '#000000' ? '#191919' : tone('neutral1', 100, 800)
   const hover = tone('neutral2', 100, 800)
   const colors = {
     primaryText: text,

@@ -32,52 +32,59 @@
     <p v-if="!loading && !error && !entries.length">
       {{ t('Settings.Sync Settings.No Activity') }}
     </p>
-    <ol
+    <div
       v-if="!loading && entries.length"
-      :id="activityListId"
-      ref="activityList"
-      class="activityList"
-      :class="{ activityPreview: hasHiddenEntries }"
+      ref="activityScroller"
+      v-overlay-scrollbars
+      class="activityScroller"
+      :class="{ activityExpanded: showAll }"
     >
-      <li
-        v-for="entry in visibleEntries"
-        :key="entry.id"
-        tabindex="-1"
+      <ol
+        :id="activityListId"
+        ref="activityList"
+        class="activityList"
+        :class="{ activityPreview: hasHiddenEntries }"
       >
-        <I18nT
-          :keypath="entry.messageKey"
-          tag="p"
-          scope="global"
+        <li
+          v-for="entry in visibleEntries"
+          :key="entry.id"
+          tabindex="-1"
         >
-          <template #device>
-            {{ entry.deviceName }}
-          </template>
-          <template #setting>
-            <button
-              v-if="entry.target"
-              type="button"
-              class="activitySetting"
-              @click="navigation.open(entry.target)"
-            >
-              {{ entry.setting }}
-            </button>
-            <span v-else>{{ entry.setting }}</span>
-          </template>
-          <template #item>
-            {{ entry.item }}
-          </template>
-          <template #value>
-            {{ entry.displayValue }}
-          </template>
-        </I18nT>
-        <time
-          :datetime="new Date(entry.createdAt).toISOString()"
-          :title="dateLabel(entry.createdAt)"
-        >
-          {{ getRelativeTimeFromDate(entry.createdAt, true, true, relativeTimeNow) }}
-        </time>
-      </li>
-    </ol>
+          <I18nT
+            :keypath="entry.messageKey"
+            tag="p"
+            scope="global"
+          >
+            <template #device>
+              {{ entry.deviceName }}
+            </template>
+            <template #setting>
+              <button
+                v-if="entry.target"
+                type="button"
+                class="activitySetting"
+                @click="navigation.open(entry.target)"
+              >
+                {{ entry.setting }}
+              </button>
+              <span v-else>{{ entry.setting }}</span>
+            </template>
+            <template #item>
+              {{ entry.item }}
+            </template>
+            <template #value>
+              {{ entry.displayValue }}
+            </template>
+          </I18nT>
+          <time
+            :datetime="new Date(entry.createdAt).toISOString()"
+            :title="dateLabel(entry.createdAt)"
+          >
+            {{ getRelativeTimeFromDate(entry.createdAt, true, true, relativeTimeNow) }}
+          </time>
+        </li>
+      </ol>
+    </div>
     <button
       v-if="!loading && entries.length > 3"
       type="button"
@@ -105,16 +112,24 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../helpers/sync-setting-labels'
 
 import { settingsSearchNavigationKey } from '../../helpers/settingsSearch'
+import { useScrollClamp } from '../../composables/useScrollClamp'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
-import { getRelativeTimeFromDate } from '../../helpers/utils'
+import { getRelativeTimeFromDate, getLocalizedShortcut } from '../../helpers/utils'
+import { getKeyboardShortcutLabelMappings } from '../../helpers/keyboardShortcutLabels'
 import { formatDateTime } from '../../helpers/dateFormat'
 
 const navigation = inject(settingsSearchNavigationKey, null)
 const relativeTimeNow = useRelativeTimeClock()
 const { t, te, locale } = useI18n()
 const entries = computed(() => store.getters.getSyncServerActivity)
+const shortcutLabels = computed(() => new Map(
+  getKeyboardShortcutLabelMappings(t)
+    .flatMap(([label, codes]) => codes.map(code => [code, label]))
+))
 const activityListId = useId()
 const activityList = useTemplateRef('activityList')
+const activityScroller = useTemplateRef('activityScroller')
+useScrollClamp(activityScroller, activityList)
 const showAll = ref(false)
 const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
 const loading = ref(true)
@@ -144,6 +159,9 @@ function displayIntlName(value, type) {
 }
 
 function displayActivityValue(entry) {
+  if (entry.key === 'keyboardShortcuts' && entry.detail && typeof entry.value === 'string') {
+    return entry.value ? getLocalizedShortcut(entry.value) : t('KeyboardShortcutPrompt.Unassigned')
+  }
   if (entry.detail === 'feedTypes') {
     return typeof entry.value === 'string' && entry.value
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
@@ -209,6 +227,10 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     .filter(key => key && te(key)).map(key => t(key))
   const target = entry.key ? navigation?.find(labels, entry.key) : null
+  if (entry.key === 'keyboardShortcuts') {
+    const shortcutLabel = shortcutLabels.value.get(entry.detail)
+    if (shortcutLabel) labels.push(shortcutLabel)
+  }
   const detailKey = entry.key === 'subscriptionChannelSettings'
     ? detailLabels[entry.detail]
     : entry.key === 'defaultCaptionSettings' && entry.detail
@@ -217,7 +239,8 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
   if (entry.item && entry.key && (entry.key !== 'customThemes' || entry.action === 'updated')) labels.push(entry.item)
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   if (detailKey && te(detailKey)) labels.push(t(detailKey))
-  const hasValue = entry.key && ['string', 'number', 'boolean'].includes(typeof entry.value)
+  const hasValue = entry.key && (entry.key !== 'keyboardShortcuts' || entry.detail) &&
+    ['string', 'number', 'boolean'].includes(typeof entry.value)
   const messageKey = entry.action === 'added'
     ? 'Settings.Sync Settings.Item Added'
     : entry.action === 'removed'

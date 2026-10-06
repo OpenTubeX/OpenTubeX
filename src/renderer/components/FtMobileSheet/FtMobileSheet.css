@@ -123,7 +123,7 @@
   block-size: 4px;
   inset-block-start: 5px;
   inset-inline-start: calc(50% - 16px);
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   background: var(--secondary-text-color);
   opacity: 0.5;
 }

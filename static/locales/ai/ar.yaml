@@ -267,6 +267,11 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Enable Tabs: "تفعيل علامات التبويب"
+    Thumbnail Swipe Gestures:
+      Left: السحب لليسار على الصور المصغرة
+      Right: السحب لليمين على الصور المصغرة
+      Description: اسحب صورة الفيديو المصغرة أفقيًا ثم ارفع إصبعك لتنفيذ الإجراء المحدد.
     Data Saver Thumbnails: "صور مصغرة موفرة للبيانات"
     Use tray icon: "استخدام أيقونة علبة النظام"
     Close to system tray: "الإغلاق إلى علبة النظام"
@@ -275,7 +280,9 @@ Settings:
     Swipe to refresh: اسحب للتحديث
     Blur Thumbnails: تمويه الصور المصغرة
     Navigation:
-      Show Active Subscriptions: إظهار الاشتراكات النشطة
+      Always Show Navigation Bar: إظهار شريط التنقل دائمًا عندما يكون في الأسفل
+      Compact Tab Labels: شريط تنقل مضغوط عندما يكون في الأسفل
+      Show Active Subscriptions: إظهار الاشتراكات النشطة في الشريط الجانبي
       Navigation: التنقل
       Customize Navigation: تخصيص التنقل
       Add Item: إضافة عنصر
@@ -357,6 +364,7 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Compact Mobile Mini Player: "مشغّل مصغّر مدمج للهاتف"
     Always Show Mobile Search Bar: "إظهار شريط البحث على الهاتف دائمًا"
     Frosted Glass Player UI: "واجهة مشغل بتأثير الزجاج المصنفر"
     Main Color Theme:
@@ -439,8 +447,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX فاتح"
-      OpenTubeX Dark: "OpenTubeX داكن"
+      Ocean Light: "Ocean فاتح"
+      Ocean Dark: "Ocean داكن"
       Custom: مخصص
     Light Theme: سمة فاتحة
     Dark Theme: سمة داكنة
@@ -475,6 +483,7 @@ Settings:
       Unable to Delete: غير قادر على حذف السمة المخصصة
       Invalid Theme File: ملف السمة المخصصة غير صالح
       Colors:
+        Watched thumbnail overlay: "تراكب الصور المصغّرة للفيديوهات المُشاهَدة"
         Main text: النص الرئيسي
         Secondary text: النص الثانوي
         Subtle text: نص دقيق
@@ -629,6 +638,8 @@ Settings:
     Preload Upcoming Videos: "تحميل الفيديوهات القادمة مسبقًا"
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
+    Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
+    Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
     Show Google Cast Button: "إظهار زر Google Cast"
   Channel Settings:
     Channel Settings: إعدادات القناة
@@ -666,9 +677,9 @@ Settings:
     Update Managed Tools: تحديث
     Managed Tools Download Error Template: 'تعذر تنزيل الأدوات المُدارة: {errors}'
     Download Folder: مجلد التنزيل
-    Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية العامة
+    Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
     Concurrent Downloads: التنزيلات المتزامنة
-    Bandwidth Limit: حد النطاق الترددي (كيلو بايت/ثانية، 0 لعدد غير محدود)
+    Bandwidth Limit: حد النطاق الترددي (KiB/s)
     Choose Download Folder: اختر مجلد التنزيل
     Download Templates: قوالب التنزيل
     Manage Download Templates: إدارة تنزيل القوالب ({templateCount})
@@ -741,8 +752,8 @@ Settings:
       Automatic: التحديث تلقائيا
       Ask: اسأل قبل التحديث
       Manual: قم بالتحديث يدويًا فقط
-    yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
-    FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
+    yt-dlp Executable Path: ملف yt-dlp التنفيذي
+    FFmpeg Executable Path: ملف FFmpeg التنفيذي
     Restricted Playback Authentication: "ملفات تعريف ارتباط yt-dlp"
     Cookie Source: مصدر ملفات تعريف الارتباط
     Cookie Sources:
@@ -985,7 +996,7 @@ Settings:
     Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
     Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.
     Description: 'زامن الاشتراكات والملفات الشخصية وقوائم التشغيل وسجل المشاهدة والإعدادات المدعومة مع خادم مزامنة OpenTubeX أو LibreTube. قد لا تدعم خوادم LibreTube جميع ميزات المزامنة.'
-    Server URL: عنوان URL للخادم
+    Server URL: رابط خادم المزامنة
     Checking Server: جارٍ التحقق من خادم المزامنة…
     Server Unavailable: غير قادر على الاتصال بخادم المزامنة هذا. تحقق من عنوان URL وحاول مرة أخرى.
     Username: اسم المستخدم
@@ -1075,7 +1086,7 @@ Settings:
     Open All Tabs Confirmation: "هل تريد فتح كل علامات التبويب؟"
     Server Update Required: "حدّث هذا الخادم لدعم المزامنة المباشرة المشفّرة."
   Proxy Settings:
-    IP Block Recovery Script Path: مسار البرنامج النصي لاسترداد كتلة IP
+    IP Block Recovery Script Path: برنامج استعادة حظر عنوان IP
     Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP
     Running IP block recovery script: تشغيل البرنامج النصي لاسترداد كتلة IP
     IP block recovery script failed: 'فشل البرنامج النصي لاسترداد حظر IP (رمز الخروج: {exitCode})'
@@ -1087,7 +1098,7 @@ Settings:
       Excluded Channels: "القنوات المستثناة"
       Tooltip: "أدخل معرّف قناة لمنع تخطي مقاطع SponsorBlock في فيديوهاتها. يجب أن يطابق المعرّف تمامًا، مع مراعاة حالة الأحرف."
     Enable SponsorBlock Submission: تمكين تقديم SponsorBlock
-    SponsorBlock Private User ID (optional): معرف المستخدم الخاص لـ SponsorBlock (اختياري)
+    SponsorBlock Private User ID (optional): معرّف المستخدم الخاص (اختياري)
     SponsorBlock Private User ID Tooltip: الصق معرف مستخدم SponsorBlock الخاص من ملحق المتصفح. اترك هذا الحقل فارغًا لاستخدام المعرف الذي أنشأه التطبيق.
     Generated SponsorBlock User ID: تم إنشاء معرف مستخدم SponsorBlock
     Generated SponsorBlock User ID Tooltip: يمكن استخدام معرف مستخدم SponsorBlock الذي تم إنشاؤه بواسطة التطبيق في ملحق المتصفح أو إذا كنت تستخدم التطبيق على جهاز كمبيوتر آخر.
@@ -1099,7 +1110,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: إرجاع عدم الإعجاب على YouTube
     Enable Return YouTube Dislike: تمكين إرجاع عدم الإعجاب على YouTube
-    Return YouTube Dislike Url: قم بإرجاع عنوان URL لواجهة برمجة تطبيقات YouTube Dislike (الافتراضي هو https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: رابط API
   Parental Control Settings:
     Disable Channel Links: تعطيل روابط القنوات
   Password Dialog:
@@ -1144,6 +1155,21 @@ About:
   Matrix: مصفوفة
   Email: بريد إلكتروني
 Profile:
+  Customization: التخصيص
+  Manage Profile Subscriptions: إدارة اشتراكات الملف الشخصي
+  Icon Names:
+    Person: شخص
+    People: أشخاص
+    Headphones: سماعات الرأس
+    Gaming: ألعاب
+    Film: فيلم
+    Art: فن
+    Science: علوم
+    Globe: كرة أرضية
+    Heart: قلب
+    Sun: شمس
+    Moon: قمر
+    Trophy: كأس
   Profile Icon: أيقونة الملف الشخصي
   Choose an Emoji: اختر رمزًا تعبيريًا
   Custom Emoji: رموز تعبيرية مخصصة
@@ -1332,12 +1358,16 @@ Video:
     Hide: يخفي
     Show: يعرض
     Scroll Mini Player:
+      Collapse Controls: "طي عناصر التحكم"
+      Expand Controls: "توسيع عناصر التحكم"
       Back to Top: العودة إلى الأعلى
       Return to Video Tab: العودة إلى علامة التبويب الفيديو
       Hide: إخفاء المشغل المصغّر
       Play: يلعب
       Pause: يوقف
       Drag Handle: نقل لاعب صغير
+      Rewind 10 seconds: الرجوع 10 ثوانٍ
+      Forward 10 seconds: التقديم 10 ثوانٍ
     SponsorBlock:
       CancelCurrentSegment: إلغاء إنشاء المقطع
       ClearSegments: مسح القطاعات
@@ -1415,6 +1445,10 @@ Video:
       UpvoteSegment: التصويت لصالح
       DownvoteSegment: التصويت السلبي
       VoteFailed: فشل إرسال تصويت SponsorBlock.
+      ChangeCategory: تغيير الفئة
+      CopyAndDownvote: نسخ والتصويت سلبًا
+      SubmitCategoryVote: إرسال تصويت الفئة
+      CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
       Cast: "البث إلى جهاز Google Cast"
       Connected: "جارٍ البث إلى {device}"
@@ -1488,6 +1522,7 @@ Share:
   Share failed: "تعذرت مشاركة الرابط"
   Timestamp Link Copied: تم نسخ رابط الطابع الزمني إلى الحافظة
 Context Menu:
+  Open in a Background Tab: "فتح في علامة تبويب في الخلفية"
   Select Tab: تحديد علامة التبويب
   Close Tabs Before: إغلاق علامات التبويب السابقة
   Close Tabs After: إغلاق علامات التبويب التالية
@@ -1649,6 +1684,7 @@ Description:
   Games: ألعاب
 Tooltips:
   General Settings:
+    Enable Tabs: "يؤدي إيقاف هذا الخيار إلى إغلاق جميع علامات التبويب الأخرى مع إبقاء الصفحة الحالية مفتوحة."
     Data Saver Thumbnails: "استخدم صورًا مصغرة بدقة أقل لتقليل استهلاك البيانات."
     Use AI Translation Completions: املأ الفجوات في الترجمات البشرية بنصوص تم إنشاؤها بواسطة الذكاء الاصطناعي. الترجمات البشرية لها الأولوية دائمًا.
     Update Relative Timestamps: يقوم بتحديث الطوابع الزمنية النسبية في جميع أنحاء التطبيق بينما تظل الصفحة مفتوحة. عند تعطيلها، يتم تحديثها فقط بعد إعادة تحميل الصفحة أو إعادة زيارتها.
@@ -1678,6 +1714,7 @@ Tooltips:
     Preload Upcoming Videos: "يجلب روابط بث yt-dlp للفيديوهات التالية ويخزنها مؤقتًا. لقائمة الانتظار الأولوية على قوائم التشغيل والاقتراحات."
     Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
     Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
+    Ignore System Rotation Lock for Fullscreen: استخدم دوران الجهاز الفعلي للدخول إلى ملء الشاشة والخروج منه حتى عند إيقاف التدوير التلقائي في أندرويد.
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.
@@ -1843,8 +1880,8 @@ Downloads:
   File Name Template: قالب اسم الملف
   File Name Template Help: 'الحقول المتاحة: {title}، {author}، {upload_date}، {id}، {playlist}، {playlist_index}، {ext}'
   Time Range and Chapters: النطاق الزمني والفصول
-  Start Time: 'وقت البدء (س س: د د: ث س)'
-  End Time: 'وقت الانتهاء (س س: د د: ث س)'
+  Start Time: وقت البدء
+  End Time: وقت الانتهاء
   Split by Chapters: تقسيم إلى ملفات منفصلة حسب الفصل
   Remove Segments: إزالة القطاعات
   Subtitles and Metadata: الترجمة والبيانات الوصفية
@@ -1933,5 +1970,42 @@ Tray:
 Tray Icon:
   Title: "أيقونة علبة النظام"
   Follow App Theme: "اتباع سمة التطبيق"
+
+Form Inputs:
+  Enter Password Hint: "أدخل كلمة مرورك"
+  Choose Password Hint: "اختر كلمة مرور"
+  Confirm Password Hint: "كرر كلمة مرورك الجديدة"
+  Encryption Passphrase Hint: "أدخل عبارة مرور التشفير"
+  Show Password: "إظهار كلمة المرور"
+  Hide Password: "إخفاء كلمة المرور"
+  Search Text Hint: "أدخل كلمات البحث"
+  Playlist Description Hint: "صِف قائمة التشغيل هذه"
+  Filename Preview: "معاينة اسم الملف"
+  Enter Channels: "أدخل القنوات"
+  Enter Text: "أدخل النص"
+  Video URL: رابط الفيديو أو قائمة التشغيل
+  Paste Link: الصق رابط فيديو أو قائمة تشغيل
+  Example: مثلًا {example}
+  No Minimum: لا حد أدنى
+  No Maximum: لا حد أقصى
+  Any Age: أي عمر
+  Included Terms Example: مثلًا شرح, مراجعة
+  Excluded Terms Example: مثلًا إعلان, معاينة
+  Download Folder Hint: اتركه فارغًا لاستخدام مجلد التنزيلات
+  Global Arguments Hint: وسيطات اختيارية لكل تنزيل
+  Unlimited Hint: 0 لعدم التقييد
+  Add Argument: أضف وسيطة
+  Template Name Example: مثلًا صوت فقط
+  Download Arguments Hint: وسيطات اختيارية لهذا التنزيل
+  Generated ID Hint: اتركه فارغًا لإنشاء معرّف
+  Default Value: "الافتراضي: {value}"
+
+Search Filters:
+  Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."
+
+Storage Startup Error:
+  Title: "تعذر تحميل بيانات التطبيق"
+  Message: "حرّر مساحة تخزين على الجهاز وحاول مجددًا. المزامنة متوقفة مؤقتًا حتى يتم تحميل بياناتك."
+  Retry: "إعادة المحاولة"
 Native Permissions:
   Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."
