@@ -60,6 +60,7 @@ public class DlnaCastingTest {
         AtomicReference<String> castUri = new AtomicReference<>();
         AtomicReference<byte[]> receivedVideo = new AtomicReference<>();
         AtomicReference<Throwable> rendererError = new AtomicReference<>();
+        CountDownLatch descriptionsStarted = new CountDownLatch(2);
         ExecutorService clients = Executors.newCachedThreadPool();
         try (ServerSocket fixture = new ServerSocket(0, 8, local);
              MulticastSocket ssdp = new MulticastSocket(1900);
@@ -117,7 +118,13 @@ public class DlnaCastingTest {
                                     } finally { stream.disconnect(); }
                                 }
                             }
-                            String body = request.contains("/otx-dlna-test.xml")
+                            if (request.contains("/otx-dlna-concurrent-")) {
+                                descriptionsStarted.countDown();
+                                if (!descriptionsStarted.await(3, TimeUnit.SECONDS)) {
+                                    rendererError.compareAndSet(null, new AssertionError("DLNA device description requests ran serially"));
+                                }
+                            }
+                            String body = request.contains("/otx-dlna-")
                                 ? "<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>Android test TV</friendlyName><serviceList><service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType><controlURL>/control</controlURL></service></serviceList></device></root>"
                                 : "GetPositionInfo".equals(action) ? "<GetPositionInfoResponse><RelTime>00:00:08</RelTime></GetPositionInfoResponse>" : request.startsWith("POST ") ? "<ok/>" : range ? "cdef" : "abcdefghij";
                             byte[] bytes = request.contains("/audio.m4a") ? audio : request.contains("/real.mp4") ? video : body.getBytes(StandardCharsets.US_ASCII);
@@ -180,6 +187,16 @@ public class DlnaCastingTest {
             assertEquals(200, result.getJSONObject("control").getInt("status"));
             assertTrue(result.getJSONObject("position").getString("body").contains("<RelTime>00:00:08</RelTime>"));
             assertTrue(result.getBoolean("rejected"));
+            evaluate(webView, String.format(java.util.Locale.ROOT, """
+                window.__dlnaConcurrent = null;
+                Promise.all([1, 2].map(index => window.Capacitor.nativePromise('Dlna', 'request', {
+                    url: 'http://%s:%d/otx-dlna-concurrent-' + index + '.xml'
+                }))).then(results => window.__dlnaConcurrent = results.map(result => result.status))
+                  .catch(error => window.__dlnaConcurrent = {error: String(error)}); true;
+                """, host, fixture.getLocalPort()));
+            await(webView, "window.__dlnaConcurrent !== null");
+            assertEquals("[200,200]", evaluate(webView, "window.__dlnaConcurrent"));
+            assertNull("Device descriptions must load concurrently", rendererError.get());
             JSONObject relay = result.getJSONObject("relay");
             String media = relay.getString("mediaUrl");
             HttpURLConnection request = (HttpURLConnection) new URL(media).openConnection(Proxy.NO_PROXY);
