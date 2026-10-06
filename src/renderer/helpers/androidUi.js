@@ -75,9 +75,9 @@ function pictureInPictureGeometry(video) {
     width = videoWidth
     height = videoHeight
   }
-  if (x + width <= 0 || y + height <= 0 || x >= window.innerWidth || y >= window.innerHeight) {
-    // Keep automatic PiP available after scrolling the video offscreen. Move
-    // its live content and enclosing element together into the native crop.
+  if (x < 0 || y < 0 || x + width > window.innerWidth || y + height > window.innerHeight) {
+    // Move partially scrolled videos too, so PiP shows the whole picture
+    // instead of enlarging only the strip still visible in the viewport.
     const offsetX = Math.max(0, Math.min(x, window.innerWidth - width)) - x
     const offsetY = Math.max(0, Math.min(y, window.innerHeight - height)) - y
     x += offsetX

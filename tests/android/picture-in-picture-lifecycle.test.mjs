@@ -165,8 +165,9 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
   }
 }
 
-for (const [scale, trigger, offscreen = false] of [[100, 'button'], [125, 'button'], [100, 'home'], [125, 'home'], [100, 'home', true]]) {
-  const label = offscreen ? `${trigger}-offscreen` : trigger
+for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 'home'], [125, 'home'], [100, 'home', 'offscreen'],
+  [100, 'button', 'partial'], [100, 'home', 'partial'], [125, 'home', 'partial']]) {
+  const label = scroll ? `${trigger}-${scroll}` : trigger
   test(`native PiP preserves the real inline player at ${scale}% UI scale through ${label}`, { skip: !enabled }, async () => {
     await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
     await page.evaluate(async trigger => {
@@ -176,21 +177,26 @@ for (const [scale, trigger, offscreen = false] of [[100, 'button'], [125, 'butto
       video.currentTime = 2
       await video.play()
     }, trigger)
-    await page.evaluate(offscreen => {
+    await page.evaluate(scroll => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setScrollMiniPlayerEnabled', !offscreen)
-      if (offscreen) {
+      store.commit('setScrollMiniPlayerEnabled', !scroll)
+      if (scroll) {
         // Stand in for a long description/comments section while retaining
         // the real Watch layout and its scroll viewport.
         const content = document.createElement('div')
         content.id = 'pip-offscreen-content'
         content.style.height = '2000px'
         document.querySelector('.videoLayout').append(content)
-        window.scrollTo(0, 1000)
+        const video = document.querySelector('video').getBoundingClientRect()
+        window.scrollTo(0, scroll === 'partial' ? window.scrollY + video.bottom - 40 : 1000)
       }
-    }, offscreen)
+    }, scroll)
     await page.waitForTimeout(400)
-    if (offscreen) assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
+    if (scroll === 'partial') assert.ok(await page.evaluate(() => {
+      const rect = document.querySelector('video').getBoundingClientRect()
+      return rect.top < 0 && rect.bottom > 0 && rect.bottom <= 41
+    }), 'only a narrow strip of the inline video remains inside the viewport')
+    else if (scroll) assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
       'the real inline video has scrolled entirely above the viewport')
     const start = await page.evaluate(() => {
       const video = document.querySelector('video')
@@ -305,8 +311,8 @@ for (const [scale, trigger, offscreen = false] of [[100, 'button'], [125, 'butto
           for (const value of pixels) clock = (Math.imul(clock, 31) + value) | 0
           return { visible: true, videoBounds, clock }
         }, { png: screenshot.toString('base64'), nativeWidth: right - left, nativeHeight: bottom - top })
-        if (!visible && process.env.ANDROID_ARTIFACT_DIR) {
-          await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${trigger}-${sample}.png`, screenshot)
+        if ((!visible || sample === 0) && process.env.ANDROID_ARTIFACT_DIR) {
+          await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}-${sample}.png`, screenshot)
         }
         assert.ok(visible,
           `PiP must keep the video visible across the entire native window without a page/black flash: ${JSON.stringify(diagnostic)}`)
@@ -339,7 +345,7 @@ for (const [scale, trigger, offscreen = false] of [[100, 'button'], [125, 'butto
       assert.ok(frames.every(frame => !frame.mini), 'native PiP must not activate the scroll mini-player')
       for (const frame of frames.filter(frame => frame.active && !frame.returning)) {
         const expected = [...start.rect]
-        if (offscreen) expected[1] = 0
+        if (scroll) expected[1] = 0
         assert.ok(frame.rect.every((value, axis) => Math.abs(value - expected[axis]) <= 1),
           `PiP must preserve the live video element's geometry: ${JSON.stringify(frame)}`)
         assert.deepEqual(frame.inner, start.inner, 'Chromium must keep the original viewport during PiP')
