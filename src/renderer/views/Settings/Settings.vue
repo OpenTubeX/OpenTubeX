@@ -1190,7 +1190,9 @@ function getSearchTargetText(element) {
   return normalizeSearchText(clone.textContent.trim())
 }
 
-function handleSettingsSearch() {
+function handleSettingsSearch(event) {
+  // Search uncommitted text too: Android keyboards compose until a word ends.
+  settingsSearchQuery.value = event.target.value
   closeSubpage?.()
   subpageTitle.value = ''
   subpageIcon.value = null
