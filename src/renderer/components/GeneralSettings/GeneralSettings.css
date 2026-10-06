@@ -45,6 +45,7 @@
 }
 
 .generalSelectGrid :deep(.select-label) {
+  column-gap: 4px;
   max-inline-size: calc(100% - 24px);
   margin-inline-end: 24px;
 }
