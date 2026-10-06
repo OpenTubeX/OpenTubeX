@@ -4,7 +4,29 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { ChromecastManager } from '../../src/main/chromecast.js'
-import { CAST_MEDIA } from '../../src/main/castSender.js'
+import { CAST_MEDIA, CastSender } from '../../src/main/castSender.js'
+import { EventEmitter } from 'node:events'
+
+for (const wait of [false, true]) {
+  test(`a failed helper write rejects a ${wait ? 'waiting' : 'non-waiting'} send`, async t => {
+    const sender = new EventEmitter()
+    Object.setPrototypeOf(sender, CastSender.prototype)
+    let killed = false
+    Object.assign(sender, {
+      nextId: 1, pending: new Map(), closed: false,
+      lines: { close() {} },
+      process: { stdin: { write(_, callback) { queueMicrotask(() => callback(new Error('Broken pipe'))) } }, kill() { killed = true } }
+    })
+    t.after(() => sender.close())
+    const result = await Promise.race([
+      sender.send('namespace', 'receiver', { type: 'CONNECT' }, wait).then(() => 'resolved', error => error.message),
+      new Promise(resolve => setTimeout(() => resolve('unsettled'), 100))
+    ])
+    assert.equal(result, 'Cast device disconnected')
+    assert.equal(killed, true)
+    assert.equal(sender.pending.size, 0)
+  })
+}
 
 // A receiver at the bridge boundary makes session tests independent of LAN
 // discovery and hardware. Native networking is covered by the emulator test.

@@ -1402,6 +1402,7 @@ Video:
       Return: "Återgå till lokal uppspelning"
       No Devices: "Inga Google Cast-enheter hittades"
       No Source: "Ingen kompatibel ström för Google Cast"
+      Error: "Det gick inte att casta videon"
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

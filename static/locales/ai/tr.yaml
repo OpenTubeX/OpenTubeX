@@ -1392,6 +1392,7 @@ Video:
       Return: "Yerel oynatmaya dön"
       No Devices: "Google Cast cihazı bulunamadı"
       No Source: "Google Cast için uyumlu akış yok"
+      Error: "Video yayınlanamadı"
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

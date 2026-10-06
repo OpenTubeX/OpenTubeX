@@ -1407,6 +1407,7 @@ Video:
       Return: "Itzuli tokiko erreprodukziora"
       No Devices: "Ez da Google Cast gailurik aurkitu"
       No Source: "Ez dago Google Cast-erako korronte bateragarririk"
+      Error: "Ezin izan da bideoa igorri"
   Station: Estazioa
   Playlist:
     Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude

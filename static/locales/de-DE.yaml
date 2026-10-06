@@ -2077,6 +2077,7 @@ Video:
       Return: "Zur lokalen Wiedergabe zurückkehren"
       No Devices: "Keine Google-Cast-Geräte gefunden"
       No Source: "Kein kompatibler Stream für Google Cast"
+      Error: "Das Video konnte nicht übertragen werden"
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
   Retry With Built-in Extraction: Erneut mit der integrierten Extraktion versuchen
   Retry With yt-dlp Extraction: Erneut mit der yt-dlp-Extraktion versuchen

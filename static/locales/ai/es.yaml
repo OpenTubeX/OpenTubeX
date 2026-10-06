@@ -1394,6 +1394,7 @@ Video:
       Return: "Volver a la reproducción local"
       No Devices: "No se encontraron dispositivos Google Cast"
       No Source: "No hay un flujo compatible con Google Cast"
+      Error: "No se pudo transmitir el vídeo"
   External Media:
     Dislikes: "No me gusta | No me gusta | No me gusta"
     Reposts: "Repost | Reposts | Reposts"

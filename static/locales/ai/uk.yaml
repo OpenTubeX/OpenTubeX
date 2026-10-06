@@ -1424,6 +1424,7 @@ Video:
       Return: "Повернутися до локального відтворення"
       No Devices: "Пристроїв Google Cast не знайдено"
       No Source: "Немає сумісного потоку для Google Cast"
+      Error: "Не вдалося транслювати відео"
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано

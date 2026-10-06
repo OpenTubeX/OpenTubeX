@@ -1414,6 +1414,7 @@ Video:
       Return: "Fara aftur í staðbundna spilun"
       No Devices: "Engin Google Cast-tæki fundust"
       No Source: "Enginn samhæfur straumur fyrir Google Cast"
+      Error: "Ekki tókst að senda myndskeiðið"
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:

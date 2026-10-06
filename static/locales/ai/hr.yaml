@@ -1409,6 +1409,7 @@ Video:
       Return: "Vrati se na lokalnu reprodukciju"
       No Devices: "Nisu pronađeni uređaji Google Cast"
       No Source: "Nema kompatibilnog toka za Google Cast"
+      Error: "Videozapis nije moguće prenijeti"
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

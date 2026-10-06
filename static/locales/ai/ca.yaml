@@ -1866,6 +1866,7 @@ Video:
       Return: "Torna a la reproducció local"
       No Devices: "No s’han trobat dispositius Google Cast"
       No Source: "No hi ha cap flux compatible amb Google Cast"
+      Error: "No s’ha pogut transmetre el vídeo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'

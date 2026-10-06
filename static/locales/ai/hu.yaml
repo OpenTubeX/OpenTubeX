@@ -1392,6 +1392,7 @@ Video:
       Return: "Visszatérés a helyi lejátszáshoz"
       No Devices: "Nem találhatók Google Cast-eszközök"
       No Source: "Nincs kompatibilis adatfolyam a Google Casthoz"
+      Error: "Nem sikerült átküldeni a videót"
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

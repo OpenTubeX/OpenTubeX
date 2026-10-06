@@ -1392,6 +1392,7 @@ Video:
       Return: "返回本地播放"
       No Devices: "未找到 Google Cast 设备"
       No Source: "没有兼容 Google Cast 的视频流"
+      Error: "无法投放视频"
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"

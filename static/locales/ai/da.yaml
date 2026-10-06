@@ -1456,6 +1456,7 @@ Video:
       Return: "Vend tilbage til lokal afspilning"
       No Devices: "Ingen Google Cast-enheder fundet"
       No Source: "Ingen kompatibel stream til Google Cast"
+      Error: "Videoen kunne ikke castes"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'

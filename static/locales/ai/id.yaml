@@ -1400,6 +1400,7 @@ Video:
       Return: "Kembali ke pemutaran lokal"
       No Devices: "Tidak ditemukan perangkat Google Cast"
       No Source: "Tidak ada aliran yang kompatibel untuk Google Cast"
+      Error: "Video tidak dapat ditransmisikan"
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'

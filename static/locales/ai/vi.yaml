@@ -1421,6 +1421,7 @@ Video:
       Return: "Quay lại phát trên máy"
       No Devices: "Không tìm thấy thiết bị Google Cast"
       No Source: "Không có luồng tương thích với Google Cast"
+      Error: "Không thể truyền video"
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

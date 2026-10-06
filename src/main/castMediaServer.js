@@ -143,6 +143,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       let contentType = resource.contentType
       let upstream
       let url
+      let manifest = false
       if (resource.url.startsWith('data:')) {
         if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
         data = decodeURIComponent(resource.url.slice(resource.url.indexOf(',') + 1))
@@ -169,8 +170,8 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         contentType ??= upstream.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
         if (url.pathname.endsWith('.mpd')) contentType = 'application/dash+xml'
         if (/\.m3u8$/i.test(url.pathname)) contentType = 'application/x-mpegurl'
-        if (upstream.ok && request.method !== 'HEAD' &&
-          ['application/dash+xml', 'application/x-mpegurl', 'application/vnd.apple.mpegurl'].includes(contentType)) {
+        manifest = ['application/dash+xml', 'application/x-mpegurl', 'application/vnd.apple.mpegurl'].includes(contentType)
+        if (upstream.ok && request.method !== 'HEAD' && manifest) {
           if (Number(upstream.headers.get('content-length')) > MAX_MANIFEST_SIZE) throw new Error('Cast manifest is too large')
           data = ''
           const decoder = new TextDecoder()
@@ -192,7 +193,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       }
       const headers = { ...cors, 'content-type': contentType ?? 'application/octet-stream' }
       const encoded = upstream.headers.get('content-encoding') && upstream.headers.get('content-encoding') !== 'identity'
-      for (const name of encoded ? [] : ['content-length', 'content-range', 'accept-ranges']) {
+      for (const name of encoded || manifest ? [] : ['content-length', 'content-range', 'accept-ranges']) {
         const value = upstream.headers.get(name)
         if (value) headers[name] = value
       }

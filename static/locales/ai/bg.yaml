@@ -1405,6 +1405,7 @@ Video:
       Return: "Връщане към локално възпроизвеждане"
       No Devices: "Няма намерени устройства Google Cast"
       No Source: "Няма съвместим поток за Google Cast"
+      Error: "Видеото не можа да се предаде"
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

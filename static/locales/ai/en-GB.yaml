@@ -1372,6 +1372,7 @@ Video:
       Return: "Return to local playback"
       No Devices: "No Google Cast devices found"
       No Source: "No compatible stream for Google Cast"
+      Error: "Could not cast the video"
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden

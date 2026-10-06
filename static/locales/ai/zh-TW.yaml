@@ -1394,6 +1394,7 @@ Video:
       Return: "返回本機播放"
       No Devices: "找不到 Google Cast 裝置"
       No Source: "沒有相容 Google Cast 的串流"
+      Error: "無法投放影片"
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

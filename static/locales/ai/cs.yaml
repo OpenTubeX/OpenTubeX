@@ -1392,6 +1392,7 @@ Video:
       Return: "Vrátit se k místnímu přehrávání"
       No Devices: "Nenalezena žádná zařízení Google Cast"
       No Source: "Žádný kompatibilní stream pro Google Cast"
+      Error: "Video se nepodařilo odeslat"
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"

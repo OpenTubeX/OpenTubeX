@@ -1391,6 +1391,7 @@ Video:
       Return: "Revenir à la lecture locale"
       No Devices: "Aucun appareil Google Cast trouvé"
       No Source: "Aucun flux compatible avec Google Cast"
+      Error: "Impossible de diffuser la vidéo"
   External Media:
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"

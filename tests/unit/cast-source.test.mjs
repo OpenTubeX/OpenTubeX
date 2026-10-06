@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { compileFunction } from 'node:vm'
 import { selectCastSource } from '../../src/renderer/helpers/player/castSource.js'
 import { castSourceAvailable } from '../../src/main/chromecast.js'
+import { YtDlpPlaybackSourceCache } from '../../src/renderer/helpers/player/ytDlpPlaybackCache.js'
 
 test('selects a complete H.264 MP4 rather than an adaptive track or an unsupported codec', () => {
   const formats = [
@@ -55,6 +56,31 @@ test('does not replace video with an audio-only DASH manifest', () => {
 
 const watchCode = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const methodCode = watchCode.slice(watchCode.indexOf('    async getChromecastSource() {'), watchCode.indexOf('    handleVideoPlay() {'))
+
+test('Cast refreshes reuse normal yt-dlp playback cache entries without subtitle extraction', async () => {
+  const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
+  const keyCode = code.slice(code.indexOf('function effectivePlaybackSourceCacheKey('), code.indexOf('\n/**', code.indexOf('function effectivePlaybackSourceCacheKey(')))
+  const loaderCode = code.slice(code.indexOf('export function getYtDlpPlaybackSource(')).replace('export function', 'function')
+  const cache = new YtDlpPlaybackSourceCache()
+  const cached = { legacyFormats: [], manifestSrc: 'https://media.test/cached.mpd', manifestMimeType: 'application/dash+xml',
+    expiryDate: new Date(Date.now() + 3600_000), isLive: false, subtitlesIncluded: true }
+  cache.set('video', JSON.stringify(['cache-key', false]), cached)
+  let extractions = 0
+  const getSource = compileFunction(`${keyCode}\n${loaderCode}\nreturn getYtDlpPlaybackSource`,
+    ['playbackSourceCache', 'pendingPlaybackSourceLoads', 'ytDlp'])(cache, new Map(), {
+    ytDlpPlaybackCacheGet: async () => null,
+    ytDlpGetPlaybackInfo: async () => { extractions++; throw new Error('Unexpected extraction') }
+  })
+  const { getChromecastSource } = compileFunction(`return {${methodCode}}`,
+    ['selectCastSource', 'supportsYtDlp', 'MANIFEST_TYPE_SABR', 'getYtDlpPlaybackSource'])(
+    selectCastSource, true, 'application/sabr+json', getSource)
+  const watch = { videoId: 'video', ytDlpPlaybackCacheKey: 'cache-key', alwaysUseYtDlpPlaybackCookies: false,
+    legacyFormats: [], manifestSrc: 'https://media.test/source.sabr', manifestMimeType: 'application/sabr+json' }
+  for (let i = 0; i < 3; i++) {
+    assert.deepEqual(await getChromecastSource.call(watch), { url: cached.manifestSrc, contentType: cached.manifestMimeType })
+  }
+  assert.equal(extractions, 0)
+})
 
 for (const outcome of ['adaptive', 'failed extraction', 'non-SABR']) {
   test(`Watch Cast source selection handles ${outcome} with a progressive fallback`, async () => {

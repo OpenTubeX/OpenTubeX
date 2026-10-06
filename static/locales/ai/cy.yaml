@@ -1414,6 +1414,7 @@ Video:
       Return: "Dychwelyd i chwarae lleol"
       No Devices: "Heb ganfod dyfeisiau Google Cast"
       No Source: "Dim ffrwd gydnaws ar gyfer Google Cast"
+      Error: "Methu darlledu’r fideo"
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio

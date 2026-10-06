@@ -24,7 +24,7 @@ test.use({
 async function mockCast(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const state = { currentTime: 5, duration: 30, paused: false, connected: true, volume: 0.5, muted: false, activeTrackIds: [] }
-    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false }
+    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, failStatus: false, failStop: false, statusCalls: 0 }
     for (const name of ['cast-discover', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
     ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
     ipcMain.handle('cast-start', (_, payload) => {
@@ -34,7 +34,11 @@ async function mockCast(app) {
       state.paused = payload.paused
       return { castId: 'session-id', deviceName: 'Test TV', status: { ...state } }
     })
-    ipcMain.handle('cast-status', () => ({ ...state }))
+    ipcMain.handle('cast-status', () => {
+      globalThis.castTest.statusCalls++
+      if (globalThis.castTest.failStatus) throw new Error('Cast status unavailable')
+      return { ...state }
+    })
     ipcMain.handle('cast-control', (_, id, action, value) => {
       globalThis.castTest.controls.push({ id, action, value })
       if (action === 'pause') state.paused = true
@@ -47,6 +51,7 @@ async function mockCast(app) {
     })
     ipcMain.handle('cast-stop', (_, id) => {
       globalThis.castTest.stops.push(id)
+      if (globalThis.castTest.failStop) throw new Error('Cast stop unavailable')
       return { ...state, connected: false }
     })
   })
@@ -186,8 +191,8 @@ test('Cast controls fit a narrow window at fractional UI scale and stop on navig
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
-test('packaged sender discovers and plays on the selected Cast emulator', async ({ app, page }) => {
-  test.skip(!process.env.OPENTUBEX_CAST_TEST_DEVICE, 'Requires an explicitly selected Cast test receiver')
+test('packaged sender discovers and plays on the selected authenticated Cast receiver', async ({ app, page }) => {
+  test.skip(!process.env.OPENTUBEX_CAST_TEST_DEVICE, 'Requires an explicitly selected Google-authenticated Cast receiver')
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-electron-'))
   let upstream
   const instanceRequests = []
@@ -260,6 +265,31 @@ test('receiver polling saves progress before navigation', async ({ app, page }) 
   await expect(page).toHaveURL(/#\/history/)
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
+
+for (const failStop of [false, true]) {
+  test(`a status polling error releases local controls with a ${failStop ? 'failed' : 'successful'} stop`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await choice(page, 'Test TV')
+    await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
+    await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBe(18)
+    const successfulCalls = await app.electronApp.evaluate(failStop => {
+      globalThis.castTest.failStatus = true
+      globalThis.castTest.failStop = failStop
+      return globalThis.castTest.statusCalls
+    }, failStop)
+    await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+    await expect.poll(() => watch.evaluate(vm => vm.chromecastActive)).toBe(false)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    await page.waitForTimeout(2100)
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.statusCalls)).toBe(successfulCalls + 1)
+    await app.electronApp.evaluate(() => { globalThis.castTest.failStatus = false; globalThis.castTest.failStop = false })
+    await choice(page, 'Test TV')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.statusCalls)).toBeGreaterThan(successfulCalls + 1)
+  })
+}
 
 test('natural receiver completion marks watched and invokes Watch completion once', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)

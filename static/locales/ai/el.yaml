@@ -1429,6 +1429,7 @@ Video:
       Return: "Επιστροφή στην τοπική αναπαραγωγή"
       No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
       No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
+      Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

@@ -1437,6 +1437,7 @@ Video:
       Return: "Terug naar lokaal afspelen"
       No Devices: "Geen Google Cast-apparaten gevonden"
       No Source: "Geen compatibele stream voor Google Cast"
+      Error: "Kan de video niet casten"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'

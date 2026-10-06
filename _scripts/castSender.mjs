@@ -32,6 +32,7 @@ export async function prepareCastSender(output = 'dist', platform = process.plat
   }
   licenses.push(`Go standard library\n${await readFile(resolve(root, '_scripts/cast-sender/Go.LICENSE'), 'utf8')}`)
   licenses.push(`Chromium Cast protocol definitions\n${await readFile(resolve(root, '_scripts/cast-sender/CastProtocol.LICENSE'), 'utf8')}`)
+  licenses.push(`OpenScreen Cast trust roots\n${await readFile(resolve(root, '_scripts/cast-sender/OpenScreen.LICENSE'), 'utf8')}`)
   await writeFile(join(directory, 'cast-sender-licenses.txt'), licenses.join('\n\n'))
 }
 

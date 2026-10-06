@@ -1665,6 +1665,7 @@ Video:
       Return: "Gå tilbake til lokal avspeling"
       No Devices: "Fann ingen Google Cast-einingar"
       No Source: "Ingen kompatibel straum for Google Cast"
+      Error: "Kunne ikkje strøyme videoen"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

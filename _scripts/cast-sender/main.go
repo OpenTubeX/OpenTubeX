@@ -90,6 +90,10 @@ func (t *transport) send(source, destination, namespace string, payload interfac
 		SourceId:        &source, DestinationId: &destination, Namespace: &namespace,
 		PayloadType: pb.CastMessage_STRING.Enum(), PayloadUtf8: &text,
 	}
+	return t.writeMessage(message)
+}
+
+func (t *transport) writeMessage(message *pb.CastMessage) error {
 	data, err := proto.Marshal(message)
 	if err != nil {
 		return err
@@ -116,7 +120,11 @@ func (t *transport) send(source, destination, namespace string, payload interfac
 }
 
 func (t *transport) receive() (*pb.CastMessage, error) {
-	if err := t.connection.SetReadDeadline(time.Now().Add(30 * time.Second)); err != nil {
+	return t.receiveBefore(time.Now().Add(30 * time.Second))
+}
+
+func (t *transport) receiveBefore(deadline time.Time) (*pb.CastMessage, error) {
+	if err := t.connection.SetReadDeadline(deadline); err != nil {
 		return nil, err
 	}
 	var length uint32
@@ -154,12 +162,17 @@ func connect(address string, port int) error {
 	if net.ParseIP(address) == nil || port < 1 || port > 65535 {
 		return fmt.Errorf("invalid Cast address")
 	}
-	// Cast devices use self-signed TLS certificates.
+	// Cast uses self-signed TLS; device authentication below binds its certificate
+	// to a Google-signed device identity before any session data can be sent.
 	connection, err := tls.DialWithDialer(&net.Dialer{Timeout: 3 * time.Second}, "tcp", net.JoinHostPort(address, strconv.Itoa(port)), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		return err
 	}
 	defer connection.Close()
+	channel := &transport{connection: connection}
+	if err := authenticateReceiver(channel, connection.ConnectionState().PeerCertificates[0], castRoots()); err != nil {
+		return err
+	}
 	localAddress, _, err := net.SplitHostPort(connection.LocalAddr().String())
 	if err != nil {
 		return err
@@ -168,7 +181,6 @@ func connect(address string, port int) error {
 	if err := encoder.Encode(map[string]interface{}{"event": "connected", "address": localAddress}); err != nil {
 		return err
 	}
-	channel := &transport{connection: connection}
 	go func() {
 		for {
 			message, err := channel.receive()

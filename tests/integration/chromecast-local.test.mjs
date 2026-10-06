@@ -13,9 +13,9 @@ import { createMuxedMediaServer } from '../../src/main/dlnaMux.js'
 const execFileAsync = promisify(execFile)
 const deviceName = process.env.OPENTUBEX_CAST_TEST_DEVICE
 
-// Run against openchromecast with its mpv backend. An explicitly selected
-// device prevents this test from taking over another receiver on the LAN.
-test('Cast emulator plays MP4, DASH, HLS and shared merged tracks', { skip: !deviceName, timeout: 90_000 }, async t => {
+// Requires a Google-authenticated Cast receiver; uncertified emulators are
+// rejected. Explicit selection prevents taking over another receiver on the LAN.
+test('authenticated Cast receiver plays MP4, DASH, HLS and shared merged tracks', { skip: !deviceName, timeout: 90_000 }, async t => {
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-media-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const demo = path.resolve('e2e/fixtures/media/demo.webm')
@@ -67,7 +67,7 @@ test('Cast emulator plays MP4, DASH, HLS and shared merged tracks', { skip: !dev
       if (predicate(state)) return state
       await setTimeout(200)
     }
-    assert.fail(`Cast emulator did not reach expected playback state: ${JSON.stringify(state)}`)
+    assert.fail(`Cast receiver did not reach expected playback state: ${JSON.stringify(state)}`)
   }
 
   const dash = (await readFile(path.join(directory, 'manifest.mpd'), 'utf8')).replace(/(<MPD[^>]*>)/, `$1<BaseURL>${upstreamUrl}/</BaseURL>`)
@@ -90,9 +90,8 @@ test('Cast emulator plays MP4, DASH, HLS and shared merged tracks', { skip: !dev
         : source.contentType === 'application/dash+xml' ? request.filename.startsWith('chunk-') : request.filename.endsWith('.ts')))
     assert.equal((await manager.control(1, id, 'pause')).error, undefined)
     await eventually(id, state => state.paused)
-    // openchromecast's mpv status cache can report PLAYING after seeking
-    // even when mpv is paused. Verify pause/resume before seeking here;
-    // the bridge unit test verifies Cast's PLAYBACK_PAUSE flag separately.
+    // Verify pause/resume before seeking; bridge unit tests separately cover
+    // preserving a paused receiver's seek state.
     assert.equal((await manager.control(1, id, 'play')).error, undefined)
     await eventually(id, state => !state.paused)
     if (source.url !== mergedUrl) {

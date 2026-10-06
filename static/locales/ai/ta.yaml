@@ -1432,6 +1432,7 @@ Video:
       Return: "உள்ளூர் இயக்கத்திற்குத் திரும்பு"
       No Devices: "Google Cast சாதனங்கள் கிடைக்கவில்லை"
       No Source: "Google Cast-க்கு இணக்கமான ஓடை இல்லை"
+      Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்

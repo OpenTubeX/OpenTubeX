@@ -83,7 +83,7 @@ const options = computed(() => {
 })
 
 function reportError() {
-  if (!disposed) showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
+  if (!disposed) showToast({ message: t('Video.Player.Google Cast.Error'), icon: ['fas', 'cast'] })
 }
 
 async function refreshDevices() {
@@ -134,7 +134,14 @@ async function poll() {
       if (!disposed) emit('ended')
       return
     }
-  } catch { reportError() }
+  } catch {
+    if (disposed || id !== castId.value) return
+    // Stop the remote session and release local controls after a failed poll.
+    // stopCasting's finally block also handles a failed stop request.
+    await stopCasting(false).catch(() => {})
+    reportError()
+    return
+  }
   if (castId.value && !disposed) pollTimer = setTimeout(poll, 1000)
 }
 

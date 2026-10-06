@@ -2372,6 +2372,7 @@ Video:
       Return: "Return to local playback"
       No Devices: "No Google Cast devices found"
       No Source: "No compatible stream for Google Cast"
+      Error: "Could not cast the video"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

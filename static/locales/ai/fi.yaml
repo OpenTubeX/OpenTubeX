@@ -1429,6 +1429,7 @@ Video:
       Return: "Palaa paikalliseen toistoon"
       No Devices: "Google Cast -laitteita ei löytynyt"
       No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
+      Error: "Videon lähetys epäonnistui"
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

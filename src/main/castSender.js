@@ -80,8 +80,10 @@ export class CastSender extends EventEmitter {
         this.pending.set(id, { resolve, reject, timer, namespace })
       }
       this.process.stdin.write(`${JSON.stringify({ id, namespace, destination, payload })}\n`, error => {
-        if (error) this.close()
-        else if (!wait) resolve()
+        if (error) {
+          this.close()
+          if (!wait) reject(new Error('Cast device disconnected'))
+        } else if (!wait) resolve()
       })
     })
   }

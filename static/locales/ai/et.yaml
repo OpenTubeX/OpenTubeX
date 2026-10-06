@@ -1394,6 +1394,7 @@ Video:
       Return: "Naase kohalikule taasesitusele"
       No Devices: "Google Casti seadmeid ei leitud"
       No Source: "Google Casti jaoks pole ühilduvat voogu"
+      Error: "Video edastamine ebaõnnestus"
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"

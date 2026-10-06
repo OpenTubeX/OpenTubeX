@@ -1405,6 +1405,7 @@ Video:
       Return: "Gå tilbake til lokal avspilling"
       No Devices: "Ingen Google Cast-enheter funnet"
       No Source: "Ingen kompatibel strøm for Google Cast"
+      Error: "Kunne ikke strømme videoen"
   Station: Stasjon
   Playlist:
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult

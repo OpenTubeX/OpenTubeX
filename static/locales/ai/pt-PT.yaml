@@ -1421,6 +1421,7 @@ Video:
       Return: "Voltar à reprodução local"
       No Devices: "Nenhum dispositivo Google Cast encontrado"
       No Source: "Nenhum fluxo compatível com Google Cast"
+      Error: "Não foi possível transmitir o vídeo"
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

@@ -1424,6 +1424,7 @@ Video:
       Return: "Revino la redarea locală"
       No Devices: "Nu s-au găsit dispozitive Google Cast"
       No Source: "Nu există un flux compatibil cu Google Cast"
+      Error: "Videoclipul nu a putut fi transmis"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'

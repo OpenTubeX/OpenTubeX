@@ -167,6 +167,35 @@ test('serves local data manifests and rejects directory traversal in segment tem
   assert.equal(await head.text(), '')
 })
 
+for (const [contentType, filename, body] of [
+  ['application/dash+xml', 'video.mpd', '<MPD><BaseURL>segment.mp4</BaseURL></MPD>'],
+  ['application/x-mpegurl', 'video.m3u8', '#EXTM3U\n#EXTINF:5,\nsegment.ts\n']
+]) {
+  test(`remote ${filename} HEAD omits upstream representation headers`, async t => {
+    const upstream = createServer((request, response) => {
+      response.writeHead(200, { 'content-type': contentType, 'content-length': Buffer.byteLength(body),
+        'content-range': `bytes 0-${Buffer.byteLength(body) - 1}/${Buffer.byteLength(body)}`, 'accept-ranges': 'bytes' })
+      response.end(request.method === 'HEAD' ? undefined : body)
+    })
+    const upstreamUrl = await listen(upstream)
+    t.after(() => close(upstream))
+    const media = createCastMediaServer({ url: `${upstreamUrl}/${filename}`, contentType }, '127.0.0.1', 'token')
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const head = await fetch(media.mediaUrl(), { method: 'HEAD' })
+    assert.equal(head.status, 200)
+    assert.equal(head.headers.get('content-type'), contentType)
+    assert.equal(await head.text(), '')
+    for (const header of ['content-length', 'content-range', 'accept-ranges']) {
+      assert.equal(head.headers.get(header), null, header)
+    }
+    const get = await fetch(media.mediaUrl())
+    const rewritten = await get.text()
+    assert.ok(rewritten.includes('/token/'))
+    assert.equal(Number(get.headers.get('content-length')), Buffer.byteLength(rewritten))
+  })
+}
+
 test('rejects requests from a different device address', async t => {
   const media = createCastMediaServer({ url: 'https://media.test/video.mp4', contentType: 'video/mp4' }, '192.0.2.1', 'token')
   media.setOrigin(await listen(media.server))

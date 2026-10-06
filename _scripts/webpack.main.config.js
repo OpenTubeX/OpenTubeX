@@ -74,7 +74,7 @@ const config = {
         let preparedInputs = null
         let inputs = []
         const prepare = async () => {
-          inputs = (await fs.readdir(directory)).filter(file => /\.(go|mod|sum|LICENSE)$/.test(file)).sort().map(file => path.join(directory, file))
+          inputs = (await fs.readdir(directory)).filter(file => /\.(go|mod|sum|pem|LICENSE)$/.test(file)).sort().map(file => path.join(directory, file))
           inputs.push(path.join(__dirname, 'castSender.mjs'))
           const signature = (await Promise.all(inputs.map(async file => {
             const stat = await fs.stat(file)

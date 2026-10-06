@@ -1432,6 +1432,7 @@ Video:
       Return: "Voltar à reprodução local"
       No Devices: "Nenhum dispositivo Google Cast encontrado"
       No Source: "Nenhum fluxo compatível com Google Cast"
+      Error: "Não foi possível transmitir o vídeo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tempo restante do anúncio inicial: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tempo restante de espera do SABR: {remindingTimeSeconds}s'

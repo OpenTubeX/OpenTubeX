@@ -1,12 +1,71 @@
 package main
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/binary"
 	"encoding/json"
+	"io"
+	"math/big"
 	"net"
+	"os"
+	"strconv"
 	"sync"
 	"testing"
+	"time"
 )
+
+func TestConnectRejectsUnauthenticatedReceiver(t *testing.T) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cert := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "Untrusted TV"},
+		NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), KeyUsage: x509.KeyUsageDigitalSignature}
+	der, err := x509.CreateCertificate(rand.Reader, cert, cert, &key.PublicKey, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	listener, err := tls.Listen("tcp", "127.0.0.1:0", &tls.Config{Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	go func() {
+		connection, err := listener.Accept()
+		if err != nil {
+			return
+		}
+		defer connection.Close()
+		_ = connection.(*tls.Conn).Handshake()
+		// Close without answering device authentication.
+	}()
+	address, port, _ := net.SplitHostPort(listener.Addr().String())
+	portNumber, _ := strconv.Atoi(port)
+	output, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer output.Close()
+	originalOutput := os.Stdout
+	os.Stdout = writer
+	defer func() { os.Stdout = originalOutput; writer.Close() }()
+	if err := connect(address, portNumber); err == nil {
+		t.Fatal("connected to a receiver that never authenticated")
+	}
+	os.Stdout = originalOutput
+	writer.Close()
+	events, err := io.ReadAll(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 0 {
+		t.Fatalf("emitted session events before authentication: %s", events)
+	}
+}
 
 func TestHeartbeatAddresses(t *testing.T) {
 	left, right := net.Pipe()

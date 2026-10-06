@@ -1392,6 +1392,7 @@ Video:
       Return: "ローカル再生に戻る"
       No Devices: "Google Castデバイスが見つかりません"
       No Source: "Google Cast対応のストリームがありません"
+      Error: "動画をキャストできませんでした"
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"

@@ -1769,6 +1769,7 @@ Video:
       Return: "Grįžti į vietinį atkūrimą"
       No Devices: "Google Cast įrenginių nerasta"
       No Source: "Nėra su Google Cast suderinamo srauto"
+      Error: "Nepavyko transliuoti vaizdo įrašo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

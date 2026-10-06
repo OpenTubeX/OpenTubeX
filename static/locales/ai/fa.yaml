@@ -1461,6 +1461,7 @@ Video:
       Return: "بازگشت به پخش محلی"
       No Devices: "هیچ دستگاه Google Cast پیدا نشد"
       No Source: "جریان سازگاری برای Google Cast وجود ندارد"
+      Error: "پخش ویدیو در دستگاه ممکن نشد"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'

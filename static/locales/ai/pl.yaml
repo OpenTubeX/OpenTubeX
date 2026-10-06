@@ -739,6 +739,7 @@ Video:
       Return: "Wróć do lokalnego odtwarzania"
       No Devices: "Nie znaleziono urządzeń Google Cast"
       No Source: "Brak zgodnego strumienia dla Google Cast"
+      Error: "Nie udało się przesłać filmu"
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"

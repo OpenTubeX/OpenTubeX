@@ -1467,6 +1467,7 @@ Video:
       Return: "Вярнуцца да лакальнага прайгравання"
       No Devices: "Прылады Google Cast не знойдзены"
       No Source: "Няма сумяшчальнага патоку для Google Cast"
+      Error: "Не ўдалося трансляваць відэа"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

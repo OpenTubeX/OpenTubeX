@@ -1395,6 +1395,7 @@ Video:
       Return: "Vrátiť sa k miestnemu prehrávaniu"
       No Devices: "Nenašli sa žiadne zariadenia Google Cast"
       No Source: "Žiadny kompatibilný stream pre Google Cast"
+      Error: "Video sa nepodarilo preniesť"
   External Media:
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"

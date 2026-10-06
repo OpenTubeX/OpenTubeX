@@ -1450,6 +1450,7 @@ Video:
       Return: "Врати се на локалну репродукцију"
       No Devices: "Нису пронађени Google Cast уређаји"
       No Source: "Нема компатибилног тока за Google Cast"
+      Error: "Видео није могуће емитовати"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'

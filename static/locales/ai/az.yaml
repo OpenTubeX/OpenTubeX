@@ -1404,6 +1404,7 @@ Video:
       Return: "Yerli oxutmaya qayıt"
       No Devices: "Google Cast cihazları tapılmadı"
       No Source: "Google Cast üçün uyğun yayım yoxdur"
+      Error: "Videonu yayımlamaq mümkün olmadı"
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"
