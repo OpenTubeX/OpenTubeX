@@ -257,6 +257,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
     await electronApp.close().catch(() => {})
+    expect(startupErrors, 'Renderer errors during startup').toEqual([])
     throw error
   } finally {
     context.off('weberror', recordStartupError)

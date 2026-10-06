@@ -1,26 +1,34 @@
 import { rm } from 'node:fs/promises'
 import { test, expect, createUserDataDir, launchApp, sel } from '../../helpers/app.mjs'
 
-test('rejects renderer errors reported before app readiness', async () => {
-  const userDataDir = await createUserDataDir()
-  let startedApp
-  try {
-    await expect(launchApp(userDataDir, [], {
-      onPhase: async (phase, page) => {
-        if (phase !== 'windowCreated') return
-        await Promise.all([
-          page.waitForEvent('pageerror'),
-          page.evaluate(() => {
-            setTimeout(() => { throw new Error('Injected startup error') }, 0)
-          })
-        ])
-      }
-    }).then(app => { startedApp = app })).rejects.toThrow('Injected startup error')
-  } finally {
-    await startedApp?.electronApp.close()
-    await rm(userDataDir, { recursive: true, force: true })
-  }
-})
+for (const blockReadiness of [false, true]) {
+  const title = blockReadiness
+    ? 'reports renderer errors when app readiness times out'
+    : 'rejects renderer errors reported before app readiness'
+  test(title, async () => {
+    const userDataDir = await createUserDataDir()
+    let startedApp
+    try {
+      await expect(launchApp(userDataDir, [], {
+        onPhase: async (phase, page) => {
+          if (phase !== (blockReadiness ? 'routeCommitted' : 'windowCreated')) return
+          if (blockReadiness) {
+            await page.addStyleTag({ content: '.topNav { visibility: hidden !important; }' })
+          }
+          await Promise.all([
+            page.waitForEvent('pageerror'),
+            page.evaluate(() => {
+              setTimeout(() => { throw new Error('Injected startup error') }, 0)
+            })
+          ])
+        }
+      }).then(app => { startedApp = app })).rejects.toThrow('Injected startup error')
+    } finally {
+      await startedApp?.electronApp.close()
+      await rm(userDataDir, { recursive: true, force: true })
+    }
+  })
+}
 
 test.describe('startup arguments', () => {
   test.use({ launchArgs: ['not-a-url.txt', '--unknown-option'] })
