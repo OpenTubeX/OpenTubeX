@@ -24,12 +24,14 @@ test.use({
 async function mockCast(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const state = { currentTime: 5, duration: 30, paused: false, connected: true, volume: 0.5, muted: false, activeTrackIds: [] }
-    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, startDelayMs: 0, failStatus: false, failStop: false, statusCalls: 0 }
+    globalThis.castTest = { state, starts: [], stops: [], controls: [], failStart: false, startDelayMs: 0, startCompletions: 0, failStatus: false, failStop: false, statusCalls: 0 }
     for (const name of ['cast-discover', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
     ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
     ipcMain.handle('cast-start', async (_, payload) => {
       globalThis.castTest.starts.push(payload)
+      if (globalThis.castTest.holdStart) await new Promise(resolve => { globalThis.castTest.finishStart = resolve })
       await new Promise(resolve => setTimeout(resolve, globalThis.castTest.startDelayMs))
+      globalThis.castTest.startCompletions++
       if (globalThis.castTest.failStart === 'throw') throw new Error('Receiver connection failed')
       if (globalThis.castTest.failStart) return { error: 'Receiver rejected media' }
       state.currentTime = payload.startSeconds
@@ -320,6 +322,67 @@ for (const outcome of ['success', 'reported failure', 'thrown failure']) {
   })
 }
 
+for (const outcome of ['success', 'reported failure', 'thrown failure', 'stop failure']) {
+  test(`removing the Cast control during startup restores playback after ${outcome}`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate(vm => vm.$refs.player.play())
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    await app.electronApp.evaluate((_, outcome) => {
+      globalThis.castTest.holdStart = true
+      globalThis.castTest.failStart = outcome === 'thrown failure' ? 'throw' : outcome === 'reported failure'
+      globalThis.castTest.failStop = outcome === 'stop failure'
+    }, outcome)
+    await choice(page, 'Test TV')
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+    await expect(page.locator('.chromecastControl')).toHaveCount(0)
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(0)
+    await app.electronApp.evaluate(() => globalThis.castTest.finishStart())
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(1)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(
+      ['success', 'stop failure'].includes(outcome) ? ['session-id'] : [])
+    expect(await watch.evaluate(vm => vm.chromecastActive)).toBe(false)
+  })
+}
+
+for (const teardown of ['paused playback', 'navigation']) {
+  test(`startup disposal preserves ${teardown} without resuming the old player`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    if (teardown === 'navigation') {
+      await watch.evaluate(vm => vm.$refs.player.play())
+      await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    } else await watch.evaluate(vm => vm.$refs.player.pause())
+    await app.electronApp.evaluate(() => { globalThis.castTest.holdStart = true })
+    await watch.evaluate(vm => {
+      const player = vm.$refs.player
+      const play = player.play.bind(player)
+      window.castResumeCalls = 0
+      player.play = (...args) => { window.castResumeCalls++; return play(...args) }
+    })
+    await choice(page, 'Test TV')
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+    if (teardown === 'navigation') {
+      await watch.evaluate(vm => vm.tabRouter.push('/history'))
+      await expect(page).toHaveURL(/#\/history$/)
+    } else {
+      await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+      await expect(page.locator('.chromecastControl')).toHaveCount(0)
+    }
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.startCompletions)).toBe(0)
+    await app.electronApp.evaluate(() => globalThis.castTest.finishStart())
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+    // A subsequent IPC round trip drains the stop reply and startup cleanup
+    // before checking that the original player has never been resumed.
+    await page.evaluate(() => window.ftElectron.chromecast.status('session-id'))
+    expect(await page.evaluate(() => window.castResumeCalls)).toBe(0)
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+    if (teardown === 'paused playback') expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+  })
+}
+
 test('Cast controls fit a narrow window at fractional UI scale and stop on navigation', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
@@ -407,16 +470,19 @@ test('packaged sender discovers and plays on the selected authenticated Cast rec
   }
 })
 
-test('receiver polling saves progress before navigation', async ({ app, page }) => {
+test('navigation persists the receiver position without a manual save', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await choice(page, 'Test TV')
   await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
   await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBe(18)
-  await watch.evaluate(vm => vm.handleWatchProgressManualSave())
-  await expect.poll(() => watch.evaluate(vm => vm.historyEntry?.watchProgress)).toBe(18)
   await page.locator('.sideNav a[href="#/history"]').first().evaluate(link => link.click())
   await expect(page).toHaveURL(/#\/history/)
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+  await expect.poll(async () => {
+    const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+    return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
+  }).toBe(18)
 })
 
 for (const failStop of [false, true]) {

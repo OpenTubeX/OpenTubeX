@@ -40,7 +40,7 @@ const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'en
 const { t } = useI18n()
 const store = useStore()
 const route = useRoute()
-const watchPath = route.path
+let watchPath = route.path
 const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
@@ -218,6 +218,7 @@ async function handleChoice(choice) {
     })))
     if (disposed) return
     const player = props.getPlayer()
+    watchPath = route.path
     const paused = player?.isPaused() ?? true
     if (!paused) {
       resumePlayer = player
@@ -236,7 +237,10 @@ async function handleChoice(choice) {
       isLive: props.isLive
     })
     if (result.error) throw new Error(result.error)
-    if (disposed) { await window.ftElectron.chromecast.stop(result.castId); return }
+    if (disposed || route.path !== watchPath || props.getPlayer() !== player) {
+      await window.ftElectron.chromecast.stop(result.castId)
+      return
+    }
     resumePlayer = null
     castId.value = result.castId
     deviceName.value = result.deviceName
@@ -248,9 +252,13 @@ async function handleChoice(choice) {
     button.value?.hideDropdown()
     pollTimer = setTimeout(poll, 1000)
   } catch {
-    if (!disposed && resumePlayer && props.getPlayer() === resumePlayer) resumePlayer.play()?.catch(() => {})
     reportError()
-  } finally { busy.value = false }
+  } finally {
+    // A removed control can still own a pending handoff. Restore only its
+    // surviving player after startup or cancellation cleanup has settled.
+    if (resumePlayer && props.getPlayer() === resumePlayer && route.path === watchPath) releaseLocalPlayer(undefined, true)
+    busy.value = false
+  }
 }
 
 defineExpose({ stopCasting })
