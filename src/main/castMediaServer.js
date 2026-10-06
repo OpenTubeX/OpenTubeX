@@ -100,6 +100,24 @@ function httpUrl(value, base) {
   return url
 }
 
+function applyHlsReloadQuery(url, query) {
+  if (query.length > 512) throw new Error('Invalid HLS reload query')
+  const directives = new URLSearchParams(query)
+  const names = new Set()
+  for (const [name, value] of directives) {
+    const valid = name === '_HLS_skip'
+      ? ['YES', 'v2'].includes(value)
+      : ['_HLS_msn', '_HLS_part'].includes(name) && /^\d{1,20}$/.test(value)
+    if (!valid || names.has(name)) throw new Error('Invalid HLS reload query')
+    names.add(name)
+  }
+  if (directives.has('_HLS_part') && !directives.has('_HLS_msn') && !url.searchParams.has('_HLS_msn')) throw new Error('Invalid HLS reload query')
+  if (!names.size) return
+  // Preserve signed query encoding and repeated upstream parameters exactly.
+  const original = url.search ? url.search.slice(1).split('&') : []
+  url.search = [...original.filter(part => !names.has(new URLSearchParams(part).keys().next().value)), directives.toString()].join('&')
+}
+
 /** Rewrites resource URLs while retaining DASH ranges and segment templates. */
 export function rewriteCastDash(xml, base, register, dashContext, onRoot) {
   if (xml.length > MAX_MANIFEST_SIZE) throw new Error('Cast manifest is too large')
@@ -374,11 +392,18 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           const attemptTimeout = resource.urls.length > 1 ? setTimeout(() => attempt.abort(), 5000) : null
           try {
             url = httpUrl(candidate)
+            let path = match[2]
+            const queryStart = path.indexOf('?')
+            const hls = ['application/x-mpegurl', 'application/vnd.apple.mpegurl'].includes(resource.contentType) ||
+              (resource.contentType === undefined && /\.m3u8$/i.test(url.pathname))
+            const reloadQuery = queryStart >= 0 && hls ? path.slice(queryStart + 1) : undefined
+            if (reloadQuery !== undefined) path = path.slice(0, queryStart)
             if (url.pathname.endsWith('/')) {
-              const next = httpUrl(match[2], url)
+              const next = httpUrl(path, url)
               if (next.origin !== url.origin || !next.pathname.startsWith(url.pathname) || /%2e|%2f|%5c|%25/i.test(next.pathname)) throw new Error('Invalid Cast resource path')
               url = next
-            } else if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
+            } else if (path !== 'media') throw new Error('Invalid Cast resource path')
+            if (reloadQuery !== undefined) applyHlsReloadQuery(url, reloadQuery)
             for (let redirects = 0; ; redirects++) {
               const addresses = await isAllowedUrl(url)
               if (!addresses) throw new Error('Unsupported Cast resource destination')

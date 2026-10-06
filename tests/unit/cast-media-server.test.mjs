@@ -693,6 +693,90 @@ for (const reference of [
   })
 }
 
+for (const type of ['application/x-mpegurl', 'application/vnd.apple.mpegurl', undefined]) {
+  test(`HLS blocking reloads preserve upstream queries and rewrite refreshed media for ${type ?? 'inferred HLS'}`, async t => {
+    const requests = []
+    const upstream = createServer((request, response) => {
+      requests.push({ url: request.url, method: request.method, authorization: request.headers.authorization })
+      if (request.url.startsWith('/private/live.m3u8?')) {
+        return response.end('#EXTM3U\n#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=12\n#EXT-X-PART:DURATION=0.5,URI="part.ts"\n')
+      }
+      if (request.url === '/private/part.ts') return response.end('part')
+      response.writeHead(404).end()
+    })
+    const origin = await listen(upstream)
+    t.after(() => close(upstream))
+    const originalQuery = 'sig=a%20b~c%2Fd&token=one&token=two&_HLS_msn=1'
+    const media = createCastMediaServer({ url: `${origin}/private/live.m3u8?${originalQuery}`, contentType: type }, '127.0.0.1', 'token',
+      url => new URL(url).pathname.startsWith('/private/') ? { Authorization: 'Bearer private' } : {})
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const root = media.mediaUrl()
+    const reload = await fetch(`${root}?_HLS_msn=42&_HLS_part=2&_HLS_skip=v2`)
+    assert.equal(reload.status, 200)
+    const partUrl = (await reload.text()).match(/URI="([^"]+)"/)[1]
+    assert.equal(await (await fetch(partUrl)).text(), 'part')
+    assert.equal((await fetch(`${root}?_HLS_skip=YES`, { method: 'HEAD' })).status, 200)
+    assert.equal((await fetch(`${root}?_HLS_part=0`, { method: 'HEAD' })).status, 200)
+    assert.equal((await fetch(`${root}?&&`, { method: 'HEAD' })).status, 200)
+    assert.deepEqual(requests, [
+      { url: '/private/live.m3u8?sig=a%20b~c%2Fd&token=one&token=two&_HLS_msn=42&_HLS_part=2&_HLS_skip=v2', method: 'GET', authorization: 'Bearer private' },
+      { url: '/private/part.ts', method: 'GET', authorization: 'Bearer private' },
+      { url: `/private/live.m3u8?${originalQuery}&_HLS_skip=YES`, method: 'HEAD', authorization: 'Bearer private' },
+      { url: `/private/live.m3u8?${originalQuery}&_HLS_part=0`, method: 'HEAD', authorization: 'Bearer private' },
+      { url: `/private/live.m3u8?${originalQuery}`, method: 'HEAD', authorization: 'Bearer private' }
+    ])
+  })
+}
+
+test('extensionless HLS child reloads preserve variable imports, redirect authorization and destination checks', async t => {
+  const requests = [], destinations = []
+  const upstream = createServer((request, response) => {
+    requests.push({ url: request.url, authorization: request.headers.authorization })
+    if (request.url === '/master') return response.end('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nprivate/playlist?sig=secret\n')
+    if (request.url === '/private/playlist?sig=secret&_HLS_msn=42&_HLS_part=0') return response.writeHead(302, { location: '/public/playlist?_HLS_msn=42&_HLS_part=0' }).end()
+    if (request.url === '/public/playlist?_HLS_msn=42&_HLS_part=0') return response.end('#EXTM3U\n#EXT-X-DEFINE:IMPORT="id"\n#EXT-X-PART:DURATION=0.5,URI="part-{$id}.ts"\n')
+    if (request.url === '/public/part-720.ts') return response.end('part')
+    response.writeHead(404).end()
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/master`, contentType: 'application/x-mpegurl' }, '127.0.0.1', 'token',
+    url => new URL(url).pathname.startsWith('/private/') ? { Authorization: 'Bearer private' } : {},
+    url => { destinations.push(url.href); return url.hostname === '127.0.0.1' })
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const master = await (await fetch(media.mediaUrl())).text()
+  const child = master.trim().split('\n').at(-1)
+  const reload = await fetch(`${child}?_HLS_msn=42&_HLS_part=0`)
+  assert.equal(reload.status, 200)
+  const part = (await reload.text()).match(/URI="([^"]+)"/)[1]
+  assert.equal(await (await fetch(part)).text(), 'part')
+  assert.deepEqual(requests, [
+    { url: '/master', authorization: undefined },
+    { url: '/private/playlist?sig=secret&_HLS_msn=42&_HLS_part=0', authorization: 'Bearer private' },
+    { url: '/public/playlist?_HLS_msn=42&_HLS_part=0', authorization: undefined },
+    { url: '/public/part-720.ts', authorization: undefined }
+  ])
+  assert.deepEqual(destinations, requests.map(request => `${origin}${request.url}`))
+})
+
+test('HLS reload queries reject unknown, duplicate and invalid directives and non-playlist resources', async t => {
+  const media = createMediaServer({ url: 'https://media.test/live', contentType: 'application/x-mpegurl' }, '127.0.0.1', 'token',
+    () => assert.fail('Invalid reloads must not request headers'), () => assert.fail('Invalid reloads must not resolve a destination'),
+    () => assert.fail('Invalid reloads must not fetch upstream'))
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  for (const query of ['token=changed', '_HLS_msn=-1', '_HLS_msn=1.5', '_HLS_msn=1&_HLS_msn=2', '_HLS_part=1', '_HLS_skip=NO', `_HLS_msn=${'1'.repeat(21)}`]) {
+    assert.equal((await fetch(`${root}?${query}`)).status, 502)
+  }
+  for (const [url, type] of [['https://media.test/video.mp4', 'video/mp4'], ['https://media.test/live.mpd', 'application/dash+xml'],
+    ['https://media.test/caption.vtt', 'text/vtt'], ['data:application/x-mpegurl,%23EXTM3U', 'application/x-mpegurl']]) {
+    assert.equal((await fetch(`${media.register(url, type)}?_HLS_msn=1`)).status, 502)
+  }
+})
+
 test('live HLS refreshes reclaim retired parts beyond the session resource budget', async t => {
   t.mock.timers.enable({ apis: ['Date'], now: 0 })
   let generation = 0
