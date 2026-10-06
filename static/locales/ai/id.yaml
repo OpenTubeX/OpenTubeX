@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
+    Show Google Cast Button: "Tampilkan tombol Google Cast"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1431,6 +1432,17 @@ Video:
       CopyAndDownvote: Salin dan beri suara negatif
       SubmitCategoryVote: Kirim suara kategori
       CategoryVoteSuccess: Suara kategori terkirim.
+    Google Cast:
+      Allow Private Instance: "Izinkan transmisi ini membaca media dari instans Invidious pribadi {instance}?"
+      Cast: "Transmisikan ke perangkat Google Cast"
+      Connected: "Mentransmisikan ke {device}"
+      Rewind: "Mundur 10 detik"
+      Forward: "Maju 10 detik"
+      Subtitles Off: "Nonaktifkan subtitel"
+      Return: "Kembali ke pemutaran lokal"
+      No Devices: "Tidak ditemukan perangkat Google Cast"
+      No Source: "Tidak ada aliran yang kompatibel untuk Google Cast"
+      Error: "Video tidak dapat ditransmisikan"
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'
@@ -1989,3 +2001,6 @@ Storage Startup Error:
   Retry: "Coba lagi"
 Search Bar:
   Use Suggestion: Gunakan saran
+
+Native Permissions:
+  Local Network: "Temukan perangkat di jaringan lokal Anda dan transmisikan video ke perangkat tersebut, serta sinkronkan pengaturan dan data antarperangkat."

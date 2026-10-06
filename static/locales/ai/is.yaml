@@ -643,6 +643,7 @@ Settings:
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
+    Show Google Cast Button: "Sýna Google Cast-hnapp"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1441,6 +1442,17 @@ Video:
       CopyAndDownvote: Afrita og greiða atkvæði gegn
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
+    Google Cast:
+      Allow Private Instance: "Leyfa þessari sendingu að lesa miðla frá einkatilviki Invidious {instance}?"
+      Cast: "Senda í Google Cast-tæki"
+      Connected: "Sendir í {device}"
+      Rewind: "Til baka um 10 sekúndur"
+      Forward: "Áfram um 10 sekúndur"
+      Subtitles Off: "Slökkva á texta"
+      Return: "Fara aftur í staðbundna spilun"
+      No Devices: "Engin Google Cast-tæki fundust"
+      No Source: "Enginn samhæfur straumur fyrir Google Cast"
+      Error: "Ekki tókst að senda myndskeiðið"
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:
@@ -2000,3 +2012,6 @@ Storage Startup Error:
   Retry: "Reyna aftur"
 Search Bar:
   Use Suggestion: Nota tillögu
+
+Native Permissions:
+  Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."

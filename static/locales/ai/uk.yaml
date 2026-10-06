@@ -647,6 +647,7 @@ Settings:
     Concurrent Preloads: "Одночасне попереднє завантаження"
     Ignore System Rotation Lock for Fullscreen: Ігнорувати системне блокування повороту для повноекранного режиму
     Swipe Left or Right to Seek in Fullscreen: Проводьте ліворуч або праворуч для перемотування в повноекранному режимі
+    Show Google Cast Button: "Показувати кнопку Google Cast"
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1455,6 +1456,17 @@ Video:
       CopyAndDownvote: Копіювати й оцінити негативно
       SubmitCategoryVote: Надіслати голос за категорію
       CategoryVoteSuccess: Голос за категорію надіслано.
+    Google Cast:
+      Allow Private Instance: "Дозволити цій трансляції читати медіа з приватного екземпляра Invidious {instance}?"
+      Cast: "Транслювати на пристрій Google Cast"
+      Connected: "Трансляція на {device}"
+      Rewind: "Назад на 10 секунд"
+      Forward: "Уперед на 10 секунд"
+      Subtitles Off: "Вимкнути субтитри"
+      Return: "Повернутися до локального відтворення"
+      No Devices: "Пристроїв Google Cast не знайдено"
+      No Source: "Немає сумісного потоку для Google Cast"
+      Error: "Не вдалося транслювати відео"
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано
@@ -2019,3 +2031,5 @@ Storage Startup Error:
   Title: "Не вдалося завантажити дані застосунку"
   Message: "Звільніть місце на пристрої та спробуйте ще раз. Синхронізацію призупинено до завантаження ваших даних."
   Retry: "Спробувати ще раз"
+Native Permissions:
+  Local Network: "Знаходити пристрої в локальній мережі та транслювати на них відео, а також синхронізувати налаштування й дані між пристроями."

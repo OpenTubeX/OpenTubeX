@@ -652,6 +652,7 @@ Settings:
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
+    Show Google Cast Button: "Näytä Google Cast -painike"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1460,6 +1461,17 @@ Video:
       CopyAndDownvote: Kopioi ja anna miinusääni
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
+    Google Cast:
+      Allow Private Instance: "Sallitaanko tämän lähetyksen lukea mediaa yksityisestä Invidious-palvelusta {instance}?"
+      Cast: "Lähetä Google Cast -laitteeseen"
+      Connected: "Lähetetään laitteeseen {device}"
+      Rewind: "Kelaa 10 sekuntia taaksepäin"
+      Forward: "Kelaa 10 sekuntia eteenpäin"
+      Subtitles Off: "Poista tekstitys käytöstä"
+      Return: "Palaa paikalliseen toistoon"
+      No Devices: "Google Cast -laitteita ei löytynyt"
+      No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
+      Error: "Videon lähetys epäonnistui"
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
@@ -2026,3 +2038,5 @@ Storage Startup Error:
   Title: "Sovelluksen tietoja ei voitu ladata"
   Message: "Vapauta laitteen tallennustilaa ja yritä uudelleen. Synkronointi on keskeytetty, kunnes tietosi on ladattu."
   Retry: "Yritä uudelleen"
+Native Permissions:
+  Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."

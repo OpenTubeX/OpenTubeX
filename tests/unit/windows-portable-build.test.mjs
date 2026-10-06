@@ -53,6 +53,7 @@ for (const architecture of ['x64', 'arm64']) {
     const source = (await readFile('_scripts/build.mjs', 'utf8')).replace(/^import .*\n/gm, '')
     const requests = []
     const shareArchitectures = []
+    const castTargets = []
     let interposerPreparations = 0
     await runInNewContext(`(async () => { ${source} })()`, {
       process: { platform: 'win32', argv: ['node', 'build.mjs', architecture] },
@@ -60,6 +61,7 @@ for (const architecture of ['x64', 'arm64']) {
       Platform: { WINDOWS: { createTarget: (formats, arch) => ({ formats: Array.from(formats), arch }) } },
       config: {},
       prepareWindowsShare: async arch => shareArchitectures.push(arch),
+      prepareCastSender: async (...args) => castTargets.push(args),
       prepareWindowsInterposer: async () => { interposerPreparations++ },
       withWindowsPortable,
       build: async request => { requests.push(request); return [] },
@@ -67,6 +69,7 @@ for (const architecture of ['x64', 'arm64']) {
     })
 
     assert.deepEqual(shareArchitectures, [architecture])
+    assert.deepEqual(castTargets, [['dist', 'win32', architecture]])
     assert.equal(interposerPreparations, architecture === 'x64' ? 1 : 0)
     assert.equal(requests.length, 2)
     assert.deepEqual(requests.map(request => request.targets), [

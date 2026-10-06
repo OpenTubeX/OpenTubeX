@@ -886,6 +886,7 @@ Settings:
     Concurrent Preloads: "Precàrregues simultànies"
     Ignore System Rotation Lock for Fullscreen: Ignora el bloqueig de rotació del sistema per a la pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
+    Show Google Cast Button: "Mostra el botó de Google Cast"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1899,6 +1900,17 @@ Video:
       CopyAndDownvote: Copia i vota en contra
       SubmitCategoryVote: Envia el vot de categoria
       CategoryVoteSuccess: S’ha enviat el vot de categoria.
+    Google Cast:
+      Allow Private Instance: "Voleu permetre que aquesta transmissió llegeixi contingut multimèdia de la instància privada d’Invidious {instance}?"
+      Cast: "Transmet a un dispositiu Google Cast"
+      Connected: "S’està transmetent a {device}"
+      Rewind: "Retrocedeix 10 segons"
+      Forward: "Avança 10 segons"
+      Subtitles Off: "Desactiva els subtítols"
+      Return: "Torna a la reproducció local"
+      No Devices: "No s’han trobat dispositius Google Cast"
+      No Source: "No hi ha cap flux compatible amb Google Cast"
+      Error: "No s’ha pogut transmetre el vídeo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'
@@ -2622,3 +2634,5 @@ Storage Startup Error:
   Title: "No s'han pogut carregar les dades de l'aplicació"
   Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
   Retry: "Torna-ho a provar"
+Native Permissions:
+  Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."

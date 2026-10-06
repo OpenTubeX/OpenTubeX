@@ -60,6 +60,13 @@ updates:
       - dependency-name: "sax"
       - dependency-name: "vue-sonner"
       - dependency-name: "yaml"
+  - package-ecosystem: "gomod"
+    directory: "/_scripts/cast-sender"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

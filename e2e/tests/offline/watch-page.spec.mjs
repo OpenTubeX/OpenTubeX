@@ -231,71 +231,145 @@ test('connection loss keeps the previous page covered while Watch is scrolled', 
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 })
 
-test('casts a complete MP4 stream to a discovered DLNA device and returns to local playback', async ({ app, page }) => {
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.__dlnaCalls = []
-    ipcMain.removeHandler('dlna-discover')
-    ipcMain.removeHandler('dlna-start')
-    ipcMain.removeHandler('dlna-stop')
-    ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
-    ipcMain.handle('dlna-start', (_event, payload) => {
-      globalThis.__dlnaCalls.push({ action: 'start', payload })
-      return { castId: 'test-cast', deviceName: 'Living room TV' }
+for (const mode of ['combined', 'merged', 'fallback', 'late-failure', 'pending-extraction']) {
+  const pendingExtraction = mode === 'pending-extraction'
+  const merged = mode !== 'combined' && !pendingExtraction
+  const fallback = mode === 'fallback'
+  const lateFailure = mode === 'late-failure'
+  test(`casts ${lateFailure ? 'a complete MP4 after a merged stream fails' : fallback ? 'a complete MP4 when FFmpeg is unavailable' : pendingExtraction ? 'a complete MP4 while higher-resolution extraction is pending' : merged ? 'separate high-resolution tracks' : 'a complete MP4 stream'} to a discovered DLNA device and returns to local playback`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ ipcMain }, { merged, fallback, pendingExtraction }) => {
+      globalThis.__dlnaCalls = []
+      globalThis.__dlnaExtractionCalls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__dlnaExtractionCalls++
+        if (pendingExtraction) return new Promise(() => {})
+        return {
+          isLive: false,
+          formats: merged
+            ? [
+                { url: 'https://example.test/video-1080.mp4', protocol: 'https', ext: 'mp4', vcodec: 'avc1.640028', acodec: 'none', height: 1080 },
+                { url: 'https://example.test/audio.m4a', protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2', formatId: '140' }
+              ]
+            : []
+        }
+      })
+      ipcMain.removeHandler('dlna-discover')
+      ipcMain.removeHandler('dlna-start')
+      ipcMain.removeHandler('dlna-stop')
+      ipcMain.removeHandler('dlna-recover')
+      ipcMain.handle('dlna-recover', (_event, castId, payload) => {
+        globalThis.__dlnaCalls.push({ action: 'stop', castId }, { action: 'start', payload })
+        return { castId: 'recovered-cast', deviceName: 'Living room TV' }
+      })
+      ipcMain.removeHandler('dlna-has-failed')
+      ipcMain.handle('dlna-has-failed', () => globalThis.__dlnaFailed ?? false)
+      ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
+      ipcMain.handle('dlna-start', async (_event, payload) => {
+        globalThis.__dlnaCalls.push({ action: 'start', payload })
+        if (fallback && payload.audioUrl) {
+          // Slow FFmpeg validation outlasts Chromium's transient user activation.
+          await new Promise(resolve => setTimeout(resolve, 6000))
+          // The main-process start now owns the authorized complete-MP4 retry.
+          globalThis.__dlnaCalls.push({
+            action: 'start',
+            payload: {
+              deviceId: payload.deviceId,
+              mediaUrl: payload.fallbackMediaUrl,
+              title: payload.title,
+              startSeconds: payload.startSeconds
+            }
+          })
+          return { castId: 'test-cast', deviceName: 'Living room TV', usedFallback: true }
+        }
+        return { castId: 'test-cast', deviceName: 'Living room TV' }
+      })
+      ipcMain.handle('dlna-stop', (_event, castId) => {
+        globalThis.__dlnaCalls.push({ action: 'stop', castId })
+        return true
+      })
+    }, { merged, fallback, pendingExtraction })
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const view = await watchViewHandle(page)
+    await view.evaluate(view => {
+      view.legacyFormats = [{
+        url: 'https://example.test/video.mp4',
+        mimeType: 'video/mp4',
+        qualityLabel: '360p',
+        height: 360
+      }]
     })
-    ipcMain.handle('dlna-stop', (_event, castId) => {
-      globalThis.__dlnaCalls.push({ action: 'stop', castId })
-      return true
+
+    const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
+    await expect(castButton).toHaveCount(0)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+    await expect(castButton).toBeVisible()
+    await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
+    await expect(page.locator('.ftVideoPlayer .dlnaCastControl')).toHaveCount(0)
+    await expect(castButton.locator('[data-icon="cast"]')).toBeVisible()
+    const playerBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
+    const castTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
+    expect(castTop).toBeGreaterThan(playerBottom)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await expect.poll(async () => {
+      const videoBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
+      const buttonTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
+      return buttonTop > videoBottom
+    }).toBe(true)
+    await castButton.click()
+    if (pendingExtraction) {
+      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible({ timeout: 3000 })
+      await castButton.click()
+      await castButton.click()
+      await expect(page.getByRole('option', { name: 'Living room TV' })).toBeVisible()
+      expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
+      await page.screenshot({ path: test.info().outputPath('dlna-devices-while-extracting.png') })
+    }
+    await page.getByRole('option', { name: 'Living room TV' }).click()
+    if (fallback) {
+      // Renderer evaluate() calls grant a fresh user gesture in Playwright.
+      // Observe the main process while waiting for the authorized fallback.
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
+    }
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    if (pendingExtraction) {
+      expect(await app.electronApp.evaluate(() => globalThis.__dlnaExtractionCalls)).toBe(1)
+    }
+    if (lateFailure) {
+      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = true })
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
+      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = false })
+    }
+    const calls = await app.electronApp.evaluate(() => globalThis.__dlnaCalls)
+    expect(calls[0].action).toBe('start')
+    expect(calls[0].payload.mediaUrl).toBe(merged ? 'https://example.test/video-1080.mp4' : 'https://example.test/video.mp4')
+    expect(calls[0].payload.audioUrl).toBe(merged ? 'https://example.test/audio.m4a' : undefined)
+    if (fallback || lateFailure) {
+      const retry = calls.filter(call => call.action === 'start')[1]
+      expect(retry.payload.mediaUrl).toBe('https://example.test/video.mp4')
+      expect(retry.payload.audioUrl).toBeUndefined()
+    }
+
+    await castButton.click()
+    await page.getByRole('option', { name: 'Stop casting' }).click()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+    expect(await app.electronApp.evaluate(() => globalThis.__dlnaCalls.at(-1))).toEqual({
+      action: 'stop', castId: lateFailure ? 'recovered-cast' : 'test-cast'
     })
-  })
-  await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  const view = await watchViewHandle(page)
-  await view.evaluate(view => {
-    view.legacyFormats = [{
-      url: 'https://example.test/video.mp4',
-      mimeType: 'video/mp4',
-      qualityLabel: '360p',
-      height: 360
-    }]
-  })
 
-  const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
-  await expect(castButton).toHaveCount(0)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
-  await expect(castButton).toBeVisible()
-  await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
-  await expect(page.locator('.ftVideoPlayer .dlnaCastControl')).toHaveCount(0)
-  await expect(castButton.locator('[data-icon="cast"]')).toBeVisible()
-  const playerBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
-  const castTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
-  expect(castTop).toBeGreaterThan(playerBottom)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
-  await expect.poll(async () => {
-    const videoBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
-    const buttonTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
-    return buttonTop > videoBottom
-  }).toBe(true)
-  await castButton.click()
-  await page.getByRole('option', { name: 'Living room TV' }).click()
-  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
-  const calls = await app.electronApp.evaluate(() => globalThis.__dlnaCalls)
-  expect(calls[0].action).toBe('start')
-  expect(calls[0].payload.mediaUrl).toBe('https://example.test/video.mp4')
-
-  await castButton.click()
-  await page.getByRole('option', { name: 'Stop casting' }).click()
-  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
-  expect(await app.electronApp.evaluate(() => globalThis.__dlnaCalls.at(-1))).toEqual({
-    action: 'stop', castId: 'test-cast'
+    await video.evaluate(element => element.pause())
+    await castButton.click()
+    await page.getByRole('option', { name: 'Living room TV' }).click()
+    if (fallback) {
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(4)
+    }
+    await expect(castButton).toHaveAttribute('aria-pressed', 'true')
+    await castButton.click()
+    await page.getByRole('option', { name: 'Stop casting' }).click()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
   })
-
-  await video.evaluate(element => element.pause())
-  await castButton.click()
-  await page.getByRole('option', { name: 'Living room TV' }).click()
-  await castButton.click()
-  await page.getByRole('option', { name: 'Stop casting' }).click()
-  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
-})
+}
 
 test('hides the DLNA action while the playback source is pending', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

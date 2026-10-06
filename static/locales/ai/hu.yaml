@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
     Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
+    Show Google Cast Button: "Google Cast gomb megjelenítése"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: Másolás és leszavazás
       SubmitCategoryVote: Kategóriaszavazat elküldése
       CategoryVoteSuccess: Kategóriaszavazat elküldve.
+    Google Cast:
+      Allow Private Instance: "Engedélyezi, hogy ez az átküldés médiát olvasson a privát Invidious-példányról: {instance}?"
+      Cast: "Átküldés Google Cast-eszközre"
+      Connected: "Átküldés ide: {device}"
+      Rewind: "Vissza 10 másodpercet"
+      Forward: "Előre 10 másodpercet"
+      Subtitles Off: "Feliratok kikapcsolása"
+      Return: "Visszatérés a helyi lejátszáshoz"
+      No Devices: "Nem találhatók Google Cast-eszközök"
+      No Source: "Nincs kompatibilis adatfolyam a Google Casthoz"
+      Error: "Nem sikerült átküldeni a videót"
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"
@@ -1979,3 +1991,6 @@ Storage Startup Error:
   Retry: "Újrapróbálkozás"
 Search Bar:
   Use Suggestion: Javaslat használata
+
+Native Permissions:
+  Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."

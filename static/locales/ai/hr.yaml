@@ -641,6 +641,7 @@ Settings:
     Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
     Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
+    Show Google Cast Button: "Prikaži gumb Google Cast"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1440,6 +1441,17 @@ Video:
       CopyAndDownvote: Kopiraj i glasaj protiv
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
+    Google Cast:
+      Allow Private Instance: "Dopustiti ovom emitiranju čitanje medija s privatne instance Invidious {instance}?"
+      Cast: "Emitiraj na uređaj Google Cast"
+      Connected: "Emitiranje na {device}"
+      Rewind: "Natrag 10 sekundi"
+      Forward: "Naprijed 10 sekundi"
+      Subtitles Off: "Isključi titlove"
+      Return: "Vrati se na lokalnu reprodukciju"
+      No Devices: "Nisu pronađeni uređaji Google Cast"
+      No Source: "Nema kompatibilnog toka za Google Cast"
+      Error: "Videozapis nije moguće prenijeti"
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno
@@ -2004,3 +2016,5 @@ Storage Startup Error:
   Title: "Nije moguće učitati podatke aplikacije"
   Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
   Retry: "Pokušaj ponovno"
+Native Permissions:
+  Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."

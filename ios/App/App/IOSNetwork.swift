@@ -11,6 +11,8 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
     }
     private var prepared: [String: URLRequest] = [:]
     private var external: [String: URLRequest] = [:]
+    private var externalOwners: [String: Set<String>] = [:]
+    private var expiredExternal = Set<String>()
     private var transfers: [ObjectIdentifier: WKURLSchemeTask] = [:]
     private var tasks: [ObjectIdentifier: URLSessionDataTask] = [:]
     private lazy var session: URLSession = {
@@ -41,9 +43,40 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         let id = UUID().uuidString
         external[id] = request
         DispatchQueue.main.asyncAfter(deadline: .now() + 7200) { [weak self] in
-            self?.external.removeValue(forKey: id)
+            self?.expireExternal(id)
         }
         return id
+    }
+
+    func expireExternal(_ id: String) {
+        guard external[id] != nil else { return }
+        expiredExternal.insert(id)
+        removeExpiredExternal(id)
+    }
+
+    // A displayed source or casting control can outlive the cache's two-hour
+    // expiry. Keep its original URL and headers until all owners release it.
+    func retainMediaRequests(owner: String, urls: [URL]) {
+        let previous = externalOwners[owner] ?? []
+        let ids = Set(urls.compactMap { registeredMediaRequest($0) == nil ? nil : $0.lastPathComponent })
+        if ids.isEmpty { externalOwners.removeValue(forKey: owner) }
+        else { externalOwners[owner] = ids }
+        for id in previous.subtracting(ids) { removeExpiredExternal(id) }
+    }
+
+    private func removeExpiredExternal(_ id: String) {
+        if expiredExternal.contains(id) && !externalOwners.values.contains(where: { $0.contains(id) }) {
+            external.removeValue(forKey: id)
+            expiredExternal.remove(id)
+        }
+    }
+
+    // Accessed on the main queue, like registration and the WebKit scheme handler.
+    func registeredMediaRequest(_ url: URL) -> URLRequest? {
+        let id = url.lastPathComponent
+        guard url.scheme == "capacitor", url.host == "localhost", url.query == nil,
+              url.path == "/_opentubex_media/\(id)" else { return nil }
+        return external[id]
     }
 
     func abort(_ id: String) {

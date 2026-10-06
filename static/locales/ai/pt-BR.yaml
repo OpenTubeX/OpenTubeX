@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para tela cheia
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou retroceder em tela cheia
+    Show Google Cast Button: "Mostrar botão Google Cast"
   Channel Settings:
     Channel Settings: Configurações dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as configurações escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: Copiar e votar contra
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
+    Google Cast:
+      Allow Private Instance: "Permitir que esta transmissão leia mídia da instância privada do Invidious {instance}?"
+      Cast: "Transmitir para um dispositivo Google Cast"
+      Connected: "Transmitindo para {device}"
+      Rewind: "Voltar 10 segundos"
+      Forward: "Avançar 10 segundos"
+      Subtitles Off: "Desativar legendas"
+      Return: "Voltar à reprodução local"
+      No Devices: "Nenhum dispositivo Google Cast encontrado"
+      No Source: "Nenhum fluxo compatível com Google Cast"
+      Error: "Não foi possível transmitir o vídeo"
   External Media:
     Dislikes: "Desgosto | Desgostos | Desgostos"
     Reposts: "Republicação | Republicações | Republicações"
@@ -1978,3 +1990,6 @@ Storage Startup Error:
   Retry: "Tentar novamente"
 Search Bar:
   Use Suggestion: Usar sugestão
+
+Native Permissions:
+  Local Network: "Encontrar dispositivos na sua rede local e transmitir vídeos para eles, e sincronizar configurações e dados entre dispositivos."

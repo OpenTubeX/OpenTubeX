@@ -663,6 +663,7 @@ Settings:
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
     Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
+    Show Google Cast Button: "Vis Google Cast-knap"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1487,6 +1488,17 @@ Video:
       CopyAndDownvote: Kopiér og stem ned
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
+    Google Cast:
+      Allow Private Instance: "Tillad denne casting at læse medier fra den private Invidious-instans {instance}?"
+      Cast: "Cast til en Google Cast-enhed"
+      Connected: "Caster til {device}"
+      Rewind: "Spol 10 sekunder tilbage"
+      Forward: "Spol 10 sekunder frem"
+      Subtitles Off: "Slå undertekster fra"
+      Return: "Vend tilbage til lokal afspilning"
+      No Devices: "Ingen Google Cast-enheder fundet"
+      No Source: "Ingen kompatibel stream til Google Cast"
+      Error: "Videoen kunne ikke castes"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'
@@ -2063,3 +2075,5 @@ Storage Startup Error:
   Title: "Appdata kunne ikke indlæses"
   Message: "Frigør lagerplads på enheden, og prøv igen. Synkronisering er sat på pause, indtil dine data er indlæst."
   Retry: "Prøv igen"
+Native Permissions:
+  Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."

@@ -647,6 +647,7 @@ Settings:
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
     Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
     Swipe Left or Right to Seek in Fullscreen: اسحب إلى اليسار أو اليمين للتقديم أو الترجيع في وضع ملء الشاشة
+    Show Google Cast Button: "إظهار زر Google Cast"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1455,6 +1456,17 @@ Video:
       CopyAndDownvote: نسخ والتصويت سلبًا
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
+    Google Cast:
+      Allow Private Instance: "هل تسمح لهذا البث بقراءة الوسائط من مثيل Invidious الخاص {instance}؟"
+      Cast: "البث إلى جهاز Google Cast"
+      Connected: "جارٍ البث إلى {device}"
+      Rewind: "الرجوع 10 ثوانٍ"
+      Forward: "التقديم 10 ثوانٍ"
+      Subtitles Off: "إيقاف الترجمة"
+      Return: "العودة إلى التشغيل المحلي"
+      No Devices: "لم يُعثر على أجهزة Google Cast"
+      No Source: "لا يوجد بث متوافق مع Google Cast"
+      Error: "تعذر بث الفيديو"
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة
@@ -2004,3 +2016,5 @@ Storage Startup Error:
   Title: "تعذر تحميل بيانات التطبيق"
   Message: "حرّر مساحة تخزين على الجهاز وحاول مجددًا. المزامنة متوقفة مؤقتًا حتى يتم تحميل بياناتك."
   Retry: "إعادة المحاولة"
+Native Permissions:
+  Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."

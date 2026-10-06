@@ -641,6 +641,7 @@ Settings:
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
+    Show Google Cast Button: "Dangos botwm Google Cast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1445,6 +1446,17 @@ Video:
       CopyAndDownvote: Copïo a phleidleisio yn erbyn
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
+    Google Cast:
+      Allow Private Instance: "Caniatáu i’r darllediad hwn ddarllen cyfryngau o’r enghraifft breifat Invidious {instance}?"
+      Cast: "Castio i ddyfais Google Cast"
+      Connected: "Yn castio i {device}"
+      Rewind: "Yn ôl 10 eiliad"
+      Forward: "Ymlaen 10 eiliad"
+      Subtitles Off: "Diffodd isdeitlau"
+      Return: "Dychwelyd i chwarae lleol"
+      No Devices: "Heb ganfod dyfeisiau Google Cast"
+      No Source: "Dim ffrwd gydnaws ar gyfer Google Cast"
+      Error: "Methu darlledu’r fideo"
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
@@ -2009,3 +2021,5 @@ Storage Startup Error:
   Title: "Methu llwytho data'r ap"
   Message: "Rhyddhewch le storio ar y ddyfais a cheisiwch eto. Mae cysoni wedi'i oedi nes bod eich data wedi'i lwytho."
   Retry: "Ceisio eto"
+Native Permissions:
+  Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."

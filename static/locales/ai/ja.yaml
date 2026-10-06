@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
+    Show Google Cast Button: "Google Castボタンを表示"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: コピーして低評価
       SubmitCategoryVote: カテゴリ変更の投票を送信
       CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
+    Google Cast:
+      Allow Private Instance: "このキャストによる非公開の Invidious インスタンス {instance} からのメディアの読み取りを許可しますか？"
+      Cast: "Google Castデバイスにキャスト"
+      Connected: "{device}にキャスト中"
+      Rewind: "10秒戻る"
+      Forward: "10秒進む"
+      Subtitles Off: "字幕をオフ"
+      Return: "ローカル再生に戻る"
+      No Devices: "Google Castデバイスが見つかりません"
+      No Source: "Google Cast対応のストリームがありません"
+      Error: "動画をキャストできませんでした"
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"
@@ -1978,3 +1990,6 @@ Storage Startup Error:
   Retry: "再試行"
 Search Bar:
   Use Suggestion: 候補を入力
+
+Native Permissions:
+  Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"

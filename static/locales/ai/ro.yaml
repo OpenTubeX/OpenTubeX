@@ -643,6 +643,7 @@ Settings:
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
+    Show Google Cast Button: "Afișează butonul Google Cast"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1455,6 +1456,17 @@ Video:
       CopyAndDownvote: Copiază și votează negativ
       SubmitCategoryVote: Trimite votul pentru categorie
       CategoryVoteSuccess: Votul pentru categorie a fost trimis.
+    Google Cast:
+      Allow Private Instance: "Permiteți acestei transmisii să citească fișiere media din instanța privată Invidious {instance}?"
+      Cast: "Transmite către un dispozitiv Google Cast"
+      Connected: "Se transmite către {device}"
+      Rewind: "Înapoi 10 secunde"
+      Forward: "Înainte 10 secunde"
+      Subtitles Off: "Dezactivează subtitrările"
+      Return: "Revino la redarea locală"
+      No Devices: "Nu s-au găsit dispozitive Google Cast"
+      No Source: "Nu există un flux compatibil cu Google Cast"
+      Error: "Videoclipul nu a putut fi transmis"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
@@ -2028,3 +2040,5 @@ Storage Startup Error:
   Title: "Datele aplicației nu au putut fi încărcate"
   Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
   Retry: "Încearcă din nou"
+Native Permissions:
+  Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."

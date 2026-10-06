@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
+    Show Google Cast Button: "显示 Google Cast 按钮"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: 复制并投反对票
       SubmitCategoryVote: 提交类别投票
       CategoryVoteSuccess: 类别投票已提交。
+    Google Cast:
+      Allow Private Instance: "允许此次投屏从私有 Invidious 实例 {instance} 读取媒体吗？"
+      Cast: "投放到 Google Cast 设备"
+      Connected: "正在投放到 {device}"
+      Rewind: "后退 10 秒"
+      Forward: "前进 10 秒"
+      Subtitles Off: "关闭字幕"
+      Return: "返回本地播放"
+      No Devices: "未找到 Google Cast 设备"
+      No Source: "没有兼容 Google Cast 的视频流"
+      Error: "无法投放视频"
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"
@@ -1978,3 +1990,6 @@ Storage Startup Error:
   Retry: "重试"
 Search Bar:
   Use Suggestion: 使用建议
+
+Native Permissions:
+  Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"

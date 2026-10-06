@@ -15,7 +15,10 @@ import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
+import { selectCastSource } from '../../helpers/player/castSource'
+import WatchChromecast from '../../components/WatchChromecast/WatchChromecast.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
@@ -173,6 +176,7 @@ export default defineComponent({
     PhoneCommentsButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchDlnaCast,
+    WatchChromecast,
     WatchVideoDownloadPrompt,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
@@ -226,6 +230,7 @@ export default defineComponent({
     return {
       t,
       isElectron: process.env.IS_ELECTRON,
+      isCapacitor: process.env.IS_CAPACITOR,
       phoneLayout: usePhoneLayout(),
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,
@@ -408,6 +413,10 @@ export default defineComponent({
       ytDlpStreamsPending: false,
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
+      chromecastActive: false,
+      chromecastBusy: false,
+      dlnaCastActive: false,
+      chromecastStatus: null,
       captions: [],
       captionTranslations: [],
       currentTime: 0,
@@ -1407,6 +1416,7 @@ export default defineComponent({
     },
   },
   created: function () {
+    retainIosMediaSources(() => this.legacyFormats.map(format => format.url))
     this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
     this.isShort = this.tabRoute.query.short === 'true'
@@ -4393,7 +4403,8 @@ export default defineComponent({
       this.currentTime = currentSeconds
     },
 
-    handleTimeUpdate: function (currentSeconds) {
+    handleTimeUpdate: function (currentSeconds, fromChromecast = false) {
+      if (this.chromecastActive && !fromChromecast) return
       // Once the refreshed stream has actually played a stretch of content it
       // has proven itself, so refill the budget: a later, unrelated SABR
       // failure gets its own refetch instead of dropping straight to legacy
@@ -4498,7 +4509,7 @@ export default defineComponent({
         !this.videoPlayerLoaded ||
         this.isUpcoming ||
         this.isLive ||
-        this.$refs.player?.isPaused() ||
+        this.isPlaybackPaused() ||
         now - this.historyLastTouchedAt < 60_000
       ) {
         return
@@ -4521,7 +4532,7 @@ export default defineComponent({
         return
       }
 
-      if (!isFinished && this.$refs.player?.isPaused()) {
+      if (!isFinished && this.isPlaybackPaused()) {
         return
       }
 
@@ -4626,7 +4637,34 @@ export default defineComponent({
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
+    isPlaybackPaused() {
+      return this.chromecastStatus?.paused ?? this.$refs.player?.isPaused() ?? true
+    },
+    handleChromecastState(state) {
+      this.chromecastStatus = state
+      this.handleTimeUpdate(state.currentTime, true)
+    },
+    handleChromecastChange(active) {
+      this.chromecastActive = active
+      if (!active) this.chromecastStatus = null
+    },
+    async getChromecastSource() {
+      const source = selectCastSource(this.legacyFormats, this.manifestSrc, this.manifestMimeType)
+      if (!supportsYtDlp || this.manifestMimeType !== MANIFEST_TYPE_SABR) return source
+      try {
+        const extracted = await getYtDlpPlaybackSource(this.videoId, this.ytDlpPlaybackCacheKey, undefined,
+          this.alwaysUseYtDlpPlaybackCookies, false, false)
+        return (extracted && selectCastSource(extracted.legacyFormats, extracted.manifestSrc, extracted.manifestMimeType)) ?? source
+      } catch (error) {
+        if (source) return source
+        throw error
+      }
+    },
     handleVideoPlay() {
+      if (this.chromecastActive) {
+        this.$refs.player?.pause()
+        return
+      }
       this.waitingForPlaylistContinuation = false
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
     },
@@ -4668,7 +4706,7 @@ export default defineComponent({
         videoId: this.videoId,
         time,
         now: Date.now(),
-        playing: !this.$refs.player.isPaused(),
+        playing: !this.isPlaybackPaused(),
         rate: this.currentPlaybackRate ?? 1,
       })
       this.recommendationPlaybackSample = current
@@ -4698,7 +4736,7 @@ export default defineComponent({
       }
     },
     trackWatchTime() {
-      if (!this.rememberHistory || !this.enableWatchStats || this.$refs.player?.isPaused()) {
+      if (!this.rememberHistory || !this.enableWatchStats || this.isPlaybackPaused() || this.chromecastStatus?.buffering) {
         this.watchTimeLastTick = null
         return
       }
@@ -4763,11 +4801,11 @@ export default defineComponent({
       const player = this.$refs.player
       // A seek establishes a position before its media segment finishes loading.
       // Save that position, but never the initial zero before playback or a seek.
-      if (!player?.hasPlaybackPosition) { return }
+      if (!player?.hasPlaybackPosition && !this.chromecastStatus) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
         ? this.videoLengthSeconds
-        : player.getCurrentTime()
+        : (this.chromecastStatus?.currentTime ?? player.getCurrentTime())
       if (!this.historyEntryExists) {
         this.addToHistory(currentTime)
         return
@@ -5360,6 +5398,7 @@ export default defineComponent({
     },
 
     handleRouteChange: async function () {
+      await this.$refs.chromecast?.stopCasting(false)
       this.abortAutoplayCountdown(true)
       this.handleWatchProgressAutoSave()
       await this.flushWatchTime()
@@ -6304,6 +6343,9 @@ export default defineComponent({
     },
 
     getWatchedProgress: function () {
+      if (!this.isLoading && this.chromecastActive && this.chromecastStatus) {
+        return this.chromecastStatus.currentTime
+      }
       const player = this.$refs.player
 
       if (!this.isLoading && player?.hasLoaded) {

@@ -723,6 +723,7 @@ Settings:
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
+    Show Google Cast Button: "Mostrar botón de Google Cast"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1788,6 +1789,17 @@ Video:
       CopyAndDownvote: Copiar y votar en contra
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
+    Google Cast:
+      Allow Private Instance: "¿Permitir que esta transmisión lea contenido multimedia de la instancia privada de Invidious {instance}?"
+      Cast: "Transmitir a un dispositivo Google Cast"
+      Connected: "Transmitiendo a {device}"
+      Rewind: "Retroceder 10 segundos"
+      Forward: "Avanzar 10 segundos"
+      Subtitles Off: "Desactivar subtítulos"
+      Return: "Volver a la reproducción local"
+      No Devices: "No se encontraron dispositivos Google Cast"
+      No Source: "No hay un flujo compatible con Google Cast"
+      Error: "No se pudo transmitir el video"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'
@@ -2539,3 +2551,5 @@ Storage Startup Error:
   Title: "No se pudieron cargar los datos de la aplicación"
   Message: "Liberá espacio en el dispositivo e intentá de nuevo. La sincronización está pausada hasta que se carguen tus datos."
   Retry: "Reintentar"
+Native Permissions:
+  Local Network: "Detectar dispositivos en tu red local y transmitirles videos, y sincronizar la configuración y los datos entre dispositivos."

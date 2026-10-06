@@ -652,6 +652,7 @@ Settings:
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
     Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
+    Show Google Cast Button: "Εμφάνιση κουμπιού Google Cast"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1460,6 +1461,17 @@ Video:
       CopyAndDownvote: Αντιγραφή και αρνητική ψήφος
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
+    Google Cast:
+      Allow Private Instance: "Να επιτραπεί σε αυτή τη μετάδοση να διαβάζει πολυμέσα από την ιδιωτική εγκατάσταση Invidious {instance};"
+      Cast: "Μετάδοση σε συσκευή Google Cast"
+      Connected: "Μετάδοση στο {device}"
+      Rewind: "Πίσω 10 δευτερόλεπτα"
+      Forward: "Μπροστά 10 δευτερόλεπτα"
+      Subtitles Off: "Απενεργοποίηση υποτίτλων"
+      Return: "Επιστροφή στην τοπική αναπαραγωγή"
+      No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
+      No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
+      Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
@@ -2026,3 +2038,5 @@ Storage Startup Error:
   Title: "Δεν ήταν δυνατή η φόρτωση των δεδομένων της εφαρμογής"
   Message: "Ελευθερώστε χώρο στη συσκευή και δοκιμάστε ξανά. Ο συγχρονισμός έχει τεθεί σε παύση μέχρι να φορτωθούν τα δεδομένα σας."
   Retry: "Δοκιμή ξανά"
+Native Permissions:
+  Local Network: "Εντοπισμός συσκευών στο τοπικό σας δίκτυο και μετάδοση βίντεο σε αυτές, καθώς και συγχρονισμός ρυθμίσεων και δεδομένων μεταξύ συσκευών."

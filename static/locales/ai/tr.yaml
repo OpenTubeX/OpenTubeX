@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
+    Show Google Cast Button: "Google Cast düğmesini göster"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: Kopyala ve olumsuz oy ver
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
+    Google Cast:
+      Allow Private Instance: "Bu yayının özel Invidious örneği {instance} üzerinden medya okumasına izin verilsin mi?"
+      Cast: "Google Cast cihazına yayınla"
+      Connected: "{device} cihazına yayınlanıyor"
+      Rewind: "10 saniye geri"
+      Forward: "10 saniye ileri"
+      Subtitles Off: "Altyazıları kapat"
+      Return: "Yerel oynatmaya dön"
+      No Devices: "Google Cast cihazı bulunamadı"
+      No Source: "Google Cast için uyumlu akış yok"
+      Error: "Video yayınlanamadı"
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"
@@ -1979,3 +1991,6 @@ Storage Startup Error:
   Retry: "Tekrar dene"
 Search Bar:
   Use Suggestion: Öneriyi kullan
+
+Native Permissions:
+  Local Network: "Yerel ağınızdaki cihazları keşfedin ve onlara video yayınlayın, cihazlar arasında ayarları ve verileri eşitleyin."

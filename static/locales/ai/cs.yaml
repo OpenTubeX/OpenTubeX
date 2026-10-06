@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Souběžná přednačtení"
     Ignore System Rotation Lock for Fullscreen: Ignorovat systémový zámek otáčení pro celou obrazovku
     Swipe Left or Right to Seek in Fullscreen: Přejetím doleva nebo doprava posouvat přehrávání na celé obrazovce
+    Show Google Cast Button: "Zobrazit tlačítko Google Cast"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1423,6 +1424,17 @@ Video:
       CopyAndDownvote: Zkopírovat a hlasovat proti
       SubmitCategoryVote: Odeslat hlas pro kategorii
       CategoryVoteSuccess: Hlas pro kategorii byl odeslán.
+    Google Cast:
+      Allow Private Instance: "Povolit tomuto přenosu číst média ze soukromé instance Invidious {instance}?"
+      Cast: "Odeslat do zařízení Google Cast"
+      Connected: "Odesílání do {device}"
+      Rewind: "Zpět o 10 sekund"
+      Forward: "Vpřed o 10 sekund"
+      Subtitles Off: "Vypnout titulky"
+      Return: "Vrátit se k místnímu přehrávání"
+      No Devices: "Nenalezena žádná zařízení Google Cast"
+      No Source: "Žádný kompatibilní stream pro Google Cast"
+      Error: "Video se nepodařilo odeslat"
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"
@@ -1978,3 +1990,6 @@ Storage Startup Error:
   Retry: "Zkusit znovu"
 Search Bar:
   Use Suggestion: Použít návrh
+
+Native Permissions:
+  Local Network: "Vyhledávat zařízení v místní síti a přenášet do nich videa a synchronizovat nastavení a data mezi zařízeními."

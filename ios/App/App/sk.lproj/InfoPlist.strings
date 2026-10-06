@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Naskenujte párovací kód zobrazený na pridávanom zariadení.";
-"NSLocalNetworkUsageDescription" = "Synchronizácia nastavení a údajov medzi zariadeniami";
+"NSLocalNetworkUsageDescription" = "Vyhľadávať zariadenia v miestnej sieti a prenášať do nich videá a synchronizovať nastavenia a údaje medzi zariadeniami.";

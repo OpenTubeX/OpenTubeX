@@ -5,7 +5,7 @@ import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
 export default {
   appId: `io.opentubex.${packageDetails.name}`,
   copyright: 'Copyleft © 2020-2026',
-  asarUnpack: ['dist/windows_share.node'],
+  asarUnpack: ['dist/windows_share.node', 'dist/opentubex-cast', 'dist/opentubex-cast.exe'],
   // compression: 'store',
   productName: packageDetails.productName,
   directories: {
@@ -120,6 +120,8 @@ export default {
     target: ['dmg', 'zip', '7z'],
     type: 'distribution',
     extendInfo: {
+      NSLocalNetworkUsageDescription: 'OpenTubeX discovers and controls Cast devices on your local network.',
+      NSBonjourServices: ['_googlecast._tcp'],
       CFBundleURLTypes: [
         'opentubex'
       ],

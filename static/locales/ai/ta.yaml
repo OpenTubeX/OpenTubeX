@@ -652,6 +652,7 @@ Settings:
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
     Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
     Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
+    Show Google Cast Button: "Google Cast பொத்தானைக் காட்டு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1464,6 +1465,17 @@ Video:
       CopyAndDownvote: நகலெடுத்து எதிராக வாக்களி
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
+    Google Cast:
+      Allow Private Instance: "இந்த ஒளிபரப்பு தனிப்பட்ட Invidious சேவையான {instance} இலிருந்து ஊடகத்தைப் படிக்க அனுமதிக்கவா?"
+      Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
+      Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
+      Rewind: "10 வினாடிகள் பின்னால்"
+      Forward: "10 வினாடிகள் முன்னால்"
+      Subtitles Off: "வசன வரிகளை அணை"
+      Return: "உள்ளூர் இயக்கத்திற்குத் திரும்பு"
+      No Devices: "Google Cast சாதனங்கள் கிடைக்கவில்லை"
+      No Source: "Google Cast-க்கு இணக்கமான ஓடை இல்லை"
+      Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்
@@ -2029,3 +2041,5 @@ Storage Startup Error:
   Title: "செயலித் தரவை ஏற்ற முடியவில்லை"
   Message: "சாதனத்தில் சேமிப்பிடத்தை விடுவித்து மீண்டும் முயற்சிக்கவும். உங்கள் தரவு ஏற்றப்படும் வரை ஒத்திசைவு இடைநிறுத்தப்பட்டுள்ளது."
   Retry: "மீண்டும் முயற்சி"
+Native Permissions:
+  Local Network: "உங்கள் உள்ளூர் வலையமைப்பில் சாதனங்களைக் கண்டறிந்து அவற்றுக்கு காணொளிகளை அனுப்பவும், சாதனங்களுக்கு இடையே அமைப்புகள் மற்றும் தரவை ஒத்திசைக்கவும்."

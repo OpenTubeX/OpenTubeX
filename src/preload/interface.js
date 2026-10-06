@@ -373,10 +373,37 @@ export default {
     discover: () => navigator.userActivation.isActive
       ? ipcRenderer.invoke(IpcChannels.DLNA_DISCOVER)
       : Promise.resolve([]),
-    start: payload => navigator.userActivation.isActive
-      ? ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
+    start: async payload => {
+      if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
+      return ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
+    },
+    stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId),
+    hasFailed: castId => ipcRenderer.invoke(IpcChannels.DLNA_HAS_FAILED, castId),
+    recover: (castId, payload) => ipcRenderer.invoke(IpcChannels.DLNA_RECOVER, castId, payload)
+  },
+
+  chromecast: {
+    discover: () => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.CAST_DISCOVER)
+      : Promise.resolve([]),
+    start: async preparePayload => {
+      // Authorize the click before subtitle preparation can outlive activation.
+      if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
+      const preparation = await ipcRenderer.invoke(IpcChannels.CAST_PREPARE)
+      if (preparation.error) return preparation
+      try {
+        const payload = await preparePayload()
+        if (!payload) return { error: 'Cast start cancelled' }
+        return await ipcRenderer.invoke(IpcChannels.CAST_START, payload, preparation.preparationId)
+      } finally {
+        ipcRenderer.send(IpcChannels.CAST_CANCEL_PREPARATION, preparation.preparationId)
+      }
+    },
+    status: castId => ipcRenderer.invoke(IpcChannels.CAST_STATUS, castId),
+    control: (castId, action, value) => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.CAST_CONTROL, castId, action, value)
       : Promise.resolve({ error: 'Casting requires a user action' }),
-    stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId)
+    stop: castId => ipcRenderer.invoke(IpcChannels.CAST_STOP, castId)
   },
 
   /**

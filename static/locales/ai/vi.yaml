@@ -647,6 +647,7 @@ Settings:
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
+    Show Google Cast Button: "Hiện nút Google Cast"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1452,6 +1453,17 @@ Video:
       CopyAndDownvote: Sao chép và bỏ phiếu phản đối
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
+    Google Cast:
+      Allow Private Instance: "Cho phép phiên truyền này đọc nội dung đa phương tiện từ máy chủ Invidious riêng tư {instance}?"
+      Cast: "Truyền tới thiết bị Google Cast"
+      Connected: "Đang truyền tới {device}"
+      Rewind: "Lùi 10 giây"
+      Forward: "Tiến 10 giây"
+      Subtitles Off: "Tắt phụ đề"
+      Return: "Quay lại phát trên máy"
+      No Devices: "Không tìm thấy thiết bị Google Cast"
+      No Source: "Không có luồng tương thích với Google Cast"
+      Error: "Không thể truyền video"
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
@@ -2016,3 +2028,5 @@ Storage Startup Error:
   Title: "Không thể tải dữ liệu ứng dụng"
   Message: "Giải phóng bộ nhớ thiết bị rồi thử lại. Đồng bộ hóa bị tạm dừng cho đến khi dữ liệu của bạn được tải."
   Retry: "Thử lại"
+Native Permissions:
+  Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."

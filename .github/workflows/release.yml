@@ -83,6 +83,13 @@ jobs:
         node-version: ${{ matrix.node-version }}
         package-manager-cache: false
 
+    - name: Set up Go for the Cast sender
+      if: matrix.runtime != 'android'
+      uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+      with:
+        go-version-file: _scripts/cast-sender/go.mod
+        cache: false
+
     - name: Install pnpm
       uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       with:

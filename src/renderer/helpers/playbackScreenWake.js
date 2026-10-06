@@ -2,6 +2,7 @@ import { KeepAwake } from '@capacitor-community/keep-awake'
 
 export function createPlaybackScreenWake(plugin) {
   const videos = new Set()
+  const owners = new Set()
   let appActive = false
   let applied = null
   let pending = Promise.resolve()
@@ -10,7 +11,7 @@ export function createPlaybackScreenWake(plugin) {
     // Capacitor calls are asynchronous. Serialize them and read the latest
     // state so a delayed acquisition cannot outlive pause or backgrounding.
     pending = pending.then(async () => {
-      const awake = appActive && videos.size > 0
+      const awake = appActive && (videos.size > 0 || owners.size > 0)
       if (awake === applied) return
       if (awake) await plugin.keepAwake()
       else await plugin.allowSleep()
@@ -22,6 +23,15 @@ export function createPlaybackScreenWake(plugin) {
   }
 
   return {
+    acquire() {
+      const owner = Symbol('playback')
+      owners.add(owner)
+      sync()
+      return () => {
+        owners.delete(owner)
+        sync()
+      }
+    },
     setAppActive(active) {
       appActive = active
       sync()

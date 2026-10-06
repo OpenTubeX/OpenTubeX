@@ -6,7 +6,13 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
+    <!-- DLNA uses HTTP at runtime-discovered LAN IPs and loopback relay ports.
+         Network Security Config domain rules cannot match arbitrary LAN IP ranges,
+         so a static allowlist would break discovery on other networks. Native
+         control requests are pinned to SSDP responders, refuse redirects and do
+         not send app cookies; media relays accept only the selected renderer. -->
     <application
+        android:usesCleartextTraffic="true"
         android:name=".OpenTubeXApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,6 +25,11 @@
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
+
+        <service
+            android:name=".DlnaCastService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <service
             android:name=".AndroidMediaSessionService"
@@ -91,6 +102,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

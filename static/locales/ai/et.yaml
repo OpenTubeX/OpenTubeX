@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
+    Show Google Cast Button: "Näita Google Casti nuppu"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1425,6 +1426,17 @@ Video:
       CopyAndDownvote: Kopeeri ja hääleta vastu
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
+    Google Cast:
+      Allow Private Instance: "Kas lubada sellel edastusel lugeda meediat privaatsest Invidiousi instantsist {instance}?"
+      Cast: "Edasta Google Casti seadmesse"
+      Connected: "Edastamine seadmesse {device}"
+      Rewind: "10 sekundit tagasi"
+      Forward: "10 sekundit edasi"
+      Subtitles Off: "Lülita subtiitrid välja"
+      Return: "Naase kohalikule taasesitusele"
+      No Devices: "Google Casti seadmeid ei leitud"
+      No Source: "Google Casti jaoks pole ühilduvat voogu"
+      Error: "Video edastamine ebaõnnestus"
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"
@@ -1981,3 +1993,6 @@ Storage Startup Error:
   Retry: "Proovi uuesti"
 Search Bar:
   Use Suggestion: Kasuta soovitust
+
+Native Permissions:
+  Local Network: "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel."
