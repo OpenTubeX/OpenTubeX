@@ -121,6 +121,7 @@ export default {
     type: 'distribution',
     extendInfo: {
       NSLocalNetworkUsageDescription: 'OpenTubeX discovers and controls Cast devices on your local network.',
+      NSBonjourServices: ['_googlecast._tcp'],
       CFBundleURLTypes: [
         'opentubex'
       ],

@@ -1,11 +1,22 @@
 import assert from 'node:assert/strict'
-import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { ChromecastManager } from '../../src/main/chromecast.js'
 import { CAST_MEDIA, CastSender } from '../../src/main/castSender.js'
 import { EventEmitter } from 'node:events'
+
+test('macOS packaging declares every Bonjour service browsed by the Cast helper', async () => {
+  const { default: config } = await import('../../_scripts/ebuilder.config.mjs')
+  const helper = await readFile(new URL('../../_scripts/cast-sender/main.go', import.meta.url), 'utf8')
+  const services = [...helper.matchAll(/resolver\.Browse\(ctx, "([^"]+)"/g)].map(match => match[1])
+  assert.ok(services.length > 0, 'Must find the native discovery service')
+  assert.match(config.mac.extendInfo.NSLocalNetworkUsageDescription, /\S/)
+  for (const service of services) {
+    assert.ok(config.mac.extendInfo.NSBonjourServices?.includes(service), `Missing macOS Bonjour declaration for ${service}`)
+  }
+})
 
 for (const wait of [false, true]) {
   test(`a failed helper write rejects a ${wait ? 'waiting' : 'non-waiting'} send`, async t => {
