@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Precaricamenti simultanei"
     Ignore System Rotation Lock for Fullscreen: Ignora il blocco della rotazione del sistema per lo schermo intero
     Swipe Left or Right to Seek in Fullscreen: Scorri a sinistra o a destra per avanzare o riavvolgere a schermo intero
+    Show Google Cast Button: "Mostra pulsante Google Cast"
   Channel Settings:
     Channel Settings: Impostazioni dei canali
     Channel Settings Description: Ricorda separatamente per ogni canale le impostazioni scelte durante la visione e le riapplica quando guardi un altro video dello stesso canale.
@@ -1423,6 +1424,16 @@ Video:
       CopyAndDownvote: Copia e vota contro
       SubmitCategoryVote: Invia voto per la categoria
       CategoryVoteSuccess: Voto per la categoria inviato.
+    Google Cast:
+      Cast: "Trasmetti a un dispositivo Google Cast"
+      Connected: "Trasmissione a {device}"
+      Rewind: "Indietro di 10 secondi"
+      Forward: "Avanti di 10 secondi"
+      Subtitles Off: "Disattiva sottotitoli"
+      Return: "Torna alla riproduzione locale"
+      No Devices: "Nessun dispositivo Google Cast trovato"
+      No Source: "Nessun flusso compatibile con Google Cast"
+      Error: "Impossibile trasmettere il video"
   External Media:
     Dislikes: "Non mi piace | Non mi piace | Non mi piace"
     Reposts: "Repost | Repost | Repost"

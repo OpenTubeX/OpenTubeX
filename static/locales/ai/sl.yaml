@@ -854,6 +854,7 @@ Settings:
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
+    Show Google Cast Button: "Prikaži gumb Google Cast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1877,6 +1878,16 @@ Video:
       CopyAndDownvote: Kopiraj in glasuj proti
       SubmitCategoryVote: Pošlji glas za kategorijo
       CategoryVoteSuccess: Glas za kategorijo je poslan.
+    Google Cast:
+      Cast: "Predvajaj na napravi Google Cast"
+      Connected: "Predvajanje na {device}"
+      Rewind: "Nazaj za 10 sekund"
+      Forward: "Naprej za 10 sekund"
+      Subtitles Off: "Izklopi podnapise"
+      Return: "Vrni se na lokalno predvajanje"
+      No Devices: "Ni najdenih naprav Google Cast"
+      No Source: "Ni združljivega toka za Google Cast"
+      Error: "Videoposnetka ni bilo mogoče predvajati na napravi"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'

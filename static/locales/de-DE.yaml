@@ -952,6 +952,7 @@ Settings:
     Parallel Segment Loading: Paralleles Laden von Segmenten
     Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
     Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
+    Show Google Cast Button: "Google-Cast-Schaltfläche anzeigen"
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -2094,6 +2095,16 @@ Video:
       Zoom: Zoom
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
+    Google Cast:
+      Cast: "Auf ein Google-Cast-Gerät übertragen"
+      Connected: "Übertragung an {device}"
+      Rewind: "10 Sekunden zurück"
+      Forward: "10 Sekunden vor"
+      Subtitles Off: "Untertitel aus"
+      Return: "Zur lokalen Wiedergabe zurückkehren"
+      No Devices: "Keine Google-Cast-Geräte gefunden"
+      No Source: "Kein kompatibler Stream für Google Cast"
+      Error: "Das Video konnte nicht übertragen werden"
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
   Retry With Built-in Extraction: Erneut mit der integrierten Extraktion versuchen
   Retry With yt-dlp Extraction: Erneut mit der yt-dlp-Extraktion versuchen

@@ -669,6 +669,7 @@ Settings:
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
     Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
+    Show Google Cast Button: "نمایش دکمهٔ Google Cast"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1493,6 +1494,16 @@ Video:
       CopyAndDownvote: کپی و رأی منفی
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
+    Google Cast:
+      Cast: "پخش روی دستگاه Google Cast"
+      Connected: "در حال پخش روی {device}"
+      Rewind: "۱۰ ثانیه عقب"
+      Forward: "۱۰ ثانیه جلو"
+      Subtitles Off: "خاموش کردن زیرنویس"
+      Return: "بازگشت به پخش محلی"
+      No Devices: "هیچ دستگاه Google Cast پیدا نشد"
+      No Source: "جریان سازگاری برای Google Cast وجود ندارد"
+      Error: "پخش ویدیو در دستگاه ممکن نشد"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'

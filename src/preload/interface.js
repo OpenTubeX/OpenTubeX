@@ -382,6 +382,24 @@ export default {
     recover: (castId, payload) => ipcRenderer.invoke(IpcChannels.DLNA_RECOVER, castId, payload)
   },
 
+  chromecast: {
+    discover: () => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.CAST_DISCOVER)
+      : Promise.resolve([]),
+    start: async preparePayload => {
+      // Authorize the click before subtitle preparation can outlive activation.
+      if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
+      const payload = await preparePayload()
+      if (!payload) return { error: 'Cast start cancelled' }
+      return ipcRenderer.invoke(IpcChannels.CAST_START, payload)
+    },
+    status: castId => ipcRenderer.invoke(IpcChannels.CAST_STATUS, castId),
+    control: (castId, action, value) => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.CAST_CONTROL, castId, action, value)
+      : Promise.resolve({ error: 'Casting requires a user action' }),
+    stop: castId => ipcRenderer.invoke(IpcChannels.CAST_STOP, castId)
+  },
+
   /**
    * @param {(
    *   externalPlayer: string,

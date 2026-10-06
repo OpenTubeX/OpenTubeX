@@ -739,6 +739,7 @@ Settings:
     Concurrent Preloads: "Samstundes førehandslasting"
     Ignore System Rotation Lock for Fullscreen: Ignorer rotasjonslåsen i systemet for fullskjerm
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
+    Show Google Cast Button: "Vis Google Cast-knapp"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1696,6 +1697,16 @@ Video:
       CopyAndDownvote: Kopier og røyst ned
       SubmitCategoryVote: Send kategorirøyst
       CategoryVoteSuccess: Kategorirøyst sendt.
+    Google Cast:
+      Cast: "Cast til ei Google Cast-eining"
+      Connected: "Castar til {device}"
+      Rewind: "Spol 10 sekund tilbake"
+      Forward: "Spol 10 sekund fram"
+      Subtitles Off: "Slå av undertekstar"
+      Return: "Gå tilbake til lokal avspeling"
+      No Devices: "Fann ingen Google Cast-einingar"
+      No Source: "Ingen kompatibel straum for Google Cast"
+      Error: "Kunne ikkje strøyme videoen"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

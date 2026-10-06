@@ -654,6 +654,7 @@ Settings:
     Concurrent Preloads: "Pré-carregamentos simultâneos"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueio de rotação do sistema para ecrã inteiro
     Swipe Left or Right to Seek in Fullscreen: Deslizar para a esquerda ou direita para avançar ou recuar em ecrã inteiro
+    Show Google Cast Button: "Mostrar botão Google Cast"
   Channel Settings:
     Channel Settings: Definições dos canais
     Channel Settings Description: Memorizar individualmente para cada canal as definições escolhidas durante a visualização, para que sejam aplicadas quando voltar a ver um dos seus vídeos.
@@ -1463,6 +1464,16 @@ Video:
       CopyAndDownvote: Copiar e votar contra
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
+    Google Cast:
+      Cast: "Transmitir para um dispositivo Google Cast"
+      Connected: "A transmitir para {device}"
+      Rewind: "Recuar 10 segundos"
+      Forward: "Avançar 10 segundos"
+      Subtitles Off: "Desativar legendas"
+      Return: "Voltar à reprodução local"
+      No Devices: "Nenhum dispositivo Google Cast encontrado"
+      No Source: "Nenhum fluxo compatível com Google Cast"
+      Error: "Não foi possível transmitir o vídeo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tempo restante do anúncio inicial: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tempo restante de espera do SABR: {remindingTimeSeconds}s'

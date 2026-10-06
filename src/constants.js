@@ -166,6 +166,11 @@ const IpcChannels = {
   DLNA_STOP: 'dlna-stop',
   DLNA_HAS_FAILED: 'dlna-has-failed',
   DLNA_RECOVER: 'dlna-recover',
+  CAST_DISCOVER: 'cast-discover',
+  CAST_START: 'cast-start',
+  CAST_STATUS: 'cast-status',
+  CAST_CONTROL: 'cast-control',
+  CAST_STOP: 'cast-stop',
 
   YT_DLP_DOWNLOAD: 'yt-dlp-download',
   YT_DLP_CANCEL_DOWNLOAD: 'yt-dlp-cancel-download',

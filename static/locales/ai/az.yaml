@@ -641,6 +641,7 @@ Settings:
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
     Ignore System Rotation Lock for Fullscreen: Tam ekran üçün sistemin fırlanma kilidini nəzərə alma
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda irəli və ya geri keçmək üçün sola və ya sağa sürüşdürün
+    Show Google Cast Button: "Google Cast düyməsini göstər"
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1435,6 +1436,16 @@ Video:
       CopyAndDownvote: Kopyala və mənfi səs ver
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
+    Google Cast:
+      Cast: "Google Cast cihazına yayımla"
+      Connected: "{device} cihazına yayımlanır"
+      Rewind: "10 saniyə geri"
+      Forward: "10 saniyə irəli"
+      Subtitles Off: "Altyazıları söndür"
+      Return: "Yerli oxutmaya qayıt"
+      No Devices: "Google Cast cihazları tapılmadı"
+      No Source: "Google Cast üçün uyğun yayım yoxdur"
+      Error: "Videonu yayımlamaq mümkün olmadı"
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"

@@ -284,6 +284,7 @@ Settings:
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
+    Show Google Cast Button: "Pokaż przycisk Google Cast"
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
@@ -770,6 +771,16 @@ Video:
       CopyAndDownvote: Kopiuj i zagłosuj przeciw
       SubmitCategoryVote: Wyślij głos na kategorię
       CategoryVoteSuccess: Głos na kategorię został wysłany.
+    Google Cast:
+      Cast: "Przesyłaj na urządzenie Google Cast"
+      Connected: "Przesyłanie na {device}"
+      Rewind: "Cofnij o 10 sekund"
+      Forward: "Przewiń o 10 sekund"
+      Subtitles Off: "Wyłącz napisy"
+      Return: "Wróć do lokalnego odtwarzania"
+      No Devices: "Nie znaleziono urządzeń Google Cast"
+      No Source: "Brak zgodnego strumienia dla Google Cast"
+      Error: "Nie udało się przesłać filmu"
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"

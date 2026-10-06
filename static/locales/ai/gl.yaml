@@ -647,6 +647,7 @@ Settings:
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueo de rotación do sistema para pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Deslizar á esquerda ou á dereita para avanzar ou retroceder a pantalla completa
+    Show Google Cast Button: "Amosar o botón de Google Cast"
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
@@ -1464,6 +1465,16 @@ Video:
       CopyAndDownvote: Copiar e votar en contra
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
+    Google Cast:
+      Cast: "Transmitir a un dispositivo Google Cast"
+      Connected: "Transmitindo a {device}"
+      Rewind: "Retroceder 10 segundos"
+      Forward: "Avanzar 10 segundos"
+      Subtitles Off: "Desactivar os subtítulos"
+      Return: "Volver á reprodución local"
+      No Devices: "Non se atoparon dispositivos Google Cast"
+      No Source: "Non hai un fluxo compatible con Google Cast"
+      Error: "Non se puido transmitir o vídeo"
   Station: Estación
   Playlist:
     Unavailable videos are hidden: 1 vídeo non dispoñible está oculto | {count} vídeos non dispoñibles están ocultos

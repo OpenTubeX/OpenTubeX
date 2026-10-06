@@ -1,5 +1,9 @@
 import { isYouTubeSubtitleUrl } from '../../../youtubeSubtitle.js'
 
+export function shouldUseSubtitleCookies(url, getters) {
+  return Boolean((getters.getYtDlpPlaybackAlwaysUseCookies || getters.getYtDlpSubtitleUseCookies) && isYouTubeSubtitleUrl(url))
+}
+
 /**
  * @param {string} url
  * @param {Record<string, unknown>} getters
@@ -7,8 +11,7 @@ import { isYouTubeSubtitleUrl } from '../../../youtubeSubtitle.js'
  * @returns {Promise<string>}
  */
 export async function getSubtitleRequestUrl(url, getters, bridge) {
-  if (!(getters.getYtDlpPlaybackAlwaysUseCookies || getters.getYtDlpSubtitleUseCookies) ||
-    !isYouTubeSubtitleUrl(url)) {
+  if (!shouldUseSubtitleCookies(url, getters)) {
     return url
   }
 

@@ -814,6 +814,7 @@ Settings:
     Concurrent Preloads: "동시 미리 로드 수"
     Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
     Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
+    Show Google Cast Button: "Google Cast 버튼 표시"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1766,6 +1767,16 @@ Video:
       CopyAndDownvote: 복사 및 반대 투표
       SubmitCategoryVote: 카테고리 투표 제출
       CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
+    Google Cast:
+      Cast: "Google Cast 기기로 전송"
+      Connected: "{device}(으)로 전송 중"
+      Rewind: "10초 뒤로"
+      Forward: "10초 앞으로"
+      Subtitles Off: "자막 끄기"
+      Return: "로컬 재생으로 돌아가기"
+      No Devices: "Google Cast 기기를 찾을 수 없습니다"
+      No Source: "Google Cast와 호환되는 스트림이 없습니다"
+      Error: "동영상을 전송할 수 없습니다"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'

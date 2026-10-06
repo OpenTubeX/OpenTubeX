@@ -641,6 +641,7 @@ Settings:
     Concurrent Preloads: "Samtidiga förinläsningar"
     Ignore System Rotation Lock for Fullscreen: Ignorera systemets rotationslås för helskärm
     Swipe Left or Right to Seek in Fullscreen: Svep åt vänster eller höger för att spola i helskärm
+    Show Google Cast Button: "Visa Google Cast-knapp"
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -1433,6 +1434,16 @@ Video:
       CopyAndDownvote: Kopiera och rösta ned
       SubmitCategoryVote: Skicka kategoriröst
       CategoryVoteSuccess: Kategoriröst skickad.
+    Google Cast:
+      Cast: "Casta till en Google Cast-enhet"
+      Connected: "Castar till {device}"
+      Rewind: "Spola tillbaka 10 sekunder"
+      Forward: "Spola framåt 10 sekunder"
+      Subtitles Off: "Stäng av undertexter"
+      Return: "Återgå till lokal uppspelning"
+      No Devices: "Inga Google Cast-enheter hittades"
+      No Source: "Ingen kompatibel ström för Google Cast"
+      Error: "Det gick inte att casta videon"
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

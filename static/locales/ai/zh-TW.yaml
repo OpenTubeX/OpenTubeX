@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
     Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
+    Show Google Cast Button: "顯示 Google Cast 按鈕"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1425,6 +1426,16 @@ Video:
       CopyAndDownvote: 複製並投反對票
       SubmitCategoryVote: 提交類別投票
       CategoryVoteSuccess: 類別投票已提交。
+    Google Cast:
+      Cast: "投放到 Google Cast 裝置"
+      Connected: "正在投放到 {device}"
+      Rewind: "倒退 10 秒"
+      Forward: "快進 10 秒"
+      Subtitles Off: "關閉字幕"
+      Return: "返回本機播放"
+      No Devices: "找不到 Google Cast 裝置"
+      No Source: "沒有相容 Google Cast 的串流"
+      Error: "無法投放影片"
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

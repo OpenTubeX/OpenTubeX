@@ -641,6 +641,7 @@ Settings:
     Concurrent Preloads: "Едновременни предварителни зареждания"
     Ignore System Rotation Lock for Fullscreen: Игнориране на системното заключване на завъртането за цял екран
     Swipe Left or Right to Seek in Fullscreen: Плъзнете наляво или надясно за превъртане на цял екран
+    Show Google Cast Button: "Показване на бутона Google Cast"
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1436,6 +1437,16 @@ Video:
       CopyAndDownvote: Копиране и отрицателен вот
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
+    Google Cast:
+      Cast: "Предаване към устройство Google Cast"
+      Connected: "Предаване към {device}"
+      Rewind: "Назад с 10 секунди"
+      Forward: "Напред с 10 секунди"
+      Subtitles Off: "Изключване на субтитрите"
+      Return: "Връщане към локално възпроизвеждане"
+      No Devices: "Няма намерени устройства Google Cast"
+      No Source: "Няма съвместим поток за Google Cast"
+      Error: "Видеото не можа да се предаде"
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
+    Show Google Cast Button: "Zobraziť tlačidlo Google Cast"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1426,6 +1427,16 @@ Video:
       CopyAndDownvote: Skopírovať a hlasovať proti
       SubmitCategoryVote: Odoslať hlas za kategóriu
       CategoryVoteSuccess: Hlas za kategóriu bol odoslaný.
+    Google Cast:
+      Cast: "Odoslať do zariadenia Google Cast"
+      Connected: "Odosielanie do {device}"
+      Rewind: "Späť o 10 sekúnd"
+      Forward: "Vpred o 10 sekúnd"
+      Subtitles Off: "Vypnúť titulky"
+      Return: "Vrátiť sa k miestnemu prehrávaniu"
+      No Devices: "Nenašli sa žiadne zariadenia Google Cast"
+      No Source: "Žiadny kompatibilný stream pre Google Cast"
+      Error: "Video sa nepodarilo preniesť"
   External Media:
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"

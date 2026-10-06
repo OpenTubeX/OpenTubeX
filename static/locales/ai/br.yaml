@@ -639,6 +639,7 @@ Settings:
     Concurrent Preloads: "Rakgargadennoù war un dro"
     Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
+    Show Google Cast Button: "Diskouez ar bouton Google Cast"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1432,6 +1433,16 @@ Video:
       CopyAndDownvote: Eilañ ha votiñ a-enep
       SubmitCategoryVote: Kas ar vot evit ar rummad
       CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
+    Google Cast:
+      Cast: "Kas d’un trevnad Google Cast"
+      Connected: "O kas da {device}"
+      Rewind: "Distreiñ 10 eilenn"
+      Forward: "Mont war-raok 10 eilenn"
+      Subtitles Off: "Istitloù diweredekaet"
+      Return: "Distreiñ d’al lenn lec’hel"
+      No Devices: "N’eus trevnad Google Cast ebet kavet"
+      No Source: "N’eus gwazh kenglotus ebet evit Google Cast"
+      Error: "N’eo ket bet gallet skignañ ar video"
   External Media:
     Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
     Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"

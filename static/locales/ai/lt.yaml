@@ -839,6 +839,7 @@ Settings:
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
     Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
     Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
+    Show Google Cast Button: "Rodyti Google Cast mygtuką"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1801,6 +1802,16 @@ Video:
       CopyAndDownvote: Kopijuoti ir balsuoti prieš
       SubmitCategoryVote: Pateikti balsą už kategoriją
       CategoryVoteSuccess: Balsas už kategoriją pateiktas.
+    Google Cast:
+      Cast: "Perduoti į Google Cast įrenginį"
+      Connected: "Perduodama į {device}"
+      Rewind: "Atgal 10 sekundžių"
+      Forward: "Pirmyn 10 sekundžių"
+      Subtitles Off: "Išjungti subtitrus"
+      Return: "Grįžti į vietinį atkūrimą"
+      No Devices: "Google Cast įrenginių nerasta"
+      No Source: "Nėra su Google Cast suderinamo srauto"
+      Error: "Nepavyko transliuoti vaizdo įrašo"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

@@ -661,6 +661,7 @@ Settings:
     Concurrent Preloads: "Истовремена предучитавања"
     Ignore System Rotation Lock for Fullscreen: Занемари системско закључавање ротације за цео екран
     Swipe Left or Right to Seek in Fullscreen: Превуците налево или надесно за премотавање преко целог екрана
+    Show Google Cast Button: "Прикажи дугме Google Cast"
   Channel Settings:
     Channel Settings: Подешавања канала
     Channel Settings Description: За сваки канал засебно запамти подешавања која изабереш током гледања, како би поново била примењена када следећи пут гледаш неки његов видео-снимак.
@@ -1481,6 +1482,16 @@ Video:
       CopyAndDownvote: Копирај и гласај против
       SubmitCategoryVote: Пошаљи глас за категорију
       CategoryVoteSuccess: Глас за категорију је послат.
+    Google Cast:
+      Cast: "Емитуј на Google Cast уређај"
+      Connected: "Емитовање на {device}"
+      Rewind: "Назад 10 секунди"
+      Forward: "Напред 10 секунди"
+      Subtitles Off: "Искључи титлове"
+      Return: "Врати се на локалну репродукцију"
+      No Devices: "Нису пронађени Google Cast уређаји"
+      No Source: "Нема компатибилног тока за Google Cast"
+      Error: "Видео није могуће емитовати"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
