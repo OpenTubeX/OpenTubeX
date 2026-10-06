@@ -5,7 +5,7 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, revokeResponseLost = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
@@ -43,14 +43,16 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     expires_at: now + 86400000,
     encrypted_device_info: deviceInfo,
   }]
-  if (otherLogin) {
+  if (otherLogin || revokeResponseLost) {
+    const loginDeviceId = otherLogin ? oldDeviceId : currentDeviceId
     accountSessions.push({
       ...accountSessions[0],
       id: 'current-login',
+      device_id: loginDeviceId,
       current: !otherLoginExpires,
       encrypted_device_info: await encryptSyncServerDeviceInfo({
         name: 'Current phone', platform: 'android', architecture: 'arm64', release: '15',
-      }, key, oldDeviceId),
+      }, key, loginDeviceId),
     })
   }
   const requests = []
@@ -80,6 +82,11 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       else expect(document.devices[oldDeviceId]).toBeUndefined()
       if (revokeFailsOnce && revokeAttempts++ === 0) {
         return route.fulfill({ status: 503, body: 'Fixture revocation failure' })
+      }
+      if (revokeResponseLost) {
+        if (revoked) return route.fulfill({ status: 404 })
+        revoked = true
+        return route.fulfill({ status: 503, body: 'Fixture response lost after revocation' })
       }
       revoked = true
       return route.fulfill({ status: 204 })
@@ -165,10 +172,10 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       if (capture) await capture('device-removal-reconfirmation', prompt)
     }
     await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
-    if (revokeFailsOnce) {
+    if (revokeFailsOnce || revokeResponseLost) {
       await expect(prompt.getByRole('alert')).toHaveText('Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access.')
       await expect(prompt.getByRole('button', { name: 'Revoke session', exact: true })).toBeEnabled()
-      expect(revoked).toBe(false)
+      expect(revoked).toBe(revokeResponseLost)
       expect(document.devices[oldDeviceId]).toBeUndefined()
       expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
       if (capture) await capture('device-removal-partial-failure', prompt)
@@ -176,6 +183,12 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     }
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
+    if (revokeResponseLost) {
+      expect(requests.filter(request => request === 'DELETE /v1/account/sessions/old-login')).toHaveLength(1)
+      expect(requests.filter(request => request === 'PUT /v1/encrypted_sync/sessionsV2')).toHaveLength(1)
+      await expect(sync.locator('.sessionCard', { hasText: 'Current device' })).toBeVisible()
+      if (capture) await capture('device-removal-completed', sync.locator('.accountManagement'))
+    }
     expect(revoked).toBe(true)
     if (preserveTabs) {
       expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs'])

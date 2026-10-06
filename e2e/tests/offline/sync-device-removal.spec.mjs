@@ -14,3 +14,7 @@ test('device removal reconfirms tab deletion when another login expires', async 
 test('device removal reports partial completion when revocation fails and can be retried', async ({ page }) => {
   await verifySyncDeviceRemoval(page, { revokeFailsOnce: true })
 })
+
+test('device removal finishes after a lost revocation response without repeating deletion', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { revokeResponseLost: true })
+})

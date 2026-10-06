@@ -2,10 +2,11 @@ import { test } from 'node:test'
 import { chromium } from '@playwright/test'
 import { verifySyncDeviceRemoval } from '../../e2e/helpers/sync-device-removal.mjs'
 
-for (const options of [{ otherLogin: false }, { otherLogin: true }, { otherLogin: true, otherLoginExpires: true }, { revokeFailsOnce: true }]) {
+for (const options of [{ otherLogin: false }, { otherLogin: true }, { otherLogin: true, otherLoginExpires: true }, { revokeFailsOnce: true }, { revokeResponseLost: true }]) {
   let behavior = `${options.otherLogin ? 'preserves tabs used by another login' : 'cleans up synced tabs'} and orphaned sets can be deleted`
   if (options.otherLoginExpires) behavior = 'reconfirms tab deletion when another login expires'
   if (options.revokeFailsOnce) behavior = 'reports partial completion when revocation fails and can be retried'
+  if (options.revokeResponseLost) behavior = 'finishes after a lost revocation response without repeating deletion'
   test(`Android device removal ${behavior}`, {
     skip: !process.env.ANDROID_CDP_URL,
   }, async () => {

@@ -14,7 +14,7 @@ const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false, accountResponse, revokeFailsOnce = false } = {}) {
+async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -64,16 +64,25 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
   const revokeDeletesTabs = { value: false }
   const promptError = { value: '' }
   const emitted = []
+  let reloads = 0
   const componentContext = vm.createContext({
     sessionToRevoke: prompt, promptError, actionBusy: { value: false }, sessions, revokeDeletesTabs,
     client: () => ({
       token: 'token',
       async getAccountSessions() {
         if (accountResponse !== undefined) return accountResponse
-        return { sessions: sessions.value.filter(session => !otherLoginExpires || session.id === 'login-id') }
+        return { sessions: sessions.value.filter(session => (
+          (!otherLoginExpires || session.id === 'login-id') && (!revoked || session.id !== 'login-id')
+        )) }
       },
       async revokeAccountSession() {
-        if (revokeFailsOnce && revokeAttempts++ === 0) {
+        revokeAttempts++
+        if (revokeResponseLost) {
+          if (revoked) throw new Error('Not found')
+          revoked = true
+          throw new Error('Response lost')
+        }
+        if (revokeFailsOnce && revokeAttempts === 1) {
           remote.devices.laptop.sessions.push(tabSet('new-laptop-tabs'))
           throw new Error('Offline')
         }
@@ -82,16 +91,40 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
       cancel() {},
     }),
     store: { dispatch: context.dispatch }, showToast() {}, t: key => key,
-    emit: event => emitted.push(event), loadSessions: async () => {},
+    emit: event => emitted.push(event), loadSessions: async () => { reloads++ },
     handleRequestError: async (error, token, target) => { target.value = error.message },
   })
   vm.runInContext(revokeSource, componentContext)
   componentContext.openRevokePrompt(prompt.value)
   return {
     revoke: () => componentContext.revokeSession(),
-    state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value }),
+    state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value, revokeAttempts, reloads }),
   }
 }
+
+test('finishes revocation after a lost response without repeating deletion requests', async () => {
+  const app = await fixture({ revokeResponseLost: true })
+  await app.revoke()
+  assert.equal(app.state().revoked, true)
+  assert.equal(app.state().error, 'Settings.Sync Settings.Revoke Session Partial Failure')
+  assert.equal(app.state().prompt.device_id, 'old-phone')
+  assert.equal(app.state().puts, 1)
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().puts, 1)
+  assert.equal(app.state().revokeAttempts, 1)
+  assert.equal(app.state().reloads, 1)
+})
+
+test('does not delete tabs or send a DELETE when the refreshed login is already absent', async () => {
+  const app = await fixture({ accountResponse: { sessions: [] } })
+  await app.revoke()
+  assert.equal(app.state().prompt, null)
+  assert.equal(app.state().puts, 0)
+  assert.equal(app.state().revokeAttempts, 0)
+  assert.equal(app.state().reloads, 1)
+  assert.deepEqual(app.state().remote.devices['old-phone'].sessions, [tabSet('old-tabs'), tabSet('older-tabs')])
+})
 
 for (const [label, accountResponse] of [['null', null], ['missing sessions', {}], ['non-array sessions', { sessions: {} }]]) {
   test(`keeps revocation retryable with a translated error for a ${label} response`, async () => {

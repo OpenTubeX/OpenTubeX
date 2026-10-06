@@ -497,7 +497,8 @@ async function revokeSession() {
     const response = await requestClient.getAccountSessions()
     if (!Array.isArray(response?.sessions)) throw new Error(t('Settings.Sync Settings.Account Management Failed'))
     const accountSessions = response.sessions
-    const deletesTabs = !hasOtherDeviceLogins(session, accountSessions)
+    const sessionActive = accountSessions.some(other => other.id === session.id)
+    const deletesTabs = sessionActive && !hasOtherDeviceLogins(session, accountSessions)
     if (deletesTabs && !revokeDeletesTabs.value) {
       revokeDeletesTabs.value = true
       return
@@ -508,7 +509,7 @@ async function revokeSession() {
       if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
       tabsDeleted = true
     }
-    await requestClient.revokeAccountSession(session.id)
+    if (sessionActive) await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
     showToast({
       message: t('Settings.Sync Settings.Session Revoked'),
