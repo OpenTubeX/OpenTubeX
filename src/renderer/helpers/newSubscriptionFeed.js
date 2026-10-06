@@ -79,7 +79,9 @@ export function getNewSubscriptionFeedEntries({
         return
       }
 
-      getNewSubscriptionEntriesSnapshot(cacheEntry?.[entriesKey] ?? []).forEach(entry => {
+      const source = cacheEntry?.[entriesKey] ?? []
+      const newEntries = getNewSubscriptionEntriesSnapshot(source)
+      newEntries.forEach(entry => {
         if (!isMembersOnlySubscriptionVideoVisible(
           entry,
           subscription,
@@ -106,7 +108,7 @@ export function getNewSubscriptionFeedEntries({
   })
 
   let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
-    return entries[category].map(entry => ({ category, entry }))
+    return entries[category].map(entry => ({ category, entry, timestamp: entryTimestamp(entry) }))
   })
 
   mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
@@ -115,7 +117,7 @@ export function getNewSubscriptionFeedEntries({
     forbiddenTitles,
   }))
 
-  mediaEntries.sort((a, b) => entryTimestamp(b.entry) - entryTimestamp(a.entry))
+  mediaEntries.sort((a, b) => b.timestamp - a.timestamp)
 
   const hasPerChannelLimit = [...subscriptionsById.values()].some(subscription => (
     Number.isInteger(subscription.dailyVideoLimit) && subscription.dailyVideoLimit > 0

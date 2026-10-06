@@ -2,7 +2,7 @@
   <FtSettingsSection
     :title="t('Settings.Download Settings.Download Settings')"
   >
-    <FtFlexBox>
+    <FtFlexBox class="downloadEnable">
       <FtToggleSwitch
         :label="t('Settings.Download Settings.Enable Downloads')"
         :default-value="enableDownloads"
@@ -28,7 +28,10 @@
       class="downloadPathInputs settingsFlexStart460px"
     >
       <FtInput
-        :placeholder="t('Settings.Download Settings.Download Folder')"
+        :icon="['fas', 'folder-open']"
+        :label="t('Settings.Download Settings.Download Folder')"
+        placeholder="/path/to/downloads"
+        :supporting-text="t('Form Inputs.Download Folder Hint')"
         :show-action-button="true"
         :action-button-label="t('Settings.Download Settings.Choose Download Folder')"
         :allow-action-button-when-empty="true"
@@ -41,7 +44,9 @@
         @click="chooseDownloadFolder"
       />
       <FtInput
-        :placeholder="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
+        :icon="['fas', 'terminal']"
+        :label="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
+        :placeholder="t('Form Inputs.Global Arguments Hint')"
         :show-action-button="false"
         :show-label="true"
         :value="ytDlpDownloadCustomArgs"
@@ -64,7 +69,9 @@
       />
       <FtInput
         input-type="number"
-        :placeholder="t('Settings.Download Settings.Bandwidth Limit')"
+        :icon="['fas', 'gauge-high']"
+        :label="t('Settings.Download Settings.Bandwidth Limit')"
+        :placeholder="t('Form Inputs.Unlimited Hint')"
         :show-action-button="false"
         :show-label="true"
         :value="ytDlpDownloadBandwidthLimit"
@@ -154,11 +161,15 @@ async function chooseDownloadFolder() {
 </script>
 
 <style scoped>
+.downloadEnable :deep(.switch-ctn.compact) {
+  margin-block: var(--settings-control-margin);
+}
+
 .downloadActions {
   align-items: stretch;
   gap: 10px;
   justify-content: center;
-  margin-block-end: 20px;
+  margin-block: var(--settings-control-margin);
 }
 
 .downloadActions :deep(.btn) {
@@ -177,33 +188,18 @@ async function chooseDownloadFolder() {
 .downloadPathInputs :deep(.ft-input-component),
 .downloadQueueInputs > * {
   inline-size: 340px;
+  min-inline-size: 0;
   max-inline-size: 100%;
 }
 
 .downloadQueueInputs {
   align-items: flex-end;
   column-gap: 12px;
-  margin-block-start: 16px;
 }
 
-.downloadQueueInputs :deep(.ft-input-component) {
-  margin-block-start: 30px;
-}
-
-.downloadQueueInputs :deep(.selectLabel) {
-  position: absolute;
-  inset-block-start: -20px;
-  inset-inline-start: 0;
-  font-size: 14px;
-  line-height: 1;
-}
-
-.downloadQueueInputs :deep(.select.containsTooltip) {
-  margin-inline-end: 0;
-}
-
-.downloadQueueInputs :deep(.ft-input) {
-  margin-block-end: 0;
+.downloadQueueInputs :deep(.select) {
+  inline-size: calc(340px + var(--select-indicator-space));
+  margin-inline-end: calc(70px - var(--select-indicator-space));
 }
 
 </style>

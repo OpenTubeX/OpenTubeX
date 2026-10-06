@@ -110,13 +110,18 @@
           @click="showCollaboratorsPrompt = true"
         >
           <span class="collaboratorSummaryThumbnails">
-            <FtRetryImage
+            <span
               v-for="collaborator in channelCollaborators"
               :key="collaborator.id"
-              :src="collaborator.thumbnail"
               class="channelThumbnail collaboratorThumbnail"
-              alt=""
-            />
+            >
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
+                :src="collaborator.thumbnail"
+                class="collaboratorThumbnailImage"
+                alt=""
+              />
+            </span>
           </span>
           <span
             class="channelName collaboratorSummaryName"
@@ -137,6 +142,7 @@
               @auxclick="handleChannelLinkClick"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="channelThumbnail"
                 :class="enableChannelLinks ? '' : 'initialCursor'"
                 class="channelThumbnail"

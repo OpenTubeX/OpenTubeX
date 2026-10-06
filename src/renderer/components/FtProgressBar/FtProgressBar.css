@@ -37,7 +37,7 @@
 
 @media only screen and (width <= 680px) {
   .progressBar {
-    inset-block-end: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)));
+    inset-block-end: var(--mobile-nav-height);
     overflow: hidden;
     box-shadow: none;
   }

@@ -263,6 +263,11 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Enable Tabs: "Gweredekaat an ivinelloù"
+    Thumbnail Swipe Gestures:
+      Left: Riklañ a-gleiz war ar skeudennigoù
+      Right: Riklañ a-zehou war ar skeudennigoù
+      Description: Riklit a-blaen war skeudennig ur video ha laoskit evit seveniñ an ober dibabet.
     Data Saver Thumbnails: "Skeudennoù bihan evit espern roadennoù"
     Use tray icon: "Implijout un arlun er maez reizhiad"
     Close to system tray: "Serriñ er maez reizhiad"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Riklañ evit freskaat
     Blur Thumbnails: Lakaat ar skeudennoùigoù da vezañ dispis
     Navigation:
-      Show Active Subscriptions: Diskouez ar c’houmanantoù oberiant
+      Always Show Navigation Bar: Diskouez ar varrenn verdeiñ atav pa vez en traoñ
+      Compact Tab Labels: Barrenn verdeiñ gompakt pa vez en traoñ
+      Show Active Subscriptions: Diskouez ar c’houmanantoù oberiant er varrenn gostez
       Navigation: Merdeiñ
       Customize Navigation: Personelaat ar merdeiñ
       Add Item: Ouzhpennañ un elfenn
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Compact Mobile Mini Player: "Lenner bihan hezoug stank"
     Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
     Frosted Glass Player UI: "Etrefas al lenner gant efed gwer skornet"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Sklaer"
-      OpenTubeX Dark: "OpenTubeX Teñval"
+      Ocean Light: "Ocean Sklaer"
+      Ocean Dark: "Ocean Teñval"
       Custom: "Personelaet"
     Light Theme: "Neuz sklaer"
     Dark Theme: "Neuz teñval"
@@ -621,6 +629,8 @@ Settings:
     Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
     Concurrent Preloads: "Rakgargadennoù war un dro"
+    Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
+    Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -657,9 +667,9 @@ Settings:
     Update Managed Tools: "Hizivaat"
     Managed Tools Download Error Template: "N'eus ket bet gallet pellgargañ an ostilhoù meret: {errors}"
     Download Folder: "Teuliad pellgargañ"
-    Global Additional yt-dlp Arguments: "Arventennoù ouzhpenn hollek evit yt-dlp"
+    Global Additional yt-dlp Arguments: Arventennoù ouzhpenn yt-dlp
     Concurrent Downloads: "Pellgargadennoù war un dro"
-    Bandwidth Limit: "Bevenn ledander-bann (KiB/s, 0 evit hep bevenn)"
+    Bandwidth Limit: Bevenn ledander-bann (KiB/s)
     Choose Download Folder: "Dibab un teuliad pellgargañ"
     Download Templates: "Patromoù pellgargañ"
     Manage Download Templates: "Merañ ar patromoù pellgargañ ({templateCount})"
@@ -732,8 +742,8 @@ Settings:
       Automatic: "Hizivaat ent emgefreek"
       Ask: "Goulenn a-raok hizivaat"
       Manual: "Hizivaat gant an dorn hepken"
-    yt-dlp Executable Path: "Hent erounezadus yt-dlp"
-    FFmpeg Executable Path: "Hent erounezadus FFmpeg"
+    yt-dlp Executable Path: Restr erounezadus yt-dlp
+    FFmpeg Executable Path: Restr erounezadus FFmpeg
     Restricted Playback Authentication: "Toupinoù yt-dlp"
     Cookie Source: "Tarzh an toupinoù"
     Cookie Sources:
@@ -965,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."
     Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
-    Server URL: "URL ar servijer"
+    Server URL: URL ar servijer goubredañ
     Checking Server: "O wiriañ ar servijer goubredañ…"
     Server Unavailable: "N'eus ket bet gallet kennaskañ ouzh ar servijer goubredañ-mañ. Gwiriit an URL ha klaskit en-dro."
     Username: "Anv implijer"
@@ -1055,7 +1065,7 @@ Settings:
     Open All Tabs Confirmation: "Digeriñ an holl ivinelloù?"
     Server Update Required: "Hizivait ar servijer-mañ evit ma vo skoret ar c’henamzeriañ sifret en amzer wir."
   Proxy Settings:
-    IP Block Recovery Script Path: "Hent ar skript adtapout goude ur stankadur IP"
+    IP Block Recovery Script Path: Skript adtapout goude ur stankadur IP
     Select IP Block Recovery Script File: "Dibab restr ar skript adtapout goude ur stankadur IP"
     Running IP block recovery script: "Oc'h erounit ar skript adtapout goude ur stankadur IP"
     IP block recovery script failed: "C'hwitet eo ar skript adtapout goude ur stankadur IP (kod ermaeziañ: {exitCode})"
@@ -1064,7 +1074,7 @@ Settings:
     Failed to select IP block recovery script: "N'eus ket bet gallet dibab ar skript adtapout goude ur stankadur IP"
   SponsorBlock Settings:
     Enable SponsorBlock Submission: "Gweredekaat ar c'hasadennoù da SponsorBlock"
-    SponsorBlock Private User ID (optional): "Naoudi implijer prevez SponsorBlock (diret)"
+    SponsorBlock Private User ID (optional): ID prevez an implijer (diret)
     SponsorBlock Private User ID Tooltip: "Pegit an naoudi implijer prevez SponsorBlock eus askouezh ar merdeer. Laoskit goullo evit implijout un naoudi krouet gant an arload."
     Generated SponsorBlock User ID: "Naoudi implijer SponsorBlock krouet"
     Generated SponsorBlock User ID Tooltip: "Gallout a reer implijout an naoudi implijer SponsorBlock krouet gant an arload en askouezh ar merdeer pe pa vez implijet an arload war un urzhiataer all."
@@ -1076,7 +1086,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: "Gweredekaat Return YouTube Dislike"
-    Return YouTube Dislike Url: "URL API Return YouTube Dislike (https://ryd-proxy.kavin.rocks dre ziouer)"
+    Return YouTube Dislike Url: URL an API
   Password Dialog:
     Incorrect Password: "Ger-tremen direizh"
     Unlock: "Dibrennañ"
@@ -1117,6 +1127,21 @@ About:
   Matrix: Matrix
   Email: "Postel"
 Profile:
+  Customization: Personelaat
+  Manage Profile Subscriptions: Merañ koumanantoù ar profil
+  Icon Names:
+    Person: Den
+    People: Tud
+    Headphones: Selaouelloù
+    Gaming: Cʼhoarioù
+    Film: Film
+    Art: Arz
+    Science: Skiant
+    Globe: Boul douar
+    Heart: Kalon
+    Sun: Heol
+    Moon: Loar
+    Trophy: Trofell
   Profile Icon: "Arlun ar profil"
   Choose an Emoji: "Dibab un emoji"
   Custom Emoji: "Emoji personelaet"
@@ -1308,12 +1333,16 @@ Video:
     Hide: "Kuzhat"
     Show: "Diskouez"
     Scroll Mini Player:
+      Collapse Controls: "Plegañ ar reolerezhioù"
+      Expand Controls: "Astenn ar reolerezhioù"
       Back to Top: "Distreiñ e penn ar bajenn"
       Return to Video Tab: "Distreiñ da ivinell ar video"
       Hide: "Kuzhat al lenner bihan"
       Play: "Lenn"
       Pause: "Ehan"
       Drag Handle: "Dilec'hiañ al lenner bihan"
+      Rewind 10 seconds: Mont 10 eilenn war-gil
+      Forward 10 seconds: Mont 10 eilenn war-raok
     SponsorBlock:
       CancelCurrentSegment: "Nullañ krouidigezh ar rann"
       ClearSegments: "Skarzhañ ar rannoù"
@@ -1450,6 +1479,7 @@ Share:
   Share failed: "N’eus ket bet gallet rannañ al liamm"
   Timestamp Link Copied: "Eilet eo bet al liamm gant ar mare er golver"
 Context Menu:
+  Open in a Background Tab: "Digeriñ en un ivinell en drekleur"
   Select Tab: Diuzañ an ivinell
   Close Tabs Before: Serriñ an ivinelloù a-raok
   Close Tabs After: Serriñ an ivinelloù war-lerc’h
@@ -1610,6 +1640,7 @@ Description:
   Games: "C'hoarioù"
 Tooltips:
   General Settings:
+    Enable Tabs: "Diweredekaat an dra-mañ a serr an holl ivinelloù all hag a lez ar bajenn vremanel digor."
     Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
     Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."
     Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel en arload a-bezh keit ha ma chom ur bajenn digor. Pa vez diweredekaet ne vezont hizivaet nemet goude adkargañ pe addigeriñ ar bajenn."
@@ -1654,6 +1685,7 @@ Tooltips:
     Preload Upcoming Videos: "Kargañ ha krubuilhañ a ra liammoù yt-dlp ar videoioù da-heul. Ar steudad a zo kentoc’h eget ar rolloù lenn hag an erbedadennoù."
     Upcoming Videos to Preload: "Niver brasañ a videoioù da-heul a vez karget o liammoù yt-dlp en drekleur."
     Concurrent Preloads: "Niver brasañ a argerzhioù yt-dlp a vez implijet evit rakgargañ videoioù war un dro. An talvoudoù uheloc'h a implij muioc'h a c'halloud ar c'hewerier, a vemor hag a ledander rouedad."
+    Ignore System Rotation Lock for Fullscreen: Troit an trevnad evit mont e skramm leun hag er-maez anezhañ, zoken pa vez diweredekaet an troadur emgefreek en Android.
   Download Settings:
     Download Folder: "Enrollet e vez ar videoioù en teuliad-mañ. Laoskit goullo evit implijout teuliad Pellgargadennoù ho reizhiad."
     Global Additional yt-dlp Arguments: "Arventennoù arc'had ouzhpenn tremenet da yt-dlp evit pep pellgargadenn, da skouer --cookies-from-browser firefox."
@@ -1817,8 +1849,8 @@ Downloads:
   File Name Template: "Patrom anv restr"
   File Name Template Help: "Maeziennoù hegerz: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}"
   Time Range and Chapters: "Etremez amzer ha chabistroù"
-  Start Time: "Mare deroù (HH:MM:SS)"
-  End Time: "Mare dibenn (HH:MM:SS)"
+  Start Time: Mare deroù
+  End Time: Mare dibenn
   Split by Chapters: "Dispartiañ e restroù distag dre chabistr"
   Remove Segments: "Dilemel rannoù"
   Subtitles and Metadata: "Istitloù ha metaroadennoù"
@@ -1904,3 +1936,40 @@ Tray:
 Tray Icon:
   Title: "Arlun ar maez reizhiad"
   Follow App Theme: "Heuliañ neuz an arload"
+
+Form Inputs:
+  Enter Password Hint: "Enlakait ho ker-tremen"
+  Choose Password Hint: "Dibabit ur ger-tremen"
+  Confirm Password Hint: "Adskrivit ho ker-tremen nevez"
+  Encryption Passphrase Hint: "Enlakait ho frazenn-tremen sifrañ"
+  Show Password: "Diskouez ar ger-tremen"
+  Hide Password: "Kuzhat ar ger-tremen"
+  Search Text Hint: "Enlakait gerioù klask"
+  Playlist Description Hint: "Deskrivit ar roll-lenn-mañ"
+  Filename Preview: "Alberz eus anv ar restr"
+  Enter Channels: "Merkit ar chadennoù"
+  Enter Text: "Merkit un destenn"
+  Video URL: URL video pe roll-lenn
+  Paste Link: Pegit ul liamm video pe roll-lenn
+  Example: da skouer {example}
+  No Minimum: Hep izelañ
+  No Maximum: Hep uhelañ
+  Any Age: Oad forzh pe hini
+  Included Terms Example: da skouer kentel, selladenn
+  Excluded Terms Example: da skouer tañva, rakwel
+  Download Folder Hint: Lezit goullo evit implijout ho teuliad Pellgargadennoù
+  Global Arguments Hint: Arventennoù diret evit pep pellgargadenn
+  Unlimited Hint: 0 evit didermenet
+  Add Argument: Ouzhpennañ un arventenn
+  Template Name Example: da skouer Son hepken
+  Download Arguments Hint: Arventennoù diret evit ar bellgargadenn-mañ
+  Generated ID Hint: Lezit goullo evit genel un ID
+  Default Value: "Dre ziouer: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."
+
+Storage Startup Error:
+  Title: "N'eus ket bet gallet kargañ roadennoù an arload"
+  Message: "Dieubit plas war an trevnad ha klaskit en-dro. Ehanet eo ar goubredañ betek ma vo karget ho roadennoù."
+  Retry: "Klask en-dro"

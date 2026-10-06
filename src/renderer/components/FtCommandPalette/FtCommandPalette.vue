@@ -104,6 +104,7 @@
                   />
                   <FtRetryImage
                     v-else-if="hasUsableIconUrl(command)"
+                    :fallback-icon="command.icon || ['fas', 'circle-user']"
                     class="commandPaletteOptionIconImage"
                     :src="command.iconUrl"
                     alt=""

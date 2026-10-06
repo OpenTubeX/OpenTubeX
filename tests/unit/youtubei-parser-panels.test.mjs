@@ -24,6 +24,33 @@ test('retains video title headers and shelves in structured descriptions', (t) =
   assert.ok(panel.content.items[1] instanceof YTNodes.Shelf)
 })
 
+test('retains item sections and their contents in structured descriptions without type mismatch warnings', (t) => {
+  const warn = t.mock.method(console, 'warn', () => {})
+  const panel = Parser.parseItem({
+    engagementPanelSectionListRenderer: {
+      content: {
+        structuredDescriptionContentRenderer: {
+          items: [{
+            itemSectionRenderer: {
+              sectionIdentifier: 'related-videos',
+              contents: [{ shelfRenderer: { title: { simpleText: 'Related videos' } } }]
+            }
+          }]
+        }
+      }
+    }
+  })
+
+  assert.equal(warn.mock.callCount(), 0)
+  assert.equal(panel.content.items.length, 1)
+  const section = panel.content.items[0]
+  assert.ok(section instanceof YTNodes.ItemSection)
+  assert.equal(section.target_id, 'related-videos')
+  assert.equal(section.contents.length, 1)
+  assert.ok(section.contents[0] instanceof YTNodes.Shelf)
+  assert.equal(section.contents[0].title.toString(), 'Related videos')
+})
+
 test('parses loading panel content without runtime parser generation or type mismatches', (t) => {
   const warn = t.mock.method(console, 'warn', () => {})
   const panel = Parser.parseItem({

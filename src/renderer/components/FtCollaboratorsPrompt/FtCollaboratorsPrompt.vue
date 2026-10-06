@@ -28,6 +28,7 @@
           @click="emit('close')"
         >
           <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="collaborator.thumbnail"
             class="collaboratorModalThumbnail"
             alt=""

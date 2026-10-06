@@ -13,6 +13,7 @@ for (const [active, animating] of [[true, false], [true, true], [false, true]]) 
       onlyUseOverFlowMenu,
       scrollMiniPlayerActive: { value: active },
       scrollMiniPlayerAnimating: { value: animating },
+      scrollMiniPlayerDragStyle: { value: null },
       USE_OVERFLOW_MENU_WIDTH_THRESHOLD: 634,
       rememberInlinePlayerLayoutHeight() {},
       repairScrollMiniPlaceholderHeight() {},
@@ -27,6 +28,7 @@ test('a settled inline player still adapts its controls to the actual width', ()
     onlyUseOverFlowMenu,
     scrollMiniPlayerActive: { value: false },
     scrollMiniPlayerAnimating: { value: false },
+    scrollMiniPlayerDragStyle: { value: null },
     USE_OVERFLOW_MENU_WIDTH_THRESHOLD: 634,
     rememberInlinePlayerLayoutHeight() {},
     repairScrollMiniPlaceholderHeight() {},
@@ -35,4 +37,34 @@ test('a settled inline player still adapts its controls to the actual width', ()
     resized([{ contentBoxSize: [{ inlineSize: width }] }])
     assert.equal(onlyUseOverFlowMenu.value, expected)
   }
+})
+
+test('swipe previews defer hidden control layout until the inline player settles', () => {
+  const sourceStart = source.indexOf('    function scheduleControlPanelLayout(')
+  const sourceEnd = source.indexOf('    function setupAdaptiveControlPanelLayout(', sourceStart)
+  let frames = 0
+  let layouts = 0
+  const scrollMiniPlayerDragStyle = { value: {} }
+  let queued
+  const schedule = vm.runInNewContext(`${source.slice(sourceStart, sourceEnd)}\nscheduleControlPanelLayout`, {
+    isActiveTab: { value: true },
+    scrollMiniPlayerActive: { value: false },
+    scrollMiniPlayerAnimating: { value: false },
+    scrollMiniPlayerDragStyle,
+    controlPanelLayoutFrame: null,
+    requestAnimationFrame(callback) { frames++; queued = callback; return frames },
+    cancelAnimationFrame() {},
+    updateControlPanelLayout() { layouts++ },
+  })
+  schedule({})
+  assert.equal(frames, 0, 'a held swipe does not schedule control measurements')
+  scrollMiniPlayerDragStyle.value = null
+  schedule({})
+  scrollMiniPlayerDragStyle.value = {}
+  queued()
+  assert.equal(layouts, 0, 'a new swipe cancels work queued before it began')
+  scrollMiniPlayerDragStyle.value = null
+  schedule({})
+  queued()
+  assert.equal(layouts, 1, 'settled inline controls can be measured again')
 })

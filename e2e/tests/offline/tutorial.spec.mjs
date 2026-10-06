@@ -17,23 +17,27 @@ for (const zoom of [1, 0.95]) {
         await store.dispatch('updateBaseTheme', baseTheme)
       }, theme)
 
-      // A contrasting border shrinks the visible fill even when the outer
-      // bounds match. Compare both the bounds and the painted background.
+      // Outlined Skip and filled Next share the same outer bounds; the
+      // outline is part of Skip's visible surface.
       const buttons = tutorial.locator('.tutorialActions .btn')
       await expect(buttons).toHaveCount(2)
       const metrics = await buttons.evaluateAll(elements => elements.map(element => {
         const style = getComputedStyle(element)
         const bounds = element.getBoundingClientRect()
-        const borderBlends = style.borderTopColor === style.backgroundColor ||
-          (style.borderTopColor === 'rgba(0, 0, 0, 0)' && style.backgroundClip === 'border-box')
-        const borderHeight = Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.borderBottomWidth)
         return {
           height: bounds.height,
-          visibleHeight: bounds.height - (borderBlends ? 0 : borderHeight)
+          center: bounds.y + bounds.height / 2,
+          background: style.backgroundColor,
+          border: style.borderTopColor,
+          borderWidth: Number.parseFloat(style.borderTopWidth)
         }
       }))
       expect(metrics[0].height).toBeCloseTo(metrics[1].height, 1)
-      expect(metrics[0].visibleHeight).toBeCloseTo(metrics[1].visibleHeight, 1)
+      expect(metrics[0].center).toBeCloseTo(metrics[1].center, 1)
+      expect(metrics[0].background).toBe('rgba(0, 0, 0, 0)')
+      expect(metrics[0].border).not.toBe('rgba(0, 0, 0, 0)')
+      expect(metrics[0].borderWidth).toBeGreaterThan(0)
+      expect(metrics[1].background).not.toBe('rgba(0, 0, 0, 0)')
       await testInfo.attach(`Tutorial buttons in ${theme} theme at ${zoom} scale`, {
         body: await tutorial.screenshot({ animations: 'disabled' }),
         contentType: 'image/png'
@@ -427,3 +431,57 @@ test('highlights the mobile search button', async ({ app, page }) => {
   await expect(tutorial).toHaveAccessibleName('Search or paste a link')
   await expectHighlightCenteredOn(page, '.navSearchButton[data-tutorial="search"]')
 })
+
+for (const uiScale of [100, 95]) {
+  test.describe(`rounded keyboard focus at ${uiScale}% scale`, () => {
+    test.use({ seed: { settings: { baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', uiScale } } })
+
+    test('keeps the complete button highlight inside the tutorial viewport', async ({ page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+      await page.reload()
+      const tutorial = page.locator('.tutorialCard')
+      const next = tutorial.getByRole('button', { name: 'Next', exact: true })
+      await tutorial.getByRole('button', { name: 'Skip', exact: true }).focus()
+      await page.keyboard.press('Tab')
+      await expect(next).toBeFocused()
+
+      const geometry = await next.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const viewport = element.closest('.tutorialScroll').getBoundingClientRect()
+        const style = getComputedStyle(element)
+        const outside = Math.max(0, parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth))
+        return { bottom: bounds.bottom + outside, viewportBottom: viewport.bottom, outline: style.outlineStyle }
+      })
+      await testInfo.attach('keyboard-focus', {
+        body: await tutorial.screenshot({ animations: 'disabled' }), contentType: 'image/png'
+      })
+      expect(geometry.outline).toBe('solid')
+      expect(geometry.bottom - geometry.viewportBottom).toBeLessThanOrEqual(0.1)
+
+      if (uiScale === 100) {
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+          const screenshot = testInfo.outputPath(`keyboard-focus-${colorScheme}.png`)
+          await tutorial.locator('.tutorialActions').screenshot({ path: screenshot })
+          await testInfo.attach(`keyboard-focus-${colorScheme}`, { path: screenshot, contentType: 'image/png' })
+        }
+      }
+
+      for (const width of [1600, 480]) {
+        await page.setViewportSize({ width, height: 800 })
+        for (const roundness of [0, 50, 100, 200]) {
+          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+          await tutorial.getByRole('button', { name: 'Skip', exact: true }).focus()
+          const unfocusedRadius = await next.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))
+          expect(unfocusedRadius).toBeCloseTo((width <= 680 ? 24 : 20) * roundness / 100, 1)
+          await page.keyboard.press('Tab')
+          await expect(next).toBeFocused()
+          expect(await next.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(unfocusedRadius, 1)
+        }
+      }
+    })
+  })
+}

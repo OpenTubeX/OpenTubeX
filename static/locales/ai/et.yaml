@@ -263,6 +263,11 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Enable Tabs: "Luba vahekaardid"
+    Thumbnail Swipe Gestures:
+      Left: Pisipiltidel vasakule pühkimine
+      Right: Pisipiltidel paremale pühkimine
+      Description: Valitud toimingu tegemiseks pühi video pisipildil horisontaalselt ja tõsta sõrm.
     Data Saver Thumbnails: "Andmesäästlikud pisipildid"
     Use tray icon: "Kasuta süsteemisalve ikooni"
     Close to system tray: "Sulge süsteemisalve"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Värskendamiseks viipa
     Blur Thumbnails: Hägusta pisipildid
     Navigation:
-      Show Active Subscriptions: Näita aktiivseid tellimusi
+      Always Show Navigation Bar: Kuva navigeerimisriba alati, kui see on allosas
+      Compact Tab Labels: Kompaktne navigeerimisriba, kui see on allosas
+      Show Active Subscriptions: Näita aktiivseid tellimusi külgribal
       Navigation: Navigeerimine
       Customize Navigation: Kohanda navigeerimist
       Add Item: Lisa üksus
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktne mobiilne minipleier"
     Always Show Mobile Search Bar: "Kuva mobiili otsinguriba alati"
     Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Hele"
-      OpenTubeX Dark: "OpenTubeX Tume"
+      Ocean Light: "Ocean Hele"
+      Ocean Dark: "Ocean Tume"
       Custom: Kohandatud
     Light Theme: Hele teema
     Dark Theme: Tume teema
@@ -621,6 +629,8 @@ Settings:
     Preload Upcoming Videos: "Järgmiste videote eellaadimine"
     Upcoming Videos to Preload: "Eellaaditavate videote arv"
     Concurrent Preloads: "Samaaegsed eellaadimised"
+    Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
+    Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -657,9 +667,9 @@ Settings:
     Update Managed Tools: Uuenda
     Managed Tools Download Error Template: 'Hallatavaid tööriistu ei õnnestunud alla laadida: {errors}'
     Download Folder: Allalaadimiskaust
-    Global Additional yt-dlp Arguments: Üldised yt-dlp lisaargumendid
+    Global Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
     Concurrent Downloads: Samaaegsed allalaadimised
-    Bandwidth Limit: Ribalaiuse piirang (KiB/s, 0 tähendab piiranguta)
+    Bandwidth Limit: Ribalaiuse piirang (KiB/s)
     Choose Download Folder: Vali allalaadimiskaust
     Download Templates: Allalaadimismallid
     Manage Download Templates: Halda allalaadimismalle ({templateCount})
@@ -732,8 +742,8 @@ Settings:
       Automatic: Uuenda automaatselt
       Ask: Küsi enne uuendamist
       Manual: Uuenda ainult käsitsi
-    yt-dlp Executable Path: yt-dlp täitmisfaili asukoht
-    FFmpeg Executable Path: FFmpegi täitmisfaili asukoht
+    yt-dlp Executable Path: yt-dlp käivitatav fail
+    FFmpeg Executable Path: FFmpeg käivitatav fail
     Restricted Playback Authentication: "yt-dlp küpsised"
     Cookie Source: Küpsiste allikas
     Cookie Sources:
@@ -965,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
     Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
-    Server URL: Serveri URL
+    Server URL: Sünkroonimisserveri URL
     Checking Server: Sünkroonimisserveri kontrollimine…
     Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.
     Username: Kasutajanimi
@@ -1055,7 +1065,7 @@ Settings:
     Open All Tabs Confirmation: "Kas avada kõik vahelehed?"
     Server Update Required: "Uuenda seda serverit, et toetada krüptitud reaalajas sünkroonimist."
   Proxy Settings:
-    IP Block Recovery Script Path: IP-blokeeringust taastamise skripti asukoht
+    IP Block Recovery Script Path: IP-blokeeringust taastamise skript
     Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail
     Running IP block recovery script: IP-blokeeringust taastamise skripti käivitamine
     IP block recovery script failed: 'IP-blokeeringust taastamise skript nurjus (väljumiskood: {exitCode})'
@@ -1064,7 +1074,7 @@ Settings:
     Failed to select IP block recovery script: IP-blokeeringust taastamise skripti valimine nurjus
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Luba SponsorBlocki andmete esitamine
-    SponsorBlock Private User ID (optional): SponsorBlocki privaatne kasutaja-ID (valikuline)
+    SponsorBlock Private User ID (optional): Privaatne kasutaja ID (valikuline)
     SponsorBlock Private User ID Tooltip: Kleepige brauserilaiendist SponsorBlocki privaatne kasutaja-ID. Rakenduse loodud ID kasutamiseks jätke see tühjaks.
     Generated SponsorBlock User ID: Loodud SponsorBlocki kasutaja-ID
     Generated SponsorBlock User ID Tooltip: Seda rakenduse loodud SponsorBlocki kasutaja-ID-d saab kasutada brauserilaiendis või rakenduse kasutamisel teises arvutis.
@@ -1076,7 +1086,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Luba Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike’i API URL (vaikimisi https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: Vale parool
     Unlock: Ava
@@ -1117,6 +1127,21 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Customization: Kohandamine
+  Manage Profile Subscriptions: Halda profiili tellimusi
+  Icon Names:
+    Person: Inimene
+    People: Inimesed
+    Headphones: Kõrvaklapid
+    Gaming: Mängud
+    Film: Film
+    Art: Kunst
+    Science: Teadus
+    Globe: Gloobus
+    Heart: Süda
+    Sun: Päike
+    Moon: Kuu
+    Trophy: Karikas
   Profile Icon: Profiiliikoon
   Choose an Emoji: Vali emotikon
   Custom Emoji: Kohandatud emotikon
@@ -1301,12 +1326,16 @@ Video:
     Hide: Peida
     Show: Näita
     Scroll Mini Player:
+      Collapse Controls: "Ahenda juhtnupud"
+      Expand Controls: "Laienda juhtnupud"
       Back to Top: Tagasi üles
       Return to Video Tab: Naase video vahekaardile
       Hide: Peida minipleier
       Play: Esita
       Pause: Peata
       Drag Handle: Liiguta minipleierit
+      Rewind 10 seconds: Keri 10 sekundit tagasi
+      Forward 10 seconds: Keri 10 sekundit edasi
     SponsorBlock:
       CancelCurrentSegment: Tühista lõigu loomine
       ClearSegments: Kustuta lõigud
@@ -1443,6 +1472,7 @@ Share:
   Share failed: "Linki ei õnnestunud jagada"
   Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale
 Context Menu:
+  Open in a Background Tab: "Ava taustal uuel vahelehel"
   Select Tab: Vali vahekaart
   Close Tabs Before: Sulge eelnevad vahekaardid
   Close Tabs After: Sulge järgnevad vahekaardid
@@ -1604,6 +1634,7 @@ Description:
   Games: Mängud
 Tooltips:
   General Settings:
+    Enable Tabs: "Selle väljalülitamine sulgeb kõik teised vahekaardid ja jätab praeguse lehe avatuks."
     Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
     Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.
     Update Relative Timestamps: Uuendab suhtelisi ajamärke kogu rakenduses, kuni leht on avatud. Kui see on välja lülitatud, uuendatakse neid alles pärast lehe uuesti laadimist või sellele naasmist.
@@ -1648,6 +1679,7 @@ Tooltips:
     Preload Upcoming Videos: "Hangib ja salvestab järgmiste videote yt-dlp voogedastusaadressid vahemällu. Järjekord on esitusloenditest ja soovitustest tähtsam."
     Upcoming Videos to Preload: "Taustal hangitavate yt-dlp aadressidega järgmiste videote suurim arv."
     Concurrent Preloads: "Suurim arv yt-dlp protsesse, mida kasutatakse videote samaaegseks eellaadimiseks. Suuremad väärtused kasutavad rohkem protsessorit, mälu ja võrgu läbilaskevõimet."
+    Ignore System Rotation Lock for Fullscreen: Pööra seadet füüsiliselt täisekraani avamiseks ja sulgemiseks ka siis, kui Androidi automaatne pööramine on välja lülitatud.
   Download Settings:
     Download Folder: Videod salvestatakse sellesse kausta. Süsteemi allalaadimiste kausta kasutamiseks jäta väli tühjaks.
     Global Additional yt-dlp Arguments: Täiendavad käsureaargumendid, mis edastatakse iga allalaadimise puhul yt-dlp-le, näiteks --cookies-from-browser firefox.
@@ -1811,8 +1843,8 @@ Downloads:
   File Name Template: Failinime mall
   File Name Template Help: 'Saadaolevad väljad: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Ajavahemik ja peatükid
-  Start Time: Algusaeg (HH:MM:SS)
-  End Time: Lõpuaeg (HH:MM:SS)
+  Start Time: Algusaeg
+  End Time: Lõpuaeg
   Split by Chapters: Jaga peatükkide kaupa eraldi failideks
   Remove Segments: Eemalda segmendid
   Subtitles and Metadata: Subtiitrid ja metaandmed
@@ -1898,3 +1930,40 @@ Tray:
 Tray Icon:
   Title: "Süsteemisalve ikoon"
   Follow App Theme: "Järgi rakenduse teemat"
+
+Form Inputs:
+  Enter Password Hint: "Sisesta oma parool"
+  Choose Password Hint: "Vali parool"
+  Confirm Password Hint: "Korda oma uut parooli"
+  Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"
+  Show Password: "Näita parooli"
+  Hide Password: "Peida parool"
+  Search Text Hint: "Sisesta otsingusõnad"
+  Playlist Description Hint: "Kirjelda seda esitusloendit"
+  Filename Preview: "Failinime eelvaade"
+  Enter Channels: "Sisesta kanalid"
+  Enter Text: "Sisesta tekst"
+  Video URL: Video või esitusloendi URL
+  Paste Link: Kleebi video või esitusloendi link
+  Example: nt {example}
+  No Minimum: Miinimum puudub
+  No Maximum: Maksimum puudub
+  Any Age: Mis tahes vanus
+  Included Terms Example: nt õpetus, arvustus
+  Excluded Terms Example: nt treiler, eelvaade
+  Download Folder Hint: Jäta tühjaks, et kasutada allalaadimiste kausta
+  Global Arguments Hint: Valikulised argumendid igale allalaadimisele
+  Unlimited Hint: 0 tähendab piiramatut
+  Add Argument: Lisa argument
+  Template Name Example: nt Ainult heli
+  Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
+  Generated ID Hint: Jäta tühjaks, et luua ID
+  Default Value: "Vaikimisi: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+
+Storage Startup Error:
+  Title: "Rakenduse andmeid ei saanud laadida"
+  Message: "Vabasta seadmes salvestusruumi ja proovi uuesti. Sünkroonimine on peatatud, kuni andmed on laaditud."
+  Retry: "Proovi uuesti"

@@ -265,6 +265,11 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Enable Tabs: "Omogući kartice"
+    Thumbnail Swipe Gestures:
+      Left: Povlačenje ulijevo po sličicama
+      Right: Povlačenje udesno po sličicama
+      Description: Povucite vodoravno po sličici videozapisa i otpustite za izvođenje odabrane radnje.
     Data Saver Thumbnails: "Sličice za uštedu podataka"
     Use tray icon: "Koristi ikonu u sistemskoj traci"
     Close to system tray: "Zatvori u sistemsku traku"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Povucite za osvježavanje
     Blur Thumbnails: Zamuti minijature
     Navigation:
-      Show Active Subscriptions: Prikaži aktivne pretplate
+      Always Show Navigation Bar: Uvijek prikaži navigacijsku traku kada je na dnu
+      Compact Tab Labels: Kompaktna navigacijska traka kada je na dnu
+      Show Active Subscriptions: Prikaži aktivne pretplate u bočnoj traci
       Navigation: Navigacija
       Customize Navigation: Prilagodi navigaciju
       Add Item: Dodaj stavku
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
     Frosted Glass Player UI: "Sučelje reproduktora s efektom matiranog stakla"
     Main Color Theme:
@@ -437,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Svijetla"
-      OpenTubeX Dark: "OpenTubeX Tamna"
+      Ocean Light: "Ocean Svijetla"
+      Ocean Dark: "Ocean Tamna"
       Custom: Prilagođena
     Light Theme: Svijetla tema
     Dark Theme: Tamna tema
@@ -623,6 +631,8 @@ Settings:
     Preload Upcoming Videos: "Predučitaj sljedeće videozapise"
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
+    Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
+    Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -659,9 +669,9 @@ Settings:
     Update Managed Tools: Ažuriraj
     Managed Tools Download Error Template: 'Nije moguće preuzeti alate kojima upravlja aplikacija: {errors}'
     Download Folder: Mapa za preuzimanja
-    Global Additional yt-dlp Arguments: Globalni dodatni argumenti za yt-dlp
+    Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
     Concurrent Downloads: Istodobna preuzimanja
-    Bandwidth Limit: Ograničenje propusnosti (KiB/s, 0 za neograničeno)
+    Bandwidth Limit: Ograničenje propusnosti (KiB/s)
     Choose Download Folder: Odaberi mapu za preuzimanja
     Download Templates: Predlošci za preuzimanje
     Manage Download Templates: Upravljaj predlošcima za preuzimanje ({templateCount})
@@ -734,8 +744,8 @@ Settings:
       Automatic: Ažuriraj automatski
       Ask: Pitaj prije ažuriranja
       Manual: Ažuriraj samo ručno
-    yt-dlp Executable Path: Putanja do izvršne datoteke yt-dlp
-    FFmpeg Executable Path: Putanja do izvršne datoteke FFmpeg
+    yt-dlp Executable Path: Izvršna datoteka yt-dlp
+    FFmpeg Executable Path: Izvršna datoteka FFmpeg
     Restricted Playback Authentication: "yt-dlp kolačići"
     Cookie Source: Izvor kolačića
     Cookie Sources:
@@ -969,7 +979,7 @@ Settings:
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
     Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.
     Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
-    Server URL: URL poslužitelja
+    Server URL: URL poslužitelja sinkronizacije
     Checking Server: Provjera poslužitelja za sinkronizaciju…
     Server Unavailable: Povezivanje s ovim poslužiteljem za sinkronizaciju nije moguće. Provjerite URL i pokušajte ponovno.
     Username: Korisničko ime
@@ -1059,7 +1069,7 @@ Settings:
     Open All Tabs Confirmation: "Otvoriti sve kartice?"
     Server Update Required: "Ažurirajte ovaj poslužitelj za podršku šifriranoj sinkronizaciji u stvarnom vremenu."
   Proxy Settings:
-    IP Block Recovery Script Path: Putanja skripte za oporavak nakon blokiranja IP adrese
+    IP Block Recovery Script Path: Skripta za oporavak od blokiranja IP-a
     Select IP Block Recovery Script File: Odaberi datoteku skripte za oporavak nakon blokiranja IP adrese
     Running IP block recovery script: Izvršavanje skripte za oporavak nakon blokiranja IP adrese
     IP block recovery script failed: 'Skripta za oporavak nakon blokiranja IP adrese nije uspjela (izlazni kôd: {exitCode})'
@@ -1071,7 +1081,7 @@ Settings:
       Excluded Channels: "Izuzeti kanali"
       Tooltip: "Unesite ID kanala kako se segmenti SponsorBlocka ne bi preskakali u njegovim videozapisima. ID se mora točno podudarati i razlikuje velika i mala slova."
     Enable SponsorBlock Submission: Omogući slanje podataka u SponsorBlock
-    SponsorBlock Private User ID (optional): Privatni korisnički ID za SponsorBlock (neobvezno)
+    SponsorBlock Private User ID (optional): Privatni korisnički ID (neobavezno)
     SponsorBlock Private User ID Tooltip: Zalijepite privatni korisnički ID za SponsorBlock iz proširenja preglednika. Ostavite prazno da biste upotrijebili ID koji je stvorila aplikacija.
     Generated SponsorBlock User ID: Stvoreni korisnički ID za SponsorBlock
     Generated SponsorBlock User ID Tooltip: Ovaj korisnički ID za SponsorBlock koji je stvorila aplikacija možete upotrijebiti u proširenju preglednika ili pri uporabi aplikacije na drugom računalu.
@@ -1083,7 +1093,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Omogući Return YouTube Dislike
-    Return YouTube Dislike Url: URL API-ja Return YouTube Dislike (zadano je https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API-ja
   Password Dialog:
     Incorrect Password: Neispravna lozinka
     Unlock: Otključaj
@@ -1126,6 +1136,21 @@ About:
   Matrix: Matrix
   Email: E-pošta
 Profile:
+  Customization: Prilagodba
+  Manage Profile Subscriptions: Upravljaj pretplatama profila
+  Icon Names:
+    Person: Osoba
+    People: Ljudi
+    Headphones: Slušalice
+    Gaming: Igre
+    Film: Film
+    Art: Umjetnost
+    Science: Znanost
+    Globe: Globus
+    Heart: Srce
+    Sun: Sunce
+    Moon: Mjesec
+    Trophy: Trofej
   Profile Icon: Ikona profila
   Choose an Emoji: Odaberi emoji
   Custom Emoji: Prilagođeni emoji
@@ -1316,12 +1341,16 @@ Video:
     Hide: Sakrij
     Show: Prikaži
     Scroll Mini Player:
+      Collapse Controls: "Sažmi kontrole"
+      Expand Controls: "Proširi kontrole"
       Back to Top: Povratak na vrh
       Return to Video Tab: Povratak na karticu videozapisa
       Hide: Sakrij mini reproduktor
       Play: Reproduciraj
       Pause: Pauziraj
       Drag Handle: Premjesti minireproduktor
+      Rewind 10 seconds: Premotaj 10 sekundi unatrag
+      Forward 10 seconds: Premotaj 10 sekundi unaprijed
     SponsorBlock:
       CancelCurrentSegment: Odustani od izrade segmenta
       ClearSegments: Očisti segmente
@@ -1462,6 +1491,7 @@ Share:
   Share failed: "Poveznicu nije moguće podijeliti"
   Timestamp Link Copied: Poveznica s vremenskom oznakom kopirana je u međuspremnik
 Context Menu:
+  Open in a Background Tab: "Otvori u kartici u pozadini"
   Select Tab: Odaberi karticu
   Close Tabs Before: Zatvori prethodne kartice
   Close Tabs After: Zatvori sljedeće kartice
@@ -1623,6 +1653,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Enable Tabs: "Isključivanjem se zatvaraju sve ostale kartice, a trenutačna stranica ostaje otvorena."
     Data Saver Thumbnails: "Koristite sličice niže razlučivosti kako biste smanjili potrošnju podataka."
     Use AI Translation Completions: Popunjava praznine u ljudskim prijevodima tekstom koji generira umjetna inteligencija. Ljudski prijevodi uvijek imaju prednost.
     Update Relative Timestamps: Ažurira relativne vremenske oznake u cijeloj aplikaciji dok je stranica otvorena. Kada je isključeno, ažuriraju se tek nakon ponovnog učitavanja ili ponovnog posjeta stranici.
@@ -1667,6 +1698,7 @@ Tooltips:
     Preload Upcoming Videos: "Dohvaća i sprema yt-dlp adrese za sljedeće videozapise. Red čekanja ima prednost pred popisima i preporukama."
     Upcoming Videos to Preload: "Najveći broj sljedećih videozapisa čije se yt-dlp adrese dohvaćaju u pozadini."
     Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
+    Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
   Download Settings:
     Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.
     Global Additional yt-dlp Arguments: Dodatni argumenti naredbenog retka koji se prosljeđuju alatu yt-dlp pri svakom preuzimanju, primjerice --cookies-from-browser firefox.
@@ -1832,8 +1864,8 @@ Downloads:
   File Name Template: Predložak naziva datoteke
   File Name Template Help: 'Dostupna polja: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Vremenski raspon i poglavlja
-  Start Time: Vrijeme početka (HH:MM:SS)
-  End Time: Vrijeme završetka (HH:MM:SS)
+  Start Time: Vrijeme početka
+  End Time: Vrijeme završetka
   Split by Chapters: Podijeli u zasebne datoteke po poglavljima
   Remove Segments: Ukloni segmente
   Subtitles and Metadata: Titlovi i metapodaci
@@ -1922,3 +1954,40 @@ Tray:
 Tray Icon:
   Title: "Ikona u sistemskoj traci"
   Follow App Theme: "Prati temu aplikacije"
+
+Form Inputs:
+  Enter Password Hint: "Unesite svoju lozinku"
+  Choose Password Hint: "Odaberite lozinku"
+  Confirm Password Hint: "Ponovite novu lozinku"
+  Encryption Passphrase Hint: "Unesite svoju zaporku za šifriranje"
+  Show Password: "Prikaži lozinku"
+  Hide Password: "Sakrij lozinku"
+  Search Text Hint: "Unesite pojmove za pretraživanje"
+  Playlist Description Hint: "Opišite ovaj popis za reprodukciju"
+  Filename Preview: "Pregled naziva datoteke"
+  Enter Channels: "Unesite kanale"
+  Enter Text: "Unesite tekst"
+  Video URL: URL videozapisa ili popisa
+  Paste Link: Zalijepite poveznicu na videozapis ili popis
+  Example: npr. {example}
+  No Minimum: Bez minimuma
+  No Maximum: Bez maksimuma
+  Any Age: Bilo koja starost
+  Included Terms Example: npr. vodič, recenzija
+  Excluded Terms Example: npr. najava, pregled
+  Download Folder Hint: Ostavite prazno za korištenje mape Preuzimanja
+  Global Arguments Hint: Neobavezni argumenti za svako preuzimanje
+  Unlimited Hint: 0 za neograničeno
+  Add Argument: Dodajte argument
+  Template Name Example: npr. Samo zvuk
+  Download Arguments Hint: Neobavezni argumenti za ovo preuzimanje
+  Generated ID Hint: Ostavite prazno za generiranje ID-a
+  Default Value: "Zadano: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+
+Storage Startup Error:
+  Title: "Nije moguće učitati podatke aplikacije"
+  Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
+  Retry: "Pokušaj ponovno"

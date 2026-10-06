@@ -34,7 +34,7 @@
 .moreOptionContainer {
   position: fixed;
   background-color: var(--side-nav-color);
-  inset-block-end: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) + var(--mobile-progress-bar-space, 0px));
+  inset-block-end: calc(var(--mobile-nav-height) + var(--mobile-progress-bar-space, 0px));
   inline-size: 70px;
   z-index: 0;
   box-shadow: 3px -3px 5px 0 rgb(0 0 0 / 20%);
@@ -87,6 +87,23 @@
 
   .closed .navIconExpand {
     block-size: 1.3em;
+  }
+
+  .compactLabels .moreOptionNav {
+    align-items: center;
+    block-size: var(--mobile-nav-content-height);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    padding-block: 0;
+  }
+
+  .compactLabels .moreOptionNav .navIcon {
+    margin-block-start: 0;
+  }
+
+  .compactLabels .moreOptionNav .navLabel {
+    display: none;
   }
 }
 

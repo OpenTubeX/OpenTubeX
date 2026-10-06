@@ -311,16 +311,47 @@ test('reuses recommendations when revisiting Home and bypasses the cache with Re
   backend.channelVideos = [video('recfresh001', 'Linux desktop fresh results')]
   backend.searchVideos = []
   await goTo(page, 'history')
+  const loadingStates = await page.evaluateHandle(() => {
+    const states = []
+    const observer = new MutationObserver(() => {
+      if (document.querySelector('[data-home-section="recommendations"][aria-busy="true"]')) states.push(true)
+    })
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-busy'] })
+    return { states, observer }
+  })
   await goTo(page, 'home')
   await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await renderTurn(page)
   expect(backend.requests).toHaveLength(requestCount)
+  expect(await loadingStates.evaluate(({ states, observer }) => {
+    observer.disconnect()
+    return states
+  })).toEqual([])
+  await loadingStates.dispose()
 
   await recommendations(page).getByRole('button', { name: REFRESH, exact: true }).click()
   await expectBothSources(backend, requestCount)
   await backend.settled()
   await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop fresh results/ })).toBeVisible()
   await expect(recommendations(page).locator('.recommendationFeed .ft-list-video')).toHaveCount(1)
+})
+
+test('reranks cached recommendations when candidate visibility changes while away from Home', async ({ page }) => {
+  const backend = await mockCandidates(page)
+  backend.channelVideos.push({ ...video('reclive0001', 'Linux desktop livestream'), liveNow: true })
+  await goTo(page, 'home')
+  await changeLayoutSetting(page, 'updateHideLiveStreams', true)
+  await setEnabled(page, true)
+  await backend.settled()
+  const liveCard = recommendations(page).locator('a.title').filter({ hasText: /Linux desktop livestream/ })
+  await expect(liveCard).toHaveCount(0)
+  const requestCount = backend.requests.length
+
+  await goTo(page, 'history')
+  await changeLayoutSetting(page, 'updateHideLiveStreams', false)
+  await goTo(page, 'home')
+  await expect(liveCard).toBeVisible()
+  expect(backend.requests).toHaveLength(requestCount)
 })
 
 test('keeps the open recommendation feed unchanged when watch history updates until Refresh', async ({ page }) => {

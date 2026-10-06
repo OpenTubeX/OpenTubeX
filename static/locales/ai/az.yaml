@@ -265,6 +265,11 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Enable Tabs: "Vərəqləri aktivləşdir"
+    Thumbnail Swipe Gestures:
+      Left: Miniatürlərdə sola sürüşdürmə
+      Right: Miniatürlərdə sağa sürüşdürmə
+      Description: Seçilmiş əməliyyatı yerinə yetirmək üçün video miniatürünü üfüqi sürüşdürüb buraxın.
     Data Saver Thumbnails: "Verilənlərə qənaət edən miniatürlər"
     Use tray icon: "Sistem sahəsi nişanından istifadə et"
     Close to system tray: "Sistem sahəsinə bağla"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Yeniləmək üçün sürüşdür
     Blur Thumbnails: Miniatürləri bulanıqlaşdır
     Navigation:
-      Show Active Subscriptions: Aktiv abunəlikləri göstər
+      Always Show Navigation Bar: Naviqasiya paneli aşağıda olduqda onu həmişə göstər
+      Compact Tab Labels: Aşağıda olduqda yığcam naviqasiya paneli
+      Show Active Subscriptions: Aktiv abunəlikləri yan paneldə göstər
       Navigation: Naviqasiya
       Customize Navigation: Naviqasiyanı fərdiləşdir
       Add Item: Element əlavə et
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
     Frosted Glass Player UI: "Buzlu şüşə effektli pleyer interfeysi"
     Move Downloads to App Header: Yükləmələri tətbiqin başlığına köçür
@@ -422,8 +430,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: OpenTubeX Açıq
-      OpenTubeX Dark: OpenTubeX Tünd
+      Ocean Light: Ocean Açıq
+      Ocean Dark: Ocean Tünd
       Custom: Fərdi
     Main Color Theme:
       Catppuccin Macchiato Rosewater: Catppuccin Macchiato Rosewater
@@ -623,6 +631,8 @@ Settings:
     Reorder Playback Speed: Oynatma sürətinin yerini dəyişmək üçün sürükləyin
     Playback Speed: Oynatma sürəti
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
+    Ignore System Rotation Lock for Fullscreen: Tam ekran üçün sistemin fırlanma kilidini nəzərə alma
+    Swipe Left or Right to Seek in Fullscreen: Tam ekranda irəli və ya geri keçmək üçün sola və ya sağa sürüşdürün
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -659,9 +669,9 @@ Settings:
     Update Managed Tools: Yenilə
     Managed Tools Download Error Template: 'İdarə olunan vasitələri endirmək mümkün olmadı: {errors}'
     Download Folder: Endirmə qovluğu
-    Global Additional yt-dlp Arguments: Əlavə ümumi yt-dlp arqumentləri
+    Global Additional yt-dlp Arguments: Əlavə yt-dlp arqumentləri
     Concurrent Downloads: Eyni vaxtda endirmələr
-    Bandwidth Limit: Ötürmə sürəti limiti (KiB/s, limitsiz üçün 0)
+    Bandwidth Limit: Ötürmə sürəti limiti (KiB/s)
     Choose Download Folder: Endirmə qovluğunu seç
     Download Templates: Endirmə şablonları
     Manage Download Templates: Endirmə şablonlarını idarə et ({templateCount})
@@ -734,8 +744,8 @@ Settings:
       Automatic: Avtomatik yenilə
       Ask: Yeniləməzdən əvvəl soruş
       Manual: Yalnız əl ilə yenilə
-    yt-dlp Executable Path: yt-dlp icra faylının yolu
-    FFmpeg Executable Path: FFmpeg icra faylının yolu
+    yt-dlp Executable Path: yt-dlp icra faylı
+    FFmpeg Executable Path: FFmpeg icra faylı
     Restricted Playback Authentication: "yt-dlp kukiləri"
     Cookie Source: Kuki mənbəyi
     Cookie Sources:
@@ -938,7 +948,7 @@ Settings:
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
     Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.
     Description: 'Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.'
-    Server URL: Server URL-i
+    Server URL: Sinxronizasiya serverinin URL-si
     Checking Server: Sinxronizasiya serveri yoxlanılır…
     Server Unavailable: Bu sinxronizasiya serverinə qoşulmaq mümkün olmadı. URL-i yoxlayıb yenidən cəhd edin.
     Username: İstifadəçi adı
@@ -1058,7 +1068,7 @@ Settings:
     Confirm Data Loss: Sil və davam et
     Server Update Required: "Şifrələnmiş canlı sinxronizasiyanı dəstəkləmək üçün bu serveri yeniləyin."
   Proxy Settings:
-    IP Block Recovery Script Path: IP blokundan bərpa skriptinin yolu
+    IP Block Recovery Script Path: IP blokundan bərpa skripti
     Select IP Block Recovery Script File: IP blokundan bərpa skripti faylını seç
     Running IP block recovery script: IP blokundan bərpa skripti işə salınır
     IP block recovery script failed: 'IP blokundan bərpa skripti uğursuz oldu (çıxış kodu: {exitCode})'
@@ -1067,7 +1077,7 @@ Settings:
     Failed to select IP block recovery script: IP blokundan bərpa skriptini seçmək alınmadı
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock göndərişlərini aktivləşdir
-    SponsorBlock Private User ID (optional): SponsorBlock məxfi istifadəçi ID-si (istəyə bağlı)
+    SponsorBlock Private User ID (optional): Məxfi istifadəçi ID-si (istəyə bağlı)
     SponsorBlock Private User ID Tooltip: Brauzer əlavəsindən məxfi SponsorBlock istifadəçi ID-sini yapışdırın. Tətbiqin yaratdığı ID-dən istifadə etmək üçün boş buraxın.
     Generated SponsorBlock User ID: Yaradılmış SponsorBlock istifadəçi ID-si
     Generated SponsorBlock User ID Tooltip: Tətbiqin yaratdığı bu SponsorBlock istifadəçi ID-si brauzer əlavəsində və ya tətbiqi başqa kompüterdə istifadə etdikdə işlədilə bilər.
@@ -1079,7 +1089,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivləşdir
-    Return YouTube Dislike Url: "Return YouTube Dislike API URL-i (varsayılan: https://ryd-proxy.kavin.rocks)"
+    Return YouTube Dislike Url: API URL-si
   Password Dialog:
     Incorrect Password: Yanlış parol
     Unlock: Kilidi aç
@@ -1120,6 +1130,21 @@ About:
   Matrix: Matrix
   Email: E-poçt
 Profile:
+  Customization: Fərdiləşdirmə
+  Manage Profile Subscriptions: Profil abunəliklərini idarə et
+  Icon Names:
+    Person: Şəxs
+    People: İnsanlar
+    Headphones: Qulaqlıq
+    Gaming: Oyun
+    Film: Film
+    Art: İncəsənət
+    Science: Elm
+    Globe: Qlobus
+    Heart: Ürək
+    Sun: Günəş
+    Moon: Ay
+    Trophy: Kubok
   Profile Icon: Profil nişanı
   Choose an Emoji: Emoji seç
   Custom Emoji: Fərdi emoji
@@ -1311,12 +1336,16 @@ Video:
     Hide: Gizlət
     Show: Göstər
     Scroll Mini Player:
+      Collapse Controls: "İdarəetməni yığ"
+      Expand Controls: "İdarəetməni genişləndir"
       Back to Top: Yuxarı qayıt
       Return to Video Tab: Video vərəqsinə qayıt
       Hide: Kiçik oynadıcını gizlət
       Play: Oynat
       Pause: Dayandır
       Drag Handle: Kiçik oynadıcını köçür
+      Rewind 10 seconds: 10 saniyə geri sar
+      Forward 10 seconds: 10 saniyə irəli sar
     SponsorBlock:
       CancelCurrentSegment: Seqment yaratmağı ləğv et
       ClearSegments: Seqmentləri təmizlə
@@ -1453,6 +1482,7 @@ Share:
   Share failed: Link paylaşıla bilmədi
   Timestamp Link Copied: Vaxt göstəricili link buferə köçürüldü
 Context Menu:
+  Open in a Background Tab: "Arxa planda tabda aç"
   Select Tab: Vərəqi seç
   Close Tabs Before: Əvvəlki vərəqləri bağla
   Close Tabs After: Sonrakı vərəqləri bağla
@@ -1614,6 +1644,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Enable Tabs: "Bunu söndürmək bütün digər vərəqləri bağlayır və cari səhifəni açıq saxlayır."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
     Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.
@@ -1658,6 +1689,7 @@ Tooltips:
     Preload Upcoming Videos: Növbəti oynadıla biləcək videoların yt-dlp axın URL-lərini alır və keşdə saxlayır. Baxış növbəsinə pleylistlər və tövsiyələrdən daha çox üstünlük verilir.
     Upcoming Videos to Preload: yt-dlp axın URL-ləri arxa planda alınan növbəti videoların maksimum sayı.
     Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
+    Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
   Download Settings:
     Download Folder: Videolar bu qovluqda saxlanır. Sistemin Yükləmələr qovluğunu istifadə etmək üçün boş buraxın.
     Global Additional yt-dlp Arguments: Hər endirmədə yt-dlp-yə ötürülən əlavə əmr sətri arqumentləri, məsələn --cookies-from-browser firefox.
@@ -1821,8 +1853,8 @@ Downloads:
   File Name Template: Fayl adı şablonu
   File Name Template Help: 'Mövcud sahələr: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Vaxt aralığı və bölümlər
-  Start Time: Başlama vaxtı (HH:MM:SS)
-  End Time: Bitmə vaxtı (HH:MM:SS)
+  Start Time: Başlama vaxtı
+  End Time: Bitmə vaxtı
   Split by Chapters: Bölümlərə görə ayrı fayllara böl
   Remove Segments: Seqmentləri sil
   Subtitles and Metadata: Titrlər və metaməlumatlar
@@ -1905,3 +1937,40 @@ Tray:
 Tray Icon:
   Title: "Sistem treyi nişanı"
   Follow App Theme: "Tətbiqin mövzusunu izlə"
+
+Form Inputs:
+  Enter Password Hint: "Şifrənizi daxil edin"
+  Choose Password Hint: "Şifrə seçin"
+  Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
+  Encryption Passphrase Hint: "Şifrələmə parol ifadənizi daxil edin"
+  Show Password: "Şifrəni göstər"
+  Hide Password: "Şifrəni gizlət"
+  Search Text Hint: "Axtarış sözlərini daxil edin"
+  Playlist Description Hint: "Bu pleylisti təsvir edin"
+  Filename Preview: "Fayl adının önizləməsi"
+  Enter Channels: "Kanalları daxil edin"
+  Enter Text: "Mətn daxil edin"
+  Video URL: Video və ya pleylist URL-si
+  Paste Link: Video və ya pleylist keçidini yapışdırın
+  Example: məs. {example}
+  No Minimum: Minimum yoxdur
+  No Maximum: Maksimum yoxdur
+  Any Age: İstənilən yaş
+  Included Terms Example: məs. təlimat, icmal
+  Excluded Terms Example: məs. treyler, önizləmə
+  Download Folder Hint: Yükləmələr qovluğunu istifadə etmək üçün boş saxlayın
+  Global Arguments Hint: Hər yükləmə üçün əlavə arqumentlər
+  Unlimited Hint: Limitsiz üçün 0
+  Add Argument: Arqument əlavə edin
+  Template Name Example: məs. Yalnız audio
+  Download Arguments Hint: Bu yükləmə üçün əlavə arqumentlər
+  Generated ID Hint: ID yaratmaq üçün boş saxlayın
+  Default Value: "Standart: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."
+
+Storage Startup Error:
+  Title: "Tətbiq məlumatları yüklənmədi"
+  Message: "Cihazda yaddaş sahəsi boşaldın və yenidən cəhd edin. Məlumatlarınız yüklənənədək sinxronizasiya dayandırılıb."
+  Retry: "Yenidən cəhd et"

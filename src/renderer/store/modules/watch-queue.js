@@ -46,6 +46,16 @@ export const watchQueueMutations = {
 
   clearWatchQueue(state) {
     state.items.splice(0)
+  },
+
+  // Vuex broadcasts this mutation to both downloads and the watch queue, so
+  // clearing history or deleting files also discards their queued copies.
+  removeYtDlpDownload(state, id) {
+    for (let index = state.items.length - 1; index >= 0; index--) {
+      if (state.items[index].route?.query?.downloadId === String(id)) {
+        state.items.splice(index, 1)
+      }
+    }
   }
 }
 

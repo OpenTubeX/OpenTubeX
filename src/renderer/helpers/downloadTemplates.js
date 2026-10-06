@@ -25,6 +25,11 @@ export const DEFAULT_DOWNLOAD_TEMPLATES = [
   { value: 'subtitles:vtt', label: t => t('Downloads.Templates.Subtitles Format', { format: 'VTT' }), options: { mode: 'subtitles', subtitleFormat: 'vtt' } }
 ]
 
+/** @param {string} value */
+export function filterDownloadTimeInput(value) {
+  return value.replaceAll(/[^0-9:]/g, '')
+}
+
 /**
  * Resolves the options stored by a built-in or custom template. Automatic
  * downloads use the same templates as the download prompt, without needing to

@@ -1,3 +1,5 @@
+import { runCooperatively, runSynchronously } from './cooperativeTask.js'
+
 const DAY = 24 * 60 * 60 * 1000
 const STOPWORDS = new Set(`
   a about above after again against all an and any are as at be because been
@@ -92,21 +94,48 @@ export function recommendationSubscriptionIds(subscriptions) {
     .filter(channel => typeof channel === 'string' && channel.length > 0)
 }
 
+/** Select only the learning budget; history is already sorted by recency. */
+export function getRecommendationLearningEntries(videos, isVisible, limit = 1000) {
+  const recent = []
+  for (const video of videos) {
+    if (!valid(video) || !isVisible(video)) continue
+    recent.push(video)
+    if (recent.length >= limit) break
+  }
+  return recent
+}
+
 /**
  * Learn reversible long-term, current-session, negative and channel interests.
  * Saved videos and positive feedback contribute even before the first watch.
  * Actual playback observations replace seekable resume positions when available.
  */
-export function buildRecommendationProfile(history, {
+function * buildRecommendationProfileSteps(history, {
   now = Date.now(), records = [], favorites = [], saved = [], subscriptions = [], round = 0,
 } = {}) {
-  const entries = Array.isArray(history) ? history.filter(valid) : []
-  const evidence = new Map((Array.isArray(records) ? records : []).filter(valid).map(record => [record.videoId, record]))
-  const seenVideoIds = new Set((Array.isArray(history) ? history : []).map(video => id(video?.videoId)).filter(Boolean))
-  const blockedChannels = new Set([...evidence.values()].filter(record => record.feedback === 'blockChannel').map(record => record.authorId).filter(Boolean))
-  const rejectedIds = new Set([...evidence.values()].filter(record => ['dismiss', 'blockChannel'].includes(record.feedback)).map(record => record.videoId))
+  const entries = []
+  const seenVideoIds = new Set()
+  for (const video of (Array.isArray(history) ? history : [])) {
+    if (valid(video)) entries.push(video)
+    const videoId = id(video?.videoId)
+    if (videoId) seenVideoIds.add(videoId)
+    yield
+  }
+  const evidence = new Map()
+  for (const record of (Array.isArray(records) ? records : [])) {
+    if (valid(record)) evidence.set(record.videoId, record)
+    yield
+  }
+  const blockedChannels = new Set()
+  const rejectedIds = new Set()
+  for (const record of evidence.values()) {
+    if (record.feedback === 'blockChannel' && record.authorId) blockedChannels.add(record.authorId)
+    if (['dismiss', 'blockChannel'].includes(record.feedback)) rejectedIds.add(record.videoId)
+    yield
+  }
   const sources = new Map()
   for (const record of entries.toSorted((a, b) => number(b.timeWatched) - number(a.timeWatched)).slice(0, 1000)) {
+    yield
     if (sources.has(record.videoId)) continue
     const learned = evidence.get(record.videoId)
     const actual = learned?.lastWatchSeconds
@@ -118,30 +147,43 @@ export function buildRecommendationProfile(history, {
     sources.set(record.videoId, { video: { ...record, ...learned }, weight, at: number(learned?.watchedAt ?? record.timeWatched), strong: completion >= 0.7 || (completion >= 0.35 && progress >= 180) })
   }
   for (const [videos, weight] of [[saved, 0.8], [favorites, 1.5]]) {
-    for (const video of (Array.isArray(videos) ? videos : []).filter(valid).slice(0, 500)) {
+    let count = 0
+    for (const video of (Array.isArray(videos) ? videos : [])) {
+      yield
+      if (!valid(video)) continue
       const existing = sources.get(video.videoId)
       sources.set(video.videoId, { video: { ...video, ...evidence.get(video.videoId) }, weight: Math.max(weight, existing?.weight ?? 0), at: existing?.at || now, strong: true })
+      if (++count >= 500) break
     }
   }
   for (const record of evidence.values()) {
+    yield
     if (record.feedback === 'positive') {
       const existing = sources.get(record.videoId)
       sources.set(record.videoId, { video: { ...existing?.video, ...record }, weight: Math.max(1.8, existing?.weight ?? 0), at: Math.max(number(existing?.at), number(record.feedbackAt)), strong: true })
     }
   }
   const usable = [...sources.values()].filter(source => !rejectedIds.has(source.video.videoId) && !blockedChannels.has(source.video.authorId))
-  const documents = usable.map(source => recommendationFeatures(source.video))
+  const documents = []
+  for (const source of usable) {
+    documents.push(recommendationFeatures(source.video))
+    yield
+  }
   const frequency = new Map()
-  for (const features of documents) for (const term of features.keys()) frequency.set(term, (frequency.get(term) ?? 0) + 1)
+  for (const features of documents) {
+    for (const term of features.keys()) frequency.set(term, (frequency.get(term) ?? 0) + 1)
+    yield
+  }
   const idf = new Map([...frequency].map(([term, count]) => [term, 1 + Math.log(1 + documents.length / count)]))
-  const vectorFor = video => normalize(new Map([...recommendationFeatures(video)].map(([term, value]) => [term, value * (idf.get(term) ?? 1)])))
+  const vectorForFeatures = features => normalize(new Map([...features].map(([term, value]) => [term, value * (idf.get(term) ?? 1)])))
+  const vectorFor = video => vectorForFeatures(recommendationFeatures(video))
   const longTerm = new Map()
   const session = new Map()
   const negative = new Map()
   let negativeStrength = 0
   const channelWeights = new Map()
-  for (const source of usable) {
-    const vector = vectorFor(source.video)
+  for (const [index, source] of usable.entries()) {
+    const vector = vectorForFeatures(documents[index])
     const weight = source.weight * decay(source.at, now, 60)
     source.vector = vector
     source.score = weight
@@ -149,8 +191,10 @@ export function buildRecommendationProfile(history, {
     sumInto(session, vector, source.weight * decay(source.at, now, 0.5))
     const channel = id(source.video.authorId)
     if (channel) channelWeights.set(channel, (channelWeights.get(channel) ?? 0) + source.weight * decay(source.at, now, 30))
+    yield
   }
   for (const record of evidence.values()) {
+    yield
     if (['dismiss', 'blockChannel'].includes(record.feedback)) {
       const weight = decay(record.feedbackAt, now, 60)
       sumInto(negative, vectorFor(record), weight)
@@ -216,10 +260,11 @@ export function buildRecommendationProfile(history, {
 }
 
 /** Rank by personalized relevance, graph evidence, confidence and feed novelty. */
-export function scoreRecommendationCandidates(candidates, profile, { exploration = 0.2, now = Date.now() } = {}) {
+function * scoreRecommendationCandidateSteps(candidates, profile, { exploration = 0.2, now = Date.now() } = {}) {
   const scored = new Map()
   const seedMap = new Map(profile.seeds.map(seed => [seed.videoId, seed]))
   for (const video of (Array.isArray(candidates) ? candidates : [])) {
+    yield
     if (!valid(video) || profile.seenVideoIds.has(video.videoId) || profile.rejectedIds.has(video.videoId) || profile.blockedChannels.has(video.authorId)) continue
     const vector = profile.vectorFor(video)
     const affinity = cosine(profile.interests, vector)
@@ -257,7 +302,7 @@ export function scoreRecommendationCandidates(candidates, profile, { exploration
   return [...scored.values()].sort((a, b) => b.score - a.score || tie(a.video.videoId, b.video.videoId))
 }
 
-export function diversifyRecommendations(scored, { limit = 24, exploration = 0.2 } = {}) {
+function * diversifyRecommendationSteps(scored, { limit = 24, exploration = 0.2 } = {}) {
   limit = Math.floor(number(limit))
   const pool = [...scored]
   const selected = []
@@ -267,6 +312,7 @@ export function diversifyRecommendations(scored, { limit = 24, exploration = 0.2
     let bestIndex = -1
     let bestScore = -Infinity
     for (let i = 0; i < pool.length; i++) {
+      yield
       const item = pool[i]
       const count = channelCounts.get(id(item.video.authorId)) ?? 0
       if (count >= 3) continue
@@ -283,6 +329,27 @@ export function diversifyRecommendations(scored, { limit = 24, exploration = 0.2
     channelCounts.set(channel, (channelCounts.get(channel) ?? 0) + 1)
   }
   return selected
+}
+
+export function buildRecommendationProfile(history, options) {
+  return runSynchronously(buildRecommendationProfileSteps(history, options))
+}
+
+export function buildRecommendationProfileAsync(history, options, isCancelled) {
+  return runCooperatively(buildRecommendationProfileSteps(history, options), isCancelled)
+}
+
+export function scoreRecommendationCandidates(candidates, profile, options) {
+  return runSynchronously(scoreRecommendationCandidateSteps(candidates, profile, options))
+}
+
+export function diversifyRecommendations(scored, options) {
+  return runSynchronously(diversifyRecommendationSteps(scored, options))
+}
+
+export async function rankRecommendationCandidatesAsync(candidates, profile, options, isCancelled) {
+  const scored = await runCooperatively(scoreRecommendationCandidateSteps(candidates, profile, options), isCancelled)
+  return scored && runCooperatively(diversifyRecommendationSteps(scored, options), isCancelled)
 }
 
 export function rankRecommendations(candidates, history, options = {}) {

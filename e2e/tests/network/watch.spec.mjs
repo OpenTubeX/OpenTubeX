@@ -277,7 +277,7 @@ test.describe('watch page metadata', () => {
   test('shows video metadata', async ({ page }) => {
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
-    await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('img.tabAvatar')).toBeVisible()
   })
 })
 
@@ -407,7 +407,7 @@ test.describe('watch page', () => {
     await page.evaluate(() => { window.__blockNextFormatUnload = true })
     await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
     await expect.poll(() => page.evaluate(() => window.__formatUnloadBlocked)).toBe(true)
-    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+    await expect(player.locator('.countdownPoster, .musicAudioSurface')).toBeVisible()
     await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.newFormat)
     await page.evaluate(() => window.__finishFormatUnload())
     await expect.poll(() => watchComponent.evaluate((component) => ({
@@ -497,7 +497,7 @@ test.describe('watch page', () => {
     await expect(searchButton).toBeVisible()
     const languageButton = transcriptCard.getByRole('button', { name: 'Transcript language' })
     await expect(languageButton).toBeVisible()
-    await expect(transcriptCard.getByPlaceholder('Search transcript')).toHaveCount(0)
+    await expect(transcriptCard.getByRole('searchbox', { name: 'Search transcript', exact: true })).toHaveCount(0)
     await languageButton.click()
     await transcriptCard.getByRole('button', { name: 'German' }).click()
     await expect(copyButton).toHaveAttribute('aria-disabled', 'true')
@@ -511,7 +511,7 @@ test.describe('watch page', () => {
     await expect(transcriptSegments).toHaveClass(/transcriptFadeTop/)
     await expect(transcriptSegments).not.toHaveClass(/transcriptFadeBottom/)
     await searchButton.click()
-    await transcriptCard.getByPlaceholder('Search transcript').fill('Transcript line 2500.')
+    await transcriptCard.getByRole('searchbox', { name: 'Search transcript', exact: true }).fill('Transcript line 2500.')
     await expect(page.locator('.transcriptSegment')).toHaveCount(1)
     await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBe(0)
     await expect(transcriptSegments).not.toHaveClass(/transcriptFadeTop|transcriptFadeBottom/)
@@ -1677,7 +1677,7 @@ test.describe('custom Shorts player', () => {
     await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
     await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true')
-    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(actionDock).toHaveCSS('opacity', '1')
     await expect(actionDock).toHaveCSS('pointer-events', 'auto')
@@ -1743,7 +1743,7 @@ test.describe('custom Shorts player', () => {
     await expect(page.locator('.infoArea')).toBeHidden()
     const video = player.locator('video')
     await expect(video).toHaveAttribute('loop', '')
-    await expect(video).toHaveAttribute('poster', FIRST_SHORT_THUMBNAIL)
+    await expect(player.locator('.countdownPoster img:not(.retryImagePlaceholder)')).toHaveAttribute('src', FIRST_SHORT_THUMBNAIL)
     await expect(video).toHaveCSS('object-fit', 'cover')
     await expect(player.locator('.shortsTopControl').first()).toHaveCSS(
       'backdrop-filter',

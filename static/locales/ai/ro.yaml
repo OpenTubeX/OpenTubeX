@@ -265,6 +265,11 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Enable Tabs: "Activează filele"
+    Thumbnail Swipe Gestures:
+      Left: Glisare la stânga pe miniaturi
+      Right: Glisare la dreapta pe miniaturi
+      Description: Glisați orizontal pe miniatura unui videoclip și eliberați pentru a efectua acțiunea selectată.
     Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
     Use tray icon: "Folosește pictograma din zona de notificare"
     Close to system tray: "Închide în zona de notificare"
@@ -273,7 +278,9 @@ Settings:
     Swipe to refresh: Glisează pentru a reîmprospăta
     Blur Thumbnails: Estompează miniaturile
     Navigation:
-      Show Active Subscriptions: Afișează abonamentele active
+      Always Show Navigation Bar: Afișează întotdeauna bara de navigare când este în partea de jos
+      Compact Tab Labels: Bară de navigare compactă când este în partea de jos
+      Show Active Subscriptions: Afișează abonamentele active în bara laterală
       Navigation: Navigare
       Customize Navigation: Personalizează navigarea
       Add Item: Adaugă element
@@ -355,6 +362,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Compact Mobile Mini Player: "Mini player mobil compact"
     Always Show Mobile Search Bar: "Afișează mereu bara de căutare pe mobil"
     Frosted Glass Player UI: "Interfață de player cu efect de sticlă mată"
     Main Color Theme:
@@ -437,8 +445,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Luminoasă"
-      OpenTubeX Dark: "OpenTubeX Întunecată"
+      Ocean Light: "Ocean Luminoasă"
+      Ocean Dark: "Ocean Întunecată"
       Custom: Personalizată
     Light Theme: Temă luminoasă
     Dark Theme: Temă întunecată
@@ -625,6 +633,8 @@ Settings:
     Preload Upcoming Videos: "Preîncarcă videoclipurile următoare"
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
+    Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
+    Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -661,9 +671,9 @@ Settings:
     Update Managed Tools: Actualizează
     Managed Tools Download Error Template: 'Instrumentele gestionate nu au putut fi descărcate: {errors}'
     Download Folder: Folder pentru descărcări
-    Global Additional yt-dlp Arguments: Argumente yt-dlp suplimentare globale
+    Global Additional yt-dlp Arguments: Argumente suplimentare yt-dlp
     Concurrent Downloads: Descărcări simultane
-    Bandwidth Limit: Limită de lățime de bandă (KiB/s, 0 pentru nelimitat)
+    Bandwidth Limit: Limită de lățime de bandă (KiB/s)
     Choose Download Folder: Alege folderul pentru descărcări
     Download Templates: Șabloane de descărcare
     Manage Download Templates: Gestionează șabloanele de descărcare ({templateCount})
@@ -736,8 +746,8 @@ Settings:
       Automatic: Actualizează automat
       Ask: Întreabă înainte de actualizare
       Manual: Actualizează numai manual
-    yt-dlp Executable Path: Calea executabilului yt-dlp
-    FFmpeg Executable Path: Calea executabilului FFmpeg
+    yt-dlp Executable Path: Executabil yt-dlp
+    FFmpeg Executable Path: Executabil FFmpeg
     Restricted Playback Authentication: "Cookie-uri yt-dlp"
     Cookie Source: Sursa cookie-urilor
     Cookie Sources:
@@ -979,7 +989,7 @@ Settings:
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
     Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
-    Server URL: Adresa URL a serverului
+    Server URL: URL-ul serverului de sincronizare
     Checking Server: Se verifică serverul de sincronizare…
     Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
     Username: Nume de utilizator
@@ -1070,7 +1080,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy
-    IP Block Recovery Script Path: Calea scriptului de recuperare după blocarea IP-ului
+    IP Block Recovery Script Path: Script de recuperare după blocarea IP
     Select IP Block Recovery Script File: Selectați fișierul scriptului de recuperare după blocarea IP-ului
     Running IP block recovery script: Se rulează scriptul de recuperare după blocarea IP-ului
     IP block recovery script failed: 'Scriptul de recuperare după blocarea IP-ului a eșuat (cod de ieșire: {exitCode})'
@@ -1082,7 +1092,7 @@ Settings:
       Excluded Channels: "Canale excluse"
       Tooltip: "Introdu ID-ul unui canal pentru a împiedica omiterea segmentelor SponsorBlock din videoclipurile sale. ID-ul trebuie să corespundă exact și diferențiază literele mari de cele mici."
     Enable SponsorBlock Submission: Activează trimiterea către SponsorBlock
-    SponsorBlock Private User ID (optional): ID privat de utilizator SponsorBlock (opțional)
+    SponsorBlock Private User ID (optional): ID privat de utilizator (opțional)
     SponsorBlock Private User ID Tooltip: Lipiți ID-ul privat de utilizator SponsorBlock din extensia de browser. Lăsați câmpul gol pentru a folosi un ID generat de aplicație.
     Generated SponsorBlock User ID: ID de utilizator SponsorBlock generat
     Generated SponsorBlock User ID Tooltip: Acest ID de utilizator SponsorBlock generat de aplicație poate fi folosit în extensia de browser sau când folosiți aplicația pe alt computer.
@@ -1094,7 +1104,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activează Return YouTube Dislike
-    Return YouTube Dislike Url: Adresa URL a API-ului Return YouTube Dislike (implicită este https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Disable Channel Links: Dezactivează linkurile canalelor
   Password Dialog:
@@ -1142,6 +1152,21 @@ About:
   Please read the {roomRulesLink}: Citiți {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
 Profile:
+  Customization: Personalizare
+  Manage Profile Subscriptions: Gestionează abonamentele profilului
+  Icon Names:
+    Person: Persoană
+    People: Persoane
+    Headphones: Căști
+    Gaming: Jocuri
+    Film: Film
+    Art: Artă
+    Science: Știință
+    Globe: Glob
+    Heart: Inimă
+    Sun: Soare
+    Moon: Lună
+    Trophy: Trofeu
   Profile Icon: Pictograma profilului
   Choose an Emoji: Alegeți un emoji
   Custom Emoji: Emoji personalizat
@@ -1331,12 +1356,16 @@ Video:
     Hide: Ascunde
     Show: Afișează
     Scroll Mini Player:
+      Collapse Controls: "Restrânge comenzile"
+      Expand Controls: "Extinde comenzile"
       Back to Top: Înapoi sus
       Return to Video Tab: Revino la fila videoclipului
       Hide: Ascunde miniplayerul
       Play: Redă
       Pause: Pauză
       Drag Handle: Mută miniplayerul
+      Rewind 10 seconds: Înapoi cu 10 secunde
+      Forward 10 seconds: Înainte cu 10 secunde
     SponsorBlock:
       CancelCurrentSegment: Anulează crearea segmentului
       ClearSegments: Șterge segmentele
@@ -1481,6 +1510,7 @@ Share:
   Share Post: Distribuie postarea
   Timestamp Link Copied: Linkul cu marcaj temporal a fost copiat în clipboard
 Context Menu:
+  Open in a Background Tab: "Deschide într-o filă în fundal"
   Select Tab: Selectează fila
   Close Tabs Before: Închide filele anterioare
   Close Tabs After: Închide filele următoare
@@ -1645,6 +1675,7 @@ Description:
   Games: Jocuri
 Tooltips:
   General Settings:
+    Enable Tabs: "Dezactivarea închide toate celelalte file și păstrează pagina curentă deschisă."
     Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
     Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.
@@ -1689,6 +1720,7 @@ Tooltips:
     Preload Upcoming Videos: "Obține și memorează în cache adresele yt-dlp ale videoclipurilor următoare. Coada are prioritate față de liste și recomandări."
     Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
+    Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.
@@ -1856,8 +1888,8 @@ Downloads:
   File Name Template: Șablon pentru numele fișierului
   File Name Template Help: 'Câmpuri disponibile: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Interval de timp și capitole
-  Start Time: Ora de început (HH:MM:SS)
-  End Time: Ora de sfârșit (HH:MM:SS)
+  Start Time: Ora de început
+  End Time: Ora de sfârșit
   Split by Chapters: Împarte în fișiere separate după capitole
   Remove Segments: Elimină segmentele
   Subtitles and Metadata: Subtitrări și metadate
@@ -1946,3 +1978,40 @@ Tray:
 Tray Icon:
   Title: "Pictogramă în zona de notificare"
   Follow App Theme: "Urmează tema aplicației"
+
+Form Inputs:
+  Enter Password Hint: "Introdu parola ta"
+  Choose Password Hint: "Alege o parolă"
+  Confirm Password Hint: "Repetă noua parolă"
+  Encryption Passphrase Hint: "Introdu fraza ta de criptare"
+  Show Password: "Afișează parola"
+  Hide Password: "Ascunde parola"
+  Search Text Hint: "Introduceți termeni de căutare"
+  Playlist Description Hint: "Descrieți această listă de redare"
+  Filename Preview: "Previzualizarea numelui fișierului"
+  Enter Channels: "Introdu canale"
+  Enter Text: "Introdu text"
+  Video URL: URL video sau listă de redare
+  Paste Link: Lipește un link video sau de listă de redare
+  Example: de ex. {example}
+  No Minimum: Fără minim
+  No Maximum: Fără maxim
+  Any Age: Orice vechime
+  Included Terms Example: de ex. tutorial, recenzie
+  Excluded Terms Example: de ex. trailer, previzualizare
+  Download Folder Hint: Lasă gol pentru a folosi dosarul Descărcări
+  Global Arguments Hint: Argumente opționale pentru fiecare descărcare
+  Unlimited Hint: 0 pentru nelimitat
+  Add Argument: Adaugă un argument
+  Template Name Example: de ex. Doar audio
+  Download Arguments Hint: Argumente opționale pentru această descărcare
+  Generated ID Hint: Lasă gol pentru a genera un ID
+  Default Value: "Implicit: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."
+
+Storage Startup Error:
+  Title: "Datele aplicației nu au putut fi încărcate"
+  Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
+  Retry: "Încearcă din nou"

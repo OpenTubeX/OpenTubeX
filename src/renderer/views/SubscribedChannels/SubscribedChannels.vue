@@ -14,7 +14,9 @@
         v-show="subscribedChannels.length > 1"
         ref="searchBarChannels"
         input-type="search"
-        :placeholder="$t('Channels.Search bar placeholder')"
+        :label="$t('Channels.Search bar placeholder')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
         :value="query"
         :show-action-button="false"
         :maxlength="255"
@@ -45,6 +47,7 @@
             >
               <FtRetryImage
                 v-if="hasUsableThumbnail(channel.thumbnail)"
+                :fallback-icon="['fas', 'circle-user']"
                 class="channelThumbnail"
                 :src="thumbnailURL(channel.thumbnail)"
                 alt=""

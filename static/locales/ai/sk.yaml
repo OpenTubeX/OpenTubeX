@@ -263,6 +263,11 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Enable Tabs: "Povoliť karty"
+    Thumbnail Swipe Gestures:
+      Left: Potiahnutie doľava po náhľadoch
+      Right: Potiahnutie doprava po náhľadoch
+      Description: Potiahnite vodorovne po náhľade videa a uvoľnením vykonajte vybranú akciu.
     Data Saver Thumbnails: "Úsporné náhľady"
     Use tray icon: "Používať ikonu v systémovej lište"
     Close to system tray: "Pri zatvorení skryť do systémovej lišty"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Obnoviť potiahnutím
     Blur Thumbnails: Rozmazať miniatúry
     Navigation:
-      Show Active Subscriptions: Zobraziť aktívne odbery
+      Always Show Navigation Bar: Vždy zobrazovať navigačnú lištu, keď je dole
+      Compact Tab Labels: Kompaktná navigačná lišta, keď je dole
+      Show Active Subscriptions: Zobraziť aktívne odbery v bočnom paneli
       Navigation: Navigácia
       Customize Navigation: Prispôsobiť navigáciu
       Add Item: Pridať položku
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktný mobilný miniprehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Svetlá"
-      OpenTubeX Dark: "OpenTubeX Tmavá"
+      Ocean Light: "Ocean Svetlá"
+      Ocean Dark: "Ocean Tmavá"
       Custom: Vlastný
     Light Theme: Svetlý motív
     Dark Theme: Tmavý motív
@@ -621,6 +629,8 @@ Settings:
     Preload Upcoming Videos: "Prednačítavať nasledujúce videá"
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
     Concurrent Preloads: "Súbežné prednačítania"
+    Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
+    Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -657,9 +667,9 @@ Settings:
     Update Managed Tools: Aktualizovať
     Managed Tools Download Error Template: 'Spravované nástroje sa nepodarilo stiahnuť: {errors}'
     Download Folder: Priečinok sťahovania
-    Global Additional yt-dlp Arguments: Globálne dodatočné argumenty yt-dlp
+    Global Additional yt-dlp Arguments: Ďalšie argumenty yt-dlp
     Concurrent Downloads: Súbežné sťahovania
-    Bandwidth Limit: Limit šírky pásma (KiB/s, 0 znamená bez obmedzenia)
+    Bandwidth Limit: Limit šírky pásma (KiB/s)
     Choose Download Folder: Vybrať priečinok sťahovania
     Download Templates: Šablóny sťahovania
     Manage Download Templates: Spravovať šablóny sťahovania ({templateCount})
@@ -732,8 +742,8 @@ Settings:
       Automatic: Aktualizovať automaticky
       Ask: Pred aktualizáciou sa opýtať
       Manual: Aktualizovať len ručne
-    yt-dlp Executable Path: Cesta k spustiteľnému súboru yt-dlp
-    FFmpeg Executable Path: Cesta k spustiteľnému súboru FFmpeg
+    yt-dlp Executable Path: Spustiteľný súbor yt-dlp
+    FFmpeg Executable Path: Spustiteľný súbor FFmpeg
     Restricted Playback Authentication: "Cookies yt-dlp"
     Cookie Source: Zdroj súborov cookie
     Cookie Sources:
@@ -966,7 +976,7 @@ Settings:
     Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
     Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'
     Description: 'Synchronizujte odbery, profily, playlisty, históriu pozerania a podporované nastavenia so synchronizačným serverom OpenTubeX alebo LibreTube. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.'
-    Server URL: Adresa URL servera
+    Server URL: URL synchronizačného servera
     Checking Server: Kontroluje sa synchronizačný server…
     Server Unavailable: K tomuto synchronizačnému serveru sa nepodarilo pripojiť. Skontrolujte adresu URL a skúste to znova.
     Username: Používateľské meno
@@ -1055,7 +1065,7 @@ Settings:
     Open All Tabs Confirmation: "Otvoriť všetky karty?"
     Server Update Required: "Aktualizujte tento server, aby podporoval šifrovanú synchronizáciu v reálnom čase."
   Proxy Settings:
-    IP Block Recovery Script Path: Cesta k skriptu na obnovenie po zablokovaní IP adresy
+    IP Block Recovery Script Path: Skript na obnovu po blokovaní IP
     Select IP Block Recovery Script File: Vybrať súbor skriptu na obnovenie po zablokovaní IP adresy
     Running IP block recovery script: Spúšťa sa skript na obnovenie po zablokovaní IP adresy
     IP block recovery script failed: 'Skript na obnovenie po zablokovaní IP adresy zlyhal (návratový kód: {exitCode})'
@@ -1067,7 +1077,7 @@ Settings:
       Excluded Channels: "Vylúčené kanály"
       Tooltip: "Zadajte ID kanála, aby sa v jeho videách nepreskakovali segmenty SponsorBlock. ID sa musí presne zhodovať a rozlišujú sa veľké a malé písmená."
     Enable SponsorBlock Submission: Zapnúť odosielanie do SponsorBlock
-    SponsorBlock Private User ID (optional): Súkromné ID používateľa SponsorBlock (voliteľné)
+    SponsorBlock Private User ID (optional): Súkromné ID používateľa (voliteľné)
     SponsorBlock Private User ID Tooltip: Vložte súkromné ID používateľa SponsorBlock z rozšírenia prehliadača. Ak chcete použiť ID vytvorené aplikáciou, ponechajte pole prázdne.
     Generated SponsorBlock User ID: Vytvorené ID používateľa SponsorBlock
     Generated SponsorBlock User ID Tooltip: Toto ID používateľa SponsorBlock vytvorené aplikáciou môžete použiť v rozšírení prehliadača alebo v aplikácii na inom počítači.
@@ -1079,7 +1089,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Zapnúť Return YouTube Dislike
-    Return YouTube Dislike Url: Adresa URL API Return YouTube Dislike (predvolená je https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Password Dialog:
     Incorrect Password: Nesprávne heslo
     Unlock: Odomknúť
@@ -1120,6 +1130,21 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Customization: Prispôsobenie
+  Manage Profile Subscriptions: Spravovať odbery profilu
+  Icon Names:
+    Person: Osoba
+    People: Ľudia
+    Headphones: Slúchadlá
+    Gaming: Hranie
+    Film: Film
+    Art: Umenie
+    Science: Veda
+    Globe: Glóbus
+    Heart: Srdce
+    Sun: Slnko
+    Moon: Mesiac
+    Trophy: Trofej
   Profile Icon: Ikona profilu
   Choose an Emoji: Vyberte emoji
   Custom Emoji: Vlastné emoji
@@ -1302,12 +1327,16 @@ Video:
     Hide: Skryť
     Show: Zobraziť
     Scroll Mini Player:
+      Collapse Controls: "Zbaliť ovládanie"
+      Expand Controls: "Rozbaliť ovládanie"
       Back to Top: Späť nahor
       Return to Video Tab: Vrátiť sa na kartu videa
       Hide: Skryť miniatúrny prehrávač
       Play: Prehrať
       Pause: Pozastaviť
       Drag Handle: Presunúť miniatúrny prehrávač
+      Rewind 10 seconds: Pretočiť o 10 sekúnd späť
+      Forward 10 seconds: Pretočiť o 10 sekúnd dopredu
     SponsorBlock:
       CancelCurrentSegment: Zrušiť vytváranie segmentu
       ClearSegments: Vymazať segmenty
@@ -1444,6 +1473,7 @@ Share:
   Share failed: "Odkaz sa nepodarilo zdieľať"
   Timestamp Link Copied: Odkaz s časovým údajom bol skopírovaný do schránky
 Context Menu:
+  Open in a Background Tab: "Otvoriť na karte na pozadí"
   Select Tab: Vybrať kartu
   Close Tabs Before: Zavrieť predchádzajúce karty
   Close Tabs After: Zavrieť nasledujúce karty
@@ -1604,6 +1634,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
+    Enable Tabs: "Vypnutím zatvoríte všetky ostatné karty a ponecháte aktuálnu stránku otvorenú."
     Data Saver Thumbnails: "Používať náhľady s nižším rozlíšením na zníženie spotreby dát."
     Use AI Translation Completions: Doplní medzery v ľudských prekladoch textom vytvoreným umelou inteligenciou. Ľudské preklady majú vždy prednosť.
     Update Relative Timestamps: Aktualizuje relatívne časové údaje v celej aplikácii, kým je stránka otvorená. Ak je táto možnosť vypnutá, aktualizujú sa až po opätovnom načítaní alebo otvorení stránky.
@@ -1648,6 +1679,7 @@ Tooltips:
     Preload Upcoming Videos: "Načíta a uloží do vyrovnávacej pamäte adresy yt-dlp pre nasledujúce videá. Front má prednosť pred zoznamami a odporúčaniami."
     Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
     Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
+    Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.
@@ -1811,8 +1843,8 @@ Downloads:
   File Name Template: Šablóna názvu súboru
   File Name Template Help: 'Dostupné polia: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Časový rozsah a kapitoly
-  Start Time: Čas začiatku (HH:MM:SS)
-  End Time: Čas konca (HH:MM:SS)
+  Start Time: Čas začiatku
+  End Time: Čas konca
   Split by Chapters: Rozdeliť kapitoly do samostatných súborov
   Remove Segments: Odstrániť segmenty
   Subtitles and Metadata: Titulky a metaúdaje
@@ -1898,3 +1930,40 @@ Tray:
 Tray Icon:
   Title: "Ikona v oblasti oznámení"
   Follow App Theme: "Použiť motív aplikácie"
+
+Form Inputs:
+  Enter Password Hint: "Zadajte svoje heslo"
+  Choose Password Hint: "Zvoľte heslo"
+  Confirm Password Hint: "Zopakujte nové heslo"
+  Encryption Passphrase Hint: "Zadajte svoju šifrovaciu prístupovú frázu"
+  Show Password: "Zobraziť heslo"
+  Hide Password: "Skryť heslo"
+  Search Text Hint: "Zadajte hľadané výrazy"
+  Playlist Description Hint: "Opíšte tento zoznam videí"
+  Filename Preview: "Ukážka názvu súboru"
+  Enter Channels: "Zadajte kanály"
+  Enter Text: "Zadajte text"
+  Video URL: URL videa alebo playlistu
+  Paste Link: Vložte odkaz na video alebo playlist
+  Example: napr. {example}
+  No Minimum: Bez minima
+  No Maximum: Bez maxima
+  Any Age: Ľubovoľný vek
+  Included Terms Example: napr. návod, recenzia
+  Excluded Terms Example: napr. trailer, ukážka
+  Download Folder Hint: Nechajte prázdne pre použitie priečinka Stiahnuté
+  Global Arguments Hint: Voliteľné argumenty pre každé sťahovanie
+  Unlimited Hint: 0 pre neobmedzenú rýchlosť
+  Add Argument: Pridajte argument
+  Template Name Example: napr. Iba zvuk
+  Download Arguments Hint: Voliteľné argumenty pre toto sťahovanie
+  Generated ID Hint: Nechajte prázdne pre vygenerovanie ID
+  Default Value: "Predvolené: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
+
+Storage Startup Error:
+  Title: "Údaje aplikácie sa nepodarilo načítať"
+  Message: "Uvoľnite miesto v zariadení a skúste to znova. Synchronizácia je pozastavená, kým sa údaje nenačítajú."
+  Retry: "Skúsiť znova"

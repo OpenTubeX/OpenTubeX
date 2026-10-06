@@ -2,7 +2,7 @@
   <div>
     <FtCard class="card">
       <h2>{{ editOrCreateProfileLabel }}</h2>
-      <FtFlexBox class="profileEdit">
+      <div class="profileEdit">
         <div>
           <h3>{{ $t("Profile.Color Picker") }}</h3>
           <FtFlexBox
@@ -12,12 +12,18 @@
               class="colorOption themeColorOption"
               :class="{ selected: profileBgColor === THEME_BG_COLOR }"
               :aria-pressed="profileBgColor === THEME_BG_COLOR"
+              :aria-label="$t('Profile.Theme Color')"
               :title="$t('Profile.Theme Color')"
               tabindex="0"
               role="button"
               @click="selectProfileBgColor(THEME_BG_COLOR)"
               @keydown.enter.space.prevent="selectProfileBgColor(THEME_BG_COLOR)"
-            />
+            >
+              <FtIcon
+                :icon="['fas', 'palette']"
+                aria-hidden="true"
+              />
+            </div>
             <div
               v-for="color in COLOR_VALUES"
               :key="color"
@@ -54,20 +60,15 @@
             @cancel="restoreSemanticProfileBgColor"
             @reset="restoreSemanticProfileBgColor"
           />
-          <FtInput
-            class="colorSelection"
-            placeholder=""
-            :value="profileBgColorLabel"
-            :show-action-button="false"
-            :disabled="true"
-          />
         </div>
         <div class="secondEditRow">
           <div>
             <h3>{{ editOrCreateProfileNameLabel }}</h3>
             <FtInput
               class="profileName"
-              :placeholder="$t('Profile.Profile Name')"
+              :label="$t('Profile.Profile Name')"
+              :icon="['fas', 'circle-user']"
+              :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
               :disabled="isMainProfile"
               :value="translatedProfileName"
               :show-action-button="false"
@@ -79,6 +80,25 @@
               {{ $t("Profile.Profile Icon") }}
             </h3>
             <div class="profileIconOptions">
+              <div
+                class="builtinIconOptions"
+                role="group"
+                :aria-label="$t('Profile.Profile Icon')"
+              >
+                <button
+                  v-for="icon in PROFILE_ICONS"
+                  :key="icon"
+                  type="button"
+                  class="builtinIconOption"
+                  :class="{ selected: profileIcon?.type === 'icon' && profileIcon.value === icon }"
+                  :aria-label="iconLabels[icon]"
+                  :title="iconLabels[icon]"
+                  :aria-pressed="profileIcon?.type === 'icon' && profileIcon.value === icon"
+                  @click="selectBuiltinIcon(icon)"
+                >
+                  <FtIcon :icon="['fas', icon]" />
+                </button>
+              </div>
               <div
                 class="emojiOptions"
                 role="group"
@@ -96,21 +116,28 @@
                   {{ emoji }}
                 </button>
               </div>
-              <label
-                class="customEmojiLabel"
-                for="profileEmoji"
-              >
-                {{ $t("Profile.Custom Emoji") }}
+              <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -- FtInput renders the nested input control. -->
+              <label class="customEmojiLabel">
+                <span>{{ $t('Profile.Custom Emoji') }}</span>
+                <FtInput
+                  class="customEmojiInput"
+                  :placeholder="CUSTOM_EMOJI_PLACEHOLDER"
+                  :label="$t('Profile.Custom Emoji')"
+                  :show-label="false"
+                  :value="profileIcon?.type === 'emoji' ? profileIcon.value : ''"
+                  :show-action-button="false"
+                  :input-filter="filterCustomEmoji"
+                  @input="selectCustomEmoji"
+                >
+                  <template #extraAction>
+                    <span
+                      v-if="profileIcon?.type !== 'emoji' || !profileIcon.value"
+                      class="customEmojiPlaceholder"
+                      aria-hidden="true"
+                    >{{ CUSTOM_EMOJI_PLACEHOLDER }}</span>
+                  </template>
+                </FtInput>
               </label>
-              <input
-                id="profileEmoji"
-                class="customEmojiInput"
-                type="text"
-                inputmode="text"
-                :placeholder="$t('Profile.Emoji')"
-                :value="profileIcon?.type === 'emoji' ? profileIcon.value : ''"
-                @input="selectCustomEmoji"
-              >
               <input
                 ref="imageInput"
                 class="imageInput"
@@ -126,7 +153,7 @@
                   @click="openImagePicker"
                 />
                 <FtButton
-                  v-if="profileIcon"
+                  v-if="profileIcon && profileIcon.type !== 'initial'"
                   :label="$t('Profile.Use Initial')"
                   :icon="['fas', 'undo']"
                   @click="clearProfileIcon"
@@ -142,13 +169,24 @@
                 :profile="profilePreview"
                 :fallback="profileInitial"
               />
-              <FtFlexBox>
-                <FtButton
+              <FtFlexBox
+                class="profileActions"
+                :class="{ profileCreationActions: isNew }"
+              >
+                <template
                   v-if="isNew"
-                  :label="$t('Profile.Create Profile')"
-                  :icon="['fas', 'user-plus']"
-                  @click="saveProfile"
-                />
+                >
+                  <FtButton
+                    :label="$t('Profile.Create Profile')"
+                    :icon="['fas', 'user-plus']"
+                    @click="saveProfile"
+                  />
+                  <FtButton
+                    :label="$t('Cancel')"
+                    :icon="['fas', 'xmark']"
+                    @click="emit('cancel-creation')"
+                  />
+                </template>
                 <template
                   v-else
                 >
@@ -175,7 +213,7 @@
             </div>
           </div>
         </div>
-      </FtFlexBox>
+      </div>
     </FtCard>
     <FtPrompt
       v-if="cropDialogOpen"
@@ -233,7 +271,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -251,6 +290,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { calculateColorLuminance, colors, resolveThemeColor } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
+import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
 
 /**
  * @typedef {object} Profile
@@ -258,7 +298,7 @@ import { getFirstCharacter } from '../../helpers/strings'
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
- * @property {{type: 'emoji'|'image', value: string}|null|undefined} icon
+ * @property {{type: 'icon'|'emoji'|'image', value: string}|{type: 'initial'}|null|undefined} icon
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
@@ -268,6 +308,10 @@ import { getFirstCharacter } from '../../helpers/strings'
 const { locale, t } = useI18n()
 
 const props = defineProps({
+  isActive: {
+    type: Boolean,
+    default: true
+  },
   isMainProfile: {
     type: Boolean,
     required: true
@@ -282,7 +326,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['new-profile-created', 'profile-deleted'])
+const emit = defineEmits(['new-profile-created', 'profile-deleted', 'cancel-creation'])
 
 const COLOR_VALUES = colors.map(color => color.value)
 
@@ -308,6 +352,13 @@ const lastOpaqueProfileBgColor = ref(
 const profileTextColor = ref(props.profile.textColor)
 
 const profileIcon = ref(deepCopy(props.profile.icon ?? null))
+let automaticProfileIcon = props.isNew
+
+watch(profileName, (name) => {
+  if (automaticProfileIcon) {
+    profileIcon.value = { ...(name.trim() ? INITIAL_PROFILE_ICON : DEFAULT_PROFILE_ICON) }
+  }
+})
 
 const imageInput = useTemplateRef('imageInput')
 const cropCanvas = useTemplateRef('cropCanvas')
@@ -319,7 +370,30 @@ let cropBitmap = null
 let cropPointer = null
 let imageSelectionRequest = 0
 
+watch(() => props.isActive, (isActive) => {
+  if (isActive) return
+  profileColorPickerRef.value?.close(false, false)
+  imageSelectionRequest++
+  closeCropEditor()
+})
+
+const CUSTOM_EMOJI_PLACEHOLDER = '🙂'
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
+
+const iconLabels = computed(() => ({
+  'circle-user': t('Profile.Icon Names.Person'),
+  users: t('Profile.Icon Names.People'),
+  headphones: t('Profile.Icon Names.Headphones'),
+  gamepad: t('Profile.Icon Names.Gaming'),
+  film: t('Profile.Icon Names.Film'),
+  palette: t('Profile.Icon Names.Art'),
+  flask: t('Profile.Icon Names.Science'),
+  globe: t('Profile.Icon Names.Globe'),
+  heart: t('Profile.Icon Names.Heart'),
+  sun: t('Profile.Icon Names.Sun'),
+  moon: t('Profile.Icon Names.Moon'),
+  trophy: t('Profile.Icon Names.Trophy')
+}))
 
 watch(profileBgColor, (value) => {
   profileTextColor.value = value === THEME_BG_COLOR ? THEME_TEXT_COLOR : calculateColorLuminance(value)
@@ -343,20 +417,21 @@ onBeforeUnmount(() => {
 // the color input can't handle a CSS variable, so it needs the resolved value,
 // which has to be refreshed whenever the theme changes the variable underneath it
 const themeColor = ref(resolveThemeColor())
-
-watch([() => store.getters.getMainColor, () => store.getters.getBaseTheme], async () => {
-  await nextTick()
+const themeColorObserver = new MutationObserver(() => {
   themeColor.value = resolveThemeColor()
 })
+
+onMounted(() => {
+  themeColorObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] })
+  themeColor.value = resolveThemeColor()
+})
+
+onBeforeUnmount(() => themeColorObserver.disconnect())
 
 const customColorPickerValue = computed(() => {
   if (profileBgColor.value === THEME_BG_COLOR) return themeColor.value
 
   return profileBgColor.value === 'transparent' ? '#000000' : profileBgColor.value
-})
-
-const profileBgColorLabel = computed(() => {
-  return profileBgColor.value === THEME_BG_COLOR ? t('Profile.Theme Color') : profileBgColor.value
 })
 
 function isSemanticProfileBgColor(color) {
@@ -439,24 +514,31 @@ function saveProfile() {
   }
 }
 
+function selectBuiltinIcon(icon) {
+  automaticProfileIcon = false
+  profileIcon.value = { type: 'icon', value: icon }
+  restoreOpaqueProfileColor()
+}
+
 function selectEmoji(emoji) {
+  automaticProfileIcon = false
   profileIcon.value = { type: 'emoji', value: emoji }
   restoreOpaqueProfileColor()
 }
 
-function selectCustomEmoji(event) {
-  const value = event.target.value
+function filterCustomEmoji(value) {
   const candidate = value ? getFirstCharacter(value, locale.value) : ''
   const currentEmoji = profileIcon.value?.type === 'emoji' ? profileIcon.value.value : ''
+  return candidate && !isEmoji(candidate) ? currentEmoji : candidate
+}
 
-  if (candidate && !isEmoji(candidate)) {
-    event.target.value = currentEmoji
+function selectCustomEmoji(candidate) {
+  if (candidate === (profileIcon.value?.type === 'emoji' ? profileIcon.value.value : '')) return
+  if (!candidate) {
+    clearProfileIcon()
     return
   }
-
-  event.target.value = candidate
-  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : null
-  restoreOpaqueProfileColor()
+  selectEmoji(candidate)
 }
 
 function isEmoji(value) {
@@ -608,6 +690,7 @@ function applyCrop() {
     canvas.height
   )
 
+  automaticProfileIcon = false
   profileIcon.value = {
     type: 'image',
     value: canvas.toDataURL('image/webp', 0.9)
@@ -628,7 +711,8 @@ function closeCropEditor() {
 }
 
 function clearProfileIcon() {
-  profileIcon.value = null
+  automaticProfileIcon = true
+  profileIcon.value = { ...(profileName.value.trim() ? INITIAL_PROFILE_ICON : DEFAULT_PROFILE_ICON) }
   restoreOpaqueProfileColor()
 }
 

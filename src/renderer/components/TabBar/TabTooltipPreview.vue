@@ -1,14 +1,15 @@
 <template>
   <div class="tabTooltipPreview">
-    <img
+    <FtRetryImage
       v-if="previewUrl"
       :src="previewUrl"
       alt=""
       draggable="false"
       @error="previewUrl = null"
-    >
+    />
     <FtRetryImage
       v-else-if="avatarUrl && avatarUrl !== failedAvatarUrl"
+      :fallback-icon="pageIcon || ['fas', 'display']"
       :src="avatarUrl"
       alt=""
       class="tabTooltipPreviewAvatar"
@@ -32,6 +33,7 @@
   >
     <FtRetryImage
       v-if="showIcon && avatarUrl && avatarUrl !== failedAvatarUrl"
+      :fallback-icon="pageIcon || ['fas', 'display']"
       :src="avatarUrl"
       class="tabTooltipGridTitleAvatar"
       alt=""
@@ -69,9 +71,9 @@ let requestId = 0
 watch(() => props.tab.id, async tabId => {
   const currentRequestId = ++requestId
   previewUrl.value = null
-  if (!process.env.IS_ELECTRON || typeof window.ftElectron?.tabs?.capturePreview !== 'function') return
+  if (!process.env.IS_ELECTRON || typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function') return
   try {
-    const dataUrl = await window.ftElectron.tabs.capturePreview(tabId)
+    const dataUrl = (await window.ftElectron.tabs.getCachedPreviews([tabId]))[tabId]
     if (currentRequestId === requestId) {
       previewUrl.value = typeof dataUrl === 'string' && dataUrl.length > 0 ? dataUrl : null
     }
@@ -96,7 +98,8 @@ onBeforeUnmount(() => { requestId++ })
   backdrop-filter: var(--secondary-card-bg-blur, none);
 }
 
-.tabTooltipPreview img {
+.tabTooltipPreview img,
+.tabTooltipPreview .retryImagePlaceholder {
   display: block;
   inline-size: 100%;
   block-size: 100%;

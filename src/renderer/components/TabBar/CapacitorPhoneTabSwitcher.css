@@ -70,7 +70,7 @@
   color: var(--text-with-main-color);
   background-color: var(--primary-color);
   border: 2px solid var(--card-bg-color);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
@@ -191,8 +191,7 @@
   gap: 4px;
 }
 
-.capacitorPhoneTabHistoryEntry,
-.capacitorPhoneTabHistoryButton {
+.capacitorPhoneTabHistoryEntry {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -213,8 +212,7 @@
   overflow-wrap: anywhere;
 }
 
-.capacitorPhoneTabHistoryEntry :deep(.ft-icon),
-.capacitorPhoneTabHistoryButton :deep(.ft-icon) {
+.capacitorPhoneTabHistoryEntry :deep(.ft-icon) {
   flex: 0 0 20px;
   inline-size: 20px;
 }
@@ -225,24 +223,11 @@
   font-size: 12px;
 }
 
-.capacitorPhoneTabHistoryButton {
-  inline-size: 100%;
-  border-block-start: 1px solid var(--border-color);
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
-  font-size: 13px;
-}
-
 .capacitorPhoneTabHistoryEntry[aria-current='page'],
-.capacitorPhoneTabHistoryEntry:is(:hover, :active),
-.capacitorPhoneTabHistoryButton:is(:hover, :active) {
+.capacitorPhoneTabHistoryEntry:is(:hover, :active) {
   background-color: var(--side-nav-hover-color);
 }
 
-
-.withHistory .capacitorPhoneTabClose {
-  inset-block-end: 52px;
-}
 
 .capacitorPhoneOpenTabs,
 .capacitorPhoneSyncedTabsContent {
@@ -258,6 +243,8 @@
 
 .capacitorPhoneTabRow {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-inline-size: 0;
   border: 2px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -293,6 +280,7 @@
 
 .capacitorPhoneTabTarget {
   display: flex;
+  flex: 1;
   flex-direction: column;
   inline-size: 100%;
   min-inline-size: 0;
@@ -308,8 +296,13 @@
   touch-action: manipulation;
 }
 
+.capacitorPhoneTabTarget :deep(.capacitorTabPreview) {
+  flex: 1;
+}
+
 .capacitorPhoneTabTitle {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 6px;
   align-self: stretch;

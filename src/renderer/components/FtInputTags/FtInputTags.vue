@@ -1,7 +1,15 @@
 <template>
   <div
     class="ft-input-tags-component"
+    role="group"
+    :aria-labelledby="`${id}-heading`"
   >
+    <h3
+      :id="`${id}-heading`"
+      class="tagInputHeading"
+    >
+      {{ label }}
+    </h3>
     <div
       v-if="disabled"
       class="disabledMsg"
@@ -12,7 +20,8 @@
       ref="tagNameInput"
       :disabled="disabled || isUpdating"
       :placeholder="tagNamePlaceholder"
-      :label="label"
+      :icon="areChannelTags ? ['fas', 'users'] : ['fas', 'hashtag']"
+      :label="entryLabel || (areChannelTags ? t('Form Inputs.Enter Channels') : t('Form Inputs.Enter Text'))"
       :setting-key="settingKey"
       :min-input-length="minInputLength"
       :show-label="true"
@@ -23,20 +32,13 @@
       :force-action-button-icon-name="['fas', 'arrow-right']"
       @click="updateTags"
     />
-    <div
+    <FtCheckboxList
       v-if="tagList.length >= 1"
-      class="checkbox-container"
-    >
-      <input
-        :id="id"
-        type="checkbox"
-        :checked="showTags"
-        @change="toggleShowTags"
-      >
-      <label :for="id">
-        {{ t('Settings.Distraction Free Settings.Show Added Items') }}
-      </label>
-    </div>
+      :labels="[t('Settings.Distraction Free Settings.Show Added Items')]"
+      :values="['show']"
+      :model-value="showTags ? ['show'] : []"
+      @update:model-value="toggleShowTags"
+    />
     <div
       v-if="showTags"
       class="ft-tag-box"
@@ -53,6 +55,7 @@
               class="tag-icon-link"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="tag.icon"
                 alt=""
                 class="tag-icon"
@@ -91,6 +94,7 @@
 </template>
 
 <script setup>
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { useId, useTemplateRef, ref } from 'vue'
@@ -120,6 +124,10 @@ const props = defineProps({
   label: {
     type: String,
     required: true
+  },
+  entryLabel: {
+    type: String,
+    default: ''
   },
   minInputLength: {
     type: Number,

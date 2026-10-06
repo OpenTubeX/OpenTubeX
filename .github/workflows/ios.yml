@@ -64,7 +64,8 @@ jobs:
         GH_TOKEN: ${{ github.token }}
     - run: brew list ffmpeg >/dev/null 2>&1 || brew install ffmpeg
     - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p 'ios_*python_test.py'
-    - name: Select an installed simulator
+    - name: Boot an installed simulator
+      timeout-minutes: 5
       env:
         DEVICE_FAMILY: ${{ matrix.device }}
       run: |
@@ -75,8 +76,11 @@ jobs:
                    for device in group if device['name'].startswith(os.environ['DEVICE_FAMILY'])]
         if not devices:
             raise SystemExit('No matching iOS simulator installed')
+        device = devices[-1]
+        # bootstatus -b boots if needed and also waits for an ongoing boot.
+        subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True, timeout=240)
         with open(os.environ['GITHUB_ENV'], 'a') as output:
-            output.write('SIMULATOR_ID=' + devices[-1]['udid'] + '\n')
+            output.write('SIMULATOR_ID=' + device['udid'] + '\n')
         PY
     - name: Build and test without Apple credentials
       env:
@@ -88,6 +92,7 @@ jobs:
         fi
         xcodebuild -project ios/App/App.xcodeproj -scheme App \
           -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+          -parallel-testing-enabled NO \
           -derivedDataPath ios/DerivedData -resultBundlePath ios/TestResults \
           "${args[@]}" \
           CODE_SIGN_IDENTITY=- test

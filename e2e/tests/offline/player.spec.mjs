@@ -297,7 +297,7 @@ test('a Short opened in a background tab never starts playback', async ({ app, p
   }))).toEqual({ paused: true, currentTime: 0 })
 })
 
-test('uses the playing interface hide delay in fullscreen and full window', async ({ app, page }) => {
+test('uses one playing interface hide delay in portrait, landscape, fullscreen and full window', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   await video.evaluate(element => { element.loop = true })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -307,20 +307,25 @@ test('uses the playing interface hide delay in fullscreen and full window', asyn
     await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
   })
 
-  for (const mode of ['fullWindow', 'fullscreen']) {
+  for (const mode of ['portrait', 'landscape', 'fullWindow', 'fullscreen']) {
+    if (mode === 'portrait') await setWindowSize(app, page, { width: 420, height: 920 })
+    if (mode === 'landscape') await setWindowSize(app, page, { width: 1600, height: 880 })
     if (mode === 'fullWindow') await page.locator('body').press('s')
-    else await setPlayerFullscreen(page, true)
+    if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
     await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
     const bounds = await player.boundingBox()
+    await page.mouse.move(0, 0)
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(player).not.toHaveClass(/no-cursor/)
+    await page.waitForTimeout(250)
+    await expect(controls).toHaveAttribute('shown', 'true')
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
 
     if (mode === 'fullWindow') await page.locator('body').press('s')
-    else await setPlayerFullscreen(page, false)
-    await expect(player).not.toHaveAttribute('data-playing-interface-hide-delay')
+    if (mode === 'fullscreen') await setPlayerFullscreen(page, false)
+    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
   }
 })
 
@@ -455,6 +460,149 @@ test('playback rate shortcuts use the normal rate while hold-to-double is active
   }
 })
 
+test.describe('player wheel gestures', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...PLAYER_SEED,
+        displayVideoPlayButton: true,
+        videoVolumeMouseScroll: false,
+        videoSkipMouseScroll: true,
+        videoPlaybackRateMouseScroll: true,
+      }
+    }
+  })
+
+  for (const gesture of ['seek', 'speed']) {
+    test(`scroll-to-${gesture} works across the video with controls shown and hidden`, async ({ app, page }) => {
+      const video = await openDemoVideo({ app, page })
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const controls = player.locator('.shaka-controls-container')
+      await video.evaluate(element => {
+        element.pause()
+        element.currentTime = 10
+        element.playbackRate = 1.25
+      })
+      // Corners and center of the video, above the bottom control toolbar.
+      const points = [[0.2, 0.25], [0.8, 0.25], [0.5, 0.45], [0.2, 0.65], [0.8, 0.65]]
+      for (const fullscreen of [false, true]) {
+        await setPlayerFullscreen(page, fullscreen)
+        const bounds = await player.boundingBox()
+        for (const shown of [false, true]) {
+          for (const [horizontal, vertical] of points) {
+            const point = { x: bounds.x + bounds.width * horizontal, y: bounds.y + bounds.height * vertical }
+            await page.mouse.move(point.x, point.y)
+            const scrollY = await page.evaluate(() => window.scrollY)
+            const value = () => video.evaluate((element, gesture) => gesture === 'seek' ? element.currentTime : element.playbackRate, gesture)
+            if (gesture === 'speed') await page.keyboard.down('Control')
+            try {
+              for (const [delta, expected] of [[-120, gesture === 'seek' ? 15 : 1.3], [120, gesture === 'seek' ? 10 : 1.25]]) {
+                await controls.evaluate((element, shown) => {
+                  if (shown) element.setAttribute('shown', 'true')
+                  else element.removeAttribute('shown')
+                }, shown)
+                const target = await page.evaluate(point => {
+                  const element = document.elementFromPoint(point.x, point.y)
+                  return `${element.tagName}.${element.getAttribute('class')}`
+                }, point)
+                await page.mouse.wheel(0, delta)
+                await expect.poll(value, { message: `${gesture} over ${target}; fullscreen=${fullscreen}, controls shown=${shown}` }).toBe(expected)
+                expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
+              }
+            } finally {
+              if (gesture === 'speed') await page.keyboard.up('Control')
+            }
+          }
+        }
+      }
+    })
+  }
+
+  test('scroll-to-seek works over the center play icon', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    await video.evaluate(element => { element.pause(); element.currentTime = 10 })
+    const icon = page.locator(`${activeTab} .shaka-big-buttons-container .shaka-play-button svg`).first()
+    for (const fullscreen of [false, true]) {
+      await setPlayerFullscreen(page, fullscreen)
+      await icon.hover()
+      await page.mouse.wheel(0, -120)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(15)
+      await page.mouse.wheel(0, 120)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(10)
+    }
+  })
+
+  test('scroll-to-speed works over the center play icon', async ({ app, page }) => {
+    const video = await openDemoVideo({ app, page })
+    await video.evaluate(element => { element.pause(); element.playbackRate = 1.25 })
+    const icon = page.locator(`${activeTab} .shaka-big-buttons-container .shaka-play-button svg`).first()
+    for (const fullscreen of [false, true]) {
+      await setPlayerFullscreen(page, fullscreen)
+      await icon.hover()
+      for (const modifier of ['Control', 'Meta']) {
+        await page.keyboard.down(modifier)
+        try {
+          await page.mouse.wheel(0, -120)
+          await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.3)
+          await page.mouse.wheel(0, 120)
+          await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+        } finally {
+          await page.keyboard.up(modifier)
+        }
+      }
+    }
+  })
+})
+
+test('mobile speed holds pass through hidden center buttons and restore playback on release', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator('.app').evaluate(element => {
+    const mobile = () => {
+      for (const name of ['capacitorTabs', 'capacitorTabletLayout']) {
+        if (!element.classList.contains(name)) element.classList.add(name)
+      }
+    }
+    new MutationObserver(mobile).observe(element, { attributeFilter: ['class'] })
+    mobile()
+  })
+  const video = await openMockedVideo(page)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const controls = player.locator('.shaka-controls-container')
+  const playButton = player.locator('.shaka-big-buttons-container .shaka-play-button')
+  const session = await page.context().newCDPSession(page)
+  const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
+    type, touchPoints: point ? [point] : [],
+  })
+  try {
+    for (const fullscreen of [false, true]) {
+      await setPlayerFullscreen(page, fullscreen)
+      await video.evaluate(element => { element.loop = true; element.playbackRate = 1.25; return element.play() })
+      await controls.evaluate(element => element.removeAttribute('shown'))
+      await expect(playButton).toHaveCSS('opacity', '0')
+      const bounds = await playButton.boundingBox()
+      const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      await touch('touchStart', center)
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2.5)
+      await touch('touchEnd')
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+      expect(await video.evaluate(element => element.paused)).toBe(false)
+      await expect(controls).not.toHaveAttribute('shown')
+
+      // Let the hold's release-click suppression expire before a fresh tap.
+      await page.waitForTimeout(400)
+      // A short tap reveals controls; the visible center button still pauses.
+      await touch('touchStart', center)
+      await touch('touchEnd')
+      await expect(controls).toHaveAttribute('shown', 'true')
+      await playButton.click()
+      await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    }
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await session.detach()
+  }
+})
+
 test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
@@ -492,19 +640,24 @@ test('smoothly transitions video zoom at fractional UI scale', async ({ app, pag
   const video = await openDemoVideo({ app, page })
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
 
-  await page.locator('body').press('z')
-  const zoomTransition = await video.evaluateHandle((element) => {
-    const transition = element.getAnimations().find(animation =>
-      animation instanceof CSSTransition && animation.transitionProperty === 'transform'
-    )
-
-    if (!transition) {
-      throw new Error('Video zoom transition not found')
+  // Capture and pause the transition in the renderer before a delayed
+  // Playwright round trip can miss its 200ms lifetime.
+  const zoomState = await video.evaluateHandle((element) => {
+    const state = { transition: null }
+    function captureTransition(event) {
+      if (event.target !== element || event.propertyName !== 'transform') return
+      state.transition = element.getAnimations().find(animation =>
+        animation instanceof CSSTransition && animation.transitionProperty === 'transform'
+      )
+      state.transition.pause()
+      element.removeEventListener('transitionrun', captureTransition)
     }
-
-    transition.pause()
-    return transition
+    element.addEventListener('transitionrun', captureTransition)
+    return state
   })
+  await page.locator('body').press('z')
+  await expect.poll(() => zoomState.evaluate(state => state.transition !== null)).toBe(true)
+  const zoomTransition = await zoomState.evaluateHandle(state => state.transition)
 
   expect(await zoomTransition.evaluate(transition => transition.effect.getTiming())).toMatchObject({
     duration: 200,
@@ -518,6 +671,7 @@ test('smoothly transitions video zoom at fractional UI scale', async ({ app, pag
   expect(intermediateScale).toBeLessThan(1.25)
 
   await zoomTransition.dispose()
+  await zoomState.dispose()
 
   // A new choice replaces the in-flight transition and becomes its final state.
   await page.locator('body').press('z')
@@ -1350,6 +1504,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   const surface = player.locator('.shaka-controls-container')
   const playButtons = player.locator('.shaka-big-buttons-container .shaka-play-button')
 
+  await surface.evaluate(element => element.setAttribute('casting', 'true'))
   await expect(playButtons).toHaveCount(1)
   await expect(player.locator('.shaka-controls-button-panel .shaka-play-button')).toBeHidden()
   await expect(player.locator('.shaka-controls-button-panel .shaka-pip-button')).toBeVisible()
@@ -1357,6 +1512,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   await expect(player.locator('.shaka-mute-button, .shaka-volume-bar-container')).toHaveCount(0)
   await expect.poll(() => video.evaluate(element => ({ muted: element.muted, volume: element.volume })))
     .toEqual({ muted: false, volume: 1 })
+  await surface.evaluate(element => element.removeAttribute('casting'))
   await video.evaluate(element => element.play())
   await surface.evaluate(element => element.setAttribute('shown', 'true'))
 
@@ -2680,13 +2836,30 @@ for (const uiScale of [100, 125]) {
       await expect(player).toHaveClass(/scrollMiniPlayer/)
       await expect(page.locator('.tabBar .tab')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
+      await page.evaluate(() => {
+        const spacer = document.createElement('div')
+        spacer.style.height = '2000px'
+        document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(spacer)
+        window.scrollTo(0, 900)
+      })
       await attachScreenshot('video continues while browsing subscriptions')
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
       await player.evaluate(element => {
         document.documentElement.dataset.reducedMotion = 'no-preference'
         window.oversizedMiniControls = []
         window.miniRestoreFrames = 0
+        window.miniRestoreGeometry = []
         const sample = () => {
           if (!element.isConnected) return
+          const bounds = element.getBoundingClientRect()
+          const center = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
+          window.miniRestoreGeometry.push({
+            left: bounds.left,
+            top: bounds.top,
+            width: bounds.width,
+            height: bounds.height,
+            visible: element.contains(center)
+          })
           if (element.hasAttribute('data-inline-mini-drag')) {
             window.miniRestoreFrames++
             for (const button of element.querySelectorAll('.scrollMiniPlayerControls button')) {
@@ -2705,10 +2878,21 @@ for (const uiScale of [100, 125]) {
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       const samples = await page.evaluate(() => {
         cancelAnimationFrame(window.miniRestoreSample)
-        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls }
+        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls, geometry: window.miniRestoreGeometry }
       })
       expect(samples.frames).toBeGreaterThan(0)
       expect(samples.oversized).toEqual([])
+      const start = samples.geometry[0]
+      const end = samples.geometry.at(-1)
+      const expanding = samples.geometry.filter(frame => frame.width > start.width + 5 && frame.width < end.width - 5)
+      expect(expanding.length, 'the video visibly expands from the mini player').toBeGreaterThan(2)
+      expect(expanding.filter(frame => !frame.visible), 'the moving video stays above the Watch preview').toEqual([])
+      const distance = Math.hypot(end.left - start.left, end.top - start.top, end.width - start.width, end.height - start.height)
+      const steps = samples.geometry.slice(1).map((frame, index) => {
+        const previous = samples.geometry[index]
+        return Math.hypot(frame.left - previous.left, frame.top - previous.top, frame.width - previous.width, frame.height - previous.height)
+      })
+      expect(Math.max(...steps), 'the player must not jump at the preview handoff').toBeLessThan(distance / 2)
       expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
       await expect(page.locator('.tabBar .tab')).toHaveText(title)
     })

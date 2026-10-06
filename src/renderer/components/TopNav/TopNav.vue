@@ -1,11 +1,16 @@
 <template>
   <nav
+    ref="header"
     class="topNav"
-    :class="{ topNavBarColor: barColor, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
+    :class="{ topNavBarColor: barColor, compactLogo, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
+    :style="{ '--header-side-space': `${headerSideSpace}px` }"
     @keydown.esc="closePhoneSearch"
   >
     <div class="topNavInner">
-      <div class="side">
+      <div
+        ref="navigationActions"
+        class="side"
+      >
         <button
           class="menuButton navButton"
           :aria-label="expandCollapseSideBarLabel"
@@ -92,13 +97,14 @@
             @click="closePhoneSearch"
           >
             <FtIcon
-              :icon="['fas', 'times']"
+              :icon="['fas', 'arrow-left']"
               aria-hidden="true"
             />
           </button>
           <FtInput
             ref="searchInput"
             :placeholder="t('Search / Go to URL')"
+            :show-label="false"
             class="searchInput"
             input-type="search"
             is-search
@@ -131,7 +137,10 @@
           </FtInput>
         </div>
       </div>
-      <div class="side profiles">
+      <div
+        ref="headerActions"
+        class="side profiles"
+      >
         <button
           v-if="!hideSearchBar && !phoneSearchPinned"
           ref="searchTrigger"
@@ -177,7 +186,7 @@
           />
         </button>
         <button
-          v-if="showDownloadsButton && !compactPhoneActions"
+          v-if="showDownloadsButton && !headerShortcutsOverflow"
           type="button"
           class="downloadsButton navButton"
           :class="{ active: downloadsWindowOpen }"
@@ -192,7 +201,7 @@
           />
         </button>
         <button
-          v-if="showSettingsButton && !compactPhoneActions"
+          v-if="showSettingsButton && !headerShortcutsOverflow"
           type="button"
           class="settingsButton navButton"
           :class="{ active: settingsWindowOpen }"
@@ -206,8 +215,14 @@
             :icon="['fas', 'cog']"
           />
         </button>
-        <CapacitorPhoneTabSwitcher @request-exit="emit('request-android-exit')" />
-        <FtQuickSettingsMenu :header-actions-overflow="compactPhoneActions">
+        <CapacitorPhoneTabSwitcher
+          v-if="store.getters.getTabsEnabled"
+          @request-exit="emit('request-android-exit')"
+        />
+        <FtQuickSettingsMenu
+          :compact-header="phoneLayout"
+          :header-actions-overflow="headerShortcutsOverflow"
+        >
           <template #overflow-actions="{ close }">
             <template v-if="compactPhoneActions">
               <button
@@ -285,17 +300,78 @@ const route = useRoute()
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
-const compactViewport = usePhoneLayout('(max-width: 680px)')
 const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
+const header = useTemplateRef('header')
+const navigationActions = useTemplateRef('navigationActions')
+const headerActions = useTemplateRef('headerActions')
+const headerMetrics = shallowRef({ width: window.innerWidth, navigation: 0, actions: 0, logoText: 0, shortcutSpace: window.innerWidth })
+const compactLogo = computed(() => !hideSearchBar.value && headerMetrics.value.width < 440 + 2 * Math.max(
+  headerMetrics.value.navigation + headerMetrics.value.logoText,
+  headerMetrics.value.actions
+))
+const headerSideSpace = computed(() => Math.max(
+  headerMetrics.value.navigation + (compactLogo.value ? 0 : headerMetrics.value.logoText),
+  headerMetrics.value.actions
+))
+const compactHeader = computed(() => headerMetrics.value.width <= 680 ||
+  headerMetrics.value.width < 240 + 2 * Math.max(headerMetrics.value.navigation, headerMetrics.value.actions))
 const phoneLayout = computed(() => process.env.IS_CAPACITOR
-  ? compactViewport.value || !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
-  : compactViewport.value)
+  ? compactHeader.value || !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
+  : compactHeader.value)
 const showSearchContainer = ref(!phoneLayout.value)
-const narrowHeader = usePhoneLayout('(width < 480px)')
+const narrowHeader = computed(() => headerMetrics.value.width < 480)
 const compactPhoneActions = computed(() => phoneLayout.value && narrowHeader.value)
+const headerShortcutsOverflow = computed(() => phoneLayout.value &&
+  headerMetrics.value.shortcutSpace < 52 * (Number(showDownloadsButton.value) + Number(showSettingsButton.value)))
 const searchTrigger = useTemplateRef('searchTrigger')
 const pinnedSearchTrigger = useTemplateRef('pinnedSearchTrigger')
 watch(phoneLayout, phone => { showSearchContainer.value = !phone })
+
+// Reserve equal space on each side using the actual controls, including optional
+// actions. Exclude the search icon so collapsing search cannot change its cutoff.
+function measureHeader() {
+  const width = header.value.getBoundingClientRect().width
+  if (phoneLayout.value && showSearchContainer.value) {
+    headerMetrics.value = { ...headerMetrics.value, width }
+    return
+  }
+  const headerStyle = getComputedStyle(header.value.firstElementChild)
+  const measureActions = (element, outerMargin, excludeShortcuts = false) => {
+    const children = [...element.children].filter(child =>
+      !child.classList.contains('navSearchButton') &&
+      (!excludeShortcuts || !child.matches('.downloadsButton, .settingsButton')) &&
+      child.getBoundingClientRect().width > 0)
+    const style = getComputedStyle(element)
+    return children.reduce((total, child) => {
+      const childStyle = getComputedStyle(child)
+      return total + child.getBoundingClientRect().width +
+        (parseFloat(childStyle.marginInlineStart) || 0) + (parseFloat(childStyle.marginInlineEnd) || 0)
+    }, 0) + Math.max(0, children.length - 1) * (parseFloat(style.columnGap) || 0) +
+      (parseFloat(style.paddingInlineStart) || 0) + (parseFloat(style.paddingInlineEnd) || 0) +
+      (parseFloat(style[outerMargin]) || 0) + (parseFloat(headerStyle.paddingInlineStart) || 12)
+  }
+  const text = navigationActions.value.querySelector('.logoText')
+  const textStyle = text && getComputedStyle(text)
+  const logoText = textStyle ? parseFloat(textStyle.inlineSize) + parseFloat(textStyle.marginInlineStart) : 0
+  const navigationWidth = measureActions(navigationActions.value, 'marginInlineStart')
+  const navigationSpace = navigationWidth -
+    (text?.getBoundingClientRect().width > 0 ? logoText : 0)
+  const sectionGap = parseFloat(headerStyle.columnGap) || 0
+  headerMetrics.value = {
+    width,
+    navigation: navigationSpace,
+    actions: measureActions(headerActions.value, 'marginInlineEnd'),
+    logoText,
+    // Reserve a 48px touch target plus the 4px gap for search and each shortcut.
+    // Budget phone shortcuts against the icon so hiding the name cannot make
+    // shortcuts appear again and repeatedly toggle the layout.
+    shortcutSpace: width - (phoneLayout.value ? navigationSpace : navigationWidth) - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
+      (hideSearchBar.value ? 0 : 52)
+  }
+}
+const headerResizeObserver = new ResizeObserver(measureHeader)
+// The scrollbar setting changes the actions' margin without resizing their box.
+watch(() => store.getters.getScrollbarThumbWidth, measureHeader, { flush: 'post' })
 const logicalHistoryState = computed(() => {
   const tabId = store.getters.getPresentedTabId
   return store.getters.getTabHistoryState(tabId)
@@ -1036,6 +1112,10 @@ function handleKeyboardShortcuts(event) {
 }
 
 onMounted(() => {
+  measureHeader()
+  for (const element of [header.value, navigationActions.value, headerActions.value]) {
+    headerResizeObserver.observe(element)
+  }
   // Store is not up-to-date when the component mounts, so we use timeout.
   setTimeout(() => {
     if (store.getters.getExpandSideBar && !useWatchSideNavOverlay.value) {
@@ -1065,6 +1145,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  headerResizeObserver.disconnect()
   window.removeEventListener('opentubex:focus-search', handleFocusSearch)
 
   if (process.env.IS_ELECTRON) {

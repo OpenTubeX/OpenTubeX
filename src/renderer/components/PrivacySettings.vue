@@ -66,7 +66,6 @@
         @change="updateExternalLinkHandling"
       />
     </div>
-    <br>
     <FtFlexBox>
       <FtSlider
         :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
@@ -81,7 +80,6 @@
         @change="updateWatchedPercentageThreshold"
       />
     </FtFlexBox>
-    <br>
     <FtFlexBox>
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"

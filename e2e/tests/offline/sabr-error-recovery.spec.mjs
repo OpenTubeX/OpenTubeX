@@ -652,7 +652,7 @@ for (const zoom of [1, 1.25]) {
     })
     const player = page.locator('.ftVideoPlayer')
     await expect(player.locator('.countdownOverlay')).toBeVisible()
-    const poster = player.locator('.countdownPoster img')
+    const poster = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
     await expect(poster).toBeVisible()
     await expect.poll(() => poster.evaluate(image => image.naturalWidth)).toBe(480)
     expect(await poster.getAttribute('alt')).toBe('')
@@ -660,7 +660,7 @@ for (const zoom of [1, 1.25]) {
     expect(await poster.boundingBox()).toEqual(bounds)
     expect(await poster.evaluate(image => getComputedStyle(image).objectFit)).toBe('contain')
     await expect(player.locator('.countdownOverlay')).toBeHidden({ timeout: 15_000 })
-    await expect(poster).toHaveCount(0)
+    await expect(poster).toBeHidden()
     await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBeGreaterThanOrEqual(3)
   })
 
@@ -710,7 +710,8 @@ for (const zoom of [1, 1.25]) {
       })
       await expect.poll(() => page.evaluate(() => window.__playerTeardownFinished)).toBe(true)
       expect(await player.locator('video').evaluate(element => element.videoWidth)).toBe(0)
-      await expect(player.locator('video')).toHaveAttribute('poster', /i\.ytimg\.com/)
+      await expect(player.locator('.countdownPoster')).toBeVisible()
+      await expect(player.locator('.countdownPoster img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /i\.ytimg\.com/)
       const during = await player.boundingBox()
       expect(Math.abs(during.height - before.height)).toBeLessThanOrEqual(1)
       await testInfo.attach('player-during-teardown', {
@@ -1334,7 +1335,7 @@ test('repeated SABR failures without a legacy fallback never switch to audio', a
 
   const errorPlayer = page.locator('.videoPlayerError')
   await expect(errorPlayer).toBeVisible()
-  await expect(errorPlayer.locator('.videoThumbnail')).toHaveAttribute('src', /\S+/)
+  await expect(errorPlayer.locator('.videoThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\S+/)
 
   const [playerBounds, infoBounds] = await Promise.all([
     errorPlayer.boundingBox(),

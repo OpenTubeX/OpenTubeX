@@ -24,6 +24,9 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
     /** @private */
     this._checkmarkIcon = checkmarkIcon
 
+    /** @private */
+    this.audioTrackCount_ = 0
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })
@@ -46,11 +49,11 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
 
     if (this.isSubMenu) {
       this.eventManager.listen(this.controls, 'submenuopen', () => {
-        this.updateAudioTracks_()
+        this.updateVisibility_()
       })
 
       this.eventManager.listen(this.controls, 'submenuclose', () => {
-        this.updateAudioTracks_()
+        this.updateVisibility_()
       })
     }
 
@@ -102,13 +105,14 @@ export class AudioTrackSelection extends shaka.ui.SettingsMenu {
 
     menu.querySelector('shaka-chosen-item')?.parentElement.focus()
 
-    this.button.setAttribute('shaka-status', this.currentSelection.innerText)
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent)
+    this.audioTrackCount_ = count
+    this.updateVisibility_()
+  }
 
-    if (count > 1 && !this.isSubMenuOpened) {
-      this.button.classList.remove('shaka-hidden')
-    } else {
-      this.button.classList.add('shaka-hidden')
-    }
+  /** @private */
+  updateVisibility_() {
+    this.button.classList.toggle('shaka-hidden', this.audioTrackCount_ <= 1 || this.isSubMenuOpened)
   }
 
   /**

@@ -478,7 +478,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       })
     }
   } else if (process.env.IS_CAPACITOR) {
-    if (doCreateNewTab || doCreateNewWindow) {
+    if ((doCreateNewTab || doCreateNewWindow) && getCapacitorTabService().tabsEnabled) {
       return getCapacitorTabService().createTab({ path, query }, title, makeActive)
     }
 

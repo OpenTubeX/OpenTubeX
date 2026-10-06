@@ -5,6 +5,7 @@ import { runInNewContext } from 'node:vm'
 import * as Vue from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../../src/renderer/helpers/videoThumbnail.js'
+import { getCustomIconImageSource } from '../../src/renderer/helpers/customIcons.js'
 
 async function compileComponent(path, bindings = {}) {
   const { descriptor } = parse(await readFile(new URL(`../../src/renderer/components/${path}`, import.meta.url), 'utf8'))
@@ -13,30 +14,50 @@ async function compileComponent(path, bindings = {}) {
     .replace(/^import .* from .*\n/gm, '')
     .replace("import('../helpers/api/capacitor-http')", 'loadNativeHttp()')
     .replace('export default', 'const component =')
-  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
+  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
 }
 
-async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue') {
+async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map()) {
   const requests = []
+  const loads = []
   const timers = new Map()
   const settings = Vue.reactive({ getThumbnailDataSaver: false })
   const RetryImage = await compileComponent('FtRetryImage.vue', {
     store: { getters: settings },
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
+    FtIcon: { render: () => Vue.h('fallback') },
+    thumbnailPlaceholder: 'placeholder.svg',
     setTimeout: callback => { const id = {}; timers.set(id, callback); return id },
     clearTimeout: id => timers.delete(id)
   })
   const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
     FtRetryImage: RetryImage, FtIcon: { render: () => Vue.h('fallback') },
+    Icon: { render: () => Vue.h('fallback') }, getCustomIconImageSource,
+    resolveIconifyId: () => 'test:icon', normalizeFaIcon: () => null,
+    currentIconPack: Vue.ref('material'), faAliasToCanon: {},
     getTabAvatarUrl: tab => tab.avatarUrl, getTabPreviewFallbackUrl: () => null,
     getTabPageIcon: () => null, formatTabTitle: title => title
   })
   const renderer = Vue.createRenderer({
-    createElement: tag => ({ tag, props: {}, children: [] }),
+    createElement: tag => ({
+      tag, props: {}, children: [],
+      dispatchEvent(event) {
+        Object.defineProperties(event, { target: { value: this }, currentTarget: { value: this } })
+        this.props.onLoad?.(event)
+      }
+    }),
     createComment: () => ({ tag: 'comment' }),
     createText: text => ({ tag: 'text', text }),
     setElementText() {}, setText() {},
-    patchProp: (node, key, previous, value) => { node.props[key] = value },
+    patchProp: (node, key, previous, value) => {
+      node.props[key] = value
+      if (node.tag === 'img' && key === 'src') {
+        const size = cachedSources.get(value)
+        node.complete = !!size
+        node.naturalWidth = size?.[0] ?? 0
+        node.naturalHeight = size?.[1] ?? 0
+      }
+    },
     insert(node, parent, anchor) {
       node.parent = parent
       const index = anchor ? parent.children.indexOf(anchor) : -1
@@ -50,20 +71,85 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   const thumbnail = Vue.ref('https://yt3.ggpht.com/avatar')
   const root = { children: [] }
   const app = renderer.createApp({ render: () => Vue.h(Avatar, componentPath === 'FtRetryImage.vue'
-    ? { src: thumbnail.value }
+    ? { src: thumbnail.value, onLoad: event => loads.push({ type: event.type, target: event.target, currentTarget: event.currentTarget }) }
+    : componentPath === 'FtIcon/FtIcon.vue'
+    ? { icon: { type: 'image', value: thumbnail.value } }
     : componentPath.startsWith('TabBar/')
     ? { tab: { id: 'channel-tab', avatarUrl: thumbnail.value, title: 'Channel' } }
     : { thumbnail: thumbnail.value }) })
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
-  return { requests, timers, thumbnail, settings, find }
+  return { requests, loads, timers, thumbnail, settings, find }
 }
 
 async function fail(image) {
   for (const handler of [image.props.onError].flat()) await handler({ type: 'error' })
   await Vue.nextTick()
 }
+
+test('cached avatars are visible on mount and when switching back to a cached source before load events', async t => {
+  const src = 'https://yt3.ggpht.com/avatar'
+  const f = await mountAvatar(t, null, 'FtChannelAvatar/FtChannelAvatar.vue', new Map([[src, [48, 48]]]))
+  await Vue.nextTick()
+  assert.ok(!f.find('fallback'), 'a complete cached image needs no placeholder')
+  assert.notEqual(f.find('img').props.style?.visibility, 'hidden')
+  f.thumbnail.value = 'https://yt3.ggpht.com/uncached-avatar'
+  await Vue.nextTick()
+  assert.ok(f.find('fallback'), 'a pending source still needs its placeholder')
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  assert.ok(!f.find('fallback'))
+  assert.notEqual(f.find('img').props.style?.visibility, 'hidden')
+})
+
+test('cached custom image icons are visible immediately when their source changes', async t => {
+  const src = 'data:image/png;base64,AAAA'
+  const f = await mountAvatar(t, null, 'FtIcon/FtIcon.vue', new Map([[src, [24, 24]]]))
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  assert.ok(!f.find('fallback'), 'cached custom images need no placeholder')
+  assert.equal(f.find('img').props.style.visibility, 'visible')
+})
+
+test('cached missing-resolution thumbnails still fall back and reveal an already cached smaller image', async t => {
+  const src = 'https://i.ytimg.com/vi/cached/maxresdefault.jpg'
+  const fallback = getVideoThumbnailFallbackUrl(src)
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map([[src, [120, 90]], [fallback, [640, 480]]]))
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, fallback)
+  assert.notEqual(f.find('img').props.style?.visibility, 'hidden')
+  assert.equal(f.loads.length, 1)
+  assert.equal(f.loads[0].type, 'load')
+  assert.ok(Vue.toRaw(f.loads[0].currentTarget) === f.find('img'), 'cached load events retain the image for consumers')
+})
+
+test('complete but undecodable cached images keep their placeholder', async t => {
+  const f = await mountAvatar(t, null, 'FtChannelAvatar/FtChannelAvatar.vue', new Map([['https://yt3.ggpht.com/avatar', [0, 0]]]))
+  await Vue.nextTick()
+  assert.ok(f.find('fallback'))
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+})
+
+test('avatars show their default icon while loading, retrying, and after a source change', async t => {
+  const f = await mountAvatar(t, null)
+  assert.ok(f.find('fallback'), 'show the avatar placeholder before the first load')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+  await fail(f.find('img'))
+  assert.ok(f.find('fallback'), 'keep the placeholder during native recovery and the retry delay')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+  for (const callback of f.timers.values()) callback()
+  await Vue.nextTick()
+  f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
+  assert.equal(f.find('fallback'), undefined)
+  assert.notEqual(f.find('img').props.style?.visibility, 'hidden')
+  f.thumbnail.value = 'https://yt3.ggpht.com/new-avatar'
+  await Vue.nextTick()
+  assert.ok(f.find('fallback'), 'restore the placeholder for a new URL')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+})
 
 test('stored medium-resolution thumbnails load sharply by default and honor data saver', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
@@ -73,6 +159,19 @@ test('stored medium-resolution thumbnails load sharply by default and honor data
   f.settings.getThumbnailDataSaver = true
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
+})
+
+test('undecodable embedded images keep their placeholder without an invalid HTTP retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const source of ['data:image/png;base64,AAAA', 'blob:https://localhost/invalid']) {
+    f.thumbnail.value = source
+    await Vue.nextTick()
+    await fail(f.find('img'))
+    assert.equal(f.find('img').props.src, source)
+    assert.equal(f.find('img').props.style?.visibility, 'hidden')
+    assert.equal(f.timers.size, 0)
+    assert.equal(f.requests.length, 0)
+  }
 })
 
 test('data saver changes loaded thumbnail sources and resets resolution fallbacks', async t => {
@@ -93,11 +192,14 @@ test('data saver changes loaded thumbnail sources and resets resolution fallback
   assert.equal(f.timers.size, 0)
 })
 
-test('channel avatars recover through native HTTP before showing a fallback', async t => {
+test('channel avatars keep their placeholder until the native HTTP image loads', async t => {
   const f = await mountAvatar(t, 'data:image/png;base64,AA==')
   await fail(f.find('img'))
   assert.deepEqual(f.requests, ['https://yt3.ggpht.com/avatar'])
   assert.equal(f.find('img')?.props.src, 'data:image/png;base64,AA==')
+  assert.ok(f.find('fallback'), 'keep the placeholder until the recovered image decodes')
+  f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
   assert.equal(f.find('fallback'), undefined)
 })
 
@@ -125,7 +227,7 @@ test('video thumbnails fall back in resolution order on errors and loaded placeh
   assert.equal(f.find('img').props.src, f.thumbnail.value)
 })
 
-test('channel avatars show a fallback only after the delayed retry fails and reset for a new URL', async t => {
+test('channel avatars remove the failed image after the delayed retry and reset for a new URL', async t => {
   const f = await mountAvatar(t, null)
   await fail(f.find('img'))
   assert.ok(f.find('img'), 'keep the image mounted while retrying')

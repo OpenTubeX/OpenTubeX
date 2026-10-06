@@ -263,6 +263,11 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Enable Tabs: "Lapok engedélyezése"
+    Thumbnail Swipe Gestures:
+      Left: Balra húzás a bélyegképeken
+      Right: Jobbra húzás a bélyegképeken
+      Description: Húzza vízszintesen a videó bélyegképét, majd engedje el a kiválasztott művelet végrehajtásához.
     Data Saver Thumbnails: "Adattakarékos bélyegképek"
     Use tray icon: "Rendszertálcaikon használata"
     Close to system tray: "Bezárás a rendszertálcára"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Frissítés húzással
     Blur Thumbnails: Bélyegképek elhomályosítása
     Navigation:
-      Show Active Subscriptions: Aktív feliratkozások megjelenítése
+      Always Show Navigation Bar: Navigációs sáv megjelenítése mindig, amikor alul van
+      Compact Tab Labels: Kompakt navigációs sáv, amikor alul van
+      Show Active Subscriptions: Aktív feliratkozások megjelenítése az oldalsávban
       Navigation: Navigáció
       Customize Navigation: Navigáció testreszabása
       Add Item: Elem hozzáadása
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
     Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Világos"
-      OpenTubeX Dark: "OpenTubeX Sötét"
+      Ocean Light: "Ocean Világos"
+      Ocean Dark: "Ocean Sötét"
       Custom: Egyéni
     Light Theme: Világos téma
     Dark Theme: Sötét téma
@@ -621,6 +629,8 @@ Settings:
     Preload Upcoming Videos: "Következő videók előtöltése"
     Upcoming Videos to Preload: "Előtöltendő videók száma"
     Concurrent Preloads: "Egyidejű előtöltések"
+    Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
+    Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -657,9 +667,9 @@ Settings:
     Update Managed Tools: Frissítés
     Managed Tools Download Error Template: 'Nem sikerült letölteni a felügyelt eszközöket: {errors}'
     Download Folder: Letöltési mappa
-    Global Additional yt-dlp Arguments: Globális további yt-dlp-argumentumok
+    Global Additional yt-dlp Arguments: További yt-dlp argumentumok
     Concurrent Downloads: Egyidejű letöltések
-    Bandwidth Limit: Sávszélességkorlát (KiB/s, 0 = korlátlan)
+    Bandwidth Limit: Sávszélességkorlát (KiB/s)
     Choose Download Folder: Letöltési mappa kiválasztása
     Download Templates: Letöltési sablonok
     Manage Download Templates: Letöltési sablonok kezelése ({templateCount})
@@ -732,8 +742,8 @@ Settings:
       Automatic: Automatikus frissítés
       Ask: Rákérdezés frissítés előtt
       Manual: Csak kézi frissítés
-    yt-dlp Executable Path: yt-dlp végrehajtható fájljának elérési útja
-    FFmpeg Executable Path: FFmpeg végrehajtható fájljának elérési útja
+    yt-dlp Executable Path: yt-dlp végrehajtható fájl
+    FFmpeg Executable Path: FFmpeg végrehajtható fájl
     Restricted Playback Authentication: "yt-dlp sütik"
     Cookie Source: Sütik forrása
     Cookie Sources:
@@ -965,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
     Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.
     Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
-    Server URL: Kiszolgáló URL-je
+    Server URL: Szinkronizálási kiszolgáló URL-je
     Checking Server: Szinkronizálási kiszolgáló ellenőrzése…
     Server Unavailable: Nem lehet kapcsolódni ehhez a szinkronizálási kiszolgálóhoz. Ellenőrizze az URL-t, majd próbálja újra.
     Username: Felhasználónév
@@ -1055,7 +1065,7 @@ Settings:
     Open All Tabs Confirmation: "Megnyitja az összes lapot?"
     Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
   Proxy Settings:
-    IP Block Recovery Script Path: IP-tiltás helyreállító parancsfájljának elérési útja
+    IP Block Recovery Script Path: IP-blokkolás helyreállítási szkriptje
     Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása
     Running IP block recovery script: IP-tiltás helyreállító parancsfájljának futtatása
     IP block recovery script failed: 'Az IP-tiltás helyreállító parancsfájlja hibával leállt (kilépési kód: {exitCode})'
@@ -1064,7 +1074,7 @@ Settings:
     Failed to select IP block recovery script: Nem sikerült kiválasztani az IP-tiltás helyreállító parancsfájlját
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock-beküldések engedélyezése
-    SponsorBlock Private User ID (optional): Privát SponsorBlock felhasználói azonosító (nem kötelező)
+    SponsorBlock Private User ID (optional): Privát felhasználói azonosító (opcionális)
     SponsorBlock Private User ID Tooltip: Illessze be a böngészőbővítményből a privát SponsorBlock felhasználói azonosítót. Hagyja üresen az alkalmazás által létrehozott azonosító használatához.
     Generated SponsorBlock User ID: Létrehozott SponsorBlock felhasználói azonosító
     Generated SponsorBlock User ID Tooltip: Az alkalmazás által létrehozott SponsorBlock felhasználói azonosító használható a böngészőbővítményben, illetve akkor, ha az alkalmazást másik számítógépen használja.
@@ -1076,7 +1086,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike engedélyezése
-    Return YouTube Dislike Url: Return YouTube Dislike API URL-je (alapértelmezés szerint https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL-je
   Password Dialog:
     Incorrect Password: Hibás jelszó
     Unlock: Feloldás
@@ -1117,6 +1127,21 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Customization: Testreszabás
+  Manage Profile Subscriptions: Profil feliratkozásainak kezelése
+  Icon Names:
+    Person: Személy
+    People: Emberek
+    Headphones: Fejhallgató
+    Gaming: Játék
+    Film: Film
+    Art: Művészet
+    Science: Tudomány
+    Globe: Földgömb
+    Heart: Szív
+    Sun: Nap
+    Moon: Hold
+    Trophy: Trófea
   Profile Icon: Profilikon
   Choose an Emoji: Emoji kiválasztása
   Custom Emoji: Egyéni emoji
@@ -1299,12 +1324,16 @@ Video:
     Hide: Elrejtés
     Show: Megjelenítés
     Scroll Mini Player:
+      Collapse Controls: "Vezérlők összecsukása"
+      Expand Controls: "Vezérlők kibontása"
       Back to Top: Vissza a tetejére
       Return to Video Tab: Vissza a videó lapjára
       Hide: Mini lejátszó elrejtése
       Play: Lejátszás
       Pause: Szünet
       Drag Handle: Minilejátszó áthelyezése
+      Rewind 10 seconds: Visszatekerés 10 másodperccel
+      Forward 10 seconds: Előretekerés 10 másodperccel
     SponsorBlock:
       CancelCurrentSegment: Szakasz létrehozásának megszakítása
       ClearSegments: Szakaszok törlése
@@ -1441,6 +1470,7 @@ Share:
   Share failed: "Nem sikerült megosztani a hivatkozást"
   Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva
 Context Menu:
+  Open in a Background Tab: "Megnyitás háttérlapon"
   Select Tab: Lap kijelölése
   Close Tabs Before: Előző lapok bezárása
   Close Tabs After: Következő lapok bezárása
@@ -1602,6 +1632,7 @@ Description:
   Games: Játékok
 Tooltips:
   General Settings:
+    Enable Tabs: "A kikapcsolás bezárja az összes többi lapot, és nyitva hagyja az aktuális oldalt."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
     Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.
     Update Relative Timestamps: A relatív időbélyegek frissítése az egész alkalmazásban, amíg nyitva van egy oldal. Kikapcsolva csak az oldal újratöltésekor vagy újbóli megnyitásakor frissülnek.
@@ -1646,6 +1677,7 @@ Tooltips:
     Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
     Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
+    Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.
@@ -1809,8 +1841,8 @@ Downloads:
   File Name Template: Fájlnévsablon
   File Name Template Help: 'Elérhető mezők: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Időtartomány és fejezetek
-  Start Time: Kezdési idő (HH:MM:SS)
-  End Time: Befejezési idő (HH:MM:SS)
+  Start Time: Kezdési idő
+  End Time: Befejezési idő
   Split by Chapters: Felosztás fejezetenként külön fájlokra
   Remove Segments: Szegmensek eltávolítása
   Subtitles and Metadata: Feliratok és metaadatok
@@ -1896,3 +1928,40 @@ Tray:
 Tray Icon:
   Title: "Tálcaikon"
   Follow App Theme: "Alkalmazástéma követése"
+
+Form Inputs:
+  Enter Password Hint: "Add meg a jelszavad"
+  Choose Password Hint: "Válassz jelszót"
+  Confirm Password Hint: "Ismételd meg az új jelszavad"
+  Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"
+  Show Password: "Jelszó megjelenítése"
+  Hide Password: "Jelszó elrejtése"
+  Search Text Hint: "Adjon meg keresési kifejezéseket"
+  Playlist Description Hint: "Írja le ezt a lejátszási listát"
+  Filename Preview: "Fájlnév előnézete"
+  Enter Channels: "Csatornák megadása"
+  Enter Text: "Szöveg megadása"
+  Video URL: Videó vagy lejátszási lista URL-je
+  Paste Link: Illesszen be egy videó- vagy lejátszásilista-hivatkozást
+  Example: pl. {example}
+  No Minimum: Nincs minimum
+  No Maximum: Nincs maximum
+  Any Age: Bármilyen korú
+  Included Terms Example: pl. útmutató, értékelés
+  Excluded Terms Example: pl. előzetes, bemutató
+  Download Folder Hint: Hagyja üresen a Letöltések mappa használatához
+  Global Arguments Hint: Opcionális argumentumok minden letöltéshez
+  Unlimited Hint: 0 a korlátlanhoz
+  Add Argument: Argumentum hozzáadása
+  Template Name Example: pl. Csak hang
+  Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
+  Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
+  Default Value: "Alapértelmezett: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
+
+Storage Startup Error:
+  Title: "Nem sikerült betölteni az alkalmazás adatait"
+  Message: "Szabadítson fel tárhelyet az eszközön, majd próbálja újra. A szinkronizálás az adatok betöltéséig szünetel."
+  Retry: "Újrapróbálkozás"

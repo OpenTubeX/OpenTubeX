@@ -145,12 +145,14 @@ const { t } = useI18n()
 const menuButton = useTemplateRef('menuButton')
 const openMobileContextActions = inject('openMobileContextActions')
 const playlistMenuItems = computed(() => {
-  const items = [{
-    label: t('Context Menu.Open in a New Tab'),
-    icon: ['fas', 'arrow-up-right-from-square'],
-    quickAction: true,
-    run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
-  }]
+  const items = store.getters.getTabsEnabled
+    ? [{
+        label: t('Context Menu.Open in a New Tab'),
+        icon: ['fas', 'arrow-up-right-from-square'],
+        quickAction: true,
+        run: () => openInternalPath({ ...playlistPageLinkTo.value, title: titleForDisplay.value, doCreateNewTab: true, makeActive: true })
+      }]
+    : []
   if (process.env.IS_ELECTRON) {
     items.push({
       label: t('Context Menu.Open in a New Window'),

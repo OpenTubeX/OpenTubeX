@@ -86,7 +86,14 @@ for (const width of [1600, 480]) {
     await page.getByText('Click to View Comments', { exact: true }).click()
     const comments = page.locator('.commentThread')
     await expect(comments.first()).toBeVisible()
-    const loadedComments = await comments.allTextContents()
+    // Lazy emoji images can become their alt text after losing connectivity.
+    // Compare the same readable content in either rendering.
+    const commentTexts = () => comments.evaluateAll(elements => elements.map(element => {
+      const copy = element.cloneNode(true)
+      copy.querySelectorAll('img[alt]').forEach(image => image.replaceWith(image.alt))
+      return copy.textContent
+    }))
+    const loadedComments = await commentTexts()
     const recommendations = page.locator('.watchVideoRecommendations .h3Title')
     await expect(recommendations.first()).toBeVisible()
     const loadedRecommendations = await recommendations.allTextContents()
@@ -112,7 +119,7 @@ for (const width of [1600, 480]) {
       window.dispatchEvent(new Event('offline'))
     })
     await expect(page.locator('.connectionStatus')).toHaveText('Offline')
-    await expect.poll(() => comments.allTextContents()).toEqual(loadedComments)
+    await expect.poll(commentTexts).toEqual(loadedComments)
     await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
     await expect.poll(() => sponsorSegments.allTextContents()).toEqual(loadedSponsorSegments)
     await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
@@ -134,7 +141,7 @@ for (const width of [1600, 480]) {
       window.dispatchEvent(new Event('online'))
     })
     await expect.poll(() => watch.evaluate(vm => vm.isOffline)).toBe(false)
-    await expect.poll(() => comments.allTextContents()).toEqual(loadedComments)
+    await expect.poll(commentTexts).toEqual(loadedComments)
     await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeEnabled()
     await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeEnabled()

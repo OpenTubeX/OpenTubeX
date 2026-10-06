@@ -18,7 +18,7 @@ export function shouldRotateFullscreenToLandscape(fullscreen, video, enabled = t
   )
 }
 
-function setLandscapeOrientation(landscape) {
+export function setLandscapeOrientation(landscape) {
   return landscape
     ? ScreenOrientation.lock({ type: OrientationType.LANDSCAPE })
     : ScreenOrientation.unlock()

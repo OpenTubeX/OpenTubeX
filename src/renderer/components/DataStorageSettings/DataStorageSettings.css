@@ -24,7 +24,7 @@
 .dataStorageTab::after {
   background: transparent;
   block-size: 2px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   content: '';
   inset-block-end: 0;
   inset-inline: 12px;

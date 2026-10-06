@@ -17,6 +17,9 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <!-- Older Android previews cannot read the saved app theme. -->
+        <item name="android:windowDisablePreview">@bool/disable_startup_preview</item>
+        <item name="android:windowBackground">@color/startup_background</item>
+        <item name="windowSplashScreenBackground">@color/startup_background</item>
     </style>
 </resources>

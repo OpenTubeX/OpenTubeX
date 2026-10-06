@@ -95,6 +95,15 @@ test('Home shelves use one row and reserve space for paging controls', () => {
   })
 })
 
+test('Home shelves mount only one card before their width is measured', () => {
+  for (const width of [0, Number.NaN, Number.POSITIVE_INFINITY, -1]) {
+    assert.deepEqual(getHomeShelfLayout(width, 10_800, 260, 12), {
+      pageSize: 1,
+      showControls: false,
+    })
+  }
+})
+
 test('continue watching is not capped before shelf pagination', () => {
   const entries = Array.from({ length: 8 }, (_, index) => ({
     videoId: `video-${index}`,

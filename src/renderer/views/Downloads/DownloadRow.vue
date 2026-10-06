@@ -1,11 +1,11 @@
 <template>
   <article class="downloadRow">
     <div class="downloadMain">
-      <img
+      <FtRetryImage
         :src="download.thumbnail || thumbnailPlaceholder"
         class="downloadThumbnail"
         alt=""
-      >
+      />
       <div class="downloadDetails">
         <h3 dir="auto">
           {{ download.title }}
@@ -44,7 +44,7 @@
           <div
             class="progressFill"
             :class="{ indeterminate: download.status !== 'downloading' }"
-            :style="{ inlineSize: `${progressPercentage}%` }"
+            :style="{ transform: `scaleX(${progressPercentage / 100})` }"
             aria-hidden="true"
           />
         </div>
@@ -156,6 +156,13 @@
           @click="emit('play')"
         />
         <FtIconButton
+          v-if="canPlay && !IS_IOS"
+          :title="t('Video.Add to Queue')"
+          :icon="['fas', 'add-to-queue']"
+          theme="secondary"
+          @click="emit('queue')"
+        />
+        <FtIconButton
           v-if="canAccessFiles"
           :title="t('Downloads.Show in Folder')"
           :icon="['fas', 'folder-open']"
@@ -181,6 +188,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../../components/FtRetryImage.vue'
 import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
@@ -205,7 +213,8 @@ const props = defineProps({
   canMoveEarlier: { type: Boolean, default: false },
   canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'remove', 'resume', 'retry'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'remove', 'resume', 'retry'])
+const IS_IOS = !!process.env.IS_IOS
 const { t } = useI18n()
 const inProgress = computed(() => ['preparing', 'downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (

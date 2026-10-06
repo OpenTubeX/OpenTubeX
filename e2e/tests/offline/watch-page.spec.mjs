@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import { abortUnmockedRequest, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { measureFullscreenDockToggle } from '../../helpers/fullscreen-docks.mjs'
 import {
   DEMO_MEDIA_URL,
   POST_LIVE_AUDIO_URL,
@@ -85,6 +86,65 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('phone watch players have square corners where the layout meets the screen or header', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let releaseMetadata
+  const metadataPending = new Promise(resolve => { releaseMetadata = resolve })
+  await page.route(/\/youtubei\/v1\/player|www\.youtube\.com\/watch\?/, async route => {
+    await metadataPending
+    await route.fallback()
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 200))
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+  try {
+    await expect(skeleton).toHaveCSS('border-radius', '24px')
+    await page.locator('.tabBar').evaluate(element => { element.style.display = 'none' })
+    await page.locator('.app').evaluate(element => {
+      element.classList.remove('topTabs')
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+    await setWindowSize(app, page, { width: 375, height: 812 })
+    await expect(skeleton).toHaveCSS('border-radius', '0px')
+  } finally {
+    releaseMetadata()
+  }
+
+  await waitForPlayback(page)
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('video').evaluate(element => element.pause())
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    for (const size of [{ width: 375, height: 812 }, { width: 667, height: 375 }, { width: 812, height: 375 }]) {
+      await page.setViewportSize(size)
+      if (size.width === 375) {
+        await expect(player).toHaveCSS('border-radius', '0px')
+        continue
+      }
+      const headerGap = await player.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const header = document.querySelector('.topNav').getBoundingClientRect()
+        return Math.abs(bounds.top - header.bottom)
+      })
+      await expect(player).toHaveCSS('border-radius', headerGap <= 1 ? '0px' : '24px')
+    }
+  }
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.locator('.tabBar').evaluate(element => { element.style.display = '' })
+  await page.locator('.app').evaluate(element => {
+    element.classList.remove('capacitorPhoneLayout')
+    element.classList.add('capacitorTabletLayout', 'topTabs')
+  })
+  await expect(player).toHaveCSS('border-radius', '24px')
+  await page.locator('.app').evaluate(element => element.classList.remove('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 375, height: 812 })
+  await expect(player).toHaveCSS('border-radius', '24px')
+})
+
 test('watch page skeletons follow UI roundness before playback loads', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   let releaseMetadata
@@ -109,8 +169,8 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
     for (const roundness of [0, 100, 200]) {
       await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
       await expect(skeleton).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
-      await expect(recommendations).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
-      await expect(comments).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
+      await expect(recommendations).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
+      await expect(comments).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
     }
     await attachScreenshot('watch page skeletons at 200% roundness')
 
@@ -147,7 +207,7 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
   await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
   await expect(page.locator('.ftVideoPlayer')).toHaveCSS('border-radius', '24px')
   await expect(page.locator('.recommendationsSkeleton')).toHaveCount(0)
-  await expect(page.locator('.watchVideoRecommendations')).toHaveCSS('border-radius', '16px')
+  await expect(page.locator('.watchVideoRecommendations')).toHaveCSS('border-radius', '24px')
   await expect(page.locator('.commentsSkeleton')).toHaveCount(0)
   await expect(page.locator('.commentsArea .card')).toBeVisible()
 })
@@ -261,7 +321,286 @@ test.describe('desktop quick playback speed bar', () => {
 
   const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
 
+  for (const format of ['audio', 'legacy']) {
+    test(`keeps speed changes during ${format} format unload`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      const view = await watchViewHandle(page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const bar = player.locator('.ft-quick-playback-rate-bar')
+      await view.evaluate((view, url) => {
+        view.manifestSrc = url
+        view.manifestMimeType = 'video/webm'
+      }, DEMO_MEDIA_URL)
+      await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      if (format === 'legacy') {
+        await view.evaluate(view => { view.activeFormat = 'audio' })
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      }
+
+      await player.evaluate(element => {
+        const player = element.ui.getControls().getPlayer()
+        const unload = player.unload.bind(player)
+        const pending = new Promise(resolve => { window.finishSpeedUnload = resolve })
+        window.speedUnloadStarted = false
+        player.unload = async (...args) => {
+          window.speedUnloadStarted = true
+          await pending
+          return unload(...args)
+        }
+      })
+      try {
+        await view.evaluate((view, format) => { view.activeFormat = format }, format)
+        await expect.poll(() => page.evaluate(() => window.speedUnloadStarted)).toBe(true)
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(false)
+        await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+        await bar.locator('[data-rate="1.5"]').click()
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        await page.evaluate(() => window.finishSpeedUnload())
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      } finally {
+        await page.evaluate(() => window.finishSpeedUnload())
+      }
+    })
+  }
+
+  for (const control of ['quick bar', 'menu']) {
+    test(`keeps ${control} speed changes while a legacy quality waits for availability`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      const view = await watchViewHandle(page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const bar = player.locator('.ft-quick-playback-rate-bar')
+      await view.evaluate(async view => {
+        view.legacyFormats = [...view.legacyFormats, {
+          ...view.legacyFormats[0],
+          width: 426,
+          height: 240,
+          qualityLabel: '240p',
+          availableAt: Math.floor(Date.now() / 1000) + 8
+        }]
+        await view.$nextTick()
+      })
+      await player.evaluate(element => {
+        element.ui.configure({ enableTooltips: false })
+        window.speedQualityLoaded = false
+        element.ui.getControls().getPlayer().addEventListener('loaded', () => {
+          window.speedQualityLoaded = true
+        }, { once: true })
+      })
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await player.getByRole('button', { name: 'More settings', exact: true }).click()
+      await player.locator('.legacy-quality-button').click()
+      await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
+      expect(await view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      expect(await page.evaluate(() => window.speedQualityLoaded)).toBe(false)
+      await player.evaluate(element => element.ui.getControls().hideSettingsMenus())
+      if (control === 'quick bar') {
+        await bar.locator('[data-rate="1.5"]').click()
+      } else {
+        await player.getByRole('button', { name: 'More settings', exact: true }).click()
+        await player.locator('.shaka-playbackrate-button').click()
+        await player.locator('.shaka-playback-rates').getByRole('button', { name: '1.5x', exact: true }).click()
+      }
+      await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+      await expect.poll(() => page.evaluate(() => window.speedQualityLoaded), { timeout: 15_000 }).toBe(true)
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+      await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+    })
+  }
+
+  test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      'updateQuickPlaybackSpeedBarOptions', JSON.stringify([0.05, 20, 1].map(speed => ({ speed })))
+    ))
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const bar = player.locator('.ft-quick-playback-rate-bar')
+    for (const rate of [0.05, 20, 1]) {
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      const button = bar.locator(`[data-rate="${rate}"]`)
+      await button.click()
+      await expect(button).toHaveClass(/is-current-rate/)
+      await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getPlaybackRate())).toBe(rate)
+    }
+  })
+
+  for (const control of ['quick bar', 'menu', 'normal-rate menu', 'normal-speed toggle']) {
+    test(`keeps ${control} speed selections while the DASH manifest is still loading`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      const manifestUrl = 'https://media.test/pending-speed.mpd'
+      const mediaUrl = DEMO_MEDIA_URL.replaceAll('&', '&amp;')
+      const manifest = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT30S" minBufferTime="PT0.1S">
+        <Period>
+          <AdaptationSet mimeType="video/webm" codecs="vp9,opus">
+            <Representation id="demo" bandwidth="200000" width="640" height="360">
+              <SegmentList duration="30">
+                <Initialization sourceURL="${mediaUrl}"/>
+                <SegmentURL media="${mediaUrl}"/>
+              </SegmentList>
+            </Representation>
+          </AdaptationSet>
+        </Period>
+      </MPD>`
+      let releaseManifest
+      const manifestReady = new Promise(resolve => { releaseManifest = resolve })
+      let manifestRequested
+      const requested = new Promise(resolve => { manifestRequested = resolve })
+      await page.route(manifestUrl, async route => {
+        manifestRequested()
+        await manifestReady
+        await route.fulfill({ contentType: 'application/dash+xml', body: manifest })
+      })
+
+      try {
+        const watch = await page.evaluateHandle(findWatchComponent)
+        await watch.evaluate((component, url) => {
+          component.proxy.manifestMimeType = 'application/dash+xml'
+          component.proxy.manifestSrc = url
+          component.proxy.activeFormat = 'dash'
+          component.proxy.playerLoadGeneration++
+        }, manifestUrl)
+        await requested
+        const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+        await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
+        if (!control.endsWith('menu')) {
+          await bar.locator('[data-rate="1.5"]').click()
+          await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        } else {
+          if (control === 'normal-rate menu') await bar.locator('[data-rate="1.5"]').click()
+          const selectedRate = control === 'normal-rate menu' ? 1 : 1.5
+          const player = page.locator(`${activeTab} .ftVideoPlayer`)
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await player.locator('.shaka-playbackrate-button').click()
+          const menu = player.locator('.shaka-playback-rates')
+          await menu.getByRole('button', { name: `${selectedRate}x`, exact: true }).click()
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await player.locator('.shaka-playbackrate-button').click()
+          await expect(menu.getByRole('button', { name: `${selectedRate}x`, exact: true })).toHaveAttribute('aria-selected', 'true')
+          await menu.locator('.shaka-back-to-overflow-button').click()
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+        }
+        const rate = control === 'normal-speed toggle' || control === 'normal-rate menu' ? 1 : 1.75
+        if (control !== 'normal-rate menu') {
+          await page.locator('body').press(control === 'normal-speed toggle' ? 'g' : 'p')
+        }
+        await expect(bar.locator(`[data-rate="${rate}"]`)).toHaveClass(/is-current-rate/)
+
+        releaseManifest()
+        await waitForPlayback(page)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(rate)
+        await expect(bar.locator(`[data-rate="${rate}"]`)).toHaveClass(/is-current-rate/)
+        if (control === 'normal-speed toggle') {
+          await page.locator('body').press('g')
+          await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+          await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        }
+      } finally {
+        releaseManifest()
+      }
+    })
+  }
+
+  for (const music of [false, true]) {
+    test(`keeps quick speed selections made before the ${music ? 'music ' : ''}video loads`, async ({ app, page }) => {
+      if (music) await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_OMV')
+      else await mockPlayableWatchPage(app, page)
+      let releaseMedia
+      const mediaReady = new Promise(resolve => { releaseMedia = resolve })
+      await page.route(`${DEMO_MEDIA_URL}*`, async route => {
+        await mediaReady
+        await route.fallback()
+      })
+
+      try {
+        await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+        await page.locator(sel.searchInput).press('Enter')
+        const video = page.locator(`${activeTab} video`)
+        const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
+        await expect(bar).toBeVisible()
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+
+        for (const rate of [1.25, 1.5]) {
+          const button = bar.locator(`[data-rate="${rate}"]`)
+          await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
+          await button.click()
+          await expect(button).toHaveClass(/is-current-rate/)
+        }
+
+        releaseMedia()
+        await waitForPlayback(page)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      } finally {
+        releaseMedia()
+      }
+    })
+  }
+
   for (const scale of [100, 125]) {
+    test(`smoothly scrolls clipped quick speeds without dropping wheel ticks at ${scale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await setWindowSize(app, page, { width: 1050, height: 850 })
+      await page.evaluate(async ({ scale, presets }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
+        await store.dispatch('updateUiScale', scale)
+        await store.dispatch('updateReducedMotion', 'off')
+      }, { scale, presets: overflowingPresets })
+      await page.locator('body').press('s')
+      await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      const bar = page.locator('.ft-quick-playback-rate-bar')
+      await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(240)
+
+      for (const frosted of [true, false]) {
+        await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
+        for (const horizontal of [false, true]) {
+          await bar.evaluate(element => { element.scrollLeft = 0 })
+          const movement = await bar.evaluate(async (element, horizontal) => {
+            // Dispatch together so the animation cannot advance between ticks.
+            for (let tick = 0; tick < 3; tick++) {
+              element.dispatchEvent(new WheelEvent('wheel', {
+                deltaX: horizontal ? 80 : 0,
+                deltaY: horizontal ? 0 : 80,
+                bubbles: true,
+                cancelable: true
+              }))
+            }
+            const initial = element.scrollLeft
+            const samples = []
+            const deadline = performance.now() + 2000
+            while (performance.now() < deadline && element.scrollLeft < 239) {
+              await new Promise(resolve => requestAnimationFrame(resolve))
+              samples.push(element.scrollLeft)
+            }
+            return { initial, samples, final: element.scrollLeft }
+          }, horizontal)
+          expect(movement.initial).toBe(0)
+          expect(movement.samples.some(offset => offset > 0 && offset < 239)).toBe(true)
+          expect(Math.abs(movement.final - 240)).toBeLessThanOrEqual(1)
+          // Let scrollend clear the previous destination before the next gesture.
+          await page.waitForTimeout(100)
+        }
+      }
+
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+      expect(await bar.evaluate(element => {
+        element.scrollLeft = 0
+        element.dispatchEvent(new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true }))
+        return element.scrollLeft
+      })).toBeCloseTo(120, 0)
+    })
+
     test(`contains quick speed wheel input at both ends at ${scale}% scale`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)
@@ -396,6 +735,9 @@ test.describe('desktop quick playback speed bar', () => {
     for (const frosted of [true, false]) {
       await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
       await bar.locator('[data-rate="1"]').hover()
+      // Hover can scroll the preset into view after the previous theme's end test.
+      await bar.evaluate(element => { element.scrollLeft = 0 })
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBe(0)
       await page.mouse.wheel(0, 120)
       await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
       await page.mouse.wheel(0, -120)
@@ -458,26 +800,33 @@ test.describe('desktop quick playback speed bar', () => {
       const controls = document.querySelector('.shaka-controls-container')
       const panel = controls.querySelector('.shaka-controls-button-panel')
       const bar = panel.querySelector('.ft-quick-playback-rate-bar')
+      const glass = panel.querySelector('.ft-right-control-glass')
+      const layers = [glass, bar]
       controls.setAttribute('shown', 'true')
-      await new Promise(resolve => setTimeout(resolve, 750))
+      layers.forEach(element => element.getAnimations().forEach(animation => animation.finish()))
       controls.removeAttribute('shown')
-      await new Promise(resolve => setTimeout(resolve, 180))
+      for (const element of layers) {
+        const fade = element.getAnimations().find(animation => animation.transitionProperty === 'opacity')
+        if (!fade) throw new Error('Controls fade transition not found')
+        fade.pause()
+        fade.currentTime = 300
+      }
       return {
-        panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+        glassOpacity: Number(getComputedStyle(glass).opacity),
         barOpacity: Number(getComputedStyle(bar).opacity)
       }
     })
-    expect(result.panelFade).toBeGreaterThan(0.1)
-    expect(result.panelFade).toBeLessThan(0.9)
-    expect(result.barOpacity - result.panelFade).toBeLessThan(0.05)
+    expect(result.glassOpacity).toBeGreaterThan(0.1)
+    expect(result.glassOpacity).toBeLessThan(0.9)
+    expect(Math.abs(result.barOpacity - result.glassOpacity)).toBeLessThan(0.05)
   })
 
   test('uses the shaded glass surface', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const bar = page.locator('.ft-quick-playback-rate-bar')
-    await expect(bar).toBeVisible()
     await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    await expect(bar).toBeVisible()
     await expect(bar).toHaveCSS('backdrop-filter', /blur\(10px\)/)
     const surface = await bar.evaluate(element => {
       const style = getComputedStyle(element)
@@ -521,31 +870,30 @@ test.describe('desktop quick playback speed bar', () => {
 
 test('right control pill fades with its icons in both directions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
   const result = await page.evaluate(async () => {
     const controls = document.querySelector('.shaka-controls-container')
     const panel = controls.querySelector('.shaka-controls-button-panel')
     const pill = panel.querySelector('.ft-right-control-glass')
     const snapshot = () => ({
-      panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+      iconOpacity: Number(getComputedStyle(panel.querySelector('.shaka-overflow-menu-button > .shaka-ui-icon')).filter.match(/opacity\(([^)]+)\)/)[1]),
       pillOpacity: Number(getComputedStyle(pill).opacity)
     })
-    controls.setAttribute('casting', 'true')
-    panel.style.transition = 'none'
-    panel.style.setProperty('--ft-controls-fade', '0')
+    controls.setAttribute('shown', 'true')
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.removeAttribute('shown')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    const appearing = snapshot()
-    panel.style.setProperty('--ft-controls-fade', '1')
+    const disappearing = snapshot()
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.setAttribute('shown', 'true')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    return { appearing, disappearing: snapshot() }
+    return { appearing: snapshot(), disappearing }
   })
   for (const state of [result.appearing, result.disappearing]) {
-    expect(state.panelFade).toBe(0.5)
-    expect(Math.abs(state.pillOpacity - state.panelFade)).toBeLessThan(0.05)
+    expect(state.iconOpacity).toBeGreaterThan(0)
+    expect(state.iconOpacity).toBeLessThan(1)
+    expect(Math.abs(state.pillOpacity - state.iconOpacity)).toBeLessThan(0.05)
   }
 })
 
@@ -1054,17 +1402,17 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const surface = player.locator('.musicAudioSurface')
   const canvas = surface.locator('.musicVisualizerCanvas')
+  const artwork = surface.locator('img.musicAudioArtwork:not(.retryImagePlaceholder)')
 
   await expect(player).toHaveClass(/musicAudioPlayer/)
   await expect(surface).toBeVisible()
-  await expect(surface.locator('.musicAudioArtwork')).toBeVisible()
+  await expect(artwork).toBeVisible()
   await expect(surface.locator('.musicAudioTitle')).toHaveText(/\S/)
   await expect(surface.locator('.musicAudioArtist')).toHaveText(/\S/)
   await expect(surface.locator('.musicAudioAvatar')).toBeVisible()
   await expect(video).toHaveCSS('opacity', '0')
   await expect(canvas).toBeVisible()
 
-  const artwork = surface.locator('.musicAudioArtwork')
   const artworkSrc = await artwork.getAttribute('src')
   await artwork.dispatchEvent('error')
   await expect(artwork).toBeHidden()
@@ -1075,6 +1423,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   await artwork.evaluate((element, src) => { element.src = src }, artworkSrc)
   await expect.poll(() => artwork.evaluate(element => element.naturalWidth)).toBeGreaterThan(0)
 
+  await player.hover()
   await player.getByRole('button', { name: 'More settings' }).click({ force: true })
   const visualizerToggle = player.getByRole('button', { name: 'Music visualizer', exact: true })
   await expect(visualizerToggle).toBeVisible()
@@ -1144,7 +1493,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
 
   const [playerBounds, artworkBounds] = await Promise.all([
     player.boundingBox(),
-    surface.locator('.musicAudioArtwork').boundingBox(),
+    artwork.boundingBox(),
   ])
   expect(playerBounds).not.toBeNull()
   expect(artworkBounds).not.toBeNull()
@@ -1255,7 +1604,8 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await openMockedVideo(page)
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
   const ambientMode = player.getByRole('button', { name: 'Ambient Mode', exact: true })
   const skipSilence = player.getByRole('button', { name: 'Skip Silence', exact: true })
 
@@ -1886,7 +2236,8 @@ test('mobile skip buttons flank the centered play button', async ({ app, page })
     expect(bounds[2].width).toBeCloseTo(48, 0)
     expect(bounds[0].height).toBeCloseTo(48, 0)
     expect(bounds[2].height).toBeCloseTo(48, 0)
-    expect(bounds[1].width).toBeGreaterThanOrEqual(64)
+    // Chromium can round fractional UI-scale geometry slightly below 64 CSS px.
+    expect(bounds[1].width).toBeGreaterThanOrEqual(64 - 0.5)
     expect(Math.abs(bounds[1].width - bounds[1].height)).toBeLessThan(1)
     expect(bounds[0].x + bounds[0].width).toBeLessThan(bounds[1].x)
     expect(bounds[1].x + bounds[1].width).toBeLessThan(bounds[2].x)
@@ -3047,6 +3398,68 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
 }
 
 test.describe('watch page', () => {
+  for (const playbackEngine of ['built-in', 'yt-dlp']) {
+    test(`${playbackEngine} respects live and premiere seeking limits`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      const watchView = await watchViewHandle(page)
+      await watchView.evaluate((view, engine) => { view.activePlaybackEngine = engine }, playbackEngine)
+
+      let liveDetails = {}
+      await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+        const videoId = JSON.parse(request.postData() ?? '{}').videoId
+        const response = demoPlayerResponse(videoId)
+        Object.assign(response.videoDetails, liveDetails)
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify(response) })
+      })
+
+      const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+      for (const scenario of [
+        { details: { isLive: true, isLiveContent: true, isLiveDvrEnabled: false }, dvr: false, premiere: false },
+        { details: { isLive: true, isLiveContent: true, isLiveDvrEnabled: true }, dvr: true, premiere: false },
+        { details: { isLive: true, isLiveContent: false }, dvr: null, premiere: true }
+      ]) {
+        liveDetails = scenario.details
+        await watchView.evaluate(view => view.getVideoInformationLocal(view.videoLoadGeneration, true))
+        expect(await watchView.evaluate(view => ({
+          live: view.isLive,
+          dvr: view.isLiveDvrEnabled,
+          premiere: view.isPremiere
+        }))).toEqual({ live: true, dvr: scenario.dvr, premiere: scenario.premiere })
+        const seekingAllowed = playbackEngine === 'yt-dlp' && scenario.dvr !== false
+        await expect(seekBar).toHaveCount(seekingAllowed ? 1 : 0)
+
+        await video.evaluate(element => {
+          element.pause()
+          element.currentTime = 10
+        })
+        await page.keyboard.press('ArrowLeft')
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 5 : 10, 3)
+
+        await watchView.evaluate(view => view.changeTimestamp(3))
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 3 : 10, 3)
+
+        await watchView.evaluate(async view => {
+          view.videoChapters = [
+            { title: 'First chapter', startSeconds: 0 },
+            { title: 'Second chapter', startSeconds: 5 }
+          ]
+          view.videoCurrentChapterIndex = 1
+          await view.$nextTick()
+        })
+        await page.keyboard.press('Control+ArrowLeft')
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 0 : 10, 3)
+      }
+
+      await watchView.evaluate(view => { view.isLiveDvrEnabled = false })
+      liveDetails = {}
+      await openMockedVideo(page, 'dQw4w9WgXcQ')
+      const nextWatchView = await watchViewHandle(page)
+      expect(await nextWatchView.evaluate(view => view.isLiveDvrEnabled)).toBeNull()
+      await expect(seekBar).toHaveCount(1)
+    })
+  }
+
   test('skips known unavailable playlist videos when enabled and stops at the end', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3533,6 +3946,102 @@ test.describe('watch page', () => {
       hasText: 'The preferred yt-dlp clients could not provide playable streams'
     })).toHaveCount(1)
   })
+
+  for (const scenario of ['preferred clients', 'default clients', 'authenticated default clients', 'anonymous extraction fails']) {
+    test(`retries a limited authenticated live manifest without cookies: ${scenario}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
+        contentType: 'application/x-mpegURL',
+        body: '#EXTM3U\n'
+      }))
+      await openMockedVideo(page)
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+        await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      })
+      await app.electronApp.evaluate(({ ipcMain }, scenario) => {
+        globalThis.__premiereAuthenticationCalls = []
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients, useAuthentication) => {
+          globalThis.__premiereAuthenticationCalls.push({ useDefaultClients, useAuthentication })
+          if (scenario === 'default clients' && !useDefaultClients) {
+            return { error: 'Preferred clients could not extract formats' }
+          }
+          if (['authenticated default clients', 'anonymous extraction fails'].includes(scenario) && !useAuthentication) {
+            return { error: 'This live stream requires authentication' }
+          }
+          return {
+            isLive: true,
+            liveStatus: 'is_live',
+            hlsManifestUrl: !useAuthentication || (scenario === 'authenticated default clients' && useDefaultClients)
+              ? 'https://example.invalid/manifest_duration/3600/full.m3u8'
+              : 'https://example.invalid/manifest_duration/30/limited.m3u8',
+            formats: [],
+            duration: null,
+            version: 'test'
+          }
+        })
+      }, scenario)
+      const view = await watchViewHandle(page)
+      await view.evaluate(view => view.handlePlaybackEngineChange('yt-dlp'))
+      const calls = [{ useDefaultClients: false, useAuthentication: true }]
+      calls.push({ useDefaultClients: true, useAuthentication: true })
+      if (scenario !== 'authenticated default clients') calls.push({ useDefaultClients: true, useAuthentication: false })
+      expect(await app.electronApp.evaluate(() => globalThis.__premiereAuthenticationCalls)).toEqual(calls)
+      const retainedLimitedStream = scenario === 'anonymous extraction fails'
+      expect(await view.evaluate(view => view.manifestSrc)).toBe(retainedLimitedStream
+        ? 'https://example.invalid/manifest_duration/30/limited.m3u8'
+        : 'https://example.invalid/manifest_duration/3600/full.m3u8')
+      await expect(page.locator('.shaka-seek-bar-container')).toHaveCount(retainedLimitedStream ? 0 : 1)
+    })
+  }
+
+  for (const incompletePreferredSource of [true, false]) {
+    test(`retains the complete limited live source when preferred clients are incomplete: ${incompletePreferredSource}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
+        contentType: 'application/x-mpegURL',
+        body: '#EXTM3U\n'
+      }))
+      await openMockedVideo(page)
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+        await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      })
+      await app.electronApp.evaluate(({ ipcMain }, incompletePreferredSource) => {
+        globalThis.__limitedSourceAuthenticationCalls = []
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients, useAuthentication) => {
+          globalThis.__limitedSourceAuthenticationCalls.push({ useDefaultClients, useAuthentication })
+          if (!useAuthentication) return { error: 'This live stream requires authentication' }
+          return {
+            isLive: true,
+            liveStatus: 'is_live',
+            hlsManifestUrl: `https://example.invalid/manifest_duration/30/${useDefaultClients ? 'default' : 'preferred'}.m3u8`,
+            incomplete: useDefaultClients ? !incompletePreferredSource : incompletePreferredSource,
+            formats: [],
+            duration: null,
+            version: 'test'
+          }
+        })
+      }, incompletePreferredSource)
+      const view = await watchViewHandle(page)
+      await view.evaluate(view => view.handlePlaybackEngineChange('yt-dlp'))
+      expect(await app.electronApp.evaluate(() => globalThis.__limitedSourceAuthenticationCalls)).toEqual([
+        { useDefaultClients: false, useAuthentication: true },
+        { useDefaultClients: true, useAuthentication: true },
+        { useDefaultClients: true, useAuthentication: false }
+      ])
+      expect(await view.evaluate(view => view.manifestSrc)).toBe(
+        `https://example.invalid/manifest_duration/30/${incompletePreferredSource ? 'default' : 'preferred'}.m3u8`
+      )
+      await expect(page.locator('.shaka-seek-bar-container')).toHaveCount(0)
+    })
+  }
 
   test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
@@ -5164,22 +5673,7 @@ test.describe('watch page', () => {
     await expect(fullscreenMetadata).toBeVisible()
     await expect(player).not.toHaveClass(/presentationModeChanging/)
 
-    expect(await player.evaluate(element => {
-      const movingProperties = [
-        ['.player', 'inline-size'],
-        ['.shaka-controls-container', 'inline-size'],
-        ['.shortsTopControls', 'inset-inline-start'],
-        ['.shortsTopControls', 'max-inline-size'],
-        ['.fullscreenActions', 'inset-inline-end']
-      ]
-      return movingProperties.map(([selector, property]) => {
-        const style = getComputedStyle(element.querySelector(selector))
-        const properties = style.transitionProperty.split(', ')
-        const durations = style.transitionDuration.split(', ')
-        const index = properties.indexOf(property)
-        return index === -1 ? null : durations[index % durations.length]
-      })
-    })).toEqual(Array(5).fill('0.25s'))
+    await expect(player.locator('.shaka-controls-container')).toHaveCSS('transition-property', 'none')
 
     expect(await player.evaluate(element => {
       return getComputedStyle(
@@ -5187,23 +5681,16 @@ test.describe('watch page', () => {
       ).transitionProperty
     })).toBe('none')
 
-    const closingMotion = player.evaluate(element => new Promise(resolve => {
-      const controls = element.querySelector('.shaka-controls-container')
-      const seek = element.querySelector('.shaka-seek-bar-container')
-      const initial = {
-        seekLeft: seek.getBoundingClientRect().left
-      }
-      controls.addEventListener('transitionrun', event => {
-        resolve({ initial, transitionProperty: event.propertyName })
-      }, { once: true })
-    }))
-    await watchComponent.evaluate(component => {
-      component.proxy.$refs.player.setFullscreenMetadata(false)
+    const initialSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
+      return element.getBoundingClientRect().left
     })
-    const { initial, transitionProperty } = await closingMotion
+    const closingMotion = await measureFullscreenDockToggle(watchComponent, false)
+    expect(closingMotion.animationKeyframes).toHaveLength(2)
+    expect(closingMotion.animationKeyframes[0].scale).not.toBe(closingMotion.animationKeyframes[1].scale)
+    expect(closingMotion.widths.length).toBeLessThanOrEqual(2)
+    expect(closingMotion.controlWidths.length).toBeLessThanOrEqual(2)
     await expect(fullscreenMetadata).toHaveCount(0)
     const fullscreenWidth = (await player.boundingBox()).width
-    expect(['inline-size', 'width']).toContain(transitionProperty)
     await expect.poll(async () => {
       return player.locator('.shaka-controls-container').evaluate(element => {
         return element.getBoundingClientRect().width
@@ -5212,19 +5699,14 @@ test.describe('watch page', () => {
     const closedSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
       return element.getBoundingClientRect().left
     })
-    expect(closedSeekLeft).toBeGreaterThan(initial.seekLeft)
+    expect(closedSeekLeft).toBeGreaterThan(initialSeekLeft)
 
-    const reopeningMotion = player.evaluate(element => new Promise(resolve => {
-      const controls = element.querySelector('.shaka-controls-container')
-      controls.addEventListener('transitionend', event => {
-        resolve(event.propertyName)
-      }, { once: true })
-    }))
-    await watchComponent.evaluate(component => {
-      component.proxy.$refs.player.setFullscreenMetadata(true)
-    })
+    const reopeningMotion = await measureFullscreenDockToggle(watchComponent, true)
     await expect(fullscreenMetadata).toBeVisible()
-    expect(['inline-size', 'width']).toContain(await reopeningMotion)
+    expect(reopeningMotion.animationKeyframes).toHaveLength(2)
+    expect(reopeningMotion.animationKeyframes[0].scale).not.toBe(reopeningMotion.animationKeyframes[1].scale)
+    expect(reopeningMotion.widths.length).toBeLessThanOrEqual(2)
+    expect(reopeningMotion.controlWidths.length).toBeLessThanOrEqual(2)
     const reopenedControlsWidth = await player.locator('.shaka-controls-container').evaluate(element => {
       return element.getBoundingClientRect().width
     })
@@ -5494,7 +5976,7 @@ test.describe('watch page', () => {
     })
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
-    expect(standardCardRadius).toBe('16px')
+    expect(standardCardRadius).toBe('24px')
     await expect(panel).toHaveCSS('border-radius', standardCardRadius)
     await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
     await expect.poll(() => panel.evaluate((element) => {
@@ -5984,15 +6466,19 @@ test.describe('watch page', () => {
     await openMockedVideo(page)
 
     const video = page.locator('.ftVideoPlayer video')
-    await video.evaluate(element => {
+    await video.evaluate(async element => {
       element.pause()
+      const seeked = new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
       element.currentTime = 29
-      element.dispatchEvent(new Event('timeupdate'))
+      await seeked
     })
 
     const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
     await expect(prompt).toBeVisible()
-    await video.dispatchEvent('ended')
+    // A synthetic ended event leaves playback inside the segment, where a queued
+    // timeupdate can recreate the prompt. Let the media actually finish instead.
+    await video.evaluate(element => element.play())
+    await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
 
     await expect(prompt).toHaveCount(0)
   })
@@ -6769,6 +7255,7 @@ test.describe('manual comment loading', () => {
 
   test('loads collapsed replies from the video uploader while filtering', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { creatorReply: true, ownerReply: true })
+    await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
     await openMockedVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -6781,7 +7268,7 @@ test.describe('manual comment loading', () => {
       name: /replies from .+ and others/
     })
     await expect(ownerReplyToggle).toBeVisible()
-    await expect(ownerReplyToggle.locator('.commentReplyOwnerThumbnail')).toBeVisible()
+    await expect(ownerReplyToggle.locator('img.commentReplyOwnerThumbnail')).toBeVisible()
     await expect(ownerReplyToggle.locator('.commentReplyOwnerSeparator')).toHaveText('•')
     await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
     await expect(ownerReplyToggle).not.toContainText('from')
@@ -6953,6 +7440,11 @@ test.describe('manual comment loading', () => {
     await expect(commentSearchInput).toBeFocused()
     await expect(page.locator('.commentTools .clearInputTextButton')).toHaveCount(0)
     await expectCommentHeaderToolsAligned(page)
+    await expect.poll(() => page.locator('.commentTools .ft-input-component').evaluate(element => {
+      const parent = element.parentElement
+      const style = getComputedStyle(parent)
+      return Math.abs(parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - element.getBoundingClientRect().width)
+    })).toBeLessThanOrEqual(1)
     await commentSearchInput.fill('honored')
 
     const searchCancelButtonStyles = await page.evaluate(() => {
@@ -7218,7 +7710,7 @@ test.describe('manual comment loading', () => {
 
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     const creatorFilter = page.getByRole('checkbox', { name: 'From creator' })
-    await expect(creatorFilter.locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+    await expect(creatorFilter.locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
     await creatorFilter.click()
 
     await expect(page.locator('.commentThread')).toHaveCount(1)
@@ -7397,7 +7889,7 @@ test.describe('manual comment loading', () => {
       const scroller = dock.locator('.commentsContentWrapper')
       const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
-      await expect(dock.getByRole('checkbox', { name: 'From creator' }).locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+      await expect(dock.getByRole('checkbox', { name: 'From creator' }).locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)

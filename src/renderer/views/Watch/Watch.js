@@ -1,6 +1,7 @@
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
+import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
@@ -100,6 +101,7 @@ import {
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
+import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -167,6 +169,7 @@ export default defineComponent({
   components: {
     FtRetryImage,
     FtPhonePanel,
+    PhoneCommentsButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchDlnaCast,
     'watch-video-info': WatchVideoInfo,
@@ -267,9 +270,12 @@ export default defineComponent({
       isFamilyFriendly: null,
       commentsDisabled: false,
       commentsLoaded: false,
+      commentPreviews: [],
       liveChatLoaded: false,
       transcriptLoaded: false,
       isLive: false,
+      /** @type {boolean | null} */
+      isLiveDvrEnabled: null,
       isPremiere: false,
       liveChat: null,
       liveChatIsReplay: false,
@@ -2271,8 +2277,10 @@ export default defineComponent({
       this.isFamilyFriendly = null
       this.commentsDisabled = false
       this.isLive = false
+      this.isLiveDvrEnabled = null
       this.isPremiere = false
       this.commentsLoaded = false
+      this.commentPreviews = []
       this.liveChatLoaded = false
       this.transcriptLoaded = false
       this.sponsorBlockInfoSegments = []
@@ -3118,9 +3126,11 @@ export default defineComponent({
           adEndTimeUnixMs,
           paidPromotionDurationMs,
           isPremiere,
+          isLiveDvrEnabled,
           watchPageIpBlocked,
           musicMediaType,
           androidLiveHlsManifestUrl,
+          androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
@@ -3330,6 +3340,7 @@ export default defineComponent({
         }
 
         this.isLive = !!result.basic_info.is_live
+        this.isLiveDvrEnabled = isLiveDvrEnabled ?? null
         this.isUpcoming = !!result.basic_info.is_upcoming
         this.isLiveContent = !!result.basic_info.is_live_content
         this.isPremiere = isPremiere === true
@@ -3496,15 +3507,22 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            if (result.streaming_data?.dash_manifest_url) {
-              this.manifestSrc = result.streaming_data.dash_manifest_url
+            // Ongoing streams and premieres use HLS at the live edge. Remote
+            // DASH can advertise a rewind range whose segments are unavailable.
+            const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
+            const dashManifestUrl = this.isPostLiveDvr
+              ? result.streaming_data?.dash_manifest_url ??
+                ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
+              : null
+            if (dashManifestUrl) {
+              this.manifestSrc = dashManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
               // A blocked live player response can contain all watch-page metadata
               // without either manifest URL. Keep the missing source as `null`, as
               // expected by the player availability checks, while yt-dlp extracts
               // its independent HLS manifest.
-              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
+              this.manifestSrc = hlsManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_HLS
             }
           }
@@ -3877,6 +3895,7 @@ export default defineComponent({
           this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
 
           this.isLive = result.liveNow
+          this.isLiveDvrEnabled = null
           this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
@@ -5222,7 +5241,7 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
-      this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
+      this.tabRouter.push(nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` })
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
     },

@@ -124,10 +124,11 @@
   flex: 1 1 220px;
   min-inline-size: 0;
   inline-size: 220px;
-  margin-block-start: 0;
+  margin-block: 0;
 }
 
 .headerSortSelect :deep(.select-text) {
+  padding-block: 2px;
   block-size: 36px;
   padding-inline-start: 86px;
   font-size: 0.9rem;
@@ -248,8 +249,12 @@
   left: 0;
   block-size: 3px;
 
-  /* scaled up to the tab width via the inline transform */
-  inline-size: 1px;
+  /* A 1px base amplifies device-pixel rounding when stretched to a tab's
+     width in WebView. Keep the base wide and scale it to the selected tab. */
+  inline-size: 100px;
+
+  /* Compensate for scaleX so the end caps stay round at every tab width. */
+  border-radius: calc(150px * var(--ui-roundness) / var(--tab-indicator-width)) / calc(1.5px * var(--ui-roundness));
   background-color: var(--primary-color);
   pointer-events: none;
   transform-origin: left top;
@@ -347,6 +352,20 @@
   margin: 0;
 }
 
+@media only screen and (width <= 680px), only screen and (orientation: landscape) and (height <= 600px) {
+  .subscriptionsHeader {
+    --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);
+
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .subscriptionsHeader.scrollHidden:not(:has(:focus-visible)) {
+    transform: translateY(calc(-100% - var(--subscriptions-top-bar-block-size) - 2px));
+    transition: var(--mobile-nav-hide-transition);
+    pointer-events: none;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .card {
     --subscriptions-header-padding-block-end: 10px;
@@ -374,7 +393,8 @@
     gap: 0;
   }
 
-  .tab {
+  .tab,
+  .newFeedTab {
     flex: 1 1 0;
     min-inline-size: 0;
     min-block-size: 44px;
@@ -457,12 +477,14 @@
   }
 
   .newFeedTabs {
-    gap: 4px;
+    flex-wrap: nowrap;
+    gap: 0;
   }
 }
 
 @media only screen and (width <= 480px) {
-  .tabs .subscriptionIcon {
+  .tabs .subscriptionIcon,
+  .newFeedTabs .subscriptionIcon {
     display: none;
   }
 }

@@ -11,14 +11,23 @@ h3 {
   color: var(--tertiary-text-color);
 }
 
-.profileName,
-.colorSelection {
+.profileName {
   margin: auto;
   inline-size: min(350px, 100%);
 }
 
 .profileIconHeading {
   margin-block-start: 24px;
+}
+
+.profileActions {
+  margin-block-start: 16px;
+  justify-content: center;
+  gap: 12px;
+}
+
+.profileActions :deep(.btn) {
+  margin: 0;
 }
 
 .profileIconOptions {
@@ -28,6 +37,7 @@ h3 {
   gap: 10px;
 }
 
+.builtinIconOptions,
 .emojiOptions {
   display: flex;
   flex-wrap: wrap;
@@ -36,18 +46,23 @@ h3 {
   max-inline-size: min(350px, 100%);
 }
 
+.builtinIconOption,
 .emojiOption {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;
+  color: var(--primary-text-color);
   font-size: 24px;
   block-size: 42px;
   inline-size: 42px;
   padding: 0;
 }
 
+.builtinIconOption:hover,
+.builtinIconOption:focus-visible,
+.builtinIconOption.selected,
 .emojiOption:hover,
 .emojiOption:focus-visible,
 .emojiOption.selected {
@@ -56,19 +71,38 @@ h3 {
 }
 
 .customEmojiLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
 }
 
 .customEmojiInput {
-  background: var(--search-bar-color);
-  backdrop-filter: var(--search-bar-blur, none);
-  border: 1px solid var(--divider-color);
-  border-radius: calc(4px * var(--ui-roundness));
-  color: var(--primary-text-color);
+  --input-bottom-spacing: 0;
+
+  inline-size: 64px;
+}
+
+.customEmojiInput :deep(.ft-input) {
+  padding-inline: 6px;
   font-size: 24px;
-  inline-size: 80px;
-  padding: 6px;
   text-align: center;
+}
+
+.customEmojiInput :deep(.ft-input::placeholder) {
+  opacity: 0;
+}
+
+.customEmojiPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  filter: grayscale(1);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .imageInput {
@@ -131,13 +165,8 @@ h3 {
   justify-content: center;
 }
 
-.profileEdit {
-  flex-direction: column;
-  column-gap: 10px;
-}
-
-.profileEdit > * {
-  flex: 1;
+.profileEdit > * + * {
+  margin-block-start: 20px;
 }
 
 .colorOptions {
@@ -167,6 +196,10 @@ h3 {
 
 .themeColorOption {
   background: var(--primary-color);
+  color: var(--text-with-main-color);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
 }
 
 .transparentColorOption {
@@ -196,14 +229,19 @@ h3 {
 }
 
 .secondEditRow {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: start;
+  gap: 24px;
+}
+
+.secondEditRow > * {
+  min-inline-size: 0;
 }
 
 .card {
   inline-size: 85%;
-  margin-block: 0 60px;
+  margin-block: 0 15px;
   margin-inline: auto;
 }
 
@@ -220,6 +258,7 @@ h3 {
     max-inline-size: 100%;
   }
 
+  .builtinIconOption,
   .emojiOption,
   .colorOption {
     inline-size: var(--phone-touch-target, 48px);

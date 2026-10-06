@@ -509,6 +509,8 @@ export function isVideoHiddenByPreferences(video, {
     return true
   }
 
+  if (forbiddenTitles.length === 0) return false
+
   const lowerCaseAuthor = video.author?.toLowerCase()
   const lowerCaseTitle = video.title?.toLowerCase()
 

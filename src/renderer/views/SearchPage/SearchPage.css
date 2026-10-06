@@ -33,6 +33,19 @@
   text-align: center;
 }
 
+.searchNotice {
+  margin-block: 32px 16px;
+  text-align: center;
+}
+
+.searchNotice p {
+  color: var(--tertiary-text-color);
+}
+
+.searchRetryButton {
+  margin-inline: auto;
+}
+
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 100%;

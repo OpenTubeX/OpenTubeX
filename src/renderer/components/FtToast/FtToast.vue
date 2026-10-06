@@ -56,14 +56,17 @@
         </div>
       </div>
     </div>
+    <!-- Keep the holder moving with navigation even before a status appears. -->
     <div
-      v-if="connectionState !== 'online' && !(fullscreenTarget && connectionState === 'offline')"
       ref="connectionHolder"
       class="connection-status-holder"
       :class="tabBarToastClasses"
       :style="toastHolderStyle"
     >
-      <FtConnectionStatus :state="connectionState" />
+      <FtConnectionStatus
+        v-if="connectionState !== 'online' && !(fullscreenTarget && connectionState === 'offline')"
+        :state="connectionState"
+      />
     </div>
   </Teleport>
 </template>

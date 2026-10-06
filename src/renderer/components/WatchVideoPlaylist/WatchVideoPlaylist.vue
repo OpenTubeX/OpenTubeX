@@ -1,7 +1,7 @@
 <template>
   <FtCard
     class="relative"
-    :class="{ fullscreenPlaylist: fullscreenOverlay, isCollapsed: playlistCollapsed }"
+    :class="{ fullscreenPlaylist: fullscreenOverlay, phonePlaylist: phonePanel, isCollapsed: playlistCollapsed }"
   >
     <FtLoader
       v-if="isLoading"
@@ -33,35 +33,41 @@
         :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
       >
         <div class="playlistHeader">
-          <div
-            v-if="!fullscreenOverlay"
-            class="playlistTitleRow"
+          <Teleport
+            :to="phonePanelHeader || 'body'"
+            :disabled="!phonePanelHeader"
           >
-            <h3
-              class="playlistTitle"
-              :title="playlistTitle"
+            <div
+              v-if="!fullscreenOverlay"
+              class="playlistTitleRow"
             >
-              <RouterLink
-                class="playlistTitleLink"
-                dir="auto"
-                :to="playlistPageLinkTo"
+              <h3
+                class="playlistTitle"
+                :title="playlistTitle"
               >
-                {{ playlistTitle }}
-              </RouterLink>
-            </h3>
-            <button
-              class="playlistButton playlistCollapseButton"
-              :aria-label="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
-              :aria-expanded="!playlistCollapsed"
-              :title="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
-              @click="toggleCollapse"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', playlistCollapsed ? 'angle-down' : 'angle-up']"
-              />
-            </button>
-          </div>
+                <RouterLink
+                  class="playlistTitleLink"
+                  dir="auto"
+                  :to="playlistPageLinkTo"
+                >
+                  {{ playlistTitle }}
+                </RouterLink>
+              </h3>
+              <button
+                v-if="!phonePanel"
+                class="playlistButton playlistCollapseButton"
+                :aria-label="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+                :aria-expanded="!playlistCollapsed"
+                :title="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+                @click="toggleCollapse"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', playlistCollapsed ? 'angle-down' : 'angle-up']"
+                />
+              </button>
+            </div>
+          </Teleport>
           <template
             v-if="!playlistCollapsed && channelName !== ''"
           >
@@ -71,13 +77,19 @@
               dir="auto"
               :to="`/channel/${channelId}`"
             >
-              {{ channelName }} -
+              {{ channelName }}<span
+                class="channelNameSeparator"
+                aria-hidden="true"
+              > -</span>
             </RouterLink>
             <bdi
               v-else
               class="channelName"
             >
-              {{ channelName }} -
+              {{ channelName }}<span
+                class="channelNameSeparator"
+                aria-hidden="true"
+              > -</span>
             </bdi>
           </template>
           <span
@@ -113,12 +125,12 @@
                   :style="previewStyle"
                 >
                   <div class="previewTooltip">
-                    <img
+                    <FtRetryImage
                       v-if="previewVideoThumbnail"
                       :src="previewVideoThumbnail"
                       alt=""
                       class="previewThumbnail"
-                    >
+                    />
                     <div class="previewText">
                       {{ previewVideoIndex }} / {{ playlistVideoCount }}
                     </div>
@@ -131,62 +143,68 @@
               </div>
             </div>
           </span>
-          <div
-            v-show="!playlistCollapsed"
-            class="playlistButtons"
+          <Teleport
+            :to="phonePanelHeader || 'body'"
+            :disabled="!phonePanelHeader"
           >
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: loopEnabled }"
-              :aria-label="t('Video.Loop Playlist')"
-              :aria-pressed="loopEnabled"
-              :title="t('Video.Loop Playlist')"
-              @click="toggleLoop"
+            <div
+              v-show="!playlistCollapsed"
+              class="playlistButtons"
+              :class="{ phonePlaylistActions: phonePanelHeader }"
             >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'retweet']"
-              />
-            </button>
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: shuffleEnabled }"
-              :aria-label="t('Video.Shuffle Playlist')"
-              :aria-pressed="shuffleEnabled"
-              :title="t('Video.Shuffle Playlist')"
-              @click="toggleShuffle"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'random']"
-              />
-            </button>
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: reversePlaylist }"
-              :aria-label="t('Video.Reverse Playlist')"
-              :aria-pressed="reversePlaylist"
-              :title="t('Video.Reverse Playlist')"
-              @click="toggleReversePlaylist"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'exchange-alt']"
-              />
-            </button>
-            <button
-              v-if="userPlaylistWatchedVideoCount > 0"
-              class="playlistButton"
-              :aria-label="t('User Playlists.Remove Watched Videos')"
-              :title="t('User Playlists.Remove Watched Videos')"
-              @click="showRemoveWatchedVideosPrompt = true"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'eye-slash']"
-              />
-            </button>
-          </div>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: loopEnabled }"
+                :aria-label="t('Video.Loop Playlist')"
+                :aria-pressed="loopEnabled"
+                :title="t('Video.Loop Playlist')"
+                @click="toggleLoop"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'retweet']"
+                />
+              </button>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: shuffleEnabled }"
+                :aria-label="t('Video.Shuffle Playlist')"
+                :aria-pressed="shuffleEnabled"
+                :title="t('Video.Shuffle Playlist')"
+                @click="toggleShuffle"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'random']"
+                />
+              </button>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: reversePlaylist }"
+                :aria-label="t('Video.Reverse Playlist')"
+                :aria-pressed="reversePlaylist"
+                :title="t('Video.Reverse Playlist')"
+                @click="toggleReversePlaylist"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'exchange-alt']"
+                />
+              </button>
+              <button
+                v-if="userPlaylistWatchedVideoCount > 0"
+                class="playlistButton"
+                :aria-label="t('User Playlists.Remove Watched Videos')"
+                :title="t('User Playlists.Remove Watched Videos')"
+                @click="showRemoveWatchedVideosPrompt = true"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'eye-slash']"
+                />
+              </button>
+            </div>
+          </Teleport>
         </div>
         <component
           :is="playlistItemsWrapperComponent"
@@ -225,7 +243,7 @@
             :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
-            @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+            @move-dragged-video="onMoveDraggedVideo"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
             @remove-from-playlist="removeVideoFromPlaylist"
@@ -252,8 +270,9 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -310,22 +329,26 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  phonePanel: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
+const phonePanelHeader = inject('phonePanelHeader', null)
 const router = useRouter()
 const { tabId, isTabPresented } = useTabContext()
 const playlistCacheTabId = tabId ?? 'web'
 
-// Set when centering is attempted while the tab is hidden (e.g. opened in a
-// background tab): the list has no layout yet, so we retry once it is presented.
+// Retry centering once a hidden tab or phone panel has a measurable list.
 const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
 const isCollapsed = ref(false)
-const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay)
+const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay && !props.phonePanel)
 let savedScrollTop = 0
 let lastScrolledVideoId = null
 const shuffleEnabled = ref(false)
@@ -349,7 +372,7 @@ const previewVideoIndex = ref(1)
 
 const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
-let previewPositionUpdatePending = false
+let previewAnimationFrame = null
 let previewPointerClientX = 0
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
@@ -916,6 +939,16 @@ function moveDraggedVideoTemporarily(draggedOverVideo, draggedVideo_) {
 
 const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
 
+/**
+ * @param {VideoData} video
+ * @param {VideoData} source
+ */
+function onMoveDraggedVideo(video, source) {
+  // Pointer drags already wait for transitions and flush their final target.
+  if (source.pointerDragging) moveDraggedVideoTemporarily(video, source)
+  else moveDraggedVideoTemporarilyThrottled(video, source)
+}
+
 function playNextVideo() {
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
@@ -1152,11 +1185,14 @@ function shufflePlaylistItems() {
 
 const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
 let playlistItemsObserver = null
+let playlistItemsResizeObserver = null
 let playlistItemsClampFrame = null
 
 function stopObservingPlaylistItems() {
   playlistItemsObserver?.disconnect()
   playlistItemsObserver = null
+  playlistItemsResizeObserver?.disconnect()
+  playlistItemsResizeObserver = null
   if (playlistItemsClampFrame !== null) {
     cancelAnimationFrame(playlistItemsClampFrame)
     playlistItemsClampFrame = null
@@ -1170,7 +1206,7 @@ watch(playlistItemsWrapper, (wrapper) => {
     return
   }
 
-  playlistItemsObserver = new MutationObserver(() => {
+  const scheduleClamp = () => {
     playlistItemsClampFrame ??= requestAnimationFrame(() => {
       playlistItemsClampFrame = null
       const items = container.querySelectorAll(':scope > .playlistItem')
@@ -1178,9 +1214,15 @@ watch(playlistItemsWrapper, (wrapper) => {
         container,
         items[items.length - 1] ?? null
       )
+      if (needsInitialCenter.value && container.clientHeight > 0) {
+        centerCurrentVideo()
+      }
     })
-  })
+  }
+  playlistItemsObserver = new MutationObserver(scheduleClamp)
   playlistItemsObserver.observe(container, { childList: true })
+  playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
+  playlistItemsResizeObserver.observe(container)
 }, { flush: 'post' })
 
 onBeforeUnmount(stopObservingPlaylistItems)
@@ -1225,7 +1267,7 @@ function scrollToVideo(index) {
     return false
   }
 
-  const currentVideoItemEl = container.children[index]
+  const currentVideoItemEl = container.querySelectorAll(':scope > .playlistItem')[index]
 
   if (currentVideoItemEl == null) {
     return false
@@ -1236,7 +1278,7 @@ function scrollToVideo(index) {
   const itemOffset = itemRect.top - containerRect.top - container.clientTop + container.scrollTop
   const centeredOffset = (container.clientHeight - itemRect.height) / 2
 
-  container.scrollTop = Math.max(0, itemOffset - centeredOffset)
+  restoreOverlayScrollTop(container, Math.max(0, itemOffset - centeredOffset))
   return true
 }
 
@@ -1246,12 +1288,16 @@ function scrollToCurrentVideo() {
 
 function centerCurrentVideo() {
   nextTick(() => {
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+      const item = container?.querySelectorAll(':scope > .playlistItem')[currentVideoIndexZeroBased.value]
+      // Move transitions can temporarily place a newly visible row outside the list.
+      await Promise.allSettled((item?.getAnimations() ?? []).map(animation => animation.finished))
       if (scrollToCurrentVideo()) {
         needsInitialCenter.value = false
         requestAnimationFrame(scrollToCurrentVideo)
       } else {
-        // The tab is still hidden; retry once it becomes presented.
+        // Retry once the tab or phone panel becomes visible.
         needsInitialCenter.value = true
       }
     })
@@ -1268,21 +1314,26 @@ const progressBarPreview = useTemplateRef('progressBarPreview')
 /**
  * @param {MouseEvent} event
  */
-async function updateProgressBarPreview(event) {
+function updateProgressBarPreview(event) {
   if (!showProgressBarPreview.value) return
+  previewPointerClientX = event.clientX
+  if (previewAnimationFrame !== null) return
+  previewAnimationFrame = requestAnimationFrame(renderProgressBarPreview)
+}
+
+async function renderProgressBarPreview() {
+  previewAnimationFrame = null
+  if (!showProgressBarPreview.value || !playlistProgressBar.value) return
 
   const rect = playlistProgressBar.value.getBoundingClientRect()
-  const mouseX = event.clientX - rect.left
+  const clientX = previewPointerClientX
+  const mouseX = clientX - rect.left
   const progressBarWidth = rect.width
   const percentage = Math.max(0, Math.min(100, (mouseX / progressBarWidth) * 100))
 
   previewVideoIndex.value = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil((percentage / 100) * playlistVideoCount.value)))
-  previewPointerClientX = event.clientX
-
-  if (previewPositionUpdatePending) return
-  previewPositionUpdatePending = true
   await nextTick()
-  previewPositionUpdatePending = false
+  if (!showProgressBarPreview.value || !playlistProgressBar.value) return
 
   const boundary = playlistProgressBar.value.closest('.watchVideoPlaylist')
   if (boundary && progressBarPreview.value) {
@@ -1296,7 +1347,7 @@ async function updateProgressBarPreview(event) {
     const previewWidth = Math.min(progressBarPreview.value.offsetWidth, availableWidth)
     const minimumViewportLeft = boundaryRect.left + margin
     const maximumViewportLeft = boundaryRect.right - margin - previewWidth
-    const centeredViewportLeft = previewPointerClientX - (previewWidth / 2)
+    const centeredViewportLeft = clientX - (previewWidth / 2)
     const viewportLeft = Math.max(
       minimumViewportLeft,
       Math.min(maximumViewportLeft, centeredViewportLeft)
@@ -1304,6 +1355,17 @@ async function updateProgressBarPreview(event) {
     previewPositionPixels.value = viewportLeft - rect.left
   }
 }
+
+watch(showProgressBarPreview, shown => {
+  if (!shown) cancelProgressBarPreview()
+})
+
+function cancelProgressBarPreview() {
+  if (previewAnimationFrame !== null) cancelAnimationFrame(previewAnimationFrame)
+  previewAnimationFrame = null
+}
+
+onBeforeUnmount(cancelProgressBarPreview)
 
 /**
  * @param {PointerEvent} event

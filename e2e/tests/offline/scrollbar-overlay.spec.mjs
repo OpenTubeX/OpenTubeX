@@ -59,6 +59,24 @@ async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
 }
 
 test.describe('overlay scrollbars', () => {
+  test('page and nested scrollbar handles follow live UI roundness changes', async ({ page }) => {
+    await addPageOverflow(page)
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-roundness-scrollbar', 0)
+    for (const width of [4, 10]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', value)
+      }, width)
+      for (const roundness of [0, 50, 100, 200]) {
+        await page.evaluate(value => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        }, roundness)
+        for (const scrollbar of [page.locator(PAGE_SCROLLBAR), viewport.locator(':scope > .os-scrollbar-vertical')]) {
+          await expect(scrollbar.locator('.os-scrollbar-handle')).toHaveCSS('border-radius', `${width * roundness / 100}px`)
+        }
+      }
+    }
+  })
+
   test('preserves native keyboard scrolling and clamps a fractional viewport after content shrinks', async ({ page }) => {
     const viewport = await addNestedCustomSpeedScroller(page, 'data-keyboard-scrollbar', 0)
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))

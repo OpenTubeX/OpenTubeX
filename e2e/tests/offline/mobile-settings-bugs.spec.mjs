@@ -48,22 +48,26 @@ for (const uiScale of [100, 125]) {
           const help = el.querySelector('.selectTooltip').getBoundingClientRect()
           const select = el.querySelector('.select-text').getBoundingClientRect()
           const style = getComputedStyle(el)
-          const contentWidth = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-          return Math.abs(select.width - (contentWidth - 70)) < 1 && help.left - select.right >= 15.75 && help.left - select.right <= 17
+          const indicators = el.querySelector('.selectIndicators').getBoundingClientRect()
+          const contentRight = el.getBoundingClientRect().right - parseFloat(style.paddingRight)
+          return help.left - select.right >= 7.75 && help.left - select.right <= 9 &&
+            indicators.right <= contentRight + 1
         }))).toBe(true)
       })
     }
 
-    test('centers caption help with a multiline switch label', async ({ page }) => {
+    test('lets caption help follow a multiline switch label', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 })
       const captions = await goToSettingsSection(page, 'playback')
       const label = captions.locator('.captionControls .switch-label').filter({ has: page.locator('.tooltip') }).first()
       await label.locator('.switch-label-text').evaluate(el => { el.textContent = 'A long translated switch label that takes several lines' })
       expect(await label.evaluate(el => {
-        const label = el.getBoundingClientRect()
+        const range = document.createRange()
+        range.selectNodeContents(el.querySelector('.switch-label-text'))
+        const lastLineTop = Math.max(...Array.from(range.getClientRects(), rect => rect.top))
         const help = el.querySelector('.tooltip').getBoundingClientRect()
-        return Math.abs(label.top + label.height / 2 - help.top - help.height / 2)
-      })).toBeLessThan(2)
+        return help.top + help.height / 2 - lastLineTop
+      })).toBeGreaterThanOrEqual(-1)
     })
 
     test('wraps long storage size descriptions while loading and after loading', async ({ page }) => {
@@ -201,7 +205,10 @@ test.describe('German playback settings on a narrow screen', () => {
     expect(await playback.locator('.switch-label-text').evaluateAll(elements => (
       elements.every(element => getComputedStyle(element).hyphens === 'auto')
     ))).toBe(true)
-    expect(await getMidWordLineBreaks(playback.locator('.quickPlaybackSpeedToggle .switch-label-text'))).toEqual([])
+    // German compounds may hyphenate beside the wider switch track.
+    expect(await playback.locator('.quickPlaybackSpeedToggle .switch-label-text').evaluate(element => (
+      element.scrollWidth <= element.clientWidth + 1
+    ))).toBe(true)
     expect(await getMidWordLineBreaks(customize)).toEqual([])
   })
 })

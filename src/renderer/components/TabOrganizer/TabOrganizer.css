@@ -18,7 +18,7 @@
   color: var(--primary-text-color);
   display: flex;
   flex-direction: column;
-  inline-size: min(1040px, 100%);
+  inline-size: min(1400px, 100%);
   max-block-size: calc(100vh - clamp(24px, 10vh, 96px));
   overflow: hidden;
 }
@@ -72,9 +72,9 @@
 .tabOrganizerSearch {
   align-items: center;
   display: grid;
-  flex: 1 1 260px;
+  flex: 1 1 180px;
   grid-template-columns: minmax(0, 1fr);
-  min-inline-size: min(260px, 100%);
+  min-inline-size: min(180px, 100%);
   position: relative;
 }
 
@@ -100,7 +100,7 @@
   border-block-end: 1px solid var(--divider-color);
   display: flex;
   flex: 0 0 auto;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 8px;
   padding-block: 6px 12px;
   padding-inline: 18px;
@@ -108,8 +108,6 @@
 
 .selectionControls,
 .bulkActions,
-.newGroupForm,
-.newGroupForm label,
 .selectionControls label {
   align-items: center;
   display: flex;
@@ -118,8 +116,7 @@
 }
 
 .selectionControls,
-.bulkActions,
-.newGroupForm {
+.bulkActions {
   align-items: flex-end;
 }
 
@@ -132,33 +129,16 @@
 }
 
 .selectionControls > button,
-.bulkActions button,
-.newGroupForm > button {
+.bulkActions button {
   align-items: center;
   display: inline-flex;
   gap: 6px;
   justify-content: center;
 }
 
-.controlLabel {
-  color: var(--accent-color);
-  display: block;
-  font-size: 12px;
-}
-
-.newGroupForm input {
-  background: var(--card-bg-color);
-  min-block-size: 34px;
-  padding-inline: 8px;
-}
-
 .compactSelect {
   inline-size: 190px;
-  margin-block-start: 22px;
-}
-
-.compactSelect.bulkActionSelect {
-  margin-block-start: 0;
+  margin-block: 8px 0;
 }
 
 .compactSelect :deep(.select-text) {
@@ -177,32 +157,17 @@
 
 .compactSelect :deep(.select-label) {
   font-size: 12px;
-  inset-block-start: -18px;
 }
 
 .compactSelect :deep(.iconSelect) {
   inset-inline-end: 8px;
 }
 
-.colorSelect {
-  inline-size: 150px;
-}
+.newGroupNameInput {
+  --input-bottom-spacing: 0;
 
-.newGroupForm {
-  border-block-start: 1px solid var(--divider-color);
-  padding-block-start: 8px;
-}
-
-.newGroupForm label:first-child {
-  align-items: stretch;
-  flex: 1 1 260px;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.groupNameInput {
-  flex: 1;
-  min-inline-size: 140px;
+  inline-size: min(420px, calc(100vw - 100px));
+  max-inline-size: 100%;
 }
 
 .dangerButton {
@@ -283,8 +248,7 @@
   box-sizing: border-box;
 }
 
-.groupIconButton,
-.groupColorButton {
+.groupIconButton {
   aspect-ratio: 1;
   background: transparent !important;
   border-color: transparent !important;
@@ -296,25 +260,23 @@
 }
 
 .groupIconButton:hover,
-.groupIconButton:focus-visible,
-.groupColorButton:hover,
-.groupColorButton:focus-visible {
+.groupIconButton:focus-visible {
   background: var(--side-nav-hover-color) !important;
 }
 
-.groupIconEditor,
-.groupColorEditor {
+.groupIconEditor {
   position: relative;
 }
 
-.groupIconPicker,
-.groupColorPicker {
+.groupAppearancePicker {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
-  display: flex;
-  gap: 3px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 6px;
+  inline-size: min(305px, calc(100vw - 116px));
   inset-block-start: calc(100% + 3px);
   inset-inline-start: 0;
   padding: 5px;
@@ -322,14 +284,13 @@
   z-index: 3;
 }
 
-.groupIconPicker button,
-.groupColorPicker button {
+.groupAppearancePicker button {
   aspect-ratio: 1;
   background: transparent;
   border-color: transparent;
   display: grid;
-  min-block-size: 30px;
-  min-inline-size: 30px;
+  min-block-size: 0;
+  min-inline-size: 0;
   padding: 0;
   place-items: center;
 }
@@ -340,9 +301,21 @@
   border-color: var(--accent-color);
 }
 
+.groupColorPicker,
 .groupIconPicker {
   display: grid;
-  grid-template-columns: repeat(5, 34px);
+  gap: 3px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.groupColorPicker .groupColor {
+  block-size: 18px;
+  inline-size: 18px;
+}
+
+.groupIconPicker {
+  border-block-start: 1px solid var(--divider-color);
+  padding-block-start: 6px;
 }
 
 .groupNameButton {
@@ -443,7 +416,8 @@
   justify-content: center;
 }
 
-.tabIcon img {
+.tabIcon img,
+.tabIcon .retryImagePlaceholder {
   block-size: 20px;
   border-radius: 50%;
   inline-size: 20px;
@@ -494,7 +468,11 @@
 }
 
 .tabSelection :deep(label::after) {
-  inset-inline-start: 6px !important;
+  inset-inline-start: 12px !important;
+}
+
+.tabSelection :deep(.checkboxStateLayer) {
+  inset-inline-start: 12px;
 }
 
 .tabSelection :deep(.checkboxLabelText) {
@@ -625,7 +603,7 @@
 .syncedSessionTab::after {
   background: transparent;
   block-size: 2px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   content: '';
   inset-block-end: -1px;
   inset-inline: 8px;
@@ -797,8 +775,8 @@
     grid-template-columns: 24px minmax(0, 1fr) auto;
   }
 
-  .compactSelect.bulkActionSelect {
-    margin-block-start: 22px;
+  .tabOrganizerSearch {
+    flex-basis: 100%;
   }
 
   .tabGroupHeader {

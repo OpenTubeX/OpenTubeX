@@ -42,30 +42,39 @@
   object-fit: contain;
 }
 
+.engineIcon :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
 .fallbackIcon {
   color: var(--secondary-text-color);
 }
 
 .removeEngine {
-  display: grid;
-  place-items: center;
-  align-self: center;
-  inline-size: 36px;
-  block-size: 36px;
-  color: var(--text-color);
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 0;
-  line-height: 1;
+  min-block-size: max(var(--form-control-height), var(--button-height));
+  justify-self: center;
+  margin: 0;
 }
 
 .addEngine {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(240px, 2fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 340px)) auto;
   gap: 12px;
   align-items: center;
+  justify-content: center;
+}
+
+.addEngine :deep(.btn) {
+  justify-self: center;
+  margin: 0;
+}
+
+/* New values have no saved-setting markers to reserve a gutter for. */
+.addEngine :deep(.ft-input-component.floatingLabel) {
+  border-inline-start: 0;
+  padding-inline-start: 0;
 }
 
 h3 {
@@ -79,7 +88,10 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .removeEngine {
-    justify-self: end;
+  .engineRow :deep(.ft-input-component),
+  .addEngine :deep(.ft-input-component) {
+    justify-self: center;
+    inline-size: min(340px, 100%);
   }
+
 }

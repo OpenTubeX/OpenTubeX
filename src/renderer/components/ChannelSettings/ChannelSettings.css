@@ -52,6 +52,15 @@
   text-align: start;
 }
 
+.addSubscribedChannelHeader {
+  flex: none;
+  padding-inline: 12px;
+}
+
+.addSubscribedChannelHeading {
+  text-align: center;
+}
+
 .addSubscribedChannelSearch {
   margin-block-end: 8px;
 }
@@ -104,6 +113,7 @@
 }
 
 .channelSearch {
+  inline-size: 100%;
   margin-block-end: 1em;
 }
 
@@ -116,11 +126,19 @@
 
   /* Keep the cards' focus outlines clear of the scroll container's edges */
   padding: 2px;
+
+  /* Overlay scrollbars need their own space beside the cards. */
+  padding-inline-end: calc(var(--scrollbar-track-width) + 6px);
 }
 
 .emptyState {
   padding: 2rem;
   text-align: center;
+}
+
+.channelListContent {
+  /* Include child margins in the wrapper used to measure the scroll boundary. */
+  display: flow-root;
 }
 
 .channelList {

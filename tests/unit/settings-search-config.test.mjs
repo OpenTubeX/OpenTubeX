@@ -66,22 +66,38 @@ test('iOS settings search includes supported download options', () => {
     isIos: true,
     usingElectron: false,
   }).get('download').map(entry => entry.label)
-  for (const label of ['Concurrent downloads', 'Bandwidth limit (KiB/s, 0 for unlimited)', 'Global Additional yt-dlp Arguments']) {
+  for (const label of ['Concurrent downloads', 'Bandwidth limit (KiB/s)', 'Additional yt-dlp arguments']) {
     assert.ok(entries.includes(label), label)
   }
   assert.equal(entries.includes('Automatic Downloads'), false)
 })
 
-test('swipe to refresh is searchable in mobile general settings only', () => {
-  for (const isCapacitor of [true, false]) {
+test('fullscreen rotation lock override is searchable only on Android', () => {
+  for (const [isCapacitor, isIos] of [[true, false], [true, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'playback', title: 'Playback', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      isCapacitor,
+      isIos,
+      usingElectron: !isCapacitor,
+    }).get('playback')
+    assert.equal(entries.some(({ label }) => label === 'Ignore system rotation lock for fullscreen'), isCapacitor && !isIos)
+  }
+})
+
+test('mobile general settings search includes swipe to refresh and omits desktop thumbnail actions', () => {
+  for (const [isCapacitor, phoneLayout] of [[true, false], [false, false], [false, true]]) {
     const entries = createSettingsSearchIndex({
       sections: [{ type: 'general', title: 'General', description: '' }],
       tm: path => getAtPath(locale, path),
       store: { getters: {} },
       isCapacitor,
+      phoneLayout,
       usingElectron: !isCapacitor,
     }).get('general')
     assert.equal(entries.some(({ label }) => label === 'Swipe to refresh'), isCapacitor)
+    assert.equal(entries.some(({ label }) => label === 'Extra Thumbnail Action Button'), !isCapacitor && !phoneLayout)
   }
 })
 
@@ -381,6 +397,7 @@ for (const [platform, usingElectron, isCapacitor] of [
       const label = getAtPath(locale, `Settings.General Settings.${path}`)
       assert.equal(entries.some(entry => entry.label === label), usingElectron || isCapacitor, label)
     }
+    assert.equal(entries.some(entry => entry.label === 'Enable Tabs'), isCapacitor)
   })
 }
 
@@ -462,7 +479,9 @@ test('settings search retains the subpage containing each control', () => {
     usingElectron: true,
   })
   for (const [section, label, subpage] of [
-    ['appearance', 'Show Active Subscriptions', 'navigation'],
+    ['appearance', 'Show active subscriptions in sidebar', 'navigation'],
+    ['appearance', "Always show navigation bar when it's at the bottom", 'navigation'],
+    ['appearance', "Compact navigation bar when it's at the bottom", 'navigation'],
     ['appearance', 'Add item', 'navigation'],
     ['playback', 'Add Playback Speed', 'quick-playback-speed'],
     ['playback', 'Playback Speed', 'quick-playback-speed'],
@@ -525,4 +544,19 @@ test('subscription activity resolves to its control even with a partially transl
   assert.deepEqual(findSettingsSearchTarget(index, ['Subscription settings'], 'subscriptionChannelSettings'), {
     section: 'subscriptions', match: { label: 'Subscription settings', settingKey: 'subscriptionChannelSettings' },
   })
+})
+
+test('sync search indexes controls and actions without progress or server feedback', () => {
+  const values = ['', 'test-token'].flatMap(token => createSettingsSearchIndex({
+    sections: [{ type: 'sync', title: 'Sync', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getSyncServerEnabled: true, getSyncServerToken: token } },
+    usingElectron: true,
+  }).get('sync').map(match => match.label))
+  for (const key of ['Syncing history', 'Syncing subscriptions', 'Uploading encrypted data', 'Finishing sync', 'History not supported', 'Settings not supported', 'Enhanced Privacy Enabled', 'Previous Auto Sync Notice', 'Video Sent']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), false, key)
+  }
+  for (const key of ['Enable Sync', 'Sync Now', 'Privacy Passphrase', 'Change Password', 'Pair Another Device', 'Privacy Policy', 'Confirm Data Loss', 'Open All Tabs', 'Open On Device', 'Turn Flashlight On', 'Turn Flashlight Off']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), true, key)
+  }
 })

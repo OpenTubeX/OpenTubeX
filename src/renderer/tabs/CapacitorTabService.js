@@ -84,6 +84,7 @@ export class CapacitorTabService {
         ? activateCapacitorTab(session, landingTab.id)
         : addCapacitorTab(session, createCapacitorTab(landingRoute))
     }
+    if (!this.tabsEnabled) session = singleTabSession(session)
     for (const tab of session.tabs) {
       if (tab.id === session.activeTabId || startupBehavior === 'loadAllTabs') {
         session = loadCapacitorTab(session, tab.id)
@@ -108,6 +109,9 @@ export class CapacitorTabService {
       })
     })
     this.removeStoreSubscription = this.store.subscribe((mutation) => {
+      if (mutation.type === 'setEnableMobileTabs' && !this.tabsEnabled) {
+        this.disableTabs().catch(error => console.error('Failed to disable mobile tabs:', error))
+      }
       if (mutation.type === 'setRememberTabNavigationHistory') this.persist()
       else if (PERSISTED_MUTATIONS.has(mutation.type)) this.schedulePersistence()
       if (mutation.type === 'setPresentedTab') {
@@ -130,6 +134,7 @@ export class CapacitorTabService {
   }
 
   async createTab(location = `/${this.store.getters.getLandingPage}`, title = '', makeActive = true) {
+    if (!this.tabsEnabled) return null
     const tab = createCapacitorTab(this.router.resolve(location), title)
     const previous = this.currentSession()
     const session = addCapacitorTab(previous, tab, makeActive, this.store.getters.getNewTabPosition ?? 'afterCurrentInOrder')
@@ -150,6 +155,7 @@ export class CapacitorTabService {
   }
 
   async duplicateTab(tabId) {
+    if (!this.tabsEnabled) return null
     const source = this.store.getters.getTabById(tabId)
     if (!source) return null
 
@@ -190,6 +196,7 @@ export class CapacitorTabService {
   }
 
   async restoreClosedTab() {
+    if (!this.tabsEnabled) return null
     const previous = this.currentSession()
     const session = restoreClosedCapacitorTab(previous)
     if (session === previous) return null
@@ -214,6 +221,7 @@ export class CapacitorTabService {
   }
 
   async applySyncSessions(sessions) {
+    if (!this.tabsEnabled) return false
     const synced = sessions.find(session => Array.isArray(session?.tabs) && session.tabs.length > 0)
     if (!synced) return false
 
@@ -241,6 +249,7 @@ export class CapacitorTabService {
   }
 
   async openSyncedSession(session) {
+    if (!this.tabsEnabled) return false
     if (!Array.isArray(session?.tabs) || session.tabs.length === 0) return false
 
     for (const tab of session.tabs) {
@@ -398,6 +407,18 @@ export class CapacitorTabService {
     }
   }
 
+  get tabsEnabled() {
+    return this.store.getters.getEnableMobileTabs !== false
+  }
+
+  async disableTabs() {
+    // Keep the page actually on screen, even if another tab is still mounting.
+    const session = singleTabSession(this.currentSession(), this.store.getters.getPresentedTabId)
+    this.commitSession(session, session.activeTabId)
+    await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)
+    this.persist()
+  }
+
   commitSession(session, presentedTabId = this.store.getters.getPresentedTabId ?? session.activeTabId) {
     const liveIds = new Set(session.tabs.map(tab => tab.id))
     const previousActiveId = this.store.getters.getActiveTabId
@@ -481,6 +502,17 @@ export class CapacitorTabService {
     this.removeRouterHook()
     this.removeStoreSubscription()
     this.initialized = false
+  }
+}
+
+function singleTabSession(session, tabId = session.activeTabId) {
+  const tab = session.tabs.find(tab => tab.id === tabId) ?? session.tabs.find(tab => tab.id === session.activeTabId)
+  return {
+    ...session,
+    tabs: [{ ...tab, isPinned: false, placementOpenerTabId: undefined }],
+    closedTabs: [],
+    activeTabId: tab.id,
+    selectionRevision: session.selectionRevision + 1
   }
 }
 

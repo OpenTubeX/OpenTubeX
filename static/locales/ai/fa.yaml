@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: فقط اعضا
 Search Filters:
+  Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
   Prioritize:
     Prioritize: اولویت‌بندی
     Popularity: محبوبیت
@@ -280,6 +281,11 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Enable Tabs: "فعال‌سازی زبانه‌ها"
+    Thumbnail Swipe Gestures:
+      Left: کشیدن به چپ روی تصاویر بندانگشتی
+      Right: کشیدن به راست روی تصاویر بندانگشتی
+      Description: تصویر بندانگشتی ویدیو را افقی بکشید و رها کنید تا عمل انتخاب‌شده انجام شود.
     Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
     Use tray icon: "استفاده از نماد سینی سیستم"
     Close to system tray: "بستن به سینی سیستم"
@@ -288,7 +294,9 @@ Settings:
     Swipe to refresh: کشیدن برای تازه‌سازی
     Blur Thumbnails: تار کردن تصاویر بندانگشتی
     Navigation:
-      Show Active Subscriptions: نمایش اشتراک‌های فعال
+      Always Show Navigation Bar: همیشه نوار پیمایش را وقتی در پایین است نمایش بده
+      Compact Tab Labels: نوار پیمایش فشرده وقتی در پایین است
+      Show Active Subscriptions: نمایش اشتراک‌های فعال در نوار کناری
       Navigation: پیمایش
       Customize Navigation: سفارشی‌سازی پیمایش
       Add Item: افزودن مورد
@@ -370,6 +378,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Compact Mobile Mini Player: "پخش‌کننده کوچک و فشرده موبایل"
     Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
     Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
     Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
@@ -437,8 +446,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX روشن"
-      OpenTubeX Dark: "OpenTubeX تاریک"
+      Ocean Light: "Ocean روشن"
+      Ocean Dark: "Ocean تاریک"
       Custom: سفارشی
       Catppuccin Latte: Catppuccin Latte
     Light Theme: زمینهٔ روشن
@@ -650,6 +659,8 @@ Settings:
     Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
+    Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
+    Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -686,9 +697,9 @@ Settings:
     Update Managed Tools: به‌روزرسانی
     Managed Tools Download Error Template: 'ابزارهای مدیریت‌شده بارگیری نشدند: {errors}'
     Download Folder: پوشهٔ بارگیری
-    Global Additional yt-dlp Arguments: آرگومان‌های اضافی سراسری yt-dlp
+    Global Additional yt-dlp Arguments: آرگومان‌های اضافی yt-dlp
     Concurrent Downloads: بارگیری‌های هم‌زمان
-    Bandwidth Limit: محدودیت پهنای باند (KiB/s، 0 یعنی نامحدود)
+    Bandwidth Limit: محدودیت پهنای باند (KiB/s)
     Choose Download Folder: انتخاب پوشهٔ بارگیری
     Download Templates: الگوهای بارگیری
     Manage Download Templates: مدیریت الگوهای بارگیری ({templateCount})
@@ -761,8 +772,8 @@ Settings:
       Automatic: به‌روزرسانی خودکار
       Ask: پرسش پیش از به‌روزرسانی
       Manual: فقط به‌روزرسانی دستی
-    yt-dlp Executable Path: مسیر فایل اجرایی yt-dlp
-    FFmpeg Executable Path: مسیر فایل اجرایی FFmpeg
+    yt-dlp Executable Path: فایل اجرایی yt-dlp
+    FFmpeg Executable Path: فایل اجرایی FFmpeg
     Restricted Playback Authentication: "کوکی‌های yt-dlp"
     Cookie Source: منبع کوکی
     Cookie Sources:
@@ -1011,7 +1022,7 @@ Settings:
     Enhanced Privacy Enabled: حریم خصوصی پیشرفته فعال است. سرور فقط داده‌های رمزگذاری‌شدهٔ همگام‌سازی را نگه می‌دارد.
     Enhanced Privacy Unsupported: هشدار — این سرور از حریم خصوصی پیشرفته پشتیبانی نمی‌کند. گردانندهٔ سرور می‌تواند داده‌های همگام‌شده را ببیند.
     Description: 'اشتراک‌ها، نمایه‌ها، فهرست‌های پخش، تاریخچهٔ تماشا و تنظیمات پشتیبانی‌شده را با یک سرور همگام‌سازی OpenTubeX یا LibreTube همگام کنید. ممکن است سرورهای LibreTube از همهٔ قابلیت‌های همگام‌سازی پشتیبانی نکنند.'
-    Server URL: نشانی سرور
+    Server URL: نشانی سرور همگام‌سازی
     Checking Server: در حال بررسی سرور همگام‌سازی…
     Server Unavailable: اتصال به این سرور همگام‌سازی ممکن نیست. نشانی را بررسی و دوباره تلاش کنید.
     Username: نام کاربری
@@ -1101,7 +1112,7 @@ Settings:
     Open All Tabs Confirmation: "همهٔ زبانه‌ها باز شوند؟"
     Server Update Required: "این سرور را برای پشتیبانی از همگام‌سازی زندهٔ رمزگذاری‌شده به‌روز کنید."
   Proxy Settings:
-    IP Block Recovery Script Path: مسیر اسکریپت بازیابی مسدودشدن IP
+    IP Block Recovery Script Path: اسکریپت بازیابی مسدودیت IP
     Select IP Block Recovery Script File: انتخاب فایل اسکریپت بازیابی مسدودشدن IP
     Running IP block recovery script: در حال اجرای اسکریپت بازیابی مسدودشدن IP
     IP block recovery script failed: 'اسکریپت بازیابی مسدودشدن IP ناموفق بود (کد خروج: {exitCode})'
@@ -1113,7 +1124,7 @@ Settings:
       Excluded Channels: "کانال‌های مستثنا"
       Tooltip: "شناسهٔ کانالی را وارد کنید تا بخش‌های SponsorBlock در ویدیوهای آن رد نشوند. شناسه باید دقیقاً یکسان باشد و به بزرگی و کوچکی حروف حساس است."
     Enable SponsorBlock Submission: فعال‌کردن ارسال به SponsorBlock
-    SponsorBlock Private User ID (optional): شناسهٔ خصوصی کاربر SponsorBlock (اختیاری)
+    SponsorBlock Private User ID (optional): شناسهٔ خصوصی کاربر (اختیاری)
     SponsorBlock Private User ID Tooltip: شناسهٔ خصوصی کاربر SponsorBlock را از افزونهٔ مرورگر جای‌گذاری کنید. برای استفاده از شناسهٔ ساخته‌شده توسط برنامه، این قسمت را خالی بگذارید.
     Generated SponsorBlock User ID: شناسهٔ کاربر SponsorBlock ساخته‌شده
     Generated SponsorBlock User ID Tooltip: این شناسهٔ کاربر SponsorBlock که برنامه ساخته است، در افزونهٔ مرورگر یا هنگام استفاده از برنامه در رایانه‌ای دیگر کاربرد دارد.
@@ -1125,7 +1136,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: فعال‌کردن Return YouTube Dislike
-    Return YouTube Dislike Url: نشانی API سرویس Return YouTube Dislike (پیش‌فرض https://ryd-proxy.kavin.rocks است)
+    Return YouTube Dislike Url: نشانی API
   Parental Control Settings:
     Disable Channel Links: غیرفعال‌کردن پیوندهای کانال
   Password Dialog:
@@ -1173,6 +1184,21 @@ About:
   Please read the {roomRulesLink}: لطفاً {roomRulesLink} را بخوانید
   OpenTubeX is made possible by {creditsPageLink}: ساخت OpenTubeX با کمک {creditsPageLink} ممکن شده است
 Profile:
+  Customization: شخصی‌سازی
+  Manage Profile Subscriptions: مدیریت اشتراک‌های نمایه
+  Icon Names:
+    Person: شخص
+    People: افراد
+    Headphones: هدفون
+    Gaming: بازی
+    Film: فیلم
+    Art: هنر
+    Science: علم
+    Globe: کرهٔ زمین
+    Heart: قلب
+    Sun: خورشید
+    Moon: ماه
+    Trophy: جام
   Profile Icon: نماد نمایه
   Choose an Emoji: انتخاب ایموجی
   Custom Emoji: ایموجی سفارشی
@@ -1368,12 +1394,16 @@ Video:
     Hide: پنهان کردن
     Show: نمایش
     Scroll Mini Player:
+      Collapse Controls: "جمع کردن کنترل‌ها"
+      Expand Controls: "باز کردن کنترل‌ها"
       Back to Top: بازگشت به بالا
       Return to Video Tab: بازگشت به زبانهٔ ویدیو
       Hide: پنهان‌کردن پخش‌کنندهٔ کوچک
       Play: پخش
       Pause: مکث
       Drag Handle: جابه‌جایی پخش‌کنندهٔ کوچک
+      Rewind 10 seconds: ۱۰ ثانیه به عقب
+      Forward 10 seconds: ۱۰ ثانیه به جلو
     SponsorBlock:
       CancelCurrentSegment: لغو ساخت بخش
       ClearSegments: پاک کردن بخش‌ها
@@ -1518,6 +1548,7 @@ Share:
   Share Post: هم‌رسانی پست
   Timestamp Link Copied: پیوند زمان‌دار در بریده‌دان کپی شد
 Context Menu:
+  Open in a Background Tab: "باز کردن در زبانه‌ای در پس‌زمینه"
   Select Tab: انتخاب زبانه
   Close Tabs Before: بستن زبانه‌های قبلی
   Close Tabs After: بستن زبانه‌های بعدی
@@ -1682,6 +1713,7 @@ Description:
   Games: بازی‌ها
 Tooltips:
   General Settings:
+    Enable Tabs: "با خاموش کردن این گزینه، همهٔ زبانه‌های دیگر بسته می‌شوند و صفحهٔ فعلی باز می‌ماند."
     Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."
     Use AI Translation Completions: جاهای خالی ترجمه‌های انسانی را با متن تولیدشده با هوش مصنوعی پر می‌کند. ترجمه‌های انسانی همیشه اولویت دارند.
     Update Relative Timestamps: تا زمانی که صفحه باز است، زمان‌های نسبی را در سراسر برنامه به‌روز می‌کند. در صورت غیرفعال بودن، فقط پس از بارگیری دوباره یا بازدید مجدد از صفحه به‌روز می‌شوند.
@@ -1726,6 +1758,7 @@ Tooltips:
     Preload Upcoming Videos: "نشانی‌های پخش yt-dlp ویدیوهای بعدی را دریافت و ذخیره می‌کند. صف بر فهرست‌های پخش و پیشنهادها اولویت دارد."
     Upcoming Videos to Preload: "بیشترین تعداد ویدیوهای بعدی که نشانی yt-dlp آن‌ها در پس‌زمینه دریافت می‌شود."
     Concurrent Preloads: "بیشترین تعداد فرایندهای yt-dlp که برای پیش‌بارگذاری هم‌زمان ویدیوها استفاده می‌شوند. مقادیر بالاتر از پردازنده، حافظه و پهنای باند شبکه بیشتری استفاده می‌کنند."
+    Ignore System Rotation Lock for Fullscreen: با چرخاندن فیزیکی دستگاه وارد حالت تمام‌صفحه شوید یا از آن خارج شوید، حتی وقتی چرخش خودکار اندروید خاموش است.
   Download Settings:
     Download Folder: ویدیوها در این پوشه ذخیره می‌شوند. برای استفاده از پوشه «بارگیری‌ها»ی سیستم، خالی بگذارید.
     Global Additional yt-dlp Arguments: آرگومان‌های اضافی خط فرمان که برای هر بارگیری به yt-dlp فرستاده می‌شوند؛ برای مثال --cookies-from-browser firefox.
@@ -1893,8 +1926,8 @@ Downloads:
   File Name Template: الگوی نام فایل
   File Name Template Help: 'فیلدهای موجود: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: بازه زمانی و فصل‌ها
-  Start Time: زمان شروع (HH:MM:SS)
-  End Time: زمان پایان (HH:MM:SS)
+  Start Time: زمان شروع
+  End Time: زمان پایان
   Split by Chapters: جداسازی هر فصل در فایلی جداگانه
   Remove Segments: حذف بخش‌ها
   Subtitles and Metadata: زیرنویس و فراداده
@@ -1983,3 +2016,37 @@ Tray:
 Tray Icon:
   Title: "نماد سینی سیستم"
   Follow App Theme: "پیروی از زمینهٔ برنامه"
+
+Form Inputs:
+  Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Choose Password Hint: "یک گذرواژه انتخاب کنید"
+  Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
+  Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"
+  Show Password: "نمایش گذرواژه"
+  Hide Password: "پنهان کردن گذرواژه"
+  Search Text Hint: "عبارت‌های جستجو را وارد کنید"
+  Playlist Description Hint: "این فهرست پخش را توصیف کنید"
+  Filename Preview: "پیش‌نمایش نام فایل"
+  Enter Channels: "کانال‌ها را وارد کنید"
+  Enter Text: "متن را وارد کنید"
+  Video URL: نشانی ویدیو یا فهرست پخش
+  Paste Link: پیوند ویدیو یا فهرست پخش را جای‌گذاری کنید
+  Example: مثلاً {example}
+  No Minimum: بدون حداقل
+  No Maximum: بدون حداکثر
+  Any Age: هر قدمتی
+  Included Terms Example: مثلاً آموزش, بررسی
+  Excluded Terms Example: مثلاً تریلر, پیش‌نمایش
+  Download Folder Hint: برای استفاده از پوشهٔ بارگیری‌ها خالی بگذارید
+  Global Arguments Hint: آرگومان‌های اختیاری برای هر بارگیری
+  Unlimited Hint: 0 برای نامحدود
+  Add Argument: افزودن آرگومان
+  Template Name Example: مثلاً فقط صدا
+  Download Arguments Hint: آرگومان‌های اختیاری برای این بارگیری
+  Generated ID Hint: برای ایجاد شناسه خالی بگذارید
+  Default Value: "پیش‌فرض: {value}"
+
+Storage Startup Error:
+  Title: "داده‌های برنامه بارگیری نشد"
+  Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
+  Retry: "تلاش دوباره"

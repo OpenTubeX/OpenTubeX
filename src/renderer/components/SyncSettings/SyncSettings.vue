@@ -14,7 +14,9 @@
     <template v-if="syncEnabled">
       <FtFlexBox class="fields">
         <FtInput
-          :placeholder="t('Settings.Sync Settings.Server URL')"
+          :icon="['fas', 'link']"
+          :label="t('Settings.Sync Settings.Server URL')"
+          placeholder="https://sync.example.com"
           :show-action-button="false"
           :data-list="syncServerInstances"
           :value="serverUrl"
@@ -24,7 +26,9 @@
           @blur="saveServerUrl"
         />
         <FtInput
-          :placeholder="t('Settings.Sync Settings.Username')"
+          :icon="['fas', 'circle-user']"
+          :label="t('Settings.Sync Settings.Username')"
+          :placeholder="t('Form Inputs.Example', { example: 'alex' })"
           :show-action-button="false"
           :value="connected ? savedUsername : username"
           :disabled="connected || serverCredentialsDisabled"
@@ -33,7 +37,9 @@
         />
         <FtInput
           v-if="!connected"
-          :placeholder="t('Settings.Password Dialog.Password')"
+          :icon="['fas', 'lock']"
+          :label="t('Settings.Password Dialog.Password')"
+          :placeholder="t('Form Inputs.Enter Password Hint')"
           :show-action-button="false"
           :value="password"
           :disabled="serverCredentialsDisabled"
@@ -44,7 +50,9 @@
         />
         <FtInput
           v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
-          :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
+          :icon="['fas', 'key']"
+          :label="t('Settings.Sync Settings.Privacy Passphrase')"
+          :placeholder="t('Form Inputs.Encryption Passphrase Hint')"
           :show-action-button="false"
           :value="privacyPassphrase"
           :disabled="serverCredentialsDisabled"
@@ -136,7 +144,7 @@
         >
           {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
         </p>
-        <FtFlexBox class="toggles">
+        <FtFlexBox class="toggles syncOptions">
           <FtToggleSwitch
             :label="t('Settings.Sync Settings.Sync Automatically')"
             :default-value="autoSync"
@@ -376,7 +384,9 @@
         <div class="deleteAccountContent passwordForm">
           <p>{{ t('Settings.Sync Settings.Change Password Warning') }}</p>
           <FtInput
-            :placeholder="t('Settings.Sync Settings.Current Password')"
+            :icon="['fas', 'lock']"
+            :label="t('Settings.Sync Settings.Current Password')"
+            :placeholder="t('Form Inputs.Enter Password Hint')"
             :show-action-button="false"
             :value="currentPassword"
             :disabled="accountActionBusy"
@@ -385,7 +395,9 @@
             @input="currentPassword = $event"
           />
           <FtInput
-            :placeholder="t('Settings.Sync Settings.New Password')"
+            :icon="['fas', 'lock']"
+            :label="t('Settings.Sync Settings.New Password')"
+            :placeholder="t('Form Inputs.Choose Password Hint')"
             :show-action-button="false"
             :value="newPassword"
             :disabled="accountActionBusy"
@@ -394,7 +406,9 @@
             @input="newPassword = $event"
           />
           <FtInput
-            :placeholder="t('Settings.Sync Settings.Confirm New Password')"
+            :icon="['fas', 'lock']"
+            :label="t('Settings.Sync Settings.Confirm New Password')"
+            :placeholder="t('Form Inputs.Confirm Password Hint')"
             :show-action-button="false"
             :value="confirmedPassword"
             :disabled="accountActionBusy"
@@ -437,7 +451,9 @@
             {{ t('Settings.Sync Settings.Delete Account Warning') }}
           </p>
           <FtInput
-            :placeholder="t('Settings.Password Dialog.Password')"
+            :icon="['fas', 'lock']"
+            :label="t('Settings.Password Dialog.Password')"
+            :placeholder="t('Form Inputs.Enter Password Hint')"
             :show-action-button="false"
             :value="deleteAccountPassword"
             input-type="password"

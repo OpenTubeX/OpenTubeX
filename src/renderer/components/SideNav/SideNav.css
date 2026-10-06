@@ -1,11 +1,11 @@
 .sideNav {
   display: block;
-  block-size: calc(100vh - 60px);
+  block-size: calc(100dvh - var(--top-nav-sticky-offset, 60px));
   inline-size: 80px;
   overflow-x: hidden;
   position: sticky;
   inset-inline-start: 0;
-  inset-block-start: 60px;
+  inset-block-start: var(--top-nav-sticky-offset, 60px);
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
@@ -145,8 +145,16 @@
 }
 
 .channelThumbnail {
+  block-size: 35px;
+  inline-size: 35px;
   border-radius: 50%;
   vertical-align: middle;
+}
+
+.channelThumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
 }
 
 .subscriptionLoadSentinel {
@@ -334,6 +342,23 @@
 
   .hiddenLabels {
     inline-size: 100%;
+  }
+
+  .compactLabels .navOption {
+    align-items: center;
+    block-size: var(--mobile-nav-content-height);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    padding-block: 0;
+  }
+
+  .compactLabels .thumbnailContainer {
+    margin-block: 0;
+  }
+
+  .compactLabels .navLabel {
+    display: none;
   }
 }
 

@@ -6,9 +6,14 @@
     :class="{
       placeholder: !visible,
       draggable: canBecomeDraggable,
+      pointerDragging,
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
-    :draggable="canBecomeDraggable"
+    :draggable="canBecomeDraggable && !pointerDragging"
+    :data-playlist-drag-item="canBecomeDraggable ? '' : null"
+    :data-video-id="data.videoId"
+    :data-playlist-item-id="playlistItemId"
+    @pointerdown.capture="canBecomeDraggable && startPointerDrag($event, videoData)"
     v-on="canBecomeDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -78,7 +83,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { handleDragAndDrop } from '../../helpers/dragAndDrop'
+import { usePlaylistDrag } from '../../composables/usePlaylistDrag'
 import store from '../../store/index'
 
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
@@ -191,7 +196,7 @@ const downloadAvailable = computed(() => {
 
 const inUserPlaylist = props.playlistType === 'user'
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag } = handleDragAndDrop(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),

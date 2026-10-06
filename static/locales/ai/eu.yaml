@@ -263,6 +263,11 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Enable Tabs: "Gaitu fitxak"
+    Thumbnail Swipe Gestures:
+      Left: Irudi txikietan ezkerrera irristatu
+      Right: Irudi txikietan eskuinera irristatu
+      Description: Irristatu horizontalki bideo baten irudi txikian eta askatu hautatutako ekintza egiteko.
     Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
     Use tray icon: "Erabili sistemaren erretiluko ikonoa"
     Close to system tray: "Itxi sistemaren erretilura"
@@ -271,7 +276,9 @@ Settings:
     Swipe to refresh: Irristatu freskatzeko
     Blur Thumbnails: Lausotu koadro txikiak
     Navigation:
-      Show Active Subscriptions: Erakutsi harpidetza aktiboak
+      Always Show Navigation Bar: Erakutsi beti nabigazio-barra behealdean dagoenean
+      Compact Tab Labels: Nabigazio-barra trinkoa behealdean dagoenean
+      Show Active Subscriptions: Erakutsi harpidetza aktiboak alboko barran
       Navigation: Nabigazioa
       Customize Navigation: Pertsonalizatu nabigazioa
       Add Item: Gehitu elementua
@@ -353,6 +360,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
     Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
     Frosted Glass Player UI: "Beira esmerilatu efektuko erreproduzigailuaren interfazea"
     Main Color Theme:
@@ -435,8 +443,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Argia"
-      OpenTubeX Dark: "OpenTubeX Iluna"
+      Ocean Light: "Ocean Argia"
+      Ocean Dark: "Ocean Iluna"
       Custom: Pertsonalizatua
     Light Theme: Gai argia
     Dark Theme: Gai iluna
@@ -621,6 +629,8 @@ Settings:
     Preload Upcoming Videos: "Aurrekargatu hurrengo bideoak"
     Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
     Concurrent Preloads: "Aldibereko aurrekargak"
+    Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
+    Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -657,9 +667,9 @@ Settings:
     Update Managed Tools: Eguneratu
     Managed Tools Download Error Template: 'Ezin izan dira kudeatutako tresnak deskargatu: {errors}'
     Download Folder: Deskargen karpeta
-    Global Additional yt-dlp Arguments: yt-dlp-ren argumentu global gehigarriak
+    Global Additional yt-dlp Arguments: yt-dlp argumentu gehigarriak
     Concurrent Downloads: Aldibereko deskargak
-    Bandwidth Limit: Banda-zabaleraren muga (KiB/s, 0 mugarik gabe)
+    Bandwidth Limit: Banda-zabaleraren muga (KiB/s)
     Choose Download Folder: Aukeratu deskargen karpeta
     Download Templates: Deskarga-txantiloiak
     Manage Download Templates: Kudeatu deskarga-txantiloiak ({templateCount})
@@ -732,8 +742,8 @@ Settings:
       Automatic: Eguneratu automatikoki
       Ask: Galdetu eguneratu aurretik
       Manual: Eguneratu eskuz soilik
-    yt-dlp Executable Path: yt-dlp exekutagarriaren bide-izena
-    FFmpeg Executable Path: FFmpeg exekutagarriaren bide-izena
+    yt-dlp Executable Path: yt-dlp exekutagarria
+    FFmpeg Executable Path: FFmpeg exekutagarria
     Restricted Playback Authentication: "yt-dlp cookieak"
     Cookie Source: Cookieen jatorria
     Cookie Sources:
@@ -965,7 +975,7 @@ Settings:
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
     Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
-    Server URL: Zerbitzariaren URLa
+    Server URL: Sinkronizazio-zerbitzariaren URLa
     Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
     Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.
     Username: Erabiltzaile-izena
@@ -1055,7 +1065,7 @@ Settings:
     Open All Tabs Confirmation: "Fitxa guztiak ireki?"
     Server Update Required: "Eguneratu zerbitzari hau zifratutako zuzeneko sinkronizazioa onartzeko."
   Proxy Settings:
-    IP Block Recovery Script Path: IP blokeoa berreskuratzeko scriptaren bide-izena
+    IP Block Recovery Script Path: IP blokeoaren berreskuratze-scripta
     Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia
     Running IP block recovery script: IP blokeoa berreskuratzeko scripta exekutatzen
     IP block recovery script failed: 'IP blokeoa berreskuratzeko scriptak huts egin du (irteera-kodea: {exitCode})'
@@ -1067,7 +1077,7 @@ Settings:
       Excluded Channels: "Salbuetsitako kanalak"
       Tooltip: "Sartu kanalaren IDa haren bideoetan SponsorBlock segmentuak ez saltatzeko. IDak bat etorri behar du zehazki, maiuskulak eta minuskulak bereizita."
     Enable SponsorBlock Submission: Gaitu SponsorBlock-era bidaltzea
-    SponsorBlock Private User ID (optional): SponsorBlock erabiltzaile-ID pribatua (aukerakoa)
+    SponsorBlock Private User ID (optional): Erabiltzailearen ID pribatua (aukerakoa)
     SponsorBlock Private User ID Tooltip: Itsatsi arakatzailearen hedapeneko SponsorBlock erabiltzaile-ID pribatua. Utzi hutsik aplikazioak sortutako ID bat erabiltzeko.
     Generated SponsorBlock User ID: Aplikazioak sortutako SponsorBlock erabiltzaile-IDa
     Generated SponsorBlock User ID Tooltip: Aplikazioak sortutako SponsorBlock erabiltzaile-ID hau arakatzailearen hedapenean edo aplikazioa beste ordenagailu batean erabiltzean erabil dezakezu.
@@ -1079,7 +1089,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Gaitu Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike APIaren URLa (lehenetsia https://ryd-proxy.kavin.rocks da)
+    Return YouTube Dislike Url: APIaren URLa
   Password Dialog:
     Incorrect Password: Pasahitza ez da zuzena
     Unlock: Desblokeatu
@@ -1120,6 +1130,21 @@ About:
   Matrix: Matrix
   Email: Helbide elektronikoa
 Profile:
+  Customization: Pertsonalizazioa
+  Manage Profile Subscriptions: Kudeatu profileko harpidetzak
+  Icon Names:
+    Person: Pertsona
+    People: Pertsonak
+    Headphones: Entzungailuak
+    Gaming: Jokoak
+    Film: Filma
+    Art: Artea
+    Science: Zientzia
+    Globe: Lur-globoa
+    Heart: Bihotza
+    Sun: Eguzkia
+    Moon: Ilargia
+    Trophy: Garaikurra
   Profile Icon: Profilaren ikonoa
   Choose an Emoji: Aukeratu emojia
   Custom Emoji: Emoji pertsonalizatua
@@ -1314,12 +1339,16 @@ Video:
     Hide: Ezkutatu
     Show: Erakutsi
     Scroll Mini Player:
+      Collapse Controls: "Tolestu kontrolak"
+      Expand Controls: "Zabaldu kontrolak"
       Back to Top: Itzuli goialdera
       Return to Video Tab: Itzuli bideoaren fitxara
       Hide: Ezkutatu minierreproduzigailua
       Play: Erreproduzitu
       Pause: Pausatu
       Drag Handle: Mugitu minierreproduzigailua
+      Rewind 10 seconds: 10 segundo atzera
+      Forward 10 seconds: 10 segundo aurrera
     SponsorBlock:
       CancelCurrentSegment: Utzi segmentua sortzeari
       ClearSegments: Garbitu segmentuak
@@ -1459,6 +1488,7 @@ Share:
   Share failed: "Ezin izan da esteka partekatu"
   Timestamp Link Copied: Denbora-markaren esteka arbelean kopiatu da
 Context Menu:
+  Open in a Background Tab: "Ireki atzeko planoko fitxa batean"
   Select Tab: Hautatu fitxa
   Close Tabs Before: Itxi aurreko fitxak
   Close Tabs After: Itxi ondorengo fitxak
@@ -1619,6 +1649,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Enable Tabs: "Aukera hau desaktibatzean, gainerako fitxa guztiak ixten dira eta uneko orria irekita mantentzen da."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
     Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.
@@ -1663,6 +1694,7 @@ Tooltips:
     Preload Upcoming Videos: "Hurrengo bideoen yt-dlp URLak eskuratu eta cachean gordetzen ditu. Ilarak lehentasuna du zerrenden eta gomendioen aurretik."
     Upcoming Videos to Preload: "Atzeko planoan yt-dlp URLak eskuratuko zaizkien hurrengo bideoen gehieneko kopurua."
     Concurrent Preloads: "Bideoak aldi berean aurrekargatzeko erabilitako yt-dlp prozesuen gehieneko kopurua. Balio handiagoek PUZ, memoria eta sareko banda-zabalera gehiago erabiltzen dute."
+    Ignore System Rotation Lock for Fullscreen: Biratu gailua fisikoki pantaila osoan sartzeko eta irteteko, Androiden biraketa automatikoa desaktibatuta badago ere.
   Download Settings:
     Download Folder: Bideoak karpeta honetan gordetzen dira. Utzi hutsik sistemako Deskargak karpeta erabiltzeko.
     Global Additional yt-dlp Arguments: Deskarga bakoitzean yt-dlp-ri emandako komando-lerroko argumentu gehigarriak; adibidez, --cookies-from-browser firefox.
@@ -1826,8 +1858,8 @@ Downloads:
   File Name Template: Fitxategi-izenaren txantiloia
   File Name Template Help: 'Eremu erabilgarriak: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Denbora-tartea eta kapituluak
-  Start Time: Hasiera-unea (HH:MM:SS)
-  End Time: Amaiera-unea (HH:MM:SS)
+  Start Time: Hasiera-unea
+  End Time: Amaiera-unea
   Split by Chapters: Zatitu kapitulu bakoitza fitxategi bereizi batean
   Remove Segments: Kendu segmentuak
   Subtitles and Metadata: Azpitituluak eta metadatuak
@@ -1913,3 +1945,40 @@ Tray:
 Tray Icon:
   Title: "Sistemaren erretiluko ikonoa"
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
+
+Form Inputs:
+  Enter Password Hint: "Sartu zure pasahitza"
+  Choose Password Hint: "Aukeratu pasahitz bat"
+  Confirm Password Hint: "Errepikatu zure pasahitz berria"
+  Encryption Passphrase Hint: "Sartu zure zifratze-pasaesaldia"
+  Show Password: "Erakutsi pasahitza"
+  Hide Password: "Ezkutatu pasahitza"
+  Search Text Hint: "Sartu bilaketa-hitzak"
+  Playlist Description Hint: "Deskribatu erreprodukzio-zerrenda hau"
+  Filename Preview: "Fitxategi-izenaren aurrebista"
+  Enter Channels: "Sartu kanalak"
+  Enter Text: "Sartu testua"
+  Video URL: Bideoaren edo erreprodukzio-zerrendaren URLa
+  Paste Link: Itsatsi bideo edo erreprodukzio-zerrenda baten esteka
+  Example: adib. {example}
+  No Minimum: Gutxienekorik ez
+  No Maximum: Gehienekorik ez
+  Any Age: Edozein antzinatasun
+  Included Terms Example: adib. tutoriala, iritzia
+  Excluded Terms Example: adib. trailerra, aurrerapena
+  Download Folder Hint: Utzi hutsik Deskargak karpeta erabiltzeko
+  Global Arguments Hint: Aukerako argumentuak deskarga guztietarako
+  Unlimited Hint: 0 mugarik ez izateko
+  Add Argument: Gehitu argumentu bat
+  Template Name Example: adib. Audioa soilik
+  Download Arguments Hint: Aukerako argumentuak deskarga honetarako
+  Generated ID Hint: Utzi hutsik ID bat sortzeko
+  Default Value: "Lehenetsia: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
+
+Storage Startup Error:
+  Title: "Ezin izan dira aplikazioaren datuak kargatu"
+  Message: "Askatu biltegiratze-lekua gailuan eta saiatu berriro. Sinkronizazioa etenda dago zure datuak kargatu arte."
+  Retry: "Saiatu berriro"

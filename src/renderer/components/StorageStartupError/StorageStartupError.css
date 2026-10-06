@@ -1,0 +1,38 @@
+.storageError {
+  box-sizing: border-box;
+  min-block-size: 100dvh;
+  display: grid;
+  place-items: center;
+  padding-block: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-bottom));
+  padding-inline: 24px;
+  background: var(--startup-background, #0f0f0f);
+  color: var(--startup-foreground, #eee);
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+section { max-inline-size: 32rem; }
+h1 { font-size: 1.5rem; }
+p { margin-block: 16px 24px; }
+
+.retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 24px;
+  border: 1px solid currentcolor;
+  border-radius: 24px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.retry:active { opacity: 0.7; }
+
+.retry:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 4px;
+}

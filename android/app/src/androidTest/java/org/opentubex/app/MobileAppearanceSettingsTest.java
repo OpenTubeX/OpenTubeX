@@ -3,6 +3,8 @@ package org.opentubex.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -20,6 +22,261 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class MobileAppearanceSettingsTest {
+    @Test
+    public void performanceIndicatorsWrapWithoutSqueezingSwitchLabels() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        window.__mobileAppearanceSaved.ShowPerformanceImpactIndicators = store.getters.getShowPerformanceImpactIndicators;
+                        store.dispatch('showSettingsWindow');
+                    })()
+                    """);
+                awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
+                evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                String control = "document.querySelector('.settingsContent [data-setting-key=updateRelativeTimestamps]')";
+                awaitCondition(view, "!!" + control);
+                for (int scale : new int[] {100, 125, 150}) {
+                    evaluate(view, """
+                        (() => {
+                            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                            store.commit('setShowPerformanceImpactIndicators', false);
+                            store.commit('setUiScale', %d);
+                        })()
+                        """.formatted(scale));
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01 && !" +
+                        control + ".querySelector('.performanceImpact')");
+                    double originalWidth = json(view, "({width: " + control +
+                        ".querySelector('.switch-label-text').getBoundingClientRect().width})").getDouble("width");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowPerformanceImpactIndicators', true)");
+                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact')");
+                    JSONObject layout = json(view, """
+                        (() => {
+                            const element = %s;
+                            const text = element.querySelector('.switch-label-text');
+                            const badge = element.querySelector('.performanceImpact');
+                            const range = document.createRange();
+                            range.selectNodeContents(text);
+                            const textBottom = Math.max(...Array.from(range.getClientRects(), rect => rect.bottom));
+                            const bounds = badge.getBoundingClientRect();
+                            const label = text;
+                            const knob = getComputedStyle(label, '::after');
+                            const textBounds = text.getBoundingClientRect();
+                            const knobCenter = label.getBoundingClientRect().top + parseFloat(knob.top) +
+                                new DOMMatrix(knob.transform).m42 + parseFloat(knob.height) / 2;
+                            return {switchCenterOffset: Math.abs(knobCenter - textBounds.top - textBounds.height / 2), width: text.getBoundingClientRect().width, textBottom,
+                                badgeTop: bounds.top, badgeRight: bounds.right,
+                                helpLeft: element.querySelector('.tooltip').getBoundingClientRect().left,
+                                helpBottom: element.querySelector('.tooltip').getBoundingClientRect().bottom};
+                        })()
+                        """.formatted(control));
+                    assertTrue("The label retains its width at " + scale + "%: " + layout,
+                        layout.getDouble("width") >= originalWidth - 1);
+                    assertTrue("The badge wraps below the text at " + scale + "%: " + layout,
+                        layout.getDouble("badgeTop") >= layout.getDouble("textBottom") - 1);
+                    assertTrue("The switch stays centered beside its text at " + scale + "%: " + layout,
+                        layout.getDouble("switchCenterOffset") <= 1);
+                    assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
+                        layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
+                            layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
+                }
+            } finally {
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSettingsWindowOpen', false)");
+                restore(view);
+            }
+        }
+    }
+
+    @Test
+    public void pinchGesturesKeepTheConfiguredUiScale() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            boolean[] builtInZoom = new boolean[1];
+            scenario.onActivity(activity -> {
+                builtInZoom[0] = view.getSettings().getBuiltInZoomControls();
+                // Exercise gesture-enabled WebViews as well as Capacitor's default.
+                // Disabling page zoom must not rely only on the built-in-controls flag.
+                view.getSettings().setBuiltInZoomControls(true);
+            });
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const target = document.createElement('div');
+                        target.id = 'pinch-test-target';
+                        target.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:var(--bg-color)';
+                        target.textContent = 'Pinch zoom regression';
+                        document.body.append(target);
+                    })()
+                    """);
+                for (int scale : new int[] {100, 75, 125, 150}) {
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', " + scale + ")");
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    for (boolean spread : new boolean[] {true, false}) {
+                        pinch(view, spread);
+                        Thread.sleep(300);
+                        double actual = Double.parseDouble(evaluate(view, "window.visualViewport.scale"));
+                        assertEquals("Pinching must keep the configured " + scale + "% UI scale", scale / 100.0, actual, 0.01);
+                    }
+                }
+            } finally {
+                scenario.onActivity(activity -> view.getSettings().setBuiltInZoomControls(builtInZoom[0]));
+                evaluate(view, "document.querySelector('#pinch-test-target')?.remove()");
+                restore(view);
+            }
+        }
+    }
+
+    private static void pinch(WebView view, boolean spread) throws Exception {
+        float[] geometry = new float[3];
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int[] origin = new int[2];
+            view.getLocationOnScreen(origin);
+            geometry[0] = origin[0] + view.getWidth() / 2f;
+            geometry[1] = origin[1] + view.getHeight() / 2f;
+            geometry[2] = view.getWidth();
+        });
+        long downTime = SystemClock.uptimeMillis();
+        float start = geometry[2] * (spread ? 0.1f : 0.35f);
+        float end = geometry[2] * (spread ? 0.35f : 0.1f);
+        touch(downTime, MotionEvent.ACTION_DOWN, geometry[0] - start, geometry[1]);
+        MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+        MotionEvent.PointerCoords[] coordinates = new MotionEvent.PointerCoords[2];
+        for (int i = 0; i < 2; i++) {
+            properties[i] = new MotionEvent.PointerProperties();
+            properties[i].id = i;
+            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
+            coordinates[i] = new MotionEvent.PointerCoords();
+            coordinates[i].y = geometry[1];
+            coordinates[i].pressure = 1;
+            coordinates[i].size = 1;
+        }
+        for (int step = 0; step <= 21; step++) {
+            float distance = start + (end - start) * Math.min(step, 20) / 20f;
+            coordinates[0].x = geometry[0] - distance;
+            coordinates[1].x = geometry[0] + distance;
+            int action = step == 0
+                ? MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
+                : step == 21 ? MotionEvent.ACTION_POINTER_UP | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
+                : MotionEvent.ACTION_MOVE;
+            MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action,
+                2, properties, coordinates, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
+            InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
+            event.recycle();
+            Thread.sleep(20);
+        }
+        touch(downTime, MotionEvent.ACTION_UP, geometry[0] - end, geometry[1]);
+    }
+
+    @Test
+    public void alwaysShowScrollbarsControlsNativePageFading() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String saved = evaluate(view, store + ".getters.getAlwaysShowScrollbars");
+            try {
+                evaluate(view, """
+                    (() => {
+                        const style = document.createElement('style');
+                        style.id = 'native-scrollbar-test-style';
+                        style.textContent = '#app { display: none !important; } html, body { background: #ff00ff !important; overflow-y: auto !important; }';
+                        document.head.append(style);
+                        const content = document.createElement('div');
+                        content.id = 'native-scrollbar-test-content';
+                        content.style.height = '6000px';
+                        document.body.append(content);
+                    })()
+                    """);
+                for (boolean enabled : new boolean[] {false, true, false}) {
+                    evaluate(view, store + ".commit('setAlwaysShowScrollbars', " + enabled + ")");
+                    awaitScrollbarFading(scenario, view, !enabled);
+                    WebView currentView = view;
+                    scenario.onActivity(activity -> {
+                        assertTrue("The native page scrollbar stays enabled", currentView.isVerticalScrollBarEnabled());
+                        assertEquals("Native scrollbar fading follows Always Show Scrollbars", !enabled,
+                            currentView.isScrollbarFadingEnabled());
+                    });
+                    evaluate(view, "window.scrollTo(0, 1200)");
+                    awaitCondition(view, "window.scrollY > 1000");
+                    assertIdlePageScrollbar(scenario, view, enabled);
+                }
+                // Enabling the preference must also cancel a fade from recent scrolling.
+                evaluate(view, "window.scrollTo(0, 1500)");
+                awaitCondition(view, "window.scrollY >= 1499");
+                evaluate(view, store + ".commit('setAlwaysShowScrollbars', true)");
+                awaitScrollbarFading(scenario, view, false);
+                assertIdlePageScrollbar(scenario, view, true);
+                evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
+                awaitCondition(view, "window.__scrollbarSettingSaved === true");
+                scenario.recreate();
+                view = webView(scenario);
+                awaitScrollbarFading(scenario, view, false);
+            } finally {
+                evaluate(view, "document.querySelector('#native-scrollbar-test-style')?.remove(); document.querySelector('#native-scrollbar-test-content')?.remove(); window.scrollTo(0, 0)");
+                evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', " + saved + ").then(() => window.__scrollbarSettingRestored = true)");
+                awaitCondition(view, "window.__scrollbarSettingRestored === true");
+                evaluate(view, "delete window.__scrollbarSettingSaved; delete window.__scrollbarSettingRestored");
+            }
+        }
+    }
+
+    private static void awaitScrollbarFading(ActivityScenario<MainActivity> scenario, WebView view,
+        boolean expected) throws Exception {
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        AtomicReference<Boolean> fading = new AtomicReference<>();
+        while (SystemClock.uptimeMillis() < deadline) {
+            scenario.onActivity(activity -> fading.set(view.isScrollbarFadingEnabled()));
+            if (Boolean.valueOf(expected).equals(fading.get())) return;
+            Thread.sleep(100);
+        }
+        assertEquals("Native scrollbar fading follows Always Show Scrollbars", Boolean.valueOf(expected), fading.get());
+    }
+
+    private static void assertIdlePageScrollbar(ActivityScenario<MainActivity> scenario, WebView view,
+        boolean visible) throws Exception {
+        int[] bounds = new int[4];
+        int[] idleDelay = new int[1];
+        CountDownLatch rendered = new CountDownLatch(1);
+        scenario.onActivity(activity -> {
+            view.getLocationOnScreen(bounds);
+            bounds[2] = view.getWidth();
+            bounds[3] = view.getHeight();
+            idleDelay[0] = view.getScrollBarDefaultDelayBeforeFade() + view.getScrollBarFadeDuration() + 500;
+            view.postVisualStateCallback(0, new WebView.VisualStateCallback() {
+                @Override public void onComplete(long requestId) {
+                    view.postOnAnimation(() -> view.postOnAnimation(rendered::countDown));
+                }
+            });
+        });
+        assertTrue("The scroll fixture is rendered", rendered.await(10, TimeUnit.SECONDS));
+        Thread.sleep(idleDelay[0]);
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        int scrollbarPixels = 0;
+        while (SystemClock.uptimeMillis() < deadline) {
+            Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+            assertTrue("The screen can be captured", screenshot != null);
+            try {
+                scrollbarPixels = 0;
+                // The fixture has a uniform magenta background. Only the native thumb
+                // should draw over the right edge, away from Android's system bars.
+                for (int y = bounds[1] + bounds[3] / 10; y < bounds[1] + bounds[3] * 9 / 10; y++) {
+                    for (int x = bounds[0] + bounds[2] - 20; x < bounds[0] + bounds[2]; x++) {
+                        if (screenshot.getPixel(x, y) != Color.MAGENTA) scrollbarPixels++;
+                    }
+                }
+            } finally {
+                screenshot.recycle();
+            }
+            if (visible == (scrollbarPixels > 0)) return;
+            Thread.sleep(100);
+        }
+        assertEquals("The page scrollbar's idle visibility follows the preference (pixels: " + scrollbarPixels + ")",
+            visible, scrollbarPixels > 0);
+    }
+
     @Test
     public void tappingBesideNestedScrollbarHandleDoesNotScroll() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
@@ -200,6 +457,95 @@ public class MobileAppearanceSettingsTest {
                 awaitCondition(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$route.path === '/userplaylists' && !document.querySelector('.sideNav').classList.contains('scrollHidden')");
             } finally {
                 evaluate(view, "document.querySelector('#mobile-navigation-scroll-fixture')?.remove(); delete window.__navigationPageHeight; window.scrollTo(0, 0)");
+                restore(view);
+            }
+        }
+    }
+
+    @Test
+    public void navigationVisibilityAndCompactLabelsFollowPreferences() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        for (const key of ['AlwaysShowNavigationBar', 'CompactNavigationLabels', 'HideLabelsSideBar']) {
+                            window.__mobileAppearanceSaved[key] = store.getters['get' + key];
+                            store.commit('set' + key, false);
+                        }
+                        const content = document.createElement('div');
+                        content.id = 'mobile-navigation-options-fixture';
+                        content.style.height = '4000px';
+                        document.querySelector('.app > .flexBox').append(content);
+                    })()
+                    """);
+                for (int scale : new int[] {100, 125}) {
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', " + scale + ")");
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    evaluate(view, "window.scrollTo(0, 0)");
+                    awaitCondition(view, "window.scrollY === 0");
+                    evaluate(view, "document.activeElement.blur(); window.scrollTo(0, 300)");
+                    awaitCondition(view, "document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowNavigationBar', true)");
+                    awaitCondition(view, "!document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "window.scrollTo(0, 600)");
+                    awaitCondition(view, "Math.abs(window.scrollY - 600) <= 1");
+                    awaitCondition(view, "Math.abs(document.querySelector('.sideNav').getBoundingClientRect().bottom - innerHeight) <= 1");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowNavigationBar', false)");
+                    evaluate(view, "window.scrollTo(0, 800)");
+                    awaitCondition(view, "document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "window.scrollTo(0, 0)");
+                    awaitCondition(view, "!document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', true)");
+                    awaitCondition(view, """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel')];
+                            const visible = labels.filter(label => getComputedStyle(label).display !== 'none');
+                            const icons = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navIcon, .moreOptionNav .navIcon')];
+                            const centered = icons.every(icon => {
+                                const bounds = icon.getBoundingClientRect();
+                                const option = icon.closest('.navOption').getBoundingClientRect();
+                                return Math.abs((bounds.top + bounds.bottom - option.top - option.bottom) / 2) <= 1 &&
+                                    Math.abs(option.height - 48) <= 1;
+                            });
+                            return labels.length === 4 && visible.length === 0 && centered &&
+                                labels.every(label => !!label.closest('.navOption').getAttribute('aria-label'));
+                        })()
+                        """);
+                    evaluate(view, "document.querySelector('.sideNav .moreOptionNav').click()");
+                    awaitCondition(view, "!!document.querySelector('.moreOptionContainer')");
+                    assertEquals("Overflow labels stay readable", "true", evaluate(view,
+                        """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.moreOptionContainer .navLabel')];
+                            return labels.length > 0 && labels.every(label => {
+                                const bounds = label.getBoundingClientRect();
+                                return getComputedStyle(label).visibility === 'visible' && bounds.width > 0 && bounds.height > 0;
+                            });
+                        })()
+                        """));
+                    evaluate(view, "document.querySelector('.moreOptionContainer a[href=\"#/subscribedchannels\"]').click()");
+                    awaitCondition(view, "document.querySelector('.moreOptionNav').classList.contains('router-link-active') && getComputedStyle(document.querySelector('.moreOptionNav .navLabel')).display === 'none'");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history')");
+                    awaitCondition(view, "!!document.querySelector('.sideNav .inner > .navOption.router-link-active[href=\"#/history\"]')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', false)");
+                    awaitCondition(view, """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel, .moreOptionNav .navLabel')];
+                            return labels.length === 5 && labels.every(label => {
+                                const bounds = label.getBoundingClientRect();
+                                return getComputedStyle(label).visibility === 'visible' && bounds.width > 0 && bounds.height > 0;
+                            });
+                        })()
+                        """);
+                }
+            } finally {
+                evaluate(view, "document.querySelector('#mobile-navigation-options-fixture')?.remove(); window.scrollTo(0, 0)");
                 restore(view);
             }
         }
@@ -397,6 +743,88 @@ public class MobileAppearanceSettingsTest {
     }
 
     @Test
+    public void dynamicBackgroundRespectsSystemThemeOverlays() throws Exception {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        boolean dark = (context.getResources().getConfiguration().uiMode &
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        int backgroundId = dark ? android.R.color.system_neutral1_900 : android.R.color.system_neutral1_50;
+        String expected = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(backgroundId) & 0xffffff);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            String savedWindowOpen = evaluate(view, store + ".getters.getSettingsWindowOpen");
+            String savedWindowMinimized = evaluate(view, store + ".getters.getSettingsWindowMinimized");
+            try {
+                evaluate(view, store + ".commit('setBaseTheme', 'dynamic')");
+                evaluate(view, store + ".commit('setSettingsWindowMinimized', false); " +
+                    store + ".commit('setSettingsWindowOpen', true)");
+                String background = "document.body.style.getPropertyValue('--bg-color').toLowerCase()";
+                awaitCondition(view, background + " !== '' && !!document.querySelector('.settingsWindow')");
+                assertEquals("Dynamic background respects system dark-theme overlays", JSONObject.quote(expected),
+                    evaluate(view, background));
+                int cardId = dark ? android.R.color.system_neutral1_800 : android.R.color.system_neutral1_100;
+                String expectedCard = dark && expected.equals("#000000") ? "#191919" :
+                    String.format(java.util.Locale.ROOT, "#%06x", context.getColor(cardId) & 0xffffff);
+                assertEquals("Cards remain distinguishable above pure-black backgrounds", JSONObject.quote(expectedCard),
+                    evaluate(view, "document.body.style.getPropertyValue('--card-bg-color').toLowerCase()"));
+                int rgb = Integer.parseInt(expectedCard.substring(1), 16);
+                String expectedRgb = "rgb(" + ((rgb >> 16) & 255) + ", " + ((rgb >> 8) & 255) + ", " + (rgb & 255) + ")";
+                assertEquals("The visible settings panel uses the system surface", JSONObject.quote(expectedRgb),
+                    evaluate(view, "getComputedStyle(document.querySelector('.settingsWindow')).backgroundColor"));
+                assertEquals("The status-bar inset uses the system surface", JSONObject.quote(expectedRgb),
+                    evaluate(view, "getComputedStyle(document.querySelector('.app'), '::before').backgroundColor"));
+                evaluate(view, "document.body.style.removeProperty('--bg-color')");
+                scenario.onActivity(activity -> activity.onConfigurationChanged(
+                    new android.content.res.Configuration(activity.getResources().getConfiguration())));
+                awaitCondition(view, background + " === '" + expected + "'");
+            } finally {
+                evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                evaluate(view, store + ".commit('setSettingsWindowOpen', " + savedWindowOpen + "); " +
+                    store + ".commit('setSettingsWindowMinimized', " + savedWindowMinimized + ")");
+            }
+        }
+    }
+
+    @Test
+    public void lineageBlackThemeUpdatesTheExistingWebView() throws Exception {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        String overlay = "org.lineageos.overlay.customization.blacktheme";
+        String overlays = shell("cmd overlay list android");
+        org.junit.Assume.assumeTrue(overlays.contains(overlay));
+        boolean originallyEnabled = overlays.contains("[x] " + overlay);
+        org.junit.Assume.assumeTrue((InstrumentationRegistry.getInstrumentation().getTargetContext()
+            .getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            try {
+                evaluate(view, store + ".commit('setBaseTheme', 'dynamic')");
+                awaitCondition(view, "document.body.style.getPropertyValue('--primary-color') !== ''");
+                for (boolean enabled : new boolean[] {false, true, false, true}) {
+                    shell("cmd overlay " + (enabled ? "enable" : "disable") + " --user 0 " + overlay);
+                    String expected = overlayColor("system_neutral1_900");
+                    if (enabled) assertEquals("LineageOS supplies pure black", "#000000", expected);
+                    awaitCondition(view, "document.body.style.getPropertyValue('--bg-color').toLowerCase() === '" + expected + "'");
+                    String expectedCard = enabled ? "#191919" : overlayColor("system_neutral1_800");
+                    assertEquals("Live overlay updates restore the expected card surface", JSONObject.quote(expectedCard),
+                        evaluate(view, "document.body.style.getPropertyValue('--card-bg-color')"));
+                }
+            } finally {
+                try {
+                    shell("cmd overlay " + (originallyEnabled ? "enable" : "disable") + " --user 0 " + overlay);
+                } finally {
+                    evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                }
+            }
+        }
+    }
+
+    @Test
     public void systemPaletteChangeUpdatesTheExistingWebView() throws Exception {
         org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
         android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -460,9 +888,14 @@ public class MobileAppearanceSettingsTest {
 
     private static void openPhoneTabHistory(WebView view) throws Exception {
         evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-        evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
-        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')");
+        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+            ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+        awaitCondition(view, "!!document.querySelector('.capacitorTabActions')");
+        evaluate(view, "[...document.querySelectorAll('.capacitorTabActions [role=menuitem]')]" +
+            ".find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Tab Organizer.Tab History')).click()");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry') && " +
+            "!document.querySelector('.capacitorTabActionsBackdrop')");
     }
 
     private static void prepare(WebView view) throws Exception {
@@ -509,6 +942,21 @@ public class MobileAppearanceSettingsTest {
                 document.querySelector('#mobile-appearance-test-style')?.remove();
             })()
             """);
+    }
+
+    private static String overlayColor(String resource) throws Exception {
+        String nativeColor = shell("cmd overlay lookup android android:color/" + resource).trim();
+        java.util.regex.Matcher resolved = java.util.regex.Pattern.compile("#ff([0-9a-fA-F]{6})$").matcher(nativeColor);
+        assertTrue("System resource is a resolved color: " + nativeColor, resolved.find());
+        return "#" + resolved.group(1).toLowerCase(java.util.Locale.ROOT);
+    }
+
+    private static String shell(String command) throws Exception {
+        try (java.io.InputStream output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+            return new java.io.BufferedReader(new java.io.InputStreamReader(output,
+                java.nio.charset.StandardCharsets.UTF_8)).lines().collect(java.util.stream.Collectors.joining("\n"));
+        }
     }
 
     private static JSONObject json(WebView view, String expression) throws Exception {

@@ -223,6 +223,7 @@
           @keydown.enter.space.prevent="showSuperChatComment(comment)"
         >
           <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="comment.author.thumbnailUrl"
             class="channelThumbnail"
           />
@@ -255,6 +256,7 @@
               class="upperSuperChatMessage"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="superChat.author.thumbnailUrl"
                 class="channelThumbnail"
               />
@@ -320,6 +322,7 @@
                   class="upperSuperChatMessage"
                 >
                   <FtRetryImage
+                    :fallback-icon="['fas', 'circle-user']"
                     :src="comment.author.thumbnailUrl"
                     class="channelThumbnail"
                   />
@@ -356,6 +359,7 @@
                 v-else
               >
                 <FtRetryImage
+                  :fallback-icon="['fas', 'circle-user']"
                   :src="comment.author.thumbnailUrl"
                   class="channelThumbnail"
                 />
@@ -381,15 +385,16 @@
                     {{ comment.author.name }}
                   </RouterLink>
                   <span
-                    v-if="comment.badge"
+                    v-if="comment.badge?.url"
                     class="badge"
                   >
-                    <img
+                    <FtRetryImage
+                      :fallback-icon="['fas', 'user-check']"
                       :src="comment.badge.url"
                       alt=""
                       :title="comment.badge.tooltip"
                       class="badgeImage"
-                    >
+                    />
                   </span>
                   <bdi
                     v-safer-html="comment.message"

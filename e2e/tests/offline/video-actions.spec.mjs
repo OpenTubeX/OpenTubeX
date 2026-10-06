@@ -7,6 +7,7 @@ import {
   goTo,
   goToSettingsSection,
   openNewWindowFromTabBar,
+  setWindowSize,
   waitForAppReady
 } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
@@ -149,7 +150,7 @@ test.describe('video link copy actions', () => {
   })
 
   for (const width of [1600, 375]) {
-    test(`keeps copying in the context menu and thumbnail action at ${width}px`, async ({ app, page }) => {
+    test(`keeps video link copy actions available at ${width}px`, async ({ app, page }) => {
       await goTo(page, 'history')
       await page.setViewportSize({ width, height: 900 })
       const video = page.locator('.ft-list-video').first()
@@ -175,7 +176,10 @@ test.describe('video link copy actions', () => {
         await video.locator('.title').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
           bubbles: true, cancelable: true, pointerType: 'touch'
         })))
-        await page.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
+        const mobileMenu = page.locator('.mobileLinkActions')
+        await expect(mobileMenu.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
+        await mobileMenu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
+        await mobileMenu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
       } else {
         await video.hover()
         await video.locator('.extraThumbnailActionIcon .iconButton').click()
@@ -889,7 +893,7 @@ test.describe('video downloads', () => {
     const downloadRow = page.locator('.downloadRow').filter({ hasText: currentTitle })
     await expect(downloadRow).toBeVisible()
     await expect(downloadRow.locator('.downloadWarning')).toHaveCount(0)
-    await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute('src', currentThumbnail)
+    await expect(downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute('src', currentThumbnail)
   })
 
   test('clears a stale feed thumbnail when yt-dlp finds none', async ({ app, page }) => {
@@ -1011,7 +1015,7 @@ test.describe('video downloads', () => {
     await expect.poll(async () => {
       const [mainBounds, thumbnailBounds] = await Promise.all([
         downloadRow.locator('.downloadMain').boundingBox(),
-        downloadRow.locator('.downloadThumbnail').boundingBox()
+        downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)').boundingBox()
       ])
       return thumbnailBounds.x + thumbnailBounds.width / 2 - (mainBounds.x + mainBounds.width / 2)
     }).toBeCloseTo(0, 0)
@@ -1619,12 +1623,12 @@ test('exposes download progress to assistive technology', async ({ page }) => {
   await upsertDownload('downloading', 142)
   await expect(progress).toHaveAttribute('aria-valuenow', '100')
   await expect(progress).toHaveAttribute('aria-valuetext', '100.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('100%')
+  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(1)')
 
   await upsertDownload('downloading', -42)
   await expect(progress).toHaveAttribute('aria-valuenow', '0')
   await expect(progress).toHaveAttribute('aria-valuetext', '0.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('0%')
+  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(0)')
 
   await upsertDownload('processing', 42)
   await expect(progress).toHaveAccessibleName('Accessible download')
@@ -1660,12 +1664,12 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
   })
 
   const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Finished download' })
-  await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute(
+  await expect(downloadRow.locator('.downloadThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute(
     'src',
-    'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg'
+    'https://i.ytimg.com/vi/eeeeeeeeeee/maxresdefault.jpg'
   )
   const rowLayout = await downloadRow.evaluate((row) => ({
-    thumbnailRight: row.querySelector('.downloadThumbnail').getBoundingClientRect().right,
+    thumbnailRight: row.querySelector('.downloadThumbnail:not(.retryImagePlaceholder)').getBoundingClientRect().right,
     detailsLeft: row.querySelector('.downloadDetails').getBoundingClientRect().left
   }))
   expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
@@ -1765,6 +1769,74 @@ test.describe('list video actions', () => {
     await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
   })
 
+  for (const uiScale of [100, 95]) {
+    test(`download time ranges and helper spacing stay compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+      await goTo(page, 'history')
+      const video = page.locator('.ft-list-video').first()
+      await video.hover()
+      await video.locator('.title').click({ button: 'right' })
+      await page.getByRole('menuitem', { name: 'Download Video' }).click()
+      for (const width of [1200, 400]) {
+        await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+        await page.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          for (const name of ['Subtitle Languages', 'File Name Template']) {
+            const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
+            await field.scrollIntoViewIfNeeded()
+            const spacing = await field.evaluate(element => {
+              const field = element.querySelector('input').getBoundingClientRect()
+              const help = element.querySelector('.selectTooltip button').getBoundingClientRect()
+              const section = element.closest('.optionSection').getBoundingClientRect()
+              const rtl = getComputedStyle(element).direction === 'rtl'
+              const before = rtl ? field.left - help.right : help.left - field.right
+              const after = rtl ? help.left - section.left : section.right - help.right
+              return Math.abs(before - after)
+            })
+            expect.soft(spacing, `${direction} ${name} helper margins at ${width}px`).toBeLessThanOrEqual(1)
+          }
+          const range = page.locator('.segmentGrid')
+          await range.scrollIntoViewIfNeeded()
+          await expect(range.locator('.timeRangeSeparator')).toBeVisible()
+          expect(await range.locator('.timeRangeSeparator').evaluate(element => getComputedStyle(element, '::before').content)).toBe('"–"')
+          const geometry = await range.evaluate(element => {
+            const [start, end] = [...element.querySelectorAll('input')].map(input => input.getBoundingClientRect())
+            const rtl = getComputedStyle(element).direction === 'rtl'
+            return { gap: rtl ? start.left - end.right : end.left - start.right, top: Math.abs(start.top - end.top) }
+          })
+          expect.soft(geometry.gap).toBeGreaterThanOrEqual(16)
+          expect.soft(geometry.gap).toBeLessThanOrEqual(40)
+          expect.soft(geometry.top).toBeLessThanOrEqual(1)
+          const sponsor = page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) })
+          for (const group of [range, range.locator('..').locator('.switch-label'), sponsor.locator('.switch-label'), sponsor.locator('.sponsorCategories')]) {
+            const center = await group.evaluate(element => {
+              const rect = element.getBoundingClientRect()
+              const section = element.closest('.optionSection').getBoundingClientRect()
+              return Math.abs(rect.left + rect.width / 2 - section.left - section.width / 2)
+            })
+            expect.soft(center, `${direction} centered download control at ${width}px`).toBeLessThanOrEqual(1)
+          }
+        }
+        await page.evaluate(() => { document.body.dir = 'ltr' })
+        await page.locator('.segmentGrid').locator('..').screenshot({ path: testInfo.outputPath(`time-range-${width}.png`) })
+        await page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) }).screenshot({ path: testInfo.outputPath(`sponsorblock-${width}.png`) })
+        for (const [name, filename] of [['Subtitle Languages', 'subtitle-help'], ['File Name Template', 'filename-help']]) {
+          const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
+          await field.scrollIntoViewIfNeeded()
+          const box = await field.boundingBox()
+          await page.screenshot({
+            path: testInfo.outputPath(`${filename}-${width}.png`),
+            clip: {
+              x: box.x, y: box.y, width: box.width + 40, height: box.height
+            }
+          })
+        }
+      }
+    })
+  }
+
   test('disabled download inputs do not fade their tooltips', async ({ page }) => {
     await goTo(page, 'history')
 
@@ -1793,8 +1865,21 @@ test.describe('list video actions', () => {
       label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
       labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity
     }))
-    expect(opacity).toEqual({ label: '1', labelText: '0.4' })
+    expect(opacity).toEqual({ label: '1', labelText: '0.38' })
     await expect(tooltip).toHaveCSS('opacity', '1')
+    for (const fullWindow of [false, true]) {
+      await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)
+      await expect.poll(() => tooltip.evaluate(element => {
+        const rect = element.getBoundingClientRect()
+        // Tooltips ignore pointer events; temporarily enable hit testing to verify
+        // the visible tooltip paints above the modal rather than underneath it.
+        element.style.pointerEvents = 'auto'
+        const top = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+        element.style.pointerEvents = ''
+        return top === element || element.contains(top)
+      })).toBe(true)
+    }
+    await page.evaluate(() => document.body.classList.remove('playerFullWindow'))
   })
 
   test('the video context menu and playlist dropdown work with vertical tabs', async ({ page }) => {
@@ -1876,7 +1961,7 @@ test.describe('list video actions', () => {
     await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
 
     // The toast shows the video's thumbnail, not just the message
-    await expect(page.locator('.toast.hasImage .image')).toHaveAttribute('src', /eeeeeeeeeee/)
+    await expect(page.locator('.toast.hasImage .image:not(.retryImagePlaceholder)')).toHaveAttribute('src', /eeeeeeeeeee/)
     await expect.poll(async () => {
       const favorites = await readPlaylist(app, 'favorites')
       return favorites?.videos?.map((entry) => entry.videoId)

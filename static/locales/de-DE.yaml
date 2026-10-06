@@ -49,6 +49,7 @@ Global:
 Search / Go to URL: Suchen / URL öffnen
   # In Filter Button
 Search Filters:
+  Cookie Search Failed: "Die Suche mit den konfigurierten Cookies ist fehlgeschlagen."
   Search Filters: Suchfilter
   Prioritize:
     Most Relevant: Relevanz
@@ -347,6 +348,11 @@ Settings:
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Enable Tabs: "Tabs aktivieren"
+    Thumbnail Swipe Gestures:
+      Left: Auf Vorschaubildern nach links wischen
+      Right: Auf Vorschaubildern nach rechts wischen
+      Description: Wische horizontal über ein Video-Vorschaubild und lasse los, um die ausgewählte Aktion auszuführen.
     Data Saver Thumbnails: "Datensparende Vorschaubilder"
     Use tray icon: "Symbol im Infobereich verwenden"
     Close to system tray: "Beim Schließen in den Infobereich minimieren"
@@ -356,7 +362,9 @@ Settings:
     Blur Thumbnails: Vorschaubilder weichzeichnen
     General Settings: Allgemein
     Navigation:
-      Show Active Subscriptions: Aktive Abos anzeigen
+      Always Show Navigation Bar: Navigationsleiste immer anzeigen, wenn sie unten ist
+      Compact Tab Labels: Kompakte Navigationsleiste, wenn sie unten ist
+      Show Active Subscriptions: Aktive Abos in der Seitenleiste anzeigen
       Navigation: Navigation
       Customize Navigation: Navigation anpassen
       Add Item: Eintrag hinzufügen
@@ -419,7 +427,7 @@ Settings:
     Current instance will be randomized on startup: Beim Start wird eine zufällige Instanz festgelegt
     No default instance has been set: Es wurde keine Standardinstanz festgelegt
     The currently set default instance is {instance}: Die aktuelle Standardinstanz ist {instance}
-    Current Invidious Instance: Aktuelle Invidious-Instanz
+    Current Invidious Instance: Invidious-Instanz
     Clear Default Instance: Standardinstanz zurücksetzen
     Set Current Instance as Default: Derzeitige Instanz als Standard festlegen
     External Link Handling:
@@ -473,6 +481,7 @@ Settings:
       Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakter mobiler Mini-Player"
     Always Show Mobile Search Bar: "Mobile Suchleiste immer anzeigen"
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
@@ -494,8 +503,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Hell"
-      OpenTubeX Dark: "OpenTubeX Dunkel"
+      Ocean Light: "Ocean Hell"
+      Ocean Dark: "Ocean Dunkel"
       Base Theme: Grundlegendes Farbschema
       Black: Schwarz
       Dark: Dunkel
@@ -871,7 +880,7 @@ Settings:
         Empty File Name: Leerer Dateiname
       File Name Tooltip: Du kannst die folgenden Variablen verwenden. %Y Jahr 4-stellig. %M Monat 2 Ziffern. %D Tag 2 Ziffern. %H Stunde 2 Ziffern. %N Minute 2 Ziffern. %S Sekunde 2 Ziffern. %T Millisekunde 3 Ziffern. %s Video-Sekunde. %t Video Millisekunde 3 Ziffern. %i Video-ID.
       Mode: Screenshot-Modus
-    Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
+    Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms ins Querformat zum Vollbild wechseln
     Rotate Wide Videos to Landscape in Fullscreen: Breite Videos im Vollbild ins Querformat drehen
     Swipe Up or Down to Enter or Exit Fullscreen: Zum Öffnen oder Schließen des Vollbilds nach oben oder unten wischen
     Continue Playback When Screen Is Locked: Wiedergabe bei gesperrtem Bildschirm fortsetzen
@@ -933,6 +942,8 @@ Settings:
       English: Englisch
       Kazakh: Kasachisch
     Parallel Segment Loading: Paralleles Laden von Segmenten
+    Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
+    Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -1232,7 +1243,7 @@ Settings:
     Your Info: Deine Info
     Test Proxy: Proxy testen
     Clicking on Test Proxy will send a request to: Indem du auf „Proxy testen“ klickst, sendest du eine Anfrage an
-    Proxy Port Number: Proxy-Portnummer
+    Proxy Port Number: Proxy-Port
     Proxy Host: Proxy-Host
     Proxy Protocol: Proxy-Protokoll
     Enable Tor / Proxy: Tor / Proxy aktivieren
@@ -1240,7 +1251,7 @@ Settings:
     Proxy Warning: OpenTubeX hat keinen eingebauten Proxy, kann aber mit einem externen Proxy verbunden werden, wie z. B. einem, der auf deinem Gerät läuft wie Tor, oder einem externen Proxy wie einem SOCKS5-Proxy, der von einigen VPNs bereitgestellt wird. Falls aktiviert, stelle sicher, dass dein Proxy/Tor richtig konfiguriert ist, da OpenTubeX ansonsten keine Daten abrufen kann.
     Proxy Username: Proxy-Anmeldename
     Proxy Password: Proxy-Passwort
-    IP Block Recovery Script Path: Skriptpfad zur IP-Block-Wiederherstellung
+    IP Block Recovery Script Path: Skript zur IP-Block-Wiederherstellung
     Select IP Block Recovery Script File: Skriptdatei für IP-Block-Wiederherstellung auswählen
     Running IP block recovery script: IP-Block-Wiederherstellungsskript wird ausgeführt
     IP block recovery script failed: 'IP-Block-Wiederherstellungsskript fehlgeschlagen (Exit-Code: {exitCode})'
@@ -1254,10 +1265,10 @@ Settings:
       Disabled Message: Einige Kanäle wurden anhand ihrer ID ausgeschlossen und werden nicht verarbeitet. Die Funktion ist gesperrt, während diese IDs aktualisiert werden.
     Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
-    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
+    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL
     Enable SponsorBlock: SponsorBlock aktivieren
     Enable SponsorBlock Submission: SponsorBlock-Einreichung aktivieren
-    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID (optional): Private Benutzer-ID (optional)
     SponsorBlock Private User ID Tooltip: Füge die private SponsorBlock-Benutzer-ID aus der Browser-Erweiterung ein. Lasse dieses Feld leer, um eine von der App erzeugte ID zu verwenden.
     Generated SponsorBlock User ID: Erzeugte SponsorBlock-Benutzer-ID
     Generated SponsorBlock User ID Tooltip: Diese von der App erzeugte SponsorBlock-Benutzer-ID kann in der Browser-Erweiterung oder bei Nutzung der App auf einem anderen Computer verwendet werden.
@@ -1275,13 +1286,13 @@ Settings:
     Custom Color: Benutzerdefinierte Farbe
     UseDeArrowTitles: DeArrow-Videotitel verwenden
     UseDeArrowThumbnails: DeArrow für Miniaturansichten verwenden
-    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Thumbnail-Generator-API-URL (Standard ist https://dearrow-thumb.ajay.app)
+    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Vorschaubild-API-URL
   External Player Settings:
     Ignore Unsupported Action Warnings: Warnungen vor nicht unterstützten Aktionen ignorieren
     External Player: Externer Video-Player
     External Player Settings: Externe Video-Player
-    Custom External Player Executable: Benutzerdefinierte ausführbare Datei des Video-Players
-    Custom External Player Arguments: Benutzerdefinierte Argumente für externen Video-Player
+    Custom External Player Executable: Pfad zur ausführbaren Datei
+    Custom External Player Arguments: Benutzerdefinierte Argumente
     Players:
       None:
         Name: Keine
@@ -1296,9 +1307,9 @@ Settings:
     Update Managed Tools: Aktualisieren
     Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     Download Folder: Download-Ordner
-    Global Additional yt-dlp Arguments: Globale zusätzliche yt-dlp-Argumente
+    Global Additional yt-dlp Arguments: Zusätzliche yt-dlp-Argumente
     Concurrent Downloads: Parallele Downloads
-    Bandwidth Limit: Bandbreitenlimit (KiB/s, 0 für unbegrenzt)
+    Bandwidth Limit: Bandbreitenlimit (KiB/s)
     Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
     External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
@@ -1371,8 +1382,8 @@ Settings:
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
-    yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
-    FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
+    yt-dlp Executable Path: Ausführbare yt-dlp-Datei
+    FFmpeg Executable Path: Ausführbare FFmpeg-Datei
     Restricted Playback Authentication: "yt-dlp-Cookies"
     Cookie Source: Cookie-Quelle
     Cookie Sources:
@@ -1429,7 +1440,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivieren
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (Standard ist https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Quick Settings:
     Quick Settings: Schnelleinstellungen
     Customize Quick Settings: Schnelleinstellungen anpassen
@@ -1530,7 +1541,7 @@ Settings:
       Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf und unterstützte Einstellungen mit einem
       OpenTubeX- oder LibreTube-Synchronisierungsserver. LibreTube-Server unterstützen möglicherweise nicht alle
       Synchronisierungsfunktionen.
-    Server URL: Server-URL
+    Server URL: Sync-Server-URL
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.
     Username: Benutzername
@@ -2048,12 +2059,16 @@ Video:
     Autoplay is off: Automatische Wiedergabe ist ausgeschaltet
     Autoplay is on: Automatische Wiedergabe ist eingeschaltet
     Scroll Mini Player:
+      Collapse Controls: "Steuerung einklappen"
+      Expand Controls: "Steuerung ausklappen"
       Back to Top: Zurück nach oben
       Return to Video Tab: Zum Video-Tab zurückkehren
       Hide: Mini-Player ausblenden
       Play: Abspielen
       Pause: Pausieren
       Drag Handle: Mini-Player verschieben
+      Rewind 10 seconds: 10 Sekunden zurückspulen
+      Forward 10 seconds: 10 Sekunden vorspulen
     MusicPlaybackRateOverride: Musikvideo erkannt, wird mit 1-facher Geschwindigkeit wiedergegeben
     Voice-over Translation:
       Start: Übersetzen
@@ -2307,6 +2322,21 @@ Yes: Ja
 No: Nein
 Locale Name: Deutsch
 Profile:
+  Customization: Anpassung
+  Manage Profile Subscriptions: Profil-Abos verwalten
+  Icon Names:
+    Person: Person
+    People: Personen
+    Headphones: Kopfhörer
+    Gaming: Gaming
+    Film: Film
+    Art: Kunst
+    Science: Wissenschaft
+    Globe: Globus
+    Heart: Herz
+    Sun: Sonne
+    Moon: Mond
+    Trophy: Pokal
   '{profile} is now the active profile': '{profile} ist jetzt dein aktives Profil'
   Your default profile has been changed to your primary profile: Dein Standardprofil wurde in dein Hauptprofil geändert
   Removed {profile} from your profiles: '{profile} wurde aus deinen Profilen entfernt'
@@ -2367,6 +2397,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Enable Tabs: "Beim Deaktivieren werden alle anderen Tabs geschlossen. Die aktuelle Seite bleibt geöffnet."
     Data Saver Thumbnails: "Verwendet Vorschaubilder mit geringerer Auflösung, um den Datenverbrauch zu reduzieren."
     Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
@@ -2444,6 +2475,7 @@ Tooltips:
     Preload Upcoming Videos: Ruft die yt-dlp-Stream-URLs der Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
     Upcoming Videos to Preload: Die Höchstzahl bevorstehender Videos, deren yt-dlp-Stream-URLs im Hintergrund abgerufen werden.
     Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
+    Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).
@@ -2689,6 +2721,7 @@ Next match: Nächster Treffer
 Close find bar: Suchleiste schließen
 No matches: Keine Treffer
 Context Menu:
+  Open in a Background Tab: "In einem Hintergrund-Tab öffnen"
   Select Tab: Tab auswählen
   Close Tabs Before: Tabs davor schließen
   Close Tabs After: Tabs danach schließen
@@ -2972,8 +3005,8 @@ Downloads:
   File Name Template: Vorlage für Dateinamen
   File Name Template Help: 'Verfügbare Felder: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zeitbereich und Kapitel
-  Start Time: Startzeit (HH:MM:SS)
-  End Time: Endzeit (HH:MM:SS)
+  Start Time: Startzeit
+  End Time: Endzeit
   Split by Chapters: Nach Kapiteln in separate Dateien aufteilen
   Remove Segments: Segmente entfernen
   Subtitles and Metadata: Untertitel und Metadaten
@@ -3097,3 +3130,37 @@ Tray Icon:
   Follow App Theme: "App-Design folgen"
 SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
+
+Form Inputs:
+  Enter Password Hint: "Gib dein Passwort ein"
+  Choose Password Hint: "Wähle ein Passwort"
+  Confirm Password Hint: "Wiederhole dein neues Passwort"
+  Encryption Passphrase Hint: "Gib deine Verschlüsselungspassphrase ein"
+  Show Password: "Passwort anzeigen"
+  Hide Password: "Passwort verbergen"
+  Search Text Hint: "Suchbegriffe eingeben"
+  Playlist Description Hint: "Beschreibe diese Playlist"
+  Filename Preview: "Vorschau des Dateinamens"
+  Enter Channels: "Kanäle eingeben"
+  Enter Text: "Text eingeben"
+  Video URL: Video- oder Playlist-URL
+  Paste Link: Video- oder Playlist-Link einfügen
+  Example: z. B. {example}
+  No Minimum: Kein Minimum
+  No Maximum: Kein Maximum
+  Any Age: Beliebiges Alter
+  Included Terms Example: z. B. Anleitung, Rezension
+  Excluded Terms Example: z. B. Trailer, Vorschau
+  Download Folder Hint: Leer lassen, um deinen Downloads-Ordner zu verwenden
+  Global Arguments Hint: Optionale Argumente für jeden Download
+  Unlimited Hint: 0 für unbegrenzt
+  Add Argument: Argument hinzufügen
+  Template Name Example: z. B. Nur Audio
+  Download Arguments Hint: Optionale Argumente für diesen Download
+  Generated ID Hint: Leer lassen, um eine ID zu erzeugen
+  Default Value: "Standard: {value}"
+
+Storage Startup Error:
+  Title: "App-Daten konnten nicht geladen werden"
+  Message: "Gib Speicherplatz auf dem Gerät frei und versuche es erneut. Die Synchronisierung bleibt pausiert, bis deine Daten geladen sind."
+  Retry: "Erneut versuchen"

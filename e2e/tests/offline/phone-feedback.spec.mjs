@@ -198,7 +198,7 @@ for (const zoom of [1, 0.95]) {
     })
     const player = page.locator('.ftVideoPlayer')
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await page.locator('.phoneCommentsButton').evaluate(button => button.click())
+    await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
     const sheet = page.locator('.dockedSheet[open]')
     await expect(sheet).toBeVisible()
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
@@ -334,24 +334,40 @@ test('submenu navigation stays outside the player menu scroller', async ({ app, 
   await expect(back).toBeInViewport()
 })
 
-test('autoplay glyph stays within its switch in both states', async ({ app, page }) => {
+test('autoplay glyph stays within its original compact switch in both states and directions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 360, height: 760 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const toggle = page.locator('.phonePlayerOptions[open] .autoplay-toggle')
-  for (let state = 0; state < 2; state++) {
-    await toggle.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(200)
-    const geometry = await toggle.evaluate(el => {
-      const track = el.querySelector('.ft-autoplay-switch').getBoundingClientRect()
-      const thumb = el.querySelector('.ft-autoplay-switch-thumb').getBoundingClientRect()
-      const enabled = el.getAttribute('aria-pressed') === 'true'
-      return { edge: enabled ? track.right - thumb.right : thumb.left - track.left, center: thumb.top + thumb.height / 2 - track.top - track.height / 2 }
-    })
-    expect(geometry.edge).toBeCloseTo(1, 0)
-    expect(geometry.center).toBeCloseTo(0, 0)
-    await toggle.click()
+  for (const roundness of [0, 50, 100, 200]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', `${999 * roundness / 100}px`)
+  }
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate(value => { document.body.dir = value }, direction)
+    for (let state = 0; state < 2; state++) {
+      await toggle.scrollIntoViewIfNeeded()
+      const geometry = await toggle.evaluate(el => {
+        const track = el.querySelector('.ft-autoplay-switch').getBoundingClientRect()
+        const thumb = el.querySelector('.ft-autoplay-switch-thumb').getBoundingClientRect()
+        const enabled = el.getAttribute('aria-pressed') === 'true'
+        const rtl = getComputedStyle(el).direction === 'rtl'
+        const startGap = rtl ? track.right - thumb.right : thumb.left - track.left
+        const endGap = rtl ? thumb.left - track.left : track.right - thumb.right
+        return {
+          edge: enabled ? endGap : startGap,
+          center: thumb.top + thumb.height / 2 - track.top - track.height / 2,
+          width: thumb.width,
+          enabled
+        }
+      })
+      expect(geometry.edge).toBeCloseTo(1, 0)
+      expect(geometry.width).toBeCloseTo(16, 0)
+      expect(geometry.center).toBeCloseTo(0, 0)
+      await toggle.click()
+    }
   }
 })
 
@@ -680,13 +696,38 @@ test('closing an expanded panel resumes the video it paused', async ({ app, page
 for (const picker of [false, true]) {
   test(`fullscreen ${picker ? 'select' : 'quick settings'} animates opening and closing`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
-    await page.locator('.profileTrigger').click()
-    if (picker) await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
-    const sheet = page.locator('.mobileSheet[open]').last()
-    expect(await sheet.evaluate(el => el.getAnimations().some(animation => animation.effect.getTiming().duration > 0))).toBe(true)
-    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
-    expect(await sheet.evaluate(el => el.getAnimations().some(animation => animation.effect.getTiming().duration > 0))).toBe(true)
-    await expect(page.locator('.mobileSheet[open]')).toHaveCount(picker ? 1 : 0)
+    // Record creation in the renderer: short animations can finish before IPC
+    // returns, especially while the rest of the suite is consuming CPU.
+    const recorded = await page.evaluateHandle(() => {
+      const state = { animate: Element.prototype.animate, animations: [] }
+      Element.prototype.animate = function (...args) {
+        const animation = state.animate.apply(this, args)
+        if (this.matches('.mobileSheet')) state.animations.push({ element: this, duration: animation.effect.getTiming().duration })
+        return animation
+      }
+      return state
+    })
+    let sheetElement
+    try {
+      await page.locator('.profileTrigger').click()
+      if (picker) await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
+      const sheet = page.locator('.mobileSheet[open]').last()
+      sheetElement = await sheet.elementHandle()
+      const durations = () => sheetElement.evaluate((element, state) => state.animations
+        .filter(animation => animation.element === element)
+        .map(animation => animation.duration), recorded)
+      await expect(sheet).toBeVisible()
+      expect((await durations()).at(-1)).toBeGreaterThan(0)
+      const openingCount = (await durations()).length
+      await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect.poll(async () => (await durations()).length).toBeGreaterThan(openingCount)
+      expect((await durations()).at(-1)).toBeGreaterThan(0)
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(picker ? 1 : 0)
+    } finally {
+      await sheetElement?.dispose()
+      await recorded.evaluate(state => { Element.prototype.animate = state.animate })
+      await recorded.dispose()
+    }
   })
 }
 

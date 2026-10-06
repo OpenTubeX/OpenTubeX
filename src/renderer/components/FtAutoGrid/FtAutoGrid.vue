@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import store from '../../store/index'
 
@@ -28,6 +28,7 @@ import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../co
 import { setThumbnailGridVisible } from '../../composables/useThumbnailSizeSlider'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { measureStableGridWidth } from './gridWidth'
+import { measureLeavingItemLayouts } from './leavingItemLayout'
 
 const props = defineProps({
   appear: {
@@ -41,6 +42,10 @@ const props = defineProps({
   itemCount: {
     type: Number,
     default: 0
+  },
+  itemKeys: {
+    type: Array,
+    default: null
   },
   youtubeStyleShorts: {
     type: Boolean,
@@ -130,6 +135,32 @@ function applyThumbnailSizeStyles() {
 
 watch(() => store.getters.getThumbnailSize, applyThumbnailSizeStyles)
 
+let leavingItemLayouts = null
+let pendingLeavingItems = []
+onBeforeUpdate(() => {
+  leavingItemLayouts = null
+  pendingLeavingItems = []
+  const grid = gridElement.value?.$el
+  if (!props.itemKeys || !(grid instanceof Element) || grid.closest('.newFeed') === null) return
+  const retainedKeys = new Set(props.itemKeys)
+  const leaving = Array.from(grid.children).filter(element => (
+    !retainedKeys.has(element.getAttribute('data-feed-item-key')) &&
+    !element.classList.contains('feed-leave-active')
+  ))
+  if (leaving.length === 0) return
+  leavingItemLayouts = measureLeavingItemLayouts(grid)
+  pendingLeavingItems = leaving
+  nextTick(() => { leavingItemLayouts = null })
+})
+
+function applyLeavingItemLayout(element) {
+  const layout = leavingItemLayouts.get(element)
+  if (!layout) return
+  for (const [dimension, value] of Object.entries(layout)) {
+    element.style.setProperty(`--feed-leave-${dimension}`, `${value}px`)
+  }
+}
+
 function captureLeavingItemLayout(element) {
   // Only the New feed takes leaving items out of flow and consumes these
   // geometry variables. Measuring every removed card in other feeds forces
@@ -138,13 +169,19 @@ function captureLeavingItemLayout(element) {
     return
   }
 
-  const itemRect = element.getBoundingClientRect()
-  const gridRect = gridElement.value.$el.getBoundingClientRect()
-
-  element.style.setProperty('--feed-leave-width', `${itemRect.width}px`)
-  element.style.setProperty('--feed-leave-height', `${itemRect.height}px`)
-  element.style.setProperty('--feed-leave-left', `${itemRect.left - gridRect.left}px`)
-  element.style.setProperty('--feed-leave-top', `${itemRect.top - gridRect.top}px`)
+  if (leavingItemLayouts === null) {
+    leavingItemLayouts = measureLeavingItemLayouts(gridElement.value.$el)
+    nextTick(() => { leavingItemLayouts = null })
+  }
+  // TransitionGroup has now captured the retained cards' original positions.
+  // Vue forces a reflow in each leave hook. Position the entire departing
+  // batch first so those reflows see no intervening layout-changing writes.
+  for (const leaving of pendingLeavingItems) {
+    applyLeavingItemLayout(leaving)
+    leaving.classList.add('feed-leave-active')
+  }
+  pendingLeavingItems = []
+  applyLeavingItemLayout(element)
 }
 
 let resizeObserver = null

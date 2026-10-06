@@ -111,6 +111,6 @@
   inline-size: 100%;
 }
 
-.capacitorTabActions .closeMenuTrigger {
+.capacitorTabActions .submenuTrigger {
   grid-template-columns: 24px minmax(0, 1fr) 24px;
 }

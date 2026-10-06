@@ -1,3 +1,5 @@
+import { getConfiguredKeyboardShortcuts } from '../../constants.js'
+import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
 import { parseCaptionSettings } from './player/caption-settings.js'
@@ -207,6 +209,20 @@ function describeCustomThemes(before, after, changes) {
   })
 }
 
+function describeKeyboardShortcuts(before, after, changes) {
+  const previous = getConfiguredKeyboardShortcuts(before)
+  const current = getConfiguredKeyboardShortcuts(after)
+  for (const [group, sections] of Object.entries(current)) {
+    for (const [section, shortcuts] of Object.entries(sections)) {
+      for (const [detail, value] of Object.entries(shortcuts)) {
+        if (keyboardShortcutsEqual(value, previous[group][section][detail])) continue
+        // Never put an entire shortcut configuration in the activity log.
+        changes.push({ key: 'keyboardShortcuts', detail, value: value === '' ? '' : activityText(value) })
+      }
+    }
+  }
+}
+
 function subscriptionPreferences(value) {
   return Object.fromEntries(Object.entries(value ?? {}).flatMap(([id, entry]) => {
     const settings = normalizeSubscriptionChannelSettings(entry.value)
@@ -233,6 +249,10 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
       }
       if (entry.key === 'defaultCaptionSettings') {
         describeCaptionSettings(previous.get(entry.key), entry.value, changes)
+        continue
+      }
+      if (entry.key === 'keyboardShortcuts') {
+        describeKeyboardShortcuts(previous.get(entry.key), entry.value, changes)
         continue
       }
       if (entry.key === 'customThemes') {
@@ -307,6 +327,7 @@ export class SyncLiveConnectionState {
 // desktop and Android. The durable server cursor handles missed notifications.
 export async function watchSyncChanges(client, onChange, onError, {
   prepare = async () => true,
+  waitForPendingSync = async () => false,
   onConnectionChange = () => {},
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
 } = {}) {
@@ -320,10 +341,18 @@ export async function watchSyncChanges(client, onChange, onError, {
           if (!await prepare() || client.cancelled) return
           prepared = true
         }
-        const response = await client.waitForSyncChanges(cursor)
+        let response = await client.waitForSyncChanges(cursor)
         if (client.cancelled) return
         if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
         if (response.cursor !== cursor) {
+          if (await waitForPendingSync()) {
+            // The first upload can wake a poll before the remaining collections
+            // are saved. Read the latest cursor before checking their revisions.
+            // Use the old cursor so an already observed change returns promptly.
+            response = await client.waitForSyncChanges(cursor)
+            if (client.cancelled) return
+            if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
+          }
           await onChange()
           // Advance only after successful processing; failures retry the same change.
           cursor = response.cursor

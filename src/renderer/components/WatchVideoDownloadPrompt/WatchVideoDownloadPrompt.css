@@ -1,4 +1,7 @@
 .downloadPromptContent {
+  --settings-control-margin: 7px 0;
+  --input-bottom-spacing: 0;
+
   display: flex;
   flex-direction: column;
   inline-size: 100%;
@@ -48,12 +51,12 @@
 }
 
 .optionSection {
-  border-block-start: 1px solid var(--side-nav-color);
   padding-block: 10px;
 }
 
 .fixedTemplateSection {
-  border-block-start: 0;
+  --settings-control-margin: 7px 0;
+
   flex: none;
   padding-block: 2px 10px;
   padding-inline: 12px;
@@ -66,21 +69,18 @@
 }
 
 .templateControls {
-  align-items: flex-end;
+  --settings-control-margin: 7px;
+
+  align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   inline-size: 100%;
 }
 
-.saveTemplateButton {
+.templateActionButton {
   flex: none;
-  margin-block-end: 3px;
-}
-
-.templateSection {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
+  margin-block: 0;
 }
 
 .fullWidth {
@@ -88,11 +88,18 @@
   inline-size: 100%;
 }
 
+.downloadOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: calc(100% - 40px);
+  margin-inline-end: 40px;
+}
+
 .optionGrid,
 .toggleGrid {
   align-items: start;
   display: grid;
-  gap: 10px 16px;
+  gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -100,15 +107,47 @@
   inline-size: 100%;
 }
 
-.segmentGrid > * {
+.segmentGrid {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  inline-size: min(500px, 100%);
+  margin-inline: auto;
+}
+
+.segmentGrid > :deep(.ft-input-component) {
   min-inline-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.timeRangeSeparator {
+  margin-block-start: 7px;
+}
+
+.timeRangeSeparator::before {
+  content: '–';
+}
+
+.centeredToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 16px;
+}
+
+.centeredToggle > :deep(.switch-ctn) {
+  inline-size: auto;
 }
 
 .sponsorCategories {
   display: grid;
   gap: 2px 18px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  inline-size: fit-content;
+  max-inline-size: 100%;
   margin-block-start: 0;
+  margin-inline: auto;
 }
 
 .sponsorCategories :deep(.checkboxTitle) {
@@ -125,12 +164,8 @@
   padding-inline: 10px;
 }
 
-.toggleGrid {
-  margin-block-start: 8px;
-}
-
 .subtitleLanguages {
-  margin-block-start: 8px;
+  margin-block-start: 23px;
 }
 
 .downloadProgress {
@@ -143,7 +178,6 @@
 .downloadFooter {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-block-start: 1px solid var(--side-nav-color);
   flex: none;
   padding-block: 8px 10px;
   padding-inline: 12px;
@@ -165,15 +199,7 @@
 }
 
 .chooseFolderButton {
-  background: none;
-  border: 0;
-  color: var(--accent-color);
-  cursor: pointer;
   flex: none;
-  font-size: inherit;
-  padding-block: 0;
-  padding-inline: 0;
-  text-decoration: underline;
 }
 
 .downloadProgressBarTrack {
@@ -199,12 +225,18 @@
   background-color: var(--accent-color);
   block-size: 100%;
   border-radius: calc(4px * var(--ui-roundness));
-  transition: inline-size 0.3s ease;
+  inline-size: 100%;
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.downloadProgressBarFill:dir(rtl) {
+  transform-origin: right;
 }
 
 .downloadProgressBarFill.indeterminate {
   animation: download-progress-indeterminate 1.5s ease-in-out infinite;
-  inline-size: 100% !important;
+  transform: none !important;
 }
 
 .downloadErrorDetails {
@@ -258,7 +290,6 @@
 
 @media (width <= 600px), (height <= 600px) {
   :deep(.downloadPromptCard) {
-    block-size: 100%;
     min-block-size: 0;
   }
 
@@ -295,6 +326,50 @@
   }
 }
 
-:global(.promptCard.downloadPromptCard.activeDownloadCard) {
+:global(.promptCard.downloadPromptCard.fixedLayout) {
   block-size: auto;
+}
+
+@media (height <= 400px) {
+  :global(.promptCard.downloadPromptCard.fixedLayout) {
+    padding-block: 0;
+  }
+
+  .downloadHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-block: 4px;
+  }
+
+  .downloadKind {
+    flex: none;
+    margin-block: 0;
+  }
+
+  .downloadVideoTitle {
+    min-inline-size: 0;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .downloadFooter:has(.downloadFolderRow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .downloadFolderRow {
+    flex-wrap: nowrap;
+    margin-block: 0;
+  }
+
+  .downloadFolderRow > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

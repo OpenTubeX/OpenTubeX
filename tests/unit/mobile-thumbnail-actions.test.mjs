@@ -11,7 +11,8 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   assert.notEqual(start, -1, 'thumbnail actions must be available in the mobile context menu')
   const end = source.indexOf('\nconst openMobileContextActions', start)
   const calls = []
-  const context = { computed,
+  const context = { computed, process: { env: { IS_CAPACITOR: true } },
+    store: { getters: reactive({ getTabsEnabled: true }) },
     extraThumbnailActionButton: ref(null), showPlaylists: ref(true),
     isInAnyPlaylist: ref(false), isQuickBookmarkEnabled: ref(true), props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
     quickBookmarkIconText: ref('Bookmark'), quickBookmarkIcon: ref(['far', 'bookmark']),
@@ -20,20 +21,21 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
     canToggleLiveReminder: ref(false), liveReminderActive: ref(false), liveReminderLoading: ref(false),
     t: key => key,
     mobilePlaylistPickerOpen: ref(false),
-    handleExtraThumbnailAction: () => calls.push('extra'), toggleQuickBookmarked: () => calls.push('bookmark'),
+    handleOptionsClick: option => calls.push(option), toggleQuickBookmarked: () => calls.push('bookmark'),
     moveVideoUp: () => calls.push('up'), moveVideoDown: () => calls.push('down'),
     removeFromPlaylist: () => calls.push('remove'), toggleLiveReminder: () => calls.push('reminder')
   }
   vm.runInNewContext(source.slice(start, end) + '\nglobalThis.actions = mobileThumbnailActions', context)
-  assert.equal(context.actions.value.length, 2)
+  assert.equal(context.actions.value.length, 3)
+  assert.equal(context.actions.value[0].label, 'Context Menu.Open in a Background Tab')
   context.actions.value.forEach(action => action.run())
   assert.equal(context.mobilePlaylistPickerOpen.value, true)
-  assert.deepEqual(calls, ['bookmark'])
+  assert.deepEqual(calls, ['openBackgroundTab', 'bookmark'])
   context.isInQuickBookmarkPlaylist.value = true
-  assert.equal(context.actions.value[1].pressed, true)
+  assert.equal(context.actions.value[2].pressed, true)
   context.showPlaylists.value = false
   context.props.quickBookmarkButtonEnabled = false
-  assert.equal(context.actions.value.length, 0)
+  assert.equal(context.actions.value.length, 1)
   context.inUserPlaylist.value = true
   context.props.canMoveVideoUp = true
   context.props.canMoveVideoDown = true
@@ -44,7 +46,10 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   assert.equal(context.actions.value.length, 5)
   assert.equal(context.actions.value.at(-1).enabled, false)
   context.actions.value.slice(0, 4).forEach(action => action.run())
-  assert.deepEqual(calls.slice(1), ['extra', 'up', 'down', 'remove'])
+  assert.deepEqual(calls.slice(2), ['openBackgroundTab', 'up', 'down', 'remove'])
+  context.store.getters.getTabsEnabled = false
+  assert.equal(context.actions.value.length, 4)
+  assert.ok(context.actions.value.every(action => action.label !== 'Context Menu.Open in a Background Tab'))
 })
 
 test('the thumbnail row is reactive and only appears at the root of its mobile menu', async () => {

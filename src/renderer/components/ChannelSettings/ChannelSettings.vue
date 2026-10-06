@@ -70,7 +70,9 @@
         v-if="channelEntries.length > SEARCH_THRESHOLD || searchQuery !== ''"
         class="channelSearch"
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="value => searchQuery = value"
@@ -80,7 +82,10 @@
         v-overlay-scrollbars
         class="channelListContainer"
       >
-        <div ref="channelListContent">
+        <div
+          ref="channelListContent"
+          class="channelListContent"
+        >
           <p
             v-if="visibleChannelEntries.length === 0"
             class="emptyState"
@@ -108,6 +113,7 @@
                 >
                   <FtRetryImage
                     v-if="channel.thumbnail"
+                    :fallback-icon="['fas', 'circle-user']"
                     class="channelThumbnail"
                     :src="channel.thumbnail"
                     alt=""
@@ -222,6 +228,28 @@
         fixed-layout
         @click="closeAddChannelPrompt"
       >
+        <template #label="{ labelId }">
+          <div class="addSubscribedChannelHeader">
+            <h2
+              :id="labelId"
+              class="addSubscribedChannelHeading"
+            >
+              {{ t('Settings.Channel Settings.Add Subscribed Channel') }}
+            </h2>
+            <FtInput
+              v-if="enabledPreferences.length > 0"
+              ref="addChannelSearch"
+              class="addSubscribedChannelSearch"
+              input-type="search"
+              :label="t('Settings.Channel Settings.Search Channels')"
+              :icon="['fas', 'search']"
+              :placeholder="t('Form Inputs.Search Text Hint')"
+              :show-action-button="false"
+              :value="addChannelSearchQuery"
+              @input="value => addChannelSearchQuery = value"
+            />
+          </div>
+        </template>
         <div class="addSubscribedChannelPicker">
           <p
             v-if="enabledPreferences.length === 0"
@@ -230,15 +258,6 @@
             {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
           </p>
           <template v-else>
-            <FtInput
-              ref="addChannelSearch"
-              class="addSubscribedChannelSearch"
-              input-type="search"
-              :placeholder="t('Settings.Channel Settings.Search Channels')"
-              :show-action-button="false"
-              :value="addChannelSearchQuery"
-              @input="value => addChannelSearchQuery = value"
-            />
             <p
               v-if="visibleAvailableSubscriptions.length === 0"
               class="addSubscribedChannelEmptyState"
@@ -261,6 +280,7 @@
                 >
                   <FtRetryImage
                     v-if="channel.thumbnail"
+                    :fallback-icon="['fas', 'circle-user']"
                     class="channelThumbnail"
                     :src="channel.thumbnail"
                     alt=""

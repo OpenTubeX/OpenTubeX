@@ -10,11 +10,14 @@
   >
     <FtCard class="card">
       <div
+        ref="headerRef"
         class="subscriptionsHeader"
         :class="{
           singleRow: headerFitsOneRow,
+          scrollHidden: headerScrollHidden,
           tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed'
         }"
+        @focusin="resetHeaderScrollVisibility"
       >
         <div
           ref="headerRowRef"
@@ -284,7 +287,10 @@
               :icon="tab.icon"
               class="subscriptionIcon"
             />
-            <span>{{ tab.label }}</span>
+            <span
+              class="tabLabel"
+              :data-label="tab.label"
+            ><span>{{ tab.label }}</span></span>
             <FtNewContentDot
               v-if="showNewSubscriptionFeedIndicators && newFeedTabHasNewContent(tab.id)"
               class="newFeedTabDot"
@@ -370,6 +376,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
@@ -480,6 +487,33 @@ function handleFeedContextMenu(event) {
 const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
 
 const { tabId, isTabPresented } = useTabContext()
+
+const headerRef = useTemplateRef('headerRef')
+const headerScrollHidden = ref(false)
+const headerScroll = createMobileNavigationScroll({ revealThreshold: 64 })
+const mobileHeaderLayout = window.matchMedia('(max-width: 680px), (orientation: landscape) and (max-height: 600px)')
+
+function resetHeaderScrollVisibility() {
+  headerScroll.reset(window.scrollY)
+  headerScrollHidden.value = false
+}
+
+function updateHeaderScrollVisibility() {
+  if (!mobileHeaderLayout.matches || (isTabPresented && !isTabPresented.value)) return
+  const header = headerRef.value
+  const content = header?.nextElementSibling
+  // The translated sticky header keeps its space in the document. Wait until
+  // that space scrolls behind the top bar so hiding cannot expose an empty gap.
+  if (!content || content.getBoundingClientRect().top > Number.parseFloat(getComputedStyle(header).top) ||
+      header.querySelector(':focus-visible, [aria-expanded="true"]')) {
+    resetHeaderScrollVisibility()
+    return
+  }
+  const page = document.scrollingElement
+  headerScrollHidden.value = headerScroll.update(window.scrollY, page.scrollHeight - page.clientHeight)
+}
+
+watch(() => isTabPresented?.value, resetHeaderScrollVisibility)
 useSubscriptionPremiereUpdates()
 const { t } = useI18n()
 const route = useRoute()
@@ -599,6 +633,7 @@ let restoreScrollOnActivate = false
 useTabLifecycle({
   deactivate: resetFeedTabHold,
   activate: () => {
+    resetHeaderScrollVisibility()
     if (!restoreScrollOnActivate) {
       return
     }
@@ -606,63 +641,10 @@ useTabLifecycle({
     restoreScrollOnActivate = false
     const value = currentTab.value
     window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+    resetHeaderScrollVisibility()
     scrollPositionOwnerTab = value
   }
 })
-
-const subscriptionRefreshTimestamps = computed(() => [
-  store.getters.getSubscriptionFeedLastRefreshTimestamp,
-  store.getters.getSubscriptionShortsLastRefreshTimestamp,
-  store.getters.getSubscriptionLiveLastRefreshTimestamp,
-  store.getters.getSubscriptionPostsLastRefreshTimestamp
-])
-
-watch(subscriptionRefreshTimestamps, (timestamps, previousTimestamps) => {
-  const feedTabs = ['videos', 'shorts', 'live', 'community']
-
-  timestamps.forEach((timestamp, index) => {
-    if (timestamp && timestamp !== previousTimestamps[index]) {
-      resetScrollAfterRefresh(feedTabs[index])
-    }
-  })
-})
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'community'} refreshedTab
- */
-async function resetScrollAfterRefresh(refreshedTab) {
-  tabScrollPositions[refreshedTab] = 0
-  tabScrollPositions.new = 0
-
-  if (currentTab.value !== refreshedTab && currentTab.value !== 'new') {
-    return
-  }
-
-  if (usesLogicalTabs && tabId) {
-    // Watch can keep this feed mounted behind the player. A refresh there
-    // must not erase the Watch history entry's scroll position.
-    if (store.getters.getTabById(tabId)?.route.path === route.path) {
-      getTabNavigationService().resetScroll(tabId)
-    }
-  } else {
-    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-  }
-
-  // The completion event is dispatched before the refreshed array reaches
-  // this view. Correct the scroll again after Vue and browser scroll anchoring
-  // have applied the new list layout.
-  await nextTick()
-  await nextAnimationFrame()
-  await nextAnimationFrame()
-
-  if (
-    isMounted &&
-    (currentTab.value === refreshedTab || currentTab.value === 'new') &&
-    (!usesLogicalTabs || isTabPresented?.value === true)
-  ) {
-    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-  }
-}
 
 function nextAnimationFrame() {
   return new Promise(resolve => window.requestAnimationFrame(() => resolve()))
@@ -675,6 +657,9 @@ let removeFeedMarkSeenRequestListener = null
 onMounted(() => {
   isMounted = true
   document.addEventListener('keydown', handlePanelTabNavigation)
+  resetHeaderScrollVisibility()
+  window.addEventListener('scroll', updateHeaderScrollVisibility, { passive: true })
+  window.addEventListener('resize', resetHeaderScrollVisibility)
 
   if (isElectron) {
     removeFeedReloadRequestListener = window.ftElectron.subscriptionFeeds.onRequestReload(handleFeedReloadRequest)
@@ -687,11 +672,14 @@ onBeforeUnmount(() => {
   resetFeedTabHold()
   tabChangeSequence++
   document.removeEventListener('keydown', handlePanelTabNavigation)
+  window.removeEventListener('scroll', updateHeaderScrollVisibility)
+  window.removeEventListener('resize', resetHeaderScrollVisibility)
   removeFeedReloadRequestListener?.()
   removeFeedMarkSeenRequestListener?.()
 })
 
 watch(currentTab, async (value) => {
+  resetHeaderScrollVisibility()
   if (value !== null) {
     // Use the last selected feed when opening another subscription view
     localStorage.setItem(currentTabStorageKey, value)
@@ -728,6 +716,7 @@ watch(currentTab, async (value) => {
   }
 
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+  resetHeaderScrollVisibility()
   scrollPositionOwnerTab = value
 })
 
@@ -1397,7 +1386,8 @@ function updateTabIndicator(containerRef, selectedTabSelector, indicatorStyle, s
   // The indicator sits just below the tab and only its transform is animated,
   // keeping movement on the compositor while a large feed renders.
   const style = {
-    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth})`
+    '--tab-indicator-width': String(selected.offsetWidth),
+    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth / 100})`
   }
 
   if (state.wasHidden) {
