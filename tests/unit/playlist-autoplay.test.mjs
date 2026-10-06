@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, reactive, ref, shallowRef } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, watch as observe } from 'vue'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
@@ -24,12 +24,13 @@ function harness({ laterPageError = null } = {}) {
   const loopEnabled = ref(false)
   const isLoading = ref(false)
   const errors = []
+  const toasts = []
   let finishContinuation
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
     props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
-    isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed,
+    isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
     store: { commit() {} }, playlistCacheTabId: 'android-tab',
@@ -42,13 +43,16 @@ function harness({ laterPageError = null } = {}) {
       callback(page)
       if (laterPageError) throw laterPageError
     },
+    expectedAutoSkipItem: null, router: { push() {} }, showToast: toast => toasts.push(toast),
     showApiErrorToast: (_message, error) => errors.push(error), t: key => key,
     console: { error: error => errors.push(error) },
   }
   const load = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'async function loadCachedPlaylistInformation(', '\nasync function getPlaylistInformationLocal(')}\nloadCachedPlaylistInformation`, context)
   const shuffle = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function shuffleItems(', '\nconst playlistItemsWrapper =')}\nshufflePlaylistItems`, context)
-  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(upcomingVideos,')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
+  const state = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const currentVideoIndexZeroBased =', '\nwatch(')}\n;({ nextVideo, upcomingVideos, playlistUnavailableVideoCount, isWaitingForNextVideo })`, context)
 
+  const shouldStop = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const videoIsLastInInPlaylistItems =', '\n/**\n * Index that')}\nshouldStopDueToPlaylistEnd`, context)
+  const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo() {', '\nfunction playPreviousVideo() {')}\nplayNextVideo`, context)
   const watch = {
     isCurrentlyPresented: () => true, handleWatchProgressAutoSaveWhenProgressEnabled() {},
     customShortsPlayerActive: false, isStandaloneShort: false, playNextQueuedVideo: () => false,
@@ -56,7 +60,9 @@ function harness({ laterPageError = null } = {}) {
     $refs: { watchVideoPlaylist: {
       get nextVideo() { return state.nextVideo.value },
       get isWaitingForNextVideo() { return state.isWaitingForNextVideo.value },
-      shouldStopDueToPlaylistEnd: false, resetUnavailableSkipChain() {},
+      get isFetchingPlaylistContinuation() { return isFetchingPlaylistContinuation.value },
+      get shouldStopDueToPlaylistEnd() { return shouldStop.value },
+      playNextVideo: () => playNext(), resetUnavailableSkipChain() {},
     } },
     defaultInterval: 5, $store: { getters: { getAvoidTranslation: 'never' } },
   }
@@ -69,7 +75,10 @@ function harness({ laterPageError = null } = {}) {
     clearTimeout() {}, clearInterval() {},
   }).abortAutoplayCountdown
   const replay = vm.runInNewContext(`({${extractSourceBetweenMarkers(watchSource, '    handleVideoPlay() {', '\n    handlePlayerSeeking()')} })`).handleVideoPlay
+  context.emit = (_name, videos) => watch.handleUpcomingPlaylistVideosChange(videos)
   return {
+    observeUpcoming: t => t.after(vm.runInNewContext(extractSourceBetweenMarkers(playlistSource, '\nwatch(', '\nconst playlistPageLinkTo'), context)),
+    toasts,
     notifyUpcoming: () => watch.handleUpcomingPlaylistVideosChange(state.upcomingVideos.value),
     cancelAutoplay: () => cancel.call(watch, true),
     replayVideo: () => replay.call(watch),
@@ -198,6 +207,25 @@ for (const action of ['cancelAutoplay', 'replayVideo']) {
     await loading
     state.notifyUpcoming()
     assert.equal(state.watch.waitingForPlaylistContinuation, false)
+    assert.ok(state.watch.autoplayCountdown == null)
+  })
+}
+
+for (const result of ['empty', 'failed']) {
+  test(`${result === 'empty' ? 'An empty' : 'A failed'} boundary continuation clears waiting and reports the playlist end`, async t => {
+    const state = harness()
+    state.observeUpcoming(t)
+    const loading = state.load()
+    state.props.videoId = 'second'
+    state.endVideo()
+    await nextTick()
+    assert.equal(state.watch.waitingForPlaylistContinuation, true)
+    if (result === 'failed') state.failContinuation(new Error('Continuation failed'))
+    else state.finishContinuation({ items: [] })
+    await loading
+    await nextTick()
+    assert.equal(state.watch.waitingForPlaylistContinuation, false)
+    assert.equal(state.toasts.at(-1)?.message, 'The playlist has ended. Enable loop to continue playing')
     assert.ok(state.watch.autoplayCountdown == null)
   })
 }

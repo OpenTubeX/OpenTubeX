@@ -317,10 +317,11 @@ for (const defaultInterval of [0, 1]) {
   })
 }
 
-for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop']) {
+for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop', 'boundary-empty', 'boundary-failed']) {
   test(`YouTube playlist autoplay advances with a ${continuationState} continuation request`, async ({ app, page }) => {
     const { watch } = await openVideo({ app, page })
-    const atBoundary = continuationState.startsWith('delayed')
+    const endsAtBoundary = continuationState.startsWith('boundary-')
+    const atBoundary = continuationState.startsWith('delayed') || endsAtBoundary
     let requested = false
     let releaseContinuation
     const continuationGate = new Promise(resolve => { releaseContinuation = resolve })
@@ -328,24 +329,27 @@ for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop']
       if (route.request().postDataJSON()?.continuation !== 'autoplay-continuation') return route.fallback()
       requested = true
       if (continuationState !== 'failed') await continuationGate
+      if (continuationState === 'boundary-failed') return route.fulfill({ status: 500, body: 'Continuation failed' })
       if (atBoundary) {
         await route.fulfill({
           json: {
             onResponseReceivedActions: [{
               appendContinuationItemsAction: {
-                continuationItems: [{
-                  playlistVideoRenderer: {
-                    videoId: 'video000000',
-                    title: { simpleText: 'Second video', accessibility: { accessibilityData: { label: 'Second video' } } },
-                    index: { simpleText: '2' },
-                    shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
-                    thumbnail: { thumbnails: [] },
-                    isPlayable: true,
-                    lengthSeconds: '10',
-                    lengthText: { simpleText: '0:10' },
-                    navigationEndpoint: { watchEndpoint: { videoId: 'video000000' } }
-                  }
-                }]
+                continuationItems: continuationState === 'boundary-empty'
+                  ? []
+                  : [{
+                      playlistVideoRenderer: {
+                        videoId: 'video000000',
+                        title: { simpleText: 'Second video', accessibility: { accessibilityData: { label: 'Second video' } } },
+                        index: { simpleText: '2' },
+                        shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
+                        thumbnail: { thumbnails: [] },
+                        isPlayable: true,
+                        lengthSeconds: '10',
+                        lengthText: { simpleText: '0:10' },
+                        navigationEndpoint: { watchEndpoint: { videoId: 'video000000' } }
+                      }
+                    }]
               }
             }]
           }
@@ -387,6 +391,13 @@ for (const continuationState of ['pending', 'failed', 'delayed', 'delayed-loop']
         await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
         await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?playlistId=youtube-autoplay/)
         releaseContinuation()
+      }
+      if (endsAtBoundary) {
+        await expect.poll(() => watch.evaluate(component => component.proxy.waitingForPlaylistContinuation)).toBe(false)
+        await expect(page.getByText(/The playlist has ended\.\s+Enable loop to continue playing/)).toBeVisible()
+        await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+        await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?playlistId=youtube-autoplay/)
+        return
       }
       await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
       await expect(page.locator('.autoplayTitle')).toHaveText('Second video')

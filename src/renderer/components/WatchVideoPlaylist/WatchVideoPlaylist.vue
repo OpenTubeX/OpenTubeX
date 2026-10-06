@@ -500,7 +500,7 @@ const upcomingVideos = computed(() => {
     : remainingVideos
 })
 
-watch(upcomingVideos, videos => {
+watch([upcomingVideos, isFetchingPlaylistContinuation], ([videos]) => {
   emit('upcoming-videos-change', videos)
 }, { immediate: true, flush: 'post' })
 
@@ -1490,6 +1490,7 @@ defineExpose({
   playPreviousVideo,
   nextVideo,
   shouldStopDueToPlaylistEnd,
+  isFetchingPlaylistContinuation,
   isWaitingForNextVideo,
   getState: () => ({
     index: reversePlaylist.value

@@ -1527,7 +1527,8 @@ export default defineComponent({
     },
     handleUpcomingPlaylistVideosChange(videos) {
       this.upcomingPlaylistVideos = Array.isArray(videos) ? videos : []
-      if (this.waitingForPlaylistContinuation && this.upcomingPlaylistVideos.length > 0) {
+      if (this.waitingForPlaylistContinuation && (this.upcomingPlaylistVideos.length > 0 ||
+        this.$refs.watchVideoPlaylist?.isFetchingPlaylistContinuation === false)) {
         this.waitingForPlaylistContinuation = false
         this.handleVideoEnded()
       }

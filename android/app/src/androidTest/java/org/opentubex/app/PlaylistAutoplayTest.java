@@ -42,11 +42,25 @@ public class PlaylistAutoplayTest {
         verifyAutoplay(true, false, true, true);
     }
 
+    @Test
+    public void failedBoundaryContinuationReportsPlaylistEnd() throws Exception {
+        verifyAutoplay(true, true, true, false);
+    }
+
+    @Test
+    public void emptyBoundaryContinuationReportsPlaylistEnd() throws Exception {
+        verifyAutoplay(true, false, true, false, true);
+    }
+
     private void verifyAutoplay(boolean youtube, boolean failContinuation) throws Exception {
         verifyAutoplay(youtube, failContinuation, false, false);
     }
 
     private void verifyAutoplay(boolean youtube, boolean failContinuation, boolean atBoundary, boolean loop) throws Exception {
+        verifyAutoplay(youtube, failContinuation, atBoundary, loop, false);
+    }
+
+    private void verifyAutoplay(boolean youtube, boolean failContinuation, boolean atBoundary, boolean loop, boolean emptyBoundary) throws Exception {
         String media;
         try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("demo.webm")) {
             media = android.util.Base64.encodeToString(YtDlpFiles.read(input, 1024 * 1024), android.util.Base64.NO_WRAP);
@@ -103,7 +117,7 @@ public class PlaylistAutoplayTest {
                         if (plugin === 'CapacitorHttp' && method === 'request') {
                             if (String(options.data).includes('autoplay-continuation')) {
                                 window.__playlistContinuationRequested = true;
-                                if (FAIL_CONTINUATION) return Promise.resolve({ status: 500, headers: {},
+                                if (FAIL_CONTINUATION && !AT_BOUNDARY) return Promise.resolve({ status: 500, headers: {},
                                     data: 'Continuation failed', url: options.url });
                                 return new Promise(resolve => { window.__playlistFinishContinuation = resolve; });
                             }
@@ -147,22 +161,41 @@ public class PlaylistAutoplayTest {
                     await(view, "window.__playlistWatch().waitingForPlaylistContinuation === true");
                     assertEquals("Pending pages cannot wrap or start a countdown", "true", evaluate(view,
                         "window.__playlistRouter.currentRoute.value.params.id === 'jNQXAC9IVRw' && !document.querySelector('.autoplayCountdownOverlay')"));
-                    evaluate(view, """
-                        window.__playlistFinishContinuation({ status: 200, headers: { 'Content-Type': 'application/json' },
-                            url: 'https://www.youtube.com/youtubei/v1/browse', data: {
-                                onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [{
-                                    playlistVideoRenderer: {
-                                        videoId: 'abcdefghijk',
-                                        title: { simpleText: 'Playlist video 2', accessibility: { accessibilityData: { label: 'Playlist video 2' } } },
-                                        index: { simpleText: '2' },
-                                        shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
-                                        thumbnail: { thumbnails: [] }, isPlayable: true, lengthSeconds: '10',
-                                        lengthText: { simpleText: '0:10' }, navigationEndpoint: { watchEndpoint: { videoId: 'abcdefghijk' } }
-                                    }
-                                }] } }]
-                            }
-                        });
-                        """);
+                    if (failContinuation) {
+                        evaluate(view, "window.__playlistFinishContinuation({ status: 500, headers: {}, data: 'Continuation failed', url: 'https://www.youtube.com/youtubei/v1/browse' })");
+                    } else if (emptyBoundary) {
+                        evaluate(view, """
+                            window.__playlistFinishContinuation({ status: 200, headers: { 'Content-Type': 'application/json' },
+                                url: 'https://www.youtube.com/youtubei/v1/browse', data: {
+                                    onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [] } }]
+                                }
+                            });
+                            """);
+                    } else {
+                        evaluate(view, """
+                            window.__playlistFinishContinuation({ status: 200, headers: { 'Content-Type': 'application/json' },
+                                url: 'https://www.youtube.com/youtubei/v1/browse', data: {
+                                    onResponseReceivedActions: [{ appendContinuationItemsAction: { continuationItems: [{
+                                        playlistVideoRenderer: {
+                                            videoId: 'abcdefghijk',
+                                            title: { simpleText: 'Playlist video 2', accessibility: { accessibilityData: { label: 'Playlist video 2' } } },
+                                            index: { simpleText: '2' },
+                                            shortBylineText: { runs: [{ text: 'Test', navigationEndpoint: { browseEndpoint: { browseId: 'UCtest' } } }] },
+                                            thumbnail: { thumbnails: [] }, isPlayable: true, lengthSeconds: '10',
+                                            lengthText: { simpleText: '0:10' }, navigationEndpoint: { watchEndpoint: { videoId: 'abcdefghijk' } }
+                                        }
+                                    }] } }]
+                                }
+                            });
+                            """);
+                    }
+                    if (failContinuation || emptyBoundary) {
+                        await(view, "window.__playlistWatch().waitingForPlaylistContinuation === false");
+                        await(view, "Array.from(document.querySelectorAll('.toast .message')).some(node => node.textContent.includes('The playlist has ended.'))");
+                        assertEquals("Terminal pagination cannot wrap or start a countdown", "true", evaluate(view,
+                            "window.__playlistRouter.currentRoute.value.params.id === 'jNQXAC9IVRw' && !document.querySelector('.autoplayCountdownOverlay')"));
+                        return;
+                    }
                 }
                 await(view, "!!document.querySelector('.autoplayCountdownOverlay')");
                 await(view, "window.__playlistRouter.currentRoute.value.params.id === 'abcdefghijk'");
