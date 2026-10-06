@@ -7,14 +7,14 @@ import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/hel
 import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
 const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
-const revokeSource = component.slice(component.indexOf('async function revokeSession()'), component.indexOf('\ndefineExpose'))
+const revokeSource = component.slice(component.indexOf('function closeRevokePrompt()'), component.indexOf('\ndefineExpose'))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 const deleteStart = storeSource.indexOf('  deleteSyncServerSession(')
 const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async completeSyncServerPairing', deleteStart))
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false } = {}) {
+async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -63,7 +63,14 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
   const emitted = []
   const componentContext = vm.createContext({
     sessionToRevoke: prompt, promptError, actionBusy: { value: false },
-    client: () => ({ token: 'token', async revokeAccountSession() { revoked = true }, cancel() {} }),
+    client: () => ({
+      token: 'token',
+      async getAccountSessions() {
+        return { sessions: [prompt.value, ...(otherLogin ? [{ id: 'remaining-login', device_id: 'old-phone' }] : [])] }
+      },
+      async revokeAccountSession() { revoked = true },
+      cancel() {},
+    }),
     store: { dispatch: context.dispatch }, showToast() {}, t: key => key,
     emit: event => emitted.push(event), loadSessions: async () => {},
     handleRequestError: async (error, token, target) => { target.value = error.message },
@@ -106,3 +113,16 @@ test('keeps the removal retryable when saving the tab cleanup fails', async () =
   assert.equal(app.state().error, 'Offline')
   assert.equal(app.state().prompt.device_id, 'old-phone')
 })
+
+for (const current of [false, true]) {
+  test(`revoking a ${current ? 'current' : 'previous'} login preserves tabs used by another login with the same device ID`, async () => {
+    const app = await fixture({ current, otherLogin: true })
+    await app.revoke()
+    const result = app.state()
+    assert.equal(result.revoked, true)
+    assert.equal(result.puts, 0)
+    assert.deepEqual(result.remote.devices['old-phone'].sessions, [tabSet('old-tabs'), tabSet('older-tabs')])
+    assert.deepEqual(result.remote.deletedSessions, {})
+    assert.deepEqual(result.emitted, current ? ['current-revoked'] : [])
+  })
+}

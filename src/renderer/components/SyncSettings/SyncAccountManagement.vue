@@ -194,7 +194,9 @@
             : t('Settings.Sync Settings.Revoke Session Warning', { device: sessionToRevoke.deviceInfo.name })
           }}
         </p>
-        <p>{{ t('Settings.Sync Settings.Revoke Session Tabs Warning') }}</p>
+        <p v-if="!hasOtherDeviceLogins(sessionToRevoke, sessions)">
+          {{ t('Settings.Sync Settings.Revoke Session Tabs Warning') }}
+        </p>
         <p
           v-if="promptError"
           class="managementError"
@@ -473,6 +475,10 @@ function closeRevokePrompt() {
   promptError.value = ''
 }
 
+function hasOtherDeviceLogins(session, accountSessions) {
+  return accountSessions.some(other => other.id !== session.id && other.device_id === session.device_id)
+}
+
 async function revokeSession() {
   const session = sessionToRevoke.value
   if (!session || actionBusy.value) return
@@ -480,9 +486,11 @@ async function revokeSession() {
   promptError.value = ''
   const requestClient = client()
   try {
+    const { sessions: accountSessions } = await requestClient.getAccountSessions()
     // Clean up while this login can still retry the operation, including when
-    // revoking the current device. Keep unrelated and shared tab sets intact.
-    if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
+    // revoking the current device. Another login may still use the same tabs.
+    if (!hasOtherDeviceLogins(session, accountSessions) &&
+        !await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
     await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
     showToast({

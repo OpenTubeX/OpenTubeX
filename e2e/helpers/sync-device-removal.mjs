@@ -5,11 +5,12 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
   const currentDeviceId = Buffer.alloc(16, 4).toString('base64url')
+  const activeDeviceId = otherLogin ? oldDeviceId : currentDeviceId
   const orphanId = 'phone-before-app-data-reset'
   const tabSet = (sessionId, title) => ({
     sessionId,
@@ -30,6 +31,25 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
     name: 'Previous phone', platform: 'android', architecture: 'arm64', release: '15',
   }, key, oldDeviceId)
   const now = Date.now()
+  const accountSessions = [{
+    id: 'old-login',
+    device_id: oldDeviceId,
+    current: false,
+    created_at: now,
+    last_active_at: now,
+    expires_at: now + 86400000,
+    encrypted_device_info: deviceInfo,
+  }]
+  if (otherLogin) {
+    accountSessions.push({
+      ...accountSessions[0],
+      id: 'current-login',
+      current: true,
+      encrypted_device_info: await encryptSyncServerDeviceInfo({
+        name: 'Current phone', platform: 'android', architecture: 'arm64', release: '15',
+      }, key, oldDeviceId),
+    })
+  }
   const requests = []
   const routeHandler = async route => {
     const request = route.request()
@@ -42,22 +62,17 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
       return route.fulfill({
         json: {
           password_login: true,
-          sessions: revoked
-            ? []
-            : [{
-                id: 'old-login',
-                device_id: oldDeviceId,
-                current: false,
-                created_at: now,
-                last_active_at: now,
-                expires_at: now + 86400000,
-                encrypted_device_info: deviceInfo,
-              }]
+          sessions: accountSessions.filter(session => !revoked || session.id !== 'old-login')
         }
       })
     }
+    if (pathname === '/v1/account/sessions/current-login' && request.method() === 'PATCH') {
+      accountSessions[1].encrypted_device_info = request.postDataJSON().encrypted_device_info
+      return route.fulfill({ status: 204 })
+    }
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
-      expect(document.devices[oldDeviceId]).toBeUndefined()
+      if (otherLogin) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
+      else expect(document.devices[oldDeviceId]).toBeUndefined()
       revoked = true
       return route.fulfill({ status: 204 })
     }
@@ -97,7 +112,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
   })
   try {
     if (await page.locator('.settingsWindow').isVisible()) await page.locator('.settingsCloseButton').click()
-    await page.evaluate(({ key, salt, currentDeviceId, sessions, phone }) => {
+    await page.evaluate(({ key, salt, currentDeviceId, sessions, snapshot, phone }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const settings = {
         SyncServerAutoSync: false,
@@ -112,6 +127,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
         SyncServerPrivacyMode: 'enhanced',
         SyncServerSyncSessions: true,
         SyncServerSharedTabs: false,
+        SyncServerSnapshot: JSON.stringify({ sessionsV2: snapshot }),
         BaseTheme: 'system',
         SystemDarkTheme: 'dark',
         SystemLightTheme: 'light',
@@ -122,24 +138,32 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
       }
       for (const [name, value] of Object.entries(settings)) store.commit(`set${name}`, value)
       store.commit('setSyncServerOtherDeviceSessions', sessions)
-    }, { key, salt, currentDeviceId, sessions: getOtherDeviceSessions(document, currentDeviceId), phone })
+    }, { key, salt, currentDeviceId: activeDeviceId, sessions: getOtherDeviceSessions(document, activeDeviceId), snapshot: document, phone })
     const sync = await goToSettingsSection(page, 'sync')
     const device = sync.locator('.sessionCard', { hasText: 'Previous phone' })
     await device.getByRole('button', { name: 'Revoke access' }).click()
     const prompt = page.getByRole('dialog', { name: 'Revoke this session?' })
-    await expect(prompt).toContainText("This device's synced tab sets will also be deleted.")
-    if (capture) await capture('device-removal-confirmation', prompt)
+    if (otherLogin) await expect(prompt).not.toContainText("This device's synced tab sets will also be deleted.")
+    else await expect(prompt).toContainText("This device's synced tab sets will also be deleted.")
+    if (capture) await capture(otherLogin ? 'shared-device-login-confirmation' : 'device-removal-confirmation', prompt)
     await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
     expect(revoked).toBe(true)
-    expect(document.devices[oldDeviceId]).toBeUndefined()
-    expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
+    if (otherLogin) {
+      expect(document.devices[oldDeviceId].sessions.map(session => session.sessionId)).toEqual(['old-tabs', 'older-tabs'])
+      expect(document.deletedSessions[oldDeviceId]).toBeUndefined()
+      expect(requests).not.toContain('PUT /v1/encrypted_sync/sessionsV2')
+      await expect(sync.locator('.sessionCard', { hasText: 'Current device' })).toBeVisible()
+    } else {
+      expect(document.devices[oldDeviceId]).toBeUndefined()
+      expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
+    }
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
     await expect.poll(() => page.evaluate(() => (
       document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .getters.getSyncServerOtherDeviceSessions.map(session => session.sessionId)
-    ))).toEqual(['orphan-tabs'])
+    ))).toEqual(otherLogin ? ['current-tabs', 'orphan-tabs'] : ['orphan-tabs'])
 
     await page.locator('.settingsCloseButton').click()
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -147,15 +171,17 @@ export async function verifySyncDeviceRemoval(page, { phone = false, capture } =
     const organizer = page.locator(phone ? '.capacitorPhoneTabDialog' : '.tabOrganizer')
     await expect(organizer).toBeVisible()
     if (phone) await organizer.getByRole('tab', { name: 'Tabs from other devices', exact: true }).click()
+    await organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true }).last().click()
     const deleteButton = organizer.getByRole('button', { name: 'Delete: Mobile · 1 tab' })
     await expect(deleteButton).toHaveText('Delete')
     if (capture) await capture('orphan-tab-set-delete', organizer.locator(phone ? '.capacitorPhoneSyncedSession' : '.syncedTabsSection'))
     await deleteButton.click()
     await page.getByRole('dialog', { name: 'Delete', exact: true }).getByRole('button', { name: 'Delete', exact: true }).click()
-    await expect(deleteButton).toHaveCount(0)
+    await expect(organizer.getByRole('tab', { name: 'Mobile · 1 tab', exact: true })).toHaveCount(otherLogin ? 1 : 0)
     expect(document.devices[orphanId]).toBeUndefined()
     expect(document.deletedSessions[orphanId]).toEqual(['orphan-tabs'])
     expect(document.devices[currentDeviceId].sessions[0].sessionId).toBe('current-tabs')
+    if (otherLogin) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
     expect(requests).toContain('DELETE /v1/account/sessions/old-login')
   } finally {
     await page.evaluate(async saved => {
