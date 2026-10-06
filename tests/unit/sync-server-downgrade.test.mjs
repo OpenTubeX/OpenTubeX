@@ -30,7 +30,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, connectionChanges } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -53,6 +53,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const common = {
     ...syncLive,
+    ...(connectionChanges ? {
+      SyncLiveConnectionState: class extends syncLive.SyncLiveConnectionState {
+        setConnected(value) {
+          connectionChanges.push(value)
+          super.setConnected(value)
+        }
+      },
+    } : {}),
     ...(reminderService ? {
       syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
       SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
@@ -826,6 +834,54 @@ test('startup and its own live notifications produce only one visible sync', asy
   assert.equal(f.dispatched.filter(([action]) => action === 'updateSyncServerSnapshot').length, 1)
   assert.equal(f.requests.filter(request => request.url.endsWith('/health')).length, 2,
     'discover support once for the full sync and once for the live listener')
+})
+
+test('a failed pending local sync does not back off or skip the live change check', async () => {
+  let releaseFailure
+  let reachedSync
+  let reachedPoll
+  let polls = 0
+  let manifests = 0
+  const connectionChanges = []
+  const syncReached = new Promise(resolve => { reachedSync = resolve })
+  const pollReached = new Promise(resolve => { reachedPoll = resolve })
+  const f = fixture({ syncServerSyncSubscriptions: false }, {
+    encrypted: true,
+    connectionChanges,
+    respond: url => {
+      const path = new URL(url).pathname
+      if (path === '/v1/encrypted_sync' && ++manifests === 1) {
+        reachedSync()
+        return new Promise(resolve => { releaseFailure = resolve })
+      }
+      if (path === '/v1/encrypted_sync/changes') {
+        reachedPoll()
+        if (++polls === 3) queueMicrotask(() => f.actions.stopSyncServerLive())
+        return { cursor: 'peer-change' }
+      }
+    },
+  })
+  const syncing = f.actions.syncWithSyncServer(f.context)
+  const failed = assert.rejects(syncing, /Local sync unavailable/)
+  await syncReached
+  const listening = f.actions.startSyncServerLive(f.context)
+  try {
+    await pollReached
+    // Let the listener capture the still-pending local sync before it fails.
+    await new Promise(resolve => setImmediate(resolve))
+    releaseFailure(new Response('Local sync unavailable', { status: 503 }))
+    await failed
+    await listening
+    assert.deepEqual(connectionChanges, [true, false], 'the live poll disconnects only when stopped')
+    assert.equal(manifests, 2, 'the peer change is checked immediately after the local failure')
+    assert.equal(f.dispatched.filter(([action, options]) =>
+      action === 'syncWithSyncServer' && options?.remoteOnly).length, 1)
+  } finally {
+    f.actions.stopSyncServerLive()
+    releaseFailure(new Response('Local sync unavailable', { status: 503 }))
+    await failed
+    await listening
+  }
 })
 
 test('a full sync refreshes capabilities reused by subsequent live checks', async () => {

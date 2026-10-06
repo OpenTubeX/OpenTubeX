@@ -739,7 +739,7 @@ const actions = {
         waitForPendingSync: async () => {
           const pending = activeSyncPromise
           if (!pending) return false
-          await pending
+          await pending.catch(() => {})
           return true
         },
         onConnectionChange: connected => {

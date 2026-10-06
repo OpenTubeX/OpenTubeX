@@ -110,6 +110,9 @@ test.describe('automatic sync efficiency', () => {
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
         'batchUpdateSubscriptionDetails', [{ channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa', channelName: 'Refreshed channel' }]
       ))
+      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .getters.getProfileList.find(profile => profile._id === 'allChannels').subscriptions[0].name)).toBe('Refreshed channel')
+      // Observe beyond the 1.5-second scheduling debounce to catch unwanted work.
       await page.waitForTimeout(2000)
       expect(requests.filter(request => request.path !== '/v1/encrypted_sync/changes')).toEqual([])
 
@@ -137,6 +140,12 @@ test.describe('automatic sync efficiency', () => {
       await syncing
       await expect.poll(() => waiting.size).toBe(1)
       await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAutoplayVideos)).toBe(false)
+      await expect.poll(() => ({
+        uploads: requests.filter(request => request.method === 'PUT').length,
+        manifests: requests.filter(request => request.path === '/v1/encrypted_sync').length,
+        discoveries: requests.filter(request => request.path === '/health').length,
+      })).toEqual({ uploads: 2, manifests: 2, discoveries: 1 })
+      // Once the expected work finishes, watch for an extra scheduled check.
       await page.waitForTimeout(2000)
       expect(requests.filter(request => request.method === 'PUT').map(request => request.path)).toEqual([
         '/v1/encrypted_sync/subscriptions', '/v1/encrypted_sync/settings',
