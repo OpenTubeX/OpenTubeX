@@ -32,6 +32,7 @@ async function expectBadgeBelowLabel(control, textSelector) {
     range.selectNodeContents(text)
     const badge = element.querySelector('.performanceImpact')
     const textRects = Array.from(range.getClientRects()).filter(rect => rect.width > 0)
+    const textBounds = text.getBoundingClientRect()
     const badgeBounds = badge.getBoundingClientRect()
     const controlBounds = element.getBoundingClientRect()
     const helpBounds = element.querySelector('.tooltip').getBoundingClientRect()
@@ -41,7 +42,6 @@ async function expectBadgeBelowLabel(control, textSelector) {
       const anchor = text
       const knob = getComputedStyle(anchor, '::after')
       const anchorBounds = anchor.getBoundingClientRect()
-      const textBounds = text.getBoundingClientRect()
       const knobCenter = anchorBounds.top + Number.parseFloat(knob.top) +
         new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
       switchCenterOffset = Math.abs(knobCenter - textBounds.top - textBounds.height / 2)
@@ -49,7 +49,7 @@ async function expectBadgeBelowLabel(control, textSelector) {
     return {
       switchCenterOffset,
       textBottom: Math.max(...textRects.map(rect => rect.bottom)),
-      textLastLineTop: Math.max(...textRects.map(rect => rect.top)),
+      textCenter: textBounds.top + textBounds.height / 2,
       badgeTop: badgeBounds.top,
       badgeLeft: badgeBounds.left,
       badgeRight: badgeBounds.right,
@@ -77,7 +77,7 @@ async function expectBadgeBelowLabel(control, textSelector) {
   expect(layout.badgeScrollWidth - layout.badgeClientWidth, JSON.stringify(layout)).toBeLessThanOrEqual(1)
   if (layout.switchCenterOffset !== undefined) {
     expect(layout.switchCenterOffset, JSON.stringify(layout)).toBeLessThanOrEqual(1)
-    expect(layout.helpCenter, JSON.stringify(layout)).toBeGreaterThanOrEqual(layout.textLastLineTop - 1)
+    expect(Math.abs(layout.helpCenter - layout.textCenter), JSON.stringify(layout)).toBeLessThanOrEqual(1)
   }
 }
 

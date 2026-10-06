@@ -1234,6 +1234,8 @@ test('keeps Android player notices and end cards clear of visible controls', asy
     const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
     return dockBounds.top - noticeBounds.bottom
   })
+  // Allow DOMRect floating-point rounding at fractional UI scales.
+  const minimumGap = 8 - 0.01
   const noticeBottom = () => player.evaluate((element) => {
     const playerBounds = element.getBoundingClientRect()
     const noticeBounds = element.querySelector('.skippedSegmentsWrapper').getBoundingClientRect()
@@ -1262,7 +1264,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
   await expect(notice).toHaveCSS('bottom', '164px')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await expect.poll(() => player.evaluate((element) => {
     const playerBounds = element.getBoundingClientRect()
     const dockBounds = element.querySelector('.fullscreenActions').getBoundingClientRect()
@@ -1316,7 +1318,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
     await setWindowSize(app, page, { width, height })
     await player.evaluate((element, dir) => { element.dir = dir }, direction)
     await alignEndCardWithSeekBar()
-    await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+    await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
     await expect.poll(async () => {
       const ownership = await hitOwnership()
       return {
@@ -1355,7 +1357,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(player).toHaveAttribute('data-submenu-opened', 'false')
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await moreOptions.click()
   await expect(overflowMenu).toBeHidden()
   await alignEndCardWithSeekBar()
@@ -1400,7 +1402,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await dockFocusAction.focus()
   await expect(actionDock).toHaveCSS('opacity', '1')
   await expect(player).toHaveAttribute('data-action-dock-visible', 'true')
-  await expect.poll(verticalGap).toBeGreaterThanOrEqual(8)
+  await expect.poll(verticalGap).toBeGreaterThanOrEqual(minimumGap)
   await dockFocusAction.evaluate(element => element.blur())
   await expect(actionDock).toHaveCSS('opacity', '0')
   await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
@@ -1587,7 +1589,10 @@ test('Shorts top controls stay legible and blur the video beneath them', async (
   await expect(topControls).toHaveCSS('border-top-left-radius', '16px')
   await expect(topControls).toHaveCSS('border-top-right-radius', '16px')
   await expect(topControls).toHaveCSS('transition-duration', '0.15s, 0.25s, 0.25s')
-  await expect(control).toHaveCSS('backdrop-filter', 'blur(10px) saturate(1.15)')
+  const glassStyle = (locator, property) => locator.evaluate(
+    (element, property) => getComputedStyle(element, '::before').getPropertyValue(property), property
+  )
+  await expect.poll(() => glassStyle(control, 'backdrop-filter')).toBe('blur(10px) saturate(1.15)')
   await player.evaluate(element => {
     element.style.backgroundImage = 'repeating-linear-gradient(90deg, #fff 0 4px, #000 4px 8px)'
   })
@@ -1607,15 +1612,16 @@ test('Shorts top controls stay legible and blur the video beneath them', async (
       return Math.max(...values) - Math.min(...values)
     }, screenshot)
   }
-  await control.evaluate(element => { element.style.backdropFilter = 'none' })
+  await page.addStyleTag({ content: '.shortsTopControl.disableBlur::before { backdrop-filter: none !important; }' })
+  await control.evaluate(element => element.classList.add('disableBlur'))
   const unblurredContrast = await stripeContrast()
-  await control.evaluate(element => { element.style.removeProperty('backdrop-filter') })
+  await control.evaluate(element => element.classList.remove('disableBlur'))
   const blurredContrast = await stripeContrast()
   expect(unblurredContrast).toBeGreaterThan(40)
   expect(blurredContrast).toBeLessThan(unblurredContrast * 0.6)
   await control.evaluate(element => element.classList.add('active'))
-  await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.42)')
-  await expect(control).toHaveCSS('background-image', /linear-gradient.*linear-gradient/)
+  await expect.poll(() => glassStyle(control, 'background-color')).toBe('rgba(0, 0, 0, 0.42)')
+  await expect.poll(() => glassStyle(control, 'background-image')).toMatch(/linear-gradient.*linear-gradient/)
 
   const volume = page.locator('.shortsVolumeControl')
   const volumeButton = volume.locator('.shortsTopControl')
@@ -1623,7 +1629,7 @@ test('Shorts top controls stay legible and blur the video beneath them', async (
   await expect(volumeSlider).toHaveCSS('inline-size', '0px')
   await expect(volumeSlider).toHaveCSS('opacity', '0')
   await volumeButton.focus()
-  await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.42)')
+  await expect.poll(() => glassStyle(volume, 'background-color')).toBe('rgba(0, 0, 0, 0.42)')
   await expect(volumeButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
   await expect(volumeSlider).toHaveCSS('inline-size', '96px')
@@ -1677,7 +1683,8 @@ test('Shorts top controls stay legible and blur the video beneath them', async (
   expect(seekBounds.y + seekBounds.height).toBeGreaterThan(playerBounds.y + playerBounds.height)
 
   await player.evaluate(element => element.classList.remove('shortsPaused'))
-  await expect(topControls).toHaveCSS('opacity', '0')
+  await expect(topControls).toHaveCSS('visibility', 'hidden')
+  await expect.poll(() => glassStyle(control, 'opacity')).toBe('0')
   await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
 
   await player.evaluate(element => {
@@ -2418,6 +2425,8 @@ test('fetches an uncached local channel avatar in the phone organizer', async ({
   }))
   await page.evaluate(async id => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    // Exercise the phone organizer's on-demand loader independently of Electron tab icons.
+    store.commit('setShowTabIcons', false)
     store.commit('setBackendPreference', 'invidious')
     store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
     await store.dispatch('createTab', { route: '/channel/' + id, title: 'Local channel', makeActive: false, lazyLoad: true })

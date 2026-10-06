@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { test } from '../../helpers/app.mjs'
+import { test } from '@playwright/test'
 
 // Exercise the actual stylesheet in Chromium, including fractional UI scales.
 test('wrapped summary disclaimer starts flush with the heading without a leading separator', async ({ page }) => {

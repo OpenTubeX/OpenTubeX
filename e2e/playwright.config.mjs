@@ -24,6 +24,10 @@ export default defineConfig({
       testMatch: 'offline/**/*.spec.mjs'
     },
     {
+      name: 'browser',
+      testMatch: 'browser/**/*.spec.mjs'
+    },
+    {
       name: 'network',
       testMatch: 'network/**/*.spec.mjs',
       timeout: 120_000,
