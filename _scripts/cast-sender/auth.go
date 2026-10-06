@@ -125,7 +125,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 		return fmt.Errorf("invalid Cast authentication challenge response")
 	}
 	device, err := x509.ParseCertificate(response.ClientAuthCertificate)
-	if err != nil {
+	if x509.IsFatal(err) {
 		return err
 	}
 	key, ok := device.PublicKey.(*rsa.PublicKey)
@@ -135,7 +135,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	intermediates := x509.NewCertPool()
 	for _, der := range response.IntermediateCertificate {
 		certificate, err := x509.ParseCertificate(der)
-		if err != nil {
+		if x509.IsFatal(err) {
 			return err
 		}
 		intermediates.AddCert(certificate)

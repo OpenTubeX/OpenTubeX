@@ -199,7 +199,7 @@ test('casts from the current Invidious instance without a saved default', async 
 test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.dlnaTest = { starts: [], stops: [] }
+    globalThis.dlnaTest = { starts: [], stops: [], stopRequests: 0, finishStop: null }
     for (const name of ['dlna-discover', 'dlna-start', 'dlna-stop', 'yt-dlp-get-playback-info']) ipcMain.removeHandler(name)
     ipcMain.handle('yt-dlp-get-playback-info', () => ({ formats: [] }))
     ipcMain.handle('dlna-discover', () => [{ id: 'dlna-tv', name: 'DLNA TV' }])
@@ -209,8 +209,9 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
       return { castId: 'dlna-session', deviceName: 'DLNA TV' }
     })
     ipcMain.handle('dlna-stop', async (_, id) => {
+      globalThis.dlnaTest.stopRequests++
+      await new Promise(resolve => { globalThis.dlnaTest.finishStop = resolve })
       globalThis.dlnaTest.stops.push(id)
-      await new Promise(resolve => setTimeout(resolve, 1200))
       return true
     })
     globalThis.castTest.startDelayMs = 1200
@@ -225,17 +226,18 @@ test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, pag
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.starts.length)).toBe(1)
   await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
   await expect(dlna).toHaveAttribute('aria-pressed', 'true')
-  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
   await dlna.click()
   await page.getByRole('option', { name: 'Stop casting', exact: true }).click()
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stops.length)).toBe(1)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stopRequests)).toBe(1)
   await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
+  expect(await app.electronApp.evaluate(() => globalThis.dlnaTest.stops)).toEqual([])
+  await app.electronApp.evaluate(() => globalThis.dlnaTest.finishStop())
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stops.length)).toBe(1)
   await expect(googleCast).toHaveAttribute('aria-disabled', 'false')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   await choice(page, 'Test TV')
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
-  await expect(dlna).toHaveAttribute('aria-disabled', 'true')
   await expect(googleCast).toHaveAttribute('aria-pressed', 'true')
   await expect(dlna).toHaveCount(0)
   const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
@@ -274,8 +276,7 @@ for (const outcome of ['success', 'reported failure', 'thrown failure']) {
     const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
     expect(payload.paused).toBe(false)
     expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
-    await page.waitForTimeout(500)
-    expect(await page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeCloseTo(payload.startSeconds, 1)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeCloseTo(payload.startSeconds, 1)
     if (outcome === 'success') {
       await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
       await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBeCloseTo(payload.startSeconds, 1)

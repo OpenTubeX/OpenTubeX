@@ -199,6 +199,72 @@ func TestNonceLessLegacyChallengeResponse(t *testing.T) {
 	}
 }
 
+func TestNonFatalCastCertificateParsing(t *testing.T) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, location := range []string{"device", "intermediate"} {
+		t.Run(location, func(t *testing.T) {
+			rootTemplate := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "Warning test root"},
+				NotBefore: time.Now().Add(-time.Hour), NotAfter: time.Now().Add(time.Hour), IsCA: true,
+				BasicConstraintsValid: true, KeyUsage: x509.KeyUsageCertSign}
+			root := issueCertificate(t, rootTemplate, rootTemplate, &key.PublicKey, key)
+			intermediateTemplate := *rootTemplate
+			intermediateTemplate.SerialNumber = big.NewInt(2)
+			intermediateTemplate.Subject.CommonName = "Warning test intermediate"
+			deviceTemplate := &x509.Certificate{SerialNumber: big.NewInt(3), Subject: pkix.Name{CommonName: "Warning test device"},
+				NotBefore: root.NotBefore, NotAfter: root.NotAfter, KeyUsage: x509.KeyUsageDigitalSignature}
+			// An empty, noncritical AIA extension is a CT-Go parse warning.
+			warning := pkix.Extension{Id: []int{1, 3, 6, 1, 5, 5, 7, 1, 1}, Value: []byte{0x30, 0x00}}
+			if location == "intermediate" {
+				intermediateTemplate.ExtraExtensions = []pkix.Extension{warning}
+			}
+			if location == "device" {
+				deviceTemplate.ExtraExtensions = []pkix.Extension{warning}
+			}
+			intermediate := issueCertificate(t, &intermediateTemplate, root, &key.PublicKey, key)
+			device := issueCertificate(t, deviceTemplate, intermediate, &key.PublicKey, key)
+			warned := device
+			if location == "intermediate" {
+				warned = intermediate
+			}
+			parsed, parseErr := castx509.ParseCertificate(warned.Raw)
+			if parsed == nil || parseErr == nil || castx509.IsFatal(parseErr) {
+				t.Fatalf("fixture did not produce a usable warning: %v", parseErr)
+			}
+			for _, scenario := range []string{"valid", "untrusted", "expired", "bad signature", "fatal device parse", "fatal intermediate parse", "critical extension"} {
+				t.Run(scenario, func(t *testing.T) {
+					nonce, peer := []byte("fresh nonce"), []byte("current TLS certificate")
+					response := signedResponse(t, device, intermediate, key, nonce, peer)
+					roots, now := testCastRoots(t, root), time.Now()
+					switch scenario {
+					case "untrusted":
+						roots = castRoots()
+					case "expired":
+						now = now.Add(2 * time.Hour)
+					case "bad signature":
+						response.Signature[0] ^= 1
+					case "fatal device parse":
+						response.ClientAuthCertificate = []byte("invalid")
+					case "fatal intermediate parse":
+						response.IntermediateCertificate = [][]byte{[]byte("invalid")}
+					case "critical extension":
+						critical := *deviceTemplate
+						critical.ExtraExtensions = append([]pkix.Extension{}, deviceTemplate.ExtraExtensions...)
+						critical.ExtraExtensions = append(critical.ExtraExtensions, pkix.Extension{Id: []int{1, 2, 3, 4}, Critical: true, Value: []byte{0x05, 0x00}})
+						response.ClientAuthCertificate = issueCertificate(t, &critical, intermediate, &key.PublicKey, key).Raw
+					}
+					err := verifyReceiver(response, nonce, peer, roots, now)
+					if (err == nil) != (scenario == "valid") {
+						t.Fatalf("unexpected warning verification result: %v", err)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestDeviceAuthenticationVerification(t *testing.T) {
 	device, intermediate, _, key, roots := authFixture(t)
 	nonce, peerDER := []byte("challenge nonce!"), []byte("TLS certificate DER")
