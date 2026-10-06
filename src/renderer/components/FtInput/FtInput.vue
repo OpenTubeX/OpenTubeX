@@ -145,7 +145,7 @@
             v-if="showSuggestionFillButton"
             type="button"
             class="acceptSuggestionButton"
-            :aria-label="t('Search Bar.Use Suggestion')"
+            :aria-label="`${t('Search Bar.Use Suggestion')}: ${getDataListProperty(index)?.displayText ?? entry}`"
             :title="t('Search Bar.Use Suggestion')"
             @pointerdown.prevent
             @click.stop="handleAcceptSuggestion(index)"
@@ -470,6 +470,7 @@ function handleInput(data) {
     }
   }
   inputData.value = text
+  searchState.showOptions = true
 
   // Native cancel can clear a keyboard preview while inputData is already empty.
   if (text === '') updateVisibleDataList()
