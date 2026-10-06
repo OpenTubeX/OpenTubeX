@@ -2,11 +2,16 @@ package org.opentubex.app;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.OkHttpClient;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
@@ -17,6 +22,39 @@ import org.json.JSONObject;
 public class DlnaMediaServerTest {
     private final OkHttpClient client = new OkHttpClient.Builder().proxy(Proxy.NO_PROXY)
         .callTimeout(3, TimeUnit.SECONDS).build();
+
+    @Test public void stalledMergeAfterFirstBytesIsDestroyedAndRequestsRecovery() throws Exception {
+        CountDownLatch destroyed = new CountDownLatch(1);
+        InputStream input = new InputStream() {
+            private boolean first = true;
+            @Override public int read() throws IOException {
+                if (first) { first = false; return 1; }
+                try { destroyed.await(); return -1; }
+                catch (InterruptedException error) { throw new IOException(error); }
+            }
+            @Override public int read(byte[] bytes, int offset, int length) throws IOException {
+                int value = read();
+                if (value >= 0) { bytes[offset] = (byte) value; return 1; }
+                return -1;
+            }
+        };
+        Process process = new Process() {
+            @Override public InputStream getInputStream() { return input; }
+            @Override public InputStream getErrorStream() { return InputStream.nullInputStream(); }
+            @Override public OutputStream getOutputStream() { return OutputStream.nullOutputStream(); }
+            @Override public int waitFor() { return 1; }
+            @Override public int exitValue() { return 1; }
+            @Override public void destroy() { destroyed.countDown(); }
+        };
+        var reader = Executors.newSingleThreadExecutor();
+        try (DlnaMediaServer relay = new DlnaMediaServer(HttpUrl.get("http://127.0.0.1/video"), "127.0.0.1", InetAddress.getLoopbackAddress())) {
+            byte[] buffer = new byte[32];
+            assertEquals(1, relay.readMerged(process, input, buffer, 100));
+            var stalled = reader.submit(() -> relay.readMerged(process, input, buffer, 100));
+            assertEquals(-1, (int) stalled.get(1, TimeUnit.SECONDS));
+            assertTrue("Stall requests complete-source recovery", relay.muxFailed);
+        } finally { process.destroy(); reader.shutdownNow(); }
+    }
 
     @Test public void forwardsRangesAndHeadWithoutCookiesAndRejectsWrongTokens() throws Exception {
         try (MockWebServer upstream = new MockWebServer()) {

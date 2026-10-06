@@ -58,9 +58,20 @@ export async function createMuxedMediaServer(videoUrl, audioUrl, address, token,
       '+frag_keyframe+empty_moov+default_base_moof', '-f', 'mp4', 'pipe:1')
     const process = spawn(options.ffmpegPath, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] })
     processes.add(process)
-    const timeout = setTimeout(() => process.kill('SIGKILL'), 15_000)
-    process.stdout.once('data', () => {
+    let timeout
+    const watchOutput = () => {
       clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        if (!response.destroyed) server.muxFailed = true
+        process.kill('SIGKILL')
+      }, 15_000)
+    }
+    watchOutput()
+    process.stdout.on('data', watchOutput)
+    // A paused TV can stop draining its socket. Only time out while output can flow.
+    process.stdout.on('pause', () => clearTimeout(timeout))
+    process.stdout.on('resume', watchOutput)
+    process.stdout.once('data', () => {
       response.writeHead(200, headers)
     })
     process.stdout.pipe(response, { end: false })
@@ -81,7 +92,10 @@ export async function createMuxedMediaServer(videoUrl, audioUrl, address, token,
         else response.destroy()
       }
     })
-    response.on('close', () => process.kill('SIGKILL'))
+    response.on('close', () => {
+      clearTimeout(timeout)
+      process.kill('SIGKILL')
+    })
   })
   server.muxFailed = false
   server.on('close', close)

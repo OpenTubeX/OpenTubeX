@@ -47,6 +47,7 @@ const deviceName = ref('')
 let disposed = false
 let resumeLocalPlayback = false
 let castPayload = null
+let sourceLoading = false
 const mergedSource = ref(null)
 
 const source = computed(() => {
@@ -86,19 +87,24 @@ const options = computed(() => {
   return items
 })
 
+async function refreshSource() {
+  if (!props.videoId || castId.value || sourceLoading || disposed) return
+  sourceLoading = true
+  mergedSource.value = null
+  try {
+    const info = await ytDlp.ytDlpGetPlaybackInfo(props.videoId, true, store.getters.getYtDlpPlaybackAlwaysUseCookies && hasConfiguredRestrictedPlaybackAuthentication(store.getters), false)
+    if (!disposed && !castId.value && info && !info.error && !info.isLive) mergedSource.value = selectDlnaTracks(info.formats)
+  } catch { /* The existing combined MP4 remains available. */ } finally {
+    sourceLoading = false
+  }
+}
+
 async function refreshDevices() {
   if (loading.value || disposed) return
   loading.value = true
+  refreshSource()
   try {
-    const [results] = await Promise.all([
-      dlnaCast.discover(),
-      (async () => {
-        if (!props.videoId || castId.value) return
-        mergedSource.value = null
-        const info = await ytDlp.ytDlpGetPlaybackInfo(props.videoId, true, store.getters.getYtDlpPlaybackAlwaysUseCookies && hasConfiguredRestrictedPlaybackAuthentication(store.getters), false)
-        if (!disposed && info && !info.error && !info.isLive) mergedSource.value = selectDlnaTracks(info.formats)
-      })().catch(() => { /* The existing combined MP4 remains available. */ })
-    ])
+    const results = await dlnaCast.discover()
     if (!disposed) devices.value = results
   } catch {
     if (!disposed) showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
@@ -144,30 +150,22 @@ async function handleChoice(choice) {
   busy.value = true
   try {
     const wasPlaying = !props.getPlayer()?.isPaused?.()
+    const combined = selectDlnaSource(props.formats)
     const payload = {
       deviceId: choice,
       mediaUrl: source.value.url,
       ...(source.value.audioUrl ? { audioUrl: source.value.audioUrl } : {}),
+      ...(source.value.audioUrl && combined ? { fallbackMediaUrl: combined.url } : {}),
       title: props.title,
       startSeconds: props.getPlayer()?.getCurrentTime?.() ?? 0
     }
-    let result = await dlnaCast.start(payload)
-    if (result.muxUnavailable && payload.audioUrl && !disposed) {
-      const combined = selectDlnaSource(props.formats)
-      if (combined) {
-        delete payload.audioUrl
-        payload.mediaUrl = combined.url
-        result = await dlnaCast.start({
-          deviceId: choice, mediaUrl: combined.url, title: props.title, startSeconds: payload.startSeconds
-        })
-      }
-    }
+    const result = await dlnaCast.start(payload)
     if (result.error) throw new Error(result.error)
     if (disposed) {
       await dlnaCast.stop(result.castId)
       return
     }
-    castPayload = result.muxUnavailable ? null : payload
+    castPayload = result.usedFallback ? null : payload
     resumeLocalPlayback = wasPlaying
     castId.value = result.castId
     deviceName.value = result.deviceName
