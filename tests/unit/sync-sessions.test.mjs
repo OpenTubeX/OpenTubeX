@@ -414,3 +414,28 @@ test('uses legacy sessions as the baseline when the versioned snapshot is null',
 
   assert.deepEqual(result.sessionsToApply, localSessions)
 })
+
+for (const retainedSnapshot of [false, true]) {
+  test(`a new login reclaims a tombstoned mobile session with ${retainedSnapshot ? 'a retained' : 'no'} snapshot`, () => {
+    const local = session('mobile', 2)
+    const previous = normalizeSyncSessionsDocument({ devices: {
+      phone: { platform: 'mobile', sessions: [local] },
+      laptop: { platform: 'desktop', sessions: [session('laptop', 1)] },
+    } })
+    let remote = removeSyncSession(previous, 'phone', 'mobile')
+    remote = removeSyncSession(remote, 'other-phone', 'mobile')
+    const merged = mergeSyncSessions({
+      localSessions: [local], remoteValue: remote, previousValue: retainedSnapshot ? previous : null,
+      deviceId: 'phone', platform: 'mobile', preferredMode: 'separate', reclaimDeviceSessions: true,
+    })
+    assert.deepEqual(merged.document.devices.phone.sessions, [local])
+    assert.equal(merged.document.deletedSessions.phone, undefined)
+    assert.deepEqual(merged.document.deletedSessions['other-phone'], ['mobile'])
+    assert.deepEqual(merged.document.devices.laptop, previous.devices.laptop)
+    const again = mergeSyncSessions({
+      localSessions: [local], remoteValue: merged.document, previousValue: merged.document,
+      deviceId: 'phone', platform: 'mobile', preferredMode: 'separate',
+    })
+    assert.deepEqual(again.document.devices.phone.sessions, [local])
+  })
+}

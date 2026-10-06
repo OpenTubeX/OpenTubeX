@@ -213,6 +213,7 @@ export function mergeSyncSessions({
   platform,
   preferredMode,
   legacyDeviceIds = [],
+  reclaimDeviceSessions = false,
 }) {
   const remote = claimLegacyDeviceSessions(
     claimLegacyDesktopSessions(
@@ -234,6 +235,12 @@ export function mergeSyncSessions({
         deviceId,
         legacyDeviceIds
       )
+  if (reclaimDeviceSessions && remote.deletedSessions[deviceId]) {
+    delete remote.deletedSessions[deviceId]
+    // Revocation removed the remote session, not the phone's local tabs.
+    // A fresh login must publish those tabs instead of inferring a deletion.
+    if (previous) delete previous.devices[deviceId]
+  }
   const localMode = preferredMode === 'shared' ? 'shared' : 'separate'
   const localModeChanged = previous !== null && previous.mode !== localMode
   const remoteModeChanged = previous !== null && remote.mode !== previous.mode

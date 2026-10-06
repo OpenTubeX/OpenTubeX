@@ -241,6 +241,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let encryptedCollections = null
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
   const previous = parseSnapshot(settings.syncServerSnapshot)
+  const reclaimDeviceSessions = Boolean(previous.reclaimDeviceSessions) &&
+    previous.reclaimDeviceSessions === settings.syncServerDeviceId
   const next = { ...previous }
   const result = {}
   const skippedCollections = new Set()
@@ -411,10 +413,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const sessions = await syncSessions(
           targetClient,
           store,
-          getPreviousSyncSessions(previous)
+          getPreviousSyncSessions(previous),
+          { reclaimDeviceSessions }
         )
         if (sessions !== null) {
           next.sessionsV2 = sessions.document
+          delete next.reclaimDeviceSessions
           result.sessions = sessions.sessionsToApply.reduce(
             (count, session) => count + session.tabs.length,
             0
@@ -1073,7 +1077,9 @@ const actions = {
     await dispatch('updateSyncServerDeviceId', deviceId, { root: true })
     await dispatch('updateSyncServerDeviceName', deviceName, { root: true })
     await dispatch('updateSyncServerResumeAutoSync', false, { root: true })
-    await dispatch('updateSyncServerSnapshot', '{}', { root: true })
+    await dispatch('updateSyncServerSnapshot', JSON.stringify(
+      process.env.IS_CAPACITOR ? { reclaimDeviceSessions: deviceId } : {}
+    ), { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
     await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
     await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
@@ -1187,10 +1193,12 @@ const actions = {
       await updateWhileEnabled('updateSyncServerUsername', trimmedUsername)
       await updateWhileEnabled('updateSyncServerDeviceId', deviceId)
       await updateWhileEnabled('updateSyncServerDeviceName', deviceName)
-      if (!resumesExpiredSession) {
-        await updateWhileEnabled('updateSyncServerSnapshot', '{}')
-        await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
+      if (!resumesExpiredSession || (process.env.IS_CAPACITOR && privacySupported)) {
+        const snapshot = resumesExpiredSession ? parseSnapshot(rootState.settings.syncServerSnapshot) : {}
+        if (process.env.IS_CAPACITOR && privacySupported) snapshot.reclaimDeviceSessions = deviceId
+        await updateWhileEnabled('updateSyncServerSnapshot', JSON.stringify(snapshot))
       }
+      if (!resumesExpiredSession) await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
       await updateWhileEnabled(
         'updateSyncServerPrivacyMode',
         privacySupported ? 'enhanced' : 'legacy'

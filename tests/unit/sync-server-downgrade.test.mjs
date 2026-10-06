@@ -1,3 +1,5 @@
+import * as sessions from '../../src/renderer/helpers/sync-sessions.js'
+import { isValidSyncServerDeviceId } from '../../src/renderer/helpers/sync-server-sessions.js'
 import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
 import { syncLiveReminders } from '../../src/renderer/helpers/sync-live-reminders.js'
@@ -30,7 +32,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -67,6 +69,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
     } : {}),
     ...bookmarks,
+    ...sessions,
+    isValidSyncServerDeviceId,
+    applySyncServerUserAgent: headers => headers,
+    capacitorHttpFetch: (url, options) => common.fetch(url, options),
     ...subscriptionSettingsSync,
     ...errors,
     showToast: options => notifications.push(options),
@@ -98,7 +104,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     structuredClone,
     TextEncoder,
     TextDecoder,
-    process: { env: { IS_ELECTRON: Boolean(reminderService || desktopTabs) } },
+    process: { env: { IS_ELECTRON: !capacitor && Boolean(reminderService || desktopTabs), IS_CAPACITOR: capacitor } },
     packageDetails: { version: 'test' },
     MAIN_PROFILE_ID: 'main',
     deepCopy: structuredClone,
@@ -127,7 +133,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   const helper = vm.createContext({ ...common })
-  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, normalizeSyncServerUrl };', helper)
+  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, syncSessions, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
   vm.runInContext(withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
@@ -1559,3 +1565,80 @@ test('a new live device message is delivered after an older activity response fi
     await listening
   }
 })
+
+for (const resumed of [false, true]) {
+  test(`a new phone login persists tab reclamation before publishing its token${resumed ? ' when resuming an expired session' : ''}`, async () => {
+    const snapshot = { subscriptions: ['private-channel'], sessionsV2: { devices: {} } }
+    const f = fixture({ syncServerSyncSubscriptions: false, syncServerSnapshot: JSON.stringify(snapshot) }, { encrypted: true, capacitor: true })
+    f.context.state.syncServerSessionExpired = resumed
+    await f.actions.authenticateSyncServer(f.context, { ...credentials, privacyPassphrase: 'separate-privacy-passphrase' })
+    const saved = JSON.parse(f.settings.syncServerSnapshot)
+    assert.equal(saved.reclaimDeviceSessions, credentials.deviceId)
+    if (resumed) assert.deepEqual(saved.subscriptions, snapshot.subscriptions)
+    const write = f.dispatched.findIndex(([action]) => action === 'updateSyncServerSnapshot')
+    const token = f.dispatched.findIndex(([action]) => action === 'replaceSyncServerToken')
+    assert.ok(write < token)
+  })
+}
+
+for (const conflict of [false, true]) {
+  test(`phone reclamation survives ${conflict ? 'a conflicting upload' : 'an upload failure and retry'} and is consumed after success`, async () => {
+    const deviceId = Buffer.alloc(16, 7).toString('base64url')
+    const local = [{ sessionId: 'mobile', updatedAt: 2, activeTabId: 'tab', tabs: [{ id: 'tab', url: '/subscriptions' }] }]
+    const previous = sessions.normalizeSyncSessionsDocument({ devices: {
+      [deviceId]: { platform: 'mobile', sessions: local },
+      laptop: { platform: 'desktop', sessions: [{ ...local[0], sessionId: 'laptop' }] },
+    } })
+    let remote = sessions.removeSyncSession(previous, deviceId, 'mobile')
+    let revision = 1
+    let puts = 0
+    const f = fixture({
+      syncServerDeviceId: deviceId, syncServerSyncSubscriptions: false, syncServerSyncSessions: true,
+      syncServerSnapshot: JSON.stringify({ sessionsV2: previous, reclaimDeviceSessions: deviceId }),
+    }, { encrypted: true, desktopTabs: { getSyncSessions: () => local, applySyncSessions: () => true }, respond: async (url, options) => {
+      if (url.endsWith('/v1/encrypted_sync')) return { collections: [{ collection: 'sessionsV2', revision }] }
+      if (!url.endsWith('/v1/encrypted_sync/sessionsV2')) return undefined
+      if (options.method === 'PUT') {
+        puts++
+        if (puts === 1) {
+          if (conflict) {
+            remote.devices.laptop.sessions.push({ ...local[0], sessionId: 'new-laptop' })
+            revision++
+          }
+          return new Response('Retry', { status: conflict ? 409 : 503 })
+        }
+        remote = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        revision++
+      }
+      return { revision, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    } })
+    if (!conflict) {
+      await assert.rejects(f.actions.syncWithSyncServer(f.context), /Retry/)
+      assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, deviceId)
+    }
+    await f.actions.syncWithSyncServer(f.context)
+    assert.deepEqual(remote.devices[deviceId].sessions, local)
+    assert.equal(remote.deletedSessions[deviceId], undefined)
+    assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, undefined)
+    if (conflict) assert.equal(remote.devices.laptop.sessions.length, 2)
+    remote = sessions.removeSyncSession(remote, deviceId, 'mobile')
+    revision++
+    await f.actions.syncWithSyncServer(f.context)
+    assert.deepEqual(remote.devices[deviceId].sessions, [])
+    assert.deepEqual(remote.deletedSessions[deviceId], ['mobile'])
+  })
+}
+
+for (const capacitor of [false, true]) {
+  test(`${capacitor ? 'phone' : 'desktop'} pairing saves the appropriate session reclamation before its token`, async () => {
+    const f = fixture({}, { encrypted: true, capacitor })
+    await f.actions.completeSyncServerPairing(f.context, {
+      serverUrl: f.settings.syncServerUrl, username: f.settings.syncServerUsername, token: 'paired-token',
+      privacyKey: f.settings.syncServerPrivacyKey, privacySalt: f.settings.syncServerPrivacySalt,
+      deviceId: credentials.deviceId, deviceName: credentials.deviceName,
+    })
+    assert.equal(JSON.parse(f.settings.syncServerSnapshot).reclaimDeviceSessions, capacitor ? credentials.deviceId : undefined)
+    assert.ok(f.dispatched.findIndex(([action]) => action === 'updateSyncServerSnapshot') <
+      f.dispatched.findIndex(([action]) => action === 'replaceSyncServerToken'))
+  })
+}

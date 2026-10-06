@@ -26,3 +26,21 @@ for (const options of [{ otherLogin: false }, { otherLogin: true }, { otherLogin
     }
   })
 }
+
+for (const conflict of [false, true]) {
+  test(`Android revoked phone reconnects with its persisted device ID after ${conflict ? 'a conflict' : 'a failed upload'}`, {
+    skip: !process.env.ANDROID_CDP_URL,
+  }, async () => {
+    const { verifySyncDeviceReconnection } = await import('./helpers/sync-device-reconnection.mjs')
+    const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+    const keepAlive = setTimeout(() => {}, 120_000)
+    try {
+      const page = browser.contexts()[0].pages()[0]
+      await page.reload()
+      await verifySyncDeviceReconnection(page, { conflict })
+    } finally {
+      clearTimeout(keepAlive)
+      await browser.close()
+    }
+  })
+}

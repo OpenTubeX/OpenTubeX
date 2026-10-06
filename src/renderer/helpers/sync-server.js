@@ -1252,7 +1252,7 @@ function getTabSyncAdapter() {
   return null
 }
 
-export async function syncSessions(client, store, previous = null) {
+export async function syncSessions(client, store, previous = null, { reclaimDeviceSessions = false } = {}) {
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
 
   const tabs = getTabSyncAdapter()
@@ -1273,6 +1273,7 @@ export async function syncSessions(client, store, previous = null) {
     platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
     preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
     legacyDeviceIds,
+    reclaimDeviceSessions,
   })
 
   if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {
