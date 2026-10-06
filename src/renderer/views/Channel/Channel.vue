@@ -274,7 +274,7 @@
     </FtCard>
     <FtCard
       v-if="errorMessage"
-      class="card"
+      class="card channelError"
     >
       <p>
         {{ errorMessage }}
