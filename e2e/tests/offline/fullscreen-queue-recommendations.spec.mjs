@@ -383,5 +383,69 @@ for (const { uiScale, iconPack, colorScheme } of [
         await watch.dispose()
       }
     })
+
+    test('matches cached recommendations before using offline download suggestions', async ({ app, page }, testInfo) => {
+      await setWindowSize(app, page, { width: 1360, height: 850 })
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+      await mockPlayableWatchPage(app, page)
+      await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+      await openMockedVideo(page)
+      const watch = await page.evaluateHandle(findWatchComponent)
+      try {
+        await watch.evaluate(component => {
+          const watch = component.proxy
+          watch.$store.commit('setFullscreenActions', ['recommendations', 'share'])
+          watch.$store.commit('upsertYtDlpDownload', {
+            id: 1,
+            status: 'completed',
+            mode: 'video',
+            files: [{ videoId: 'offline0001', title: 'Saved offline video', path: '/offline.webm', extension: 'webm' }],
+          })
+          watch.recommendedVideos = [{ videoId: 'related0001', title: 'Cached recommendation', author: 'Recommendation channel', type: 'video' }]
+          watch.isOffline = true
+          watch.localFilePlayback = true
+          watch.$store.commit('setForbiddenTitles', JSON.stringify(['Cached recommendation']))
+        })
+        const player = page.locator('.ftVideoPlayer')
+        await player.locator('video').evaluate(element => element.pause())
+        await setPlayerFullscreen(page, true)
+        const action = player.locator('.fullscreenActions').getByRole('button', { name: 'Recommended videos', exact: true })
+        const dock = player.locator('.fullscreenRecommendationsOverlay.open')
+        await expect.poll(() => watch.evaluate(component => component.proxy.offlineDownloadSuggestions.length)).toBe(1)
+        await expect(action).toHaveCount(0)
+        await expect(dock).toHaveCount(0)
+
+        await watch.evaluate(component => { component.proxy.$store.commit('setForbiddenTitles', '[]') })
+        await action.click()
+        await expect(dock.getByText('Cached recommendation', { exact: true }).first()).toBeVisible()
+        await expect(dock.getByText('Saved offline video', { exact: true })).toHaveCount(0)
+        await watch.evaluate(component => { component.proxy.$store.commit('setForbiddenTitles', JSON.stringify(['Cached recommendation'])) })
+        await expect(action).toHaveCount(0)
+        await expect(dock).toHaveCount(0)
+
+        await watch.evaluate(component => { component.proxy.recommendedVideos = [] })
+        await action.click()
+        await expect(dock.locator('.offlineDownloadRecommendation')).toHaveText(/Saved offline video/)
+        await expectImagesLoaded(dock.locator('img:visible'))
+        const bounds = await dock.evaluate(element => {
+          const dock = element.getBoundingClientRect()
+          const row = element.querySelector('.offlineDownloadRecommendation').getBoundingClientRect()
+          return { x: dock.x, y: dock.y, width: dock.width, height: row.bottom - dock.top + 12 }
+        })
+        const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, bounds) => {
+          const contents = BrowserWindow.getAllWindows()[0].webContents
+          const zoom = contents.getZoomFactor()
+          const clip = Object.fromEntries(Object.entries(bounds).map(([key, value]) => [key, Math.round(value * zoom)]))
+          return (await contents.capturePage(clip)).toPNG().toString('base64')
+        }, bounds)
+        await writeFile(testInfo.outputPath(`offline-recommendations-${colorScheme}.png`), Buffer.from(screenshot, 'base64'))
+        await watch.evaluate(component => { component.proxy.$store.commit('removeYtDlpDownload', 1) })
+        await expect(action).toHaveCount(0)
+        await expect(dock).toHaveCount(0)
+      } finally {
+        await watch.dispose()
+      }
+    })
   })
 }

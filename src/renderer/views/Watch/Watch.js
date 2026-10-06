@@ -1063,7 +1063,9 @@ export default defineComponent({
     },
     fullscreenRecommendationsAvailable() {
       if (this.isLoading || this.hideRecommendedVideos || (this.isFamilyFriendly === false && this.showFamilyFriendlyOnly)) return false
-      if (this.isOffline && this.localFilePlayback && this.offlineDownloadSuggestions.length > 0) return true
+      if (this.recommendedVideos.length === 0) {
+        return this.isOffline && this.localFilePlayback && this.offlineDownloadSuggestions.length > 0
+      }
       return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
         hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
         forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
