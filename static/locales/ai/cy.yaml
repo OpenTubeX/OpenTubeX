@@ -1434,6 +1434,10 @@ Video:
       UpvoteSegment: Pleidleisio o blaid
       DownvoteSegment: Pleidleisio yn erbyn
       VoteFailed: Methodd cyflwyno pleidlais SponsorBlock.
+      ChangeCategory: Newid categori
+      CopyAndDownvote: Copïo a phleidleisio yn erbyn
+      SubmitCategoryVote: Cyflwyno pleidlais categori
+      CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio

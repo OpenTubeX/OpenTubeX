@@ -1441,6 +1441,10 @@ Video:
       UpvoteSegment: Voto positivo
       DownvoteSegment: Voto negativo
       VoteFailed: Não foi possível enviar o voto ao SponsorBlock.
+      ChangeCategory: Alterar categoria
+      CopyAndDownvote: Copiar e votar contra
+      SubmitCategoryVote: Enviar voto de categoria
+      CategoryVoteSuccess: Voto de categoria enviado.
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

@@ -1430,6 +1430,10 @@ Video:
       UpvoteSegment: Gefa jákvætt atkvæði
       DownvoteSegment: Gefa neikvætt atkvæði
       VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
+      ChangeCategory: Breyta flokki
+      CopyAndDownvote: Afrita og greiða atkvæði gegn
+      SubmitCategoryVote: Senda atkvæði um flokk
+      CategoryVoteSuccess: Atkvæði um flokk sent.
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:

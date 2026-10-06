@@ -2053,6 +2053,10 @@ Video:
       MuteActionType: Stummschalten
       MutePrompt: '{segmentCategory} stummschalten?'
       SkipActionType: Überspringen
+      ChangeCategory: Kategorie ändern
+      CopyAndDownvote: Kopieren & negativ bewerten
+      SubmitCategoryVote: Kategorievorschlag senden
+      CategoryVoteSuccess: Kategorievorschlag gesendet.
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
     Auto-generated Caption Template: '{language} (automatisch erstellt)'
     Exit Full Window: Vollständiges Fenster beenden

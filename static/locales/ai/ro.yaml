@@ -1444,6 +1444,10 @@ Video:
       UpvoteSegment: Votează pozitiv
       DownvoteSegment: Votează negativ
       VoteFailed: Votul SponsorBlock nu a putut fi trimis.
+      ChangeCategory: Schimbă categoria
+      CopyAndDownvote: Copiază și votează negativ
+      SubmitCategoryVote: Trimite votul pentru categorie
+      CategoryVoteSuccess: Votul pentru categorie a fost trimis.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'

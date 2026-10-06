@@ -1412,6 +1412,10 @@ Video:
       UpvoteSegment: Olumlu oy ver
       DownvoteSegment: Olumsuz oy ver
       VoteFailed: SponsorBlock oyu gönderilemedi.
+      ChangeCategory: Kategoriyi değiştir
+      CopyAndDownvote: Kopyala ve olumsuz oy ver
+      SubmitCategoryVote: Kategori oyunu gönder
+      CategoryVoteSuccess: Kategori oyu gönderildi.
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

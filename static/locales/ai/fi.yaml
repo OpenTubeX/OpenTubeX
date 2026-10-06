@@ -1449,6 +1449,10 @@ Video:
       UpvoteSegment: Äänestä puolesta
       DownvoteSegment: Äänestä vastaan
       VoteFailed: SponsorBlock-äänen lähettäminen epäonnistui.
+      ChangeCategory: Vaihda luokkaa
+      CopyAndDownvote: Kopioi ja anna miinusääni
+      SubmitCategoryVote: Lähetä luokkaääni
+      CategoryVoteSuccess: Luokkaääni lähetetty.
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

@@ -1865,6 +1865,10 @@ Video:
       UpvoteSegment: Glasuj za
       DownvoteSegment: Glasuj proti
       VoteFailed: Glasu za SponsorBlock ni bilo mogoče oddati.
+      ChangeCategory: Spremeni kategorijo
+      CopyAndDownvote: Kopiraj in glasuj proti
+      SubmitCategoryVote: Pošlji glas za kategorijo
+      CategoryVoteSuccess: Glas za kategorijo je poslan.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'

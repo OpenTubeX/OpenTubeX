@@ -1444,6 +1444,10 @@ Video:
       UpvoteSegment: Проголосувати за
       DownvoteSegment: Проголосувати проти
       VoteFailed: Не вдалося надіслати голос у SponsorBlock.
+      ChangeCategory: Змінити категорію
+      CopyAndDownvote: Копіювати й оцінити негативно
+      SubmitCategoryVote: Надіслати голос за категорію
+      CategoryVoteSuccess: Голос за категорію надіслано.
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано

@@ -1122,6 +1122,8 @@
           v-for="{ uuid, translatedCategory, color, unskipped, isHighlight } in skippedSponsorBlockSegments"
           :key="uuid"
           class="skippedSegment"
+          :class="{ editing: sponsorBlockToastEditingUuid === uuid }"
+          @click.stop
           @mouseenter="pauseSponsorBlockToastCountdown(uuid)"
           @mouseleave="resumeSponsorBlockToastCountdown(uuid)"
           @focusin="pauseSponsorBlockToastCountdown(uuid)"
@@ -1148,16 +1150,46 @@
                   {{ getSponsorBlockToastTimeLabel(uuid) }}
                 </template>
               </span>
-              <button
+              <FtIconButton
                 class="closeSkippedSegmentButton"
                 :title="$t('Close')"
-                @click.stop.prevent="removeSponsorBlockToast(uuid)"
-              >
-                <ft-icon :icon="['fas', 'xmark']" />
-              </button>
+                :icon="['fas', 'xmark']"
+                :use-shadow="false"
+                :size="16"
+                :padding="8"
+                @click="removeSponsorBlockToast(uuid)"
+              />
+              <FtIconButton
+                v-if="sponsorBlockEnableSubmission"
+                :title="$t('Edit')"
+                :icon="['fas', 'pencil']"
+                :aria-expanded="sponsorBlockToastEditingUuid === uuid"
+                :disabled="sponsorBlockVotePending !== null"
+                :use-shadow="false"
+                :size="16"
+                :padding="8"
+                @click="toggleSponsorBlockToastEditing(uuid)"
+              />
             </div>
           </div>
-          <div class="skippedSegmentActions">
+          <div
+            v-if="sponsorBlockToastEditingSegment?.uuid === uuid"
+            v-overlay-scrollbars
+            class="sponsorBlockToastEditor"
+          >
+            <SponsorBlockSegmentEditor
+              :segment="sponsorBlockToastEditingSegment"
+              :pending="sponsorBlockVotePending !== null"
+              center-wrapped-cancel
+              @category-vote="changeSponsorBlockInfoSegmentCategory"
+              @copy-and-downvote="copyAndDownvoteSponsorBlockInfoSegment"
+              @resize="clampSponsorBlockToastEditorScroll"
+            />
+          </div>
+          <div
+            v-else
+            class="skippedSegmentActions"
+          >
             <button
               v-if="unskipped"
               class="unskipButton"
@@ -1239,16 +1271,15 @@
                   >
                     {{ $t('Video.Player.SponsorBlock.NowAction') }}
                   </button>
-                  <label class="textInputLabel sponsorBlockDraftTimeField">
-                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.StartTimeLabel') }}</span>
-                    <input
-                      class="sponsorBlockDraftTimeInput"
-                      :placeholder="$t('Form Inputs.Example', { example: '0:00' })"
-                      :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
-                      :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
-                      @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
-                    >
-                  </label>
+                  <!-- eslint-disable @intlify/vue-i18n/no-raw-text -- Timestamp examples are language independent. -->
+                  <input
+                    class="sponsorBlockDraftTimeInput"
+                    placeholder="0:00.000"
+                    :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                    :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                    @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                  >
+                  <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
                 </template>
                 <span
                   v-else
@@ -1261,16 +1292,15 @@
                   class="sponsorBlockDraftTimeDivider"
                 >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
                 <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
-                  <label class="textInputLabel sponsorBlockDraftTimeField">
-                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.EndTimeLabel') }}</span>
-                    <input
-                      class="sponsorBlockDraftTimeInput"
-                      :placeholder="$t('Form Inputs.Example', { example: '0:30' })"
-                      :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
-                      :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
-                      @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
-                    >
-                  </label>
+                  <!-- eslint-disable @intlify/vue-i18n/no-raw-text -- Timestamp examples are language independent. -->
+                  <input
+                    class="sponsorBlockDraftTimeInput"
+                    placeholder="0:30.000"
+                    :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                    :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                    @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                  >
+                  <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
                   <button
                     class="sponsorBlockDraftTimeAction"
                     @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"

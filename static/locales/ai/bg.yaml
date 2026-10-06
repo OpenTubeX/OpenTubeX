@@ -1425,6 +1425,10 @@ Video:
       UpvoteSegment: Гласуване „за“
       DownvoteSegment: Гласуване „против“
       VoteFailed: Гласът в SponsorBlock не можа да бъде изпратен.
+      ChangeCategory: Промяна на категорията
+      CopyAndDownvote: Копиране и отрицателен вот
+      SubmitCategoryVote: Изпращане на вот за категория
+      CategoryVoteSuccess: Вотът за категория е изпратен.
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

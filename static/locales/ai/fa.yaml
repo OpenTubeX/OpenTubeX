@@ -1482,6 +1482,10 @@ Video:
       UpvoteSegment: رأی مثبت
       DownvoteSegment: رأی منفی
       VoteFailed: ارسال رأی SponsorBlock ناموفق بود.
+      ChangeCategory: تغییر دسته‌بندی
+      CopyAndDownvote: کپی و رأی منفی
+      SubmitCategoryVote: ارسال رأی دسته‌بندی
+      CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'

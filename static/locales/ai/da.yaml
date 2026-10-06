@@ -1476,6 +1476,10 @@ Video:
       UpvoteSegment: Stem op
       DownvoteSegment: Stem ned
       VoteFailed: SponsorBlock-stemmen kunne ikke indsendes.
+      ChangeCategory: Skift kategori
+      CopyAndDownvote: Kopiér og stem ned
+      SubmitCategoryVote: Indsend kategoristemme
+      CategoryVoteSuccess: Kategoristemme indsendt.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'

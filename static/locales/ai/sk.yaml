@@ -1415,6 +1415,10 @@ Video:
       UpvoteSegment: Hlasovať za
       DownvoteSegment: Hlasovať proti
       VoteFailed: Hlas SponsorBlock sa nepodarilo odoslať.
+      ChangeCategory: Zmeniť kategóriu
+      CopyAndDownvote: Skopírovať a hlasovať proti
+      SubmitCategoryVote: Odoslať hlas za kategóriu
+      CategoryVoteSuccess: Hlas za kategóriu bol odoslaný.
   External Media:
     Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
     Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"

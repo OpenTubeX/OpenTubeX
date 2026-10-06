@@ -1414,6 +1414,10 @@ Video:
       UpvoteSegment: Anna poolthääl
       DownvoteSegment: Anna vastuhääl
       VoteFailed: SponsorBlocki hääle saatmine nurjus.
+      ChangeCategory: Muuda kategooriat
+      CopyAndDownvote: Kopeeri ja hääleta vastu
+      SubmitCategoryVote: Saada kategooriahääl
+      CategoryVoteSuccess: Kategooriahääl saadetud.
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"

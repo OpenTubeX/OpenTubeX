@@ -2595,7 +2595,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .skippedSegmentsWrapper {
   position: absolute;
   inset-inline-end: 2%;
-  bottom: max(15%, calc(46px + 2.5% + 3%)); /* 46px + 2.5% is the height of the controls */
+
+  --sponsorblock-notice-bottom: max(15%, calc(46px + 2.5% + 3%)); /* 46px + 2.5% is the height of the controls */
+
+  bottom: var(--sponsorblock-notice-bottom);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2603,6 +2606,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
   z-index: 3;
   transition: inset-inline-end 250ms ease;
+}
+
+.skippedSegmentsWrapper:has(.sponsorBlockToastEditor) {
+  max-width: 96%;
+  max-height: calc(100% - var(--sponsorblock-notice-bottom) - 8px);
 }
 
 /* Scale the SponsorBlock skip notice down with the mini player so it stays
@@ -2614,6 +2622,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper:where(:dir(rtl)) {
   transform-origin: bottom left;
+}
+
+.skippedSegment.editing {
+  box-sizing: border-box;
+  width: 420px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  background-color: var(--card-bg-color);
+  color: var(--primary-text-color);
+}
+
+.sponsorBlockToastEditor {
+  min-height: 0;
+  overflow: hidden auto;
 }
 
 .skippedSegment {
@@ -2646,6 +2669,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .sponsorBlockSubmissionMenu {
+  --sponsorblock-submission-surface: rgb(24 24 24);
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2654,7 +2679,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding: 10px 12px 12px;
   border: 1px solid rgb(255 255 255 / 14%);
   border-radius: calc(10px * var(--ui-roundness));
-  background-color: rgb(24 24 24 / 96%);
+  background-color: var(--sponsorblock-submission-surface);
   color: #fff;
   box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
 }
@@ -2744,10 +2769,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   cursor: pointer;
 }
 
-.sponsorBlockDraftTimeField .textInputLabelText {
-  color: inherit;
-}
-
 .sponsorBlockDraftTimeInput {
   width: 78px;
   min-width: 78px;
@@ -2778,7 +2799,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftCategory) {
   inline-size: 100%;
-  margin-block-start: 16px;
+  margin-block: 8px 0;
 }
 
 :deep(.sponsorBlockDraftCategory .select-text),
@@ -2801,7 +2822,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
   inset-block-start: 0;
-  background-color: rgb(0 0 0 / 85%);
+  background-color: var(--sponsorblock-submission-surface);
 }
 
 :deep(.sponsorBlockDraftCategory .select-bar::before),
@@ -2837,6 +2858,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .skippedSegmentHeader {
+  flex-shrink: 0;
   justify-content: space-between;
   gap: 12px;
 }
@@ -2880,7 +2902,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   text-align: center;
 }
 
-.closeSkippedSegmentButton {
+.skippedSegment.editing .skippedSegmentTimer {
+  background-color: var(--secondary-card-bg-color);
+  color: var(--secondary-text-color);
+}
+
+.closeSkippedSegmentButton:not(.ftIconButton) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2896,12 +2923,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.closeSkippedSegmentButton:hover {
+.closeSkippedSegmentButton:not(.ftIconButton):hover {
   background-color: rgb(255 255 255 / 12%);
   color: #fff;
 }
 
-.closeSkippedSegmentButton:focus {
+.closeSkippedSegmentButton:not(.ftIconButton):focus {
   outline: 2px solid rgb(255 255 255 / 45%);
   outline-offset: 1px;
 }
@@ -3255,7 +3282,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /* Keep SponsorBlock notices above the mobile action dock while it is visible. */
 :global(.capacitorTabs .ftVideoPlayer:is(:fullscreen, .fullWindow)[data-action-dock-visible='true'] > .skippedSegmentsWrapper) {
-  bottom: calc(
+  --sponsorblock-notice-bottom: calc(
     var(--mobile-fullscreen-actions-block-end) +
     var(--mobile-fullscreen-actions-block-size) +
     var(--mobile-fullscreen-overlay-gap)

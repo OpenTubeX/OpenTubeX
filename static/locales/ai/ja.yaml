@@ -1412,6 +1412,10 @@ Video:
       UpvoteSegment: 高評価
       DownvoteSegment: 低評価
       VoteFailed: SponsorBlockの評価を送信できませんでした。
+      ChangeCategory: カテゴリを変更
+      CopyAndDownvote: コピーして低評価
+      SubmitCategoryVote: カテゴリ変更の投票を送信
+      CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"

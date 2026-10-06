@@ -1777,6 +1777,10 @@ Video:
       UpvoteSegment: Votar a favor
       DownvoteSegment: Votar en contra
       VoteFailed: No se pudo enviar el voto a SponsorBlock.
+      ChangeCategory: Cambiar categoría
+      CopyAndDownvote: Copiar y votar en contra
+      SubmitCategoryVote: Enviar voto de categoría
+      CategoryVoteSuccess: Voto de categoría enviado.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'
