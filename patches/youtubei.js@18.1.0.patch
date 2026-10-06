@@ -317,40 +317,42 @@ index 0000000..45748bd
 +    }
 +}
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.d.ts b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
-index 29052ff..5410c11 100644
+index 29052ff..eee9c5c 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.d.ts
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.d.ts
-@@ -14,8 +14,10 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+@@ -14,8 +14,11 @@ import ExpandableMetadata from './ExpandableMetadata.js';
  import MerchandiseShelf from './MerchandiseShelf.js';
  import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
  import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
 +import VideoTitleHeaderView from './VideoTitleHeaderView.js';
 +import Shelf from './Shelf.js';
++import ItemSection from './ItemSection.js';
  export default class StructuredDescriptionContent extends YTNode {
      static type: string;
 -    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView>;
-+    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | VideoTitleHeaderView | Shelf>;
++    items: ObservedArray<VideoDescriptionHeader | ExpandableVideoDescriptionBody | VideoDescriptionMusicSection | VideoDescriptionInfocardsSection | VideoDescriptionTranscriptSection | VideoDescriptionCourseSection | VideoDescriptionYouchatSectionView | HorizontalCardList | ReelShelf | VideoAttributesSectionView | HowThisWasMadeSectionView | ExpandableMetadata | MerchandiseShelf | HypeFanCreditsSectionView | VideoTitleHeaderView | Shelf | ItemSection>;
      constructor(data: RawNode);
  }
 diff --git a/dist/src/parser/classes/StructuredDescriptionContent.js b/dist/src/parser/classes/StructuredDescriptionContent.js
-index dc4ba3a..acf6064 100644
+index dc4ba3a..a65274a 100644
 --- a/dist/src/parser/classes/StructuredDescriptionContent.js
 +++ b/dist/src/parser/classes/StructuredDescriptionContent.js
-@@ -14,6 +14,8 @@ import ExpandableMetadata from './ExpandableMetadata.js';
+@@ -14,6 +14,9 @@ import ExpandableMetadata from './ExpandableMetadata.js';
  import MerchandiseShelf from './MerchandiseShelf.js';
  import HypeFanCreditsSectionView from './HypeFanCreditsSectionView.js';
  import VideoDescriptionYouchatSectionView from './VideoDescriptionYouchatSectionView.js';
 +import VideoTitleHeaderView from './VideoTitleHeaderView.js';
 +import Shelf from './Shelf.js';
++import ItemSection from './ItemSection.js';
  export default class StructuredDescriptionContent extends YTNode {
      static type = 'StructuredDescriptionContent';
      items;
-@@ -23,7 +25,7 @@ export default class StructuredDescriptionContent extends YTNode {
+@@ -23,7 +26,7 @@ export default class StructuredDescriptionContent extends YTNode {
              VideoDescriptionHeader, ExpandableVideoDescriptionBody, VideoDescriptionMusicSection,
              VideoDescriptionInfocardsSection, VideoDescriptionCourseSection, VideoDescriptionTranscriptSection,
              VideoDescriptionYouchatSectionView, HorizontalCardList, ReelShelf, VideoAttributesSectionView,
 -            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView
-+            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView, VideoTitleHeaderView, Shelf
++            HowThisWasMadeSectionView, ExpandableMetadata, MerchandiseShelf, HypeFanCreditsSectionView, VideoTitleHeaderView, Shelf, ItemSection
          ]);
      }
  }
