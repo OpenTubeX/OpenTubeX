@@ -119,16 +119,22 @@ export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
     },
 
     async recover(castId, payload) {
-      if (activeCast?.castId !== castId || payload.audioUrl || !await cast.hasFailed(castId)) {
+      if (activeCast?.castId !== castId || payload.audioUrl) {
         return { error: 'No failed cast is available to recover' }
       }
+      const status = await native.hasFailed({ castId })
+      if (!status.failed || status.stopped) {
+        return { error: 'No failed cast is available to recover' }
+      }
+      const requestedStart = Number.isFinite(payload.startSeconds) ? payload.startSeconds : 0
+      const base = Number.isFinite(status.baseSeconds) && status.baseSeconds >= 0 ? status.baseSeconds : requestedStart
       let position = null
       try {
         position = parseDlnaPosition(await send(activeCast.device, 'GetPositionInfo', { InstanceID: 0 }))
       } catch { /* Some renderers do not report their playback position. */ }
       await cast.stop(castId)
       return cast.start({
-        ...payload, startSeconds: (Number.isFinite(payload.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
+        ...payload, startSeconds: position === null ? requestedStart : base + position
       })
     },
 

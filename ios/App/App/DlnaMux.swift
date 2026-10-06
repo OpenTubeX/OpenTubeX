@@ -315,7 +315,7 @@ final class DlnaMuxer {
         return (.container("moof", boxes), mdat)
     }
 
-    func stream(video: URLRequest, audio: URLRequest, startSeconds: Double, authorization: DlnaAuthorization? = nil, send: (Data) -> Bool) throws {
+    func stream(video: URLRequest, audio: URLRequest, startSeconds: Double, authorization: DlnaAuthorization? = nil, started: (Double) -> Void = { _ in }, send: (Data) -> Bool) throws {
         lock.lock()
         guard !cancelled else { lock.unlock(); throw URLError(.cancelled) }
         let videoTrack = DlnaTrack(video, authorization: authorization)
@@ -356,6 +356,7 @@ final class DlnaMuxer {
             defaults.append(trex)
         }
         children.append(.container("mvex", defaults))
+        started(base)
         guard send(Data("HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nAccept-Ranges: none\r\ntransferMode.dlna.org: Streaming\r\nConnection: close\r\n\r\n".utf8)),
               send(videoTrack.ftyp.data), send(DlnaBox.container("moov", children).data) else { throw URLError(.cancelled) }
         var fragments = [try videoTrack.fragment(), try audioTrack.fragment()]

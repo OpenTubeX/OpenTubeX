@@ -139,6 +139,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private let path: String
     private let complete: () -> Void
     private let failure: () -> Void
+    private let muxStarted: (Double) -> Void
     private var header = Data()
     private var head = false
     private var task: URLSessionDataTask?
@@ -146,12 +147,13 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private var finished = false
     private var sentHeaders = false
 
-    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, authorization: DlnaAuthorization? = nil, failure: @escaping () -> Void, complete: @escaping () -> Void) {
+    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, authorization: DlnaAuthorization? = nil, muxStarted: @escaping (Double) -> Void = { _ in }, failure: @escaping () -> Void, complete: @escaping () -> Void) {
         self.connection = connection
         self.media = media
         self.authorization = authorization
         self.audio = audio
         self.startSeconds = startSeconds
+        self.muxStarted = muxStarted
         self.path = path
         self.complete = complete
         self.failure = failure
@@ -201,7 +203,7 @@ final class DlnaTransfer: NSObject, URLSessionDataDelegate {
             }
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
-                    try self.muxer.stream(video: self.media, audio: audio, startSeconds: self.startSeconds, authorization: self.authorization) { data in
+                    try self.muxer.stream(video: self.media, audio: audio, startSeconds: self.startSeconds, authorization: self.authorization, started: self.muxStarted) { data in
                         let sent = self.send(data)
                         self.sentHeaders = self.sentHeaders || sent
                         return sent
@@ -306,6 +308,7 @@ final class DlnaMediaServer {
     private var transfers: [UUID: DlnaTransfer] = [:]
     private(set) var mediaUrl = ""
     private(set) var muxFailed = false
+    private(set) var baseSeconds: Double?
 
     func expire(_ complete: (() -> Void)? = nil) {
         dlnaQueue.async { self.muxFailed = true; self.close(complete) }
@@ -332,7 +335,9 @@ final class DlnaMediaServer {
                   case .hostPort(let host, _) = connection.endpoint,
                   host == NWEndpoint.Host(address) else { connection.cancel(); return }
             let id = UUID()
-            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4", authorization: authorization, failure: { [weak self] in
+            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4", authorization: authorization, muxStarted: { [weak self] base in
+                dlnaQueue.async { self?.baseSeconds = base }
+            }, failure: { [weak self] in
                 dlnaQueue.async { self?.muxFailed = true; failure?() }
             }) { [weak self] in
                 self?.transfers.removeValue(forKey: id)
@@ -542,7 +547,12 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func hasFailed(_ call: CAPPluginCall) {
         dlnaQueue.async {
-            call.resolve(["failed": self.relay?.castId == call.getString("castId") && self.relay?.muxFailed == true])
+            var result: [String: Any] = ["failed": false]
+            if let relay = self.relay, relay.castId == call.getString("castId") {
+                result["failed"] = relay.muxFailed
+                if let base = relay.baseSeconds { result["baseSeconds"] = base }
+            }
+            call.resolve(result)
         }
     }
 
