@@ -48,3 +48,43 @@ test('parses an empty linear layout without optional renderer context', (t) => {
   assert.deepEqual([...layout.items], [])
   assert.equal(layout.renderer_context, undefined)
 })
+
+test('retains video detail layouts inside description item sections without type mismatch warnings', (t) => {
+  const warn = t.mock.method(console, 'warn', () => {})
+  const response = Parser.parseResponse({
+    engagementPanels: [{
+      engagementPanelSectionListRenderer: {
+        panelIdentifier: 'engagement-panel-structured-description',
+        content: {
+          structuredDescriptionContentRenderer: {
+            items: [{
+              itemSectionRenderer: {
+                sectionIdentifier: 'video-details-section',
+                contents: [{
+                  linearLayoutViewModel: {
+                    items: [
+                      { sectionHeaderViewModel: { headline: { content: 'Video details' } } },
+                      { listViewModel: { listItems: [{ listItemViewModel: { title: { content: 'Date' } } }] } }
+                    ]
+                  }
+                }]
+              }
+            }]
+          }
+        }
+      }
+    }]
+  })
+
+  assert.equal(warn.mock.callCount(), 0)
+  const panel = response.engagement_panels[0]
+  assert.ok(panel instanceof YTNodes.EngagementPanelSectionList)
+  assert.ok(panel.content instanceof YTNodes.StructuredDescriptionContent)
+  const section = panel.content.items[0]
+  assert.ok(section instanceof YTNodes.ItemSection)
+  assert.equal(section.target_id, 'video-details-section')
+  const layout = section.contents[0]
+  assert.ok(layout instanceof YTNodes.LinearLayoutView)
+  assert.equal(layout.items[0].headline.toString(), 'Video details')
+  assert.equal(layout.items[1].items[0].title.toString(), 'Date')
+})
