@@ -278,6 +278,7 @@ public class DlnaCastingTest {
                 if (!merged) assertArrayEquals("Renderer received the complete MP4 through the phone relay", video, receivedVideo.get());
                 assertEquals(merged ? Arrays.asList("SetAVTransportURI", "Play") : Arrays.asList("SetAVTransportURI", "Play", "Seek"), actions);
                 assertEquals("true", evaluate(webView, "document.querySelector('video').paused"));
+                awaitScreenWake(scenario, true);
                 File received = File.createTempFile("dlna-received-", ".mp4", context.getCacheDir());
                 try {
                     try (OutputStream output = new FileOutputStream(received)) { output.write(receivedVideo.get()); }
@@ -301,6 +302,8 @@ public class DlnaCastingTest {
                 finished.setConnectTimeout(1000);
                 try { finished.getResponseCode(); fail("Cast relay still listening after Stop casting"); }
                 catch (IOException expected) {} finally { finished.disconnect(); }
+                evaluate(webView, "document.querySelector('video').pause();true");
+                awaitScreenWake(scenario, false);
                 System.out.println("DLNA UI " + (merged ? "streaming merge" : "complete MP4") + ": discovered renderer, Play/Stop, received " + receivedVideo.get().length + " MP4 bytes, decoded frame, resumed local playback, closed relay");
             } finally {
                 evaluate(webView, "document.querySelector('video')?.pause();testRouter.push('/subscriptions');testStore.dispatch('updateShowDlnaCastButton', originalCastSetting);URL.revokeObjectURL(window.dlnaLocalUrl);window.Capacitor.nativePromise=dlnaOriginalNativePromise;true");
@@ -416,6 +419,18 @@ public class DlnaCastingTest {
         byte[] buffer = new byte[4096];
         for (int count; (count = input.read(buffer)) != -1;) output.write(buffer, 0, count);
         return output.toByteArray();
+    }
+
+    private static void awaitScreenWake(ActivityScenario<MainActivity> scenario, boolean expected) throws Exception {
+        AtomicReference<Boolean> awake = new AtomicReference<>();
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        do {
+            scenario.onActivity(activity -> awake.set((activity.getWindow().getAttributes().flags &
+                android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0));
+            if (awake.get() == expected) return;
+            Thread.sleep(100);
+        } while (System.nanoTime() < deadline);
+        assertEquals("Cast must retain screen wake while local video is paused and release it on stop", expected, awake.get());
     }
 
     private static String evaluate(WebView view, String script) throws Exception {
