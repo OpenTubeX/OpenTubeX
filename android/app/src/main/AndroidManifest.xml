@@ -6,7 +6,11 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
-    <!-- DLNA device descriptions, SOAP control and media relay URLs use HTTP. -->
+    <!-- DLNA uses HTTP at runtime-discovered LAN IPs and loopback relay ports.
+         Network Security Config domain rules cannot match arbitrary LAN IP ranges,
+         so a static allowlist would break discovery on other networks. Native
+         control requests are pinned to SSDP responders, refuse redirects and do
+         not send app cookies; media relays accept only the selected renderer. -->
     <application
         android:usesCleartextTraffic="true"
         android:name=".OpenTubeXApplication"
