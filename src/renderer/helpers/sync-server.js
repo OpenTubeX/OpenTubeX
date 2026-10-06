@@ -1253,6 +1253,8 @@ function getTabSyncAdapter() {
 }
 
 export async function syncSessions(client, store, previous = null) {
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
+
   const tabs = getTabSyncAdapter()
   if (typeof tabs?.getSyncSessions !== 'function' ||
       typeof tabs?.applySyncSessions !== 'function') {
@@ -1261,6 +1263,7 @@ export async function syncSessions(client, store, previous = null) {
 
   const local = await tabs.getSyncSessions()
   const remote = await client.getSessions()
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
   const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
   const merged = mergeSyncSessions({
     localSessions: local,
@@ -1276,6 +1279,7 @@ export async function syncSessions(client, store, previous = null) {
     const applied = await tabs.applySyncSessions(merged.sessionsToApply)
     if (!applied) throw new Error('Failed to apply synced tab sessions')
   }
+  if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
   if (!metadataEquals(remote, merged.document)) {
     await client.putSessions(merged.document)
   }

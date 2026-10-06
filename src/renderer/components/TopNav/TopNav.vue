@@ -215,7 +215,10 @@
             :icon="['fas', 'cog']"
           />
         </button>
-        <CapacitorPhoneTabSwitcher @request-exit="emit('request-android-exit')" />
+        <CapacitorPhoneTabSwitcher
+          v-if="store.getters.getTabsEnabled"
+          @request-exit="emit('request-android-exit')"
+        />
         <FtQuickSettingsMenu
           :compact-header="phoneLayout"
           :header-actions-overflow="headerShortcutsOverflow"

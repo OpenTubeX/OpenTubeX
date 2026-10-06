@@ -263,6 +263,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Enable Tabs: "Aktifkan Tab"
     Thumbnail Swipe Gestures:
       Left: Usap ke kiri pada gambar mini
       Right: Usap ke kanan pada gambar mini
@@ -1641,6 +1642,7 @@ Description:
   Games: Gim
 Tooltips:
   General Settings:
+    Enable Tabs: "Menonaktifkan ini akan menutup semua tab lain dan membiarkan halaman saat ini tetap terbuka."
     Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."
     Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
     Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.

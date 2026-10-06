@@ -263,6 +263,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Enable Tabs: "Gweredekaat an ivinelloù"
     Thumbnail Swipe Gestures:
       Left: Riklañ a-gleiz war ar skeudennigoù
       Right: Riklañ a-zehou war ar skeudennigoù
@@ -1639,6 +1640,7 @@ Description:
   Games: "C'hoarioù"
 Tooltips:
   General Settings:
+    Enable Tabs: "Diweredekaat an dra-mañ a serr an holl ivinelloù all hag a lez ar bajenn vremanel digor."
     Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
     Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."
     Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel en arload a-bezh keit ha ma chom ur bajenn digor. Pa vez diweredekaet ne vezont hizivaet nemet goude adkargañ pe addigeriñ ar bajenn."

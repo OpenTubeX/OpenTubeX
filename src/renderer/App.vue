@@ -9,8 +9,8 @@
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
       compactNavigation: compactNavigationLabels,
       capacitorTabs: isCapacitor,
-      capacitorPhoneLayout: isCapacitor && !showTabletTabStrip,
-      capacitorTabletLayout: showTabletTabStrip,
+      capacitorPhoneLayout: isCapacitor && !capacitorTabletLayout,
+      capacitorTabletLayout,
       verticalTabs: useVerticalTabBar,
       verticalTabsLeft: tabBarPosition === 'left',
       verticalTabsRight: tabBarPosition === 'right',
@@ -25,7 +25,7 @@
       :inert="isAnyPromptOpen"
     />
     <CapacitorTabletTabBar
-      v-if="isCapacitor"
+      v-if="isCapacitor && store.getters.getTabsEnabled"
       :inert="isAnyPromptOpen"
       @request-exit="requestAndroidAppExit"
     />
@@ -849,9 +849,10 @@ const useVerticalTabBar = computed(() => isElectron && isVerticalTabBarPosition(
 const tabletTabStripQuery = window.matchMedia('(min-width: 768px)')
 const automaticTabletTabStrip = ref(tabletTabStripQuery.matches)
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
-const showTabletTabStrip = computed(() => isCapacitor && (
+const capacitorTabletLayout = computed(() => isCapacitor && (
   usesCapacitorTabletLayout(capacitorLayoutMode.value, automaticTabletTabStrip.value)
 ))
+const showTabletTabStrip = computed(() => capacitorTabletLayout.value && store.getters.getTabsEnabled)
 tabletTabStripQuery.addEventListener('change', handleTabletTabStripChange)
 
 const appStyle = computed(() => {
@@ -1091,6 +1092,7 @@ watch(() => mobileContextMenuStack.value.length, (depth) => {
   }
 })
 const mobileContextLinkCanOpenInTab = computed(() => {
+  if (!store.getters.getTabsEnabled) return false
   const href = mobileContextLink.value?.href ?? ''
   return href.startsWith(`${window.location.href.split('#')[0]}#`) ||
     /^https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\//.test(href)

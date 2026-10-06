@@ -267,6 +267,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Enable Tabs: "Tabbladen inschakelen"
     Thumbnail Swipe Gestures:
       Left: Naar links vegen op miniaturen
       Right: Naar rechts vegen op miniaturen
@@ -1683,6 +1684,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Enable Tabs: "Als je dit uitschakelt, worden alle andere tabbladen gesloten en blijft de huidige pagina open."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."
     Use AI Translation Completions: Vul ontbrekende menselijke vertalingen aan met door AI gegenereerde tekst. Menselijke vertalingen krijgen altijd voorrang.
     Update Relative Timestamps: Werkt relatieve tijdsaanduidingen in de hele app bij zolang een pagina geopend blijft. Als dit is uitgeschakeld, worden ze alleen bijgewerkt nadat je de pagina opnieuw laadt of bezoekt.

@@ -265,6 +265,7 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Enable Tabs: "Virkja flipa"
     Thumbnail Swipe Gestures:
       Left: Strjúka til vinstri á smámyndum
       Right: Strjúka til hægri á smámyndum
@@ -1650,6 +1651,7 @@ Description:
   Games: Leikir
 Tooltips:
   General Settings:
+    Enable Tabs: "Ef slökkt er á þessu lokast allir aðrir flipar og núverandi síða helst opin."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
     Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.

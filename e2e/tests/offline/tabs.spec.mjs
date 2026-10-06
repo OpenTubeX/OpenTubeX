@@ -71,6 +71,19 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
+  test('the mobile tabs preference leaves desktop tabs available', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileTabs', false)
+    })
+    await goToSettingsSection(page, 'general')
+    await expect(page.locator('[data-setting-key="enableMobileTabs"]')).toHaveCount(0)
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow')
+    })
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+  })
+
   test('reconciles synced sessions without remounting retained tabs', async ({ page }) => {
     const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
     const retainedTabId = initialState.activeTabId

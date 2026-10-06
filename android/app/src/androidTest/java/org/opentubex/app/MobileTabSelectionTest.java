@@ -795,6 +795,109 @@ public class MobileTabSelectionTest {
         }
     }
 
+    @Test
+    public void disablingTabsKeepsOnePageAndRemovesMobileTabActions() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            String saved = evaluate(view, """
+                JSON.stringify((() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    return { tabs: store.state.tabs, enabled: store.getters.getEnableMobileTabs,
+                        layout: store.getters.getCapacitorLayoutMode, scale: store.getters.getUiScale };
+                })())
+                """);
+            try {
+                evaluate(view, STORE + ".dispatch('updateEnableMobileTabs', true);" +
+                    STORE + ".commit('setCapacitorLayoutMode', 'phone');" + STORE + ".commit('setUiScale', 100)");
+                await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton')");
+                // Exercise the actual long-press link menu and tab creation path.
+                evaluate(view, """
+                    (() => {
+                        const link = document.createElement('a');
+                        link.id = 'disable-tabs-link';
+                        link.href = location.href.split('#')[0] + '#/history';
+                        link.textContent = 'History';
+                        document.querySelector('.app').append(link);
+                        link.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+                    })()
+                    """);
+                await(view, "!!document.querySelector('.mobileLinkActions')");
+                clickText(view, ".mobileLinkActions button", "Context Menu.Open in a New Tab");
+                await(view, STORE + ".getters.getActiveTab?.route.path === '/history' && " +
+                    STORE + ".getters.getActiveTab?.loadState === 'loaded' && " + STORE + ".getters.getTabs.length > 1");
+                String currentId = evaluate(view, STORE + ".getters.getPresentedTabId");
+                evaluate(view, STORE + ".dispatch('showSettingsWindow')");
+                await(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
+                evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                await(view, "!!document.querySelector('[data-setting-key=enableMobileTabs] .switch-label')");
+                evaluate(view, "document.querySelector('[data-setting-key=enableMobileTabs] .switch-label').click()");
+                await(view, STORE + ".getters.getEnableMobileTabs === false && " + STORE + ".getters.getTabs.length === 1");
+                assertEquals("The current page survives", currentId, evaluate(view, STORE + ".getters.getPresentedTabId"));
+                assertEquals("No hidden background page or closed-tab history survives", "true", evaluate(view,
+                    "document.querySelectorAll('.tabContent').length === 1 && " + STORE + ".getters.getClosedTabs.length === 0"));
+                evaluate(view, STORE + ".dispatch('hideSettingsWindow')");
+                await(view, "!document.querySelector('.settingsWindow')");
+                for (String layout : new String[] {"phone", "tablet"}) {
+                    for (int scale : new int[] {100, 125}) {
+                        evaluate(view, STORE + ".commit('setCapacitorLayoutMode', '" + layout + "');" +
+                            STORE + ".commit('setUiScale', " + scale + ")");
+                        await(view, "!document.querySelector('.capacitorPhoneTabSwitcher, .capacitorTabletTabBar') && " +
+                            "document.querySelector('.app').classList.contains('capacitor" +
+                            (layout.equals("phone") ? "Phone" : "Tablet") + "Layout')");
+                        assertEquals("No empty tab-strip space", "false", evaluate(view,
+                            "document.querySelector('.app').classList.contains('topTabs')"));
+                        assertEquals("Content clears the fixed header in " + layout + " layout at scale " + scale,
+                            "true", evaluate(view, """
+                                (() => {
+                                    const header = document.querySelector('.topNav').getBoundingClientRect();
+                                    const content = document.querySelector('.app > .routerView').getBoundingClientRect();
+                                    return content.top >= header.bottom - 1 && content.top <= header.bottom + 19;
+                                })()
+                                """));
+                    }
+                }
+                evaluate(view, "document.querySelector('#disable-tabs-link').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                await(view, "!!document.querySelector('.mobileLinkActions')");
+                assertEquals("Long press cannot open a new tab", "false", evaluate(view, """
+                    [...document.querySelectorAll('.mobileLinkActions button')].some(button =>
+                        button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Context Menu.Open in a New Tab'))
+                    """));
+                clickText(view, ".mobileLinkActions button", "Share.Open Link");
+                await(view, "!document.querySelector('.mobileLinkActions')");
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
+                await(view, STORE + ".getters.getPresentedTab.route.path === '/userplaylists'");
+                assertEquals("Ordinary navigation stays in the current page", currentId, evaluate(view, STORE + ".getters.getPresentedTabId"));
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, STORE + ".getters.getPresentedTab.route.path === '/history'");
+                evaluate(view, "location.reload()");
+                await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+                assertEquals("The preference survives restarting the renderer", "true", evaluate(view,
+                    STORE + ".getters.getEnableMobileTabs === false && " + STORE + ".getters.getTabs.length === 1 && " +
+                    "!document.querySelector('.capacitorPhoneTabSwitcher, .capacitorTabletTabBar')"));
+                evaluate(view, STORE + ".dispatch('updateEnableMobileTabs', true);" + STORE + ".commit('setCapacitorLayoutMode', 'phone')");
+                await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton')");
+                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                await(view, "!!document.querySelector('.capacitorPhoneTabDialog')");
+                evaluate(view, "[...document.querySelectorAll('.capacitorPhoneTabDialog button')].find(button => button.title === document.querySelector('#app').__vue_app__.config.globalProperties.$t('New Tab')).click()");
+                await(view, STORE + ".getters.getTabs.length === 2");
+            } finally {
+                evaluate(view, "document.querySelector('#disable-tabs-link')?.remove();" +
+                    "(async () => { const saved = JSON.parse(" + saved + "); const store = " + STORE + ";" +
+                    "await store.dispatch('updateEnableMobileTabs', true); store.commit('setTabsState', saved.tabs);" +
+                    "store.commit('setPresentedTab', saved.tabs.presentedTabId);" +
+                    "store.commit('setCapacitorLayoutMode', saved.layout); store.commit('setUiScale', saved.scale);" +
+                    "await store.dispatch('updateEnableMobileTabs', saved.enabled); window.disableTabsRestored = true; })()");
+                await(view, "window.disableTabsRestored === true");
+            }
+        }
+    }
+
     private static void openPhoneTabHistory(WebView view) throws Exception {
         evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
         await(view, "!!document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')");

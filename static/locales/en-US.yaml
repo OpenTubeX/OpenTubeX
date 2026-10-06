@@ -529,6 +529,7 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Enable Tabs: "Enable Tabs"
     Thumbnail Swipe Gestures:
       Left: Swipe left on thumbnails
       Right: Swipe right on thumbnails
@@ -2678,6 +2679,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Enable Tabs: "Turning this off closes all other tabs and keeps the current page open."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.

@@ -852,7 +852,7 @@ const actions = {
           }
         } else if (event.recipient === settings.syncServerDeviceId &&
             (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
-            !(process.env.IS_CAPACITOR && isAppHidden())) {
+            !(process.env.IS_CAPACITOR && (isAppHidden() || rootState.settings.enableMobileTabs === false))) {
           const receiptKey = `sync-received:${JSON.stringify([settings.syncServerUrl, settings.syncServerUsername, settings.syncServerDeviceId])}`
           let receipts = []
           try { receipts = JSON.parse(localStorage.getItem(receiptKey) ?? '[]') } catch {}

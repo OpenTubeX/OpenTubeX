@@ -263,6 +263,7 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Enable Tabs: "Sekmeleri Etkinleştir"
     Thumbnail Swipe Gestures:
       Left: Küçük resimlerde sola kaydırma
       Right: Küçük resimlerde sağa kaydırma
@@ -1631,6 +1632,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Enable Tabs: "Bu seçeneği kapatmak diğer tüm sekmeleri kapatır ve geçerli sayfayı açık tutar."
     Data Saver Thumbnails: "Veri kullanımını azaltmak için daha düşük çözünürlüklü küçük resimler kullanın."
     Use AI Translation Completions: İnsan çevirilerindeki eksikleri yapay zekâ tarafından oluşturulan metinlerle tamamlar. İnsan çevirileri her zaman önceliklidir.
     Update Relative Timestamps: Sayfa açık kaldığı sürece uygulamadaki göreli zaman damgalarını günceller. Devre dışı bırakıldığında yalnızca sayfa yeniden yüklendiğinde veya ziyaret edildiğinde güncellenir.

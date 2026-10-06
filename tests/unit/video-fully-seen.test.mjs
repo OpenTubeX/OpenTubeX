@@ -101,6 +101,7 @@ test('subscription seen and unseen menu actions are exclusive', () => {
     for (const inSubscriptions of [true, false]) {
       const context = {
         computed: fn => ({ value: fn() }),
+        store: { getters: { getTabsEnabled: true } },
         props: { data: { isNewInSubscriptionFeed: state, isInNewSubscriptionFeed: inSubscriptions } },
         process: { env: {} },
         t: key => key,

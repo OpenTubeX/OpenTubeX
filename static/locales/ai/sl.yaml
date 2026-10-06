@@ -386,6 +386,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Enable Tabs: "Omogoči zavihke"
     Thumbnail Swipe Gestures:
       Left: Podrsanje levo po sličicah
       Right: Podrsanje desno po sličicah
@@ -2119,6 +2120,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Enable Tabs: "Izklop zapre vse druge zavihke in pusti trenutno stran odprto."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.
     Update Relative Timestamps: Posodablja relativne časovne žige po vsej aplikaciji, dokler je stran odprta. Če je možnost izklopljena, se posodobijo šele po ponovnem nalaganju ali obisku strani.

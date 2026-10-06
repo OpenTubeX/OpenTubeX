@@ -55,6 +55,7 @@ function createStore (session, presentedTabId = session.activeTabId) {
     commit (type, payload) {
       if (type === 'setTabsState') runtime = payload
       else if (type === 'setPresentedTab') runtime.presentedTabId = payload
+      else if (type === 'setEnableMobileTabs') getters.getEnableMobileTabs = payload
       else if (type === 'setRememberTabNavigationHistory') getters.getRememberTabNavigationHistory = payload
       else throw new Error(`Unexpected mutation: ${type}`)
       for (const subscriber of subscribers) subscriber({ type, payload })
@@ -691,4 +692,78 @@ test('mobile session writes coalesce across tasks and skip transient tab state',
   assert.equal(writes.length, 2)
   t.mock.timers.tick(250)
   assert.equal(writes.length, 2)
+})
+
+for (const behavior of ['loadAllTabs', 'restoreTabLoadState', 'loadLastActiveTab', 'loadLandingPage', 'emptySession']) {
+  test(`disabled mobile tabs restore a single page with ${behavior}`, async t => {
+    const persisted = createThreeTabSession()
+    persisted.closedTabs = [createCapacitorTab(WATCH_ROUTE, 'Closed video', 'closed')]
+    const storage = globalThis.localStorage
+    let saved = persisted
+    globalThis.localStorage = {
+      getItem: () => JSON.stringify(saved),
+      setItem: (_key, value) => { saved = JSON.parse(value) }
+    }
+    t.after(() => { globalThis.localStorage = storage })
+    const store = createStore(createLoadedSession())
+    store.getters.getEnableMobileTabs = false
+    store.getters.getStartupBehavior = behavior
+    store.getters.getLandingPage = 'subscriptions'
+    const router = createRouter()
+    router.afterEach = () => () => {}
+    const navigation = createNavigation(store, true)
+    navigation.projectRoute = async route => { router.currentRoute.value = route }
+    navigation.restoreScroll = () => {}
+    const service = new CapacitorTabService(router, store, navigation)
+    t.after(() => service.dispose())
+    await service.initialize({ path: '/', fullPath: '/' })
+    assert.equal(store.getters.getTabs.length, 1)
+    assert.equal(saved.tabs.length, 1)
+    assert.equal(store.getters.getActiveTab.route.fullPath,
+      ['loadLandingPage', 'emptySession'].includes(behavior) ? '/subscriptions' : persisted.tabs[1].route.fullPath)
+    assert.equal(store.getters.getClosedTabs.length, 0)
+    assert.equal(saved.closedTabs.length, 0)
+    assert.equal(await service.createTab(WATCH_ROUTE), null)
+    assert.equal(await service.createTab(WATCH_ROUTE, 'Background video', false), null)
+    assert.equal(await service.duplicateTab(store.getters.getActiveTabId), null)
+    assert.equal(await service.restoreClosedTab(), null)
+    const synced = { tabs: [{ id: 'synced', url: 'https://localhost/#/history' }], activeTabId: 'synced' }
+    assert.equal(await service.applySyncSessions([synced]), false)
+    assert.equal(await service.openSyncedSession(synced), false)
+    assert.equal(store.getters.getTabs.length, 1)
+    store.commit('setEnableMobileTabs', true)
+    assert.ok(await service.createTab(WATCH_ROUTE, '', false))
+    assert.equal(store.getters.getTabs.length, 2)
+  })
+}
+
+test('disabling mobile tabs preserves the presented page and history during a pending activation', async t => {
+  const store = createStore(createLoadedSession())
+  const router = createRouter()
+  router.afterEach = () => () => {}
+  const storage = globalThis.localStorage
+  globalThis.localStorage = { getItem: () => null, setItem() {} }
+  t.after(() => { globalThis.localStorage = storage })
+  const navigation = createNavigation(store, true)
+  const service = new CapacitorTabService(router, store, navigation)
+  t.after(() => service.dispose())
+  await service.initialize(HOME_ROUTE)
+  const presented = store.getters.getActiveTab
+  const history = presented.history
+  let resolveActivation
+  navigation.requestPresentation = (tabId) => {
+    if (tabId === presented.id) return Promise.resolve(true)
+    return new Promise(resolve => { resolveActivation = resolve })
+  }
+  const activation = service.createTab(WATCH_ROUTE)
+  assert.equal(store.getters.getTabs.length, 2)
+  assert.notEqual(store.getters.getActiveTabId, presented.id)
+  store.commit('setEnableMobileTabs', false)
+  resolveActivation(false)
+  assert.equal(await activation, null)
+  assert.deepEqual(store.getters.getTabs.map(tab => tab.id), [presented.id])
+  assert.equal(store.getters.getPresentedTabId, presented.id)
+  assert.equal(store.getters.getActiveTabId, presented.id)
+  assert.deepEqual(store.getters.getActiveTab.history, history)
+  assert.equal(store.getters.getClosedTabs.length, 0)
 })

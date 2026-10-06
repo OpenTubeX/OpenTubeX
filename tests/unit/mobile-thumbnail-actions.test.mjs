@@ -12,6 +12,7 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   const end = source.indexOf('\nconst openMobileContextActions', start)
   const calls = []
   const context = { computed, process: { env: { IS_CAPACITOR: true } },
+    store: { getters: reactive({ getTabsEnabled: true }) },
     extraThumbnailActionButton: ref(null), showPlaylists: ref(true),
     isInAnyPlaylist: ref(false), isQuickBookmarkEnabled: ref(true), props: reactive({ quickBookmarkButtonEnabled: true, canMoveVideoUp: false, canMoveVideoDown: false, canRemoveFromPlaylist: false }),
     quickBookmarkIconText: ref('Bookmark'), quickBookmarkIcon: ref(['far', 'bookmark']),
@@ -46,6 +47,9 @@ test('mobile thumbnail actions retain availability, state, and handlers', () => 
   assert.equal(context.actions.value.at(-1).enabled, false)
   context.actions.value.slice(0, 4).forEach(action => action.run())
   assert.deepEqual(calls.slice(2), ['openBackgroundTab', 'up', 'down', 'remove'])
+  context.store.getters.getTabsEnabled = false
+  assert.equal(context.actions.value.length, 4)
+  assert.ok(context.actions.value.every(action => action.label !== 'Context Menu.Open in a Background Tab'))
 })
 
 test('the thumbnail row is reactive and only appears at the root of its mobile menu', async () => {
