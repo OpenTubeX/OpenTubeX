@@ -352,11 +352,17 @@ test.describe('configured gamepad highlight roundness', () => {
     })
     const switchSetting = switchInput.locator('..')
     const switchLabel = switchSetting.locator('.switch-label')
-    const unfocusedSwitchPositions = await switchLabel.evaluate(element => ({
-      textStart: element.querySelector('.switch-label-text').getBoundingClientRect().left,
-      thumbStart: element.getBoundingClientRect().left +
-        Number.parseFloat(getComputedStyle(element, '::after').insetInlineStart)
-    }))
+    const measureSwitchPositions = () => switchLabel.evaluate(element => {
+      const text = element.querySelector('.switch-label-text')
+      const textStart = text.getBoundingClientRect().left
+      const thumbStart = textStart + Number.parseFloat(getComputedStyle(text, '::after').insetInlineStart)
+      return {
+        ringStartPadding: thumbStart - element.getBoundingClientRect().left,
+        textStart,
+        thumbStart
+      }
+    })
+    const unfocusedSwitchPositions = await measureSwitchPositions()
     await page.evaluate(() => (
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showOutlines')
     ))
@@ -366,12 +372,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await expect(switchLabel).toHaveCSS('outline-style', 'solid')
     await expect(switchLabel).toHaveCSS('border-radius', '4px')
     await expect(switchSetting).toHaveCSS('border-left-width', '3px')
-    const focusedSwitchPositions = await switchLabel.evaluate(element => ({
-      ringStartPadding: Number.parseFloat(getComputedStyle(element, '::after').insetInlineStart),
-      textStart: element.querySelector('.switch-label-text').getBoundingClientRect().left,
-      thumbStart: element.getBoundingClientRect().left +
-        Number.parseFloat(getComputedStyle(element, '::after').insetInlineStart)
-    }))
+    const focusedSwitchPositions = await measureSwitchPositions()
     expect(focusedSwitchPositions.ringStartPadding).toBeGreaterThanOrEqual(5)
     expect(focusedSwitchPositions.textStart).toBeCloseTo(unfocusedSwitchPositions.textStart)
     expect(focusedSwitchPositions.thumbStart).toBeCloseTo(unfocusedSwitchPositions.thumbStart)
