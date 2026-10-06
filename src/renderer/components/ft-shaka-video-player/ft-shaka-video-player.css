@@ -2646,6 +2646,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .sponsorBlockSubmissionMenu {
+  --sponsorblock-submission-surface: rgb(24 24 24);
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2654,7 +2656,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding: 10px 12px 12px;
   border: 1px solid rgb(255 255 255 / 14%);
   border-radius: calc(10px * var(--ui-roundness));
-  background-color: rgb(24 24 24 / 96%);
+  background-color: var(--sponsorblock-submission-surface);
   color: #fff;
   box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
 }
@@ -2797,7 +2799,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
   inset-block-start: 0;
-  background-color: rgb(24 24 24);
+  background-color: var(--sponsorblock-submission-surface);
 }
 
 :deep(.sponsorBlockDraftCategory .select-bar::before),
