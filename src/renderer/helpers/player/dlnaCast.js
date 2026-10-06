@@ -1,9 +1,10 @@
 import { registerPlugin } from '@capacitor/core'
 import { isDlnaSourceUrl } from './dlnaSource.js'
+import { playbackScreenWake } from '../playbackScreenWake.js'
 import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
 
 /** Native networking keeps multicast and streaming bytes outside the WebView. */
-export function createMobileDlnaCast(native) {
+export function createMobileDlnaCast(native, screenWake = playbackScreenWake) {
   const devices = new Map()
   let activeCast = null
   let starting = false
@@ -74,7 +75,7 @@ export function createMobileDlnaCast(native) {
             await send(device, 'Seek', { InstanceID: 0, Unit: 'REL_TIME', Target: formatDlnaTime(payload.startSeconds) })
           } catch { /* Seeking is optional on DLNA renderers. */ }
         }
-        activeCast = { device, castId: relay.castId }
+        activeCast = { device, castId: relay.castId, releaseWake: screenWake?.acquire() }
         return { castId: relay.castId, deviceName: device.name }
       } catch (error) {
         if (didSetUri) {
@@ -115,6 +116,7 @@ export function createMobileDlnaCast(native) {
         await native.stopMediaServer({ castId })
         return true
       } finally {
+        cast.releaseWake?.()
         stopping = false
       }
     }
