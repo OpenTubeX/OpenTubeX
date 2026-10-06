@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { setImmediate } from 'node:timers/promises'
 
 import { createMobileDlnaCast } from '../../src/renderer/helpers/player/dlnaCast.js'
+import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
 import { parseDlnaPosition, parseSsdpLocation } from '../../src/dlnaProtocol.js'
 
 const location = 'http://192.168.1.7:8000/device.xml'
@@ -11,7 +13,7 @@ const description = `<root><device><deviceType>urn:schemas-upnp-org:device:Media
 <controlURL>/control</controlURL></service></serviceList></device></root>`
 const payload = { deviceId: location, mediaUrl: 'https://media.example/video.mp4', title: 'A & B', startSeconds: 65.8 }
 
-function fixture() {
+function fixture(screenWake) {
   const calls = []
   let failure
   let streamFailed = false
@@ -38,12 +40,67 @@ function fixture() {
     async stopMediaServer(options) { calls.push({ stop: options }) }
   }
   return {
-    cast: createMobileDlnaCast(native), calls, native,
+    cast: createMobileDlnaCast(native, screenWake), calls, native,
     fail(action) { failure = action },
     failStream() { streamFailed = true },
     delayStop(promise) { finishStop = promise }
   }
 }
+
+test('a mobile relay keeps the foreground screen awake after local video pauses and releases on stop', async () => {
+  const wakeCalls = []
+  const wake = createPlaybackScreenWake({
+    async keepAwake() { wakeCalls.push('awake') },
+    async allowSleep() { wakeCalls.push('sleep') }
+  })
+  const video = Object.assign(new EventTarget(), { paused: false, ended: false })
+  const binding = wake.bindVideo(video, () => true)
+  wake.setAppActive(true)
+  const { cast } = fixture(wake)
+  await cast.discover()
+  await cast.start(payload)
+  video.paused = true
+  video.dispatchEvent(new Event('pause'))
+  await setImmediate()
+  assert.equal(wakeCalls.at(-1), 'awake', 'pausing local playback must not allow the casting phone to auto-lock')
+  wake.setAppActive(false)
+  await setImmediate()
+  assert.equal(wakeCalls.at(-1), 'sleep')
+  wake.setAppActive(true)
+  await setImmediate()
+  assert.equal(wakeCalls.at(-1), 'awake', 'returning to the relay reacquires screen wake')
+  assert.equal(await cast.stop('wrong-cast'), false)
+  await setImmediate()
+  assert.equal(wakeCalls.at(-1), 'awake')
+  await cast.stop('cast-1')
+  await setImmediate()
+  assert.equal(wakeCalls.at(-1), 'sleep')
+  binding.destroy()
+})
+
+test('failed mobile cast startup and failed relay teardown leave sleep allowed', async () => {
+  const calls = []
+  const wake = createPlaybackScreenWake({
+    async keepAwake() { calls.push('awake') },
+    async allowSleep() { calls.push('sleep') }
+  })
+  wake.setAppActive(true)
+  const setup = fixture(wake)
+  await setup.cast.discover()
+  setup.fail('Play')
+  assert.ok((await setup.cast.start(payload)).error)
+  await setImmediate()
+  assert.equal(calls.at(-1), 'sleep')
+  assert.equal(calls.includes('awake'), false)
+  setup.fail(undefined)
+  await setup.cast.start(payload)
+  await setImmediate()
+  assert.equal(calls.at(-1), 'awake')
+  setup.native.stopMediaServer = async () => { throw new Error('relay closed') }
+  await assert.rejects(setup.cast.stop('cast-1'), /relay closed/)
+  await setImmediate()
+  assert.equal(calls.at(-1), 'sleep')
+})
 
 function actions(calls) {
   return calls.filter(call => call.method === 'POST').map(call => call.headers.SOAPACTION.split('#')[1].slice(0, -1))
