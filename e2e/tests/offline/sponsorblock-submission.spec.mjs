@@ -2,6 +2,31 @@ import { setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+async function expectMatchingLabelSurfaces(page) {
+  const screenshot = await page.screenshot()
+  const difference = await page.evaluate(async screenshotBase64 => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${screenshotBase64}`
+    await image.decode()
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const context = canvas.getContext('2d')
+    context.drawImage(image, 0, 0)
+    // Electron captures retain native zoom; DOM bounds need device-pixel coordinates.
+    const scale = window.devicePixelRatio
+    const sample = (x, y) => context.getImageData(Math.floor(x * scale), Math.floor(y * scale), 1, 1).data
+    return Math.max(...[...document.querySelectorAll('.sponsorBlockDraftCategory .select-label')].flatMap(label => {
+      const bounds = label.getBoundingClientRect()
+      // Sample the label's empty padding and the panel just above its cutout.
+      const cutout = sample(bounds.left + 2, bounds.top + bounds.height / 2)
+      const panel = sample(bounds.left + 2, bounds.top - 2)
+      return [0, 1, 2].map(channel => Math.abs(cutout[channel] - panel[channel]))
+    }))
+  }, screenshot.toString('base64'))
+  expect(difference).toBeLessThanOrEqual(1)
+}
+
 for (const uiScale of [100, 95]) {
   test.describe(`SponsorBlock submission at ${uiScale}% UI scale`, () => {
     test.use({
@@ -28,9 +53,12 @@ for (const uiScale of [100, 95]) {
         element.pause()
         element.currentTime = 0
       })
-      await page.locator('.sponsorblock-start-button').click({ force: true })
+      await page.locator('.ftVideoPlayer').hover()
+      await page.locator('.sponsorblock-start-button').click()
       await video.evaluate(element => { element.currentTime = 10 })
-      await page.locator('.sponsorblock-end-button').click({ force: true })
+      await page.locator('.ftVideoPlayer').hover()
+      await page.locator('.sponsorblock-end-button').click()
+      await video.evaluate(element => { element.style.filter = 'brightness(0) invert(1)' })
 
       const menu = page.locator('.sponsorBlockSubmissionMenu')
       await expect(menu).toBeVisible()
@@ -50,6 +78,7 @@ for (const uiScale of [100, 95]) {
             return Math.abs(labelBounds.top + labelBounds.height / 2 - selectBounds.top)
           })).toBeLessThan(1)
         }
+        if (size.width === 1200) await expectMatchingLabelSurfaces(page)
         await expect.poll(() => menu.evaluate(element => {
           const selects = element.querySelectorAll('.sponsorBlockDraftCategory')
           const first = selects[0].getBoundingClientRect()
