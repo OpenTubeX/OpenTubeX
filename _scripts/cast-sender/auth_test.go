@@ -165,6 +165,40 @@ func TestLegacySHA1ChallengeResponse(t *testing.T) {
 	}
 }
 
+func TestNonceLessLegacyChallengeResponse(t *testing.T) {
+	device, intermediate, _, key, roots := authFixture(t)
+	nonce, peer := []byte("fresh challenge nonce"), []byte("TLS certificate DER")
+	for _, scenario := range []string{"valid", "changed TLS certificate", "bad signature", "untrusted", "expired", "wrong nonempty nonce"} {
+		t.Run(scenario, func(t *testing.T) {
+			response := signedResponse(t, device, intermediate, key, nil, peer)
+			response.HashAlgorithm = nil
+			digest := sha1.Sum(peer)
+			var err error
+			response.Signature, err = rsa.SignPKCS1v15(rand.Reader, key, crypto.SHA1, digest[:])
+			if err != nil {
+				t.Fatal(err)
+			}
+			pool, now, peerDER := roots, time.Now(), peer
+			switch scenario {
+			case "changed TLS certificate":
+				peerDER = []byte("other TLS certificate")
+			case "bad signature":
+				response.Signature[0] ^= 1
+			case "untrusted":
+				pool = castRoots()
+			case "expired":
+				now = now.Add(48 * time.Hour)
+			case "wrong nonempty nonce":
+				response.SenderNonce = []byte("other nonce")
+			}
+			err = verifyReceiver(response, nonce, peerDER, pool, now)
+			if (err == nil) != (scenario == "valid") {
+				t.Fatalf("unexpected nonce-less verification result: %v", err)
+			}
+		})
+	}
+}
+
 func TestDeviceAuthenticationVerification(t *testing.T) {
 	device, intermediate, _, key, roots := authFixture(t)
 	nonce, peerDER := []byte("challenge nonce!"), []byte("TLS certificate DER")

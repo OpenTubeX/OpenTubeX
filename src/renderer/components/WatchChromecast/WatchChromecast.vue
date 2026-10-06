@@ -18,6 +18,7 @@
 import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { selectCastSource } from '../../helpers/player/castSource'
@@ -38,6 +39,8 @@ const props = defineProps({
 const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'ended'])
 const { t } = useI18n()
 const store = useStore()
+const route = useRoute()
+const watchPath = route.path
 const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
@@ -49,6 +52,7 @@ const deviceName = ref('')
 const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, muted: false, activeTrackIds: [] })
 const castCaptions = ref([])
 let disposed = false
+let disposedPlayer = null
 let pollTimer
 const resolvedSource = shallowRef(null)
 const source = computed(() => resolvedSource.value ?? selectCastSource(props.formats, props.manifestUrl, props.manifestType))
@@ -115,10 +119,10 @@ async function refreshDevices() {
 }
 
 function releaseLocalPlayer(position, resume) {
-  if (disposed) return
   const player = props.getPlayer()
+  if (disposed && (!disposedPlayer || player !== disposedPlayer || route.path !== watchPath)) return
   if (Number.isFinite(position)) player?.setCurrentTime(position)
-  emit('casting-change', false)
+  if (!disposed) emit('casting-change', false)
   if (resume) player?.play()?.catch(reportError)
 }
 
@@ -152,19 +156,24 @@ async function poll() {
   if (castId.value && !disposed) pollTimer = setTimeout(poll, 1000)
 }
 
+let stopPromise = null
 async function stopCasting(resume = true) {
+  if (stopPromise) return stopPromise
   const id = castId.value
   if (!id) return
   clearTimeout(pollTimer)
   const previous = status.value
-  try {
-    const result = await window.ftElectron.chromecast.stop(id)
-    status.value = { ...previous, ...result }
-    if (!disposed) emit('playback-state', status.value)
-  } finally {
-    castId.value = null
-    releaseLocalPlayer(status.value.currentTime, resume && !status.value.paused && !previous.ended)
-  }
+  stopPromise = (async () => {
+    try {
+      const result = await window.ftElectron.chromecast.stop(id)
+      status.value = { ...previous, ...result }
+      if (!disposed) emit('playback-state', status.value)
+    } finally {
+      castId.value = null
+      releaseLocalPlayer(status.value.currentTime, resume && !status.value.paused && !previous.ended)
+    }
+  })()
+  try { await stopPromise } finally { stopPromise = null }
 }
 
 async function handleChoice(choice) {
@@ -247,10 +256,12 @@ async function handleChoice(choice) {
 defineExpose({ stopCasting })
 
 onBeforeUnmount(() => {
+  // Capture the original player before Vue clears refs; navigation never resumes it.
+  disposedPlayer = props.getPlayer()
+  stopCasting().catch(console.error)
   disposed = true
   emit('busy-change', false)
   emit('casting-change', false)
   clearTimeout(pollTimer)
-  stopCasting(false).catch(console.error)
 })
 </script>

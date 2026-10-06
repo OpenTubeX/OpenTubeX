@@ -147,10 +147,12 @@ export function rewriteCastDash(xml, base, register) {
   function render(node, inheritedBases) {
     if (typeof node === 'string') return escapeXml(node)
     const name = node.name.split(':').at(-1)
-    if (['Location', 'PatchLocation'].includes(name)) {
+    // Patch operations need the original MPD context to resolve their URLs.
+    // Use full MPD refreshes until the relay supports that context.
+    if (name === 'PatchLocation') return ''
+    if (name === 'Location') {
       // Manifest refreshes resolve against the original document, not media BaseURL.
-      const url = register(httpUrl(node.children.join('').trim(), base).href,
-        name === 'Location' ? 'application/dash+xml' : 'application/dash-patch+xml')
+      const url = register(httpUrl(node.children.join('').trim(), base).href, 'application/dash+xml')
       return `<${node.name}${renderAttributes(node, [base])}>${escapeXml(url)}</${node.name}>`
     }
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
@@ -167,11 +169,41 @@ export function rewriteCastDash(xml, base, register) {
   return root.children.map(node => render(node, [base])).join('')
 }
 
-export function rewriteCastHls(text, base, register) {
+export function rewriteCastHls(text, base, register, parentVariables = {}) {
   if (text.length > MAX_MANIFEST_SIZE || !text.trimStart().startsWith('#EXTM3U')) throw new Error('Invalid Cast HLS manifest')
+  const variables = new Map()
+  let variableSnapshot = {}
+  function substitute(value) {
+    return value.replaceAll(/\{\$([a-zA-Z0-9_-]+)\}/g, (_, name) => {
+      if (!variables.has(name)) throw new Error('Undefined HLS variable')
+      return variables.get(name)
+    })
+  }
+  function resource(value) {
+    // Resolve variables before URL parsing; keep the receiver on exact resources.
+    return register(httpUrl(value, base).href, undefined, variableSnapshot)
+  }
   return text.split('\n').map(line => {
-    if (line.trim() && !line.startsWith('#')) return register(httpUrl(line.trim(), base).href)
-    return line.replaceAll(/URI="([^"]+)"/g, (_, url) => `URI="${register(httpUrl(url, base).href)}"`)
+    if (line.startsWith('#EXT-X-DEFINE:')) {
+      const attributes = Object.fromEntries([...line.matchAll(/([A-Z]+)="([^"]*)"/g)].map(([, name, value]) => [name, substitute(value)]))
+      const definitions = ['NAME', 'IMPORT', 'QUERYPARAM'].filter(name => Object.hasOwn(attributes, name))
+      if (definitions.length !== 1) throw new Error('Invalid HLS variable definition')
+      const name = attributes[definitions[0]]
+      let value
+      if (definitions[0] === 'NAME') value = attributes.VALUE
+      else if (definitions[0] === 'IMPORT') value = Object.hasOwn(parentVariables, name) ? parentVariables[name] : undefined
+      else value = new URL(base).searchParams.get(name) ?? undefined
+      if (!/^[a-zA-Z0-9_-]+$/.test(name) || variables.has(name) || value === undefined || /["\r\n]/.test(value)) {
+        throw new Error('Invalid HLS variable definition')
+      }
+      variables.set(name, value)
+      variableSnapshot = Object.fromEntries(variables)
+      // Definitions, imports and query parameters have already been consumed.
+      return ''
+    }
+    if (line.trim() && !line.startsWith('#')) return resource(substitute(line.trim()))
+    return line.replaceAll(/"([^"\r\n]*)"/g, (_, value) => `"${substitute(value)}"`)
+      .replaceAll(/URI="([^"]+)"/g, (_, url) => `URI="${resource(url)}"`)
   }).join('\n')
 }
 
@@ -179,8 +211,24 @@ export function rewriteCastHls(text, base, register) {
 export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch) {
   const resources = []
   const resourceIds = new Map()
+  const hlsContexts = new Map()
+  const hlsContextCache = new WeakMap()
   let origin
-  function register(value, contentType) {
+  function register(value, contentType, hlsVariables) {
+    let context
+    if (hlsVariables) {
+      context = hlsContextCache.get(hlsVariables)
+      if (!context) {
+        const key = JSON.stringify(hlsVariables)
+        context = hlsContexts.get(key)
+        if (!context) {
+          if (hlsContexts.size >= MAX_RESOURCES) throw new Error('Too many Cast HLS variable contexts')
+          context = { id: hlsContexts.size, variables: hlsVariables }
+          hlsContexts.set(key, context)
+        }
+        hlsContextCache.set(hlsVariables, context)
+      }
+    }
     const values = Array.isArray(value) ? value : [value]
     const candidates = values.map(value => {
       if (value.startsWith('data:')) {
@@ -191,7 +239,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           throw new Error('Unsupported Cast data URL')
         }
       } else httpUrl(value)
-      const template = !value.startsWith('data:') && value.includes('$')
+      const template = !hlsVariables && !value.startsWith('data:') && value.includes('$')
       const url = template ? httpUrl(value) : null
       const firstPlaceholder = url?.pathname.indexOf('$') ?? -1
       const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
@@ -200,13 +248,13 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : 'media'
       }
     })
-    const key = JSON.stringify(candidates)
+    const key = JSON.stringify([candidates, context?.id])
     let id = resourceIds.get(key)
     if (id === undefined) {
       if (resources.length >= MAX_RESOURCES) throw new Error('Too many Cast resources')
       id = resources.length
       resourceIds.set(key, id)
-      resources.push({ urls: candidates.map(candidate => candidate.url), contentType })
+      resources.push({ urls: candidates.map(candidate => candidate.url), contentType, hlsVariables: context?.variables })
     }
     return `${origin}/${token}/${id}/${candidates[0].suffix}`
   }
@@ -296,7 +344,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           ? data
           : contentType === 'application/dash+xml'
             ? rewriteCastDash(data, url?.href, register)
-            : rewriteCastHls(data, url.href, register)
+            : rewriteCastHls(data, url.href, register, resource.hlsVariables)
         response.writeHead(200, { ...cors, 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
         response.end(request.method === 'HEAD' ? undefined : rewritten)
         return

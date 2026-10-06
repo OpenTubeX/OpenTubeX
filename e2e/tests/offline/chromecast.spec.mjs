@@ -110,6 +110,28 @@ test('casts the current video, controls the receiver and returns to its remote p
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
+for (const outcome of ['playing', 'paused', 'stop failure']) {
+  test(`removing the Cast control restores local playback after ${outcome}`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate(vm => vm.$refs.player.play())
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+    await choice(page, 'Test TV')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    await app.electronApp.evaluate(outcome => {
+      globalThis.castTest.state.currentTime = 18
+      globalThis.castTest.state.paused = outcome === 'paused'
+      globalThis.castTest.failStop = outcome === 'stop failure'
+    }, outcome)
+    await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus.currentTime)).toBe(18)
+    await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
+    await expect(page.locator('.chromecastControl')).toHaveCount(0)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(18)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(outcome === 'paused')
+    await expect.poll(() => watch.evaluate(vm => vm.chromecastActive)).toBe(false)
+    expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+  })
+}
+
 test('casts from the current Invidious instance without a saved default', async ({ app, page }) => {
   await mockCast(app)
   await mockPlayableWatchPage(app, page)
@@ -146,6 +168,12 @@ test('casts from the current Invidious instance without a saved default', async 
   }))
   const defaultInstance = await page.evaluate(async url => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    // Keep an in-flight startup list refresh inside this fixture's instance set.
+    store.subscribe(({ type, payload }) => {
+      if (type === 'setInvidiousInstancesList' && (payload.length !== 1 || payload[0] !== url)) {
+        store.commit('setInvidiousInstancesList', [url])
+      }
+    })
     await Promise.all([
       store.dispatch('updateBackendPreference', 'invidious'),
       store.dispatch('updateDefaultInvidiousInstance', ''),
@@ -260,7 +288,7 @@ for (const outcome of ['success', 'reported failure', 'thrown failure']) {
 }
 
 test('Cast controls fit a narrow window at fractional UI scale and stop on navigation', async ({ app, page }) => {
-  await openCastVideo(app, page)
+  const watch = await openCastVideo(app, page)
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
   await setWindowSize(app, page, { width: 600, height: 850 })
   await choice(page, 'Test TV')
@@ -272,8 +300,15 @@ test('Cast controls fit a narrow window at fractional UI scale and stop on navig
   expect(bounds.x).toBeGreaterThanOrEqual(0)
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + 1)
   await page.keyboard.press('Escape')
+  await watch.evaluate(vm => {
+    const player = vm.$refs.player
+    const play = player.play.bind(player)
+    window.castResumeCalls = 0
+    player.play = (...args) => { window.castResumeCalls++; return play(...args) }
+  })
   await goTo(page, 'history')
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+  expect(await page.evaluate(() => window.castResumeCalls)).toBe(0)
 })
 
 test('packaged sender discovers and plays on the selected authenticated Cast receiver', async ({ app, page }) => {

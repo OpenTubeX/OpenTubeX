@@ -118,7 +118,9 @@ func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *
 }
 
 func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.CertPool, now time.Time) error {
-	if !bytes.Equal(response.SenderNonce, nonce) || (response.HashAlgorithm != nil && *response.HashAlgorithm > 1) ||
+	// Older receivers omit the nonce and sign only the short-lived TLS certificate.
+	// A returned nonce must still match the fresh challenge.
+	if (len(response.SenderNonce) != 0 && !bytes.Equal(response.SenderNonce, nonce)) || (response.HashAlgorithm != nil && *response.HashAlgorithm > 1) ||
 		(response.SignatureAlgorithm != nil && *response.SignatureAlgorithm != 1) {
 		return fmt.Errorf("invalid Cast authentication challenge response")
 	}
@@ -153,7 +155,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 			}
 		}
 	}
-	signed := append(append([]byte{}, nonce...), peerDER...)
+	signed := append(append([]byte{}, response.SenderNonce...), peerDER...)
 	hash, digest := crypto.SHA256, sha256.New()
 	// Request SHA256, but verify legacy replies using their declared hash.
 	// The protocol defaults an omitted hash_algorithm to SHA1.

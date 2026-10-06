@@ -350,9 +350,9 @@ test('rewrites DASH manifest locations against the document URL while preserving
   const xml = '<dash:MPD xmlns:dash="urn:mpeg:dash:schema:mpd:2011"><dash:BaseURL>https://media.test/segments/</dash:BaseURL><dash:Location serviceLocation="A&amp;B"> next?x=1&amp;y=2 </dash:Location><dash:Location>https://other.test/updated.mpd</dash:Location><dash:PatchLocation ttl="60">patch.xml</dash:PatchLocation></dash:MPD>'
   const urls = []
   const result = rewriteCastDash(xml, 'https://instance.test/live/start.mpd', url => { urls.push(url); return `http://cast.test/${urls.length}` })
-  assert.deepEqual(urls, ['https://media.test/segments/', 'https://instance.test/live/next?x=1&y=2', 'https://other.test/updated.mpd', 'https://instance.test/live/patch.xml'])
+  assert.deepEqual(urls, ['https://media.test/segments/', 'https://instance.test/live/next?x=1&y=2', 'https://other.test/updated.mpd'])
   assert.match(result, /<dash:Location serviceLocation="A&amp;B">http:\/\/cast.test\/2<\/dash:Location>/)
-  assert.match(result, /<dash:PatchLocation ttl="60">http:\/\/cast.test\/4<\/dash:PatchLocation>/)
+  assert.ok(!result.includes('PatchLocation'))
   assert.throws(() => rewriteCastDash('<MPD><Location>file:///manifest</Location></MPD>', undefined, () => ''), /Unsupported/)
 })
 
@@ -362,8 +362,8 @@ test('dynamic DASH refreshes keep scoped credentials and rewrite the refreshed m
     requests.push([request.url, request.headers.authorization])
     if (request.headers.authorization !== 'Bearer scoped-test') return response.writeHead(401).end()
     const xml = request.url === '/live/start'
-      ? '<MPD type="dynamic"><BaseURL>https://media.test/segments/</BaseURL><Location>next</Location></MPD>'
-      : '<MPD type="dynamic"><Location>third</Location></MPD>'
+      ? '<MPD type="dynamic"><BaseURL>https://media.test/segments/</BaseURL><Location>next</Location><PatchLocation>patch.mpp</PatchLocation></MPD>'
+      : '<MPD type="dynamic"><Location>third</Location><PatchLocation>next-patch.mpp</PatchLocation></MPD>'
     response.writeHead(200, { 'content-type': 'application/dash+xml' }).end(xml)
   })
   const origin = await listen(upstream)
@@ -374,12 +374,74 @@ test('dynamic DASH refreshes keep scoped credentials and rewrite the refreshed m
   media.setOrigin(relayOrigin)
   t.after(() => close(media.server))
   const initial = await (await fetch(media.mediaUrl())).text()
+  assert.ok(!initial.includes('PatchLocation'))
   const location = initial.match(/<Location>([^<]+)<\/Location>/)[1]
   assert.equal(new URL(location).origin, relayOrigin)
   const refreshed = await fetch(location)
   assert.equal(refreshed.status, 200)
-  assert.match(await refreshed.text(), new RegExp(`<Location>${relayOrigin}/token/\\d+/media</Location>`))
+  const refreshedBody = await refreshed.text()
+  assert.ok(!refreshedBody.includes('PatchLocation'))
+  assert.match(refreshedBody, new RegExp(`<Location>${relayOrigin}/token/\\d+/media</Location>`))
   assert.deepEqual(requests, [['/live/start', 'Bearer scoped-test'], ['/live/next', 'Bearer scoped-test']])
+})
+
+test('DASH patch locations are omitted while full manifest refreshes remain relayed', () => {
+  const urls = []
+  const xml = '<MPD type="dynamic"><Location>next.mpd</Location><PatchLocation ttl="60">patch.mpp</PatchLocation></MPD>'
+  const result = rewriteCastDash(xml, 'https://media.test/live/start.mpd', url => { urls.push(url); return 'http://cast.test/full' })
+  assert.ok(!result.includes('PatchLocation'))
+  assert.match(result, /<Location>http:\/\/cast.test\/full<\/Location>/)
+  assert.deepEqual(urls, ['https://media.test/live/next.mpd'])
+})
+
+test('HLS variable substitution covers URI lines, keys, imported values and original query parameters', () => {
+  const urls = []
+  const playlist = '#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-DEFINE:IMPORT="token"\n#EXT-X-DEFINE:QUERYPARAM="key"\n#EXT-X-KEY:METHOD=AES-128,URI="key-{$key}"\n#EXTINF:5,\nsegment-{$id}.ts?token={$token}\n'
+  const result = rewriteCastHls(playlist, 'https://media.test/live/main.m3u8?key=secret%20value', url => { urls.push(url); return `http://cast.test/${urls.length}` }, { token: 'scoped' })
+  assert.deepEqual(urls, ['https://media.test/live/key-secret%20value', 'https://media.test/live/segment-720.ts?token=scoped'])
+  assert.ok(!result.includes('EXT-X-DEFINE'))
+  assert.match(result, /URI="http:\/\/cast.test\/1"/)
+  assert.match(result, /\nhttp:\/\/cast.test\/2\n/)
+  assert.throws(() => rewriteCastHls('#EXTM3U\n{$missing}.ts', 'https://media.test/live/', () => ''), /variable/)
+})
+
+test('HLS relay resources isolate import contexts and do not interpret substituted values as templates', async t => {
+  const media = createCastMediaServer({ url: 'https://media.test/master.m3u8' }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const first = media.register('https://media.test/child.m3u8', undefined, { token: 'first' })
+  const second = media.register('https://media.test/child.m3u8', undefined, { token: 'second' })
+  assert.notEqual(first, second)
+  assert.equal(media.register('https://media.test/child.m3u8', undefined, { token: 'first' }), first)
+  const literal = rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:IMPORT="literal"\n{$literal}\n', 'https://media.test/live/', media.register, { literal: 'segment-{$other}.ts' }).trim().split('\n').at(-1)
+  assert.ok(literal.endsWith('/media'))
+  assert.equal((await fetch(literal.replace('/media', '/different.ts'))).status, 502)
+  assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:QUERYPARAM="absent"\n', 'https://media.test/live/', () => ''), /variable/)
+  assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:IMPORT="absent"\n', 'https://media.test/live/', () => ''), /variable/)
+  assert.throws(() => rewriteCastHls('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="1"\n#EXT-X-DEFINE:NAME="id",VALUE="2"\n', 'https://media.test/live/', () => ''), /variable/)
+})
+
+test('HLS child playlists retain imported variables across the relay', async t => {
+  const requests = []
+  const upstream = createServer((request, response) => {
+    requests.push(request.url)
+    if (request.url === '/master.m3u8') return response.writeHead(200, { 'content-type': 'application/x-mpegurl' }).end('#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nvideo.m3u8\n')
+    if (request.url === '/video.m3u8') return response.writeHead(200, { 'content-type': 'application/x-mpegurl' }).end('#EXTM3U\n#EXT-X-DEFINE:IMPORT="id"\n#EXTINF:5,\nsegment-{$id}.ts\n')
+    if (request.url === '/segment-720.ts') return response.writeHead(200, { 'content-type': 'video/mp2t' }).end('segment')
+    response.writeHead(404).end()
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/master.m3u8` }, '127.0.0.1', 'token', () => ({}), () => true)
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const master = await (await fetch(media.mediaUrl())).text()
+  const child = master.trim().split('\n').at(-1)
+  const playlist = await (await fetch(child)).text()
+  const segment = await fetch(playlist.trim().split('\n').at(-1))
+  assert.equal(segment.status, 200)
+  assert.equal(await segment.text(), 'segment')
+  assert.deepEqual(requests, ['/master.m3u8', '/video.m3u8', '/segment-720.ts'])
 })
 
 test('rewrites HLS variants, segments, initialization maps and keys', () => {
