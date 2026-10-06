@@ -1987,7 +1987,11 @@ test.describe('settings', () => {
     const content = page.locator('.settingsContent')
     await content.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => content.evaluate(element => Math.abs(
+      element.scrollHeight - element.clientHeight - element.scrollTop
+    ))).toBeLessThanOrEqual(1)
     const scrollTop = await content.evaluate(element => element.scrollTop)
+    const appearanceRange = await content.evaluate(element => element.scrollHeight - element.clientHeight)
 
     await pressSettingsShortcut(app)
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -1997,8 +2001,26 @@ test.describe('settings', () => {
       await content.evaluate(element => element.scrollTop) - scrollTop
     )).toBeLessThanOrEqual(1)
 
-    await page.locator('.settingsMenu [data-section="playback"]').click()
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+    await expect(content.locator(':scope > [data-section="privacy"]')).toBeVisible()
     await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0)
+    await expect.poll(() => content.evaluate(element => element.scrollHeight - element.clientHeight))
+      .toBeLessThan(appearanceRange)
+    await expect.poll(() => content.evaluate(element => {
+      const section = element.querySelector(':scope > [data-section="privacy"]')
+      const renderedEnd = section.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+        element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
+      const maximum = Math.max(0, renderedEnd - element.clientHeight)
+      const nativeRange = element.scrollHeight - element.clientHeight
+      if (Math.abs(nativeRange - maximum) > 1) return false
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      if (maximum <= 1) return scrollbar.classList.contains('os-scrollbar-unusable')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return !scrollbar.classList.contains('os-scrollbar-unusable') &&
+        Math.abs(thumb.top - track.top) <= 1 &&
+        Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+    }), { message: 'the shorter category has no retained empty range and its thumb matches the rendered content' }).toBe(true)
   })
 
   test('minimizes utility windows into the header and restores their view', async ({ page }) => {
