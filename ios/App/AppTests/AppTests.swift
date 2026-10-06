@@ -178,6 +178,50 @@ final class AppTests: XCTestCase {
         try await verifyDlnaMergedFixture(videoResource: "fixture")
     }
 
+    func testDlnaMergedWriteTimeoutReportsFailure() async throws {
+        let failed = expectation(description: "Stalled merged transfer requests recovery")
+        let sent = expectation(description: "Write deadline expires")
+        let listener = try makeLoopbackListener()
+        var peer: NWConnection?
+        let accepted = expectation(description: "Nonreading TV connected")
+        listener.newConnectionHandler = { connection in
+            peer = connection
+            connection.start(queue: .main)
+            accepted.fulfill()
+        }
+        try await startLoopbackListener(listener)
+        defer { peer?.cancel(); listener.cancel() }
+        let connection = NWConnection(host: "127.0.0.1", port: try XCTUnwrap(listener.port), using: .tcp)
+        let request = URLRequest(url: URL(string: "http://127.0.0.1/video")!)
+        let transfer = DlnaTransfer(connection, media: request, audio: request, startSeconds: 0, path: "/video", failure: { failed.fulfill() }, complete: {})
+        defer { transfer.close() }
+        await fulfillment(of: [accepted], timeout: 5)
+        DispatchQueue.global().async {
+            XCTAssertFalse(transfer.send(Data(repeating: 0, count: 16 * 1024 * 1024), timeout: .milliseconds(100)))
+            sent.fulfill()
+        }
+        await fulfillment(of: [sent, failed], timeout: 3)
+    }
+
+    func testDlnaCancelledMuxDoesNotOpenUpstreamRequests() async throws {
+        let unexpected = expectation(description: "Cancelled mux must not fetch tracks")
+        unexpected.isInverted = true
+        let source = try await loopbackServer { _, connection in
+            unexpected.fulfill()
+            connection.cancel()
+        }
+        defer { source.cancel() }
+        let request = URLRequest(url: URL(string: "http://127.0.0.1:\(try XCTUnwrap(source.port).rawValue)/video")!)
+        let muxer = DlnaMuxer()
+        muxer.cancel()
+        try await Task.detached {
+            XCTAssertThrowsError(try muxer.stream(video: request, audio: request, startSeconds: 1) { _ in true }) {
+                XCTAssertEqual(($0 as? URLError)?.code, .cancelled)
+            }
+        }.value
+        await fulfillment(of: [unexpected], timeout: 0.5)
+    }
+
     func testDlnaMergedDurationUsesFragmentSamples() async throws {
         try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2)
     }

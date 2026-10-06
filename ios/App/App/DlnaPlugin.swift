@@ -62,7 +62,7 @@ private final class DlnaRequest: NSObject, URLSessionDataDelegate {
 
 // URLSession and Network stream each response with backpressure. Video bytes
 // never enter the Capacitor bridge or accumulate as a complete response.
-private final class DlnaTransfer: NSObject, URLSessionDataDelegate {
+final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private let connection: NWConnection
     private let media: URLRequest
     private let audio: URLRequest?
@@ -166,14 +166,19 @@ private final class DlnaTransfer: NSObject, URLSessionDataDelegate {
         task?.resume()
     }
 
-    private func send(_ data: Data) -> Bool {
+    func send(_ data: Data, timeout: DispatchTimeInterval = .seconds(30)) -> Bool {
         let done = DispatchSemaphore(value: 0)
         var succeeded = false
         connection.send(content: data, completion: .contentProcessed { error in
             succeeded = error == nil
             done.signal()
         })
-        if done.wait(timeout: .now() + 30) == .timedOut { return false }
+        if done.wait(timeout: .now() + timeout) == .timedOut {
+            dlnaQueue.async {
+                if !self.finished && self.audio != nil { self.failure() }
+            }
+            return false
+        }
         return succeeded
     }
 

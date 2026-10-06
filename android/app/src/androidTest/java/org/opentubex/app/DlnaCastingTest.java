@@ -215,8 +215,10 @@ public class DlnaCastingTest {
             } finally { head.disconnect(); }
             HttpURLConnection denied = (HttpURLConnection) new URL(media.replace(relay.getString("castId"), "wrong-token")).openConnection(Proxy.NO_PROXY);
             try { assertEquals(404, denied.getResponseCode()); } finally { denied.disconnect(); }
-            evaluate(webView, "window.__dlnaStopped=false;window.Capacitor.nativePromise('Dlna','stopMediaServer',{castId:'" + relay.getString("castId") + "'}).then(()=>window.__dlnaStopped=true)");
+            evaluate(webView, "window.__dlnaDiscoveryFinished=false;window.Capacitor.nativePromise('Dlna','discover',{}).finally(()=>window.__dlnaDiscoveryFinished=true);window.__dlnaStopped=false;window.Capacitor.nativePromise('Dlna','stopMediaServer',{castId:'" + relay.getString("castId") + "'}).then(()=>{window.__dlnaStopBlocked=window.__dlnaDiscoveryFinished;window.__dlnaStopped=true})");
             await(webView, "window.__dlnaStopped");
+            assertEquals("Stop must not wait for rediscovery", "false", evaluate(webView, "window.__dlnaStopBlocked"));
+            await(webView, "window.__dlnaDiscoveryFinished");
             HttpURLConnection stopped = (HttpURLConnection) new URL(media).openConnection(Proxy.NO_PROXY);
             stopped.setConnectTimeout(1000);
             try { stopped.getResponseCode(); fail("Stopped relay still listening"); }

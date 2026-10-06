@@ -2027,3 +2027,5 @@ Storage Startup Error:
   Title: "Datele aplicației nu au putut fi încărcate"
   Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
   Retry: "Încearcă din nou"
+Native Permissions:
+  Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."
