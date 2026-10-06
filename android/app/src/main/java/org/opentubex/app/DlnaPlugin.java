@@ -138,9 +138,16 @@ public final class DlnaPlugin extends Plugin {
                 Network network = wifiNetwork();
                 if (network != null) network.bindSocket(route);
                 route.connect(InetAddress.getByName(address), 1900);
-                relay = new DlnaMediaServer(getContext(), url, audio, address, route.getLocalAddress(), call.getDouble("startSeconds", 0.0));
+                relay = new DlnaMediaServer(getContext(), url, audio, address, route.getLocalAddress(), call.getDouble("startSeconds", 0.0),
+                    call.getObject("authorization") == null ? null : new DlnaAuthorization(call.getObject("authorization")));
+                DlnaMediaServer server = relay;
+                server.onFailure = () -> DlnaCastService.stop(getContext(), server);
+                DlnaCastService.start(getContext(), server);
                 call.resolve(new JSObject().put("castId", relay.castId).put("mediaUrl", relay.mediaUrl()));
-            } catch (Exception error) { call.reject("Unable to start DLNA media relay", error); }
+            } catch (Exception error) {
+                if (relay != null) { DlnaCastService.stop(getContext(), relay); relay.close(); relay = null; }
+                call.reject("Unable to start DLNA media relay", error);
+            }
         });
     }
 
@@ -152,6 +159,7 @@ public final class DlnaPlugin extends Plugin {
     @PluginMethod public void stopMediaServer(PluginCall call) {
         worker.execute(() -> {
             if (relay != null && relay.castId.equals(call.getString("castId"))) {
+                DlnaCastService.stop(getContext(), relay);
                 relay.close();
                 relay = null;
             }
@@ -165,7 +173,7 @@ public final class DlnaPlugin extends Plugin {
         if (socket != null) socket.close();
         discoveryWorker.shutdownNow();
         requestWorker.shutdownNow();
-        worker.execute(() -> { if (relay != null) { relay.close(); relay = null; } });
+        worker.execute(() -> { if (relay != null) { DlnaCastService.stop(getContext(), relay); relay.close(); relay = null; } });
         worker.shutdown();
         super.handleOnDestroy();
     }
