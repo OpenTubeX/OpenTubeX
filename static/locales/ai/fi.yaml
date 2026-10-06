@@ -483,6 +483,7 @@ Settings:
       Unable to Delete: Mukautettua teemaa ei voitu poistaa
       Invalid Theme File: Virheellinen mukautettu teematiedosto
       Colors:
+        Watched thumbnail overlay: "Katsottujen videoiden pikkukuvien peite"
         Main text: Pääteksti
         Secondary text: Toissijainen teksti
         Subtle text: Hillitty teksti

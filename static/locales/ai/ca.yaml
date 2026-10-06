@@ -620,6 +620,7 @@ Settings:
       Unable to Delete: No s'ha pogut suprimir el tema personalitzat
       Invalid Theme File: El fitxer de tema personalitzat no és vàlid
       Colors:
+        Watched thumbnail overlay: "Superposició de les miniatures dels vídeos vistos"
         Main text: Text principal
         Secondary text: Text secundari
         Subtle text: Text discret

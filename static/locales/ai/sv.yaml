@@ -481,6 +481,7 @@ Settings:
       Unable to Delete: Det gick inte att ta bort det egna temat
       Invalid Theme File: Ogiltig fil för eget tema
       Colors:
+        Watched thumbnail overlay: "Överlägg på miniatyrbilder för sedda videor"
         Main text: Primär text
         Secondary text: Sekundär text
         Subtle text: Diskret text

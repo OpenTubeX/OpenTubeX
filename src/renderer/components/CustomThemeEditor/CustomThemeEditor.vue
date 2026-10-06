@@ -491,11 +491,13 @@ function readThemeSourceColors() {
 function readColor(probe, property) {
   probe.style.color = `var(${property})`
   const color = getComputedStyle(probe).color
-  const match = color.match(/rgba?\(\s*(\d+)[, ]+\s*(\d+)[, ]+\s*(\d+)(?:\s*[,/]\s*([\d.]+))?\s*\)/)
+  const srgb = color.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\s*\)$/)
+  const match = srgb ?? color.match(/rgba?\(\s*(\d+)[, ]+\s*(\d+)[, ]+\s*(\d+)(?:\s*[,/]\s*([\d.]+))?\s*\)/)
   if (!match) return '#000000'
 
+  const channelScale = srgb ? 255 : 1
   const rgb = match.slice(1, 4)
-    .map(value => Number.parseInt(value, 10).toString(16).padStart(2, '0'))
+    .map(value => Math.round(Number.parseFloat(value) * channelScale).toString(16).padStart(2, '0'))
     .join('')
   const alpha = match[4] === undefined ? 255 : Math.round(Number.parseFloat(match[4]) * 255)
   return `#${rgb}${alpha < 255 ? alpha.toString(16).padStart(2, '0') : ''}`

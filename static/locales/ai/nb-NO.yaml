@@ -479,6 +479,7 @@ Settings:
       Unable to Delete: Kunne ikke slette det egendefinerte temaet
       Invalid Theme File: Ugyldig fil for egendefinert tema
       Colors:
+        Watched thumbnail overlay: "Overlegg på miniatyrbilder av sette videoer"
         Main text: Hovedtekst
         Secondary text: Sekundærtekst
         Subtle text: Diskré tekst

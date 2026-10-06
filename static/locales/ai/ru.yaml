@@ -456,6 +456,7 @@ Settings:
       Unable to Delete: Не удалось удалить пользовательскую тему
       Invalid Theme File: Недопустимый файл пользовательской темы
       Colors:
+        Watched thumbnail overlay: "Наложение на миниатюры просмотренных видео"
         Main text: Основной текст
         Secondary text: Вторичный текст
         Subtle text: Приглушённый текст

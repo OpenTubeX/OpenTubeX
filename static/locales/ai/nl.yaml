@@ -483,6 +483,7 @@ Settings:
       Unable to Delete: Aangepast thema kan niet worden verwijderd
       Invalid Theme File: Ongeldig bestand voor aangepast thema
       Colors:
+        Watched thumbnail overlay: "Overlay op miniaturen van bekeken video's"
         Main text: Hoofdtekst
         Secondary text: Secundaire tekst
         Subtle text: Subtiele tekst

@@ -483,6 +483,7 @@ Settings:
       Unable to Delete: زمینهٔ سفارشی حذف نشد
       Invalid Theme File: پروندهٔ زمینهٔ سفارشی نامعتبر است
       Colors:
+        Watched thumbnail overlay: "لایهٔ روی تصاویر بندانگشتی ویدیوهای تماشاشده"
         Main text: متن اصلی
         Secondary text: متن فرعی
         Subtle text: متن کم‌رنگ

@@ -78,15 +78,19 @@ $watched-transition-duration: 0.5s;
 
     @include low-contrast-when-watched(var(--primary-text-color));
 
-    .thumbnailImage {
-      opacity: 0.3;
+    .thumbnailLink::after {
+      background-color: var(--watched-thumbnail-overlay-color);
+      content: '';
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
       /* stylelint-disable-next-line declaration-property-value-no-unknown */
       transition: opacity $watched-transition-duration;
     }
 
-    &:hover .thumbnailImage,
-    &:focus .thumbnailImage {
-      opacity: 1;
+    &:hover .thumbnailLink::after,
+    .thumbnailLink:focus::after {
+      opacity: 0;
       transition-duration: $watched-transition-duration;
     }
   }

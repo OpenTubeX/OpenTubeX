@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: Није могуће обрисати прилагођену тему
       Invalid Theme File: Неважећа датотека прилагођене теме
       Colors:
+        Watched thumbnail overlay: "Прекривање сличица одгледаних видео-снимака"
         Main text: Основни текст
         Secondary text: Споредни текст
         Subtle text: Ненаглашени текст
