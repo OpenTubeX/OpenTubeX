@@ -5,6 +5,7 @@ export const SYNC_SESSIONS_VERSION = 1
 // Account device IDs are base64url, so this reserved key cannot name a device.
 // Keeping these markers in the existing map lets older clients preserve them.
 const REVOCATION_KEY_PREFIX = 'revoked:'
+const REVOCATION_LOGIN_KEY_PREFIX = 'revoked-login:'
 
 function revocationKey(deviceId) {
   return `${REVOCATION_KEY_PREFIX}${deviceId}`
@@ -53,8 +54,16 @@ function normalizeDeletedSessions(value) {
   for (const [key, sessionIds] of Object.entries(deletedSessions)) {
     if (!key.startsWith(REVOCATION_KEY_PREFIX)) continue
     const deviceId = key.slice(REVOCATION_KEY_PREFIX.length)
-    deletedSessions[key] = sessionIds.filter(id => deletedSessions[deviceId]?.includes(id))
+    deletedSessions[key] = deletedSessions[`${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`]
+      ? sessionIds.filter(id => deletedSessions[deviceId]?.includes(id))
+      : []
     if (deletedSessions[key].length === 0) delete deletedSessions[key]
+  }
+  for (const key of Object.keys(deletedSessions)) {
+    if (key.startsWith(REVOCATION_LOGIN_KEY_PREFIX) &&
+        !deletedSessions[revocationKey(key.slice(REVOCATION_LOGIN_KEY_PREFIX.length))]) {
+      delete deletedSessions[key]
+    }
   }
   return deletedSessions
 }
@@ -113,16 +122,28 @@ export function getOtherDeviceSessions(value, deviceId, legacyDeviceIds = []) {
     })))
 }
 
-export function removeSyncSession(value, deviceId, sessionId, { revoked = false } = {}) {
+export function getRevokedSyncSessionLogins(value, deviceId) {
+  return normalizeSyncSessionsDocument(value).deletedSessions[`${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`] ?? []
+}
+
+export function removeSyncSession(value, deviceId, sessionId, { revokedAccountSessionId } = {}) {
   const document = normalizeSyncSessionsDocument(value)
   const device = document.devices[deviceId]
   const key = revocationKey(deviceId)
+  const loginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`
+  const revoked = typeof revokedAccountSessionId === 'string' && revokedAccountSessionId.length > 0
   const alreadyDeleted = document.deletedSessions[deviceId]?.includes(sessionId)
-  if (revoked && !alreadyDeleted) {
-    document.deletedSessions[key] = [...(document.deletedSessions[key] ?? []), sessionId]
+  if (revoked && (!alreadyDeleted || document.deletedSessions[key]?.includes(sessionId))) {
+    document.deletedSessions[key] = Array.from(new Set([...(document.deletedSessions[key] ?? []), sessionId]))
+    document.deletedSessions[loginKey] = Array.from(new Set([
+      ...(document.deletedSessions[loginKey] ?? []), revokedAccountSessionId,
+    ]))
   } else if (!revoked && document.deletedSessions[key]) {
     document.deletedSessions[key] = document.deletedSessions[key].filter(id => id !== sessionId)
-    if (document.deletedSessions[key].length === 0) delete document.deletedSessions[key]
+    if (document.deletedSessions[key].length === 0) {
+      delete document.deletedSessions[key]
+      delete document.deletedSessions[loginKey]
+    }
   }
   document.deletedSessions[deviceId] = Array.from(new Set([
     ...(document.deletedSessions[deviceId] ?? []),
@@ -132,6 +153,18 @@ export function removeSyncSession(value, deviceId, sessionId, { revoked = false 
 
   device.sessions = device.sessions.filter(session => session.sessionId !== sessionId)
   if (device.sessions.length === 0) delete document.devices[deviceId]
+  return document
+}
+
+export function removeSyncDeviceSessions(value, deviceId, accountSessionId) {
+  let document = normalizeSyncSessionsDocument(value)
+  const sessionIds = new Set([
+    ...(document.devices[deviceId]?.sessions ?? []).map(session => session.sessionId),
+    ...(document.deletedSessions[revocationKey(deviceId)] ?? []),
+  ])
+  for (const sessionId of sessionIds) {
+    document = removeSyncSession(document, deviceId, sessionId, { revokedAccountSessionId: accountSessionId })
+  }
   return document
 }
 
@@ -176,8 +209,18 @@ function claimDeletedSessions(document, sourceId, deviceId) {
   const revoked = Array.from(new Set([
     ...(deleted[targetKey] ?? []), ...(deleted[sourceKey] ?? []),
   ])).filter(id => !explicitDeletions.has(id))
-  if (revoked.length > 0) deleted[targetKey] = revoked
-  else delete deleted[targetKey]
+  const sourceLoginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${sourceId}`
+  const targetLoginKey = `${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`
+  if (revoked.length > 0) {
+    deleted[targetKey] = revoked
+    deleted[targetLoginKey] = Array.from(new Set([
+      ...(deleted[targetLoginKey] ?? []), ...(deleted[sourceLoginKey] ?? []),
+    ]))
+  } else {
+    delete deleted[targetKey]
+    delete deleted[targetLoginKey]
+  }
+  delete deleted[sourceLoginKey]
   delete deleted[sourceId]
   delete deleted[sourceKey]
 }
@@ -269,6 +312,7 @@ export function mergeSyncSessions({
     remote.deletedSessions[deviceId] = remote.deletedSessions[deviceId].filter(id => !reclaimedSessionIds.has(id))
     if (remote.deletedSessions[deviceId].length === 0) delete remote.deletedSessions[deviceId]
     delete remote.deletedSessions[key]
+    delete remote.deletedSessions[`${REVOCATION_LOGIN_KEY_PREFIX}${deviceId}`]
     // Revocation removed the remote sessions, not this device's local tabs.
     // A fresh login must publish those tabs instead of inferring a deletion.
     if (previous) delete previous.devices[deviceId]

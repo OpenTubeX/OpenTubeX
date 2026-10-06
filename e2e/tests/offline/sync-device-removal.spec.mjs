@@ -37,3 +37,7 @@ for (const conflict of [false, true]) {
 test('desktop reauthentication preserves intentional tab-set deletion', async ({ page }) => {
   await verifySyncDeviceReconnection(page, { intentionalDeletion: true })
 })
+
+test('desktop upgrade reclaims tabs after an older client signs back in', async ({ page }) => {
+  await verifySyncDeviceReconnection(page, { olderLogin: true })
+})

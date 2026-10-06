@@ -423,7 +423,7 @@ for (const retainedSnapshot of [false, true]) {
       phone: { platform: 'mobile', sessions: [local] },
       laptop: { platform: 'desktop', sessions: [session('laptop', 1)] },
     } })
-    let remote = removeSyncSession(previous, 'phone', 'mobile', { revoked: true })
+    let remote = removeSyncSession(previous, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
     remote = removeSyncSession(remote, 'other-phone', 'mobile')
     const merged = mergeSyncSessions({
       localSessions: [local], remoteValue: remote, previousValue: retainedSnapshot ? previous : null,
@@ -446,7 +446,7 @@ for (const platform of ['mobile', 'desktop']) {
     const local = [session('deleted', 2), session('revoked', 2)]
     const previous = normalizeSyncSessionsDocument({ devices: { device: { platform, sessions: local } } })
     let remote = removeSyncSession(previous, 'device', 'deleted')
-    remote = removeSyncSession(remote, 'device', 'revoked', { revoked: true })
+    remote = removeSyncSession(remote, 'device', 'revoked', { revokedAccountSessionId: 'old-login' })
     const merged = mergeSyncSessions({ localSessions: local, remoteValue: remote, previousValue: previous,
       deviceId: 'device', platform, reclaimDeviceSessions: true })
     assert.deepEqual(merged.document.devices.device.sessions, [local[1]])
@@ -457,7 +457,7 @@ for (const platform of ['mobile', 'desktop']) {
 
 test('an intentional deletion overrides a revocation marker before reauthentication', () => {
   const local = [session('mobile', 2)]
-  let remote = removeSyncSession({}, 'phone', 'mobile', { revoked: true })
+  let remote = removeSyncSession({}, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
   remote = removeSyncSession(remote, 'phone', 'mobile')
   const merged = mergeSyncSessions({ localSessions: local, remoteValue: remote,
     deviceId: 'phone', platform: 'mobile', reclaimDeviceSessions: true })
@@ -469,7 +469,7 @@ test('reclamation preserves an existing remote window alongside the revoked loca
   const local = session('revoked-window', 2)
   const newer = session('new-window', 3)
   const remote = removeSyncSession({ devices: { desktop: { platform: 'desktop', sessions: [newer] } } },
-    'desktop', local.sessionId, { revoked: true })
+    'desktop', local.sessionId, { revokedAccountSessionId: 'old-login' })
   const result = mergeSyncSessions({ localSessions: [local], remoteValue: remote,
     previousValue: { devices: { desktop: { platform: 'desktop', sessions: [local] } } },
     deviceId: 'desktop', platform: 'desktop', reclaimDeviceSessions: true })
@@ -479,7 +479,7 @@ test('reclamation preserves an existing remote window alongside the revoked loca
 })
 
 test('revocation cleanup cannot reclassify an intentional deletion', () => {
-  const remote = removeSyncSession(removeSyncSession({}, 'phone', 'mobile'), 'phone', 'mobile', { revoked: true })
+  const remote = removeSyncSession(removeSyncSession({}, 'phone', 'mobile'), 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
   assert.equal(remote.deletedSessions['revoked:phone'], undefined)
 })
 
@@ -490,7 +490,7 @@ for (const platform of ['mobile', 'desktop']) {
       owner: { platform, sessions: local },
       older: { platform: 'desktop', sessions: [session('older', 1)] },
     } })
-    let revoked = removeSyncSession(initial, 'owner', 'revoked', { revoked: true })
+    let revoked = removeSyncSession(initial, 'owner', 'revoked', { revokedAccountSessionId: 'old-login' })
     revoked = releasedClient.removeSyncSession(revoked, 'owner', 'deleted')
     const roundTrip = releasedClient.mergeSyncSessions({ remoteValue: revoked, previousValue: initial,
       localSessions: [session('older', 3)], deviceId: 'older', platform: 'desktop', preferredMode: 'separate' }).document
@@ -508,7 +508,7 @@ test('an updated explicit Delete overrides revocation after an older client roun
     phone: { platform: 'mobile', sessions: local },
     older: { platform: 'desktop', sessions: [session('older', 1)] },
   } })
-  const revoked = removeSyncSession(initial, 'phone', 'mobile', { revoked: true })
+  const revoked = removeSyncSession(initial, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
   const roundTrip = releasedClient.mergeSyncSessions({ remoteValue: revoked,
     localSessions: [session('older', 2)], deviceId: 'older', platform: 'desktop' }).document
   const deleted = removeSyncSession(roundTrip, 'phone', 'mobile')
@@ -521,7 +521,7 @@ test('an updated explicit Delete overrides revocation after an older client roun
 
 test('revocation classification is discarded when the primary tombstone is gone', () => {
   const document = normalizeSyncSessionsDocument({ deletedSessions: {
-    phone: ['mobile'], 'revoked:phone': ['mobile', 'closed'], 'revoked:desktop': ['closed-window'],
+    phone: ['mobile'], 'revoked:phone': ['mobile', 'closed'], 'revoked-login:phone': ['old-login'], 'revoked:desktop': ['closed-window'],
   } })
-  assert.deepEqual(document.deletedSessions, { phone: ['mobile'], 'revoked:phone': ['mobile'] })
+  assert.deepEqual(document.deletedSessions, { phone: ['mobile'], 'revoked:phone': ['mobile'], 'revoked-login:phone': ['old-login'] })
 })

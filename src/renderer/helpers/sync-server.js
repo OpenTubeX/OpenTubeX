@@ -1,4 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants'
+import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
 import { applySyncServerUserAgent } from '../../syncServerUserAgent'
 import {
@@ -29,7 +30,7 @@ import {
 } from './profile-sync.js'
 import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
-import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
+import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import { mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
@@ -1252,7 +1253,7 @@ function getTabSyncAdapter() {
   return null
 }
 
-export async function syncSessions(client, store, previous = null, { reclaimDeviceSessions = false } = {}) {
+export async function syncSessions(client, store, previous = null, { accountClient = client } = {}) {
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
 
   const tabs = getTabSyncAdapter()
@@ -1265,6 +1266,21 @@ export async function syncSessions(client, store, previous = null, { reclaimDevi
   const remote = await client.getSessions()
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
   const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
+  const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)
+  let reclaimDeviceSessions = false
+  if (revokedLogins.length > 0) {
+    const response = await accountClient.getAccountSessions()
+    const current = Array.isArray(response?.sessions)
+      ? response.sessions.filter(session => session?.current === true)
+      : []
+    if (current.length !== 1 || current[0].device_id !== deviceId ||
+        typeof current[0].id !== 'string' || current[0].id.length === 0) {
+      throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+    }
+    // The cleanup's login may still be active until its DELETE finishes. Only
+    // a different authenticated login may restore the revoked tab sets.
+    reclaimDeviceSessions = !revokedLogins.includes(current[0].id)
+  }
   const merged = mergeSyncSessions({
     localSessions: local,
     remoteValue: remote,

@@ -37,7 +37,7 @@ import {
   loadSyncServerDevices,
 } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
-import { getPreviousSyncSessions, getSyncTabRoute, normalizeSyncSessionsDocument, removeSyncSession } from '../../helpers/sync-sessions'
+import { getPreviousSyncSessions, getSyncTabRoute, removeSyncDeviceSessions, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   dispatchRemoteSyncAction,
@@ -241,8 +241,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let encryptedCollections = null
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
   const previous = parseSnapshot(settings.syncServerSnapshot)
-  const reclaimDeviceSessions = Boolean(previous.reclaimDeviceSessions) &&
-    previous.reclaimDeviceSessions === settings.syncServerDeviceId
   const next = { ...previous }
   const result = {}
   const skippedCollections = new Set()
@@ -414,11 +412,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           getPreviousSyncSessions(previous),
-          { reclaimDeviceSessions }
+          { accountClient: networkClient }
         )
         if (sessions !== null) {
           next.sessionsV2 = sessions.document
-          delete next.reclaimDeviceSessions
           result.sessions = sessions.sessionsToApply.reduce(
             (count, session) => count + session.tabs.length,
             0
@@ -997,13 +994,9 @@ const actions = {
           }
 
           assertSyncEnabled(rootState, client)
-          let nextSessions = normalizeSyncSessionsDocument(remoteValue)
-          const sessionIds = sessionId === undefined
-            ? (nextSessions.devices[syncDeviceId]?.sessions ?? []).map(session => session.sessionId)
-            : [sessionId]
-          for (const id of sessionIds) {
-            nextSessions = removeSyncSession(nextSessions, syncDeviceId, id, { revoked: sessionId === undefined })
-          }
+          const nextSessions = sessionId === undefined
+            ? removeSyncDeviceSessions(remoteValue, syncDeviceId, accountSessionId)
+            : removeSyncSession(remoteValue, syncDeviceId, sessionId)
           const payload = await encryptSyncDocument(
             nextSessions,
             settings.syncServerPrivacyKey,
@@ -1079,9 +1072,7 @@ const actions = {
     await dispatch('updateSyncServerDeviceId', deviceId, { root: true })
     await dispatch('updateSyncServerDeviceName', deviceName, { root: true })
     await dispatch('updateSyncServerResumeAutoSync', false, { root: true })
-    await dispatch('updateSyncServerSnapshot', JSON.stringify(
-      { reclaimDeviceSessions: deviceId }
-    ), { root: true })
+    await dispatch('updateSyncServerSnapshot', '{}', { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
     await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
     await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
@@ -1195,10 +1186,8 @@ const actions = {
       await updateWhileEnabled('updateSyncServerUsername', trimmedUsername)
       await updateWhileEnabled('updateSyncServerDeviceId', deviceId)
       await updateWhileEnabled('updateSyncServerDeviceName', deviceName)
-      if (!resumesExpiredSession || privacySupported) {
-        const snapshot = resumesExpiredSession ? parseSnapshot(rootState.settings.syncServerSnapshot) : {}
-        if (privacySupported) snapshot.reclaimDeviceSessions = deviceId
-        await updateWhileEnabled('updateSyncServerSnapshot', JSON.stringify(snapshot))
+      if (!resumesExpiredSession) {
+        await updateWhileEnabled('updateSyncServerSnapshot', '{}')
       }
       if (!resumesExpiredSession) await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
       await updateWhileEnabled(

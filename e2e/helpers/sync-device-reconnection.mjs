@@ -5,7 +5,7 @@ import { normalizeSyncSessionsDocument, removeSyncSession } from '../../src/rend
 import { encryptSyncServerDeviceInfo } from '../../src/renderer/helpers/sync-server-sessions.js'
 import { goToSettingsSection } from './app.mjs'
 
-export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false } = {}) {
+export async function verifySyncDeviceReconnection(page, { conflict = false, phone = false, intentionalDeletion = false, olderLogin = false } = {}) {
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
   await expect.poll(() => page.evaluate(() => (
     document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabs.length
@@ -151,6 +151,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerToken)).toBe('')
     expect(document.deletedSessions[deviceId]).toEqual(sessionIds)
     expect(document.deletedSessions[`revoked:${deviceId}`]).toEqual(intentionalDeletion ? undefined : sessionIds)
+    expect(document.deletedSessions[`revoked-login:${deviceId}`]).toEqual(intentionalDeletion ? undefined : ['old-login'])
     // A connected peer still running the released v1 client rewrites the
     // encrypted collection between revocation and the owning device's login.
     document = releasedClient.mergeSyncSessions({
@@ -161,25 +162,60 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
       preferredMode: 'separate',
     }).document
     revision++
-    const error = await page.evaluate(async ({ deviceId, passphrase }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      try {
-        await store.dispatch('authenticateSyncServer', {
-          mode: 'login',
-          serverUrl: 'https://device-reconnection.example',
-          username: 'fixture-user',
-          password: 'fixture-account-password',
-          privacyPassphrase: passphrase,
-          deviceId,
-          deviceName: 'Fixture phone',
-          deviceSystemInfo: { platform: 'android', architecture: 'x64', release: '15' }
-        })
-        return ''
-      } catch (error) { return error.message }
-    }, { deviceId, passphrase })
+    let error
+    if (olderLogin) {
+      await request({
+        url: 'https://device-reconnection.example/v1/account/login',
+        method: 'POST',
+        data: JSON.stringify({ name: 'fixture-user', password: 'fixture-account-password', device_id: deviceId })
+      })
+      document = releasedClient.mergeSyncSessions({
+        remoteValue: document,
+        localSessions,
+        deviceId,
+        platform: phone ? 'mobile' : 'desktop',
+        preferredMode: 'separate'
+      }).document
+      revision++
+      // Reproduce the persisted state of an older authenticated installation.
+      // The updated app runs ordinary sync without calling its sign-in action.
+      await page.evaluate(async ({ key, salt, deviceId, snapshot }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerUrl', 'https://device-reconnection.example')
+        store.commit('setSyncServerDeviceId', deviceId)
+        store.commit('setSyncServerPrivacyMode', 'enhanced')
+        store.commit('setSyncServerPrivacyKey', key)
+        store.commit('setSyncServerPrivacySalt', salt)
+        store.commit('setSyncServerSnapshot', JSON.stringify({ sessionsV2: snapshot }))
+        await store.dispatch('replaceSyncServerToken', 'new-fixture-token')
+      }, { key, salt, deviceId, snapshot: document })
+      error = await page.evaluate(async () => {
+        try {
+          await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
+          return ''
+        } catch (error) { return error.message }
+      })
+    } else {
+      error = await page.evaluate(async ({ deviceId, passphrase }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        try {
+          await store.dispatch('authenticateSyncServer', {
+            mode: 'login',
+            serverUrl: 'https://device-reconnection.example',
+            username: 'fixture-user',
+            password: 'fixture-account-password',
+            privacyPassphrase: passphrase,
+            deviceId,
+            deviceName: 'Fixture phone',
+            deviceSystemInfo: { platform: 'android', architecture: 'x64', release: '15' }
+          })
+          return ''
+        } catch (error) { return error.message }
+      }, { deviceId, passphrase })
+    }
     if (!conflict && !intentionalDeletion) {
       expect(error).toBe('Fixture upload failure')
-      expect(await page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot).reclaimDeviceSessions)).toBe(deviceId)
+      expect(document.deletedSessions[`revoked-login:${deviceId}`]).toEqual(['old-login'])
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     } else expect(error).toBe('')
     expect(loginDeviceId).toBe(deviceId)
@@ -189,7 +225,7 @@ export async function verifySyncDeviceReconnection(page, { conflict = false, pho
     expect(document.deletedSessions[`revoked:${deviceId}`]).toBeUndefined()
     expect(document.deletedSessions['other-phone']).toEqual(['mobile'])
     expect(document.devices.laptop.sessions).toHaveLength(conflict ? 2 : 1)
-    expect(await page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.syncServerSnapshot).reclaimDeviceSessions)).toBeUndefined()
+    expect(document.deletedSessions[`revoked-login:${deviceId}`]).toBeUndefined()
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     expect(document.devices[deviceId].sessions.flatMap(session => session.tabs.map(tab => tab.id))).toEqual(intentionalDeletion ? [] : tabIds)
   } finally {

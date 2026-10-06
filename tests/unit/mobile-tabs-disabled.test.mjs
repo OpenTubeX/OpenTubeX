@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { getRevokedSyncSessionLogins } from '../../src/renderer/helpers/sync-sessions.js'
 
 const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', import.meta.url), 'utf8')
 const start = utils.indexOf('export function openInternalPath(')
@@ -83,6 +84,7 @@ for (const mobile of [true, false]) {
           applySyncSessions: () => { markApplying(); return applied }
         }),
         getTabSessionDeviceIdentity: () => ({ deviceId: 'local', legacyDeviceIds: [] }),
+        getRevokedSyncSessionLogins,
         mergeSyncSessions: () => merged,
         metadataEquals: (a, b) => JSON.stringify(a) === JSON.stringify(b)
       })

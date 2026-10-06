@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
-import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
+import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDeviceSessions, removeSyncSession } from '../../src/renderer/helpers/sync-sessions.js'
 
 const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
 const revokeSource = component.slice(component.indexOf('function openRevokePrompt('), component.indexOf('\ndefineExpose'))
@@ -14,7 +14,7 @@ const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
+async function fixture({ current = false, alreadyRevoked = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -22,6 +22,10 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     'new-phone': { platform: 'mobile', sessions: [tabSet('new-tabs')] },
     laptop: { platform: 'desktop', sessions: [tabSet('laptop-tabs')] },
   } })
+  if (alreadyRevoked) {
+    remote = removeSyncSession(remote, 'old-phone', 'old-tabs', { revokedAccountSessionId: 'former-login' })
+    remote = removeSyncSession(remote, 'old-phone', 'older-tabs')
+  }
   remote.shared = [tabSet('shared-tabs')]
   const settings = {
     syncServerEnabled: true, syncServerToken: 'token', syncServerPrivacyKey: key,
@@ -61,7 +65,7 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     },
     trackSyncClient: client => client, releaseSyncClient() {},
     assertSyncEnabled() {}, withSyncLock: callback => callback(),
-    ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, removeSyncSession,
+    ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, removeSyncDeviceSessions, removeSyncSession,
     normalizeSyncSessionsDocument,
     i18n: { global: { t: key => key } },
     parseSnapshot: JSON.parse,
@@ -297,4 +301,13 @@ test('does not report deleted tabs when cleanup preserves a newly shared device 
   assert.equal(app.state().revoked, true)
   assert.equal(app.state().puts, 0)
   assert.ok(app.state().remote.devices['old-phone'])
+})
+
+test('revoking a subsequent login updates classified tombstones while preserving explicit deletions', async () => {
+  const app = await fixture({ current: true, alreadyRevoked: true })
+  await app.revoke()
+  const remote = app.state().remote
+  assert.deepEqual(remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
+  assert.deepEqual(remote.deletedSessions['revoked:old-phone'], ['old-tabs'])
+  assert.deepEqual(remote.deletedSessions['revoked-login:old-phone'], ['former-login', 'login-id'])
 })
