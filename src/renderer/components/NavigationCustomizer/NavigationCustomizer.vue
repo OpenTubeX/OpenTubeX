@@ -16,6 +16,9 @@
     :icon="['fas', 'bars']"
     @close="close"
   >
+    <template #breadcrumb-action>
+      <FtSyncedSettingIndicator setting-key="navigationItems" />
+    </template>
     <div class="navigationActions">
       <div
         ref="itemPickerAnchorRef"

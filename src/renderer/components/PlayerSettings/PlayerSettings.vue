@@ -539,6 +539,9 @@
       grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >
+      <template #breadcrumb-action>
+        <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
+      </template>
       <div class="quickPlaybackSpeedToolbar">
         <FtFlexBox class="quickPlaybackSpeedToolbarActions">
           <FtButton
