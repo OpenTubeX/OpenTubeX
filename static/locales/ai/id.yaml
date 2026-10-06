@@ -919,6 +919,7 @@ Settings:
     Import search history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Kumpulan tab tersinkronisasi perangkat ini juga akan dihapus."
+    Revoke Session Partial Failure: "Kumpulan tab tersinkron telah dihapus, tetapi pencabutan akses tidak dapat dikonfirmasi. Coba cabut akses lagi."
     Show More: "Tampilkan lebih banyak"
     Sync Automatically: "Sinkronkan secara otomatis"
     Activity: "Aktivitas akun"

@@ -5,7 +5,7 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument } from '../../src
 import { goToSettingsSection } from './app.mjs'
 
 // Shared by Electron and real Android WebView regression tests.
-export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, capture } = {}) {
+export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin = false, otherLoginExpires = false, revokeFailsOnce = false, capture } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const oldDeviceId = Buffer.alloc(16, 3).toString('base64url')
@@ -27,6 +27,7 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
   })
   let revision = 1
   let revoked = false
+  let revokeAttempts = 0
   let otherLoginExpired = false
   const preserveTabs = otherLogin && !otherLoginExpires
   const deviceInfo = await encryptSyncServerDeviceInfo({
@@ -77,6 +78,9 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
     if (pathname === '/v1/account/sessions/old-login' && request.method() === 'DELETE') {
       if (preserveTabs) expect(document.devices[oldDeviceId].sessions).toHaveLength(2)
       else expect(document.devices[oldDeviceId]).toBeUndefined()
+      if (revokeFailsOnce && revokeAttempts++ === 0) {
+        return route.fulfill({ status: 503, body: 'Fixture revocation failure' })
+      }
       revoked = true
       return route.fulfill({ status: 204 })
     }
@@ -161,6 +165,15 @@ export async function verifySyncDeviceRemoval(page, { phone = false, otherLogin 
       if (capture) await capture('device-removal-reconfirmation', prompt)
     }
     await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+    if (revokeFailsOnce) {
+      await expect(prompt.getByRole('alert')).toHaveText('Synced tab sets were deleted, but revocation could not be confirmed. Retry to revoke access.')
+      await expect(prompt.getByRole('button', { name: 'Revoke session', exact: true })).toBeEnabled()
+      expect(revoked).toBe(false)
+      expect(document.devices[oldDeviceId]).toBeUndefined()
+      expect(document.deletedSessions[oldDeviceId]).toEqual(['old-tabs', 'older-tabs'])
+      if (capture) await capture('device-removal-partial-failure', prompt)
+      await prompt.getByRole('button', { name: 'Revoke session', exact: true }).click()
+    }
     await expect(prompt).toBeHidden()
     await expect(device).toHaveCount(0)
     expect(revoked).toBe(true)

@@ -919,6 +919,7 @@ Settings:
     Import search history formats: 'Onartutako formatuak: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Gailu honen sinkronizatutako fitxa multzoak ere ezabatuko dira."
+    Revoke Session Partial Failure: "Sinkronizatutako fitxa multzoak ezabatu dira, baina ezin izan da sarbidea kentzea berretsi. Saiatu berriro sarbidea kentzen."
     Show More: "Erakutsi gehiago"
     Sync Automatically: "Sinkronizatu automatikoki"
     Activity: "Kontuaren jarduera"

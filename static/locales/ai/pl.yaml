@@ -453,6 +453,7 @@ Settings:
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
     Revoke Session Tabs Warning: "Zsynchronizowane zestawy kart tego urządzenia również zostaną usunięte."
+    Revoke Session Partial Failure: "Zsynchronizowane zestawy kart zostały usunięte, ale nie udało się potwierdzić cofnięcia dostępu. Spróbuj ponownie cofnąć dostęp."
     Show More: "Pokaż więcej"
     Watch stats: "Statystyki oglądania"
     Syncing statistics: Synchronizowanie statystyk oglądania…

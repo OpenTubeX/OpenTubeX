@@ -919,6 +919,7 @@ Settings:
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Bu cihazın eşitlenmiş sekme kümeleri de silinecek."
+    Revoke Session Partial Failure: "Eşitlenen sekme kümeleri silindi ancak erişimin iptali doğrulanamadı. Erişimi iptal etmeyi yeniden deneyin."
     Show More: "Daha fazla göster"
     Watch stats: "İzleme istatistikleri"
     Syncing statistics: İzleme istatistikleri eşitleniyor…

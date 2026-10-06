@@ -919,6 +919,7 @@ Settings:
     Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
   Sync Settings:
     Revoke Session Tabs Warning: "Holladoù ivinelloù sinkronizet an trevnad-mañ a vo diverket ivez."
+    Revoke Session Partial Failure: "Dilamet eo bet ar strolladoù ivinelloù goubredet, met n'eo ket bet kadarnaet torriñ ar moned. Klaskit en-dro torriñ ar moned."
     Show More: "Diskouez muioc'h"
     Sync Automatically: "Goubredañ ent emgefreek"
     Activity: "Obererezh ar gont"

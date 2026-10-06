@@ -938,6 +938,7 @@ Settings:
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "ستُحذف أيضًا مجموعات علامات التبويب المتزامنة لهذا الجهاز."
+    Revoke Session Partial Failure: "حُذفت مجموعات علامات التبويب المتزامنة، لكن تعذر تأكيد إلغاء الوصول. أعد المحاولة لإلغاء الوصول."
     Show More: "إظهار المزيد"
     Sync Automatically: "المزامنة تلقائيًا"
     Activity: "نشاط الحساب"

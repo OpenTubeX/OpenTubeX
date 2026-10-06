@@ -1241,6 +1241,7 @@ Settings:
     Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."
+    Revoke Session Partial Failure: "S'han suprimit els conjunts de pestanyes sincronitzats, però no s'ha pogut confirmar la revocació. Torneu a provar de revocar l'accés."
     Show More: "Mostra'n més"
     Sync Automatically: "Sincronitza automàticament"
     Activity: "Activitat del compte"

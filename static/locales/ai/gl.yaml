@@ -938,6 +938,7 @@ Settings:
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Tamén se eliminarán os conxuntos de lapelas sincronizados deste dispositivo."
+    Revoke Session Partial Failure: "Elimináronse os conxuntos de lapelas sincronizados, pero non se puido confirmar a revogación. Tenta revogar o acceso de novo."
     Show More: "Amosar máis"
     Sync Automatically: "Sincronizar automaticamente"
     Activity: "Actividade da conta"

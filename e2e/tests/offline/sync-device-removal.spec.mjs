@@ -10,3 +10,7 @@ for (const otherLogin of [false, true]) {
 test('device removal reconfirms tab deletion when another login expires', async ({ page }) => {
   await verifySyncDeviceRemoval(page, { otherLogin: true, otherLoginExpires: true })
 })
+
+test('device removal reports partial completion when revocation fails and can be retried', async ({ page }) => {
+  await verifySyncDeviceRemoval(page, { revokeFailsOnce: true })
+})

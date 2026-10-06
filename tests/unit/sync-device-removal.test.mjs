@@ -14,7 +14,7 @@ const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false } = {}) {
+async function fixture({ current = false, conflict = false, cleanupFails = false, otherLogin = false, otherLoginExpires = false, accountResponse, revokeFailsOnce = false } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -28,6 +28,7 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     syncServerPrivacySalt: salt, syncServerDeviceId: current ? 'old-phone' : 'new-phone', syncServerSnapshot: '{}',
   }
   let revoked = false
+  let revokeAttempts = 0
   let puts = 0
   let visible = getOtherDeviceSessions(remote, settings.syncServerDeviceId)
   const context = { rootState: { settings }, commit(name, value) {
@@ -68,9 +69,16 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
     client: () => ({
       token: 'token',
       async getAccountSessions() {
+        if (accountResponse !== undefined) return accountResponse
         return { sessions: sessions.value.filter(session => !otherLoginExpires || session.id === 'login-id') }
       },
-      async revokeAccountSession() { revoked = true },
+      async revokeAccountSession() {
+        if (revokeFailsOnce && revokeAttempts++ === 0) {
+          remote.devices.laptop.sessions.push(tabSet('new-laptop-tabs'))
+          throw new Error('Offline')
+        }
+        revoked = true
+      },
       cancel() {},
     }),
     store: { dispatch: context.dispatch }, showToast() {}, t: key => key,
@@ -85,7 +93,31 @@ async function fixture({ current = false, conflict = false, cleanupFails = false
   }
 }
 
+for (const [label, accountResponse] of [['null', null], ['missing sessions', {}], ['non-array sessions', { sessions: {} }]]) {
+  test(`keeps revocation retryable with a translated error for a ${label} response`, async () => {
+    const app = await fixture({ accountResponse })
+    await app.revoke()
+    assert.equal(app.state().revoked, false)
+    assert.equal(app.state().puts, 0)
+    assert.equal(app.state().error, 'Settings.Sync Settings.Account Management Failed')
+    assert.equal(app.state().prompt.device_id, 'old-phone')
+  })
+}
+
 for (const current of [false, true]) {
+  test(`reports completed tab cleanup when revoking a ${current ? 'current' : 'previous'} login fails and preserves newer sync changes on retry`, async () => {
+    const app = await fixture({ current, revokeFailsOnce: true })
+    await app.revoke()
+    assert.equal(app.state().revoked, false)
+    assert.equal(app.state().error, 'Settings.Sync Settings.Revoke Session Partial Failure')
+    assert.equal(app.state().remote.devices['old-phone'], undefined)
+    assert.deepEqual(app.state().remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
+    assert.equal(app.state().prompt.device_id, 'old-phone')
+    await app.revoke()
+    assert.equal(app.state().revoked, true)
+    assert.deepEqual(app.state().remote.devices.laptop.sessions, [tabSet('laptop-tabs'), tabSet('new-laptop-tabs')])
+    assert.deepEqual(app.state().remote.deletedSessions['old-phone'], ['old-tabs', 'older-tabs'])
+  })
   test(`removing the ${current ? 'current' : 'previous'} phone login removes all its saved tab sets`, async () => {
     const app = await fixture({ current })
     await app.revoke()

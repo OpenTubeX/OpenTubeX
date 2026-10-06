@@ -492,8 +492,11 @@ async function revokeSession() {
   actionBusy.value = true
   promptError.value = ''
   const requestClient = client()
+  let tabsDeleted = false
   try {
-    const { sessions: accountSessions } = await requestClient.getAccountSessions()
+    const response = await requestClient.getAccountSessions()
+    if (!Array.isArray(response?.sessions)) throw new Error(t('Settings.Sync Settings.Account Management Failed'))
+    const accountSessions = response.sessions
     const deletesTabs = !hasOtherDeviceLogins(session, accountSessions)
     if (deletesTabs && !revokeDeletesTabs.value) {
       revokeDeletesTabs.value = true
@@ -501,7 +504,10 @@ async function revokeSession() {
     }
     // Clean up while this login can still retry the operation, including when
     // revoking the current device. Another login may still use the same tabs.
-    if (deletesTabs && !await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
+    if (deletesTabs) {
+      if (!await store.dispatch('deleteSyncServerDeviceSessions', session.device_id)) return
+      tabsDeleted = true
+    }
     await requestClient.revokeAccountSession(session.id)
     sessionToRevoke.value = null
     showToast({
@@ -515,6 +521,9 @@ async function revokeSession() {
     await loadSessions()
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token, promptError)
+    if (tabsDeleted && promptError.value) {
+      promptError.value = t('Settings.Sync Settings.Revoke Session Partial Failure')
+    }
   } finally {
     requestClient.cancel()
     actionBusy.value = false

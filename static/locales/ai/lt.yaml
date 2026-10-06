@@ -1171,7 +1171,8 @@ Settings:
     Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
-    Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti kortelių rinkiniai."
+    Revoke Session Tabs Warning: "Taip pat bus ištrinti šio įrenginio sinchronizuoti skirtukų rinkiniai."
+    Revoke Session Partial Failure: "Sinchronizuoti skirtukų rinkiniai buvo ištrinti, tačiau prieigos atšaukimo patvirtinti nepavyko. Bandykite dar kartą atšaukti prieigą."
     Show More: "Rodyti daugiau"
     Sync Automatically: "Sinchronizuoti automatiškai"
     Activity: "Paskyros veikla"

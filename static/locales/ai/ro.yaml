@@ -932,6 +932,7 @@ Settings:
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Seturile de file sincronizate ale acestui dispozitiv vor fi și ele șterse."
+    Revoke Session Partial Failure: "Seturile de file sincronizate au fost șterse, dar revocarea nu a putut fi confirmată. Încercați din nou să revocați accesul."
     Show More: "Afișează mai mult"
     Watch stats: "Statistici de vizionare"
     Syncing statistics: Se sincronizează statisticile de vizionare…

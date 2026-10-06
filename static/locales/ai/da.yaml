@@ -961,6 +961,7 @@ Settings:
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Denne enheds synkroniserede fanesæt vil også blive slettet."
+    Revoke Session Partial Failure: "De synkroniserede fanesæt blev slettet, men tilbagekaldelsen kunne ikke bekræftes. Prøv at tilbagekalde adgangen igen."
     Show More: "Vis mere"
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"

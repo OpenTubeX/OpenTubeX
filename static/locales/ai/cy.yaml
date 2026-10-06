@@ -923,6 +923,7 @@ Settings:
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Bydd setiau tabiau wedi’u cysoni’r ddyfais hon hefyd yn cael eu dileu."
+    Revoke Session Partial Failure: "Cafodd y setiau tabiau wedi'u cysoni eu dileu, ond ni ellid cadarnhau dirymu mynediad. Ceisiwch ddirymu mynediad eto."
     Show More: "Dangos rhagor"
     Sync Automatically: "Cysoni'n awtomatig"
     Activity: "Gweithgarwch cyfrif"

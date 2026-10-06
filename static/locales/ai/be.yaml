@@ -966,6 +966,7 @@ Settings:
     Import search history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Сінхранізаваныя наборы ўкладак гэтай прылады таксама будуць выдалены."
+    Revoke Session Partial Failure: "Сінхранізаваныя наборы ўкладак выдалены, але адкліканне доступу не ўдалося пацвердзіць. Паўтарыце спробу адклікання доступу."
     Show More: "Паказаць больш"
     Sync Automatically: "Сінхранізаваць аўтаматычна"
     Activity: "Дзеянні ўліковага запісу"

@@ -923,6 +923,7 @@ Settings:
     Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Синхронизираните набори от раздели на това устройство също ще бъдат изтрити."
+    Revoke Session Partial Failure: "Синхронизираните набори от раздели бяха изтрити, но отнемането на достъпа не можа да бъде потвърдено. Опитайте отново да отнемете достъпа."
     Show More: "Покажи още"
     Sync Automatically: "Автоматично синхронизиране"
     Activity: "Активност на акаунта"

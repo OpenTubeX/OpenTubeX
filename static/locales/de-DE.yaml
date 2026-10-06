@@ -1508,6 +1508,7 @@ Settings:
     Volume: Lautstärke
   Sync Settings:
     Revoke Session Tabs Warning: "Die synchronisierten Tab-Sammlungen dieses Geräts werden ebenfalls gelöscht."
+    Revoke Session Partial Failure: "Die synchronisierten Tab-Sammlungen wurden gelöscht, aber der Zugriffsentzug konnte nicht bestätigt werden. Versuche erneut, den Zugriff zu entziehen."
     Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"

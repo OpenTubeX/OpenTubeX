@@ -943,6 +943,7 @@ Settings:
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
+    Revoke Session Partial Failure: "Synkronoidut välilehtijoukot poistettiin, mutta käyttöoikeuden peruuttamista ei voitu vahvistaa. Yritä peruuttaa käyttöoikeus uudelleen."
     Show More: "Näytä lisää"
     Sync Automatically: "Synkronoi automaattisesti"
     Activity: "Tilin tapahtumat"

@@ -919,6 +919,7 @@ Settings:
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Synchronizované sady kariet tohto zariadenia budú tiež odstránené."
+    Revoke Session Partial Failure: "Synchronizované súpravy kariet boli odstránené, ale odobratie prístupu sa nepodarilo potvrdiť. Skúste prístup odobrať znova."
     Show More: "Zobraziť viac"
     Watch stats: "Štatistiky sledovania"
     Syncing statistics: Synchronizujú sa štatistiky sledovania…

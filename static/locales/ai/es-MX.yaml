@@ -1093,6 +1093,7 @@ Settings:
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "También se eliminarán los conjuntos de pestañas sincronizados de este dispositivo."
+    Revoke Session Partial Failure: "Se eliminaron los conjuntos de pestañas sincronizados, pero no se pudo confirmar la revocación. Vuelve a intentar revocar el acceso."
     Show More: "Mostrar más"
     Sync Automatically: "Sincronizar automáticamente"
     Activity: "Actividad de la cuenta"

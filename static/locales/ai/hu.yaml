@@ -919,6 +919,7 @@ Settings:
     Import search history formats: 'Támogatott formátumok: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Az eszköz szinkronizált lapkészletei is törlődnek."
+    Revoke Session Partial Failure: "A szinkronizált lapkészletek törlődtek, de a hozzáférés visszavonását nem sikerült megerősíteni. Próbáld újra visszavonni a hozzáférést."
     Show More: "Több megjelenítése"
     Sync Automatically: "Automatikus szinkronizálás"
     Activity: "Fióktevékenység"

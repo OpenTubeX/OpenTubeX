@@ -943,6 +943,7 @@ Settings:
     Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "De gesynchroniseerde tabbladsets van dit apparaat worden ook verwijderd."
+    Revoke Session Partial Failure: "Gesynchroniseerde tabbladsets zijn verwijderd, maar het intrekken kon niet worden bevestigd. Probeer de toegang opnieuw in te trekken."
     Show More: "Meer tonen"
     Sync Automatically: "Automatisch synchroniseren"
     Activity: "Accountactiviteit"

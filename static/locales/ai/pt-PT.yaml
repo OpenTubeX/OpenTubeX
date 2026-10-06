@@ -938,6 +938,7 @@ Settings:
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
     Revoke Session Tabs Warning: "Os conjuntos de separadores sincronizados deste dispositivo também serão eliminados."
+    Revoke Session Partial Failure: "Os conjuntos de separadores sincronizados foram eliminados, mas não foi possível confirmar a revogação. Tente revogar o acesso novamente."
     Show More: "Mostrar mais"
     Watch stats: "Estatísticas de visualização"
     Syncing statistics: A sincronizar estatísticas de visualização…
