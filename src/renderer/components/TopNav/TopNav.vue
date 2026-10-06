@@ -108,6 +108,7 @@
             class="searchInput"
             input-type="search"
             is-search
+            show-suggestion-fill-button
             external-media-navigation
             :action-button-label="t('Search Bar.Search')"
             :data-list="activeDataList"

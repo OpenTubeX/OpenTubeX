@@ -1976,3 +1976,5 @@ Storage Startup Error:
   Title: "Impossibile caricare i dati dell’app"
   Message: "Libera spazio sul dispositivo e riprova. La sincronizzazione è sospesa finché i dati non vengono caricati."
   Retry: "Riprova"
+Search Bar:
+  Use Suggestion: Usa suggerimento

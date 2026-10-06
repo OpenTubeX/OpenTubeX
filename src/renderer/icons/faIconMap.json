@@ -39,6 +39,10 @@
     "ri": "arrow-up-line",
     "material": "arrow-upward-rounded"
   },
+  "arrow-up-left": {
+    "ri": "arrow-left-up-line",
+    "material": "north-west-rounded"
+  },
   "arrow-up-right-from-square": {
     "ri": "external-link-line",
     "material": "open-in-new-rounded"
