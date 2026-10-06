@@ -224,6 +224,7 @@ History:
   Custom: مخصص
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
+  Navigation and Controls: "التنقل وعناصر التحكم"
   Fullscreen Actions:
     Recommended Videos: "الفيديوهات المقترحة"
     Title: "إجراءات ملء الشاشة"

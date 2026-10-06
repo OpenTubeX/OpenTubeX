@@ -343,6 +343,7 @@ History:
   Custom: Po meri
   History Older Than Days Removed: Zgodovina ogledov, starejša od 1 dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
+  Navigation and Controls: "Krmarjenje in kontrolniki"
   Fullscreen Actions:
     Recommended Videos: "Priporočeni videoposnetki"
     Title: "Dejanja v celozaslonskem načinu"

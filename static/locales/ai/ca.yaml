@@ -351,6 +351,7 @@ History:
   Custom: Personalitzat
   History Older Than Days Removed: S'ha suprimit l'historial de reproducció anterior a 1 dia | S'ha suprimit l'historial de reproducció anterior a {days} dies | S'ha suprimit l'historial de reproducció anterior a {days} dies
 Settings:
+  Navigation and Controls: "Navegació i controls"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomanats"
     Title: "Accions de pantalla completa"

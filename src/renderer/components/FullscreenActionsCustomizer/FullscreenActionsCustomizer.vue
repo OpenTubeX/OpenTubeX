@@ -528,6 +528,7 @@ function resetItems() {
 }
 
 .itemActions {
+  align-items: center;
   align-self: stretch;
   display: flex;
 }

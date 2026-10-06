@@ -1,6 +1,6 @@
 <template>
   <FtSettingsSection
-    :title="`${t('Settings.General Settings.Navigation.Navigation')} / ${t('Settings.Quick Settings.Quick Settings')} / ${t('Settings.Fullscreen Actions.Title')}`"
+    :title="t('Settings.Navigation and Controls')"
   >
     <div class="customizerLaunchers">
       <div class="settingButtonWithSync">
@@ -444,6 +444,7 @@ function resetQuickSettings() {
 }
 
 .settingActions {
+  align-items: center;
   align-self: stretch;
   display: flex;
 }
