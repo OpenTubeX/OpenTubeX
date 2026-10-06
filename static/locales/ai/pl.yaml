@@ -913,7 +913,7 @@ Description:
   Games: Gry
 Tooltips:
   General Settings:
-    Enable Tabs: "Wyłączenie zamyka wszystkie pozostałe karty i pozostawia bieżącą stronę otwartą."
+    Enable Tabs: "Bieżąca strona pozostaje otwarta. Pozostałe karty są zachowywane do ponownego uruchomienia aplikacji; włącz karty ponownie, aby je przywrócić."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."
     Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
     Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.

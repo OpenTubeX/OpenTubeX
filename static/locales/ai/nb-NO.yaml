@@ -1654,7 +1654,7 @@ Description:
   Games: Spill
 Tooltips:
   General Settings:
-    Enable Tabs: "Hvis du slår av dette, lukkes alle andre faner, og den gjeldende siden holdes åpen."
+    Enable Tabs: "Holder den gjeldende siden åpen. Andre faner beholdes til appen startes på nytt; aktiver faner igjen for å gjenopprette dem."
     Data Saver Thumbnails: "Bruk miniatyrbilder med lavere oppløsning for å redusere databruken."
     Use AI Translation Completions: Fyll ut mangler i menneskelige oversettelser med KI-generert tekst. Menneskelige oversettelser prioriteres alltid.
     Update Relative Timestamps: Oppdaterer relative tidsstempler i hele appen mens en side er åpen. Når dette er slått av, oppdateres de først når siden lastes inn på nytt eller åpnes igjen.

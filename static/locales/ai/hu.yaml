@@ -1637,7 +1637,7 @@ Description:
   Games: Játékok
 Tooltips:
   General Settings:
-    Enable Tabs: "A kikapcsolás bezárja az összes többi lapot, és nyitva hagyja az aktuális oldalt."
+    Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
     Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.
     Update Relative Timestamps: A relatív időbélyegek frissítése az egész alkalmazásban, amíg nyitva van egy oldal. Kikapcsolva csak az oldal újratöltésekor vagy újbóli megnyitásakor frissülnek.

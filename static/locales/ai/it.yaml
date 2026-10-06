@@ -1636,7 +1636,7 @@ Description:
   Games: Giochi
 Tooltips:
   General Settings:
-    Enable Tabs: "Disattivando questa opzione si chiudono tutte le altre schede e la pagina corrente rimane aperta."
+    Enable Tabs: "Mantiene aperta la pagina attuale. Le altre schede vengono conservate fino al riavvio dell’app; riattiva le schede per ripristinarle."
     Data Saver Thumbnails: "Usa miniature a risoluzione inferiore per ridurre il consumo di dati."
     Use AI Translation Completions: Completa le parti mancanti delle traduzioni umane con testo generato dall'IA. Le traduzioni umane hanno sempre la precedenza.
     Update Relative Timestamps: Aggiorna gli orari relativi in tutta l'app mentre una pagina rimane aperta. Se disabilitato, si aggiornano solo dopo aver ricaricato o riaperto la pagina.

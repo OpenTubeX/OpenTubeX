@@ -2163,7 +2163,7 @@ Description:
   Games: Jocs
 Tooltips:
   General Settings:
-    Enable Tabs: "Si desactives aquesta opció, es tanquen totes les altres pestanyes i la pàgina actual es manté oberta."
+    Enable Tabs: "Manté oberta la pàgina actual. Les altres pestanyes es conserven fins que es reinicia l’aplicació; torneu a activar les pestanyes per restaurar-les."
     Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
     Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.

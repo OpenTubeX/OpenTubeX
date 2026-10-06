@@ -2402,7 +2402,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
-    Enable Tabs: "Beim Deaktivieren werden alle anderen Tabs geschlossen. Die aktuelle Seite bleibt geöffnet."
+    Enable Tabs: "Die aktuelle Seite bleibt geöffnet. Andere Tabs bleiben bis zum Neustart der App erhalten; aktiviere Tabs erneut, um sie wiederherzustellen."
     Data Saver Thumbnails: "Verwendet Vorschaubilder mit geringerer Auflösung, um den Datenverbrauch zu reduzieren."
     Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.

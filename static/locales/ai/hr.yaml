@@ -1658,7 +1658,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
-    Enable Tabs: "Isključivanjem se zatvaraju sve ostale kartice, a trenutačna stranica ostaje otvorena."
+    Enable Tabs: "Trenutačna stranica ostaje otvorena. Ostale kartice čuvaju se do ponovnog pokretanja aplikacije; ponovno omogućite kartice da biste ih vratili."
     Data Saver Thumbnails: "Koristite sličice niže razlučivosti kako biste smanjili potrošnju podataka."
     Use AI Translation Completions: Popunjava praznine u ljudskim prijevodima tekstom koji generira umjetna inteligencija. Ljudski prijevodi uvijek imaju prednost.
     Update Relative Timestamps: Ažurira relativne vremenske oznake u cijeloj aplikaciji dok je stranica otvorena. Kada je isključeno, ažuriraju se tek nakon ponovnog učitavanja ili ponovnog posjeta stranici.

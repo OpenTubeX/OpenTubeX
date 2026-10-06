@@ -1635,7 +1635,7 @@ Description:
   Games: Jeux
 Tooltips:
   General Settings:
-    Enable Tabs: "La désactivation ferme tous les autres onglets et garde la page actuelle ouverte."
+    Enable Tabs: "Garde la page actuelle ouverte. Les autres onglets sont conservés jusqu’au redémarrage de l’application ; réactivez les onglets pour les restaurer."
     Data Saver Thumbnails: "Utiliser des miniatures de résolution inférieure pour réduire la consommation de données."
     Use AI Translation Completions: Complète les traductions humaines avec du texte généré par l’IA. Les traductions humaines sont toujours prioritaires.
     Update Relative Timestamps: Actualise les horodatages relatifs dans toute l’application tant qu’une page reste ouverte. Lorsque cette option est désactivée, ils ne sont actualisés qu’après le rechargement ou une nouvelle visite de la page.

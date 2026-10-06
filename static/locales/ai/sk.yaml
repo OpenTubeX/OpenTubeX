@@ -1639,7 +1639,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
-    Enable Tabs: "Vypnutím zatvoríte všetky ostatné karty a ponecháte aktuálnu stránku otvorenú."
+    Enable Tabs: "Aktuálna stránka zostane otvorená. Ostatné karty sa uchovajú do reštartovania aplikácie; opäť povoľte karty, aby ste ich obnovili."
     Data Saver Thumbnails: "Používať náhľady s nižším rozlíšením na zníženie spotreby dát."
     Use AI Translation Completions: Doplní medzery v ľudských prekladoch textom vytvoreným umelou inteligenciou. Ľudské preklady majú vždy prednosť.
     Update Relative Timestamps: Aktualizuje relatívne časové údaje v celej aplikácii, kým je stránka otvorená. Ak je táto možnosť vypnutá, aktualizujú sa až po opätovnom načítaní alebo otvorení stránky.

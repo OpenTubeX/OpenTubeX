@@ -1680,7 +1680,7 @@ Description:
   Games: Jocuri
 Tooltips:
   General Settings:
-    Enable Tabs: "Dezactivarea închide toate celelalte file și păstrează pagina curentă deschisă."
+    Enable Tabs: "Păstrează pagina curentă deschisă. Celelalte file sunt păstrate până la repornirea aplicației; activați din nou filele pentru a le restaura."
     Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
     Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.

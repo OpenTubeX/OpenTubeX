@@ -1638,7 +1638,7 @@ Description:
   Games: 遊戲
 Tooltips:
   General Settings:
-    Enable Tabs: "關閉此選項會關閉所有其他分頁，並保留目前頁面。"
+    Enable Tabs: "保持目前頁面開啟。其他分頁會保留到應用程式重新啟動，再次啟用分頁即可還原。"
     Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
     Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
