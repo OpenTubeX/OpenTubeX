@@ -205,15 +205,14 @@ private final class DlnaTrack {
         throw URLError(.cannotDecodeContentData)
     }
 
-    func seek(_ seconds: Double) throws -> Double {
+    func seek(_ seconds: Double, replaceReader: (UInt64) throws -> Void) throws -> Double {
         guard seconds > 0 else { return 0 }
         // Without an index, locating a late keyframe would download the entire
         // preceding video. Report an unsupported seek so the complete source
         // can start promptly at the requested position instead.
         guard let segment = index.last(where: { $0.time <= seconds }) else { throw URLError(.cannotDecodeContentData) }
         guard segment.time > 0 else { return 0 }
-        reader.cancel()
-        reader = DlnaTrackReader(request, offset: segment.offset)
+        try replaceReader(segment.offset)
         pending = nil
         position = segment.offset
         return segment.time
@@ -247,6 +246,14 @@ final class DlnaMuxer {
         let readers = tracks.map(\.reader)
         lock.unlock()
         for reader in readers { reader.cancel() }
+    }
+
+    private func replaceReader(_ track: DlnaTrack, offset: UInt64) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !cancelled else { throw URLError(.cancelled) }
+        track.reader.cancel()
+        track.reader = DlnaTrackReader(track.request, offset: offset)
     }
 
     private func trimAudio(_ fragment: (DlnaBox, DlnaBox, Double), track: DlnaTrack, base: Double) throws -> (DlnaBox, DlnaBox)? {
@@ -302,19 +309,18 @@ final class DlnaMuxer {
     }
 
     func stream(video: URLRequest, audio: URLRequest, startSeconds: Double, send: (Data) -> Bool) throws {
+        lock.lock()
+        guard !cancelled else { lock.unlock(); throw URLError(.cancelled) }
         let videoTrack = DlnaTrack(video)
         let audioTrack = DlnaTrack(audio)
-        lock.lock()
         tracks = [videoTrack, audioTrack]
-        let stopped = cancelled
         lock.unlock()
         defer { cancel() }
-        guard !stopped else { throw URLError(.cancelled) }
         try videoTrack.prepare()
         try audioTrack.prepare()
         // Begin at the preceding video segment/keyframe, retaining audio alignment.
-        let base = try videoTrack.seek(startSeconds)
-        _ = try audioTrack.seek(base)
+        let base = try videoTrack.seek(startSeconds) { try replaceReader(videoTrack, offset: $0) }
+        _ = try audioTrack.seek(base) { try replaceReader(audioTrack, offset: $0) }
         var children = try videoTrack.moov.children().filter { !["trak", "mvex"].contains($0.type) }
         if let at = children.firstIndex(where: { $0.type == "mvhd" }) {
             try children[at].clearDuration()

@@ -1992,3 +1992,5 @@ Storage Startup Error:
   Title: "Kunne ikke laste appdata"
   Message: "Frigjør lagringsplass på enheten og prøv igjen. Synkronisering er satt på pause til dataene dine er lastet."
   Retry: "Prøv igjen"
+Native Permissions:
+  Local Network: "Finn enheter på det lokale nettverket og cast videoer til dem, og synkroniser innstillinger og data mellom enheter."
