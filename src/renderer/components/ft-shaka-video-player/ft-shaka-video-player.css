@@ -2744,10 +2744,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   cursor: pointer;
 }
 
-.sponsorBlockDraftTimeField .textInputLabelText {
-  color: inherit;
-}
-
 .sponsorBlockDraftTimeInput {
   width: 78px;
   min-width: 78px;
@@ -2778,7 +2774,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftCategory) {
   inline-size: 100%;
-  margin-block-start: 16px;
+  margin-block: 8px 0;
 }
 
 :deep(.sponsorBlockDraftCategory .select-text),
@@ -2801,7 +2797,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
   inset-block-start: 0;
-  background-color: rgb(0 0 0 / 85%);
+  background-color: rgb(24 24 24);
 }
 
 :deep(.sponsorBlockDraftCategory .select-bar::before),
