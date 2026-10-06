@@ -199,15 +199,15 @@ test('a failed native PiP bounds update retries on the next layout event', async
   assert.equal(r.calls.at(-1)[0], 'bounds')
 })
 
-test('cover video bounds are clipped to the visible viewport and retain their object fit', async () => {
+test('partially offscreen cover video moves into the viewport and retains its object fit', async () => {
   const r = renderer({ fit: 'cover', rect: { x: -10, y: -20, width: 400, height: 225 } })
   const entered = r.enterAndroidPictureInPicture(r.video)
   r.flush()
   await entered
   assert.deepEqual(r.calls.find(([action]) => action === 'enter')[1].sourceRect,
-    { x: 0, y: 0, width: 390, height: 205, viewportWidth: 480 })
+    { x: 0, y: 0, width: 400, height: 225, viewportWidth: 480 })
   assert.equal(r.properties.get('--android-pip-video-fit'), 'cover')
-  assert.equal(r.properties.get('--android-pip-source-top'), '-20px')
+  assert.equal(r.properties.get('--android-pip-source-top'), '0px')
 })
 
 test('native entry and resize callbacks never change the live video geometry or multiply its UI scale', async () => {
@@ -246,8 +246,8 @@ test('disabling automatic entry while already in PiP retains the manual video ta
   assert.equal(r.attributes.has('data-android-picture-in-picture-target'), false)
 })
 
-for (const y of [-1000, 1000]) {
-  test(`offscreen automatic PiP relocates the live content into its current crop at y=${y}`, async () => {
+for (const [position, y] of [['offscreen', -1000], ['offscreen', 1000], ['partially scrolled', -200], ['partially scrolled', 700]]) {
+  test(`${position} automatic PiP keeps the full video crop at y=${y}`, async () => {
     const r = renderer()
     await r.setAndroidAutoPictureInPicture(true, r.video)
     r.rect.y = y
@@ -255,11 +255,12 @@ for (const y of [-1000, 1000]) {
     r.flush()
     const { sourceRect } = r.calls.at(-1)[1]
     assert.ok(sourceRect, 'automatic entry still has a live video crop')
+    assert.equal(sourceRect.height, 225, 'PiP must show the whole video, not only its visible strip')
+    assert.equal(sourceRect.width, 400)
     assert.ok(sourceRect.y >= 0 && sourceRect.y + sourceRect.height <= r.window.innerHeight)
     r.setAndroidPictureInPictureDocumentState(true, { transitioning: true })
     assert.equal(parseFloat(r.properties.get('--android-pip-source-top')) + 37.5, sourceRect.y,
-      'the frozen video and native content crop must move together')
-    assert.equal(sourceRect.height, 225)
+      'the frozen live video must move with the complete native crop')
   })
 }
 
