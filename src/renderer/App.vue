@@ -32,10 +32,11 @@
     <TopNav
       :inert="isAnyPromptOpen"
       @request-android-exit="requestAndroidAppExit"
-      @pointerdown="startPageSwipe"
-      @pointermove="movePageSwipe"
-      @pointerup="finishPageSwipe"
-      @pointercancel="cancelPageSwipe"
+      @pointerdown.capture="startPageSwipe"
+      @pointermove.capture="movePageSwipe"
+      @pointerup.capture="finishPageSwipe"
+      @pointercancel.capture="cancelPageSwipe"
+      @click.capture="suppressPageSwipeClick"
     />
     <SideNav
       :inert="isAnyPromptOpen"
@@ -721,12 +722,22 @@ const pageSwipeNeighborIds = computed(() => {
 
 const pageSwipe = shallowRef(null)
 let pageSwipePointer = null
+let pageSwipeClickPointerId = null
+let pageSwipeClickTimeout = null
+
+function clearPageSwipeClick() {
+  window.clearTimeout(pageSwipeClickTimeout)
+  pageSwipeClickTimeout = null
+  pageSwipeClickPointerId = null
+}
 
 function startPageSwipe(event) {
+  if (event.isPrimary) clearPageSwipeClick()
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
       pageSwipe.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
-      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer, .thumbnailSwipeEnabled')) return
+      !event.target.closest('.topNavInner') ||
+      event.target.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"], .dropdownLayer, .ft-input-component .options')) return
 
   const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
   if (!width) return
@@ -736,26 +747,36 @@ function startPageSwipe(event) {
     x: event.clientX,
     y: event.clientY,
     time: event.timeStamp,
-    width
+    width,
+    dragging: false,
+    cancelled: false
   }
-  event.currentTarget.setPointerCapture(event.pointerId)
 }
 
 function movePageSwipe(event) {
   const pointer = pageSwipePointer
-  if (!pointer || pointer.id !== event.pointerId) return
+  if (!pointer || pointer.id !== event.pointerId || pointer.cancelled) return
 
   const distance = event.clientX - pointer.x
   const verticalDistance = Math.abs(event.clientY - pointer.y)
-  if (!pageSwipe.value && (Math.abs(distance) < 10 || Math.abs(distance) < verticalDistance * 1.2)) {
+  if (!pointer.dragging && (Math.abs(distance) < 10 || Math.abs(distance) < verticalDistance * 1.2)) {
     if (verticalDistance > 10) pageSwipePointer = null
     return
   }
 
-  if (activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
-    cancelPageSwipe()
+  if (isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
+    // Keep tracking the release so cancellation cannot turn a drag into a click.
+    pointer.cancelled = true
+    pageSwipe.value = null
     return
   }
+
+  if (!pointer.dragging) {
+    pointer.dragging = true
+    pageSwipeClickPointerId = event.pointerId
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  event.preventDefault()
 
   const direction = distance < 0 ? 1 : -1
   const target = findSwipeTab(store.getters.getTabs, pointer.fromId, direction)
@@ -771,14 +792,24 @@ function movePageSwipe(event) {
     : null
 }
 
+function suppressPageSwipeClick(event) {
+  if (event.detail === 0 || event.pointerId !== pageSwipeClickPointerId) return
+  clearPageSwipeClick()
+  event.preventDefault()
+  event.stopPropagation()
+}
+
 async function finishPageSwipe(event, cancelled = false) {
   const pointer = pageSwipePointer
   if (!pointer || pointer.id !== event.pointerId) return
   pageSwipePointer = null
+  // Keep suppression for the click dispatched with pointerup, then expire it
+  // even when capture release or cancellation produces no click.
+  if (pointer.dragging) pageSwipeClickTimeout = window.setTimeout(clearPageSwipeClick, 0)
   const swipe = pageSwipe.value
   if (!swipe) return
 
-  const commit = !cancelled && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
+  const commit = !cancelled && !isAnyPromptOpen.value && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
     findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
   const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -817,7 +848,7 @@ async function finishPageSwipe(event, cancelled = false) {
   }
   if (pageSwipe.value !== settledSwipe) return
   try {
-    if (commit && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
+    if (commit && !isAnyPromptOpen.value && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
         findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
       await capacitorTabService.activateTab(swipe.toId)
     }
@@ -831,6 +862,7 @@ function cancelPageSwipe(event) {
     finishPageSwipe(event, true)
     return
   }
+  clearPageSwipeClick()
   pageSwipePointer = null
   pageSwipe.value = null
 }

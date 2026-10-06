@@ -642,3 +642,36 @@ test('phone tab history clamps its rendered scroll range after resize and fewer 
   await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBe(0)
   await expect.poll(checkRange).toBe(true)
 })
+
+for (const uiScale of [100, 125]) {
+  test.describe(`header long presses at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale } } })
+
+    test('cancels a mouse hold outside the button and preserves stationary holds and clicks', async ({ page }) => {
+      await goTo(page, 'userplaylists')
+      await goTo(page, 'history')
+      const button = page.locator('.navBackButton .iconButton')
+      const dropdown = page.locator('.navBackButton .iconDropdown')
+      await expect(button).toHaveAttribute('aria-disabled', 'false')
+      const box = await button.boundingBox()
+      const origin = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      await page.mouse.move(origin.x, origin.y)
+      await page.mouse.down()
+      await page.mouse.move(origin.x, origin.y + 100)
+      await page.mouse.up()
+      // Wait past the 500ms hold threshold to expose a timer surviving release.
+      await page.waitForTimeout(600)
+      await expect(dropdown).toBeHidden()
+      await expect(page).toHaveURL(/#\/history/)
+      await page.mouse.move(origin.x, origin.y)
+      await page.mouse.down()
+      await expect(dropdown).toBeVisible()
+      await page.mouse.up()
+      await expect(page).toHaveURL(/#\/history/)
+      await page.keyboard.press('Escape')
+      await expect(dropdown).toBeHidden()
+      await button.click()
+      await expect(page).toHaveURL(/#\/userplaylists/)
+    })
+  })
+}
