@@ -98,6 +98,16 @@ const payload = {
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
 }
 
+test('Cast accepts authenticated WebVTT without forwarding the original caption URL', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const caption = { label: 'English', language: 'en', url: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0APrivate%20caption' }
+  const result = await manager.start(42, { ...payload, captions: [caption] })
+  assert.ok(result.castId, result.error)
+  assert.deepEqual(result.status.activeTrackIds, [1])
+  await manager.stop(42, result.castId)
+})
+
 test('Cast owns a suspension blocker only during receiver playback and buffering', async t => {
   const starts = []
   const stops = []

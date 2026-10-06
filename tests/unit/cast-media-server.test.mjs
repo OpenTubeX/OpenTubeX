@@ -4,7 +4,7 @@ import test from 'node:test'
 import { gzipSync } from 'node:zlib'
 import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
-import { createCastMediaServer as createMediaServer, fetchCastMedia, resolveCastMediaAddresses, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
+import { createCastMediaServer as createMediaServer, fetchCastMedia, MAX_CAST_SUBTITLE_BYTES, resolveCastMediaAddresses, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
 
 // Trust only the loopback HTTP fixtures in these unit tests.
@@ -12,6 +12,38 @@ function createCastMediaServer(source, address, token, headers, allowed = url =>
   return createMediaServer(source, address, token, headers, async url => await allowed(url) ? [{ address: '127.0.0.1', family: 4 }] : null,
     (url, options) => fetchCastMedia({ request: httpRequest }, url, options))
 }
+
+test('authenticated WebVTT is served locally for GET and HEAD without upstream credentials', async t => {
+  const media = createMediaServer({ url: 'https://media.test/video', contentType: 'video/mp4' }, '127.0.0.1', 'token',
+    () => assert.fail('Inline captions must not request headers'), () => assert.fail('Inline captions must not resolve a destination'),
+    () => assert.fail('Inline captions must not fetch upstream'))
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nÜbersetzung\n'
+  const url = media.register(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`, 'text/vtt')
+  const response = await fetch(url)
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('content-type'), 'text/vtt')
+  assert.equal(response.headers.get('content-length'), String(Buffer.byteLength(text)))
+  assert.equal(await response.text(), text)
+  const head = await fetch(url, { method: 'HEAD' })
+  assert.equal(head.status, 200)
+  assert.equal(head.headers.get('content-length'), String(Buffer.byteLength(text)))
+  assert.equal(await head.text(), '')
+})
+
+test('inline caption resources reject unsupported types, malformed encoding and oversized content', async t => {
+  const media = createMediaServer({ url: 'https://media.test/video', contentType: 'video/mp4' }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  assert.throws(() => media.register('data:text/html;charset=utf-8,caption', 'text/vtt'), /Unsupported/)
+  assert.throws(() => media.register('data:text/vtt;charset=utf-8,caption', 'video/mp4'), /Unsupported/)
+  assert.throws(() => media.register(`data:text/vtt;charset=utf-8,${'x'.repeat(MAX_CAST_SUBTITLE_BYTES * 3 + 64)}`, 'text/vtt'), /Unsupported/)
+  const oversized = media.register(`data:text/vtt;charset=utf-8,${'x'.repeat(MAX_CAST_SUBTITLE_BYTES + 1)}`, 'text/vtt')
+  assert.equal((await fetch(oversized)).status, 502)
+  const malformed = media.register('data:text/vtt;charset=utf-8,%zz', 'text/vtt')
+  assert.equal((await fetch(malformed)).status, 502)
+})
 
 test('relay connections use only the addresses returned by destination validation', async () => {
   const network = {

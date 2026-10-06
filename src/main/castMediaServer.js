@@ -6,6 +6,7 @@ import sax from 'sax'
 import { isNonPublicNetworkAddress } from './utils.js'
 
 const MAX_MANIFEST_SIZE = 2_000_000
+export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
 const MAX_RESOURCES = 65_536
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
@@ -181,7 +182,10 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
     const values = Array.isArray(value) ? value : [value]
     const candidates = values.map(value => {
       if (value.startsWith('data:')) {
-        if (!/^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(value) || value.length > MAX_MANIFEST_SIZE * 3) {
+        const supported = /^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(value) ||
+          (contentType === 'text/vtt' && /^data:text\/vtt;charset=utf-8,/i.test(value))
+        const limit = contentType === 'text/vtt' ? MAX_CAST_SUBTITLE_BYTES : MAX_MANIFEST_SIZE
+        if (!supported || value.length > limit * 3 + 64) {
           throw new Error('Unsupported Cast data URL')
         }
       } else httpUrl(value)
@@ -232,7 +236,9 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       if (resource.urls[0].startsWith('data:')) {
         if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
         data = decodeURIComponent(resource.urls[0].slice(resource.urls[0].indexOf(',') + 1))
-        contentType = 'application/dash+xml'
+        const limit = contentType === 'text/vtt' ? MAX_CAST_SUBTITLE_BYTES : MAX_MANIFEST_SIZE
+        if (Buffer.byteLength(data) > limit) throw new Error('Cast data is too large')
+        contentType ??= 'application/dash+xml'
       } else {
         for (const [index, candidate] of resource.urls.entries()) {
           const attempt = new AbortController()
@@ -284,9 +290,11 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       }
       clearTimeout(timeout)
       if (data !== undefined) {
-        const rewritten = contentType === 'application/dash+xml'
-          ? rewriteCastDash(data, url?.href, register)
-          : rewriteCastHls(data, url.href, register)
+        const rewritten = contentType === 'text/vtt'
+          ? data
+          : contentType === 'application/dash+xml'
+            ? rewriteCastDash(data, url?.href, register)
+            : rewriteCastHls(data, url.href, register)
         response.writeHead(200, { ...cors, 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
         response.end(request.method === 'HEAD' ? undefined : rewritten)
         return

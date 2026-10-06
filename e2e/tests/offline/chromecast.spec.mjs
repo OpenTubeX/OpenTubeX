@@ -421,6 +421,50 @@ test('preserves the active subtitle identity when Watch and player track order d
   expect(started.captions[started.captionIndex].language).toBe('en')
 })
 
+for (const setting of ['YtDlpSubtitleUseCookies', 'YtDlpPlaybackAlwaysUseCookies']) {
+  test(`casts cookie-backed captions through the authenticated subtitle download with ${setting}`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    const url = 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt'
+    const text = 'WEBVTT\n\n00:00.000 --> 00:30.000\nPrivate caption\n'
+    await page.route(url, route => route.fulfill({ status: 403, body: 'Cookies required' }))
+    await app.electronApp.evaluate(({ ipcMain }, text) => {
+      globalThis.castSubtitleRequests = []
+      ipcMain.removeHandler('yt-dlp-get-subtitle')
+      ipcMain.handle('yt-dlp-get-subtitle', (_, url) => {
+        globalThis.castSubtitleRequests.push(url)
+        return text
+      })
+    }, text)
+    await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(`update${setting}`, true), setting)
+    await watch.evaluate((vm, url) => { vm.captions = [{ url, label: 'English', language: 'en', mimeType: 'text/vtt' }] }, url)
+    await choice(page, 'Test TV')
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+    expect(started.captions[0].url).toBe(`data:text/vtt;charset=utf-8,${encodeURIComponent(text)}`)
+    expect(await app.electronApp.evaluate(() => globalThis.castSubtitleRequests)).toContain(url)
+    await choice(page, 'Return to local playback')
+  })
+}
+
+test('an authenticated Cast caption failure leaves local playback running', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('yt-dlp-get-subtitle')
+    ipcMain.handle('yt-dlp-get-subtitle', () => ({ error: 'Unable to load subtitle with configured cookies' }))
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpSubtitleUseCookies', true))
+  await watch.evaluate(vm => {
+    vm.captions = [{ url: 'https://www.youtube.com/api/timedtext?v=jNQXAC9IVRw&lang=en&fmt=vtt', label: 'English', language: 'en', mimeType: 'text/vtt' }]
+    vm.$refs.player.play()
+  })
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  await choice(page, 'Test TV')
+  await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+  expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+})
+
 for (const outcome of ['resolved', 'rejected']) {
   test(`refreshes a ${outcome} Cast source lookup superseded by stream recovery`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)

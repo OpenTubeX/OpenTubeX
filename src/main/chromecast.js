@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto'
 import { isIP } from 'node:net'
 import { CastSender, discoverCastDevices, CAST_CONNECTION, CAST_RECEIVER, CAST_MEDIA } from './castSender.js'
-import { createCastMediaServer } from './castMediaServer.js'
+import { createCastMediaServer, MAX_CAST_SUBTITLE_BYTES } from './castMediaServer.js'
 
 const RECEIVER_APP = 'CC1AD845' // Default Media Receiver, independent of YouTube.
 const CONTENT_TYPES = new Set(['video/mp4', 'application/dash+xml', 'application/x-mpegurl', 'application/vnd.apple.mpegurl'])
@@ -62,7 +62,9 @@ export class ChromecastManager {
     if (this.active || this.starting) return { error: 'Another window is already casting' }
     const captions = payload.captions ?? []
     if (!Array.isArray(captions) || captions.length > 100 || captions.some(caption =>
-      typeof caption.url !== 'string' || !/^https?:\/\//i.test(caption.url) || caption.url.length > 16_000 ||
+      typeof caption.url !== 'string' || !(
+        (/^https?:\/\//i.test(caption.url) && caption.url.length <= 16_000) ||
+        (/^data:text\/vtt;charset=utf-8,/i.test(caption.url) && caption.url.length <= MAX_CAST_SUBTITLE_BYTES * 3 + 64)) ||
       typeof caption.label !== 'string' || caption.label.length > 256 || typeof caption.language !== 'string' || caption.language.length > 32)) {
       return { error: 'Invalid Cast subtitles' }
     }

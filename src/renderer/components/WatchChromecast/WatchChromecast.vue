@@ -21,6 +21,7 @@ import { useStore } from 'vuex'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { selectCastSource } from '../../helpers/player/castSource'
+import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 
 const props = defineProps({
   formats: { type: Array, required: true },
@@ -196,12 +197,17 @@ async function handleChoice(choice) {
       return
     }
     if (!choice.startsWith('device-') || !source.value) return
-    const captions = props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
+    let captions = props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
       .map(({ url, label, language }) => ({ url, label, language }))
     const caption = props.subtitlesEnabled ? props.getPlayer()?.getActiveCaption() : null
     if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
+    const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
+    captions = await Promise.all(captions.map(async caption => ({
+      ...caption, url: await getSubtitleRequestUrl(caption.url, store.getters)
+    })))
+    if (disposed) return
     const player = props.getPlayer()
     const paused = player?.isPaused() ?? true
     if (!paused) {
@@ -217,7 +223,7 @@ async function handleChoice(choice) {
       startSeconds,
       paused,
       captions,
-      captionIndex: caption ? captions.findIndex(item => item.url === caption.url) : null,
+      captionIndex,
       isLive: props.isLive
     })
     if (result.error) throw new Error(result.error)
