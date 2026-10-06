@@ -327,6 +327,13 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   aspect-ratio: auto;
 }
 
+/* Interpolate the Shorts fade while sharing its value with glass and icons. */
+@property --ft-controls-fade {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
 .shortsTopControls {
   position: absolute;
   z-index: 4;

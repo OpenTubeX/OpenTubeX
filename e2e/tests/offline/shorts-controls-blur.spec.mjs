@@ -13,8 +13,7 @@ test.use({
 
 async function openShort({ app, page }) {
   await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => { element.loop = true })
+  await openMockedVideo(page)
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate(async component => {
     component.proxy.useCustomShortsPlayerForCurrentVideo = true
@@ -23,6 +22,12 @@ async function openShort({ app, page }) {
   })
   await watch.dispose()
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
+  // Entering Shorts replaces the original video element.
+  await page.locator('.ftVideoPlayer video').evaluate(async element => {
+    element.loop = true
+    await element.play()
+  })
+  await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/shortsPaused/)
   await page.mouse.move(0, 0)
 }
 
