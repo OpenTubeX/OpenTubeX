@@ -121,6 +121,49 @@ test('preserves channel search avatar slots in grid and list layouts', async ({ 
   await expectStableImageSlot(app, page, page.locator('.ft-list-channel .channelThumbnailLink'), pending, ['grid', 'list'])
 })
 
+test('uses muted channel avatar placeholders in dark and light themes', async ({ page }, testInfo) => {
+  const pending = []
+  await page.route('https://slot-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'avatar-color',
+      data: [{ type: 'channel', dataSource: 'local', name: 'Channel avatar', id: 'avatar-color', thumbnail: 'https://slot-images.test/avatar-color' }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/avatar-color' })
+  })
+  const channel = page.locator('.ft-list-channel')
+  const placeholder = channel.locator('.retryImagePlaceholder[data-icon="circle-user"]')
+  await expect(placeholder).toBeVisible()
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  for (const iconPack of ['material', 'remix']) {
+    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), iconPack)
+    await expect(placeholder).toHaveAttribute('data-icon-pack', iconPack)
+    for (const theme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: theme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+      const mutedColor = await page.evaluate(() => {
+        const probe = document.createElement('span')
+        probe.style.color = 'var(--tertiary-text-color)'
+        document.body.append(probe)
+        const color = getComputedStyle(probe).color
+        probe.remove()
+        return color
+      })
+      await expect(placeholder).toHaveCSS('color', mutedColor)
+      await expect(placeholder.locator('svg')).toHaveCSS('color', mutedColor)
+      await channel.screenshot({ path: testInfo.outputPath(`avatar-color-${iconPack}-${theme}.png`) })
+    }
+  }
+  while (pending.length) await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(channel.locator('img.channelImage')).toBeVisible()
+  await expect(placeholder).toHaveCount(0)
+})
+
 test('preserves watch channel avatar slots while loading and retrying', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

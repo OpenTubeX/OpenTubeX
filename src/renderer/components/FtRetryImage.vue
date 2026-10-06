@@ -165,6 +165,10 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.retryImagePlaceholder[data-icon='circle-user'] {
+  color: var(--tertiary-text-color);
+}
+
 .retryImagePlaceholder :deep(.ft-icon__glyph) {
   block-size: 100%;
   inline-size: 100%;
