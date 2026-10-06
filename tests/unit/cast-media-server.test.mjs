@@ -532,6 +532,157 @@ test('rewrites HLS variants, segments, initialization maps and keys', () => {
   assert.match(result, /\nhttp:\/\/cast.test\/3\n/)
 })
 
+for (const reference of [
+  '#EXT-X-STREAM-INF:BANDWIDTH=500000\nplaylist?id=video',
+  '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Audio",URI="playlist?id=audio"',
+  '#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=50000,URI="playlist?id=iframe"',
+  '#EXT-X-RENDITION-REPORT:URI="playlist?id=alternate",LAST-MSN=1'
+]) {
+  test(`extensionless HLS playlists preserve imports through ${reference.split(':')[0]}`, async t => {
+    const upstream = createServer((request, response) => {
+      response.setHeader('content-type', 'application/octet-stream')
+      if (request.url === '/master') return response.end(`#EXTM3U\n#EXT-X-DEFINE:NAME="token",VALUE="scoped"\n${reference}\n`)
+      if (request.url.startsWith('/playlist?')) return response.end('#EXTM3U\n#EXT-X-DEFINE:IMPORT="token"\n#EXT-X-KEY:METHOD=AES-128,URI="key"\n#EXTINF:5,\nsegment.ts?token={$token}\n')
+      if (request.url === '/key') return response.end('binary key')
+      if (request.url === '/segment.ts?token=scoped') return response.end('binary segment')
+      response.writeHead(404).end()
+    })
+    const origin = await listen(upstream)
+    t.after(() => close(upstream))
+    const media = createCastMediaServer({ url: `${origin}/master`, contentType: 'application/x-mpegurl' }, '127.0.0.1', 'token')
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const master = await (await fetch(media.mediaUrl())).text()
+    const childUrl = master.match(/URI="([^"]+)"/)?.[1] ?? master.trim().split('\n').at(-1)
+    const child = await fetch(childUrl)
+    assert.equal(child.headers.get('content-type'), 'application/x-mpegurl')
+    const playlist = await child.text()
+    const key = await fetch(playlist.match(/URI="([^"]+)"/)[1])
+    assert.equal(await key.text(), 'binary key')
+    const segment = await fetch(playlist.trim().split('\n').at(-1))
+    assert.equal(segment.status, 200)
+    assert.equal(await segment.text(), 'binary segment')
+  })
+}
+
+test('live HLS refreshes reclaim retired parts beyond the session resource budget', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  let generation = 0
+  const upstream = createServer((request, response) => {
+    if (request.url === '/live.m3u8') {
+      const parts = Array.from({ length: 32_750 }, (_, index) => `#EXT-X-PART:DURATION=0.001,URI="part-${generation}-${index}"`).join('\n')
+      return response.end(`#EXTM3U\n#EXT-X-TARGETDURATION:1\n${parts}\n`)
+    }
+    response.end(request.url)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/live.m3u8` }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  async function refresh() {
+    const response = await fetch(root)
+    assert.equal(response.status, 200)
+    return (await response.text()).match(/URI="([^"]+)"/)[1]
+  }
+  const first = await refresh()
+  generation++
+  t.mock.timers.setTime(121_000)
+  const second = await refresh()
+  assert.equal((await fetch(first)).status, 200, 'recently retired parts have request grace')
+  generation++
+  t.mock.timers.setTime(242_000)
+  const third = await refresh()
+  assert.equal((await fetch(first)).status, 404, 'expired IDs cannot serve a different part')
+  assert.equal(await (await fetch(second)).text(), '/part-1-0')
+  assert.equal(await (await fetch(third)).text(), '/part-2-0')
+  // Current references survive an arbitrarily long gap between refreshes.
+  t.mock.timers.setTime(10_000_000)
+  assert.equal(await refresh(), third)
+  assert.equal(await (await fetch(third)).text(), '/part-2-0')
+})
+
+test('HLS retirement preserves shared references, long windows, VOD, captions and active downloads', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  let includeShared = true
+  let includeLong = true
+  let includeSlow = true
+  let finishSlow
+  const upstream = createServer((request, response) => {
+    if (request.url === '/master.m3u8') return response.end('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\na.m3u8\n#EXT-X-STREAM-INF:BANDWIDTH=200\nb.m3u8\n#EXT-X-STREAM-INF:BANDWIDTH=300\nvod.m3u8\n')
+    if (request.url === '/a.m3u8') return response.end(`#EXTM3U\n#EXT-X-TARGETDURATION:300\n${includeShared ? '#EXTINF:5,\nshared\n' : ''}${includeLong ? '#EXTINF:300,\nlong\n' : ''}${includeSlow ? '#EXTINF:5,\nslow\n' : ''}#EXTINF:5,\ncurrent\n`)
+    if (request.url === '/b.m3u8') return response.end('#EXTM3U\n#EXT-X-TARGETDURATION:5\n#EXTINF:5,\nshared\n')
+    if (request.url === '/vod.m3u8') return response.end('#EXTM3U\n#EXTINF:5,\nvod\n#EXT-X-ENDLIST\n')
+    if (request.url === '/slow') {
+      response.write('begin')
+      finishSlow = () => response.end('end')
+      return
+    }
+    response.end(request.url)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/master.m3u8` }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  const caption = media.register('data:text/vtt;charset=utf-8,WEBVTT', 'text/vtt')
+  const playlists = (await (await fetch(root)).text()).split('\n').filter(line => line.startsWith('http'))
+  const parts = (await (await fetch(playlists[0])).text()).split('\n').filter(line => line.startsWith('http'))
+  await (await fetch(playlists[1])).text()
+  const vod = (await (await fetch(playlists[2])).text()).split('\n').find(line => line.startsWith('http'))
+  const slow = await fetch(parts[2])
+  t.after(() => finishSlow?.())
+  includeShared = includeLong = includeSlow = false
+  await (await fetch(playlists[0])).text()
+  t.mock.timers.setTime(121_000)
+  await (await fetch(root)).text()
+  assert.equal(await (await fetch(parts[1])).text(), '/long', 'long playlists extend the minimum retirement grace')
+  t.mock.timers.setTime(901_000)
+  await (await fetch(root)).text()
+  assert.equal((await fetch(parts[1])).status, 404, 'retired long-window resources expire after three target durations')
+  assert.equal(await (await fetch(parts[0])).text(), '/shared', 'another playlist still owns this resource')
+  assert.equal(await (await fetch(vod)).text(), '/vod', 'VOD references do not expire without refreshes')
+  assert.equal(await (await fetch(caption)).text(), 'WEBVTT', 'standalone captions remain registered')
+  finishSlow()
+  assert.equal(await slow.text(), 'beginend', 'a retired resource can finish an outstanding download')
+})
+
+test('removed HLS playlist cycles retire together and old URLs are never reassigned', async t => {
+  t.mock.timers.enable({ apis: ['Date'], now: 0 })
+  let includeChild = true
+  const upstream = createServer((request, response) => {
+    if (request.url === '/master.m3u8') return response.end(`#EXTM3U\n${includeChild ? '#EXT-X-STREAM-INF:BANDWIDTH=100\na.m3u8\n' : ''}`)
+    if (request.url === '/a.m3u8') return response.end('#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="b.m3u8",LAST-MSN=1\n#EXTINF:5,\nsegment\n')
+    if (request.url === '/b.m3u8') return response.end('#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="a.m3u8",LAST-MSN=1\n#EXTINF:5,\nsegment\n')
+    response.end(request.url)
+  })
+  const origin = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${origin}/master.m3u8` }, '127.0.0.1', 'token')
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = media.mediaUrl()
+  const a = (await (await fetch(root)).text()).trim().split('\n').at(-1)
+  const aText = await (await fetch(a)).text()
+  const segment = aText.trim().split('\n').at(-1)
+  const b = aText.match(/URI="([^"]+)"/)[1]
+  const backToA = (await (await fetch(b)).text()).match(/URI="([^"]+)"/)[1]
+  assert.equal(backToA, a)
+  includeChild = false
+  await (await fetch(root)).text()
+  assert.equal((await fetch(segment)).status, 200, 'removed playlists retain their old window during grace')
+  t.mock.timers.setTime(121_000)
+  await (await fetch(root)).text()
+  for (const retired of [a, b, segment]) assert.equal((await fetch(retired)).status, 404)
+  includeChild = true
+  const nextA = (await (await fetch(root)).text()).trim().split('\n').at(-1)
+  assert.notEqual(nextA, a)
+  assert.equal((await fetch(a)).status, 404)
+  assert.equal((await fetch(nextA)).status, 200)
+})
+
 test('serves session resources with ranges, CORS, subtitles and per-origin credentials', async t => {
   const requests = []
   const upstream = createServer((request, response) => {

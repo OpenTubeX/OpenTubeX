@@ -8,6 +8,7 @@ import { isNonPublicNetworkAddress } from './utils.js'
 const MAX_MANIFEST_SIZE = 2_000_000
 export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
 const MAX_RESOURCES = 65_536
+const HLS_RESOURCE_GRACE_MS = 120_000
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
@@ -177,15 +178,16 @@ export function rewriteCastHls(text, base, register, parentVariables = {}) {
   if (text.length > MAX_MANIFEST_SIZE || !text.trimStart().startsWith('#EXTM3U')) throw new Error('Invalid Cast HLS manifest')
   const variables = new Map()
   let variableSnapshot = {}
+  let nextIsPlaylist = false
   function substitute(value) {
     return value.replaceAll(/\{\$([a-zA-Z0-9_-]+)\}/g, (_, name) => {
       if (!variables.has(name)) throw new Error('Undefined HLS variable')
       return variables.get(name)
     })
   }
-  function resource(value) {
+  function resource(value, playlist = false) {
     // Resolve variables before URL parsing; keep the receiver on exact resources.
-    return register(httpUrl(value, base).href, undefined, variableSnapshot)
+    return register(httpUrl(value, base).href, playlist ? 'application/x-mpegurl' : undefined, variableSnapshot)
   }
   return text.split('\n').map(line => {
     if (line.startsWith('#EXT-X-DEFINE:')) {
@@ -205,34 +207,68 @@ export function rewriteCastHls(text, base, register, parentVariables = {}) {
       // Definitions, imports and query parameters have already been consumed.
       return ''
     }
-    if (line.trim() && !line.startsWith('#')) return resource(substitute(line.trim()))
+    if (line.trim() && !line.startsWith('#')) {
+      const result = resource(substitute(line.trim()), nextIsPlaylist)
+      nextIsPlaylist = false
+      return result
+    }
+    if (line.startsWith('#EXT-X-STREAM-INF:')) nextIsPlaylist = true
+    const playlist = /^#EXT-X-(?:MEDIA|I-FRAME-STREAM-INF|RENDITION-REPORT):/.test(line)
     return line.replaceAll(/"([^"\r\n]*)"/g, (_, value) => `"${substitute(value)}"`)
-      .replaceAll(/URI="([^"]+)"/g, (_, url) => `URI="${resource(url)}"`)
+      .replaceAll(/URI="([^"]+)"/g, (_, url) => `URI="${resource(url, playlist)}"`)
   }).join('\n')
+}
+
+function hlsResourceGrace(text) {
+  let duration = 0
+  let longest = 0
+  let target = 0
+  for (const line of text.split('\n')) {
+    const value = Number(line.match(/^#EXTINF:([\d.]+)/)?.[1] ??
+      (line.startsWith('#EXT-X-PART:') ? line.replaceAll(/"[^"]*"/g, '""').match(/(?:[:,])DURATION=([\d.]+)/)?.[1] : undefined))
+    if (Number.isFinite(value)) { duration += value; longest = Math.max(longest, value) }
+    if (line.startsWith('#EXT-X-TARGETDURATION:')) target = Number(line.slice(line.indexOf(':') + 1)) || 0
+  }
+  // Include a full playlist plus a segment, and at least three target durations
+  // for partial segments. The minimum also covers delayed receiver requests.
+  const graceMs = Math.max(HLS_RESOURCE_GRACE_MS, (duration + longest) * 1000, target * 3000)
+  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast HLS duration')
+  return graceMs
 }
 
 /** A session-scoped endpoint; only registered resources are fetchable. */
 export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch) {
-  const resources = []
+  const resources = new Map()
   const resourceIds = new Map()
-  const hlsContexts = new Map()
-  const hlsContextCache = new WeakMap()
+  let nextResourceId = 0
   let origin
-  function register(value, contentType, hlsVariables, dashContext) {
-    let context
-    if (hlsVariables) {
-      context = hlsContextCache.get(hlsVariables)
-      if (!context) {
-        const key = JSON.stringify(hlsVariables)
-        context = hlsContexts.get(key)
-        if (!context) {
-          if (hlsContexts.size >= MAX_RESOURCES) throw new Error('Too many Cast HLS variable contexts')
-          context = { id: hlsContexts.size, variables: hlsVariables }
-          hlsContexts.set(key, context)
-        }
-        hlsContextCache.set(hlsVariables, context)
+  function collectExpiredResources() {
+    // Follow session roots and active requests. Rendition-report cycles also
+    // become unreachable when their parent playlist drops them.
+    const reachable = new Set()
+    const pending = [...resources.values()].filter(resource => resource.persistent || resource.active).map(resource => resource.id)
+    while (pending.length) {
+      const id = pending.pop()
+      if (reachable.has(id)) continue
+      reachable.add(id)
+      const resource = resources.get(id)
+      if (resource) {
+        for (const reference of resource.references) if (!reachable.has(reference)) pending.push(reference)
       }
     }
+    const now = Date.now()
+    for (const resource of resources.values()) {
+      if (reachable.has(resource.id)) resource.expiresAt = undefined
+      else {
+        resource.expiresAt ??= now + resource.graceMs
+        if (resource.expiresAt <= now) {
+          resources.delete(resource.id)
+          resourceIds.delete(resource.key)
+        }
+      }
+    }
+  }
+  function register(value, contentType, hlsVariables, dashContext, references) {
     const values = Array.isArray(value) ? value : [value]
     const candidates = values.map(value => {
       if (value.startsWith('data:')) {
@@ -252,14 +288,29 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
         suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : 'media'
       }
     })
-    const key = JSON.stringify([candidates, contentType, context?.id, dashContext])
+    // Keep variable contexts in resource identity rather than a session-long
+    // intern table, so retiring a resource also releases its import context.
+    const key = JSON.stringify([candidates, contentType, hlsVariables, dashContext])
     let id = resourceIds.get(key)
     if (id === undefined) {
-      if (resources.length >= MAX_RESOURCES) throw new Error('Too many Cast resources')
-      id = resources.length
+      if (resources.size >= MAX_RESOURCES) throw new Error('Too many Cast resources')
+      id = nextResourceId++
       resourceIds.set(key, id)
-      resources.push({ urls: candidates.map(candidate => candidate.url), contentType, hlsVariables: context?.variables, dashContext })
+      resources.set(id, {
+        id,
+        key,
+        urls: candidates.map(candidate => candidate.url),
+        contentType,
+        hlsVariables,
+        dashContext,
+        references: new Set(),
+        graceMs: HLS_RESOURCE_GRACE_MS,
+        active: 0,
+        persistent: false
+      })
     }
+    if (references) references.add(id)
+    else resources.get(id).persistent = true
     return `${origin}/${token}/${id}/${candidates[0].suffix}`
   }
   const server = createServer(async (request, response) => {
@@ -275,11 +326,12 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       response.writeHead(404).end()
       return
     }
-    const resource = resources[Number(match[1])]
+    const resource = resources.get(Number(match[1]))
     if (!resource) { response.writeHead(404).end(); return }
     if (request.method === 'OPTIONS') { response.writeHead(204, cors).end(); return }
+    resource.active++
     const controller = new AbortController()
-    response.on('close', () => controller.abort())
+    response.on('close', () => { resource.active--; controller.abort() })
     const timeout = setTimeout(() => controller.abort(), 15_000)
     try {
       let data
@@ -344,11 +396,23 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       }
       clearTimeout(timeout)
       if (data !== undefined) {
+        const references = new Set()
+        const hls = contentType !== 'text/vtt' && contentType !== 'application/dash+xml'
+        if (hls) collectExpiredResources()
         const rewritten = contentType === 'text/vtt'
           ? data
           : contentType === 'application/dash+xml'
             ? rewriteCastDash(data, url?.href, register, resource.dashContext)
-            : rewriteCastHls(data, url.href, register, resource.hlsVariables)
+            : rewriteCastHls(data, url.href, (value, type, variables) => register(value, type, variables, undefined, references), resource.hlsVariables)
+        if (hls) {
+          const graceMs = hlsResourceGrace(data)
+          for (const id of references) {
+            const child = resources.get(id)
+            child.graceMs = Math.max(child.graceMs, graceMs)
+          }
+          resource.references = references
+          collectExpiredResources()
+        }
         response.writeHead(200, { ...cors, 'content-type': contentType, 'content-length': Buffer.byteLength(rewritten) })
         response.end(request.method === 'HEAD' ? undefined : rewritten)
         return
