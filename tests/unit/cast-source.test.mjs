@@ -31,7 +31,8 @@ test('allows local DASH and remote HLS but excludes SABR, blobs and files', () =
     ['https://media.test/sabr', 'application/x-sabr'],
     ['blob:local-video', 'video/mp4'],
     ['file:///video.mp4', 'video/mp4'],
-    ['data:text/html,hello', 'application/dash+xml']
+    ['data:text/html,hello', 'application/dash+xml'],
+    ['data:application/x-mpegurl;base64,I0VYVE0zVQ==', 'application/x-mpegurl']
   ]) {
     assert.equal(selectCastSource([], url, type), null)
     assert.equal(castSourceAvailable({ url, contentType: type }), false)
@@ -53,6 +54,19 @@ test('does not replace video with an audio-only DASH manifest', () => {
   assert.deepEqual(selectCastSource([{ url, mimeType: 'video/mp4' }], manifest, 'application/dash+xml'),
     { url, contentType: 'video/mp4' })
 })
+
+for (const type of ['application/x-mpegurl', 'application/vnd.apple.mpegurl']) {
+  for (const charset of ['', ';charset=UTF-8']) {
+    test(`selects inline ${type}${charset} with no progressive fallback`, () => {
+      const url = `data:${type}${charset},${encodeURIComponent('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nhttps://media.test/video.m3u8\n')}`
+      const source = selectCastSource([], url, type)
+      assert.deepEqual(source, { url, contentType: type })
+      assert.equal(castSourceAvailable(source), true)
+      assert.equal(selectCastSource([], url, 'application/dash+xml'), null)
+      assert.equal(castSourceAvailable({ url, contentType: 'application/dash+xml' }), false)
+    })
+  }
+}
 
 const watchCode = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const methodCode = watchCode.slice(watchCode.indexOf('    async getChromecastSource() {'), watchCode.indexOf('    handleVideoPlay() {'))

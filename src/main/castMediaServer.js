@@ -4,6 +4,7 @@ import { Readable, pipeline } from 'node:stream'
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
 import sax from 'sax'
 import { isNonPublicNetworkAddress } from './utils.js'
+import { getInlineCastManifestType } from '../castManifest.js'
 
 const MAX_MANIFEST_SIZE = 2_000_000
 export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
@@ -287,15 +288,17 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
   function register(value, contentType, hlsVariables, dashContext, references) {
     const values = Array.isArray(value) ? value : [value]
     const candidates = values.map(value => {
-      if (value.startsWith('data:')) {
-        const supported = /^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(value) ||
+      const inline = /^data:/i.test(value)
+      if (inline) {
+        const inlineType = getInlineCastManifestType(value)
+        const supported = (inlineType && (contentType === undefined || contentType === inlineType)) ||
           (contentType === 'text/vtt' && /^data:text\/vtt;charset=utf-8,/i.test(value))
         const limit = contentType === 'text/vtt' ? MAX_CAST_SUBTITLE_BYTES : MAX_MANIFEST_SIZE
         if (!supported || value.length > limit * 3 + 64) {
           throw new Error('Unsupported Cast data URL')
         }
       } else httpUrl(value)
-      const template = !hlsVariables && !dashContext && !value.startsWith('data:') && value.includes('$')
+      const template = !hlsVariables && !dashContext && !inline && value.includes('$')
       const url = template ? httpUrl(value) : null
       const firstPlaceholder = url?.pathname.indexOf('$') ?? -1
       const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
@@ -355,12 +358,12 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       let upstream
       let url
       let manifest = false
-      if (resource.urls[0].startsWith('data:')) {
+      if (/^data:/i.test(resource.urls[0])) {
         if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
         data = decodeURIComponent(resource.urls[0].slice(resource.urls[0].indexOf(',') + 1))
         const limit = contentType === 'text/vtt' ? MAX_CAST_SUBTITLE_BYTES : MAX_MANIFEST_SIZE
         if (Buffer.byteLength(data) > limit) throw new Error('Cast data is too large')
-        contentType ??= 'application/dash+xml'
+        contentType ??= getInlineCastManifestType(resource.urls[0])
       } else {
         for (const [index, candidate] of resource.urls.entries()) {
           const attempt = new AbortController()
@@ -422,7 +425,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           ? data
           : dash
             ? rewriteCastDash(data, url?.href, registerResource, resource.dashContext, attributes => { dashAttributes = attributes })
-            : rewriteCastHls(data, url.href, registerResource, resource.hlsVariables)
+            : rewriteCastHls(data, url?.href ?? resource.urls[0], registerResource, resource.hlsVariables)
         if (isManifest) {
           const graceMs = dash
             ? resource.dashContext ? resource.graceMs : dashResourceGrace(dashAttributes)

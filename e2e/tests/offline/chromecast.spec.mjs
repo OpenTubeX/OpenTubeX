@@ -535,6 +535,25 @@ test('prefers the resolved adaptive source over a progressive SABR fallback', as
   expect((await app.electronApp.evaluate(() => globalThis.castTest.starts))[0].source.contentType).toBe('application/dash+xml')
 })
 
+test('casts an inline Twitch HLS fallback without progressive formats', async ({ app, page }) => {
+  await mockCast(app)
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  const url = `data:application/x-mpegurl;charset=UTF-8,${encodeURIComponent('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nhttps://cast-media.test/video.m3u8\n')}`
+  await watch.evaluate((vm, url) => {
+    // Exercise Watch's real selection with the external source while keeping
+    // the offline local player fixture loaded for the handoff.
+    vm.getChromecastSource = () => vm.$options.methods.getChromecastSource.call({
+      legacyFormats: [], manifestSrc: url, manifestMimeType: 'application/x-mpegurl'
+    })
+  }, url)
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  expect((await app.electronApp.evaluate(() => globalThis.castTest.starts))[0].source).toEqual({ url, contentType: 'application/x-mpegurl' })
+  await choice(page, 'Return to local playback')
+})
+
 test('preserves the active subtitle identity when Watch and player track order differ', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await watch.evaluate(vm => {

@@ -2,13 +2,15 @@ import { randomBytes } from 'node:crypto'
 import { isIP } from 'node:net'
 import { CastSender, discoverCastDevices, CAST_CONNECTION, CAST_RECEIVER, CAST_MEDIA } from './castSender.js'
 import { createCastMediaServer, MAX_CAST_SUBTITLE_BYTES } from './castMediaServer.js'
+import { getInlineCastManifestType } from '../castManifest.js'
 
 const RECEIVER_APP = 'CC1AD845' // Default Media Receiver, independent of YouTube.
 const CONTENT_TYPES = new Set(['video/mp4', 'application/dash+xml', 'application/x-mpegurl', 'application/vnd.apple.mpegurl'])
 
 export function castSourceAvailable(source) {
   if (!source || !CONTENT_TYPES.has(source.contentType) || typeof source.url !== 'string' || source.url.length > 6_000_000) return false
-  if (/^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(source.url)) return source.contentType === 'application/dash+xml'
+  const inlineType = getInlineCastManifestType(source.url)
+  if (inlineType) return source.contentType === inlineType
   try {
     const url = new URL(source.url)
     return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password

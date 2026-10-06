@@ -524,6 +524,73 @@ test('HLS child playlists retain imported variables across the relay', async t =
   assert.deepEqual(requests, ['/master.m3u8', '/video.m3u8', '/segment-720.ts'])
 })
 
+for (const type of ['application/x-mpegurl', 'application/vnd.apple.mpegurl']) {
+  test(`inline ${type} relays an absolute child and its relative media with scoped credentials`, async t => {
+    const requests = []
+    const upstream = createServer((request, response) => {
+      requests.push({ url: request.url, authorization: request.headers.authorization })
+      if (request.url === '/private/playlist') return response.end('#EXTM3U\n#EXT-X-DEFINE:IMPORT="id"\n#EXTINF:5,\n../segment-{$id}.ts\n')
+      if (request.url === '/segment-720.ts') return response.end('segment')
+      response.writeHead(404).end()
+    })
+    const origin = await listen(upstream)
+    t.after(() => close(upstream))
+    const playlist = `#EXTM3U\n#EXT-X-DEFINE:NAME="id",VALUE="720"\n#EXT-X-STREAM-INF:BANDWIDTH=500000\n${origin}/private/playlist\n`
+    const media = createCastMediaServer({ url: `data:${type};charset=UTF-8,${encodeURIComponent(playlist)}`, contentType: type }, '127.0.0.1', 'token',
+      url => new URL(url).pathname.startsWith('/private/') ? { Authorization: 'Bearer private' } : {})
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const root = media.mediaUrl()
+    const response = await fetch(root)
+    assert.equal(response.status, 200)
+    assert.equal(response.headers.get('content-type'), type)
+    const master = await response.text()
+    const head = await fetch(root, { method: 'HEAD' })
+    assert.equal(head.status, 200)
+    assert.equal(head.headers.get('content-length'), String(Buffer.byteLength(master)))
+    assert.equal(await head.text(), '')
+    const child = await (await fetch(master.trim().split('\n').at(-1))).text()
+    const segment = await fetch(child.trim().split('\n').at(-1))
+    assert.equal(segment.status, 200)
+    assert.equal(await segment.text(), 'segment')
+    assert.deepEqual(requests, [{ url: '/private/playlist', authorization: 'Bearer private' }, { url: '/segment-720.ts', authorization: undefined }])
+  })
+}
+
+test('inline HLS infers its MIME type and still validates every child destination', async t => {
+  const destinations = []
+  const playlist = '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000\nhttps://media.test/private\n'
+  const media = createMediaServer({ url: `DATA:application/x-mpegurl,${encodeURIComponent(playlist)}` }, '127.0.0.1', 'token',
+    () => assert.fail('Denied destinations must not receive headers'), url => { destinations.push(url.href); return null },
+    () => assert.fail('Denied destinations must not be fetched'))
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const root = await fetch(media.mediaUrl())
+  assert.equal(root.status, 200)
+  assert.equal(root.headers.get('content-type'), 'application/x-mpegurl')
+  const child = (await root.text()).trim().split('\n').at(-1)
+  assert.equal((await fetch(child)).status, 502)
+  assert.deepEqual(destinations, ['https://media.test/private'])
+})
+
+test('inline HLS rejects malformed, oversized and unresolvable manifests', async t => {
+  const media = createMediaServer({ url: 'https://media.test/video', contentType: 'video/mp4' }, '127.0.0.1', 'token',
+    () => assert.fail('Invalid manifests must not request headers'), () => assert.fail('Invalid manifests must not resolve a destination'),
+    () => assert.fail('Invalid manifests must not fetch upstream'))
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  assert.throws(() => media.register('data:application/x-mpegurl;base64,I0VYVE0zVQ==', 'application/x-mpegurl'), /Unsupported/)
+  assert.throws(() => media.register('data:application/x-mpegurl,%23EXTM3U', 'application/dash+xml'), /Unsupported/)
+  assert.throws(() => media.register(`data:application/x-mpegurl,${'x'.repeat(6_000_064)}`, 'application/x-mpegurl'), /Unsupported/)
+  assert.equal((await fetch(media.register('data:application/x-mpegurl,%zz', 'application/x-mpegurl'))).status, 502)
+  for (const text of ['not a playlist', `#EXTM3U\n${'x'.repeat(2_000_000)}`, ...[
+    'relative.m3u8', 'file:///video.m3u8', 'data:application/x-mpegurl,%23EXTM3U'
+  ].map(uri => `#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000\n${uri}\n`)]) {
+    const url = media.register(`data:application/x-mpegurl,${encodeURIComponent(text)}`, 'application/x-mpegurl')
+    assert.equal((await fetch(url)).status, 502)
+  }
+})
+
 test('rewrites HLS variants, segments, initialization maps and keys', () => {
   const urls = []
   const result = rewriteCastHls('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key"\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:5,\nchunk.ts\n', 'https://media.test/live/main.m3u8', url => { urls.push(url); return `http://cast.test/${urls.length}` })
