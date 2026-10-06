@@ -56,20 +56,15 @@
   align-items: center;
   max-inline-size: 100%;
   min-inline-size: 0;
-
-  @media (width <= 680px) {
-    display: block;
-  }
-
-  @container settings-content (width <= 680px) {
-    display: block;
-  }
 }
 
 .switch-label-text {
   position: relative;
+  min-inline-size: 0;
+  hyphens: auto;
+  overflow-wrap: anywhere;
 
-  /* Anchor the switch to its text while help icons and badges can wrap. */
+  /* Center the switch on its text even when the label spans several lines. */
   &::before,
   &::after {
     content: '';
@@ -112,12 +107,6 @@
       inline-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
     }
   }
-
-  @media (width <= 680px) {
-    min-inline-size: 0;
-    hyphens: auto;
-    overflow-wrap: break-word;
-  }
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
@@ -131,6 +120,7 @@
 }
 
 .switch-label-main > .selectTooltip {
+  flex-shrink: 0;
   margin-inline-start: 5px;
   vertical-align: middle;
 }

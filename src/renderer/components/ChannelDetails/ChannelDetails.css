@@ -98,6 +98,10 @@
   margin-block-end: 0;
 }
 
+.channelSearchToggle {
+  display: none;
+}
+
 .infoTabs {
   position: relative;
   inline-size: 100%;
@@ -234,18 +238,29 @@
 @media only screen and (width <=800px) {
   .infoTabs {
     block-size: auto;
-    flex-flow: column-reverse;
+    flex-flow: row wrap;
     gap: var(--channel-header-gap);
   }
 
   .channelSearch {
+    flex-basis: 100%;
+    order: -1;
     inline-size: 100%;
     max-inline-size: none;
   }
 
+  .channelSearch:not(.expanded) {
+    display: none;
+  }
+
+  .channelSearchToggle {
+    display: block;
+    flex: none;
+    align-self: center;
+  }
+
   .tabs {
-    flex: 1 1 auto;
-    inline-size: 100%;
+    flex: 1 1 0;
   }
 
   .tab {

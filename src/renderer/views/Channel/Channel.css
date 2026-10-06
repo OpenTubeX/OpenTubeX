@@ -17,10 +17,12 @@
 }
 
 .select-container {
+  --channel-sort-label-space: 7px;
+
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-end;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   margin-block-end: 10px;
 }
@@ -36,12 +38,17 @@
 
 .select-container > :deep(.select) {
   /* Reserve only the half-height of the floating label above its outline. */
-  margin-block-start: 7px;
+  margin-block-start: var(--channel-sort-label-space);
+}
+
+.select-container:has(> .select) > :deep(.btn) {
+  /* Match the select's margins so their visible controls share a center. */
+  margin-block: var(--channel-sort-label-space) 20px;
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
-  .select-container > :deep(.select) {
-    margin-block-start: 8px;
+  .select-container {
+    --channel-sort-label-space: 8px;
   }
 }
 

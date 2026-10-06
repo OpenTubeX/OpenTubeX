@@ -71,7 +71,8 @@ async function expectTabScrollRange(tabs) {
     return {
       validOffset: Math.abs(container.scrollLeft) <= range + tolerance,
       noEmptySpace: content.left <= viewport.left + tolerance && content.right >= viewport.right - tolerance,
-      scrollbarMatchesRange: scrollbar.classList.contains('os-scrollbar-unusable') === (range < 1),
+      // Native overflow rounds fractional content and viewport widths separately.
+      scrollbarMatchesRange: scrollbar.classList.contains('os-scrollbar-unusable') === (container.scrollWidth <= container.clientWidth),
       thumbSizeMatchesRange: range < 1 || Math.abs(thumb.width - track.width * viewport.width / content.width) <= tolerance,
       thumbPositionMatchesOffset: range < 1 || Math.abs(thumb.left - track.left - thumbOffset) <= tolerance,
       fullLabels: [...container.querySelectorAll('.tabLabel > span')].every(label => label.scrollWidth <= label.clientWidth + 1)
@@ -108,7 +109,8 @@ test('hides channel tab icons before shortening labels when space is limited', a
   await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
   await expect.poll(() => page.locator('.channelDetails:visible .tabs').evaluate(container =>
     container.scrollWidth - container.clientWidth
-  )).toBe(0)
+  )).toBeLessThanOrEqual(1)
+  await expectTabScrollRange(page.locator('.channelDetails:visible .tabs'))
   await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
 })
 
@@ -120,6 +122,10 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
     await page.evaluate(value => {
       return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value)
     }, scale)
+    const searchToggle = page.getByRole('button', { name: 'Search Channel', exact: true })
+    if (await searchToggle.isVisible() && await searchToggle.getAttribute('aria-expanded') === 'false') {
+      await searchToggle.click()
+    }
     await expectAligned(page)
     await expect.poll(() => page.locator('.channelDetails:visible').evaluate(header => {
       const bounds = selector => header.querySelector(selector).getBoundingClientRect()
@@ -174,6 +180,36 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
   })).toBe(20)
 })
 
+test('collapses channel search to an accessible icon at narrow widths', async ({ app, page }) => {
+  const input = page.locator('.channelSearch input')
+  const toggle = page.getByRole('button', { name: 'Search Channel', exact: true })
+  for (const [width, scale] of [[500, 100], [375, 95], [812, 125], [1600, 95]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setSize(width, 900), width)
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    if (width * 100 / scale > 800) {
+      await expect(toggle).toBeHidden()
+      await expect(input).toBeVisible()
+      continue
+    }
+    await expect(input).toBeHidden()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await toggle.click()
+    await expect(input).toBeFocused()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await input.fill('animation')
+    await input.press('Enter')
+    await expect(page).toHaveURL(/searchQueryText=animation/)
+    await input.clear()
+    await expect(page).not.toHaveURL(/searchQueryText=/)
+    await toggle.click()
+    await expect(input).toBeHidden()
+    await toggle.press('Control+f')
+    await expect(input).toBeFocused()
+    await toggle.click()
+    await expectAligned(page)
+  }
+})
+
 test('centers channel tab titles vertically at every layout size', async ({ app, page }) => {
   for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
@@ -192,7 +228,7 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
   }
 })
 
-test('keeps the visible channel content 20px below the tabs', async ({ app, page }) => {
+test('keeps channel content rows 20px below the tabs', async ({ app, page }, testInfo) => {
   const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
   let description = 'Channel description'
   await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
@@ -230,14 +266,35 @@ test('keeps the visible channel content 20px below the tabs', async ({ app, page
     ]) {
       await page.locator(`#${tabId}`).click()
       await expect(page.locator(contentSelector)).toBeVisible()
+      if (tabId === 'videosTab') {
+        expect(await page.locator('.select-container').evaluate(row => {
+          const button = row.querySelector('.channel-view-all').getBoundingClientRect()
+          const select = row.querySelector('.select-text').getBoundingClientRect()
+          return Math.abs(button.top + button.height / 2 - select.top - select.height / 2)
+        }), `View All center at ${width}px, ${scale}%`).toBeLessThanOrEqual(1)
+      }
       await expect.poll(() => page.locator(contentSelector).evaluate(content => {
         const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
-        const controls = [...content.querySelectorAll('.channel-view-all, .select-text, .select-label')]
-          .map(element => element.getBoundingClientRect()).filter(bounds => bounds.width > 0 && bounds.height > 0)
-        const top = controls.length > 0 ? Math.min(...controls.map(bounds => bounds.top)) : content.getBoundingClientRect().top
-        return Math.round(top - tabs.bottom)
+        return Math.round(content.getBoundingClientRect().top - tabs.bottom)
       }), { message: `20px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(20)
     }
+  }
+  await page.locator('#videosTab').click()
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(500, 1000))
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUiScale', 100)
+    await store.dispatch('updateBaseTheme', 'system')
+  })
+  await page.mouse.move(0, 0)
+  await page.evaluate(() => document.activeElement?.blur())
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+    await page.locator('.channelSearchToggle .iconButton').evaluate(button => {
+      for (const animation of button.getAnimations()) animation.finish()
+    })
+    await captureAppFramebuffer(app, testInfo, `channel-controls-${colorScheme}`)
   }
   description = ''
   await page.reload()
