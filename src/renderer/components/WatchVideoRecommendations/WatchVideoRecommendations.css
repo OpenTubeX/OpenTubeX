@@ -2,7 +2,11 @@
   position: relative;
 }
 
-.watchVideoRecommendations {
+.recommendationsScroller {
+  padding-block-start: 8px;
+}
+
+.recommendationsContent {
   display: grid;
   gap: 8px;
 }
@@ -10,6 +14,20 @@
 .VideoRecommendationsTopBar {
   display: flex;
   justify-content: space-between;
+}
+
+.fullscreenRecommendations {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.fullscreenRecommendations .recommendationsScroller {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  margin-inline: 16px 4px;
+  padding-inline-end: calc(var(--scrollbar-track-width) + 4px);
 }
 
 .offlineDownloadRecommendation {

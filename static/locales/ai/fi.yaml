@@ -224,6 +224,13 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Suositellut videot"
+    Title: "Koko näytön toiminnot"
+    Customize: "Mukauta koko näytön toimintoja"
+    Add Action: "Lisää toiminto"
+    Empty: "Koko näytön toimintoja ei ole valittu"
+    Quick Bookmark: "Pikakirjanmerkki"
   Quick Settings:
     Quick Settings: Pika-asetukset
     Customize Quick Settings: Mukauta pika-asetuksia

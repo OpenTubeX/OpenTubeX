@@ -333,6 +333,13 @@ History:
   Custom: Pasirinktinai
   History Older Than Days Removed: Pašalinti senesni nei 1 dienos žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai | Pašalinti senesni nei {days} dienų žiūrėjimo istorijos įrašai
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Rekomenduojami vaizdo įrašai"
+    Title: "Viso ekrano veiksmai"
+    Customize: "Tinkinti viso ekrano veiksmus"
+    Add Action: "Pridėti veiksmą"
+    Empty: "Nepasirinkti jokie viso ekrano veiksmai"
+    Quick Bookmark: "Sparčioji žymelė"
   Quick Settings:
     Quick Settings: Spartieji nustatymai
     Customize Quick Settings: Tinkinti sparčiuosius nustatymus

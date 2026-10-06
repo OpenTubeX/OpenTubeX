@@ -220,6 +220,13 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Anbefalte videoer"
+    Title: "Fullskjermhandlinger"
+    Customize: "Tilpass fullskjermhandlinger"
+    Add Action: "Legg til handling"
+    Empty: "Ingen fullskjermhandlinger valgt"
+    Quick Bookmark: "Hurtigbokmerke"
   Quick Settings:
     Quick Settings: Hurtiginnstillinger
     Customize Quick Settings: Tilpass hurtiginnstillinger

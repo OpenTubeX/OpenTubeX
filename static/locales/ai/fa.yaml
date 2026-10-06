@@ -238,6 +238,13 @@ History:
   Custom: سفارشی
   History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "ویدیوهای پیشنهادی"
+    Title: "اقدامات تمام‌صفحه"
+    Customize: "سفارشی‌سازی اقدامات تمام‌صفحه"
+    Add Action: "افزودن اقدام"
+    Empty: "هیچ اقدام تمام‌صفحه‌ای انتخاب نشده است"
+    Quick Bookmark: "نشانک سریع"
   Quick Settings:
     Quick Settings: تنظیمات سریع
     Customize Quick Settings: سفارشی‌سازی تنظیمات سریع

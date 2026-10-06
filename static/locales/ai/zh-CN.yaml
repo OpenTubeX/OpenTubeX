@@ -220,6 +220,13 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "推荐视频"
+    Title: "全屏操作"
+    Customize: "自定义全屏操作"
+    Add Action: "添加操作"
+    Empty: "未选择全屏操作"
+    Quick Bookmark: "快速书签"
   Quick Settings:
     Quick Settings: 快速设置
     Customize Quick Settings: 自定义快速设置

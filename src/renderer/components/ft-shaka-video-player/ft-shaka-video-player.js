@@ -16,6 +16,7 @@ import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
+import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
@@ -209,6 +210,8 @@ const FULLSCREEN_DOCK_HEADER_SELECTOR = [
   '.liveChatDockHeader',
   '.fullscreenCommentHeader',
   '.playlistDockHeader',
+  '.queueHeader',
+  '.recommendationsDockHeader',
 ].join(', ')
 
 // The UTF-8 characters "h", "t", "t", and "p".
@@ -510,6 +513,11 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    queueAvailable: { type: Boolean, default: false },
+    recommendationsAvailable: { type: Boolean, default: false },
+    downloadAvailable: { type: Boolean, default: false },
+    startWithFullscreenQueue: { type: Boolean, default: false },
+    startWithFullscreenRecommendations: { type: Boolean, default: false },
     startWithFullscreenPlaylist: {
       type: Boolean,
       default: false
@@ -645,6 +653,9 @@ export default defineComponent({
     'fullscreen-comments-change',
     'fullscreen-live-chat-change',
     'fullscreen-playlist-change',
+    'fullscreen-queue-change',
+    'fullscreen-recommendations-change',
+    'open-download',
     'toggle-transcript',
     'toggle-quick-bookmark',
     'chapters-overlay-change',
@@ -820,6 +831,42 @@ export default defineComponent({
     const shakaControlsShown = ref(false)
     const isSubMenuOpened = ref(false)
     const actionDockFocused = ref(false)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const fullscreenActionsElement = ref(null)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const fullscreenActionsContent = ref(null)
+    const fullscreenActionsBlockSize = ref(50)
+    /** @type {import('vue').Ref<HTMLElement|null>} */
+    const sponsorBlockNoticesElement = ref(null)
+    const sponsorBlockNoticeSize = ref({ inline: 0, block: 0 })
+    watch(sponsorBlockNoticesElement, (element, _previous, onCleanup) => {
+      if (!element) {
+        sponsorBlockNoticeSize.value = { inline: 0, block: 0 }
+        return
+      }
+      const observer = new ResizeObserver(entries => {
+        const size = entries[0].borderBoxSize[0]
+        sponsorBlockNoticeSize.value = { inline: size.inlineSize, block: size.blockSize }
+      })
+      observer.observe(element)
+      onCleanup(() => observer.disconnect())
+    })
+    watch(fullscreenActionsElement, (element, _previous, onCleanup) => {
+      if (!element) return
+      const observer = new ResizeObserver(entries => {
+        fullscreenActionsBlockSize.value = entries[0].borderBoxSize[0].blockSize
+      })
+      observer.observe(element)
+      onCleanup(() => observer.disconnect())
+    })
+    watch(fullscreenActionsContent, (content, _previous, onCleanup) => {
+      const scroller = fullscreenActionsElement.value
+      if (!content || !scroller) return
+      const observer = new ResizeObserver(() => clampOverlayScrollTop(scroller, content))
+      observer.observe(content)
+      observer.observe(scroller)
+      onCleanup(() => observer.disconnect())
+    }, { flush: 'post' })
     /** @type {number|null} */
     let pausedInterfaceRevealTimeout = null
 
@@ -839,6 +886,7 @@ export default defineComponent({
       )
     ))
     const actionDockVisible = computed(() => (
+      visibleFullscreenActions.value.length > 0 &&
       !isSubMenuOpened.value &&
       (
         actionDockFocused.value || (
@@ -924,10 +972,21 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenPlaylistTarget = ref(null)
     const showFullscreenPlaylist = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenQueueOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenQueueTarget = ref(null)
+    const showFullscreenQueue = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenRecommendationsOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenRecommendationsTarget = ref(null)
+    const showFullscreenRecommendations = ref(false)
     const fullscreenDockOpen = computed(() => {
       return showFullscreenMetadata.value || showFullscreenTranscript.value ||
         showFullscreenSponsorBlock.value || showFullscreenComments.value ||
         showFullscreenLiveChat.value || showFullscreenPlaylist.value ||
+        showFullscreenQueue.value || showFullscreenRecommendations.value ||
         (showChaptersOverlay.value && props.chapters.length > 0)
     })
     const fullscreenDockLayoutOpen = ref(false)
@@ -1017,9 +1076,22 @@ export default defineComponent({
     })
     const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
+    const visibleFullscreenActions = computed(() => getAvailableFullscreenActions(store.getters.getFullscreenActions, {
+      queue: props.queueAvailable,
+      download: props.downloadAvailable,
+      recommendations: props.recommendationsAvailable,
+      playlist: props.watchingPlaylist,
+      liveChat: props.liveChatAvailable,
+      comments: props.commentsAvailable,
+      sponsorBlock: useSponsorBlock.value && !props.isUpcoming,
+      transcript: props.captions.length > 0 && !isLive.value && !props.isUpcoming,
+      share: showFullscreenShareAction.value,
+      addToPlaylist: showFullscreenPlaylistAction.value && props.playlistVideoData != null,
+      quickBookmark: props.quickBookmarkEnabled,
+    }))
     const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.videoId))
 
-    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'liveChat', 'comments', 'playlist', 'chapters'])
+    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'liveChat', 'comments', 'queue', 'playlist', 'recommendations', 'chapters'])
     const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
     const fullscreenDockCollapsedState = Object.fromEntries(fullscreenDockOrder.map(dock => [dock, null]))
     const fullscreenDockResizing = ref(false)
@@ -1036,6 +1108,8 @@ export default defineComponent({
         case 'sponsorBlock': return showFullscreenSponsorBlock.value
         case 'comments': return showFullscreenComments.value
         case 'liveChat': return showFullscreenLiveChat.value
+        case 'queue': return showFullscreenQueue.value
+        case 'recommendations': return showFullscreenRecommendations.value
         case 'playlist': return showFullscreenPlaylist.value
         case 'chapters': return showChaptersOverlay.value && props.chapters.length > 0
         default: return false
@@ -1067,11 +1141,17 @@ export default defineComponent({
       return {
         insetBlockStart: index === 0
           ? 'calc(var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) + 12px)'
-          : `calc(${weightBefore * 100 / totalWeight}% + 6px)`,
+          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightBefore / totalWeight} + 6px)`,
         insetBlockEnd: index === openDocks.length - 1
-          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px)'
-          : `calc(${weightAfter * 100 / totalWeight}% + 6px)`,
+          ? 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 12px + var(--fullscreen-actions-footer-space, 0px))'
+          : `calc((100% - var(--fullscreen-actions-footer-space, 0px)) * ${weightAfter / totalWeight} + var(--fullscreen-actions-footer-space, 0px) + 6px)`,
       }
+    }
+
+    function getFullscreenDockBounds() {
+      const bounds = container.value.getBoundingClientRect()
+      const footerSpace = parseFloat(getComputedStyle(container.value).getPropertyValue('--fullscreen-actions-footer-space')) || 0
+      return { top: bounds.top, height: Math.max(1, bounds.height - footerSpace) }
     }
 
     function fullscreenDockCanResize(dock) {
@@ -1105,7 +1185,7 @@ export default defineComponent({
         dock,
         fullscreenDockWeights,
         fullscreenDockCollapsedState,
-        container.value.clientHeight
+        getFullscreenDockBounds().height
       )
 
       if (toggled) {
@@ -1127,7 +1207,8 @@ export default defineComponent({
       // it. Dense stacks keep the full header plus a small content sliver so
       // dividers stay useful without clipping the header.
       const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-      const preferredMinimumFits = openDocks.length === 2 && container.value.clientHeight >=
+      const layoutHeight = getFullscreenDockBounds().height
+      const preferredMinimumFits = openDocks.length === 2 && layoutHeight >=
         openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
         FULLSCREEN_DOCK_OUTER_INSET * 2 +
         FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
@@ -1137,7 +1218,7 @@ export default defineComponent({
       const minimumShare = minimumHeight + panelChrome
       const minimumWeight = Math.min(
         pairWeight / 2,
-        minimumShare / container.value.clientHeight * totalWeight
+        minimumShare / layoutHeight * totalWeight
       )
       const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
       fullscreenDockWeights[dock] = clampedWeight
@@ -1160,7 +1241,7 @@ export default defineComponent({
         .reduce((total, name) => total + fullscreenDockWeights[name], 0)
       resizingFullscreenDockTotalWeight = openDocks
         .reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      resizingFullscreenDockBounds = container.value.getBoundingClientRect()
+      resizingFullscreenDockBounds = getFullscreenDockBounds()
       window.addEventListener('pointermove', handleFullscreenDockResizePointerMove)
       window.addEventListener('pointerup', stopFullscreenDockResize)
       window.addEventListener('pointercancel', stopFullscreenDockResize)
@@ -1191,7 +1272,7 @@ export default defineComponent({
 
       const openDocks = getFullscreenOpenDocks()
       const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-      const movement = (event.key === 'ArrowUp' ? -20 : 20) / container.value.clientHeight * totalWeight
+      const movement = (event.key === 'ArrowUp' ? -20 : 20) / getFullscreenDockBounds().height * totalWeight
       setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
       event.preventDefault()
     }
@@ -1212,7 +1293,7 @@ export default defineComponent({
 
       fullscreenDockReordering.value = true
       reorderingFullscreenDock = dock
-      reorderingFullscreenDockBounds = container.value.getBoundingClientRect()
+      reorderingFullscreenDockBounds = getFullscreenDockBounds()
       window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
       window.addEventListener('pointerup', stopFullscreenDockReorder)
       window.addEventListener('pointercancel', stopFullscreenDockReorder)
@@ -1272,6 +1353,10 @@ export default defineComponent({
     function getShareTimestamp() {
       const currentTime = Math.floor(video.value?.currentTime ?? 0)
       return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+    }
+
+    function openDownload() {
+      if (props.downloadAvailable) emit('open-download')
     }
 
     function toggleQuickBookmark() {
@@ -1395,6 +1480,8 @@ export default defineComponent({
     let restoreFullscreenComments = props.startWithFullscreenComments
     let restoreFullscreenLiveChat = props.startWithFullscreenLiveChat
     let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
+    let restoreFullscreenQueue = props.startWithFullscreenQueue
+    let restoreFullscreenRecommendations = props.startWithFullscreenRecommendations
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
 
@@ -5195,7 +5282,7 @@ export default defineComponent({
       const interactiveTarget = event.target.closest(
         '.playerFullscreenTitleOverlay, .fullscreenActions, .fullscreenMetadataOverlay, ' +
         '.fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, ' +
-        '.fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .chapterOverlay, .shortsTopControls, ' +
+        '.fullscreenCommentsOverlay, .fullscreenPlaylistOverlay, .fullscreenQueueOverlay, .fullscreenRecommendationsOverlay, .chapterOverlay, .shortsTopControls, ' +
         '.shaka-controls-button-panel, .shaka-settings-menu, .shaka-context-menu'
       )
       if (!interactiveTarget && isCapacitorMobilePlayer()) {
@@ -8888,6 +8975,28 @@ export default defineComponent({
       setFullscreenPlaylist(false)
     }
 
+    function setFullscreenQueue(shouldOpen) {
+      const open = Boolean(shouldOpen && props.queueAvailable &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value))
+      showFullscreenQueue.value = open
+      emit('fullscreen-queue-change', { open, target: fullscreenQueueTarget.value })
+    }
+
+    function closeFullscreenQueue() {
+      setFullscreenQueue(false)
+    }
+
+    function setFullscreenRecommendations(shouldOpen) {
+      const open = Boolean(shouldOpen && props.recommendationsAvailable &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value))
+      showFullscreenRecommendations.value = open
+      emit('fullscreen-recommendations-change', { open, target: fullscreenRecommendationsTarget.value })
+    }
+
+    function closeFullscreenRecommendations() {
+      setFullscreenRecommendations(false)
+    }
+
     function rememberDockedPanels() {
       restoreFullscreenMetadata = showFullscreenMetadata.value
       restoreFullscreenTranscript = showFullscreenTranscript.value
@@ -8895,6 +9004,8 @@ export default defineComponent({
       restoreFullscreenComments = showFullscreenComments.value
       restoreFullscreenLiveChat = showFullscreenLiveChat.value
       restoreFullscreenPlaylist = showFullscreenPlaylist.value
+      restoreFullscreenQueue = showFullscreenQueue.value
+      restoreFullscreenRecommendations = showFullscreenRecommendations.value
     }
 
     function rememberAndCloseDockedPanels() {
@@ -8905,6 +9016,8 @@ export default defineComponent({
       closeFullscreenLiveChat()
       closeFullscreenComments()
       closeFullscreenPlaylist()
+      closeFullscreenQueue()
+      closeFullscreenRecommendations()
     }
 
     function restoreDockedPanels() {
@@ -8944,6 +9057,16 @@ export default defineComponent({
         setFullscreenSponsorBlock(true)
       }
 
+      if (restoreFullscreenQueue) {
+        restoreFullscreenQueue = false
+        setFullscreenQueue(true)
+      }
+
+      if (restoreFullscreenRecommendations) {
+        restoreFullscreenRecommendations = false
+        setFullscreenRecommendations(true)
+      }
+
       if (restoreFullscreenPlaylist) {
         restoreFullscreenPlaylist = false
         setFullscreenPlaylist(true)
@@ -8966,6 +9089,17 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.queueAvailable, available => {
+      if (!available) {
+        restoreFullscreenQueue = false
+        if (showFullscreenQueue.value) closeFullscreenQueue()
+      }
+    })
+
+    watch(() => props.recommendationsAvailable, available => {
+      if (!available && showFullscreenRecommendations.value) closeFullscreenRecommendations()
+    })
+
     watch(() => props.watchingPlaylist, watching => {
       if (!watching && showFullscreenPlaylist.value) {
         closeFullscreenPlaylist()
@@ -8985,7 +9119,7 @@ export default defineComponent({
             'metadata',
             fullscreenDockWeights,
             fullscreenDockCollapsedState,
-            container.value.clientHeight
+            getFullscreenDockBounds().height
           )
         }
         setFullscreenMetadata(open)
@@ -12260,6 +12394,8 @@ export default defineComponent({
         closeFullscreenLiveChat()
         closeFullscreenComments()
         closeFullscreenPlaylist()
+        closeFullscreenQueue()
+        closeFullscreenRecommendations()
         if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
           delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
@@ -12529,6 +12665,8 @@ export default defineComponent({
      *   startNextVideoWithFullscreenMetadata: boolean,
      *   startNextVideoWithFullscreenComments: boolean,
      *   startNextVideoWithFullscreenLiveChat: boolean,
+     *   startNextVideoWithFullscreenQueue: boolean,
+     *   startNextVideoWithFullscreenRecommendations: boolean,
      *   startNextVideoWithFullscreenPlaylist: boolean
      * }>}
      */
@@ -12573,6 +12711,8 @@ export default defineComponent({
         startNextVideoWithFullscreenMetadata: false,
         startNextVideoWithFullscreenComments: false,
         startNextVideoWithFullscreenLiveChat: false,
+        startNextVideoWithFullscreenQueue: false,
+        startNextVideoWithFullscreenRecommendations: false,
         startNextVideoWithFullscreenPlaylist: false
       }
 
@@ -12592,6 +12732,8 @@ export default defineComponent({
             startNextVideoWithFullscreenMetadata: showFullscreenMetadata.value,
             startNextVideoWithFullscreenComments: showFullscreenComments.value,
             startNextVideoWithFullscreenLiveChat: showFullscreenLiveChat.value,
+            startNextVideoWithFullscreenQueue: showFullscreenQueue.value,
+            startNextVideoWithFullscreenRecommendations: showFullscreenRecommendations.value,
             startNextVideoWithFullscreenPlaylist: showFullscreenPlaylist.value
           }
         }
@@ -12644,6 +12786,10 @@ export default defineComponent({
       closeFullscreenComments,
       closeFullscreenLiveChat,
       closeFullscreenPlaylist,
+      setFullscreenQueue,
+      closeFullscreenQueue,
+      setFullscreenRecommendations,
+      closeFullscreenRecommendations,
       closeChaptersOverlay,
       toggleSponsorBlockInfo,
       closeSponsorBlockInfo,
@@ -12770,7 +12916,13 @@ export default defineComponent({
       showVideoTitleWhenPaused,
       showFullscreenActionsWhenPaused,
       actionDockVisible,
+      visibleFullscreenActions,
       actionDockFocused,
+      fullscreenActionsElement,
+      fullscreenActionsContent,
+      fullscreenActionsBlockSize,
+      sponsorBlockNoticesElement,
+      sponsorBlockNoticeSize,
       playerControlsShown,
       lightsOffVisible,
       isSubMenuOpened,
@@ -12831,6 +12983,16 @@ export default defineComponent({
       showFullscreenLiveChat,
       closeFullscreenLiveChat,
       setFullscreenLiveChat,
+      fullscreenQueueOverlay,
+      fullscreenQueueTarget,
+      showFullscreenQueue,
+      setFullscreenQueue,
+      closeFullscreenQueue,
+      fullscreenRecommendationsOverlay,
+      fullscreenRecommendationsTarget,
+      showFullscreenRecommendations,
+      setFullscreenRecommendations,
+      closeFullscreenRecommendations,
       fullscreenPlaylistOverlay,
       fullscreenPlaylistTarget,
       showFullscreenPlaylist,
@@ -12843,6 +13005,7 @@ export default defineComponent({
       useSponsorBlock,
       getShareTimestamp,
       toggleQuickBookmark,
+      openDownload,
 
       autoQualitySupported,
       tabId,

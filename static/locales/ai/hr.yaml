@@ -222,6 +222,13 @@ History:
   Custom: Prilagođeno
   History Older Than Days Removed: Uklonjena je povijest gledanja starija od 1 dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Preporučeni videozapisi"
+    Title: "Radnje na cijelom zaslonu"
+    Customize: "Prilagodi radnje na cijelom zaslonu"
+    Add Action: "Dodaj radnju"
+    Empty: "Nisu odabrane radnje na cijelom zaslonu"
+    Quick Bookmark: "Brza oznaka"
   Quick Settings:
     Quick Settings: Brze postavke
     Customize Quick Settings: Prilagodi brze postavke

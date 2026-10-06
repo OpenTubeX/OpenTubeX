@@ -224,6 +224,13 @@ History:
   Custom: Власний термін
   History Older Than Days Removed: Історію перегляду, давнішу за 1 день, видалено | Історію перегляду, давнішу за {days} дні, видалено | Історію перегляду, давнішу за {days} днів, видалено
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Рекомендовані відео"
+    Title: "Дії в повноекранному режимі"
+    Customize: "Налаштувати повноекранні дії"
+    Add Action: "Додати дію"
+    Empty: "Повноекранні дії не вибрано"
+    Quick Bookmark: "Швидка закладка"
   Quick Settings:
     Quick Settings: Швидкі налаштування
     Customize Quick Settings: Налаштувати швидкі налаштування

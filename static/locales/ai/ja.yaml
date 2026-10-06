@@ -220,6 +220,13 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "おすすめ動画"
+    Title: "全画面のアクション"
+    Customize: "全画面のアクションをカスタマイズ"
+    Add Action: "アクションを追加"
+    Empty: "全画面のアクションが選択されていません"
+    Quick Bookmark: "クイックブックマーク"
   Quick Settings:
     Quick Settings: クイック設定
     Customize Quick Settings: クイック設定をカスタマイズ

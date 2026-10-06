@@ -342,6 +342,13 @@ History:
   Custom: Po meri
   History Older Than Days Removed: Zgodovina ogledov, starejša od 1 dneva, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena | Zgodovina ogledov, starejša od {days} dni, je odstranjena
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Priporočeni videoposnetki"
+    Title: "Dejanja v celozaslonskem načinu"
+    Customize: "Prilagodi dejanja v celozaslonskem načinu"
+    Add Action: "Dodaj dejanje"
+    Empty: "Ni izbranih dejanj v celozaslonskem načinu"
+    Quick Bookmark: "Hiter zaznamek"
   Quick Settings:
     Quick Settings: Hitre nastavitve
     Customize Quick Settings: Prilagodi hitre nastavitve

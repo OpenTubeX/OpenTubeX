@@ -5,6 +5,7 @@ for (const uiScale of [100, 125]) {
     test.use({ seed: { settings: { uiScale } } })
 
     for (const { name, rowSelector, idAttribute } of [
+      { name: 'fullscreen actions', rowSelector: '.selectedAction', idAttribute: 'data-fullscreen-action-id' },
       { name: 'navigation', rowSelector: '.selectedItem', idAttribute: 'data-navigation-item-id' },
       { name: 'quick settings', rowSelector: '.selectedSetting', idAttribute: 'data-setting-id' },
     ]) {

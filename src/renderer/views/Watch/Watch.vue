@@ -140,6 +140,11 @@
             :start-with-fullscreen-comments="startNextVideoWithFullscreenComments"
             :start-with-fullscreen-live-chat="startNextVideoWithFullscreenLiveChat"
             :start-with-fullscreen-playlist="startNextVideoWithFullscreenPlaylist"
+            :start-with-fullscreen-queue="startNextVideoWithFullscreenQueue"
+            :start-with-fullscreen-recommendations="startNextVideoWithFullscreenRecommendations"
+            :queue-available="$store.getters.getWatchQueueLength > 0 && (isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
+            :recommendations-available="fullscreenRecommendationsAvailable"
+            :download-available="downloadAvailable"
             :channel-id="channelId"
             :playlist-video-data="addToPlaylistVideoData"
             :published="videoPublished"
@@ -203,6 +208,9 @@
             @fullscreen-comments-change="handleFullscreenCommentsChange"
             @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
             @fullscreen-playlist-change="handleFullscreenPlaylistChange"
+            @fullscreen-queue-change="handleFullscreenQueueChange"
+            @fullscreen-recommendations-change="handleFullscreenRecommendationsChange"
+            @open-download="openVideoDownloadPrompt"
             @toggle-quick-bookmark="toggleCurrentVideoQuickBookmarked"
             @chapters-overlay-change="handleChaptersOverlayChange"
             @chapter-thumbnails-change="handleChapterThumbnailsChange"
@@ -708,6 +716,7 @@
               @use-local-source="useLocalPlaybackSource"
               @use-online-source="useOnlinePlaybackSource"
               @pause-player="pausePlayer"
+              @open-download="openVideoDownloadPrompt"
               @save-watched-progress="handleWatchProgressManualSave"
               @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
               @save-channel-video-quality="handleChannelVideoQualityManualSave"
@@ -865,6 +874,7 @@
           @use-local-source="useLocalPlaybackSource"
           @use-online-source="useOnlinePlaybackSource"
           @pause-player="pausePlayer"
+          @open-download="openVideoDownloadPrompt"
           @save-watched-progress="handleWatchProgressManualSave"
           @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
           @save-channel-video-quality="handleChannelVideoQualityManualSave"
@@ -1208,20 +1218,28 @@
           </transition>
         </FtPhonePanel>
       </Teleport>
-      <FtPhonePanel
-        :enabled="phonePanelsEnabled"
-        :open="mobilePanel === 'queue'"
-        custom-header
-        fill
-        :title="$t('Video.Queue')"
-        @close="mobilePanel = null"
+      <Teleport
+        :to="fullscreenQueueTarget || 'body'"
+        :disabled="!fullscreenQueueOpen"
       >
-        <watch-video-queue
-          v-if="$store.getters.getWatchQueueLength > 0"
-          class="watchVideoSideBar watchVideoQueue"
-          @pause-player="pausePlayer"
-        />
-      </FtPhonePanel>
+        <FtPhonePanel
+          :enabled="phonePanelsEnabled && !fullscreenQueueOpen"
+          :open="mobilePanel === 'queue'"
+          custom-header
+          fill
+          :title="$t('Video.Queue')"
+          @close="mobilePanel = null"
+        >
+          <watch-video-queue
+            v-if="$store.getters.getWatchQueueLength > 0"
+            ref="watchVideoQueue"
+            :fullscreen-overlay="fullscreenQueueOpen"
+            class="watchVideoSideBar watchVideoQueue"
+            @close="closeFullscreenQueue"
+            @pause-player="pausePlayer"
+          />
+        </FtPhonePanel>
+      </Teleport>
       <Teleport
         :to="fullscreenPlaylistTarget || 'body'"
         :disabled="!fullscreenPlaylistOpen || shortsPhonePanelsEnabled"
@@ -1256,18 +1274,26 @@
           />
         </FtPhonePanel>
       </Teleport>
-      <watch-video-recommendations
-        v-if="!isLoading && !hideRecommendedVideos && (recommendedVideos.length > 0 || (isOffline && localFilePlayback && offlineDownloadSuggestions.length > 0))"
-        :data="recommendedVideos.length > 0 ? recommendedVideos : offlineDownloadSuggestions"
-        :offline="isOffline && recommendedVideos.length === 0"
-        class="watchVideoSideBar watchVideoRecommendations"
-        :class="{
-          theatreRecommendations: useTheatreMode,
-          watchVideoRecommendationsLowerCard: watchingPlaylist || isLive,
-          watchVideoRecommendationsNoCard: !watchingPlaylist || !isLive
-        }"
-        @pause-player="pausePlayer"
-      />
+      <Teleport
+        :to="fullscreenRecommendationsTarget || 'body'"
+        :disabled="!fullscreenRecommendationsOpen"
+      >
+        <watch-video-recommendations
+          v-if="!isLoading && !hideRecommendedVideos && (recommendedVideos.length > 0 || (isOffline && localFilePlayback && offlineDownloadSuggestions.length > 0))"
+          ref="watchVideoRecommendations"
+          :fullscreen-overlay="fullscreenRecommendationsOpen"
+          :data="recommendedVideos.length > 0 ? recommendedVideos : offlineDownloadSuggestions"
+          :offline="isOffline && recommendedVideos.length === 0"
+          class="watchVideoSideBar watchVideoRecommendations"
+          :class="{
+            theatreRecommendations: useTheatreMode,
+            watchVideoRecommendationsLowerCard: watchingPlaylist || isLive,
+            watchVideoRecommendationsNoCard: !watchingPlaylist || !isLive
+          }"
+          @close="closeFullscreenRecommendations"
+          @pause-player="pausePlayer"
+        />
+      </Teleport>
     </div>
     <div
       v-if="(isFamilyFriendly !== false || !showFamilyFriendlyOnly)"
@@ -1324,6 +1350,13 @@
         </FtPhonePanel>
       </Teleport>
     </div>
+    <WatchVideoDownloadPrompt
+      v-if="showDownloadPrompt && downloadAvailable"
+      :video-id="videoId"
+      :title="videoTitle"
+      :thumbnail="thumbnail"
+      @close="showDownloadPrompt = false"
+    />
   </div>
 </template>
 

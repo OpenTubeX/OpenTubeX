@@ -326,6 +326,13 @@ History:
   History Older Than Days Removed: Der Wiedergabeverlauf, der älter als {days} Tage ist, wurde gelöscht
 Most Popular Feed Empty: Der Feed „Am beliebtesten“ dieser Invidious-Instanz ist leer.
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Empfohlene Videos"
+    Title: "Vollbildaktionen"
+    Customize: "Vollbildaktionen anpassen"
+    Add Action: "Aktion hinzufügen"
+    Empty: "Keine Vollbildaktionen ausgewählt"
+    Quick Bookmark: "Schnell-Lesezeichen"
   # On Settings Page
   Settings: Einstellungen
   Categories:

@@ -224,6 +224,13 @@ History:
   Custom: Προσαρμοσμένο
   History Older Than Days Removed: Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από 1 ημέρα | Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από {days} ημέρες
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Προτεινόμενα βίντεο"
+    Title: "Ενέργειες πλήρους οθόνης"
+    Customize: "Προσαρμογή ενεργειών πλήρους οθόνης"
+    Add Action: "Προσθήκη ενέργειας"
+    Empty: "Δεν επιλέχθηκαν ενέργειες πλήρους οθόνης"
+    Quick Bookmark: "Γρήγορος σελιδοδείκτης"
   Quick Settings:
     Quick Settings: Γρήγορες ρυθμίσεις
     Customize Quick Settings: Προσαρμογή γρήγορων ρυθμίσεων

@@ -197,6 +197,13 @@ History:
   Custom: Другое
   History Older Than Days Removed: История просмотра старше 1 дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Рекомендуемые видео"
+    Title: "Действия в полноэкранном режиме"
+    Customize: "Настроить действия в полноэкранном режиме"
+    Add Action: "Добавить действие"
+    Empty: "Полноэкранные действия не выбраны"
+    Quick Bookmark: "Быстрая закладка"
   Quick Settings:
     Quick Settings: Быстрые настройки
     Customize Quick Settings: Настроить быстрые настройки

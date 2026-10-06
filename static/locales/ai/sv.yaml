@@ -222,6 +222,13 @@ History:
   Custom: Anpassad
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Rekommenderade videor"
+    Title: "Fullskärmsåtgärder"
+    Customize: "Anpassa fullskärmsåtgärder"
+    Add Action: "Lägg till åtgärd"
+    Empty: "Inga fullskärmsåtgärder valda"
+    Quick Bookmark: "Snabbbokmärke"
   Quick Settings:
     Quick Settings: Snabbinställningar
     Customize Quick Settings: Anpassa snabbinställningar

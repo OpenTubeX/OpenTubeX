@@ -222,6 +222,13 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Videoclipuri recomandate"
+    Title: "Acțiuni pe ecran complet"
+    Customize: "Personalizează acțiunile pe ecran complet"
+    Add Action: "Adaugă acțiune"
+    Empty: "Nu sunt selectate acțiuni pe ecran complet"
+    Quick Bookmark: "Marcaj rapid"
   Quick Settings:
     Quick Settings: Setări rapide
     Customize Quick Settings: Personalizează setările rapide

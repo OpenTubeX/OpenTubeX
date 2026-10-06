@@ -224,6 +224,13 @@ History:
   Custom: مخصص
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "الفيديوهات المقترحة"
+    Title: "إجراءات ملء الشاشة"
+    Customize: "تخصيص إجراءات ملء الشاشة"
+    Add Action: "إضافة إجراء"
+    Empty: "لم يتم تحديد إجراءات ملء الشاشة"
+    Quick Bookmark: "إشارة مرجعية سريعة"
   Quick Settings:
     Quick Settings: إعدادات سريعة
     Customize Quick Settings: تخصيص الإعدادات السريعة

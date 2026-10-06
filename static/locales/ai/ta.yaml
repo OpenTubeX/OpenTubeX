@@ -226,6 +226,13 @@ History:
   Custom: தனிப்பயன்
   History Older Than Days Removed: 1 நாளுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது | {days} நாட்களுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "பரிந்துரைக்கப்பட்ட காணொளிகள்"
+    Title: "முழுத்திரைச் செயல்கள்"
+    Customize: "முழுத்திரைச் செயல்களைத் தனிப்பயனாக்கு"
+    Add Action: "செயலைச் சேர்"
+    Empty: "முழுத்திரைச் செயல்கள் எதுவும் தேர்ந்தெடுக்கப்படவில்லை"
+    Quick Bookmark: "விரைவு புத்தகக்குறி"
   Quick Settings:
     Quick Settings: விரைவு அமைப்புகள்
     Customize Quick Settings: விரைவு அமைப்புகளைத் தனிப்பயனாக்கு

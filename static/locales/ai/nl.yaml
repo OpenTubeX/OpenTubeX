@@ -224,6 +224,13 @@ History:
   Custom: Aangepast
   History Older Than Days Removed: Kijkgeschiedenis ouder dan 1 dag is verwijderd | Kijkgeschiedenis ouder dan {days} dagen is verwijderd
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Aanbevolen video’s"
+    Title: "Acties op volledig scherm"
+    Customize: "Acties op volledig scherm aanpassen"
+    Add Action: "Actie toevoegen"
+    Empty: "Geen acties op volledig scherm geselecteerd"
+    Quick Bookmark: "Snelle bladwijzer"
   Quick Settings:
     Quick Settings: Snelle instellingen
     Customize Quick Settings: Snelle instellingen aanpassen

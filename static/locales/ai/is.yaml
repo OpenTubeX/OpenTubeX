@@ -222,6 +222,13 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Ráðlögð myndbönd"
+    Title: "Aðgerðir á öllum skjánum"
+    Customize: "Sérsníða aðgerðir á öllum skjánum"
+    Add Action: "Bæta við aðgerð"
+    Empty: "Engar aðgerðir á öllum skjánum valdar"
+    Quick Bookmark: "Flýtibókamerki"
   Quick Settings:
     Quick Settings: Flýtistillingar
     Customize Quick Settings: Sérsníða flýtistillingar

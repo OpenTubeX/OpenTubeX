@@ -308,6 +308,13 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "추천 동영상"
+    Title: "전체 화면 작업"
+    Customize: "전체 화면 작업 사용자 지정"
+    Add Action: "작업 추가"
+    Empty: "선택된 전체 화면 작업 없음"
+    Quick Bookmark: "빠른 북마크"
   Quick Settings:
     Quick Settings: 빠른 설정
     Customize Quick Settings: 빠른 설정 맞춤설정

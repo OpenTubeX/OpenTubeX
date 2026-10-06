@@ -220,6 +220,13 @@ History:
   Custom: "Personelaet"
   History Older Than Days Removed: "Dilamet eo bet an istor sellout koshoc'h eget 1 devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} zevezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh. | Dilamet eo bet an istor sellout koshoc'h eget {days} devezh."
 Settings:
+  Fullscreen Actions:
+    Recommended Videos: "Videoioù erbedet"
+    Title: "Oberoù skramm leun"
+    Customize: "Personelaat an oberoù skramm leun"
+    Add Action: "Ouzhpennañ un ober"
+    Empty: "N'eus ober skramm leun ebet diuzet"
+    Quick Bookmark: "Sined buan"
   Quick Settings:
     Quick Settings: "Arventennoù prim"
     Customize Quick Settings: Personelaat an arventennoù prim
