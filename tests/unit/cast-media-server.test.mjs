@@ -225,6 +225,52 @@ test('relays DASH index and switching URLs without changing boolean attributes o
   assert.match(result, /sourceURL="http:\/\/cast.test\/7" range="0-50"/)
 })
 
+for (const failure of ['status', 'connection', 'policy', 'timeout']) {
+  test(`DASH alternate bases survive a first-CDN ${failure} failure with nested templates and scoped credentials`, async t => {
+    const requests = []
+    const checked = []
+    const xml = '<MPD><BaseURL serviceLocation="first">https://first.test/vod/</BaseURL><BaseURL serviceLocation="second">https://second.test/alternate/</BaseURL><Period><BaseURL>tracks/</BaseURL><AdaptationSet><SegmentTemplate media="video-$Number$.m4s?sig=a&amp;b=2" initialization="init.mp4"/></AdaptationSet></Period></MPD>'
+    const media = createMediaServer({ url: `data:application/dash+xml,${encodeURIComponent(xml)}`, contentType: 'application/dash+xml' }, '127.0.0.1', 'token', url =>
+      new URL(url).hostname === 'first.test' ? { Authorization: 'Bearer first' } : { Authorization: 'Bearer second' }, async url => {
+      checked.push(url.href)
+      return failure === 'policy' && url.hostname === 'first.test' ? null : [{ address: '8.8.8.8', family: 4 }]
+    }, async (url, options) => {
+      requests.push([url, options.headers.get('Authorization'), options.headers.get('Range')])
+      if (new URL(url).hostname === 'first.test') {
+        if (failure === 'connection') throw new Error('CDN unavailable')
+        if (failure === 'timeout') return new Promise((resolve, reject) => options.signal.addEventListener('abort', () => reject(new Error('CDN timed out')), { once: true }))
+        return new Response('unavailable', { status: 503 })
+      }
+      return new Response('segment', { status: 206, headers: { 'content-range': 'bytes 0-6/7' } })
+    })
+    media.setOrigin(await listen(media.server))
+    t.after(() => close(media.server))
+    const body = await (await fetch(media.mediaUrl())).text()
+    assert.match(body, /serviceLocation="first"/)
+    assert.match(body, /serviceLocation="second"/)
+    const template = body.match(/media="([^"]+)"/)[1].replaceAll('&amp;', '&')
+    const response = await fetch(template.replace('$Number$', '7'), { headers: { Range: 'bytes=0-6' } })
+    assert.equal(response.status, 206)
+    assert.equal(await response.text(), 'segment')
+    assert.equal(response.headers.get('content-range'), 'bytes 0-6/7')
+    assert.deepEqual(checked, ['https://first.test/vod/tracks/video-7.m4s?sig=a&b=2', 'https://second.test/alternate/tracks/video-7.m4s?sig=a&b=2'])
+    assert.deepEqual(requests.at(-1), ['https://second.test/alternate/tracks/video-7.m4s?sig=a&b=2', 'Bearer second', 'bytes=0-6'])
+    if (failure !== 'policy') assert.deepEqual(requests[0], ['https://first.test/vod/tracks/video-7.m4s?sig=a&b=2', 'Bearer first', 'bytes=0-6'])
+    else assert.equal(requests.length, 1)
+  })
+}
+
+test('DASH resolution preserves combinations of nested alternatives and absolute overrides', () => {
+  const registered = []
+  const xml = '<MPD><BaseURL>https://first.test/vod/</BaseURL><BaseURL>https://second.test/live/</BaseURL><Period><BaseURL>video/</BaseURL><BaseURL>audio/</BaseURL><AdaptationSet><SegmentTemplate media="../shared/$Number$.m4s" initialization="/init.mp4"/><Representation><BaseURL>https://third.test/only/</BaseURL><SegmentTemplate media="chunk-$Number$.m4s"/></Representation></AdaptationSet></Period></MPD>'
+  rewriteCastDash(xml, undefined, value => { registered.push(value); return `http://cast.test/${registered.length}` })
+  assert.ok(registered.some(value => Array.isArray(value) && value.length === 2 &&
+    value[0] === 'https://first.test/vod/shared/$Number$.m4s' && value[1] === 'https://second.test/live/shared/$Number$.m4s'))
+  assert.ok(registered.some(value => Array.isArray(value) && value.length === 2 &&
+    value[0] === 'https://first.test/init.mp4' && value[1] === 'https://second.test/init.mp4'))
+  assert.ok(registered.includes('https://third.test/only/chunk-$Number$.m4s'))
+})
+
 test('rewrites DASH resources using their original inherited base and preserves ranges/templates', () => {
   const registered = []
   const xml = `<MPD><BaseURL>https://media.test/vod/</BaseURL><Period><AdaptationSet>

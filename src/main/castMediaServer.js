@@ -6,6 +6,7 @@ import sax from 'sax'
 import { isNonPublicNetworkAddress } from './utils.js'
 
 const MAX_MANIFEST_SIZE = 2_000_000
+const MAX_RESOURCES = 65_536
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
@@ -115,39 +116,52 @@ export function rewriteCastDash(xml, base, register) {
   if (root.children.find(node => typeof node !== 'string')?.name.split(':').at(-1) !== 'MPD') {
     throw new Error('Invalid Cast DASH manifest')
   }
-  function renderAttributes(node, base) {
+  function resolveUrls(values, bases) {
+    const urls = new Set()
+    for (const value of values) {
+      for (const base of bases) {
+        urls.add(httpUrl(value, base).href)
+        if (urls.size > MAX_RESOURCES) throw new Error('Too many Cast resource alternatives')
+      }
+    }
+    return [...urls]
+  }
+  function registerUrls(urls, contentType) {
+    return register(urls.length === 1 ? urls[0] : urls, contentType)
+  }
+  function renderAttributes(node, bases) {
     const element = node.name.split(':').at(-1)
     return Object.entries(node.attributes).map(([name, value]) => {
       const attribute = name.split(':').at(-1)
       if (['media', 'initialization', 'sourceURL', 'href'].includes(attribute) ||
           (attribute === 'index' && ['SegmentTemplate', 'SegmentURL'].includes(element)) ||
           (attribute === 'bitstreamSwitching' && element === 'SegmentTemplate')) {
-        value = register(httpUrl(value, base).href)
+        value = registerUrls(resolveUrls([value], bases))
       }
       return ` ${name}="${escapeXml(value)}"`
     }).join('')
   }
-  function render(node, inheritedBase) {
+  function render(node, inheritedBases) {
     if (typeof node === 'string') return escapeXml(node)
     const name = node.name.split(':').at(-1)
     if (['Location', 'PatchLocation'].includes(name)) {
       // Manifest refreshes resolve against the original document, not media BaseURL.
       const url = register(httpUrl(node.children.join('').trim(), base).href,
         name === 'Location' ? 'application/dash+xml' : 'application/dash-patch+xml')
-      return `<${node.name}${renderAttributes(node, base)}>${escapeXml(url)}</${node.name}>`
+      return `<${node.name}${renderAttributes(node, [base])}>${escapeXml(url)}</${node.name}>`
     }
     const bases = node.children.filter(child => typeof child !== 'string' && child.name.split(':').at(-1) === 'BaseURL')
-    const effectiveBase = bases.length ? httpUrl(bases[0].children.join('').trim(), inheritedBase).href : inheritedBase
-    const attributes = renderAttributes(node, effectiveBase)
+    const effectiveBases = bases.length ? resolveUrls(bases.map(child => child.children.join('').trim()), inheritedBases) : inheritedBases
+    const attributes = renderAttributes(node, effectiveBases)
     const children = node.children.map(child => {
       if (bases.includes(child)) {
-        return `<${child.name}${renderAttributes(child, inheritedBase)}>${escapeXml(register(httpUrl(child.children.join('').trim(), inheritedBase).href))}</${child.name}>`
+        return `<${child.name}${renderAttributes(child, inheritedBases)}>${escapeXml(registerUrls(resolveUrls([child.children.join('').trim()], inheritedBases)))}</${child.name}>`
       }
-      return render(child, effectiveBase)
+      return render(child, effectiveBases)
     }).join('')
     return `<${node.name}${attributes}>${children}</${node.name}>`
   }
-  return root.children.map(node => render(node, base)).join('')
+  return root.children.map(node => render(node, [base])).join('')
 }
 
 export function rewriteCastHls(text, base, register) {
@@ -164,27 +178,31 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
   const resourceIds = new Map()
   let origin
   function register(value, contentType) {
-    if (value.startsWith('data:')) {
-      if (!/^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(value) || value.length > MAX_MANIFEST_SIZE * 3) {
-        throw new Error('Unsupported Cast data URL')
+    const values = Array.isArray(value) ? value : [value]
+    const candidates = values.map(value => {
+      if (value.startsWith('data:')) {
+        if (!/^data:application\/dash\+xml(?:;charset=UTF-8)?,/i.test(value) || value.length > MAX_MANIFEST_SIZE * 3) {
+          throw new Error('Unsupported Cast data URL')
+        }
+      } else httpUrl(value)
+      const template = !value.startsWith('data:') && value.includes('$')
+      const url = template ? httpUrl(value) : null
+      const firstPlaceholder = url?.pathname.indexOf('$') ?? -1
+      const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
+      return {
+        url: template ? new URL(url.pathname.slice(0, directoryEnd), url).href : value,
+        suffix: template ? url.pathname.slice(directoryEnd) + url.search : value.endsWith('/') ? '' : 'media'
       }
-    } else httpUrl(value)
-    const template = !value.startsWith('data:') && value.includes('$')
-    const url = template ? httpUrl(value) : null
-    const firstPlaceholder = url?.pathname.indexOf('$') ?? -1
-    const directoryEnd = url ? url.pathname.lastIndexOf('/', firstPlaceholder < 0 ? url.pathname.length : firstPlaceholder) + 1 : 0
-    const resource = template ? new URL(url.pathname.slice(0, directoryEnd), url).href : value
-    let id = resourceIds.get(resource)
+    })
+    const key = JSON.stringify(candidates)
+    let id = resourceIds.get(key)
     if (id === undefined) {
-      if (resources.length >= 65_536) throw new Error('Too many Cast resources')
+      if (resources.length >= MAX_RESOURCES) throw new Error('Too many Cast resources')
       id = resources.length
-      resourceIds.set(resource, id)
-      resources.push({ url: resource, contentType })
+      resourceIds.set(key, id)
+      resources.push({ urls: candidates.map(candidate => candidate.url), contentType })
     }
-    const suffix = template
-      ? url.pathname.slice(directoryEnd) + url.search
-      : value.endsWith('/') ? '' : 'media'
-    return `${origin}/${token}/${id}/${suffix}`
+    return `${origin}/${token}/${id}/${candidates[0].suffix}`
   }
   const server = createServer(async (request, response) => {
     const cors = {
@@ -211,29 +229,43 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
       let upstream
       let url
       let manifest = false
-      if (resource.url.startsWith('data:')) {
+      if (resource.urls[0].startsWith('data:')) {
         if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
-        data = decodeURIComponent(resource.url.slice(resource.url.indexOf(',') + 1))
+        data = decodeURIComponent(resource.urls[0].slice(resource.urls[0].indexOf(',') + 1))
         contentType = 'application/dash+xml'
       } else {
-        url = httpUrl(resource.url)
-        if (url.pathname.endsWith('/')) {
-          const next = httpUrl(match[2], url)
-          if (next.origin !== url.origin || !next.pathname.startsWith(url.pathname) || /%2e|%2f|%5c|%25/i.test(next.pathname)) throw new Error('Invalid Cast resource path')
-          url = next
-        } else if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
-        for (let redirects = 0; ; redirects++) {
-          const addresses = await isAllowedUrl(url)
-          if (!addresses) throw new Error('Unsupported Cast resource destination')
-          const headers = new Headers(getHeaders(url.href) ?? {})
-          headers.set('Accept-Encoding', 'identity')
-          if (request.headers.range) headers.set('Range', request.headers.range)
-          upstream = await fetchMedia(url.href, { headers, signal: controller.signal, redirect: 'manual', method: request.method, addresses })
-          const location = upstream.headers.get('location')
-          if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
-          if (redirects >= 5) throw new Error('Too many Cast media redirects')
-          await upstream.body?.cancel()
-          url = httpUrl(location, url)
+        for (const [index, candidate] of resource.urls.entries()) {
+          const attempt = new AbortController()
+          const signal = AbortSignal.any([controller.signal, attempt.signal])
+          const attemptTimeout = resource.urls.length > 1 ? setTimeout(() => attempt.abort(), 5000) : null
+          try {
+            url = httpUrl(candidate)
+            if (url.pathname.endsWith('/')) {
+              const next = httpUrl(match[2], url)
+              if (next.origin !== url.origin || !next.pathname.startsWith(url.pathname) || /%2e|%2f|%5c|%25/i.test(next.pathname)) throw new Error('Invalid Cast resource path')
+              url = next
+            } else if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
+            for (let redirects = 0; ; redirects++) {
+              const addresses = await isAllowedUrl(url)
+              if (!addresses) throw new Error('Unsupported Cast resource destination')
+              const headers = new Headers(getHeaders(url.href) ?? {})
+              headers.set('Accept-Encoding', 'identity')
+              if (request.headers.range) headers.set('Range', request.headers.range)
+              upstream = await fetchMedia(url.href, { headers, signal, redirect: 'manual', method: request.method, addresses })
+              const location = upstream.headers.get('location')
+              if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
+              if (redirects >= 5) throw new Error('Too many Cast media redirects')
+              await upstream.body?.cancel()
+              url = httpUrl(location, url)
+            }
+            if (!upstream.ok && index < resource.urls.length - 1) {
+              await upstream.body?.cancel()
+              continue
+            }
+            break
+          } catch (error) {
+            if (controller.signal.aborted || index === resource.urls.length - 1) throw error
+          } finally { clearTimeout(attemptTimeout) }
         }
         contentType ??= upstream.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
         if (url.pathname.endsWith('.mpd')) contentType = 'application/dash+xml'

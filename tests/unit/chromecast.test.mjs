@@ -80,13 +80,13 @@ lines.on('line', async line=>{
 lines.on('close',()=>process.exit(0))
 `
 
-async function managerForTest(t) {
+async function managerForTest(t, powerSaveBlocker) {
   if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return null }
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-'))
   const executable = path.join(directory, 'sender.mjs')
   await writeFile(executable, receiver)
   await chmod(executable, 0o755)
-  const manager = new ChromecastManager(executable)
+  const manager = new ChromecastManager(executable, powerSaveBlocker)
   t.after(async () => { await manager.stop(); await rm(directory, { recursive: true, force: true }) })
   assert.deepEqual(await manager.discover(), [{ id: 'device', name: 'Test TV' }])
   return manager
@@ -96,6 +96,61 @@ const payload = {
   deviceId: 'device', title: 'Test video', startSeconds: 12, paused: false,
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
+}
+
+test('Cast owns a suspension blocker only during receiver playback and buffering', async t => {
+  const starts = []
+  const stops = []
+  const manager = await managerForTest(t, { start(type) { starts.push(type); return starts.length - 1 }, stop(id) { stops.push(id) } })
+  if (!manager) return
+  const result = await manager.start(42, payload)
+  assert.ok(result.castId)
+  assert.deepEqual(starts, ['prevent-app-suspension'])
+  await manager.status(42, result.castId)
+  assert.equal(starts.length, 1)
+  await manager.control(42, result.castId, 'pause')
+  assert.deepEqual(stops, [0])
+  await manager.control(42, result.castId, 'play')
+  assert.equal(starts.length, 2)
+  const cast = manager.active
+  cast.sender.emit('message', CAST_MEDIA, { type: 'MEDIA_STATUS', status: [{ mediaSessionId: cast.mediaSessionId, playerState: 'BUFFERING' }] })
+  assert.equal(starts.length, 2)
+  assert.deepEqual(stops, [0])
+  await manager.control(42, result.castId, 'seek', 120)
+  assert.deepEqual(stops, [0, 1])
+  await manager.stop(42, result.castId)
+  assert.deepEqual(stops, [0, 1])
+})
+
+for (const cleanup of ['stop', 'disconnect', 'empty status', 'replaced media', 'status timeout']) {
+  test(`Cast releases its suspension blocker once on ${cleanup}`, async t => {
+    const ids = new Set()
+    const manager = await managerForTest(t, {
+      start(type) { assert.equal(type, 'prevent-app-suspension'); ids.add(0); return 0 },
+      stop(id) { assert.ok(ids.delete(id), 'Blocker released exactly once') }
+    })
+    if (!manager) return
+    assert.ok((await manager.start(42, { ...payload, paused: true })).castId)
+    assert.equal(ids.size, 0)
+    await manager.stop()
+    assert.match((await manager.start(42, { ...payload, title: 'Reject media' })).error, /LOAD_FAILED/)
+    assert.equal(ids.size, 0)
+    const result = await manager.start(42, payload)
+    assert.equal(ids.size, 1)
+    const cast = manager.active
+    if (cleanup === 'stop') await manager.stop()
+    if (cleanup === 'disconnect') cast.sender.close()
+    if (cleanup === 'empty status') cast.sender.emit('message', CAST_MEDIA, { type: 'MEDIA_STATUS', status: [] })
+    if (cleanup === 'replaced media') cast.sender.emit('message', CAST_MEDIA, { type: 'MEDIA_STATUS', status: [{ mediaSessionId: 999, playerState: 'PLAYING' }] })
+    if (cleanup === 'status timeout') {
+      cast.sender.send = () => Promise.reject(new Error('Disconnected'))
+      await manager.status(42, result.castId)
+    }
+    assert.equal(manager.active, null)
+    assert.equal(ids.size, 0)
+    manager.cleanup(cast)
+    assert.equal(ids.size, 0)
+  })
 }
 
 test('owns one session, forwards controls, and returns the remote position and pause state', async t => {

@@ -30,8 +30,9 @@ function mediaState(status) {
 
 /** One owned session prevents different windows from controlling each other. */
 export class ChromecastManager {
-  constructor(executable) {
+  constructor(executable, powerSaveBlocker) {
     this.executable = executable
+    this.powerSaveBlocker = powerSaveBlocker
     this.devices = new Map()
     this.active = null
     this.starting = false
@@ -79,6 +80,7 @@ export class ChromecastManager {
       mediaSessionId: null,
       trackCount: captions.length,
       status: {},
+      powerSaveBlockerId: null,
       heartbeat: null
     }
     sender.on('closed', () => this.cleanup(cast))
@@ -102,6 +104,7 @@ export class ChromecastManager {
         return
       }
       cast.status = { ...cast.status, ...status, volume: cast.status.volume, media: { ...cast.status.media, ...status.media } }
+      if (this.active === cast) this.updatePowerSaveBlocker(cast)
     })
     let loaded = false
     try {
@@ -156,6 +159,7 @@ export class ChromecastManager {
       cast.mediaSessionId = status.mediaSessionId
       cast.status = { ...cast.status, ...status, volume: cast.status.volume }
       this.active = cast
+      this.updatePowerSaveBlocker(cast)
       cast.heartbeat = setInterval(() => {
         sender.send('urn:x-cast:com.google.cast.tp.heartbeat', 'receiver-0', { type: 'PING' }, false).catch(() => this.cleanup(cast))
         sender.send(CAST_RECEIVER, 'receiver-0', { type: 'GET_STATUS' }).then(result => {
@@ -172,7 +176,21 @@ export class ChromecastManager {
     } finally { this.starting = false }
   }
 
+  updatePowerSaveBlocker(cast) {
+    if (['PLAYING', 'BUFFERING'].includes(cast.status.playerState)) {
+      if (cast.powerSaveBlockerId === null) cast.powerSaveBlockerId = this.powerSaveBlocker?.start('prevent-app-suspension') ?? null
+    } else this.releasePowerSaveBlocker(cast)
+  }
+
+  releasePowerSaveBlocker(cast) {
+    if (cast.powerSaveBlockerId === null) return
+    const id = cast.powerSaveBlockerId
+    cast.powerSaveBlockerId = null
+    this.powerSaveBlocker.stop(id)
+  }
+
   cleanup(cast) {
+    this.releasePowerSaveBlocker(cast)
     if (this.active === cast) this.active = null
     clearInterval(cast.heartbeat)
     cast.media.server.close()
