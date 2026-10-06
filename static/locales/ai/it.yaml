@@ -1271,6 +1271,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: La replica della chat dal vivo è abilitata. I messaggi appariranno qui durante la riproduzione del video.
   Premiere started: Première in corso. Iniziata {timeAgo}
   Player:
+    Music Mode: "Modalità musica"
+    Music Mode Description: "Riproduci i video a 1× e avvia i nuovi video dall’inizio in questa scheda. Le impostazioni di riproduzione predefinite salvate rimangono invariate."
     DLNA:
       Cast: "Trasmetti a un dispositivo DLNA"
       Stop: "Interrompi la trasmissione"

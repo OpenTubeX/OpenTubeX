@@ -1621,6 +1621,8 @@ Video:
     music offtopic: Ne muzika
     filler: Nukrypimai
   Player:
+    Music Mode: "Muzikos režimas"
+    Music Mode Description: "Leiskite vaizdo įrašus 1× greičiu ir šiame skirtuke naujus vaizdo įrašus pradėkite nuo pradžių. Išsaugotos numatytosios atkūrimo nuostatos nesikeičia."
     DLNA:
       Cast: "Transliuoti į DLNA įrenginį"
       Stop: "Sustabdyti transliaciją"

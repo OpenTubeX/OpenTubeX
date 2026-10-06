@@ -1289,6 +1289,8 @@ Video:
     music offtopic: Ekki tónlist
     filler: Útúrdúrar
   Player:
+    Music Mode: "Tónlistarhamur"
+    Music Mode Description: "Spilaðu myndskeið á 1× hraða og byrjaðu ný myndskeið frá upphafi á þessum flipa. Vistaðar sjálfgefnar spilunarstillingar haldast óbreyttar."
     DLNA:
       Cast: "Senda í DLNA-tæki"
       Stop: "Stöðva útsendingu"

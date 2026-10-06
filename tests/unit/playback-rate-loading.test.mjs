@@ -17,6 +17,7 @@ function fixture(music, controllerReady = false) {
     props,
     video: { value: video },
     hasLoaded,
+    musicMode: { value: false },
     pendingPlaybackRateRestore: 1,
     playbackRateUserSet: false,
     temporaryPlaybackRateActive: false,
@@ -82,6 +83,29 @@ test('a music default does not overwrite an explicit quick speed during loading'
   select(1.5)
   await nextTick()
   assert.equal(selected(), 1.5)
+})
+
+test('music mode starts unclassified videos at normal speed despite saved defaults or recovery state', () => {
+  const { state, api, video } = fixture(false)
+  state.musicMode.value = true
+  state.props.currentPlaybackRate = 2
+  state.props.sabrReloadState = { playbackRate: 2 }
+  state.pendingPlaybackRateRestore = null
+  assert.equal(api.getInitialPlaybackRate(), 1)
+  state.hasLoaded.value = true
+  api.restorePendingPlaybackRate()
+  assert.equal(video.playbackRate, 1)
+})
+
+test('music mode preserves a manual speed selected while loading', async () => {
+  const { state, api, select, selected, video } = fixture(false)
+  state.musicMode.value = true
+  select(1.5)
+  await nextTick()
+  assert.equal(selected(), 1.5)
+  state.hasLoaded.value = true
+  api.restorePendingPlaybackRate()
+  assert.equal(video.playbackRate, 1.5)
 })
 
 test('a speed restored after SABR recovery does not overwrite a newer selection', async () => {

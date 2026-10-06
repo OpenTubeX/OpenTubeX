@@ -5,8 +5,8 @@
       type="button"
       class="profileTrigger"
       data-tutorial="quick-settings"
-      :aria-label="t('Settings.Quick Settings.Quick Settings')"
-      :title="t('Settings.Quick Settings.Quick Settings')"
+      :aria-label="triggerLabel"
+      :title="triggerLabel"
       :aria-expanded="menuOpen"
       :aria-controls="id"
       :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
@@ -19,6 +19,12 @@
         class="profileInitial"
         :profile="activeProfile"
         :fallback="activeProfileInitial"
+      />
+      <FtIcon
+        v-if="musicMode"
+        class="musicModeIndicator"
+        :icon="['fas', 'headphones']"
+        aria-hidden="true"
       />
     </button>
 
@@ -204,8 +210,16 @@
                     :class="{ pairedQuickSetting: isPairedQuickSetting(section.settings, setting.id) }"
                     :data-setting-id="setting.id"
                   >
+                    <FtToggleSwitch
+                      v-if="setting.id === 'musicMode'"
+                      :label="t('Video.Player.Music Mode')"
+                      :default-value="musicMode"
+                      :tooltip="t('Video.Player.Music Mode Description')"
+                      compact
+                      @change="updateMusicMode"
+                    />
                     <FtSelect
-                      v-if="setting.id === 'baseTheme'"
+                      v-else-if="setting.id === 'baseTheme'"
                       class="quickSelect"
                       :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
                       :value="baseTheme"
@@ -499,6 +513,16 @@ let mainContentResizeObserver = null
 
 const profileList = computed(() => store.getters.getProfileList)
 const activeProfile = computed(() => store.getters.getActiveProfile)
+const musicModeTabId = computed(() => store.getters.getActiveTabId ?? 'web')
+const musicMode = computed(() => store.getters.getTabMusicMode(musicModeTabId.value))
+const triggerLabel = computed(() => musicMode.value
+  ? `${t('Settings.Quick Settings.Quick Settings')} — ${t('Video.Player.Music Mode')}`
+  : t('Settings.Quick Settings.Quick Settings'))
+
+function updateMusicMode(value) {
+  store.commit('setTabMusicMode', { tabId: musicModeTabId.value, value })
+}
+
 const activeProfileInitial = computed(() => activeProfile.value?.name
   ? getFirstCharacter(translateProfileName(activeProfile.value), locale.value)
   : '')

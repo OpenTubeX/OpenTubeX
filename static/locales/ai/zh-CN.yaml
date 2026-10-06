@@ -1271,6 +1271,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: 已启用实时聊天回放。视频播放时，聊天消息会显示在这里。
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
+    Music Mode: "音乐模式"
+    Music Mode Description: "在此标签页中以1倍速播放视频，并从头开始播放新视频。已保存的默认播放设置保持不变。"
     DLNA:
       Cast: "投放到 DLNA 设备"
       Stop: "停止投放"

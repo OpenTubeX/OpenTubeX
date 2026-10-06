@@ -1286,6 +1286,8 @@ Video:
     music offtopic: Musikaz bestelakoa
     filler: Gaitik kanpokoak
   Player:
+    Music Mode: "Musika modua"
+    Music Mode Description: "Erreproduzitu bideoak 1× abiaduran eta hasi bideo berriak hasieratik fitxa honetan. Gordetako erreprodukzio-ezarpen lehenetsiak ez dira aldatzen."
     DLNA:
       Cast: "Igorri DLNA gailu batera"
       Stop: "Gelditu igorpena"

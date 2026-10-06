@@ -1608,6 +1608,8 @@ Video:
       shuffling playlists: aleatorizar las listas de reproducción
       looping playlists: reproducir en bucle las listas de reproducción
   Player:
+    Music Mode: "Modo música"
+    Music Mode Description: "Reproducí videos a 1× e iniciá los videos nuevos desde el principio en esta pestaña. Tus ajustes de reproducción predeterminados guardados no cambian."
     DLNA:
       Cast: "Transmitir a un dispositivo DLNA"
       Stop: "Detener transmisión"

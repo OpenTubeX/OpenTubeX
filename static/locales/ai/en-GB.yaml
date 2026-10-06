@@ -1251,6 +1251,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Live chat replay is enabled.  Chat messages will appear here as the video plays.
   Premiere started: Premiere in progress. Started {timeAgo}
   Player:
+    Music Mode: "Music Mode"
+    Music Mode Description: "Play videos at 1× and start new videos from the beginning in this tab. Your saved playback defaults stay unchanged."
     DLNA:
       Cast: "Cast to a DLNA device"
       Stop: "Stop casting"

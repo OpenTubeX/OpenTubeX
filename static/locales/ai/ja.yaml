@@ -1271,6 +1271,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: ライブチャットのリプレイが有効です。動画の再生に合わせてチャットメッセージがここに表示されます。
   Premiere started: プレミア公開中です。{timeAgo}に開始しました
   Player:
+    Music Mode: "音楽モード"
+    Music Mode Description: "このタブでは動画を1倍速で再生し、新しい動画を最初から開始します。保存済みの再生設定は変更されません。"
     DLNA:
       Cast: "DLNA デバイスにキャスト"
       Stop: "キャストを停止"

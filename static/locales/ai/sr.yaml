@@ -1329,6 +1329,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Снимак ћаскања уживо је укључен. Поруке ће се приказивати овде током репродукције видео-снимка.
   Premiere started: Премијера је у току. Почела је {timeAgo}
   Player:
+    Music Mode: "Музички режим"
+    Music Mode Description: "Пуштајте видео-снимке брзином 1× и покрећите нове видео-снимке од почетка у овој картици. Сачуване подразумеване поставке репродукције остају непромењене."
     DLNA:
       Cast: "Емитуј на DLNA уређај"
       Stop: "Заустави емитовање"

@@ -1273,6 +1273,8 @@ Video:
   Sponsor Block category:
     hook: 開場／問候
   Player:
+    Music Mode: "音樂模式"
+    Music Mode Description: "在此分頁中以1倍速播放影片，並從頭開始播放新影片。已儲存的預設播放設定維持不變。"
     DLNA:
       Cast: "投放到 DLNA 裝置"
       Stop: "停止投放"

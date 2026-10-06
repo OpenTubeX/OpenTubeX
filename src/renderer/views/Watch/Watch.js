@@ -1198,12 +1198,15 @@ export default defineComponent({
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       )
     },
+    musicMode() {
+      return this.$store.getters.getTabMusicMode(this.tabId ?? 'web')
+    },
     startTimeSeconds: function () {
       if (this.isLoading || this.isLive) {
         return null
       }
 
-      const shortPosition = this.customShortsPlayerActive && this.tabRoute.query.shortSource
+      const shortPosition = !this.musicMode && this.customShortsPlayerActive && this.tabRoute.query.shortSource
         ? this.shortsPlaybackCache.getPosition(this.videoId)
         : 0
       if (shortPosition > 0 && shortPosition < this.videoLengthSeconds) {
@@ -1214,6 +1217,8 @@ export default defineComponent({
         return this.oneTimeTimestamp
       } else if (this.timestamp !== null && this.timestamp < this.videoLengthSeconds) {
         return this.timestamp
+      } else if (this.musicMode) {
+        return 0
       } else if (this.watchedProgressSavingEnabled && this.historyEntryExists) {
         // For UX consistency, no progress reading if writing disabled
 
@@ -2766,7 +2771,9 @@ export default defineComponent({
           ...(shortSource === 'channel'
             ? { shortChannelId: this.tabRoute.query.shortChannelId }
             : {}),
-          oneTimeTimestamp: String(this.shortsPlaybackCache.getPosition(target.videoId)),
+          ...(this.musicMode
+            ? {}
+            : { oneTimeTimestamp: String(this.shortsPlaybackCache.getPosition(target.videoId)) }),
         }
       })
     },
@@ -6541,6 +6548,11 @@ export default defineComponent({
     },
 
     initializePlaybackRate() {
+      if (this.musicMode) {
+        this.currentPlaybackRate = 1
+        return
+      }
+
       if (this.sabrReloadState?.playbackRate !== undefined) {
         this.currentPlaybackRate = this.sabrReloadState.playbackRate
         return

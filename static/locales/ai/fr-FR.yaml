@@ -1270,6 +1270,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: La rediffusion du chat en direct est activée.  Les messages du chat apparaîtront ici pendant la lecture de la vidéo.
   Premiere started: Première en cours. A commencé {timeAgo}
   Player:
+    Music Mode: "Mode musique"
+    Music Mode Description: "Lisez les vidéos à 1× et démarrez les nouvelles vidéos depuis le début dans cet onglet. Vos réglages de lecture par défaut enregistrés restent inchangés."
     DLNA:
       Cast: "Diffuser sur un appareil DLNA"
       Stop: "Arrêter la diffusion"

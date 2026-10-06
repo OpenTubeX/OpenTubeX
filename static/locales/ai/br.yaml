@@ -1280,6 +1280,8 @@ Video:
     music offtopic: "N'eo ket sonerezh"
     filler: "Dihanadennoù"
   Player:
+    Music Mode: "Mod sonerezh"
+    Music Mode Description: "Lennit ar videoioù gant un tizh 1× ha krogit ar videoioù nevez adalek an deroù en ivinell-mañ. Ho arventennoù lenn dre ziouer enrollet a chom digemm."
     DLNA:
       Cast: "Skignañ war un trevnad DLNA"
       Stop: "Paouez da skignañ"

@@ -1719,6 +1719,8 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
+    Music Mode: "Mode música"
+    Music Mode Description: "Reprodueix vídeos a 1× i inicia els vídeos nous des del principi en aquesta pestanya. Els valors de reproducció predeterminats desats no canvien."
     DLNA:
       Cast: "Envia a un dispositiu DLNA"
       Stop: "Atura la transmissió"

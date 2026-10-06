@@ -1271,6 +1271,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
+    Music Mode: "Müzik modu"
+    Music Mode Description: "Bu sekmede videoları 1× hızında oynatın ve yeni videoları baştan başlatın. Kaydedilmiş varsayılan oynatma ayarlarınız değişmez."
     DLNA:
       Cast: "DLNA cihazına yayınla"
       Stop: "Yayını durdur"

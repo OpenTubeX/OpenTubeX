@@ -1281,6 +1281,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
+    Music Mode: "Musikläge"
+    Music Mode Description: "Spela upp videor i 1× hastighet och starta nya videor från början på den här fliken. Dina sparade standardinställningar för uppspelning förblir oförändrade."
     DLNA:
       Cast: "Casta till en DLNA-enhet"
       Stop: "Sluta casta"

@@ -676,6 +676,7 @@ export default defineComponent({
     const playerIsPresented = computed(() => !shortsNavigationSuspended.value && (isTabPresented?.value ?? true))
     const mediaTabId = tabId ?? 'web'
     const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
+    const musicMode = computed(() => store.getters.getTabMusicMode(mediaTabId))
     const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
     const lightsOffVisible = computed(() => showLightsOffToggle.value && lightsOff.value &&
       (isTabPresented?.value ?? true))
@@ -4897,6 +4898,7 @@ export default defineComponent({
           'ft_skip_silence',
           'ft_voice_over_translation',
           'ft_music_visualizer',
+          'ft_music_mode',
           'ft_ambient_mode',
           'ft_lights_off',
           'ft_video_zoom',
@@ -4948,6 +4950,7 @@ export default defineComponent({
           'ft_skip_silence',
           'ft_voice_over_translation',
           'ft_music_visualizer',
+          'ft_music_mode',
           'ft_ambient_mode',
           'ft_lights_off',
           'ft_video_zoom',
@@ -9548,6 +9551,21 @@ export default defineComponent({
       })
     }
 
+    function registerMusicModeButton() {
+      registerOwnElement(shakaOverflowMenu, 'ft_music_mode', {
+        create(rootElement, controls) {
+          return new BooleanSettingButton({
+            value: musicMode,
+            updateValue: value => store.commit('setTabMusicMode', { tabId: mediaTabId, value }),
+            events,
+            className: 'music-mode-button',
+            mappedIcon: 'headphones',
+            getLabel: () => t('Video.Player.Music Mode'),
+          }, rootElement, controls)
+        }
+      })
+    }
+
     function registerSkipSilenceButton() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class SkipSilenceButtonFactory {
@@ -10036,6 +10054,7 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
       shakaOverflowMenu.registerElement('ft_lights_off', null)
       shakaOverflowMenu.registerElement('ft_music_visualizer', null)
+      shakaOverflowMenu.registerElement('ft_music_mode', null)
       shakaOverflowMenu.registerElement('ft_video_zoom', null)
       shakaOverflowMenu.registerElement('ft_skip_silence', null)
       shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
@@ -10132,7 +10151,7 @@ export default defineComponent({
       return props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
     })
 
-    const shouldUseNormalPlaybackRateByDefault = computed(() => isLive.value || isMusicVideoDetected.value)
+    const shouldUseNormalPlaybackRateByDefault = computed(() => musicMode.value || isLive.value || isMusicVideoDetected.value)
 
     /**
      * @param {number} fallbackPlaybackRate
@@ -10149,6 +10168,8 @@ export default defineComponent({
       if (playbackRateUserSet && pendingPlaybackRateRestore !== null) {
         return pendingPlaybackRateRestore
       }
+
+      if (musicMode.value) return NORMAL_PLAYBACK_RATE
 
       const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadState?.playbackRate)
       if (sabrReloadPlaybackRate !== null) {
@@ -10423,6 +10444,22 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to apply normal playback rate default:', error)
       }
+    })
+
+    watch(musicMode, () => {
+      cancelTemporaryPlaybackRateHolds()
+      playbackRateUserSet = false
+      togglePlaybackRate = null
+      const rate = shouldUseNormalPlaybackRateByDefault.value
+        ? NORMAL_PLAYBACK_RATE
+        : savedChannelPlaybackRate.value ?? defaultPlaybackRate.value
+      queuePlaybackRateRestore(rate)
+      if (hasLoaded.value) {
+        restorePendingPlaybackRate()
+      } else {
+        setVideoPlaybackRate(rate)
+      }
+      emit('playback-rate-updated', rate)
     })
 
     /**
@@ -11715,6 +11752,7 @@ export default defineComponent({
       registerAutoplayToggle()
       registerAmbientModeButton()
       registerMusicVisualizerButton()
+      registerMusicModeButton()
       registerVideoZoomSelection()
       registerLightsOffButton()
       registerSkipSilenceButton()
