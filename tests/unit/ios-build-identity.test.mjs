@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import test from 'node:test'
 
-test('iOS preparation gives nightly its own Release identity and restores stable on reuse', async t => {
+async function prepareFixture(t) {
   const directory = await mkdtemp(join(tmpdir(), 'ios-identity-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   for (const path of ['_scripts', 'ios/App/App', 'ios/App/App.xcodeproj', 'ios/App/CapApp-SPM', 'static/locales']) {
@@ -20,6 +20,11 @@ test('iOS preparation gives nightly its own Release identity and restores stable
   await copyFile('static/locales/en-US.yaml', join(directory, 'static/locales/en-US.yaml'))
   const configPath = join(directory, 'ios/App/App/capacitor.config.json')
   await writeFile(configPath, JSON.stringify({ appId: 'org.opentubex.app', appName: 'OpenTubeX', plugins: { Share: {} } }))
+  return { directory, projectPath, configPath }
+}
+
+test('iOS preparation gives nightly its own Release identity and restores stable on reuse', async t => {
+  const { directory, projectPath, configPath } = await prepareFixture(t)
 
   for (const [version, id, name] of [
     ['0.35.2-nightly-1757', 'org.opentubex.app.nightly', 'OpenTubeX Nightly'],
@@ -57,6 +62,48 @@ test('iOS preparation gives nightly its own Release identity and restores stable
       assert.notEqual(result.status, 0, 'Preparation must reject a missing Release identity setting')
       assert.match(result.stderr, /Unable to configure iOS Release identity/)
       assert.deepEqual(JSON.parse(await readFile(configPath, 'utf8')), config)
+    })
+  }
+})
+
+test('iOS preparation repairs partial FFmpeg dependencies and rejects unmatched manifest edits', async t => {
+  const { directory } = await prepareFixture(t)
+  await writeFile(join(directory, 'package.json'), JSON.stringify({ version: '0.35.2' }))
+  const packagePath = join(directory, 'ios/App/CapApp-SPM/Package.swift')
+  const original = await readFile(packagePath, 'utf8')
+  const packageEntry = '.package(name: "OpenTubeXFFmpeg", path: "../FFmpegKit")'
+  const productEntry = '.product(name: "OpenTubeXFFmpeg", package: "OpenTubeXFFmpeg")'
+  const withoutPackage = original.replace(`        ${packageEntry},\n`, '')
+  const withoutProduct = original.replace(`                ${productEntry},\n`, '')
+
+  for (const [name, manifest] of [
+    ['fresh Capacitor manifest', withoutPackage.replace(`                ${productEntry},\n`, '').replace('platforms: [.iOS("17.4")]', 'platforms: [.iOS(.v17)]')],
+    ['missing package', withoutPackage],
+    ['missing product', withoutProduct],
+    ['already configured manifest', original],
+  ]) {
+    await t.test(name, async () => {
+      await writeFile(packagePath, manifest)
+      const result = spawnSync(process.execPath, ['_scripts/prepareIos.mjs'], { cwd: directory, encoding: 'utf8' })
+      assert.equal(result.status, 0, result.stderr)
+      assert.equal(await readFile(packagePath, 'utf8'), original)
+      const repeated = spawnSync(process.execPath, ['_scripts/prepareIos.mjs'], { cwd: directory, encoding: 'utf8' })
+      assert.equal(repeated.status, 0, repeated.stderr)
+      assert.equal(await readFile(packagePath, 'utf8'), original)
+    })
+  }
+
+  for (const [name, manifest] of [
+    ['missing package insertion point', withoutPackage.replace('dependencies: [', 'dependencies : [')],
+    ['missing product insertion point', withoutProduct.replace('dependencies: [\n                .product', 'dependencies: [\n              .product')],
+    ['partial replacement', withoutPackage.replace(`                ${productEntry},\n`, '').replace('dependencies: [\n                .product', 'dependencies: [\n              .product')],
+  ]) {
+    await t.test(name, async () => {
+      await writeFile(packagePath, manifest)
+      const result = spawnSync(process.execPath, ['_scripts/prepareIos.mjs'], { cwd: directory, encoding: 'utf8' })
+      assert.notEqual(result.status, 0, 'Preparation must reject an unapplied FFmpeg dependency edit')
+      assert.match(result.stderr, /Unable to configure the Capacitor Swift package for FFmpegKit/)
+      assert.equal(await readFile(packagePath, 'utf8'), manifest, 'A failed edit must leave the manifest unchanged')
     })
   }
 })

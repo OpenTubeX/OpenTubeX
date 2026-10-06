@@ -75,8 +75,15 @@ writeFileSync(projectPath, project)
 const packagePath = new URL('ios/App/CapApp-SPM/Package.swift', root)
 let capacitorPackage = readFileSync(packagePath, 'utf8')
 capacitorPackage = capacitorPackage.replace('platforms: [.iOS(.v17)]', 'platforms: [.iOS("17.4")]')
-if (!capacitorPackage.includes('OpenTubeXFFmpeg')) {
-  capacitorPackage = capacitorPackage.replace('dependencies: [', 'dependencies: [\n        .package(name: "OpenTubeXFFmpeg", path: "../FFmpegKit"),')
-  capacitorPackage = capacitorPackage.replace('dependencies: [\n                .product', 'dependencies: [\n                .product(name: "OpenTubeXFFmpeg", package: "OpenTubeXFFmpeg"),\n                .product')
+const ffmpegPackage = '.package(name: "OpenTubeXFFmpeg", path: "../FFmpegKit")'
+const ffmpegProduct = '.product(name: "OpenTubeXFFmpeg", package: "OpenTubeXFFmpeg")'
+if (!capacitorPackage.includes(ffmpegPackage)) {
+  capacitorPackage = capacitorPackage.replace('\n    dependencies: [', `\n    dependencies: [\n        ${ffmpegPackage},`)
+}
+if (!capacitorPackage.includes(ffmpegProduct)) {
+  capacitorPackage = capacitorPackage.replace('\n            dependencies: [\n                .product', `\n            dependencies: [\n                ${ffmpegProduct},\n                .product`)
+}
+if (!capacitorPackage.includes(ffmpegPackage) || !capacitorPackage.includes(ffmpegProduct)) {
+  throw new Error('Unable to configure the Capacitor Swift package for FFmpegKit')
 }
 writeFileSync(packagePath, capacitorPackage)
