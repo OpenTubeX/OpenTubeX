@@ -822,6 +822,37 @@ test('a timeline seek superseding End on a paused Short cancels replay', async (
   expect(await video.evaluate(video => video.currentTime)).toBeGreaterThan(14)
 })
 
+test('a timeline selection at the End backoff position cancels replay', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateLoopShorts', false))
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(video => {
+    video.pause()
+    video.ui.getControls().getPlayer().configure('streaming.durationBackoff', 5)
+  })
+  await page.locator('body').press('End')
+  await expect(player.locator('.shortsReplayIcon')).toBeVisible()
+  const target = await video.evaluate(video => video.duration - 5)
+  await player.locator('.shaka-seek-bar').evaluate((input, target) => {
+    // Shorts hide Shaka's regular controls; exercise its actual range handlers.
+    input.disabled = false
+    input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }))
+    input.value = String(target)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.blur()
+  }, target)
+  await expect.poll(() => video.evaluate(video => video.currentTime)).toBeCloseTo(target, 3)
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsReplayIcon')).toBeHidden()
+  await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused)).toBe(true)
+  expect(await video.evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(target)
+})
+
 test('End on a playing Short keeps playing through Shaka backoff to its ended event', async ({ app, page }) => {
   await openShort({ app, page })
   const watch = await page.evaluateHandle(findWatchComponent)

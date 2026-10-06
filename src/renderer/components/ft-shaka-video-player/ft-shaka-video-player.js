@@ -12393,6 +12393,8 @@ export default defineComponent({
      * @param {number} time
      */
     function rememberSeekPosition(time) {
+      // Explicit seeks supersede End even when they match Shaka's backoff.
+      shortsEndSeekTarget = null
       hasPlaybackPosition.value = true
       if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
