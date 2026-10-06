@@ -723,9 +723,16 @@ const pageSwipeNeighborIds = computed(() => {
 const pageSwipe = shallowRef(null)
 let pageSwipePointer = null
 let pageSwipeClickPointerId = null
+let pageSwipeClickTimeout = null
+
+function clearPageSwipeClick() {
+  window.clearTimeout(pageSwipeClickTimeout)
+  pageSwipeClickTimeout = null
+  pageSwipeClickPointerId = null
+}
 
 function startPageSwipe(event) {
-  if (event.isPrimary) pageSwipeClickPointerId = null
+  if (event.isPrimary) clearPageSwipeClick()
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
       pageSwipe.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
@@ -784,7 +791,7 @@ function movePageSwipe(event) {
 
 function suppressPageSwipeClick(event) {
   if (event.detail === 0 || event.pointerId !== pageSwipeClickPointerId) return
-  pageSwipeClickPointerId = null
+  clearPageSwipeClick()
   event.preventDefault()
   event.stopPropagation()
 }
@@ -793,6 +800,9 @@ async function finishPageSwipe(event, cancelled = false) {
   const pointer = pageSwipePointer
   if (!pointer || pointer.id !== event.pointerId) return
   pageSwipePointer = null
+  // Keep suppression for the click dispatched with pointerup, then expire it
+  // even when capture release or cancellation produces no click.
+  if (pointer.dragging) pageSwipeClickTimeout = window.setTimeout(clearPageSwipeClick, 0)
   const swipe = pageSwipe.value
   if (!swipe) return
 
@@ -849,6 +859,7 @@ function cancelPageSwipe(event) {
     finishPageSwipe(event, true)
     return
   }
+  clearPageSwipeClick()
   pageSwipePointer = null
   pageSwipe.value = null
 }

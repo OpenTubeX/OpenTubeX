@@ -136,6 +136,18 @@ test('Android header swipes include controls and preserve taps and long presses'
     await page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.locator('#capacitor-phone-tab-dialog')).toHaveCount(0)
 
+    // Browser cancellation produces no click; it must not affect the next tap.
+    await touch('touchStart', point)
+    await touch('touchMove', { ...point, x: point.x - 40 })
+    await page.waitForTimeout(60)
+    await touch('touchCancel')
+    await expect(page.locator('.pageSwipeFrom, .pageSwipeTo')).toHaveCount(0)
+    await expect.poll(presented).toBe(first)
+    await tap('.capacitorPhoneTabSwitcherButton')
+    await expect(page.locator('#capacitor-phone-tab-dialog')).toBeVisible()
+    await page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(page.locator('#capacitor-phone-tab-dialog')).toHaveCount(0)
+
     // Tablet navigation has a long-press history menu; swiping must cancel its timer.
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCapacitorLayoutMode', 'tablet'))
     await goTo(page, 'history')
@@ -148,7 +160,10 @@ test('Android header swipes include controls and preserve taps and long presses'
     await page.waitForTimeout(600)
     await touch('touchEnd')
     await expect(page.locator('.navBackButton .iconDropdown')).toBeVisible()
+    await expect(page).toHaveURL(/#\/history/)
+    await page.locator('.navBackButton .iconDropdown').focus()
     await page.keyboard.press('Escape')
+    await expect(page.locator('.navBackButton .iconDropdown')).toHaveCount(0)
     await tap('.navBackButton .iconButton')
     await expect(page).toHaveURL(/#\/userplaylists/)
   } finally {

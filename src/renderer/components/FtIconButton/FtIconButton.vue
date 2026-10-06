@@ -22,9 +22,6 @@
       :aria-expanded="ariaExpanded ?? dropdownShown"
       :aria-pressed="ariaPressed"
       @pointerdown="handleIconPointerDown"
-      @pointermove="cancelMovedLongPress"
-      @pointerup="clearLongPress"
-      @pointercancel="clearLongPress"
       @contextmenu.prevent
       @click="handleIconClick"
     >
@@ -315,7 +312,7 @@ const portaledDropdown = computed(() => props.dropdownPortal || fullscreenDropdo
 const modalLayout = usePhoneLayout('(max-width: 900px), (max-height: 600px)')
 const useModal = computed(() => props.dropdownModalOnMobile && modalLayout.value && !fullscreenDropdownTarget.value)
 
-let blockLeftClick = false
+let longPressClickPointerId = null
 let longPressTimer = null
 let longPressStart = null
 let dropdownViewportUpdateFrame = null
@@ -364,6 +361,7 @@ watch(fullscreenDropdownTarget, (target) => {
 
 onBeforeUnmount(() => {
   clearLongPress()
+  clearLongPressClick()
   removeDropdownViewportListeners()
   fullscreenTargetObserver?.disconnect()
   document.removeEventListener('fullscreenchange', syncFullscreenDropdownTarget)
@@ -379,7 +377,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
     return
   }
 
-  if (blockLeftClick) {
+  if (suppressLongPressClick(e)) {
     return
   }
 
@@ -419,16 +417,18 @@ function handleIconPointerDown(event) {
     handleIconClick(null, true)
   } else if (event.button === 0) { // left button click
     clearLongPress()
-    longPressStart = { x: event.clientX, y: event.clientY }
+    longPressStart = { id: event.pointerId, x: event.clientX, y: event.clientY }
+    window.addEventListener('pointermove', cancelMovedLongPress, true)
+    window.addEventListener('pointerup', finishLongPress, true)
+    window.addEventListener('pointercancel', finishLongPress, true)
     longPressTimer = setTimeout(() => {
       clearLongPress()
       handleIconClick(null, true)
 
-      // prevent a long press that ends on the icon button from firing the handleIconClick handler
-      window.addEventListener('pointerup', preventButtonClickAfterLongPress, { once: true })
-      window.addEventListener('pointercancel', () => {
-        window.removeEventListener('pointerup', preventButtonClickAfterLongPress)
-      }, { once: true })
+      // WebView can dispatch the release click after zero-delay timers.
+      longPressClickPointerId = event.pointerId
+      window.addEventListener('pointerdown', clearLongPressClick, true)
+      window.addEventListener('pointercancel', cancelLongPressClick, true)
     }, LONG_CLICK_BOUNDARY_MS)
   }
 }
@@ -437,10 +437,19 @@ function clearLongPress() {
   clearTimeout(longPressTimer)
   longPressTimer = null
   longPressStart = null
+  window.removeEventListener('pointermove', cancelMovedLongPress, true)
+  window.removeEventListener('pointerup', finishLongPress, true)
+  window.removeEventListener('pointercancel', finishLongPress, true)
 }
 
+/** @param {PointerEvent} event */
+function finishLongPress(event) {
+  if (longPressStart?.id === event.pointerId) clearLongPress()
+}
+
+/** @param {PointerEvent} event */
 function cancelMovedLongPress(event) {
-  if (longPressStart && Math.hypot(event.clientX - longPressStart.x, event.clientY - longPressStart.y) >= 10) {
+  if (longPressStart?.id === event.pointerId && Math.hypot(event.clientX - longPressStart.x, event.clientY - longPressStart.y) >= 10) {
     clearLongPress()
   }
 }
@@ -559,12 +568,22 @@ function removeDropdownViewportListeners() {
   }
 }
 
-function preventButtonClickAfterLongPress() {
-  blockLeftClick = true
+function clearLongPressClick() {
+  longPressClickPointerId = null
+  window.removeEventListener('pointerdown', clearLongPressClick, true)
+  window.removeEventListener('pointercancel', cancelLongPressClick, true)
+}
 
-  setTimeout(() => {
-    blockLeftClick = false
-  }, 0)
+/** @param {PointerEvent} event */
+function cancelLongPressClick(event) {
+  if (event.pointerId === longPressClickPointerId) clearLongPressClick()
+}
+
+/** @param {PointerEvent | null} event */
+function suppressLongPressClick(event) {
+  if (!event || event.detail === 0 || event.pointerId !== longPressClickPointerId) return false
+  clearLongPressClick()
+  return true
 }
 
 const ftIconButton = useTemplateRef('ftIconButton')
