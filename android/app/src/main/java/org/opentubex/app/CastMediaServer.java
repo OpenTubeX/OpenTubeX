@@ -90,6 +90,13 @@ final class CastMediaServer implements AutoCloseable {
         var additions = new java.util.HashMap<Integer, JSObject>();
         for (int index = 0; index < batch.length(); index++) {
             JSObject resource = JSObject.fromJSONObject(batch.getJSONObject(index));
+            if (resource.has("contentType")) {
+                Object contentType = resource.get("contentType");
+                if (!(contentType instanceof String type) || type.length() > 256 ||
+                    type.chars().anyMatch(character -> character < 32 || character == 127)) {
+                    throw new IllegalArgumentException("Invalid Cast resource content type");
+                }
+            }
             int id = resource.optInt("id", -1);
             if (id < 0 || resources.containsKey(id) || additions.containsKey(id)) throw new IllegalArgumentException("Invalid Cast resource ID");
             var candidates = resource.getJSONArray("candidates");
@@ -156,6 +163,7 @@ final class CastMediaServer implements AutoCloseable {
                 case "", "identity" -> body;
                 case "gzip" -> new java.util.zip.GZIPInputStream(body);
                 case "deflate" -> new java.util.zip.InflaterInputStream(body);
+                case "br" -> new org.brotli.dec.BrotliInputStream(body);
                 default -> throw new IllegalArgumentException("Unsupported Cast manifest encoding");
             };
         }

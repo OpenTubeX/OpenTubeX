@@ -142,6 +142,24 @@ test('Android uses the native sender and relay for handoff, captions, controls a
   assert.deepEqual(wake, ['awake', 'sleep', 'awake', 'sleep'])
 })
 
+test('Android preserves DASH directory bases with queries and fragments', async t => {
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  t.after(() => api.stop(result.castId))
+  for (const base of ['https://media.test/vod/?token=a%2Fb', 'https://media.test/vod/#period']) {
+    await fixture.event('castManifest', { requestId: 'directory', resourceId: 0, url: 'https://media.test/manifest.mpd', contentType: 'application/dash+xml',
+      body: `<MPD><BaseURL>${base}</BaseURL><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
+    const relayBase = fixture.completed.at(-1).body.match(/<BaseURL>([^<]+)<\/BaseURL>/)[1]
+    const parsed = new URL(relayBase)
+    const directory = fixture.resources.find(resource => resource.id === Number(parsed.pathname.split('/')[2]))
+    assert.equal(directory.candidates[0].template, true, 'Native relay must recognize the directory even when its URL has a query or fragment')
+    assert.equal(directory.candidates[0].url, 'https://media.test/vod/')
+    assert.equal(new URL('segment.m4s', relayBase).pathname, `${parsed.pathname}segment.m4s`)
+  }
+})
+
 test('Android preserves DASH placeholders in segment query strings', async t => {
   const fixture = nativeFixture()
   const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })

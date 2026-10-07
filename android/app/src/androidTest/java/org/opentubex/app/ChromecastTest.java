@@ -293,7 +293,7 @@ public class ChromecastTest {
     }
 
     @Test public void relayDecodesCompressedManifestsBeforeRewriting() throws Exception {
-        for (String encoding : new String[]{"gzip", "deflate", "gzip, deflate", "gzip|deflate"}) {
+        for (String encoding : new String[]{"gzip", "deflate", "gzip, deflate", "gzip|deflate", "br", "br, gzip", "br|gzip"}) {
             byte[] encoded = "#EXTM3U\n".getBytes(StandardCharsets.UTF_8);
             for (String layer : encoding.replace("|", ", ").split(", ")) encoded = compress(encoded, layer);
             final byte[] bytes = encoded;
@@ -348,26 +348,54 @@ public class ChromecastTest {
     @Test public void relayLimitsDecodedManifestSize() throws Exception {
         byte[] decoded = new byte[2_000_001];
         java.util.Arrays.fill(decoded, (byte) 'A');
-        byte[] bytes = compress(decoded, "gzip");
-        var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain ->
-            new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1).code(200).message("OK")
-                .header("Content-Encoding", "gzip").body(okhttp3.ResponseBody.create(bytes, okhttp3.MediaType.get("application/x-mpegurl"))).build()).build();
-        java.util.concurrent.atomic.AtomicInteger rewrites = new java.util.concurrent.atomic.AtomicInteger();
-        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> rewrites.incrementAndGet(), upstream)) {
-            JSArray resources = new JSArray();
-            resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
-            server.register(resources);
-            fetch(server.origin() + "/test-token/0/media", 502);
-            assertEquals(0, rewrites.get());
+        for (String encoding : new String[]{"gzip", "br"}) {
+            // Brotli fixture expands to 2,000,001 bytes of 'x'.
+            byte[] bytes = encoding.equals("br") ? java.util.Base64.getDecoder().decode("m4CEHvgl8OKxQECHzwM=") : compress(decoded, encoding);
+            var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain ->
+                new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1).code(200).message("OK")
+                    .header("Content-Encoding", encoding).body(okhttp3.ResponseBody.create(bytes, okhttp3.MediaType.get("application/x-mpegurl"))).build()).build();
+            java.util.concurrent.atomic.AtomicInteger rewrites = new java.util.concurrent.atomic.AtomicInteger();
+            try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> rewrites.incrementAndGet(), upstream)) {
+                JSArray resources = new JSArray();
+                resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
+                server.register(resources);
+                fetch(server.origin() + "/test-token/0/media", 502);
+                assertEquals(0, rewrites.get());
+            }
         }
     }
 
     private static byte[] compress(byte[] bytes, String encoding) throws Exception {
+        // Brotli fixture for "#EXTM3U\n", generated with Node's brotliCompressSync.
+        if (encoding.equals("br")) {
+            assertArrayEquals("#EXTM3U\n".getBytes(StandardCharsets.UTF_8), bytes);
+            return java.util.Base64.getDecoder().decode("iwOAI0VYVE0zVQoD");
+        }
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (var encoder = encoding.equals("gzip") ? new java.util.zip.GZIPOutputStream(output) : new java.util.zip.DeflaterOutputStream(output)) {
             encoder.write(bytes);
         }
         return output.toByteArray();
+    }
+
+    @Test public void resourceTypesCannotInjectHeadersOrPartiallyRegisterABatch() throws Exception {
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {})) {
+            for (Object type : new Object[]{"text/vtt\r\nX-Injected: yes", "text/vtt\n", "text/vtt\t", "text/vtt\u0000", "text/vtt\u007f", 42, org.json.JSONObject.NULL}) {
+                JSArray batch = new JSArray();
+                batch.put(resource(0, "data:text/vtt,WEBVTT", "text/vtt"));
+                batch.put(resource(1, "data:text/vtt,WEBVTT", "text/vtt").put("contentType", type));
+                try { server.register(batch); fail("Reject unsafe Content-Type before registering any resources"); }
+                catch (IllegalArgumentException expected) { assertEquals("Invalid Cast resource content type", expected.getMessage()); }
+                fetch(server.origin() + "/test-token/0/media", 404);
+                fetch(server.origin() + "/test-token/1/media", 404);
+            }
+            JSArray valid = new JSArray();
+            valid.put(resource(0, "data:text/vtt,WEBVTT", "text/vtt; charset=utf-8"));
+            valid.put(resource(1, "data:text/vtt,WEBVTT", ""));
+            server.register(valid);
+            assertEquals("WEBVTT", fetch(server.origin() + "/test-token/0/media", 200));
+            assertEquals("WEBVTT", fetch(server.origin() + "/test-token/1/media", 200));
+        }
     }
 
     @Test public void relayRetiresResourcesWithoutChangingRemainingUrls() throws Exception {
