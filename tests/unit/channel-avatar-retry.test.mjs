@@ -27,6 +27,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
+    imageSkeleton: 'skeleton.svg',
     setTimeout: callback => { const id = {}; timers.set(id, callback); return id },
     clearTimeout: id => timers.delete(id)
   })
@@ -262,6 +263,7 @@ test('an undecodable native image falls back without retrying indefinitely', asy
 
 test('tab preview channel avatars recover before hiding the failed URL', async t => {
   const f = await mountAvatar(t, 'data:image/png;base64,AA==', 'TabBar/TabTooltipPreview.vue')
+  assert.match(f.find('fallback').props.class, /ft-shimmer/)
   await fail(f.find('img'))
   assert.deepEqual(f.requests, ['https://yt3.ggpht.com/avatar'])
   assert.equal(f.find('img')?.props.src, 'data:image/png;base64,AA==')
@@ -279,4 +281,54 @@ test('unexpected native recovery errors still allow the delayed retry and termin
   assert.match(f.find('img').props.src, /opentubex_retry=/)
   await fail(f.find('img'))
   assert.ok(f.find('fallback'))
+})
+
+
+test('thumbnail skeletons persist through retries, stop on failure, and restart for a new source', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const placeholder = () => f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+  assert.equal(placeholder().props.src, 'skeleton.svg')
+  assert.match(placeholder().props.class, /ft-shimmer/)
+  await fail(f.find('img'))
+  assert.equal(placeholder().props.src, 'skeleton.svg')
+  for (const callback of f.timers.values()) callback()
+  await Vue.nextTick()
+  await fail(f.find('img'))
+  assert.equal(placeholder().props.src, 'placeholder.svg')
+  assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
+  f.thumbnail.value = 'https://images.test/new-thumbnail'
+  await Vue.nextTick()
+  assert.equal(placeholder().props.src, 'skeleton.svg')
+  f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
+  await Vue.nextTick()
+  assert.equal(placeholder(), undefined)
+})
+
+test('missing and intentionally hidden thumbnails keep their permanent fallback', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const source of ['', 'placeholder.svg']) {
+    f.thumbnail.value = source
+    await Vue.nextTick()
+    const placeholder = f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+    assert.equal(placeholder.props.src, 'placeholder.svg')
+    assert.doesNotMatch(placeholder.props.class, /ft-shimmer/)
+  }
+})
+
+test('custom image icons shimmer until decoded and keep a static fallback after failure', async t => {
+  const f = await mountAvatar(t, null, 'FtIcon/FtIcon.vue')
+  f.thumbnail.value = 'data:image/png;base64,AAAA'
+  await Vue.nextTick()
+  const skeleton = () => f.find('img').parent.children.find(node => node.props?.class?.includes('ft-shimmer'))
+  assert.ok(skeleton())
+  await fail(f.find('img'))
+  assert.equal(skeleton(), undefined)
+  assert.ok(f.find('fallback'))
+  f.thumbnail.value = 'data:image/png;base64,BBBB'
+  await Vue.nextTick()
+  assert.ok(skeleton())
+  f.find('img').props.onLoad()
+  await Vue.nextTick()
+  assert.equal(skeleton(), undefined)
+  assert.equal(f.find('fallback'), undefined)
 })
