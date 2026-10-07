@@ -4751,7 +4751,11 @@ function runApp() {
     const onProgress = stage => {
       const frame = event.senderFrame
       if (!event.sender.isDestroyed() && frame && !frame.detached) {
-        frame.send(IpcChannels.CAST_PROGRESS, { preparationId, stage })
+        try {
+          frame.send(IpcChannels.CAST_PROGRESS, { preparationId, stage })
+        } catch {
+          // Progress is advisory; the frame may close between the guard and send.
+        }
       }
     }
     const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia, onProgress)

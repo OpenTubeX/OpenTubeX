@@ -67,6 +67,7 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
     complete: preparationId => handlers.get('start')(event, {}, preparationId),
     cancel: preparationId => listeners.get('cancel')(event, preparationId),
     changeFrame(id) { event.senderFrame.routingId = id },
+    setProgressSender(send) { event.senderFrame.send = send },
     changeOwner(id) { sender.id = id },
     setFocus(value) { focused = value; userActivation.isActive = value },
     async start(instance, owner = 1, focused = true, frame = 'app://opentubex/index.html') {
@@ -156,6 +157,18 @@ test('Cast preparation retains initial focus authorization through the actual pr
   complete({ deviceId: 'tv' })
   assert.equal((await pending).castId, 'cast-1')
   assert.deepEqual(stages, ['connecting'])
+})
+
+test('a closed frame cannot fail Cast startup when progress delivery throws', async () => {
+  const f = await fixture('')
+  let sends = 0
+  f.setProgressSender(() => {
+    sends++
+    throw new Error('Render frame was disposed before WebFrameMain could be accessed')
+  })
+  const result = await f.api.start(() => ({ deviceId: 'tv' }))
+  assert.equal(sends, 1)
+  assert.equal(result.castId, 'cast-1')
 })
 
 test('renderer payload cannot replace the configured private Cast origin', async () => {
