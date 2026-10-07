@@ -220,9 +220,10 @@
 
 .menuSection {
   --quick-settings-label-overhang: 7px;
+  --quick-settings-row-gap: 16px;
 
   border-block-start: 1px solid var(--divider-color);
-  gap: 16px 8px;
+  gap: var(--quick-settings-row-gap) 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   padding-block: 10px 16px;
@@ -260,7 +261,7 @@
 .quickSettingControl:first-of-type,
 .quickSettingsMenu:not(.phoneQuickSettings) .pairedQuickSetting:first-of-type + .pairedQuickSetting {
   /* Keep the first caption seven pixels below its section heading. */
-  margin-block-start: -9px;
+  margin-block-start: calc(7px - var(--quick-settings-row-gap));
 }
 
 .quickSettingControl:has(.quickSelect) {
@@ -367,6 +368,11 @@
 }
 
 @media (any-pointer: coarse) {
+  .menuSection {
+    /* Leave room for both switches' invisible touch padding. */
+    --quick-settings-row-gap: max(16px, calc(max(48px, var(--switch-touch-height)) - var(--switch-track-height)));
+  }
+
   .menuSection :deep(.switch-ctn) {
     --quick-settings-switch-padding: calc((max(48px, var(--switch-touch-height)) - var(--switch-track-height)) / 2);
 
