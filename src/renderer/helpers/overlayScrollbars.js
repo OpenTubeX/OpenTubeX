@@ -65,6 +65,11 @@ function scrollbarOptions(initialization) {
 /** @param {MutationRecord} mutation */
 function ignorePageScrollbarMutation(mutation) {
   const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
+  // Moving/resizing a fixed utility window cannot change the page's scroll
+  // range. Remeasuring it here forces layout on every drag frame.
+  if (mutation.type === 'attributes' && mutation.attributeName === 'style' && element?.matches('.settingsWindow')) {
+    return true
+  }
   return element?.closest('.tabBar') != null
 }
 

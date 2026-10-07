@@ -411,6 +411,8 @@ const actions = {
   },
 
   showKeyboardShortcutPrompt ({ commit }) {
+    commit('setSettingsWindowReturnView', null)
+    commit('setSettingsWindowView', null)
     commit('setIsKeyboardShortcutPromptShown', true)
     commit('setSettingsWindowMinimized', false)
     commit('setSettingsWindowOpen', true)

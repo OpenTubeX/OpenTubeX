@@ -85,10 +85,12 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
+    <!-- Leave keyframes avoid staging classes that restyle the settings subtree. -->
     <Transition
       name="settings-window"
       :css="!settingsWindowMorphing"
-      @after-leave="resetClosedSettingsWindowView"
+      leave-from-class=""
+      leave-to-class=""
     >
       <KeepAlive>
         <SettingsWindow
@@ -966,14 +968,7 @@ const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
 /** @type {import('vue').ComputedRef<boolean>} */
 const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
 const settingsWindowOpen = computed(() => store.getters.getSettingsWindowOpen)
-const settingsWindowMinimized = computed(() => store.getters.getSettingsWindowMinimized)
 const settingsWindowMorphing = computed(() => store.getters.getSettingsWindowMorphing)
-
-function resetClosedSettingsWindowView() {
-  if (!settingsWindowOpen.value && !settingsWindowMinimized.value) {
-    store.dispatch('showSettingsWindowRoot')
-  }
-}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylistPrompt)

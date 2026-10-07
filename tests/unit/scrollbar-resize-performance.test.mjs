@@ -155,6 +155,7 @@ test('page scrollbar ignores clipped tab-bar mutations while nested scrollbars s
   class Element {
     constructor(inTabBar = false) { this.inTabBar = inTabBar }
     closest(selector) { return selector === '.tabBar' && this.inTabBar ? this : null }
+    matches() { return false }
   }
   const body = new Element()
   const context = vm.createContext({
@@ -175,4 +176,23 @@ test('page scrollbar ignores clipped tab-bar mutations while nested scrollbars s
   assert.equal(vm.runInContext('scrollbarOptions(nested).update', context), undefined, 'nested tab-bar scrolling keeps its own observers')
   context.document.documentElement.dir = 'rtl'
   assert.equal(options.update.flowDirectionStyles().direction, 'rtl')
+})
+
+test('moving a fixed utility window does not remeasure page overflow', () => {
+  class Element {
+    constructor(settingsWindow = false) { this.settingsWindow = settingsWindow }
+    closest() { return null }
+    matches(selector) { return selector === '.settingsWindow' && this.settingsWindow }
+  }
+  const context = vm.createContext({
+    Element,
+    document: { body: new Element(), documentElement: { dir: 'ltr' } },
+    process: { env: { IS_CAPACITOR: false } }
+  })
+  const ignore = vm.runInContext(`${optionsFunctions}; scrollbarOptions(document.body).update.ignoreMutation`, context)
+  const dialog = new Element(true)
+  assert.equal(ignore({ type: 'attributes', attributeName: 'style', target: dialog }), true)
+  assert.equal(ignore({ type: 'attributes', attributeName: 'class', target: dialog }), false)
+  assert.equal(ignore({ type: 'childList', target: dialog }), false)
+  assert.equal(ignore({ type: 'attributes', attributeName: 'style', target: new Element() }), false, 'normal page layout still remeasures overflow')
 })
