@@ -28,35 +28,40 @@
       />
     </button>
 
-    <Transition
-      name="quick-settings-menu"
-      @after-leave="handleMenuAfterLeave"
+    <FtMobileSheet
+      v-if="menuRendered"
+      :enabled="phoneLayout"
+      :open="menuOpen"
+      :title="profilePanelOpen ? t('Profile.Profile Select') : t('Settings.Quick Settings.Quick Settings')"
+      :back="profilePanelOpen"
+      @closed="handleSheetClosed"
+      @back="closeProfilePanel"
+      @close="closeMenu"
     >
-      <FtMobileSheet
-        v-if="menuRendered"
-        :enabled="phoneLayout"
-        :open="menuOpen"
-        :title="profilePanelOpen ? t('Profile.Profile Select') : t('Settings.Quick Settings.Quick Settings')"
-        :back="profilePanelOpen"
-        @closed="handleSheetClosed"
-        @back="closeProfilePanel"
-        @close="closeMenu"
+      <template #actions>
+        <div
+          ref="quickHeaderActions"
+          class="phoneQuickHeaderActions"
+        />
+        <button
+          v-if="profilePanelOpen"
+          type="button"
+          :aria-label="t('Profile.Profile Settings')"
+          @click="openProfileSettings"
+        >
+          <FtIcon :icon="['fas', 'sliders-h']" />
+        </button>
+      </template>
+      <Transition
+        name="quick-settings-menu"
+        :css="!phoneLayout"
+        appear
+        @enter="finishMenuTransition"
+        @leave="finishMenuTransition"
+        @after-leave="handleMenuAfterLeave"
       >
-        <template #actions>
-          <div
-            ref="quickHeaderActions"
-            class="phoneQuickHeaderActions"
-          />
-          <button
-            v-if="profilePanelOpen"
-            type="button"
-            :aria-label="t('Profile.Profile Settings')"
-            @click="openProfileSettings"
-          >
-            <FtIcon :icon="['fas', 'sliders-h']" />
-          </button>
-        </template>
         <FtCard
+          v-if="menuOpen || phoneLayout"
           :id="id"
           ref="menuRef"
           class="quickSettingsMenu"
@@ -435,8 +440,8 @@
             </div>
           </template>
         </FtCard>
-      </FtMobileSheet>
-    </Transition>
+      </Transition>
+    </FtMobileSheet>
   </div>
 </template>
 
@@ -497,7 +502,6 @@ const menuOpen = ref(false)
 const menuRendered = ref(false)
 watch(menuOpen, open => {
   if (open) menuRendered.value = true
-  else if (!phoneLayout.value) menuRendered.value = false
 })
 const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
@@ -667,8 +671,18 @@ function toggleMenu() {
   }
 }
 
+async function finishMenuTransition(element, done) {
+  // Vue starts CSS transitions two frames after rendering. Await their actual
+  // completion because the animation-speed setting adjusts their playback rate.
+  await nextTick()
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  await Promise.allSettled(element.getAnimations().map(animation => animation.finished))
+  done()
+}
+
 function handleMenuAfterLeave() {
   if (!menuOpen.value) {
+    if (!phoneLayout.value) menuRendered.value = false
     profilePanelOpen.value = false
     stopObservingMainContent()
   }

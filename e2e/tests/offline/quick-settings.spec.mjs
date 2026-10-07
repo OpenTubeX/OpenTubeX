@@ -31,6 +31,127 @@ const ADDITIONAL_QUICK_SETTINGS = [
 ]
 
 for (const uiScale of [100, 125]) {
+  test.describe(`desktop quick settings animation at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale, reducedMotion: 'off', currentLocale: 'en-US' } } })
+
+    test('animates the visible panel when opening and closing', async ({ page }) => {
+      const menu = page.locator('.quickSettingsMenu')
+      for (const opening of [true, false]) {
+        const midpoint = await page.evaluate(async () => {
+          document.querySelector('.profileTrigger').click()
+          // Allow Vue to render, then start its CSS transition over two frames.
+          for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame)
+          const panel = document.querySelector('.quickSettingsMenu')
+          if (!panel) return null
+          const animations = panel.getAnimations()
+          for (const animation of animations) {
+            animation.pause()
+            animation.currentTime = Number(animation.effect.getTiming().duration) / 2
+          }
+          const style = getComputedStyle(panel)
+          const sample = {
+            properties: animations.map(animation => animation.transitionProperty).sort(),
+            opacity: Number(style.opacity),
+            transform: style.transform,
+            width: panel.getBoundingClientRect().width,
+          }
+          for (const animation of animations) animation.play()
+          return sample
+        })
+        expect(midpoint, `${opening ? 'opening' : 'closing'} keeps the panel mounted`).not.toBeNull()
+        expect(midpoint.properties).toEqual(['opacity', 'transform'])
+        expect(midpoint.opacity).toBeGreaterThan(0)
+        expect(midpoint.opacity).toBeLessThan(1)
+        expect(midpoint.transform).not.toBe('none')
+        expect(midpoint.width).toBeGreaterThan(0)
+        if (opening) {
+          await expect(menu).toBeVisible()
+          await menu.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+          await expect(menu).toHaveCSS('opacity', '1')
+          await expect(menu).toHaveCSS('transform', 'none')
+        } else {
+          await expect(menu).toHaveCount(0)
+        }
+      }
+    })
+
+    test('opens and closes immediately with reduced motion enabled', async ({ page }) => {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+      await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
+      await page.locator('.profileTrigger').click()
+      const menu = page.locator('.quickSettingsMenu')
+      await expect(menu).toBeVisible()
+      expect(await menu.evaluate(element => element.getAnimations().length)).toBe(0)
+      await expect(menu).toHaveCSS('opacity', '1')
+      await expect(menu).toHaveCSS('transform', 'none')
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+    })
+
+    test('finishes closing at the slowest animation speed before removing the panel', async ({ page }) => {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+      await page.locator('.profileTrigger').click()
+      const menu = page.locator('.quickSettingsMenu')
+      await expect(menu).toHaveCSS('transform', 'none')
+      const transitions = await page.evaluate(() => new Promise(resolve => {
+        const onTransitionRun = event => {
+          if (!event.target.matches('.quickSettingsMenu')) return
+          clearTimeout(timeout)
+          document.removeEventListener('transitionrun', onTransitionRun)
+          const animations = event.target.getAnimations()
+          Promise.all(animations.map(async animation => {
+            const status = await animation.finished.then(() => 'finished', () => 'cancelled')
+            return { property: animation.transitionProperty, playbackRate: animation.playbackRate, status }
+          })).then(resolve)
+        }
+        const timeout = setTimeout(() => {
+          document.removeEventListener('transitionrun', onTransitionRun)
+          resolve([])
+        }, 1000)
+        document.addEventListener('transitionrun', onTransitionRun)
+        document.querySelector('.profileTrigger').click()
+      }))
+      expect(transitions.map(animation => animation.property).sort()).toEqual(['opacity', 'transform'])
+      for (const transition of transitions) {
+        expect(transition.playbackRate).toBe(0.25)
+        expect(transition.status).toBe('finished')
+      }
+      await expect(menu).toHaveCount(0)
+    })
+
+    test('keeps the panel open when reopening during its close animation', async ({ page }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.locator('.quickSettingsMenu')
+      await expect(menu).toHaveCSS('transform', 'none')
+      const wasClosing = await page.evaluate(() => new Promise(resolve => {
+        const trigger = document.querySelector('.profileTrigger')
+        const onTransitionRun = event => {
+          if (!event.target.matches('.quickSettingsMenu')) return
+          clearTimeout(timeout)
+          document.removeEventListener('transitionrun', onTransitionRun)
+          trigger.click()
+          resolve(true)
+        }
+        const timeout = setTimeout(() => {
+          document.removeEventListener('transitionrun', onTransitionRun)
+          resolve(false)
+        }, 1000)
+        document.addEventListener('transitionrun', onTransitionRun)
+        trigger.click()
+      }))
+      expect(wasClosing).toBe(true)
+      await expect(menu).toHaveCount(1)
+      await expect(menu).toBeVisible()
+      await expect(menu).toHaveCSS('opacity', '1')
+      await expect(menu).toHaveCSS('transform', 'none')
+      await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'true')
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+    })
+  })
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`quick settings select interactions at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, baseTheme: 'dark', alwaysShowScrollbars: true } } })
 
