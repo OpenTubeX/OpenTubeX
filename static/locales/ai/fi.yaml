@@ -959,6 +959,8 @@ Settings:
     Sync Automatically: "Synkronoi automaattisesti"
     Activity: "Tilin tapahtumat"
     No Activity: "Ei viimeaikaisia tapahtumia"
+    Clear Activity: "Tyhjennä tällä laitteella"
+    Clear Activity Hint: "Piilota tilin nykyinen toiminta tällä laitteella. Palvelimen ja muiden laitteiden toiminta ei muutu. Uusi toiminta näkyy edelleen."
     Setting Changed: "{device} muutti asetuksen {setting} arvoksi {value}"
     Item Updated: "{device} päivitti asetuksen {setting}"
     Item Added: "{device} lisäsi kohteen {item} kohteeseen {setting}"

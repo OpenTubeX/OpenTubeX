@@ -1188,6 +1188,8 @@ Settings:
     Sync Automatically: "Sinchronizuoti automatiškai"
     Activity: "Paskyros veikla"
     No Activity: "Nėra naujausios veiklos"
+    Clear Activity: "Išvalyti šiame įrenginyje"
+    Clear Activity Hint: "Paslėpti esamą paskyros veiklą šiame įrenginyje. Veikla serveryje ir kituose įrenginiuose nesikeičia. Nauja veikla ir toliau bus rodoma."
     Setting Changed: "{device} pakeitė {setting} į {value}"
     Item Updated: "{device} atnaujino {setting}"
     Item Added: "{device} pridėjo {item} prie {setting}"

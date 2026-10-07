@@ -1096,6 +1096,8 @@ Settings:
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"
     No Activity: "Ingen nyleg aktivitet"
+    Clear Activity: "Tøm på denne eininga"
+    Clear Activity Hint: "Gøym eksisterande kontoaktivitet på denne eininga. Aktivitet på tenaren og andre einingar er uendra. Ny aktivitet vil framleis visast."
     Setting Changed: "{device} endra {setting} til {value}"
     Item Updated: "{device} oppdaterte {setting}"
     Item Added: "{device} la til {item} i {setting}"

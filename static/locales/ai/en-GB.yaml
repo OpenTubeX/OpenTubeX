@@ -916,6 +916,8 @@ Settings:
     Sync Automatically: "Sync automatically"
     Activity: "Account activity"
     No Activity: "No recent activity"
+    Clear Activity: "Clear on this device"
+    Clear Activity Hint: "Hide existing account activity on this device. Activity on the server and other devices stays unchanged. New activity will still appear."
     Setting Changed: "{device} changed {setting} to {value}"
     Item Updated: "{device} updated {setting}"
     Item Added: "{device} added {item} to {setting}"

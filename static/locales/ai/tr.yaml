@@ -937,6 +937,8 @@ Settings:
     Sync Automatically: "Otomatik eşitle"
     Activity: "Hesap etkinliği"
     No Activity: "Son etkinlik yok"
+    Clear Activity: "Bu cihazda temizle"
+    Clear Activity Hint: "Bu cihazdaki mevcut hesap etkinliğini gizleyin. Sunucudaki ve diğer cihazlardaki etkinlik değişmez. Yeni etkinlikler görünmeye devam eder."
     Setting Changed: "{device}, {setting} ayarını {value} olarak değiştirdi"
     Item Updated: "{device}, {setting} ayarını güncelledi"
     Item Added: "{device}, {item} öğesini {setting} listesine ekledi"

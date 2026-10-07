@@ -1523,6 +1523,8 @@ Settings:
     Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"
+    Clear Activity: "Auf diesem Gerät leeren"
+    Clear Activity Hint: "Bisherige Kontoaktivitäten auf diesem Gerät ausblenden. Aktivitäten auf dem Server und anderen Geräten bleiben unverändert. Neue Aktivitäten werden weiterhin angezeigt."
     Show More: "Mehr anzeigen"
     Setting Changed: "{device} hat {setting} auf {value} geändert"
     Item Updated: "{device} hat {setting} aktualisiert"

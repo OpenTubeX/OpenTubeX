@@ -931,6 +931,8 @@ Settings:
     Sync Automatically: "Синхронизировать автоматически"
     Activity: "Действия аккаунта"
     No Activity: "Нет недавних действий"
+    Clear Activity: "Очистить на этом устройстве"
+    Clear Activity Hint: "Скрыть существующую активность аккаунта на этом устройстве. Активность на сервере и других устройствах останется без изменений. Новая активность продолжит отображаться."
     Setting Changed: "{device} изменило {setting} на {value}"
     Item Updated: "{device} обновило {setting}"
     Item Added: "{device} добавило {item} в {setting}"

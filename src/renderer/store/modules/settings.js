@@ -526,6 +526,7 @@ const state = {
   syncServerSettingUpdatedAt: {},
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
+  syncServerActivityClearedThrough: {},
   subscriptionSeenVideos: '[]',
   subscriptionSeenPosts: '[]',
   playlistBookmarks: [],
@@ -843,6 +844,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSettingUpdatedAt',
   'syncServerLastSyncAt',
   'syncServerSnapshot',
+  'syncServerActivityClearedThrough',
   'subscriptionSeenVideos',
   'subscriptionSeenPosts',
 
@@ -1042,6 +1044,22 @@ function updateOrderedSetting(commit, settings, settingId, value) {
 let androidProxyUpdate = Promise.resolve()
 
 const customActions = {
+  async updateSyncServerActivityClearedThrough({ commit }, value) {
+    const persist = async () => {
+      const saved = await DBSettingHandlers.find()
+      const cutoffs = { ...saved.find(setting => setting._id === 'syncServerActivityClearedThrough')?.value }
+      for (const [account, cutoff] of Object.entries(value)) {
+        if (!cutoffs[account] || cutoff > cutoffs[account]) cutoffs[account] = cutoff
+      }
+      await DBSettingHandlers.upsert('syncServerActivityClearedThrough', cutoffs)
+      commit('setSyncServerActivityClearedThrough', cutoffs)
+    }
+    // Read and merge inside the shared lock so stale windows cannot undo a
+    // newer dismissal or drop another account's cutoff during concurrent clears.
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      await navigator.locks.request('opentubex-sync-server-activity-clear', persist)
+    } else await persist()
+  },
   ...Object.fromEntries(ANDROID_PROXY_SETTING_KEYS.filter(() => process.env.IS_CAPACITOR).map(settingId => [
     defaultUpdaterId(settingId),
     ({ commit, state }, value) => {

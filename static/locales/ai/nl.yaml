@@ -959,6 +959,8 @@ Settings:
     Sync Automatically: "Automatisch synchroniseren"
     Activity: "Accountactiviteit"
     No Activity: "Geen recente activiteit"
+    Clear Activity: "Wissen op dit apparaat"
+    Clear Activity Hint: "Verberg bestaande accountactiviteit op dit apparaat. Activiteit op de server en andere apparaten blijft ongewijzigd. Nieuwe activiteit blijft verschijnen."
     Setting Changed: "{device} heeft {setting} gewijzigd naar {value}"
     Item Updated: "{device} heeft {setting} bijgewerkt"
     Item Added: "{device} heeft {item} toegevoegd aan {setting}"

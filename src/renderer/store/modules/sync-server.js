@@ -95,6 +95,18 @@ function clearSyncServerDevices(commit) {
   commit('setSyncServerDevices', {})
 }
 
+function activityAccountKey(settings) {
+  return JSON.stringify([settings.syncServerUrl,
+    settings.syncServerUsername, settings.syncServerDeviceId])
+}
+
+function unclearedActivity(entries, settings) {
+  const cutoff = settings.syncServerActivityClearedThrough?.[activityAccountKey(settings)]
+  return typeof cutoff === 'string'
+    ? entries.filter(entry => entry.id.split(':')[0] > cutoff)
+    : entries
+}
+
 function trackSyncClient(client) {
   activeSyncClients.add(client)
   return client
@@ -154,7 +166,7 @@ const state = {
 
 const getters = {
   getSyncServerLiveSupported: state => state.syncServerLiveSupported,
-  getSyncServerActivity: state => state.syncServerActivity,
+  getSyncServerActivity: (state, getters, rootState) => unclearedActivity(state.syncServerActivity, rootState.settings),
   getSyncServerDevices: (state, getters, rootState) => Object.entries(state.syncServerDevices)
     .filter(([id]) => id !== rootState.settings.syncServerDeviceId)
     .map(([id, device]) => ({ id, ...device })),
@@ -814,6 +826,24 @@ const actions = {
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
   },
 
+  async clearSyncServerActivity({ commit, dispatch, rootState, state }) {
+    const settings = rootState.settings
+    const accountKey = activityAccountKey(settings)
+    const savedCutoff = settings.syncServerActivityClearedThrough?.[accountKey] ?? ''
+    const cutoff = state.syncServerActivity.reduce((latest, entry) => {
+      const eventId = entry.id.split(':')[0]
+      return eventId > latest ? eventId : latest
+    }, eventsSince > savedCutoff ? eventsSince : savedCutoff)
+    if (!cutoff) return
+    await dispatch('updateSyncServerActivityClearedThrough', {
+      ...settings.syncServerActivityClearedThrough,
+      [accountKey]: cutoff,
+    })
+    if (activityAccountKey(rootState.settings) === accountKey) {
+      commit('setSyncServerActivity', unclearedActivity(state.syncServerActivity, rootState.settings))
+    }
+  },
+
   async refreshSyncServerEvents({ commit, dispatch, rootState, state }, { background = false, fresh = false } = {}) {
     const settings = { ...rootState.settings }
     if (!settings.syncServerEnabled || !settings.syncServerToken || !settings.syncServerPrivacyKey) return
@@ -829,6 +859,7 @@ const actions = {
     const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
     const stillCurrent = () => rootState.settings.syncServerEnabled &&
       rootState.settings.syncServerUrl === settings.syncServerUrl &&
+      rootState.settings.syncServerUsername === settings.syncServerUsername &&
       rootState.settings.syncServerPrivacyKey === settings.syncServerPrivacyKey &&
       rootState.settings.syncServerDeviceId === settings.syncServerDeviceId &&
       rootState.settings.syncServerToken === settings.syncServerToken && !client.cancelled
@@ -890,7 +921,7 @@ const actions = {
         }
       }
       if (stillCurrent()) {
-        commit('setSyncServerActivity', activity
+        commit('setSyncServerActivity', unclearedActivity(activity, rootState.settings)
           .filter(entry => entry.createdAt > Date.now() - 30 * 24 * 60 * 60 * 1000)
           .sort((a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id)).slice(0, 200))
         eventsSince = nextEventsSince

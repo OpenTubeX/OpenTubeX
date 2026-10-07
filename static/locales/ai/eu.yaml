@@ -935,6 +935,8 @@ Settings:
     Sync Automatically: "Sinkronizatu automatikoki"
     Activity: "Kontuaren jarduera"
     No Activity: "Ez dago azken jarduerarik"
+    Clear Activity: "Garbitu gailu honetan"
+    Clear Activity Hint: "Ezkutatu kontuaren lehendik dagoen jarduera gailu honetan. Zerbitzariko eta beste gailuetako jarduera ez da aldatuko. Jarduera berria agertzen jarraituko da."
     Setting Changed: "{device} gailuak {setting} aldatu du: {value}"
     Item Updated: "{device} gailuak {setting} eguneratu du"
     Item Added: "{device} gailuak {item} gehitu du {setting} atalera"

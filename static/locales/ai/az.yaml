@@ -938,6 +938,8 @@ Settings:
     Sync Automatically: "Avtomatik sinxronlaşdır"
     Activity: "Hesab fəaliyyəti"
     No Activity: "Son fəaliyyət yoxdur"
+    Clear Activity: "Bu cihazda təmizlə"
+    Clear Activity Hint: "Mövcud hesab fəaliyyətini bu cihazda gizlədin. Serverdə və digər cihazlarda fəaliyyət dəyişməz qalır. Yeni fəaliyyət görünməyə davam edəcək."
     Setting Changed: "{device} {setting} ayarını {value} olaraq dəyişdi"
     Item Updated: "{device} {setting} ayarını yenilədi"
     Item Added: "{device} {item} elementini {setting} bölməsinə əlavə etdi"

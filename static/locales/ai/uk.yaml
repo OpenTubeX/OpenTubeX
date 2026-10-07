@@ -956,6 +956,8 @@ Settings:
     Sync Automatically: "Синхронізувати автоматично"
     Activity: "Дії облікового запису"
     No Activity: "Немає нещодавніх дій"
+    Clear Activity: "Очистити на цьому пристрої"
+    Clear Activity Hint: "Приховати наявну активність облікового запису на цьому пристрої. Активність на сервері та інших пристроях залишиться без змін. Нова активність і далі відображатиметься."
     Setting Changed: "{device} змінив {setting} на {value}"
     Item Updated: "{device} оновив {setting}"
     Item Added: "На пристрої {device} додано {item} ({setting})"

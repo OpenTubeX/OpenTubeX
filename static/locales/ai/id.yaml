@@ -935,6 +935,8 @@ Settings:
     Sync Automatically: "Sinkronkan secara otomatis"
     Activity: "Aktivitas akun"
     No Activity: "Tidak ada aktivitas terbaru"
+    Clear Activity: "Bersihkan di perangkat ini"
+    Clear Activity Hint: "Sembunyikan aktivitas akun yang ada di perangkat ini. Aktivitas di server dan perangkat lain tetap tidak berubah. Aktivitas baru akan tetap muncul."
     Setting Changed: "{device} mengubah {setting} menjadi {value}"
     Item Updated: "{device} memperbarui {setting}"
     Item Added: "{device} menambahkan {item} ke {setting}"

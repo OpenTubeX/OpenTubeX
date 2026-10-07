@@ -937,6 +937,8 @@ Settings:
     Sync Automatically: "自动同步"
     Activity: "账户活动"
     No Activity: "暂无近期活动"
+    Clear Activity: "在此设备上清除"
+    Clear Activity Hint: "隐藏此设备上现有的账户活动。服务器和其他设备上的活动保持不变。新活动仍会显示。"
     Setting Changed: "{device} 将 {setting} 更改为 {value}"
     Item Updated: "{device} 更新了 {setting}"
     Item Added: "{device}将{item}添加到{setting}"

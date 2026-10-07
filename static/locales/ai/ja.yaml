@@ -935,6 +935,8 @@ Settings:
     Sync Automatically: "自動的に同期"
     Activity: "アカウントのアクティビティ"
     No Activity: "最近のアクティビティはありません"
+    Clear Activity: "このデバイスで消去"
+    Clear Activity Hint: "このデバイスで既存のアカウントアクティビティを非表示にします。サーバーや他のデバイスのアクティビティは変更されません。新しいアクティビティは引き続き表示されます。"
     Setting Changed: "{device} が {setting} を {value} に変更しました"
     Item Updated: "{device} が {setting} を更新しました"
     Item Added: "{device} が {item} を {setting} に追加しました"

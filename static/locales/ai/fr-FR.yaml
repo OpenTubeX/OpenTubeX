@@ -935,6 +935,8 @@ Settings:
     Sync Automatically: "Synchroniser automatiquement"
     Activity: "Activité du compte"
     No Activity: "Aucune activité récente"
+    Clear Activity: "Effacer sur cet appareil"
+    Clear Activity Hint: "Masquer l’activité existante du compte sur cet appareil. L’activité sur le serveur et les autres appareils reste inchangée. La nouvelle activité continuera d’apparaître."
     Setting Changed: "{device} a changé {setting} en {value}"
     Item Updated: "{device} a mis à jour {setting}"
     Item Added: "{device} a ajouté {item} à {setting}"
