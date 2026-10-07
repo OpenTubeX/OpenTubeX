@@ -111,6 +111,36 @@ test('Android supplies playlist timing for blocking HLS reloads', async t => {
   }
 })
 
+for (const contentType of ['application/x-mpegurl', 'application/vnd.apple.mpegurl']) {
+  test(`Android registers signed HLS directory URLs directly (${contentType})`, async t => {
+    const fixture = nativeFixture()
+    const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+    await api.discover()
+    const url = 'https://media.test/live/?token=a%2Fb&dup=a&dup=b'
+    const result = await api.start(() => ({ ...handoff, captions: [], source: { url, contentType } }))
+    t.after(() => api.stop(result.castId))
+    assert.ok(result.castId, result.error)
+    const root = fixture.resources[0]
+    assert.equal(root.candidates[0].url, url, 'The native source must retain its signed query')
+    assert.equal(root.candidates[0].template, false, 'HLS playlists must enter the native blocking-reload path')
+    assert.equal(root.candidates[0].suffix, 'media')
+    const load = fixture.calls.find(([name, options]) => name === 'send' && options.payload.type === 'LOAD')[1].payload
+    assert.ok(load.media.contentId.endsWith('/media'), 'Only receiver reload directives belong in the relay query')
+    await fixture.event('castManifest', { resourceId: root.id, requestId: 'directory', url, contentType,
+      body: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nvariant/?token=c%2Fd\n' })
+    const variant = fixture.resources.find(resource => resource.candidates[0].url === 'https://media.test/live/variant/?token=c%2Fd')
+    assert.ok(variant)
+    await fixture.event('castManifest', { resourceId: variant.id, requestId: 'variant', url: variant.candidates[0].url, contentType: variant.contentType,
+      body: '#EXTM3U\n#EXT-X-TARGETDURATION:10\n#EXTINF:10,\n../segment/?sig=e%2Ff\n' })
+    for (const source of ['https://media.test/live/variant/?token=c%2Fd', 'https://media.test/live/segment/?sig=e%2Ff']) {
+      const child = fixture.resources.find(resource => resource.candidates[0].url === source)
+      assert.ok(child, 'Signed HLS child URLs must also stay intact')
+      assert.equal(child.candidates[0].template, false)
+      assert.equal(child.candidates[0].suffix, 'media')
+    }
+  })
+}
+
 test('Android uses the native sender and relay for handoff, captions, controls and return', async t => {
   const fixture = nativeFixture()
   const wake = []

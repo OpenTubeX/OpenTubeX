@@ -96,7 +96,8 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
           if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error('Unsupported Cast resource URL')
           const placeholder = parsed.pathname.indexOf('$')
           const end = parsed.pathname.lastIndexOf('/', placeholder < 0 ? parsed.pathname.length : placeholder) + 1
-          const template = (hlsVariables === undefined && dashContext === undefined && url.includes('$')) || parsed.pathname.endsWith('/')
+          const template = hlsVariables === undefined && !['application/x-mpegurl', 'application/vnd.apple.mpegurl'].includes(contentType) &&
+            ((dashContext === undefined && url.includes('$')) || parsed.pathname.endsWith('/'))
           return {
             url: template ? new URL(parsed.pathname.slice(0, end), parsed).href : url,
             suffix: template ? parsed.pathname.slice(end) + parsed.search : 'media',

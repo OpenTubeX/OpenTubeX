@@ -402,6 +402,43 @@ public class ChromecastTest {
         }
     }
 
+    @Test public void directoryHlsManifestsPreserveSourceQueriesAndBlockingReloads() throws Exception {
+        for (String type : new String[]{"application/x-mpegurl", "application/vnd.apple.mpegurl"}) {
+            LinkedBlockingQueue<String> requests = new LinkedBlockingQueue<>();
+            LinkedBlockingQueue<Integer> timeouts = new LinkedBlockingQueue<>();
+            AtomicReference<CastMediaServer> relay = new AtomicReference<>();
+            var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
+                requests.add(chain.request().url().toString());
+                timeouts.add(chain.readTimeoutMillis());
+                if (chain.request().url().queryParameter("_HLS_msn") != null) {
+                    try { Thread.sleep(6000); }
+                    catch (InterruptedException error) { Thread.currentThread().interrupt(); throw new java.io.IOException(error); }
+                    if (chain.call().isCanceled()) throw new java.io.IOException("Blocking reload was given a fallback deadline");
+                }
+                return new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
+                    .code(200).message("OK").body(okhttp3.ResponseBody.create("#EXTM3U\n", okhttp3.MediaType.get(type))).build();
+            }).build();
+            try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
+                     event -> relay.get().complete(event.getString("requestId"), event.getString("body"), 360_000), upstream)) {
+                relay.set(server);
+                String source = "https://8.8.8.8/live/?token=a%2fb&dup=a&dup=b";
+                JSObject playlist = resource(0, source, type);
+                playlist.getJSONArray("candidates").put(new JSObject().put("url", "https://1.1.1.1/live/?token=alternative"));
+                JSArray resources = new JSArray();
+                resources.put(playlist);
+                server.register(resources);
+                assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200));
+                assertEquals(source, requests.poll(2, TimeUnit.SECONDS));
+                assertEquals(30_000, (int) timeouts.poll(2, TimeUnit.SECONDS));
+                assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media?_HLS_msn=123&_HLS_part=0", 200, 9000));
+                assertEquals(source + "&_HLS_msn=123&_HLS_part=0", requests.poll(2, TimeUnit.SECONDS));
+                assertEquals("Directory playlists use the manifest-derived wait", 360_000, (int) timeouts.poll(2, TimeUnit.SECONDS));
+                fetch(server.origin() + "/test-token/0/media?token=changed", 502);
+                assertTrue("Receiver directives cannot replace source credentials", requests.isEmpty());
+            }
+        }
+    }
+
     @Test public void abandonedBlockingReloadCancelsItsUpstreamCall() throws Exception {
         CountDownLatch started = new CountDownLatch(1);
         CompletableFuture<Boolean> cancelled = new CompletableFuture<>();
