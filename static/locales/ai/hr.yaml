@@ -547,6 +547,7 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
+    Show Music Mode Toggle: "Prikaži prekidač glazbenog načina"
     Enable DLNA Casting: "Omogući DLNA emitiranje"
     Skip Unavailable Playlist Videos: "Preskoči nedostupne videozapise na popisima za reprodukciju"
     Lights Off: Ugasi svjetla

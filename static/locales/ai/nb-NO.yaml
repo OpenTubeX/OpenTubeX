@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    Show Music Mode Toggle: "Vis bryter for musikkmodus"
     Enable DLNA Casting: "Aktiver DLNA-casting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelige videoer i spillelister"
     Lights Off: Slå av lyset

@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Destruktivní akce při stisknutí
         Text and icons on destructive actions: Text a ikony destruktivních akcí
   Player Settings:
+    Show Music Mode Toggle: "Zobrazit přepínač hudebního režimu"
     Enable DLNA Casting: "Povolit vysílání DLNA"
     Skip Unavailable Playlist Videos: "Přeskakovat nedostupná videa v playlistech"
     Lights Off: Zhasnout

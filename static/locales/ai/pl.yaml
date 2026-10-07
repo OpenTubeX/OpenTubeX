@@ -256,6 +256,7 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Show Music Mode Toggle: "Pokaż przełącznik trybu muzyki"
     Enable DLNA Casting: "Włącz przesyłanie DLNA"
     Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"
     Lights Off: Zgaś światło

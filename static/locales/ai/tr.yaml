@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Show Music Mode Toggle: "Müzik modu düğmesini göster"
     Enable DLNA Casting: "DLNA yayınını etkinleştir"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat

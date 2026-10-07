@@ -606,6 +606,7 @@ for (const uiScale of [100, 95]) {
           currentLocale: 'en-US',
           uiScale,
           quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'],
+          showMusicModeToggle: true,
         }
       }
     })
@@ -810,6 +811,7 @@ test.describe('quick settings touch spacing below 100% native UI scale', () => {
         uiScale: 75,
         bounds: { x: 0, y: 0, width: 360, height: 675, maximized: false },
         quickSettings: ['enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists'],
+        showMusicModeToggle: true,
       }
     }
   })

@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Show Music Mode Toggle: "Erakutsi musika-moduaren etengailua"
     Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
     Lights Off: Argiak itzali

@@ -1,28 +1,29 @@
-import { test, expect, goTo, goToSettingsSection, setWindowSize, sel } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindowSize, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
 
-test.use({
-  seed: {
-    settings: {
-      videoPlaybackEngine: 'built-in',
-      ytDlpPlaybackEngineDefaultMigration: true,
-      autoplayVideos: false,
-      defaultPlayback: 2,
-      quickSettings: ['musicMode', 'defaultPlayback', 'baseTheme'],
-      playNextVideo: false,
-      hideRecommendedVideos: false,
-      rememberPlaybackSpeedPerChannel: true,
-      autoUpdateChannelPlaybackSpeeds: false,
-      useCustomShortsPlayer: true,
-      baseTheme: 'system',
-      systemDarkTheme: 'dark',
-      systemLightTheme: 'light',
-      mainColor: 'Red',
-      secColor: 'Blue',
-    },
-    history: [watchHistoryEntry, { ...watchHistoryEntry, _id: 'musicvideo1', videoId: 'musicvideo1', timeWatched: watchHistoryEntry.timeWatched - 1000 }],
+const musicModeSeed = {
+  settings: {
+    videoPlaybackEngine: 'built-in',
+    ytDlpPlaybackEngineDefaultMigration: true,
+    autoplayVideos: false,
+    defaultPlayback: 2,
+    quickSettings: ['musicMode', 'defaultPlayback', 'baseTheme'],
+    playNextVideo: false,
+    hideRecommendedVideos: false,
+    rememberPlaybackSpeedPerChannel: true,
+    autoUpdateChannelPlaybackSpeeds: false,
+    useCustomShortsPlayer: true,
+    baseTheme: 'system',
+    systemDarkTheme: 'dark',
+    systemLightTheme: 'light',
+    mainColor: 'Red',
+    secColor: 'Blue',
   },
-})
+  history: [watchHistoryEntry, { ...watchHistoryEntry, _id: 'musicvideo1', videoId: 'musicvideo1', timeWatched: watchHistoryEntry.timeWatched - 1000 }],
+}
+
+test.use({ seed: { ...musicModeSeed, settings: { ...musicModeSeed.settings, showMusicModeToggle: true } } })
 
 const videoSelector = '.tabContent[aria-hidden="false"] .ftVideoPlayer video'
 
@@ -172,13 +173,17 @@ test('inactive Shorts cannot overwrite the active channel speed when music mode 
     view.channelId = 'second'
     await view.$nextTick()
   })
-  await openShort(page, 'jNQXAC9IVRw')
+  const video = await openShort(page, 'jNQXAC9IVRw')
+  const position = await video.evaluate(element => {
+    element.pause()
+    return element.currentTime
+  })
   await watch.evaluate(async view => {
     view.channelId = 'first'
     await view.$nextTick()
   })
   await setMusicMode(page, false)
-  await expectPlayback(page, 0, 2.5)
+  await expectPlayback(page, position, 2.5)
   await expect.poll(() => watch.evaluate(view => view.currentPlaybackRate)).toBe(2.5)
 })
 
@@ -222,4 +227,120 @@ test('adds and removes music mode through the Quick Settings customizer', async 
   await page.locator('.settingsCloseButton').click()
   await setMusicMode(page, true)
   await expect(page.locator('.musicModeIndicator')).toBeVisible()
+})
+
+test('music mode headphones have a translucent circular background in both icon packs and themes', async ({ page }, testInfo) => {
+  await setMusicMode(page, true)
+  for (const iconPack of ['material', 'remix']) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+      const indicator = page.locator('.musicModeIndicator')
+      await expect(indicator).toBeVisible()
+      await expect(indicator).toHaveCSS('background-color', /\/ 0\.4\)$/)
+      await expect(indicator).toHaveCSS('border-radius', '50%')
+      await expect(indicator).toHaveCSS('opacity', '1')
+      const bounds = await page.locator('.profileTrigger').boundingBox()
+      await testInfo.attach(`music-mode-${iconPack}-${colorScheme}`, {
+        body: await page.screenshot({ clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 } }),
+        contentType: 'image/png',
+      })
+    }
+  }
+})
+
+test('clamps Quick Settings when hiding music mode at the bottom at normal and fractional UI scales', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 1000, height: 700 })
+  for (const scale of [100, 125]) {
+    await page.evaluate(async ({ scale, ids }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', scale)
+      await store.dispatch('updateQuickSettings', [...ids, 'musicMode'])
+      await store.dispatch('updateShowMusicModeToggle', true)
+    }, { scale, ids: DEFAULT_QUICK_SETTINGS })
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const scroller = menu.locator('.quickSettingsScroll')
+    const scrollbar = scroller.locator('.os-scrollbar-vertical')
+    const thumb = scrollbar.locator('.os-scrollbar-handle')
+    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expectScrollAtRenderedEnd(scroller)
+    const originalThumbHeight = await thumb.evaluate(element => element.getBoundingClientRect().height)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowMusicModeToggle', false))
+    await expect(menu.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+    await expect.poll(() => thumb.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(originalThumbHeight)
+    await menu.press('Escape')
+    await expect(menu).toBeHidden()
+  }
+})
+
+test.describe('music mode visibility setting', () => {
+  test.use({ seed: musicModeSeed })
+
+  test('hides toggles by default while keeping Music Mode customizable and saves the visibility preference', async ({ app, page }, testInfo) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator('.profileTrigger').click()
+    await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
+    await page.locator('.profileTrigger').click()
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    await page.getByRole('button', { name: 'Remove Music Mode', exact: true }).click()
+    await page.getByRole('button', { name: 'Add setting' }).click()
+    const search = page.getByLabel('Search settings')
+    await search.fill('Music Mode')
+    await page.locator('.settingPicker .optionWrapper').getByText('Music Mode', { exact: true }).click()
+    await search.press('Escape')
+    await page.locator('.settingsBackButton').click()
+    const playback = await goToSettingsSection(page, 'playback')
+    const visibility = playback.getByRole('checkbox', { name: /^Show Music Mode Toggle/ })
+    await expect(visibility).not.toBeChecked()
+    const help = visibility.locator('..').locator('.selectTooltip button')
+    await help.focus()
+    const explanation = page.getByRole('tooltip').filter({ hasText: 'Play videos at 1×' })
+    await expect(explanation).toBeVisible()
+    await expect(explanation).toContainText('Your saved playback defaults stay unchanged.')
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+      await testInfo.attach(`music-mode-explanation-${colorScheme}`, {
+        body: await explanation.screenshot(),
+        contentType: 'image/png',
+      })
+    }
+    await visibility.focus()
+    await expect(explanation).toBeHidden()
+    await testInfo.attach('music-mode-visibility-setting', {
+      body: await visibility.locator('..').screenshot(),
+      contentType: 'image/png',
+    })
+    await visibility.locator('..').locator('label').click()
+    await expect(visibility).toBeChecked()
+    await page.locator('.settingsCloseButton').click()
+    await setMusicMode(page, true)
+    await goTo(page, 'history')
+    await page.locator('a.title').filter({ hasText: watchHistoryEntry.title }).first().click()
+    await expectPlayback(page, 0, 1)
+    await page.locator('.ftVideoPlayer').hover()
+    await page.locator('.shaka-overflow-menu-button').click()
+    await expect(page.locator('.music-mode-button')).toBeVisible()
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(view => view.$store.dispatch('updateShowMusicModeToggle', false))
+    await expect(page.locator('.music-mode-button')).toHaveCount(0)
+    await page.locator('.profileTrigger').click()
+    await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
+    expect(await watch.evaluate(view => view.$store.getters.getQuickSettings.includes('musicMode'))).toBe(true)
+    await expect(page.locator('.musicModeIndicator')).toBeVisible()
+    await expectPlayback(page, 0, 1)
+    await watch.evaluate(view => view.$store.dispatch('updateShowMusicModeToggle', true))
+    await expect(page.locator('[data-setting-id="musicMode"]')).toBeVisible()
+    await expect(page.locator('[data-setting-id="musicMode"]').getByRole('checkbox')).toBeChecked()
+    const restarted = await app.relaunch()
+    await restarted.page.locator('.profileTrigger').click()
+    await expect(restarted.page.locator('[data-setting-id="musicMode"]')).toBeVisible()
+    await expect(restarted.page.locator('[data-setting-id="musicMode"]').getByRole('checkbox')).not.toBeChecked()
+  })
 })

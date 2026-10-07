@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Show Music Mode Toggle: "Kuva muusikarežiimi lüliti"
     Enable DLNA Casting: "Luba DLNA edastamine"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja

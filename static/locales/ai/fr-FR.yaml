@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Action destructive à l’appui
         Text and icons on destructive actions: Texte et icônes des actions destructives
   Player Settings:
+    Show Music Mode Toggle: "Afficher le bouton du mode musique"
     Enable DLNA Casting: "Activer la diffusion DLNA"
     Skip Unavailable Playlist Videos: "Ignorer les vidéos indisponibles dans les playlists"
     Lights Off: Éteindre les lumières
