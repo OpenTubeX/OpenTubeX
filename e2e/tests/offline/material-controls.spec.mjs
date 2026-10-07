@@ -324,8 +324,11 @@ for (const scale of [100, 95]) {
       const move = organizer.locator('.bulkActionSelect')
       await expect(move.getByRole('combobox')).toBeDisabled()
       await expect.soft(move.locator('.select-label')).toHaveCSS('opacity', '1', { timeout: 1000 })
+      await expect(move.locator('.select-label-text')).toHaveCSS('opacity', '0.38')
       if (scale === 100) await move.screenshot({ path: testInfo.outputPath('disabled-organizer-select.png') })
       await organizer.getByRole('button', { name: 'Select All', exact: true }).click()
+      await expect(move.getByRole('combobox')).toBeEnabled()
+      await expect(move.locator('.select-label-text')).toHaveCSS('opacity', '1')
       for (const direction of ['ltr', 'rtl']) {
         await page.evaluate(value => { document.body.dir = value }, direction)
         for (const checkbox of await organizer.locator('.tabSelection input').all()) {
