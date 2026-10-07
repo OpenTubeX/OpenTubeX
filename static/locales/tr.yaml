@@ -724,6 +724,7 @@ Channel:
       Oldest: 'En eski'
       Most Popular: 'En Popüler'
     This channel has videos but none could be displayed, try fetching more: Bu kanalda videolar var ancak hiçbiri görüntülenemedi, daha fazlasını getirmeyi deneyin
+    This channel does not currently have any videos: 'Bu kanalda şu anda herhangi bir video yok'
   Playlists:
     Playlists: 'Oynatma Listeleri'
     This channel does not currently have any playlists: 'Bu kanalda şu anda herhangi bir oynatma listesi yok'

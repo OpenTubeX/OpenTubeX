@@ -671,6 +671,7 @@ Channel:
       Newest: 'Novos'
       Oldest: 'Antigos'
       Most Popular: 'Mais populares'
+    This channel does not currently have any videos: 'Este canal não possui vídeos no momento'
   Playlists:
     Playlists: 'Playlists'
     This channel does not currently have any playlists: 'Este canal não possui nenhuma playlist no momento'

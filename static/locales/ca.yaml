@@ -368,6 +368,7 @@ Channel:
       Newest: 'Més Nou'
       Oldest: 'Més Vell'
       Most Popular: 'Més Popular'
+    This channel does not currently have any videos: 'Aquest canal no té actualment cap vídeo'
   Playlists:
     Playlists: 'Llistes De Reproducció'
     This channel does not currently have any playlists: 'Aquest canal no té actualment cap llista de reproducció'

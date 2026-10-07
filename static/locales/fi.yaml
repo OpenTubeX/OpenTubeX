@@ -640,6 +640,7 @@ Channel:
       Newest: 'Uusimmat'
       Oldest: 'Vanhimmat'
       Most Popular: 'Suosituimmat'
+    This channel does not currently have any videos: 'Tällä kanavalla ei juuri nyt ole yhtään videota'
   Playlists:
     Playlists: 'Soittolistat'
     This channel does not currently have any playlists: 'Tällä kanavalla ei juuri nyt ole yhtään soittolistaa'

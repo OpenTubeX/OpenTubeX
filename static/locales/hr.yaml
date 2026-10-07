@@ -705,6 +705,7 @@ Channel:
       Newest: 'Najnoviji'
       Oldest: 'Najstariji'
       Most Popular: 'Najpopularniji'
+    This channel does not currently have any videos: 'Na ovom kanalu trenutačno nema videa'
   Playlists:
     Playlists: 'Zbirke'
     This channel does not currently have any playlists: 'Ovaj kanal trenutačno ne sadrži nijednu zbirku'

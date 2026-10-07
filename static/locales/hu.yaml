@@ -727,6 +727,7 @@ Channel:
       Newest: 'Legújabb'
       Oldest: 'Legrégebbi'
       Most Popular: 'Legnépszerűbb'
+    This channel does not currently have any videos: 'Ebben a csatornában jelenleg nincsenek videók'
   Playlists:
     Playlists: 'Lejátszási listák'
     This channel does not currently have any playlists: 'Ennek a csatornának jelenleg nincsenek lejátszási listái'

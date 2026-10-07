@@ -665,6 +665,7 @@ Channel:
       Newest: 'Najnovšie'
       Oldest: 'Najstaršie'
       Most Popular: 'Najpopulárnejšie'
+    This channel does not currently have any videos: 'Tento kanál momentálne nemá žiadne videá'
   Playlists:
     Playlists: 'Playlisty'
     This channel does not currently have any playlists: 'Tento kanál momentálne nemá žiadne playlisty'

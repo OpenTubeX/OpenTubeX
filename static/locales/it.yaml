@@ -674,6 +674,7 @@ Channel:
       Oldest: 'Più vecchi'
       Most Popular: 'Più popolari'
     This channel has videos but none could be displayed, try fetching more: Questo canale contiene video, ma non è stato possibile visualizzarne alcuno; prova a caricarne altri
+    This channel does not currently have any videos: 'Questo canale attualmente non ha alcun video'
   Playlists:
     Playlists: 'Playlist'
     This channel does not currently have any playlists: 'Questo canale attualmente non ha alcuna playlist'

@@ -667,6 +667,7 @@ Channel:
       Newest: 'Nyeste'
       Oldest: 'Eldste'
       Most Popular: 'Mest populære'
+    This channel does not currently have any videos: 'Kanalen har ingen videoer enda'
   Playlists:
     Playlists: 'Spillelister'
     This channel does not currently have any playlists: 'Kanalen har ingen spillelister'

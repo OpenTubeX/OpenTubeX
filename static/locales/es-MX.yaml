@@ -461,6 +461,7 @@ Channel:
       Newest: 'Mas nuevo'
       Oldest: 'Mas viejo'
       Most Popular: 'Mas popular'
+    This channel does not currently have any videos: 'Este canal no tiene ningun video actualmente'
   Playlists:
     Playlists: 'Listas de Reproducción'
     This channel does not currently have any playlists: 'Este canal no tiene ninguna lista de reproducción actualmente'

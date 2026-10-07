@@ -398,6 +398,7 @@ Channel:
       Newest: 'Najnovejši'
       Oldest: 'Najstarejši'
       Most Popular: 'Najbolj popularni'
+    This channel does not currently have any videos: 'Ta kanal trenutno nima nobenih videoposnetkov'
   Playlists:
     Playlists: 'Seznami predvajanja'
     This channel does not currently have any playlists: 'Ta kanal trenutno nima nobenih seznamov predvajanja'

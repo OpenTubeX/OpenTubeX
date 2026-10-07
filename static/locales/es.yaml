@@ -714,6 +714,7 @@ Channel:
       Newest: 'Más recientes'
       Oldest: 'Más antiguos'
       Most Popular: 'Más populares'
+    This channel does not currently have any videos: 'Este canal no tiene actualmente ningún vídeo'
   Playlists:
     Playlists: 'Listas de reproducción'
     This channel does not currently have any playlists: 'Este canal no tiene actualmente ninguna lista de reproducción'

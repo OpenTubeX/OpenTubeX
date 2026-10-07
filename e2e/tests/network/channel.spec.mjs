@@ -375,6 +375,7 @@ test.describe('channel route changes', () => {
     await expect(page.getByRole('button', { name: 'Fetch more' })).toBeVisible()
     await page.getByRole('button', { name: 'Fetch more' }).click()
     await expect(message).toHaveCount(0)
+    await expect(page.getByText('This channel does not currently have any videos')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Fetch more' })).toHaveCount(0)
   })
 
@@ -456,7 +457,7 @@ test.describe('channel route changes', () => {
       const secondId = 'UCfMJ2MchTSW2kWaT0kK94Yw'
       const releaseVideos = new Map()
       const emptyMessage = tab === 'videos'
-        ? 'This channel has videos but none could be displayed, try fetching more'
+        ? 'This channel does not currently have any videos'
         : 'This channel does not currently have any shorts'
 
       await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
@@ -526,11 +527,7 @@ test.describe('channel route changes', () => {
       }
 
       await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
-      if (tab === 'shorts') {
-        await expect(page.getByText(emptyMessage)).toBeVisible()
-      } else {
-        await expect(page.getByText(emptyMessage)).toHaveCount(0)
-      }
+      await expect(page.getByText(emptyMessage)).toBeVisible()
     })
   }
 })

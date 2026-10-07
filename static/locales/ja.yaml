@@ -669,6 +669,7 @@ Channel:
       Newest: '新しい'
       Oldest: '古い'
       Most Popular: '人気'
+    This channel does not currently have any videos: 'このチャンネルには動画がありません'
   Playlists:
     Playlists: '再生リスト'
     This channel does not currently have any playlists: 'このチャンネルには再生リストがありません'

@@ -714,6 +714,7 @@ Channel:
       Newest: 'Nýjast'
       Oldest: 'Elst'
       Most Popular: 'Vinsælast'
+    This channel does not currently have any videos: 'Þessi rás er ekki með nein myndskeið'
   Playlists:
     Playlists: 'Spilunarlistar'
     This channel does not currently have any playlists: 'Þessi rás er ekki með neina spilunarlista'

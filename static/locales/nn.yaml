@@ -537,6 +537,7 @@ Channel:
       Newest: 'Nyaste'
       Oldest: 'Eldste'
       Most Popular: 'Mest populære'
+    This channel does not currently have any videos: 'Kanalen har ingen videoar enda'
   Playlists:
     Playlists: 'Spelelister'
     This channel does not currently have any playlists: 'Denne kanalen har ingen spelelister enda'

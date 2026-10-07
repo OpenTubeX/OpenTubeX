@@ -385,6 +385,8 @@ Channel:
   This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ئەم کەناڵە تەمەنی سنووردارە و لە ئێستادا ناتوانرێت لە OpenTubeX ببینرێت.
   Live:
     This channel does not currently have any live streams: ئەم کەناڵە لە ئێستادا هیچ پەخشێکی ڕاستەوخۆی نییە
+  Videos:
+    This channel does not currently have any videos: ئەم کەناڵە لە ئێستادا هیچ ڤیدیۆیەکی نییە
 New Window: پەنجەرەی نوێ
 Go to page: بڕۆ بۆ {page}
 Preferences: هەڵبژاردەکان

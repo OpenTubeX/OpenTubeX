@@ -650,6 +650,7 @@ Channel:
       Newest: 'Новым'
       Oldest: 'Старым'
       Most Popular: 'Самым популярным'
+    This channel does not currently have any videos: 'На этом канале в настоящее время нет видео'
   Playlists:
     Playlists: 'Плейлисты'
     This channel does not currently have any playlists: 'На этом канале в настоящее время нет плейлистов'

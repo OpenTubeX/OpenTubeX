@@ -715,6 +715,7 @@ Channel:
       Newest: 'Nyaste'
       Oldest: 'Äldsta'
       Most Popular: 'Mest populärt'
+    This channel does not currently have any videos: 'Den här kanalen har för närvarande inga videor'
   Playlists:
     Playlists: 'Spellistor'
     This channel does not currently have any playlists: 'Den här kanalen har för närvarande inga spellistor'

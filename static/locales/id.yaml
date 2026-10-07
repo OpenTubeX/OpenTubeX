@@ -718,6 +718,7 @@ Channel:
       Newest: 'Terbaru'
       Oldest: 'Terlawas'
       Most Popular: 'Paling Populer'
+    This channel does not currently have any videos: 'Kanal ini belum memiliki video apa pun'
   Playlists:
     Playlists: 'Daftar Putar'
     This channel does not currently have any playlists: 'Kanal ini belum memiliki daftar putar apa pun'
