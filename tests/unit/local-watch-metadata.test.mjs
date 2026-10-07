@@ -23,7 +23,11 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   const dependencies = {
     initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
     getConnectionState: () => 'online',
-    getLocalVideoInfo: async () => ({ info, paidPromotionDurationMs: null }),
+    getLocalVideoInfo: async () => ({
+      info,
+      paidPromotionDurationMs: options.paidPromotionDurationMs ?? null,
+      paidPromotionPromise: options.paidPromotionPromise,
+    }),
     getOembedTitle: options.getOembedTitle ?? (async () => null),
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
@@ -35,13 +39,14 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
     formatNumber: String,
+    showApiErrorToast() {},
     console: { error: error => errors.push(String(error)) },
   }
   const load = compileFunction(`return ({${source.slice(start, end)}\n} }).getVideoInformationLocal`, Object.keys(dependencies))(...Object.values(dependencies))
   let completed = false
-  const watch = {
+  const watch = Object.assign(options.watch ?? {}, {
     restrictedPlaybackError: null,
-    createLocalDashManifest: async () => 'manifest',
+    createLocalDashManifest: options.createLocalDashManifest ?? (async () => 'manifest'),
     applyDownloadedPlaybackSource: () => false,
     alignActiveFormatWithAvailableSources() {},
     applyYtDlpPlaybackSource() {},
@@ -50,20 +55,120 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     isCurrentVideoLoad: () => true,
     $store: { getters: { getAvoidTranslation: avoidTranslation }, commit() {} },
     setTabAvatar() {}, updateSubscriptionDetails() {}, initializePlaybackRate() {}, initializeVideoQuality() {},
-    extractChaptersFromDescription, finalizeChapters() {}, getSponsorBlockCommunityChapters: async () => [],
+    extractChaptersFromDescription, finalizeChapters() {},
+    getSponsorBlockCommunityChapters: options.getSponsorBlockCommunityChapters ?? (async () => []),
     updateShortsPlayerState() {}, updateShortThumbnail() {}, updateTitle() { completed = true },
     runIpBlockRecoveryScriptAndReload: async () => false,
     finishDownloadedPlaybackWithoutMetadata: () => false,
     getUnavailableVideoThumbnail: () => '',
     hideVideoLikesAndDislikes: options.hideVideoLikesAndDislikes ?? true,
-  }
+    backendPreference: 'local',
+    backendFallback: options.backendFallback ?? false,
+    getVideoInformationInvidious: options.getVideoInformationInvidious,
+    t: value => value,
+    showTabToast() {},
+  })
   await load.call(watch)
-  assert.deepEqual(errors, [])
+  assert.deepEqual(errors, options.expectedErrors ?? [])
   assert.equal(watch.errorMessage, undefined)
   assert.equal(watch.isLoading, false)
   assert.equal(completed, true)
   assert.equal(watch.manifestSrc, 'manifest')
   return watch
+}
+
+test('removes the skeleton before community chapters finish loading', async () => {
+  const watch = {}
+  let finishChapters
+  const chapters = new Promise(resolve => { finishChapters = resolve })
+  const loading = loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Ready video', duration: 42 }, page: [],
+  }, 'disabled', { watch, getSponsorBlockCommunityChapters: () => chapters })
+  await new Promise(resolve => setImmediate(resolve))
+  try {
+    assert.equal(watch.isLoading, false, 'Optional chapters must not keep the video skeleton visible')
+    assert.equal(watch.manifestSrc, 'manifest')
+  } finally {
+    finishChapters([])
+    await loading
+  }
+})
+
+for (const change of ['none', 'navigation', 'reload', 'hide chapters']) {
+  test(`handles late community chapters after ${change}`, async () => {
+    let finishChapters
+    const chapters = new Promise(resolve => { finishChapters = resolve })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42 }, page: [],
+    }, 'disabled', { getSponsorBlockCommunityChapters: () => chapters })
+    const generation = watch.videoLoadGeneration
+    watch.isCurrentVideoLoad = candidate => candidate === watch.videoLoadGeneration
+    if (change === 'navigation') watch.isCurrentVideoLoad = () => false
+    if (change === 'reload') watch.videoLoadGeneration++
+    if (change === 'hide chapters') watch.hideChapters = true
+    const result = [{ title: 'Community chapter', startSeconds: 0, endSeconds: 42 }]
+    finishChapters(result)
+    await chapters
+    assert.deepEqual(watch.videoChapters, change === 'none' ? result : [])
+    assert.equal(watch.isLoading, false)
+    assert.equal(watch.videoLoadGeneration, generation + (change === 'reload' ? 1 : 0))
+  })
+}
+
+for (const change of ['none', 'navigation', 'reload']) {
+  test(`handles late promotion details after ${change}`, async () => {
+    let finishPromotion
+    const paidPromotionPromise = new Promise(resolve => { finishPromotion = resolve })
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42 }, page: [],
+    }, 'disabled', { paidPromotionPromise })
+    assert.equal(watch.hasPaidPromotion, false)
+    const generation = watch.videoLoadGeneration
+    watch.isCurrentVideoLoad = candidate => candidate === generation && watch.videoLoadGeneration === generation
+    if (change === 'navigation') watch.isCurrentVideoLoad = () => false
+    if (change === 'reload') watch.videoLoadGeneration++
+    finishPromotion(60000)
+    await paidPromotionPromise
+    assert.equal(watch.hasPaidPromotion, change === 'none')
+    assert.equal(watch.paidPromotionDurationMs, change === 'none' ? 60000 : 10000)
+  })
+}
+
+test('preserves a known promotion when the additional response has no disclosure', async () => {
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' }, basic_info: { title: 'Ready video' }, page: [],
+  }, 'disabled', { paidPromotionDurationMs: 60000, paidPromotionPromise: Promise.resolve(null) })
+  assert.equal(watch.hasPaidPromotion, true)
+  assert.equal(watch.paidPromotionDurationMs, 60000)
+})
+
+for (const response of [[], [{ title: 'Stale community chapter', startSeconds: 0, endSeconds: 42 }]]) {
+  test(`preserves fallback chapters after a failed local manifest and ${response.length ? 'nonempty' : 'empty'} late community response`, async () => {
+    let finishChapters
+    const chapters = new Promise(resolve => { finishChapters = resolve })
+    const fallbackChapters = [{ title: 'Fallback chapter', startSeconds: 0, endSeconds: 42 }]
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' }, basic_info: { title: 'Ready video', duration: 42 }, page: [],
+    }, 'disabled', {
+      backendFallback: true,
+      expectedErrors: ['Error: Manifest failed'],
+      getSponsorBlockCommunityChapters: () => chapters,
+      createLocalDashManifest: async () => { throw new Error('Manifest failed') },
+      getVideoInformationInvidious(generation) {
+        assert.equal(generation, this.videoLoadGeneration, 'Backend fallback shares the video generation')
+        this.videoChapters = fallbackChapters
+        this.manifestSrc = 'manifest'
+        this.isLoading = false
+        this.updateTitle()
+      },
+    })
+    finishChapters(response)
+    await chapters
+    assert.deepEqual(watch.videoChapters, fallbackChapters)
+  })
 }
 
 for (const views of [undefined, 1234]) {

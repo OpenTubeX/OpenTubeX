@@ -6155,6 +6155,9 @@ export default defineComponent({
       if (chapterCount === 0) {
         closeChaptersOverlay()
       }
+      if (hasLoaded.value) {
+        loadChapterThumbnails()
+      }
     })
 
     watch(sponsorBlockSubmissionVisibleButtons, () => {
