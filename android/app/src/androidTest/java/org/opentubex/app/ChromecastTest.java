@@ -209,6 +209,44 @@ public class ChromecastTest {
         } finally { fixture.delete(); }
     }
 
+    @Test public void unsolicitedStartupStatusCannotOwnOrStopExistingMedia() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File fixture = new File(context.getCacheDir(), "cast-startup-status-fixture.sh");
+        String namespace = "urn:x-cast:com.google.cast.media";
+        String owned = "{\"mediaSessionId\":7,\"media\":{\"contentId\":\"http://media.test/ours.mp4\"}}";
+        for (boolean content : new boolean[]{true, false}) {
+            String foreign = "{\"mediaSessionId\":42" + (content ? ",\"media\":{\"contentId\":\"http://media.test/other.mp4\"}" : "") + "}";
+            String script = "echo '{\"event\":\"connected\",\"address\":\"127.0.0.1\"}'\n" +
+                "echo '{\"event\":\"message\",\"namespace\":\"" + namespace + "\",\"payload\":{\"type\":\"MEDIA_STATUS\",\"status\":[" + foreign + "]}}'\n" +
+                "status='" + foreign + "'\nwhile read -r command; do\n" +
+                "id=${command#*'\"id\":'}\nid=${id%%,*}\n" +
+                "case \"$command\" in *'\"type\":\"LOAD\"'*) status='" + owned + "';; esac\n" +
+                "echo '{\"event\":\"message\",\"namespace\":\"fixture\",\"payload\":'\"$command\"'}'\n" +
+                "echo '{\"event\":\"message\",\"namespace\":\"" + namespace + "\",\"payload\":{\"type\":\"MEDIA_STATUS\",\"requestId\":'\"$id\"',\"status\":['\"$status\"']}}'\n" +
+                "done\n";
+            LinkedBlockingQueue<JSObject> commands = new LinkedBlockingQueue<>();
+            try {
+                java.nio.file.Files.write(fixture.toPath(), script.getBytes(StandardCharsets.UTF_8));
+                try (CastTransport sender = new CastTransport("/system/bin/sh", fixture.getAbsolutePath(), 0, event -> {
+                    if ("fixture".equals(event.getString("namespace"))) commands.add(event.getJSObject("payload").getJSObject("payload"));
+                })) {
+                    sender.connect();
+                    sender.send(namespace, "transport", new JSObject().put("type", "GET_STATUS"), true);
+                    assertEquals("GET_STATUS", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+                    sender.stopMedia();
+                    sender.send(namespace, "transport", new JSObject().put("type", "LOAD")
+                        .put("media", new JSObject().put("contentId", "http://media.test/ours.mp4")), true);
+                    assertEquals("Existing receiver media must not be stopped", "LOAD", commands.poll(2, TimeUnit.SECONDS).getString("type"));
+                    sender.stopMedia();
+                    JSObject stopped = commands.poll(2, TimeUnit.SECONDS);
+                    assertNotNull("The loaded session can still be stopped", stopped);
+                    assertEquals("STOP", stopped.getString("type"));
+                    assertEquals(7, stopped.getInt("mediaSessionId"));
+                }
+            } finally { fixture.delete(); }
+        }
+    }
+
     @Test public void rejectedControlDoesNotDisconnectTheNativeSender() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File fixture = new File(context.getCacheDir(), "cast-control-fixture.sh");

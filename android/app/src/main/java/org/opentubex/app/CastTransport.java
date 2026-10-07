@@ -75,7 +75,7 @@ final class CastTransport implements AutoCloseable {
                         if (statuses != null && statuses.length() > 0) {
                             var status = statuses.getJSONObject(0);
                             int session = status.optInt("mediaSessionId", -1);
-                            if (payload.optInt("requestId", -1) == loadRequestId) mediaSessionId = session;
+                            if (loadRequestId > 0 && payload.optInt("requestId", -1) == loadRequestId) mediaSessionId = session;
                             var info = status.optJSONObject("media");
                             if (mediaSessionId >= 0 && (session != mediaSessionId || (info != null && info.has("contentId") &&
                                 !mediaContentId.equals(info.optString("contentId"))))) { close(); return; }
