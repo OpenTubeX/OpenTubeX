@@ -1,11 +1,57 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
 
 import {
   commitCustomThemesEdit,
   repairSystemThemeSettings,
 } from '../../src/renderer/helpers/customThemeSync.js'
 import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+
+test('theme sync does not echo colors filled in while loading a received theme', () => {
+  const theme = structuredClone({ ...DEFAULT_CUSTOM_THEME, id: 'discussion-1196', name: 'D3SOX' })
+  delete theme.colors.watchedThumbnailOverlay
+  const received = { key: 'customThemes', value: [theme], updatedAt: 10 }
+  const entry = mergeSettingEntry({
+    key: 'customThemes', value: normalizeCustomThemes(received.value),
+    old: received, remoteEntry: received, now: 100,
+  })
+  assert.deepEqual(entry, received, 'Loading default colors must not create another sync update')
+})
+
+test('theme sync does not echo a desktop theme list sorted by name', () => {
+  const themes = normalizeCustomThemes([
+    { ...DEFAULT_CUSTOM_THEME, id: 'youtube', name: 'YouTube Web Dark' },
+    { ...DEFAULT_CUSTOM_THEME, id: 'd3sox', name: 'D3SOX' },
+  ])
+  const received = { key: 'customThemes', value: themes, updatedAt: 10 }
+  const entry = mergeSettingEntry({
+    key: 'customThemes', value: [...themes].reverse(),
+    old: received, remoteEntry: received, now: 100,
+  })
+  assert.deepEqual(entry, received, 'Storage order must not create another sync update')
+})
+
+for (const [change, edit] of [
+  ['rename', themes => { themes[0].name = 'Renamed' }],
+  ['color', themes => { themes[0].colors.primaryText = '#123456' }],
+  ['custom overlay', themes => { themes[0].colors.watchedThumbnailOverlay = '#abcdef80' }],
+  ['blur', themes => { themes[0].blurs.cardBackground = 20 }],
+  ['addition', themes => { themes.push({ ...structuredClone(themes[0]), id: 'added' }) }],
+  ['deletion', themes => { themes.pop() }],
+]) {
+  test(`theme sync still uploads a real ${change}`, () => {
+    const original = normalizeCustomThemes([{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1' }])
+    const value = structuredClone(original)
+    edit(value)
+    const received = { key: 'customThemes', value: original, updatedAt: 10 }
+    const entry = mergeSettingEntry({
+      key: 'customThemes', value, old: received, remoteEntry: received, localUpdatedAt: 20, now: 100,
+    })
+    assert.deepEqual(entry, { key: 'customThemes', value, updatedAt: 20 })
+    assert.deepEqual(received.value, original)
+  })
+}
 
 test('normalizes newer theme selections against a winning collection deletion', () => {
   const previousThemes = [{ id: 'removed', isDark: true, basedOn: 'solarizedDark' }]
@@ -137,8 +183,8 @@ test('repairs system theme slots from a store after a cross-window update', asyn
 })
 
 test('uses the custom-theme edit timestamp when resolving a conflict', () => {
-  const localThemes = [{ id: 'theme-1', name: 'Local' }]
-  const remoteThemes = [{ id: 'theme-1', name: 'Remote' }]
+  const localThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Local' }]
+  const remoteThemes = [{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1', name: 'Remote' }]
   const entry = mergeSettingEntry({
     key: 'customThemes',
     value: localThemes,

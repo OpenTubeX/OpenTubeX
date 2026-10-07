@@ -1,6 +1,16 @@
 import { areJsonValuesEqual } from './jsonValues.js'
 import { resolveBaseTheme, resolveSystemTheme } from '../../appearanceSettings.js'
-import { customThemeIdFromValue } from '../../customTheme.js'
+import { CUSTOM_THEMES_SYNC_KEY, customThemeIdFromValue, normalizeCustomThemes } from '../../customTheme.js'
+
+export function areSyncSettingValuesEqual(key, left, right) {
+  if (key === CUSTOM_THEMES_SYNC_KEY) {
+    // Storage order and defaults filled in by different app versions are not edits.
+    const normalize = themes => normalizeCustomThemes(themes).sort((a, b) =>
+      a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+    return areJsonValuesEqual(normalize(left), normalize(right))
+  }
+  return areJsonValuesEqual(left, right)
+}
 
 export function resolveMergedThemeEntry(entry, themes, previousThemes, now) {
   let value = entry.value
@@ -14,7 +24,7 @@ export function resolveMergedThemeEntry(entry, themes, previousThemes, now) {
 }
 
 export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt, now }) {
-  const localChanged = old !== undefined && !areJsonValuesEqual(value, old.value)
+  const localChanged = old !== undefined && !areSyncSettingValuesEqual(key, value, old.value)
 
   if (!old && remoteEntry) return remoteEntry
   if (localChanged && (!remoteEntry || (localUpdatedAt ?? now) >= remoteEntry.updatedAt)) {

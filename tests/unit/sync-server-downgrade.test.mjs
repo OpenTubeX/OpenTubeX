@@ -11,8 +11,8 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
-import { CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes } from '../../src/customTheme.js'
-import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
+import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
+import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
@@ -112,6 +112,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     createSyncServerRequestHeaders,
     CUSTOM_THEMES_SYNC_KEY,
     normalizeCustomThemes,
+    areSyncSettingValuesEqual,
     mergeSettingEntry,
     resolveMergedThemeEntry,
     getSyncableSettingKeys: () => syncableSettingKeys,
@@ -1297,6 +1298,7 @@ test('live checks retry failed local uploads before clearing the sync error', as
 for (const [scenario, desktopKeys, phoneKeys] of [
   ['different setting orders', ['autoplayVideos', 'baseTheme'], ['baseTheme', 'autoplayVideos']],
   ['different enabled settings', ['baseTheme', 'autoplayVideos'], ['autoplayVideos']],
+  ['different theme defaults and orders', ['autoplayVideos'], ['autoplayVideos']],
 ]) {
   test(`two devices with ${scenario} settle after live notifications`, async () => {
     const collections = new Map()
@@ -1324,6 +1326,25 @@ for (const [scenario, desktopKeys, phoneKeys] of [
     const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark' }
     const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, { encrypted: true, respond, syncableSettingKeys: desktopKeys })
     const b = fixture({ ...settings, syncServerDeviceId: 'phone' }, { encrypted: true, respond, syncableSettingKeys: phoneKeys })
+    if (scenario === 'different theme defaults and orders') {
+      const themes = normalizeCustomThemes([
+        { ...DEFAULT_CUSTOM_THEME, id: 'youtube', name: 'YouTube Web Dark' },
+        { ...DEFAULT_CUSTOM_THEME, id: 'd3sox', name: 'D3SOX' },
+      ])
+      const phoneThemes = structuredClone(themes)
+      for (const theme of phoneThemes) delete theme.colors.watchedThumbnailOverlay
+      const received = { key: CUSTOM_THEMES_SYNC_KEY, value: phoneThemes, updatedAt: 10 }
+      collections.set('settings', {
+        revision: 1,
+        payload: await privacy.encryptSyncDocument([received], a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt),
+      })
+      for (const f of [a, b]) {
+        f.settings.syncServerSnapshot = JSON.stringify({ settings: { [CUSTOM_THEMES_SYNC_KEY]: received } })
+        f.settings.syncServerSettingUpdatedAt = { [CUSTOM_THEMES_SYNC_KEY]: 20 }
+      }
+      a.context.rootState.utils.customThemes = [...themes].reverse()
+      b.context.rootState.utils.customThemes = phoneThemes
+    }
     await a.actions.syncWithSyncServer(a.context)
     await b.actions.syncWithSyncServer(b.context)
     // A peer can serialize the same entries in another order. Do not echo it.
@@ -1335,8 +1356,9 @@ for (const [scenario, desktopKeys, phoneKeys] of [
     })
     writes.length = 0
     for (let notification = 0; notification < 4; notification++) {
-      await a.actions.syncWithSyncServer(a.context, { automatic: true, remoteOnly: true })
-      await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+      // Force periodic merges too: cached live notifications alone skip local comparison.
+      await a.actions.syncWithSyncServer(a.context, { automatic: true })
+      await b.actions.syncWithSyncServer(b.context, { automatic: true })
     }
     const sorted = document => [...document].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
     for (const document of documents) assert.deepEqual(sorted(document), sorted(documents[0]))

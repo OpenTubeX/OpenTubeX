@@ -33,7 +33,7 @@ import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
 import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
-import { mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
+import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
 import { capacitorHttpFetch } from './api/capacitor-http'
 
@@ -1365,7 +1365,10 @@ export async function syncSettings(client, store, previous = {}) {
     const currentValue = key === CUSTOM_THEMES_SYNC_KEY || key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
       ? value
       : store.state.settings[key]
-    if (!metadataEquals(currentValue, entry.value)) {
+    const valuesEqual = key === CUSTOM_THEMES_SYNC_KEY
+      ? areSyncSettingValuesEqual(key, currentValue, entry.value)
+      : metadataEquals(currentValue, entry.value)
+    if (!valuesEqual) {
       if (key === SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY) {
         await applySubscriptionSettingsSync(store, entry.value)
       } else if (key === CUSTOM_THEMES_SYNC_KEY) {
