@@ -282,6 +282,7 @@ for (const userSeek of [false, true]) {
       player,
       video: { value: mediaElement },
       pendingMetadataSeek: null,
+      process: { env: {} },
       hasPlaybackPosition: { value: userSeek }
     })
     await loadPlaybackSource('https://example.com/video', 15, 'video/webm')

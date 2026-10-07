@@ -5,6 +5,7 @@ import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const loadSource = source.slice(source.indexOf('    async function performFirstLoad('), source.indexOf('    /**', source.indexOf('    async function performFirstLoad(')))
+const playbackLoadSource = source.match(/    async function loadPlaybackSource\([^]*?\n    }/)[0]
 function extract(name) {
   const start = source.indexOf(`    function ${name}(`)
   return source.slice(start, source.indexOf('\n    function ', start + 1))
@@ -16,6 +17,8 @@ function fixture() {
   const video = { value: { ended: false, played: { length: 0 }, pause() {} } }
   const playbackStates = []
   const noop = () => {}
+  video.value.addEventListener = noop
+  video.value.removeEventListener = noop
   const context = {
     video, props: { manifestMimeType: 'sabr' }, MANIFEST_TYPE_SABR: 'sabr', ignoreErrors: false,
     initialAutoplayCanceled: false, hasPlaybackPosition: { value: false }, isActiveTab: { value: true },
@@ -34,39 +37,60 @@ function fixture() {
     mediaSessionStopped: false, seekingIsPossible: { value: false },
     handlePause: () => playbackStates.push('paused'),
     scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
+    player: { addEventListener: noop, removeEventListener: noop, load: async () => {} }, pendingMetadataSeek: null,
   }
-  const methods = vm.runInNewContext(['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
+  const methods = vm.runInNewContext(playbackLoadSource + '\n' + ['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ loadPlaybackSource, startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
   return { ...methods, context, playbackStates, props: context.props, video, remaining, duration, intervals }
 }
 
-for (const sought of [false, true]) test(`Android starts its playback service while autoplay waits for SABR${sought ? ' after a startup seek' : ''}`, () => {
+for (const sought of [false, true]) test(`Android starts its playback service before SABR loading${sought ? ' after a startup seek' : ''}`, async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
   f.context.hasPlaybackPosition.value = sought
+  await f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before the first SABR response')
   f.startSabrBackoffTimer(20000)
   assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
 })
 
-for (const continuePlayback of [true, false]) test(`a late Android backoff respects hidden activity with background playback ${continuePlayback ? 'enabled' : 'disabled'}`, () => {
+for (const continuePlayback of [true, false]) test(`Android SABR loading respects an already-hidden activity with background playback ${continuePlayback ? 'enabled' : 'disabled'}`, async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.context.isAppHidden = () => true
   f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = continuePlayback
   f.video.value.autoplay = true
   f.video.value.paused = true
+  await f.loadPlaybackSource('fixture', null, 'sabr')
   f.startSabrBackoffTimer(20000)
   assert.deepEqual(f.playbackStates, [], 'a hidden activity must keep the pending media session idle')
   assert.equal(f.video.value.autoplay, continuePlayback, 'disabled background playback must cancel pending native autoplay')
   assert.equal(f.context.initialAutoplayCanceled, !continuePlayback)
 })
 
-for (const sought of [false, true]) test(`pausing pending SABR autoplay${sought ? ' after a startup seek' : ''} updates the session even without a native pause event`, () => {
+test('pending SABR loading protects enabled playback before a late background backoff', async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
+  let finishLoad
+  f.context.player.load = () => new Promise(resolve => { finishLoad = resolve })
+  const loading = f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.deepEqual(f.playbackStates, ['playing'], 'the asynchronous load must begin with background protection already requested')
+  f.context.isAppHidden = () => true
+  f.startSabrBackoffTimer(20000)
+  assert.deepEqual(f.playbackStates, ['playing'], 'a late backoff must preserve the existing session')
+  finishLoad()
+  await loading
+})
+
+for (const sought of [false, true]) test(`pausing pending SABR autoplay${sought ? ' after a startup seek' : ''} updates the session even without a native pause event`, async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  await f.loadPlaybackSource('fixture', null, 'sabr')
   f.startSabrBackoffTimer(20000)
   f.context.hasPlaybackPosition.value = sought
   f.pause()
@@ -75,11 +99,12 @@ for (const sought of [false, true]) test(`pausing pending SABR autoplay${sought 
   assert.deepEqual(f.playbackStates, ['playing', 'paused'], 'a later backoff must not reactivate the canceled session')
 })
 
-for (const sought of [false, true]) test(`stopping pending SABR autoplay${sought ? ' after a startup seek' : ''} clears the session and prevents a later backoff from restarting it`, () => {
+for (const sought of [false, true]) test(`stopping pending SABR autoplay${sought ? ' after a startup seek' : ''} clears the session and prevents a later backoff from restarting it`, async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
+  await f.loadPlaybackSource('fixture', null, 'sabr')
   f.startSabrBackoffTimer(20000)
   f.context.hasPlaybackPosition.value = sought
   f.registerMediaSessionHandlers()
@@ -89,8 +114,8 @@ for (const sought of [false, true]) test(`stopping pending SABR autoplay${sought
   assert.deepEqual(f.playbackStates, ['playing', 'none'])
 })
 
-for (const reason of ['autoplay disabled', 'autoplay canceled', 'background tab', 'iOS', 'desktop', 'already playing']) {
-  test(`SABR countdown preserves playback state with ${reason}`, () => {
+for (const reason of ['autoplay disabled', 'autoplay canceled', 'background tab', 'iOS', 'desktop', 'already playing', 'downloaded', 'non-SABR']) {
+  test(`SABR loading and countdown preserve playback state with ${reason}`, async () => {
     const f = fixture()
     f.context.process.env.IS_CAPACITOR = reason !== 'desktop'
     f.context.process.env.IS_IOS = reason === 'iOS'
@@ -99,6 +124,8 @@ for (const reason of ['autoplay disabled', 'autoplay canceled', 'background tab'
     f.context.hasPlaybackPosition.value = reason === 'already playing'
     f.video.value.played.length = reason === 'already playing' ? 1 : 0
     f.video.value.autoplay = reason !== 'autoplay disabled'
+    f.props.localFilePlayback = reason === 'downloaded'
+    await f.loadPlaybackSource('fixture', null, reason === 'non-SABR' ? 'video/mp4' : 'sabr')
     f.startSabrBackoffTimer(20000)
     assert.deepEqual(f.playbackStates, [])
   })

@@ -7889,24 +7889,6 @@ export default defineComponent({
         return
       }
 
-      if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
-        video.value?.autoplay && !initialAutoplayCanceled &&
-        video.value.played.length === 0 && isActiveTab.value) {
-        // Start the foreground service before leaving the app. Waiting for
-        // the first play event lets Android freeze loading or reject the start.
-        // A queued startup seek is a position, but has not played any media.
-        if (!isAppHidden()) {
-          tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
-        } else if (!store.getters.getContinuePlaybackWhenScreenIsLocked) {
-          // The background pause sweep can precede this first backoff while
-          // the session is still idle. Cancel autoplay without publishing a
-          // paused session, which would also start the service from background.
-          initialAutoplayCanceled = true
-          video.value.autoplay = false
-          video.value.pause()
-        }
-      }
-
       const endsAt = Date.now() + backoffMs
       sabrBackoffDurationMs.value = backoffMs
 
@@ -11954,6 +11936,23 @@ export default defineComponent({
     async function loadPlaybackSource(url, startTime, mimeType) {
       const loadingPlayer = player
       const mediaElement = video.value
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
+        !props.localFilePlayback && mimeType === MANIFEST_TYPE_SABR &&
+        mediaElement.autoplay && !initialAutoplayCanceled &&
+        mediaElement.played.length === 0 && isActiveTab.value) {
+        // Protect pending autoplay before the asynchronous SABR load: even its
+        // first response can arrive after Android hides the activity.
+        // A queued startup seek is a position, but has not played any media.
+        if (!isAppHidden()) {
+          tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
+        } else if (!store.getters.getContinuePlaybackWhenScreenIsLocked) {
+          // A player initialized while hidden missed the pause sweep. Cancel
+          // autoplay without publishing a paused session that starts a service.
+          initialAutoplayCanceled = true
+          mediaElement.autoplay = false
+          mediaElement.pause()
+        }
+      }
       const restoreNativeStart = () => {
         if (player !== loadingPlayer || pendingMetadataSeek !== null ||
           hasPlaybackPosition.value || mediaElement.seeking || startTime == null) return

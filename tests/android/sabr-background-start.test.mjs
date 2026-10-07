@@ -75,6 +75,7 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false } o
   { continuePlayback: false, seekBeforeBackoff: false },
   { continuePlayback: true, seekBeforeBackoff: true },
   { continuePlayback: false, seekBeforeBackoff: false, backoffWhileHidden: true },
+  { continuePlayback: true, seekBeforeBackoff: false, backoffWhileHidden: true },
 ]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}${backoffWhileHidden ? ' with a late background response' : ''}`, { skip: !enabled }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'otx-sabr-background-'))
   let browser, page, settings, route, server, port, releaseBackoff
@@ -129,26 +130,28 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false } o
         RememberHistory: false, WatchedProgressSavingMode: 'never', ContinuePlaybackWhenScreenIsLocked: continuePlayback }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__sabrBackgroundResponses = new Map()
-      window.__sabrBackgroundNativePromise = window.Capacitor.nativePromise
+      const responses = new Map()
+      const nativePromise = window.__sabrBackgroundNativePromise ?? window.Capacitor.nativePromise
+      const originalFetch = window.__sabrBackgroundFetch ?? window.fetch
+      window.__sabrBackgroundNativePromise = nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => {
-        if (plugin === 'SabrHttp' && method === 'prepare') return window.__sabrBackgroundNativePromise('CapacitorHttp', 'request', {
+        if (plugin === 'SabrHttp' && method === 'prepare') return nativePromise('CapacitorHttp', 'request', {
           url: `http://127.0.0.1:${port}/sabr`, method: 'POST', data: options.body, headers: { 'Content-Type': 'text/plain' }, responseType: 'json',
         }).then(({ data: { requestId, body } }) => {
-          window.__sabrBackgroundResponses.set(requestId, body)
+          responses.set(requestId, body)
           return { requestId }
         })
         if (plugin === 'SabrHttp' && method === 'abort') return Promise.resolve()
-        return window.__sabrBackgroundNativePromise(plugin, method, options)
+        return nativePromise(plugin, method, options)
       }
-      window.__sabrBackgroundFetch = window.fetch
+      window.__sabrBackgroundFetch = originalFetch
       window.fetch = (url, options) => {
         if (String(url).startsWith('/_opentubex_sabr/')) {
-          const body = window.__sabrBackgroundResponses.get(String(url).split('/').at(-1))
+          const body = responses.get(String(url).split('/').at(-1))
           return Promise.resolve(new Response(Uint8Array.from(atob(body), char => char.charCodeAt(0))))
         }
         return String(url).startsWith('https://localhost/')
-          ? window.__sabrBackgroundFetch(url, options) : Promise.reject(new Error('Local SABR test'))
+          ? originalFetch(url, options) : Promise.reject(new Error('Local SABR test'))
       }
       location.hash = '#/home'
       return saved
@@ -186,27 +189,36 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false } o
       })).toBe(true)
       releaseBackoff()
     }
+    await watch.dispose()
     if (backoffWhileHidden) {
       await expect.poll(() => requests.length).toBeGreaterThan(0)
+      await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
+      await expect.poll(() => adb('shell', 'dumpsys', 'media_session')).toMatch(/PlaybackState \{state=(?:3|PLAYING\(3\)),/)
       adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
       // Keep CDP attached until this late response is processed, so renderer
       // suspension cannot mask the activity's 250 ms pause sweep being missed.
       await expect.poll(() => page.evaluate(() => window.Capacitor.nativePromise('App', 'getState'))).toMatchObject({ isActive: false })
       await new Promise(resolve => setTimeout(resolve, 1000))
+      if (continuePlayback) {
+        assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.played.length === 0), true, 'leave before the first SABR response')
+        await browser.close()
+        browser = null
+      }
       releaseBackoff()
     }
-    await watch.dispose()
-    await expect(page.locator('.countdownOverlay')).toBeVisible()
-    if (backoffWhileHidden) {
-      assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && !video.autoplay), true, 'a late background response must cancel disabled autoplay')
-      assert.doesNotMatch(adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev'), /isForeground=true/, 'a hidden activity must not start the playback service')
-    } else {
-      await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
+    if (browser) {
+      await expect(page.locator('.countdownOverlay')).toBeVisible()
+      if (backoffWhileHidden) {
+        assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && !video.autoplay), true, 'a late background response must cancel disabled autoplay')
+        await expect.poll(() => adb('shell', 'dumpsys', 'media_session')).toMatch(/PlaybackState \{state=(?:2|PAUSED\(2\)),/)
+      } else {
+        await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
+      }
+      assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.played.length === 0), true, 'leave while autoplay is still waiting')
+      await browser.close()
+      browser = null
+      if (!backoffWhileHidden) adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
     }
-    assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.played.length === 0), true, 'leave while autoplay is still waiting')
-    await browser.close()
-    browser = null
-    if (!backoffWhileHidden) adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
     // Avoid polling the WebView during the wait: CDP evaluation can wake a
     // frozen renderer and mask the lifecycle failure this test should catch.
     if (continuePlayback) {
@@ -252,7 +264,6 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false } o
       delete window.__sabrBackgroundFetch
       window.Capacitor.nativePromise = window.__sabrBackgroundNativePromise
       delete window.__sabrBackgroundNativePromise
-      delete window.__sabrBackgroundResponses
     }, { settings, route }).catch(() => {})
     await browser?.close()
     if (port) adb('reverse', '--remove', `tcp:${port}`)
