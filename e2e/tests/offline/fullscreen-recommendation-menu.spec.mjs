@@ -11,6 +11,7 @@ async function longPressCard(card, menu) {
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
     await thumbnail.click({ trial: true })
     const bounds = await thumbnail.boundingBox()
+    expect(bounds, 'recommendation thumbnail must be visible before long-pressing').not.toBeNull()
     await session.send('Input.dispatchTouchEvent', {
       type: 'touchStart',
       touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }],
