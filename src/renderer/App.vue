@@ -194,12 +194,15 @@
       v-if="showCreatePlaylistPrompt"
     />
     <FtContextMenu />
-    <Teleport to="body">
+    <Teleport :to="mobileContextMenuTarget">
       <div
         v-if="mobileContextLink || mobileContextActions"
         class="mobileLinkActionsBackdrop"
-        @pointerdown.self.stop
-        @click.self.stop="closeMobileLinkActions"
+        @pointerdown.stop
+        @touchstart.stop
+        @touchend.stop
+        @dblclick.stop
+        @click.stop.self="closeMobileLinkActions"
         @keydown.esc.stop="backMobileContextMenu"
       >
         <section
@@ -1060,6 +1063,12 @@ const hardwareKeyboardAttached = ref(!isCapacitor)
 provide('hardwareKeyboardAttached', hardwareKeyboardAttached)
 const mobileContextLink = ref(null)
 const mobileContextActions = shallowRef(null)
+const mobileContextMenuTarget = shallowRef(document.fullscreenElement ?? document.body)
+function updateMobileContextMenuTarget() {
+  mobileContextMenuTarget.value = document.fullscreenElement ?? document.body
+}
+document.addEventListener('fullscreenchange', updateMobileContextMenuTarget)
+onBeforeUnmount(() => document.removeEventListener('fullscreenchange', updateMobileContextMenuTarget))
 const mobileContextMenuPath = ref([])
 const mobileContextMenuStack = computed(() => {
   const stack = [{ label: mobileContextLinkLabel.value, items: unref(mobileContextActions.value?.actions) ?? [] }]

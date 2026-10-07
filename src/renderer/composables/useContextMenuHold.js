@@ -33,7 +33,7 @@ export function useContextMenuHold(openMenu) {
 
   function startMenuHold(event) {
     cancelMenuHold()
-    if (event.pointerType !== 'touch' || !event.isPrimary || event.target.closest('button, .channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
+    if (event.pointerType !== 'touch' || !event.isPrimary || event.currentTarget.contains(event.target.closest('button, .channelName, [role="dialog"], [role="menu"], .iconDropdown'))) return
     position = { x: event.clientX, y: event.clientY }
     timer = setTimeout(() => openMenu(event), 500)
   }
