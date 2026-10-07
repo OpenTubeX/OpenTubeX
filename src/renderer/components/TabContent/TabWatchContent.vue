@@ -159,7 +159,7 @@ function beginMinimizePreview() {
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const tab = store.getters.getTabById(props.tabId)
-  previewHistoryEntry = { index: tab.historyIndex, fullPath: props.route.fullPath }
+  previewHistoryEntry = { index: tab.historyIndex, fullPath: props.route.fullPath, entry: tab.history[tab.historyIndex] }
   const browsingScroll = getPreviousBrowsingRoute(tab)
     ? tab.history[tab.historyIndex - 1].scroll
     : null
@@ -312,7 +312,7 @@ function interruptMinimizePreview() {
 
 function preservePreviewHistoryScroll() {
   const tab = store.getters.getTabById(props.tabId)
-  if (previewScroll && previewHistoryEntry && tab?.historyIndex === previewHistoryEntry.index && tab.history[previewHistoryEntry.index]?.route.fullPath === previewHistoryEntry.fullPath) {
+  if (previewScroll && previewHistoryEntry && tab?.historyIndex === previewHistoryEntry.index && tab.history[previewHistoryEntry.index] === previewHistoryEntry.entry) {
     // saveScroll writes browsing's preview offset into Watch. Repair it before
     // navigation clones/trims history, or when a tab switch ends the preview.
     store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex: previewHistoryEntry.index, scroll: previewScroll })

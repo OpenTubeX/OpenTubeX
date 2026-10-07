@@ -233,6 +233,34 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
           assert.equal(await history.evaluate(element => element.style.translate), '')
         }
       }
+      // Reload rewrites the current history URL with a playback timestamp.
+      // A held downward preview must preserve Watch's offset across that rewrite.
+      await page.evaluate(() => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', 100)
+      })
+      await player.locator('.mobileMiniBarReturn').click()
+      await expect(page).toHaveURL(/#\/watch\//)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      await page.evaluate(() => window.scrollTo({ top: 20, behavior: 'instant' }))
+      const watchScroll = await page.evaluate(() => window.scrollY)
+      const reloadBox = await player.boundingBox()
+      assert.ok(reloadBox, 'the player must be visible before holding the reload swipe')
+      const reloadStart = { x: reloadBox.x + reloadBox.width / 2, y: reloadBox.y + reloadBox.height / 2 }
+      await touch('touchStart', reloadStart)
+      for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...reloadStart, y: reloadStart.y + distance })
+      await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setCurrentWatchTimestamp', { tabId: store.getters.getPresentedTabId, value: 12 })
+        await store.dispatch('reloadActiveTab')
+      })
+      await expect.poll(() => page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const tab = store.getters.getTabById(store.getters.getPresentedTabId)
+        return { timestamp: tab.history[tab.historyIndex].route.query.oneTimeTimestamp, scroll: tab.history[tab.historyIndex].scroll.top }
+      })).toEqual({ timestamp: '12', scroll: watchScroll })
+      await expect(page.locator('.watchPreviewing')).toHaveCount(0)
+      await touch('touchCancel')
       await originalVideo.dispose()
       return
     }
