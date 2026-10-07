@@ -9150,7 +9150,9 @@ export default defineComponent({
       emit('chapter-thumbnails-change', thumbnails)
     })
 
+    let chapterThumbnailLoadGeneration = 0
     async function loadChapterThumbnails() {
+      const loadGeneration = ++chapterThumbnailLoadGeneration
       chapterThumbnails.value = []
 
       const activePlayer = player
@@ -9208,7 +9210,7 @@ export default defineComponent({
         }
       }))
 
-      if (player === activePlayer && props.videoId === videoId) {
+      if (loadGeneration === chapterThumbnailLoadGeneration && player === activePlayer && props.videoId === videoId) {
         chapterThumbnails.value = thumbnails
       }
     }
@@ -11940,6 +11942,7 @@ export default defineComponent({
       window.addEventListener('blur', handleSeekBarWindowBlur)
 
       player.addEventListener('loading', () => {
+        chapterThumbnailLoadGeneration++
         silenceSkipping.reset()
         hasLoaded.value = false
         hasPlaybackPosition.value = false
