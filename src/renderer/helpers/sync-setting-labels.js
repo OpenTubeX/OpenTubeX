@@ -254,6 +254,7 @@ export const SYNC_SETTING_LABELS = {
   showFullscreenActionsWhenPaused: 'Settings.Distraction Free Settings.Show Bottom Right Actions Dock',
   showLightsOffToggle: 'Settings.Player Settings.Show Lights Off Toggle',
   showLiveChatTimestamps: 'Video.Show Live Chat Timestamps',
+  showMusicModeToggle: 'Settings.Player Settings.Show Music Mode Toggle',
   showNewSubscriptionFeed: 'Settings.Subscription Settings.Show New Content Feed',
   showNewSubscriptionFeedIndicators: 'Settings.Subscription Settings.Show New Content Indicators',
   showPerformanceImpactIndicators: 'Settings.Performance Impact.Show Performance Impact',
