@@ -152,6 +152,48 @@ test('metadata failure leaves the dialog available and honors backend fallback',
   assert.equal(fallback.calls.length, 1)
 })
 
+test('Invidious failure uses local metadata for both actions only when fallback is enabled', async () => {
+  for (const action of ['queue', 'playlist']) {
+    for (const fallback of [false, true]) {
+      let localLoads = 0
+      const h = videoActions({
+        backend: 'invidious',
+        fallback,
+        invidious: async () => { throw new Error('Instance unavailable') },
+        local: async () => {
+          localLoads++
+          return { videoDetails: { videoId: id, title: video.title, author: video.author, channelId: video.authorId, lengthSeconds: '120' } }
+        }
+      })
+      await h.add(action)
+      assert.equal(localLoads, fallback ? 1 : 0)
+      assert.equal(h.failed.value, !fallback)
+      assert.equal(h.calls.length, fallback ? 1 : 0)
+      if (fallback) {
+        const queuedVideo = action === 'queue' ? h.calls[0][1].video : h.calls[0][1].videos[0]
+        assert.equal(queuedVideo.title, video.title)
+        assert.equal(queuedVideo.lengthSeconds, 120)
+        assert.deepEqual(h.emitted, ['close'])
+      }
+    }
+  }
+})
+
+test('cancelled Invidious requests do not attempt a local fallback', async () => {
+  const h = videoActions({
+    backend: 'invidious',
+    fallback: true,
+    invidious: async () => {
+      h.controller.abort()
+      throw new Error('Cancelled')
+    },
+    local: () => assert.fail('Cancellation must not load another backend')
+  })
+  await h.add('queue')
+  assert.deepEqual(h.calls, [])
+  assert.equal(h.failed.value, false)
+})
+
 test('closing during metadata loading prevents later actions and duplicate taps', async () => {
   let resolve
   const pending = new Promise(done => { resolve = done })

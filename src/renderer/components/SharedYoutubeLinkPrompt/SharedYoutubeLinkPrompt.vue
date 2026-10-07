@@ -113,16 +113,14 @@ async function loadVideo(signal) {
     if (info?.error || info?.videoId !== props.videoId) throw new Error('Video metadata unavailable')
     return { ...info, published: info.published * 1000, isLive: info.liveNow }
   }
+  const loadLocal = async () => parseHistoryRepairPlayer(await getLocalHistoryMetadata(props.videoId, signal), props.videoId)
+  const prefersInvidious = store.getters.getBackendPreference === 'invidious'
   let info
-  if (store.getters.getBackendPreference === 'invidious') {
-    info = await loadInvidious()
-  } else {
-    try {
-      info = parseHistoryRepairPlayer(await getLocalHistoryMetadata(props.videoId, signal), props.videoId)
-    } catch (error) {
-      if (signal.aborted || !store.getters.getBackendFallback) throw error
-      info = await loadInvidious()
-    }
+  try {
+    info = await (prefersInvidious ? loadInvidious() : loadLocal())
+  } catch (error) {
+    if (signal.aborted || !store.getters.getBackendFallback) throw error
+    info = await (prefersInvidious ? loadLocal() : loadInvidious())
   }
   if (typeof info.title !== 'string' || !info.title.trim()) throw new Error('Video title unavailable')
   return { ...info, videoId: props.videoId, type: 'video', lengthSeconds: Number(info.lengthSeconds) || 0 }

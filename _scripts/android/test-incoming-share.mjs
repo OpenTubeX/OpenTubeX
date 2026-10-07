@@ -76,10 +76,10 @@ function share(text = `A shared video\n${url}`) {
 
 const dialog = () => page.getByRole('dialog', { name: 'Shared YouTube link' })
 
-async function metadataFixtures({ fail = false, slow = false } = {}) {
+async function metadataFixtures({ fail = false, failLocal = fail, failInvidious = fail, slow = false } = {}) {
   // Exercise both real API adapters with deterministic metadata; keep native
   // intent reception and renderer dispatch unchanged.
-  await page.evaluate(({ id, fail, slow }) => {
+  await page.evaluate(({ id, failLocal, failInvidious, slow }) => {
     window.shareTestOriginalFetch ??= window.fetch
     window.shareTestOriginalNativePromise ??= window.Capacitor.nativePromise
     window.shareTestMetadataFinished = false
@@ -89,7 +89,7 @@ async function metadataFixtures({ fail = false, slow = false } = {}) {
       if (String(input?.url ?? input).startsWith('https://share-fixture.invalid/api/v1/videos/')) {
         if (pending) await pending
         window.shareTestMetadataFinished = true
-        return new Response(JSON.stringify(fail ? { error: 'Unavailable' } : metadata), { status: fail ? 503 : 200 })
+        return new Response(JSON.stringify(failInvidious ? { error: 'Unavailable' } : metadata), { status: failInvidious ? 503 : 200 })
       }
       return window.shareTestOriginalFetch(input, init)
     }
@@ -98,7 +98,7 @@ async function metadataFixtures({ fail = false, slow = false } = {}) {
         if (pending) await pending
         window.shareTestMetadataFinished = true
         return {
-          status: fail ? 503 : 200,
+          status: failLocal ? 503 : 200,
           headers: { 'content-type': 'application/json' },
           url: options.url,
           data: JSON.stringify({ videoDetails: { videoId: id, title: metadata.title, author: metadata.author, channelId: metadata.authorId, lengthSeconds: '120' } })
@@ -108,7 +108,7 @@ async function metadataFixtures({ fail = false, slow = false } = {}) {
     }
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setCurrentInvidiousInstance', 'https://share-fixture.invalid')
-  }, { id, fail, slow })
+  }, { id, failLocal, failInvidious, slow })
 }
 
 try {
@@ -140,9 +140,9 @@ try {
   await page.waitForFunction(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.currentRoute.value.path === '/subscriptions')
   console.log('PASS cold-start share presents all four actions before playback')
 
-  for (const backend of ['local', 'invidious']) {
-    await settings({ BackendPreference: backend })
-    await metadataFixtures()
+  for (const [backend, fallback] of [['local', false], ['invidious', false], ['local', true], ['invidious', true]]) {
+    await settings({ BackendPreference: backend, BackendFallback: fallback })
+    await metadataFixtures({ failLocal: fallback && backend === 'local', failInvidious: fallback && backend === 'invidious' })
     const length = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength)
     await dialog().getByRole('button', { name: 'Add to Queue', exact: true }).click()
     await expect(dialog()).toHaveCount(0)
@@ -153,8 +153,10 @@ try {
     await expect(page.locator('.playlistPromptHeading')).toBeVisible()
     await page.locator('.prompt').filter({ has: page.locator('.playlistPromptHeading') }).getByRole('button', { name: 'Cancel', exact: true }).click()
     share()
-    console.log(`PASS ${backend} metadata supports queue and playlist actions`)
+    console.log(`PASS ${backend}${fallback ? ' fallback' : ''} metadata supports queue and playlist actions`)
   }
+  await settings({ BackendFallback: false })
+  await metadataFixtures()
 
   await dialog().getByRole('button', { name: 'Download', exact: true }).click()
   await expect(page.locator('.downloadPromptCard')).toBeVisible()
