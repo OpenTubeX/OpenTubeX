@@ -70,10 +70,16 @@ async function mediaFixture(directory, audio) {
   }
 }
 
-for (const continuePlayback of [true, false]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}`, { skip: !enabled }, async () => {
+for (const { continuePlayback, seekBeforeBackoff } of [
+  { continuePlayback: true, seekBeforeBackoff: false },
+  { continuePlayback: false, seekBeforeBackoff: false },
+  { continuePlayback: true, seekBeforeBackoff: true },
+]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}`, { skip: !enabled }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'otx-sabr-background-'))
-  let browser, page, settings, route, server, port
+  let browser, page, settings, route, server, port, releaseBackoff
   try {
+    const backoffReady = new Promise(resolve => { releaseBackoff = resolve })
+    if (!seekBeforeBackoff) releaseBackoff()
     const fixtures = await Promise.all([mediaFixture(directory, true), mediaFixture(directory, false)])
     const requests = []
     const delayed = new Set()
@@ -98,6 +104,7 @@ for (const continuePlayback of [true, false]) test(`SABR backoff honors backgrou
       let data
       if (isInit && !delayed.has(media.format.itag)) {
         delayed.add(media.format.itag)
+        await backoffReady
         data = umpResponse(null)
       } else {
         const time = Number(body.clientAbrState.playerTimeMs)
@@ -168,16 +175,36 @@ for (const continuePlayback of [true, false]) test(`SABR backoff honors backgrou
         })),
       })
     }, { formats: [fixtures[0].format, fixtures[1].format, { ...fixtures[1].format, itag: 136, bitrate: 250000 }] })
+    if (seekBeforeBackoff) {
+      await expect.poll(() => requests.length).toBeGreaterThan(0)
+      await expect.poll(() => watch.evaluate(component => {
+        const player = component.proxy.$refs.player
+        if (!player) return false
+        player.setCurrentTime(2)
+        return player.hasPlaybackPosition
+      })).toBe(true)
+      releaseBackoff()
+    }
     await watch.dispose()
     await expect(page.locator('.countdownOverlay')).toBeVisible()
     await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
-    assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.currentTime === 0), true, 'leave while autoplay is still waiting')
+    assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.played.length === 0), true, 'leave while autoplay is still waiting')
     await browser.close()
     browser = null
     adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
     // Avoid polling the WebView during the wait: CDP evaluation can wake a
     // frozen renderer and mask the lifecycle failure this test should catch.
-    await new Promise(resolve => setTimeout(resolve, 25000))
+    if (continuePlayback) {
+      await expect.poll(() => {
+        const state = adb('shell', 'dumpsys', 'media_session').match(/PlaybackState \{state=(?:3|PLAYING\(3\)), position=(\d+),/)
+        // PLAYING is published during backoff; require a real position update
+        // beyond the startup seek before reconnecting the debugger.
+        return requests.some(request => !request.isInit) &&
+          Number(state?.[1]) > (seekBeforeBackoff ? 2000 : 0) + 250
+      }, { timeout: 60000 }).toBe(true)
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 25000))
+    }
     if (continuePlayback) {
       assert.ok(requests.some(request => !request.isInit), 'the background player must request media after its backoff')
       assert.match(adb('shell', 'dumpsys', 'media_session'), /PlaybackState \{state=(?:3|PLAYING\(3\)),/, 'native playback must be active before reconnecting the debugger')
@@ -195,6 +222,7 @@ for (const continuePlayback of [true, false]) test(`SABR backoff honors backgrou
     if (continuePlayback) assert.ok(state.time > 0, 'background playback must advance')
     else assert.ok(state.time < 0.25, `disabled background playback must not advance past the first sample: ${state.time}`)
   } finally {
+    releaseBackoff?.()
     launch()
     if (!browser && page) {
       browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })

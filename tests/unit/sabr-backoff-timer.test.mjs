@@ -13,7 +13,7 @@ function fixture() {
   const intervals = new Set()
   const remaining = { value: 0 }
   const duration = { value: 0 }
-  const video = { value: { ended: false, pause() {} } }
+  const video = { value: { ended: false, played: { length: 0 }, pause() {} } }
   const playbackStates = []
   const noop = () => {}
   const context = {
@@ -38,11 +38,12 @@ function fixture() {
   return { ...methods, context, playbackStates, props: context.props, video, remaining, duration, intervals }
 }
 
-test('Android starts its playback service while autoplay waits for SABR', () => {
+for (const sought of [false, true]) test(`Android starts its playback service while autoplay waits for SABR${sought ? ' after a startup seek' : ''}`, () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
+  f.context.hasPlaybackPosition.value = sought
   f.startSabrBackoffTimer(20000)
   assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
 })
@@ -82,6 +83,7 @@ for (const reason of ['autoplay disabled', 'autoplay canceled', 'background tab'
     f.context.initialAutoplayCanceled = reason === 'autoplay canceled'
     f.context.isActiveTab.value = reason !== 'background tab'
     f.context.hasPlaybackPosition.value = reason === 'already playing'
+    f.video.value.played.length = reason === 'already playing' ? 1 : 0
     f.video.value.autoplay = reason !== 'autoplay disabled'
     f.startSabrBackoffTimer(20000)
     assert.deepEqual(f.playbackStates, [])

@@ -7891,9 +7891,10 @@ export default defineComponent({
 
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
         video.value?.autoplay && !initialAutoplayCanceled &&
-        !hasPlaybackPosition.value && isActiveTab.value) {
+        video.value.played.length === 0 && isActiveTab.value) {
         // Start the foreground service before leaving the app. Waiting for
         // the first play event lets Android freeze loading or reject the start.
+        // A queued startup seek is a position, but has not played any media.
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
       }
 
