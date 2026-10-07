@@ -348,7 +348,7 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .menuSection {
-    --quick-settings-label-overhang: 8px;
+    --quick-settings-label-overhang: 9px;
   }
 
   .menuSection :deep(.sliderControl) {
