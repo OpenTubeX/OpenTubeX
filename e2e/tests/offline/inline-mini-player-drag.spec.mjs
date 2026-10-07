@@ -554,7 +554,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       store.commit('setBackendPreference', 'invidious')
       store.commit('setPopularCache', Array.from({ length: 40 }, (_, index) => ({ ...entry, videoId: index ? `popular-${index}` : entry.videoId })))
     }, watchHistoryEntry)
-    await page.keyboard.press('Control+k')
+    await page.keyboard.press('ControlOrMeta+k')
     await page.getByRole('combobox', { name: 'Search commands' }).fill('most popular')
     await page.getByRole('option', { name: 'Most Popular', exact: true }).click()
     await setWindowSize(app, page, { width: 480, height: 850 })
