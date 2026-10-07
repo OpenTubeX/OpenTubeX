@@ -31,6 +31,71 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RotationFullscreenTest {
     @Test
+    public void fullscreenKeepsTheSystemRotationAnimation() {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> assertEquals(
+                "Fullscreen must preserve Android's rotating transition",
+                WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE,
+                activity.getWindow().getAttributes().rotationAnimation));
+        }
+    }
+
+    @Test
+    public void rotationRequestKeepsTheOldFrameUntilConfigurationArrives() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            CountDownLatch painted = new CountDownLatch(1);
+            AtomicReference<WebViewRotationFrame> guard = new AtomicReference<>();
+            AtomicReference<Boolean> blockedBeforeRun = new AtomicReference<>();
+            AtomicReference<Boolean> releasedAfterRun = new AtomicReference<>();
+            scenario.onActivity(activity -> {
+                WebView webView = activity.getBridge().getWebView();
+                guard.set(new WebViewRotationFrame(webView, true));
+                // This test isolates the configuration gate from renderer startup
+                // speed. The production deadline is covered separately below.
+                webView.removeCallbacks(guard.get());
+                webView.postVisualStateCallback(0, new WebView.VisualStateCallback() {
+                    @Override public void onComplete(long requestId) {
+                        // Rendering the old portrait viewport must not release
+                        // the snapshot guard before the configuration changes.
+                        blockedBeforeRun.set(!guard.get().onPreDraw());
+                        guard.get().run();
+                        releasedAfterRun.set(guard.get().onPreDraw());
+                        painted.countDown();
+                    }
+                });
+            });
+            try {
+                assertTrue("Chromium must acknowledge the pending frame", painted.await(5, TimeUnit.SECONDS));
+                assertEquals("Old portrait frame must not release the guard", Boolean.TRUE, blockedBeforeRun.get());
+                assertEquals("run() must release the guard", Boolean.TRUE, releasedAfterRun.get());
+            } finally {
+                scenario.onActivity(activity -> guard.get().run());
+            }
+        }
+    }
+
+    @Test
+    public void rotationRequestReleasesTheGuardWhenNoConfigurationArrives() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            CountDownLatch checked = new CountDownLatch(1);
+            AtomicReference<Boolean> released = new AtomicReference<>();
+            scenario.onActivity(activity -> {
+                WebView webView = activity.getBridge().getWebView();
+                WebViewRotationFrame guard = new WebViewRotationFrame(webView, true);
+                // Both callbacks use the UI queue, so a slow emulator cannot run
+                // this check ahead of the guard's 500 ms deadline.
+                webView.postDelayed(() -> {
+                    released.set(guard.onPreDraw());
+                    guard.run();
+                    checked.countDown();
+                }, 750);
+            });
+            assertTrue("The UI queue must complete the deadline check", checked.await(5, TimeUnit.SECONDS));
+            assertEquals("A denied rotation must not freeze drawing", Boolean.TRUE, released.get());
+        }
+    }
+
+    @Test
     public void unsupportedOrientationSensorsAreRejectedAndStayDisabledOnResume() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             Field listenerField = AndroidUiPlugin.class.getDeclaredField("deviceRotationListener");

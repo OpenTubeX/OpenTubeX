@@ -14,7 +14,9 @@ class ElementStub {
 
 function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, seekSwipe = () => true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen, width = 400, seekState = () => ({ time: 60, start: 0, end: 600 }) } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
-  const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element }
+  const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element, requestAnimationFrame: globalThis.requestAnimationFrame }
+  const frames = []
+  globalThis.requestAnimationFrame = callback => { frames.push(callback); return frames.length }
   globalThis.Element = ElementStub
   globalThis.document = { querySelector: () => ({ classList: { contains: () => mobile } }) }
   globalThis.window = { setTimeout: (...args) => setTimeout(...args), matchMedia: () => ({ matches: reducedMotion }) }
@@ -81,7 +83,8 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
     return { clientX: x, clientY: y, pointerId: 1, pointerType: 'touch', button: 0, isPrimary: true, target: surface,
       preventDefault() { this.prevented = true }, stopPropagation() {}, stopImmediatePropagation() {}, ...extra }
   }
-  return { gestures, calls, event, captures, container, unmount }
+  const paint = () => frames.splice(0).forEach(callback => callback())
+  return { gestures, calls, event, captures, container, unmount, paint }
 }
 
 test('Shorts vertical swipes stay available for feed navigation', t => {
@@ -138,6 +141,65 @@ test('center swipes retain fullscreen and disabled sides allow fullscreen swipes
   assert.deepEqual(calls, [])
 })
 
+test('committed fullscreen swipe starts after painting without a settle delay', async t => {
+  const { gestures: g, event, calls, paint } = fixture(t, { reducedMotion: false })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  g.startMobileFullscreenGesture(event(210, 150))
+  g.moveMobileFullscreenGesture(event(210, 50))
+  g.finishMobileFullscreenGesture(event(210, 50))
+  t.mock.timers.tick(0)
+  await nextTick()
+  paint()
+  paint()
+  await Promise.resolve()
+  assert.equal(calls.includes('fullscreen'), true, 'A committed swipe must not wait for the 140 ms settle animation')
+})
+
+for (const interrupt of ['none', 'new touch', 'cancel', 'unmount', 'fullscreen changed']) {
+  test(`fullscreen swipe paints its reset before handoff (${interrupt})`, async t => {
+    let fullscreen = false
+    const { gestures: g, event, calls, paint, unmount } = fixture(t, {
+      fullscreen: () => fullscreen,
+    })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(210, 150))
+    g.moveMobileFullscreenGesture(event(210, 50))
+    g.finishMobileFullscreenGesture(event(210, 50))
+    t.mock.timers.tick(0)
+    await nextTick()
+    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+    assert.equal(calls.includes('fullscreen'), false)
+    paint()
+    assert.equal(calls.includes('fullscreen'), false, 'One animation callback does not guarantee a painted frame')
+    if (interrupt === 'new touch') g.startMobileFullscreenGesture(event(210, 150))
+    if (interrupt === 'cancel') g.cancelMobileFullscreenGesture()
+    if (interrupt === 'unmount') unmount()
+    if (interrupt === 'fullscreen changed') fullscreen = true
+    paint()
+    await Promise.resolve()
+    assert.equal(calls.includes('fullscreen'), interrupt === 'none')
+    await Promise.resolve()
+  })
+}
+
+test('rejected fullscreen entry is handled', async t => {
+  t.mock.method(console, 'warn', () => {})
+  const { gestures: g, event, paint } = fixture(t, {
+    toggleFullscreen: () => Promise.reject(new Error('Fullscreen rejected')),
+  })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  g.startMobileFullscreenGesture(event(210, 150))
+  g.moveMobileFullscreenGesture(event(210, 50))
+  g.finishMobileFullscreenGesture(event(210, 50))
+  t.mock.timers.tick(0)
+  await nextTick()
+  paint()
+  paint()
+  await Promise.resolve()
+  await Promise.resolve()
+  assert.equal(console.warn.mock.callCount(), 1)
+})
+
 test('fullscreen swipe controls auto-hide after the configured delay despite suppressed touchend', async t => {
   // Exercise Shaka's real touch/mouse and opacity methods. touchmove stops its
   // idle timer, while the app consumes touchend to prevent a second surface tap.
@@ -178,11 +240,14 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
     mouseStillTimer_: timer(() => controls.onMouseStill_()),
   })
   let fullscreen = false
-  const { gestures: g, event, container } = fixture(t, {
+  const { gestures: g, event, container, paint } = fixture(t, {
     controls,
     fullscreen: () => fullscreen,
     toggleFullscreen: () => {
       fullscreen = true
+      // The presentation change can cancel the old pointer gesture while the
+      // accepted fullscreen promise is still completing.
+      g.cancelMobileFullscreenGesture()
       controls.videoContainer_.dataset.playingInterfaceHideDelay = '2'
       controls.showUI()
     },
@@ -199,6 +264,10 @@ test('fullscreen swipe controls auto-hide after the configured delay despite sup
   g.handleMobilePlayerTouchEnd(touchEnd)
   assert.equal(touchEnd.prevented, true)
   t.mock.timers.tick(0)
+  await nextTick()
+  paint()
+  paint()
+  await Promise.resolve()
   await Promise.resolve()
   assert.equal(fullscreen, true)
   assert.equal(attributes.has('shown'), true)

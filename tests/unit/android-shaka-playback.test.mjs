@@ -80,37 +80,17 @@ test('Android phone uses the central Shaka play button without a duplicate in th
   assert.equal(controls(false).includes('play_pause'), true)
 })
 
-test('Android restores orientation if fullscreen entry fails after rotation starts', async () => {
+test('Android fullscreen button delegates orientation sequencing to the adapter', () => {
   const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
   const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
-  assert.ok(start !== -1 && end !== -1)
   const calls = []
-  let afterEntry
-  const context = {
+  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({})`, {
     androidRotationFullscreen: false,
-    process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
-    document: { fullscreenElement: null },
-    fullscreenEntryAttempt: 0,
-    isActiveTab: { value: true },
-    isNativeFullscreenActive: () => false,
-    setFullscreenOrientation: async fullscreen => { calls.push(fullscreen) },
-    video: { value: { videoWidth: 0, videoHeight: 0 } },
-    rotateFullscreenToLandscape: { value: true },
-    fullscreenAspectRatio: { value: 16 / 9 },
-    suppressPanelTransitions: () => {},
-    handleScrollMiniFullscreenButtonClick: () => {},
-    setTimeout: callback => { afterEntry = callback },
-  }
-  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({})`, context)
-  await Promise.resolve()
-  assert.deepEqual(calls, [true])
-  assert.equal(typeof afterEntry, 'function')
-  context.document.fullscreenElement = {}
-  await afterEntry()
-  assert.deepEqual(calls, [true])
-  context.document.fullscreenElement = null
-  await afterEntry()
-  assert.deepEqual(calls, [true, false])
+    finishAndroidFullscreenExit: () => calls.push('finish-exit'),
+    handleScrollMiniFullscreenButtonClick: () => calls.push('fullscreen'),
+    setFullscreenOrientation: () => calls.push('rotate'),
+  })
+  assert.deepEqual(calls, ['finish-exit', 'fullscreen'], 'Clear a pending exit before delegating to the fullscreen adapter')
 })
 
 function androidRotationHarness(overrides = {}) {
@@ -144,6 +124,7 @@ function androidRotationHarness(overrides = {}) {
     syncAndroidStatusBarVisibility: () => {},
     isNativeFullscreenActive: () => false,
     pictureInPictureActive: { value: false },
+    androidFullscreenEntering: false,
     mobileAdjustmentsVisible: { value: true },
     enterFullscreenOnDisplayRotate: { value: true },
     fullscreenRotationIgnoresSystemLock: { value: false },
@@ -218,6 +199,7 @@ test('Android exits physical rotation fullscreen when portrait arrives before re
 })
 
 for (const [state, overrides] of [
+  ['manual fullscreen entry pending', { androidFullscreenEntering: true }],
   ['fullscreen-on-rotate disabled', { enterFullscreenOnDisplayRotate: { value: false } }],
   ['minimized player', { scrollMiniPlayerActive: { value: true } }],
   ['audio playback', { props: { format: 'audio', shortsPlayer: false } }],
@@ -281,35 +263,144 @@ test('Android selects physical sensing only for the opt-in and releases subscrip
   assert.deepEqual(calls, ['exit', 'display', 'stop:display', 'exit', 'device', 'stop:device', 'exit', 'exit'])
 })
 
-test('Android ignores fullscreen recovery from an earlier entry attempt', async () => {
-  const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
-  const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
-  assert.ok(start !== -1 && end !== -1)
-  const calls = []
-  const recoveryTimers = []
-  const context = {
-    androidRotationFullscreen: false,
-    process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
-    document: { fullscreenElement: null },
-    fullscreenEntryAttempt: 0,
-    isActiveTab: { value: true },
-    isNativeFullscreenActive: () => false,
-    setFullscreenOrientation: async fullscreen => { calls.push(fullscreen) },
-    video: { value: { videoWidth: 0, videoHeight: 0 } },
-    rotateFullscreenToLandscape: { value: true },
-    fullscreenAspectRatio: { value: 16 / 9 },
-    suppressPanelTransitions: () => {},
-    handleScrollMiniFullscreenButtonClick: () => {},
-    setTimeout: callback => { recoveryTimers.push(callback) },
+test('Android retains the exit surface only for a requested rotation', async () => {
+  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('    function fullscreenChangeHandler()', start)
+  const listeners = new Map()
+  const timers = new Map()
+  const frames = new Map()
+  let open = false
+  let cleanup
+  let exitTimeout
+  const host = {
+    setAttribute() {}, removeAttribute() {},
+    showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
   }
-  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({}); handleFullscreenButtonClick({})`, context)
-  await Promise.resolve()
-  assert.deepEqual(calls, [true, true])
-  assert.equal(recoveryTimers.length, 2)
-  recoveryTimers[0]()
-  assert.deepEqual(calls, [true, true])
-  recoveryTimers[1]()
-  assert.deepEqual(calls, [true, true, false])
+  const context = {
+    androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
+    document: { fullscreenElement: null },
+    getAndroidDisplayOrientation: async () => 'landscape-primary',
+    onBeforeUnmount: callback => { cleanup = callback },
+    watch() {}, isActiveTab: {},
+    suppressPanelTransitions() {},
+    requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
+    cancelAnimationFrame: id => frames.delete(id),
+    clearTimeout: id => timers.delete(id),
+    window: {
+      innerWidth: 800, innerHeight: 400,
+      addEventListener: (name, callback) => listeners.set(name, callback),
+      removeEventListener: name => listeners.delete(name),
+      setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
+    },
+  }
+  const retain = vm.runInNewContext(`${source.slice(start, end)}
+    (requested = true) => { androidFullscreenRotationRequested = requested; retainAndroidFullscreenDuringRotation() }`, context)
+  retain(false)
+  assert.equal(open, false, 'An exit without a rotation request must remain immediate')
+  assert.equal(timers.size, 0)
+  retain()
+  assert.equal(open, true)
+  context.window.innerHeight = 380 // System bars resize before rotation finishes.
+  listeners.get('resize')()
+  assert.equal(open, true)
+  context.window.innerWidth = 400
+  context.window.innerHeight = 800
+  listeners.get('resize')()
+  assert.equal(open, true, 'Keep the surface until the restored viewport paints')
+  frames.get(1)()
+  assert.equal(open, true)
+  frames.get(1)()
+  assert.equal(open, false)
+  assert.equal(context.androidFullscreenHostActive.value, false)
+  assert.equal(timers.size, 0)
+  assert.equal(listeners.size, 0)
+
+  context.window.innerWidth = 900
+  retain()
+  timers.get(1)() // A user/device policy can keep the display landscape.
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, false)
+  assert.equal(listeners.size, 0)
+  retain()
+  await new Promise(resolve => setImmediate(resolve))
+  frames.get(1)?.()
+  frames.get(1)?.()
+  assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
+  assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, false)
+  assert.equal(timers.size, 0)
+  // Native rotation may complete before the WebView's resized frame arrives.
+  context.getAndroidDisplayOrientation = async () => 'portrait-primary'
+  retain()
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
+  context.window.innerWidth = 400
+  context.window.innerHeight = 900
+  listeners.get('resize')()
+  frames.get(1)()
+  frames.get(1)()
+  assert.equal(open, false)
+  context.window.innerWidth = 1000
+  retain()
+  cleanup() // Navigating away must cancel the pending exit.
+  assert.equal(open, false)
+  assert.equal(timers.size, 0)
+  assert.equal(listeners.size, 0)
+})
+
+test('Android tracks landscape requests including metadata changes during fullscreen', () => {
+  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('    function retainAndroidFullscreenDuringRotation', start)
+  const orientationSource = readFileSync(new URL('../../src/renderer/helpers/capacitorUi.js', import.meta.url), 'utf8')
+  const predicate = orientationSource.slice(orientationSource.indexOf('export function shouldRotateFullscreenToLandscape'), orientationSource.indexOf('export function setLandscapeOrientation')).replace('export ', '')
+  let activeChanged
+  const context = {
+    onBeforeUnmount() {},
+    watch: (_source, callback) => { activeChanged = callback },
+    isActiveTab: { value: true },
+    video: { value: {} },
+    rotateFullscreenToLandscape: { value: false },
+    fullscreenAspectRatio: { value: 16 / 9 },
+    setFullscreenOrientation: async () => {},
+  }
+  const request = vm.runInNewContext(`${predicate}\n${source.slice(start, end)}
+    fullscreen => { requestFullscreenOrientation(fullscreen); return androidFullscreenRotationRequested }`, context)
+  assert.equal(request(true), false, 'Disabled rotation must not retain the exit')
+  context.rotateFullscreenToLandscape.value = true
+  context.fullscreenAspectRatio.value = 9 / 16
+  assert.equal(request(true), false, 'Portrait video must not retain the exit')
+  context.fullscreenAspectRatio.value = 16 / 9
+  assert.equal(request(true), true, 'Late landscape metadata must track its lock request')
+  context.rotateFullscreenToLandscape.value = false
+  assert.equal(request(true), true, 'An unlock from a preference change can still be rotating')
+  assert.equal(request(false), true, 'Exit must preserve the request until retention finishes')
+  activeChanged(false)
+  assert.equal(request(true), false, 'Reactivating a retained tab must not reuse its old rotation request')
+})
+
+test('Android fullscreen events do not repeat an entry rotation already in flight', () => {
+  const start = source.indexOf('    function updateFullscreenOrientation(fullscreen)')
+  const end = source.indexOf('    /** @type {(preserveOrientation?', start)
+  const calls = []
+  const context = {
+    androidFullscreenEntering: true,
+    isActiveTab: { value: true },
+    isNativeFullscreenActive: () => true,
+    video: { value: {} }, rotateFullscreenToLandscape: { value: true }, fullscreenAspectRatio: { value: 16 / 9 },
+    requestFullscreenOrientation: active => { calls.push(active) },
+  }
+  const update = vm.runInNewContext(`${source.slice(start, end)}\nupdateFullscreenOrientation`, context)
+  update(true)
+  assert.deepEqual(calls, [])
+  context.androidFullscreenEntering = false
+  update(true)
+  assert.deepEqual(calls, [true])
+  context.isNativeFullscreenActive = () => false
+  update(false)
+  assert.deepEqual(calls, [true, false])
 })
 
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {
@@ -324,8 +415,37 @@ test('Android rechecks fullscreen orientation when metadata aspect ratio arrives
     fullscreenAspectRatio: { value: 16 / 9 },
     isNativeFullscreenActive: () => true,
     video: { value: { videoWidth: 0, videoHeight: 0 } },
-    setFullscreenOrientation: async (_fullscreen, _video, _enabled, ratio) => { calls.push(ratio) },
+    requestFullscreenOrientation: fullscreen => { calls.push(fullscreen) },
   })
   await onChange([true, 16 / 9])
-  assert.deepEqual(calls, [16 / 9])
+  assert.deepEqual(calls, [true])
+})
+
+test('Android leaves fullscreen orientation to its native preference', () => {
+  const expression = source.match(/forceLandscapeOnFullscreen: ([^\n]+),/)?.[1]
+  assert.ok(expression)
+  const configured = env => vm.runInNewContext(expression, { process: { env } })
+  assert.equal(configured({ IS_CAPACITOR: true, IS_IOS: false }), false)
+  assert.equal(configured({ IS_CAPACITOR: true, IS_IOS: true }), true)
+  assert.equal(configured({ IS_ELECTRON: true }), true)
+})
+
+test('fullscreen gesture completion restarts controls while the real post-hold touch is suppressed', () => {
+  const start = source.indexOf('    function handlePlayerTouchEnd(event) {')
+  const end = source.indexOf('\n    /**', start)
+  const calls = []
+  const handler = vm.runInNewContext(`${source.slice(start, end)}\nhandlePlayerTouchEnd`, {
+    suppressTemporaryPlaybackRateClick: true,
+    handleMobilePlayerTouchEnd: () => calls.push('restart-idle'),
+  })
+  const event = trusted => ({
+    isTrusted: trusted,
+    preventDefault: () => calls.push('prevent'),
+    stopImmediatePropagation: () => calls.push('stop'),
+  })
+  handler(event(true))
+  assert.deepEqual(calls, ['prevent', 'stop'])
+  calls.length = 0
+  handler(event(false))
+  assert.deepEqual(calls, ['restart-idle'])
 })
