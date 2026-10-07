@@ -52,7 +52,7 @@ async function searchForAgeGate(page) {
   return requests
 }
 
-async function configureCookieSearch(app, mode = 'file') {
+async function configureCookieSearch(app, mode = 'file', responseDelay = 300) {
   test.skip(process.platform === 'win32', 'The fixture executable uses a POSIX shebang')
   const executable = path.join(app.userDataDir, 'search-fixture.cjs')
   const log = path.join(app.userDataDir, 'search-args.json')
@@ -61,7 +61,7 @@ async function configureCookieSearch(app, mode = 'file') {
   await writeFile(executable, `#!${process.execPath}
 const fs = require('node:fs')
 fs.writeFileSync(${JSON.stringify(log)}, JSON.stringify(process.argv.slice(2)))
-setTimeout(() => process.stdout.write(fs.readFileSync(${JSON.stringify(response)}, 'utf8')), 300)
+setTimeout(() => process.stdout.write(fs.readFileSync(${JSON.stringify(response)}, 'utf8')), ${responseDelay})
 `)
   await chmod(executable, 0o755)
   await app.page.evaluate(async ({ executable, mode }) => {
@@ -74,6 +74,18 @@ setTimeout(() => process.stdout.write(fs.readFileSync(${JSON.stringify(response)
     await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/fixture/profile')
   }, { executable, mode })
   return { log, response }
+}
+
+async function captureSearchNotice(page, filename, animations = 'allow') {
+  const box = await page.locator('.searchNotice').boundingBox()
+  const width = Math.min(750, box.width)
+  await page.screenshot({
+    path: test.info().outputPath(filename),
+    animations,
+    clip: {
+      x: box.x + (box.width - width) / 2, y: box.y - 12, width, height: box.height + 24
+    }
+  })
 }
 
 test('shows the age gate, cookie setup hint, and cached notice at desktop and phone widths', async ({ app, page }) => {
@@ -93,7 +105,7 @@ test('shows the age gate, cookie setup hint, and cached notice at desktop and ph
 
 for (const mode of ['file', 'browser']) {
   test(`retries through yt-dlp with ${mode} cookies and the original filters`, async ({ app, page }) => {
-    const { log, response } = await configureCookieSearch(app, mode)
+    const { log, response } = await configureCookieSearch(app, mode, 3000)
     await page.locator('.navFilterButton').click()
     await page.locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
     await page.getByRole('button', { name: 'Close', exact: true }).click()
@@ -104,23 +116,22 @@ for (const mode of ['file', 'browser']) {
       for (const theme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme: theme })
         await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
-        const notice = page.locator('.searchNotice')
-        const box = await notice.boundingBox()
-        const width = Math.min(750, box.width)
-        await page.screenshot({
-          path: test.info().outputPath(`age-restricted-search-${theme}.png`),
-          animations: 'disabled',
-          clip: {
-            x: box.x + (box.width - width) / 2, y: box.y - 12, width, height: box.height + 24
-          }
-        })
+        await captureSearchNotice(page, `age-restricted-search-${theme}.png`, 'disabled')
       }
     }
     await writeFile(response, JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Authenticated search result', channel: 'Creator', duration: 120 }] }))
     const retry = page.getByRole('button', { name: 'Try with configured cookies' })
     await retry.click()
     await expect(retry).toBeDisabled()
+    await expect(page.locator('.searchNotice .spinner')).toBeVisible({ timeout: 1000 })
+    await expect(page.getByText('Fetching results. Please wait')).toHaveCount(0)
+    await expect(page.locator('.searchNotice [data-tab-loading-indicator]')).toBeVisible()
+    const theme = mode === 'file' ? 'dark' : 'light'
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await captureSearchNotice(page, `age-restricted-search-loading-${theme}.png`)
     await expect(page.getByText('Authenticated search result', { exact: true })).toBeVisible()
+    await expect(page.locator('.searchNotice .spinner')).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Confirm your age' })).toHaveCount(0)
     const args = JSON.parse(await readFile(log, 'utf8'))
     const cookieFlag = mode === 'file' ? '--cookies' : '--cookies-from-browser'
@@ -141,6 +152,7 @@ test('preserves the restriction and allows another retry when cookies return no 
   await expect(page.getByRole('alert')).toContainText('Search failed with the configured cookies.')
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toBeEnabled()
+  await expect(page.locator('.searchNotice .spinner')).toHaveCount(0)
   await expect(page.getByText('Your search results have returned 0 results')).toHaveCount(0)
 })
 

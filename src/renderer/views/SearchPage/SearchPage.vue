@@ -34,9 +34,11 @@
             :disabled="isRetryingWithCookies"
             @click="retrySearchWithCookies"
           />
-          <p v-if="isRetryingWithCookies">
-            {{ t('Search Filters["Fetching results. Please wait"]') }}
-          </p>
+          <FtLoader
+            v-if="isRetryingWithCookies"
+            role="status"
+            :aria-label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+          />
         </template>
       </div>
       <p
