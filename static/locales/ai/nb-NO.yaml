@@ -1543,6 +1543,7 @@ Share:
   Share failed: "Kunne ikke dele lenken"
   Timestamp Link Copied: Lenken med tidsstempel er kopiert til utklippstavlen
 Context Menu:
+  Opened in a Background Tab: "Åpnet i en bakgrunnsfane"
   Open in a Background Tab: "Åpne i en fane i bakgrunnen"
   Select Tab: Velg fane
   Close Tabs Before: Lukk foregående faner

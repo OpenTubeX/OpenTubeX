@@ -1524,6 +1524,7 @@ Share:
   Share failed: "Nem sikerült megosztani a hivatkozást"
   Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva
 Context Menu:
+  Opened in a Background Tab: "Megnyitva egy háttérben lévő lapon"
   Open in a Background Tab: "Megnyitás háttérlapon"
   Select Tab: Lap kijelölése
   Close Tabs Before: Előző lapok bezárása

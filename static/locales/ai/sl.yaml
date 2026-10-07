@@ -2004,6 +2004,7 @@ Clipboard:
   Copy failed: Kopiranje v odložišče ni uspelo
   Cannot access clipboard without a secure connection: Brez varne povezave dostop do odložišča ni mogoč
 Context Menu:
+  Opened in a Background Tab: "Odprto v zavihku v ozadju"
   Open in a Background Tab: "Odpri v zavihku v ozadju"
   Select Tab: Izberi zavihek
   Close Tabs Before: Zapri prejšnje zavihke

@@ -8,6 +8,56 @@ const utils = await readFile(new URL('../../src/renderer/helpers/utils.js', impo
 const start = utils.indexOf('export function openInternalPath(')
 const navigationSource = utils.slice(start, utils.indexOf('\n}\n', start) + 2).replace('export ', '')
 
+for (const ios of [false, true]) {
+  for (const makeActive of [false, true]) {
+    test(`${ios ? 'iOS' : 'Android'} ${makeActive ? 'foreground' : 'background'} tab confirmation waits for successful creation`, async () => {
+      let finishCreation
+      const creation = new Promise(resolve => { finishCreation = resolve })
+      const toasts = []
+      const context = vm.createContext({
+        process: { env: { IS_CAPACITOR: true, IS_IOS: ios } },
+        getCapacitorTabService: () => ({
+          tabsEnabled: true,
+          createTab: (route, title, active) => {
+            assert.deepEqual(structuredClone(route), { path: '/history', query: undefined })
+            assert.equal(title, 'History')
+            assert.equal(active, makeActive)
+            return creation
+          }
+        }),
+        i18n: { global: { t: key => key } },
+        showToast: message => toasts.push(message)
+      })
+      vm.runInContext(navigationSource, context)
+      const opening = context.openInternalPath({ path: '/history', title: 'History', thumbnail: 'video-thumbnail.jpg', doCreateNewTab: true, makeActive })
+      assert.deepEqual(toasts, [])
+      finishCreation('new-tab')
+      assert.equal(await opening, 'new-tab')
+      assert.deepEqual(structuredClone(toasts), !ios && !makeActive
+        ? [{ message: 'Context Menu.Opened in a Background Tab', image: 'video-thumbnail.jpg' }]
+        : [])
+    })
+  }
+}
+
+for (const rejects of [false, true]) {
+  test(`Android does not confirm a background tab when creation ${rejects ? 'rejects' : 'returns null'}`, async () => {
+    const error = new Error('Creation failed')
+    const context = vm.createContext({
+      process: { env: { IS_CAPACITOR: true } },
+      getCapacitorTabService: () => ({
+        tabsEnabled: true,
+        createTab: () => rejects ? Promise.reject(error) : Promise.resolve(null)
+      }),
+      showToast: () => assert.fail('Confirmed an unsuccessful tab creation')
+    })
+    vm.runInContext(navigationSource, context)
+    const opening = context.openInternalPath({ path: '/history', doCreateNewTab: true, makeActive: false })
+    if (rejects) await assert.rejects(opening, error)
+    else assert.equal(await opening, null)
+  })
+}
+
 for (const newWindow of [true, false]) {
   test(`mobile modified navigation stays in the current page with tabs disabled (${newWindow ? 'window' : 'tab'})`, () => {
     const calls = []

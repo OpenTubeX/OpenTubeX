@@ -1524,6 +1524,7 @@ Share:
   Share failed: "Bağlantı paylaşılamadı"
   Timestamp Link Copied: Zaman damgası bağlantısı panoya kopyalandı
 Context Menu:
+  Opened in a Background Tab: "Arka plan sekmesinde açıldı"
   Open in a Background Tab: "Arka plan sekmesinde aç"
   Select Tab: Sekmeyi Seç
   Close Tabs Before: Önceki Sekmeleri Kapat

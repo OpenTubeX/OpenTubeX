@@ -860,6 +860,7 @@ Change Format:
   yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
+  Opened in a Background Tab: "Otwarto w karcie w tle"
   Open in a Background Tab: "Otwórz w karcie w tle"
   Select Tab: Zaznacz kartę
   Close Tabs Before: Zamknij poprzednie karty

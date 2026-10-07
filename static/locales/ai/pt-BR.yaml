@@ -1526,6 +1526,7 @@ Share:
   Share failed: "Não foi possível compartilhar o link"
   Timestamp Link Copied: Link com marca temporal copiada para a área de download
 Context Menu:
+  Opened in a Background Tab: "Aberto em uma aba em segundo plano"
   Open in a Background Tab: "Abrir em uma aba em segundo plano"
   Select Tab: Selecionar guia
   Close Tabs Before: Fechar guias anteriores

@@ -1540,6 +1540,7 @@ Share:
   Share failed: "Kunde inte dela länken"
   Timestamp Link Copied: Länken med tidsstämpeln har kopierats till urklipp
 Context Menu:
+  Opened in a Background Tab: "Öppnat i en bakgrundsflik"
   Open in a Background Tab: "Öppna i en flik i bakgrunden"
   Select Tab: Välj flik
   Close Tabs Before: Stäng föregående flikar

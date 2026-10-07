@@ -1514,6 +1514,7 @@ function handleOptionsClick(option) {
         path: `/watch/${id.value}`,
         query: watchPageLinkQuery.value,
         title: title.value,
+        thumbnail: toastThumbnail.value,
         doCreateNewTab: option !== 'openNewWindow',
         doCreateNewWindow: option === 'openNewWindow',
         makeActive: option !== 'openBackgroundTab'

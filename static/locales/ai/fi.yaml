@@ -1567,6 +1567,7 @@ Share:
   Share failed: "Linkin jakaminen epäonnistui"
   Timestamp Link Copied: Aikaleiman sisältävä linkki kopioitiin leikepöydälle
 Context Menu:
+  Opened in a Background Tab: "Avattu taustavälilehdelle"
   Open in a Background Tab: "Avaa taustavälilehdessä"
   Select Tab: Valitse välilehti
   Close Tabs Before: Sulje edeltävät välilehdet
