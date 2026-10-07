@@ -147,6 +147,39 @@ test('both casting protocols share one button with Google Cast and DLNA tabs', a
   await expect(castButtons).toHaveCount(0)
 })
 
+for (const uiScale of [80, 125]) {
+  test(`casting tabs and options retain 48px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
+    await openCastVideo(app, page)
+    await mockDlna(app)
+    await page.evaluate(async scale => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', scale)
+      await store.dispatch('updateShowDlnaCastButton', true)
+    }, uiScale)
+    const session = await page.context().newCDPSession(page)
+    for (const coarsePointer of [false, true]) {
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: coarsePointer })
+      await setWindowSize(app, page, { width: coarsePointer ? 1200 : 375, height: coarsePointer ? 950 : 850 })
+      expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(coarsePointer)
+      await page.locator('.castControl > button').click()
+      for (const protocol of ['Google Cast', 'DLNA']) {
+        await page.getByRole('tab', { name: protocol, exact: true }).click()
+        await expect(page.getByRole('option', { name: protocol === 'DLNA' ? 'DLNA TV' : 'Test TV', exact: true })).toBeVisible()
+        const targets = page.locator('.castControl .castTab, .castControl .castOption')
+        const bounds = await targets.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().toJSON()))
+        for (const target of bounds) {
+          // Fractional Electron zoom can round CSS bounds slightly downward.
+          expect(target.height).toBeGreaterThanOrEqual(47.75)
+          expect(target.height * uiScale / 100).toBeGreaterThanOrEqual(47.75)
+          expect(target.width).toBeGreaterThanOrEqual(47.75)
+        }
+      }
+      await page.keyboard.press('Escape')
+    }
+    await session.detach()
+  })
+}
+
 for (const zoom of [1, 1.25]) {
   test(`casting tabs restore and clamp themed scrolling at ${zoom * 100}% UI scale`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)
@@ -178,6 +211,19 @@ for (const zoom of [1, 1.25]) {
     await expectScrollAtRenderedEnd(scroller)
     await setWindowSize(app, page, { width: 1200, height: 950 })
     await expectScrollAtRenderedEnd(scroller)
+    // Returning from touch-sized rows to compact rows reduces the scroll range.
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await session.detach()
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await setWindowSize(app, page, { width: 1200, height: 950 })
+    await expectScrollAtRenderedEnd(scroller)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
     await app.electronApp.evaluate(() => { globalThis.castDevices = [{ id: 'test-tv', name: 'Test TV' }] })
     // Rediscovery replaces the long list while the menu is still open.
