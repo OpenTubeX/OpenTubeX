@@ -1301,6 +1301,102 @@ test('repeated SABR reload requests never fall back to audio', async ({ app, pag
   expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
+test('exhausted SABR reload requests use the playback engine fallback once', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true }
+  ], { legacyFormats: [], enablePlaybackEngineFallback: true })
+
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
+  expect(result.activePlaybackEngine).toBe('yt-dlp')
+  expect(result.playbackEngineFallbackAttempted).toBe(true)
+  expect(result.errorMessage).toBe('')
+})
+
+test('a rejected SABR playback-engine fallback reports the terminal error', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async (view, maxRecoveries) => {
+    view.errorMessage = ''
+    view.isSabrVideoStream = () => true
+    view.sabrErrorRecoveryAttempts = maxRecoveries
+    view.legacyFormats = []
+    view.tryPlaybackEngineFallback = async () => {
+      throw new Error('Synthetic playback-engine teardown failure')
+    }
+    await view.onPlayerReloadRequested({ wasPlaying: false })
+  }, MAX_SABR_ERROR_RECOVERIES)
+  await expect(page.locator('.errorMessage')).toContainText('[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream')
+})
+
+for (const wasPlaying of [false, true]) {
+  test(`exhausted SABR reloads preserve ${wasPlaying ? 'playing' : 'paused'} state without saved progress`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate((view, wasPlaying) => {
+      view.$store.commit('setWatchedProgressSavingMode', 'never')
+      // Opposite autoplay preference makes the outgoing state decisive.
+      view.$store.commit('setAutoplayVideos', !wasPlaying)
+    }, wasPlaying)
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 5.25
+      element.playbackRate = 1.5
+      element.loop = true
+    })
+    await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+    if (wasPlaying) await video.evaluate(element => element.play())
+    const outgoingPlayer = await page.locator('.ftVideoPlayer').elementHandle()
+
+    await watchView.evaluate(async (view, maxRecoveries) => {
+      const payload = view.$refs.player.getSabrReloadState()
+      const timestamp = view.getTimestamp()
+      const legacyFormats = view.legacyFormats
+      // The local demo uses progressive media. Replay only the SABR recovery
+      // boundary, then serve that same local media through the engine fallback.
+      view.isSabrVideoStream = () => true
+      view.getTimestamp = () => timestamp
+      view.sabrErrorRecoveryAttempts = maxRecoveries
+      view.legacyFormats = []
+      view.extractYtDlpPlaybackSource = async () => {
+        view.activePlaybackEngine = 'yt-dlp'
+        view.legacyFormats = legacyFormats
+        view.activeFormat = 'legacy'
+        return true
+      }
+      await view.onPlayerReloadRequested(payload)
+    }, MAX_SABR_ERROR_RECOVERIES)
+
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toBeVisible()
+    const replacementPlayer = await player.elementHandle()
+    expect(await outgoingPlayer.evaluate((before, after) => before === after, replacementPlayer)).toBe(false)
+    const replacementVideo = player.locator('video')
+    await expect.poll(() => replacementVideo.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    await expect.poll(() => replacementVideo.evaluate(element => element.paused)).toBe(!wasPlaying)
+    await expect.poll(() => replacementVideo.evaluate(element => element.loop)).toBe(true)
+    await expect.poll(() => replacementVideo.evaluate(element => element.playbackRate)).toBe(1.5)
+    if (wasPlaying) {
+      await expect.poll(() => replacementVideo.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(5)
+    } else {
+      await expect.poll(() => replacementVideo.evaluate(element => element.currentTime)).toBeCloseTo(5, 1)
+    }
+    expect(await watchView.evaluate(view => view.watchedProgressSavingEnabled)).toBe(false)
+    expect(await watchView.evaluate(view => view.activePlaybackEngine)).toBe('yt-dlp')
+  })
+}
+
 test('a SABR failure refetches when no 360p fallback is available', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

@@ -5729,7 +5729,7 @@ export default defineComponent({
     /**
      * Tries the other playback engine once after the selected engine exhausts
      * its own stream recovery options.
-     * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
+     * @param {{ code: number | string, data?: unknown[] }} error
      * @returns {Promise<boolean>}
      */
     tryPlaybackEngineFallback: async function (error) {
@@ -6723,7 +6723,20 @@ export default defineComponent({
         console.error('Unable to recover the SABR stream. Reverting to legacy formats...')
         this.enableLegacyFormat()
       } else {
-        this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+        const timestamp = this.getTimestamp()
+        if (timestamp > 0) {
+          this.oneTimeTimestamp = timestamp
+        }
+        this.setPlayerReloadState(payload)
+        let fallbackStarted = false
+        try {
+          fallbackStarted = await this.tryPlaybackEngineFallback({ code: 'SABR_RELOAD' })
+        } catch (error) {
+          console.error('SABR playback-engine fallback failed', error)
+        }
+        if (!fallbackStarted) {
+          this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+        }
       }
     },
 
