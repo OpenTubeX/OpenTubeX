@@ -138,10 +138,20 @@
   block-size: 36px;
 }
 
-.headerSortSelect :deep(.select-label),
-.headerSortSelect :deep(.select-text ~ .select-label) {
+/* This compact control keeps its label inline rather than in an outline notch. */
+.headerActions .headerSortSelect :deep(.selectOutline) {
+  inset-block-start: 0;
+}
+
+.headerActions .headerSortSelect :deep(.selectLegend) {
+  display: contents;
+}
+
+.headerActions .headerSortSelect :deep(.select-label) {
+  position: absolute;
   inset-block-start: 50%;
   inset-inline-start: 12px;
+  padding-inline: 0;
   z-index: 1;
   max-inline-size: 68px;
   overflow: hidden;
@@ -455,8 +465,7 @@
     padding-inline-start: 36px;
   }
 
-  .headerSortSelect :deep(.select-label),
-  .headerSortSelect :deep(.select-text ~ .select-label) {
+  .headerActions .headerSortSelect :deep(.select-label) {
     max-inline-size: 16px;
   }
 

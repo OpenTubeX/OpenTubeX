@@ -1275,26 +1275,23 @@
                   {{ getSponsorBlockToastTimeLabel(uuid) }}
                 </template>
               </span>
-              <FtIconButton
-                class="closeSkippedSegmentButton"
-                :title="$t('Close')"
-                :icon="['fas', 'xmark']"
-                :use-shadow="false"
-                :size="16"
-                :padding="8"
-                @click="removeSponsorBlockToast(uuid)"
-              />
-              <FtIconButton
+              <button
                 v-if="sponsorBlockEnableSubmission"
+                class="editSkippedSegmentButton"
                 :title="$t('Edit')"
-                :icon="['fas', 'pencil']"
                 :aria-expanded="sponsorBlockToastEditingUuid === uuid"
                 :disabled="sponsorBlockVotePending !== null"
-                :use-shadow="false"
-                :size="16"
-                :padding="8"
-                @click="toggleSponsorBlockToastEditing(uuid)"
-              />
+                @click.stop.prevent="toggleSponsorBlockToastEditing(uuid)"
+              >
+                <ft-icon :icon="['fas', 'pencil']" />
+              </button>
+              <button
+                class="closeSkippedSegmentButton"
+                :title="$t('Close')"
+                @click.stop.prevent="removeSponsorBlockToast(uuid)"
+              >
+                <ft-icon :icon="['fas', 'xmark']" />
+              </button>
             </div>
           </div>
           <div

@@ -2824,15 +2824,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.sponsorBlockDraftCategory .select-label),
-:deep(.sponsorBlockDraftCategory .select-text ~ .select-label),
 :deep(.sponsorBlockDraftCategory .iconSelect) {
   color: rgb(255 255 255 / 70%);
   font-size: 12px;
-}
-
-:deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
-  inset-block-start: 0;
-  background-color: var(--sponsorblock-submission-surface);
 }
 
 :deep(.sponsorBlockDraftCategory .select-bar::before),
@@ -2917,7 +2911,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   color: var(--secondary-text-color);
 }
 
-.closeSkippedSegmentButton:not(.ftIconButton) {
+.closeSkippedSegmentButton,
+.editSkippedSegmentButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2933,14 +2928,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.closeSkippedSegmentButton:not(.ftIconButton):hover {
+.closeSkippedSegmentButton:hover,
+.editSkippedSegmentButton:hover:where(:not(:disabled)) {
   background-color: rgb(255 255 255 / 12%);
   color: #fff;
 }
 
-.closeSkippedSegmentButton:not(.ftIconButton):focus {
+.closeSkippedSegmentButton:focus,
+.editSkippedSegmentButton:focus {
   outline: 2px solid rgb(255 255 255 / 45%);
   outline-offset: 1px;
+}
+
+.skippedSegment.editing :is(.closeSkippedSegmentButton, .editSkippedSegmentButton) {
+  color: var(--secondary-text-color);
+  outline-color: currentcolor;
+}
+
+.editSkippedSegmentButton:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .unskipButton {
