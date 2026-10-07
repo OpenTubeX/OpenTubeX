@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Playlist Thumbnail Size: "Esitusloendi pisipiltide suurus"
     Compact Mobile Mini Player: "Kompaktne mobiilne minipleier"
     Always Show Mobile Search Bar: "Kuva mobiili otsinguriba alati"
     Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"

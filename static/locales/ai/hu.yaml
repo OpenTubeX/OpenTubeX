@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Playlist Thumbnail Size: "Lejátszási lista bélyegképeinek mérete"
     Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
     Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"

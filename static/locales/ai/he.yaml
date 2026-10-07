@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Playlist Thumbnail Size: "גודל התמונות הממוזערות ברשימת ההשמעה"
     Compact Mobile Mini Player: "נגן קטן קומפקטי לנייד"
     Always Show Mobile Search Bar: "הצגת סרגל החיפוש בנייד תמיד"
     Frosted Glass Player UI: "ממשק נגן עם אפקט זכוכית חלבית"

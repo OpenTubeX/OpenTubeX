@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Playlist Thumbnail Size: "再生リストのサムネイルサイズ"
     Compact Mobile Mini Player: "モバイルのミニプレーヤーをコンパクトに表示"
     Always Show Mobile Search Bar: "モバイルの検索バーを常に表示"
     Frosted Glass Player UI: "すりガラス風のプレーヤー UI"

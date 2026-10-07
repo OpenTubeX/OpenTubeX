@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Playlist Thumbnail Size: "Ment skeudennoù bihan ar roll-lenn"
     Compact Mobile Mini Player: "Lenner bihan hezoug stank"
     Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
     Frosted Glass Player UI: "Etrefas al lenner gant efed gwer skornet"

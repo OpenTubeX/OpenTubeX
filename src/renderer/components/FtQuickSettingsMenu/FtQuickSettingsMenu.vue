@@ -270,20 +270,20 @@
                       />
                     </div>
                     <div
-                      v-else-if="setting.id === 'thumbnailSize'"
+                      v-else-if="setting.id === 'thumbnailSize' || setting.id === 'playlistThumbnailSize'"
                       class="sliderGroup"
                     >
                       <FtSlider
-                        class="thumbnailSizeSlider"
-                        :label="t('Settings.Theme Settings.Thumbnail Size')"
-                        :default-value="thumbnailSize"
-                        setting-key="thumbnailSize"
+                        :class="setting.id === 'playlistThumbnailSize' ? 'playlistThumbnailSizeSlider' : 'thumbnailSizeSlider'"
+                        :label="setting.label"
+                        :default-value="setting.id === 'playlistThumbnailSize' ? playlistThumbnailSize : thumbnailSize"
+                        :setting-key="setting.id"
                         :min-value="MIN_THUMBNAIL_SIZE"
-                        :max-value="maxThumbnailSize"
+                        :max-value="setting.id === 'playlistThumbnailSize' ? maxPlaylistThumbnailSize : maxThumbnailSize"
                         :step="THUMBNAIL_SIZE_STEP"
                         value-extension="%"
-                        @input="previewThumbnailSize"
-                        @change="updateThumbnailSize"
+                        @input="previewThumbnailSize($event, setting.id)"
+                        @change="updateThumbnailSize($event, setting.id)"
                       />
                     </div>
                     <FtSelect
@@ -572,6 +572,7 @@ const mainColorAvailable = computed(() => (
 ))
 const uiScale = computed(() => store.getters.getUiScale)
 const { thumbnailSize, maxThumbnailSize } = useThumbnailSizeSlider()
+const { thumbnailSize: playlistThumbnailSize, maxThumbnailSize: maxPlaylistThumbnailSize } = useThumbnailSizeSlider('playlistThumbnailSize')
 const playNextVideo = computed(() => store.getters.getPlayNextVideo)
 const enableSubtitlesByDefault = computed(() => store.getters.getEnableSubtitlesByDefault)
 const listType = computed(() => store.getters.getListType)
@@ -902,12 +903,12 @@ function updateProxy(value) {
   })
 }
 
-function previewThumbnailSize(value) {
-  store.commit('setThumbnailSize', value)
+function previewThumbnailSize(value, settingKey) {
+  store.commit(settingKey === 'playlistThumbnailSize' ? 'setPlaylistThumbnailSize' : 'setThumbnailSize', value)
 }
 
-function updateThumbnailSize(value) {
-  return runSettingUpdate(() => store.dispatch('updateThumbnailSize', value))
+function updateThumbnailSize(value, settingKey) {
+  return runSettingUpdate(() => store.dispatch(settingKey === 'playlistThumbnailSize' ? 'updatePlaylistThumbnailSize' : 'updateThumbnailSize', value))
 }
 
 function handleHideRecommendedVideos(value) {

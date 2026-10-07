@@ -499,6 +499,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Playlist Thumbnail Size: "Velikost sličic seznama predvajanja"
     Compact Mobile Mini Player: "Kompakten mobilni mini predvajalnik"
     Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
     Frosted Glass Player UI: "Vmesnik predvajalnika z učinkom motnega stekla"

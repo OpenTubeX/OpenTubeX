@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Playlist Thumbnail Size: "Velikost miniatur playlistu"
     Compact Mobile Mini Player: "Kompaktní mobilní minipřehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovat vyhledávací panel na telefonu"
     Frosted Glass Player UI: "Rozhraní přehrávače s efektem matného skla"

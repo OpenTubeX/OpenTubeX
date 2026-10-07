@@ -155,6 +155,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Playlist Thumbnail Size: "Rozmiar miniatur playlisty"
     Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"
     Always Show Mobile Search Bar: "Zawsze pokazuj pasek wyszukiwania na telefonie"
     Frosted Glass Player UI: "Interfejs odtwarzacza z efektem matowego szkła"

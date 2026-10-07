@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Playlist Thumbnail Size: "Μέγεθος μικρογραφιών λίστας αναπαραγωγής"
     Compact Mobile Mini Player: "Συμπαγής μίνι αναπαραγωγέας κινητού"
     Always Show Mobile Search Bar: "Να εμφανίζεται πάντα η γραμμή αναζήτησης στο κινητό"
     Frosted Glass Player UI: "Διεπαφή προγράμματος αναπαραγωγής με εφέ θαμπού γυαλιού"

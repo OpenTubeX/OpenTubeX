@@ -489,6 +489,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Playlist Thumbnail Size: "Grojaraščio miniatiūrų dydis"
     Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"
     Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
     Frosted Glass Player UI: "Grotuvo sąsaja su matinio stiklo efektu"

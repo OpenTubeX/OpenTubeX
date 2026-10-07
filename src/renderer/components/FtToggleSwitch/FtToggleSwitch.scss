@@ -81,7 +81,7 @@
     background-color: var(--toggle-track-color, color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color)));
     border: 2px solid var(--secondary-text-color);
     box-sizing: border-box;
-    border-radius: calc(var(--switch-track-height) / 2 * var(--ui-roundness));
+    border-radius: calc(var(--switch-track-height) / 2 * max(1, var(--ui-roundness)));
     block-size: var(--switch-track-height);
     inset-inline-start: calc(-1 * var(--switch-track-width) - 12px);
     inline-size: var(--switch-track-width);

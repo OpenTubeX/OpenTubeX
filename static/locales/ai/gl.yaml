@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Playlist Thumbnail Size: "Tamaño das miniaturas da lista de reprodución"
     Compact Mobile Mini Player: "Minirreprodutor móbil compacto"
     Always Show Mobile Search Bar: "Amosar sempre a barra de busca no móbil"
     Frosted Glass Player UI: "Interface do reprodutor con efecto de vidro esmerilado"

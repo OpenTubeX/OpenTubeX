@@ -640,6 +640,7 @@ Settings:
         #* Main Color Theme
     UI Scale: Skalierung der Benutzeroberfläche
     Thumbnail Size: Vorschaubildgröße
+    Playlist Thumbnail Size: Wiedergabelisten-Vorschaubildgröße
     Disable Smooth Scrolling: Gleichmäßiges Scrollen deaktivieren
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden

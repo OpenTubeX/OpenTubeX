@@ -44,8 +44,8 @@ export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0, viewportWid
 }
 
 /**
- * List thumbnails scale off fixed values only, so these are set once on the
- * document body instead of per list.
+ * List thumbnails scale off fixed values only. Set these on the document body
+ * for general lists or on a playlist page for its independent preference.
  * @param {number} thumbnailSize
  */
 export function getThumbnailListStyles(thumbnailSize) {

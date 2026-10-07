@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Playlist Thumbnail Size: "Ukuran thumbnail playlist"
     Compact Mobile Mini Player: "Pemutar mini seluler ringkas"
     Always Show Mobile Search Bar: "Selalu tampilkan bilah pencarian di ponsel"
     Frosted Glass Player UI: "Antarmuka pemutar dengan efek kaca buram"

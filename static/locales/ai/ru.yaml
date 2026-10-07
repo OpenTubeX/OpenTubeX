@@ -344,6 +344,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Playlist Thumbnail Size: "Размер миниатюр плейлиста"
     Compact Mobile Mini Player: "Компактный мобильный мини-плеер"
     Always Show Mobile Search Bar: "Всегда показывать строку поиска на телефоне"
     Frosted Glass Player UI: "Интерфейс плеера с эффектом матового стекла"

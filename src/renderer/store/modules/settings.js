@@ -491,6 +491,7 @@ const state = {
   showThumbnailPreviews: true,
   showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
+  playlistThumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
   animationSpeed: 100,
   showToastTimeoutIndicator: true,

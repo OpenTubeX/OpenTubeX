@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Playlist Thumbnail Size: "Veľkosť miniatúr zoznamu videí"
     Compact Mobile Mini Player: "Kompaktný mobilný miniprehrávač"
     Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"

@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Playlist Thumbnail Size: "Soittolistan pikkukuvien koko"
     Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"
     Always Show Mobile Search Bar: "Näytä mobiilin hakupalkki aina"
     Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"

@@ -20,12 +20,12 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onBeforeUpdate, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import store from '../../store/index'
 
 import { getThumbnailGridStyles, PHONE_THUMBNAIL_VIEWPORT_WIDTH } from '../../constants/thumbnailSize'
-import { setThumbnailGridVisible } from '../../composables/useThumbnailSizeSlider'
+import { setThumbnailGridVisible, thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { measureStableGridWidth } from './gridWidth'
 import { measureLeavingItemLayouts } from './leavingItemLayout'
@@ -60,6 +60,7 @@ const props = defineProps({
 const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
+const thumbnailSizeSetting = inject(thumbnailSizeSettingKey, 'thumbnailSize')
 const feedTransitionDuration = computed(() => {
   return `${300 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
 })
@@ -75,7 +76,7 @@ let active = true
 
 function updateGridSliderLimit() {
   const element = gridElement.value?.$el
-  if (element) setThumbnailGridVisible(element, active && props.grid && gridWidth > 0)
+  if (element) setThumbnailGridVisible(element, active && props.grid && gridWidth > 0, thumbnailSizeSetting)
 }
 
 watch(() => props.grid, updateGridSliderLimit)
@@ -126,14 +127,14 @@ function applyThumbnailSizeStyles() {
     return
   }
 
-  const styles = getThumbnailGridStyles(store.getters.getThumbnailSize, gridWidth, window.innerWidth)
+  const styles = getThumbnailGridStyles(store.state.settings[thumbnailSizeSetting], gridWidth, window.innerWidth)
 
   for (const [property, value] of Object.entries(styles)) {
     element.style.setProperty(property, value)
   }
 }
 
-watch(() => store.getters.getThumbnailSize, applyThumbnailSizeStyles)
+watch(() => store.state.settings[thumbnailSizeSetting], applyThumbnailSizeStyles)
 
 let leavingItemLayouts = null
 let pendingLeavingItems = []

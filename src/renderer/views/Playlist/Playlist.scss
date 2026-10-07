@@ -100,7 +100,8 @@
     }
 
     .playlistItemsCard {
-      inline-size: 60%;
+      flex: 1;
+      min-inline-size: 0;
       padding: 10px;
     }
   }
