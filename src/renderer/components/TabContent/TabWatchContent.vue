@@ -131,6 +131,7 @@ provide('isTabActive', presented)
 provide(routeLocationKey, injectedRoute)
 provide('tabRoute', injectedRoute)
 const router = navigation.createRouterFacade(props.tabId)
+const unregisterPreviewScrollGuard = router.beforeEach(preservePreviewHistoryScroll)
 const watchRouter = Object.create(router)
 Object.defineProperty(watchRouter, 'currentRoute', { value: computed(() => watchRoute.value) })
 provide(routerKey, watchRouter)
@@ -296,13 +297,17 @@ async function finishMinimizePreview(commit) {
   if (isWatchRoute.value) await clearMinimizePreview()
 }
 
-function clearMinimizePreview() {
+function preservePreviewHistoryScroll() {
   const tab = store.getters.getTabById(props.tabId)
-  if (previewScroll && previewHistoryEntry && tab?.history[previewHistoryEntry.index]?.route.fullPath === previewHistoryEntry.fullPath) {
-    // Navigation (including Back or a tab switch interrupting the gesture)
-    // saves browsing's document offset into Watch. Preserve its own viewport.
+  if (previewScroll && previewHistoryEntry && tab?.historyIndex === previewHistoryEntry.index && tab.history[previewHistoryEntry.index]?.route.fullPath === previewHistoryEntry.fullPath) {
+    // saveScroll writes browsing's preview offset into Watch. Repair it before
+    // navigation clones/trims history, or when a tab switch ends the preview.
     store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex: previewHistoryEntry.index, scroll: previewScroll })
   }
+}
+
+function clearMinimizePreview() {
+  preservePreviewHistoryScroll()
   const watchScroll = previewActive.value && !previewRestoring && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
   previewHistoryEntry = null
   previewScroll = null
@@ -376,6 +381,7 @@ watch(enabled, value => {
 
 onBeforeUnmount(() => {
   clearMinimizePreview()
+  unregisterPreviewScrollGuard()
   unregister()
   dispose()
 })
