@@ -1884,6 +1884,18 @@ Video:
       SubmitCategoryVote: Pošlji glas za kategorijo
       CategoryVoteSuccess: Glas za kategorijo je poslan.
     Google Cast:
+      Disconnected: "Sprejemnik se je odklopil."
+      Timeout: "Sprejemnik se ni odzval."
+      Busy: "Drugo okno že predvaja."
+      Not Authorized: "Aktivirajte to okno in poskusite znova."
+      Invalid Request: "Neveljavna zahteva za predvajanje."
+      IPv4 Required: "Potrebna je povezava IPv4."
+      Launch Failed: "Sprejemnika ni bilo mogoče zagnati."
+      Load Failed: "Sprejemnik ni mogel naložiti videa."
+      Cancelled: "Predvajanje je bilo preklicano."
+      Private Not Authorized: "Dostop do zasebnih medijev ni bil odobren."
+      Invalid Subtitles: "Neveljavni podnapisi za predvajanje."
+      Discovery Failed: "Sprejemnikov ni bilo mogoče poiskati."
       Preparing Video: "Priprava videoposnetka za predvajanje…"
       Connecting: "Povezovanje z {device}…"
       Starting Receiver: "Zagon sprejemnika Cast…"

@@ -777,6 +777,18 @@ Video:
       SubmitCategoryVote: Wyślij głos na kategorię
       CategoryVoteSuccess: Głos na kategorię został wysłany.
     Google Cast:
+      Disconnected: "Odbiornik się rozłączył."
+      Timeout: "Odbiornik nie odpowiedział."
+      Busy: "Inne okno już przesyła."
+      Not Authorized: "Aktywuj to okno i spróbuj ponownie."
+      Invalid Request: "Nieprawidłowe żądanie przesyłania."
+      IPv4 Required: "Wymagane jest połączenie IPv4."
+      Launch Failed: "Nie udało się uruchomić odbiornika."
+      Load Failed: "Odbiornik nie mógł wczytać filmu."
+      Cancelled: "Przesyłanie anulowano."
+      Private Not Authorized: "Dostęp do prywatnych mediów nie został zatwierdzony."
+      Invalid Subtitles: "Nieprawidłowe napisy do przesyłania."
+      Discovery Failed: "Nie udało się wyszukać odbiorników."
       Preparing Video: "Przygotowywanie filmu do przesyłania…"
       Connecting: "Łączenie z {device}…"
       Starting Receiver: "Uruchamianie odbiornika Cast…"

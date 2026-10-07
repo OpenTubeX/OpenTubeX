@@ -1432,6 +1432,18 @@ Video:
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
     Google Cast:
+      Disconnected: "Vastuvõtja ühendus katkes."
+      Timeout: "Vastuvõtja ei vastanud."
+      Busy: "Teine aken juba edastab."
+      Not Authorized: "Aktiveeri see aken ja proovi uuesti."
+      Invalid Request: "Vigane edastamistaotlus."
+      IPv4 Required: "Vajalik on IPv4-ühendus."
+      Launch Failed: "Vastuvõtjat ei saanud käivitada."
+      Load Failed: "Vastuvõtja ei saanud videot laadida."
+      Cancelled: "Edastamine tühistati."
+      Private Not Authorized: "Juurdepääsu privaatsele meediale ei kinnitatud."
+      Invalid Subtitles: "Vigased edastamise subtiitrid."
+      Discovery Failed: "Vastuvõtjaid ei saanud otsida."
       Preparing Video: "Video ettevalmistamine edastamiseks…"
       Connecting: "Ühendamine seadmega {device}…"
       Starting Receiver: "Casti vastuvõtja käivitamine…"

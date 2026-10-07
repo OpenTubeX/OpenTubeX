@@ -1430,6 +1430,18 @@ Video:
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
     Google Cast:
+      Disconnected: "Alıcının bağlantısı kesildi."
+      Timeout: "Alıcı yanıt vermedi."
+      Busy: "Başka bir pencere zaten yayın yapıyor."
+      Not Authorized: "Bu pencereyi etkinleştirip tekrar deneyin."
+      Invalid Request: "Geçersiz yayın isteği."
+      IPv4 Required: "IPv4 bağlantısı gereklidir."
+      Launch Failed: "Alıcı başlatılamadı."
+      Load Failed: "Alıcı videoyu yükleyemedi."
+      Cancelled: "Yayın iptal edildi."
+      Private Not Authorized: "Özel medya erişimi onaylanmadı."
+      Invalid Subtitles: "Geçersiz yayın altyazıları."
+      Discovery Failed: "Alıcılar aranamadı."
       Preparing Video: "Video yayın için hazırlanıyor…"
       Connecting: "{device} cihazına bağlanılıyor…"
       Starting Receiver: "Cast alıcısı başlatılıyor…"

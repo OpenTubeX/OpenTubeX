@@ -1471,6 +1471,18 @@ Video:
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
+      Disconnected: "O receptor desconectouse."
+      Timeout: "O receptor non respondeu."
+      Busy: "Outra xanela xa está a transmitir."
+      Not Authorized: "Activa esta xanela e téntao de novo."
+      Invalid Request: "Solicitude de transmisión non válida."
+      IPv4 Required: "Precísase unha conexión IPv4."
+      Launch Failed: "Non se puido iniciar o receptor."
+      Load Failed: "O receptor non puido cargar o vídeo."
+      Cancelled: "Cancelouse a transmisión."
+      Private Not Authorized: "Non se aprobou o acceso a contido privado."
+      Invalid Subtitles: "Subtítulos de transmisión non válidos."
+      Discovery Failed: "Non se puideron buscar receptores."
       Preparing Video: "Preparando o vídeo para transmitir…"
       Connecting: "Conectando con {device}…"
       Starting Receiver: "Iniciando o receptor Cast…"

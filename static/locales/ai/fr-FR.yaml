@@ -1429,6 +1429,18 @@ Video:
       SubmitCategoryVote: Envoyer le vote de catégorie
       CategoryVoteSuccess: Vote de catégorie envoyé.
     Google Cast:
+      Disconnected: "Le récepteur s’est déconnecté."
+      Timeout: "Le récepteur n’a pas répondu."
+      Busy: "Une autre fenêtre diffuse déjà."
+      Not Authorized: "Activez cette fenêtre et réessayez."
+      Invalid Request: "Demande de diffusion invalide."
+      IPv4 Required: "Une connexion IPv4 est requise."
+      Launch Failed: "Impossible de démarrer le récepteur."
+      Load Failed: "Le récepteur n’a pas pu charger la vidéo."
+      Cancelled: "La diffusion a été annulée."
+      Private Not Authorized: "L’accès aux médias privés n’a pas été approuvé."
+      Invalid Subtitles: "Sous-titres de diffusion invalides."
+      Discovery Failed: "Impossible de rechercher les récepteurs."
       Preparing Video: "Préparation de la vidéo pour la diffusion…"
       Connecting: "Connexion à {device}…"
       Starting Receiver: "Démarrage du récepteur Cast…"

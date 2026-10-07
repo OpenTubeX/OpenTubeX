@@ -1462,6 +1462,18 @@ Video:
       SubmitCategoryVote: Надіслати голос за категорію
       CategoryVoteSuccess: Голос за категорію надіслано.
     Google Cast:
+      Disconnected: "З’єднання з приймачем втрачено."
+      Timeout: "Приймач не відповів."
+      Busy: "Інше вікно вже транслює."
+      Not Authorized: "Активуйте це вікно та спробуйте знову."
+      Invalid Request: "Неприпустимий запит трансляції."
+      IPv4 Required: "Потрібне з’єднання IPv4."
+      Launch Failed: "Не вдалося запустити приймач."
+      Load Failed: "Приймач не зміг завантажити відео."
+      Cancelled: "Трансляцію скасовано."
+      Private Not Authorized: "Доступ до приватних медіа не схвалено."
+      Invalid Subtitles: "Неприпустимі субтитри трансляції."
+      Discovery Failed: "Не вдалося знайти приймачі."
       Preparing Video: "Підготовка відео до трансляції…"
       Connecting: "Підключення до {device}…"
       Starting Receiver: "Запуск приймача Cast…"

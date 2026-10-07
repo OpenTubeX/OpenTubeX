@@ -1432,6 +1432,18 @@ Video:
       SubmitCategoryVote: 提交類別投票
       CategoryVoteSuccess: 類別投票已提交。
     Google Cast:
+      Disconnected: "接收器已中斷連線。"
+      Timeout: "接收器未回應。"
+      Busy: "另一個視窗已在投放。"
+      Not Authorized: "請啟用此視窗後重試。"
+      Invalid Request: "投放請求無效。"
+      IPv4 Required: "需要 IPv4 連線。"
+      Launch Failed: "無法啟動接收器。"
+      Load Failed: "接收器無法載入影片。"
+      Cancelled: "投放已取消。"
+      Private Not Authorized: "未核准存取私人媒體。"
+      Invalid Subtitles: "投放字幕無效。"
+      Discovery Failed: "無法搜尋接收器。"
       Preparing Video: "正在準備投放影片…"
       Connecting: "正在連線至 {device}…"
       Starting Receiver: "正在啟動 Cast 接收器…"

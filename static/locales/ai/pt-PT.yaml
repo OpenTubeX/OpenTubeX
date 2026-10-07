@@ -1459,6 +1459,18 @@ Video:
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
     Google Cast:
+      Disconnected: "O recetor desligou-se."
+      Timeout: "O recetor não respondeu."
+      Busy: "Outra janela já está a transmitir."
+      Not Authorized: "Ative esta janela e tente novamente."
+      Invalid Request: "Pedido de transmissão inválido."
+      IPv4 Required: "É necessária uma ligação IPv4."
+      Launch Failed: "Não foi possível iniciar o recetor."
+      Load Failed: "O recetor não conseguiu carregar o vídeo."
+      Cancelled: "A transmissão foi cancelada."
+      Private Not Authorized: "O acesso a conteúdos privados não foi aprovado."
+      Invalid Subtitles: "Legendas de transmissão inválidas."
+      Discovery Failed: "Não foi possível procurar recetores."
       Preparing Video: "A preparar o vídeo para transmissão…"
       Connecting: "A ligar a {device}…"
       Starting Receiver: "A iniciar o recetor Cast…"

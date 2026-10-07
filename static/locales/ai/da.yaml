@@ -1494,6 +1494,18 @@ Video:
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
     Google Cast:
+      Disconnected: "Modtageren blev afbrudt."
+      Timeout: "Modtageren svarede ikke."
+      Busy: "Et andet vindue caster allerede."
+      Not Authorized: "Aktivér dette vindue, og prøv igen."
+      Invalid Request: "Ugyldig cast-anmodning."
+      IPv4 Required: "En IPv4-forbindelse er påkrævet."
+      Launch Failed: "Modtageren kunne ikke startes."
+      Load Failed: "Modtageren kunne ikke indlæse videoen."
+      Cancelled: "Casting blev annulleret."
+      Private Not Authorized: "Adgang til private medier blev ikke godkendt."
+      Invalid Subtitles: "Ugyldige undertekster til casting."
+      Discovery Failed: "Modtagere kunne ikke søges."
       Preparing Video: "Forbereder video til casting…"
       Connecting: "Opretter forbindelse til {device}…"
       Starting Receiver: "Starter Cast-modtageren…"

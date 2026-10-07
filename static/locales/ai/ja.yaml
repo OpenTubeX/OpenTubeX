@@ -1430,6 +1430,18 @@ Video:
       SubmitCategoryVote: カテゴリ変更の投票を送信
       CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
     Google Cast:
+      Disconnected: "受信機との接続が切れました。"
+      Timeout: "受信機から応答がありません。"
+      Busy: "別のウィンドウがすでにキャストしています。"
+      Not Authorized: "このウィンドウをアクティブにして、もう一度お試しください。"
+      Invalid Request: "キャスト要求が無効です。"
+      IPv4 Required: "IPv4接続が必要です。"
+      Launch Failed: "受信機を起動できませんでした。"
+      Load Failed: "受信機が動画を読み込めませんでした。"
+      Cancelled: "キャストがキャンセルされました。"
+      Private Not Authorized: "非公開メディアへのアクセスは許可されませんでした。"
+      Invalid Subtitles: "キャスト用字幕が無効です。"
+      Discovery Failed: "受信機を検索できませんでした。"
       Preparing Video: "キャスト用の動画を準備中…"
       Connecting: "{device} に接続中…"
       Starting Receiver: "Cast レシーバーを起動中…"

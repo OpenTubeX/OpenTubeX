@@ -1462,6 +1462,18 @@ Video:
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
+      Disconnected: "انقطع اتصال جهاز الاستقبال."
+      Timeout: "لم يستجب جهاز الاستقبال."
+      Busy: "هناك نافذة أخرى تبث بالفعل."
+      Not Authorized: "نشّط هذه النافذة وحاول مجددًا."
+      Invalid Request: "طلب بث غير صالح."
+      IPv4 Required: "يلزم اتصال IPv4."
+      Launch Failed: "تعذّر بدء جهاز الاستقبال."
+      Load Failed: "تعذّر على جهاز الاستقبال تحميل الفيديو."
+      Cancelled: "أُلغي البث."
+      Private Not Authorized: "لم تتم الموافقة على الوصول إلى الوسائط الخاصة."
+      Invalid Subtitles: "ترجمات البث غير صالحة."
+      Discovery Failed: "تعذّر البحث عن أجهزة الاستقبال."
       Preparing Video: "جارٍ تجهيز الفيديو للبث…"
       Connecting: "جارٍ الاتصال بـ {device}…"
       Starting Receiver: "جارٍ تشغيل جهاز استقبال Cast…"

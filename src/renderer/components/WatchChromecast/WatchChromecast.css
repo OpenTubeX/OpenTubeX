@@ -12,7 +12,7 @@
   max-inline-size: calc(100% - 32px);
   padding-block: 12px;
   padding-inline: 16px;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   color: var(--primary-text-color);
   font-size: 14px;

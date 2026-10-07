@@ -1448,6 +1448,18 @@ Video:
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
+      Disconnected: "Móttakarinn aftengdist."
+      Timeout: "Móttakarinn svaraði ekki."
+      Busy: "Annar gluggi er þegar að senda."
+      Not Authorized: "Virkjaðu þennan glugga og reyndu aftur."
+      Invalid Request: "Ógild sendingarbeiðni."
+      IPv4 Required: "IPv4-tenging er nauðsynleg."
+      Launch Failed: "Ekki tókst að ræsa móttakarann."
+      Load Failed: "Móttakarinn gat ekki hlaðið myndskeiðinu."
+      Cancelled: "Sending var afturkölluð."
+      Private Not Authorized: "Aðgangur að einkamiðlum var ekki samþykktur."
+      Invalid Subtitles: "Ógildir skjátextar fyrir sendingu."
+      Discovery Failed: "Ekki tókst að leita að móttökurum."
       Preparing Video: "Undirbý myndskeið fyrir sendingu…"
       Connecting: "Tengist {device}…"
       Starting Receiver: "Ræsi Cast-móttakara…"

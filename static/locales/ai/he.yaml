@@ -1469,6 +1469,18 @@ Video:
       SubmitCategoryVote: שליחת הצבעה על קטגוריה
       CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
+      Disconnected: "המקלט התנתק."
+      Timeout: "המקלט לא הגיב."
+      Busy: "חלון אחר כבר משדר."
+      Not Authorized: "יש להפעיל חלון זה ולנסות שוב."
+      Invalid Request: "בקשת שידור לא תקינה."
+      IPv4 Required: "נדרש חיבור IPv4."
+      Launch Failed: "לא ניתן להפעיל את המקלט."
+      Load Failed: "המקלט לא הצליח לטעון את הסרטון."
+      Cancelled: "השידור בוטל."
+      Private Not Authorized: "הגישה למדיה פרטית לא אושרה."
+      Invalid Subtitles: "כתוביות השידור לא תקינות."
+      Discovery Failed: "לא ניתן לחפש מקלטים."
       Preparing Video: "מכין את הסרטון לשידור…"
       Connecting: "מתחבר אל {device}…"
       Starting Receiver: "מפעיל את מקלט Cast…"

@@ -1475,6 +1475,18 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Disconnected: "De ontvanger is losgekoppeld."
+      Timeout: "De ontvanger reageerde niet."
+      Busy: "Een ander venster cast al."
+      Not Authorized: "Activeer dit venster en probeer opnieuw."
+      Invalid Request: "Ongeldig castverzoek."
+      IPv4 Required: "Een IPv4-verbinding is vereist."
+      Launch Failed: "De ontvanger kon niet worden gestart."
+      Load Failed: "De ontvanger kon de video niet laden."
+      Cancelled: "Het casten is geannuleerd."
+      Private Not Authorized: "Toegang tot privémedia is niet goedgekeurd."
+      Invalid Subtitles: "Ongeldige ondertitels voor casting."
+      Discovery Failed: "Ontvangers konden niet worden gezocht."
       Preparing Video: "Video voorbereiden voor casten…"
       Connecting: "Verbinden met {device}…"
       Starting Receiver: "Cast-ontvanger starten…"

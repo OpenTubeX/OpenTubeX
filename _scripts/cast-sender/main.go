@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -233,7 +234,11 @@ func main() {
 		err = fmt.Errorf("expected discover or address and port")
 	}
 	if err != nil {
-		_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"event": "error", "error": err.Error()})
+		message := map[string]string{"event": "error", "error": err.Error()}
+		if errors.Is(err, errUntrustedCastCertificate) {
+			message["code"] = "CAST_UNTRUSTED_CERTIFICATE"
+		}
+		_ = json.NewEncoder(os.Stdout).Encode(message)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

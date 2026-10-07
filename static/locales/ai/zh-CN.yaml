@@ -1430,6 +1430,18 @@ Video:
       SubmitCategoryVote: 提交类别投票
       CategoryVoteSuccess: 类别投票已提交。
     Google Cast:
+      Disconnected: "接收器已断开连接。"
+      Timeout: "接收器未响应。"
+      Busy: "另一个窗口已在投屏。"
+      Not Authorized: "请激活此窗口后重试。"
+      Invalid Request: "投屏请求无效。"
+      IPv4 Required: "需要 IPv4 连接。"
+      Launch Failed: "无法启动接收器。"
+      Load Failed: "接收器无法加载视频。"
+      Cancelled: "投屏已取消。"
+      Private Not Authorized: "未批准访问私有媒体。"
+      Invalid Subtitles: "投屏字幕无效。"
+      Discovery Failed: "无法搜索接收器。"
       Preparing Video: "正在准备投屏视频…"
       Connecting: "正在连接 {device}…"
       Starting Receiver: "正在启动 Cast 接收器…"

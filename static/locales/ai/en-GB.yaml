@@ -1410,6 +1410,18 @@ Video:
       SubmitCategoryVote: Submit category vote
       CategoryVoteSuccess: Category vote submitted.
     Google Cast:
+      Disconnected: "Receiver disconnected."
+      Timeout: "Receiver did not respond."
+      Busy: "Another window is already casting."
+      Not Authorized: "Activate this window and try again."
+      Invalid Request: "Invalid casting request."
+      IPv4 Required: "An IPv4 connection is required."
+      Launch Failed: "Could not start the receiver."
+      Load Failed: "Receiver could not load the video."
+      Cancelled: "Casting was cancelled."
+      Private Not Authorized: "Private media access was not approved."
+      Invalid Subtitles: "Invalid casting subtitles."
+      Discovery Failed: "Could not discover receivers."
       Preparing Video: "Preparing video for casting…"
       Connecting: "Connecting to {device}…"
       Starting Receiver: "Starting the Cast receiver…"

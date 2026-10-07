@@ -1488,6 +1488,18 @@ Video:
       SubmitCategoryVote: Пошаљи глас за категорију
       CategoryVoteSuccess: Глас за категорију је послат.
     Google Cast:
+      Disconnected: "Пријемник се искључио."
+      Timeout: "Пријемник није одговорио."
+      Busy: "Други прозор већ емитује."
+      Not Authorized: "Активирајте овај прозор и покушајте поново."
+      Invalid Request: "Неважећи захтев за емитовање."
+      IPv4 Required: "Потребна је IPv4 веза."
+      Launch Failed: "Пријемник није могао да се покрене."
+      Load Failed: "Пријемник није могао да учита видео."
+      Cancelled: "Емитовање је отказано."
+      Private Not Authorized: "Приступ приватним медијима није одобрен."
+      Invalid Subtitles: "Неважећи титлови за емитовање."
+      Discovery Failed: "Пријемници нису могли да се пронађу."
       Preparing Video: "Припрема видеа за емитовање…"
       Connecting: "Повезивање са {device}…"
       Starting Receiver: "Покретање Cast пријемника…"

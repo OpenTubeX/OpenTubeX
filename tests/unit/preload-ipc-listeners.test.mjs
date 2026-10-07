@@ -102,7 +102,9 @@ test('Cast start checks activation before asynchronous payload preparation and i
   assert.equal((await pending).castId, 'cast-1')
   assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE], [IpcChannels.CAST_START, payload, 'grant']])
   assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
-  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 0)
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
+  ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'grant', stage: 'loading' })
+  assert.deepEqual(stages, ['connecting'], 'Settled preparation must no longer receive progress')
 })
 
 test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {
@@ -120,7 +122,31 @@ test('unauthorized, cancelled and failed Cast preparation never sends a start re
   assert.match((await api.chromecast.start(() => null)).error, /cancelled/)
   await assert.rejects(api.chromecast.start(async () => { throw new Error('Caption failed') }), /Caption failed/)
   assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant'], [IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
-  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 0)
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
+})
+
+test('overlapping Cast preparations share one IPC listener and release their progress callbacks', async () => {
+  const { api, ipcRenderer, IpcChannels, userActivation } = await loadPreloadInterface()
+  const completions = []
+  const stages = []
+  let nextPreparation = 0
+  ipcRenderer.invoke = channel => Promise.resolve(channel === IpcChannels.CAST_PREPARE
+    ? { preparationId: String(++nextPreparation) }
+    : { castId: 'cast-1' })
+  userActivation.isActive = true
+  const pending = Array.from({ length: 11 }, (_, index) => api.chromecast.start(
+    () => new Promise(resolve => { completions[index] = resolve }),
+    stage => stages.push([index, stage])
+  ))
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
+  ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: '7', stage: 'loading' })
+  assert.deepEqual(stages, [[6, 'loading']])
+  completions.forEach(complete => complete(null))
+  await Promise.all(pending)
+  ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: '7', stage: 'connecting' })
+  assert.deepEqual(stages, [[6, 'loading']], 'Settled preparations must no longer receive progress')
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
 })
 
 test('player IPC subscriptions share one Electron listener per channel', async () => {

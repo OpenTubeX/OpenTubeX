@@ -1430,6 +1430,18 @@ Video:
       SubmitCategoryVote: Odeslat hlas pro kategorii
       CategoryVoteSuccess: Hlas pro kategorii byl odeslán.
     Google Cast:
+      Disconnected: "Přijímač se odpojil."
+      Timeout: "Přijímač neodpověděl."
+      Busy: "Jiné okno již vysílá."
+      Not Authorized: "Aktivujte toto okno a zkuste to znovu."
+      Invalid Request: "Neplatný požadavek na vysílání."
+      IPv4 Required: "Je vyžadováno připojení IPv4."
+      Launch Failed: "Přijímač se nepodařilo spustit."
+      Load Failed: "Přijímač nemohl načíst video."
+      Cancelled: "Vysílání bylo zrušeno."
+      Private Not Authorized: "Přístup k soukromým médiím nebyl schválen."
+      Invalid Subtitles: "Neplatné titulky pro vysílání."
+      Discovery Failed: "Přijímače se nepodařilo vyhledat."
       Preparing Video: "Příprava videa k odesílání…"
       Connecting: "Připojování k {device}…"
       Starting Receiver: "Spouštění přijímače Cast…"

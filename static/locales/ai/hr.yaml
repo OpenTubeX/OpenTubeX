@@ -1447,6 +1447,18 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Disconnected: "Prijamnik se odspojio."
+      Timeout: "Prijamnik nije odgovorio."
+      Busy: "Drugi prozor već emitira."
+      Not Authorized: "Aktivirajte ovaj prozor i pokušajte ponovno."
+      Invalid Request: "Nevažeći zahtjev za emitiranje."
+      IPv4 Required: "Potrebna je IPv4 veza."
+      Launch Failed: "Prijamnik nije moguće pokrenuti."
+      Load Failed: "Prijamnik nije mogao učitati video."
+      Cancelled: "Emitiranje je otkazano."
+      Private Not Authorized: "Pristup privatnim medijima nije odobren."
+      Invalid Subtitles: "Nevažeći titlovi za emitiranje."
+      Discovery Failed: "Prijamnike nije moguće potražiti."
       Preparing Video: "Priprema videozapisa za emitiranje…"
       Connecting: "Povezivanje s {device}…"
       Starting Receiver: "Pokretanje Cast prijamnika…"

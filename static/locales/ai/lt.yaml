@@ -1808,6 +1808,18 @@ Video:
       SubmitCategoryVote: Pateikti balsą už kategoriją
       CategoryVoteSuccess: Balsas už kategoriją pateiktas.
     Google Cast:
+      Disconnected: "Imtuvas atsijungė."
+      Timeout: "Imtuvas neatsakė."
+      Busy: "Kitas langas jau perduoda."
+      Not Authorized: "Suaktyvinkite šį langą ir bandykite dar kartą."
+      Invalid Request: "Neteisinga perdavimo užklausa."
+      IPv4 Required: "Reikalingas IPv4 ryšys."
+      Launch Failed: "Nepavyko paleisti imtuvo."
+      Load Failed: "Imtuvas negalėjo įkelti vaizdo įrašo."
+      Cancelled: "Perdavimas atšauktas."
+      Private Not Authorized: "Prieiga prie privačios medijos nebuvo patvirtinta."
+      Invalid Subtitles: "Neteisingi perdavimo subtitrai."
+      Discovery Failed: "Nepavyko ieškoti imtuvų."
       Preparing Video: "Vaizdo įrašo paruošimas perdavimui…"
       Connecting: "Jungiamasi prie {device}…"
       Starting Receiver: "Paleidžiamas Cast imtuvas…"

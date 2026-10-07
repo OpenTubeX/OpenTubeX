@@ -1906,6 +1906,18 @@ Video:
       SubmitCategoryVote: Envia el vot de categoria
       CategoryVoteSuccess: S’ha enviat el vot de categoria.
     Google Cast:
+      Disconnected: "El receptor s’ha desconnectat."
+      Timeout: "El receptor no ha respost."
+      Busy: "Una altra finestra ja està transmetent."
+      Not Authorized: "Activeu aquesta finestra i torneu-ho a provar."
+      Invalid Request: "Sol·licitud de transmissió no vàlida."
+      IPv4 Required: "Cal una connexió IPv4."
+      Launch Failed: "No s’ha pogut iniciar el receptor."
+      Load Failed: "El receptor no ha pogut carregar el vídeo."
+      Cancelled: "S’ha cancel·lat la transmissió."
+      Private Not Authorized: "No s’ha aprovat l’accés a contingut privat."
+      Invalid Subtitles: "Subtítols de transmissió no vàlids."
+      Discovery Failed: "No s’han pogut cercar receptors."
       Preparing Video: "Preparant el vídeo per transmetre…"
       Connecting: "Connectant amb {device}…"
       Starting Receiver: "Iniciant el receptor Cast…"

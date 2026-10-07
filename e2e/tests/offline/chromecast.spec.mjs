@@ -48,7 +48,12 @@ async function mockCast(app) {
       await new Promise(resolve => setTimeout(resolve, globalThis.castTest.startDelayMs))
       globalThis.castTest.startCompletions++
       if (globalThis.castTest.failStart === 'throw') throw new Error('Receiver connection failed')
-      if (globalThis.castTest.failStart) return { error: typeof globalThis.castTest.failStart === 'string' ? globalThis.castTest.failStart : 'Receiver rejected media' }
+      if (globalThis.castTest.failStart) {
+        return {
+          error: typeof globalThis.castTest.failStart === 'string' ? globalThis.castTest.failStart : 'Receiver rejected media',
+          errorCode: globalThis.castTest.failStartCode
+        }
+      }
       state.currentTime = payload.startSeconds
       state.paused = payload.paused
       return { castId: 'session-id', deviceName: 'Test TV', status: { ...state } }
@@ -134,6 +139,10 @@ test('Cast shows persistent startup stages and receiver buffering until playback
     backgrounds.push(await progress.evaluate(el => getComputedStyle(el).backgroundColor))
   }
   expect(backgrounds[0]).not.toBe(backgrounds[1])
+  for (const [roundness, radius] of [[0, '0px'], [200, '16px'], [100, '8px']]) {
+    await watch.evaluate((vm, value) => vm.$store.dispatch('updateUiRoundness', value), roundness)
+    await expect(progress).toHaveCSS('border-radius', radius)
+  }
   await app.electronApp.evaluate(() => {
     globalThis.castTest.state.buffering = true
     globalThis.castTest.finishStart()
@@ -155,6 +164,8 @@ test('Cast loading feedback fits fractional scale and respects reduced motion', 
   await expect(progress).toHaveText('Connecting to Test TV…')
   const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
   const progressBounds = await progress.boundingBox()
+  expect(playerBounds, 'Player must have visible bounds').not.toBeNull()
+  expect(progressBounds, 'Cast progress must have visible bounds').not.toBeNull()
   expect(progressBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
   expect(progressBounds.x + progressBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width)
   await expect(page.locator('.castProgressSpinner')).toHaveCSS('animation-name', 'none')
@@ -412,7 +423,8 @@ test('Cast explains an untrusted receiver certificate and preserves local playba
   await watch.evaluate(vm => vm.$refs.player.play())
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   await app.electronApp.evaluate(() => {
-    globalThis.castTest.failStart = 'untrusted Cast device certificate: x509: certificate signed by unknown authority'
+    globalThis.castTest.failStart = 'Receiver identity verification failed'
+    globalThis.castTest.failStartCode = 'CAST_UNTRUSTED_CERTIFICATE'
   })
   await choice(page, 'Test TV')
   await expect(page.getByText("Could not cast the video: The receiver's certificate is not trusted. Use an authenticated Google Cast receiver.", { exact: true })).toBeVisible()
@@ -420,15 +432,50 @@ test('Cast explains an untrusted receiver certificate and preserves local playba
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
 })
 
+test('Cast preserves certificate wording without a typed trust failure', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.failStart = 'Receiver reported untrusted Cast device certificate: diagnostic only'
+  })
+  await choice(page, 'Test TV')
+  await expect(page.getByText('Could not cast the video: Receiver reported untrusted Cast device certificate: diagnostic only', { exact: true })).toBeVisible()
+})
+
+test('Cast localizes receiver disconnects in German', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await choice(page, 'Test TV')
+  await watch.evaluate(vm => vm.$store.dispatch('updateCurrentLocale', 'de-DE'))
+  await app.electronApp.evaluate(() => { globalThis.castTest.state.connected = false })
+  await expect(page.getByText('Das Video konnte nicht übertragen werden: Die Verbindung zum Empfänger wurde getrennt.', { exact: true })).toBeVisible()
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+})
+
+for (const [code, reason] of [
+  ['CAST_TIMEOUT', 'Der Empfänger hat nicht geantwortet.'],
+  ['CAST_LAUNCH_FAILED', 'Der Empfänger konnte nicht gestartet werden.'],
+  ['CAST_LOAD_FAILED', 'Der Empfänger konnte das Video nicht laden.']
+]) {
+  test(`Cast localizes ${code} startup errors in German`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate(vm => vm.$store.dispatch('updateCurrentLocale', 'de-DE'))
+    await app.electronApp.evaluate((_, code) => {
+      globalThis.castTest.failStart = 'Application diagnostic in English'
+      globalThis.castTest.failStartCode = code
+    }, code)
+    await choice(page, 'Test TV')
+    await expect(page.getByText(`Das Video konnte nicht übertragen werden: ${reason}`, { exact: true })).toBeVisible()
+  })
+}
+
 test('Cast shows discovery failure details without interrupting local playback', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
   await watch.evaluate(vm => vm.$refs.player.play())
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('cast-discover')
-    ipcMain.handle('cast-discover', () => ({ error: 'Cast discovery failed: helper is missing' }))
+    ipcMain.handle('cast-discover', () => ({ error: 'helper is missing' }))
   })
   await page.locator('.chromecastControl > button').click()
-  await expect(page.getByText('Could not cast the video: Cast discovery failed: helper is missing', { exact: true })).toBeVisible()
+  await expect(page.getByText('Could not cast the video: helper is missing', { exact: true })).toBeVisible()
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
 })

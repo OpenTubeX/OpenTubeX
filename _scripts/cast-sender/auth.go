@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	stdx509 "crypto/x509"
 	_ "embed"
+	"errors"
 	"fmt"
 	"time"
 
@@ -26,6 +27,8 @@ import (
 var castRootPEM []byte
 
 const deviceAuthNamespace = "urn:x-cast:com.google.cast.tp.deviceauth"
+
+var errUntrustedCastCertificate = errors.New("untrusted Cast device certificate")
 
 func castRoots() *x509.CertPool {
 	roots := x509.NewCertPool()
@@ -146,7 +149,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	chains, err := device.Verify(x509.VerifyOptions{Roots: roots, Intermediates: intermediates,
 		CurrentTime: now, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageAny}})
 	if err != nil {
-		return fmt.Errorf("untrusted Cast device certificate: %w", err)
+		return fmt.Errorf("%w: %w", errUntrustedCastCertificate, err)
 	}
 	for _, certificate := range chains[0] {
 		for _, policy := range certificate.PolicyIdentifiers {

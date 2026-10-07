@@ -85,13 +85,18 @@ test('Cast preserves the native authentication error when the helper exits', asy
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-error-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const executable = path.join(directory, 'sender.mjs')
-  const reason = 'untrusted Cast device certificate: x509: certificate signed by unknown authority'
-  await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason }) + '\n')}, () => process.exit(1))\n`)
+  const reason = 'Receiver identity verification failed'
+  const code = 'CAST_UNTRUSTED_CERTIFICATE'
+  await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason, code }) + '\n')}, () => process.exit(1))\n`)
   await chmod(executable, 0o755)
   const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
   t.after(() => sender.close())
-  await assert.rejects(sender.connect(), { message: reason })
-  await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason })
+  await assert.rejects(sender.connect(), { message: reason, code })
+  await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason, code })
+  const manager = new ChromecastManager(executable)
+  manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
+  t.after(() => manager.stop())
+  assert.deepEqual(await manager.start(42, payload), { error: reason, errorCode: code })
 })
 
 async function managerForTest(t, powerSaveBlocker) {
@@ -275,7 +280,9 @@ test('an empty receiver media status closes the endpoint and releases the sessio
 test('failed loads release resources and allow a subsequent cast', async t => {
   const manager = await managerForTest(t)
   if (!manager) return
-  assert.match((await manager.start(42, { ...payload, title: 'Reject media' })).error, /LOAD_FAILED/)
+  const failure = await manager.start(42, { ...payload, title: 'Reject media' })
+  assert.match(failure.error, /LOAD_FAILED/)
+  assert.equal(failure.errorCode, 'CAST_LOAD_FAILED')
   assert.equal(manager.active, null)
   assert.equal(manager.starting, false)
   const result = await manager.start(42, payload)

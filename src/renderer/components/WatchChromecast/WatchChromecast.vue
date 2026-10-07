@@ -129,7 +129,21 @@ function reportError(error) {
   let reason = typeof error?.message === 'string'
     ? error.message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')
     : ''
-  if (reason.includes('untrusted Cast device certificate:')) reason = t('Video.Player.Google Cast.Untrusted Receiver')
+  reason = {
+    CAST_UNTRUSTED_CERTIFICATE: t('Video.Player.Google Cast.Untrusted Receiver'),
+    CAST_DISCONNECTED: t('Video.Player.Google Cast.Disconnected'),
+    CAST_TIMEOUT: t('Video.Player.Google Cast.Timeout'),
+    CAST_BUSY: t('Video.Player.Google Cast.Busy'),
+    CAST_NOT_AUTHORIZED: t('Video.Player.Google Cast.Not Authorized'),
+    CAST_INVALID_REQUEST: t('Video.Player.Google Cast.Invalid Request'),
+    CAST_IPV4_REQUIRED: t('Video.Player.Google Cast.IPv4 Required'),
+    CAST_LAUNCH_FAILED: t('Video.Player.Google Cast.Launch Failed'),
+    CAST_LOAD_FAILED: t('Video.Player.Google Cast.Load Failed'),
+    CAST_CANCELLED: t('Video.Player.Google Cast.Cancelled'),
+    CAST_PRIVATE_NOT_AUTHORIZED: t('Video.Player.Google Cast.Private Not Authorized'),
+    CAST_INVALID_SUBTITLES: t('Video.Player.Google Cast.Invalid Subtitles'),
+    CAST_DISCOVERY_FAILED: t('Video.Player.Google Cast.Discovery Failed')
+  }[error?.code] ?? reason
   showToast({
     message: reason ? t('Video.Player.Google Cast.Error With Details', { error: reason }) : t('Video.Player.Google Cast.Error'),
     icon: ['fas', 'cast']
@@ -143,7 +157,7 @@ async function refreshDevices() {
     refreshSource().catch(reportError)
     const result = await window.ftElectron.chromecast.discover()
     if (disposed) return
-    if (!Array.isArray(result)) throw new Error(result?.error ?? 'Cast discovery failed')
+    if (!Array.isArray(result)) throw Object.assign(new Error(result?.error ?? 'Cast discovery failed'), { code: result?.errorCode ?? (result?.error ? undefined : 'CAST_DISCOVERY_FAILED') })
     devices.value = result
   } catch (error) { reportError(error) } finally { loading.value = false }
 }
@@ -180,7 +194,7 @@ async function poll() {
     if (!result.connected) {
       castId.value = null
       releaseLocalPlayer(result.currentTime ?? status.value.currentTime, false)
-      reportError(new Error('Cast device disconnected'))
+      reportError(Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' }))
       return
     }
     status.value = result
@@ -245,7 +259,7 @@ async function handleChoice(choice) {
       } else if (choice === 'mute') value = !status.value.muted
       else if (choice.startsWith('caption-')) { action = 'caption'; value = Number(choice.slice(8)) }
       const result = await window.ftElectron.chromecast.control(castId.value, action, value)
-      if (result.error) throw new Error(result.error)
+      if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
       status.value = result
       emit('playback-state', result)
       return
@@ -291,7 +305,7 @@ async function handleChoice(choice) {
     }, stage => {
       if (!disposed && ['connecting', 'launching', 'loading'].includes(stage)) startupStage.value = stage
     })
-    if (result.error) throw new Error(result.error)
+    if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
     if (disposed || route.path !== watchPath || props.getPlayer() !== player) {
       await window.ftElectron.chromecast.stop(result.castId)
       return

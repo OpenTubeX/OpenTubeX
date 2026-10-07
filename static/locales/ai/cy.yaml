@@ -1452,6 +1452,18 @@ Video:
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
+      Disconnected: "Datgysylltodd y derbynnydd."
+      Timeout: "Ni ymatebodd y derbynnydd."
+      Busy: "Mae ffenestr arall eisoes yn castio."
+      Not Authorized: "Gweithredwch y ffenestr hon a rhowch gynnig arall."
+      Invalid Request: "Cais castio annilys."
+      IPv4 Required: "Mae angen cysylltiad IPv4."
+      Launch Failed: "Methu cychwyn y derbynnydd."
+      Load Failed: "Ni allai’r derbynnydd lwytho’r fideo."
+      Cancelled: "Canslwyd y castio."
+      Private Not Authorized: "Ni chymeradwywyd mynediad at gyfryngau preifat."
+      Invalid Subtitles: "Isdeitlau castio annilys."
+      Discovery Failed: "Methu chwilio am dderbynyddion."
       Preparing Video: "Yn paratoi'r fideo i'w ddarlledu…"
       Connecting: "Yn cysylltu â {device}…"
       Starting Receiver: "Yn cychwyn y derbynnydd Cast…"

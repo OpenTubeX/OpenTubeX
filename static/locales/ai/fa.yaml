@@ -1500,6 +1500,18 @@ Video:
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
     Google Cast:
+      Disconnected: "اتصال گیرنده قطع شد."
+      Timeout: "گیرنده پاسخ نداد."
+      Busy: "پنجرهٔ دیگری در حال پخش است."
+      Not Authorized: "این پنجره را فعال کنید و دوباره تلاش کنید."
+      Invalid Request: "درخواست پخش نامعتبر است."
+      IPv4 Required: "اتصال IPv4 لازم است."
+      Launch Failed: "گیرنده راه‌اندازی نشد."
+      Load Failed: "گیرنده نتوانست ویدیو را بارگیری کند."
+      Cancelled: "پخش لغو شد."
+      Private Not Authorized: "دسترسی به رسانهٔ خصوصی تأیید نشد."
+      Invalid Subtitles: "زیرنویس‌های پخش نامعتبرند."
+      Discovery Failed: "جست‌وجوی گیرنده‌ها ممکن نشد."
       Preparing Video: "در حال آماده‌سازی ویدیو برای پخش…"
       Connecting: "در حال اتصال به {device}…"
       Starting Receiver: "در حال راه‌اندازی گیرندهٔ Cast…"

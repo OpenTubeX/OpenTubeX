@@ -12,7 +12,7 @@ export const CAST_MEDIA = 'urn:x-cast:com.google.cast.media'
 export async function discoverCastDevices(executable) {
   const { stdout } = await execFileAsync(executable, ['discover'], { timeout: 6000, maxBuffer: 256_000, windowsHide: true })
   const devices = JSON.parse(stdout)
-  if (!Array.isArray(devices)) throw new Error('Invalid Cast discovery response')
+  if (!Array.isArray(devices)) throw Object.assign(new Error('Invalid Cast discovery response'), { code: 'CAST_DISCOVERY_FAILED' })
   return devices.filter(device => typeof device.id === 'string' && device.id.length <= 256 &&
     typeof device.name === 'string' && device.name.length <= 256 && isIP(device.address) === 4 &&
     Number.isInteger(device.port) && device.port > 0 && device.port <= 65535)
@@ -36,7 +36,9 @@ export class CastSender extends EventEmitter {
       try {
         const message = JSON.parse(line)
         if (message.event === 'error' && typeof message.error === 'string' && message.error.length > 0) {
-          this.close(new Error(message.error.slice(0, 512)))
+          const error = new Error(message.error.slice(0, 512))
+          if (message.code === 'CAST_UNTRUSTED_CERTIFICATE') error.code = message.code
+          this.close(error)
           return
         }
         if (message.event === 'connected') this.emit('connected', message.address)
@@ -45,8 +47,13 @@ export class CastSender extends EventEmitter {
         if (pending && pending.namespace === message.namespace) {
           this.pending.delete(message.payload.requestId)
           clearTimeout(pending.timer)
-          if (['INVALID_REQUEST', 'LOAD_FAILED', 'LAUNCH_ERROR'].includes(message.payload.type)) {
-            pending.reject(new Error(`Cast ${message.payload.type}`))
+          const code = {
+            INVALID_REQUEST: 'CAST_INVALID_REQUEST',
+            LOAD_FAILED: 'CAST_LOAD_FAILED',
+            LAUNCH_ERROR: 'CAST_LAUNCH_FAILED'
+          }[message.payload.type]
+          if (typeof code === 'string') {
+            pending.reject(Object.assign(new Error(`Cast ${message.payload.type}`), { code }))
           } else {
             pending.resolve(message.payload)
           }
@@ -65,7 +72,7 @@ export class CastSender extends EventEmitter {
       }
       const connected = address => { cleanup(); resolve(address) }
       const closed = error => { cleanup(); reject(error) }
-      const timer = setTimeout(() => { this.close(new Error('Cast device did not respond')) }, 8000)
+      const timer = setTimeout(() => { this.close(Object.assign(new Error('Cast device did not respond'), { code: 'CAST_TIMEOUT' })) }, 8000)
       this.once('connected', connected)
       this.once('closed', closed)
       if (this.closed) closed(this.closeError)
@@ -79,7 +86,7 @@ export class CastSender extends EventEmitter {
       if (wait) {
         const timer = setTimeout(() => {
           this.pending.delete(id)
-          reject(new Error('Cast device did not respond'))
+          reject(Object.assign(new Error('Cast device did not respond'), { code: 'CAST_TIMEOUT' }))
         }, 8000)
         this.pending.set(id, { resolve, reject, timer, namespace })
       }
@@ -92,7 +99,7 @@ export class CastSender extends EventEmitter {
     })
   }
 
-  close(error = new Error('Cast device disconnected')) {
+  close(error = Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })) {
     if (this.closed) return
     this.closed = true
     this.closeError = error

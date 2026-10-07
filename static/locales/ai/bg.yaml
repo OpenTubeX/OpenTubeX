@@ -1443,6 +1443,18 @@ Video:
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
+      Disconnected: "Приемникът прекъсна връзката."
+      Timeout: "Приемникът не отговори."
+      Busy: "Друг прозорец вече предава."
+      Not Authorized: "Активирайте този прозорец и опитайте отново."
+      Invalid Request: "Невалидна заявка за предаване."
+      IPv4 Required: "Необходима е IPv4 връзка."
+      Launch Failed: "Приемникът не можа да бъде стартиран."
+      Load Failed: "Приемникът не можа да зареди видеото."
+      Cancelled: "Предаването беше отменено."
+      Private Not Authorized: "Достъпът до частни медии не беше одобрен."
+      Invalid Subtitles: "Невалидни субтитри за предаване."
+      Discovery Failed: "Приемниците не можаха да бъдат намерени."
       Preparing Video: "Подготовка на видеото за предаване…"
       Connecting: "Свързване с {device}…"
       Starting Receiver: "Стартиране на Cast приемника…"

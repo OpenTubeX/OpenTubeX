@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"math/big"
 	"net"
 	"testing"
@@ -295,6 +296,10 @@ func TestDeviceAuthenticationVerification(t *testing.T) {
 			err := verifyReceiver(response, nonce, peer, pool, now)
 			if (err == nil) != (scenario == "valid") {
 				t.Fatalf("unexpected verification result: %v", err)
+			}
+			untrusted := scenario == "untrusted" || scenario == "missing intermediate" || scenario == "expired"
+			if errors.Is(err, errUntrustedCastCertificate) != untrusted {
+				t.Fatalf("unexpected certificate error classification for %s: %v", scenario, err)
 			}
 		})
 	}

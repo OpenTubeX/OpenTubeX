@@ -1445,6 +1445,18 @@ Video:
       SubmitCategoryVote: Bidali kategoriaren botoa
       CategoryVoteSuccess: Kategoriaren botoa bidali da.
     Google Cast:
+      Disconnected: "Hartzailea deskonektatu da."
+      Timeout: "Hartzaileak ez du erantzun."
+      Busy: "Beste leiho bat dago jada igortzen."
+      Not Authorized: "Aktibatu leiho hau eta saiatu berriro."
+      Invalid Request: "Igorpen-eskaera baliogabea."
+      IPv4 Required: "IPv4 konexioa behar da."
+      Launch Failed: "Ezin izan da hartzailea abiarazi."
+      Load Failed: "Hartzaileak ezin izan du bideoa kargatu."
+      Cancelled: "Igorpena bertan behera utzi da."
+      Private Not Authorized: "Ez da onartu multimedia pribaturako sarbidea."
+      Invalid Subtitles: "Igorpenaren azpititulu baliogabeak."
+      Discovery Failed: "Ezin izan dira hartzaileak bilatu."
       Preparing Video: "Bideoa igortzeko prestatzen…"
       Connecting: "{device} gailura konektatzen…"
       Starting Receiver: "Cast hargailua abiarazten…"

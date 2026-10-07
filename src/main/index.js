@@ -4659,12 +4659,12 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.CAST_DISCOVER, async event => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
-    try { return await chromecast.discover() } catch (error) { return { error: `Cast discovery failed: ${error.message}` } }
+    try { return await chromecast.discover() } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
   })
   const castOwners = new WeakSet()
   const castPreparations = new Map()
   ipcMain.handle(IpcChannels.CAST_PREPARE, event => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
     const ownerId = event.sender.id
     const preparationId = randomUUID()
     castPreparations.set(ownerId, { preparationId, frameId: event.senderFrame.routingId, frameUrl: event.senderFrame.url })
@@ -4687,7 +4687,7 @@ function runApp() {
     const preparation = castPreparations.get(ownerId)
     if (!isOpenTubeXUrl(event.senderFrame.url) || !preparation || preparation.preparationId !== preparationId ||
         preparation.frameId !== event.senderFrame.routingId || preparation.frameUrl !== event.senderFrame.url) {
-      return { error: 'Cast start is not authorized' }
+      return { error: 'Cast start is not authorized', errorCode: 'CAST_NOT_AUTHORIZED' }
     }
     // Consume the focused-window grant once, preserving it across subtitle work.
     castPreparations.delete(ownerId)
@@ -4746,8 +4746,8 @@ function runApp() {
     // Ask before launching the receiver, so a private source's native consent
     // dialog does not consume the receiver's media-loading timeout.
     if (privateInstance && isInvidiousInstanceUrl(payload?.source?.url, privateInstance) &&
-        !await resolveAddresses(new URL(payload.source.url))) return { error: 'Private Cast media was not authorized' }
-    if (event.sender.isDestroyed()) return { error: 'Cast start cancelled' }
+        !await resolveAddresses(new URL(payload.source.url))) return { error: 'Private Cast media was not authorized', errorCode: 'CAST_PRIVATE_NOT_AUTHORIZED' }
+    if (event.sender.isDestroyed()) return { error: 'Cast start cancelled', errorCode: 'CAST_CANCELLED' }
     const onProgress = stage => {
       const frame = event.senderFrame
       if (!event.sender.isDestroyed() && frame && !frame.detached) {
@@ -4766,7 +4766,7 @@ function runApp() {
   })
   ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() || typeof castId !== 'string') {
-      return { error: 'Casting requires an active OpenTubeX window' }
+      return { error: 'Casting requires an active OpenTubeX window', errorCode: 'CAST_NOT_AUTHORIZED' }
     }
     return chromecast.control(event.sender.id, castId, action, value)
   })

@@ -1703,6 +1703,18 @@ Video:
       SubmitCategoryVote: Send kategorirøyst
       CategoryVoteSuccess: Kategorirøyst sendt.
     Google Cast:
+      Disconnected: "Mottakaren vart fråkopla."
+      Timeout: "Mottakaren svarte ikkje."
+      Busy: "Eit anna vindauge castar allereie."
+      Not Authorized: "Aktiver dette vindauget og prøv igjen."
+      Invalid Request: "Ugyldig cast-førespurnad."
+      IPv4 Required: "Ei IPv4-tilkopling er nødvendig."
+      Launch Failed: "Kunne ikkje starte mottakaren."
+      Load Failed: "Mottakaren kunne ikkje laste videoen."
+      Cancelled: "Casting vart avbroten."
+      Private Not Authorized: "Tilgang til private medium vart ikkje godkjend."
+      Invalid Subtitles: "Ugyldige undertekstar for casting."
+      Discovery Failed: "Kunne ikkje søkje etter mottakarar."
       Preparing Video: "Førebur video for casting…"
       Connecting: "Koplar til {device}…"
       Starting Receiver: "Startar Cast-mottakaren…"

@@ -1462,6 +1462,18 @@ Video:
       SubmitCategoryVote: Trimite votul pentru categorie
       CategoryVoteSuccess: Votul pentru categorie a fost trimis.
     Google Cast:
+      Disconnected: "Receptorul s-a deconectat."
+      Timeout: "Receptorul nu a răspuns."
+      Busy: "O altă fereastră transmite deja."
+      Not Authorized: "Activați această fereastră și încercați din nou."
+      Invalid Request: "Cerere de transmitere nevalidă."
+      IPv4 Required: "Este necesară o conexiune IPv4."
+      Launch Failed: "Receptorul nu a putut fi pornit."
+      Load Failed: "Receptorul nu a putut încărca videoclipul."
+      Cancelled: "Transmiterea a fost anulată."
+      Private Not Authorized: "Accesul la conținut privat nu a fost aprobat."
+      Invalid Subtitles: "Subtitrări nevalide pentru transmitere."
+      Discovery Failed: "Receptoarele nu au putut fi căutate."
       Preparing Video: "Se pregătește videoclipul pentru transmitere…"
       Connecting: "Se conectează la {device}…"
       Starting Receiver: "Se pornește receptorul Cast…"

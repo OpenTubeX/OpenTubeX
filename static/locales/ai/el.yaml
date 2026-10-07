@@ -1467,6 +1467,18 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Disconnected: "Ο δέκτης αποσυνδέθηκε."
+      Timeout: "Ο δέκτης δεν απάντησε."
+      Busy: "Ένα άλλο παράθυρο μεταδίδει ήδη."
+      Not Authorized: "Ενεργοποιήστε αυτό το παράθυρο και δοκιμάστε ξανά."
+      Invalid Request: "Μη έγκυρο αίτημα μετάδοσης."
+      IPv4 Required: "Απαιτείται σύνδεση IPv4."
+      Launch Failed: "Δεν ήταν δυνατή η εκκίνηση του δέκτη."
+      Load Failed: "Ο δέκτης δεν μπόρεσε να φορτώσει το βίντεο."
+      Cancelled: "Η μετάδοση ακυρώθηκε."
+      Private Not Authorized: "Δεν εγκρίθηκε η πρόσβαση σε ιδιωτικά πολυμέσα."
+      Invalid Subtitles: "Μη έγκυροι υπότιτλοι μετάδοσης."
+      Discovery Failed: "Δεν ήταν δυνατή η αναζήτηση δεκτών."
       Preparing Video: "Προετοιμασία βίντεο για μετάδοση…"
       Connecting: "Σύνδεση με {device}…"
       Starting Receiver: "Εκκίνηση του δέκτη Cast…"

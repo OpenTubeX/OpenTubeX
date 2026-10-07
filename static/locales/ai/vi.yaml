@@ -1459,6 +1459,18 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Disconnected: "Thiết bị nhận đã ngắt kết nối."
+      Timeout: "Thiết bị nhận không phản hồi."
+      Busy: "Một cửa sổ khác đang truyền."
+      Not Authorized: "Kích hoạt cửa sổ này và thử lại."
+      Invalid Request: "Yêu cầu truyền không hợp lệ."
+      IPv4 Required: "Cần kết nối IPv4."
+      Launch Failed: "Không thể khởi động thiết bị nhận."
+      Load Failed: "Thiết bị nhận không thể tải video."
+      Cancelled: "Đã hủy truyền."
+      Private Not Authorized: "Quyền truy cập nội dung riêng tư chưa được chấp thuận."
+      Invalid Subtitles: "Phụ đề truyền không hợp lệ."
+      Discovery Failed: "Không thể tìm thiết bị nhận."
       Preparing Video: "Đang chuẩn bị video để truyền…"
       Connecting: "Đang kết nối với {device}…"
       Starting Receiver: "Đang khởi động thiết bị nhận Cast…"

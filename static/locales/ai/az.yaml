@@ -1442,6 +1442,18 @@ Video:
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
     Google Cast:
+      Disconnected: "Qəbuledici ilə əlaqə kəsildi."
+      Timeout: "Qəbuledici cavab vermədi."
+      Busy: "Başqa pəncərə artıq yayımlayır."
+      Not Authorized: "Bu pəncərəni aktivləşdirib yenidən cəhd edin."
+      Invalid Request: "Yanlış yayım sorğusu."
+      IPv4 Required: "IPv4 bağlantısı tələb olunur."
+      Launch Failed: "Qəbuledicini başlatmaq mümkün olmadı."
+      Load Failed: "Qəbuledici videonu yükləyə bilmədi."
+      Cancelled: "Yayım ləğv edildi."
+      Private Not Authorized: "Şəxsi mediaya giriş təsdiqlənmədi."
+      Invalid Subtitles: "Yayım subtitrləri yanlışdır."
+      Discovery Failed: "Qəbulediciləri axtarmaq mümkün olmadı."
       Preparing Video: "Video yayımlama üçün hazırlanır…"
       Connecting: "{device} ilə bağlantı qurulur…"
       Starting Receiver: "Cast qəbuledicisi başladılır…"

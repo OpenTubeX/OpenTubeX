@@ -2101,6 +2101,18 @@ Video:
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
     Google Cast:
+      Disconnected: "Die Verbindung zum Empfänger wurde getrennt."
+      Timeout: "Der Empfänger hat nicht geantwortet."
+      Busy: "Ein anderes Fenster überträgt bereits."
+      Not Authorized: "Aktiviere dieses Fenster und versuche es erneut."
+      Invalid Request: "Ungültige Übertragungsanfrage."
+      IPv4 Required: "Eine IPv4-Verbindung ist erforderlich."
+      Launch Failed: "Der Empfänger konnte nicht gestartet werden."
+      Load Failed: "Der Empfänger konnte das Video nicht laden."
+      Cancelled: "Die Übertragung wurde abgebrochen."
+      Private Not Authorized: "Der Zugriff auf private Medien wurde nicht genehmigt."
+      Invalid Subtitles: "Ungültige Untertitel für die Übertragung."
+      Discovery Failed: "Es konnten keine Empfänger gesucht werden."
       Preparing Video: Video zum Übertragen wird vorbereitet…
       Connecting: Verbindung mit {device} wird hergestellt…
       Starting Receiver: Cast-Empfänger wird gestartet…

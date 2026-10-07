@@ -13,6 +13,11 @@ let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()
 const ytDlpBinaryUpdatedListeners = new Set()
+const castProgressListeners = new Map()
+
+ipcRenderer.on(IpcChannels.CAST_PROGRESS, (_, progress) => {
+  castProgressListeners.get(progress?.preparationId)?.(progress.stage)
+})
 
 ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
   for (const listener of ytDlpBinaryDownloadProgressListeners) {
@@ -388,26 +393,23 @@ export default {
       : Promise.resolve([]),
     start: async (preparePayload, onProgress) => {
       // Authorize the click before subtitle preparation can outlive activation.
-      if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
+      if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action', errorCode: 'CAST_NOT_AUTHORIZED' }
       const preparation = await ipcRenderer.invoke(IpcChannels.CAST_PREPARE)
       if (preparation.error) return preparation
-      const listener = (_, progress) => {
-        if (progress?.preparationId === preparation.preparationId) onProgress?.(progress.stage)
-      }
-      ipcRenderer.on(IpcChannels.CAST_PROGRESS, listener)
+      castProgressListeners.set(preparation.preparationId, onProgress)
       try {
         const payload = await preparePayload()
-        if (!payload) return { error: 'Cast start cancelled' }
+        if (!payload) return { error: 'Cast start cancelled', errorCode: 'CAST_CANCELLED' }
         return await ipcRenderer.invoke(IpcChannels.CAST_START, payload, preparation.preparationId)
       } finally {
-        ipcRenderer.removeListener(IpcChannels.CAST_PROGRESS, listener)
+        castProgressListeners.delete(preparation.preparationId)
         ipcRenderer.send(IpcChannels.CAST_CANCEL_PREPARATION, preparation.preparationId)
       }
     },
     status: castId => ipcRenderer.invoke(IpcChannels.CAST_STATUS, castId),
     control: (castId, action, value) => navigator.userActivation.isActive
       ? ipcRenderer.invoke(IpcChannels.CAST_CONTROL, castId, action, value)
-      : Promise.resolve({ error: 'Casting requires a user action' }),
+      : Promise.resolve({ error: 'Casting requires a user action', errorCode: 'CAST_NOT_AUTHORIZED' }),
     stop: castId => ipcRenderer.invoke(IpcChannels.CAST_STOP, castId)
   },
 

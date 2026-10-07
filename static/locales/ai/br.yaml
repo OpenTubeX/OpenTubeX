@@ -1439,6 +1439,18 @@ Video:
       SubmitCategoryVote: Kas ar vot evit ar rummad
       CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
     Google Cast:
+      Disconnected: "Digevreet eo ar resever."
+      Timeout: "N'en deus ket respontet ar resever."
+      Busy: "Ur prenestr all a zo o skignañ dija."
+      Not Authorized: "Gweredekait ar prenestr-mañ ha klaskit adarre."
+      Invalid Request: "Reked skignañ direizh."
+      IPv4 Required: "Ur c'hevread IPv4 zo ret."
+      Launch Failed: "N'eo ket bet gallet loc'hañ ar resever."
+      Load Failed: "N'en deus ket gallet ar resever kargañ ar video."
+      Cancelled: "Nullet eo bet ar skignañ."
+      Private Not Authorized: "N'eo ket bet aotreet ar moned d'ar mediaoù prevez."
+      Invalid Subtitles: "Istitloù skignañ direizh."
+      Discovery Failed: "N'eo ket bet gallet kavout reseverioù."
       Preparing Video: "O prientiñ ar video evit skignañ…"
       Connecting: "O kennaskañ ouzh {device}…"
       Starting Receiver: "O loc'hañ ar resever Cast…"

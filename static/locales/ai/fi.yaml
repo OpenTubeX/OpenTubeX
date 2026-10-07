@@ -1467,6 +1467,18 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Disconnected: "Vastaanottajan yhteys katkesi."
+      Timeout: "Vastaanottaja ei vastannut."
+      Busy: "Toinen ikkuna lähettää jo."
+      Not Authorized: "Aktivoi tämä ikkuna ja yritä uudelleen."
+      Invalid Request: "Virheellinen lähetyspyyntö."
+      IPv4 Required: "IPv4-yhteys vaaditaan."
+      Launch Failed: "Vastaanottajaa ei voitu käynnistää."
+      Load Failed: "Vastaanottaja ei voinut ladata videota."
+      Cancelled: "Lähetys peruttiin."
+      Private Not Authorized: "Yksityisten medioiden käyttöä ei hyväksytty."
+      Invalid Subtitles: "Virheelliset lähetyksen tekstitykset."
+      Discovery Failed: "Vastaanottajia ei voitu etsiä."
       Preparing Video: "Valmistellaan videota lähetettäväksi…"
       Connecting: "Yhdistetään laitteeseen {device}…"
       Starting Receiver: "Käynnistetään Cast-vastaanotinta…"

@@ -1471,6 +1471,18 @@ Video:
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
+      Disconnected: "பெறுநரின் இணைப்பு துண்டிக்கப்பட்டது."
+      Timeout: "பெறுநர் பதிலளிக்கவில்லை."
+      Busy: "மற்றொரு சாளரம் ஏற்கனவே ஒளிபரப்புகிறது."
+      Not Authorized: "இந்தச் சாளரத்தைச் செயல்படுத்தி மீண்டும் முயலவும்."
+      Invalid Request: "செல்லாத ஒளிபரப்புக் கோரிக்கை."
+      IPv4 Required: "IPv4 இணைப்பு தேவை."
+      Launch Failed: "பெறுநரைத் தொடங்க முடியவில்லை."
+      Load Failed: "பெறுநரால் காணொளியை ஏற்ற முடியவில்லை."
+      Cancelled: "ஒளிபரப்பு ரத்து செய்யப்பட்டது."
+      Private Not Authorized: "தனிப்பட்ட ஊடக அணுகல் அங்கீகரிக்கப்படவில்லை."
+      Invalid Subtitles: "செல்லாத ஒளிபரப்பு வசனங்கள்."
+      Discovery Failed: "பெறுநர்களைத் தேட முடியவில்லை."
       Preparing Video: "அனுப்புவதற்காகக் காணொளியைத் தயார்செய்கிறது…"
       Connecting: "{device} உடன் இணைக்கிறது…"
       Starting Receiver: "Cast பெறுநரைத் தொடங்குகிறது…"

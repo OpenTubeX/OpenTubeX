@@ -61,16 +61,16 @@ export class ChromecastManager {
     if (!device || !castSourceAvailable(payload?.source) || typeof payload.title !== 'string' || payload.title.length > 500 ||
       !Number.isFinite(payload.startSeconds) || payload.startSeconds < 0 || typeof payload.paused !== 'boolean' ||
       !Number.isFinite(payload.playbackRate) || payload.playbackRate <= 0) {
-      return { error: 'Invalid Cast device or media' }
+      return { error: 'Invalid Cast device or media', errorCode: 'CAST_INVALID_REQUEST' }
     }
-    if (this.active || this.starting) return { error: 'Another window is already casting' }
+    if (this.active || this.starting) return { error: 'Another window is already casting', errorCode: 'CAST_BUSY' }
     const captions = payload.captions ?? []
     if (!Array.isArray(captions) || captions.length > 100 || captions.some(caption =>
       typeof caption.url !== 'string' || !(
         (/^https?:\/\//i.test(caption.url) && caption.url.length <= 16_000) ||
         (/^data:text\/vtt;charset=utf-8,/i.test(caption.url) && caption.url.length <= MAX_CAST_SUBTITLE_BYTES * 3 + 64)) ||
       typeof caption.label !== 'string' || caption.label.length > 256 || typeof caption.language !== 'string' || caption.language.length > 32)) {
-      return { error: 'Invalid Cast subtitles' }
+      return { error: 'Invalid Cast subtitles', errorCode: 'CAST_INVALID_SUBTITLES' }
     }
     this.starting = true
     const sender = new CastSender(this.executable, device)
@@ -116,7 +116,7 @@ export class ChromecastManager {
     try {
       onProgress('connecting')
       const localAddress = await sender.connect()
-      if (isIP(localAddress) !== 4) throw new Error('Cast requires an IPv4 network interface')
+      if (isIP(localAddress) !== 4) throw Object.assign(new Error('Cast requires an IPv4 network interface'), { code: 'CAST_IPV4_REQUIRED' })
       await new Promise((resolve, reject) => {
         media.server.once('error', reject)
         media.server.listen(0, localAddress, () => { media.server.removeListener('error', reject); resolve() })
@@ -140,7 +140,7 @@ export class ChromecastManager {
         receiver = await sender.send(CAST_RECEIVER, 'receiver-0', { type: 'LAUNCH', appId: RECEIVER_APP })
         application = receiver.status?.applications?.find(app => app.appId === RECEIVER_APP)
       }
-      if (!application?.transportId || !application.sessionId) throw new Error('Cast receiver could not launch')
+      if (!application?.transportId || !application.sessionId) throw Object.assign(new Error('Cast receiver could not launch'), { code: 'CAST_LAUNCH_FAILED' })
       cast.transportId = application.transportId
       cast.receiverSessionId = application.sessionId
       await sender.send(CAST_CONNECTION, cast.transportId, { type: 'CONNECT' }, false)
@@ -164,8 +164,8 @@ export class ChromecastManager {
       })
       loaded = true
       const status = result.status?.[0]
-      if (!Number.isInteger(status?.mediaSessionId) || status.playerState === 'IDLE') throw new Error('Cast media failed to load')
-      if (sender.closed) throw new Error('Cast device disconnected')
+      if (!Number.isInteger(status?.mediaSessionId) || status.playerState === 'IDLE') throw Object.assign(new Error('Cast media failed to load'), { code: 'CAST_LOAD_FAILED' })
+      if (sender.closed) throw Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })
       cast.mediaSessionId = status.mediaSessionId
       cast.status = { ...cast.status, ...status, volume: cast.status.volume }
       this.active = cast
@@ -182,7 +182,7 @@ export class ChromecastManager {
         try { await sender.send(CAST_MEDIA, cast.transportId, { type: 'STOP', mediaSessionId: cast.status.mediaSessionId }) } catch { /* Preserve startup failure. */ }
       }
       this.cleanup(cast)
-      return { error: error.message }
+      return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) }
     } finally { this.starting = false }
   }
 
@@ -224,28 +224,28 @@ export class ChromecastManager {
 
   async control(ownerId, castId, action, value) {
     const cast = this.owned(ownerId, castId)
-    if (!cast) return { error: 'Cast session is unavailable' }
+    if (!cast) return { error: 'Cast session is unavailable', errorCode: 'CAST_DISCONNECTED' }
     let payload = { mediaSessionId: cast.mediaSessionId }
     switch (action) {
       case 'play': payload.type = 'PLAY'; break
       case 'pause': payload.type = 'PAUSE'; break
       case 'seek':
-        if (!Number.isFinite(value) || value < 0) return { error: 'Invalid Cast seek position' }
+        if (!Number.isFinite(value) || value < 0) return { error: 'Invalid Cast seek position', errorCode: 'CAST_INVALID_REQUEST' }
         payload = { ...payload, type: 'SEEK', currentTime: value, resumeState: cast.status.playerState === 'PAUSED' ? 'PLAYBACK_PAUSE' : 'PLAYBACK_START' }
         break
       case 'volume':
-        if (!Number.isFinite(value) || value < 0 || value > 1) return { error: 'Invalid Cast volume' }
+        if (!Number.isFinite(value) || value < 0 || value > 1) return { error: 'Invalid Cast volume', errorCode: 'CAST_INVALID_REQUEST' }
         payload = { ...payload, type: 'SET_VOLUME', volume: { level: value } }
         break
       case 'mute':
-        if (typeof value !== 'boolean') return { error: 'Invalid Cast mute state' }
+        if (typeof value !== 'boolean') return { error: 'Invalid Cast mute state', errorCode: 'CAST_INVALID_REQUEST' }
         payload = { ...payload, type: 'SET_VOLUME', volume: { muted: value } }
         break
       case 'caption':
-        if (!Number.isInteger(value) || value < 0 || value > cast.trackCount) return { error: 'Invalid Cast subtitle track' }
+        if (!Number.isInteger(value) || value < 0 || value > cast.trackCount) return { error: 'Invalid Cast subtitle track', errorCode: 'CAST_INVALID_SUBTITLES' }
         payload = { ...payload, type: 'EDIT_TRACKS_INFO', activeTrackIds: value === 0 ? [] : [value] }
         break
-      default: return { error: 'Unsupported Cast control' }
+      default: return { error: 'Unsupported Cast control', errorCode: 'CAST_INVALID_REQUEST' }
     }
     try {
       if (action === 'volume' || action === 'mute') {
@@ -253,9 +253,9 @@ export class ChromecastManager {
       } else {
         await cast.sender.send(CAST_MEDIA, cast.transportId, payload)
       }
-      if (this.active !== cast) return { error: 'Cast session is unavailable' }
+      if (this.active !== cast) return { error: 'Cast session is unavailable', errorCode: 'CAST_DISCONNECTED' }
       return mediaState(cast.status)
-    } catch (error) { return { error: error.message } }
+    } catch (error) { return { error: error.message, ...(error.code ? { errorCode: error.code } : {}) } }
   }
 
   async stop(ownerId, castId) {

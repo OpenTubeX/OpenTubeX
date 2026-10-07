@@ -1506,6 +1506,18 @@ Video:
       SubmitCategoryVote: Адправіць голас за катэгорыю
       CategoryVoteSuccess: Голас за катэгорыю адпраўлены.
     Google Cast:
+      Disconnected: "Злучэнне з прыёмнікам страчана."
+      Timeout: "Прыёмнік не адказаў."
+      Busy: "Іншае акно ўжо транслюе."
+      Not Authorized: "Актывуйце гэтае акно і паўтарыце спробу."
+      Invalid Request: "Няправільны запыт трансляцыі."
+      IPv4 Required: "Патрабуецца злучэнне IPv4."
+      Launch Failed: "Не ўдалося запусціць прыёмнік."
+      Load Failed: "Прыёмнік не змог загрузіць відэа."
+      Cancelled: "Трансляцыя скасавана."
+      Private Not Authorized: "Доступ да прыватных медыя не ўхвалены."
+      Invalid Subtitles: "Няправільныя субцітры трансляцыі."
+      Discovery Failed: "Не ўдалося знайсці прыёмнікі."
       Preparing Video: "Падрыхтоўка відэа да трансляцыі…"
       Connecting: "Падключэнне да {device}…"
       Starting Receiver: "Запуск прыёмніка Cast…"
