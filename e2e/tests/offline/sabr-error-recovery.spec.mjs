@@ -1301,6 +1301,25 @@ test('repeated SABR reload requests never fall back to audio', async ({ app, pag
   expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
+test('exhausted SABR reload requests use the playback engine fallback once', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true }
+  ], { legacyFormats: [], enablePlaybackEngineFallback: true })
+
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
+  expect(result.activePlaybackEngine).toBe('yt-dlp')
+  expect(result.playbackEngineFallbackAttempted).toBe(true)
+  expect(result.errorMessage).toBe('')
+})
+
 test('a SABR failure refetches when no 360p fallback is available', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

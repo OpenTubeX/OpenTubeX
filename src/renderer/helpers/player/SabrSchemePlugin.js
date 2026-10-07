@@ -590,6 +590,12 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
+    if (shouldRetryDueToNextRequestPolicy) {
+      // Policies received before MEDIA_END can establish the session cookie
+      // even when this request succeeds. Subsequent audio/video requests must
+      // carry it, including the first segments fetched at a resume position.
+      currentState.sabrStreamState.playbackCookieBytes = nextRequestPlaybackCookieBytes
+    }
     const data = /** @__NOINLINE__ */ concatenateChunks(responseDataChunks)
 
     if (operationInputs.isInit) {
