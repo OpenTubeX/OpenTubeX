@@ -16,11 +16,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 public class OpenTubeXWebViewClient extends BridgeWebViewClient {
+    private static final Pattern CONTENT_RANGE = Pattern.compile("bytes ([0-9]+)-([0-9]+)/", Pattern.CASE_INSENSITIVE);
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 30_000;
     private final SabrRequestRegistry sabrRequests;
@@ -93,24 +96,10 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             Map<String, String> responseHeaders = AndroidHttpUtils.flattenHeaders(
                 connection.getHeaderFields()
             );
-            responseHeaders.putAll(corsHeaders());
-
             String responseMessage = connection.getResponseMessage();
-            if (statusCode == HttpURLConnection.HTTP_PARTIAL) {
-                // WebView applies the request's Range offset again when an
-                // intercepted response is marked as 206. The stream already
-                // contains exactly the requested slice, so expose it as an
-                // opaque successful response instead.
-                statusCode = HttpURLConnection.HTTP_OK;
-                responseMessage = "OK";
-                removeHeader(responseHeaders, "Accept-Ranges");
-                removeHeader(responseHeaders, "Content-Length");
-                removeHeader(responseHeaders, "Content-Range");
-            }
-
-            return new WebResourceResponse(
+            return mediaResponse(
+                request,
                 AndroidHttpUtils.mimeType(connection.getContentType(), "application/octet-stream"),
-                null,
                 statusCode,
                 responseMessage == null ? "" : responseMessage,
                 responseHeaders,
@@ -148,20 +137,12 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             ResponseBody body = response.body();
             InputStream stream = body == null ? new ByteArrayInputStream(new byte[0]) : body.byteStream();
             Map<String, String> responseHeaders = AndroidHttpUtils.flattenHeaders(response.headers().toMultimap());
-            responseHeaders.putAll(corsHeaders());
             String responseMessage = response.message();
             if (responseMessage == null || responseMessage.isEmpty()) responseMessage = "HTTP " + statusCode;
-            if (statusCode == 206) {
-                // WebView applies Range again to intercepted 206 responses.
-                statusCode = 200;
-                responseMessage = "OK";
-                removeHeader(responseHeaders, "Accept-Ranges");
-                removeHeader(responseHeaders, "Content-Length");
-                removeHeader(responseHeaders, "Content-Range");
-            }
-            return new WebResourceResponse(
+            return mediaResponse(
+                webRequest,
                 AndroidHttpUtils.mimeType(response.header("Content-Type"), "application/octet-stream"),
-                null, statusCode, responseMessage, responseHeaders,
+                statusCode, responseMessage, responseHeaders,
                 new FilterInputStream(stream) {
                     @Override public void close() throws IOException {
                         try { super.close(); } finally { if (body != null) response.close(); }
@@ -246,6 +227,42 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             sabrRequests.complete(request);
             return errorResponse(502, "Bad Gateway");
         }
+    }
+
+    static WebResourceResponse mediaResponse(WebResourceRequest request, String mimeType,
+                                             int statusCode, String responseMessage,
+                                             Map<String, String> headers, InputStream stream) {
+        // WebView adds Content-Type from WebResourceResponse's MIME type.
+        // Supplying it again produces an invalid "video/mp4, video/mp4".
+        removeHeader(headers, "Content-Type");
+        headers.putAll(corsHeaders());
+        if (statusCode == HttpURLConnection.HTTP_PARTIAL && headerValue(request.getRequestHeaders(), "Range") == null) {
+            // Keep Shaka's query-ranged responses opaque. Native media needs
+            // the original range headers to load and seek.
+            statusCode = HttpURLConnection.HTTP_OK;
+            responseMessage = "OK";
+            removeHeader(headers, "Accept-Ranges");
+            removeHeader(headers, "Content-Length");
+            removeHeader(headers, "Content-Range");
+        }
+        if (statusCode == HttpURLConnection.HTTP_PARTIAL) {
+            String contentRange = headerValue(headers, "Content-Range");
+            Matcher range = CONTENT_RANGE.matcher(contentRange == null ? "" : contentRange);
+            if (range.find()) {
+                try {
+                    stream = AndroidHttpUtils.alreadyRangedStream(stream,
+                        Long.parseLong(range.group(1)), Long.parseLong(range.group(2)));
+                } catch (NumberFormatException ignored) { /* Invalid upstream range. */ }
+            }
+        }
+        return new WebResourceResponse(mimeType, null, statusCode, responseMessage, headers, stream);
+    }
+
+    private static String headerValue(Map<String, String> headers, String name) {
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            if (name.equalsIgnoreCase(header.getKey())) return header.getValue();
+        }
+        return null;
     }
 
     private static WebResourceResponse errorResponse(int status, String reason) {

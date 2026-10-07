@@ -25,6 +25,44 @@ final class AndroidHttpUtils {
         return contentType == null ? fallback : contentType.split(";", 2)[0];
     }
 
+    static InputStream alreadyRangedStream(InputStream stream, long start, long end) {
+        if (start < 0 || end < start || end == Long.MAX_VALUE) return stream;
+        // WebView treats intercepted streams as whole resources: it checks
+        // available() for range bounds and calls skip(start) before reading.
+        // The upstream 206 body is already sliced, so account for that prefix
+        // without downloading or discarding the same bytes again.
+        return new FilterInputStream(stream) {
+            private long prefix = start;
+            private long remaining = end - start + 1;
+
+            @Override public int available() {
+                long size = prefix + remaining;
+                return size > Integer.MAX_VALUE ? 0 : (int) size;
+            }
+
+            @Override public long skip(long count) throws IOException {
+                if (count <= 0) return 0;
+                long virtual = Math.min(count, prefix);
+                prefix -= virtual;
+                long actual = count == virtual ? 0 : in.skip(count - virtual);
+                remaining = Math.max(0, remaining - actual);
+                return virtual + actual;
+            }
+
+            @Override public int read() throws IOException {
+                int value = in.read();
+                if (value >= 0) remaining = Math.max(0, remaining - 1);
+                return value;
+            }
+
+            @Override public int read(byte[] bytes, int offset, int length) throws IOException {
+                int count = in.read(bytes, offset, length);
+                if (count > 0) remaining = Math.max(0, remaining - count);
+                return count;
+            }
+        };
+    }
+
     static InputStream disconnectOnClose(InputStream stream, HttpURLConnection connection) {
         return disconnectOnClose(stream, connection, () -> {});
     }
