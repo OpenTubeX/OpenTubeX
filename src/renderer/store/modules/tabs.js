@@ -27,12 +27,14 @@ const state = {
   currentWatchTimestamps: {},
   videoZoomByTabId: {},
   lightsOffByTabId: {},
+  musicModeByTabId: {},
   skipSilenceByTabId: {}
 }
 
 const getters = {
   getTabsEnabled: (_state, getters) => !process.env.IS_CAPACITOR || getters.getEnableMobileTabs !== false,
   getTabLightsOff: (state) => (tabId) => state.lightsOffByTabId[tabId] ?? false,
+  getTabMusicMode: (state) => (tabId) => state.musicModeByTabId[tabId] ?? false,
   getTabs: (state) => state.tabs,
   getTabGroups: (state) => state.groups,
   getClosedTabs: (state) => state.closedTabs,
@@ -147,6 +149,11 @@ const mutations = {
     for (const tabId of Object.keys(state.skipSilenceByTabId)) {
       if (tabId !== 'web' && !incomingIds.has(tabId)) {
         delete state.skipSilenceByTabId[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.musicModeByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.musicModeByTabId[tabId]
       }
     }
   },
@@ -270,6 +277,10 @@ const mutations = {
 
   setTabLightsOff(state, { tabId, value }) {
     state.lightsOffByTabId[tabId] = value === true
+  },
+
+  setTabMusicMode(state, { tabId, value }) {
+    state.musicModeByTabId[tabId] = value === true
   },
 
   setTabSkipSilence(state, { tabId, value }) {

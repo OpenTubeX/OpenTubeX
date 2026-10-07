@@ -1272,6 +1272,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého chatu je zapnutý. Zprávy se zde budou zobrazovat během přehrávání videa.
   Premiere started: Probíhá premiéra. Začala {timeAgo}
   Player:
+    Music Mode: "Hudební režim"
+    Music Mode Description: "Přehrávejte videa rychlostí 1× a nová videa v této kartě spouštějte od začátku. Uložená výchozí nastavení přehrávání zůstanou beze změny."
     DLNA:
       Cast: "Odeslat do zařízení DLNA"
       Stop: "Ukončit přehrávání na zařízení"

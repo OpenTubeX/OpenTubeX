@@ -1294,6 +1294,8 @@ Video:
     music offtopic: Heb fod yn gerddoriaeth
     filler: Gwyriadau
   Player:
+    Music Mode: "Modd cerddoriaeth"
+    Music Mode Description: "Chwaraewch fideos ar gyflymder 1× a dechreuwch fideos newydd o’r dechrau yn y tab hwn. Bydd eich gosodiadau chwarae diofyn wedi’u cadw yn aros yr un fath."
     DLNA:
       Cast: "Darlledu i ddyfais DLNA"
       Stop: "Rhoi’r gorau i ddarlledu"

@@ -1304,6 +1304,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: تم تمكين إعادة تشغيل الدردشة المباشرة.  ستظهر رسائل الدردشة هنا أثناء تشغيل الفيديو.
   Premiere started: العرض الأول قيد التقدم. بدأ {timeAgo}
   Player:
+    Music Mode: "وضع الموسيقى"
+    Music Mode Description: "شغّل الفيديوهات بسرعة 1× وابدأ الفيديوهات الجديدة من البداية في علامة التبويب هذه. تبقى إعدادات التشغيل الافتراضية المحفوظة دون تغيير."
     DLNA:
       Cast: "البث إلى جهاز DLNA"
       Stop: "إيقاف البث"

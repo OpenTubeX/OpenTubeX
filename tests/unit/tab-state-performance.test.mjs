@@ -32,6 +32,21 @@ function snapshot(count = 100) {
   }
 }
 
+test('music mode is temporary, isolated per tab, and cleared when a tab closes', () => {
+  const store = createTabStore()
+  const payload = snapshot(2)
+  store.commit('setTabsState', payload)
+  assert.equal(store.getters.getTabMusicMode('tab-0'), false)
+  store.commit('setTabMusicMode', { tabId: 'tab-0', value: true })
+  assert.equal(store.getters.getTabMusicMode('tab-0'), true)
+  assert.equal(store.getters.getTabMusicMode('tab-1'), false)
+  store.commit('setTabsState', structuredClone(payload))
+  assert.equal(store.getters.getTabMusicMode('tab-0'), true)
+  store.commit('setTabsState', { tabs: [payload.tabs[1]] })
+  assert.equal(store.getters.getTabMusicMode('tab-0'), false)
+  assert.equal(createTabStore().getters.getTabMusicMode('tab-0'), false)
+})
+
 test('metadata updates preserve unrelated tab objects and collections', () => {
   const store = createTabStore()
   const payload = snapshot()

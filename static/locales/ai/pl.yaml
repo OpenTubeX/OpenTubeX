@@ -703,6 +703,8 @@ Video:
   All Messages: Wszystkie wiadomości
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Powtórka czatu na żywo jest włączona. Wiadomości będą pojawiać się tutaj podczas odtwarzania filmu.
   Player:
+    Music Mode: "Tryb muzyczny"
+    Music Mode Description: "Odtwarzaj filmy z prędkością 1× i rozpoczynaj nowe filmy od początku w tej karcie. Zapisane domyślne ustawienia odtwarzania pozostają bez zmian."
     DLNA:
       Cast: "Przesyłaj na urządzenie DLNA"
       Stop: "Zatrzymaj przesyłanie"

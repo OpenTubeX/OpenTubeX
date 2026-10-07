@@ -1280,6 +1280,8 @@ Video:
   Sponsor Block category:
     hook: Pembuka/Sapaan
   Player:
+    Music Mode: "Mode Musik"
+    Music Mode Description: "Putar video dengan kecepatan 1× dan mulai video baru dari awal di tab ini. Pengaturan pemutaran bawaan yang tersimpan tetap tidak berubah."
     DLNA:
       Cast: "Transmisikan ke perangkat DLNA"
       Stop: "Hentikan transmisi"

@@ -1311,6 +1311,8 @@ Video:
   Sponsor Block category:
     hook: פתיח/ברכות
   Player:
+    Music Mode: "מצב מוזיקה"
+    Music Mode Description: "נגן סרטונים במהירות 1× והתחל סרטונים חדשים מההתחלה בלשונית זו. הגדרות ברירת המחדל השמורות להפעלה נשארות ללא שינוי."
     DLNA:
       Cast: "שידור למכשיר DLNA"
       Stop: "הפסקת השידור"

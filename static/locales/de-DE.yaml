@@ -1915,6 +1915,8 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    Music Mode: Musikmodus
+    Music Mode Description: Videos in diesem Tab mit 1× abspielen und neue Videos von Anfang an starten. Deine gespeicherten Wiedergabeeinstellungen bleiben unverändert.
     DLNA:
       Cast: Auf ein DLNA-Gerät übertragen
       Stop: Übertragung beenden
