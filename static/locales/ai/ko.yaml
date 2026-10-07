@@ -1476,6 +1476,8 @@ Channel:
     Reveal Answers: 답변 표시
     Hide Answers: 답변 숨기기
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "이 채널에는 동영상이 있지만 표시할 수 없습니다. 더 불러오기를 시도하세요"
 Video:
   External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."
   Invalid Media URL: "유효하지 않은 미디어 URL"

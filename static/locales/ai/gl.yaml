@@ -1208,6 +1208,8 @@ Channel:
   Search Result Types: Tipos de resultados da busca
   All Results: Todos
   View All: Ver todo
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Esta canle ten vídeos, pero non se puido mostrar ningún. Proba a cargar máis"
 Video:
   External DRM Protected: "Os vídeos protexidos con DRM non se poden reproducir en OpenTubeX, xa que requiren compoñentes propietarios e de código pechado."
   Invalid Media URL: "URL multimedia non válida"

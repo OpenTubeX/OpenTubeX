@@ -1434,6 +1434,8 @@ Channel:
     Reveal Answers: Revelar las respuestas
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intenta cargar más"
 Video:
   External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"

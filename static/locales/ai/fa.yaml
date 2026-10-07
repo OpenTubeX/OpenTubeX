@@ -1239,6 +1239,8 @@ Channel:
   Search Result Types: انواع نتایج جست‌وجو
   All Results: همه
   View All: مشاهدهٔ همه
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "این کانال ویدیو دارد، اما هیچ‌کدام نمایش داده نشد. دریافت ویدیوهای بیشتر را امتحان کنید"
 Video:
   External DRM Protected: "ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند."
   Invalid Media URL: "نشانی رسانه نامعتبر است"

@@ -1402,6 +1402,8 @@ Channel:
     Reveal Answers: Vis svara
     Hide Answers: Gøym svar
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
 Video:
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
   Invalid Media URL: "Ugyldig medie-URL"

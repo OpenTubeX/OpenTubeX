@@ -81,7 +81,7 @@ test.describe('channel page', () => {
       await page.getByRole('tab', { name: 'Videos' }).click()
       await expect(page.locator('.elementList')).toHaveCount(0)
       await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
-      await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
+      await expect(page.getByText('This channel has videos but none could be displayed, try fetching more')).toHaveCount(0)
     } finally {
       releaseVideos()
     }
@@ -333,6 +333,51 @@ test.describe('channel route changes', () => {
     }
   })
 
+  test('explains when channel videos cannot be displayed and more can be fetched', async ({ page }) => {
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, route => {
+      const url = new URL(route.request().url())
+      if (url.pathname.endsWith('/videos')) {
+        return route.fulfill({
+          json: url.searchParams.has('continuation')
+            ? { videos: [] }
+            : { videos: [], continuation: 'next' }
+        })
+      }
+      return route.fulfill({
+        json: {
+          author: 'Example channel',
+          authorId: CHANNEL_ID,
+          authorThumbnails: [],
+          authorBanners: [],
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          description: '',
+          relatedChannels: [],
+          isFamilyFriendly: true,
+          tabs: ['videos']
+        }
+      })
+    })
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+      json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', false)
+    })
+    await page.locator(sel.searchInput).fill(CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+
+    const message = page.getByText('This channel has videos but none could be displayed, try fetching more')
+    await expect(message).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Fetch more' })).toBeVisible()
+    await page.getByRole('button', { name: 'Fetch more' }).click()
+    await expect(message).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Fetch more' })).toHaveCount(0)
+  })
+
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
     const videos = [1, 2].map(number => ({
       videoId: `alpha00000${number}`,
@@ -399,7 +444,7 @@ test.describe('channel route changes', () => {
       await page.evaluate(() => window.releaseChannelResponses.newest())
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
-      await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
+      await expect(page.getByText('This channel has videos but none could be displayed, try fetching more')).toHaveCount(0)
     } finally {
       await page.evaluate(() => Object.values(window.releaseChannelResponses).forEach(release => release()))
     }
@@ -411,7 +456,7 @@ test.describe('channel route changes', () => {
       const secondId = 'UCfMJ2MchTSW2kWaT0kK94Yw'
       const releaseVideos = new Map()
       const emptyMessage = tab === 'videos'
-        ? 'This channel does not currently have any videos'
+        ? 'This channel has videos but none could be displayed, try fetching more'
         : 'This channel does not currently have any shorts'
 
       await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
@@ -480,7 +525,12 @@ test.describe('channel route changes', () => {
         for (const release of releaseVideos.values()) release()
       }
 
-      await expect(page.getByText(emptyMessage)).toBeVisible()
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
+      if (tab === 'shorts') {
+        await expect(page.getByText(emptyMessage)).toBeVisible()
+      } else {
+        await expect(page.getByText(emptyMessage)).toHaveCount(0)
+      }
     })
   }
 })

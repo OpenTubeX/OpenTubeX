@@ -1208,6 +1208,8 @@ Channel:
   Search Result Types: Типи результатів пошуку
   All Results: Усі
   View All: Переглянути всі
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "На цьому каналі є відео, але жодне не вдалося показати. Спробуйте завантажити ще"
 Video:
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."
   Invalid Media URL: "Недійсна URL-адреса медіа"

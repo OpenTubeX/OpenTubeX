@@ -1190,6 +1190,8 @@ Channel:
   Channel Name Unavailable: Naziv kanala nije dostupan
   Search Result Types: Vrste rezultata pretraživanja
   All Results: Sve
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Ovaj kanal ima videozapise, ali nijedan se nije mogao prikazati. Pokušajte učitati još"
 Video:
   External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."
   Invalid Media URL: "Nevažeći URL medija"

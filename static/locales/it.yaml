@@ -669,11 +669,11 @@ Channel:
   Your search results have returned 0 results: 'La tua ricerca ha prodotto 0 risultati'
   Videos:
     Videos: 'Video'
-    This channel does not currently have any videos: 'Questo canale attualmente non ha alcun video'
     Sort Types:
       Newest: 'Più nuovi'
       Oldest: 'Più vecchi'
       Most Popular: 'Più popolari'
+    This channel has videos but none could be displayed, try fetching more: Questo canale contiene video, ma non è stato possibile visualizzarne alcuno; prova a caricarne altri
   Playlists:
     Playlists: 'Playlist'
     This channel does not currently have any playlists: 'Questo canale attualmente non ha alcuna playlist'

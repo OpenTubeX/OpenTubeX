@@ -1208,6 +1208,8 @@ Channel:
   Search Result Types: أنواع نتائج البحث
   All Results: الجميع
   View All: عرض الكل
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "تحتوي هذه القناة على فيديوهات، لكن تعذر عرض أي منها. حاول جلب المزيد"
 Video:
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."
   Invalid Media URL: "رابط الوسائط غير صالح"
