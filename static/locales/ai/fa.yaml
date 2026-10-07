@@ -981,6 +981,8 @@ Settings:
     Sync Automatically: "همگام‌سازی خودکار"
     Activity: "فعالیت حساب"
     No Activity: "فعالیت اخیری وجود ندارد"
+    Clear Activity: "پاک کردن در این دستگاه"
+    Clear Activity Hint: "فعالیت فعلی حساب را در این دستگاه پنهان کنید. فعالیت در سرور و دستگاه‌های دیگر تغییری نمی‌کند. فعالیت جدید همچنان نمایش داده می‌شود."
     Setting Changed: "{device} مقدار {setting} را به {value} تغییر داد"
     Item Updated: "{device} گزینهٔ {setting} را به‌روز کرد"
     Item Added: "{device} مورد {item} را به {setting} افزود"

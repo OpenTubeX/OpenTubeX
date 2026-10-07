@@ -13,9 +13,17 @@
 .activityHeader {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: space-between;
   margin-block-end: 1rem;
+}
+
+.activityActions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  margin-inline-start: auto;
 }
 
 .activityScroller {

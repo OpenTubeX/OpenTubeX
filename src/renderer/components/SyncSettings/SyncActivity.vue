@@ -10,17 +10,27 @@
         </span>
         <h3>{{ t('Settings.Sync Settings.Activity') }}</h3>
       </div>
-      <FtIconButton
-        class="activityAction"
-        :title="t('Theme Discovery.Refresh')"
-        :icon="['fas', 'sync']"
-        :disabled="loading"
-        :use-shadow="false"
-        :padding="11"
-        :size="20"
-        theme="base-no-default"
-        @click="refresh"
-      />
+      <div class="activityActions">
+        <FtButton
+          :label="t('Settings.Sync Settings.Clear Activity')"
+          :icon="['fas', 'trash']"
+          variant="outlined"
+          :disabled="loading || !entries.length"
+          @click="showClearPrompt = true"
+        />
+        <FtIconButton
+          ref="refreshButton"
+          class="activityAction"
+          :title="t('Theme Discovery.Refresh')"
+          :icon="['fas', 'sync']"
+          :disabled="loading"
+          :use-shadow="false"
+          :padding="11"
+          :size="20"
+          theme="base-no-default"
+          @click="refresh"
+        />
+      </div>
     </div>
     <FtLoader v-if="loading" />
     <p
@@ -99,6 +109,19 @@
         aria-hidden="true"
       />
     </button>
+    <FtPrompt
+      v-if="showClearPrompt"
+      :autosize="true"
+      card-class="readable-width"
+      :label="t('Settings.Sync Settings.Clear Activity')"
+      :extra-labels="[t('Settings.Sync Settings.Clear Activity Hint'), ...(clearError ? [clearError] : [])]"
+      :option-names="[t('Settings.Sync Settings.Clear Activity'), t('Cancel')]"
+      :option-values="['clear', 'cancel']"
+      :option-icons="[['fas', 'trash'], ['fas', 'xmark']]"
+      :is-first-option-destructive="true"
+      :busy="clearing"
+      @click="clearActivity"
+    />
   </section>
 </template>
 
@@ -108,7 +131,9 @@ import { computed, inject, nextTick, onMounted, ref, useId, useTemplateRef } fro
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtButton from '../FtButton/FtButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../helpers/sync-setting-labels'
 
 import { settingsSearchNavigationKey } from '../../helpers/settingsSearch'
@@ -129,11 +154,15 @@ const shortcutLabels = computed(() => new Map(
 const activityListId = useId()
 const activityList = useTemplateRef('activityList')
 const activityScroller = useTemplateRef('activityScroller')
+const refreshButton = useTemplateRef('refreshButton')
 useScrollClamp(activityScroller, activityList)
 const showAll = ref(false)
 const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
 const loading = ref(true)
 const error = ref('')
+const showClearPrompt = ref(false)
+const clearing = ref(false)
+const clearError = ref('')
 const collectionLabels = {
   subscriptions: 'Subscriptions.Subscriptions',
   playlists: 'Playlists',
@@ -287,6 +316,28 @@ async function refresh() {
     error.value = failure.message
   } finally {
     loading.value = false
+  }
+}
+
+async function clearActivity(option) {
+  if (clearing.value) return
+  clearError.value = ''
+  if (option !== 'clear') {
+    showClearPrompt.value = false
+    return
+  }
+  clearing.value = true
+  try {
+    await store.dispatch('clearSyncServerActivity')
+    showAll.value = false
+    error.value = ''
+    showClearPrompt.value = false
+    await nextTick()
+    refreshButton.value?.$el.querySelector('button')?.focus()
+  } catch (failure) {
+    clearError.value = failure.message
+  } finally {
+    clearing.value = false
   }
 }
 onMounted(refresh)

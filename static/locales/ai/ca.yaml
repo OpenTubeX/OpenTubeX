@@ -1257,6 +1257,8 @@ Settings:
     Sync Automatically: "Sincronitza automàticament"
     Activity: "Activitat del compte"
     No Activity: "No hi ha activitat recent"
+    Clear Activity: "Neteja en aquest dispositiu"
+    Clear Activity Hint: "Amaga l’activitat existent del compte en aquest dispositiu. L’activitat al servidor i als altres dispositius no canvia. L’activitat nova continuarà apareixent."
     Setting Changed: "{device} ha canviat {setting} a {value}"
     Item Updated: "{device} ha actualitzat {setting}"
     Item Added: "{device} ha afegit {item} a {setting}"

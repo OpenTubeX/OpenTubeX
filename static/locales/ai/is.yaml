@@ -940,6 +940,8 @@ Settings:
     Sync Automatically: "Samstilla sjálfkrafa"
     Activity: "Virkni reiknings"
     No Activity: "Engin nýleg virkni"
+    Clear Activity: "Hreinsa á þessu tæki"
+    Clear Activity Hint: "Fela núverandi virkni reiknings á þessu tæki. Virkni á þjóninum og öðrum tækjum helst óbreytt. Ný virkni mun áfram birtast."
     Setting Changed: "{device} breytti {setting} í {value}"
     Item Updated: "{device} uppfærði {setting}"
     Item Added: "{device} bætti {item} við {setting}"

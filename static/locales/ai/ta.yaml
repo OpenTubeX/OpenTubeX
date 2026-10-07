@@ -960,6 +960,8 @@ Settings:
     Sync Automatically: "தானாக ஒத்திசை"
     Activity: "கணக்குச் செயல்பாடு"
     No Activity: "சமீபத்திய செயல்பாடு இல்லை"
+    Clear Activity: "இந்தச் சாதனத்தில் அழி"
+    Clear Activity Hint: "இந்தச் சாதனத்தில் உள்ள கணக்கின் தற்போதைய செயல்பாட்டை மறைக்கவும். சேவையகத்திலும் பிற சாதனங்களிலும் உள்ள செயல்பாடு மாறாது. புதிய செயல்பாடு தொடர்ந்து தோன்றும்."
     Setting Changed: "{device}, {setting} என்பதை {value} ஆக மாற்றியது"
     Item Updated: "{device}, {setting} என்பதைப் புதுப்பித்தது"
     Item Added: "{device} {item} என்பதை {setting} இல் சேர்த்தது"

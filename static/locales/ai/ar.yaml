@@ -953,6 +953,8 @@ Settings:
     Sync Automatically: "المزامنة تلقائيًا"
     Activity: "نشاط الحساب"
     No Activity: "لا يوجد نشاط حديث"
+    Clear Activity: "مسح على هذا الجهاز"
+    Clear Activity Hint: "إخفاء نشاط الحساب الحالي على هذا الجهاز. يبقى النشاط على الخادم والأجهزة الأخرى دون تغيير. سيظل النشاط الجديد يظهر."
     Setting Changed: "غيّر {device} الإعداد {setting} إلى {value}"
     Item Updated: "حدّث {device} الإعداد {setting}"
     Item Added: "أضاف {device} ‏{item} إلى {setting}"

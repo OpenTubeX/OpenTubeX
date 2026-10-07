@@ -1,4 +1,4 @@
-import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 
 async function seedActivity(page, count = 30) {
   await page.evaluate(count => {
@@ -56,6 +56,25 @@ async function expectActivityRange(scroller, atEnd = true) {
 
 test.describe('account activity labels', () => {
   test.use({ seed: { settings: { syncServerUrl: '' } } })
+
+  test('an older confirmation cannot restore activity cleared in another window', async ({ app, page }) => {
+    const sync = await goToSettingsSection(page, 'sync')
+    await seedActivity(page, 3)
+    const firstCard = sync.locator('.syncActivity')
+    const secondPage = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(secondPage)
+    const secondSync = await goToSettingsSection(secondPage, 'sync')
+    await seedActivity(secondPage)
+    await firstCard.getByRole('button', { name: 'Clear on this device' }).click()
+    await secondSync.locator('.syncActivity').getByRole('button', { name: 'Clear on this device' }).click()
+    await secondPage.getByRole('dialog', { name: 'Clear on this device', exact: true })
+      .getByRole('button', { name: 'Clear on this device' }).click()
+    await expect(firstCard.locator('.activityList li')).toHaveCount(0)
+    await page.getByRole('dialog', { name: 'Clear on this device', exact: true })
+      .getByRole('button', { name: 'Clear on this device' }).click()
+    await seedActivity(page)
+    await expect(firstCard).toContainText('No recent activity')
+  })
 
   test('shows named changes across synced collections and settings', async ({ page }) => {
     const sync = await goToSettingsSection(page, 'sync')
@@ -193,6 +212,71 @@ test.describe('account activity labels', () => {
 for (const uiScale of [100, 125]) {
   test.describe(`account activity at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, syncServerUrl: '' } } })
+
+    test('clears activity locally after confirmation and keeps it hidden after restart', async ({ app, page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await seedActivity(page)
+      const card = sync.locator('.syncActivity')
+      const clear = card.getByRole('button', { name: 'Clear on this device' })
+      await card.locator('.activityDisclosure').click()
+      await scrollActivityToBottom(card.locator('.activityScroller'))
+      const pageScroller = page.locator('.settingsContent')
+      await pageScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await clear.click()
+      const dialog = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
+      await expect(dialog).toContainText('Activity on the server and other devices stays unchanged')
+      await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await expect(card.locator('.activityList li')).toHaveCount(30)
+      await clear.click()
+      await dialog.getByRole('button', { name: 'Clear on this device' }).click()
+      await expect(dialog).toBeHidden()
+      await expect(card).toContainText('No recent activity')
+      await expect(clear).toBeDisabled()
+      await expect(card.getByRole('button', { name: 'Refresh', exact: true })).toBeFocused()
+      await expect(card.locator('.activityScroller')).toBeHidden()
+      await expect(card.locator('.activityDisclosure')).toBeHidden()
+      await expectScrollAtRenderedEnd(pageScroller)
+
+      const { page: restartedPage } = await app.relaunch()
+      const reloadedSync = await goToSettingsSection(restartedPage, 'sync')
+      await seedActivity(restartedPage)
+      const reloadedCard = reloadedSync.locator('.syncActivity')
+      await expect(reloadedCard).toContainText('No recent activity')
+      await restartedPage.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerActivity', [{
+          id: 'new:0',
+          deviceName: 'Laptop',
+          collection: 'subscriptions',
+          action: 'added',
+          item: 'New channel',
+          createdAt: Date.now(),
+        }])
+      })
+      await expect(reloadedCard.locator('.activityList li')).toHaveCount(1)
+      await expect(reloadedCard).toContainText('New channel')
+      await setWindowSize(app, restartedPage, { width: 480, height: 700 })
+      await expect(reloadedCard.getByRole('button', { name: 'Clear on this device' })).toBeVisible()
+      expect(await reloadedCard.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+    })
+
+    test('keeps activity and the confirmation available when clearing fails', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await seedActivity(page, 3)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store._actions.updateSyncServerActivityClearedThrough = [
+          () => Promise.reject(new Error('Could not save activity preference')),
+        ]
+      })
+      const card = sync.locator('.syncActivity')
+      await card.getByRole('button', { name: 'Clear on this device' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
+      await dialog.getByRole('button', { name: 'Clear on this device' }).click()
+      await expect(dialog).toContainText('Could not save activity preference')
+      await expect(card.locator('.activityList li')).toHaveCount(3)
+      await dialog.getByRole('button', { name: 'Cancel', exact: true }).click()
+    })
 
     test('keeps expanded activity in its own bounded themed scroll area', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')

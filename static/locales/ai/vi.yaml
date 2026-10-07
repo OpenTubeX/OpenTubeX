@@ -955,6 +955,8 @@ Settings:
     Sync Automatically: "Tự động đồng bộ"
     Activity: "Hoạt động tài khoản"
     No Activity: "Không có hoạt động gần đây"
+    Clear Activity: "Xóa trên thiết bị này"
+    Clear Activity Hint: "Ẩn hoạt động tài khoản hiện có trên thiết bị này. Hoạt động trên máy chủ và các thiết bị khác không thay đổi. Hoạt động mới vẫn sẽ xuất hiện."
     Setting Changed: "{device} đã đổi {setting} thành {value}"
     Item Updated: "{device} đã cập nhật {setting}"
     Item Added: "{device} đã thêm {item} vào {setting}"

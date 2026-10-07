@@ -976,6 +976,8 @@ Settings:
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"
     No Activity: "Ingen nylig aktivitet"
+    Clear Activity: "Ryd på denne enhed"
+    Clear Activity Hint: "Skjul eksisterende kontoaktivitet på denne enhed. Aktivitet på serveren og andre enheder forbliver uændret. Ny aktivitet vises stadig."
     Setting Changed: "{device} ændrede {setting} til {value}"
     Item Updated: "{device} opdaterede {setting}"
     Item Added: "{device} føjede {item} til {setting}"

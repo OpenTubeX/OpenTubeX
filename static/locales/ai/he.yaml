@@ -958,6 +958,8 @@ Settings:
     Sync Automatically: "סנכרון אוטומטי"
     Activity: "פעילות החשבון"
     No Activity: "אין פעילות אחרונה"
+    Clear Activity: "ניקוי במכשיר זה"
+    Clear Activity Hint: "הסתרת פעילות החשבון הקיימת במכשיר זה. הפעילות בשרת ובמכשירים אחרים לא תשתנה. פעילות חדשה תמשיך להופיע."
     Setting Changed: "{device} שינה את {setting} ל־{value}"
     Item Updated: "{device} עדכן את {setting}"
     Item Added: "{device} הוסיף את {item} אל {setting}"

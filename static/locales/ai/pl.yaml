@@ -470,6 +470,8 @@ Settings:
     Sync Automatically: "Synchronizuj automatycznie"
     Activity: "Aktywność konta"
     No Activity: "Brak ostatniej aktywności"
+    Clear Activity: "Wyczyść na tym urządzeniu"
+    Clear Activity Hint: "Ukryj dotychczasową aktywność konta na tym urządzeniu. Aktywność na serwerze i innych urządzeniach pozostanie bez zmian. Nowa aktywność nadal będzie się pojawiać."
     Setting Changed: "{device} zmieniło {setting} na {value}"
     Item Updated: "{device} zaktualizowało {setting}"
     Item Added: "Na urządzeniu {device} dodano {item} ({setting})"

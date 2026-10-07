@@ -1458,6 +1458,68 @@ test('activity refresh shares an in-flight download and retries after failure', 
   assert.equal(f.requests.length, 2)
 })
 
+test('cleared activity stays hidden after reauthentication while newer activity remains visible', async () => {
+  let events = []
+  const f = fixture({ syncServerDeviceId: 'laptop' }, { encrypted: true, respond: url => {
+    if (new URL(url).pathname === '/v1/encrypted_sync/events') return events
+  } })
+  const payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  const event = id => ({ id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 })
+  events = [event('0001'), event('0002')]
+  await f.actions.refreshSyncServerEvents(f.context)
+  await f.actions.clearSyncServerActivity(f.context)
+  assert.equal(f.context.state.syncServerActivity.length, 0)
+  assert.ok(f.dispatched.some(([action]) => action === 'updateSyncServerActivityClearedThrough'))
+  assert.equal(f.requests.some(request => request.method !== 'GET'), false)
+  const dispatch = f.context.dispatch
+  f.context.dispatch = (action, value) => action === 'initializeSyncServer'
+    ? Promise.resolve()
+    : dispatch(action, value)
+  await f.actions.applySyncServerToken(f.context)
+  events.push(event('0003'))
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(Array.from(f.context.state.syncServerActivity, entry => entry.id), ['0003:0'])
+
+  f.settings.syncServerUsername = 'bob'
+  await f.actions.applySyncServerToken(f.context)
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.equal(f.context.state.syncServerActivity.length, 3, 'Another account keeps its activity')
+})
+
+test('a download already in flight cannot restore cleared activity', async () => {
+  let release
+  let events
+  const pending = new Promise(resolve => { release = resolve })
+  const f = fixture({}, { respond: async url => {
+    if (new URL(url).pathname === '/v1/encrypted_sync/events') {
+      await pending
+      return events
+    }
+  } })
+  const payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  events = ['0001', '0002'].map(id => ({
+    id, recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000,
+  }))
+  f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
+  const refreshing = f.actions.refreshSyncServerEvents(f.context)
+  await f.actions.clearSyncServerActivity(f.context)
+  release()
+  await refreshing
+  assert.deepEqual(Array.from(f.context.state.syncServerActivity, entry => entry.id), ['0002:0'])
+})
+
+test('failed persistence leaves activity available to retry clearing', async () => {
+  const f = fixture()
+  f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
+  f.context.dispatch = async () => { throw new Error('Disk full') }
+  await assert.rejects(f.actions.clearSyncServerActivity(f.context), /Disk full/)
+  assert.equal(f.context.state.syncServerActivity.length, 1)
+})
+
 for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {
   test(`failure of ${refreshAction} cannot turn a saved library sync into an error`, async () => {
     const f = liveFixture()

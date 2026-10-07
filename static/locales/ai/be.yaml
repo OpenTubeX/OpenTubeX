@@ -981,6 +981,8 @@ Settings:
     Sync Automatically: "Сінхранізаваць аўтаматычна"
     Activity: "Дзеянні ўліковага запісу"
     No Activity: "Няма нядаўніх дзеянняў"
+    Clear Activity: "Ачысціць на гэтай прыладзе"
+    Clear Activity Hint: "Схаваць існуючую актыўнасць уліковага запісу на гэтай прыладзе. Актыўнасць на серверы і іншых прыладах застанецца без змен. Новая актыўнасць будзе паказвацца."
     Setting Changed: "{device} змяніў {setting} на {value}"
     Item Updated: "{device} абнавіў {setting}"
     Item Added: "{device} дадаў {item} у {setting}"

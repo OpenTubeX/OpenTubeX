@@ -938,6 +938,8 @@ Settings:
     Sync Automatically: "Automatski sinkroniziraj"
     Activity: "Aktivnost računa"
     No Activity: "Nema nedavnih aktivnosti"
+    Clear Activity: "Očisti na ovom uređaju"
+    Clear Activity Hint: "Sakrij postojeću aktivnost računa na ovom uređaju. Aktivnost na poslužitelju i drugim uređajima ostaje nepromijenjena. Nova aktivnost i dalje će se prikazivati."
     Setting Changed: "{device} je promijenio {setting} na {value}"
     Item Updated: "{device} je ažurirao {setting}"
     Item Added: "{device} dodao je {item} u {setting}"

@@ -938,6 +938,8 @@ Settings:
     Sync Automatically: "Автоматично синхронизиране"
     Activity: "Активност на акаунта"
     No Activity: "Няма скорошна активност"
+    Clear Activity: "Изчистване на това устройство"
+    Clear Activity Hint: "Скрийте съществуващата активност на акаунта на това устройство. Активността на сървъра и другите устройства остава непроменена. Новата активност ще продължи да се показва."
     Setting Changed: "{device} промени {setting} на {value}"
     Item Updated: "{device} обнови {setting}"
     Item Added: "{device} добави {item} към {setting}"
