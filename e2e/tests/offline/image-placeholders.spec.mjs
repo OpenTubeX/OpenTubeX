@@ -904,6 +904,49 @@ test('stalled playlist thumbnails stop shimmering and can still finish loading',
   await expect(card.locator('.thumbnailImage')).toBeVisible()
 })
 
+test('slow missing-resolution thumbnails give the smaller source a full loading deadline', async ({ page }, testInfo) => {
+  await page.clock.install()
+  const pending = []
+  await page.route('https://i.ytimg.com/vi/deadline/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'resolution-deadline',
+      data: [{ type: 'playlist', dataSource: 'local', playlistId: 'resolution-deadline', title: 'Resolution fallback', thumbnail: 'https://i.ytimg.com/vi/deadline/maxresdefault.jpg', channelName: 'Example channel', channelId: '', videoCount: 1 }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/resolution-deadline' })
+  })
+  const card = page.locator('.ft-list-item', { hasText: 'Resolution fallback' })
+  const placeholder = card.locator('.retryImagePlaceholder')
+  const image = card.locator('.thumbnailImage:not(.retryImagePlaceholder)')
+  await expect.poll(() => pending.length).toBe(1)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(9000)
+  await pending[0].fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>' })
+  await expect.poll(() => pending.length).toBe(2)
+  await expect(image).toHaveAttribute('src', /\/sddefault\.jpg$/)
+  await page.clock.fastForward(9001)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  expect(pending).toHaveLength(2)
+  await page.clock.fastForward(1000)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(3001)
+  await expect.poll(() => pending.length).toBe(3)
+  expect(pending[2].request().url()).toMatch(/\/sddefault\.jpg\?opentubex_retry=/)
+  await fulfillVisualFixture(pending[2], 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await image.screenshot({ path: testInfo.outputPath(`recovered-resolution-${theme}.png`) })
+  }
+})
+
 for (const retrySucceeds of [true, false]) {
   test(`stalled end-screen avatars retry once and ${retrySucceeds ? 'recover without reloading' : 'keep a bounded fallback'}`, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)

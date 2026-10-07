@@ -111,16 +111,17 @@ function resetSource(src, isFallback = false) {
   retryPending = false
   currentSource = src
   hasLoaded.value = false
+  clearTimeout(skeletonTimeoutId)
+  skeletonTimeoutId = undefined
   if (!isFallback) {
     hasFailed.value = false
-    clearTimeout(skeletonTimeoutId)
-    skeletonTimeoutId = undefined
   }
   imageUrl.value = src
 }
 
 function startLoadingTimeout() {
-  if (!isLoading.value || skeletonTimeoutId !== undefined) return
+  // Resolution fallbacks get their own deadline even if the skeleton stopped.
+  if (hasLoaded.value || !currentSource || currentSource === thumbnailPlaceholder || skeletonTimeoutId !== undefined) return
   // Keep the image mounted so a late success can still replace the fallback.
   skeletonTimeoutId = setTimeout(() => {
     hasFailed.value = true

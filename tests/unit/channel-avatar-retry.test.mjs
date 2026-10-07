@@ -233,7 +233,8 @@ test('video thumbnails fall back in resolution order on errors and loaded placeh
   await fail(f.find('img'))
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
   assert.equal(f.requests.length, 0)
-  assert.equal(f.timers.size, 0)
+  assert.equal(f.timers.size, 1, 'the remaining resolution fallback gets its own loading deadline')
+  assert.equal([...f.timers.values()][0].delay, 10_000)
   f.thumbnail.value = 'https://i.ytimg.com/vi/other/maxresdefault.jpg'
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
@@ -256,6 +257,36 @@ test('channel avatars remove the failed image after the delayed retry and reset 
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
 })
+
+for (const originalState of ['loading', 'timed out', 'failed']) {
+  test(`resolution fallbacks get their own deadline after the original request ${originalState}`, async t => {
+    const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+    f.thumbnail.value = 'https://i.ytimg.com/vi/video/maxresdefault.jpg'
+    await Vue.nextTick()
+    const [originalDeadline] = f.timers.values()
+    if (originalState === 'timed out') originalDeadline()
+    if (originalState === 'failed') await fail(f.find('img'))
+    else f.find('img').props.onLoad({ target: { naturalWidth: 120, naturalHeight: 90 } })
+    await Vue.nextTick()
+    assert.equal(f.find('img').props.src, 'https://i.ytimg.com/vi/video/sddefault.jpg')
+    const [fallbackDeadline] = f.timers.values()
+    assert.equal(f.timers.size, 1, 'cancel the old deadline and any queued retry')
+    assert.ok(fallbackDeadline && fallbackDeadline !== originalDeadline, 'the smaller source needs a fresh deadline')
+    assert.equal(fallbackDeadline.delay, 10_000)
+    const placeholder = f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+    assert.equal(/ft-shimmer/.test(placeholder.props.class), originalState === 'loading', 'a fallback must not restart a stopped skeleton')
+    fallbackDeadline()
+    await Vue.nextTick()
+    const [retry] = f.timers.values()
+    assert.equal(retry.delay, 3000)
+    retry()
+    await Vue.nextTick()
+    assert.match(f.find('img').props.src, /\/sddefault\.jpg\?opentubex_retry=/)
+    f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 480 } })
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 0)
+  })
+}
 
 test('duplicate errors during the retry delay do not remove the avatar or start another request', async t => {
   const f = await mountAvatar(t, null)
