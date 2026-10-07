@@ -65,7 +65,7 @@ test('Android confirms opening a background tab while keeping the current page',
       await mkdir(process.env.ANDROID_EVIDENCE_DIR, { recursive: true })
       await page.screenshot({ path: `${process.env.ANDROID_EVIDENCE_DIR}/background-tab-toast.png` })
     }
-    await expect(toast).toHaveCount(0, { timeout: 10_000 })
+    await expect(toast).toHaveCount(0, { timeout: 4_000 })
   } finally {
     if (originalTabs) {
       await page.evaluate(async originalTabs => {
