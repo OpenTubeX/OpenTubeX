@@ -11476,7 +11476,10 @@ export default defineComponent({
     let finishAndroidFullscreenExit = () => {}
     onBeforeUnmount(() => finishAndroidFullscreenExit())
     watch(isActiveTab, active => {
-      if (!active) finishAndroidFullscreenExit()
+      if (!active) {
+        finishAndroidFullscreenExit()
+        androidFullscreenRotationRequested = false
+      }
     })
 
     function retainAndroidFullscreenDuringRotation() {

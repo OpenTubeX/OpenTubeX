@@ -353,10 +353,14 @@ test('Android retains the exit surface only for a requested rotation', async () 
 
 test('Android tracks landscape requests including metadata changes during fullscreen', () => {
   const start = source.indexOf('    let androidFullscreenRotationRequested = false')
-  const end = source.indexOf('    function updateFullscreenOrientation', start)
+  const end = source.indexOf('    function retainAndroidFullscreenDuringRotation', start)
   const orientationSource = readFileSync(new URL('../../src/renderer/helpers/capacitorUi.js', import.meta.url), 'utf8')
   const predicate = orientationSource.slice(orientationSource.indexOf('export function shouldRotateFullscreenToLandscape'), orientationSource.indexOf('export function setLandscapeOrientation')).replace('export ', '')
+  let activeChanged
   const context = {
+    onBeforeUnmount() {},
+    watch: (_source, callback) => { activeChanged = callback },
+    isActiveTab: { value: true },
     video: { value: {} },
     rotateFullscreenToLandscape: { value: false },
     fullscreenAspectRatio: { value: 16 / 9 },
@@ -373,6 +377,8 @@ test('Android tracks landscape requests including metadata changes during fullsc
   context.rotateFullscreenToLandscape.value = false
   assert.equal(request(true), true, 'An unlock from a preference change can still be rotating')
   assert.equal(request(false), true, 'Exit must preserve the request until retention finishes')
+  activeChanged(false)
+  assert.equal(request(true), false, 'Reactivating a retained tab must not reuse its old rotation request')
 })
 
 test('Android fullscreen events do not repeat an entry rotation already in flight', () => {
