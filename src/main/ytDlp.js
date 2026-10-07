@@ -151,7 +151,16 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         for (const part of format.cookies.split('; ')) {
           const separator = part.indexOf('=')
           const name = separator === -1 ? part : part.slice(0, separator)
-          const value = separator === -1 ? '' : part.slice(separator + 1)
+          const rawValue = separator === -1 ? '' : part.slice(separator + 1)
+          // Python's cookie serializer quotes values containing characters such
+          // as '=' and can escape characters with three-digit octal sequences.
+          const value = rawValue.startsWith('"') && rawValue.endsWith('"')
+            ? rawValue.slice(1, -1).replaceAll(/\\(?:([0-3][0-7]{2})|([\s\S]))/g,
+                (_match, octal, character) => octal ? String.fromCharCode(parseInt(octal, 8)) : character)
+            : rawValue
+          // Decode only RFC 6265 cookie octets; retain Python's wire encoding
+          // when the value needs quotes or escapes to be parsed correctly.
+          const cookieValue = /^[\x21\x23-\x2b\x2d-\x3a\x3c-\x5b\x5d-\x7e]+$/.test(value) ? value : rawValue
           if (name === 'Domain' || name === 'Path' || name === 'Expires' || name === 'Secure' || name === 'Version') {
             if (cookie === null) continue
             const domain = value.replace(/^\./, '').toLowerCase()
@@ -161,8 +170,8 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
             } else if (name === 'Path' && value.startsWith('/')) cookie.path = value
             else if (name === 'Expires') cookie.expires = Math.min(Number(value) || Infinity, Date.now() / 1000 + 3600)
             else if (name === 'Secure') cookie.secure = true
-          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && value &&
-        /^[\x20-\x7e]+$/.test(value) && !value.includes(';')) {
+          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && cookieValue &&
+            /^[\x20-\x7e]+$/.test(cookieValue) && !cookieValue.includes(';')) {
             cookie = {
               domain: url.hostname,
               includeSubdomains: false,
@@ -170,7 +179,7 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
               secure: false,
               expires: Date.now() / 1000 + 3600,
               name,
-              value
+              value: cookieValue
             }
             entries.push(cookie)
           }
@@ -178,10 +187,18 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         return entries
       })
     : []
-  const cookies = [...cookieFileEntries, ...formatEntries]
-
+  const cookieEntries = [...cookieFileEntries, ...formatEntries]
   const existing = externalStreamCookies.get(webContents) ?? new Map()
-  for (const host of hosts) existing.set(host, cookies)
+  for (const host of hosts) {
+    // Filter before deduplicating so a host-only cookie cannot replace a
+    // subdomain-inclusive cookie needed by a different stream host.
+    const cookies = [...new Map(cookieEntries
+      .filter(cookie => host === cookie.domain ||
+        (cookie.includeSubdomains && host.endsWith(`.${cookie.domain}`)))
+      .map(cookie => [JSON.stringify([cookie.domain, cookie.path, cookie.name]), cookie])
+    ).values()]
+    existing.set(host, cookies)
+  }
   externalStreamCookies.set(webContents, existing)
 }
 
