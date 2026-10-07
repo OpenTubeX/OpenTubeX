@@ -10,6 +10,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import SponsorBlockSegmentEditor from '../WatchVideoSponsorBlock/SponsorBlockSegmentEditor.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
+import { bindAndroidFullscreen } from '../../helpers/player/androidFullscreen'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
@@ -94,12 +95,14 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setFullscreenOrientation, setLandscapeOrientation } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, setFullscreenOrientation, setLandscapeOrientation, shouldRotateFullscreenToLandscape } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
   observeAndroidDisplayRotation,
   observeAndroidDeviceRotation,
+  prepareAndroidFullscreenRotation,
+  getAndroidDisplayOrientation,
   setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
   shouldShowAndroidStatusBar,
@@ -781,6 +784,8 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
     let iosFullscreenCleanup = null
+    let androidFullscreenCleanup = null
+    let androidFullscreenEntering = false
     let iosCaptionsCleanup = null
     let screenWakeBinding = null
 
@@ -5110,6 +5115,9 @@ export default defineComponent({
           // these have their own watchers
           enableFullscreenOnRotation: fullscreenOnRotationEnabled.value,
           fullScreenElement: androidFullscreenHost ?? container.value,
+          // Android rotation is owned by the native orientation preference.
+          // A second WebView lock races it and ignores portrait-only fullscreen.
+          forceLandscapeOnFullscreen: !(process.env.IS_CAPACITOR && !process.env.IS_IOS),
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
 
@@ -5463,7 +5471,10 @@ export default defineComponent({
       setFullscreenMetadata,
       setShowUiOnPaused,
       showOverlayControls,
-      togglePlayerFullScreen: () => ui?.getControls().toggleFullScreen(),
+      togglePlayerFullScreen: () => {
+        finishAndroidFullscreenExit(true)
+        return ui?.getControls().toggleFullScreen()
+      },
     })
 
     const mobileSeekThumbnailStyle = useSeekPreviewThumbnail({
@@ -5539,7 +5550,9 @@ export default defineComponent({
 
     /** @param {TouchEvent} event */
     function handlePlayerTouchEnd(event) {
-      if (suppressTemporaryPlaybackRateClick) {
+      // Fullscreen gestures send a synthetic container touchend to restart
+      // Shaka's idle timer. Only suppress the real post-hold touch event.
+      if (suppressTemporaryPlaybackRateClick && event.isTrusted) {
         event.preventDefault()
         event.stopImmediatePropagation()
         return
@@ -7532,7 +7545,7 @@ export default defineComponent({
 
     function handleAndroidRotation(landscape) {
       if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
-      if (pictureInPictureActive.value) return
+      if (pictureInPictureActive.value || androidFullscreenEntering) return
       if (!landscape) {
         if (androidRotationFullscreen) exitAndroidRotationFullscreen()
         else if (isNativeFullscreenActive()) {
@@ -7579,28 +7592,13 @@ export default defineComponent({
       androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
     })
 
-    let fullscreenEntryAttempt = 0
     function handleFullscreenButtonClick(event) {
+      finishAndroidFullscreenExit(true)
       if (androidRotationFullscreen) {
         event.preventDefault()
         event.stopImmediatePropagation()
         exitAndroidRotationFullscreen()
         return
-      }
-      if (process.env.IS_CAPACITOR && !process.env.IS_IOS && isActiveTab.value && !isNativeFullscreenActive()) {
-        const attempt = ++fullscreenEntryAttempt
-        // Begin rotating on the user action, before Shaka changes the fullscreen element.
-        setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
-          .then(() => {
-            // Fullscreen can be rejected after the orientation request succeeds.
-            setTimeout(() => {
-              if (attempt === fullscreenEntryAttempt && !document.fullscreenElement) {
-                setFullscreenOrientation(false, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
-              }
-            }, 1000)
-          })
-          .catch(() => {})
-        suppressPanelTransitions(500)
       }
       handleScrollMiniFullscreenButtonClick(event)
     }
@@ -11467,10 +11465,75 @@ export default defineComponent({
       isOffline.value = true
     }
 
+    let androidFullscreenPortrait = null
+    function updateFullscreenOrientation(fullscreen) {
+      if (!isActiveTab.value || isNativeFullscreenActive() !== fullscreen) return
+      if (fullscreen && androidFullscreenEntering) return
+      return setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+    }
+    /** @type {(preserveOrientation?: boolean) => void} */
+    let finishAndroidFullscreenExit = () => {}
+    onBeforeUnmount(() => finishAndroidFullscreenExit())
+    watch(isActiveTab, active => {
+      if (!active) finishAndroidFullscreenExit()
+    })
+
+    function retainAndroidFullscreenDuringRotation(orientationUpdated) {
+      if (!androidFullscreenHost || androidFullscreenPortrait === null) return
+      if ((window.innerHeight >= window.innerWidth) === androidFullscreenPortrait) {
+        androidFullscreenPortrait = null
+        return
+      }
+
+      // Keep the player in the top layer until the restored orientation reaches
+      // the WebView. Otherwise the inline page paints inside a landscape window.
+      const host = androidFullscreenHost
+      host.setAttribute('popover', 'manual')
+      host.showPopover()
+      androidFullscreenHostActive.value = true
+      suppressPanelTransitions(5000)
+      let restoredFrame = null
+      const finish = (preserveOrientation = false) => {
+        clearTimeout(timeout)
+        cancelAnimationFrame(restoredFrame)
+        window.removeEventListener('resize', resized)
+        finishAndroidFullscreenExit = () => {}
+        if (!preserveOrientation) androidFullscreenPortrait = null
+        if (host.matches(':popover-open')) host.hidePopover()
+        host.removeAttribute('popover')
+        androidFullscreenHostActive.value = document.fullscreenElement === host
+        suppressPanelTransitions(100)
+      }
+      const resized = () => {
+        if ((window.innerHeight >= window.innerWidth) !== androidFullscreenPortrait || restoredFrame !== null) return
+        // Paint the restored viewport before replacing its fullscreen surface.
+        restoredFrame = requestAnimationFrame(() => {
+          restoredFrame = requestAnimationFrame(() => finish())
+        })
+      }
+      // Auto-rotate or a different display can keep the device in landscape.
+      // Never leave an uncloseable presentation layer in that case.
+      const timeout = window.setTimeout(finish, 5000)
+      finishAndroidFullscreenExit = finish
+      window.addEventListener('resize', resized)
+      // Unlocking can legitimately keep landscape after the user turns the
+      // phone. Ask the native display after unlock rather than waiting for the
+      // orientation remembered at entry in that case.
+      orientationUpdated?.then(getAndroidDisplayOrientation).then(orientation => {
+        if (finishAndroidFullscreenExit !== finish) return
+        androidFullscreenPortrait = orientation.startsWith('portrait')
+        resized()
+      }).catch(() => {})
+    }
+
     function fullscreenChangeHandler() {
       if (shortsNavigationSuspended.value) return
       const fullscreen = isNativeFullscreenActive()
       const wasFullscreen = isFullscreen.value
+      finishAndroidFullscreenExit(true)
+      if (fullscreen && !wasFullscreen && androidFullscreenHost && androidFullscreenPortrait === null) {
+        androidFullscreenPortrait = window.innerHeight >= window.innerWidth
+      }
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
       if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
       if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
@@ -11493,12 +11556,10 @@ export default defineComponent({
         return
       }
 
-      setFullscreenOrientation(
-        fullscreen,
-        video.value,
-        rotateFullscreenToLandscape.value,
-        fullscreenAspectRatio.value
-      ).catch(() => {})
+      const orientationUpdated = updateFullscreenOrientation(fullscreen)
+      if (wasFullscreen && !fullscreen && process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+        retainAndroidFullscreenDuringRotation(orientationUpdated)
+      }
       syncAndroidStatusBarVisibility()
 
       if (fullscreen) {
@@ -11704,6 +11765,28 @@ export default defineComponent({
       }
 
       const controls = ui.getControls()
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+        androidFullscreenCleanup = bindAndroidFullscreen(controls, {
+          isActive: () => isActiveTab.value,
+          prepareEnter: async () => {
+            finishAndroidFullscreenExit(true)
+            androidFullscreenPortrait ??= window.innerHeight >= window.innerWidth
+            // The orientation event must not start a competing popover entry.
+            androidFullscreenEntering = true
+            if (shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)) {
+              await prepareAndroidFullscreenRotation().catch(() => {})
+            }
+            setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+          },
+          finishEnter: entered => {
+            androidFullscreenEntering = false
+            if (!entered) {
+              androidFullscreenPortrait = null
+              setLandscapeOrientation(false).catch(() => {})
+            }
+          },
+        })
+      }
       if (process.env.IS_IOS) {
         iosCaptionsCleanup = bindIosNativeCaptions(videoElement)
         iosFullscreenCleanup = bindIosFullscreen(controls, {
@@ -12445,6 +12528,8 @@ export default defineComponent({
       sponsorBlockRequestGeneration++
       screenWakeBinding?.destroy()
       screenWakeBinding = null
+      androidFullscreenCleanup?.()
+      androidFullscreenCleanup = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()
@@ -12763,6 +12848,8 @@ export default defineComponent({
       repeatStatsLoopObserver?.disconnect()
       screenWakeBinding?.destroy()
       screenWakeBinding = null
+      androidFullscreenCleanup?.()
+      androidFullscreenCleanup = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
       iosCaptionsCleanup?.()

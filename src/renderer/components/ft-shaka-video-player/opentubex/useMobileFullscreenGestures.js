@@ -53,6 +53,8 @@ export function useMobileFullscreenGestures({
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
+  let mobileFullscreenSettleSequence = 0
+
   /** @type {number | null} */
   let mobileSurfaceTapTimer = null
   /** @type {{ direction: number, time: number } | null} */
@@ -121,6 +123,11 @@ export function useMobileFullscreenGestures({
       lastMobileSideTap = null
     }
     if (!surfaceTap && !isSwipeControlTarget(event.target)) return
+    // A new touch supersedes a fullscreen handoff that has not painted yet.
+    mobileFullscreenSettleSequence++
+    clearTimeout(mobileFullscreenSettleTimer)
+    mobileFullscreenSwipeSettling.value = false
+    mobileFullscreenSwipeOffset.value = 0
     mobileControlSuppressClickUntil = 0
     mobileSurfaceSuppressTouchEndUntil = 0
 
@@ -374,25 +381,36 @@ export function useMobileFullscreenGestures({
   }
 
   function settleMobileFullscreenGesture(shouldToggle, wasFullscreen) {
+    const sequence = ++mobileFullscreenSettleSequence
     clearTimeout(mobileFullscreenSettleTimer)
     mobileFullscreenSwiping.value = false
     mobileFullscreenSwipeSettling.value = true
     mobileFullscreenSwipeOffset.value = shouldToggle ? (wasFullscreen ? 96 : -96) : 0
 
-    const settleDuration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140
-    mobileFullscreenSettleTimer = window.setTimeout(() => {
+    // A committed swipe hands off to the system animation immediately.
+    // Only canceled gestures need to animate back to their starting position.
+    const settleDuration = shouldToggle || window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140
+    mobileFullscreenSettleTimer = window.setTimeout(async () => {
       mobileFullscreenSettleTimer = null
       mobileFullscreenSwipeOffset.value = 0
       mobileFullscreenSwipeSettling.value = false
       if (shouldToggle && isFullscreenActive() === wasFullscreen) {
-        Promise.resolve(togglePlayerFullScreen()).then(() => {
+        try {
+          // Paint the reset swipe preview before Android snapshots the page
+          // for rotation and Chromium enters fullscreen.
+          await nextTick()
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+          if (sequence !== mobileFullscreenSettleSequence || isFullscreenActive() !== wasFullscreen) return
+          await togglePlayerFullScreen()
           if (isFullscreenActive() !== wasFullscreen) {
             // Restart Shaka's touchmove-stopped idle timer with the fullscreen
             // delay, without invoking the surface-tap handler on its child.
             getContainer()?.dispatchEvent(new Event('touchend'))
             lightHaptic()
           }
-        }).catch(error => console.warn('Fullscreen gesture failed', error))
+        } catch (error) {
+          console.warn('Fullscreen gesture failed', error)
+        }
       }
     }, settleDuration)
   }
@@ -435,6 +453,11 @@ export function useMobileFullscreenGestures({
       mobileFullscreenTitleGesture = null
     }
     if (event && event.pointerId !== mobileFullscreenGesture?.pointerId) return false
+
+    mobileFullscreenSettleSequence++
+    clearTimeout(mobileFullscreenSettleTimer)
+    mobileFullscreenSwipeSettling.value = false
+    mobileFullscreenSwipeOffset.value = 0
 
     clearMobileMiniPlayerDismiss()
 
@@ -595,6 +618,7 @@ export function useMobileFullscreenGestures({
   }
 
   onUnmounted(() => {
+    mobileFullscreenSettleSequence++
     clearMobileMiniPlayerDismiss()
     clearMobileSeekFeedback()
     miniPlayerDrag?.cancel()

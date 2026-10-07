@@ -247,7 +247,7 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
   const context = {
     foregroundLoadAbortController: { abort: () => calls.push('foreground') },
     clearSabrBackoffTimer: noop, repeatStatsTracker: null, repeatStatsLoopObserver: null,
-    screenWakeBinding: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null, ignoreErrors: false,
+    screenWakeBinding: null, androidFullscreenCleanup: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null, ignoreErrors: false,
     cancelPendingVolumeUserSet: noop, cancelSponsorBlockSkipSchedule: noop,
     hasLoaded: { value: true }, hasPlaybackPosition: { value: true },
     video: { value: null }, showPoster: { value: false }, nextTick: async () => {},

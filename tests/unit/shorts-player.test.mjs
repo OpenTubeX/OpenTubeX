@@ -315,12 +315,13 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
     suspendedShortsSabrReload: false, suspendedShortsError: null,
     isNativeFullscreenActive: () => fullscreen,
     androidFullscreenHostActive: ref(false), androidFullscreenHost: null,
+    finishAndroidFullscreenExit() {},
     videoZoomPinchStart: null, selectedVideoZoom: ref(1), VIDEO_ZOOM_LEVELS: [1],
     props: { shortsPlayer: true }, resetShortsOverflowMenu() {}, suppressPanelTransitions() {}, syncChapterOverlayButton() {},
     process: { env: {} }, fullWindowEnabled: ref(false),
     rememberAndCloseDockedPanels: () => closed.push('current player panels'),
     video: ref({}), rotateFullscreenToLandscape: ref(false), fullscreenAspectRatio: ref(1),
-    setFullscreenOrientation: async () => {}, syncAndroidStatusBarVisibility() {},
+    updateFullscreenOrientation() {}, syncAndroidStatusBarVisibility() {},
     updateScrollMiniPlayer() {}, nextTick() {}, showOverlayControls() {},
     onDeactivated() {}, onActivated: callback => { activate = callback },
     registerMediaSessionHandlers() {}, emit() {}, handleTimeupdate() {}, handlePause() {},
@@ -387,7 +388,7 @@ test('evicting an inactive Short does not close the current player panels', () =
   const closed = []
   const context = {
     onBeforeUnmount: callback => callback(), sponsorBlockRequestGeneration: 0,
-    screenWakeBinding: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null,
+    screenWakeBinding: null, androidFullscreenCleanup: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null,
     clearTimeout() {}, paidPromotionTimer: null, disableTwitchTsVideoGap: null,
     fullscreenDockLayoutFrame: null, cancelFullscreenDockVideoAnimation() {},
     cancelPendingVolumeUserSet() {}, fullWindowAnimation: null,

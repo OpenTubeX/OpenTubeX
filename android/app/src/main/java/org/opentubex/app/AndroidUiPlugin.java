@@ -109,6 +109,14 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void prepareFullscreenRotation(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            ((MainActivity) getActivity()).prepareFullscreenRotation();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
     public void setPageScrollbarsHidden(PluginCall call) {
         boolean hidden = Boolean.TRUE.equals(call.getBoolean("hidden", false));
         getActivity().runOnUiThread(() -> {

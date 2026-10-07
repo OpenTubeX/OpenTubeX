@@ -11,6 +11,8 @@ import com.getcapacitor.PluginHandle;
 
 public class MainActivity extends BridgeActivity {
     private InputManager inputManager;
+    private int lastOrientation;
+    private WebViewRotationFrame rotationFrame;
     private final InputManager.InputDeviceListener inputDeviceListener =
         new InputManager.InputDeviceListener() {
             @Override
@@ -60,6 +62,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         super.onCreate(savedInstanceState);
+        lastOrientation = getResources().getConfiguration().orientation;
         // Capacitor must select its no-title theme before the decor is created.
         StartupBackground.apply(getWindow(), StartupBackground.getColor(this));
         // Keep swiped bars visible so a second swipe can open notifications.
@@ -87,6 +90,7 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onDestroy() {
+        if (rotationFrame != null) rotationFrame.run();
         inputManager.unregisterInputDeviceListener(inputDeviceListener);
         if (isFinishing() && bridge != null) {
             PluginHandle handle = bridge.getPlugin("SubscriptionRefresh");
@@ -151,9 +155,23 @@ public class MainActivity extends BridgeActivity {
         });
     }
 
+    void prepareFullscreenRotation() {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+            || isInPictureInPictureMode()) return;
+        if (rotationFrame != null) rotationFrame.run();
+        rotationFrame = new WebViewRotationFrame(getBridge().getWebView(), true);
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation != lastOrientation) {
+            lastOrientation = newConfig.orientation;
+            if (rotationFrame != null) rotationFrame.run();
+            // PiP has its own viewport/surface synchronization.
+            rotationFrame = isInPictureInPictureMode() ? null : new WebViewRotationFrame(getBridge().getWebView());
+        }
 
         notifyHardwareKeyboardState();
     }

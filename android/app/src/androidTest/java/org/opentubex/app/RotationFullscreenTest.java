@@ -31,6 +31,41 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RotationFullscreenTest {
     @Test
+    public void fullscreenKeepsTheSystemRotationAnimation() {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> assertEquals(
+                "Fullscreen must preserve Android's rotating transition",
+                WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE,
+                activity.getWindow().getAttributes().rotationAnimation));
+        }
+    }
+
+    @Test
+    public void rotationRequestKeepsTheOldFrameUntilConfigurationArrives() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            CountDownLatch painted = new CountDownLatch(1);
+            AtomicReference<WebViewRotationFrame> guard = new AtomicReference<>();
+            scenario.onActivity(activity -> {
+                WebView webView = activity.getBridge().getWebView();
+                guard.set(new WebViewRotationFrame(webView, true));
+                assertFalse(guard.get().onPreDraw());
+                webView.postVisualStateCallback(0, new WebView.VisualStateCallback() {
+                    @Override public void onComplete(long requestId) {
+                        // Rendering the old portrait viewport must not release
+                        // the snapshot guard before the configuration changes.
+                        assertFalse(guard.get().onPreDraw());
+                        guard.get().run();
+                        assertTrue(guard.get().onPreDraw());
+                        painted.countDown();
+                    }
+                });
+            });
+            assertTrue("Chromium must acknowledge the pending frame", painted.await(5, TimeUnit.SECONDS));
+            scenario.onActivity(activity -> guard.get().run());
+        }
+    }
+
+    @Test
     public void unsupportedOrientationSensorsAreRejectedAndStayDisabledOnResume() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             Field listenerField = AndroidUiPlugin.class.getDeclaredField("deviceRotationListener");
