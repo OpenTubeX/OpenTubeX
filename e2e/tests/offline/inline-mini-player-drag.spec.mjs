@@ -505,12 +505,22 @@ test.describe('browsing scroll during mobile minimize', () => {
     }
   })
 
-  for (const trigger of ['remove', 'resize', 'responsive']) {
+  for (const trigger of ['remove', 'replace', 'search locale change', 'resize', 'responsive']) {
     test(`minimize clamps history after ${trigger} reduces its scroll range`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await setWindowSize(app, page, { width: 480, height: 850 })
       const history = page.locator('.tabContent > .routerView').first()
       await expect(history.locator('.ft-list-video').first()).toBeVisible()
+      if (trigger === 'search locale change') {
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setHistoryCacheSorted', store.getters.getHistoryCacheSorted.map((entry, index) => ({
+            ...entry, title: index < 8 ? 'istanbul' : 'Istanbul', author: 'Channel'
+          })))
+        })
+        await page.getByRole('searchbox', { name: 'Search in History' }).fill('i')
+        await expect(history.locator('.historySearchLoader')).toHaveCount(0)
+      }
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
       await expect(history.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`)).toHaveCount(0)
       const savedScroll = await page.evaluate(() => window.scrollY)
@@ -525,11 +535,17 @@ test.describe('browsing scroll during mobile minimize', () => {
       expect(savedHistoryScroll).toBeCloseTo(savedScroll, 0)
       await video.evaluate(element => element.pause())
       await enableMobileTouch(app, page, true, false)
-      if (trigger === 'remove') {
-        await page.evaluate(() => {
+      if (trigger === 'remove' || trigger === 'replace') {
+        await page.evaluate(trigger => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          store.commit('setHistoryCacheSorted', store.getters.getHistoryCacheSorted.slice(0, 8))
+          store.commit('setHistoryCacheSorted', trigger === 'replace' ? [] : store.getters.getHistoryCacheSorted.slice(0, 8))
+        }, trigger)
+      } else if (trigger === 'search locale change') {
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateCurrentLocale', 'tr')
         })
+        await expect(history.locator('.historySearchLoader')).toHaveCount(0)
       } else {
         await setWindowSize(app, page, trigger === 'resize' ? { width: 481, height: 1200 } : { width: 640, height: 900 })
       }
@@ -543,7 +559,12 @@ test.describe('browsing scroll during mobile minimize', () => {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + 140 }] })
         await expect(player).toHaveAttribute('data-inline-mini-drag', '')
         const held = await history.evaluate(element => ({ top: element.getBoundingClientRect().top, end: element.querySelector('.card').getBoundingClientRect().bottom, viewport: innerHeight }))
-        expect.soft(held.end, 'the shortened page must not leave an empty preview').toBeGreaterThan(held.viewport - 200)
+        if (trigger === 'replace') {
+          await expect(history.locator('.message')).toBeVisible()
+          await expect(history.locator('.ft-list-video')).toHaveCount(0)
+        } else {
+          expect(held.end, 'the shortened page must not leave an empty preview').toBeGreaterThan(held.viewport - 200)
+        }
         const frames = sampleBrowsingPreviewTops(history)
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect(player).not.toHaveAttribute('data-inline-mini-drag')
@@ -551,7 +572,27 @@ test.describe('browsing scroll during mobile minimize', () => {
         expect(await page.evaluate(() => window.scrollY)).toBeLessThan(savedScroll)
         const tops = await frames
         expect(tops.every(top => Math.abs(top - held.top) <= 2), `clamping must finish before the preview is visible: ${JSON.stringify({ held, min: Math.min(...tops), max: Math.max(...tops) })}`).toBe(true)
+        await expect.poll(() => page.evaluate(() => {
+          const content = document.querySelector('.app > .routerView')
+          const margin = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+          const renderedRange = Math.max(0, content.getBoundingClientRect().bottom + scrollY + margin - innerHeight)
+          const range = Math.max(0, document.documentElement.scrollHeight - innerHeight)
+          const scrollbar = document.querySelector('body > .os-scrollbar-vertical')
+          const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          const overflowing = range > 1
+          return {
+            validRange: Math.abs(range - renderedRange) <= 1 && scrollY <= renderedRange + 1,
+            usable: !scrollbar.classList.contains('os-scrollbar-unusable'),
+            overflowing,
+            thumbMatches: !overflowing || (
+              Math.abs(handle.top - track.top - scrollY / range * (track.height - handle.height)) <= 1 &&
+              Math.abs(handle.height / track.height - innerHeight / (innerHeight + range)) <= 0.01
+            )
+          }
+        })).toEqual({ validRange: true, usable: trigger !== 'replace', overflowing: trigger !== 'replace', thumbMatches: true })
       } finally {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
         await cdp.detach()
       }
     })
