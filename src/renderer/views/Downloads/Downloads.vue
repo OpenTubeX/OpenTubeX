@@ -238,7 +238,7 @@
 <script setup>
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DownloadRow from './DownloadRow.vue'
@@ -337,9 +337,17 @@ async function refreshDownloads() {
   return records
 }
 
-onMounted(() => {
-  refreshDownloads().catch(error => console.warn('Could not refresh download history', error))
-})
+// The utility window stays cached after closing. Refresh on every opening so
+// file availability and history remain current without rebuilding the view.
+watch(() => store.getters.getSettingsWindowOpen, open => {
+  if (open) {
+    refreshDownloads().catch(error => console.warn('Could not refresh download history', error))
+  } else if (!store.getters.getSettingsWindowMinimized) {
+    showUrlPrompt.value = false
+    selectedDownloadUrl.value = ''
+    pendingRemoval.value = null
+  }
+}, { immediate: true })
 
 watch(
   () => downloads.value

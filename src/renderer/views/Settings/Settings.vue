@@ -520,6 +520,7 @@ let draggingPointerId = null
 let resizeSession = null
 let dragOffsetX = 0
 let dragOffsetY = 0
+let draggedBounds = null
 let maximizedDragSession = null
 let restoreBounds = null
 /** @type {Array<{ element: HTMLElement, scrollTop: number }>} */
@@ -536,8 +537,10 @@ const windowStyle = computed(() => isWindowMaximized.value
       blockSize: 'calc(100dvh - var(--app-safe-area-inset-top, 0px))'
     }
   : {
-      left: `${windowBounds.value.x}px`,
-      top: `${windowBounds.value.y}px`,
+      left: '0',
+      top: '0',
+      // Translation keeps movement separate from layout and bounds animations.
+      translate: `${windowBounds.value.x}px ${windowBounds.value.y}px`,
       inlineSize: `${windowBounds.value.width}px`,
       blockSize: `${windowBounds.value.height}px`
     })
@@ -1439,16 +1442,23 @@ function dragWindow(event) {
     isMaximized.value = false
     return
   }
-  windowBounds.value = clampBounds({
+  draggedBounds = clampBounds({
     ...windowBounds.value,
     x: event.clientX - dragOffsetX,
     y: event.clientY - dragOffsetY
   })
+  // Updating reactive bounds here also rerenders the settings controls and their
+  // scrollbar directives. Only commit the final bounds when the drag stops.
+  settingsWindowRef.value.style.translate = `${draggedBounds.x}px ${draggedBounds.y}px`
 }
 
 function stopDragging(event) {
   if (event && event.pointerId !== draggingPointerId) return
   if (draggingPointerId === null) return
+  if (draggedBounds !== null) {
+    windowBounds.value = draggedBounds
+    draggedBounds = null
+  }
   draggingPointerId = null
   maximizedDragSession = null
   document.documentElement.classList.remove('draggingSettingsWindow')
@@ -1531,6 +1541,7 @@ function stopResizing(event) {
 
 function handleViewportResize() {
   updateNarrowLayout()
+  if (isMaximizationForced.value) stopDragging()
   clampWindowToViewport()
 }
 
@@ -1540,7 +1551,8 @@ function updateNarrowLayout() {
 
 function clampWindowToViewport() {
   if (isWindowMaximized.value) return
-  windowBounds.value = clampBounds(windowBounds.value)
+  windowBounds.value = clampBounds(draggedBounds ?? windowBounds.value)
+  if (draggedBounds !== null) draggedBounds = windowBounds.value
 }
 
 function clampBounds(bounds) {
