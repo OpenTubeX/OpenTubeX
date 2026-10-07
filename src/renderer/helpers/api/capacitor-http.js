@@ -18,6 +18,7 @@ const AVATAR_MIME_TYPES = new Set([
 ])
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024
 const MAX_AVATAR_BASE64_LENGTH = Math.ceil(MAX_AVATAR_BYTES / 3) * 4
+const AVATAR_TIMEOUT_MS = 3000
 const DNS_RETRY_DELAYS_MS = [150, 500]
 const DEFAULT_NATIVE_TIMEOUT_MS = 30_000
 const IOSHttp = process.env.IS_IOS ? registerPlugin('IOSHttp') : null
@@ -207,7 +208,9 @@ export async function fetchCapacitorAvatarDataUrl(src) {
     response = await CapacitorHttp.request({
       url: url.toString(),
       method: 'GET',
-      responseType: 'blob'
+      responseType: 'blob',
+      connectTimeout: AVATAR_TIMEOUT_MS,
+      readTimeout: AVATAR_TIMEOUT_MS
     })
   } catch {
     return null

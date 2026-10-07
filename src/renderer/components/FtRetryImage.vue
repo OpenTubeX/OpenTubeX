@@ -47,6 +47,7 @@ const parentScope = parentScopeId ? { [parentScopeId]: '' } : {}
 
 const RETRY_DELAY_MS = 3000
 const SKELETON_TIMEOUT_MS = 10_000
+const NATIVE_RECOVERY_TIMEOUT_MS = 6000
 
 const props = defineProps({
   src: {
@@ -61,7 +62,10 @@ const props = defineProps({
 
 const emit = defineEmits(['error', 'load'])
 
-const preferredSource = computed(() => getVideoThumbnailSource(typeof props.src === 'string' ? props.src.trim() : '', store.getters.getThumbnailDataSaver))
+const preferredSource = computed(() => {
+  const src = typeof props.src === 'string' ? props.src.trim() : ''
+  return getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getThumbnailDataSaver)
+})
 const imageUrl = ref(preferredSource.value)
 const hasLoaded = ref(false)
 const hasFailed = ref(false)
@@ -74,6 +78,8 @@ let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
 let retryTimeoutId
+let nativeRecoveryTimeoutId
+let finishNativeRecovery
 let skeletonTimeoutId
 let visibilityObserver
 let imageIsVisible = false
@@ -86,11 +92,11 @@ function checkCachedImage({ el: image }) {
   if (!image.complete) {
     // Lazy images can remain unrequested offscreen. Give them their full loading
     // deadline once visible, without restarting it when scrolling away and back.
-    if (image.loading !== 'lazy' || imageIsVisible) startSkeletonTimeout()
+    if (image.loading !== 'lazy' || imageIsVisible) startLoadingTimeout()
     else if (!visibilityObserver) {
       visibilityObserver = new IntersectionObserver(entries => {
         imageIsVisible = entries.some(entry => entry.isIntersecting)
-        if (imageIsVisible) startSkeletonTimeout()
+        if (imageIsVisible) startLoadingTimeout()
       })
       visibilityObserver.observe(image)
     }
@@ -104,6 +110,7 @@ function checkCachedImage({ el: image }) {
 }
 
 function resetSource(src, isFallback = false) {
+  cancelNativeRecovery()
   clearTimeout(retryTimeoutId)
   retryTimeoutId = undefined
   sourceVersion++
@@ -111,18 +118,26 @@ function resetSource(src, isFallback = false) {
   retryPending = false
   currentSource = src
   hasLoaded.value = false
+  clearTimeout(skeletonTimeoutId)
+  skeletonTimeoutId = undefined
   if (!isFallback) {
     hasFailed.value = false
-    clearTimeout(skeletonTimeoutId)
-    skeletonTimeoutId = undefined
   }
   imageUrl.value = src
 }
 
-function startSkeletonTimeout() {
-  if (!isLoading.value || skeletonTimeoutId !== undefined) return
+function startLoadingTimeout() {
+  // Resolution fallbacks get their own deadline even if the skeleton stopped.
+  if (hasLoaded.value || !currentSource || currentSource === thumbnailPlaceholder || skeletonTimeoutId !== undefined) return
   // Keep the image mounted so a late success can still replace the fallback.
-  skeletonTimeoutId = setTimeout(() => { hasFailed.value = true }, SKELETON_TIMEOUT_MS)
+  skeletonTimeoutId = setTimeout(() => {
+    hasFailed.value = true
+    // A stalled response never fires error. Keep the original request alive
+    // while trying native recovery or waiting for the browser retry.
+    if (!hasRetried && /^https?:/.test(currentSource)) {
+      return recoverImage()
+    }
+  }, SKELETON_TIMEOUT_MS)
 }
 
 function useSmallerThumbnail() {
@@ -141,6 +156,10 @@ function handleImageLoad(event) {
     if (useSmallerThumbnail()) return
   }
   clearTimeout(skeletonTimeoutId)
+  cancelNativeRecovery()
+  clearTimeout(retryTimeoutId)
+  retryTimeoutId = undefined
+  retryPending = false
   hasLoaded.value = true
   emit('load', event)
 }
@@ -177,20 +196,36 @@ async function retryImageLoad(event) {
     return
   }
 
+  await recoverImage()
+}
+
+async function recoverImage() {
   hasRetried = true
   retryPending = true
   const failedSourceVersion = sourceVersion
+  const failedSource = currentSource
 
   if (process.env.IS_CAPACITOR) {
+    // Bound the whole recovery, including connections that keep streaming data.
+    const deadline = new Promise(resolve => {
+      finishNativeRecovery = resolve
+      nativeRecoveryTimeoutId = setTimeout(() => resolve(null), NATIVE_RECOVERY_TIMEOUT_MS)
+    })
     let dataUrl = null
     try {
-      const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
-      dataUrl = await fetchCapacitorAvatarDataUrl(currentSource)
+      dataUrl = await Promise.race([
+        (async () => {
+          const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
+          return fetchCapacitorAvatarDataUrl(failedSource)
+        })(),
+        deadline
+      ])
     } catch {
       // Native recovery is optional; unexpected failures still get a delayed retry.
     }
 
-    if (failedSourceVersion !== sourceVersion) return
+    if (failedSourceVersion !== sourceVersion || hasLoaded.value) return
+    cancelNativeRecovery()
     if (dataUrl !== null) {
       retryPending = false
       imageUrl.value = dataUrl
@@ -198,6 +233,17 @@ async function retryImageLoad(event) {
     }
   }
 
+  scheduleBrowserRetry()
+}
+
+function cancelNativeRecovery() {
+  clearTimeout(nativeRecoveryTimeoutId)
+  nativeRecoveryTimeoutId = undefined
+  finishNativeRecovery?.(null)
+  finishNativeRecovery = undefined
+}
+
+function scheduleBrowserRetry() {
   retryTimeoutId = setTimeout(() => {
     retryTimeoutId = undefined
     retryPending = false
@@ -207,6 +253,7 @@ async function retryImageLoad(event) {
 
 onBeforeUnmount(() => {
   sourceVersion++
+  cancelNativeRecovery()
   visibilityObserver?.disconnect()
   clearTimeout(retryTimeoutId)
   clearTimeout(skeletonTimeoutId)

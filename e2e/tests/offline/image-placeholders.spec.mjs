@@ -904,6 +904,125 @@ test('stalled playlist thumbnails stop shimmering and can still finish loading',
   await expect(card.locator('.thumbnailImage')).toBeVisible()
 })
 
+test('slow missing-resolution thumbnails give the smaller source a full loading deadline', async ({ page }, testInfo) => {
+  await page.clock.install()
+  const pending = []
+  await page.route('https://i.ytimg.com/vi/deadline/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'resolution-deadline',
+      data: [{ type: 'playlist', dataSource: 'local', playlistId: 'resolution-deadline', title: 'Resolution fallback', thumbnail: 'https://i.ytimg.com/vi/deadline/maxresdefault.jpg', channelName: 'Example channel', channelId: '', videoCount: 1 }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/resolution-deadline' })
+  })
+  const card = page.locator('.ft-list-item', { hasText: 'Resolution fallback' })
+  const placeholder = card.locator('.retryImagePlaceholder')
+  const image = card.locator('.thumbnailImage:not(.retryImagePlaceholder)')
+  await expect.poll(() => pending.length).toBe(1)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(9000)
+  await pending[0].fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>' })
+  await expect.poll(() => pending.length).toBe(2)
+  await expect(image).toHaveAttribute('src', /\/sddefault\.jpg$/)
+  await page.clock.fastForward(9001)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  expect(pending).toHaveLength(2)
+  await page.clock.fastForward(1000)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(3001)
+  await expect.poll(() => pending.length).toBe(3)
+  expect(pending[2].request().url()).toMatch(/\/sddefault\.jpg\?opentubex_retry=/)
+  await fulfillVisualFixture(pending[2], 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await image.screenshot({ path: testInfo.outputPath(`recovered-resolution-${theme}.png`) })
+  }
+})
+
+for (const retrySucceeds of [true, false]) {
+  test(`stalled end-screen avatars retry once and ${retrySucceeds ? 'recover without reloading' : 'keep a bounded fallback'}`, async ({ app, page }, testInfo) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)
+    })
+    await page.clock.install()
+    const pending = []
+    const requests = []
+    await page.route('https://annotation-images.test/**', route => {
+      requests.push(route.request().url())
+      pending.push(route)
+    })
+    const view = await watchViewHandle(page)
+    await view.evaluate((view, retrySucceeds) => {
+      view.$store.commit('setHideEndScreenAnnotations', false)
+      view.videoAnnotations = [{
+        id: 'retry-channel',
+        type: 'CHANNEL',
+        title: 'End-screen channel',
+        startTime: 0,
+        endTime: 1000,
+        left: 0.6,
+        top: 0.2,
+        width: 0.1,
+        aspectRatio: 1,
+        route: '/channel/UCaaaaaaaaaaaaaaaaaaaaaa',
+        thumbnail: retrySucceeds ? '//annotation-images.test/avatar' : 'https://annotation-images.test/avatar'
+      }]
+    }, retrySucceeds)
+    const avatar = page.locator('.channelAvatarLink')
+    const image = avatar.locator('img:not(.retryImagePlaceholder)')
+    const placeholder = avatar.locator('.retryImagePlaceholder')
+    await expect.poll(() => pending.length).toBe(1)
+    await expect(placeholder).toHaveClass(/ft-shimmer/)
+    const originalImage = await image.elementHandle()
+    const bounds = await placeholder.boundingBox()
+    const playbackTime = await video.evaluate(element => element.currentTime)
+    await page.clock.fastForward(10_001)
+    await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+    expect(requests).toHaveLength(1)
+    await page.clock.fastForward(2000)
+    expect(requests).toHaveLength(1)
+    await page.clock.fastForward(1_001)
+    await expect.poll(() => pending.length).toBe(2)
+    await expect(image).toHaveAttribute('src', /opentubex_retry=/)
+    expect(await image.evaluate((image, original) => image === original, originalImage)).toBe(true)
+    if (retrySucceeds) {
+      await fulfillVisualFixture(pending[1], 'avatar')
+      await expect(placeholder).toHaveCount(0)
+      await expect(image).toBeVisible()
+      const loadedBounds = await image.boundingBox()
+      for (const [key, value] of Object.entries(bounds)) expect(loadedBounds[key]).toBeCloseTo(value, 1)
+      expect(await video.evaluate(element => element.currentTime)).toBe(playbackTime)
+      // Capture normal dimensions after checking recovery at 125% UI Scale.
+      await app.electronApp.evaluate(({ BrowserWindow }) => {
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+      })
+      for (const theme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme: theme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+        await expect.poll(() => image.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+        await avatar.screenshot({ path: testInfo.outputPath(`recovered-annotation-${theme}.png`) })
+      }
+    } else {
+      await pending[1].abort()
+      await expect(placeholder.locator('svg')).toBeVisible()
+      await page.clock.fastForward(120_000)
+      expect(requests).toHaveLength(2)
+      await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+    }
+  })
+}
+
 test('offscreen lazy Home thumbnails keep their skeleton until visible, then time out and recover', async ({ app, page }, testInfo) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)

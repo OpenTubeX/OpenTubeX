@@ -17,13 +17,14 @@ async function compileComponent(path, bindings = {}) {
   return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
 }
 
-async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}) {
+async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true } = {}) {
   const requests = []
   const loads = []
   const timers = new Map()
   const observers = []
   const settings = Vue.reactive({ getThumbnailDataSaver: false })
   const RetryImage = await compileComponent('FtRetryImage.vue', {
+    process: { env: { IS_CAPACITOR: isCapacitor } },
     store: { getters: settings },
     IntersectionObserver: class {
       constructor(callback) { this.callback = callback; observers.push(this) }
@@ -34,7 +35,13 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
     imageSkeleton: 'skeleton.svg',
-    setTimeout: (callback, delay) => { const id = {}; callback.delay = delay; timers.set(id, callback); return id },
+    setTimeout: (callback, delay) => {
+      const id = {}
+      const fire = () => { timers.delete(id); return callback() }
+      fire.delay = delay
+      timers.set(id, fire)
+      return id
+    },
     clearTimeout: id => timers.delete(id)
   })
   const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
@@ -212,6 +219,99 @@ test('channel avatars keep their placeholder until the native HTTP image loads',
   assert.equal(f.find('fallback'), undefined)
 })
 
+test('timed-out Capacitor avatars recover through native HTTP before a browser retry', async t => {
+  const f = await mountAvatar(t, 'data:image/png;base64,AA==', 'FtRetryImage.vue', new Map(), { fallbackIcon: ['fas', 'circle-user'] })
+  const [deadline] = f.timers.values()
+  await deadline()
+  await Vue.nextTick()
+  assert.deepEqual(f.requests, ['https://yt3.ggpht.com/avatar'])
+  assert.equal(f.find('img').props.src, 'data:image/png;base64,AA==')
+  assert.equal(f.timers.size, 0, 'a successful native response needs no browser retry')
+  assert.ok(f.find('fallback'), 'wait for the native image to decode')
+  f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
+  assert.equal(f.find('fallback'), undefined)
+})
+
+test('failed native timeout recovery still gets one delayed browser retry', async t => {
+  const f = await mountAvatar(t, () => { throw new TypeError('Native request failed') }, 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  await deadline()
+  await Vue.nextTick()
+  assert.equal(f.requests.length, 1)
+  const [retry] = f.timers.values()
+  assert.equal(retry.delay, 3000)
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /opentubex_retry=/)
+  await fail(f.find('img'))
+  assert.equal(f.requests.length, 1)
+  assert.equal(f.timers.size, 0)
+})
+
+test('a never-settling native recovery cannot block the delayed browser retry', async t => {
+  const f = await mountAvatar(t, () => new Promise(() => {}), 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  const recovery = deadline()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(f.requests.length, 1)
+  const [nativeDeadline] = f.timers.values()
+  assert.equal(nativeDeadline.delay, 6000)
+  nativeDeadline()
+  await recovery
+  const [retry] = f.timers.values()
+  assert.ok(retry, 'the browser retry must follow the overall native deadline')
+  assert.equal(retry.delay, 3000)
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /opentubex_retry=/)
+  await fail(f.find('img'))
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.requests.length, 1)
+})
+
+test('delayed native success survives a browser fallback that would fail immediately', async t => {
+  let finishNative
+  let errors = 0
+  const f = await mountAvatar(t, () => new Promise(resolve => { finishNative = resolve }), 'FtRetryImage.vue', new Map(), {
+    onError: () => { errors++; f.unmount() }
+  })
+  const [deadline] = f.timers.values()
+  const recovery = deadline()
+  await new Promise(resolve => setImmediate(resolve))
+  // A connected native response can take longer than the browser retry delay.
+  for (const timer of [...f.timers.values()]) if (timer.delay <= 3000) timer()
+  await Vue.nextTick()
+  if (f.find('img').props.src.includes('opentubex_retry=')) await fail(f.find('img'))
+  finishNative('data:image/png;base64,AA==')
+  await recovery
+  await Vue.nextTick()
+  assert.equal(errors, 0, 'do not let a browser error remove the pending native image')
+  assert.equal(f.find('img').props.src, 'data:image/png;base64,AA==')
+  assert.equal(f.timers.size, 0)
+})
+
+for (const action of ['load', 'replace', 'unmount']) {
+  test(`native timeout recovery ignores a stale result after ${action}`, async t => {
+    let finishNative
+    const f = await mountAvatar(t, () => new Promise(resolve => { finishNative = resolve }), 'FtRetryImage.vue')
+    const image = f.find('img')
+    const [deadline] = f.timers.values()
+    const recovery = deadline()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(f.requests.length, 1)
+    if (action === 'load') image.props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+    else if (action === 'replace') f.thumbnail.value = 'https://yt3.ggpht.com/replacement'
+    else f.unmount()
+    await Vue.nextTick()
+    finishNative('data:image/png;base64,AA==')
+    await recovery
+    await Vue.nextTick()
+    assert.equal(image.props.src, action === 'replace' ? f.thumbnail.value : 'https://yt3.ggpht.com/avatar')
+    assert.equal(f.timers.size, action === 'replace' ? 1 : 0)
+  })
+}
+
 test('video thumbnails fall back in resolution order on errors and loaded placeholders', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   f.thumbnail.value = 'https://invidious.test/vi/video/maxresdefault.jpg?cache=1'
@@ -227,7 +327,8 @@ test('video thumbnails fall back in resolution order on errors and loaded placeh
   await fail(f.find('img'))
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
   assert.equal(f.requests.length, 0)
-  assert.equal(f.timers.size, 0)
+  assert.equal(f.timers.size, 1, 'the remaining resolution fallback gets its own loading deadline')
+  assert.equal([...f.timers.values()][0].delay, 10_000)
   f.thumbnail.value = 'https://i.ytimg.com/vi/other/maxresdefault.jpg'
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
@@ -250,6 +351,36 @@ test('channel avatars remove the failed image after the delayed retry and reset 
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
 })
+
+for (const originalState of ['loading', 'timed out', 'failed']) {
+  test(`resolution fallbacks get their own deadline after the original request ${originalState}`, async t => {
+    const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+    f.thumbnail.value = 'https://i.ytimg.com/vi/video/maxresdefault.jpg'
+    await Vue.nextTick()
+    const [originalDeadline] = f.timers.values()
+    if (originalState === 'timed out') await originalDeadline()
+    if (originalState === 'failed') await fail(f.find('img'))
+    else f.find('img').props.onLoad({ target: { naturalWidth: 120, naturalHeight: 90 } })
+    await Vue.nextTick()
+    assert.equal(f.find('img').props.src, 'https://i.ytimg.com/vi/video/sddefault.jpg')
+    const [fallbackDeadline] = f.timers.values()
+    assert.equal(f.timers.size, 1, 'cancel the old deadline and any queued retry')
+    assert.ok(fallbackDeadline && fallbackDeadline !== originalDeadline, 'the smaller source needs a fresh deadline')
+    assert.equal(fallbackDeadline.delay, 10_000)
+    const placeholder = f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+    assert.equal(/ft-shimmer/.test(placeholder.props.class), originalState === 'loading', 'a fallback must not restart a stopped skeleton')
+    await fallbackDeadline()
+    await Vue.nextTick()
+    const [retry] = f.timers.values()
+    assert.equal(retry.delay, 3000)
+    retry()
+    await Vue.nextTick()
+    assert.match(f.find('img').props.src, /\/sddefault\.jpg\?opentubex_retry=/)
+    f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 480 } })
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 0)
+  })
+}
 
 test('duplicate errors during the retry delay do not remove the avatar or start another request', async t => {
   const f = await mountAvatar(t, null)
@@ -360,13 +491,101 @@ test('stalled requests stop shimmering without blocking a late load', async t =>
   assert.match(placeholder().props.class, /ft-shimmer/)
   const deadline = [...f.timers.values()].find(callback => callback.delay === 10_000)
   assert.ok(deadline, 'loading must have a bounded skeleton duration')
-  deadline()
+  await deadline()
   await Vue.nextTick()
   assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
   f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
   await Vue.nextTick()
   assert.equal(placeholder(), undefined)
   assert.equal(f.loads.length, 1)
+  assert.equal(f.timers.size, 0, 'a slow success cancels the pending request retry')
+})
+
+test('stalled remote avatars retry once after the loading deadline and a short grace period', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map(), { fallbackIcon: ['fas', 'circle-user'] }, { isCapacitor: false })
+  const image = f.find('img')
+  const skeletonDeadline = [...f.timers.values()].find(callback => callback.delay === 10_000)
+  await skeletonDeadline()
+  await Vue.nextTick()
+  assert.equal(image.props.src, 'https://yt3.ggpht.com/avatar', 'keep a slow request alive after its shimmer stops')
+  const requestDeadline = [...f.timers.values()].find(callback => callback.delay === 3000)
+  assert.ok(requestDeadline, 'a stalled request must recover without reloading the video')
+  requestDeadline()
+  await Vue.nextTick()
+  assert.match(image.props.src, /^https:\/\/yt3\.ggpht\.com\/avatar\?opentubex_retry=\d+$/)
+  assert.equal(f.requests.length, 0, 'a timeout should retry the browser request')
+  await fail(image)
+  assert.equal(f.timers.size, 0, 'the retry must remain bounded')
+  image.props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
+  assert.equal(f.find('fallback'), undefined)
+})
+
+test('stalled protocol-relative avatars retry over HTTPS', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  f.thumbnail.value = '//yt3.ggpht.com/avatar'
+  await Vue.nextTick()
+  const [deadline] = f.timers.values()
+  await deadline()
+  await Vue.nextTick()
+  const [retry] = f.timers.values()
+  assert.ok(retry, 'a stalled protocol-relative remote source must queue a retry')
+  assert.equal(retry.delay, 3000)
+  assert.equal(f.find('img').props.src, 'https://yt3.ggpht.com/avatar')
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /^https:\/\/yt3\.ggpht\.com\/avatar\?opentubex_retry=\d+$/)
+})
+
+test('source replacements and unmounting cancel pending timeout retries', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  await deadline()
+  await Vue.nextTick()
+  const oldTimers = [...f.timers.values()]
+  assert.equal(oldTimers[0].delay, 3000)
+  f.thumbnail.value = 'https://yt3.ggpht.com/replacement-avatar'
+  await Vue.nextTick()
+  assert.equal(f.timers.size, 1)
+  assert.ok([...f.timers.values()].every(timer => !oldTimers.includes(timer)), 'the old source must not keep any deadline')
+  const [newDeadline] = f.timers.values()
+  await newDeadline()
+  await Vue.nextTick()
+  assert.equal([...f.timers.values()][0].delay, 3000)
+  f.unmount()
+  assert.equal(f.timers.size, 0)
+})
+
+test('an error during the timeout grace period does not queue a second retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  await deadline()
+  await Vue.nextTick()
+  const [retry] = f.timers.values()
+  await fail(f.find('img'))
+  assert.equal(f.requests.length, 1, 'do not repeat native recovery during the retry delay')
+  assert.deepEqual([...f.timers.values()], [retry])
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /opentubex_retry=/)
+  await fail(f.find('img'))
+  assert.equal(f.timers.size, 0)
+})
+
+test('pending embedded images never receive an HTTP timeout retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const src of ['data:image/png;base64,AAAA', 'blob:https://localhost/pending']) {
+    f.thumbnail.value = src
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 1)
+    const [deadline] = f.timers.values()
+    assert.equal(deadline.delay, 10_000)
+    await deadline()
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 0)
+    assert.equal(f.find('img').props.src, src)
+    assert.equal(f.requests.length, 0)
+  }
 })
 
 test('null, undefined and blank image sources keep a static fallback', async t => {
@@ -402,7 +621,7 @@ test('lazy images retain their skeleton until visible and get a bounded loading 
   f.observers[0].callback([{ isIntersecting: false }])
   f.observers[0].callback([{ isIntersecting: true }])
   assert.equal([...f.timers.values()][0], deadline, 'visibility changes must not restart the deadline')
-  deadline()
+  await deadline()
   await Vue.nextTick()
   assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
   f.observers[0].callback([{ isIntersecting: false }])
