@@ -168,13 +168,15 @@ try {
   await expect(dialog()).toBeVisible()
   console.log('PASS URL resolution failure dismisses the previous prompt and shows feedback')
 
-  await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toHaveCount(0, { timeout: 10_000 })
-  share('https://youtu.be/invalid')
-  await expect(dialog()).toHaveCount(0)
-  await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toBeVisible()
-  share()
-  await expect(dialog()).toBeVisible()
-  console.log('PASS malformed short links show feedback without channel actions')
+  for (const invalidUrl of ['https://youtu.be/invalid', `https://youtube.com/watch?v=${id}X`]) {
+    await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toHaveCount(0, { timeout: 10_000 })
+    share(invalidUrl)
+    await expect(dialog()).toHaveCount(0)
+    await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toBeVisible()
+    share()
+    await expect(dialog()).toBeVisible()
+  }
+  console.log('PASS malformed video links show feedback without actions or navigation')
 
   await settings({ BackendPreference: 'invidious', BackendFallback: true })
   await metadataFixtures({ timeoutInvidious: true })

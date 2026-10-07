@@ -66,6 +66,15 @@ test('short YouTube links require exactly one video ID path segment', () => {
   assert.equal(extractSharedYoutubeLink('https://youtube.com/@channel'), 'https://youtube.com/@channel')
 })
 
+test('canonical watch links require an exact video ID before parser truncation', () => {
+  for (const query of ['', '?v=', '?v=invalid', `?v=${id}X`, `?v=${id}%20`, '?v=abcdefghij%2F']) {
+    assert.equal(extractSharedYoutubeLink(`https://youtube.com/watch${query}`), null, query)
+  }
+  const url = `https://youtube.com/watch?v=${id}&t=42&list=PL-test`
+  assert.equal(extractSharedYoutubeLink(url), url)
+  assert.equal(extractSharedYoutubeLink(`https://youtube.com/watch?v=${id}X ${url}`), url)
+})
+
 function shareHandler(dispatch) {
   const state = { value: null }
   const opened = []
@@ -115,6 +124,16 @@ test('malformed short links cannot be classified as channels or open a prompt', 
   let lookups = 0
   const h = shareHandler(async () => { lookups++; return { urlType: 'channel', channelId: 'invalid' } })
   await h.share('https://youtu.be/invalid')
+  assert.equal(lookups, 0)
+  assert.equal(h.state.value, null)
+  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
+  assert.deepEqual(h.opened, [])
+})
+
+test('oversized watch IDs cannot open actions for a truncated video', async () => {
+  let lookups = 0
+  const h = shareHandler(async () => { lookups++; return { urlType: 'video', videoId: id } })
+  await h.share(`https://youtube.com/watch?v=${id}X`)
   assert.equal(lookups, 0)
   assert.equal(h.state.value, null)
   assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
