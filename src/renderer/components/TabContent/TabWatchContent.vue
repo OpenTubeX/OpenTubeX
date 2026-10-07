@@ -2,7 +2,7 @@
   <div
     ref="previewHost"
     class="watchPreviewHost"
-    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive }"
+    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive, watchMinimizePreview: previewActive && !previewRestoring }"
   >
     <div
       v-show="isWatchRoute || previewStyle"
@@ -48,6 +48,9 @@ let previewScroll = null
 let previewOrigin = null
 let previewViewport = null
 let previewRestoring = false
+let previewReady = null
+let previewInterrupted = false
+let previewHistoryEntry = null
 const watchView = useTemplateRef('watchView')
 // Freeze the watch route while browsing, so its route watchers do not reload
 // or tear down the video when the tab moves to another page.
@@ -85,6 +88,7 @@ function dispose(context) {
 
 const unregister = tabLifecycleService.register(props.tabId, {
   async beforeNavigate(context) {
+    interruptMinimizePreview()
     await disposalPromise
     if (!isWatchRoute.value) return
     // Android teleports even the scrolling mini player outside this view.
@@ -129,6 +133,10 @@ provide('isTabActive', presented)
 provide(routeLocationKey, injectedRoute)
 provide('tabRoute', injectedRoute)
 const router = navigation.createRouterFacade(props.tabId)
+const unregisterPreviewScrollGuard = router.beforeEach(() => {
+  interruptMinimizePreview()
+  preservePreviewHistoryScroll()
+})
 const watchRouter = Object.create(router)
 Object.defineProperty(watchRouter, 'currentRoute', { value: computed(() => watchRoute.value) })
 provide(routerKey, watchRouter)
@@ -146,9 +154,15 @@ async function minimize() {
 function beginMinimizePreview() {
   if (previewActive.value) return
   previewRestoring = false
+  previewInterrupted = false
   if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
+  const tab = store.getters.getTabById(props.tabId)
+  previewHistoryEntry = { index: tab.historyIndex, fullPath: props.route.fullPath, entry: tab.history[tab.historyIndex] }
+  const browsingScroll = getPreviousBrowsingRoute(tab)
+    ? tab.history[tab.historyIndex - 1].scroll
+    : null
   const bounds = watchRoot.value.getBoundingClientRect()
   // Use an explicit positioned host: Chromium versions disagree on whether
   // inline-size query containers establish a fixed-position containing block.
@@ -165,6 +179,15 @@ function beginMinimizePreview() {
   }
   window.addEventListener('scroll', updatePreviewPosition, { passive: true })
   previewActive.value = true
+  const scroll = previewScroll
+  // Put browsing back in document flow before restoring its viewport. The
+  // browser clamps the offset to the rendered page and positions sticky headers.
+  previewReady = nextTick(() => {
+    if (!previewActive.value || previewScroll !== scroll) return
+    window.scrollTo({ left: browsingScroll?.left ?? 0, top: browsingScroll?.top ?? 0, behavior: 'instant' })
+    updatePreviewPosition()
+  })
+  return previewReady
 }
 
 function beginRestorePreview() {
@@ -222,6 +245,7 @@ function updatePreviewPosition() {
 }
 
 watch(isWatchRoute, () => {
+  if (!isWatchRoute.value && previewActive.value && !previewRestoring && !minimized.value) clearMinimizePreview()
   // The retained Watch host moves when the browsing route is replaced. Keep
   // its visible preview in place until the player returns to its inline layout.
   if (previewRestoring && previewActive.value) updatePreviewPosition()
@@ -259,14 +283,48 @@ async function finishMinimizePreview(commit) {
     }
     return
   }
-  if (commit && !disposed) {
-    await minimize().catch(error => {
+  await previewReady
+  if (commit && !disposed && !previewInterrupted && previewActive.value && isWatchRoute.value &&
+    props.route.fullPath === previewHistoryEntry?.fullPath) {
+    const tab = store.getters.getTabById(props.tabId)
+    const historyIndex = tab.historyIndex
+    if (getPreviousBrowsingRoute(tab)) {
+      store.commit('setHistoryEntryScroll', {
+        tabId: props.tabId,
+        historyIndex: historyIndex - 1,
+        scroll: { left: window.scrollX, top: window.scrollY }
+      })
+    }
+    try {
+      await minimize()
+    } catch (error) {
       console.error('Unable to dock player', error)
-    })
+    }
+  }
+  if (isWatchRoute.value) await clearMinimizePreview()
+}
+
+function interruptMinimizePreview() {
+  // Our own dock marks minimized before navigating; all other navigation
+  // invalidates the pending commit, even while lifecycle work is awaiting.
+  if (previewActive.value && !previewRestoring && !minimized.value) previewInterrupted = true
+}
+
+function preservePreviewHistoryScroll() {
+  const tab = store.getters.getTabById(props.tabId)
+  if (previewScroll && previewHistoryEntry && tab?.historyIndex === previewHistoryEntry.index && tab.history[previewHistoryEntry.index] === previewHistoryEntry.entry) {
+    // saveScroll writes browsing's preview offset into Watch. Repair it before
+    // navigation clones/trims history, or when a tab switch ends the preview.
+    store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex: previewHistoryEntry.index, scroll: previewScroll })
   }
 }
 
 function clearMinimizePreview() {
+  preservePreviewHistoryScroll()
+  const watchScroll = previewActive.value && !previewRestoring && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
+  previewHistoryEntry = null
+  previewScroll = null
+  previewReady = null
   if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   previewActive.value = false
   previewStyle.value = null
@@ -274,6 +332,11 @@ function clearMinimizePreview() {
   watchRoot.value?.style.removeProperty('opacity')
   watchRoot.value?.firstElementChild.style.removeProperty('opacity')
   window.removeEventListener('scroll', updatePreviewPosition)
+  if (watchScroll) {
+    return nextTick(() => {
+      if (!disposed && isWatchRoute.value && props.presented && !previewActive.value) window.scrollTo({ ...watchScroll, behavior: 'instant' })
+    })
+  }
 }
 
 async function dismiss() {
@@ -330,8 +393,8 @@ watch(enabled, value => {
 }, { flush: 'sync' })
 
 onBeforeUnmount(() => {
-  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
-  window.removeEventListener('scroll', updatePreviewPosition)
+  clearMinimizePreview()
+  unregisterPreviewScrollGuard()
   unregister()
   dispose()
 })
@@ -341,6 +404,11 @@ onBeforeUnmount(() => {
 .watchPreviewHost {
   position: relative;
   z-index: 1;
+}
+
+.watchMinimizePreview {
+  position: absolute;
+  inset: 0;
 }
 
 .watchRouteActive:not(.watchPreviewing) {

@@ -11,11 +11,14 @@ const source = (await readFile(new URL('../../src/renderer/components/TabContent
 const titleSource = (await readFile(new URL('../../src/renderer/tabs/TabContext.js', import.meta.url), 'utf8'))
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
+function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
   const route = { path: '/watch/video', fullPath: '/watch/video', params: { id: 'video' } }
   const props = reactive({ tabId: 'tab', route, presented: true })
-  const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }] : [] }) })
+  const defaultTab = { historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }, { route }] : [{ route }] }
+  const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => tab ?? defaultTab })
   const provides = new Map()
+  const scrollCommits = []
+  const navigationGuards = new Set()
   const unmount = []
   const titles = []
   const scope = effectScope()
@@ -44,7 +47,16 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   let disposals = 0
   async function navigate(path) {
     const to = { path, fullPath: path, params: {} }
-    await lifecycle.beforeNavigate({ to, from: props.route })
+    const from = props.route
+    const componentChanged = !from.path.startsWith('/watch/') || !path.startsWith('/watch/')
+    if (tab) tab.history[tab.historyIndex].scroll = { left: viewport.scrollX, top: viewport.scrollY }
+    if (componentChanged) await lifecycle.beforeNavigate({ to, from })
+    for (const guard of navigationGuards) await guard(to, from)
+    if (tab) {
+      tab.history = [...tab.history.slice(0, tab.historyIndex + 1), { route: to, scroll: { left: 0, top: 0 } }]
+        .slice(-100).map(entry => ({ ...entry, scroll: { ...entry.scroll } }))
+      tab.historyIndex = tab.history.length - 1
+    }
     props.route = to
     await nextTick()
     await lifecycle.afterNavigate({ to })
@@ -61,9 +73,13 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
-    store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll } },
+    store: { getters, commit: (_name, payload) => {
+      savedBrowsingScroll = payload.scroll
+      scrollCommits.push(payload)
+      if (tab?.history[payload.historyIndex]) tab.history[payload.historyIndex].scroll = { ...payload.scroll }
+    } },
     resolveRouteComponent: () => ({}),
-    getTabNavigationService: () => ({ createRouterFacade: () => ({}), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
+    getTabNavigationService: () => ({ createRouterFacade: () => ({ beforeEach: guard => { navigationGuards.add(guard); return () => navigationGuards.delete(guard) } }), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
     tabLifecycleKey: 'lifecycle', tabPresentedKey: 'presented', watchNavigationKey: 'navigation', getPreviousBrowsingRoute,
     routeLocationKey: 'route', routerKey: 'router', console
@@ -79,11 +95,125 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     scope.stop()
   })
   return {
-    mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
+    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
+}
+
+for (const commit of [false, true]) {
+  test(`minimize restores fractional browsing scroll and preserves Watch on ${commit ? 'commit' : 'cancel'}`, async t => {
+    const mounted = mountWatch(t)
+    const tab = { historyIndex: 1, history: [{ route: { path: '/history' }, scroll: { left: 4.5, top: 600.25 } }, { route: { path: '/watch/video', fullPath: '/watch/video' } }] }
+    mounted.getters.getTabById = () => tab
+    const navigation = mounted.provides.get('navigation')
+    await navigation.beginMinimizePreview()
+    assert.equal(mounted.viewport.scrollX, 4.5)
+    assert.equal(mounted.viewport.scrollY, 600.25)
+    assert.equal(mounted.previewRoot.style.top, '580.25px', 'Watch stays at its original viewport position')
+    await navigation.finishMinimizePreview(commit)
+    await navigation.clearMinimizePreview()
+    assert.equal(mounted.viewport.scrollY, commit ? 600.25 : 20)
+    if (commit) {
+      assert.equal(mounted.scrollCommits[0].historyIndex, 0)
+      assert.equal(mounted.scrollCommits[0].scroll.top, 600.25)
+      assert.equal(mounted.scrollCommits[1].historyIndex, 1)
+      assert.equal(mounted.scrollCommits[1].scroll.top, 20)
+    }
+  })
+}
+
+test('navigation interrupting a preview preserves the original Watch history scroll', async t => {
+  const mounted = mountWatch(t)
+  const tab = { historyIndex: 1, history: [
+    { route: { path: '/history' }, scroll: { left: 0, top: 600.25 } },
+    { route: { path: '/watch/video', fullPath: '/watch/video' } }
+  ] }
+  mounted.getters.getTabById = () => tab
+  const navigation = mounted.provides.get('navigation')
+  await navigation.beginMinimizePreview()
+  tab.history[1].scroll = { left: 0, top: mounted.viewport.scrollY }
+  await mounted.navigate('/subscriptions')
+  await navigation.clearMinimizePreview()
+  assert.equal(mounted.scrollCommits.at(-1).historyIndex, 1)
+  assert.equal(mounted.scrollCommits.at(-1).scroll.top, 20)
+  assert.equal(mounted.viewport.scrollY, 600.25, 'cleanup must not scroll the replacement page')
+})
+
+test('reload preserves Watch scroll when its history URL gains a playback timestamp during a held preview', async t => {
+  const tab = { historyIndex: 1, history: [
+    { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
+    { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
+  ] }
+  const mounted = mountWatch(t, { tab })
+  await mounted.provides.get('navigation').beginMinimizePreview()
+  // prepareReload saves the preview viewport, then rewrites this same entry.
+  tab.history[1].scroll = { left: mounted.viewport.scrollX, top: mounted.viewport.scrollY }
+  tab.history[1].route = { path: '/watch/video', fullPath: '/watch/video?oneTimeTimestamp=12' }
+  await mounted.lifecycle.beforeReload()
+  mounted.unmount.forEach(callback => callback())
+  await nextTick()
+  assert.equal(tab.history[1].scroll.top, 20, 'reload must keep Watch’s own viewport')
+  assert.equal(tab.history[1].route.fullPath, '/watch/video?oneTimeTimestamp=12')
+  assert.equal(tab.history[0].scroll.top, 600.25, 'browsing history is untouched')
+})
+
+test('settling minimize does not queue navigation behind an interruption awaiting fullscreen exit', async t => {
+  const exit = Promise.withResolvers()
+  t.after(() => exit.resolve())
+  const exitPresentationModes = t.mock.fn(() => exit.promise)
+  const mounted = mountWatch(t, { exitPresentationModes })
+  const navigation = mounted.provides.get('navigation')
+  await navigation.beginMinimizePreview()
+  const interrupted = mounted.navigate('/subscriptions')
+  await new Promise(resolve => setImmediate(resolve))
+  const finishing = navigation.finishMinimizePreview(true)
+  await new Promise(resolve => setImmediate(resolve))
+  exit.resolve()
+  await Promise.all([interrupted, finishing])
+  assert.equal(exitPresentationModes.mock.callCount(), 1, 'the settling swipe must not start another navigation')
+  assert.equal(mounted.props.route.fullPath, '/subscriptions')
+})
+
+for (const destination of ['/subscriptions', '/watch/next']) {
+  test(`settling minimize does not navigate again after interruption by ${destination}`, async t => {
+    const tab = { historyIndex: 1, history: [
+      { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
+      { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
+    ] }
+    const mounted = mountWatch(t, { tab })
+    const navigation = mounted.provides.get('navigation')
+    await navigation.beginMinimizePreview()
+    await mounted.navigate(destination)
+    const scrollWrites = mounted.scrollCommits.length
+    await navigation.finishMinimizePreview(true)
+    assert.equal(mounted.props.route.fullPath, destination, 'the interrupted swipe must not replace the chosen route')
+    assert.equal(mounted.scrollCommits.length, scrollWrites, 'the interrupted swipe must not overwrite another history entry')
+  })
+}
+
+for (const destination of ['/subscriptions', '/watch/next']) {
+  test(`preview preserves Watch scroll when capped history shifts on ${destination}`, async t => {
+    const tab = { historyIndex: 99, history: Array.from({ length: 100 }, (_, index) => ({
+      route: { path: '/watch/video', fullPath: '/watch/video' },
+      scroll: { left: 0, top: index + 0.25 }
+    })) }
+    const mounted = mountWatch(t, { tab })
+    const navigation = mounted.provides.get('navigation')
+    mounted.viewport.scrollY = 700.25
+    await navigation.beginMinimizePreview()
+    assert.equal(mounted.viewport.scrollY, 0, 'fallback preview uses the browsing viewport')
+    if (destination === '/subscriptions') await navigation.finishMinimizePreview(true)
+    else await mounted.navigate(destination)
+    await navigation.clearMinimizePreview()
+    assert.equal(tab.history.length, 100)
+    assert.equal(tab.history[98].route.fullPath, '/watch/video')
+    assert.equal(tab.history[98].scroll.top, 700.25, 'surviving Watch entry keeps its own offset')
+    assert.equal(tab.history[97].scroll.top, 98.25, 'an earlier entry for the same video is untouched')
+    assert.equal(tab.history[99].route.fullPath, destination)
+    assert.equal(tab.history[99].scroll.top, 0, 'the destination does not inherit Watch scroll')
+  })
 }
 
 test('retained navigation waits for fullscreen exit before deactivating Watch', async t => {
@@ -397,7 +527,7 @@ for (const commit of [false, true]) {
     navigation.beginMinimizePreview()
     assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
     await navigation.finishMinimizePreview(commit)
-    assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
+    assert.equal(mounted.mobileNavigationMinimizePreview.value, commit ? 'tab' : null)
     navigation.clearMinimizePreview()
     assert.equal(mounted.mobileNavigationMinimizePreview.value, null)
   })

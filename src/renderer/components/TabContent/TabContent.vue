@@ -389,6 +389,8 @@ function cancelLoaderSettle() {
 }
 
 .tabContent:has(.watchPreviewing) .browsingBehindWatch {
+  position: relative;
+  inset: auto;
   visibility: visible;
 }
 
