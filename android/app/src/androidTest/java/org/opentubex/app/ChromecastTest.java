@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.PluginCall;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -29,6 +30,66 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class ChromecastTest {
+    @Test public void relayCannotFetchLoopbackServices() throws Exception {
+        try (ServerSocket upstream = new ServerSocket(0);
+             CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {})) {
+            upstream.setSoTimeout(1000);
+            CompletableFuture<Boolean> contacted = new CompletableFuture<>();
+            Thread responder = new Thread(() -> {
+                try (Socket socket = upstream.accept()) {
+                    contacted.complete(true);
+                    socket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                } catch (java.net.SocketTimeoutException expected) { contacted.complete(false); }
+                catch (Exception error) { contacted.completeExceptionally(error); }
+            });
+            responder.start();
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "http://127.0.0.1:" + upstream.getLocalPort() + "/private", "video/mp4"));
+            server.register(resources);
+            fetch(server.origin() + "/test-token/0/media", 502);
+            assertFalse("No connection to the local service", contacted.get(2, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test public void manifestHandlersLeaveTheBridgeThreadAndDoNotWaitForControl() throws Exception {
+        ChromecastPlugin plugin = new ChromecastPlugin();
+        var field = ChromecastPlugin.class.getDeclaredField("worker");
+        field.setAccessible(true);
+        var control = (java.util.concurrent.ExecutorService) field.get(plugin);
+        CountDownLatch release = new CountDownLatch(1);
+        control.execute(() -> {
+            try { release.await(); } catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+        });
+        try {
+            long caller = Thread.currentThread().getId();
+            RecordingCall registration = new RecordingCall("registerResources");
+            plugin.registerResources(registration);
+            assertNotEquals("Registration is dispatched even while control waits for LOAD", caller,
+                (long) registration.completed.get(2, TimeUnit.SECONDS));
+            RecordingCall completion = new RecordingCall("completeManifest");
+            plugin.completeManifest(completion);
+            assertNotEquals("Manifest completion is dispatched independently of LOAD", caller,
+                (long) completion.completed.get(2, TimeUnit.SECONDS));
+        } finally {
+            release.countDown();
+            for (var executor : ChromecastPlugin.class.getDeclaredFields()) {
+                if (java.util.concurrent.ExecutorService.class.isAssignableFrom(executor.getType())) {
+                    executor.setAccessible(true);
+                    ((java.util.concurrent.ExecutorService) executor.get(plugin)).shutdownNow();
+                }
+            }
+        }
+    }
+
+    private static final class RecordingCall extends PluginCall {
+        final CompletableFuture<Long> completed = new CompletableFuture<>();
+        RecordingCall(String method) { super(null, "Chromecast", "test", method, new JSObject()); }
+        @Override public void resolve() { completed.complete(Thread.currentThread().getId()); }
+        @Override public void reject(String message, String code, Exception error, JSObject data) {
+            completed.complete(Thread.currentThread().getId());
+        }
+    }
+
     @Test public void androidDiscoversCastServicesWithoutGooglePlayServices() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         NsdManager nsd = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
@@ -128,40 +189,89 @@ public class ChromecastTest {
 
     @Test public void relayForwardsOnlyValidHlsReloadParametersAndPreservesSignedQuery() throws Exception {
         LinkedBlockingQueue<String> requests = new LinkedBlockingQueue<>();
-        CompletableFuture<Void> served = new CompletableFuture<>();
         AtomicReference<CastMediaServer> relay = new AtomicReference<>();
-        try (ServerSocket upstream = new ServerSocket(0);
-             CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
-                 event -> relay.get().complete(event.getString("requestId"), event.getString("body")))) {
+        okhttp3.OkHttpClient upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
+            requests.add(chain.request().url().encodedPath() + "?" + chain.request().url().encodedQuery());
+            return new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
+                .code(200).message("OK").body(okhttp3.ResponseBody.create("#EXTM3U\n", okhttp3.MediaType.get("application/x-mpegurl"))).build();
+        }).build();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
+                 event -> relay.get().complete(event.getString("requestId"), event.getString("body")), upstream)) {
             relay.set(server);
-            Thread responder = new Thread(() -> {
-                try {
-                    for (int index = 0; index < 2; index++) {
-                        try (Socket socket = upstream.accept()) {
-                            var input = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
-                            requests.add(input.readLine());
-                            for (String line; (line = input.readLine()) != null && !line.isEmpty();) {}
-                            byte[] body = "#EXTM3U\n".getBytes(StandardCharsets.UTF_8);
-                            socket.getOutputStream().write(("HTTP/1.1 200 OK\r\nContent-Type: application/x-mpegurl\r\nContent-Length: " + body.length + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
-                            socket.getOutputStream().write(body);
-                        }
-                    }
-                    served.complete(null);
-                } catch (Exception error) { served.completeExceptionally(error); }
-            });
-            responder.setDaemon(true);
-            responder.start();
             JSArray resources = new JSArray();
-            resources.put(resource(0, "http://127.0.0.1:" + upstream.getLocalPort() + "/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", "application/x-mpegurl"));
+            resources.put(resource(0, "https://8.8.8.8/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", "application/x-mpegurl"));
+            JSObject template = resource(1, "https://8.8.8.8/", "video/mp4");
+            template.getJSONArray("candidates").getJSONObject(0).put("template", true);
+            resources.put(template);
             server.register(resources);
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200));
-            assertEquals("GET /live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1 HTTP/1.1", requests.poll(3, TimeUnit.SECONDS));
+            assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", requests.poll(3, TimeUnit.SECONDS));
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media?_HLS_msn=123&_HLS_part=0&_HLS_skip=v2", 200));
-            assertEquals("GET /live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=123&_HLS_part=0&_HLS_skip=v2 HTTP/1.1", requests.poll(3, TimeUnit.SECONDS));
-            served.get(3, TimeUnit.SECONDS);
+            assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=123&_HLS_part=0&_HLS_skip=v2", requests.poll(3, TimeUnit.SECONDS));
             for (String query : new String[]{"token=changed", "_HLS_msn=1&_HLS_msn=2", "_HLS_msn=-1", "_HLS_skip=invalid"}) {
                 assertEquals("", fetch(server.origin() + "/test-token/0/media?" + query, 502));
             }
+            fetch(server.origin() + "/test-token/1/segment.mp4?number=17&time=2500", 200);
+            assertEquals("/segment.mp4?number=17&time=2500", requests.poll(3, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test public void relayRetiresResourcesWithoutChangingRemainingUrls() throws Exception {
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {})) {
+            JSArray initial = new JSArray();
+            initial.put(resource(0, "data:text/vtt,expired", "text/vtt"));
+            initial.put(resource(1, "data:text/vtt,retained", "text/vtt"));
+            server.register(initial);
+            assertEquals("expired", fetch(server.origin() + "/test-token/0/media", 200));
+            JSArray additions = new JSArray();
+            additions.put(resource(2, "data:text/vtt,new", "text/vtt"));
+            JSArray removals = new JSArray();
+            removals.put(0); removals.put(999);
+            server.register(additions, removals);
+            fetch(server.origin() + "/test-token/0/media", 404);
+            assertEquals("retained", fetch(server.origin() + "/test-token/1/media", 200));
+            assertEquals("new", fetch(server.origin() + "/test-token/2/media", 200));
+            additions = new JSArray();
+            additions.put(resource(3, "data:text/vtt,partial", "text/vtt"));
+            additions.put(resource(-1, "data:text/vtt,invalid", "text/vtt"));
+            try { server.register(additions, removals); fail("Invalid batch must fail atomically"); }
+            catch (IllegalArgumentException expected) {}
+            fetch(server.origin() + "/test-token/3/media", 404);
+        }
+    }
+
+    @Test public void retiringAResourceDoesNotAbortItsOpenResponse() throws Exception {
+        LinkedBlockingQueue<JSObject> manifests = new LinkedBlockingQueue<>();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, manifests::add)) {
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "data:application/dash+xml,%3CMPD%2F%3E", "application/dash+xml"));
+            server.register(resources);
+            var response = CompletableFuture.supplyAsync(() -> {
+                try { return fetch(server.origin() + "/test-token/0/media", 200); }
+                catch (Exception error) { throw new RuntimeException(error); }
+            });
+            JSObject manifest = manifests.poll(3, TimeUnit.SECONDS);
+            assertNotNull(manifest);
+            JSArray removals = new JSArray();
+            removals.put(0);
+            server.register(new JSArray(), removals);
+            server.complete(manifest.getString("requestId"), "<MPD/>");
+            assertEquals("<MPD/>", response.get(3, TimeUnit.SECONDS));
+            fetch(server.origin() + "/test-token/0/media", 404);
+        }
+    }
+
+    @Test public void receiverFixtureRoutingPreservesDestinationChecks() throws Exception {
+        String port = InstrumentationRegistry.getArguments().getString("castFixturePort");
+        org.junit.Assume.assumeTrue(port != null);
+        var upstream = new okhttp3.OkHttpClient.Builder().socketFactory(new FixtureSockets()).build();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {}, upstream)) {
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "http://8.8.8.8:" + port + "/caption.vtt", "text/vtt"));
+            resources.put(resource(1, "http://127.0.0.1:" + port + "/caption.vtt", "text/vtt"));
+            server.register(resources);
+            assertEquals("WEBVTT\n", fetch(server.origin() + "/test-token/0/media", 200));
+            fetch(server.origin() + "/test-token/1/media", 502);
         }
     }
 
@@ -215,11 +325,13 @@ public class ChromecastTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File ready = new File(context.getCacheDir(), "cast-emulator-ready");
         File finished = new File(context.getCacheDir(), "cast-emulator-finished");
+        AtomicReference<ChromecastPlugin> pluginRef = new AtomicReference<>();
         ready.delete(); finished.delete();
         try (var scenario = androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
             scenario.onActivity(activity -> {
                 try {
                     var plugin = activity.getBridge().getPlugin("Chromecast").getInstance();
+                    pluginRef.set((ChromecastPlugin) plugin);
                     var field = ChromecastPlugin.class.getDeclaredField("devices");
                     field.setAccessible(true);
                     @SuppressWarnings("unchecked")
@@ -232,10 +344,64 @@ public class ChromecastTest {
                     ready.createNewFile();
                 } catch (Exception error) { throw new RuntimeException(error); }
             });
+            var mediaField = ChromecastPlugin.class.getDeclaredField("media");
+            var clientField = CastMediaServer.class.getDeclaredField("client");
+            var idField = ChromecastPlugin.class.getDeclaredField("castId");
+            mediaField.setAccessible(true); clientField.setAccessible(true); idField.setAccessible(true);
+            CastMediaServer configured = null;
+            var markers = new ArrayList<File>();
             long deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(5);
-            while (!finished.exists() && System.nanoTime() < deadline) Thread.sleep(100);
+            try {
+                while (!finished.exists() && System.nanoTime() < deadline) {
+                    CastMediaServer current = (CastMediaServer) mediaField.get(pluginRef.get());
+                    if (current != null && current != configured) {
+                        // Test topology only: public fixture IP routes to the host HTTP server.
+                        // Production URL/DNS checks and receiver authentication remain enabled.
+                        var client = (okhttp3.OkHttpClient) clientField.get(current);
+                        clientField.set(current, client.newBuilder().socketFactory(new FixtureSockets()).build());
+                        File marker = new File(context.getCacheDir(), "cast-relay-" + idField.get(pluginRef.get()));
+                        marker.createNewFile(); markers.add(marker);
+                        configured = current;
+                    }
+                    Thread.sleep(100);
+                }
+            } finally { for (File marker : markers) marker.delete(); }
             assertTrue("External UI integration test completed", finished.exists());
         } finally { ready.delete(); finished.delete(); }
+    }
+
+    private static final class FixtureSockets extends javax.net.SocketFactory {
+        @Override public Socket createSocket() {
+            return new Socket() {
+                @Override public void connect(java.net.SocketAddress endpoint, int timeout) throws java.io.IOException {
+                    var address = (java.net.InetSocketAddress) endpoint;
+                    if (address.getAddress() != null && address.getAddress().getHostAddress().equals("8.8.8.8")) {
+                        endpoint = new java.net.InetSocketAddress("10.0.2.2", address.getPort());
+                    }
+                    super.connect(endpoint, timeout);
+                }
+            };
+        }
+        private Socket open(java.net.InetSocketAddress address, java.net.InetAddress local, int port) throws java.io.IOException {
+            Socket socket = createSocket();
+            try {
+                if (local != null) socket.bind(new java.net.InetSocketAddress(local, port));
+                socket.connect(address);
+                return socket;
+            } catch (java.io.IOException error) { socket.close(); throw error; }
+        }
+        @Override public Socket createSocket(String host, int port) throws java.io.IOException {
+            return open(new java.net.InetSocketAddress(host, port), null, 0);
+        }
+        @Override public Socket createSocket(java.net.InetAddress host, int port) throws java.io.IOException {
+            return open(new java.net.InetSocketAddress(host, port), null, 0);
+        }
+        @Override public Socket createSocket(String host, int port, java.net.InetAddress local, int localPort) throws java.io.IOException {
+            return open(new java.net.InetSocketAddress(host, port), local, localPort);
+        }
+        @Override public Socket createSocket(java.net.InetAddress host, int port, java.net.InetAddress local, int localPort) throws java.io.IOException {
+            return open(new java.net.InetSocketAddress(host, port), local, localPort);
+        }
     }
 
     private static JSObject resource(int id, String url, String type) {

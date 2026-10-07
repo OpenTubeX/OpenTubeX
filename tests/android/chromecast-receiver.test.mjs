@@ -4,7 +4,8 @@ import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 import { readFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
-import { execFileSync } from 'node:child_process'
+import { execFile, execFileSync } from 'node:child_process'
+import { promisify } from 'node:util'
 
 // Requires an isolated debug sender trusting the emulator's temporary test CA,
 // unmodified openchromecast + mpv, ffmpeg-generated demo MP4/DASH/HLS fixtures,
@@ -13,6 +14,7 @@ import { execFileSync } from 'node:child_process'
 // Cast commands, manifest rewriting and media streaming use the real backend.
 const root = process.env.OPENTUBEX_CAST_RECEIVER_FIXTURES
 const serial = process.env.ANDROID_SERIAL
+const execFileAsync = promisify(execFile)
 test('Android casts MP4, DASH and HLS to the open source receiver', {
   skip: !root || !serial || !process.env.ANDROID_CDP_URL, timeout: 240_000
 }, async () => {
@@ -33,7 +35,9 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
     } catch (e) { res.writeHead(404).end() }
   })
   await new Promise(resolve => server.listen(0, '0.0.0.0', resolve))
-  const upstream = `http://10.0.2.2:${server.address().port}`
+  // Instrumentation alone maps this public fixture address to the emulator host
+  // after production destination validation; production DNS and trust stay intact.
+  const upstream = `http://8.8.8.8:${server.address().port}`
   const forwarded = new Set()
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
@@ -41,7 +45,14 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
 
   let watch, original
   try {
-    await page.exposeFunction('__forwardCastRelay', port => {
+    await page.exposeFunction('__forwardCastRelay', async (port, castId) => {
+      assert.match(castId, /^[a-f0-9-]{36}$/)
+      await expect.poll(async () => {
+        try {
+          await execFileAsync('adb', ['-s', serial, 'shell', 'run-as', 'org.opentubex.app.dev', 'test', '-f', `cache/cast-relay-${castId}`], { timeout: 1000 })
+          return true
+        } catch { return false }
+      }, { timeout: 15_000, intervals: [100], message: 'Instrumentation installs the test-only relay socket mapping' }).toBe(true)
       const forwardedPort = adb('forward', 'tcp:0', `tcp:${port}`).trim()
       forwarded.add(forwardedPort)
       return `http://127.0.0.1:${forwardedPort}`
@@ -58,7 +69,7 @@ test('Android casts MP4, DASH and HLS to the open source receiver', {
         if (plugin === 'Chromecast' && method === 'discover') return { devices: [{ id: 'open-source-emulator', name: 'OpenTubeX Test Receiver', address: '127.0.0.1', port: 18009 }] }
         try {
           const result = await window.__testNativePromise(plugin, method, options)
-          if (plugin === 'Chromecast' && method === 'openMedia')result.origin = await window.__forwardCastRelay(new URL(result.origin).port)
+          if (plugin === 'Chromecast' && method === 'openMedia')result.origin = await window.__forwardCastRelay(new URL(result.origin).port, options.castId)
 
           return result
         } catch (e) { console.error('NATIVE', plugin, method, String(e)); throw e }

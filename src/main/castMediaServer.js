@@ -2,13 +2,12 @@ import { createServer } from 'node:http'
 import { isIP } from 'node:net'
 import { Readable, pipeline } from 'node:stream'
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib'
-import { rewriteCastDash, rewriteCastHls, MAX_MANIFEST_SIZE, MAX_CAST_SUBTITLE_BYTES } from '../castManifestRewrite.js'
+import { rewriteCastDash, rewriteCastHls, MAX_MANIFEST_SIZE, MAX_CAST_SUBTITLE_BYTES, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../castManifestRewrite.js'
 import { isNonPublicNetworkAddress } from './utils.js'
 import { getInlineCastManifestType } from '../castManifest.js'
 export { rewriteCastDash, rewriteCastHls, MAX_CAST_SUBTITLE_BYTES } from '../castManifestRewrite.js'
 
 const MAX_RESOURCES = 65_536
-const MIN_RESOURCE_GRACE_MS = 120_000
 
 /** Resolve once; the transport must connect only to this validated address set. */
 export async function resolveCastMediaAddresses(url, authorizePrivateUrl, resolveHost) {
@@ -113,36 +112,6 @@ function applyHlsReloadQuery(url, query) {
   // Preserve signed query encoding and repeated upstream parameters exactly.
   const original = url.search ? url.search.slice(1).split('&') : []
   url.search = [...original.filter(part => !names.has(new URLSearchParams(part).keys().next().value)), directives.toString()].join('&')
-}
-
-function hlsResourceGrace(text) {
-  let duration = 0
-  let longest = 0
-  let target = 0
-  for (const line of text.split('\n')) {
-    const value = Number(line.match(/^#EXTINF:([\d.]+)/)?.[1] ??
-      (line.startsWith('#EXT-X-PART:') ? line.replaceAll(/"[^"]*"/g, '""').match(/(?:[:,])DURATION=([\d.]+)/)?.[1] : undefined))
-    if (Number.isFinite(value)) { duration += value; longest = Math.max(longest, value) }
-    if (line.startsWith('#EXT-X-TARGETDURATION:')) target = Number(line.slice(line.indexOf(':') + 1)) || 0
-  }
-  // Include a full playlist plus a segment, and at least three target durations
-  // for partial segments. The minimum also covers delayed receiver requests.
-  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS, (duration + longest) * 1000, target * 3000)
-  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast HLS duration')
-  return graceMs
-}
-
-function dashResourceGrace(attributes) {
-  function duration(value) {
-    const match = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value ?? '')
-    // Calendar units use their longest duration to keep retirement conservative.
-    const seconds = [366 * 86400, 31 * 86400, 86400, 3600, 60, 1]
-    return match ? match.slice(1).reduce((total, part, index) => total + Number(part ?? 0) * seconds[index], 0) * 1000 : 0
-  }
-  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS,
-    duration(attributes.timeShiftBufferDepth) + duration(attributes.maxSegmentDuration) + 2 * duration(attributes.minimumUpdatePeriod))
-  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast DASH duration')
-  return graceMs
 }
 
 /** A session-scoped endpoint; only registered resources are fetchable. */

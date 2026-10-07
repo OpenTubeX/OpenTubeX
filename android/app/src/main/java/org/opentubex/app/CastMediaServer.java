@@ -43,10 +43,14 @@ final class CastMediaServer implements AutoCloseable {
     private final OkHttpClient client;
 
     CastMediaServer(String local, String peer, String castId, DlnaAuthorization authorization, Consumer<JSObject> manifests) throws Exception {
+        this(local, peer, castId, authorization, manifests, new OkHttpClient());
+    }
+
+    CastMediaServer(String local, String peer, String castId, DlnaAuthorization authorization, Consumer<JSObject> manifests, OkHttpClient upstream) throws Exception {
         this.peer = peer;
         this.castId = castId;
         this.manifests = manifests;
-        client = new OkHttpClient.Builder().cookieJar(CookieJar.NO_COOKIES)
+        client = CastMediaDestinations.restrict(upstream).newBuilder().cookieJar(CookieJar.NO_COOKIES)
             .connectTimeout(10, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor(chain -> {
                 Request.Builder request = chain.request().newBuilder();
@@ -68,11 +72,24 @@ final class CastMediaServer implements AutoCloseable {
     String origin() { return "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort(); }
 
     synchronized void register(JSArray batch) throws Exception {
-        if (resources.size() + batch.length() > 65_536) throw new IllegalArgumentException("Too many Cast resources");
+        register(batch, new JSArray());
+    }
+
+    synchronized void register(JSArray batch, JSArray removals) throws Exception {
+        if (batch.length() > 65_536 || removals.length() > 65_536) throw new IllegalArgumentException("Too many Cast resources");
+        var removed = new HashSet<Integer>();
+        for (int index = 0; index < removals.length(); index++) {
+            Object value = removals.get(index);
+            if (!(value instanceof Number number) || number.doubleValue() != number.intValue() || number.intValue() < 0 ||
+                !removed.add(number.intValue())) throw new IllegalArgumentException("Invalid Cast resource removal");
+        }
+        long retired = removed.stream().filter(resources::containsKey).count();
+        if (resources.size() - retired + batch.length() > 65_536) throw new IllegalArgumentException("Too many Cast resources");
+        var additions = new java.util.HashMap<Integer, JSObject>();
         for (int index = 0; index < batch.length(); index++) {
             JSObject resource = JSObject.fromJSONObject(batch.getJSONObject(index));
             int id = resource.optInt("id", -1);
-            if (id < 0 || resources.containsKey(id)) throw new IllegalArgumentException("Invalid Cast resource ID");
+            if (id < 0 || resources.containsKey(id) || additions.containsKey(id)) throw new IllegalArgumentException("Invalid Cast resource ID");
             var candidates = resource.getJSONArray("candidates");
             if (candidates.length() == 0 || candidates.length() > 64) throw new IllegalArgumentException("Invalid Cast resource alternatives");
             for (int item = 0; item < candidates.length(); item++) {
@@ -88,8 +105,10 @@ final class CastMediaServer implements AutoCloseable {
                     }
                 }
             }
-            resources.put(id, resource);
+            additions.put(id, resource);
         }
+        removed.forEach(resources::remove);
+        resources.putAll(additions);
     }
 
     void complete(String id, String body) {

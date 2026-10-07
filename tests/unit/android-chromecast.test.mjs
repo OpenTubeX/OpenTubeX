@@ -37,7 +37,16 @@ function nativeFixture() {
     async discover() { return { devices: [{ id: 'tv', name: 'Test TV', address: '192.168.1.7', port: 8009 }] } },
     async connect(options) { calls.push(['connect', options]); nativeId = options.castId; closed = false; return { address: '192.168.1.2' } },
     async openMedia(options) { calls.push(['openMedia', options]); return { origin: 'http://192.168.1.2:8000' } },
-    async registerResources(options) { resources.push(...options.resources) },
+    async registerResources(options) {
+      for (const id of options.removeResourceIds ?? []) {
+        const index = resources.findIndex(resource => resource.id === id)
+        if (index >= 0) resources.splice(index, 1)
+      }
+      for (const resource of options.resources) {
+        assert.ok(!resources.some(existing => existing.id === resource.id), 'Resource IDs must remain unique after retirement')
+        resources.push(resource)
+      }
+    },
     async completeManifest(options) { completed.push(options) },
     async disconnect() { closed = true; calls.push(['disconnect']) },
     async send(options) {
@@ -101,6 +110,104 @@ test('Android uses the native sender and relay for handoff, captions, controls a
   assert.equal(fixture.closed, true)
   assert.equal(fixture.listenerCount(), 0)
   assert.deepEqual(wake, ['awake', 'sleep', 'awake', 'sleep'])
+})
+
+test('Android preserves DASH placeholders in segment query strings', async t => {
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  t.after(() => api.stop(result.castId))
+  await fixture.event('castManifest', { requestId: 'query-template', resourceId: 0, url: 'https://media.test/live/manifest.mpd',
+    contentType: 'application/dash+xml', body: '<MPD><Period><AdaptationSet><Representation id="video"><SegmentTemplate media="segment.mp4?number=$Number$&amp;time=$Time$"/></Representation></AdaptationSet></Period></MPD>' })
+  assert.match(fixture.completed.at(-1).body, /\/segment\.mp4\?number=\$Number\$&amp;time=\$Time\$/)
+  assert.ok(fixture.resources.some(resource => resource.candidates.some(candidate =>
+    candidate.template && candidate.url === 'https://media.test/live/' && candidate.suffix === 'segment.mp4?number=$Number$&time=$Time$')))
+})
+
+for (const format of ['hls', 'dash']) {
+  test(`Android retires obsolete ${format} resources after the playback window`, async t => {
+    let now = 0
+    t.mock.method(Date, 'now', () => now)
+    const fixture = nativeFixture()
+    const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+    await api.discover()
+    const result = await api.start(() => handoff)
+    t.after(() => api.stop(result.castId))
+    const update = index => fixture.event('castManifest', { requestId: `refresh-${index}`, resourceId: 0,
+      url: `https://media.test/manifest.${format === 'hls' ? 'm3u8' : 'mpd'}`,
+      contentType: format === 'hls' ? 'application/x-mpegurl' : 'application/dash+xml',
+      body: format === 'hls'
+        ? `#EXTM3U\n#EXT-X-TARGETDURATION:150\n#EXTINF:150,\nsegment-${index}.ts`
+        : `<MPD type="dynamic" timeShiftBufferDepth="PT6M" maxSegmentDuration="PT30S" minimumUpdatePeriod="PT30S"><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment-${index}.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
+    await update(0)
+    const first = fixture.resources.find(resource => resource.candidates[0].url.includes('segment-0.'))
+    now = 1000
+    await update(1)
+    now = 122_000
+    await update(2)
+    assert.ok(fixture.resources.includes(first), 'Retain stale segments beyond the minimum grace when the stream has a longer window')
+    now = 452_000
+    await update(3)
+    assert.ok(!fixture.resources.includes(first), 'Retire the obsolete segment after its complete playback window')
+    for (let index = 4; index < 20; index++) {
+      now += 451_000
+      await update(index)
+      assert.equal(fixture.completed.at(-1).error, undefined)
+      assert.ok(fixture.resources.length <= 5, 'Repeated live refreshes keep the native registry bounded')
+    }
+    assert.ok(fixture.resources.some(resource => resource.id === 0), 'Keep the session manifest root')
+    assert.ok(fixture.resources.some(resource => resource.contentType === 'text/vtt'), 'Keep session captions')
+  })
+}
+
+test('Android retires unreachable HLS rendition cycles while retaining referenced playlists', async t => {
+  let now = 0
+  t.mock.method(Date, 'now', () => now)
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  t.after(() => api.stop(result.castId))
+  const update = (id, file, body) => fixture.event('castManifest', {
+    requestId: `${file}-${now}`, resourceId: id, url: `https://media.test/${file}`, contentType: 'application/x-mpegurl', body
+  })
+  const root = '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\na.m3u8'
+  await update(0, 'master.m3u8', root)
+  const a = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/a.m3u8'))
+  await update(a.id, 'a.m3u8', '#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="b.m3u8"\n#EXTINF:6,\na.ts')
+  const b = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/b.m3u8'))
+  await update(b.id, 'b.m3u8', '#EXTM3U\n#EXT-X-RENDITION-REPORT:URI="a.m3u8"\n#EXTINF:6,\nb.ts')
+  now = 121_000
+  await update(0, 'master.m3u8', root)
+  assert.ok(fixture.resources.includes(a) && fixture.resources.includes(b), 'Reachable rendition references remain usable')
+  await update(0, 'master.m3u8', '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nnew.m3u8')
+  now += 121_000
+  await update(0, 'master.m3u8', '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=100\nnew.m3u8')
+  assert.ok(!fixture.resources.includes(a) && !fixture.resources.includes(b), 'A rendition cycle cannot retain itself after the root drops it')
+  assert.ok(!fixture.resources.some(resource => /\/[ab]\.ts$/.test(resource.candidates[0].url)))
+})
+
+test('Android DASH Location refreshes release previous manifest chains', async t => {
+  let now = 0
+  t.mock.method(Date, 'now', () => now)
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  t.after(() => api.stop(result.castId))
+  let id = 0
+  for (let index = 0; index < 10; index++) {
+    now += 121_000
+    await fixture.event('castManifest', { requestId: `location-${index}`, resourceId: id,
+      url: `https://media.test/manifest-${index}.mpd`, contentType: 'application/dash+xml',
+      body: `<MPD type="dynamic"><Location>manifest-${index + 1}.mpd</Location><Period><AdaptationSet><Representation><SegmentList><SegmentURL media="segment-${index}.m4s"/></SegmentList></Representation></AdaptationSet></Period></MPD>` })
+    assert.equal(fixture.completed.at(-1).error, undefined)
+    id = fixture.resources.find(resource => resource.candidates[0].url.endsWith(`/manifest-${index + 1}.mpd`)).id
+    assert.ok(fixture.resources.length <= 7, 'Advancing Location must not keep the complete previous manifest chain reachable')
+  }
+  assert.ok(!fixture.resources.some(resource => resource.candidates[0].url.endsWith('/segment-0.m4s')))
+  assert.ok(fixture.resources.some(resource => resource.id === 0), 'The original session URL stays registered')
 })
 
 test('native disconnect and failed Android handoffs release relay listeners and wake ownership', async () => {

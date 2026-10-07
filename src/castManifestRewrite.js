@@ -2,6 +2,7 @@ import sax from 'sax'
 
 export const MAX_MANIFEST_SIZE = 2_000_000
 export const MAX_CAST_SUBTITLE_BYTES = 8 * 1024 * 1024
+export const MIN_RESOURCE_GRACE_MS = 120_000
 const MAX_RESOURCES = 65_536
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
@@ -142,4 +143,34 @@ export function rewriteCastHls(text, base, register, parentVariables = {}) {
     return line.replaceAll(/"([^"\r\n]*)"/g, (_, value) => `"${substitute(value)}"`)
       .replaceAll(/URI="([^"]+)"/g, (_, url) => `URI="${resource(url, playlist)}"`)
   }).join('\n')
+}
+
+export function hlsResourceGrace(text) {
+  let duration = 0
+  let longest = 0
+  let target = 0
+  for (const line of text.split('\n')) {
+    const value = Number(line.match(/^#EXTINF:([\d.]+)/)?.[1] ??
+      (line.startsWith('#EXT-X-PART:') ? line.replaceAll(/"[^"]*"/g, '""').match(/(?:[:,])DURATION=([\d.]+)/)?.[1] : undefined))
+    if (Number.isFinite(value)) { duration += value; longest = Math.max(longest, value) }
+    if (line.startsWith('#EXT-X-TARGETDURATION:')) target = Number(line.slice(line.indexOf(':') + 1)) || 0
+  }
+  // Include a full playlist plus a segment, and at least three target durations
+  // for partial segments. The minimum also covers delayed receiver requests.
+  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS, (duration + longest) * 1000, target * 3000)
+  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast HLS duration')
+  return graceMs
+}
+
+export function dashResourceGrace(attributes) {
+  function duration(value) {
+    const match = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/.exec(value ?? '')
+    // Calendar units use their longest duration to keep retirement conservative.
+    const seconds = [366 * 86400, 31 * 86400, 86400, 3600, 60, 1]
+    return match ? match.slice(1).reduce((total, part, index) => total + Number(part ?? 0) * seconds[index], 0) * 1000 : 0
+  }
+  const graceMs = Math.max(MIN_RESOURCE_GRACE_MS,
+    duration(attributes.timeShiftBufferDepth) + duration(attributes.maxSegmentDuration) + 2 * duration(attributes.minimumUpdatePeriod))
+  if (!Number.isFinite(graceMs)) throw new Error('Invalid Cast DASH duration')
+  return graceMs
 }

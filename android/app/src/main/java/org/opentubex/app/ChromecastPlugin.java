@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 public final class ChromecastPlugin extends Plugin {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final ExecutorService discoveryWorker = Executors.newSingleThreadExecutor();
+    // Receiver LOAD waits on control; its manifest requests must progress independently.
+    private final ExecutorService mediaWorker = Executors.newSingleThreadExecutor();
     private final Map<String, JSObject> devices = new ConcurrentHashMap<>();
     private volatile CastTransport transport;
     private volatile CastMediaServer media;
@@ -100,19 +102,23 @@ public final class ChromecastPlugin extends Plugin {
     private String peerAddress;
 
     @PluginMethod public void registerResources(PluginCall call) {
-        try {
-            CastMediaServer server = media;
-            if (!owns(call) || server == null) throw new IllegalStateException("Cast relay closed");
-            server.register(call.getArray("resources", new JSArray()));
-            call.resolve();
-        } catch (Exception error) { call.reject("Invalid Cast resources", error); }
+        mediaWorker.execute(() -> {
+            try {
+                CastMediaServer server = media;
+                if (!owns(call) || server == null) throw new IllegalStateException("Cast relay closed");
+                server.register(call.getArray("resources", new JSArray()), call.getArray("removeResourceIds", new JSArray()));
+                call.resolve();
+            } catch (Exception error) { call.reject("Invalid Cast resources", error); }
+        });
     }
 
     @PluginMethod public void completeManifest(PluginCall call) {
-        CastMediaServer server = media;
-        if (owns(call) && server != null) server.complete(call.getString("requestId"),
-            call.getBoolean("error", false) ? null : call.getString("body"));
-        call.resolve();
+        mediaWorker.execute(() -> {
+            CastMediaServer server = media;
+            if (owns(call) && server != null) server.complete(call.getString("requestId"),
+                call.getBoolean("error", false) ? null : call.getString("body"));
+            call.resolve();
+        });
     }
 
     @PluginMethod public void disconnect(PluginCall call) {
@@ -142,6 +148,7 @@ public final class ChromecastPlugin extends Plugin {
     @Override protected void handleOnDestroy() {
         destroyed = true;
         discoveryWorker.shutdownNow();
+        mediaWorker.shutdown();
         worker.execute(this::cleanup);
         worker.shutdown();
         super.handleOnDestroy();

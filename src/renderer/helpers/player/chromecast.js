@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core'
 import { ChromecastSession } from '../../../chromecastSession.js'
-import { rewriteCastDash, rewriteCastHls } from '../../../castManifestRewrite.js'
+import { rewriteCastDash, rewriteCastHls, MIN_RESOURCE_GRACE_MS, hlsResourceGrace, dashResourceGrace } from '../../../castManifestRewrite.js'
 import { playbackScreenWake } from '../playbackScreenWake.js'
 
 /** Adapt the packaged Cast V2 transport to the shared desktop session logic. */
@@ -55,23 +55,48 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
     const resources = new Map()
     const ids = new Map()
     let pending = []
+    let removed = []
+    let nextId = 0
+    let currentDashManifest
     let writing = Promise.resolve()
     let origin
     let listener
     let closed = false
-    const register = (value, contentType, hlsVariables, dashContext) => {
+    function collectExpiredResources() {
+      const reachable = new Set()
+      const pending = [...resources.values()].filter(resource => resource.persistent || resource.active || resource === currentDashManifest).map(resource => resource.id)
+      while (pending.length) {
+        const id = pending.pop()
+        if (reachable.has(id)) continue
+        reachable.add(id)
+        for (const reference of resources.get(id)?.references ?? []) pending.push(reference)
+      }
+      const now = Date.now()
+      for (const resource of resources.values()) {
+        if (reachable.has(resource.id)) resource.expiresAt = undefined
+        else {
+          resource.expiresAt ??= now + resource.graceMs
+          if (resource.expiresAt <= now) {
+            resources.delete(resource.id)
+            ids.delete(resource.key)
+            removed.push(resource.id)
+          }
+        }
+      }
+    }
+    const register = (value, contentType, hlsVariables, dashContext, references) => {
       const urls = Array.isArray(value) ? value : [value]
       const key = JSON.stringify([urls, contentType, hlsVariables, dashContext])
       if (!ids.has(key)) {
         if (resources.size >= 65_536) throw new Error('Too many Cast resources')
-        const id = resources.size
+        const id = nextId++
         const candidates = urls.map(url => {
           if (/^data:/i.test(url)) return { url, suffix: 'media' }
           const parsed = new URL(url)
           if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error('Unsupported Cast resource URL')
           const placeholder = parsed.pathname.indexOf('$')
           const end = parsed.pathname.lastIndexOf('/', placeholder < 0 ? parsed.pathname.length : placeholder) + 1
-          const template = (hlsVariables === undefined && placeholder >= 0) || url.endsWith('/')
+          const template = (hlsVariables === undefined && dashContext === undefined && url.includes('$')) || url.endsWith('/')
           return {
             url: template ? new URL(parsed.pathname.slice(0, end), parsed).href : url,
             suffix: template ? parsed.pathname.slice(end) + parsed.search : 'media',
@@ -80,32 +105,57 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
         })
         const resource = { id, candidates, contentType, hlsVariables, dashContext }
         ids.set(key, id)
-        resources.set(id, resource)
+        resources.set(id, { ...resource, key, references: new Set(), persistent: false, active: 0, graceMs: MIN_RESOURCE_GRACE_MS })
         pending.push(resource)
       }
       const resource = resources.get(ids.get(key))
+      if (references) references.add(resource.id)
+      else resource.persistent = true
       return `${origin}/${sender.castId}/${resource.id}/${resource.candidates[0].suffix}`
     }
     async function flush() {
-      const batch = pending
+      const batch = pending.filter(resource => resources.has(resource.id))
+      const removeResourceIds = removed
       pending = []
-      if (batch.length) writing = writing.then(() => native.registerResources({ castId: sender.castId, resources: batch }))
+      removed = []
+      if (batch.length || removeResourceIds.length) writing = writing.then(() => native.registerResources({ castId: sender.castId, resources: batch, removeResourceIds }))
       await writing
     }
     return {
       async listen() {
         listener = await native.addListener('castManifest', async event => {
           if (event.castId !== sender.castId || closed) return
+          const resource = resources.get(event.resourceId)
+          if (resource) resource.active++
           try {
-            const resource = resources.get(event.resourceId)
-            const body = event.contentType === 'application/dash+xml'
-              ? rewriteCastDash(event.body, event.url, register, resource?.dashContext)
-              : rewriteCastHls(event.body, event.url, register, resource?.hlsVariables)
+            if (!resource) throw new Error('Cast manifest expired')
+            collectExpiredResources()
+            const references = new Set()
+            const registerResource = (value, type, variables, context) => register(value, type, variables, context, references)
+            const dash = event.contentType === 'application/dash+xml'
+            let dashAttributes
+            const body = dash
+              ? rewriteCastDash(event.body, event.url, registerResource, resource.dashContext, attributes => { dashAttributes = attributes })
+              : rewriteCastHls(event.body, event.url, registerResource, resource.hlsVariables)
+            const graceMs = dash
+              ? resource.dashContext ? resource.graceMs : dashResourceGrace(dashAttributes)
+              : hlsResourceGrace(event.body)
+            resource.graceMs = Math.max(resource.graceMs, graceMs)
+            for (const id of references) {
+              const child = resources.get(id)
+              child.graceMs = Math.max(child.graceMs, graceMs)
+            }
+            if (dash && !resource.dashContext) {
+              if (currentDashManifest && currentDashManifest !== resource) currentDashManifest.references.clear()
+              currentDashManifest = resource
+            }
+            resource.references = references
+            collectExpiredResources()
             await flush()
             await native.completeManifest({ castId: sender.castId, requestId: event.requestId, body })
           } catch {
             await native.completeManifest({ castId: sender.castId, requestId: event.requestId, error: true }).catch(console.error)
-          }
+          } finally { if (resource) resource.active-- }
         })
         if (closed) { await listener.remove(); throw new Error('Cast relay closed') }
         const result = await native.openMedia({ castId: sender.castId, authorization: source.authorization })
