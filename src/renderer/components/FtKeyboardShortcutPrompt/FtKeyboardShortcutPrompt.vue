@@ -130,7 +130,7 @@
 
 <script setup>
 
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onDeactivated, ref } from 'vue'
 import {
   DefaultKeyboardShortcuts,
   getConfiguredKeyboardShortcuts,
@@ -158,6 +158,12 @@ const { embedded } = defineProps({
 const isMac = process.platform === 'darwin'
 const recordingShortcutPath = ref('')
 const pendingShortcutConflict = ref(null)
+
+onDeactivated(() => {
+  if (store.getters.getSettingsWindowMinimized) return
+  recordingShortcutPath.value = ''
+  pendingShortcutConflict.value = null
+})
 
 const configuredKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts
