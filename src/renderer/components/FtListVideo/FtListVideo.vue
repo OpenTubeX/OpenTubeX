@@ -1459,7 +1459,8 @@ function openVideoContextMenu(event) {
   cancelThumbnailSwipe()
   const target = event.target
   // Channel names, dialogs, and dropdowns keep their own context menus.
-  if (target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
+  const nestedControl = target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')
+  if (target.closest('.ft-list-video')?.contains(nestedControl)) return
 
   if (event.pointerType === 'touch') {
     event.preventDefault()
