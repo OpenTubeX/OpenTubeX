@@ -234,6 +234,53 @@ public class ChromecastTest {
         } finally { fixture.delete(); }
     }
 
+    @Test public void brokenStreamClosesWithoutAppendingAnotherResponse() throws Exception {
+        for (int alternatives : new int[]{2, 1}) {
+            var requests = new java.util.concurrent.atomic.AtomicInteger();
+            var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
+                okhttp3.ResponseBody body;
+                if (requests.incrementAndGet() == 1) {
+                    body = new okhttp3.ResponseBody() {
+                        private final okio.BufferedSource source = okio.Okio.buffer(new okio.Source() {
+                            private boolean started;
+                            @Override public long read(okio.Buffer sink, long count) throws java.io.IOException {
+                                if (started) throw new java.io.IOException("Upstream stream reset");
+                                started = true;
+                                sink.writeUtf8("part");
+                                return 4;
+                            }
+                            @Override public okio.Timeout timeout() { return okio.Timeout.NONE; }
+                            @Override public void close() {}
+                        });
+                        @Override public okhttp3.MediaType contentType() { return okhttp3.MediaType.get("video/mp4"); }
+                        @Override public long contentLength() { return 10; }
+                        @Override public okio.BufferedSource source() { return source; }
+                    };
+                } else body = okhttp3.ResponseBody.create("second", okhttp3.MediaType.get("video/mp4"));
+                return new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
+                    .code(200).message("OK").header("Content-Length", Long.toString(body.contentLength())).body(body).build();
+            }).build();
+            try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {}, upstream)) {
+                JSObject segment = resource(0, "https://8.8.8.8/", "video/mp4");
+                segment.getJSONArray("candidates").getJSONObject(0).put("template", true);
+                if (alternatives == 2) segment.getJSONArray("candidates").put(new JSObject().put("url", "https://1.1.1.1/").put("template", true));
+                JSArray resources = new JSArray();
+                resources.put(segment);
+                server.register(resources);
+                try (Socket receiver = new Socket("127.0.0.1", new URL(server.origin()).getPort())) {
+                    receiver.setSoTimeout(3000);
+                    receiver.getOutputStream().write("GET /test-token/0/segment.mp4 HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                    ByteArrayOutputStream wire = new ByteArrayOutputStream();
+                    for (int value; (value = receiver.getInputStream().read()) != -1;) wire.write(value);
+                    String response = wire.toString(StandardCharsets.US_ASCII.name());
+                    assertTrue(response.startsWith("HTTP/1.1 200 OK\r\n"));
+                    assertEquals("No fallback or 502 response after streaming starts", "part", response.substring(response.indexOf("\r\n\r\n") + 4));
+                    assertEquals("No further candidate may be requested", 1, requests.get());
+                }
+            }
+        }
+    }
+
     @Test public void stalledDashAlternativeFallsBackWithoutLimitingBodyStreaming() throws Exception {
         try (ServerSocket endpoint = new ServerSocket(0)) {
             endpoint.setSoTimeout(8000);

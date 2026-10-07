@@ -242,6 +242,7 @@ final class CastMediaServer implements AutoCloseable {
         if (resource == null || path.length != 2) { reply(output, 404, "text/plain", new byte[0], true); return; }
         if (request[0].equals("OPTIONS")) { reply(output, 204, "text/plain", new byte[0], true); return; }
         boolean head = request[0].equals("HEAD");
+        boolean responseStarted = false;
         var candidates = resource.getJSONArray("candidates");
         for (int attempt = 0; attempt < candidates.length(); attempt++) {
             try {
@@ -253,6 +254,7 @@ final class CastMediaServer implements AutoCloseable {
                     String body = URLDecoder.decode(url.substring(url.indexOf(',') + 1).replace("+", "%2B"), "UTF-8");
                     if (body.getBytes(StandardCharsets.UTF_8).length > (type.equals("text/vtt") ? 8 * 1024 * 1024 : 2_000_000)) throw new IllegalArgumentException("Inline resource too large");
                     if (manifest(type)) body = rewrite(id, body, null, type);
+                    responseStarted = true;
                     reply(output, 200, type, body.getBytes(StandardCharsets.UTF_8), head); return;
                 }
                 HttpUrl original = HttpUrl.get(url);
@@ -295,6 +297,7 @@ final class CastMediaServer implements AutoCloseable {
                     if (manifest(type) && response.isSuccessful() && !head && response.body() != null) {
                         byte[] bytes = manifestBody(response);
                         String body = rewrite(id, new String(bytes, StandardCharsets.UTF_8), finalUrl, type);
+                        responseStarted = true;
                         reply(output, response.code(), type, body.getBytes(StandardCharsets.UTF_8), false); return;
                     }
                     StringBuilder headers = new StringBuilder("HTTP/1.1 " + response.code() + " OK\r\nContent-Type: " + type + "\r\n" + cors());
@@ -303,6 +306,7 @@ final class CastMediaServer implements AutoCloseable {
                         String value = name.equals("Content-Encoding") ? String.join(", ", response.headers(name)) : response.header(name);
                         if (value != null && !value.isEmpty()) headers.append(name).append(": ").append(value).append("\r\n");
                     }
+                    responseStarted = true;
                     output.write(headers.append("Connection: close\r\n\r\n").toString().getBytes(StandardCharsets.US_ASCII));
                     if (!head && response.body() != null) {
                         InputStream body = response.body().byteStream();
@@ -315,7 +319,11 @@ final class CastMediaServer implements AutoCloseable {
                     finished.set(true);
                     if (watcher != null) watcher.interrupt();
                 }
-            } catch (Exception error) { if (attempt + 1 == candidates.length()) throw error; }
+            } catch (Exception error) {
+                // Close an interrupted response; a fallback or 502 would corrupt it.
+                if (responseStarted) return;
+                if (attempt + 1 == candidates.length()) throw error;
+            }
         }
     }
 
