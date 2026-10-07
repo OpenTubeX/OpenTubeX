@@ -187,7 +187,7 @@ public class DlnaCastingTest {
                     window.__dlnaSetting = true;
                 })();
                 """);
-            await(webView, "window.__dlnaSetting && Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Show DLNA Cast Button'))");
+            await(webView, "window.__dlnaSetting && Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Enable DLNA casting'))");
             evaluate(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow');true");
             evaluate(webView, String.format(java.util.Locale.ROOT, """
                 window.__dlnaTest = null;
