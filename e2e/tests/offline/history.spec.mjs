@@ -248,6 +248,42 @@ test.describe('watch history', () => {
     }
   })
 
+  test('keeps longer compact labels inside the action row in every active locale', async ({ app, page }) => {
+    test.slow()
+    await goTo(page, 'history')
+    const activeLocales = JSON.parse(await readFile(new URL('../../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
+    const actions = page.locator('.headingActions')
+    for (const locale of ['br', ...activeLocales.filter(locale => locale !== 'br')]) {
+      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      await page.waitForFunction(locale => document.documentElement.lang === locale, locale)
+      for (const zoom of [1, 1.25]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        for (const width of [320, 375]) {
+          await setWindowSize(app, page, { width, height: 1200 - width })
+          await expect.poll(() => actions.evaluate(element => {
+            const row = element.closest('.headingRow').getBoundingClientRect()
+            const buttons = [...element.querySelectorAll('button')]
+            const first = buttons[0].getBoundingClientRect()
+            return buttons.length === 3 && buttons.every(button => {
+              const rect = button.getBoundingClientRect()
+              const label = button.querySelector('.historyCompactActionLabel')
+              const labelRect = label.getBoundingClientRect()
+              const icon = button.querySelector('svg').getBoundingClientRect()
+              return Math.abs(rect.top - first.top) < 1 && rect.height >= 48 &&
+                rect.left >= row.left - 1 && rect.right <= row.right + 1 &&
+                label.textContent.trim().length > 0 && labelRect.width >= Math.min(20, label.scrollWidth - 1) &&
+                labelRect.left >= rect.left - 1 && labelRect.right <= rect.right + 1 &&
+                icon.left >= rect.left - 1 && icon.right <= rect.right + 1 &&
+                button.getAttribute('aria-label')?.trim().length > 0 &&
+                button.getAttribute('title') === button.getAttribute('aria-label') &&
+                (label.scrollWidth <= label.clientWidth || getComputedStyle(label).textOverflow === 'ellipsis')
+            })
+          }), `${locale}, ${width}px, ${zoom * 100}% zoom`).toBe(true)
+        }
+      }
+    }
+  })
+
   test('keeps thumbnail actions inset and separated on narrow desktop layouts', async ({ page }) => {
     await page.setViewportSize({ width: 680, height: 800 })
     await goTo(page, 'history')

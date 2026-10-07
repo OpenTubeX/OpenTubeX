@@ -99,8 +99,8 @@
 
   .headingActions > .historyActionButton {
     block-size: auto;
-    flex: 1 0 auto;
-    min-block-size: 48px;
+    flex: 1 1 auto;
+    min-block-size: var(--phone-touch-target, 48px);
     padding-inline: 4px;
     font-size: 0.75rem;
     gap: 4px;
@@ -112,7 +112,10 @@
   }
 
   .historyCompactActionLabel {
-    display: inline;
+    display: block;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .headingActions :deep(svg) {
