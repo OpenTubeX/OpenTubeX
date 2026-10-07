@@ -148,6 +148,29 @@ for (const uiScale of [100, 125]) {
       await page.keyboard.press('Escape')
       await expect(menu).toHaveCount(0)
     })
+
+    test('cleans up when switching layouts during a close animation', async ({ page }) => {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+      const menu = page.locator('.quickSettingsMenu')
+      for (const closingPhoneSheet of [false, true]) {
+        await page.locator('.profileTrigger').click()
+        await menu.locator('.profileSummary').click()
+        if (closingPhoneSheet) {
+          await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+        } else {
+          await page.locator('.profileTrigger').click()
+        }
+        await expect(page.locator('.profileTrigger')).toHaveAttribute('aria-expanded', 'false')
+        await expect(menu).toBeAttached()
+        await page.setViewportSize({ width: 1100, height: closingPhoneSheet ? 900 : 480 })
+        await expect(menu).toHaveCount(0)
+        await expect(page.locator('.mobileSheet')).toHaveCount(0)
+      }
+      await page.locator('.profileTrigger').click()
+      await expect(menu.locator('.profileSummary')).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(menu).toHaveCount(0)
+    })
   })
 }
 

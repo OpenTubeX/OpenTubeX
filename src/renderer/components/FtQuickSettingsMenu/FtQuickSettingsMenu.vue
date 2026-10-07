@@ -503,6 +503,9 @@ const menuRendered = ref(false)
 watch(menuOpen, open => {
   if (open) menuRendered.value = true
 })
+watch(phoneLayout, () => {
+  if (!menuOpen.value && menuRendered.value) handleSheetClosed()
+})
 const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
 let pointerDownInsideMenu = false
