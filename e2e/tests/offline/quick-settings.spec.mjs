@@ -442,12 +442,89 @@ for (const uiScale of [100, 95]) {
         for (const label of await menu.locator('.switch-label').all()) {
           expect((await label.boundingBox()).height, 'coarse-pointer toggle target stays large').toBeGreaterThanOrEqual(47.9)
         }
+        await expectQuickSwitchTargets(menu, page)
         await touch.send('Emulation.setTouchEmulationEnabled', { enabled: false })
         if (width < 680 || height < 600) {
           await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
         } else {
           await menu.press('Escape')
         }
+        await expect(menu).toHaveCount(0)
+      }
+      await touch.detach()
+    })
+  })
+
+  test.describe(`quick settings touch spacing at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          uiScale,
+          quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'],
+        }
+      }
+    })
+
+    test('uses the shared visible row gap while keeping large switch touch targets', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+      const touch = await page.context().newCDPSession(page)
+      await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+      await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
+      // Exercise the shared renderer with native mobile control dimensions.
+      await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+      for (const { width, height } of [{ width: 375, height: 900 }, { width: 480, height: 900 }, { width: 740, height: 550 }]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
+          BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, ...bounds })
+        }, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const rows = await menu.locator('.quickSettingControl').evaluateAll(controls => controls.map(control => {
+          const select = control.querySelector('.select-text')
+          const slider = control.querySelector('.sliderControl')
+          const text = control.querySelector('.switch-label-text')
+          let top
+          let bottom
+          if (select) {
+            top = control.querySelector('.select-label').getBoundingClientRect().top
+            bottom = select.getBoundingClientRect().bottom
+          } else if (slider) {
+            top = control.querySelector('.labelRow').getBoundingClientRect().top
+            const track = slider.getBoundingClientRect()
+            bottom = (track.top + track.bottom) / 2 +
+              Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
+          } else {
+            const bounds = text.getBoundingClientRect()
+            const trackHeight = Number.parseFloat(getComputedStyle(text, '::before').blockSize)
+            const visibleHeight = Math.max(bounds.height, trackHeight)
+            top = (bounds.top + bounds.bottom - visibleHeight) / 2
+            bottom = top + visibleHeight
+          }
+          return { setting: control.dataset.settingId, top, bottom }
+        }))
+        expect(rows.map(row => row.setting)).toEqual(['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'])
+        const rowGap = await menu.locator('.menuSection').evaluate(element => Number.parseFloat(getComputedStyle(element).rowGap))
+        expect(rowGap, 'shared visible gap stays at least 16px').toBeGreaterThanOrEqual(16)
+        for (let index = 1; index < rows.length; index++) {
+          expect.soft(rows[index].top - rows[index - 1].bottom,
+            `${width}px: ${rows[index - 1].setting} to ${rows[index].setting}`).toBeCloseTo(rowGap, 1)
+        }
+        for (const target of await menu.locator('.switch-label, .switch-input').all()) {
+          expect((await target.boundingBox()).height, 'switch touch target stays large').toBeGreaterThanOrEqual(47.9)
+        }
+        await expectQuickSwitchTargets(menu, page)
+        if (width === 480) {
+          for (const scheme of ['light', 'dark']) {
+            await page.emulateMedia({ colorScheme: scheme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+            const screenshot = testInfo.outputPath(`quick-settings-touch-spacing-${scheme}.png`)
+            await menu.locator('.menuSection').screenshot({ path: screenshot })
+            await testInfo.attach(`quick-settings-touch-spacing-${scheme}`, { path: screenshot, contentType: 'image/png' })
+          }
+        }
+        await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
         await expect(menu).toHaveCount(0)
       }
       await touch.detach()
@@ -557,6 +634,55 @@ for (const uiScale of [100, 95]) {
     })
   })
 }
+
+async function expectQuickSwitchTargets(menu, page) {
+  const switches = menu.locator('.switch-ctn')
+  const targets = await switches.evaluateAll(elements => elements.map(element => {
+    const label = element.querySelector('.switch-label').getBoundingClientRect()
+    const input = element.querySelector('.switch-input').getBoundingClientRect()
+    return { top: Math.min(label.top, input.top), bottom: Math.max(label.bottom, input.bottom) }
+  }))
+  for (let index = 1; index < targets.length; index++) {
+    expect(targets[index].top, 'adjacent switch touch targets do not overlap').toBeGreaterThanOrEqual(targets[index - 1].bottom - 0.1)
+  }
+  const first = switches.first()
+  await first.scrollIntoViewIfNeeded()
+  const label = first.locator('.switch-label')
+  const bounds = await label.boundingBox()
+  const before = await switches.locator('.switch-input').evaluateAll(inputs => inputs.map(input => input.checked))
+  // Tap the lower edge where an overlapping later row could steal the action.
+  // Leave three CSS pixels for hit-test rounding at fractional zoom.
+  await page.mouse.click(bounds.x + 20, bounds.y + bounds.height - 3)
+  await expect(first.locator('.switch-input')).toBeChecked({ checked: !before[0] })
+  const after = await switches.locator('.switch-input').evaluateAll(inputs => inputs.map(input => input.checked))
+  expect(after.slice(1), 'tapping the first switch leaves its neighbors unchanged').toEqual(before.slice(1))
+}
+
+test.describe('quick settings touch spacing below 100% native UI scale', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        uiScale: 75,
+        bounds: { x: 0, y: 0, width: 360, height: 675, maximized: false },
+        quickSettings: ['enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists'],
+      }
+    }
+  })
+
+  test('keeps native switch targets separate at 75% UI scale', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    const touch = await page.context().newCDPSession(page)
+    await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    await expect(menu).toBeVisible()
+    await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+    await expectQuickSwitchTargets(menu, page)
+    await touch.detach()
+  })
+})
 
 test.describe('quick system themes', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme'], baseTheme: 'system', currentLocale: 'en-US', uiScale: 125 } } })
