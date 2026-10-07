@@ -63,7 +63,7 @@
         @change="store.dispatch('updateShowDlnaCastButton', $event)"
       />
       <FtToggleSwitch
-        v-if="USING_ELECTRON"
+        v-if="USING_ELECTRON || (IS_CAPACITOR && !IS_IOS)"
         :label="t('Settings.Player Settings.Enable Google Cast')"
         :compact="true"
         :default-value="store.getters.getShowChromecastButton"

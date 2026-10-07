@@ -20,6 +20,11 @@ export async function prepareCastSender(output = 'dist', platform = process.plat
   await mkdir(directory, { recursive: true })
   await execFileAsync('go', ['build', '-mod=readonly', '-trimpath', '-ldflags=-s -w',
     '-o', resolve(directory, platform === 'win32' ? 'opentubex-cast.exe' : 'opentubex-cast'), '.'], options)
+  await writeCastSenderLicenses(directory, options)
+}
+
+export async function writeCastSenderLicenses(directory, options) {
+  await mkdir(directory, { recursive: true })
   // Include the licenses of modules actually linked into this target.
   const { stdout } = await execFileAsync('go', ['list', '-mod=readonly', '-deps', '-f',
     '{{if and .Module (not .Module.Main)}}{{.Module.Path}}|{{.Module.Dir}}{{end}}', '.'], options)

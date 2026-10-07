@@ -885,14 +885,14 @@
           @toggle-live-chat="toggleLiveChat"
         >
           <template
-            v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (isElectron && $store.getters.getShowChromecastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (supportsChromecast && $store.getters.getShowChromecastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
             <WatchCast
               ref="chromecast"
               :key="`cast-${videoId}`"
               :video-id="videoId"
-              :google-cast-enabled="isElectron && $store.getters.getShowChromecastButton"
+              :google-cast-enabled="supportsChromecast && $store.getters.getShowChromecastButton"
               :dlna-enabled="$store.getters.getShowDlnaCastButton"
               :google-cast-active="chromecastActive"
               :google-cast-busy="chromecastBusy"

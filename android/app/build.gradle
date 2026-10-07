@@ -34,9 +34,24 @@ def generateAppIconPresets = tasks.register('generateAppIconPresets', Exec) {
 }
 tasks.named('preBuild').configure { dependsOn(generateAppIconPresets) }
 
+def castSenderOutput = layout.buildDirectory.dir('generated/cast-sender')
+def generateCastSender = tasks.register('generateCastSender', Exec) {
+    workingDir rootProject.file('..')
+    inputs.dir(rootProject.file('../_scripts/cast-sender'))
+    inputs.files(rootProject.file('../_scripts/androidCastSender.mjs'), rootProject.file('../_scripts/castSender.mjs'))
+    inputs.property('abis', project.findProperty('testAbi') ?: 'arm64-v8a,armeabi-v7a,x86_64,x86')
+    outputs.dir(castSenderOutput)
+    doFirst {
+        commandLine 'node', '_scripts/androidCastSender.mjs', castSenderOutput.get().asFile.absolutePath,
+            android.ndkDirectory.absolutePath, inputs.properties.abis
+    }
+}
+tasks.named('preBuild').configure { dependsOn(generateCastSender) }
+
 android {
     namespace = "org.opentubex.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    ndkVersion '28.2.13676358'
     defaultConfig {
         applicationId "org.opentubex.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -83,6 +98,8 @@ android {
         }
     }
     sourceSets {
+        main.jniLibs.srcDirs += [new File(castSenderOutput.get().asFile, 'jniLibs')]
+        main.assets.srcDirs += [new File(castSenderOutput.get().asFile, 'licenses')]
         main.manifest.srcFile new File(appIconOutput, 'AndroidManifest.xml')
         main.res.srcDirs += [new File(appIconOutput, 'android/main/res')]
         debug.res.srcDirs = ['src/dev/res', new File(appIconOutput, 'android/dev/res')]
@@ -99,7 +116,7 @@ android {
     packagingOptions {
         jniLibs {
             useLegacyPackaging = true
-            keepDebugSymbols += ['**/libpython.zip.so', '**/libffmpeg.zip.so']
+            keepDebugSymbols += ['**/libpython.zip.so', '**/libffmpeg.zip.so', '**/libopentubex_cast.so']
         }
     }
     buildTypes {
@@ -148,6 +165,7 @@ repositories {
 
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    implementation "org.brotli:dec:0.1.2"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     implementation "io.github.junkfood02.youtubedl-android:library:0.18.1"
     implementation "io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1"

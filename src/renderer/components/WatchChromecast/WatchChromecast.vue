@@ -25,6 +25,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
+import { chromecast } from '../../helpers/player/chromecast'
 import { selectCastSource } from '../../helpers/player/castSource'
 import { getSubtitleRequestUrl, shouldUseSubtitleCookies } from '../../helpers/player/subtitleCookies'
 
@@ -145,7 +146,7 @@ async function refreshDevices() {
   loading.value = true
   try {
     refreshSource().catch(reportError)
-    const result = await window.ftElectron.chromecast.discover()
+    const result = await chromecast.discover()
     if (disposed) return
     if (!Array.isArray(result)) throw Object.assign(new Error(result?.error ?? 'Cast discovery failed'), { code: result?.errorCode ?? (result?.error ? undefined : 'CAST_DISCOVERY_FAILED') })
     devices.value = result
@@ -179,7 +180,7 @@ async function poll() {
   const id = castId.value
   if (!id || disposed || stopPromise) return
   try {
-    const result = await window.ftElectron.chromecast.status(id)
+    const result = await chromecast.status(id)
     if (disposed || id !== castId.value || stopPromise) return
     if (!result.connected) {
       castId.value = null
@@ -214,7 +215,7 @@ async function stopCasting(resume = true) {
   const previous = status.value
   stopPromise = (async () => {
     try {
-      const result = await window.ftElectron.chromecast.stop(id)
+      const result = await chromecast.stop(id)
       status.value = { ...previous, ...result }
       if (!disposed) emit('playback-state', status.value)
     } finally {
@@ -248,7 +249,7 @@ async function handleChoice(choice) {
         value = Math.min(1, Math.max(0, status.value.volume + (choice === 'volume-up' ? 0.1 : -0.1)))
       } else if (choice === 'mute') value = !status.value.muted
       else if (choice.startsWith('caption-')) { action = 'caption'; value = Number(choice.slice(8)) }
-      const result = await window.ftElectron.chromecast.control(castId.value, action, value)
+      const result = await chromecast.control(castId.value, action, value)
       if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
       status.value = result
       emit('playback-state', result)
@@ -264,7 +265,7 @@ async function handleChoice(choice) {
       captions.push({ url: caption.url, label: caption.label, language: caption.language })
     }
     let player
-    const result = await window.ftElectron.chromecast.start(async () => {
+    const result = await chromecast.start(async () => {
       // Optional authenticated tracks would each launch an unused yt-dlp process.
       captions = captions.filter(item => item.url === caption?.url || !shouldUseSubtitleCookies(item.url, store.getters))
       const captionIndex = caption ? captions.findIndex(item => item.url === caption.url) : null
@@ -283,7 +284,12 @@ async function handleChoice(choice) {
       }
       return {
         deviceId: choice.slice(7),
-        source: source.value,
+        source: {
+          ...source.value,
+          ...(process.env.IS_CAPACITOR && store.getters.getCurrentInvidiousInstanceAuthorization
+            ? { authorization: { url: store.getters.getCurrentInvidiousInstanceUrl, value: store.getters.getCurrentInvidiousInstanceAuthorization } }
+            : {})
+        },
         title: props.title,
         startSeconds: player?.getCurrentTime() ?? 0,
         playbackRate,
@@ -297,7 +303,7 @@ async function handleChoice(choice) {
     })
     if (result.error) throw Object.assign(new Error(result.error), { code: result.errorCode })
     if (disposed || route.path !== watchPath || props.getPlayer() !== player) {
-      await window.ftElectron.chromecast.stop(result.castId)
+      await chromecast.stop(result.castId)
       return
     }
     resumePlayer = null

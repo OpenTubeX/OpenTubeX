@@ -45,6 +45,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(AndroidProxyPlugin.class);
         registerPlugin(DlnaPlugin.class);
+        registerPlugin(ChromecastPlugin.class);
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(YtDlpPlugin.class);
         registerPlugin(AndroidUiPlugin.class);
