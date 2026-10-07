@@ -4,7 +4,8 @@
     "enabled": true,
     "riskCeiling": "low"
   },
-  "ignoreKeywords": "Translations update from Weblate",
+  "ignoreKeywords": "Translations update from Weblate\nchore: sync development from FreeTubeApp/FreeTube",
+  "excludeAuthors": ["dependabot[bot]"],
   "disabledLabels": ["translations"],
   "ignorePatterns": "tests/unit/*.test.mjs\ne2e/tests/**/*.spec.mjs"
 }
