@@ -548,7 +548,7 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
-    Show DLNA Cast Button: "DLNA-castknop tonen"
+    Enable DLNA Casting: "DLNA-casting inschakelen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
     Lights Off: Lichten uit
     Show Lights Off Toggle: Schakelaar voor 'Lichten uit' tonen
@@ -652,7 +652,7 @@ Settings:
     Concurrent Preloads: "Gelijktijdige voorladingen"
     Ignore System Rotation Lock for Fullscreen: Negeer de rotatievergrendeling van het systeem voor volledig scherm
     Swipe Left or Right to Seek in Fullscreen: Veeg naar links of rechts om te spoelen op volledig scherm
-    Show Google Cast Button: "Google Cast-knop tonen"
+    Enable Google Cast: "Google Cast inschakelen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1216,6 +1216,8 @@ Channel:
   Search Result Types: Typen zoekresultaten
   All Results: Alles
   View All: Alles bekijken
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Dit kanaal heeft video’s, maar er konden er geen worden weergegeven. Probeer er meer te laden"
 Video:
   External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
   Invalid Media URL: "Ongeldige media-URL"
@@ -1320,6 +1322,7 @@ Video:
   Sponsor Block category short:
     filler: Uitweidingen
   Player:
+    Cast: "Casten"
     Music Mode: "Muziekmodus"
     Music Mode Description: "Speel video’s af op 1× en start nieuwe video’s vanaf het begin in dit tabblad. Je opgeslagen standaardinstellingen voor afspelen blijven ongewijzigd."
     DLNA:

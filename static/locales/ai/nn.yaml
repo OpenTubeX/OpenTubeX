@@ -629,7 +629,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
-    Show DLNA Cast Button: "Vis DLNA-strøymeknapp"
+    Enable DLNA Casting: "Aktiver DLNA-kasting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelege videoar i spelelister"
     Lights Off: Slå av lyset
     Show Lights Off Toggle: Vis brytar for å slå av lyset
@@ -739,7 +739,7 @@ Settings:
     Concurrent Preloads: "Samstundes førehandslasting"
     Ignore System Rotation Lock for Fullscreen: Ignorer rotasjonslåsen i systemet for fullskjerm
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høgre for å spole i fullskjerm
-    Show Google Cast Button: "Vis Google Cast-knapp"
+    Enable Google Cast: "Aktiver Google Cast"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1402,6 +1402,8 @@ Channel:
     Reveal Answers: Vis svara
     Hide Answers: Gøym svar
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Denne kanalen har videoar, men ingen kunne visast. Prøv å hente fleire"
 Video:
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
   Invalid Media URL: "Ugyldig medie-URL"
@@ -1520,6 +1522,7 @@ Video:
   Sponsor Block category short:
     filler: Avsporingar
   Player:
+    Cast: "Strøym til ei eining"
     Music Mode: "Musikkmodus"
     Music Mode Description: "Spel av videoar med 1× fart og start nye videoar frå byrjinga i denne fana. Dei lagra standardinnstillingane for avspeling vert ikkje endra."
     DLNA:

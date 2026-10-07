@@ -548,7 +548,7 @@ Settings:
         Destructive pressed: Натиснута небезпечна дія
         Text and icons on destructive actions: Текст і піктограми небезпечних дій
   Player Settings:
-    Show DLNA Cast Button: "Показувати кнопку трансляції DLNA"
+    Enable DLNA Casting: "Увімкнути трансляцію DLNA"
     Skip Unavailable Playlist Videos: "Пропускати недоступні відео в списках відтворення"
     Lights Off: Вимкнути світло
     Show Lights Off Toggle: Показувати перемикач вимкнення світла
@@ -647,7 +647,7 @@ Settings:
     Concurrent Preloads: "Одночасне попереднє завантаження"
     Ignore System Rotation Lock for Fullscreen: Ігнорувати системне блокування повороту для повноекранного режиму
     Swipe Left or Right to Seek in Fullscreen: Проводьте ліворуч або праворуч для перемотування в повноекранному режимі
-    Show Google Cast Button: "Показувати кнопку Google Cast"
+    Enable Google Cast: "Увімкнути Google Cast"
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.
@@ -1208,6 +1208,8 @@ Channel:
   Search Result Types: Типи результатів пошуку
   All Results: Усі
   View All: Переглянути всі
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "На цьому каналі є відео, але жодне не вдалося показати. Спробуйте завантажити ще"
 Video:
   External DRM Protected: "Відео, захищені DRM, неможливо відтворити в OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом."
   Invalid Media URL: "Недійсна URL-адреса медіа"
@@ -1307,6 +1309,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повтор чату наживо ввімкнено.  Повідомлення чату з’являтимуться тут під час відтворення відео.
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
+    Cast: "Транслювати"
     Music Mode: "Музичний режим"
     Music Mode Description: "Відтворюйте відео зі швидкістю 1× і починайте нові відео з початку в цій вкладці. Збережені типові налаштування відтворення залишаються незмінними."
     DLNA:

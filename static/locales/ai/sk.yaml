@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
-    Show DLNA Cast Button: "Zobraziť tlačidlo vysielania DLNA"
+    Enable DLNA Casting: "Povoliť vysielanie DLNA"
     Skip Unavailable Playlist Videos: "Preskakovať nedostupné videá v zoznamoch skladieb"
     Lights Off: Zhasnúť
     Show Lights Off Toggle: Zobraziť prepínač zhasnutia
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Súbežné prednačítania"
     Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
     Swipe Left or Right to Seek in Fullscreen: Potiahnutím doľava alebo doprava posúvať prehrávanie na celej obrazovke
-    Show Google Cast Button: "Zobraziť tlačidlo Google Cast"
+    Enable Google Cast: "Povoliť Google Cast"
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1183,6 +1183,8 @@ Channel:
   Channel Name Unavailable: Názov kanála nie je dostupný
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Tento kanál má videá, ale žiadne sa nepodarilo zobraziť. Skúste načítať ďalšie"
 Video:
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Invalid Media URL: "Neplatná adresa URL média"
@@ -1278,6 +1280,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého četu je zapnutý. Správy četu sa tu zobrazia počas prehrávania videa.
   Premiere started: Prebieha premiéra. Začala sa {timeAgo}
   Player:
+    Cast: "Vysielať"
     Music Mode: "Hudobný režim"
     Music Mode Description: "Prehrávajte videá rýchlosťou 1× a nové videá na tejto karte spúšťajte od začiatku. Uložené predvolené nastavenia prehrávania zostanú nezmenené."
     DLNA:

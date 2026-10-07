@@ -364,11 +364,11 @@ Channel:
   Your search results have returned 0 results: 'Els resultats de la teva cerca han retornat 0 resultats'
   Videos:
     Videos: 'Vídeos'
-    This channel does not currently have any videos: 'Aquest canal no té actualment cap vídeo'
     Sort Types:
       Newest: 'Més Nou'
       Oldest: 'Més Vell'
       Most Popular: 'Més Popular'
+    This channel does not currently have any videos: 'Aquest canal no té actualment cap vídeo'
   Playlists:
     Playlists: 'Llistes De Reproducció'
     This channel does not currently have any playlists: 'Aquest canal no té actualment cap llista de reproducció'

@@ -619,7 +619,7 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
-    Show DLNA Cast Button: "Mostrar botón de transmisión DLNA"
+    Enable DLNA Casting: "Activar la transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir videos no disponibles en listas de reproducción"
     Lights Off: Luces apagadas
     Show Lights Off Toggle: Mostrar interruptor para apagar las luces
@@ -723,7 +723,7 @@ Settings:
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
-    Show Google Cast Button: "Mostrar botón de Google Cast"
+    Enable Google Cast: "Activar Google Cast"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1380,11 +1380,12 @@ Channel:
   View All: Ver todo
   Videos:
     Videos: Videos
-    This channel does not currently have any videos: Este canal no tiene actualmente ningún video
     Sort Types:
       Newest: Más recientes
       Oldest: Más antiguos
       Most Popular: Más populares
+    This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intentá cargar más"
+    This channel does not currently have any videos: Este canal no tiene actualmente ningún video
   Shorts:
     This channel does not currently have any shorts: Este canal no tiene actualmente ningún video corto
   Live:
@@ -1612,6 +1613,7 @@ Video:
       shuffling playlists: aleatorizar las listas de reproducción
       looping playlists: reproducir en bucle las listas de reproducción
   Player:
+    Cast: "Transmitir"
     Music Mode: "Modo música"
     Music Mode Description: "Reproducí videos a 1× e iniciá los videos nuevos desde el principio en esta pestaña. Tus ajustes de reproducción predeterminados guardados no cambian."
     DLNA:

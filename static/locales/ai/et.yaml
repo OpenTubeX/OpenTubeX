@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
-    Show DLNA Cast Button: "Kuva DLNA edastamise nupp"
+    Enable DLNA Casting: "Luba DLNA edastamine"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja
     Show Lights Off Toggle: Näita tulede väljalülitamise lülitit
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Samaaegsed eellaadimised"
     Ignore System Rotation Lock for Fullscreen: Eira täisekraani jaoks süsteemi pööramislukku
     Swipe Left or Right to Seek in Fullscreen: Täisekraanil kerimiseks pühkige vasakule või paremale
-    Show Google Cast Button: "Näita Google Casti nuppu"
+    Enable Google Cast: "Luba Google Cast"
   Channel Settings:
     Channel Settings: Kanali seaded
     Channel Settings Description: Jäta iga kanali jaoks eraldi meelde vaatamise ajal valitud seaded, et need rakenduksid uuesti, kui vaatad järgmisel korral selle kanali videot.
@@ -1277,6 +1277,7 @@ Video:
   Sponsor Block category:
     hook: Sissejuhatus/tervitus
   Player:
+    Cast: "Edasta"
     Music Mode: "Muusikarežiim"
     Music Mode Description: "Esita videoid kiirusel 1× ja alusta sellel vahelehel uusi videoid algusest. Sinu salvestatud taasesituse vaikeseaded jäävad muutmata."
     DLNA:

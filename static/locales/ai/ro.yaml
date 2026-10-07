@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Acțiune distructivă la apăsare
         Text and icons on destructive actions: Text și pictograme pentru acțiunile distructive
   Player Settings:
-    Show DLNA Cast Button: "Afișează butonul de transmitere DLNA"
+    Enable DLNA Casting: "Activează transmiterea DLNA"
     Skip Unavailable Playlist Videos: "Omite videoclipurile indisponibile din listele de redare"
     Lights Off: Stinge luminile
     Show Lights Off Toggle: Afișează comutatorul pentru stingerea luminilor
@@ -643,7 +643,7 @@ Settings:
     Concurrent Preloads: "Preîncărcări simultane"
     Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
     Swipe Left or Right to Seek in Fullscreen: Glisați la stânga sau la dreapta pentru a derula pe tot ecranul
-    Show Google Cast Button: "Afișează butonul Google Cast"
+    Enable Google Cast: "Activează Google Cast"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1207,6 +1207,8 @@ Channel:
   Search Result Types: Tipuri de rezultate ale căutării
   All Results: Toate
   View All: Vezi tot
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Acest canal are videoclipuri, dar niciunul nu a putut fi afișat. Încearcă să încarci mai multe"
 Video:
   External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."
   Invalid Media URL: "Adresă URL media nevalidă"
@@ -1307,6 +1309,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
+    Cast: "Transmite"
     Music Mode: "Mod muzică"
     Music Mode Description: "Redă videoclipurile la viteza 1× și pornește videoclipurile noi de la început în această filă. Setările implicite de redare salvate rămân neschimbate."
     DLNA:

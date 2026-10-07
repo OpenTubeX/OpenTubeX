@@ -56,7 +56,7 @@
       />
       <FtToggleSwitch
         v-if="USING_ELECTRON || IS_CAPACITOR"
-        :label="t('Settings.Player Settings.Show DLNA Cast Button')"
+        :label="t('Settings.Player Settings.Enable DLNA Casting')"
         :compact="true"
         :default-value="showDlnaCastButton"
         setting-key="showDlnaCastButton"
@@ -64,7 +64,7 @@
       />
       <FtToggleSwitch
         v-if="USING_ELECTRON"
-        :label="t('Settings.Player Settings.Show Google Cast Button')"
+        :label="t('Settings.Player Settings.Enable Google Cast')"
         :compact="true"
         :default-value="store.getters.getShowChromecastButton"
         setting-key="showChromecastButton"

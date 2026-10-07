@@ -255,7 +255,7 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
-    Show DLNA Cast Button: "Pokaż przycisk przesyłania DLNA"
+    Enable DLNA Casting: "Włącz przesyłanie DLNA"
     Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"
     Lights Off: Zgaś światło
     Show Lights Off Toggle: Pokaż przełącznik gaszenia światła
@@ -284,7 +284,7 @@ Settings:
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
     Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
-    Show Google Cast Button: "Pokaż przycisk Google Cast"
+    Enable Google Cast: "Włącz Google Cast"
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
@@ -653,6 +653,8 @@ Channel:
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Ten kanał ma filmy, ale nie udało się wyświetlić żadnego z nich. Spróbuj wczytać więcej"
 Video:
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"
@@ -706,6 +708,7 @@ Video:
   All Messages: Wszystkie wiadomości
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Powtórka czatu na żywo jest włączona. Wiadomości będą pojawiać się tutaj podczas odtwarzania filmu.
   Player:
+    Cast: "Przesyłaj"
     Music Mode: "Tryb muzyczny"
     Music Mode Description: "Odtwarzaj filmy z prędkością 1× i rozpoczynaj nowe filmy od początku w tej karcie. Zapisane domyślne ustawienia odtwarzania pozostają bez zmian."
     DLNA:

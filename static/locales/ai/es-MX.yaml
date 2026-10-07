@@ -644,7 +644,7 @@ Settings:
       Everforest Light Blue: Everforest Claro Azul
       Everforest Light Purple: Everforest Claro Morado
   Player Settings:
-    Show DLNA Cast Button: "Mostrar botón de transmisión DLNA"
+    Enable DLNA Casting: "Activar la transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir videos no disponibles en listas de reproducción"
     Lights Off: Luces apagadas
     Show Lights Off Toggle: Mostrar interruptor para apagar las luces
@@ -757,7 +757,7 @@ Settings:
     Concurrent Preloads: "Precargas simultáneas"
     Ignore System Rotation Lock for Fullscreen: Ignorar el bloqueo de rotación del sistema para pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Deslizar a izquierda o derecha para avanzar o retroceder en pantalla completa
-    Show Google Cast Button: "Mostrar botón de Google Cast"
+    Enable Google Cast: "Activar Google Cast"
   Channel Settings:
     Channel Settings: Ajustes de canales
     Channel Settings Description: Recuerda por separado los ajustes que elijas al ver cada canal para volver a aplicarlos la próxima vez que veas uno de sus videos.
@@ -1434,6 +1434,8 @@ Channel:
     Reveal Answers: Revelar las respuestas
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intenta cargar más"
 Video:
   External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"
@@ -1554,6 +1556,7 @@ Video:
     Show Original Details: Mostrar Detalles Originales
     Show Modified Details: Mostrar Detalles Modificados
   Player:
+    Cast: "Transmitir"
     Music Mode: "Modo música"
     Music Mode Description: "Reproduce videos a 1× e inicia los videos nuevos desde el principio en esta pestaña. Tus ajustes de reproducción predeterminados guardados no cambian."
     DLNA:

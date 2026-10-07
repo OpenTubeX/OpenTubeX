@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+version: 1
+reviews:
+  ignore:
+    files:
+      - "tests/unit/*.test.mjs"
+      - "e2e/tests/**/*.spec.mjs"
+    head_branches:
+      - "upstream-sync"
+      - "weblate-translations"
+      - "dependabot/**"
+    pr_labels:
+      - "translations"
+    pr_titles:
+      - "*Translations update from Weblate*"

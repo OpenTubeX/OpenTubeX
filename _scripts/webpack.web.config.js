@@ -256,19 +256,23 @@ config.plugins.push(
             from: path.join(__dirname, '../static/pwabuilder-sw.js'),
             to: path.join(outputPath, 'pwabuilder-sw.js'),
           }]),
-      {
-        from: path.join(__dirname, '../static'),
-        to: path.join(outputPath, 'static'),
-        globOptions: {
-          dot: true,
-          ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/dashFiles/**', '**/storyboards/**'],
-        },
-      },
-      {
-        from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
-        to: path.join(outputPath, 'static/shaka-player-locales'),
-        context: path.join(__dirname, '../node_modules/shaka-player/ui/locales')
-      }
+      ...(isDevMode
+        ? []
+        : [
+            {
+              from: path.join(__dirname, '../static'),
+              to: path.join(outputPath, 'static'),
+              globOptions: {
+                dot: true,
+                ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/dashFiles/**', '**/storyboards/**'],
+              },
+            },
+            {
+              from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
+              to: path.join(outputPath, 'static/shaka-player-locales'),
+              context: path.join(__dirname, '../node_modules/shaka-player/ui/locales')
+            }
+          ])
     ]
   })
 )

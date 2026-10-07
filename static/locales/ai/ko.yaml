@@ -704,7 +704,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
-    Show DLNA Cast Button: "DLNA 전송 버튼 표시"
+    Enable DLNA Casting: "DLNA 전송 활성화"
     Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"
     Lights Off: 조명 끄기
     Show Lights Off Toggle: 조명 끄기 토글 표시
@@ -814,7 +814,7 @@ Settings:
     Concurrent Preloads: "동시 미리 로드 수"
     Ignore System Rotation Lock for Fullscreen: 전체 화면에서 시스템 회전 잠금 무시
     Swipe Left or Right to Seek in Fullscreen: 전체 화면에서 좌우로 스와이프하여 탐색
-    Show Google Cast Button: "Google Cast 버튼 표시"
+    Enable Google Cast: "Google Cast 활성화"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1476,6 +1476,8 @@ Channel:
     Reveal Answers: 답변 표시
     Hide Answers: 답변 숨기기
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "이 채널에는 동영상이 있지만 표시할 수 없습니다. 더 불러오기를 시도하세요"
 Video:
   External DRM Protected: "DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다."
   Invalid Media URL: "유효하지 않은 미디어 URL"
@@ -1590,6 +1592,7 @@ Video:
     Show Original Details: 원본 정보 표시
     Show Modified Details: 수정된 정보 표시
   Player:
+    Cast: "전송"
     Music Mode: "음악 모드"
     Music Mode Description: "이 탭에서 동영상을 1배속으로 재생하고 새 동영상을 처음부터 시작합니다. 저장된 기본 재생 설정은 변경되지 않습니다."
     DLNA:

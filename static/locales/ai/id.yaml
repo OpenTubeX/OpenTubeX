@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
-    Show DLNA Cast Button: "Tampilkan tombol transmisi DLNA"
+    Enable DLNA Casting: "Aktifkan transmisi DLNA"
     Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"
     Lights Off: Matikan lampu
     Show Lights Off Toggle: Tampilkan tombol matikan lampu
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Prapemuatan serentak"
     Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
     Swipe Left or Right to Seek in Fullscreen: Geser ke kiri atau kanan untuk mencari posisi dalam layar penuh
-    Show Google Cast Button: "Tampilkan tombol Google Cast"
+    Enable Google Cast: "Aktifkan Google Cast"
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1183,6 +1183,8 @@ Channel:
   Channel Name Unavailable: Nama saluran tidak tersedia
   Search Result Types: Jenis hasil pencarian
   All Results: Semua
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Kanal ini memiliki video, tetapi tidak ada yang dapat ditampilkan. Coba muat lebih banyak"
 Video:
   External DRM Protected: "Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik."
   Invalid Media URL: "URL media tidak valid"
@@ -1283,6 +1285,7 @@ Video:
   Sponsor Block category:
     hook: Pembuka/Sapaan
   Player:
+    Cast: "Transmisikan"
     Music Mode: "Mode Musik"
     Music Mode Description: "Putar video dengan kecepatan 1× dan mulai video baru dari awal di tab ini. Pengaturan pemutaran bawaan yang tersimpan tetap tidak berubah."
     DLNA:

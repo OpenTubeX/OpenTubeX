@@ -3,9 +3,13 @@
 reviews:
   high_level_summary: false
   request_changes_workflow: true
+  path_filters:
+    - "!tests/unit/*.test.mjs"
+    - "!e2e/tests/**/*.spec.mjs"
   auto_review:
     ignore_title_keywords:
       - "Translations update from Weblate"
+      - "chore: sync development from FreeTubeApp/FreeTube"
     ignore_usernames:
       - "dependabot[bot]"
     labels:

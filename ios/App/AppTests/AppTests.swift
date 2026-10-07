@@ -750,7 +750,7 @@ final class AppTests: XCTestCase {
         let available = try await evaluate("Capacitor.isPluginAvailable('Dlna')") as? Bool
         XCTAssertEqual(available, true)
         _ = try await webView.callAsyncJavaScript("testStore.commit('setSettingsWindowSection', 'player'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
-        try await wait("Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Show DLNA Cast Button'))")
+        try await wait("Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Enable DLNA casting'))")
         let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
         _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', !original); await testStore.dispatch('updateShowDlnaCastButton', original); await testStore.dispatch('hideSettingsWindow')", arguments: ["original": original], in: nil, contentWorld: .page)
     }

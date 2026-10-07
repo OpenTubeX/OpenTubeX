@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Опасно действие при натискане
         Text and icons on destructive actions: Текст и икони върху опасните действия
   Player Settings:
-    Show DLNA Cast Button: "Показване на бутона за DLNA предаване"
+    Enable DLNA Casting: "Активиране на предаване чрез DLNA"
     Skip Unavailable Playlist Videos: "Пропускане на недостъпните видеоклипове в плейлистите"
     Lights Off: Изгасване на светлините
     Show Lights Off Toggle: Показване на превключвателя за изгасване на светлините
@@ -641,7 +641,7 @@ Settings:
     Concurrent Preloads: "Едновременни предварителни зареждания"
     Ignore System Rotation Lock for Fullscreen: Игнориране на системното заключване на завъртането за цял екран
     Swipe Left or Right to Seek in Fullscreen: Плъзнете наляво или надясно за превъртане на цял екран
-    Show Google Cast Button: "Показване на бутона Google Cast"
+    Enable Google Cast: "Активиране на Google Cast"
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1190,6 +1190,8 @@ Channel:
   Channel Name Unavailable: Името на канала не е налично
   Search Result Types: Видове резултати от търсенето
   All Results: Всички
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Този канал има видеоклипове, но нито един не може да бъде показан. Опитайте да заредите още"
 Video:
   External DRM Protected: "Видеата, защитени с DRM, не могат да се възпроизвеждат в OpenTubeX, тъй като изискват собствени компоненти със затворен код."
   Invalid Media URL: "Невалиден URL адрес на медия"
@@ -1288,6 +1290,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повторението на чата на живо е включено. Съобщенията от чата ще се показват тук при възпроизвеждането на видеоклипа.
   Premiere started: Премиерата е в ход. Започна {timeAgo}
   Player:
+    Cast: "Предаване"
     Music Mode: "Музикален режим"
     Music Mode Description: "Възпроизвеждайте видеоклипове със скорост 1× и започвайте новите видеоклипове отначало в този раздел. Запазените настройки за възпроизвеждане остават непроменени."
     DLNA:

@@ -688,11 +688,11 @@ Channel:
   Channel Tabs: 'Укладкі канала'
   Videos:
     Videos: 'Відэа'
-    This channel does not currently have any videos: 'Зараз на гэтым канале няма відэа'
     Sort Types:
       Newest: 'Самае новае'
       Oldest: 'Самае старое'
       Most Popular: 'Самае папулярнае'
+    This channel does not currently have any videos: 'Зараз на гэтым канале няма відэа'
   Shorts:
     This channel does not currently have any shorts: 'Зараз на гэтым канале няма кароткіх відэа'
   Live:

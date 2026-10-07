@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
   Player Settings:
-    Show DLNA Cast Button: "显示 DLNA 投屏按钮"
+    Enable DLNA Casting: "启用 DLNA 投屏"
     Skip Unavailable Playlist Videos: "跳过播放列表中无法播放的视频"
     Lights Off: 关灯
     Show Lights Off Toggle: 显示关灯开关
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "并发预加载数"
     Ignore System Rotation Lock for Fullscreen: 全屏时忽略系统旋转锁定
     Swipe Left or Right to Seek in Fullscreen: 全屏时向左或向右滑动以快进或快退
-    Show Google Cast Button: "显示 Google Cast 按钮"
+    Enable Google Cast: "启用 Google Cast"
   Channel Settings:
     Channel Settings: 频道设置
     Channel Settings Description: 分别记住观看各频道时选择的设置，以便下次观看该频道的视频时再次应用。
@@ -1275,6 +1275,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: 已启用实时聊天回放。视频播放时，聊天消息会显示在这里。
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
+    Cast: "投屏"
     Music Mode: "音乐模式"
     Music Mode Description: "在此标签页中以1倍速播放视频，并从头开始播放新视频。已保存的默认播放设置保持不变。"
     DLNA:

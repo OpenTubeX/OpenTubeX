@@ -548,7 +548,7 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
-    Show DLNA Cast Button: "Hiển thị nút truyền DLNA"
+    Enable DLNA Casting: "Bật truyền phát DLNA"
     Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"
     Lights Off: Tắt đèn
     Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
@@ -647,7 +647,7 @@ Settings:
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
     Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
-    Show Google Cast Button: "Hiện nút Google Cast"
+    Enable Google Cast: "Bật Google Cast"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1206,6 +1206,8 @@ Channel:
   Search Result Types: Loại kết quả tìm kiếm
   All Results: Tất cả
   View All: Xem tất cả
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Kênh này có video nhưng không thể hiển thị video nào. Hãy thử tải thêm"
 Video:
   External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."
   Invalid Media URL: "URL phương tiện không hợp lệ"
@@ -1304,6 +1306,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
+    Cast: "Truyền phát"
     Music Mode: "Chế độ âm nhạc"
     Music Mode Description: "Phát video ở tốc độ 1× và bắt đầu video mới từ đầu trong thẻ này. Các thiết lập phát mặc định đã lưu của bạn không thay đổi."
     DLNA:

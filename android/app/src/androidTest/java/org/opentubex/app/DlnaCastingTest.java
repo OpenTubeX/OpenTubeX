@@ -187,7 +187,7 @@ public class DlnaCastingTest {
                     window.__dlnaSetting = true;
                 })();
                 """);
-            await(webView, "window.__dlnaSetting && Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Show DLNA Cast Button'))");
+            await(webView, "window.__dlnaSetting && Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Enable DLNA casting'))");
             evaluate(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('hideSettingsWindow');true");
             evaluate(webView, String.format(java.util.Locale.ROOT, """
                 window.__dlnaTest = null;
@@ -386,7 +386,11 @@ public class DlnaCastingTest {
                 awaitScreenWake(scenario, false);
                 try (android.os.ParcelFileDescriptor state = InstrumentationRegistry.getInstrumentation().getUiAutomation(android.app.UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES).executeShellCommand("dumpsys power")) {
                     String power = new String(readBody(new android.os.ParcelFileDescriptor.AutoCloseInputStream(state)), StandardCharsets.UTF_8);
-                    assertFalse("Stop casting releases CPU wake", power.contains(context.getPackageName() + ":dlna-cast"));
+                    // The wake-lock history also contains locks that were released.
+                    boolean castWakeHeld = Arrays.stream(power.split("\n"))
+                        .anyMatch(line -> line.trim().startsWith("PARTIAL_WAKE_LOCK") &&
+                            line.contains(context.getPackageName() + ":dlna-cast"));
+                    assertFalse("Stop casting releases CPU wake", castWakeHeld);
                 }
                 System.out.println("DLNA UI " + (merged ? "streaming merge" : "complete MP4") + ": discovered renderer, Play/Stop, received " + receivedVideo.get().length + " MP4 bytes, decoded frame, resumed local playback, closed relay");
             } finally {

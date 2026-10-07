@@ -729,7 +729,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
-    Show DLNA Cast Button: "Rodyti DLNA transliavimo mygtuką"
+    Enable DLNA Casting: "Įjungti DLNA transliavimą"
     Skip Unavailable Playlist Videos: "Praleisti nepasiekiamus vaizdo įrašus grojaraščiuose"
     Lights Off: Išjungti šviesas
     Show Lights Off Toggle: Rodyti šviesų išjungimo jungiklį
@@ -839,7 +839,7 @@ Settings:
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
     Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
     Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
-    Show Google Cast Button: "Rodyti Google Cast mygtuką"
+    Enable Google Cast: "Įjungti Google Cast"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1499,6 +1499,8 @@ Channel:
     Reveal Answers: Rodyti atsakymus
     Hide Answers: Slėpti atsakymus
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Šiame kanale yra vaizdo įrašų, bet nė vieno nepavyko parodyti. Pabandykite įkelti daugiau"
 Video:
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."
   Invalid Media URL: "Neteisingas medijos URL"
@@ -1625,6 +1627,7 @@ Video:
     music offtopic: Ne muzika
     filler: Nukrypimai
   Player:
+    Cast: "Transliuoti"
     Music Mode: "Muzikos režimas"
     Music Mode Description: "Leiskite vaizdo įrašus 1× greičiu ir šiame skirtuke naujus vaizdo įrašus pradėkite nuo pradžių. Išsaugotos numatytosios atkūrimo nuostatos nesikeičia."
     DLNA:

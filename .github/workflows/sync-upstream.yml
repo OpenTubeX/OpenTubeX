@@ -75,3 +75,5 @@ jobs:
             Sync [FreeTubeApp/FreeTube:development](https://github.com/FreeTubeApp/FreeTube/tree/development) into `development`.
 
             Merge with a **merge commit** to preserve fork changes and shared upstream history.
+
+            @coderabbitai ignore

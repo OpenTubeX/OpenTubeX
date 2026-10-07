@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
-    Show DLNA Cast Button: "Erakutsi DLNA igorpen-botoia"
+    Enable DLNA Casting: "Gaitu DLNA bidezko igorpena"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
     Lights Off: Argiak itzali
     Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Aldibereko aurrekargak"
     Ignore System Rotation Lock for Fullscreen: Ez ikusi sistemaren biraketa-blokeoa pantaila osorako
     Swipe Left or Right to Seek in Fullscreen: Irristatu ezkerrera edo eskuinera pantaila osoan aurrera edo atzera egiteko
-    Show Google Cast Button: "Erakutsi Google Cast botoia"
+    Enable Google Cast: "Gaitu Google Cast"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1183,6 +1183,8 @@ Channel:
   Channel Name Unavailable: Kanalaren izena ez dago erabilgarri
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Kanal honek bideoak ditu, baina ezin izan da bat ere erakutsi. Saiatu gehiago kargatzen"
 Video:
   External DRM Protected: "DRM babestutako bideoak ezin dira erreproduzitu OpenTubeXn, kode itxiko osagai jabedunak behar baitituzte."
   Invalid Media URL: "Multimedia URLa ez da baliozkoa"
@@ -1290,6 +1292,7 @@ Video:
     music offtopic: Musikaz bestelakoa
     filler: Gaitik kanpokoak
   Player:
+    Cast: "Igorri"
     Music Mode: "Musika modua"
     Music Mode Description: "Erreproduzitu bideoak 1× abiaduran eta hasi bideo berriak hasieratik fitxa honetan. Gordetako erreprodukzio-ezarpen lehenetsiak ez dira aldatzen."
     DLNA:

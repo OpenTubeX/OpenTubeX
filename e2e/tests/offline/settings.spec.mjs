@@ -262,12 +262,14 @@ test.describe('skip silence settings search', () => {
   })
 })
 
-test('DLNA cast button is opt in from Player Settings', async ({ page }) => {
+test('DLNA and Google Cast casting are opt in from Player Settings', async ({ page }) => {
   const playback = await goToSettingsSection(page, 'playback')
-  const toggle = playback.getByRole('checkbox', { name: 'Show DLNA Cast Button' })
-  await expect(toggle).not.toBeChecked()
-  await playback.locator('label.switch-label').filter({ hasText: 'Show DLNA Cast Button' }).click()
-  await expect(toggle).toBeChecked()
+  for (const label of ['Enable DLNA casting', 'Enable Google Cast']) {
+    const toggle = playback.getByRole('checkbox', { name: label })
+    await expect(toggle).not.toBeChecked()
+    await playback.locator('label.switch-label').filter({ hasText: label }).click()
+    await expect(toggle).toBeChecked()
+  }
 })
 
 test('flows Player switches across balanced rows when some are unavailable', async ({ page }) => {

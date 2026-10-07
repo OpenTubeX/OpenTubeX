@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
-    Show DLNA Cast Button: "Dangos botwm castio DLNA"
+    Enable DLNA Casting: "Galluogi castio DLNA"
     Skip Unavailable Playlist Videos: "Hepgor fideos nad ydynt ar gael mewn rhestri chwarae"
     Lights Off: Diffodd y goleuadau
     Show Lights Off Toggle: Dangos togl diffodd y goleuadau
@@ -641,7 +641,7 @@ Settings:
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
     Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
     Swipe Left or Right to Seek in Fullscreen: Sychwch i’r chwith neu’r dde i symud drwy’r fideo ar sgrin lawn
-    Show Google Cast Button: "Dangos botwm Google Cast"
+    Enable Google Cast: "Galluogi Google Cast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1190,6 +1190,8 @@ Channel:
   Channel Name Unavailable: Nid yw enw'r sianel ar gael
   Search Result Types: Mathau o ganlyniadau chwilio
   All Results: Pob un
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Mae gan y sianel hon fideos ond ni ellid dangos yr un ohonynt. Ceisiwch lwytho mwy"
 Video:
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."
   Invalid Media URL: "URL cyfryngau annilys"
@@ -1297,6 +1299,7 @@ Video:
     music offtopic: Heb fod yn gerddoriaeth
     filler: Gwyriadau
   Player:
+    Cast: "Castio"
     Music Mode: "Modd cerddoriaeth"
     Music Mode Description: "Chwaraewch fideos ar gyflymder 1× a dechreuwch fideos newydd o’r dechrau yn y tab hwn. Bydd eich gosodiadau chwarae diofyn wedi’u cadw yn aros yr un fath."
     DLNA:
