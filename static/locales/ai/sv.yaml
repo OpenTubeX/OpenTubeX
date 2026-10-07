@@ -1440,6 +1440,9 @@ Video:
       SubmitCategoryVote: Skicka kategoriröst
       CategoryVoteSuccess: Kategoriröst skickad.
     Google Cast:
+      Invalid Authentication: "Mottagaren skickade ett ogiltigt autentiseringssvar."
+      Authentication Declined: "Mottagaren avvisade autentisering."
+      Audio Only Receiver: "Mottagaren stöder bara casting av ljud."
       Disconnected: "Mottagaren kopplades från."
       Timeout: "Mottagaren svarade inte."
       Busy: "Ett annat fönster castar redan."

@@ -453,7 +453,10 @@ test('Cast localizes receiver disconnects in German', async ({ app, page }) => {
 for (const [code, reason] of [
   ['CAST_TIMEOUT', 'Der Empfänger hat nicht geantwortet.'],
   ['CAST_LAUNCH_FAILED', 'Der Empfänger konnte nicht gestartet werden.'],
-  ['CAST_LOAD_FAILED', 'Der Empfänger konnte das Video nicht laden.']
+  ['CAST_LOAD_FAILED', 'Der Empfänger konnte das Video nicht laden.'],
+  ['CAST_INVALID_AUTHENTICATION', 'Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet.'],
+  ['CAST_AUTHENTICATION_DECLINED', 'Der Empfänger hat die Authentifizierung abgelehnt.'],
+  ['CAST_AUDIO_ONLY', 'Der Empfänger unterstützt nur die Übertragung von Audio.']
 ]) {
   test(`Cast localizes ${code} startup errors in German`, async ({ app, page }) => {
     const watch = await openCastVideo(app, page)

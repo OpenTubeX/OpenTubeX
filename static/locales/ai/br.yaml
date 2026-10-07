@@ -1439,6 +1439,9 @@ Video:
       SubmitCategoryVote: Kas ar vot evit ar rummad
       CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
     Google Cast:
+      Invalid Authentication: "Ur respont dilesa direizh en deus kaset ar resever."
+      Authentication Declined: "Nac'het en deus ar resever an dilesa."
+      Audio Only Receiver: "Skignañ aodio hepken a vez skoret gant ar resever."
       Disconnected: "Digevreet eo ar resever."
       Timeout: "N'en deus ket respontet ar resever."
       Busy: "Ur prenestr all a zo o skignañ dija."

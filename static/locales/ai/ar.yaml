@@ -1462,6 +1462,9 @@ Video:
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
+      Invalid Authentication: "أرسل جهاز الاستقبال استجابة مصادقة غير صالحة."
+      Authentication Declined: "رفض جهاز الاستقبال المصادقة."
+      Audio Only Receiver: "يدعم جهاز الاستقبال بث الصوت فقط."
       Disconnected: "انقطع اتصال جهاز الاستقبال."
       Timeout: "لم يستجب جهاز الاستقبال."
       Busy: "هناك نافذة أخرى تبث بالفعل."

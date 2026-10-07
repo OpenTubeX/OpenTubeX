@@ -1467,6 +1467,9 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Invalid Authentication: "Vastaanottaja lähetti virheellisen todennusvastauksen."
+      Authentication Declined: "Vastaanottaja hylkäsi todennuksen."
+      Audio Only Receiver: "Vastaanottaja tukee vain äänen lähettämistä."
       Disconnected: "Vastaanottajan yhteys katkesi."
       Timeout: "Vastaanottaja ei vastannut."
       Busy: "Toinen ikkuna lähettää jo."

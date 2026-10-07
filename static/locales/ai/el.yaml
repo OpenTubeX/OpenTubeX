@@ -1467,6 +1467,9 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Invalid Authentication: "Ο δέκτης έστειλε μη έγκυρη απάντηση ελέγχου ταυτότητας."
+      Authentication Declined: "Ο δέκτης αρνήθηκε τον έλεγχο ταυτότητας."
+      Audio Only Receiver: "Ο δέκτης υποστηρίζει μόνο μετάδοση ήχου."
       Disconnected: "Ο δέκτης αποσυνδέθηκε."
       Timeout: "Ο δέκτης δεν απάντησε."
       Busy: "Ένα άλλο παράθυρο μεταδίδει ήδη."

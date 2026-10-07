@@ -1459,6 +1459,9 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Invalid Authentication: "Thiết bị nhận gửi phản hồi xác thực không hợp lệ."
+      Authentication Declined: "Thiết bị nhận từ chối xác thực."
+      Audio Only Receiver: "Thiết bị nhận chỉ hỗ trợ truyền âm thanh."
       Disconnected: "Thiết bị nhận đã ngắt kết nối."
       Timeout: "Thiết bị nhận không phản hồi."
       Busy: "Một cửa sổ khác đang truyền."

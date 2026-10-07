@@ -1462,6 +1462,9 @@ Video:
       SubmitCategoryVote: Надіслати голос за категорію
       CategoryVoteSuccess: Голос за категорію надіслано.
     Google Cast:
+      Invalid Authentication: "Приймач надіслав неприпустиму відповідь автентифікації."
+      Authentication Declined: "Приймач відмовився від автентифікації."
+      Audio Only Receiver: "Приймач підтримує лише трансляцію аудіо."
       Disconnected: "З’єднання з приймачем втрачено."
       Timeout: "Приймач не відповів."
       Busy: "Інше вікно вже транслює."

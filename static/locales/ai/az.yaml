@@ -1442,6 +1442,9 @@ Video:
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
     Google Cast:
+      Invalid Authentication: "Qəbuledici yanlış doğrulama cavabı göndərdi."
+      Authentication Declined: "Qəbuledici doğrulamanı rədd etdi."
+      Audio Only Receiver: "Qəbuledici yalnız səs yayımını dəstəkləyir."
       Disconnected: "Qəbuledici ilə əlaqə kəsildi."
       Timeout: "Qəbuledici cavab vermədi."
       Busy: "Başqa pəncərə artıq yayımlayır."

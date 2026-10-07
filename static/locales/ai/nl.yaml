@@ -1475,6 +1475,9 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Invalid Authentication: "De ontvanger stuurde een ongeldig authenticatieantwoord."
+      Authentication Declined: "De ontvanger weigerde authenticatie."
+      Audio Only Receiver: "De ontvanger ondersteunt alleen het casten van audio."
       Disconnected: "De ontvanger is losgekoppeld."
       Timeout: "De ontvanger reageerde niet."
       Busy: "Een ander venster cast al."

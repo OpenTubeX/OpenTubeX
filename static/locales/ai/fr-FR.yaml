@@ -1429,6 +1429,9 @@ Video:
       SubmitCategoryVote: Envoyer le vote de catégorie
       CategoryVoteSuccess: Vote de catégorie envoyé.
     Google Cast:
+      Invalid Authentication: "Le récepteur a envoyé une réponse d’authentification invalide."
+      Authentication Declined: "Le récepteur a refusé l’authentification."
+      Audio Only Receiver: "Le récepteur ne prend en charge que la diffusion audio."
       Disconnected: "Le récepteur s’est déconnecté."
       Timeout: "Le récepteur n’a pas répondu."
       Busy: "Une autre fenêtre diffuse déjà."

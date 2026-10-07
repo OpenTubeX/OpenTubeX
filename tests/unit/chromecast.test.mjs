@@ -80,24 +80,25 @@ lines.on('line', async line=>{
 lines.on('close',()=>process.exit(0))
 `
 
-test('Cast preserves the native authentication error when the helper exits', async t => {
-  if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return }
-  const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-error-'))
-  t.after(() => rm(directory, { recursive: true, force: true }))
-  const executable = path.join(directory, 'sender.mjs')
-  const reason = 'Receiver identity verification failed'
-  const code = 'CAST_UNTRUSTED_CERTIFICATE'
-  await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason, code }) + '\n')}, () => process.exit(1))\n`)
-  await chmod(executable, 0o755)
-  const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
-  t.after(() => sender.close())
-  await assert.rejects(sender.connect(), { message: reason, code })
-  await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason, code })
-  const manager = new ChromecastManager(executable)
-  manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
-  t.after(() => manager.stop())
-  assert.deepEqual(await manager.start(42, payload), { error: reason, errorCode: code })
-})
+for (const code of ['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION', 'CAST_AUTHENTICATION_DECLINED', 'CAST_AUDIO_ONLY']) {
+  test(`Cast preserves native ${code} when the helper exits`, async t => {
+    if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return }
+    const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-error-'))
+    t.after(() => rm(directory, { recursive: true, force: true }))
+    const executable = path.join(directory, 'sender.mjs')
+    const reason = 'Receiver identity verification failed'
+    await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason, code }) + '\n')}, () => process.exit(1))\n`)
+    await chmod(executable, 0o755)
+    const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
+    t.after(() => sender.close())
+    await assert.rejects(sender.connect(), { message: reason, code })
+    await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason, code })
+    const manager = new ChromecastManager(executable)
+    manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
+    t.after(() => manager.stop())
+    assert.deepEqual(await manager.start(42, payload), { error: reason, errorCode: code })
+  })
+}
 
 async function managerForTest(t, powerSaveBlocker) {
   if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return null }

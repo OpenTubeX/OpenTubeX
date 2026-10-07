@@ -2101,6 +2101,9 @@ Video:
       'Off': Aus
     Resize dock: Leiste in der Größe ändern
     Google Cast:
+      Invalid Authentication: "Der Empfänger hat eine ungültige Authentifizierungsantwort gesendet."
+      Authentication Declined: "Der Empfänger hat die Authentifizierung abgelehnt."
+      Audio Only Receiver: "Der Empfänger unterstützt nur die Übertragung von Audio."
       Disconnected: "Die Verbindung zum Empfänger wurde getrennt."
       Timeout: "Der Empfänger hat nicht geantwortet."
       Busy: "Ein anderes Fenster überträgt bereits."

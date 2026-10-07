@@ -1432,6 +1432,9 @@ Video:
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
     Google Cast:
+      Invalid Authentication: "Vastuvõtja saatis vigase autentimisvastuse."
+      Authentication Declined: "Vastuvõtja keeldus autentimisest."
+      Audio Only Receiver: "Vastuvõtja toetab ainult heli edastamist."
       Disconnected: "Vastuvõtja ühendus katkes."
       Timeout: "Vastuvõtja ei vastanud."
       Busy: "Teine aken juba edastab."

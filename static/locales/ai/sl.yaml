@@ -1884,6 +1884,9 @@ Video:
       SubmitCategoryVote: Pošlji glas za kategorijo
       CategoryVoteSuccess: Glas za kategorijo je poslan.
     Google Cast:
+      Invalid Authentication: "Sprejemnik je poslal neveljaven odgovor za preverjanje pristnosti."
+      Authentication Declined: "Sprejemnik je zavrnil preverjanje pristnosti."
+      Audio Only Receiver: "Sprejemnik podpira le predvajanje zvoka."
       Disconnected: "Sprejemnik se je odklopil."
       Timeout: "Sprejemnik se ni odzval."
       Busy: "Drugo okno že predvaja."

@@ -1432,6 +1432,9 @@ Video:
       SubmitCategoryVote: 提交類別投票
       CategoryVoteSuccess: 類別投票已提交。
     Google Cast:
+      Invalid Authentication: "接收器傳送了無效的驗證回應。"
+      Authentication Declined: "接收器拒絕了驗證。"
+      Audio Only Receiver: "接收器僅支援音訊投放。"
       Disconnected: "接收器已中斷連線。"
       Timeout: "接收器未回應。"
       Busy: "另一個視窗已在投放。"

@@ -1462,6 +1462,9 @@ Video:
       SubmitCategoryVote: Trimite votul pentru categorie
       CategoryVoteSuccess: Votul pentru categorie a fost trimis.
     Google Cast:
+      Invalid Authentication: "Receptorul a trimis un răspuns de autentificare nevalid."
+      Authentication Declined: "Receptorul a refuzat autentificarea."
+      Audio Only Receiver: "Receptorul acceptă doar transmiterea audio."
       Disconnected: "Receptorul s-a deconectat."
       Timeout: "Receptorul nu a răspuns."
       Busy: "O altă fereastră transmite deja."

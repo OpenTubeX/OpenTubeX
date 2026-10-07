@@ -1452,6 +1452,9 @@ Video:
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
+      Invalid Authentication: "Anfonodd y derbynnydd ymateb dilysu annilys."
+      Authentication Declined: "Gwrthododd y derbynnydd ddilysu."
+      Audio Only Receiver: "Dim ond castio sain y mae’r derbynnydd yn ei gefnogi."
       Disconnected: "Datgysylltodd y derbynnydd."
       Timeout: "Ni ymatebodd y derbynnydd."
       Busy: "Mae ffenestr arall eisoes yn castio."

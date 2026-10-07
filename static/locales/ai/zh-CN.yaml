@@ -1430,6 +1430,9 @@ Video:
       SubmitCategoryVote: 提交类别投票
       CategoryVoteSuccess: 类别投票已提交。
     Google Cast:
+      Invalid Authentication: "接收器发送了无效的身份验证响应。"
+      Authentication Declined: "接收器拒绝了身份验证。"
+      Audio Only Receiver: "接收器仅支持音频投屏。"
       Disconnected: "接收器已断开连接。"
       Timeout: "接收器未响应。"
       Busy: "另一个窗口已在投屏。"

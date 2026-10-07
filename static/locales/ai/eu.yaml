@@ -1445,6 +1445,9 @@ Video:
       SubmitCategoryVote: Bidali kategoriaren botoa
       CategoryVoteSuccess: Kategoriaren botoa bidali da.
     Google Cast:
+      Invalid Authentication: "Hartzaileak autentifikazio-erantzun baliogabea bidali du."
+      Authentication Declined: "Hartzaileak autentifikazioa ukatu du."
+      Audio Only Receiver: "Hartzaileak audio-igorpena soilik onartzen du."
       Disconnected: "Hartzailea deskonektatu da."
       Timeout: "Hartzaileak ez du erantzun."
       Busy: "Beste leiho bat dago jada igortzen."

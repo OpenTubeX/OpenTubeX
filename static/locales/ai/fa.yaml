@@ -1500,6 +1500,9 @@ Video:
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
     Google Cast:
+      Invalid Authentication: "گیرنده پاسخ احراز هویت نامعتبری فرستاد."
+      Authentication Declined: "گیرنده احراز هویت را رد کرد."
+      Audio Only Receiver: "گیرنده فقط از پخش صدا پشتیبانی می‌کند."
       Disconnected: "اتصال گیرنده قطع شد."
       Timeout: "گیرنده پاسخ نداد."
       Busy: "پنجرهٔ دیگری در حال پخش است."

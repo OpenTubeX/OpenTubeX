@@ -301,6 +301,10 @@ func TestDeviceAuthenticationVerification(t *testing.T) {
 			if errors.Is(err, errUntrustedCastCertificate) != untrusted {
 				t.Fatalf("unexpected certificate error classification for %s: %v", scenario, err)
 			}
+			invalid := scenario == "wrong nonce" || scenario == "changed TLS certificate" || scenario == "bad signature" || scenario == "wrong hash" || scenario == "wrong signature algorithm"
+			if errors.Is(err, errInvalidCastAuthentication) != invalid {
+				t.Fatalf("unexpected authentication error classification for %s: %v", scenario, err)
+			}
 		})
 	}
 }
@@ -321,8 +325,43 @@ func TestRejectsAudioOnlyDeviceCertificate(t *testing.T) {
 		Policies: []x509.OID{audioOnlyPolicy}}
 	device := issueCertificate(t, deviceTemplate, intermediate, &key.PublicKey, key)
 	nonce, peer := []byte("nonce"), []byte("peer")
-	if err := verifyReceiver(signedResponse(t, device, intermediate, key, nonce, peer), nonce, peer, roots, time.Now()); err == nil {
-		t.Fatal("accepted an audio-only certificate for video casting")
+	if err := verifyReceiver(signedResponse(t, device, intermediate, key, nonce, peer), nonce, peer, roots, time.Now()); !errors.Is(err, errCastAudioOnly) {
+		t.Fatalf("expected a typed audio-only rejection, got: %v", err)
+	}
+}
+
+func TestAuthenticationRejectsInvalidOrDeclinedReplies(t *testing.T) {
+	device, _, _, _, roots := authFixture(t)
+	for _, scenario := range []struct {
+		name      string
+		namespace string
+		want      error
+	}{
+		{"invalid reply", "unexpected", errInvalidCastAuthentication},
+		{"declined", deviceAuthNamespace, errCastAuthenticationDeclined},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			left, right := net.Pipe()
+			defer left.Close()
+			defer right.Close()
+			client, receiver := &transport{connection: left}, &transport{connection: right}
+			result := make(chan error, 1)
+			go func() { result <- authenticateReceiver(client, device, roots) }()
+			if _, err := receiver.receive(); err != nil {
+				t.Fatal(err)
+			}
+			if err := receiver.writeMessage(&pb.CastMessage{ProtocolVersion: pb.CastMessage_CASTV2_1_0.Enum(), SourceId: proto.String("receiver-0"),
+				DestinationId: proto.String("sender-0"), Namespace: proto.String(scenario.namespace), PayloadType: pb.CastMessage_BINARY.Enum(), PayloadBinary: []byte{}}); err != nil {
+				t.Fatal(err)
+			}
+			if err := <-result; !errors.Is(err, scenario.want) {
+				t.Fatalf("expected %v, got %v", scenario.want, err)
+			}
+		})
+	}
+	expired := &x509.Certificate{NotBefore: time.Now().Add(-2 * time.Hour), NotAfter: time.Now().Add(-time.Hour)}
+	if err := authenticateReceiver(nil, expired, roots); !errors.Is(err, errInvalidCastAuthentication) {
+		t.Fatalf("expected a typed invalid TLS certificate failure, got %v", err)
 	}
 }
 

@@ -1488,6 +1488,9 @@ Video:
       SubmitCategoryVote: Пошаљи глас за категорију
       CategoryVoteSuccess: Глас за категорију је послат.
     Google Cast:
+      Invalid Authentication: "Пријемник је послао неважећи одговор за потврду идентитета."
+      Authentication Declined: "Пријемник је одбио потврду идентитета."
+      Audio Only Receiver: "Пријемник подржава само емитовање звука."
       Disconnected: "Пријемник се искључио."
       Timeout: "Пријемник није одговорио."
       Busy: "Други прозор већ емитује."

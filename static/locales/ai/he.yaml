@@ -1469,6 +1469,9 @@ Video:
       SubmitCategoryVote: שליחת הצבעה על קטגוריה
       CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
+      Invalid Authentication: "המקלט שלח תגובת אימות לא תקינה."
+      Authentication Declined: "המקלט סירב לאימות."
+      Audio Only Receiver: "המקלט תומך בשידור שמע בלבד."
       Disconnected: "המקלט התנתק."
       Timeout: "המקלט לא הגיב."
       Busy: "חלון אחר כבר משדר."

@@ -131,6 +131,9 @@ function reportError(error) {
     : ''
   reason = {
     CAST_UNTRUSTED_CERTIFICATE: t('Video.Player.Google Cast.Untrusted Receiver'),
+    CAST_INVALID_AUTHENTICATION: t('Video.Player.Google Cast.Invalid Authentication'),
+    CAST_AUTHENTICATION_DECLINED: t('Video.Player.Google Cast.Authentication Declined'),
+    CAST_AUDIO_ONLY: t('Video.Player.Google Cast.Audio Only Receiver'),
     CAST_DISCONNECTED: t('Video.Player.Google Cast.Disconnected'),
     CAST_TIMEOUT: t('Video.Player.Google Cast.Timeout'),
     CAST_BUSY: t('Video.Player.Google Cast.Busy'),

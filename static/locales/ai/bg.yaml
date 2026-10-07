@@ -1443,6 +1443,9 @@ Video:
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
+      Invalid Authentication: "Приемникът изпрати невалиден отговор за удостоверяване."
+      Authentication Declined: "Приемникът отказа удостоверяване."
+      Audio Only Receiver: "Приемникът поддържа само предаване на звук."
       Disconnected: "Приемникът прекъсна връзката."
       Timeout: "Приемникът не отговори."
       Busy: "Друг прозорец вече предава."

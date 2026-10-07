@@ -1443,6 +1443,9 @@ Video:
       SubmitCategoryVote: Send kategoristemme
       CategoryVoteSuccess: Kategoristemme sendt.
     Google Cast:
+      Invalid Authentication: "Mottakeren sendte et ugyldig autentiseringssvar."
+      Authentication Declined: "Mottakeren avviste autentisering."
+      Audio Only Receiver: "Mottakeren støtter bare casting av lyd."
       Disconnected: "Mottakeren ble frakoblet."
       Timeout: "Mottakeren svarte ikke."
       Busy: "Et annet vindu caster allerede."

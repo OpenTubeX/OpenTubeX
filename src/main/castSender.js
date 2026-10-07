@@ -37,7 +37,7 @@ export class CastSender extends EventEmitter {
         const message = JSON.parse(line)
         if (message.event === 'error' && typeof message.error === 'string' && message.error.length > 0) {
           const error = new Error(message.error.slice(0, 512))
-          if (message.code === 'CAST_UNTRUSTED_CERTIFICATE') error.code = message.code
+          if (['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION', 'CAST_AUTHENTICATION_DECLINED', 'CAST_AUDIO_ONLY'].includes(message.code)) error.code = message.code
           this.close(error)
           return
         }

@@ -1471,6 +1471,9 @@ Video:
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
+      Invalid Authentication: "பெறுநர் செல்லாத அங்கீகாரப் பதிலை அனுப்பியது."
+      Authentication Declined: "பெறுநர் அங்கீகாரத்தை நிராகரித்தது."
+      Audio Only Receiver: "பெறுநர் ஒலி ஒளிபரப்பை மட்டுமே ஆதரிக்கிறது."
       Disconnected: "பெறுநரின் இணைப்பு துண்டிக்கப்பட்டது."
       Timeout: "பெறுநர் பதிலளிக்கவில்லை."
       Busy: "மற்றொரு சாளரம் ஏற்கனவே ஒளிபரப்புகிறது."

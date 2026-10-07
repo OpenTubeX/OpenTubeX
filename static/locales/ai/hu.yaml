@@ -1430,6 +1430,9 @@ Video:
       SubmitCategoryVote: Kategóriaszavazat elküldése
       CategoryVoteSuccess: Kategóriaszavazat elküldve.
     Google Cast:
+      Invalid Authentication: "A fogadó érvénytelen hitelesítési választ küldött."
+      Authentication Declined: "A fogadó elutasította a hitelesítést."
+      Audio Only Receiver: "A fogadó csak hangközvetítést támogat."
       Disconnected: "A fogadó kapcsolata megszakadt."
       Timeout: "A fogadó nem válaszolt."
       Busy: "Egy másik ablak már közvetít."

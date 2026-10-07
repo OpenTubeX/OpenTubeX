@@ -1437,6 +1437,9 @@ Video:
       SubmitCategoryVote: Отправить голос за категорию
       CategoryVoteSuccess: Голос за категорию отправлен.
     Google Cast:
+      Invalid Authentication: "Приёмник отправил недопустимый ответ аутентификации."
+      Authentication Declined: "Приёмник отказался от аутентификации."
+      Audio Only Receiver: "Приёмник поддерживает только трансляцию аудио."
       Disconnected: "Соединение с приёмником потеряно."
       Timeout: "Приёмник не ответил."
       Busy: "Другое окно уже транслирует."

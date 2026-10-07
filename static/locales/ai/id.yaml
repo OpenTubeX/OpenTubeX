@@ -1438,6 +1438,9 @@ Video:
       SubmitCategoryVote: Kirim suara kategori
       CategoryVoteSuccess: Suara kategori terkirim.
     Google Cast:
+      Invalid Authentication: "Penerima mengirim respons autentikasi yang tidak valid."
+      Authentication Declined: "Penerima menolak autentikasi."
+      Audio Only Receiver: "Penerima hanya mendukung casting audio."
       Disconnected: "Penerima terputus."
       Timeout: "Penerima tidak merespons."
       Busy: "Jendela lain sedang melakukan casting."

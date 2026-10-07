@@ -1506,6 +1506,9 @@ Video:
       SubmitCategoryVote: Адправіць голас за катэгорыю
       CategoryVoteSuccess: Голас за катэгорыю адпраўлены.
     Google Cast:
+      Invalid Authentication: "Прыёмнік даслаў няправільны адказ аўтэнтыфікацыі."
+      Authentication Declined: "Прыёмнік адхіліў аўтэнтыфікацыю."
+      Audio Only Receiver: "Прыёмнік падтрымлівае толькі трансляцыю аўдыя."
       Disconnected: "Злучэнне з прыёмнікам страчана."
       Timeout: "Прыёмнік не адказаў."
       Busy: "Іншае акно ўжо транслюе."

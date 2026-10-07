@@ -1447,6 +1447,9 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Invalid Authentication: "Prijamnik je poslao nevažeći odgovor za provjeru autentičnosti."
+      Authentication Declined: "Prijamnik je odbio provjeru autentičnosti."
+      Audio Only Receiver: "Prijamnik podržava samo emitiranje zvuka."
       Disconnected: "Prijamnik se odspojio."
       Timeout: "Prijamnik nije odgovorio."
       Busy: "Drugi prozor već emitira."

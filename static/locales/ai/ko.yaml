@@ -1773,6 +1773,9 @@ Video:
       SubmitCategoryVote: 카테고리 투표 제출
       CategoryVoteSuccess: 카테고리 투표가 제출되었습니다.
     Google Cast:
+      Invalid Authentication: "수신기가 잘못된 인증 응답을 보냈습니다."
+      Authentication Declined: "수신기가 인증을 거부했습니다."
+      Audio Only Receiver: "수신기는 오디오 전송만 지원합니다."
       Disconnected: "수신기 연결이 끊어졌습니다."
       Timeout: "수신기가 응답하지 않았습니다."
       Busy: "다른 창에서 이미 전송 중입니다."

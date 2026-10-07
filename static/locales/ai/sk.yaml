@@ -1433,6 +1433,9 @@ Video:
       SubmitCategoryVote: Odoslať hlas za kategóriu
       CategoryVoteSuccess: Hlas za kategóriu bol odoslaný.
     Google Cast:
+      Invalid Authentication: "Prijímač odoslal neplatnú overovaciu odpoveď."
+      Authentication Declined: "Prijímač odmietol overenie."
+      Audio Only Receiver: "Prijímač podporuje iba vysielanie zvuku."
       Disconnected: "Prijímač sa odpojil."
       Timeout: "Prijímač neodpovedal."
       Busy: "Iné okno už vysiela."

@@ -1448,6 +1448,9 @@ Video:
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
+      Invalid Authentication: "Móttakarinn sendi ógilt auðkenningarsvar."
+      Authentication Declined: "Móttakarinn hafnaði auðkenningu."
+      Audio Only Receiver: "Móttakarinn styður aðeins sendingu hljóðs."
       Disconnected: "Móttakarinn aftengdist."
       Timeout: "Móttakarinn svaraði ekki."
       Busy: "Annar gluggi er þegar að senda."

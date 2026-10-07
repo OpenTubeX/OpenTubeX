@@ -777,6 +777,9 @@ Video:
       SubmitCategoryVote: Wyślij głos na kategorię
       CategoryVoteSuccess: Głos na kategorię został wysłany.
     Google Cast:
+      Invalid Authentication: "Odbiornik wysłał nieprawidłową odpowiedź uwierzytelniania."
+      Authentication Declined: "Odbiornik odmówił uwierzytelnienia."
+      Audio Only Receiver: "Odbiornik obsługuje tylko przesyłanie dźwięku."
       Disconnected: "Odbiornik się rozłączył."
       Timeout: "Odbiornik nie odpowiedział."
       Busy: "Inne okno już przesyła."

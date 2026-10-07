@@ -1430,6 +1430,9 @@ Video:
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
     Google Cast:
+      Invalid Authentication: "Alıcı geçersiz bir kimlik doğrulama yanıtı gönderdi."
+      Authentication Declined: "Alıcı kimlik doğrulamayı reddetti."
+      Audio Only Receiver: "Alıcı yalnızca ses yayınını destekliyor."
       Disconnected: "Alıcının bağlantısı kesildi."
       Timeout: "Alıcı yanıt vermedi."
       Busy: "Başka bir pencere zaten yayın yapıyor."

@@ -219,6 +219,21 @@ func connect(address string, port int) error {
 	return scanner.Err()
 }
 
+func castErrorMessage(err error) map[string]string {
+	message := map[string]string{"event": "error", "error": err.Error()}
+	switch {
+	case errors.Is(err, errUntrustedCastCertificate):
+		message["code"] = "CAST_UNTRUSTED_CERTIFICATE"
+	case errors.Is(err, errInvalidCastAuthentication):
+		message["code"] = "CAST_INVALID_AUTHENTICATION"
+	case errors.Is(err, errCastAuthenticationDeclined):
+		message["code"] = "CAST_AUTHENTICATION_DECLINED"
+	case errors.Is(err, errCastAudioOnly):
+		message["code"] = "CAST_AUDIO_ONLY"
+	}
+	return message
+}
+
 func main() {
 	var err error
 	if len(os.Args) == 2 && os.Args[1] == "discover" {
@@ -234,11 +249,7 @@ func main() {
 		err = fmt.Errorf("expected discover or address and port")
 	}
 	if err != nil {
-		message := map[string]string{"event": "error", "error": err.Error()}
-		if errors.Is(err, errUntrustedCastCertificate) {
-			message["code"] = "CAST_UNTRUSTED_CERTIFICATE"
-		}
-		_ = json.NewEncoder(os.Stdout).Encode(message)
+		_ = json.NewEncoder(os.Stdout).Encode(castErrorMessage(err))
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

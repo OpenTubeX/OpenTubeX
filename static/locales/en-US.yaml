@@ -2412,6 +2412,9 @@ Video:
       SubmitCategoryVote: Submit category vote
       CategoryVoteSuccess: Category vote submitted.
     Google Cast:
+      Invalid Authentication: "The receiver sent an invalid authentication response."
+      Authentication Declined: "The receiver declined authentication."
+      Audio Only Receiver: "The receiver only supports audio casting."
       Disconnected: "Receiver disconnected."
       Timeout: "Receiver did not respond."
       Busy: "Another window is already casting."
