@@ -680,6 +680,7 @@ export default defineComponent({
     const mediaTabId = tabId ?? 'web'
     const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
     const musicMode = computed(() => store.getters.getTabMusicMode(mediaTabId))
+    const showMusicModeToggle = computed(() => store.getters.getShowMusicModeToggle)
     const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
     const lightsOffVisible = computed(() => showLightsOffToggle.value && lightsOff.value &&
       (isTabPresented?.value ?? true))
@@ -5015,6 +5016,10 @@ export default defineComponent({
 
       if (!showLightsOffToggle.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_lights_off')
+      }
+
+      if (!showMusicModeToggle.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_music_mode')
       }
 
       if (!showSkipSilenceButton.value || isLive.value) {

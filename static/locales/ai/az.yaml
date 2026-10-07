@@ -547,6 +547,7 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Show Music Mode Toggle: "Musiqi rejimi keçidini göstər"
     Enable DLNA Casting: "DLNA yayımını aktivləşdir"
     Skip Unavailable Playlist Videos: "Pleylistdə əlçatan olmayan videoları keç"
     Lights Off: İşıqları söndür

@@ -522,6 +522,7 @@ Settings:
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
   Player Settings:
+    Show Music Mode Toggle: "Показывать переключатель музыкального режима"
     Enable DLNA Casting: "Включить трансляцию DLNA"
     Skip Unavailable Playlist Videos: "Пропускать недоступные видео в плейлистах"
     Lights Off: Выключить свет

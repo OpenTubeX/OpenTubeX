@@ -277,6 +277,7 @@ const state = {
   displayVideoPlayButton: false,
   ambientMode: false,
   musicVisualizer: true,
+  showMusicModeToggle: false,
   enableVideoMetadataCache: false,
   enableWatchStats: true,
   statsWeekStartsOn: '1',

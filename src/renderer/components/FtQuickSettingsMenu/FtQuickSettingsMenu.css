@@ -26,7 +26,7 @@
 }
 
 .musicModeIndicator {
-  background-color: var(--card-bg-color);
+  background-color: color-mix(in srgb, var(--card-bg-color) 40%, transparent);
   border-radius: 50%;
   color: var(--primary-text-color);
   inline-size: 16px;

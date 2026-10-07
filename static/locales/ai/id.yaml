@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Show Music Mode Toggle: "Tampilkan tombol mode musik"
     Enable DLNA Casting: "Aktifkan transmisi DLNA"
     Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"
     Lights Off: Matikan lampu

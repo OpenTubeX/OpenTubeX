@@ -532,6 +532,7 @@ Settings:
         Destructive pressed: Destructive pressed
         Text and icons on destructive actions: Text and icons on destructive actions
   Player Settings:
+    Show Music Mode Toggle: "Show Music Mode Toggle"
     Enable DLNA Casting: "Enable DLNA casting"
     Skip Unavailable Playlist Videos: "Skip Unavailable Playlist Videos"
     Lights Off: Lights Off

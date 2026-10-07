@@ -549,6 +549,7 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Show Music Mode Toggle: "Schakelaar voor muziekmodus tonen"
     Enable DLNA Casting: "DLNA-casting inschakelen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
     Lights Off: Lichten uit

@@ -36,6 +36,14 @@
         @change="store.dispatch('updateShowLightsOffToggle', $event)"
       />
       <FtToggleSwitch
+        :label="t('Settings.Player Settings.Show Music Mode Toggle')"
+        :compact="true"
+        :default-value="store.getters.getShowMusicModeToggle"
+        setting-key="showMusicModeToggle"
+        :tooltip="t('Video.Player.Music Mode Description')"
+        @change="store.dispatch('updateShowMusicModeToggle', $event)"
+      />
+      <FtToggleSwitch
         v-if="!IS_IOS"
         :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
         :compact="true"

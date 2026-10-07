@@ -549,6 +549,7 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Show Music Mode Toggle: "إظهار مفتاح وضع الموسيقى"
     Enable DLNA Casting: "تفعيل البث عبر DLNA"
     Skip Unavailable Playlist Videos: "تخطي الفيديوهات غير المتاحة في قوائم التشغيل"
     Lights Off: إطفاء الأنوار

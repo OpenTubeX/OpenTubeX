@@ -522,6 +522,7 @@ const profileList = computed(() => store.getters.getProfileList)
 const activeProfile = computed(() => store.getters.getActiveProfile)
 const musicModeTabId = computed(() => store.getters.getActiveTabId ?? 'web')
 const musicMode = computed(() => store.getters.getTabMusicMode(musicModeTabId.value))
+const showMusicModeToggle = computed(() => store.getters.getShowMusicModeToggle)
 const triggerLabel = computed(() => musicMode.value
   ? `${t('Settings.Quick Settings.Quick Settings')} — ${t('Video.Player.Music Mode')}`
   : t('Settings.Quick Settings.Quick Settings'))
@@ -613,6 +614,7 @@ const orderedQuickSettingSections = computed(() => {
     .map(settingId => catalogById.get(settingId))
     .filter(setting => setting != null && (
       (setting.id !== 'mainColor' || mainColorAvailable.value) &&
+      (setting.id !== 'musicMode' || showMusicModeToggle.value) &&
       (!['systemLightTheme', 'systemDarkTheme'].includes(setting.id) || baseTheme.value === 'system') &&
       (setting.id !== 'region' || regionValues.value.length > 0)
     ))

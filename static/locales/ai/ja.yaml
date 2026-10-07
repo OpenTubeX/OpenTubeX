@@ -545,6 +545,7 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    Show Music Mode Toggle: "音楽モードの切り替えを表示"
     Enable DLNA Casting: "DLNAキャストを有効にする"
     Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"
     Lights Off: 照明を消す

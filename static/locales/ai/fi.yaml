@@ -549,6 +549,7 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Show Music Mode Toggle: "Näytä musiikkitilan kytkin"
     Enable DLNA Casting: "Ota DLNA-suoratoisto käyttöön"
     Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
     Lights Off: Valot pois

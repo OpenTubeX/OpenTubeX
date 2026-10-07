@@ -547,6 +547,7 @@ Settings:
         Destructive pressed: Опасно действие при натискане
         Text and icons on destructive actions: Текст и икони върху опасните действия
   Player Settings:
+    Show Music Mode Toggle: "Показване на превключвателя за музикален режим"
     Enable DLNA Casting: "Активиране на предаване чрез DLNA"
     Skip Unavailable Playlist Videos: "Пропускане на недостъпните видеоклипове в плейлистите"
     Lights Off: Изгасване на светлините
