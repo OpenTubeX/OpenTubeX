@@ -7,7 +7,8 @@ import { checkMiniPlayerSeeking } from '../../e2e/helpers/mini-player-seeking.mj
 import { goTo } from '../../e2e/helpers/app.mjs'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint } from '../../e2e/helpers/player.mjs'
-import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
+import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
+import { watchHistoryEntry } from '../../e2e/helpers/watch.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -26,6 +27,10 @@ test('mobile mini-player dismissal animates swipes and the close button without 
 test('mobile mini-player animates an opaque backdrop in both directions without background work', {
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { animationOnly: true }))
+
+test('mobile mini-player reveals scrolled history without a jump during minimization', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { historyScrollOnly: true }))
 
 test('mobile audio artwork stays visible during mini-player swipes and native picture-in-picture', {
   skip: !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL,
@@ -82,12 +87,13 @@ test('mobile music artwork placeholder fills the thumbnail and restores its inli
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
 
-async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false, compactOnly = false, seekingOnly = false } = {}) {
+async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, historyScrollOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false, compactOnly = false, seekingOnly = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
   const session = await context.newCDPSession(page)
   let settings
+  let savedHistory
   let watch
   const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
   const rotation = landscape ? adb('settings', 'get', 'system', 'user_rotation') : null
@@ -172,6 +178,64 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    if (historyScrollOnly) {
+      savedHistory = await page.evaluate(entry => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const saved = JSON.parse(JSON.stringify(store.getters.getHistoryCacheSorted))
+        const history = Array.from({ length: 40 }, (_, index) => ({
+          ...entry, _id: index ? `history-${index}` : entry.videoId,
+          videoId: index ? `history-${index}` : entry.videoId,
+          title: `History video ${index}`, timeWatched: Date.now() - index * 1000,
+        }))
+        store.commit('setHistoryCacheSorted', history)
+        store.commit('setHistoryCacheById', Object.fromEntries(history.map(item => [item.videoId, item])))
+        location.hash = '#/history'
+        return saved
+      }, watchHistoryEntry)
+      for (const scale of [100, 125]) {
+        await page.evaluate(async scale => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setUiScale', scale)
+          await store.dispatch('updateReducedMotion', scale === 100 ? 'off' : 'on')
+        }, scale)
+        await expect(page).toHaveURL(/#\/history/)
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        const history = page.locator('.tabContent > .routerView').first()
+        await expect(history.locator('.ft-list-video').first()).toBeVisible()
+        await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
+        const saved = await history.evaluate(element => ({ top: element.getBoundingClientRect().top, scroll: window.scrollY }))
+        assert.ok(saved.scroll > 500)
+        await player.locator('.mobileMiniBarReturn').click()
+        await expect(page).toHaveURL(/#\/watch\//)
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        const box = await player.boundingBox()
+        const start = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+        for (const cancelled of [true, false]) {
+          await touch('touchStart', start)
+          for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...start, y: start.y + distance })
+          await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+          assert.ok(Math.abs(await history.evaluate(element => element.getBoundingClientRect().top) - saved.top) <= 2,
+            'held gesture must reveal history at its saved scroll position')
+          if (process.env.ANDROID_ARTIFACT_DIR && !cancelled) {
+            await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/history-minimize-${scale}.png` })
+          }
+          const frames = cancelled ? null : sampleBrowsingPreviewTops(history)
+          await touch(cancelled ? 'touchCancel' : 'touchEnd')
+          await expect(player).not.toHaveAttribute('data-inline-mini-drag')
+          if (cancelled) {
+            await expect(page).toHaveURL(/#\/watch\//)
+          } else {
+            await expect(page).toHaveURL(/#\/history/)
+            assert.ok(Math.abs(await page.evaluate(() => window.scrollY) - saved.scroll) <= 2)
+            assert.ok((await frames).every(top => Math.abs(top - saved.top) <= 2), 'history must not jump during settling or navigation')
+          }
+          assert.equal(await history.evaluate(element => element.style.translate), '')
+        }
+      }
+      await originalVideo.dispose()
+      return
+    }
     if (geometryOnly) {
       const media = audioOnly ? player.locator(artworkUnavailable
         ? 'img.musicAudioArtwork.retryImagePlaceholder' : 'img.musicAudioArtwork:not(.retryImagePlaceholder)') : video
@@ -843,12 +907,16 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       }
     }
     await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
-    await page.evaluate(({ settings, originalRoute, compactOnly, seekingOnly }) => {
+    await page.evaluate(({ settings, originalRoute, compactOnly, seekingOnly, savedHistory }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       document.querySelector('.ftVideoPlayer video')?.pause()
       store.commit('setKeepPlayingOnNavigation', false)
       location.hash = originalRoute
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
+      if (savedHistory) {
+        store.commit('setHistoryCacheSorted', savedHistory)
+        store.commit('setHistoryCacheById', Object.fromEntries(savedHistory.map(item => [item.videoId, item])))
+      }
       if ((compactOnly || seekingOnly) && settings) {
         store.dispatch('hideSettingsWindow')
         store.dispatch('updateCompactMobileMiniPlayer', settings.CompactMobileMiniPlayer)
@@ -864,7 +932,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       delete window.__miniDismissFrames
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()
-    }, { settings, originalRoute, compactOnly, seekingOnly })
+    }, { settings, originalRoute, compactOnly, seekingOnly, savedHistory })
     await watch?.dispose()
     await session.detach()
     if (dismissalOnly) await page.emulateMedia({ reducedMotion: null })

@@ -17,6 +17,19 @@ export async function mobileMiniPlayerBackdrop(page) {
   })
 }
 
+/** Sample the browsing page throughout the minimize animation and scroll handoff. */
+export function sampleBrowsingPreviewTops(browsingPage) {
+  return browsingPage.evaluate(async element => {
+    const tops = []
+    const started = performance.now()
+    while (performance.now() - started < 700) {
+      await new Promise(requestAnimationFrame)
+      tops.push(element.getBoundingClientRect().top)
+    }
+    return tops
+  })
+}
+
 /** Count background video readbacks and hidden control-layout work during a swipe. */
 export async function trackMiniPlayerWork(page) {
   await page.evaluate(() => {

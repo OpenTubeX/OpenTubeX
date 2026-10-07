@@ -16,6 +16,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   const props = reactive({ tabId: 'tab', route, presented: true })
   const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }] : [] }) })
   const provides = new Map()
+  const emit = t.mock.fn()
   const unmount = []
   const titles = []
   const scope = effectScope()
@@ -56,6 +57,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     defineProps: () => props,
+    defineEmits: () => emit,
     // The native scroll mini player lives outside the watch view's DOM tree.
     // Its component reference must remain usable without a DOM video descendant.
     useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
@@ -79,12 +81,28 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     scope.stop()
   })
   return {
-    mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
+    emit, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
 }
+
+test('minimize preview compensates for document scroll until browsing restoration finishes', async t => {
+  const mounted = mountWatch(t)
+  mounted.getters.getTabById = () => ({ historyIndex: 1, history: [{ route: { path: '/history' }, scroll: { left: 4.5, top: 600.25 } }] })
+  const navigation = mounted.provides.get('navigation')
+  navigation.beginMinimizePreview()
+  assert.equal(mounted.emit.mock.calls.at(-1).arguments[0], 'browsing-preview')
+  assert.equal(mounted.emit.mock.calls.at(-1).arguments[1].translate, '-4.5px -580.25px')
+  await navigation.finishMinimizePreview(true)
+  mounted.viewport.scrollX = 4.5
+  mounted.viewport.scrollY = 600.25
+  mounted.listeners.get('scroll')()
+  assert.equal(mounted.emit.mock.calls.at(-1).arguments[1].translate, '0px 0px')
+  navigation.clearMinimizePreview()
+  assert.deepEqual([...mounted.emit.mock.calls.at(-1).arguments], ['browsing-preview', null])
+})
 
 test('retained navigation waits for fullscreen exit before deactivating Watch', async t => {
   const exit = Promise.withResolvers()

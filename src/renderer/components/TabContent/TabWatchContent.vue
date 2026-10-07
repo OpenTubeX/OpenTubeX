@@ -38,6 +38,7 @@ const props = defineProps({
   route: { type: Object, required: true },
   presented: Boolean
 })
+const emit = defineEmits(['browsing-preview'])
 
 const navigation = getTabNavigationService()
 const watchRoot = useTemplateRef('watchRoot')
@@ -48,6 +49,7 @@ let previewScroll = null
 let previewOrigin = null
 let previewViewport = null
 let previewRestoring = false
+let previewBrowsingScroll = null
 const watchView = useTemplateRef('watchView')
 // Freeze the watch route while browsing, so its route watchers do not reload
 // or tear down the video when the tab moves to another page.
@@ -149,6 +151,11 @@ function beginMinimizePreview() {
   if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
+  const tab = store.getters.getTabById(props.tabId)
+  previewBrowsingScroll = getPreviousBrowsingRoute(tab)
+    ? tab.history[tab.historyIndex - 1].scroll
+    : null
+  updateBrowsingPreviewPosition()
   const bounds = watchRoot.value.getBoundingClientRect()
   // Use an explicit positioned host: Chromium versions disagree on whether
   // inline-size query containers establish a fixed-position containing block.
@@ -208,7 +215,17 @@ function beginRestorePreview() {
   return true
 }
 
+function updateBrowsingPreviewPosition() {
+  if (previewRestoring) return
+  // The browsing page shares Watch's document scroll until navigation finishes.
+  // Compensate for it throughout the drag and the scroll-restoration handoff.
+  emit('browsing-preview', {
+    translate: `${window.scrollX - (previewBrowsingScroll?.left ?? 0)}px ${window.scrollY - (previewBrowsingScroll?.top ?? 0)}px`
+  })
+}
+
 function updatePreviewPosition() {
+  updateBrowsingPreviewPosition()
   const root = watchRoot.value
   if (!root || !previewOrigin) return
   if (previewRestoring && previewViewport) {
@@ -267,6 +284,8 @@ async function finishMinimizePreview(commit) {
 }
 
 function clearMinimizePreview() {
+  emit('browsing-preview', null)
+  previewBrowsingScroll = null
   if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   previewActive.value = false
   previewStyle.value = null
@@ -330,8 +349,7 @@ watch(enabled, value => {
 }, { flush: 'sync' })
 
 onBeforeUnmount(() => {
-  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
-  window.removeEventListener('scroll', updatePreviewPosition)
+  clearMinimizePreview()
   unregister()
   dispose()
 })

@@ -6,7 +6,7 @@ import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../..
 import { checkCompactMiniPlayer } from '../../helpers/compact-mini-player.mjs'
 import { checkMiniPlayerSeeking } from '../../helpers/mini-player-seeking.mjs'
 import { routeDemoMedia } from '../../helpers/media.mjs'
-import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
+import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, sampleBrowsingPreviewTops, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
 test.use({
   seed: {
@@ -29,8 +29,8 @@ test.use({
   }
 })
 
-async function enableMobileTouch(app, page, phone = true) {
-  await setWindowSize(app, page, { width: 480, height: 850 })
+async function enableMobileTouch(app, page, phone = true, resize = true) {
+  if (resize) await setWindowSize(app, page, { width: 480, height: 850 })
   await page.evaluate(phone => {
     Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
     const app = document.querySelector('.app')
@@ -401,6 +401,70 @@ for (const uiScale of [100, 125]) {
     }
   })
 }
+
+test.describe('browsing scroll during mobile minimize', () => {
+  test.use({
+    seed: {
+      settings: { landingPage: 'history', videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false },
+      history: Array.from({ length: 40 }, (_, index) => ({
+        ...watchHistoryEntry,
+        _id: index ? `history-${index}` : watchHistoryEntry.videoId,
+        videoId: index ? `history-${index}` : watchHistoryEntry.videoId,
+        title: `History video ${index}`,
+        timeWatched: Date.now() - index * 1000
+      }))
+    }
+  })
+
+  for (const uiScale of [100, 125]) {
+    test(`minimize reveals history at its saved scroll position at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await setWindowSize(app, page, { width: 480, height: 850 })
+      await page.evaluate(scale => {
+        window.ftElectron.setZoomFactor(scale / 100)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      }, uiScale)
+      const history = page.locator('.tabContent > .routerView').first()
+      await expect(history.locator('.ft-list-video').first()).toBeVisible()
+      await page.evaluate(() => window.scrollTo({ top: 600, behavior: 'instant' }))
+      const saved = await history.evaluate(element => ({ top: element.getBoundingClientRect().top, scroll: window.scrollY }))
+      expect(saved.scroll).toBeGreaterThan(500)
+      await history.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`).first().evaluate(element => element.click())
+      const video = await waitForPlayback(page)
+      await video.evaluate(element => element.pause())
+      await enableMobileTouch(app, page, true, false)
+      const player = page.locator('.ftVideoPlayer')
+      const cdp = await page.context().newCDPSession(page)
+      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+      try {
+        const box = await player.boundingBox()
+        const start = { x: box.x + box.width / 2, y: box.y + 100 }
+        await touch('touchStart', start)
+        await touch('touchMove', { ...start, y: start.y + 80 })
+        await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+        expect.soft(await history.evaluate(element => element.getBoundingClientRect().top), 'cancelled preview uses the saved history position').toBeCloseTo(saved.top, 0)
+        await touch('touchCancel')
+        await expect(player).not.toHaveAttribute('data-inline-mini-drag')
+        await expect(page).toHaveURL(/#\/watch\//)
+        expect(await history.evaluate(element => element.style.translate)).toBe('')
+        await touch('touchStart', start)
+        for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...start, y: start.y + distance })
+        await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+        expect.soft(await history.evaluate(element => element.getBoundingClientRect().top), 'history must already be scrolled while the drag is held').toBeCloseTo(saved.top, 0)
+        await page.screenshot({ path: testInfo.outputPath('history-during-minimize.png') })
+        const frames = sampleBrowsingPreviewTops(history)
+        await touch('touchEnd')
+        await expect(page).toHaveURL(/#\/history/)
+        await expect(player).not.toHaveAttribute('data-inline-mini-drag')
+        expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(saved.scroll, 0)
+        expect(await history.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(saved.top, 0)
+        expect((await frames).every(top => Math.abs(top - saved.top) <= 2), 'history stays in place through settling and navigation').toBe(true)
+      } finally {
+        await cdp.detach()
+      }
+    })
+  }
+})
 
 test.describe('history progress during mobile restore', () => {
   test.use({
