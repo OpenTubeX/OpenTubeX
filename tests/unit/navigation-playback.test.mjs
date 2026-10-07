@@ -139,6 +139,40 @@ test('navigation interrupting a preview preserves the original Watch history scr
   assert.equal(mounted.viewport.scrollY, 600.25, 'cleanup must not scroll the replacement page')
 })
 
+test('settling minimize does not queue navigation behind an interruption awaiting fullscreen exit', async t => {
+  const exit = Promise.withResolvers()
+  t.after(() => exit.resolve())
+  const exitPresentationModes = t.mock.fn(() => exit.promise)
+  const mounted = mountWatch(t, { exitPresentationModes })
+  const navigation = mounted.provides.get('navigation')
+  await navigation.beginMinimizePreview()
+  const interrupted = mounted.navigate('/subscriptions')
+  await new Promise(resolve => setImmediate(resolve))
+  const finishing = navigation.finishMinimizePreview(true)
+  await new Promise(resolve => setImmediate(resolve))
+  exit.resolve()
+  await Promise.all([interrupted, finishing])
+  assert.equal(exitPresentationModes.mock.callCount(), 1, 'the settling swipe must not start another navigation')
+  assert.equal(mounted.props.route.fullPath, '/subscriptions')
+})
+
+for (const destination of ['/subscriptions', '/watch/next']) {
+  test(`settling minimize does not navigate again after interruption by ${destination}`, async t => {
+    const tab = { historyIndex: 1, history: [
+      { route: { path: '/history', fullPath: '/history' }, scroll: { left: 0, top: 600.25 } },
+      { route: { path: '/watch/video', fullPath: '/watch/video' }, scroll: { left: 0, top: 20 } }
+    ] }
+    const mounted = mountWatch(t, { tab })
+    const navigation = mounted.provides.get('navigation')
+    await navigation.beginMinimizePreview()
+    await mounted.navigate(destination)
+    const scrollWrites = mounted.scrollCommits.length
+    await navigation.finishMinimizePreview(true)
+    assert.equal(mounted.props.route.fullPath, destination, 'the interrupted swipe must not replace the chosen route')
+    assert.equal(mounted.scrollCommits.length, scrollWrites, 'the interrupted swipe must not overwrite another history entry')
+  })
+}
+
 for (const destination of ['/subscriptions', '/watch/next']) {
   test(`preview preserves Watch scroll when capped history shifts on ${destination}`, async t => {
     const tab = { historyIndex: 99, history: Array.from({ length: 100 }, (_, index) => ({

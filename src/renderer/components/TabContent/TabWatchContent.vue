@@ -49,6 +49,7 @@ let previewOrigin = null
 let previewViewport = null
 let previewRestoring = false
 let previewReady = null
+let previewInterrupted = false
 let previewHistoryEntry = null
 const watchView = useTemplateRef('watchView')
 // Freeze the watch route while browsing, so its route watchers do not reload
@@ -87,6 +88,7 @@ function dispose(context) {
 
 const unregister = tabLifecycleService.register(props.tabId, {
   async beforeNavigate(context) {
+    interruptMinimizePreview()
     await disposalPromise
     if (!isWatchRoute.value) return
     // Android teleports even the scrolling mini player outside this view.
@@ -131,7 +133,10 @@ provide('isTabActive', presented)
 provide(routeLocationKey, injectedRoute)
 provide('tabRoute', injectedRoute)
 const router = navigation.createRouterFacade(props.tabId)
-const unregisterPreviewScrollGuard = router.beforeEach(preservePreviewHistoryScroll)
+const unregisterPreviewScrollGuard = router.beforeEach(() => {
+  interruptMinimizePreview()
+  preservePreviewHistoryScroll()
+})
 const watchRouter = Object.create(router)
 Object.defineProperty(watchRouter, 'currentRoute', { value: computed(() => watchRoute.value) })
 provide(routerKey, watchRouter)
@@ -149,6 +154,7 @@ async function minimize() {
 function beginMinimizePreview() {
   if (previewActive.value) return
   previewRestoring = false
+  previewInterrupted = false
   if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
@@ -278,7 +284,8 @@ async function finishMinimizePreview(commit) {
     return
   }
   await previewReady
-  if (commit && !disposed) {
+  if (commit && !disposed && !previewInterrupted && previewActive.value && isWatchRoute.value &&
+    props.route.fullPath === previewHistoryEntry?.fullPath) {
     const tab = store.getters.getTabById(props.tabId)
     const historyIndex = tab.historyIndex
     if (getPreviousBrowsingRoute(tab)) {
@@ -295,6 +302,12 @@ async function finishMinimizePreview(commit) {
     }
   }
   if (isWatchRoute.value) await clearMinimizePreview()
+}
+
+function interruptMinimizePreview() {
+  // Our own dock marks minimized before navigating; all other navigation
+  // invalidates the pending commit, even while lifecycle work is awaiting.
+  if (previewActive.value && !previewRestoring && !minimized.value) previewInterrupted = true
 }
 
 function preservePreviewHistoryScroll() {
