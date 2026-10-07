@@ -4847,7 +4847,12 @@ function enableOpenUrl() {
 async function handleAndroidSharedText(text) {
   const id = ++sharedYoutubeLinkId
   const url = extractSharedYoutubeLink(text)
-  const info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
+  let info = null
+  try {
+    info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
+  } catch (error) {
+    console.error('Unable to resolve shared YouTube link', error)
+  }
   if (id !== sharedYoutubeLinkId) return
   sharedYoutubeLink.value = null
   if (!info || ['invalid_url', 'unknown'].includes(info.urlType) || (info.urlType === 'video' && !/^[\w-]{11}$/.test(info.videoId))) {

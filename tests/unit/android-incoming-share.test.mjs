@@ -61,10 +61,11 @@ function shareHandler(dispatch) {
   const state = { value: null }
   const opened = []
   const toasts = []
-  const { share, open } = compileFunction(`let sharedYoutubeLinkId = 0\n${handler}\nreturn { share: handleAndroidSharedText, open: openSharedYoutubeLink }`, ['sharedYoutubeLink', 'store', 'extractSharedYoutubeLink', 'showToast', 't', 'handleYoutubeLink'])(
-    state, { dispatch }, extractSharedYoutubeLink, toast => toasts.push(toast), key => key, url => opened.push(url)
+  const errors = []
+  const { share, open } = compileFunction(`let sharedYoutubeLinkId = 0\n${handler}\nreturn { share: handleAndroidSharedText, open: openSharedYoutubeLink }`, ['sharedYoutubeLink', 'store', 'extractSharedYoutubeLink', 'showToast', 't', 'handleYoutubeLink', 'console'])(
+    state, { dispatch }, extractSharedYoutubeLink, toast => toasts.push(toast), key => key, url => opened.push(url), { error: (...args) => errors.push(args) }
   )
-  return { state, opened, toasts, share, open }
+  return { state, opened, toasts, errors, share, open }
 }
 
 test('shares show actions before navigation and repeated shares reopen the dialog', async () => {
@@ -99,6 +100,33 @@ test('invalid shared text and malformed video IDs show feedback without navigati
   assert.equal(h.state.value, null)
   assert.equal(h.toasts.length, 2)
   assert.deepEqual(h.opened, [])
+})
+
+test('URL resolution failure clears an earlier share prompt and shows feedback', async () => {
+  const error = new Error('URL resolution failed')
+  const h = shareHandler(async (_, url) => {
+    if (url.includes('12345678901')) throw error
+    return { urlType: 'video', videoId: id }
+  })
+  await h.share(`https://youtu.be/${id}`)
+  assert.ok(h.state.value)
+  await h.share('https://youtu.be/12345678901')
+  assert.equal(h.state.value, null)
+  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
+  assert.equal(h.errors[0][1], error)
+  assert.deepEqual(h.opened, [])
+})
+
+test('an older failed URL resolution cannot clear a newer prompt or show stale feedback', async () => {
+  let rejectFirst
+  const first = new Promise((_, reject) => { rejectFirst = reject })
+  const h = shareHandler(async (_, url) => url.includes(id) ? first : { urlType: 'video', videoId: '12345678901' })
+  const pending = h.share(`https://youtu.be/${id}`)
+  await h.share('https://youtu.be/12345678901')
+  rejectFirst(new Error('Older URL resolution failed'))
+  await pending
+  assert.equal(h.state.value.videoId, '12345678901')
+  assert.deepEqual(h.toasts, [])
 })
 
 function videoActions({ backend = 'local', fallback = false, local, invidious } = {}) {

@@ -140,6 +140,28 @@ try {
   await page.waitForFunction(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.currentRoute.value.path === '/subscriptions')
   console.log('PASS cold-start share presents all four actions before playback')
 
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.shareTestOriginalDispatch = store.dispatch
+    store.dispatch = (type, payload, ...rest) => type === 'getYoutubeUrlInfo' && payload === 'https://youtu.be/12345678901'
+      ? Promise.reject(new Error('URL resolution failed'))
+      : window.shareTestOriginalDispatch(type, payload, ...rest)
+  })
+  try {
+    share('https://youtu.be/12345678901')
+    await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toBeVisible()
+    await expect(dialog()).toHaveCount(0)
+  } finally {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.dispatch = window.shareTestOriginalDispatch
+      delete window.shareTestOriginalDispatch
+    })
+  }
+  share()
+  await expect(dialog()).toBeVisible()
+  console.log('PASS URL resolution failure dismisses the previous prompt and shows feedback')
+
   for (const [backend, fallback] of [['local', false], ['invidious', false], ['local', true], ['invidious', true]]) {
     await settings({ BackendPreference: backend, BackendFallback: fallback })
     await metadataFixtures({ failLocal: fallback && backend === 'local', failInvidious: fallback && backend === 'invidious' })
