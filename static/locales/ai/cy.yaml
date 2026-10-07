@@ -193,6 +193,9 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  Delete Old Compact: "Dileu hen"
+  Repair Compact: "Trwsio"
+  Mark All Watched Compact: "Pob un wedi’i weld"
   Repair Use Cookies: "Defnyddio cwcis yt-dlp sydd wedi'u ffurfweddu"
   Repair Cookies Hint: "Mae angen gwirio dros 500 o fideos. Ffurfweddwch gwcis yng ngosodiadau yt-dlp a'u galluogi yma i leihau'r risg o gyfyngu ar geisiadau."
   Repair Description: "Defnyddiwch hyn ar ôl mewnforio hanes, neu pan fo manylion fideos ar goll neu label LIVE anghywir."

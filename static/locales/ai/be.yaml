@@ -206,6 +206,9 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
 History:
+  Delete Old Compact: "Выдаліць старыя"
+  Repair Compact: "Аднавіць"
+  Mark All Watched Compact: "Усе прагледжаны"
   Repair Use Cookies: "Выкарыстоўваць наладжаныя файлы cookie yt-dlp"
   Repair Cookies Hint: "Трэба праверыць больш за 500 відэа. Наладзьце файлы cookie у наладах yt-dlp і ўключыце іх тут, каб зменшыць рызыку абмежавання запытаў."
   Repair Description: "Выкарыстоўвайце пасля імпарту гісторыі або калі ў відэа адсутнічаюць звесткі ці памылкова паказваецца пазнака LIVE."

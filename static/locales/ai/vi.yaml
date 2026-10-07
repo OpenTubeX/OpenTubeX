@@ -195,6 +195,9 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
 History:
+  Delete Old Compact: "Xóa mục cũ"
+  Repair Compact: "Sửa chữa"
+  Mark All Watched Compact: "Đánh dấu tất cả đã xem"
   Repair Use Cookies: "Dùng cookie yt-dlp đã cấu hình"
   Repair Cookies Hint: "Cần kiểm tra hơn 500 video. Hãy cấu hình cookie trong cài đặt yt-dlp và bật tại đây để giảm nguy cơ bị giới hạn yêu cầu."
   Repair Description: "Dùng sau khi nhập lịch sử, hoặc khi video thiếu thông tin hay có nhãn LIVE không chính xác."

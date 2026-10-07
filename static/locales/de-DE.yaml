@@ -299,6 +299,9 @@ History:
   Repair Finished: "Reparatur abgeschlossen"
   Repair Stopped: "Reparatur gestoppt"
   Repair: "Verlauf reparieren"
+  Delete Old Compact: Alte löschen
+  Repair Compact: Reparatur
+  Mark All Watched Compact: Alle gesehen
   Repair Progress: "Geprüft {checked}/{total} · Repariert {repaired} · Fehlgeschlagen {failed}"
   # On History Page
   History: Verlauf

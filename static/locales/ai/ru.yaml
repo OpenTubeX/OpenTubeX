@@ -168,6 +168,9 @@ User Playlists:
     This playlist could not be loaded.: Не удалось загрузить этот плейлист.
     More videos could not be loaded.: Не удалось загрузить другие видео.
 History:
+  Delete Old Compact: "Удалить старые"
+  Repair Compact: "Восстановить"
+  Mark All Watched Compact: "Все просмотрены"
   Repair Use Cookies: "Использовать настроенные файлы cookie yt-dlp"
   Repair Cookies Hint: "Нужно проверить более 500 видео. Настройте файлы cookie в настройках yt-dlp и включите их здесь, чтобы снизить риск ограничения запросов."
   Repair Description: "Используйте после импорта истории или если у видео не хватает данных либо ошибочно отображается метка LIVE."

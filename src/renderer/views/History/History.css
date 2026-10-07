@@ -85,6 +85,65 @@
   margin: 0;
 }
 
+.historyCompactActionLabel {
+  display: none;
+}
+
+@media only screen and (width <= 800px) {
+  .headingActions {
+    min-inline-size: 0;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .headingActions > .historyActionButton {
+    block-size: auto;
+    flex: 1 0 auto;
+    min-block-size: 48px;
+    padding-inline: 4px;
+    font-size: 0.75rem;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .historyFullActionLabel {
+    display: none;
+  }
+
+  .historyCompactActionLabel {
+    display: inline;
+  }
+
+  .headingActions :deep(svg) {
+    flex-shrink: 0;
+  }
+}
+
+@media only screen and (width <= 360px) {
+  .headingActions {
+    gap: 4px;
+  }
+
+  .headingActions > .historyActionButton {
+    padding-inline: 2px;
+    font-size: 0.6875rem;
+    gap: 2px;
+  }
+}
+
+@media only screen and (width <= 300px) {
+  .headingActions {
+    gap: 1px;
+  }
+
+  .headingActions > .historyActionButton {
+    padding-inline: 0;
+    font-size: 0.625rem;
+    gap: 1px;
+  }
+}
+
 .cleanupPromptContent {
   box-sizing: border-box;
   inline-size: min(420px, 100%);

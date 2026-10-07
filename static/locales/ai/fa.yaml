@@ -209,6 +209,9 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
 History:
+  Delete Old Compact: "حذف قدیمی‌ها"
+  Repair Compact: "ترمیم"
+  Mark All Watched Compact: "همه تماشا شده"
   Repair Use Cookies: "استفاده از کوکی‌های پیکربندی‌شدهٔ yt-dlp"
   Repair Cookies Hint: "بیش از 500 ویدیو باید بررسی شود. کوکی‌ها را در تنظیمات yt-dlp پیکربندی و اینجا فعال کنید تا خطر محدود شدن درخواست‌ها کاهش یابد."
   Repair Description: "پس از وارد کردن سابقه، یا وقتی جزئیات ویدیوها ناقص است یا برچسب LIVE اشتباه دارند، از این گزینه استفاده کنید."

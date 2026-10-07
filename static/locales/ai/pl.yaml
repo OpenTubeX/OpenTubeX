@@ -1180,6 +1180,9 @@ App Icon:
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
 History:
+  Delete Old Compact: "Usuń stare"
+  Repair Compact: "Napraw"
+  Mark All Watched Compact: "Wszystkie obejrzane"
   Repair Use Cookies: "Użyj skonfigurowanych ciasteczek yt-dlp"
   Repair Cookies Hint: "Trzeba sprawdzić ponad 500 filmów. Skonfiguruj ciasteczka w ustawieniach yt-dlp i włącz je tutaj, aby zmniejszyć ryzyko ograniczenia zapytań."
   Repair Description: "Użyj po zaimportowaniu historii lub gdy brakuje danych filmów albo mają nieprawidłową etykietę LIVE."

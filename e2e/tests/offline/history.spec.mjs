@@ -94,6 +94,7 @@ test.use({
   seed: {
     settings: {
       uiRoundness: 200,
+      useAITranslationCompletions: true,
       quickBookmarkTargetPlaylistId: 'favorites'
     },
     playlists: [{
@@ -202,22 +203,48 @@ test.describe('watch history', () => {
     }
   })
 
-  test('history actions start with cleanup and wrap from the left', async ({ page }) => {
+  test('history actions and labels stay on one line without clipping at narrow widths and fractional zoom', async ({ app, page }) => {
     await goTo(page, 'history')
-    for (const width of [375, 520, 850, 1280]) {
-      await page.setViewportSize({ width, height: 900 })
-      const actions = page.locator('.headingActions')
-      await expect(actions.getByRole('button').first()).toHaveText('Delete Old History')
-      await expect.poll(() => actions.evaluate(element => {
-        const bounds = element.getBoundingClientRect()
-        const rows = new Map()
-        for (const button of element.querySelectorAll('button')) {
-          const rect = button.getBoundingClientRect()
-          if (!rows.has(rect.top)) rows.set(rect.top, rect.left)
-          if (rect.right > bounds.right + 1) return false
+    const actions = page.locator('.headingActions')
+    await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete Old History', 'Repair History', 'Mark All As Watched'])
+    const compactLabels = {
+      'en-US': ['Delete old', 'Repair', 'Mark all watched'],
+      'de-DE': ['Alte löschen', 'Reparatur', 'Alle gesehen'],
+      fi: ['Siivoa', 'Korjaa', 'Kaikki katsottu'],
+      cy: ['Dileu hen', 'Trwsio', 'Pob un wedi’i weld'],
+      'fr-FR': ['Suppr. anciens', 'Réparer', 'Tout vu'],
+      ta: ['பழையது அழி', 'சரி', 'யாவும் கண்டது']
+    }
+    for (const [locale, labels] of Object.entries(compactLabels)) {
+      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      for (const zoom of [1, 1.25]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        for (const width of [320, 375, 520, 732]) {
+          await setWindowSize(app, page, { width, height: width === 732 ? 550 : 1200 - width })
+          await expect(actions.locator('.historyCompactActionLabel:visible')).toHaveText(labels)
+          await expect.poll(() => actions.evaluate(element => {
+            const bounds = element.getBoundingClientRect()
+            const row = element.closest('.headingRow').getBoundingClientRect()
+            const buttons = [...element.querySelectorAll('button')]
+            const first = buttons[0].getBoundingClientRect()
+            return bounds.left >= row.left - 1 && bounds.right <= row.right + 1 && buttons.length === 3 && buttons.every(button => {
+              const rect = button.getBoundingClientRect()
+              const range = document.createRange()
+              range.selectNodeContents(button)
+              const contentFits = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).every(content => content.left >= rect.left - 1 && content.right <= rect.right + 1)
+              const textNodes = document.createTreeWalker(button, NodeFilter.SHOW_TEXT)
+              let textNode
+              while ((textNode = textNodes.nextNode())) {
+                if (!textNode.textContent.trim()) continue
+                range.selectNodeContents(textNode)
+                if ([...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length > 1) return false
+              }
+              return Math.abs(rect.top - first.top) < 1 && Math.abs(rect.height - first.height) < 1 && rect.height >= 48 &&
+                rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1 && contentFits
+            })
+          })).toBe(true)
         }
-        return [...rows.values()].every(left => Math.abs(left - bounds.left) < 1)
-      })).toBe(true)
+      }
     }
   })
 

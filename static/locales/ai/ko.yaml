@@ -276,6 +276,9 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
 History:
+  Delete Old Compact: "오래된 기록 삭제"
+  Repair Compact: "복구"
+  Mark All Watched Compact: "모두 시청 완료로"
   Repair Use Cookies: "설정된 yt-dlp 쿠키 사용"
   Repair Cookies Hint: "500개가 넘는 동영상을 확인해야 합니다. 요청 제한 위험을 줄이려면 yt-dlp 설정에서 쿠키를 구성하고 여기서 활성화하세요."
   Repair Description: "기록을 가져온 후 또는 동영상 정보가 누락되거나 LIVE 표시가 잘못된 경우 사용하세요."

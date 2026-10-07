@@ -201,6 +201,9 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
 History:
+  Delete Old Compact: "Обриши старе"
+  Repair Compact: "Поправи"
+  Mark All Watched Compact: "Све одгледано"
   Repair Use Cookies: "Користи подешене yt-dlp колачиће"
   Repair Cookies Hint: "Потребно је проверити више од 500 видео-снимака. Подесите колачиће у подешавањима yt-dlp и омогућите их овде да бисте смањили ризик од ограничавања захтева."
   Repair Description: "Користите после увоза историје или када видео-снимцима недостају подаци или имају погрешну ознаку LIVE."

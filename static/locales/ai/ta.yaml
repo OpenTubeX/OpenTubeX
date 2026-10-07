@@ -197,6 +197,9 @@ User Playlists:
     This playlist could not be loaded.: இந்தப் பிளேலிஸ்ட்டை ஏற்ற முடியவில்லை.
     More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
 History:
+  Delete Old Compact: "பழையது அழி"
+  Repair Compact: "சரி"
+  Mark All Watched Compact: "யாவும் கண்டது"
   Repair Use Cookies: "அமைக்கப்பட்ட yt-dlp குக்கீகளைப் பயன்படுத்து"
   Repair Cookies Hint: "500-க்கும் மேற்பட்ட காணொளிகளைச் சரிபார்க்க வேண்டும். கோரிக்கைகள் கட்டுப்படுத்தப்படும் அபாயத்தைக் குறைக்க yt-dlp அமைப்புகளில் குக்கீகளை அமைத்து இங்கே இயக்கவும்."
   Repair Description: "வரலாற்றை இறக்குமதி செய்த பிறகு, அல்லது காணொளி விவரங்கள் விடுபட்டிருந்தால் அல்லது தவறாக LIVE எனக் குறிக்கப்பட்டிருந்தால் இதைப் பயன்படுத்தவும்."

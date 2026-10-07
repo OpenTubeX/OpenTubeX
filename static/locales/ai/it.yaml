@@ -191,6 +191,9 @@ User Playlists:
     This playlist could not be loaded.: Impossibile caricare questa playlist.
     More videos could not be loaded.: Impossibile caricare altri video.
 History:
+  Delete Old Compact: "Elimina vecchi"
+  Repair Compact: "Ripara"
+  Mark All Watched Compact: "Segna tutti visti"
   Repair Use Cookies: "Usa i cookie configurati di yt-dlp"
   Repair Cookies Hint: "Occorre controllare più di 500 video. Configura i cookie nelle impostazioni di yt-dlp e attivali qui per ridurre il rischio di limitazione delle richieste."
   Repair Description: "Usa questa funzione dopo aver importato la cronologia o quando mancano informazioni sui video o l'etichetta LIVE è errata."

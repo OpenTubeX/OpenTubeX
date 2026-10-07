@@ -191,6 +191,9 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
 History:
+  Delete Old Compact: "古い履歴を削除"
+  Repair Compact: "修復"
+  Mark All Watched Compact: "すべて視聴済みに"
   Repair Use Cookies: "設定済みの yt-dlp Cookie を使用する"
   Repair Cookies Hint: "500 件を超える動画の確認が必要です。リクエスト制限のリスクを減らすため、yt-dlp の設定で Cookie を設定し、ここで有効にしてください。"
   Repair Description: "履歴をインポートした後や、動画の情報が不足している場合、LIVEラベルが誤って表示されている場合に使用します。"

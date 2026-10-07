@@ -193,6 +193,9 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
 History:
+  Delete Old Compact: "Köhnəni sil"
+  Repair Compact: "Təmir et"
+  Mark All Watched Compact: "Hamısı izlənib"
   Repair Use Cookies: "Konfiqurasiya edilmiş yt-dlp kukilərindən istifadə et"
   Repair Cookies Hint: "500-dən çox video yoxlanmalıdır. Sorğuların məhdudlaşdırılması riskini azaltmaq üçün yt-dlp ayarlarında kukiləri qurun və burada aktivləşdirin."
   Repair Description: "Tarixçəni idxal etdikdən sonra və ya videoların məlumatları çatışmadıqda, yaxud səhv LIVE işarəsi olduqda istifadə edin."

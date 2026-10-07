@@ -195,6 +195,9 @@ User Playlists:
     This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
 History:
+  Delete Old Compact: "Διαγραφή παλιών"
+  Repair Compact: "Επιδιόρθωση"
+  Mark All Watched Compact: "Όλα προβλήθηκαν"
   Repair Use Cookies: "Χρήση των ρυθμισμένων cookies του yt-dlp"
   Repair Cookies Hint: "Πρέπει να ελεγχθούν πάνω από 500 βίντεο. Διαμορφώστε cookies στις ρυθμίσεις του yt-dlp και ενεργοποιήστε τα εδώ για να μειώσετε τον κίνδυνο περιορισμού αιτημάτων."
   Repair Description: "Χρησιμοποιήστε το μετά την εισαγωγή ιστορικού ή όταν λείπουν στοιχεία βίντεο ή υπάρχει λανθασμένη ένδειξη LIVE."
