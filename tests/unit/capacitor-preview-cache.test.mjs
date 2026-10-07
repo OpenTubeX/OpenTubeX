@@ -66,6 +66,20 @@ test('missing frames preserve the last successful preview', async () => {
   assert.equal(cache.entries.get('a').image, 'previous')
 })
 
+test('a queued recapture is discarded when its page changes again', async () => {
+  const frame = deferred()
+  let calls = 0
+  const cache = createCapacitorPreviewCache(() => { calls += 1; return frame.promise })
+  const first = cache.capture(tab('a'))
+  cache.invalidate()
+  const queued = cache.capture(tab('b'))
+  cache.invalidate()
+  frame.resolve('stale image')
+  await Promise.all([first, queued])
+  assert.equal(calls, 1)
+  assert.equal(cache.entries.size, 0)
+})
+
 test('capture eligibility excludes settings, prompts, background and loading tabs', async () => {
   const { canCaptureCapacitorTab } = await import('../../src/renderer/tabs/capacitorPreviewCache.js')
   const presented = { ...tab('a'), loadState: 'loaded', isLoading: false }

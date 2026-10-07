@@ -2,6 +2,7 @@
 export function createCapacitorPreviewCache(capture, entries = new Map(), limit = 24) {
   let generation = 0
   let pending = null
+  let pendingGeneration = 0
   return {
     entries,
     get(tab) {
@@ -16,8 +17,15 @@ export function createCapacitorPreviewCache(capture, entries = new Map(), limit 
       }
     },
     async capture(tab) {
-      if (pending) return pending
       const revision = generation
+      if (pending) {
+        const previousRevision = pendingGeneration
+        await pending
+        // A stable-page request must not be consumed by an invalidated capture.
+        if (revision === generation && revision !== previousRevision) return this.capture(tab)
+        return
+      }
+      pendingGeneration = revision
       const { id, route: { fullPath: route } } = tab
       pending = (async () => {
         try {

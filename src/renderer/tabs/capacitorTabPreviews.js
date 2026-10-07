@@ -21,10 +21,10 @@ export async function captureBeforeTabOrganizer() {
   cache.invalidate()
 }
 
-export function initializeCapacitorTabPreviews(store) {
+export function initializeCapacitorTabPreviews(store, pageSwipe) {
   if (!process.env.IS_CAPACITOR || !Capacitor.isPluginAvailable('Screenshot')) return () => {}
   let timer
-  const canCapture = () => canCaptureCapacitorTab(store.getters, document.visibilityState === 'visible') && !hasVisibleOverlay()
+  const canCapture = () => !pageSwipe.value && canCaptureCapacitorTab(store.getters, document.visibilityState === 'visible') && !hasVisibleOverlay()
   captureCurrent = async () => {
     clearTimeout(timer)
     if (canCapture()) await cache.capture(store.getters.getPresentedTab)
@@ -34,6 +34,8 @@ export function initializeCapacitorTabPreviews(store) {
     clearTimeout(timer)
     timer = setTimeout(captureCurrent, 600)
   }
+  // Invalidate before the pages move, including a swipe cancelled on the same tab.
+  const stopSwipe = watch(() => !!pageSwipe.value, schedule, { flush: 'sync' })
   const stop = watch(() => [
     store.getters.getShowTabPreviews,
     store.getters.isAnyPromptOpen,
@@ -55,6 +57,7 @@ export function initializeCapacitorTabPreviews(store) {
   window.addEventListener('resize', schedule)
   return () => {
     stop()
+    stopSwipe()
     clearTimeout(timer)
     cache.clear()
     captureCurrent = async () => {}
