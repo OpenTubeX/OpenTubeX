@@ -844,6 +844,54 @@ test('stalled playlist thumbnails stop shimmering and can still finish loading',
   await expect(card.locator('.thumbnailImage')).toBeVisible()
 })
 
+test('offscreen lazy Home thumbnails keep their skeleton until visible, then time out and recover', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)
+  })
+  await page.clock.install()
+  const pending = []
+  await page.route('https://lazy-images.test/**', route => { pending.push(route) })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateHistory', {
+      ...store.getters.getHistoryCacheById.placeholder,
+      watchProgress: 30,
+      thumbnailUrl: 'https://lazy-images.test/thumbnail.jpg'
+    })
+  })
+  // Position the shelf below the fold before its lazy images mount.
+  await page.addStyleTag({ content: '[data-home-section="continueWatching"] { margin-block-start: 4000px !important; }' })
+  await goTo(page, 'home')
+  const card = page.locator('[data-home-section="continueWatching"] li').first()
+  const image = card.locator('img:not(.retryImagePlaceholder)')
+  const placeholder = card.locator('.retryImagePlaceholder')
+  await expect(image).toHaveAttribute('loading', 'lazy')
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top > innerHeight)).toBe(true)
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => pending.length).toBe(1)
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top < innerHeight)).toBe(true)
+  // Let the intersection notification start the deadline before advancing time.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  // Capture at normal scale after checking visibility at a fractional zoom.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+  })
+  await card.scrollIntoViewIfNeeded()
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expect(placeholder).toHaveClass(/ft-shimmer/)
+    await card.locator('.mediaThumbnail').screenshot({ path: testInfo.outputPath(`lazy-thumbnail-${theme}.png`) })
+  }
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+})
+
 test('playlist cards with missing thumbnails use static fallbacks', async ({ page }) => {
   const rendererErrors = []
   page.on('pageerror', error => rendererErrors.push(error.message))

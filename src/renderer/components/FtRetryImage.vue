@@ -75,12 +75,27 @@ let hasRetried = false
 let retryPending = false
 let retryTimeoutId
 let skeletonTimeoutId
+let visibilityObserver
+let imageIsVisible = false
 let sourceVersion = 0
 
 watch(preferredSource, src => resetSource(src), { immediate: true })
 // Element hooks run after patching, before paint, without a separate watcher.
 function checkCachedImage({ el: image }) {
-  if (hasLoaded.value || !image.complete || !currentSource) return
+  if (hasLoaded.value || !currentSource) return
+  if (!image.complete) {
+    // Lazy images can remain unrequested offscreen. Give them their full loading
+    // deadline once visible, without restarting it when scrolling away and back.
+    if (image.loading !== 'lazy' || imageIsVisible) startSkeletonTimeout()
+    else if (!visibilityObserver) {
+      visibilityObserver = new IntersectionObserver(entries => {
+        imageIsVisible = entries.some(entry => entry.isIntersecting)
+        if (imageIsVisible) startSkeletonTimeout()
+      })
+      visibilityObserver.observe(image)
+    }
+    return
+  }
   if (image.naturalWidth) {
     image.dispatchEvent(new Event('load'))
   } else if (!hasFailed.value) {
@@ -99,13 +114,15 @@ function resetSource(src, isFallback = false) {
   if (!isFallback) {
     hasFailed.value = false
     clearTimeout(skeletonTimeoutId)
-    // Bound the loading indication even when the server never finishes its response.
-    // Keep the image mounted so a late success can still replace the fallback.
-    if (src && src !== thumbnailPlaceholder) {
-      skeletonTimeoutId = setTimeout(() => { hasFailed.value = true }, SKELETON_TIMEOUT_MS)
-    }
+    skeletonTimeoutId = undefined
   }
   imageUrl.value = src
+}
+
+function startSkeletonTimeout() {
+  if (!isLoading.value || skeletonTimeoutId !== undefined) return
+  // Keep the image mounted so a late success can still replace the fallback.
+  skeletonTimeoutId = setTimeout(() => { hasFailed.value = true }, SKELETON_TIMEOUT_MS)
 }
 
 function useSmallerThumbnail() {
@@ -190,6 +207,7 @@ async function retryImageLoad(event) {
 
 onBeforeUnmount(() => {
   sourceVersion++
+  visibilityObserver?.disconnect()
   clearTimeout(retryTimeoutId)
   clearTimeout(skeletonTimeoutId)
 })
