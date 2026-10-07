@@ -4,6 +4,25 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { uiScale: 125 } } })
 
+async function longPressCard(card, menu) {
+  const thumbnail = card.locator('.thumbnailLink')
+  const session = await card.page().context().newCDPSession(card.page())
+  try {
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    await thumbnail.click({ trial: true })
+    const bounds = await thumbnail.boundingBox()
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }],
+    })
+    await expect(menu).toBeVisible()
+  } finally {
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+    await session.detach()
+  }
+}
+
 for (const input of ['touch', 'mouse']) {
   test(`fullscreen recommendations context menu accepts ${input} input`, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
@@ -27,12 +46,12 @@ for (const input of ['touch', 'mouse']) {
     await setPlayerFullscreen(page, true)
     await page.locator('.fullscreenActions').getByRole('button', { name: 'Recommended videos', exact: true }).click()
     const card = page.locator('.fullscreenRecommendationsOverlay .ft-list-video').first()
+    const menu = page.locator(input === 'touch' ? '.mobileLinkActions' : '.contextMenu')
     if (input === 'touch') {
-      await card.dispatchEvent('pointerdown', { pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 100, clientY: 100 })
+      await longPressCard(card, menu)
     } else {
       await card.click({ button: 'right' })
     }
-    const menu = page.locator(input === 'touch' ? '.mobileLinkActions' : '.contextMenu')
     await expect(menu).toBeVisible()
     await expect.poll(() => menu.evaluate(element => {
       const button = element.querySelector('button:not([disabled])')
@@ -44,7 +63,7 @@ for (const input of ['touch', 'mouse']) {
     await expect(menu).toHaveCount(0)
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
     if (input === 'touch') {
-      await card.dispatchEvent('pointerdown', { pointerType: 'touch', isPrimary: true, pointerId: 2, clientX: 100, clientY: 100 })
+      await longPressCard(card, menu)
       await menu.getByRole('menuitem', { name: 'Add to Queue', exact: true }).click()
       await expect(menu).toHaveCount(0)
       await expect.poll(() => watch.evaluate(component => component.proxy.$store.getters.getWatchQueue.some(video => video.videoId === 'related0001'))).toBe(true)
