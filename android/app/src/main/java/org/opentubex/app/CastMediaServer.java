@@ -42,6 +42,7 @@ final class CastMediaServer implements AutoCloseable {
     private final Set<Socket> sockets = ConcurrentHashMap.newKeySet();
     private final Semaphore slots = new Semaphore(MAX_CONNECTIONS);
     private final ExecutorService workers = Executors.newFixedThreadPool(MAX_CONNECTIONS);
+    private final java.util.concurrent.ScheduledExecutorService deadlines = Executors.newSingleThreadScheduledExecutor();
     private final OkHttpClient client;
 
     CastMediaServer(String local, String peer, String castId, DlnaAuthorization authorization, Consumer<JSObject> manifests) throws Exception {
@@ -277,9 +278,13 @@ final class CastMediaServer implements AutoCloseable {
                 OkHttpClient requestClient = blocking ? client.newBuilder()
                     .readTimeout(hlsReadTimeouts.getOrDefault(id, 0), TimeUnit.MILLISECONDS).build() : client;
                 var call = requestClient.newCall(upstream.build());
+                // Try alternatives promptly, but never shorten a blocking HLS reload.
+                var deadline = candidates.length() > 1 && !blocking
+                    ? deadlines.schedule(call::cancel, 5, TimeUnit.SECONDS) : null;
                 var finished = new java.util.concurrent.atomic.AtomicBoolean();
                 Thread watcher = blocking ? watchReceiver(socket, call, finished) : null;
                 try (Response response = call.execute()) {
+                    if (deadline != null) deadline.cancel(false);
                     // Only the blocking header wait is extended, not body streaming.
                     if (response.body() != null) response.body().source().timeout().timeout(30, TimeUnit.SECONDS);
                     if (!response.isSuccessful() && attempt + 1 < candidates.length()) continue;
@@ -306,6 +311,7 @@ final class CastMediaServer implements AutoCloseable {
                     }
                     return;
                 } finally {
+                    if (deadline != null) deadline.cancel(false);
                     finished.set(true);
                     if (watcher != null) watcher.interrupt();
                 }
@@ -339,6 +345,7 @@ final class CastMediaServer implements AutoCloseable {
         pending.values().forEach(manifest -> manifest.body().completeExceptionally(new IllegalStateException("Cast relay closed")));
         pending.clear();
         workers.shutdownNow();
+        deadlines.shutdownNow();
         client.dispatcher().cancelAll();
         client.connectionPool().evictAll();
     }

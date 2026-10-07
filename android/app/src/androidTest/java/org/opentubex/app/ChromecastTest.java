@@ -234,6 +234,48 @@ public class ChromecastTest {
         } finally { fixture.delete(); }
     }
 
+    @Test public void stalledDashAlternativeFallsBackWithoutLimitingBodyStreaming() throws Exception {
+        try (ServerSocket endpoint = new ServerSocket(0)) {
+            endpoint.setSoTimeout(8000);
+            CompletableFuture<Void> served = new CompletableFuture<>();
+            Thread fixture = new Thread(() -> {
+                try (Socket stalled = endpoint.accept(); Socket healthy = endpoint.accept()) {
+                    healthy.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: 5\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                    // The attempt deadline ends at headers; media may pause longer.
+                    Thread.sleep(6000);
+                    healthy.getOutputStream().write("video".getBytes(StandardCharsets.US_ASCII));
+                    served.complete(null);
+                } catch (Exception error) { served.completeExceptionally(error); }
+            });
+            fixture.start();
+            var upstream = new okhttp3.OkHttpClient.Builder().socketFactory(new FixtureSockets("127.0.0.1")).build();
+            try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {}, upstream)) {
+                JSObject segment = resource(0, "http://8.8.8.8:" + endpoint.getLocalPort() + "/", "video/mp4");
+                segment.getJSONArray("candidates").getJSONObject(0).put("template", true);
+                segment.getJSONArray("candidates").put(new JSObject().put("url", "http://8.8.8.8:" + endpoint.getLocalPort() + "/healthy/").put("template", true));
+                JSArray resources = new JSArray();
+                resources.put(segment);
+                server.register(resources);
+                HttpURLConnection receiver = (HttpURLConnection) new URL(server.origin() + "/test-token/0/segment.mp4").openConnection(java.net.Proxy.NO_PROXY);
+                receiver.setConnectTimeout(3000);
+                receiver.setReadTimeout(9000);
+                try {
+                    assertEquals("Healthy alternative must return headers before the receiver gives up", 200, receiver.getResponseCode());
+                    ByteArrayOutputStream body = new ByteArrayOutputStream();
+                    try (InputStream input = receiver.getInputStream()) {
+                        for (int value; (value = input.read()) != -1;) body.write(value);
+                    }
+                    assertEquals("Body reads retain the ordinary timeout", "video", body.toString(StandardCharsets.US_ASCII.name()));
+                    served.get(2, TimeUnit.SECONDS);
+                } finally { receiver.disconnect(); }
+            } finally {
+                endpoint.close();
+                fixture.join(9000);
+                assertFalse("Fixture must finish", fixture.isAlive());
+            }
+        }
+    }
+
     @Test public void relayForwardsOnlyValidHlsReloadParametersAndPreservesSignedQuery() throws Exception {
         LinkedBlockingQueue<Integer> timeouts = new LinkedBlockingQueue<>();
         LinkedBlockingQueue<String> requests = new LinkedBlockingQueue<>();
@@ -241,6 +283,11 @@ public class ChromecastTest {
         okhttp3.OkHttpClient upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
             requests.add(chain.request().url().encodedPath() + "?" + chain.request().url().encodedQuery());
             timeouts.add(chain.readTimeoutMillis());
+            if (chain.readTimeoutMillis() == 0) {
+                try { Thread.sleep(6000); }
+                catch (InterruptedException error) { Thread.currentThread().interrupt(); throw new java.io.IOException(error); }
+                if (chain.call().isCanceled()) throw new java.io.IOException("Blocking reload must not have a fallback deadline");
+            }
             return new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
                 .code(200).message("OK").body(okhttp3.ResponseBody.create("#EXTM3U\n", okhttp3.MediaType.get("application/x-mpegurl"))).build();
         }).build();
@@ -248,12 +295,14 @@ public class ChromecastTest {
                  event -> relay.get().complete(event.getString("requestId"), event.getString("body"), 360_000), upstream)) {
             relay.set(server);
             JSArray resources = new JSArray();
-            resources.put(resource(0, "https://8.8.8.8/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", "application/x-mpegurl"));
+            JSObject playlist = resource(0, "https://8.8.8.8/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", "application/x-mpegurl");
+            playlist.getJSONArray("candidates").put(new JSObject().put("url", "https://1.1.1.1/live.m3u8?_HLS_msn=1"));
+            resources.put(playlist);
             JSObject template = resource(1, "https://8.8.8.8/", "video/mp4");
             template.getJSONArray("candidates").getJSONObject(0).put("template", true);
             resources.put(template);
             server.register(resources);
-            assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200));
+            assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200, 9000));
             assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", requests.poll(3, TimeUnit.SECONDS));
             assertEquals("Unknown timing allows blocking headers", 0, (int) timeouts.poll(3, TimeUnit.SECONDS));
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media?_HLS_msn=123&_HLS_part=0&_HLS_skip=v2", 200));
@@ -553,12 +602,15 @@ public class ChromecastTest {
     }
 
     private static final class FixtureSockets extends javax.net.SocketFactory {
+        private final String destination;
+        FixtureSockets() { this("10.0.2.2"); }
+        FixtureSockets(String destination) { this.destination = destination; }
         @Override public Socket createSocket() {
             return new Socket() {
                 @Override public void connect(java.net.SocketAddress endpoint, int timeout) throws java.io.IOException {
                     var address = (java.net.InetSocketAddress) endpoint;
                     if (address.getAddress() != null && address.getAddress().getHostAddress().equals("8.8.8.8")) {
-                        endpoint = new java.net.InetSocketAddress("10.0.2.2", address.getPort());
+                        endpoint = new java.net.InetSocketAddress(destination, address.getPort());
                     }
                     super.connect(endpoint, timeout);
                 }
@@ -593,9 +645,13 @@ public class ChromecastTest {
     }
 
     private static String fetch(String url, int expectedStatus) throws Exception {
+        return fetch(url, expectedStatus, 5000);
+    }
+
+    private static String fetch(String url, int expectedStatus, int readTimeout) throws Exception {
         HttpURLConnection request = (HttpURLConnection) new URL(url).openConnection(java.net.Proxy.NO_PROXY);
         request.setConnectTimeout(3000);
-        request.setReadTimeout(5000);
+        request.setReadTimeout(readTimeout);
         try {
             assertEquals(expectedStatus, request.getResponseCode());
             if (expectedStatus != 200) return "";
