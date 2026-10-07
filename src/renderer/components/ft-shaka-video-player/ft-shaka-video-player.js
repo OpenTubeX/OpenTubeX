@@ -11469,7 +11469,7 @@ export default defineComponent({
     function updateFullscreenOrientation(fullscreen) {
       if (!isActiveTab.value || isNativeFullscreenActive() !== fullscreen) return
       if (fullscreen && androidFullscreenEntering) return
-      return setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+      setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
     }
     /** @type {(preserveOrientation?: boolean) => void} */
     let finishAndroidFullscreenExit = () => {}
@@ -11478,7 +11478,7 @@ export default defineComponent({
       if (!active) finishAndroidFullscreenExit()
     })
 
-    function retainAndroidFullscreenDuringRotation(orientationUpdated) {
+    function retainAndroidFullscreenDuringRotation() {
       if (!androidFullscreenHost || androidFullscreenPortrait === null) return
       if ((window.innerHeight >= window.innerWidth) === androidFullscreenPortrait) {
         androidFullscreenPortrait = null
@@ -11512,18 +11512,21 @@ export default defineComponent({
         })
       }
       // Auto-rotate or a different display can keep the device in landscape.
-      // Never leave an uncloseable presentation layer in that case.
-      const timeout = window.setTimeout(finish, 5000)
+      // Only check for that case after allowing the rotation to settle. Never
+      // replace the expected orientation with an immediate, potentially stale
+      // read after unlock. If native rotation has arrived but the WebView has
+      // not resized yet, keep protecting it until resize or the safety deadline.
+      let timeout = window.setTimeout(() => {
+        timeout = window.setTimeout(finish, 4500)
+        getAndroidDisplayOrientation().then(orientation => {
+          if (finishAndroidFullscreenExit !== finish) return
+          if (orientation.startsWith('portrait') !== androidFullscreenPortrait) finish()
+        }).catch(() => {
+          if (finishAndroidFullscreenExit === finish) finish()
+        })
+      }, 500)
       finishAndroidFullscreenExit = finish
       window.addEventListener('resize', resized)
-      // Unlocking can legitimately keep landscape after the user turns the
-      // phone. Ask the native display after unlock rather than waiting for the
-      // orientation remembered at entry in that case.
-      orientationUpdated?.then(getAndroidDisplayOrientation).then(orientation => {
-        if (finishAndroidFullscreenExit !== finish) return
-        androidFullscreenPortrait = orientation.startsWith('portrait')
-        resized()
-      }).catch(() => {})
     }
 
     function fullscreenChangeHandler() {
@@ -11556,9 +11559,9 @@ export default defineComponent({
         return
       }
 
-      const orientationUpdated = updateFullscreenOrientation(fullscreen)
+      updateFullscreenOrientation(fullscreen)
       if (wasFullscreen && !fullscreen && process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-        retainAndroidFullscreenDuringRotation(orientationUpdated)
+        retainAndroidFullscreenDuringRotation()
       }
       syncAndroidStatusBarVisibility()
 

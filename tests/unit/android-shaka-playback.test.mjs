@@ -271,6 +271,7 @@ test('Android holds the exit presentation until the WebView matches the unlocked
   const frames = new Map()
   let open = false
   let cleanup
+  let exitTimeout
   const host = {
     setAttribute() {}, removeAttribute() {},
     showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
@@ -289,7 +290,7 @@ test('Android holds the exit presentation until the WebView matches the unlocked
       innerWidth: 800, innerHeight: 400,
       addEventListener: (name, callback) => listeners.set(name, callback),
       removeEventListener: name => listeners.delete(name),
-      setTimeout: callback => { timers.set(1, callback); return 1 },
+      setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
     },
   }
   const retain = vm.runInNewContext(`${source.slice(start, end)}
@@ -317,14 +318,32 @@ test('Android holds the exit presentation until the WebView matches the unlocked
   context.window.innerWidth = 900
   retain()
   timers.get(1)() // A user/device policy can keep the display landscape.
+  await new Promise(resolve => setImmediate(resolve))
   assert.equal(open, false)
   assert.equal(listeners.size, 0)
   retain(Promise.resolve())
   await new Promise(resolve => setImmediate(resolve))
-  frames.get(1)()
-  frames.get(1)()
-  assert.equal(open, false, 'Exit promptly when Android remains landscape after unlocking')
+  frames.get(1)?.()
+  frames.get(1)?.()
+  assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
+  assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, false)
   assert.equal(timers.size, 0)
+  // Native rotation may complete before the WebView's resized frame arrives.
+  context.getAndroidDisplayOrientation = async () => 'portrait-primary'
+  retain()
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
+  context.window.innerWidth = 400
+  context.window.innerHeight = 900
+  listeners.get('resize')()
+  frames.get(1)()
+  frames.get(1)()
+  assert.equal(open, false)
+  context.window.innerWidth = 1000
   retain()
   cleanup() // Navigating away must cancel the pending exit.
   assert.equal(open, false)

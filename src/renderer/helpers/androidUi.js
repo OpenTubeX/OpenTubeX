@@ -54,13 +54,13 @@ export const observeAndroidDeviceRotation = createAndroidRotationObserver(
   enabled => AndroidUi.setDeviceRotationEnabled({ enabled })
 )
 
+export function prepareAndroidFullscreenRotation() {
+  return AndroidUi?.prepareFullscreenRotation() ?? Promise.resolve()
+}
+
 export async function getAndroidDisplayOrientation() {
   const { type } = await ScreenOrientation.getCurrentOrientation()
   return type
-}
-
-export function prepareAndroidFullscreenRotation() {
-  return AndroidUi?.prepareFullscreenRotation() ?? Promise.resolve()
 }
 
 function videoDimensions(video) {
