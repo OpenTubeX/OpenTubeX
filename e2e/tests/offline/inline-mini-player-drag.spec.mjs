@@ -438,6 +438,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
       try {
         const box = await player.boundingBox()
+        expect(box, 'the player must have a visible box before starting the swipe').not.toBeNull()
         const start = { x: box.x + 16, y: box.y + 16 }
         await touch('touchStart', start)
         await touch('touchMove', { ...start, y: start.y + 80 })
@@ -478,6 +479,7 @@ test.describe('browsing scroll during mobile minimize', () => {
     const watchScroll = await page.evaluate(() => window.scrollY)
     const player = page.locator('.ftVideoPlayer')
     const box = await player.boundingBox()
+    expect(box, 'the player must have a visible box before starting the swipe').not.toBeNull()
     const start = { x: box.x + 16, y: box.y + 16 }
     const cdp = await page.context().newCDPSession(page)
     try {
@@ -534,6 +536,7 @@ test.describe('browsing scroll during mobile minimize', () => {
       const cdp = await page.context().newCDPSession(page)
       try {
         const box = await player.boundingBox()
+        expect(box, 'the player must have a visible box before starting the swipe').not.toBeNull()
         const start = { x: box.x + 16, y: box.y + 16 }
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + 140 }] })
@@ -576,6 +579,7 @@ test.describe('browsing scroll during mobile minimize', () => {
     await enableMobileTouch(app, page, true, false)
     const player = page.locator('.ftVideoPlayer')
     const box = await player.boundingBox()
+    expect(box, 'the player must have a visible box before starting the swipe').not.toBeNull()
     const start = { x: box.x + 16, y: box.y + 16 }
     const cdp = await page.context().newCDPSession(page)
     try {
