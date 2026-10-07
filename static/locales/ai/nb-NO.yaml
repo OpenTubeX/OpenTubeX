@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
-    Show DLNA Cast Button: "Vis DLNA-strømmeknapp"
+    Enable DLNA Casting: "Aktiver DLNA-casting"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelige videoer i spillelister"
     Lights Off: Slå av lyset
     Show Lights Off Toggle: Vis bryteren for å slå av lyset
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Samtidige forhåndslastinger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotasjonslås for fullskjerm
     Swipe Left or Right to Seek in Fullscreen: Sveip til venstre eller høyre for å spole i fullskjerm
-    Show Google Cast Button: "Vis Google Cast-knapp"
+    Enable Google Cast: "Aktiver Google Cast"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1290,6 +1290,7 @@ Video:
   Sponsor Block category short:
     filler: Avsporinger
   Player:
+    Cast: "Cast"
     Music Mode: "Musikkmodus"
     Music Mode Description: "Spill av videoer med 1× hastighet og start nye videoer fra begynnelsen i denne fanen. De lagrede standardinnstillingene for avspilling forblir uendret."
     DLNA:

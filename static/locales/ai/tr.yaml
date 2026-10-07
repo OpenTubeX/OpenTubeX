@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
-    Show DLNA Cast Button: "DLNA yayın düğmesini göster"
+    Enable DLNA Casting: "DLNA yayınını etkinleştir"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat
     Show Lights Off Toggle: Işıkları kapatma düğmesini göster
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
-    Show Google Cast Button: "Google Cast düğmesini göster"
+    Enable Google Cast: "Google Cast özelliğini etkinleştir"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1275,6 +1275,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
+    Cast: "Yayınla"
     Music Mode: "Müzik modu"
     Music Mode Description: "Bu sekmede videoları 1× hızında oynatın ve yeni videoları baştan başlatın. Kaydedilmiş varsayılan oynatma ayarlarınız değişmez."
     DLNA:

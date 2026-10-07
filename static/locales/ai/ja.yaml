@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
-    Show DLNA Cast Button: "DLNA キャストボタンを表示"
+    Enable DLNA Casting: "DLNAキャストを有効にする"
     Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"
     Lights Off: 照明を消す
     Show Lights Off Toggle: 照明を消す切り替えを表示
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
     Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
-    Show Google Cast Button: "Google Castボタンを表示"
+    Enable Google Cast: "Google Castを有効にする"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1277,6 +1277,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: ライブチャットのリプレイが有効です。動画の再生に合わせてチャットメッセージがここに表示されます。
   Premiere started: プレミア公開中です。{timeAgo}に開始しました
   Player:
+    Cast: "キャスト"
     Music Mode: "音楽モード"
     Music Mode Description: "このタブでは動画を1倍速で再生し、新しい動画を最初から開始します。保存済みの再生設定は変更されません。"
     DLNA:

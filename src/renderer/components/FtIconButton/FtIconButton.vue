@@ -626,6 +626,7 @@ function handleDropdownClick(option, event) {
 
 defineExpose({
   dropdownShown: computed(() => dropdownShown.value),
+  updateDropdownLayout: keepDropdownInViewport,
 
   hideDropdown: () => {
     dropdownShown.value = false

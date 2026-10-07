@@ -565,7 +565,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
-    Show DLNA Cast Button: "Паказваць кнопку трансляцыі DLNA"
+    Enable DLNA Casting: "Уключыць трансляцыю DLNA"
     Skip Unavailable Playlist Videos: "Прапускаць недаступныя відэа ў плэйлістах"
     Lights Off: Выключыць святло
     Show Lights Off Toggle: Паказваць пераключальнік выключэння святла
@@ -669,7 +669,7 @@ Settings:
     Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
     Ignore System Rotation Lock for Fullscreen: Ігнараваць сістэмнае блакаванне павароту для поўнаэкраннага рэжыму
     Swipe Left or Right to Seek in Fullscreen: Праводзьце налева або направа для перамоткі ў поўнаэкранным рэжыме
-    Show Google Cast Button: "Паказваць кнопку Google Cast"
+    Enable Google Cast: "Уключыць Google Cast"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1353,6 +1353,7 @@ Video:
     music offtopic: Не музыка
     filler: Адступленні
   Player:
+    Cast: "Трансляваць"
     Music Mode: "Музычны рэжым"
     Music Mode Description: "Прайгравайце відэа на хуткасці 1× і пачынайце новыя відэа з пачатку ў гэтай укладцы. Захаваныя налады прайгравання застаюцца нязменнымі."
     DLNA:

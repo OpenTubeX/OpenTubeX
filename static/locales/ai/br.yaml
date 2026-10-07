@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: "Ober distrujus pouezet"
         Text and icons on destructive actions: "Testenn hag arlunioù war an oberoù distrujus"
   Player Settings:
-    Show DLNA Cast Button: "Diskouez an afell skignañ DLNA"
+    Enable DLNA Casting: "Gweredekaat skignañ DLNA"
     Skip Unavailable Playlist Videos: "Tremen ar videoioù dizimplij er rolloù lenn"
     Lights Off: Gouloù lazhet
     Show Lights Off Toggle: Diskouez an afell evit lazhañ ar gouloù
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Rakgargadennoù war un dro"
     Ignore System Rotation Lock for Fullscreen: Na ober van eus prenn troadur ar reizhiad evit ar skramm leun
     Swipe Left or Right to Seek in Fullscreen: Riklañ a-gleiz pe a-zehou evit mont war-raok pe war-gil e skramm leun
-    Show Google Cast Button: "Diskouez ar bouton Google Cast"
+    Enable Google Cast: "Gweredekaat Google Cast"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1286,6 +1286,7 @@ Video:
     music offtopic: "N'eo ket sonerezh"
     filler: "Dihanadennoù"
   Player:
+    Cast: "Skignañ"
     Music Mode: "Mod sonerezh"
     Music Mode Description: "Lennit ar videoioù gant un tizh 1× ha krogit ar videoioù nevez adalek an deroù en ivinell-mañ. Ho arventennoù lenn dre ziouer enrollet a chom digemm."
     DLNA:

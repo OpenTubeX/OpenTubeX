@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
-    Show DLNA Cast Button: "顯示 DLNA 投放按鈕"
+    Enable DLNA Casting: "啟用 DLNA 投放"
     Skip Unavailable Playlist Videos: "略過播放清單中無法播放的影片"
     Lights Off: 關燈
     Show Lights Off Toggle: 顯示關燈開關
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "同時預先載入數量"
     Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
     Swipe Left or Right to Seek in Fullscreen: 全螢幕時向左或向右滑動以快轉或倒轉
-    Show Google Cast Button: "顯示 Google Cast 按鈕"
+    Enable Google Cast: "啟用 Google Cast"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1279,6 +1279,7 @@ Video:
   Sponsor Block category:
     hook: 開場／問候
   Player:
+    Cast: "投放"
     Music Mode: "音樂模式"
     Music Mode Description: "在此分頁中以1倍速播放影片，並從頭開始播放新影片。已儲存的預設播放設定維持不變。"
     DLNA:

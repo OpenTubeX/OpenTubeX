@@ -888,20 +888,15 @@
             v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (isElectron && $store.getters.getShowChromecastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
-            <WatchDlnaCast
-              v-if="$store.getters.getShowDlnaCastButton && !chromecastActive"
-              :key="videoId"
-              :video-id="videoId"
-              :formats="legacyFormats"
-              :title="videoTitle"
-              :get-player="() => $refs.player"
-              :disabled="chromecastBusy"
-              @casting-change="dlnaCastActive = $event"
-            />
-            <WatchChromecast
-              v-if="isElectron && $store.getters.getShowChromecastButton"
+            <WatchCast
               ref="chromecast"
               :key="`cast-${videoId}`"
+              :video-id="videoId"
+              :google-cast-enabled="isElectron && $store.getters.getShowChromecastButton"
+              :dlna-enabled="$store.getters.getShowDlnaCastButton"
+              :google-cast-active="chromecastActive"
+              :google-cast-busy="chromecastBusy"
+              :dlna-active="dlnaCastActive"
               :formats="legacyFormats"
               :manifest-url="manifestSrc"
               :manifest-type="manifestMimeType"
@@ -911,7 +906,7 @@
               :title="videoTitle"
               :get-player="() => $refs.player"
               :get-source="() => getChromecastSource()"
-              :disabled="dlnaCastActive"
+              @dlna-change="dlnaCastActive = $event"
               @busy-change="chromecastBusy = $event"
               @casting-change="handleChromecastChange"
               @playback-state="handleChromecastState"

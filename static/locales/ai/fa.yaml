@@ -565,7 +565,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
-    Show DLNA Cast Button: "نمایش دکمه پخش DLNA"
+    Enable DLNA Casting: "فعال کردن پخش DLNA"
     Skip Unavailable Playlist Videos: "رد کردن ویدیوهای ناموجود در فهرست‌های پخش"
     Lights Off: خاموش کردن چراغ‌ها
     Show Lights Off Toggle: نمایش کلید خاموش کردن چراغ‌ها
@@ -669,7 +669,7 @@ Settings:
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
     Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
-    Show Google Cast Button: "نمایش دکمهٔ Google Cast"
+    Enable Google Cast: "فعال کردن Google Cast"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1347,6 +1347,7 @@ Video:
     interaction: یادآوری تعامل
     filler: حاشیه‌روی
   Player:
+    Cast: "پخش"
     Music Mode: "حالت موسیقی"
     Music Mode Description: "ویدیوها را با سرعت 1× پخش کنید و ویدیوهای جدید را در این زبانه از ابتدا شروع کنید. تنظیمات پیش‌فرض پخش ذخیره‌شده شما بدون تغییر می‌مانند."
     DLNA:

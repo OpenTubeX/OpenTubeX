@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Destruktivní akce při stisknutí
         Text and icons on destructive actions: Text a ikony destruktivních akcí
   Player Settings:
-    Show DLNA Cast Button: "Zobrazit tlačítko vysílání DLNA"
+    Enable DLNA Casting: "Povolit vysílání DLNA"
     Skip Unavailable Playlist Videos: "Přeskakovat nedostupná videa v playlistech"
     Lights Off: Zhasnout
     Show Lights Off Toggle: Zobrazit přepínač zhasnutí
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Souběžná přednačtení"
     Ignore System Rotation Lock for Fullscreen: Ignorovat systémový zámek otáčení pro celou obrazovku
     Swipe Left or Right to Seek in Fullscreen: Přejetím doleva nebo doprava posouvat přehrávání na celé obrazovce
-    Show Google Cast Button: "Zobrazit tlačítko Google Cast"
+    Enable Google Cast: "Povolit Google Cast"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1277,6 +1277,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého chatu je zapnutý. Zprávy se zde budou zobrazovat během přehrávání videa.
   Premiere started: Probíhá premiéra. Začala {timeAgo}
   Player:
+    Cast: "Vysílat"
     Music Mode: "Hudební režim"
     Music Mode Description: "Přehrávejte videa rychlostí 1× a nová videa v této kartě spouštějte od začátku. Uložená výchozí nastavení přehrávání zůstanou beze změny."
     DLNA:

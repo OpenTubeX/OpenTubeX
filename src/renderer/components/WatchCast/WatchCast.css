@@ -1,0 +1,79 @@
+.castTabs {
+  display: flex;
+  border-block-end: 1px solid var(--border-color);
+}
+
+.castTab {
+  background: transparent;
+  border: 0;
+  border-block-end: 2px solid transparent;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  flex: 1;
+  font: inherit;
+  min-block-size: 44px;
+  padding-block: 10px;
+  padding-inline: 16px;
+  white-space: nowrap;
+}
+
+.castTab[aria-selected='true'] {
+  border-block-end-color: var(--primary-color);
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.castTab:disabled,
+.castOption[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.castTab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -4px;
+}
+
+.castOptions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.castOption {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  padding-block: 8px;
+  padding-inline: 10px;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.castOption:not([aria-disabled='true']):is(:hover, :focus-visible),
+.castOption[aria-selected='true'] {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.castOption :deep(.ft-icon) {
+  flex-shrink: 0;
+  inline-size: 1em;
+}
+
+.castDivider {
+  border-block-start: 1px solid var(--border-color);
+  inline-size: 95%;
+  margin-block: 1px;
+  margin-inline: auto;
+  opacity: 0.5;
+}
+
+@media (pointer: coarse), (width <= 680px) {
+  .castTab,
+  .castOption {
+    box-sizing: border-box;
+    min-block-size: var(--phone-touch-target, 48px);
+  }
+}

@@ -14,9 +14,8 @@ import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
-import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
+import WatchCast from '../../components/WatchCast/WatchCast.vue'
 import { selectCastSource } from '../../helpers/player/castSource'
-import WatchChromecast from '../../components/WatchChromecast/WatchChromecast.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
@@ -175,8 +174,7 @@ export default defineComponent({
     FtPhonePanel,
     PhoneCommentsButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
-    WatchDlnaCast,
-    WatchChromecast,
+    WatchCast,
     WatchVideoDownloadPrompt,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,

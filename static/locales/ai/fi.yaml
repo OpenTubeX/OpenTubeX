@@ -548,7 +548,7 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
-    Show DLNA Cast Button: "Näytä DLNA-suoratoistopainike"
+    Enable DLNA Casting: "Ota DLNA-suoratoisto käyttöön"
     Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
     Lights Off: Valot pois
     Show Lights Off Toggle: Näytä valojen sammutuskytkin
@@ -652,7 +652,7 @@ Settings:
     Concurrent Preloads: "Samanaikaiset esilataukset"
     Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
     Swipe Left or Right to Seek in Fullscreen: Kelaa koko näytössä pyyhkäisemällä vasemmalle tai oikealle
-    Show Google Cast Button: "Näytä Google Cast -painike"
+    Enable Google Cast: "Ota Google Cast käyttöön"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1314,6 +1314,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Livechatin tallenne on käytössä.  Chat-viestit näkyvät tässä videon toiston aikana.
   Premiere started: Ensi-ilta on käynnissä. Alkoi {timeAgo}
   Player:
+    Cast: "Suoratoista"
     Music Mode: "Musiikkitila"
     Music Mode Description: "Toista videot nopeudella 1× ja aloita uudet videot alusta tässä välilehdessä. Tallennetut toiston oletusasetukset pysyvät ennallaan."
     DLNA:

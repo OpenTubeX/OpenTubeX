@@ -1,25 +1,12 @@
 <template>
-  <FtIconButton
-    ref="button"
-    class="chromecastControl shaka-no-propagation"
-    :title="castId ? t('Video.Player.Google Cast.Connected', { device: deviceName }) : t('Video.Player.Google Cast.Cast')"
-    :icon="['fas', 'cast']"
-    :aria-pressed="Boolean(castId)"
-    :dropdown-options="options"
-    :force-dropdown="true"
-    :disabled="disabled"
-    dropdown-position-x="right"
-    @dropdown-open="refreshDevices"
-    @click="handleChoice"
-  />
+  <slot />
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
 import { selectCastSource } from '../../helpers/player/castSource'
 import { getSubtitleRequestUrl, shouldUseSubtitleCookies } from '../../helpers/player/subtitleCookies'
@@ -36,19 +23,19 @@ const props = defineProps({
   getPlayer: { type: Function, required: true },
   getSource: { type: Function, required: true }
 })
-const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'ended'])
+const emit = defineEmits(['casting-change', 'busy-change', 'playback-state', 'ended', 'close-menu'])
 const { t } = useI18n()
 const store = useStore()
 const route = useRoute()
 let watchPath = route.path
-const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
 const busy = ref(false)
 watch(busy, value => emit('busy-change', value), { flush: 'sync' })
-watch(() => props.disabled, disabled => { if (disabled) button.value?.hideDropdown() })
+watch(() => props.disabled, disabled => { if (disabled) emit('close-menu') })
 const castId = ref(null)
 const deviceName = ref('')
+const menuTitle = computed(() => castId.value ? t('Video.Player.Google Cast.Connected', { device: deviceName.value }) : t('Video.Player.Google Cast.Cast'))
 const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, muted: false, activeTrackIds: [] })
 const castCaptions = ref([])
 let disposed = false
@@ -190,7 +177,7 @@ async function handleChoice(choice) {
   try {
     if (choice === 'stop') {
       await stopCasting()
-      button.value?.hideDropdown()
+      emit('close-menu')
       return
     }
     if (castId.value) {
@@ -261,7 +248,7 @@ async function handleChoice(choice) {
     emit('casting-change', true)
     emit('playback-state', status.value)
     props.getPlayer()?.pause()
-    button.value?.hideDropdown()
+    emit('close-menu')
     pollTimer = setTimeout(poll, 1000)
   } catch {
     reportError()
@@ -273,7 +260,7 @@ async function handleChoice(choice) {
   }
 }
 
-defineExpose({ stopCasting })
+defineExpose({ stopCasting, options, castId, menuTitle, refreshDevices, handleChoice })
 
 onBeforeUnmount(() => {
   // Capture the original player before Vue clears refs; navigation never resumes it.

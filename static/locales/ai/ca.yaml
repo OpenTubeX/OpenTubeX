@@ -763,7 +763,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
-    Show DLNA Cast Button: "Mostra el botó de transmissió DLNA"
+    Enable DLNA Casting: "Activa la transmissió DLNA"
     Skip Unavailable Playlist Videos: "Omet els vídeos no disponibles de les llistes de reproducció"
     Lights Off: Llums apagats
     Show Lights Off Toggle: Mostra el commutador per apagar els llums
@@ -886,7 +886,7 @@ Settings:
     Concurrent Preloads: "Precàrregues simultànies"
     Ignore System Rotation Lock for Fullscreen: Ignora el bloqueig de rotació del sistema per a la pantalla completa
     Swipe Left or Right to Seek in Fullscreen: Llisca cap a l’esquerra o la dreta per avançar o retrocedir a pantalla completa
-    Show Google Cast Button: "Mostra el botó de Google Cast"
+    Enable Google Cast: "Activa Google Cast"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1725,6 +1725,7 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
+    Cast: "Transmet"
     Music Mode: "Mode música"
     Music Mode Description: "Reprodueix vídeos a 1× i inicia els vídeos nous des del principi en aquesta pestanya. Els valors de reproducció predeterminats desats no canvien."
     DLNA:
