@@ -4,8 +4,40 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { setImmediate, setTimeout as delay } from 'node:timers/promises'
 
-import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
+import { isAppHidden, setAndroidAppVisible, waitForAppVisible } from '../../src/renderer/helpers/appVisibility.js'
 import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
+
+for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']) test(`foreground visibility wait handles ${outcome} and releases listeners`, async () => {
+  const originalDocument = globalThis.document
+  const document = new EventTarget()
+  const visibilityListeners = new Set()
+  const add = document.addEventListener.bind(document)
+  const remove = document.removeEventListener.bind(document)
+  document.addEventListener = (name, listener) => { visibilityListeners.add(listener); add(name, listener) }
+  document.removeEventListener = (name, listener) => { visibilityListeners.delete(listener); remove(name, listener) }
+  document.hidden = outcome !== 'already visible'
+  globalThis.document = document
+  const controller = new AbortController()
+  try {
+    if (outcome === 'already aborted') controller.abort()
+    let settled = false
+    const waiting = waitForAppVisible(controller.signal).then(result => { settled = true; return result })
+    if (outcome === 'visible' || outcome === 'abort') {
+      await Promise.resolve()
+      assert.equal(settled, false)
+      assert.equal(visibilityListeners.size, 1)
+      if (outcome === 'visible') setAndroidAppVisible(true)
+      else controller.abort()
+    }
+    assert.equal(await waiting, outcome.includes('visible'))
+    assert.equal(visibilityListeners.size, 0)
+  } finally {
+    controller.abort()
+    setAndroidAppVisible(null)
+    if (originalDocument === undefined) delete globalThis.document
+    else globalThis.document = originalDocument
+  }
+})
 
 test('Android background playback follows Home even when Chromium stays visible for a refresh', () => {
   const originalDocument = globalThis.document

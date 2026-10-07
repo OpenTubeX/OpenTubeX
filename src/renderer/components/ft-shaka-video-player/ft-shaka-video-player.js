@@ -1,6 +1,6 @@
 import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
-import { isAppHidden } from '../../helpers/appVisibility.js'
+import { isAppHidden, waitForAppVisible } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
@@ -7813,6 +7813,8 @@ export default defineComponent({
     let sabrStream
     /** @type {AbortController | undefined} */
     let sabrAbortController
+    /** @type {AbortController | undefined} */
+    let foregroundLoadAbortController
 
     const sabrBackoffRemainingMs = ref(0)
     const sabrBackoffDurationMs = ref(0)
@@ -11934,16 +11936,31 @@ export default defineComponent({
      * @param {string} mimeType
      */
     async function loadPlaybackSource(url, startTime, mimeType) {
+      foregroundLoadAbortController?.abort()
       const loadingPlayer = player
       const mediaElement = video.value
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
         !props.localFilePlayback && mimeType === MANIFEST_TYPE_SABR &&
         mediaElement.autoplay && !initialAutoplayCanceled &&
         mediaElement.played.length === 0 && isActiveTab.value) {
+        // Android cannot start a fresh playback service from a hidden activity.
+        // Metadata can finish after the app-state pause sweep, so defer this
+        // initial load until foreground protection can be established.
+        if (isAppHidden() && store.getters.getContinuePlaybackWhenScreenIsLocked) {
+          const controller = new AbortController()
+          const generation = formatSwitchGeneration
+          foregroundLoadAbortController = controller
+          while (isAppHidden()) {
+            const visible = await waitForAppVisible(controller.signal)
+            if (!visible) return
+          }
+          if (foregroundLoadAbortController === controller) foregroundLoadAbortController = undefined
+          if (controller.signal.aborted || loadingPlayer !== player || generation !== formatSwitchGeneration) return
+        }
         // Protect pending autoplay before the asynchronous SABR load: even its
         // first response can arrive after Android hides the activity.
         // A queued startup seek is a position, but has not played any media.
-        if (!isAppHidden()) {
+        if (!isAppHidden() && mediaElement.autoplay && !initialAutoplayCanceled && isActiveTab.value) {
           tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
         } else if (!store.getters.getContinuePlaybackWhenScreenIsLocked) {
           // A player initialized while hidden missed the pause sweep. Cancel
@@ -12228,6 +12245,7 @@ export default defineComponent({
        */
       async ([newFormat], [oldFormat]) => {
         const generation = ++formatSwitchGeneration
+        foregroundLoadAbortController?.abort()
         const isCurrentFormatSwitch = () => generation === formatSwitchGeneration
         ignoreErrors = true
 
@@ -12737,6 +12755,7 @@ export default defineComponent({
      * }>}
      */
     async function destroyPlayer() {
+      foregroundLoadAbortController?.abort()
       clearSabrBackoffTimer()
       repeatStatsTracker?.destroy()
       repeatStatsLoopObserver?.disconnect()

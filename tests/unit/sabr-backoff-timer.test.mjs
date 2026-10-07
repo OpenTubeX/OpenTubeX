@@ -21,6 +21,7 @@ function fixture() {
   video.value.removeEventListener = noop
   const context = {
     video, props: { manifestMimeType: 'sabr' }, MANIFEST_TYPE_SABR: 'sabr', ignoreErrors: false,
+    AbortController, foregroundLoadAbortController: null, formatSwitchGeneration: 0,
     initialAutoplayCanceled: false, hasPlaybackPosition: { value: false }, isActiveTab: { value: true },
     isAppHidden: () => false, store: { getters: { getContinuePlaybackWhenScreenIsLocked: true } },
     shortsNavigationSuspended: { value: false },
@@ -55,18 +56,63 @@ for (const sought of [false, true]) test(`Android starts its playback service be
   assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
 })
 
-for (const continuePlayback of [true, false]) test(`Android SABR loading respects an already-hidden activity with background playback ${continuePlayback ? 'enabled' : 'disabled'}`, async () => {
+test('Android defers an already-hidden SABR autoplay load until it can establish foreground protection', async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  let hidden = true
+  f.context.isAppHidden = () => hidden
+  const visible = Promise.withResolvers()
+  f.context.waitForAppVisible = () => visible.promise
+  const loads = []
+  f.context.player.load = async () => { loads.push(f.playbackStates.at(-1)) }
+  f.video.value.autoplay = true
+  const loading = f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.deepEqual(loads, [], 'no unprotected SABR request may start while hidden')
+  assert.deepEqual(f.playbackStates, [])
+  hidden = false
+  visible.resolve(true)
+  await loading
+  assert.deepEqual(loads, ['playing'], 'protection must precede loading after returning')
+})
+
+test('Android cancels pending SABR autoplay when loading starts hidden with background playback disabled', async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.context.isAppHidden = () => true
-  f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = continuePlayback
+  f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = false
   f.video.value.autoplay = true
   f.video.value.paused = true
   await f.loadPlaybackSource('fixture', null, 'sabr')
   f.startSabrBackoffTimer(20000)
   assert.deepEqual(f.playbackStates, [], 'a hidden activity must keep the pending media session idle')
-  assert.equal(f.video.value.autoplay, continuePlayback, 'disabled background playback must cancel pending native autoplay')
-  assert.equal(f.context.initialAutoplayCanceled, !continuePlayback)
+  assert.equal(f.video.value.autoplay, false, 'disabled background playback must cancel pending native autoplay')
+  assert.equal(f.context.initialAutoplayCanceled, true)
+})
+
+for (const cancellation of ['abort', 'source replacement', 'player replacement', 'pause']) test(`a deferred Android load respects ${cancellation}`, async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  let hidden = true
+  f.context.isAppHidden = () => hidden
+  const visible = Promise.withResolvers()
+  f.context.waitForAppVisible = signal => {
+    signal.addEventListener('abort', () => visible.resolve(false), { once: true })
+    return visible.promise
+  }
+  let loads = 0
+  f.context.player.load = async () => { loads++ }
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  const loading = f.loadPlaybackSource('fixture', null, 'sabr')
+  if (cancellation === 'abort') f.context.foregroundLoadAbortController.abort()
+  if (cancellation === 'source replacement') f.context.formatSwitchGeneration++
+  if (cancellation === 'player replacement') f.context.player = null
+  if (cancellation === 'pause') f.pause()
+  hidden = false
+  visible.resolve(true)
+  await loading
+  assert.equal(loads, cancellation === 'pause' ? 1 : 0)
+  assert.ok(!f.playbackStates.includes('playing'), 'a canceled or superseded load must not reactivate playback')
 })
 
 test('pending SABR loading protects enabled playback before a late background backoff', async () => {
@@ -156,6 +202,7 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
   const calls = []
   const noop = () => {}
   const context = {
+    foregroundLoadAbortController: { abort: () => calls.push('foreground') },
     clearSabrBackoffTimer: noop, repeatStatsTracker: null, repeatStatsLoopObserver: null,
     screenWakeBinding: null, iosFullscreenCleanup: null, iosCaptionsCleanup: null, ignoreErrors: false,
     cancelPendingVolumeUserSet: noop, cancelSponsorBlockSkipSchedule: noop,
@@ -165,7 +212,7 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
       getControls: () => null,
       async destroy() {
         calls.push('shaka')
-        assert.deepEqual(calls, ['sabr', 'abort', 'shaka'])
+        assert.deepEqual(calls, ['foreground', 'sabr', 'abort', 'shaka'])
       },
     },
     player: null, process: { env: { SUPPORTS_LOCAL_API: true } },
@@ -175,7 +222,7 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
   }
   const destroyPlayer = vm.runInNewContext(`${destroySource}\ndestroyPlayer`, context)
   await destroyPlayer()
-  assert.deepEqual(calls, ['sabr', 'abort', 'shaka'])
+  assert.deepEqual(calls, ['foreground', 'sabr', 'abort', 'shaka'])
 })
 
 for (const format of ['legacy', 'audio']) {

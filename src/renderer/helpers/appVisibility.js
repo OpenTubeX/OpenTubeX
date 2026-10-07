@@ -8,6 +8,28 @@ export function isAppHidden() {
     : !androidVisible
 }
 
+/**
+ * @param {AbortSignal} signal
+ * @returns {Promise<boolean>} Whether the app became visible before cancellation.
+ */
+export function waitForAppVisible(signal) {
+  if (signal.aborted) return Promise.resolve(false)
+  if (!isAppHidden()) return Promise.resolve(true)
+  return new Promise(resolve => {
+    const finish = visible => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      signal.removeEventListener('abort', onAbort)
+      resolve(visible)
+    }
+    const onVisibilityChange = () => {
+      if (!isAppHidden()) finish(true)
+    }
+    const onAbort = () => finish(false)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    signal.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
 export function setAndroidAppVisible(visible) {
   const wasHidden = isAppHidden()
   androidVisible = visible

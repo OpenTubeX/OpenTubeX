@@ -282,6 +282,7 @@ for (const userSeek of [false, true]) {
       player,
       video: { value: mediaElement },
       pendingMetadataSeek: null,
+      foregroundLoadAbortController: null,
       process: { env: {} },
       hasPlaybackPosition: { value: userSeek }
     })
