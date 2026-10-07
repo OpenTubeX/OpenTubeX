@@ -366,6 +366,19 @@
   padding-block: 6px;
 }
 
+@media (any-pointer: coarse) {
+  .menuSection :deep(.switch-ctn) {
+    --quick-settings-switch-padding: calc((max(48px, var(--switch-touch-height)) - var(--switch-track-height)) / 2);
+
+    /* Keep the grid gap between visible controls while preserving touch targets. */
+    margin-block: calc(-1 * var(--quick-settings-switch-padding));
+  }
+
+  .menuSection :deep(.switch-label) {
+    padding-block: var(--quick-settings-switch-padding);
+  }
+}
+
 /* Compact mouse-only switches in both popup and full-screen layouts. */
 @media (any-pointer: fine) and (not (any-pointer: coarse)) {
   .menuSection :deep(.switch-input) {

@@ -454,6 +454,79 @@ for (const uiScale of [100, 95]) {
     })
   })
 
+  test.describe(`quick settings touch spacing at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          uiScale,
+          quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'],
+        }
+      }
+    })
+
+    test('uses the shared visible row gap while keeping large switch touch targets', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' })
+      const touch = await page.context().newCDPSession(page)
+      await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+      await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
+      // Exercise the shared renderer with native mobile control dimensions.
+      await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+      for (const { width, height } of [{ width: 375, height: 900 }, { width: 480, height: 900 }, { width: 740, height: 550 }]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
+          BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, ...bounds })
+        }, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const rows = await menu.locator('.quickSettingControl').evaluateAll(controls => controls.map(control => {
+          const select = control.querySelector('.select-text')
+          const slider = control.querySelector('.sliderControl')
+          const text = control.querySelector('.switch-label-text')
+          let top
+          let bottom
+          if (select) {
+            top = control.querySelector('.select-label').getBoundingClientRect().top
+            bottom = select.getBoundingClientRect().bottom
+          } else if (slider) {
+            top = control.querySelector('.labelRow').getBoundingClientRect().top
+            const track = slider.getBoundingClientRect()
+            bottom = (track.top + track.bottom) / 2 +
+              Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
+          } else {
+            const bounds = text.getBoundingClientRect()
+            const trackHeight = Number.parseFloat(getComputedStyle(text, '::before').blockSize)
+            const visibleHeight = Math.max(bounds.height, trackHeight)
+            top = (bounds.top + bounds.bottom - visibleHeight) / 2
+            bottom = top + visibleHeight
+          }
+          return { setting: control.dataset.settingId, top, bottom }
+        }))
+        expect(rows.map(row => row.setting)).toEqual(['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'])
+        for (let index = 1; index < rows.length; index++) {
+          expect.soft(rows[index].top - rows[index - 1].bottom,
+            `${width}px: ${rows[index - 1].setting} to ${rows[index].setting}`).toBeCloseTo(16, 1)
+        }
+        for (const target of await menu.locator('.switch-label, .switch-input').all()) {
+          expect((await target.boundingBox()).height, 'switch touch target stays large').toBeGreaterThanOrEqual(47.9)
+        }
+        if (uiScale === 100 && width === 480) {
+          for (const scheme of ['light', 'dark']) {
+            await page.emulateMedia({ colorScheme: scheme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+            const screenshot = testInfo.outputPath(`quick-settings-touch-spacing-${scheme}.png`)
+            await menu.locator('.menuSection').screenshot({ path: screenshot })
+            await testInfo.attach(`quick-settings-touch-spacing-${scheme}`, { path: screenshot, contentType: 'image/png' })
+          }
+        }
+        await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
+        await expect(menu).toHaveCount(0)
+      }
+      await touch.detach()
+    })
+  })
+
   test.describe(`quick settings select spacing at ${uiScale}% scale`, () => {
     test.use({
       seed: {
