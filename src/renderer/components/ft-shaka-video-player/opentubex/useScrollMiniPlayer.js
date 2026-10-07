@@ -357,7 +357,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         renderScrollMiniPlayerDrag()
       })
     } else {
-      watchNavigation.beginMinimizePreview()
+      inlineDrag.ready = watchNavigation.beginMinimizePreview()
     }
     element.style.transformOrigin = 'top left'
     element.style.willChange = 'transform'

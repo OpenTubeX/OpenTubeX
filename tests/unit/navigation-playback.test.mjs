@@ -14,9 +14,9 @@ const titleSource = (await readFile(new URL('../../src/renderer/tabs/TabContext.
 function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
   const route = { path: '/watch/video', fullPath: '/watch/video', params: { id: 'video' } }
   const props = reactive({ tabId: 'tab', route, presented: true })
-  const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }] : [] }) })
+  const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }, { route }] : [{ route }] }) })
   const provides = new Map()
-  const emit = t.mock.fn()
+  const scrollCommits = []
   const unmount = []
   const titles = []
   const scope = effectScope()
@@ -57,13 +57,12 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     defineProps: () => props,
-    defineEmits: () => emit,
     // The native scroll mini player lives outside the watch view's DOM tree.
     // Its component reference must remain usable without a DOM video descendant.
     useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
-    store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll } },
+    store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll; scrollCommits.push(payload) } },
     resolveRouteComponent: () => ({}),
     getTabNavigationService: () => ({ createRouterFacade: () => ({}), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
@@ -81,27 +80,49 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     scope.stop()
   })
   return {
-    emit, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
+    scrollCommits, mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
 }
 
-test('minimize preview compensates for document scroll until browsing restoration finishes', async t => {
+for (const commit of [false, true]) {
+  test(`minimize restores fractional browsing scroll and preserves Watch on ${commit ? 'commit' : 'cancel'}`, async t => {
+    const mounted = mountWatch(t)
+    mounted.getters.getTabById = () => ({ historyIndex: 1, history: [{ route: { path: '/history' }, scroll: { left: 4.5, top: 600.25 } }, { route: { path: '/watch/video', fullPath: '/watch/video' } }] })
+    const navigation = mounted.provides.get('navigation')
+    await navigation.beginMinimizePreview()
+    assert.equal(mounted.viewport.scrollX, 4.5)
+    assert.equal(mounted.viewport.scrollY, 600.25)
+    assert.equal(mounted.previewRoot.style.top, '580.25px', 'Watch stays at its original viewport position')
+    await navigation.finishMinimizePreview(commit)
+    await navigation.clearMinimizePreview()
+    assert.equal(mounted.viewport.scrollY, commit ? 600.25 : 20)
+    if (commit) {
+      assert.equal(mounted.scrollCommits[0].historyIndex, 0)
+      assert.equal(mounted.scrollCommits[0].scroll.top, 600.25)
+      assert.equal(mounted.scrollCommits[1].historyIndex, 1)
+      assert.equal(mounted.scrollCommits[1].scroll.top, 20)
+    }
+  })
+}
+
+test('navigation interrupting a preview preserves the original Watch history scroll', async t => {
   const mounted = mountWatch(t)
-  mounted.getters.getTabById = () => ({ historyIndex: 1, history: [{ route: { path: '/history' }, scroll: { left: 4.5, top: 600.25 } }] })
+  const tab = { historyIndex: 1, history: [
+    { route: { path: '/history' }, scroll: { left: 0, top: 600.25 } },
+    { route: { path: '/watch/video', fullPath: '/watch/video' } }
+  ] }
+  mounted.getters.getTabById = () => tab
   const navigation = mounted.provides.get('navigation')
-  navigation.beginMinimizePreview()
-  assert.equal(mounted.emit.mock.calls.at(-1).arguments[0], 'browsing-preview')
-  assert.equal(mounted.emit.mock.calls.at(-1).arguments[1].translate, '-4.5px -580.25px')
-  await navigation.finishMinimizePreview(true)
-  mounted.viewport.scrollX = 4.5
-  mounted.viewport.scrollY = 600.25
-  mounted.listeners.get('scroll')()
-  assert.equal(mounted.emit.mock.calls.at(-1).arguments[1].translate, '0px 0px')
-  navigation.clearMinimizePreview()
-  assert.deepEqual([...mounted.emit.mock.calls.at(-1).arguments], ['browsing-preview', null])
+  await navigation.beginMinimizePreview()
+  tab.history[1].scroll = { left: 0, top: mounted.viewport.scrollY }
+  await mounted.navigate('/subscriptions')
+  await navigation.clearMinimizePreview()
+  assert.equal(mounted.scrollCommits.at(-1).historyIndex, 1)
+  assert.equal(mounted.scrollCommits.at(-1).scroll.top, 20)
+  assert.equal(mounted.viewport.scrollY, 600.25, 'cleanup must not scroll the replacement page')
 })
 
 test('retained navigation waits for fullscreen exit before deactivating Watch', async t => {
@@ -415,7 +436,7 @@ for (const commit of [false, true]) {
     navigation.beginMinimizePreview()
     assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
     await navigation.finishMinimizePreview(commit)
-    assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
+    assert.equal(mounted.mobileNavigationMinimizePreview.value, commit ? 'tab' : null)
     navigation.clearMinimizePreview()
     assert.equal(mounted.mobileNavigationMinimizePreview.value, null)
   })

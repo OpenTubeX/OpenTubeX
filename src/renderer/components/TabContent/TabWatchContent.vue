@@ -2,7 +2,7 @@
   <div
     ref="previewHost"
     class="watchPreviewHost"
-    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive }"
+    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive, watchMinimizePreview: previewActive && !previewRestoring }"
   >
     <div
       v-show="isWatchRoute || previewStyle"
@@ -38,7 +38,6 @@ const props = defineProps({
   route: { type: Object, required: true },
   presented: Boolean
 })
-const emit = defineEmits(['browsing-preview'])
 
 const navigation = getTabNavigationService()
 const watchRoot = useTemplateRef('watchRoot')
@@ -49,7 +48,8 @@ let previewScroll = null
 let previewOrigin = null
 let previewViewport = null
 let previewRestoring = false
-let previewBrowsingScroll = null
+let previewReady = null
+let previewHistoryEntry = null
 const watchView = useTemplateRef('watchView')
 // Freeze the watch route while browsing, so its route watchers do not reload
 // or tear down the video when the tab moves to another page.
@@ -152,10 +152,10 @@ function beginMinimizePreview() {
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const tab = store.getters.getTabById(props.tabId)
-  previewBrowsingScroll = getPreviousBrowsingRoute(tab)
+  previewHistoryEntry = { index: tab.historyIndex, fullPath: props.route.fullPath }
+  const browsingScroll = getPreviousBrowsingRoute(tab)
     ? tab.history[tab.historyIndex - 1].scroll
     : null
-  updateBrowsingPreviewPosition()
   const bounds = watchRoot.value.getBoundingClientRect()
   // Use an explicit positioned host: Chromium versions disagree on whether
   // inline-size query containers establish a fixed-position containing block.
@@ -172,6 +172,15 @@ function beginMinimizePreview() {
   }
   window.addEventListener('scroll', updatePreviewPosition, { passive: true })
   previewActive.value = true
+  const scroll = previewScroll
+  // Put browsing back in document flow before restoring its viewport. The
+  // browser clamps the offset to the rendered page and positions sticky headers.
+  previewReady = nextTick(() => {
+    if (!previewActive.value || previewScroll !== scroll) return
+    window.scrollTo({ left: browsingScroll?.left ?? 0, top: browsingScroll?.top ?? 0, behavior: 'instant' })
+    updatePreviewPosition()
+  })
+  return previewReady
 }
 
 function beginRestorePreview() {
@@ -215,17 +224,7 @@ function beginRestorePreview() {
   return true
 }
 
-function updateBrowsingPreviewPosition() {
-  if (previewRestoring) return
-  // The browsing page shares Watch's document scroll until navigation finishes.
-  // Compensate for it throughout the drag and the scroll-restoration handoff.
-  emit('browsing-preview', {
-    translate: `${window.scrollX - (previewBrowsingScroll?.left ?? 0)}px ${window.scrollY - (previewBrowsingScroll?.top ?? 0)}px`
-  })
-}
-
 function updatePreviewPosition() {
-  updateBrowsingPreviewPosition()
   const root = watchRoot.value
   if (!root || !previewOrigin) return
   if (previewRestoring && previewViewport) {
@@ -239,6 +238,7 @@ function updatePreviewPosition() {
 }
 
 watch(isWatchRoute, () => {
+  if (!isWatchRoute.value && previewActive.value && !previewRestoring && !minimized.value) clearMinimizePreview()
   // The retained Watch host moves when the browsing route is replaced. Keep
   // its visible preview in place until the player returns to its inline layout.
   if (previewRestoring && previewActive.value) updatePreviewPosition()
@@ -276,16 +276,37 @@ async function finishMinimizePreview(commit) {
     }
     return
   }
+  await previewReady
   if (commit && !disposed) {
-    await minimize().catch(error => {
+    const tab = store.getters.getTabById(props.tabId)
+    const historyIndex = tab.historyIndex
+    if (getPreviousBrowsingRoute(tab)) {
+      store.commit('setHistoryEntryScroll', {
+        tabId: props.tabId,
+        historyIndex: historyIndex - 1,
+        scroll: { left: window.scrollX, top: window.scrollY }
+      })
+    }
+    try {
+      await minimize()
+    } catch (error) {
       console.error('Unable to dock player', error)
-    })
+    }
   }
+  if (isWatchRoute.value) await clearMinimizePreview()
 }
 
 function clearMinimizePreview() {
-  emit('browsing-preview', null)
-  previewBrowsingScroll = null
+  const tab = store.getters.getTabById(props.tabId)
+  if (previewScroll && previewHistoryEntry && tab?.history[previewHistoryEntry.index]?.route.fullPath === previewHistoryEntry.fullPath) {
+    // Navigation (including Back or a tab switch interrupting the gesture)
+    // saves browsing's document offset into Watch. Preserve its own viewport.
+    store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex: previewHistoryEntry.index, scroll: previewScroll })
+  }
+  const watchScroll = previewActive.value && !previewRestoring && props.route.fullPath === previewHistoryEntry?.fullPath && props.presented ? previewScroll : null
+  previewHistoryEntry = null
+  previewScroll = null
+  previewReady = null
   if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   previewActive.value = false
   previewStyle.value = null
@@ -293,6 +314,11 @@ function clearMinimizePreview() {
   watchRoot.value?.style.removeProperty('opacity')
   watchRoot.value?.firstElementChild.style.removeProperty('opacity')
   window.removeEventListener('scroll', updatePreviewPosition)
+  if (watchScroll) {
+    return nextTick(() => {
+      if (!disposed && isWatchRoute.value && props.presented && !previewActive.value) window.scrollTo({ ...watchScroll, behavior: 'instant' })
+    })
+  }
 }
 
 async function dismiss() {
@@ -359,6 +385,11 @@ onBeforeUnmount(() => {
 .watchPreviewHost {
   position: relative;
   z-index: 1;
+}
+
+.watchMinimizePreview {
+  position: absolute;
+  inset: 0;
 }
 
 .watchRouteActive:not(.watchPreviewing) {

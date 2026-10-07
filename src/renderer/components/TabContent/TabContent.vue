@@ -32,7 +32,6 @@
         :key="resolvedComponentKey"
         class="routerView"
         :class="{ browsingBehindWatch: isWatchRoute }"
-        :style="browsingPreviewStyle"
         :inert="isWatchRoute"
         :aria-hidden="String(isWatchRoute)"
       />
@@ -43,7 +42,6 @@
       :tab-id="tab.id"
       :route="resolvedRoute"
       :presented="isPresented"
-      @browsing-preview="browsingPreviewStyle = $event"
     />
   </div>
 </template>
@@ -123,7 +121,6 @@ const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
 const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
 const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
 const browsingInitialized = ref(false)
-const browsingPreviewStyle = shallowRef(null)
 // Background Watch tabs only need to preload the video. Mount their browsing
 // page on first presentation, then retain it so a dock gesture can reveal it
 // without mounting a route while the video is moving. Mobile swipe prewarming
@@ -392,6 +389,8 @@ function cancelLoaderSettle() {
 }
 
 .tabContent:has(.watchPreviewing) .browsingBehindWatch {
+  position: relative;
+  inset: auto;
   visibility: visible;
 }
 
