@@ -445,10 +445,11 @@ export function isUnloadedBackgroundTabClick(event) {
  * @param {boolean} [params.makeActive=true] set to false to open tab in background (only used when doCreateNewTab is true)
  * @param {boolean} [params.lazyLoad=false] set to true to leave a background tab unloaded
  * @param {string} [params.title] initial title for the destination
+ * @param {string | null} [params.thumbnail] image for the Android background-tab confirmation
  * @param {object} [params.query] the query params to use (optional)
  * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, lazyLoad = false, title = undefined, searchQueryText = null }) {
+export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, lazyLoad = false, title = undefined, thumbnail = null, searchQueryText = null }) {
   if (process.env.IS_ELECTRON) {
     if (doCreateNewTab) {
       // Open in new tab
@@ -479,7 +480,12 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
     }
   } else if (process.env.IS_CAPACITOR) {
     if ((doCreateNewTab || doCreateNewWindow) && getCapacitorTabService().tabsEnabled) {
-      return getCapacitorTabService().createTab({ path, query }, title, makeActive)
+      return getCapacitorTabService().createTab({ path, query }, title, makeActive).then(tabId => {
+        if (tabId && !makeActive && !process.env.IS_IOS) {
+          showToast({ message: i18n.global.t('Context Menu.Opened in a Background Tab'), image: thumbnail })
+        }
+        return tabId
+      })
     }
 
     return getTabNavigationService().pushPresented({

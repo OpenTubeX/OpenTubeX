@@ -2031,6 +2031,7 @@ Clipboard:
   Copy failed: No s'ha pogut copiar al porta-retalls
   Cannot access clipboard without a secure connection: No es pot accedir al porta-retalls sense una connexió segura
 Context Menu:
+  Opened in a Background Tab: "Obert en una pestanya en segon pla"
   Open in a Background Tab: "Obre en una pestanya en segon pla"
   Select Tab: Selecciona la pestanya
   Close Tabs Before: Tanca les pestanyes anteriors

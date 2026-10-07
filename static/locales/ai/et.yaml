@@ -1528,6 +1528,7 @@ Share:
   Share failed: "Linki ei õnnestunud jagada"
   Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale
 Context Menu:
+  Opened in a Background Tab: "Avatud taustal oleval vahelehel"
   Open in a Background Tab: "Ava taustal uuel vahelehel"
   Select Tab: Vali vahekaart
   Close Tabs Before: Sulge eelnevad vahekaardid

@@ -1528,6 +1528,7 @@ Share:
   Share failed: "リンクを共有できませんでした"
   Timestamp Link Copied: 再生時刻付きリンクをクリップボードにコピーしました
 Context Menu:
+  Opened in a Background Tab: "バックグラウンドのタブで開きました"
   Open in a Background Tab: "バックグラウンドのタブで開く"
   Select Tab: タブを選択
   Close Tabs Before: 前のタブを閉じる

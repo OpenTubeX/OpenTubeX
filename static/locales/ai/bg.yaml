@@ -1545,6 +1545,7 @@ Share:
   Share failed: "Връзката не можа да бъде споделена"
   Timestamp Link Copied: Връзката към времевия маркер е копирана в системния буфер
 Context Menu:
+  Opened in a Background Tab: "Отворено във фонов раздел"
   Open in a Background Tab: "Отваряне в раздел на заден план"
   Select Tab: Избиране на раздел
   Close Tabs Before: Затваряне на предишните раздели
