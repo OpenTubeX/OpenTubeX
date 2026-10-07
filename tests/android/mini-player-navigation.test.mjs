@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent } from '../../e2e/helpers/player.mjs'
@@ -10,7 +10,7 @@ import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 const skip = !process.env.ANDROID_CDP_URL || !process.env.ANDROID_SERIAL
 const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
 
-async function withMobileVideo(run) {
+async function withMobileVideo(run, { fromChannel = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
   const session = await page.context().newCDPSession(page)
@@ -30,7 +30,7 @@ async function withMobileVideo(run) {
     adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
     adb('settings', 'put', 'system', 'user_rotation', '0')
     await page.locator('.profileTrigger').waitFor()
-    settings = await page.evaluate(() => {
+    settings = await page.evaluate(fromChannel => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
@@ -44,6 +44,14 @@ async function withMobileVideo(run) {
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__miniNavigationFetch = window.fetch
       window.fetch = (url, options) => {
+        if (fromChannel && String(url).includes('/api/v1/channels/UC-title-test')) {
+          const response = String(url).includes('/videos') ? { videos: [] } : {
+            author: 'Test channel', authorId: 'UC-title-test', authorThumbnails: [],
+            authorBanners: [], subCount: 1000, description: 'Channel title regression test',
+            totalViews: 0, joined: 1700000000, relatedChannels: [], tabs: ['videos'],
+          }
+          return Promise.resolve(new Response(JSON.stringify(response), { headers: { 'Content-Type': 'application/json' } }))
+        }
         if (String(url).includes('/api/v1/comments/')) {
           return Promise.resolve(new Response(JSON.stringify({
             commentCount: 1, comments: [{
@@ -60,9 +68,19 @@ async function withMobileVideo(run) {
       style.id = 'mini-navigation-test-style'
       style.textContent = '.tutorialOverlay { display: none !important; }'
       document.head.append(style)
-      location.hash = '#/watch/jNQXAC9IVRw'
+      location.hash = fromChannel ? '#/subscriptions' : '#/watch/jNQXAC9IVRw'
       return saved
-    })
+    }, fromChannel)
+    if (fromChannel) {
+      await expect(page).toHaveURL(/#\/subscriptions/)
+      await expect(page.locator('.bannerContainer')).toHaveCount(0)
+      await page.evaluate(() => { location.hash = '#/channel/UC-title-test' })
+      await expect.poll(() => page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.getters.getTabById(store.getters.getActiveTabId)?.contentTitle
+      })).toBe('Test channel')
+      await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
+    }
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
       try { return await handle.evaluate(component => !!component && component.proxy.onMountedRun && component.proxy.preparingVideoLoadGeneration === null) }
@@ -83,8 +101,9 @@ async function withMobileVideo(run) {
       })
     }, media)
     const player = page.locator('.ftVideoPlayer')
-    await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBe(4)
+    await expect.poll(() => player.locator('video').evaluate(video => video.readyState), { timeout: 15000 }).toBeGreaterThanOrEqual(1)
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    await expect.poll(() => player.locator('video').evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
     await run({ page, player, watch, tap, session })
   } finally {
     try {
@@ -118,6 +137,51 @@ async function withMobileVideo(run) {
       }
     }
   }
+}
+
+for (const audioOnly of [false, true]) {
+  test(`channel tab keeps its name after swiping down and closing ${audioOnly ? 'audio' : 'video'} playback`, { skip }, () => withMobileVideo(async ({ page, player, watch, tap, session }) => {
+    if (audioOnly) {
+      const audio = (await readFile(new URL('../../e2e/fixtures/media/demo-audio.mp3', import.meta.url))).toString('base64')
+      await watch.evaluate((component, audio) => {
+        Object.assign(component.proxy, {
+          localFilePlayback: true, manifestSrc: `data:audio/mpeg;base64,${audio}`,
+          manifestMimeType: 'audio/mpeg',
+        })
+        component.proxy.enableAudioFormat()
+      }, audio)
+      await expect(player.locator('video')).toHaveClass(/audioOnly/)
+      await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBe(4)
+      await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    }
+    const box = await player.boundingBox()
+    const point = { x: box.x + box.width / 2, y: box.y + 30 }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    for (const distance of [30, 60, 100, 150]) {
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance }] })
+    }
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(page).toHaveURL(/#\/channel\/UC-title-test/)
+    await expect(player).toHaveClass(/mobileMiniBar/)
+    const title = () => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getTabById(store.getters.getActiveTabId)?.contentTitle
+    })
+    assert.equal(await title(), 'Test channel', 'minimization must restore the cached channel name')
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+    await tap(player.locator('.mobileMiniBarDismiss'))
+    await expect(player).toHaveCount(0)
+    assert.equal(await title(), 'Test channel', 'closing playback must keep the channel name')
+    await tap(page.locator('.capacitorPhoneTabSwitcherButton'))
+    await expect(page.locator('.capacitorPhoneTabTarget[aria-selected="true"] .capacitorPhoneTabTitle')).toHaveText('Test channel')
+    if (process.env.ANDROID_ARTIFACT_DIR) {
+      await mkdir(process.env.ANDROID_ARTIFACT_DIR, { recursive: true })
+      await page.locator('.capacitorPhoneTabTarget[aria-selected="true"]').screenshot({
+        path: `${process.env.ANDROID_ARTIFACT_DIR}/channel-title-${audioOnly ? 'audio' : 'video'}.png`,
+      })
+    }
+    await page.locator('.capacitorPhoneTabHeaderButton').last().click()
+  }, { fromChannel: true }))
 }
 
 test('fullscreen comment avatar navigation opens the channel and docks the same playing video', { skip }, () => withMobileVideo(async ({ page, player, watch, tap }) => {
