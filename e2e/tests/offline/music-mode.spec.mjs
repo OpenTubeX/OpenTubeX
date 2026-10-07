@@ -172,13 +172,17 @@ test('inactive Shorts cannot overwrite the active channel speed when music mode 
     view.channelId = 'second'
     await view.$nextTick()
   })
-  await openShort(page, 'jNQXAC9IVRw')
+  const video = await openShort(page, 'jNQXAC9IVRw')
+  const position = await video.evaluate(element => {
+    element.pause()
+    return element.currentTime
+  })
   await watch.evaluate(async view => {
     view.channelId = 'first'
     await view.$nextTick()
   })
   await setMusicMode(page, false)
-  await expectPlayback(page, 0, 2.5)
+  await expectPlayback(page, position, 2.5)
   await expect.poll(() => watch.evaluate(view => view.currentPlaybackRate)).toBe(2.5)
 })
 
