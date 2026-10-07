@@ -29,7 +29,7 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
       return [{ type: 'channel', authorId: entry.id, author: entry.title, authorThumbnails: [{ url: thumbnail }], subCount: entry.channel_follower_count ?? 0 }]
     }
     if (entry.ie_key === 'YoutubeTab' && /^[\w-]+$/.test(entry.id)) {
-      return [{ type: 'playlist', playlistId: entry.id, title: entry.title, author: entry.channel ?? entry.uploader ?? '', authorId: entry.channel_id ?? '', playlistThumbnail: thumbnail, videoCount: entry.playlist_count ?? 0 }]
+      return [{ type: 'playlist', dataSource: 'local', playlistId: entry.id, title: entry.title, channelName: entry.channel ?? entry.uploader ?? '', channelId: entry.channel_id ?? '', thumbnail, videoCount: entry.playlist_count ?? undefined }]
     }
     if (!/^[\w-]{11}$/.test(entry.id)) return []
     return [{
@@ -48,4 +48,36 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
     }]
   })
   return { results, hasMoreResults: page < MAX_SEARCH_PAGES && info.entries.length >= SEARCH_PAGE_SIZE }
+}
+
+export async function completeYtDlpSearchPlaylists(results, loadPlaylist) {
+  const completed = results.slice()
+  const controller = new AbortController()
+  // Optional metadata gets a shared budget, including time spent queued.
+  const timeout = setTimeout(() => controller.abort(), 10_000)
+  let nextIndex = 0
+  async function worker() {
+    while (!controller.signal.aborted && nextIndex < results.length) {
+      const index = nextIndex++
+      const result = results[index]
+      if (result.type !== 'playlist' || (result.videoCount != null && result.thumbnail)) continue
+      try {
+        const info = await loadPlaylist(result.playlistId, controller.signal)
+        if (controller.signal.aborted) return
+        completed[index] = {
+          ...result,
+          videoCount: info.playlist_count ?? result.videoCount,
+          thumbnail: result.thumbnail || info.thumbnails?.find(item => typeof item.url === 'string')?.url || ''
+        }
+      } catch {
+        // A single unavailable playlist must not discard the search results.
+      }
+    }
+  }
+  try {
+    await Promise.all([worker(), worker()])
+    return completed
+  } finally {
+    clearTimeout(timeout)
+  }
 }

@@ -21,7 +21,7 @@ import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 import { buildYtDlpStoryboardVtt } from './ytDlpStoryboard'
 import { downloadYtDlpSubtitle } from './ytDlpSubtitle'
 import { isYouTubeSubtitleUrl } from '../youtubeSubtitle'
-import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults } from '../ytDlpSearch'
+import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../ytDlpSearch'
 import { shouldUseGioTrash } from './trashPlatform'
 import {
   compareQueuedDownloads,
@@ -1951,7 +1951,23 @@ export async function handleYtDlpSearch(event, query, params, page) {
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
     })
-    return normalizeYtDlpSearchResults(JSON.parse(stdout), page)
+    const response = normalizeYtDlpSearchResults(JSON.parse(stdout), page)
+    response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
+      // Reuse the search authentication and proxy options, fetching only one
+      // flat entry while retaining the playlist's total count and thumbnail.
+      const playlistArgs = args.slice(0, -2)
+      playlistArgs[playlistArgs.indexOf('--playlist-start') + 1] = '1'
+      playlistArgs[playlistArgs.indexOf('--playlist-end') + 1] = '1'
+      playlistArgs.push('--', `https://www.youtube.com/playlist?list=${playlistId}`)
+      const { stdout } = await execFileAsync(executable, playlistArgs, {
+        timeout: PLAYBACK_INFO_TIMEOUT,
+        maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+        windowsHide: true,
+        signal
+      })
+      return JSON.parse(stdout)
+    })
+    return response
   } catch {
     // Process errors can contain account information or cookie paths.
     return { error: 'Unable to search with configured cookies' }
