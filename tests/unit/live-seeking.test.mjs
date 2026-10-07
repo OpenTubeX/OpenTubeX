@@ -66,6 +66,7 @@ function absoluteSeekFixture(props) {
     applyPendingPresentationModes() {},
     updateAutoPip() {},
     handleVideoResize() {},
+    handlePause() {},
     canSeek: () => seekingAllowed,
     accumulatedSeekSeconds: 5,
     video: { value: { currentTime: 10, duration: 30, paused: true, autoplay: false, pause() {}, play() { state.playCalls++; return Promise.resolve() }, fastSeek(time) { this.currentTime = time } } },

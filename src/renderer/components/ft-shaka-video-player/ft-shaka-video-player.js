@@ -6767,17 +6767,14 @@ export default defineComponent({
     function registerMediaSessionHandlers() {
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
         play: () => video.value?.play(),
-        pause: () => {
-          // pause() need not emit an event while native autoplay is pending.
-          initialAutoplayCanceled = true
-          video.value?.pause()
-        },
+        pause,
         stop: () => {
           const videoElement = video.value
           if (!videoElement) return
           const wasPaused = videoElement.paused
           mediaSessionStopped = true
           initialAutoplayCanceled = true
+          if (wasPaused && !hasPlaybackPosition.value) videoElement.autoplay = false
           videoElement.pause()
           if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
             setCurrentTime(0)
@@ -7890,6 +7887,14 @@ export default defineComponent({
       if (props.localFilePlayback || props.manifestMimeType !== MANIFEST_TYPE_SABR || ignoreErrors || video.value?.ended || backoffMs <= 0) {
         clearSabrBackoffTimer({ refreshPreview: true })
         return
+      }
+
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS &&
+        video.value?.autoplay && !initialAutoplayCanceled &&
+        !hasPlaybackPosition.value && isActiveTab.value) {
+        // Start the foreground service before leaving the app. Waiting for
+        // the first play event lets Android freeze loading or reject the start.
+        tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
       }
 
       const endsAt = Date.now() + backoffMs
@@ -12634,7 +12639,13 @@ export default defineComponent({
 
     function pause() {
       initialAutoplayCanceled = true
-      video.value.pause()
+      const videoElement = video.value
+      if (!videoElement) return
+      const wasPaused = videoElement.paused
+      if (wasPaused && !hasPlaybackPosition.value) videoElement.autoplay = false
+      videoElement.pause()
+      // Pending autoplay has no play event yet, so pause() emits no pause event.
+      if (wasPaused) handlePause()
     }
 
     function play() {

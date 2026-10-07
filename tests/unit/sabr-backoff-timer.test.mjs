@@ -13,10 +13,12 @@ function fixture() {
   const intervals = new Set()
   const remaining = { value: 0 }
   const duration = { value: 0 }
-  const video = { value: { ended: false } }
+  const video = { value: { ended: false, pause() {} } }
+  const playbackStates = []
   const noop = () => {}
   const context = {
     video, props: { manifestMimeType: 'sabr' }, MANIFEST_TYPE_SABR: 'sabr', ignoreErrors: false,
+    initialAutoplayCanceled: false, hasPlaybackPosition: { value: false }, isActiveTab: { value: true },
     shortsNavigationSuspended: { value: false },
     sabrBackoffIntervalId: null, sabrBackoffRemainingMs: remaining, sabrBackoffDurationMs: duration,
     setInterval: callback => { intervals.add(callback); return callback }, clearInterval: id => intervals.delete(id),
@@ -24,11 +26,64 @@ function fixture() {
     shortsPaused: {}, playbackEnded: {}, autoplayCanceled: {}, syncPlayPauseControlIcons: noop, isCapacitorMobilePlayer: () => false,
     sleepTimer: { pauseCountdown: noop, consumeEndOfVideo: noop }, pauseSponsorBlockHighlightLabelCountdown: noop,
     cancelSponsorBlockSkipSchedule: noop, promptSponsorBlockSegments: {}, clearAbRepeatBoundarySchedule: noop,
-    tabMediaCoordinator: { setPlaybackState: noop }, mediaTabId: 'test', process: { env: {} }, updateAutoPip: noop,
+    tabMediaCoordinator: {
+      setPlaybackState: (_id, state) => playbackStates.push(state),
+      setActionHandlers: (_id, _source, handlers) => { context.handlers = handlers },
+    }, mediaTabId: 'test', process: { env: {} }, updateAutoPip: noop,
+    mediaSessionStopped: false, seekingIsPossible: { value: false },
+    handlePause: () => playbackStates.push('paused'),
     scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
   }
-  const methods = vm.runInNewContext(['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded'].map(extract).join('\n') + '\n({ startSabrBackoffTimer, handleEnded })', context)
-  return { ...methods, props: context.props, video, remaining, duration, intervals }
+  const methods = vm.runInNewContext(['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded', 'pause', 'registerMediaSessionHandlers'].map(extract).join('\n') + '\n({ startSabrBackoffTimer, handleEnded, pause, registerMediaSessionHandlers })', context)
+  return { ...methods, context, playbackStates, props: context.props, video, remaining, duration, intervals }
+}
+
+test('Android starts its playback service while autoplay waits for SABR', () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  f.startSabrBackoffTimer(20000)
+  assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
+})
+
+test('pausing pending SABR autoplay updates the session even without a native pause event', () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  f.startSabrBackoffTimer(20000)
+  f.pause()
+  assert.equal(f.video.value.autoplay, false, 'loading must not undo the pause through native autoplay')
+  f.startSabrBackoffTimer(10000)
+  assert.deepEqual(f.playbackStates, ['playing', 'paused'], 'a later backoff must not reactivate the canceled session')
+})
+
+test('stopping pending SABR autoplay clears the session and prevents a later backoff from restarting it', () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  f.startSabrBackoffTimer(20000)
+  f.registerMediaSessionHandlers()
+  f.context.handlers.stop()
+  assert.equal(f.video.value.autoplay, false)
+  f.startSabrBackoffTimer(10000)
+  assert.deepEqual(f.playbackStates, ['playing', 'none'])
+})
+
+for (const reason of ['autoplay disabled', 'autoplay canceled', 'background tab', 'iOS', 'desktop', 'already playing']) {
+  test(`SABR countdown preserves playback state with ${reason}`, () => {
+    const f = fixture()
+    f.context.process.env.IS_CAPACITOR = reason !== 'desktop'
+    f.context.process.env.IS_IOS = reason === 'iOS'
+    f.context.initialAutoplayCanceled = reason === 'autoplay canceled'
+    f.context.isActiveTab.value = reason !== 'background tab'
+    f.context.hasPlaybackPosition.value = reason === 'already playing'
+    f.video.value.autoplay = reason !== 'autoplay disabled'
+    f.startSabrBackoffTimer(20000)
+    assert.deepEqual(f.playbackStates, [])
+  })
 }
 
 test('ending playback clears an active SABR countdown and its interval', () => {
