@@ -32,7 +32,10 @@ test('parses a channel TV show as a playlist with its season count', () => {
     channelName: 'GLITCH',
     channelId: 'UCn_FAXem2-e3HQvmK-mOH4g',
     videoCount: undefined,
-    itemCountText: '3 seasons'
+    itemCountText: '3 seasons',
+    isPodcast: false,
+    isAlbum: false,
+    isCourse: false
   })
 })
 

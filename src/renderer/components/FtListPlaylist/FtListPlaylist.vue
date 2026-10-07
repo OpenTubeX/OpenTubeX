@@ -37,7 +37,7 @@
         <div class="inner">
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -- Infinity is a language-independent count indicator. -->
           <div>{{ playlistMetadata.itemCountText ?? (playlistMetadata.videoCount < 0 ? '∞' : playlistMetadata.videoCount) }}</div>
-          <div><FtIcon :icon="['fas','list']" /></div>
+          <div><FtIcon :icon="['fas', playlistTypeIcon]" /></div>
         </div>
       </div>
     </div>
@@ -261,6 +261,14 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 
 const isUserPlaylist = computed(() => props.data._id != null)
 const isPlaylistBookmark = computed(() => props.data.isPlaylistBookmark === true)
+const playlistTypeIcon = computed(() => {
+  if (!isUserPlaylist.value) {
+    if (props.data.isPodcast === true) return 'podcast'
+    if (props.data.isAlbum === true) return 'music'
+    if (props.data.isCourse === true) return 'graduation-cap'
+  }
+  return 'list'
+})
 const playlistMetadata = computed(() => {
   if (isUserPlaylist.value) {
     let thumbnailUrl = thumbnailPlaceholder

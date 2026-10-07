@@ -304,7 +304,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         channelName: gridPlaylist.author?.name,
         channelId: gridPlaylist.author?.id,
         authorThumbnailUrl: getResultAuthorThumbnailUrl(gridPlaylist),
-        videoCount: extractNumberFromString(gridPlaylist.video_count.text)
+        videoCount: extractNumberFromString(gridPlaylist.video_count.text),
+        isAlbum: gridPlaylist.thumbnail_overlays?.some(overlay => overlay.icon_type === 'MUSIC') ?? false
       }
     } else {
       let internalChannelName
@@ -344,7 +345,9 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         channelId: internalChannelId,
         authorThumbnailUrl: getResultAuthorThumbnailUrl(playlist),
         playlistId: playlist.id,
-        videoCount: extractNumberFromString(playlist.video_count.text)
+        videoCount: extractNumberFromString(playlist.video_count.text),
+        isCourse: playlist.thumbnail_overlays?.some(overlay => overlay.icon_type === 'COURSE') ?? false,
+        isAlbum: playlist.thumbnail_overlays?.some(overlay => overlay.icon_type === 'MUSIC') ?? false
       }
     }
   }
@@ -663,6 +666,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
   function parseLockupView(lockupView, channelId = undefined, channelName = undefined) {
     switch (lockupView.content_type) {
       case 'ALBUM':
+      case 'COURSE':
       case 'PLAYLIST':
       case 'PODCAST':
       case 'SHOW': {
@@ -696,7 +700,10 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           channelName,
           channelId,
           videoCount: isShow ? undefined : extractNumberFromString(thumbnailOverlayBadgeView.badges[0].text),
-          ...(isShow ? { itemCountText: thumbnailOverlayBadgeView.badges[0].text } : {})
+          ...(isShow ? { itemCountText: thumbnailOverlayBadgeView.badges[0].text } : {}),
+          isPodcast: lockupView.content_type === 'PODCAST',
+          isAlbum: lockupView.content_type === 'ALBUM' || (thumbnailOverlayBadgeView?.badges.some(badge => badge.icon_name === 'music') ?? false),
+          isCourse: lockupView.content_type === 'COURSE' || (thumbnailOverlayBadgeView?.badges.some(badge => badge.icon_name === 'COURSE') ?? false)
         }
       }
       case 'SHORT':

@@ -166,8 +166,6 @@ Subscriptions:
   Show Combined View: Dangos yr olwg gyfun
   Newest First: Mwyaf newydd yn gyntaf
   Oldest First: Hynaf yn gyntaf
-  Posts:
-    RSS Message: Nid yw YouTube yn darparu ffrydiau RSS ar gyfer postiadau. Analluogwch y gosodiad "{rssSetting}" i weld postiadau neu alluogi'r gosodiad "{hideSetting}" i guddio'r tab hwn.
 Trending:
   Load Error: Nid oedd modd llwytho Trendio.
   Unsupported Backend: Mae angen yr API Lleol ar Trendio. Dewiswch yr API Lleol neu alluogi'r darparwr wrth gefn.
@@ -906,8 +904,6 @@ Settings:
     Show Video Title: Dangos teitl y fideo
     Show Bottom Right Actions Dock: Dangos doc gweithredoedd y gwaelod ar y dde
     Paused Interface Hide Delay: Oedi cyn cuddio'r rhyngwyneb wrth oedi
-    Add: Ychwanegu
-    Remove: Dileu
   Data Settings:
     Complete backup: "Copi wrth gefn cyflawn"
     Import backup: "Mewnforio copi wrth gefn"
@@ -1090,7 +1086,6 @@ Settings:
     Failed to select IP block recovery script: Methodd dewis y sgript adfer ar ôl rhwystr IP
   SponsorBlock Settings:
     Excluded Channels:
-      Excluded Channels: "Sianeli wedi’u heithrio"
       Tooltip: "Rhowch ID sianel i atal hepgor segmentau SponsorBlock yn ei fideos. Rhaid i’r ID gyfateb yn union ac mae priflythrennau’n cyfrif."
     Enable SponsorBlock Submission: Galluogi cyflwyno i SponsorBlock
     SponsorBlock Private User ID (optional): ID defnyddiwr preifat (dewisol)
@@ -1980,8 +1975,6 @@ Channels:
   Load More Channels: "Llwytho mwy o sianeli"
 Search Bar:
   Use Suggestion: Defnyddio’r awgrym
-  Open Search Container: Agor y blwch chwilio
-  Search: Chwilio
 Theme Discovery:
   Discover Themes: "Darganfod themâu"
   Refresh: "Adnewyddu"

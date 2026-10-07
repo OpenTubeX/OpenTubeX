@@ -303,6 +303,10 @@
     "ri": "global-line",
     "material": "public"
   },
+  "graduation-cap": {
+    "ri": "graduation-cap-line",
+    "material": "school-outline-rounded"
+  },
   "grip": {
     "ri": "draggable",
     "material": "drag-indicator"
@@ -393,6 +397,10 @@
     "ph": "moon",
     "ri": "moon-line",
     "material": "dark-mode-outline-rounded"
+  },
+  "music": {
+    "ri": "music-2-line",
+    "material": "music-note-rounded"
   },
   "network-wired": {
     "ri": "node-tree",
