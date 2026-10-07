@@ -70,16 +70,17 @@ async function mediaFixture(directory, audio) {
   }
 }
 
-for (const { continuePlayback, seekBeforeBackoff } of [
+for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false } of [
   { continuePlayback: true, seekBeforeBackoff: false },
   { continuePlayback: false, seekBeforeBackoff: false },
   { continuePlayback: true, seekBeforeBackoff: true },
-]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}`, { skip: !enabled }, async () => {
+  { continuePlayback: false, seekBeforeBackoff: false, backoffWhileHidden: true },
+]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}${backoffWhileHidden ? ' with a late background response' : ''}`, { skip: !enabled }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'otx-sabr-background-'))
   let browser, page, settings, route, server, port, releaseBackoff
   try {
     const backoffReady = new Promise(resolve => { releaseBackoff = resolve })
-    if (!seekBeforeBackoff) releaseBackoff()
+    if (!seekBeforeBackoff && !backoffWhileHidden) releaseBackoff()
     const fixtures = await Promise.all([mediaFixture(directory, true), mediaFixture(directory, false)])
     const requests = []
     const delayed = new Set()
@@ -185,13 +186,27 @@ for (const { continuePlayback, seekBeforeBackoff } of [
       })).toBe(true)
       releaseBackoff()
     }
+    if (backoffWhileHidden) {
+      await expect.poll(() => requests.length).toBeGreaterThan(0)
+      adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
+      // Keep CDP attached until this late response is processed, so renderer
+      // suspension cannot mask the activity's 250 ms pause sweep being missed.
+      await expect.poll(() => page.evaluate(() => window.Capacitor.nativePromise('App', 'getState'))).toMatchObject({ isActive: false })
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      releaseBackoff()
+    }
     await watch.dispose()
     await expect(page.locator('.countdownOverlay')).toBeVisible()
-    await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
+    if (backoffWhileHidden) {
+      assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && !video.autoplay), true, 'a late background response must cancel disabled autoplay')
+      assert.doesNotMatch(adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev'), /isForeground=true/, 'a hidden activity must not start the playback service')
+    } else {
+      await expect.poll(() => adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev')).toMatch(/isForeground=true/)
+    }
     assert.equal(await page.locator('.ftVideoPlayer video').evaluate(video => video.paused && video.played.length === 0), true, 'leave while autoplay is still waiting')
     await browser.close()
     browser = null
-    adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
+    if (!backoffWhileHidden) adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
     // Avoid polling the WebView during the wait: CDP evaluation can wake a
     // frozen renderer and mask the lifecycle failure this test should catch.
     if (continuePlayback) {

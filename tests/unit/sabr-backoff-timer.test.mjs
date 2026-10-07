@@ -19,6 +19,7 @@ function fixture() {
   const context = {
     video, props: { manifestMimeType: 'sabr' }, MANIFEST_TYPE_SABR: 'sabr', ignoreErrors: false,
     initialAutoplayCanceled: false, hasPlaybackPosition: { value: false }, isActiveTab: { value: true },
+    isAppHidden: () => false, store: { getters: { getContinuePlaybackWhenScreenIsLocked: true } },
     shortsNavigationSuspended: { value: false },
     sabrBackoffIntervalId: null, sabrBackoffRemainingMs: remaining, sabrBackoffDurationMs: duration,
     setInterval: callback => { intervals.add(callback); return callback }, clearInterval: id => intervals.delete(id),
@@ -46,6 +47,19 @@ for (const sought of [false, true]) test(`Android starts its playback service wh
   f.context.hasPlaybackPosition.value = sought
   f.startSabrBackoffTimer(20000)
   assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
+})
+
+for (const continuePlayback of [true, false]) test(`a late Android backoff respects hidden activity with background playback ${continuePlayback ? 'enabled' : 'disabled'}`, () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.context.isAppHidden = () => true
+  f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = continuePlayback
+  f.video.value.autoplay = true
+  f.video.value.paused = true
+  f.startSabrBackoffTimer(20000)
+  assert.deepEqual(f.playbackStates, [], 'a hidden activity must keep the pending media session idle')
+  assert.equal(f.video.value.autoplay, continuePlayback, 'disabled background playback must cancel pending native autoplay')
+  assert.equal(f.context.initialAutoplayCanceled, !continuePlayback)
 })
 
 for (const sought of [false, true]) test(`pausing pending SABR autoplay${sought ? ' after a startup seek' : ''} updates the session even without a native pause event`, () => {

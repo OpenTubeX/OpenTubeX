@@ -7895,7 +7895,16 @@ export default defineComponent({
         // Start the foreground service before leaving the app. Waiting for
         // the first play event lets Android freeze loading or reject the start.
         // A queued startup seek is a position, but has not played any media.
-        tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
+        if (!isAppHidden()) {
+          tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
+        } else if (!store.getters.getContinuePlaybackWhenScreenIsLocked) {
+          // The background pause sweep can precede this first backoff while
+          // the session is still idle. Cancel autoplay without publishing a
+          // paused session, which would also start the service from background.
+          initialAutoplayCanceled = true
+          video.value.autoplay = false
+          video.value.pause()
+        }
       }
 
       const endsAt = Date.now() + backoffMs
