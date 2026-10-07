@@ -607,6 +607,66 @@ test('keeps inline post emoji images hidden until loaded and after failure', asy
   await text.screenshot({ path: testInfo.outputPath('inline-emoji-fallback.png') })
 })
 
+test('lazy inline post emojis wait offscreen before their loading deadline', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)
+  })
+  await page.clock.install()
+  const pending = []
+  await page.route('https://lazy-inline-images.test/**', route => { pending.push(route) })
+  await page.route('**/api/v1/post/**', route => route.fulfill({
+    json: {
+      comments: [{
+        commentId: 'lazy-placeholder-post',
+        contentHtml: 'Lazy emoji <img src="https://lazy-inline-images.test/emoji" loading="lazy" alt=":smile:" width="24" height="24" style="vertical-align: middle">',
+        author: 'Placeholder channel',
+        authorId: channelId,
+        authorThumbnails: [],
+        publishedText: '1 day ago',
+        likeCount: 0,
+        replyCount: 0
+      }]
+    }
+  }))
+  await page.addStyleTag({ content: '.postText { margin-block-start: 10000px !important; }' })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    store.commit('setHideComments', true)
+    return window.ftElectron.tabs.create({ route: '/post/lazy-placeholder-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
+  })
+  const image = page.locator('img[src="https://lazy-inline-images.test/emoji"]')
+  const placeholder = page.locator('img[src="https://lazy-inline-images.test/emoji"] + .htmlImagePlaceholder')
+  await expect(image).toHaveAttribute('loading', 'lazy')
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top > innerHeight)).toBe(true)
+  await page.clock.fastForward(20_000)
+  expect(pending).toHaveLength(0)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await placeholder.scrollIntoViewIfNeeded()
+  await expect.poll(() => pending.length).toBe(1)
+  await page.clock.runFor(100)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  // Capture at normal scale after checking visibility at a fractional zoom.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+  })
+  const text = page.locator('.postText', { hasText: 'Lazy emoji' })
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await text.scrollIntoViewIfNeeded()
+    await page.clock.runFor(100)
+    await expect.poll(() => placeholder.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await text.screenshot({ path: testInfo.outputPath(`lazy-inline-${theme}.png`) })
+  }
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+  expect((await image.boundingBox()).width).toBeCloseTo(24, 1)
+})
+
 test('keeps overlapping collaborator avatars stable while images load', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

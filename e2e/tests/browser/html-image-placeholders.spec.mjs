@@ -110,3 +110,37 @@ test('zero-width SVG loads retain the deadline for a static fallback', async ({ 
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
   await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
+
+test('lazy inline images keep their skeleton offscreen, then time out and recover', async ({ page }) => {
+  await page.clock.install()
+  const svg = await installPlaceholderHelper(page)
+  const pending = []
+  await page.route('https://lazy-inline-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const container = document.createElement('div')
+    container.id = 'lazy-inline-images'
+    container.style.marginTop = '10000px'
+    container.innerHTML = '<img src="https://lazy-inline-images.test/emoji" loading="lazy" width="48" height="48" alt="Emoji" style="vertical-align: middle">'
+    document.body.append(container)
+    window.addHtmlImagePlaceholders(container)
+  })
+  const placeholder = page.locator('.htmlImagePlaceholder')
+  await page.clock.fastForward(20_000)
+  expect(pending).toHaveLength(0)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+
+  await placeholder.scrollIntoViewIfNeeded()
+  await expect.poll(() => pending.length).toBe(1)
+  await page.clock.runFor(100)
+  await page.clock.fastForward(9_000)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(1_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+
+  await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
+  await expect(placeholder).toHaveCount(0)
+  const image = page.locator('#lazy-inline-images img')
+  await expect(image).toBeVisible()
+  await expect(image).toHaveAttribute('style', 'vertical-align: middle')
+})

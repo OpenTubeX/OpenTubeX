@@ -24,17 +24,22 @@ export function addHtmlImagePlaceholders(element) {
       placeholder.src = thumbnailPlaceholder
       placeholder.classList.remove('ft-shimmer')
     }
-    const skeletonTimeout = setTimeout(showFallback, 10_000)
+    let skeletonTimeout
+    let visibilityObserver
+    const clearLoadingDeadline = () => {
+      clearTimeout(skeletonTimeout)
+      visibilityObserver?.disconnect()
+    }
 
     image.addEventListener('load', () => {
       if (!image.naturalWidth) return
-      clearTimeout(skeletonTimeout)
+      clearLoadingDeadline()
       if (originalStyle === null) image.removeAttribute('style')
       else image.setAttribute('style', originalStyle)
       placeholder.remove()
     })
     image.addEventListener('error', () => {
-      clearTimeout(skeletonTimeout)
+      clearLoadingDeadline()
       if (image.alt) {
         placeholder.replaceWith(document.createTextNode(image.alt))
         image.remove()
@@ -50,6 +55,16 @@ export function addHtmlImagePlaceholders(element) {
     // Missing sources are also complete and should keep a permanent fallback.
     if (image.complete) {
       image.dispatchEvent(new Event(image.naturalWidth ? 'load' : 'error'))
+    } else if (image.loading === 'lazy') {
+      // Offscreen lazy images may not have started their request yet.
+      visibilityObserver = new IntersectionObserver(entries => {
+        if (!entries.some(entry => entry.isIntersecting)) return
+        visibilityObserver.disconnect()
+        skeletonTimeout = setTimeout(showFallback, 10_000)
+      })
+      visibilityObserver.observe(image)
+    } else {
+      skeletonTimeout = setTimeout(showFallback, 10_000)
     }
   }
 }
