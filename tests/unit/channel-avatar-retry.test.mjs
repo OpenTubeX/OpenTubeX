@@ -249,6 +249,23 @@ test('failed native timeout recovery still gets one delayed browser retry', asyn
   assert.equal(f.timers.size, 0)
 })
 
+test('a never-settling native recovery cannot block the delayed browser retry', async t => {
+  const f = await mountAvatar(t, () => new Promise(() => {}), 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  deadline()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(f.requests.length, 1)
+  const [retry] = f.timers.values()
+  assert.ok(retry, 'the browser retry must be scheduled independently of native completion')
+  assert.equal(retry.delay, 3000)
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /opentubex_retry=/)
+  await fail(f.find('img'))
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.requests.length, 1)
+})
+
 for (const action of ['load', 'replace', 'unmount']) {
   test(`native timeout recovery ignores a stale result after ${action}`, async t => {
     let finishNative

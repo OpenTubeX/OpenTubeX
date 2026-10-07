@@ -199,6 +199,8 @@ async function recoverImage() {
   retryPending = true
   const failedSourceVersion = sourceVersion
   const failedSource = currentSource
+  // Native recovery may never settle; the browser fallback has its own deadline.
+  scheduleBrowserRetry()
 
   if (process.env.IS_CAPACITOR) {
     let dataUrl = null
@@ -211,13 +213,12 @@ async function recoverImage() {
 
     if (failedSourceVersion !== sourceVersion || hasLoaded.value) return
     if (dataUrl !== null) {
+      clearTimeout(retryTimeoutId)
+      retryTimeoutId = undefined
       retryPending = false
       imageUrl.value = dataUrl
-      return
     }
   }
-
-  scheduleBrowserRetry()
 }
 
 function scheduleBrowserRetry() {

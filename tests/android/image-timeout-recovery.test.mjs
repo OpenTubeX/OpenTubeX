@@ -14,14 +14,15 @@ test('Android stalled avatars use native recovery before the bounded browser ret
   const data = (await readFile(new URL('../../e2e/fixtures/images/opentubex-playlist.jpg', import.meta.url))).toString('base64')
   const pending = []
   const nativeRequests = []
-  let nativeSucceeds = true
+  let nativeOutcome = true
   let saved
   try {
     await page.locator('.profileTrigger').waitFor()
     await page.route(avatarPattern, route => { pending.push(route) })
     await page.exposeBinding('__timeoutAvatarRequest', (_source, options) => {
       nativeRequests.push(options)
-      if (!nativeSucceeds) throw new Error('Native fixture failure')
+      if (nativeOutcome === 'stall') return new Promise(() => {})
+      if (!nativeOutcome) throw new Error('Native fixture failure')
       return { status: 200, headers: { 'content-type': 'image/jpeg' }, data, url: options.url }
     })
     saved = await page.evaluate(() => {
@@ -39,8 +40,8 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       return saved
     })
     await page.clock.install()
-    for (const succeeds of [true, false]) {
-      nativeSucceeds = succeeds
+    for (const succeeds of [true, false, 'stall']) {
+      nativeOutcome = succeeds
       pending.length = 0
       nativeRequests.length = 0
       await page.evaluate(succeeds => {
@@ -54,7 +55,7 @@ test('Android stalled avatars use native recovery before the bounded browser ret
         })
         location.hash = `#/search/${query}`
       }, succeeds)
-      const avatar = page.locator('.ft-list-channel .channelThumbnailLink')
+      const avatar = page.locator(`.ft-list-channel .channelThumbnailLink[href$="/channel/native-avatar-${succeeds}"]`)
       const placeholder = avatar.locator('.retryImagePlaceholder')
       const image = avatar.locator('img:not(.retryImagePlaceholder)')
       await expect.poll(() => pending.length).toBe(1)
@@ -63,7 +64,9 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       await page.clock.fastForward(10_001)
       await expect.poll(() => nativeRequests.length).toBe(1)
       assert.equal(nativeRequests[0].responseType, 'blob')
-      if (succeeds) {
+      assert.equal(nativeRequests[0].connectTimeout, 3000)
+      assert.equal(nativeRequests[0].readTimeout, 3000)
+      if (succeeds === true) {
         await expect(image).toHaveAttribute('src', /^data:image\/jpeg;base64,/)
         await expect(placeholder).toHaveCount(0)
         await expect(image).toBeVisible()
