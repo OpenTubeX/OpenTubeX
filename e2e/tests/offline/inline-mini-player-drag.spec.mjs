@@ -443,7 +443,7 @@ test.describe('browsing scroll during mobile minimize', () => {
         await touch('touchStart', start)
         await touch('touchMove', { ...start, y: start.y + 80 })
         await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-        expect.soft(await history.evaluate(element => element.getBoundingClientRect().top), 'cancelled preview uses the saved history position').toBeCloseTo(saved.top, 0)
+        expect(await history.evaluate(element => element.getBoundingClientRect().top), 'cancelled preview uses the saved history position').toBeCloseTo(saved.top, 0)
         await touch('touchCancel')
         await expect(player).not.toHaveAttribute('data-inline-mini-drag')
         await expect(page).toHaveURL(/#\/watch\//)
@@ -451,7 +451,7 @@ test.describe('browsing scroll during mobile minimize', () => {
         await touch('touchStart', start)
         for (const distance of [30, 80, 140, 200]) await touch('touchMove', { ...start, y: start.y + distance })
         await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-        expect.soft(await history.evaluate(element => element.getBoundingClientRect().top), 'history must already be scrolled while the drag is held').toBeCloseTo(saved.top, 0)
+        expect(await history.evaluate(element => element.getBoundingClientRect().top), 'history must already be scrolled while the drag is held').toBeCloseTo(saved.top, 0)
         await page.screenshot({ path: testInfo.outputPath('history-during-minimize.png') })
         const frames = sampleBrowsingPreviewTops(history)
         await touch('touchEnd')
@@ -461,6 +461,7 @@ test.describe('browsing scroll during mobile minimize', () => {
         expect(await history.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(saved.top, 0)
         expect((await frames).every(top => Math.abs(top - saved.top) <= 2), 'history stays in place through settling and navigation').toBe(true)
       } finally {
+        await touch('touchCancel').catch(() => {})
         await cdp.detach()
       }
     })
@@ -586,12 +587,13 @@ test.describe('browsing scroll during mobile minimize', () => {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + 140 }] })
       await expect(player).toHaveAttribute('data-inline-mini-drag', '')
-      expect.soft(await header.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(savedTop, 0)
+      expect(await header.evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(savedTop, 0)
       const frames = sampleBrowsingPreviewTops(header)
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
       await expect(player).not.toHaveAttribute('data-inline-mini-drag')
       expect((await frames).every(top => Math.abs(top - savedTop) <= 2)).toBe(true)
     } finally {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
       await cdp.detach()
     }
   })
