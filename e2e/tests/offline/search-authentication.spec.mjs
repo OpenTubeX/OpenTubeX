@@ -57,11 +57,14 @@ async function configureCookieSearch(app, mode = 'file', responseDelay = 300) {
   const executable = path.join(app.userDataDir, 'search-fixture.cjs')
   const log = path.join(app.userDataDir, 'search-args.json')
   const response = path.join(app.userDataDir, 'search-response.json')
+  const playlistResponse = path.join(app.userDataDir, 'playlist-response.json')
   await writeFile(response, JSON.stringify({ entries: [] }))
+  await writeFile(playlistResponse, JSON.stringify({}))
   await writeFile(executable, `#!${process.execPath}
 const fs = require('node:fs')
 fs.writeFileSync(${JSON.stringify(log)}, JSON.stringify(process.argv.slice(2)))
-setTimeout(() => process.stdout.write(fs.readFileSync(${JSON.stringify(response)}, 'utf8')), ${responseDelay})
+const response = process.argv.at(-1).includes('/playlist?') ? ${JSON.stringify(playlistResponse)} : ${JSON.stringify(response)}
+setTimeout(() => process.stdout.write(fs.readFileSync(response, 'utf8')), ${responseDelay})
 `)
   await chmod(executable, 0o755)
   await app.page.evaluate(async ({ executable, mode }) => {
@@ -73,7 +76,7 @@ setTimeout(() => process.stdout.write(fs.readFileSync(${JSON.stringify(response)
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/fixture/profile')
   }, { executable, mode })
-  return { log, response }
+  return { log, response, playlistResponse }
 }
 
 async function captureSearchNotice(page, filename, animations = 'allow') {
@@ -87,6 +90,43 @@ async function captureSearchNotice(page, filename, animations = 'allow') {
     }
   })
 }
+
+test('cookie search shows the playlist thumbnail and total count omitted by flat search', async ({ app, page }) => {
+  const { log, response, playlistResponse } = await configureCookieSearch(app)
+  const thumbnail = 'https://i.ytimg.com/vi/NIqqE7fdOPU/hq720.jpg'
+  await page.route(thumbnail, route => route.fulfill({
+    contentType: 'image/jpeg',
+    path: new URL('../../fixtures/images/opentubex-playlist.jpg', import.meta.url).pathname
+  }))
+  await writeFile(response, JSON.stringify({
+    entries: [{
+      id: 'PLWgYtX0fBKnQ',
+      ie_key: 'YoutubeTab',
+      title: 'Instalar desde cero OpenTubeX | Guía de actualización automática para no perder las nuevas funciones de este año',
+      channel: 'Vartrot Gassky',
+      channel_id: 'UCiet5KCxObauWjx3-xjlJ4A',
+      thumbnails: [{ url: thumbnail }]
+    }]
+  }))
+  await writeFile(playlistResponse, JSON.stringify({ playlist_count: 10, entries: [{ id: 'NIqqE7fdOPU' }] }))
+  await searchForAgeGate(page)
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  const card = page.locator('.ft-list-item', { hasText: 'Instalar desde cero OpenTubeX' })
+  await expect(card).toBeVisible()
+  await expect(card.locator('.videoCountContainer .inner')).toHaveText('10')
+  const image = card.locator('.thumbnailImage')
+  await expect(image).toHaveAttribute('src', thumbnail)
+  await expect.poll(() => image.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+  const args = JSON.parse(await readFile(log, 'utf8'))
+  expect(args.at(-1)).toBe('https://www.youtube.com/playlist?list=PLWgYtX0fBKnQ')
+  expect(args[args.indexOf('--playlist-start') + 1]).toBe('1')
+  expect(args[args.indexOf('--playlist-end') + 1]).toBe('1')
+  expect(args[args.indexOf('--cookies') + 1]).toBe('/fixture/cookies.txt')
+  await card.screenshot({ path: test.info().outputPath('corrected-playlist.png') })
+  await setWindowSize(app, page, { width: 390, height: 844 })
+  await expect(card.locator('.videoCountContainer .inner')).toHaveText('10')
+  await expect(image).toHaveAttribute('src', thumbnail)
+})
 
 test('shows the age gate, cookie setup hint, and cached notice at desktop and phone widths', async ({ app, page }) => {
   await searchForAgeGate(page)

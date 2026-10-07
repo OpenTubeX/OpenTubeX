@@ -29,7 +29,7 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
       return [{ type: 'channel', authorId: entry.id, author: entry.title, authorThumbnails: [{ url: thumbnail }], subCount: entry.channel_follower_count ?? 0 }]
     }
     if (entry.ie_key === 'YoutubeTab' && /^[\w-]+$/.test(entry.id)) {
-      return [{ type: 'playlist', playlistId: entry.id, title: entry.title, author: entry.channel ?? entry.uploader ?? '', authorId: entry.channel_id ?? '', playlistThumbnail: thumbnail, videoCount: entry.playlist_count ?? 0 }]
+      return [{ type: 'playlist', dataSource: 'local', playlistId: entry.id, title: entry.title, channelName: entry.channel ?? entry.uploader ?? '', channelId: entry.channel_id ?? '', thumbnail, videoCount: entry.playlist_count ?? undefined }]
     }
     if (!/^[\w-]{11}$/.test(entry.id)) return []
     return [{
@@ -48,4 +48,21 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
     }]
   })
   return { results, hasMoreResults: page < MAX_SEARCH_PAGES && info.entries.length >= SEARCH_PAGE_SIZE }
+}
+
+export async function completeYtDlpSearchPlaylists(results, loadPlaylist) {
+  return Promise.all(results.map(async result => {
+    if (result.type !== 'playlist' || (result.videoCount != null && result.thumbnail)) return result
+    try {
+      const info = await loadPlaylist(result.playlistId)
+      return {
+        ...result,
+        videoCount: info.playlist_count ?? result.videoCount,
+        thumbnail: result.thumbnail || info.thumbnails?.find(item => typeof item.url === 'string')?.url || ''
+      }
+    } catch {
+      // A single unavailable playlist must not discard the search results.
+      return result
+    }
+  }))
 }
