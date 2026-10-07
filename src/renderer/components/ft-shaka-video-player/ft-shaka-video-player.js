@@ -1844,9 +1844,9 @@ export default defineComponent({
       ui?.configure({ enableFullscreenOnRotation: newValue })
     }, { flush: 'sync' })
 
-    watch([rotateFullscreenToLandscape, fullscreenAspectRatio], ([enabled]) => {
+    watch([rotateFullscreenToLandscape, fullscreenAspectRatio], () => {
       if (!isNativeFullscreenActive()) return
-      setFullscreenOrientation(true, video.value, enabled, fullscreenAspectRatio.value).catch(() => {})
+      requestFullscreenOrientation(true)
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -7144,12 +7144,7 @@ export default defineComponent({
       updateScrollMiniPlayer()
 
       if (isActiveTab.value && isNativeFullscreenActive()) {
-        setFullscreenOrientation(
-          true,
-          video.value,
-          rotateFullscreenToLandscape.value,
-          fullscreenAspectRatio.value
-        ).catch(() => {})
+        requestFullscreenOrientation(true)
       }
     }
 
@@ -11465,11 +11460,17 @@ export default defineComponent({
       isOffline.value = true
     }
 
-    let androidFullscreenPortrait = null
+    let androidFullscreenRotationRequested = false
+    function requestFullscreenOrientation(fullscreen) {
+      // Keep this until exit finishes: unlocking after a preference/metadata
+      // change can still have a rotation in flight when fullscreen closes.
+      androidFullscreenRotationRequested ||= shouldRotateFullscreenToLandscape(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
+      setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+    }
     function updateFullscreenOrientation(fullscreen) {
       if (!isActiveTab.value || isNativeFullscreenActive() !== fullscreen) return
       if (fullscreen && androidFullscreenEntering) return
-      setFullscreenOrientation(fullscreen, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+      requestFullscreenOrientation(fullscreen)
     }
     /** @type {(preserveOrientation?: boolean) => void} */
     let finishAndroidFullscreenExit = () => {}
@@ -11479,7 +11480,7 @@ export default defineComponent({
     })
 
     function retainAndroidFullscreenDuringRotation() {
-      if (!androidFullscreenHost || androidFullscreenPortrait === null) return
+      if (!androidFullscreenHost || !androidFullscreenRotationRequested) return
       const portraitBeforeUnlock = window.innerHeight >= window.innerWidth
 
       // The device may have turned while fullscreen locked its display, even
@@ -11496,7 +11497,7 @@ export default defineComponent({
         cancelAnimationFrame(restoredFrame)
         window.removeEventListener('resize', resized)
         finishAndroidFullscreenExit = () => {}
-        if (!preserveOrientation) androidFullscreenPortrait = null
+        if (!preserveOrientation) androidFullscreenRotationRequested = false
         if (host.matches(':popover-open')) host.hidePopover()
         host.removeAttribute('popover')
         androidFullscreenHostActive.value = document.fullscreenElement === host
@@ -11532,9 +11533,6 @@ export default defineComponent({
       const fullscreen = isNativeFullscreenActive()
       const wasFullscreen = isFullscreen.value
       finishAndroidFullscreenExit(true)
-      if (fullscreen && !wasFullscreen && androidFullscreenHost && androidFullscreenPortrait === null) {
-        androidFullscreenPortrait = window.innerHeight >= window.innerWidth
-      }
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
       if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
       if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
@@ -11771,18 +11769,17 @@ export default defineComponent({
           isActive: () => isActiveTab.value,
           prepareEnter: async () => {
             finishAndroidFullscreenExit(true)
-            androidFullscreenPortrait ??= window.innerHeight >= window.innerWidth
             // The orientation event must not start a competing popover entry.
             androidFullscreenEntering = true
             if (shouldRotateFullscreenToLandscape(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)) {
               await prepareAndroidFullscreenRotation().catch(() => {})
             }
-            setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+            requestFullscreenOrientation(true)
           },
           finishEnter: entered => {
             androidFullscreenEntering = false
             if (!entered) {
-              androidFullscreenPortrait = null
+              androidFullscreenRotationRequested = false
               setLandscapeOrientation(false).catch(() => {})
             }
           },

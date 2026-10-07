@@ -257,6 +257,26 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
     await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), {
       timeout: 10000,
     }).toBe(true)
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setRotateFullscreenToLandscape', false)
+    })
+    await session.send('Runtime.evaluate', {
+      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+    })
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
+    await page.evaluate(() => {
+      document.addEventListener('fullscreenchange', function exited() {
+        if (document.fullscreenElement) return
+        document.removeEventListener('fullscreenchange', exited)
+        window.__portraitExitRetained = !!document.querySelector('.videoLayout:popover-open')
+      })
+    })
+    await session.send('Runtime.evaluate', {
+      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+    })
+    await expect.poll(() => page.evaluate(() => window.__portraitExitRetained), {
+      message: 'Exit immediately when fullscreen never requested rotation',
+    }).toBe(false)
   } finally {
     await page.evaluate(async ({ settings, originalRoute }) => {
       if (window.__originalOrientationPromise) {
@@ -276,6 +296,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       delete window.__fullscreenTransitionFetch
       delete window.__fullscreenReentered
       delete window.__landscapeExitRetained
+      delete window.__portraitExitRetained
       delete window.__transitionFrames
       delete window.__transitionFinished
       location.hash = originalRoute

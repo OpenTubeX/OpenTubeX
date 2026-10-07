@@ -263,92 +263,117 @@ test('Android selects physical sensing only for the opt-in and releases subscrip
   assert.deepEqual(calls, ['exit', 'display', 'stop:display', 'exit', 'device', 'stop:device', 'exit', 'exit'])
 })
 
-for (const enteredPortrait of [true, false]) {
-  test(`Android holds the exit presentation after entering in ${enteredPortrait ? 'portrait' : 'landscape'}`, async () => {
-    const start = source.indexOf('    let androidFullscreenPortrait = null')
-    const end = source.indexOf('    function fullscreenChangeHandler()', start)
-    const listeners = new Map()
-    const timers = new Map()
-    const frames = new Map()
-    let open = false
-    let cleanup
-    let exitTimeout
-    const host = {
-      setAttribute() {}, removeAttribute() {},
-      showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
-    }
-    const context = {
-      androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
-      document: { fullscreenElement: null },
-      getAndroidDisplayOrientation: async () => 'landscape-primary',
-      onBeforeUnmount: callback => { cleanup = callback },
-      watch() {}, isActiveTab: {},
-      suppressPanelTransitions() {},
-      requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
-      cancelAnimationFrame: id => frames.delete(id),
-      clearTimeout: id => timers.delete(id),
-      window: {
-        innerWidth: 800, innerHeight: 400,
-        addEventListener: (name, callback) => listeners.set(name, callback),
-        removeEventListener: name => listeners.delete(name),
-        setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
-      },
-    }
-    const retain = vm.runInNewContext(`${source.slice(start, end)}
-      (updated) => { androidFullscreenPortrait = ${enteredPortrait}; retainAndroidFullscreenDuringRotation(updated) }`, context)
-    retain()
-    assert.equal(open, true)
-    context.window.innerHeight = 380 // System bars resize before rotation finishes.
-    listeners.get('resize')()
-    assert.equal(open, true)
-    context.window.innerWidth = 400
-    context.window.innerHeight = 800
-    listeners.get('resize')()
-    assert.equal(open, true, 'Keep the surface until the restored viewport paints')
-    frames.get(1)()
-    assert.equal(open, true)
-    frames.get(1)()
-    assert.equal(open, false)
-    assert.equal(context.androidFullscreenHostActive.value, false)
-    assert.equal(timers.size, 0)
-    assert.equal(listeners.size, 0)
+test('Android retains the exit surface only for a requested rotation', async () => {
+  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('    function fullscreenChangeHandler()', start)
+  const listeners = new Map()
+  const timers = new Map()
+  const frames = new Map()
+  let open = false
+  let cleanup
+  let exitTimeout
+  const host = {
+    setAttribute() {}, removeAttribute() {},
+    showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
+  }
+  const context = {
+    androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
+    document: { fullscreenElement: null },
+    getAndroidDisplayOrientation: async () => 'landscape-primary',
+    onBeforeUnmount: callback => { cleanup = callback },
+    watch() {}, isActiveTab: {},
+    suppressPanelTransitions() {},
+    requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
+    cancelAnimationFrame: id => frames.delete(id),
+    clearTimeout: id => timers.delete(id),
+    window: {
+      innerWidth: 800, innerHeight: 400,
+      addEventListener: (name, callback) => listeners.set(name, callback),
+      removeEventListener: name => listeners.delete(name),
+      setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
+    },
+  }
+  const retain = vm.runInNewContext(`${source.slice(start, end)}
+    (requested = true) => { androidFullscreenRotationRequested = requested; retainAndroidFullscreenDuringRotation() }`, context)
+  retain(false)
+  assert.equal(open, false, 'An exit without a rotation request must remain immediate')
+  assert.equal(timers.size, 0)
+  retain()
+  assert.equal(open, true)
+  context.window.innerHeight = 380 // System bars resize before rotation finishes.
+  listeners.get('resize')()
+  assert.equal(open, true)
+  context.window.innerWidth = 400
+  context.window.innerHeight = 800
+  listeners.get('resize')()
+  assert.equal(open, true, 'Keep the surface until the restored viewport paints')
+  frames.get(1)()
+  assert.equal(open, true)
+  frames.get(1)()
+  assert.equal(open, false)
+  assert.equal(context.androidFullscreenHostActive.value, false)
+  assert.equal(timers.size, 0)
+  assert.equal(listeners.size, 0)
 
-    context.window.innerWidth = 900
-    retain()
-    timers.get(1)() // A user/device policy can keep the display landscape.
-    await new Promise(resolve => setImmediate(resolve))
-    assert.equal(open, false)
-    assert.equal(listeners.size, 0)
-    retain(Promise.resolve())
-    await new Promise(resolve => setImmediate(resolve))
-    frames.get(1)?.()
-    frames.get(1)?.()
-    assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
-    assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
-    timers.get(1)()
-    await new Promise(resolve => setImmediate(resolve))
-    assert.equal(open, false)
-    assert.equal(timers.size, 0)
-    // Native rotation may complete before the WebView's resized frame arrives.
-    context.getAndroidDisplayOrientation = async () => 'portrait-primary'
-    retain()
-    timers.get(1)()
-    await new Promise(resolve => setImmediate(resolve))
-    assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
-    context.window.innerWidth = 400
-    context.window.innerHeight = 900
-    listeners.get('resize')()
-    frames.get(1)()
-    frames.get(1)()
-    assert.equal(open, false)
-    context.window.innerWidth = 1000
-    retain()
-    cleanup() // Navigating away must cancel the pending exit.
-    assert.equal(open, false)
-    assert.equal(timers.size, 0)
-    assert.equal(listeners.size, 0)
-  })
-}
+  context.window.innerWidth = 900
+  retain()
+  timers.get(1)() // A user/device policy can keep the display landscape.
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, false)
+  assert.equal(listeners.size, 0)
+  retain()
+  await new Promise(resolve => setImmediate(resolve))
+  frames.get(1)?.()
+  frames.get(1)?.()
+  assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
+  assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, false)
+  assert.equal(timers.size, 0)
+  // Native rotation may complete before the WebView's resized frame arrives.
+  context.getAndroidDisplayOrientation = async () => 'portrait-primary'
+  retain()
+  timers.get(1)()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
+  context.window.innerWidth = 400
+  context.window.innerHeight = 900
+  listeners.get('resize')()
+  frames.get(1)()
+  frames.get(1)()
+  assert.equal(open, false)
+  context.window.innerWidth = 1000
+  retain()
+  cleanup() // Navigating away must cancel the pending exit.
+  assert.equal(open, false)
+  assert.equal(timers.size, 0)
+  assert.equal(listeners.size, 0)
+})
+
+test('Android tracks landscape requests including metadata changes during fullscreen', () => {
+  const start = source.indexOf('    let androidFullscreenRotationRequested = false')
+  const end = source.indexOf('    function updateFullscreenOrientation', start)
+  const orientationSource = readFileSync(new URL('../../src/renderer/helpers/capacitorUi.js', import.meta.url), 'utf8')
+  const predicate = orientationSource.slice(orientationSource.indexOf('export function shouldRotateFullscreenToLandscape'), orientationSource.indexOf('export function setLandscapeOrientation')).replace('export ', '')
+  const context = {
+    video: { value: {} },
+    rotateFullscreenToLandscape: { value: false },
+    fullscreenAspectRatio: { value: 16 / 9 },
+    setFullscreenOrientation: async () => {},
+  }
+  const request = vm.runInNewContext(`${predicate}\n${source.slice(start, end)}
+    fullscreen => { requestFullscreenOrientation(fullscreen); return androidFullscreenRotationRequested }`, context)
+  assert.equal(request(true), false, 'Disabled rotation must not retain the exit')
+  context.rotateFullscreenToLandscape.value = true
+  context.fullscreenAspectRatio.value = 9 / 16
+  assert.equal(request(true), false, 'Portrait video must not retain the exit')
+  context.fullscreenAspectRatio.value = 16 / 9
+  assert.equal(request(true), true, 'Late landscape metadata must track its lock request')
+  context.rotateFullscreenToLandscape.value = false
+  assert.equal(request(true), true, 'An unlock from a preference change can still be rotating')
+  assert.equal(request(false), true, 'Exit must preserve the request until retention finishes')
+})
 
 test('Android fullscreen events do not repeat an entry rotation already in flight', () => {
   const start = source.indexOf('    function updateFullscreenOrientation(fullscreen)')
@@ -359,7 +384,7 @@ test('Android fullscreen events do not repeat an entry rotation already in fligh
     isActiveTab: { value: true },
     isNativeFullscreenActive: () => true,
     video: { value: {} }, rotateFullscreenToLandscape: { value: true }, fullscreenAspectRatio: { value: 16 / 9 },
-    setFullscreenOrientation: async active => { calls.push(active) },
+    requestFullscreenOrientation: active => { calls.push(active) },
   }
   const update = vm.runInNewContext(`${source.slice(start, end)}\nupdateFullscreenOrientation`, context)
   update(true)
@@ -384,10 +409,10 @@ test('Android rechecks fullscreen orientation when metadata aspect ratio arrives
     fullscreenAspectRatio: { value: 16 / 9 },
     isNativeFullscreenActive: () => true,
     video: { value: { videoWidth: 0, videoHeight: 0 } },
-    setFullscreenOrientation: async (_fullscreen, _video, _enabled, ratio) => { calls.push(ratio) },
+    requestFullscreenOrientation: fullscreen => { calls.push(fullscreen) },
   })
   await onChange([true, 16 / 9])
-  assert.deepEqual(calls, [16 / 9])
+  assert.deepEqual(calls, [true])
 })
 
 test('Android leaves fullscreen orientation to its native preference', () => {
