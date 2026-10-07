@@ -1439,6 +1439,11 @@ Video:
       SubmitCategoryVote: Kas ar vot evit ar rummad
       CategoryVoteSuccess: Kaset eo ar vot evit ar rummad.
     Google Cast:
+      Preparing Video: "O prientiñ ar video evit skignañ…"
+      Connecting: "O kennaskañ ouzh {device}…"
+      Starting Receiver: "O loc'hañ ar resever Cast…"
+      Loading Video: "O kargañ ar video war ar resever…"
+      Buffering: "O lakaat er vemor c'hortoz war {device}…"
       Allow Private Instance: "Aotren ar skignañ-mañ da lenn media eus an eriolenn brevez Invidious {instance}?"
       Cast: "Kas d’un trevnad Google Cast"
       Connected: "O kas da {device}"
@@ -1449,6 +1454,8 @@ Video:
       No Devices: "N’eus trevnad Google Cast ebet kavet"
       No Source: "N’eus gwazh kenglotus ebet evit Google Cast"
       Error: "N’eo ket bet gallet skignañ ar video"
+      Error With Details: "N’eo ket bet gallet skignañ ar video: {error}"
+      Untrusted Receiver: "N’eo ket fiziet e testeni ar resever. Implijit ur resever Google Cast dilesaet."
   External Media:
     Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
     Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"

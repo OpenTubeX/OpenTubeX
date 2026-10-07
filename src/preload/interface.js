@@ -386,16 +386,21 @@ export default {
     discover: () => navigator.userActivation.isActive
       ? ipcRenderer.invoke(IpcChannels.CAST_DISCOVER)
       : Promise.resolve([]),
-    start: async preparePayload => {
+    start: async (preparePayload, onProgress) => {
       // Authorize the click before subtitle preparation can outlive activation.
       if (!navigator.userActivation.isActive) return { error: 'Casting requires a user action' }
       const preparation = await ipcRenderer.invoke(IpcChannels.CAST_PREPARE)
       if (preparation.error) return preparation
+      const listener = (_, progress) => {
+        if (progress?.preparationId === preparation.preparationId) onProgress?.(progress.stage)
+      }
+      ipcRenderer.on(IpcChannels.CAST_PROGRESS, listener)
       try {
         const payload = await preparePayload()
         if (!payload) return { error: 'Cast start cancelled' }
         return await ipcRenderer.invoke(IpcChannels.CAST_START, payload, preparation.preparationId)
       } finally {
+        ipcRenderer.removeListener(IpcChannels.CAST_PROGRESS, listener)
         ipcRenderer.send(IpcChannels.CAST_CANCEL_PREPARATION, preparation.preparationId)
       }
     },

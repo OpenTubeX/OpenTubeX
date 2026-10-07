@@ -170,6 +170,7 @@ const IpcChannels = {
   CAST_PREPARE: 'cast-prepare',
   CAST_CANCEL_PREPARATION: 'cast-cancel-preparation',
   CAST_START: 'cast-start',
+  CAST_PROGRESS: 'cast-progress',
   CAST_STATUS: 'cast-status',
   CAST_CONTROL: 'cast-control',
   CAST_STOP: 'cast-stop',

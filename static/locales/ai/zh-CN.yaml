@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: 提交类别投票
       CategoryVoteSuccess: 类别投票已提交。
     Google Cast:
+      Preparing Video: "正在准备投屏视频…"
+      Connecting: "正在连接 {device}…"
+      Starting Receiver: "正在启动 Cast 接收器…"
+      Loading Video: "正在接收器上加载视频…"
+      Buffering: "正在 {device} 上缓冲…"
       Allow Private Instance: "允许此次投屏从私有 Invidious 实例 {instance} 读取媒体吗？"
       Cast: "投放到 Google Cast 设备"
       Connected: "正在投放到 {device}"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "未找到 Google Cast 设备"
       No Source: "没有兼容 Google Cast 的视频流"
       Error: "无法投放视频"
+      Error With Details: "无法投放视频: {error}"
+      Untrusted Receiver: "接收设备的证书不受信任。请使用经过身份验证的 Google Cast 接收设备。"
   External Media:
     Dislikes: "点踩"
     Reposts: "转发"

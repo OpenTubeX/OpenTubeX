@@ -1475,6 +1475,11 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Preparing Video: "Video voorbereiden voor casten…"
+      Connecting: "Verbinden met {device}…"
+      Starting Receiver: "Cast-ontvanger starten…"
+      Loading Video: "Video laden op de ontvanger…"
+      Buffering: "Bufferen op {device}…"
       Allow Private Instance: "Deze cast toestaan media te lezen van de privé-Invidious-instantie {instance}?"
       Cast: "Casten naar een Google Cast-apparaat"
       Connected: "Casten naar {device}"
@@ -1485,6 +1490,8 @@ Video:
       No Devices: "Geen Google Cast-apparaten gevonden"
       No Source: "Geen compatibele stream voor Google Cast"
       Error: "Kan de video niet casten"
+      Error With Details: "Kan de video niet casten: {error}"
+      Untrusted Receiver: "Het certificaat van de ontvanger wordt niet vertrouwd. Gebruik een geauthenticeerde Google Cast-ontvanger."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'

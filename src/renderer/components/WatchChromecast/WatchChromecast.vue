@@ -12,6 +12,23 @@
     @dropdown-open="refreshDevices"
     @click="handleChoice"
   />
+  <Teleport
+    v-if="progressTarget"
+    :to="progressTarget"
+  >
+    <div
+      class="castProgress"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span
+        class="castProgressSpinner"
+        aria-hidden="true"
+      />
+      <span>{{ progressMessage }}</span>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -49,7 +66,21 @@ watch(busy, value => emit('busy-change', value), { flush: 'sync' })
 watch(() => props.disabled, disabled => { if (disabled) button.value?.hideDropdown() })
 const castId = ref(null)
 const deviceName = ref('')
+const startupStage = ref(null)
 const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, muted: false, activeTrackIds: [] })
+const progressMessage = computed(() => {
+  if (startupStage.value) {
+    const labels = {
+      preparing: t('Video.Player.Google Cast.Preparing Video'),
+      connecting: t('Video.Player.Google Cast.Connecting', { device: deviceName.value }),
+      launching: t('Video.Player.Google Cast.Starting Receiver'),
+      loading: t('Video.Player.Google Cast.Loading Video')
+    }
+    return labels[startupStage.value]
+  }
+  return castId.value && status.value.buffering ? t('Video.Player.Google Cast.Buffering', { device: deviceName.value }) : ''
+})
+const progressTarget = computed(() => progressMessage.value ? props.getPlayer()?.$el?.querySelector('.ftVideoPlayer') : null)
 const castCaptions = ref([])
 let disposed = false
 let disposedPlayer = null
@@ -93,8 +124,16 @@ const options = computed(() => {
   return items
 })
 
-function reportError() {
-  if (!disposed) showToast({ message: t('Video.Player.Google Cast.Error'), icon: ['fas', 'cast'] })
+function reportError(error) {
+  if (disposed) return
+  let reason = typeof error?.message === 'string'
+    ? error.message.replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')
+    : ''
+  if (reason.includes('untrusted Cast device certificate:')) reason = t('Video.Player.Google Cast.Untrusted Receiver')
+  showToast({
+    message: reason ? t('Video.Player.Google Cast.Error With Details', { error: reason }) : t('Video.Player.Google Cast.Error'),
+    icon: ['fas', 'cast']
+  })
 }
 
 async function refreshDevices() {
@@ -104,9 +143,9 @@ async function refreshDevices() {
     refreshSource().catch(reportError)
     const result = await window.ftElectron.chromecast.discover()
     if (disposed) return
-    if (!Array.isArray(result)) throw new Error('Cast discovery failed')
+    if (!Array.isArray(result)) throw new Error(result?.error ?? 'Cast discovery failed')
     devices.value = result
-  } catch { reportError() } finally { loading.value = false }
+  } catch (error) { reportError(error) } finally { loading.value = false }
 }
 
 let sourceLookup = 0
@@ -141,7 +180,7 @@ async function poll() {
     if (!result.connected) {
       castId.value = null
       releaseLocalPlayer(result.currentTime ?? status.value.currentTime, false)
-      reportError()
+      reportError(new Error('Cast device disconnected'))
       return
     }
     status.value = result
@@ -151,12 +190,12 @@ async function poll() {
       if (!disposed) emit('ended')
       return
     }
-  } catch {
+  } catch (error) {
     if (disposed || id !== castId.value || stopPromise) return
     // Stop the remote session and release local controls after a failed poll.
     // stopCasting's finally block also handles a failed stop request.
     await stopCasting(false).catch(() => {})
-    reportError()
+    reportError(error)
     return
   }
   if (castId.value && !disposed) pollTimer = setTimeout(poll, 1000)
@@ -212,6 +251,8 @@ async function handleChoice(choice) {
       return
     }
     if (!choice.startsWith('device-') || !source.value) return
+    deviceName.value = devices.value.find(device => device.id === choice.slice(7))?.name ?? ''
+    startupStage.value = 'preparing'
     let captions = props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
       .map(({ url, label, language }) => ({ url, label, language }))
     const caption = props.subtitlesEnabled ? props.getPlayer()?.getActiveCaption() : null
@@ -247,6 +288,8 @@ async function handleChoice(choice) {
         captionIndex,
         isLive: props.isLive
       }
+    }, stage => {
+      if (!disposed && ['connecting', 'launching', 'loading'].includes(stage)) startupStage.value = stage
     })
     if (result.error) throw new Error(result.error)
     if (disposed || route.path !== watchPath || props.getPlayer() !== player) {
@@ -263,12 +306,13 @@ async function handleChoice(choice) {
     props.getPlayer()?.pause()
     button.value?.hideDropdown()
     pollTimer = setTimeout(poll, 1000)
-  } catch {
-    reportError()
+  } catch (error) {
+    reportError(error)
   } finally {
     // A removed control can still own a pending handoff. Restore only its
     // surviving player after startup or cancellation cleanup has settled.
     if (resumePlayer && props.getPlayer() === resumePlayer && route.path === watchPath) releaseLocalPlayer(undefined, true)
+    startupStage.value = null
     busy.value = false
   }
 }
@@ -285,3 +329,5 @@ onBeforeUnmount(() => {
   clearTimeout(pollTimer)
 })
 </script>
+
+<style scoped src="./WatchChromecast.css" />

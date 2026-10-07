@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: カテゴリ変更の投票を送信
       CategoryVoteSuccess: カテゴリ変更の投票を送信しました。
     Google Cast:
+      Preparing Video: "キャスト用の動画を準備中…"
+      Connecting: "{device} に接続中…"
+      Starting Receiver: "Cast レシーバーを起動中…"
+      Loading Video: "レシーバーで動画を読み込み中…"
+      Buffering: "{device} でバッファリング中…"
       Allow Private Instance: "このキャストによる非公開の Invidious インスタンス {instance} からのメディアの読み取りを許可しますか？"
       Cast: "Google Castデバイスにキャスト"
       Connected: "{device}にキャスト中"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "Google Castデバイスが見つかりません"
       No Source: "Google Cast対応のストリームがありません"
       Error: "動画をキャストできませんでした"
+      Error With Details: "動画をキャストできませんでした: {error}"
+      Untrusted Receiver: "受信機の証明書は信頼されていません。認証済みの Google Cast 受信機を使用してください。"
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"

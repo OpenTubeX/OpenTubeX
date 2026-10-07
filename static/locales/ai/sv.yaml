@@ -1440,6 +1440,11 @@ Video:
       SubmitCategoryVote: Skicka kategoriröst
       CategoryVoteSuccess: Kategoriröst skickad.
     Google Cast:
+      Preparing Video: "Förbereder video för casting…"
+      Connecting: "Ansluter till {device}…"
+      Starting Receiver: "Startar Cast-mottagaren…"
+      Loading Video: "Läser in video på mottagaren…"
+      Buffering: "Buffrar på {device}…"
       Allow Private Instance: "Tillåta att denna casting läser media från den privata Invidious-instansen {instance}?"
       Cast: "Casta till en Google Cast-enhet"
       Connected: "Castar till {device}"
@@ -1450,6 +1455,8 @@ Video:
       No Devices: "Inga Google Cast-enheter hittades"
       No Source: "Ingen kompatibel ström för Google Cast"
       Error: "Det gick inte att casta videon"
+      Error With Details: "Det gick inte att casta videon: {error}"
+      Untrusted Receiver: "Mottagarens certifikat är inte betrott. Använd en autentiserad Google Cast-mottagare."
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda

@@ -4659,7 +4659,7 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.CAST_DISCOVER, async event => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
-    try { return await chromecast.discover() } catch { return { error: 'Cast discovery failed' } }
+    try { return await chromecast.discover() } catch (error) { return { error: `Cast discovery failed: ${error.message}` } }
   })
   const castOwners = new WeakSet()
   const castPreparations = new Map()
@@ -4748,7 +4748,13 @@ function runApp() {
     if (privateInstance && isInvidiousInstanceUrl(payload?.source?.url, privateInstance) &&
         !await resolveAddresses(new URL(payload.source.url))) return { error: 'Private Cast media was not authorized' }
     if (event.sender.isDestroyed()) return { error: 'Cast start cancelled' }
-    const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia)
+    const onProgress = stage => {
+      const frame = event.senderFrame
+      if (!event.sender.isDestroyed() && frame && !frame.detached) {
+        frame.send(IpcChannels.CAST_PROGRESS, { preparationId, stage })
+      }
+    }
+    const result = await chromecast.start(ownerId, payload, getHeaders, resolveAddresses, fetchMedia, onProgress)
     if (result.castId) {
       if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
     }

@@ -1448,6 +1448,11 @@ Video:
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
+      Preparing Video: "Undirbý myndskeið fyrir sendingu…"
+      Connecting: "Tengist {device}…"
+      Starting Receiver: "Ræsi Cast-móttakara…"
+      Loading Video: "Hleð myndskeiði á móttakara…"
+      Buffering: "Safna í biðminni á {device}…"
       Allow Private Instance: "Leyfa þessari sendingu að lesa miðla frá einkatilviki Invidious {instance}?"
       Cast: "Senda í Google Cast-tæki"
       Connected: "Sendir í {device}"
@@ -1458,6 +1463,8 @@ Video:
       No Devices: "Engin Google Cast-tæki fundust"
       No Source: "Enginn samhæfur straumur fyrir Google Cast"
       Error: "Ekki tókst að senda myndskeiðið"
+      Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
+      Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:

@@ -1429,6 +1429,11 @@ Video:
       SubmitCategoryVote: Envoyer le vote de catégorie
       CategoryVoteSuccess: Vote de catégorie envoyé.
     Google Cast:
+      Preparing Video: "Préparation de la vidéo pour la diffusion…"
+      Connecting: "Connexion à {device}…"
+      Starting Receiver: "Démarrage du récepteur Cast…"
+      Loading Video: "Chargement de la vidéo sur le récepteur…"
+      Buffering: "Mise en mémoire tampon sur {device}…"
       Allow Private Instance: "Autoriser cette diffusion à lire des médias depuis l’instance privée Invidious {instance} ?"
       Cast: "Diffuser sur un appareil Google Cast"
       Connected: "Diffusion sur {device}"
@@ -1439,6 +1444,8 @@ Video:
       No Devices: "Aucun appareil Google Cast trouvé"
       No Source: "Aucun flux compatible avec Google Cast"
       Error: "Impossible de diffuser la vidéo"
+      Error With Details: "Impossible de diffuser la vidéo: {error}"
+      Untrusted Receiver: "Le certificat du récepteur n’est pas fiable. Utilisez un récepteur Google Cast authentifié."
   External Media:
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"

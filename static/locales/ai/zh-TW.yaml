@@ -1432,6 +1432,11 @@ Video:
       SubmitCategoryVote: 提交類別投票
       CategoryVoteSuccess: 類別投票已提交。
     Google Cast:
+      Preparing Video: "正在準備投放影片…"
+      Connecting: "正在連線至 {device}…"
+      Starting Receiver: "正在啟動 Cast 接收器…"
+      Loading Video: "正在接收器上載入影片…"
+      Buffering: "正在 {device} 上緩衝…"
       Allow Private Instance: "允許此次投放從私人 Invidious 實例 {instance} 讀取媒體嗎？"
       Cast: "投放到 Google Cast 裝置"
       Connected: "正在投放到 {device}"
@@ -1442,6 +1447,8 @@ Video:
       No Devices: "找不到 Google Cast 裝置"
       No Source: "沒有相容 Google Cast 的串流"
       Error: "無法投放影片"
+      Error With Details: "無法投放影片: {error}"
+      Untrusted Receiver: "接收裝置的憑證不受信任。請使用經過身分驗證的 Google Cast 接收裝置。"
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

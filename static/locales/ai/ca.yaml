@@ -1906,6 +1906,11 @@ Video:
       SubmitCategoryVote: Envia el vot de categoria
       CategoryVoteSuccess: S’ha enviat el vot de categoria.
     Google Cast:
+      Preparing Video: "Preparant el vídeo per transmetre…"
+      Connecting: "Connectant amb {device}…"
+      Starting Receiver: "Iniciant el receptor Cast…"
+      Loading Video: "Carregant el vídeo al receptor…"
+      Buffering: "Emmagatzemant a la memòria intermèdia de {device}…"
       Allow Private Instance: "Voleu permetre que aquesta transmissió llegeixi contingut multimèdia de la instància privada d’Invidious {instance}?"
       Cast: "Transmet a un dispositiu Google Cast"
       Connected: "S’està transmetent a {device}"
@@ -1916,6 +1921,8 @@ Video:
       No Devices: "No s’han trobat dispositius Google Cast"
       No Source: "No hi ha cap flux compatible amb Google Cast"
       Error: "No s’ha pogut transmetre el vídeo"
+      Error With Details: "No s’ha pogut transmetre el vídeo: {error}"
+      Untrusted Receiver: "El certificat del receptor no és de confiança. Fes servir un receptor Google Cast autenticat."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'

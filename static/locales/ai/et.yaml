@@ -1432,6 +1432,11 @@ Video:
       SubmitCategoryVote: Saada kategooriahääl
       CategoryVoteSuccess: Kategooriahääl saadetud.
     Google Cast:
+      Preparing Video: "Video ettevalmistamine edastamiseks…"
+      Connecting: "Ühendamine seadmega {device}…"
+      Starting Receiver: "Casti vastuvõtja käivitamine…"
+      Loading Video: "Video laadimine vastuvõtjas…"
+      Buffering: "Puhverdamine seadmes {device}…"
       Allow Private Instance: "Kas lubada sellel edastusel lugeda meediat privaatsest Invidiousi instantsist {instance}?"
       Cast: "Edasta Google Casti seadmesse"
       Connected: "Edastamine seadmesse {device}"
@@ -1442,6 +1447,8 @@ Video:
       No Devices: "Google Casti seadmeid ei leitud"
       No Source: "Google Casti jaoks pole ühilduvat voogu"
       Error: "Video edastamine ebaõnnestus"
+      Error With Details: "Video edastamine ebaõnnestus: {error}"
+      Untrusted Receiver: "Vastuvõtja sertifikaati ei usaldata. Kasuta autenditud Google Casti vastuvõtjat."
   External Media:
     Dislikes: "Ei meeldi | Ei meeldi"
     Reposts: "Taaspostitus | Taaspostitused"

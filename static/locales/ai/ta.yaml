@@ -1471,6 +1471,11 @@ Video:
       SubmitCategoryVote: வகை வாக்கைச் சமர்ப்பி
       CategoryVoteSuccess: வகை வாக்கு சமர்ப்பிக்கப்பட்டது.
     Google Cast:
+      Preparing Video: "அனுப்புவதற்காகக் காணொளியைத் தயார்செய்கிறது…"
+      Connecting: "{device} உடன் இணைக்கிறது…"
+      Starting Receiver: "Cast பெறுநரைத் தொடங்குகிறது…"
+      Loading Video: "பெறுநரில் காணொளியை ஏற்றுகிறது…"
+      Buffering: "{device} இல் இடையகப்படுத்துகிறது…"
       Allow Private Instance: "இந்த ஒளிபரப்பு தனிப்பட்ட Invidious சேவையான {instance} இலிருந்து ஊடகத்தைப் படிக்க அனுமதிக்கவா?"
       Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
       Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
@@ -1481,6 +1486,8 @@ Video:
       No Devices: "Google Cast சாதனங்கள் கிடைக்கவில்லை"
       No Source: "Google Cast-க்கு இணக்கமான ஓடை இல்லை"
       Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
+      Error With Details: "காணொளியை ஒளிபரப்ப முடியவில்லை: {error}"
+      Untrusted Receiver: "பெறுநரின் சான்றிதழ் நம்பகமானது அல்ல. அங்கீகரிக்கப்பட்ட Google Cast பெறுநரைப் பயன்படுத்தவும்."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்

@@ -1445,6 +1445,11 @@ Video:
       SubmitCategoryVote: Bidali kategoriaren botoa
       CategoryVoteSuccess: Kategoriaren botoa bidali da.
     Google Cast:
+      Preparing Video: "Bideoa igortzeko prestatzen…"
+      Connecting: "{device} gailura konektatzen…"
+      Starting Receiver: "Cast hargailua abiarazten…"
+      Loading Video: "Bideoa hargailuan kargatzen…"
+      Buffering: "{device} gailuan bufferreratzen…"
       Allow Private Instance: "Baimendu igorpen honi {instance} Invidious instantzia pribatuko multimedia irakurtzea?"
       Cast: "Igorri Google Cast gailu batera"
       Connected: "{device} gailura igortzen"
@@ -1455,6 +1460,8 @@ Video:
       No Devices: "Ez da Google Cast gailurik aurkitu"
       No Source: "Ez dago Google Cast-erako korronte bateragarririk"
       Error: "Ezin izan da bideoa igorri"
+      Error With Details: "Ezin izan da bideoa igorri: {error}"
+      Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
   Station: Estazioa
   Playlist:
     Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude

@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: Kategori oyunu gönder
       CategoryVoteSuccess: Kategori oyu gönderildi.
     Google Cast:
+      Preparing Video: "Video yayın için hazırlanıyor…"
+      Connecting: "{device} cihazına bağlanılıyor…"
+      Starting Receiver: "Cast alıcısı başlatılıyor…"
+      Loading Video: "Video alıcıda yükleniyor…"
+      Buffering: "{device} üzerinde arabelleğe alınıyor…"
       Allow Private Instance: "Bu yayının özel Invidious örneği {instance} üzerinden medya okumasına izin verilsin mi?"
       Cast: "Google Cast cihazına yayınla"
       Connected: "{device} cihazına yayınlanıyor"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "Google Cast cihazı bulunamadı"
       No Source: "Google Cast için uyumlu akış yok"
       Error: "Video yayınlanamadı"
+      Error With Details: "Video yayınlanamadı: {error}"
+      Untrusted Receiver: "Alıcının sertifikasına güvenilmiyor. Kimliği doğrulanmış bir Google Cast alıcısı kullanın."
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

@@ -29,12 +29,16 @@ export class CastSender extends EventEmitter {
     // Keep stderr drained without logging stream URLs or device details.
     this.process.stderr.resume()
     this.process.stdin.on('error', () => this.close())
-    this.process.on('error', () => this.close())
-    this.process.on('exit', () => this.close())
+    this.process.on('error', error => this.close(error))
+    this.process.on('close', () => this.close())
     this.lines = createInterface({ input: this.process.stdout })
     this.lines.on('line', line => {
       try {
         const message = JSON.parse(line)
+        if (message.event === 'error' && typeof message.error === 'string' && message.error.length > 0) {
+          this.close(new Error(message.error.slice(0, 512)))
+          return
+        }
         if (message.event === 'connected') this.emit('connected', message.address)
         if (message.event !== 'message') return
         const pending = this.pending.get(message.payload?.requestId)
@@ -60,16 +64,16 @@ export class CastSender extends EventEmitter {
         this.removeListener('closed', closed)
       }
       const connected = address => { cleanup(); resolve(address) }
-      const closed = () => { cleanup(); reject(new Error('Cast device disconnected')) }
-      const timer = setTimeout(() => { closed(); this.close() }, 8000)
+      const closed = error => { cleanup(); reject(error) }
+      const timer = setTimeout(() => { this.close(new Error('Cast device did not respond')) }, 8000)
       this.once('connected', connected)
       this.once('closed', closed)
-      if (this.closed) closed()
+      if (this.closed) closed(this.closeError)
     })
   }
 
   send(namespace, destination, payload, wait = true) {
-    if (this.closed) return Promise.reject(new Error('Cast device disconnected'))
+    if (this.closed) return Promise.reject(this.closeError)
     const id = this.nextId++
     return new Promise((resolve, reject) => {
       if (wait) {
@@ -82,22 +86,23 @@ export class CastSender extends EventEmitter {
       this.process.stdin.write(`${JSON.stringify({ id, namespace, destination, payload })}\n`, error => {
         if (error) {
           this.close()
-          if (!wait) reject(new Error('Cast device disconnected'))
+          if (!wait) reject(this.closeError)
         } else if (!wait) resolve()
       })
     })
   }
 
-  close() {
+  close(error = new Error('Cast device disconnected')) {
     if (this.closed) return
     this.closed = true
+    this.closeError = error
     for (const pending of this.pending.values()) {
       clearTimeout(pending.timer)
-      pending.reject(new Error('Cast device disconnected'))
+      pending.reject(error)
     }
     this.pending.clear()
     this.lines.close()
     this.process.kill()
-    this.emit('closed')
+    this.emit('closed', error)
   }
 }

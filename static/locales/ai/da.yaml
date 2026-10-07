@@ -1494,6 +1494,11 @@ Video:
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
     Google Cast:
+      Preparing Video: "Forbereder video til casting…"
+      Connecting: "Opretter forbindelse til {device}…"
+      Starting Receiver: "Starter Cast-modtageren…"
+      Loading Video: "Indlæser video på modtageren…"
+      Buffering: "Buffer på {device}…"
       Allow Private Instance: "Tillad denne casting at læse medier fra den private Invidious-instans {instance}?"
       Cast: "Cast til en Google Cast-enhed"
       Connected: "Caster til {device}"
@@ -1504,6 +1509,8 @@ Video:
       No Devices: "Ingen Google Cast-enheder fundet"
       No Source: "Ingen kompatibel stream til Google Cast"
       Error: "Videoen kunne ikke castes"
+      Error With Details: "Videoen kunne ikke castes: {error}"
+      Untrusted Receiver: "Modtagerens certifikat er ikke betroet. Brug en godkendt Google Cast-modtager."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'

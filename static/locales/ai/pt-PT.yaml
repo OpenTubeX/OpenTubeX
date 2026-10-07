@@ -1459,6 +1459,11 @@ Video:
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
     Google Cast:
+      Preparing Video: "A preparar o vídeo para transmissão…"
+      Connecting: "A ligar a {device}…"
+      Starting Receiver: "A iniciar o recetor Cast…"
+      Loading Video: "A carregar o vídeo no recetor…"
+      Buffering: "A colocar em memória intermédia em {device}…"
       Allow Private Instance: "Permitir que esta transmissão leia conteúdos multimédia da instância privada do Invidious {instance}?"
       Cast: "Transmitir para um dispositivo Google Cast"
       Connected: "A transmitir para {device}"
@@ -1469,6 +1474,8 @@ Video:
       No Devices: "Nenhum dispositivo Google Cast encontrado"
       No Source: "Nenhum fluxo compatível com Google Cast"
       Error: "Não foi possível transmitir o vídeo"
+      Error With Details: "Não foi possível transmitir o vídeo: {error}"
+      Untrusted Receiver: "O certificado do recetor não é de confiança. Usa um recetor Google Cast autenticado."
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

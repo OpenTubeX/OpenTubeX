@@ -1452,6 +1452,11 @@ Video:
       SubmitCategoryVote: Cyflwyno pleidlais categori
       CategoryVoteSuccess: Cyflwynwyd y bleidlais categori.
     Google Cast:
+      Preparing Video: "Yn paratoi'r fideo i'w ddarlledu…"
+      Connecting: "Yn cysylltu â {device}…"
+      Starting Receiver: "Yn cychwyn y derbynnydd Cast…"
+      Loading Video: "Yn llwytho'r fideo ar y derbynnydd…"
+      Buffering: "Yn byffro ar {device}…"
       Allow Private Instance: "Caniatáu i’r darllediad hwn ddarllen cyfryngau o’r enghraifft breifat Invidious {instance}?"
       Cast: "Castio i ddyfais Google Cast"
       Connected: "Yn castio i {device}"
@@ -1462,6 +1467,8 @@ Video:
       No Devices: "Heb ganfod dyfeisiau Google Cast"
       No Source: "Dim ffrwd gydnaws ar gyfer Google Cast"
       Error: "Methu darlledu’r fideo"
+      Error With Details: "Methu darlledu’r fideo: {error}"
+      Untrusted Receiver: "Nid yw tystysgrif y derbynnydd yn ddibynadwy. Defnyddiwch dderbynnydd Google Cast sydd wedi ei ddilysu."
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio

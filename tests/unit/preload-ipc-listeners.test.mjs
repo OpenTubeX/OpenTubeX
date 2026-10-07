@@ -83,13 +83,18 @@ test('Cast start checks activation before asynchronous payload preparation and i
   }
   let complete
   let preparations = 0
+  const stages = []
   userActivation.isActive = true
   const pending = api.chromecast.start(() => {
     preparations++
     return new Promise(resolve => { complete = resolve })
-  })
+  }, stage => stages.push(stage))
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(preparations, 1)
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 1)
+  ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'other-grant', stage: 'loading' })
+  ipcRenderer.emit(IpcChannels.CAST_PROGRESS, {}, { preparationId: 'grant', stage: 'connecting' })
+  assert.deepEqual(stages, ['connecting'])
   assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE]])
   userActivation.isActive = false
   const payload = { deviceId: 'tv', captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT' }], startSeconds: 18 }
@@ -97,6 +102,7 @@ test('Cast start checks activation before asynchronous payload preparation and i
   assert.equal((await pending).castId, 'cast-1')
   assert.deepEqual(invocations, [[IpcChannels.CAST_PREPARE], [IpcChannels.CAST_START, payload, 'grant']])
   assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 0)
 })
 
 test('unauthorized, cancelled and failed Cast preparation never sends a start request', async () => {
@@ -114,6 +120,7 @@ test('unauthorized, cancelled and failed Cast preparation never sends a start re
   assert.match((await api.chromecast.start(() => null)).error, /cancelled/)
   await assert.rejects(api.chromecast.start(async () => { throw new Error('Caption failed') }), /Caption failed/)
   assert.deepEqual(cancellations, [[IpcChannels.CAST_CANCEL_PREPARATION, 'grant'], [IpcChannels.CAST_CANCEL_PREPARATION, 'grant']])
+  assert.equal(ipcRenderer.listenerCount(IpcChannels.CAST_PROGRESS), 0)
 })
 
 test('player IPC subscriptions share one Electron listener per channel', async () => {

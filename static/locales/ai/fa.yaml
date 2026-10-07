@@ -1500,6 +1500,11 @@ Video:
       SubmitCategoryVote: ارسال رأی دسته‌بندی
       CategoryVoteSuccess: رأی دسته‌بندی ارسال شد.
     Google Cast:
+      Preparing Video: "در حال آماده‌سازی ویدیو برای پخش…"
+      Connecting: "در حال اتصال به {device}…"
+      Starting Receiver: "در حال راه‌اندازی گیرندهٔ Cast…"
+      Loading Video: "در حال بارگذاری ویدیو روی گیرنده…"
+      Buffering: "در حال بافر کردن روی {device}…"
       Allow Private Instance: "به این پخش اجازه داده شود رسانه را از نمونهٔ خصوصی Invidious در {instance} بخواند؟"
       Cast: "پخش روی دستگاه Google Cast"
       Connected: "در حال پخش روی {device}"
@@ -1510,6 +1515,8 @@ Video:
       No Devices: "هیچ دستگاه Google Cast پیدا نشد"
       No Source: "جریان سازگاری برای Google Cast وجود ندارد"
       Error: "پخش ویدیو در دستگاه ممکن نشد"
+      Error With Details: "پخش ویدیو در دستگاه ممکن نشد: {error}"
+      Untrusted Receiver: "گواهی گیرنده قابل اعتماد نیست. از یک گیرندهٔ Google Cast احراز هویت‌شده استفاده کنید."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'

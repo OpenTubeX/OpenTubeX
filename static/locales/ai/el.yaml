@@ -1467,6 +1467,11 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Preparing Video: "Προετοιμασία βίντεο για μετάδοση…"
+      Connecting: "Σύνδεση με {device}…"
+      Starting Receiver: "Εκκίνηση του δέκτη Cast…"
+      Loading Video: "Φόρτωση βίντεο στον δέκτη…"
+      Buffering: "Αποθήκευση στην προσωρινή μνήμη του {device}…"
       Allow Private Instance: "Να επιτραπεί σε αυτή τη μετάδοση να διαβάζει πολυμέσα από την ιδιωτική εγκατάσταση Invidious {instance};"
       Cast: "Μετάδοση σε συσκευή Google Cast"
       Connected: "Μετάδοση στο {device}"
@@ -1477,6 +1482,8 @@ Video:
       No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
       No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
       Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
+      Error With Details: "Δεν ήταν δυνατή η μετάδοση του βίντεο: {error}"
+      Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

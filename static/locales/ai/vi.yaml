@@ -1459,6 +1459,11 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Preparing Video: "Đang chuẩn bị video để truyền…"
+      Connecting: "Đang kết nối với {device}…"
+      Starting Receiver: "Đang khởi động thiết bị nhận Cast…"
+      Loading Video: "Đang tải video trên thiết bị nhận…"
+      Buffering: "Đang lưu vào bộ đệm trên {device}…"
       Allow Private Instance: "Cho phép phiên truyền này đọc nội dung đa phương tiện từ máy chủ Invidious riêng tư {instance}?"
       Cast: "Truyền tới thiết bị Google Cast"
       Connected: "Đang truyền tới {device}"
@@ -1469,6 +1474,8 @@ Video:
       No Devices: "Không tìm thấy thiết bị Google Cast"
       No Source: "Không có luồng tương thích với Google Cast"
       Error: "Không thể truyền video"
+      Error With Details: "Không thể truyền video: {error}"
+      Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

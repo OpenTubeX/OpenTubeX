@@ -1442,6 +1442,11 @@ Video:
       SubmitCategoryVote: Kateqoriya səsini göndər
       CategoryVoteSuccess: Kateqoriya səsi göndərildi.
     Google Cast:
+      Preparing Video: "Video yayımlama üçün hazırlanır…"
+      Connecting: "{device} ilə bağlantı qurulur…"
+      Starting Receiver: "Cast qəbuledicisi başladılır…"
+      Loading Video: "Video qəbuledicidə yüklənir…"
+      Buffering: "{device} üzərində buferlənir…"
       Allow Private Instance: "Bu yayıma şəxsi Invidious instansiyası {instance} ünvanından media oxumağa icazə verilsin?"
       Cast: "Google Cast cihazına yayımla"
       Connected: "{device} cihazına yayımlanır"
@@ -1452,6 +1457,8 @@ Video:
       No Devices: "Google Cast cihazları tapılmadı"
       No Source: "Google Cast üçün uyğun yayım yoxdur"
       Error: "Videonu yayımlamaq mümkün olmadı"
+      Error With Details: "Videonu yayımlamaq mümkün olmadı: {error}"
+      Untrusted Receiver: "Qəbuledicinin sertifikatına etibar edilmir. Təsdiqlənmiş Google Cast qəbuledicisindən istifadə edin."
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"

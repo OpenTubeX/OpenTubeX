@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: Odeslat hlas pro kategorii
       CategoryVoteSuccess: Hlas pro kategorii byl odeslán.
     Google Cast:
+      Preparing Video: "Příprava videa k odesílání…"
+      Connecting: "Připojování k {device}…"
+      Starting Receiver: "Spouštění přijímače Cast…"
+      Loading Video: "Načítání videa v přijímači…"
+      Buffering: "Ukládání do vyrovnávací paměti na {device}…"
       Allow Private Instance: "Povolit tomuto přenosu číst média ze soukromé instance Invidious {instance}?"
       Cast: "Odeslat do zařízení Google Cast"
       Connected: "Odesílání do {device}"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "Nenalezena žádná zařízení Google Cast"
       No Source: "Žádný kompatibilní stream pro Google Cast"
       Error: "Video se nepodařilo odeslat"
+      Error With Details: "Video se nepodařilo odeslat: {error}"
+      Untrusted Receiver: "Certifikát přijímače není důvěryhodný. Použijte ověřený přijímač Google Cast."
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"

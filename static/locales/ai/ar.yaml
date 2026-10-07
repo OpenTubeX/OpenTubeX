@@ -1462,6 +1462,11 @@ Video:
       SubmitCategoryVote: إرسال تصويت الفئة
       CategoryVoteSuccess: تم إرسال تصويت الفئة.
     Google Cast:
+      Preparing Video: "جارٍ تجهيز الفيديو للبث…"
+      Connecting: "جارٍ الاتصال بـ {device}…"
+      Starting Receiver: "جارٍ تشغيل جهاز استقبال Cast…"
+      Loading Video: "جارٍ تحميل الفيديو على جهاز الاستقبال…"
+      Buffering: "جارٍ التخزين المؤقت على {device}…"
       Allow Private Instance: "هل تسمح لهذا البث بقراءة الوسائط من مثيل Invidious الخاص {instance}؟"
       Cast: "البث إلى جهاز Google Cast"
       Connected: "جارٍ البث إلى {device}"
@@ -1472,6 +1477,8 @@ Video:
       No Devices: "لم يُعثر على أجهزة Google Cast"
       No Source: "لا يوجد بث متوافق مع Google Cast"
       Error: "تعذر بث الفيديو"
+      Error With Details: "تعذر بث الفيديو: {error}"
+      Untrusted Receiver: "شهادة جهاز الاستقبال غير موثوقة. استخدم جهاز استقبال Google Cast مصادقًا عليه."
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة

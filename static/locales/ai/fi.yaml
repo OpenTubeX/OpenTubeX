@@ -1467,6 +1467,11 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Preparing Video: "Valmistellaan videota lähetettäväksi…"
+      Connecting: "Yhdistetään laitteeseen {device}…"
+      Starting Receiver: "Käynnistetään Cast-vastaanotinta…"
+      Loading Video: "Ladataan videota vastaanottimessa…"
+      Buffering: "Puskuroidaan laitteessa {device}…"
       Allow Private Instance: "Sallitaanko tämän lähetyksen lukea mediaa yksityisestä Invidious-palvelusta {instance}?"
       Cast: "Lähetä Google Cast -laitteeseen"
       Connected: "Lähetetään laitteeseen {device}"
@@ -1477,6 +1482,8 @@ Video:
       No Devices: "Google Cast -laitteita ei löytynyt"
       No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
       Error: "Videon lähetys epäonnistui"
+      Error With Details: "Videon lähetys epäonnistui: {error}"
+      Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

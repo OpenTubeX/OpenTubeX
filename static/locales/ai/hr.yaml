@@ -1447,6 +1447,11 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Preparing Video: "Priprema videozapisa za emitiranje…"
+      Connecting: "Povezivanje s {device}…"
+      Starting Receiver: "Pokretanje Cast prijamnika…"
+      Loading Video: "Učitavanje videozapisa na prijamniku…"
+      Buffering: "Spremanje u međuspremnik na {device}…"
       Allow Private Instance: "Dopustiti ovom emitiranju čitanje medija s privatne instance Invidious {instance}?"
       Cast: "Emitiraj na uređaj Google Cast"
       Connected: "Emitiranje na {device}"
@@ -1457,6 +1462,8 @@ Video:
       No Devices: "Nisu pronađeni uređaji Google Cast"
       No Source: "Nema kompatibilnog toka za Google Cast"
       Error: "Videozapis nije moguće prenijeti"
+      Error With Details: "Videozapis nije moguće prenijeti: {error}"
+      Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

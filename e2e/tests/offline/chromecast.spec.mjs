@@ -29,9 +29,10 @@ async function mockCast(app) {
     let nextPreparation = 0
     for (const name of ['cast-discover', 'cast-prepare', 'cast-start', 'cast-status', 'cast-control', 'cast-stop']) ipcMain.removeHandler(name)
     ipcMain.handle('cast-discover', () => [{ id: 'test-tv', name: 'Test TV' }])
-    ipcMain.handle('cast-prepare', event => {
+    ipcMain.handle('cast-prepare', async event => {
       const preparationId = String(++nextPreparation)
       preparations.set(event.sender.id, preparationId)
+      if (globalThis.castTest.holdPreparation) await new Promise(resolve => { globalThis.castTest.finishPreparation = resolve })
       return { preparationId }
     })
     ipcMain.on('cast-cancel-preparation', (event, preparationId) => {
@@ -41,11 +42,13 @@ async function mockCast(app) {
       if (preparations.get(event.sender.id) !== preparationId) return { error: 'Cast start is not authorized' }
       preparations.delete(event.sender.id)
       globalThis.castTest.starts.push(payload)
+      globalThis.castTest.progress = stage => event.sender.send('cast-progress', { preparationId, stage })
+      globalThis.castTest.progress('connecting')
       if (globalThis.castTest.holdStart) await new Promise(resolve => { globalThis.castTest.finishStart = resolve })
       await new Promise(resolve => setTimeout(resolve, globalThis.castTest.startDelayMs))
       globalThis.castTest.startCompletions++
       if (globalThis.castTest.failStart === 'throw') throw new Error('Receiver connection failed')
-      if (globalThis.castTest.failStart) return { error: 'Receiver rejected media' }
+      if (globalThis.castTest.failStart) return { error: typeof globalThis.castTest.failStart === 'string' ? globalThis.castTest.failStart : 'Receiver rejected media' }
       state.currentTime = payload.startSeconds
       state.paused = payload.paused
       return { castId: 'session-id', deviceName: 'Test TV', status: { ...state } }
@@ -101,6 +104,67 @@ async function selectLocalEnglishCaption(page, watch) {
   })
   await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
 }
+
+test('Cast shows persistent startup stages and receiver buffering until playback is ready', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => vm.$store.dispatch('updateBaseTheme', 'system'))
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.holdStart = true
+    globalThis.castTest.holdPreparation = true
+  })
+  await choice(page, 'Test TV')
+  const progress = page.locator('.castProgress')
+  await expect(progress).toHaveText('Preparing video for casting…')
+  await app.electronApp.evaluate(() => globalThis.castTest.finishPreparation())
+  await expect(progress).toHaveText('Connecting to Test TV…')
+  await expect(progress).toHaveAttribute('role', 'status')
+  // Events from another preparation must not replace this session's status.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.send('cast-progress', { preparationId: 'unrelated', stage: 'loading' })
+  })
+  await expect(progress).toHaveText('Connecting to Test TV…')
+  await app.electronApp.evaluate(() => globalThis.castTest.progress('launching'))
+  await expect(progress).toHaveText('Starting the Cast receiver…')
+  await app.electronApp.evaluate(() => globalThis.castTest.progress('loading'))
+  await expect(progress).toHaveText('Loading video on the receiver…')
+  const backgrounds = []
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveAttribute('data-system-theme', theme)
+    backgrounds.push(await progress.evaluate(el => getComputedStyle(el).backgroundColor))
+  }
+  expect(backgrounds[0]).not.toBe(backgrounds[1])
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.state.buffering = true
+    globalThis.castTest.finishStart()
+  })
+  await expect(progress).toHaveText('Buffering on Test TV…')
+  await app.electronApp.evaluate(() => { globalThis.castTest.state.buffering = false })
+  await expect(progress).toHaveCount(0)
+  await choice(page, 'Return to local playback')
+})
+
+test('Cast loading feedback fits fractional scale and respects reduced motion', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
+  await setWindowSize(app, page, { width: 600, height: 850 })
+  await app.electronApp.evaluate(() => { globalThis.castTest.holdStart = true })
+  await choice(page, 'Test TV')
+  const progress = page.locator('.castProgress')
+  await expect(progress).toHaveText('Connecting to Test TV…')
+  const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
+  const progressBounds = await progress.boundingBox()
+  expect(progressBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
+  expect(progressBounds.x + progressBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width)
+  await expect(page.locator('.castProgressSpinner')).toHaveCSS('animation-name', 'none')
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.failStart = true
+    globalThis.castTest.finishStart()
+  })
+  await expect(page.getByText('Could not cast the video: Receiver rejected media')).toBeVisible()
+  await expect(progress).toHaveCount(0)
+})
 
 test('casts the current video, controls the receiver and returns to its remote position', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
@@ -205,6 +269,7 @@ for (const outcome of ['playing', 'paused', 'stop failure']) {
     await expect.poll(() => watch.evaluate(vm => vm.chromecastStatus.currentTime)).toBe(18)
     await watch.evaluate(vm => vm.$store.dispatch('updateShowChromecastButton', false))
     await expect(page.locator('.chromecastControl')).toHaveCount(0)
+    await expect(page.locator('.castProgress')).toHaveCount(0)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(18)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(outcome === 'paused')
     await expect.poll(() => watch.evaluate(vm => vm.chromecastActive)).toBe(false)
@@ -331,7 +396,7 @@ test('failed casting preserves local playback and paused casting returns paused'
   await watch.evaluate(vm => vm.$refs.player.play())
   await app.electronApp.evaluate(() => { globalThis.castTest.failStart = true })
   await choice(page, 'Test TV')
-  await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+  await expect(page.getByText('Could not cast the video: Receiver rejected media', { exact: true })).toBeVisible()
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   await app.electronApp.evaluate(() => { globalThis.castTest.failStart = false })
@@ -340,6 +405,32 @@ test('failed casting preserves local playback and paused casting returns paused'
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
   await choice(page, 'Return to local playback')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
+})
+
+test('Cast explains an untrusted receiver certificate and preserves local playback', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => vm.$refs.player.play())
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  await app.electronApp.evaluate(() => {
+    globalThis.castTest.failStart = 'untrusted Cast device certificate: x509: certificate signed by unknown authority'
+  })
+  await choice(page, 'Test TV')
+  await expect(page.getByText("Could not cast the video: The receiver's certificate is not trusted. Use an authenticated Google Cast receiver.", { exact: true })).toBeVisible()
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+})
+
+test('Cast shows discovery failure details without interrupting local playback', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => vm.$refs.player.play())
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('cast-discover')
+    ipcMain.handle('cast-discover', () => ({ error: 'Cast discovery failed: helper is missing' }))
+  })
+  await page.locator('.chromecastControl > button').click()
+  await expect(page.getByText('Could not cast the video: Cast discovery failed: helper is missing', { exact: true })).toBeVisible()
+  await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
+  expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
 })
 
 for (const outcome of ['success', 'reported failure', 'thrown failure']) {
@@ -361,7 +452,9 @@ for (const outcome of ['success', 'reported failure', 'thrown failure']) {
       await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
       await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBeCloseTo(payload.startSeconds, 1)
     } else {
-      await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+      await expect(page.getByText(outcome === 'reported failure'
+        ? 'Could not cast the video: Receiver rejected media'
+        : /Could not cast the video:.*Receiver connection failed/)).toBeVisible()
       await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
       await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
     }
@@ -542,7 +635,7 @@ for (const failStop of [false, true]) {
       globalThis.castTest.failStop = failStop
       return globalThis.castTest.statusCalls
     }, failStop)
-    await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+    await expect(page.getByText(/Could not cast the video:.*Cast status unavailable/)).toBeVisible()
     await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
     await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
     await expect.poll(() => watch.evaluate(vm => vm.chromecastActive)).toBe(false)
@@ -772,7 +865,7 @@ test('an active authenticated Cast caption failure leaves local playback running
   await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
   await choice(page, 'Test TV')
-  await expect(page.getByText('Could not cast the video', { exact: true })).toBeVisible()
+  await expect(page.getByText('Could not cast the video: Unable to load subtitle with configured cookies', { exact: true })).toBeVisible()
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
   await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)

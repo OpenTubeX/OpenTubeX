@@ -1488,6 +1488,11 @@ Video:
       SubmitCategoryVote: Пошаљи глас за категорију
       CategoryVoteSuccess: Глас за категорију је послат.
     Google Cast:
+      Preparing Video: "Припрема видеа за емитовање…"
+      Connecting: "Повезивање са {device}…"
+      Starting Receiver: "Покретање Cast пријемника…"
+      Loading Video: "Учитавање видеа на пријемнику…"
+      Buffering: "Баферовање на {device}…"
       Allow Private Instance: "Дозволити овом емитовању да чита медије са приватне Invidious инстанце {instance}?"
       Cast: "Емитуј на Google Cast уређај"
       Connected: "Емитовање на {device}"
@@ -1498,6 +1503,8 @@ Video:
       No Devices: "Нису пронађени Google Cast уређаји"
       No Source: "Нема компатибилног тока за Google Cast"
       Error: "Видео није могуће емитовати"
+      Error With Details: "Видео није могуће емитовати: {error}"
+      Untrusted Receiver: "Сертификат пријемника није поуздан. Користите аутентификован Google Cast пријемник."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'

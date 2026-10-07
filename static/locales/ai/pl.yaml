@@ -777,6 +777,11 @@ Video:
       SubmitCategoryVote: Wyślij głos na kategorię
       CategoryVoteSuccess: Głos na kategorię został wysłany.
     Google Cast:
+      Preparing Video: "Przygotowywanie filmu do przesyłania…"
+      Connecting: "Łączenie z {device}…"
+      Starting Receiver: "Uruchamianie odbiornika Cast…"
+      Loading Video: "Wczytywanie filmu na odbiorniku…"
+      Buffering: "Buforowanie na {device}…"
       Allow Private Instance: "Zezwolić temu przesyłaniu na odczyt multimediów z prywatnej instancji Invidious {instance}?"
       Cast: "Przesyłaj na urządzenie Google Cast"
       Connected: "Przesyłanie na {device}"
@@ -787,6 +792,8 @@ Video:
       No Devices: "Nie znaleziono urządzeń Google Cast"
       No Source: "Brak zgodnego strumienia dla Google Cast"
       Error: "Nie udało się przesłać filmu"
+      Error With Details: "Nie udało się przesłać filmu: {error}"
+      Untrusted Receiver: "Certyfikat odbiornika nie jest zaufany. Użyj uwierzytelnionego odbiornika Google Cast."
   External Media:
     Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
     Reposts: "Repost | Reposty | Repostów"

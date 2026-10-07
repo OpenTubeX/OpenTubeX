@@ -56,7 +56,7 @@ export class ChromecastManager {
     return this.active && this.active.ownerId === ownerId && this.active.castId === castId ? this.active : null
   }
 
-  async start(ownerId, payload, getHeaders, isAllowedUrl, fetchMedia) {
+  async start(ownerId, payload, getHeaders, isAllowedUrl, fetchMedia, onProgress = () => {}) {
     const device = this.devices.get(payload?.deviceId)
     if (!device || !castSourceAvailable(payload?.source) || typeof payload.title !== 'string' || payload.title.length > 500 ||
       !Number.isFinite(payload.startSeconds) || payload.startSeconds < 0 || typeof payload.paused !== 'boolean' ||
@@ -114,6 +114,7 @@ export class ChromecastManager {
     })
     let loaded = false
     try {
+      onProgress('connecting')
       const localAddress = await sender.connect()
       if (isIP(localAddress) !== 4) throw new Error('Cast requires an IPv4 network interface')
       await new Promise((resolve, reject) => {
@@ -132,6 +133,7 @@ export class ChromecastManager {
         language: caption.language
       }))
       await sender.send(CAST_CONNECTION, 'receiver-0', { type: 'CONNECT' }, false)
+      onProgress('launching')
       let receiver = await sender.send(CAST_RECEIVER, 'receiver-0', { type: 'GET_STATUS' })
       let application = receiver.status?.applications?.find(app => app.appId === RECEIVER_APP)
       if (!application) {
@@ -145,6 +147,7 @@ export class ChromecastManager {
       const activeTrackIds = Number.isInteger(payload.captionIndex) && tracks[payload.captionIndex]
         ? [payload.captionIndex + 1]
         : []
+      onProgress('loading')
       const result = await sender.send(CAST_MEDIA, cast.transportId, {
         type: 'LOAD',
         currentTime: payload.startSeconds,

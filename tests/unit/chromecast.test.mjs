@@ -80,6 +80,20 @@ lines.on('line', async line=>{
 lines.on('close',()=>process.exit(0))
 `
 
+test('Cast preserves the native authentication error when the helper exits', async t => {
+  if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return }
+  const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-error-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const executable = path.join(directory, 'sender.mjs')
+  const reason = 'untrusted Cast device certificate: x509: certificate signed by unknown authority'
+  await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason }) + '\n')}, () => process.exit(1))\n`)
+  await chmod(executable, 0o755)
+  const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
+  t.after(() => sender.close())
+  await assert.rejects(sender.connect(), { message: reason })
+  await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason })
+})
+
 async function managerForTest(t, powerSaveBlocker) {
   if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return null }
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-'))
@@ -97,6 +111,15 @@ const payload = {
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
 }
+
+test('Cast reports actual startup stages while connecting and loading media', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const stages = []
+  const result = await manager.start(42, payload, undefined, undefined, undefined, stage => stages.push(stage))
+  assert.ok(result.castId)
+  assert.deepEqual(stages, ['connecting', 'launching', 'loading'])
+})
 
 test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
   const manager = await managerForTest(t)

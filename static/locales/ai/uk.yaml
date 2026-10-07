@@ -1462,6 +1462,11 @@ Video:
       SubmitCategoryVote: Надіслати голос за категорію
       CategoryVoteSuccess: Голос за категорію надіслано.
     Google Cast:
+      Preparing Video: "Підготовка відео до трансляції…"
+      Connecting: "Підключення до {device}…"
+      Starting Receiver: "Запуск приймача Cast…"
+      Loading Video: "Завантаження відео на приймачі…"
+      Buffering: "Буферизація на {device}…"
       Allow Private Instance: "Дозволити цій трансляції читати медіа з приватного екземпляра Invidious {instance}?"
       Cast: "Транслювати на пристрій Google Cast"
       Connected: "Трансляція на {device}"
@@ -1472,6 +1477,8 @@ Video:
       No Devices: "Пристроїв Google Cast не знайдено"
       No Source: "Немає сумісного потоку для Google Cast"
       Error: "Не вдалося транслювати відео"
+      Error With Details: "Не вдалося транслювати відео: {error}"
+      Untrusted Receiver: "Сертифікат приймача не є довіреним. Використовуйте автентифікований приймач Google Cast."
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано

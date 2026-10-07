@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: Kategóriaszavazat elküldése
       CategoryVoteSuccess: Kategóriaszavazat elküldve.
     Google Cast:
+      Preparing Video: "Videó előkészítése az átküldéshez…"
+      Connecting: "Csatlakozás ehhez: {device}…"
+      Starting Receiver: "A Cast-vevő indítása…"
+      Loading Video: "Videó betöltése a vevőn…"
+      Buffering: "Pufferelés ezen: {device}…"
       Allow Private Instance: "Engedélyezi, hogy ez az átküldés médiát olvasson a privát Invidious-példányról: {instance}?"
       Cast: "Átküldés Google Cast-eszközre"
       Connected: "Átküldés ide: {device}"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "Nem találhatók Google Cast-eszközök"
       No Source: "Nincs kompatibilis adatfolyam a Google Casthoz"
       Error: "Nem sikerült átküldeni a videót"
+      Error With Details: "Nem sikerült átküldeni a videót: {error}"
+      Untrusted Receiver: "A fogadó tanúsítványa nem megbízható. Használj hitelesített Google Cast fogadót."
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

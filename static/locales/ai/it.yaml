@@ -1430,6 +1430,11 @@ Video:
       SubmitCategoryVote: Invia voto per la categoria
       CategoryVoteSuccess: Voto per la categoria inviato.
     Google Cast:
+      Preparing Video: "Preparazione del video per la trasmissione…"
+      Connecting: "Connessione a {device}…"
+      Starting Receiver: "Avvio del ricevitore Cast…"
+      Loading Video: "Caricamento del video sul ricevitore…"
+      Buffering: "Buffering su {device}…"
       Allow Private Instance: "Consentire a questa trasmissione di leggere contenuti multimediali dall’istanza privata di Invidious {instance}?"
       Cast: "Trasmetti a un dispositivo Google Cast"
       Connected: "Trasmissione a {device}"
@@ -1440,6 +1445,8 @@ Video:
       No Devices: "Nessun dispositivo Google Cast trovato"
       No Source: "Nessun flusso compatibile con Google Cast"
       Error: "Impossibile trasmettere il video"
+      Error With Details: "Impossibile trasmettere il video: {error}"
+      Untrusted Receiver: "Il certificato del ricevitore non è attendibile. Usa un ricevitore Google Cast autenticato."
   External Media:
     Dislikes: "Non mi piace | Non mi piace | Non mi piace"
     Reposts: "Repost | Repost | Repost"

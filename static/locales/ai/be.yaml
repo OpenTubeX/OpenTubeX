@@ -1506,6 +1506,11 @@ Video:
       SubmitCategoryVote: Адправіць голас за катэгорыю
       CategoryVoteSuccess: Голас за катэгорыю адпраўлены.
     Google Cast:
+      Preparing Video: "Падрыхтоўка відэа да трансляцыі…"
+      Connecting: "Падключэнне да {device}…"
+      Starting Receiver: "Запуск прыёмніка Cast…"
+      Loading Video: "Загрузка відэа на прыёмніку…"
+      Buffering: "Буферызацыя на {device}…"
       Allow Private Instance: "Дазволіць гэтай трансляцыі чытаць медыя з прыватнага асобніка Invidious {instance}?"
       Cast: "Трансляваць на прыладу Google Cast"
       Connected: "Трансляцыя на {device}"
@@ -1516,6 +1521,8 @@ Video:
       No Devices: "Прылады Google Cast не знойдзены"
       No Source: "Няма сумяшчальнага патоку для Google Cast"
       Error: "Не ўдалося трансляваць відэа"
+      Error With Details: "Не ўдалося трансляваць відэа: {error}"
+      Untrusted Receiver: "Сертыфікат прыёмніка не з’яўляецца давераным. Выкарыстоўвайце аўтэнтыфікаваны прыёмнік Google Cast."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

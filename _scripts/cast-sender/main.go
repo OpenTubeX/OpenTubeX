@@ -233,6 +233,7 @@ func main() {
 		err = fmt.Errorf("expected discover or address and port")
 	}
 	if err != nil {
+		_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"event": "error", "error": err.Error()})
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

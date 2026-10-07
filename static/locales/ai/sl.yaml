@@ -1884,6 +1884,11 @@ Video:
       SubmitCategoryVote: Pošlji glas za kategorijo
       CategoryVoteSuccess: Glas za kategorijo je poslan.
     Google Cast:
+      Preparing Video: "Priprava videoposnetka za predvajanje…"
+      Connecting: "Povezovanje z {device}…"
+      Starting Receiver: "Zagon sprejemnika Cast…"
+      Loading Video: "Nalaganje videoposnetka na sprejemniku…"
+      Buffering: "Medpomnjenje na {device}…"
       Allow Private Instance: "Dovolite temu predvajanju branje medijev iz zasebnega primerka Invidious {instance}?"
       Cast: "Predvajaj na napravi Google Cast"
       Connected: "Predvajanje na {device}"
@@ -1894,6 +1899,8 @@ Video:
       No Devices: "Ni najdenih naprav Google Cast"
       No Source: "Ni združljivega toka za Google Cast"
       Error: "Videoposnetka ni bilo mogoče predvajati na napravi"
+      Error With Details: "Videoposnetka ni bilo mogoče predvajati na napravi: {error}"
+      Untrusted Receiver: "Potrdilo sprejemnika ni zaupanja vredno. Uporabite preverjen sprejemnik Google Cast."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'
