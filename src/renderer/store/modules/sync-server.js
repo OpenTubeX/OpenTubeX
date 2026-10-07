@@ -859,6 +859,7 @@ const actions = {
     const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
     const stillCurrent = () => rootState.settings.syncServerEnabled &&
       rootState.settings.syncServerUrl === settings.syncServerUrl &&
+      rootState.settings.syncServerUsername === settings.syncServerUsername &&
       rootState.settings.syncServerPrivacyKey === settings.syncServerPrivacyKey &&
       rootState.settings.syncServerDeviceId === settings.syncServerDeviceId &&
       rootState.settings.syncServerToken === settings.syncServerToken && !client.cancelled

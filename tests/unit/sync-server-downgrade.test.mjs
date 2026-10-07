@@ -1512,6 +1512,35 @@ test('a download already in flight cannot restore cleared activity', async () =>
   assert.deepEqual(Array.from(f.context.state.syncServerActivity, entry => entry.id), ['0002:0'])
 })
 
+test('an in-flight activity refresh cannot commit after the username changes before the token', async () => {
+  let release
+  let downloadStarted
+  const pending = new Promise(resolve => { release = resolve })
+  const started = new Promise(resolve => { downloadStarted = resolve })
+  const f = fixture({ syncServerDeviceId: 'laptop' }, { respond: async url => {
+    if (new URL(url).pathname === '/v1/encrypted_sync/events') {
+      downloadStarted()
+      await pending
+      return events
+    }
+  } })
+  const payload = await privacy.encryptSyncDocument({
+    version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
+  }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
+  const events = [{ id: '0001', recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
+  const accountKey = JSON.stringify([f.settings.syncServerUrl, 'alice', 'laptop'])
+  f.settings.syncServerActivityClearedThrough = { [accountKey]: '0001' }
+
+  const refreshing = f.actions.refreshSyncServerEvents(f.context)
+  await started
+  await f.context.dispatch('updateSyncServerUsername', 'bob')
+  release()
+  await refreshing
+  assert.equal(f.settings.syncServerToken, 'saved-token')
+  assert.equal(f.commits.some(([action]) => action === 'setSyncServerActivity'), false)
+  assert.equal(f.context.state.syncServerActivity.length, 0)
+})
+
 test('failed persistence leaves activity available to retry clearing', async () => {
   const f = fixture()
   f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
