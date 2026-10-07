@@ -12,6 +12,7 @@
       </div>
       <div class="activityActions">
         <FtButton
+          class="activityClear"
           :label="t('Settings.Sync Settings.Clear Activity')"
           :icon="['fas', 'trash']"
           variant="outlined"

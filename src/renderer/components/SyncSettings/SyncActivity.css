@@ -22,8 +22,17 @@
 .activityActions {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: flex-end;
   margin-inline-start: auto;
+  max-inline-size: 100%;
+}
+
+.activityClear {
+  margin-inline: 0;
+  max-inline-size: 100%;
+  white-space: normal;
 }
 
 .activityScroller {

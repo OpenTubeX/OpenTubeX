@@ -1,4 +1,5 @@
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
+import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
 async function seedActivity(page, count = 30) {
   await page.evaluate(count => {
@@ -212,6 +213,44 @@ test.describe('account activity labels', () => {
 for (const uiScale of [100, 125]) {
   test.describe(`account activity at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, syncServerUrl: '' } } })
+
+    test('keeps translated activity actions inside narrow cards', async ({ app, page }, testInfo) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+      await seedActivity(page, 3)
+      const card = sync.locator('.syncActivity')
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .dispatch('updateUseAITranslationCompletions', true))
+      for (const [locale, label] of [
+        ['en-US', 'Clear on this device'],
+        ['de-DE', 'Auf diesem Gerät leeren'],
+        ['it', 'Cancella su questo dispositivo'],
+      ]) {
+        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .dispatch('updateCurrentLocale', locale), locale)
+        await expect(card.locator('.activityClear')).toHaveText(label)
+        for (const width of [480, 375, 320]) {
+          await setWindowSize(app, page, { width, height: 700 + width })
+          await card.scrollIntoViewIfNeeded()
+          await expect.poll(() => card.evaluate(element => {
+            const bounds = element.querySelector('.activityHeader').getBoundingClientRect()
+            const viewport = element.closest('.settingsContent').getBoundingClientRect()
+            const tolerance = 2 / devicePixelRatio
+            const buttons = [...element.querySelectorAll('.activityActions button')]
+            return buttons.length === 2 && buttons.every(button => {
+              const rect = button.getBoundingClientRect()
+              const range = document.createRange()
+              range.selectNodeContents(button)
+              const content = range.getBoundingClientRect()
+              return rect.left >= bounds.left - tolerance && rect.right <= bounds.right + tolerance &&
+                rect.left >= viewport.left - tolerance && rect.right <= viewport.right + tolerance &&
+                content.left >= rect.left - tolerance && content.right <= rect.right + tolerance
+            })
+          }), { message: `${locale} actions fit at ${width}px and ${uiScale}% scale` }).toBe(true)
+        }
+      }
+      await captureAppFramebuffer(app, testInfo, 'translated-activity-actions')
+    })
 
     test('clears activity locally after confirmation and keeps it hidden after restart', async ({ app, page }) => {
       const sync = await goToSettingsSection(page, 'sync')
