@@ -325,10 +325,15 @@ for (const uiScale of [100, 95]) {
       await toast.hover({ position: { x: 2, y: 2 } })
       for (const name of ['Close', 'Edit']) {
         const button = toast.getByRole('button', { name, exact: true })
+        await expect(button.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
         await expect.soft(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
-        expect.soft((await button.boundingBox()).height).toBeCloseTo(24, 0)
+        const bounds = await button.boundingBox()
+        expect(bounds, `${name} button should have visible bounds`).not.toBeNull()
+        expect.soft(bounds.height).toBeCloseTo(24, 0)
       }
-      expect.soft((await toast.boundingBox()).height).toBeCloseTo(88, 0)
+      const toastBounds = await toast.boundingBox()
+      expect(toastBounds, 'Skipped notice should have visible bounds').not.toBeNull()
+      expect.soft(toastBounds.height).toBeCloseTo(88, 0)
       if (uiScale === 100) await captureThemes(page, toast, testInfo, 'sponsorblock-toast-compact')
       await expect(toast.getByRole('button', { name: 'Change category', exact: true })).toHaveCount(0)
       await toast.getByRole('button', { name: 'Edit', exact: true }).click()
