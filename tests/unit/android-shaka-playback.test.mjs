@@ -263,93 +263,92 @@ test('Android selects physical sensing only for the opt-in and releases subscrip
   assert.deepEqual(calls, ['exit', 'display', 'stop:display', 'exit', 'device', 'stop:device', 'exit', 'exit'])
 })
 
-test('Android holds the exit presentation until the WebView matches the unlocked display', async () => {
-  const start = source.indexOf('    let androidFullscreenPortrait = null')
-  const end = source.indexOf('    function fullscreenChangeHandler()', start)
-  const listeners = new Map()
-  const timers = new Map()
-  const frames = new Map()
-  let open = false
-  let cleanup
-  let exitTimeout
-  const host = {
-    setAttribute() {}, removeAttribute() {},
-    showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
-  }
-  const context = {
-    androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
-    document: { fullscreenElement: null },
-    getAndroidDisplayOrientation: async () => 'landscape-primary',
-    onBeforeUnmount: callback => { cleanup = callback },
-    watch() {}, isActiveTab: {},
-    suppressPanelTransitions() {},
-    requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
-    cancelAnimationFrame: id => frames.delete(id),
-    clearTimeout: id => timers.delete(id),
-    window: {
-      innerWidth: 800, innerHeight: 400,
-      addEventListener: (name, callback) => listeners.set(name, callback),
-      removeEventListener: name => listeners.delete(name),
-      setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
-    },
-  }
-  const retain = vm.runInNewContext(`${source.slice(start, end)}
-    (updated) => { androidFullscreenPortrait = true; retainAndroidFullscreenDuringRotation(updated) }`, context)
-  retain()
-  assert.equal(open, true)
-  context.window.innerHeight = 380 // System bars resize before rotation finishes.
-  listeners.get('resize')()
-  assert.equal(open, true)
-  context.window.innerWidth = 400
-  context.window.innerHeight = 800
-  listeners.get('resize')()
-  assert.equal(open, true, 'Keep the surface until the restored viewport paints')
-  frames.get(1)()
-  assert.equal(open, true)
-  frames.get(1)()
-  assert.equal(open, false)
-  assert.equal(context.androidFullscreenHostActive.value, false)
-  assert.equal(timers.size, 0)
-  assert.equal(listeners.size, 0)
+for (const enteredPortrait of [true, false]) {
+  test(`Android holds the exit presentation after entering in ${enteredPortrait ? 'portrait' : 'landscape'}`, async () => {
+    const start = source.indexOf('    let androidFullscreenPortrait = null')
+    const end = source.indexOf('    function fullscreenChangeHandler()', start)
+    const listeners = new Map()
+    const timers = new Map()
+    const frames = new Map()
+    let open = false
+    let cleanup
+    let exitTimeout
+    const host = {
+      setAttribute() {}, removeAttribute() {},
+      showPopover() { open = true }, hidePopover() { open = false }, matches() { return open },
+    }
+    const context = {
+      androidFullscreenHost: host, androidFullscreenHostActive: { value: false },
+      document: { fullscreenElement: null },
+      getAndroidDisplayOrientation: async () => 'landscape-primary',
+      onBeforeUnmount: callback => { cleanup = callback },
+      watch() {}, isActiveTab: {},
+      suppressPanelTransitions() {},
+      requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
+      cancelAnimationFrame: id => frames.delete(id),
+      clearTimeout: id => timers.delete(id),
+      window: {
+        innerWidth: 800, innerHeight: 400,
+        addEventListener: (name, callback) => listeners.set(name, callback),
+        removeEventListener: name => listeners.delete(name),
+        setTimeout: (callback, delay) => { exitTimeout = delay; timers.set(1, callback); return 1 },
+      },
+    }
+    const retain = vm.runInNewContext(`${source.slice(start, end)}
+      (updated) => { androidFullscreenPortrait = ${enteredPortrait}; retainAndroidFullscreenDuringRotation(updated) }`, context)
+    retain()
+    assert.equal(open, true)
+    context.window.innerHeight = 380 // System bars resize before rotation finishes.
+    listeners.get('resize')()
+    assert.equal(open, true)
+    context.window.innerWidth = 400
+    context.window.innerHeight = 800
+    listeners.get('resize')()
+    assert.equal(open, true, 'Keep the surface until the restored viewport paints')
+    frames.get(1)()
+    assert.equal(open, true)
+    frames.get(1)()
+    assert.equal(open, false)
+    assert.equal(context.androidFullscreenHostActive.value, false)
+    assert.equal(timers.size, 0)
+    assert.equal(listeners.size, 0)
 
-  // Exiting while already in the original orientation needs no temporary layer.
-  retain()
-  assert.equal(open, false)
-  context.window.innerWidth = 900
-  retain()
-  timers.get(1)() // A user/device policy can keep the display landscape.
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(open, false)
-  assert.equal(listeners.size, 0)
-  retain(Promise.resolve())
-  await new Promise(resolve => setImmediate(resolve))
-  frames.get(1)?.()
-  frames.get(1)?.()
-  assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
-  assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
-  timers.get(1)()
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(open, false)
-  assert.equal(timers.size, 0)
-  // Native rotation may complete before the WebView's resized frame arrives.
-  context.getAndroidDisplayOrientation = async () => 'portrait-primary'
-  retain()
-  timers.get(1)()
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
-  context.window.innerWidth = 400
-  context.window.innerHeight = 900
-  listeners.get('resize')()
-  frames.get(1)()
-  frames.get(1)()
-  assert.equal(open, false)
-  context.window.innerWidth = 1000
-  retain()
-  cleanup() // Navigating away must cancel the pending exit.
-  assert.equal(open, false)
-  assert.equal(timers.size, 0)
-  assert.equal(listeners.size, 0)
-})
+    context.window.innerWidth = 900
+    retain()
+    timers.get(1)() // A user/device policy can keep the display landscape.
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(open, false)
+    assert.equal(listeners.size, 0)
+    retain(Promise.resolve())
+    await new Promise(resolve => setImmediate(resolve))
+    frames.get(1)?.()
+    frames.get(1)?.()
+    assert.equal(open, true, 'A stale landscape read after unlock must not discard the expected portrait rotation')
+    assert.equal(exitTimeout, 500, 'Bound a genuine no-rotation exit without a five-second hold')
+    timers.get(1)()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(open, false)
+    assert.equal(timers.size, 0)
+    // Native rotation may complete before the WebView's resized frame arrives.
+    context.getAndroidDisplayOrientation = async () => 'portrait-primary'
+    retain()
+    timers.get(1)()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(open, true, 'Keep the overlay while the WebView still has the old landscape viewport')
+    context.window.innerWidth = 400
+    context.window.innerHeight = 900
+    listeners.get('resize')()
+    frames.get(1)()
+    frames.get(1)()
+    assert.equal(open, false)
+    context.window.innerWidth = 1000
+    retain()
+    cleanup() // Navigating away must cancel the pending exit.
+    assert.equal(open, false)
+    assert.equal(timers.size, 0)
+    assert.equal(listeners.size, 0)
+  })
+}
 
 test('Android fullscreen events do not repeat an entry rotation already in flight', () => {
   const start = source.indexOf('    function updateFullscreenOrientation(fullscreen)')

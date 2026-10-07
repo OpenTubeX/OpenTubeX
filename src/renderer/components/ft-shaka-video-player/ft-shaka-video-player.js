@@ -11480,13 +11480,11 @@ export default defineComponent({
 
     function retainAndroidFullscreenDuringRotation() {
       if (!androidFullscreenHost || androidFullscreenPortrait === null) return
-      if ((window.innerHeight >= window.innerWidth) === androidFullscreenPortrait) {
-        androidFullscreenPortrait = null
-        return
-      }
+      const portraitBeforeUnlock = window.innerHeight >= window.innerWidth
 
-      // Keep the player in the top layer until the restored orientation reaches
-      // the WebView. Otherwise the inline page paints inside a landscape window.
+      // The device may have turned while fullscreen locked its display, even
+      // when entry and exit viewports match. Retain the surface until an unlocked
+      // orientation arrives, or the delayed native check confirms no rotation.
       const host = androidFullscreenHost
       host.setAttribute('popover', 'manual')
       host.showPopover()
@@ -11505,7 +11503,7 @@ export default defineComponent({
         suppressPanelTransitions(100)
       }
       const resized = () => {
-        if ((window.innerHeight >= window.innerWidth) !== androidFullscreenPortrait || restoredFrame !== null) return
+        if ((window.innerHeight >= window.innerWidth) === portraitBeforeUnlock || restoredFrame !== null) return
         // Paint the restored viewport before replacing its fullscreen surface.
         restoredFrame = requestAnimationFrame(() => {
           restoredFrame = requestAnimationFrame(() => finish())
@@ -11520,7 +11518,7 @@ export default defineComponent({
         timeout = window.setTimeout(finish, 4500)
         getAndroidDisplayOrientation().then(orientation => {
           if (finishAndroidFullscreenExit !== finish) return
-          if (orientation.startsWith('portrait') !== androidFullscreenPortrait) finish()
+          if (orientation.startsWith('portrait') === portraitBeforeUnlock) finish()
         }).catch(() => {
           if (finishAndroidFullscreenExit === finish) finish()
         })

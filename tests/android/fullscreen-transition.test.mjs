@@ -233,6 +233,30 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       timeout: 1500, message: 'Exit promptly when the native display remains landscape',
     }).toBe(true)
     assert.equal(await page.evaluate(() => innerWidth > innerHeight), true)
+    // Start the next session in landscape, then let unlock restore portrait.
+    // Entry orientation cannot predict where a locked device will rotate on exit.
+    await session.send('Runtime.evaluate', {
+      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+    })
+    await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true)
+    await page.evaluate(() => {
+      window.Capacitor.nativePromise = window.__originalOrientationPromise
+      delete window.__originalOrientationPromise
+      document.addEventListener('fullscreenchange', function exited() {
+        if (document.fullscreenElement) return
+        document.removeEventListener('fullscreenchange', exited)
+        window.__landscapeExitRetained = !!document.querySelector('.videoLayout:popover-open')
+      })
+    })
+    await session.send('Runtime.evaluate', {
+      expression: `document.querySelector('.shaka-fullscreen-button').click()`, userGesture: true,
+    })
+    await expect.poll(() => page.evaluate(() => window.__landscapeExitRetained), {
+      message: 'Protect rotation even when fullscreen started in landscape',
+    }).toBe(true)
+    await expect.poll(() => page.evaluate(() => innerHeight > innerWidth && !document.querySelector(':popover-open')), {
+      timeout: 10000,
+    }).toBe(true)
   } finally {
     await page.evaluate(async ({ settings, originalRoute }) => {
       if (window.__originalOrientationPromise) {
@@ -251,6 +275,7 @@ test('Android fullscreen keeps the video inside the viewport throughout rotation
       if (window.__fullscreenTransitionFetch) window.fetch = window.__fullscreenTransitionFetch
       delete window.__fullscreenTransitionFetch
       delete window.__fullscreenReentered
+      delete window.__landscapeExitRetained
       delete window.__transitionFrames
       delete window.__transitionFinished
       location.hash = originalRoute
