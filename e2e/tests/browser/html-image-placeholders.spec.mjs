@@ -86,3 +86,27 @@ test('stalled inline images show static fallbacks and recover on a late load', a
   await expect(placeholder).toHaveCount(0)
   await expect(page.locator('#stalled-images img')).toBeVisible()
 })
+
+test('zero-width SVG loads retain the deadline for a static fallback', async ({ page }) => {
+  await page.clock.install()
+  const svg = await installPlaceholderHelper(page)
+  const pending = []
+  await page.route('https://zero-width-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const container = document.createElement('div')
+    container.id = 'zero-width-images'
+    container.innerHTML = '<img src="https://zero-width-images.test/image" width="48" height="48">'
+    container.firstChild.addEventListener('load', () => { container.dataset.loaded = 'true' })
+    document.body.append(container)
+    window.addHtmlImagePlaceholders(container)
+  })
+  await expect.poll(() => pending.length).toBe(1)
+  await pending.shift().fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="48"/>' })
+  await expect(page.locator('#zero-width-images')).toHaveAttribute('data-loaded', 'true')
+  expect(await page.locator('#zero-width-images img:not(.htmlImagePlaceholder)').evaluate(image => image.naturalWidth)).toBe(0)
+  const placeholder = page.locator('.htmlImagePlaceholder')
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+})

@@ -27,8 +27,8 @@ export function addHtmlImagePlaceholders(element) {
     const skeletonTimeout = setTimeout(showFallback, 10_000)
 
     image.addEventListener('load', () => {
-      clearTimeout(skeletonTimeout)
       if (!image.naturalWidth) return
+      clearTimeout(skeletonTimeout)
       if (originalStyle === null) image.removeAttribute('style')
       else image.setAttribute('style', originalStyle)
       placeholder.remove()
