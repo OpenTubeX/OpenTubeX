@@ -508,12 +508,18 @@ test.describe('browsing scroll during mobile minimize', () => {
       await setWindowSize(app, page, { width: 480, height: 850 })
       const history = page.locator('.tabContent > .routerView').first()
       await expect(history.locator('.ft-list-video').first()).toBeVisible()
-      const videoLink = await history.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`).first().elementHandle()
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+      await expect(history.locator(`a[href="#/watch/${watchHistoryEntry.videoId}"]`)).toHaveCount(0)
       const savedScroll = await page.evaluate(() => window.scrollY)
-      await videoLink.evaluate(element => element.click())
-      await videoLink.dispose()
-      const video = await waitForPlayback(page)
+      await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
+      expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(savedScroll, 0)
+      const video = await openMockedVideo(page)
+      const savedHistoryScroll = await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const tab = store.getters.getTabById(store.getters.getPresentedTabId)
+        return tab.history[tab.historyIndex - 1].scroll.top
+      })
+      expect(savedHistoryScroll).toBeCloseTo(savedScroll, 0)
       await video.evaluate(element => element.pause())
       await enableMobileTouch(app, page, true, false)
       if (trigger === 'remove') {
