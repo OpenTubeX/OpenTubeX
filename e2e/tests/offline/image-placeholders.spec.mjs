@@ -963,7 +963,7 @@ for (const retrySucceeds of [true, false]) {
       pending.push(route)
     })
     const view = await watchViewHandle(page)
-    await view.evaluate(view => {
+    await view.evaluate((view, retrySucceeds) => {
       view.$store.commit('setHideEndScreenAnnotations', false)
       view.videoAnnotations = [{
         id: 'retry-channel',
@@ -976,9 +976,9 @@ for (const retrySucceeds of [true, false]) {
         width: 0.1,
         aspectRatio: 1,
         route: '/channel/UCaaaaaaaaaaaaaaaaaaaaaa',
-        thumbnail: 'https://annotation-images.test/avatar'
+        thumbnail: retrySucceeds ? '//annotation-images.test/avatar' : 'https://annotation-images.test/avatar'
       }]
-    })
+    }, retrySucceeds)
     const avatar = page.locator('.channelAvatarLink')
     const image = avatar.locator('img:not(.retryImagePlaceholder)')
     const placeholder = avatar.locator('.retryImagePlaceholder')

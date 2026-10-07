@@ -61,7 +61,10 @@ const props = defineProps({
 
 const emit = defineEmits(['error', 'load'])
 
-const preferredSource = computed(() => getVideoThumbnailSource(typeof props.src === 'string' ? props.src.trim() : '', store.getters.getThumbnailDataSaver))
+const preferredSource = computed(() => {
+  const src = typeof props.src === 'string' ? props.src.trim() : ''
+  return getVideoThumbnailSource(src.startsWith('//') ? 'https:' + src : src, store.getters.getThumbnailDataSaver)
+})
 const imageUrl = ref(preferredSource.value)
 const hasLoaded = ref(false)
 const hasFailed = ref(false)

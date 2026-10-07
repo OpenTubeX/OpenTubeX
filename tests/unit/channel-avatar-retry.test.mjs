@@ -427,6 +427,22 @@ test('stalled remote avatars retry once after the loading deadline and a short g
   assert.equal(f.find('fallback'), undefined)
 })
 
+test('stalled protocol-relative avatars retry over HTTPS', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  f.thumbnail.value = '//yt3.ggpht.com/avatar'
+  await Vue.nextTick()
+  const [deadline] = f.timers.values()
+  deadline()
+  await Vue.nextTick()
+  const [retry] = f.timers.values()
+  assert.ok(retry, 'a stalled protocol-relative remote source must queue a retry')
+  assert.equal(retry.delay, 3000)
+  assert.equal(f.find('img').props.src, 'https://yt3.ggpht.com/avatar')
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /^https:\/\/yt3\.ggpht\.com\/avatar\?opentubex_retry=\d+$/)
+})
+
 test('source replacements and unmounting cancel pending timeout retries', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   const [deadline] = f.timers.values()
