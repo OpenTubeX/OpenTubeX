@@ -15,15 +15,21 @@ test('Android stalled avatars use native recovery before the bounded browser ret
   const pending = []
   const nativeRequests = []
   let nativeOutcome = true
+  let finishNative
   let saved
   try {
     await page.locator('.profileTrigger').waitFor()
-    await page.route(avatarPattern, route => { pending.push(route) })
+    await page.route(avatarPattern, async route => {
+      pending.push(route)
+      if (nativeOutcome === 'delayed' && route.request().url().includes('opentubex_retry=')) await route.abort()
+    })
     await page.exposeBinding('__timeoutAvatarRequest', (_source, options) => {
       nativeRequests.push(options)
       if (nativeOutcome === 'stall') return new Promise(() => {})
       if (!nativeOutcome) throw new Error('Native fixture failure')
-      return { status: 200, headers: { 'content-type': 'image/jpeg' }, data, url: options.url }
+      const response = { status: 200, headers: { 'content-type': 'image/jpeg' }, data, url: options.url }
+      if (nativeOutcome === 'delayed') return new Promise(resolve => { finishNative = () => resolve(response) })
+      return response
     })
     saved = await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -40,7 +46,7 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       return saved
     })
     await page.clock.install()
-    for (const succeeds of [true, false, 'stall']) {
+    for (const succeeds of [true, false, 'stall', 'delayed']) {
       nativeOutcome = succeeds
       pending.length = 0
       nativeRequests.length = 0
@@ -66,7 +72,12 @@ test('Android stalled avatars use native recovery before the bounded browser ret
       assert.equal(nativeRequests[0].responseType, 'blob')
       assert.equal(nativeRequests[0].connectTimeout, 3000)
       assert.equal(nativeRequests[0].readTimeout, 3000)
-      if (succeeds === true) {
+      if (succeeds === 'delayed') {
+        await page.clock.fastForward(4001)
+        expect(pending).toHaveLength(1)
+        finishNative()
+      }
+      if (succeeds === true || succeeds === 'delayed') {
         await expect(image).toHaveAttribute('src', /^data:image\/jpeg;base64,/)
         await expect(placeholder).toHaveCount(0)
         await expect(image).toBeVisible()
@@ -84,6 +95,10 @@ test('Android stalled avatars use native recovery before the bounded browser ret
         }
       } else {
         await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+        if (succeeds === 'stall') {
+          await page.clock.fastForward(6001)
+          expect(pending).toHaveLength(1)
+        }
         await page.clock.fastForward(3001)
         await expect.poll(() => pending.length).toBe(2)
         expect(pending[1].request().url()).toContain('opentubex_retry=')

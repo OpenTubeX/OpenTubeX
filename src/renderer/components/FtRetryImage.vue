@@ -47,6 +47,7 @@ const parentScope = parentScopeId ? { [parentScopeId]: '' } : {}
 
 const RETRY_DELAY_MS = 3000
 const SKELETON_TIMEOUT_MS = 10_000
+const NATIVE_RECOVERY_TIMEOUT_MS = 6000
 
 const props = defineProps({
   src: {
@@ -77,6 +78,8 @@ let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
 let retryTimeoutId
+let nativeRecoveryTimeoutId
+let finishNativeRecovery
 let skeletonTimeoutId
 let visibilityObserver
 let imageIsVisible = false
@@ -107,6 +110,7 @@ function checkCachedImage({ el: image }) {
 }
 
 function resetSource(src, isFallback = false) {
+  cancelNativeRecovery()
   clearTimeout(retryTimeoutId)
   retryTimeoutId = undefined
   sourceVersion++
@@ -152,6 +156,7 @@ function handleImageLoad(event) {
     if (useSmallerThumbnail()) return
   }
   clearTimeout(skeletonTimeoutId)
+  cancelNativeRecovery()
   clearTimeout(retryTimeoutId)
   retryTimeoutId = undefined
   retryPending = false
@@ -199,26 +204,43 @@ async function recoverImage() {
   retryPending = true
   const failedSourceVersion = sourceVersion
   const failedSource = currentSource
-  // Native recovery may never settle; the browser fallback has its own deadline.
-  scheduleBrowserRetry()
 
   if (process.env.IS_CAPACITOR) {
+    // Bound the whole recovery, including connections that keep streaming data.
+    const deadline = new Promise(resolve => {
+      finishNativeRecovery = resolve
+      nativeRecoveryTimeoutId = setTimeout(() => resolve(null), NATIVE_RECOVERY_TIMEOUT_MS)
+    })
     let dataUrl = null
     try {
-      const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
-      dataUrl = await fetchCapacitorAvatarDataUrl(failedSource)
+      dataUrl = await Promise.race([
+        (async () => {
+          const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
+          return fetchCapacitorAvatarDataUrl(failedSource)
+        })(),
+        deadline
+      ])
     } catch {
       // Native recovery is optional; unexpected failures still get a delayed retry.
     }
 
     if (failedSourceVersion !== sourceVersion || hasLoaded.value) return
+    cancelNativeRecovery()
     if (dataUrl !== null) {
-      clearTimeout(retryTimeoutId)
-      retryTimeoutId = undefined
       retryPending = false
       imageUrl.value = dataUrl
+      return
     }
   }
+
+  scheduleBrowserRetry()
+}
+
+function cancelNativeRecovery() {
+  clearTimeout(nativeRecoveryTimeoutId)
+  nativeRecoveryTimeoutId = undefined
+  finishNativeRecovery?.(null)
+  finishNativeRecovery = undefined
 }
 
 function scheduleBrowserRetry() {
@@ -231,6 +253,7 @@ function scheduleBrowserRetry() {
 
 onBeforeUnmount(() => {
   sourceVersion++
+  cancelNativeRecovery()
   visibilityObserver?.disconnect()
   clearTimeout(retryTimeoutId)
   clearTimeout(skeletonTimeoutId)

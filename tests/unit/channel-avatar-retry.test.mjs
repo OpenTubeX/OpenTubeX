@@ -252,11 +252,15 @@ test('failed native timeout recovery still gets one delayed browser retry', asyn
 test('a never-settling native recovery cannot block the delayed browser retry', async t => {
   const f = await mountAvatar(t, () => new Promise(() => {}), 'FtRetryImage.vue')
   const [deadline] = f.timers.values()
-  deadline()
+  const recovery = deadline()
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(f.requests.length, 1)
+  const [nativeDeadline] = f.timers.values()
+  assert.equal(nativeDeadline.delay, 6000)
+  nativeDeadline()
+  await recovery
   const [retry] = f.timers.values()
-  assert.ok(retry, 'the browser retry must be scheduled independently of native completion')
+  assert.ok(retry, 'the browser retry must follow the overall native deadline')
   assert.equal(retry.delay, 3000)
   retry()
   await Vue.nextTick()
@@ -264,6 +268,27 @@ test('a never-settling native recovery cannot block the delayed browser retry', 
   await fail(f.find('img'))
   assert.equal(f.timers.size, 0)
   assert.equal(f.requests.length, 1)
+})
+
+test('delayed native success survives a browser fallback that would fail immediately', async t => {
+  let finishNative
+  let errors = 0
+  const f = await mountAvatar(t, () => new Promise(resolve => { finishNative = resolve }), 'FtRetryImage.vue', new Map(), {
+    onError: () => { errors++; f.unmount() }
+  })
+  const [deadline] = f.timers.values()
+  const recovery = deadline()
+  await new Promise(resolve => setImmediate(resolve))
+  // A connected native response can take longer than the browser retry delay.
+  for (const timer of [...f.timers.values()]) if (timer.delay <= 3000) timer()
+  await Vue.nextTick()
+  if (f.find('img').props.src.includes('opentubex_retry=')) await fail(f.find('img'))
+  finishNative('data:image/png;base64,AA==')
+  await recovery
+  await Vue.nextTick()
+  assert.equal(errors, 0, 'do not let a browser error remove the pending native image')
+  assert.equal(f.find('img').props.src, 'data:image/png;base64,AA==')
+  assert.equal(f.timers.size, 0)
 })
 
 for (const action of ['load', 'replace', 'unmount']) {
