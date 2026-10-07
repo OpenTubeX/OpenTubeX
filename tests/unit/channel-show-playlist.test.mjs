@@ -36,22 +36,28 @@ test('parses a channel TV show as a playlist with its season count', () => {
   })
 })
 
-test('uses the channel name when a playlist author is unavailable', () => {
+test('preserves the playlist author ID and uses a channel name fallback when available', () => {
   const playlist = {
     type: 'Playlist',
     id: 'PLexample',
     title: { text: 'Example playlist' },
-    author: { id: 'UCplaceholder', name: 'N/A' },
+    author: { id: 'UCchannel', name: 'N/A' },
     thumbnails: [{ url: 'https://example.com/thumbnail.jpg' }],
     video_count: { text: '12 videos' }
   }
 
-  const result = parseLocalListPlaylist(playlist, 'UCchannel', 'Example channel')
-  assert.equal(result.channelName, 'Example channel')
-  assert.equal(result.channelId, 'UCchannel')
+  for (const [channelId, channelName, expectedName] of [
+    [undefined, undefined, 'N/A'],
+    ['UCfallback', 'Example channel', 'Example channel'],
+    ['UCfallback', '', 'N/A']
+  ]) {
+    const result = parseLocalListPlaylist(playlist, channelId, channelName)
+    assert.equal(result.channelName, expectedName)
+    assert.equal(result.channelId, 'UCchannel')
+  }
 })
 
-test('keeps the known channel name when playlist metadata contains a generic label', () => {
+test('replaces a generic playlist label only when a channel name fallback is available', () => {
   const playlist = {
     type: 'LockupView',
     content_type: 'PLAYLIST',
@@ -79,7 +85,13 @@ test('keeps the known channel name when playlist metadata contains a generic lab
     }
   }
 
-  const result = parseLocalListPlaylist(playlist, 'UCchannel', 'Example channel')
-  assert.equal(result.channelName, 'Example channel')
-  assert.equal(result.channelId, 'UCchannel')
+  for (const [channelName, expectedName] of [
+    ['Example channel', 'Example channel'],
+    [undefined, 'Playlist'],
+    ['', 'Playlist']
+  ]) {
+    const result = parseLocalListPlaylist(playlist, undefined, channelName)
+    assert.equal(result.channelName, expectedName)
+    assert.equal(result.channelId, 'UCchannel')
+  }
 })

@@ -310,7 +310,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
       let internalChannelName
       let internalChannelId = null
 
-      if (playlist.author && playlist.author.id !== 'N/A' && playlist.author.name !== 'N/A') {
+      if (playlist.author && playlist.author.id !== 'N/A') {
         if (playlist.author instanceof Misc.Text) {
           internalChannelName = playlist.author.text
 
@@ -318,7 +318,9 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
             internalChannelId = channelId
           }
         } else {
-          internalChannelName = playlist.author.name
+          internalChannelName = playlist.author.name === 'N/A'
+            ? channelName || playlist.author.name
+            : playlist.author.name
           internalChannelId = playlist.author.id
         }
       } else if (channelId || channelName) {
@@ -678,7 +680,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         const maybeChannelText = lockupView.metadata?.metadata?.metadata_rows?.[0]?.metadata_parts?.[0]?.text
 
         if (maybeChannelText && maybeChannelText.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL') {
-          if (maybeChannelText.text !== 'Playlist') {
+          if (maybeChannelText.text !== 'Playlist' || !channelName) {
             channelName = maybeChannelText.text
           }
           channelId = maybeChannelText.endpoint.payload.browseId
