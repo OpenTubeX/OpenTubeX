@@ -263,7 +263,7 @@ test.describe('subscriptions header layout', () => {
     )).toBeLessThanOrEqual(2)
   })
 
-  test('keeps the New feed sort control wide until its row needs to shrink', async ({ app, page, attachScreenshot }) => {
+  test('keeps the New feed sort control wide until its row needs to shrink', async ({ app, page, attachScreenshot }, testInfo) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
@@ -312,6 +312,44 @@ test.describe('subscriptions header layout', () => {
     expect(layout.label.top).toBeGreaterThanOrEqual(layout.select.top)
     expect(layout.label.bottom).toBeLessThanOrEqual(layout.select.bottom)
     await attachScreenshot('compact New feed header actions')
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'system')
+      await store.dispatch('updateSystemDarkTheme', 'dark')
+      await store.dispatch('updateSystemLightTheme', 'light')
+    })
+    for (const scheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: scheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+      for (const width of [1600, 640, 340]) {
+        await setWindowWidth(app, page, width)
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          const geometry = await page.locator('.headerSortSelect').evaluate(element => {
+            const field = element.querySelector('.select-text').getBoundingClientRect()
+            const label = element.querySelector('.select-label').getBoundingClientRect()
+            const outline = element.querySelector('.selectOutline').getBoundingClientRect()
+            return {
+              labelCenter: Math.abs(label.top + label.height / 2 - field.top - field.height / 2),
+              outlineOffset: Math.max(Math.abs(outline.top - field.top), Math.abs(outline.bottom - field.bottom))
+            }
+          })
+          expect(geometry.labelCenter).toBeLessThanOrEqual(1)
+          expect(geometry.outlineOffset).toBeLessThanOrEqual(1)
+        }
+      }
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await setWindowWidth(app, page, 1000)
+    }
+    // Fractional Electron zoom offsets Playwright's element screenshot crop.
+    // Keep the geometry checks above at 95%, then capture at normal scale.
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    for (const scheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: scheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+      await page.locator('.headerSortSelect').screenshot({ path: testInfo.outputPath(`subscription-sort-${scheme}.png`) })
+    }
   })
 
   test('separates the main feed tabs from the centered New feed tabs', async ({ app, page, attachScreenshot }) => {
