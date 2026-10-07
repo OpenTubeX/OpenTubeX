@@ -1304,6 +1304,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
+    Music Mode: "Mod muzică"
+    Music Mode Description: "Redă videoclipurile la viteza 1× și pornește videoclipurile noi de la început în această filă. Setările implicite de redare salvate rămân neschimbate."
     DLNA:
       Cast: "Transmite pe un dispozitiv DLNA"
       Stop: "Oprește transmiterea"

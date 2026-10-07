@@ -1304,6 +1304,8 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повтор чату наживо ввімкнено.  Повідомлення чату з’являтимуться тут під час відтворення відео.
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
+    Music Mode: "Музичний режим"
+    Music Mode Description: "Відтворюйте відео зі швидкістю 1× і починайте нові відео з початку в цій вкладці. Збережені типові налаштування відтворення залишаються незмінними."
     DLNA:
       Cast: "Транслювати на пристрій DLNA"
       Stop: "Зупинити трансляцію"

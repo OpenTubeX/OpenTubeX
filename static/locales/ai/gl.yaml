@@ -1313,6 +1313,8 @@ Video:
     music offtopic: Contido non musical
     filler: Digresións
   Player:
+    Music Mode: "Modo música"
+    Music Mode Description: "Reproduce vídeos a 1× e inicia os novos vídeos desde o principio nesta lapela. Os axustes de reprodución predeterminados gardados non cambian."
     DLNA:
       Cast: "Transmitir a un dispositivo DLNA"
       Stop: "Deter a transmisión"

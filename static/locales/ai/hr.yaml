@@ -1289,6 +1289,8 @@ Video:
   Sponsor Block category short:
     filler: Digresije
   Player:
+    Music Mode: "Glazbeni način"
+    Music Mode Description: "Reproducirajte videozapise brzinom 1× i pokrenite nove videozapise od početka u ovoj kartici. Vaše spremljene zadane postavke reprodukcije ostaju nepromijenjene."
     DLNA:
       Cast: "Prijenos na DLNA uređaj"
       Stop: "Zaustavi prijenos"

@@ -274,7 +274,7 @@ for (const wasPlaying of [false, true]) {
     const media = { paused: !wasPlaying, pause() { this.paused = true } }
     const context = {
       process: { env: { SUPPORTS_LOCAL_API: true } }, props: { shortsPlayer: true, sabrData: {} },
-      video: ref(media), shortsNavigationSuspended: ref(false),
+      video: ref(media), shortsNavigationSuspended: ref(false), musicMode: ref(false),
       suspendedShortsSabrReload: false, suspendedShortsError: null,
       sabrStream: null, sabrAbortController: null, playerWidth: 100, playerHeight: 200,
       AbortController: class { abort() { aborted = true } },
@@ -311,7 +311,7 @@ test('an inactive Short ignores fullscreen events and synchronizes when activate
   let fullscreen = true
   let activate
   const context = {
-    shortsNavigationSuspended: ref(true), isActiveTab: ref(false), isFullscreen: ref(false),
+    shortsNavigationSuspended: ref(true), musicMode: ref(false), isActiveTab: ref(false), isFullscreen: ref(false),
     suspendedShortsSabrReload: false, suspendedShortsError: null,
     isNativeFullscreenActive: () => fullscreen,
     androidFullscreenHostActive: ref(false), androidFullscreenHost: null,
@@ -366,7 +366,7 @@ test('an inactive Short defers player errors without changing current playback',
   const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
   const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
   vm.runInNewContext(lifecycle, {
-    ...context, handleError, registerMediaSessionHandlers() {},
+    ...context, musicMode: ref(false), handleError, registerMediaSessionHandlers() {},
     onDeactivated() {}, onActivated: callback => { activate = callback },
   })
   activate()
