@@ -17,18 +17,24 @@ async function compileComponent(path, bindings = {}) {
   return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, Event, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
 }
 
-async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map()) {
+async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}) {
   const requests = []
   const loads = []
   const timers = new Map()
+  const observers = []
   const settings = Vue.reactive({ getThumbnailDataSaver: false })
   const RetryImage = await compileComponent('FtRetryImage.vue', {
     store: { getters: settings },
+    IntersectionObserver: class {
+      constructor(callback) { this.callback = callback; observers.push(this) }
+      observe(image) { this.image = image }
+      disconnect() { this.disconnected = true }
+    },
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
     imageSkeleton: 'skeleton.svg',
-    setTimeout: callback => { const id = {}; timers.set(id, callback); return id },
+    setTimeout: (callback, delay) => { const id = {}; callback.delay = delay; timers.set(id, callback); return id },
     clearTimeout: id => timers.delete(id)
   })
   const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
@@ -44,7 +50,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
       tag, props: {}, children: [],
       dispatchEvent(event) {
         Object.defineProperties(event, { target: { value: this }, currentTarget: { value: this } })
-        this.props.onLoad?.(event)
+        this.props[event.type === 'error' ? 'onError' : 'onLoad']?.(event)
       }
     }),
     createComment: () => ({ tag: 'comment' }),
@@ -52,6 +58,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     setElementText() {}, setText() {},
     patchProp: (node, key, previous, value) => {
       node.props[key] = value
+      if (key === 'loading') node.loading = value
       if (node.tag === 'img' && key === 'src') {
         const size = cachedSources.get(value)
         node.complete = !!size
@@ -72,7 +79,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   const thumbnail = Vue.ref('https://yt3.ggpht.com/avatar')
   const root = { children: [] }
   const app = renderer.createApp({ render: () => Vue.h(Avatar, componentPath === 'FtRetryImage.vue'
-    ? { src: thumbnail.value, onLoad: event => loads.push({ type: event.type, target: event.target, currentTarget: event.currentTarget }) }
+    ? { ...attrs, src: thumbnail.value, onLoad: event => loads.push({ type: event.type, target: event.target, currentTarget: event.currentTarget }) }
     : componentPath === 'FtIcon/FtIcon.vue'
     ? { icon: { type: 'image', value: thumbnail.value } }
     : componentPath.startsWith('TabBar/')
@@ -81,7 +88,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
-  return { requests, loads, timers, thumbnail, settings, find }
+  return { requests, loads, timers, observers, thumbnail, settings, find, unmount: () => app.unmount() }
 }
 
 async function fail(image) {
@@ -190,7 +197,8 @@ test('data saver changes loaded thumbnail sources and resets resolution fallback
   f.settings.getThumbnailDataSaver = true
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
-  assert.equal(f.timers.size, 0)
+  assert.equal(f.timers.size, 1)
+  assert.equal([...f.timers.values()][0].delay, 10_000)
 })
 
 test('channel avatars keep their placeholder until the native HTTP image loads', async t => {
@@ -284,13 +292,13 @@ test('unexpected native recovery errors still allow the delayed retry and termin
 })
 
 
-test('thumbnail skeletons persist through retries, stop on failure, and restart for a new source', async t => {
+test('thumbnail skeletons stop on the first failure while retries continue and restart for a new source', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   const placeholder = () => f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
   assert.equal(placeholder().props.src, 'skeleton.svg')
   assert.match(placeholder().props.class, /ft-shimmer/)
   await fail(f.find('img'))
-  assert.equal(placeholder().props.src, 'skeleton.svg')
+  assert.equal(placeholder().props.src, 'placeholder.svg')
   for (const callback of f.timers.values()) callback()
   await Vue.nextTick()
   await fail(f.find('img'))
@@ -331,4 +339,83 @@ test('custom image icons shimmer until decoded and keep a static fallback after 
   await Vue.nextTick()
   assert.equal(skeleton(), undefined)
   assert.equal(f.find('fallback'), undefined)
+})
+
+test('completed failed images leave the skeleton even when their error event was missed', async t => {
+  const src = 'https://yt3.ggpht.com/avatar'
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map([[src, [0, 0]]]))
+  await Vue.nextTick()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(f.requests.length, 1, 'an already-failed source must enter recovery')
+  for (const callback of f.timers.values()) callback()
+  await Vue.nextTick()
+  await fail(f.find('img'))
+  const placeholder = f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+  assert.doesNotMatch(placeholder.props.class, /ft-shimmer/)
+})
+
+test('stalled requests stop shimmering without blocking a late load', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const placeholder = () => f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+  assert.match(placeholder().props.class, /ft-shimmer/)
+  const deadline = [...f.timers.values()].find(callback => callback.delay === 10_000)
+  assert.ok(deadline, 'loading must have a bounded skeleton duration')
+  deadline()
+  await Vue.nextTick()
+  assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
+  f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
+  await Vue.nextTick()
+  assert.equal(placeholder(), undefined)
+  assert.equal(f.loads.length, 1)
+})
+
+test('null, undefined and blank image sources keep a static fallback', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const source of [null, undefined, '   ']) {
+    f.thumbnail.value = source
+    await Vue.nextTick()
+    const placeholder = f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+    assert.doesNotMatch(placeholder.props.class, /ft-shimmer/)
+    assert.equal(f.find('img').props.src, undefined)
+    assert.equal(f.timers.size, 0)
+  }
+})
+
+test('already-failed custom image icons use a static fallback immediately', async t => {
+  const src = 'data:image/png;base64,AAAA'
+  const f = await mountAvatar(t, null, 'FtIcon/FtIcon.vue', new Map([[src, [0, 0]]]))
+  f.thumbnail.value = src
+  await Vue.nextTick()
+  assert.ok(f.find('fallback'))
+  assert.ok(!f.find('img').parent.children.some(node => node.props?.class?.includes('ft-shimmer')))
+})
+
+test('lazy images retain their skeleton until visible and get a bounded loading deadline', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map(), { loading: 'lazy' })
+  const placeholder = () => f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
+  assert.equal(f.timers.size, 0, 'offscreen lazy images must not start their deadline on mount')
+  assert.match(placeholder().props.class, /ft-shimmer/)
+  assert.equal(f.observers.length, 1)
+  f.observers[0].callback([{ isIntersecting: true }])
+  const deadline = [...f.timers.values()][0]
+  assert.equal(deadline.delay, 10_000)
+  f.observers[0].callback([{ isIntersecting: false }])
+  f.observers[0].callback([{ isIntersecting: true }])
+  assert.equal([...f.timers.values()][0], deadline, 'visibility changes must not restart the deadline')
+  deadline()
+  await Vue.nextTick()
+  assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
+  f.observers[0].callback([{ isIntersecting: false }])
+  f.thumbnail.value = 'https://images.test/replaced-lazy-thumbnail'
+  await Vue.nextTick()
+  assert.equal(f.timers.size, 0)
+  assert.match(placeholder().props.class, /ft-shimmer/)
+  f.observers[0].callback([{ isIntersecting: true }])
+  assert.equal(f.timers.size, 1)
+  f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
+  await Vue.nextTick()
+  assert.equal(placeholder(), undefined)
+  assert.equal(f.timers.size, 0)
+  f.unmount()
+  assert.equal(f.observers[0].disconnected, true)
 })

@@ -607,6 +607,66 @@ test('keeps inline post emoji images hidden until loaded and after failure', asy
   await text.screenshot({ path: testInfo.outputPath('inline-emoji-fallback.png') })
 })
 
+test('lazy inline post emojis wait offscreen before their loading deadline', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)
+  })
+  await page.clock.install()
+  const pending = []
+  await page.route('https://lazy-inline-images.test/**', route => { pending.push(route) })
+  await page.route('**/api/v1/post/**', route => route.fulfill({
+    json: {
+      comments: [{
+        commentId: 'lazy-placeholder-post',
+        contentHtml: 'Lazy emoji <img src="https://lazy-inline-images.test/emoji" loading="lazy" alt=":smile:" width="24" height="24" style="vertical-align: middle">',
+        author: 'Placeholder channel',
+        authorId: channelId,
+        authorThumbnails: [],
+        publishedText: '1 day ago',
+        likeCount: 0,
+        replyCount: 0
+      }]
+    }
+  }))
+  await page.addStyleTag({ content: '.postText { margin-block-start: 10000px !important; }' })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    store.commit('setHideComments', true)
+    return window.ftElectron.tabs.create({ route: '/post/lazy-placeholder-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
+  })
+  const image = page.locator('img[src="https://lazy-inline-images.test/emoji"]')
+  const placeholder = page.locator('img[src="https://lazy-inline-images.test/emoji"] + .htmlImagePlaceholder')
+  await expect(image).toHaveAttribute('loading', 'lazy')
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top > innerHeight)).toBe(true)
+  await page.clock.fastForward(20_000)
+  expect(pending).toHaveLength(0)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await placeholder.scrollIntoViewIfNeeded()
+  await expect.poll(() => pending.length).toBe(1)
+  await page.clock.runFor(100)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  // Capture at normal scale after checking visibility at a fractional zoom.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+  })
+  const text = page.locator('.postText', { hasText: 'Lazy emoji' })
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await text.scrollIntoViewIfNeeded()
+    await page.clock.runFor(100)
+    await expect.poll(() => placeholder.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await text.screenshot({ path: testInfo.outputPath(`lazy-inline-${theme}.png`) })
+  }
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+  expect((await image.boundingBox()).width).toBeCloseTo(24, 1)
+})
+
 test('keeps overlapping collaborator avatars stable while images load', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -805,4 +865,114 @@ test('protects captured tab previews while loading and after failure', async ({ 
   await expect(preview.locator('img')).toHaveCount(0)
   await expect(preview.locator('.tabTooltipFallbackIcon')).toBeVisible()
   await preview.screenshot({ path: testInfo.outputPath('captured-tab-fallback.png') })
+})
+
+test('stalled playlist thumbnails stop shimmering and can still finish loading', async ({ page }, testInfo) => {
+  await page.clock.install()
+  const pending = []
+  await page.route('https://stalled-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'stalled-playlist',
+      data: [{ type: 'playlist', dataSource: 'local', playlistId: 'empty-remote', title: 'Unavailable playlist thumbnail', thumbnail: 'https://stalled-images.test/playlist.jpg', channelName: 'Example channel', channelId: '', videoCount: 0 }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/stalled-playlist' })
+  })
+  const card = page.locator('.ft-list-item', { hasText: 'Unavailable playlist thumbnail' })
+  const placeholder = card.locator('.retryImagePlaceholder')
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect.poll(() => pending.length).toBe(1)
+  await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
+  const bounds = await placeholder.boundingBox()
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', /thumbnail_placeholder/)
+  const fallbackBounds = await placeholder.boundingBox()
+  for (const [key, value] of Object.entries(bounds)) expect(fallbackBounds[key]).toBeCloseTo(value, 1)
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await card.screenshot({ path: testInfo.outputPath(`stalled-playlist-${theme}.png`) })
+  }
+  await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(card.locator('.thumbnailImage')).toBeVisible()
+})
+
+test('offscreen lazy Home thumbnails keep their skeleton until visible, then time out and recover', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25)
+  })
+  await page.clock.install()
+  const pending = []
+  await page.route('https://lazy-images.test/**', route => { pending.push(route) })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateHistory', {
+      ...store.getters.getHistoryCacheById.placeholder,
+      watchProgress: 30,
+      thumbnailUrl: 'https://lazy-images.test/thumbnail.jpg'
+    })
+  })
+  // Position the shelf below the fold before its lazy images mount.
+  await page.addStyleTag({ content: '[data-home-section="continueWatching"] { margin-block-start: 4000px !important; }' })
+  await goTo(page, 'home')
+  const card = page.locator('[data-home-section="continueWatching"] li').first()
+  const image = card.locator('img:not(.retryImagePlaceholder)')
+  const placeholder = card.locator('.retryImagePlaceholder')
+  await expect(image).toHaveAttribute('loading', 'lazy')
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top > innerHeight)).toBe(true)
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await card.scrollIntoViewIfNeeded()
+  await expect.poll(() => pending.length).toBe(1)
+  await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top < innerHeight)).toBe(true)
+  // Let the intersection notification start the deadline before advancing time.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  // Capture at normal scale after checking visibility at a fractional zoom.
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
+  })
+  await card.scrollIntoViewIfNeeded()
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expect(placeholder).toHaveClass(/ft-shimmer/)
+    await card.locator('.mediaThumbnail').screenshot({ path: testInfo.outputPath(`lazy-thumbnail-${theme}.png`) })
+  }
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(image).toBeVisible()
+})
+
+test('playlist cards with missing thumbnails use static fallbacks', async ({ page }) => {
+  const rendererErrors = []
+  page.on('pageerror', error => rendererErrors.push(error.message))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'missing-playlist-images',
+      data: [null, undefined, '', '   '].map((thumbnail, index) => ({ type: 'playlist', dataSource: 'local', playlistId: `missing-${index}`, title: `Empty playlist ${index}`, thumbnail, channelName: '', channelId: '', videoCount: 0 })),
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/missing-playlist-images' })
+  })
+  const cards = page.locator('.ft-list-item')
+  await expect(cards).toHaveCount(4)
+  await expect(cards.locator('.ft-shimmer')).toHaveCount(0)
+  for (const card of await cards.all()) {
+    await expect(card.locator('.retryImagePlaceholder')).toBeVisible()
+    await expect(card.locator('.retryImagePlaceholder')).toHaveAttribute('src', /thumbnail_placeholder/)
+  }
+  expect(rendererErrors).toEqual([])
 })
