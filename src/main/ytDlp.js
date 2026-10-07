@@ -1952,7 +1952,7 @@ export async function handleYtDlpSearch(event, query, params, page) {
       windowsHide: true
     })
     const response = normalizeYtDlpSearchResults(JSON.parse(stdout), page)
-    response.results = await completeYtDlpSearchPlaylists(response.results, async playlistId => {
+    response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
       // Reuse the search authentication and proxy options, fetching only one
       // flat entry while retaining the playlist's total count and thumbnail.
       const playlistArgs = args.slice(0, -2)
@@ -1962,7 +1962,8 @@ export async function handleYtDlpSearch(event, query, params, page) {
       const { stdout } = await execFileAsync(executable, playlistArgs, {
         timeout: PLAYBACK_INFO_TIMEOUT,
         maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
-        windowsHide: true
+        windowsHide: true,
+        signal
       })
       return JSON.parse(stdout)
     })

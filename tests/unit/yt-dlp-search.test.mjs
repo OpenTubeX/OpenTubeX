@@ -115,3 +115,49 @@ test('retains search results and an unknown count when playlist metadata cannot 
   assert.deepEqual(completed, results)
   assert.equal(completed[0].videoCount, undefined)
 })
+
+test('limits playlist enrichment to two concurrent lookups on a full playlist page', async () => {
+  const { results } = normalizeYtDlpSearchResults({ entries: Array.from({ length: 20 }, (_, index) => ({
+    id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`
+  })) })
+  let release
+  const gate = new Promise(resolve => { release = resolve })
+  let active = 0
+  let maximumActive = 0
+  const pending = completeYtDlpSearchPlaylists(results, async () => {
+    active++
+    maximumActive = Math.max(maximumActive, active)
+    await gate
+    active--
+    return { playlist_count: 10 }
+  })
+  try {
+    assert.equal(active, 2)
+  } finally {
+    release()
+    await pending
+  }
+  assert.equal(maximumActive, 2)
+  assert.deepEqual((await pending).map(result => result.playlistId), results.map(result => result.playlistId))
+  assert.ok((await pending).every(result => result.videoCount === 10))
+})
+
+test('aborts active lookups at the shared deadline and leaves queued results intact', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const { results } = normalizeYtDlpSearchResults({ entries: Array.from({ length: 20 }, (_, index) => ({
+    id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}`,
+    thumbnails: [{ url: `https://i.ytimg.com/${index}.jpg` }]
+  })) })
+  const signals = []
+  const pending = completeYtDlpSearchPlaylists(results, async (id, signal) => {
+    signals.push(signal)
+    return new Promise((resolve, reject) => {
+      signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+    })
+  })
+  assert.equal(signals.length, 2)
+  t.mock.timers.tick(10_000)
+  assert.deepEqual(await pending, results)
+  assert.equal(signals.length, 2)
+  assert.ok(signals.every(signal => signal.aborted))
+})

@@ -51,18 +51,33 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
 }
 
 export async function completeYtDlpSearchPlaylists(results, loadPlaylist) {
-  return Promise.all(results.map(async result => {
-    if (result.type !== 'playlist' || (result.videoCount != null && result.thumbnail)) return result
-    try {
-      const info = await loadPlaylist(result.playlistId)
-      return {
-        ...result,
-        videoCount: info.playlist_count ?? result.videoCount,
-        thumbnail: result.thumbnail || info.thumbnails?.find(item => typeof item.url === 'string')?.url || ''
+  const completed = results.slice()
+  const controller = new AbortController()
+  // Optional metadata gets a shared budget, including time spent queued.
+  const timeout = setTimeout(() => controller.abort(), 10_000)
+  let nextIndex = 0
+  async function worker() {
+    while (!controller.signal.aborted && nextIndex < results.length) {
+      const index = nextIndex++
+      const result = results[index]
+      if (result.type !== 'playlist' || (result.videoCount != null && result.thumbnail)) continue
+      try {
+        const info = await loadPlaylist(result.playlistId, controller.signal)
+        if (controller.signal.aborted) return
+        completed[index] = {
+          ...result,
+          videoCount: info.playlist_count ?? result.videoCount,
+          thumbnail: result.thumbnail || info.thumbnails?.find(item => typeof item.url === 'string')?.url || ''
+        }
+      } catch {
+        // A single unavailable playlist must not discard the search results.
       }
-    } catch {
-      // A single unavailable playlist must not discard the search results.
-      return result
     }
-  }))
+  }
+  try {
+    await Promise.all([worker(), worker()])
+    return completed
+  } finally {
+    clearTimeout(timeout)
+  }
 }

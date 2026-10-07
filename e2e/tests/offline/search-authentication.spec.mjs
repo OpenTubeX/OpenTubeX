@@ -128,6 +128,39 @@ test('cookie search shows the playlist thumbnail and total count omitted by flat
   await expect(image).toHaveAttribute('src', thumbnail)
 })
 
+test('stalled playlist metadata is bounded and its subprocesses are stopped', async ({ app, page }) => {
+  const { response } = await configureCookieSearch(app)
+  const executable = path.join(app.userDataDir, 'search-fixture.cjs')
+  const pidsFile = path.join(app.userDataDir, 'playlist-pids.txt')
+  const source = await readFile(executable, 'utf8')
+  await writeFile(executable, source
+    .replace("const fs = require('node:fs')", `const fs = require('node:fs')
+if (process.argv.at(-1).includes('/playlist?')) fs.appendFileSync(${JSON.stringify(pidsFile)}, process.pid + ${JSON.stringify('\n')})`)
+    .replace(', 300)', ", process.argv.at(-1).includes('/playlist?') ? 60000 : 300)"))
+  await writeFile(response, JSON.stringify({
+    entries: Array.from({ length: 20 }, (_, index) => ({
+      id: `PLstalled${index}`, ie_key: 'YoutubeTab', title: `Stalled playlist ${index}`
+    }))
+  }))
+  await searchForAgeGate(page)
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  const cards = page.locator('.ft-list-item', { hasText: 'Stalled playlist' })
+  await expect(cards.first()).toBeVisible()
+  await expect(cards.first().locator('.videoCountContainer .inner')).toHaveText('')
+  await page.getByRole('button', { name: 'Fetch more results' }).scrollIntoViewIfNeeded()
+  await expect(page.getByRole('heading', { name: 'Stalled playlist 19', exact: true })).toBeVisible()
+  const pids = (await readFile(pidsFile, 'utf8')).trim().split('\n').map(Number)
+  expect(pids).toHaveLength(2)
+  await expect.poll(() => pids.filter(pid => {
+    try {
+      process.kill(pid, 0)
+      return true
+    } catch {
+      return false
+    }
+  }).length).toBe(0)
+})
+
 test('shows the age gate, cookie setup hint, and cached notice at desktop and phone widths', async ({ app, page }) => {
   await searchForAgeGate(page)
   await expect(page.getByText('Configure cookies in Settings → External Software → yt-dlp Cookies.')).toBeVisible()
