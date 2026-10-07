@@ -385,7 +385,11 @@ export class TabNavigationService {
       const applyNavigation = async () => {
         this.store.commit('setTabNavigation', { tabId, route, history, historyIndex })
         navigationCommitted = true
-        if (initialTitle) {
+        if (mode === 'history') {
+          // Cached views may not publish their title again when returning.
+          // Restore the destination entry without resolving pending metadata.
+          this.setTitle(tabId, history[historyIndex].title || routeTitle(to), { resolveHistoryEntry: false })
+        } else if (initialTitle) {
           this.setTitle(tabId, initialTitle)
         } else if (typeof to.name === 'string') {
           this.setTitle(tabId, routeTitle(to), { resolveHistoryEntry: false })
