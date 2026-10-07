@@ -139,7 +139,10 @@ jobs:
         fi
 
         echo "pr_url=$(jq -r '.html_url' <<< "$pr")" >> "$GITHUB_OUTPUT"
-        if [[ "$author" == "pull[bot]" && "$head_repository" == "FreeTubeApp/FreeTube" && "$head_ref" == "development" && "$base_ref" == "development" ]]; then
+        if [[ "$base_ref" == "development" ]] && {
+          [[ "$author" == "pull[bot]" && "$head_repository" == "FreeTubeApp/FreeTube" && "$head_ref" == "development" ]] ||
+          [[ "$head_repository" == "$REPOSITORY" && "$head_ref" == "upstream-sync" ]]
+        }; then
           echo "merge_method=merge" >> "$GITHUB_OUTPUT"
         else
           echo "merge_method=squash" >> "$GITHUB_OUTPUT"

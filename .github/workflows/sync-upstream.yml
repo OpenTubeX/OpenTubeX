@@ -1,0 +1,77 @@
+name: Sync upstream
+
+# UPSTREAM_SYNC_TOKEN needs Contents, Pull requests, and Workflows write access
+# plus Checks and Commit statuses read access. A separate token lets PRs run CI.
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check authentication
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::Set the UPSTREAM_SYNC_TOKEN repository secret before running upstream sync."
+            exit 1
+          fi
+
+      # Auto Merge PR / Enable Auto Merge handle this repository's approval
+      # requirements and merge eligible upstream PRs using a merge commit.
+
+      - name: Checkout fork
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: development
+          fetch-depth: 0
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+
+      - name: Select release milestone
+        id: milestone
+        run: |
+          milestone=$(gh api --paginate "repos/$GITHUB_REPOSITORY/milestones?state=open&per_page=100" |
+            jq -s '[.[][] | select(.title | test("[0-9]+\\.[0-9]+"))] |
+              sort_by(.title | capture("(?<version>[0-9]+(?:\\.[0-9]+)+)").version |
+                split(".") | map(tonumber)) | .[0].number // empty')
+          echo "number=$milestone" >> "$GITHUB_OUTPUT"
+          if [[ -z "$milestone" ]]; then
+            echo "No open version milestone is available for the upstream PR." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Prepare upstream pull request branch
+        run: |
+          git fetch --no-tags https://github.com/FreeTubeApp/FreeTube.git development
+          # Reset only the runner's temporary checkout. The action restores the
+          # fork's base and pushes upstream-sync; merging its PR preserves fork
+          # changes and upstream commit history, including on conflicting PRs.
+          git reset --hard FETCH_HEAD
+
+      - name: Create or update upstream pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+          base: development
+          branch: upstream-sync
+          delete-branch: true
+          milestone: ${{ steps.milestone.outputs.number }}
+          title: "chore: sync development from FreeTubeApp/FreeTube"
+          body: |
+            Sync [FreeTubeApp/FreeTube:development](https://github.com/FreeTubeApp/FreeTube/tree/development) into `development`.
+
+            Merge with a **merge commit** to preserve fork changes and shared upstream history.
