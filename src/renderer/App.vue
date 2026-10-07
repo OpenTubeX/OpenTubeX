@@ -527,7 +527,7 @@ import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
-import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
+import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
 import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
 import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
 import { playbackScreenWake } from './helpers/playbackScreenWake'
@@ -4871,6 +4871,7 @@ async function enableCapacitorIntegrations() {
   let backgroundStateTimeout = null
   let appStateVersion = 0
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(isActive)
     receivedAppState = true
     appStateVersion += 1
     const version = appStateVersion
@@ -4905,6 +4906,7 @@ async function enableCapacitorIntegrations() {
   })
   const appState = await CapacitorApp.getState()
   if (!receivedAppState) {
+    if (Capacitor.getPlatform() === 'android') setAndroidAppActive(appState.isActive)
     playbackScreenWake?.setAppActive(appState.isActive)
     setAndroidAppVisible(appState.isActive)
   }
@@ -4921,6 +4923,7 @@ async function enableCapacitorIntegrations() {
     appStateHandle.remove()
     window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
     playbackScreenWake?.setAppActive(false)
+    setAndroidAppActive(null)
     setAndroidAppVisible(null)
     removeReminderActions()
     removeMediaActions()

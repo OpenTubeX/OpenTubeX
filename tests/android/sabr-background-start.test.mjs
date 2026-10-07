@@ -70,14 +70,15 @@ async function mediaFixture(directory, audio) {
   }
 }
 
-for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, loadWhileHidden = false } of [
+for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, loadWhileHidden = false, loadDuringGrace = false } of [
   { continuePlayback: true, seekBeforeBackoff: false },
   { continuePlayback: false, seekBeforeBackoff: false },
   { continuePlayback: true, seekBeforeBackoff: true },
   { continuePlayback: false, seekBeforeBackoff: false, backoffWhileHidden: true },
   { continuePlayback: true, seekBeforeBackoff: false, backoffWhileHidden: true },
   { continuePlayback: true, seekBeforeBackoff: false, loadWhileHidden: true },
-]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}${backoffWhileHidden ? ' with a late background response' : ''}${loadWhileHidden ? ' when loading first starts hidden' : ''}`, { skip: !enabled }, async () => {
+  { continuePlayback: true, seekBeforeBackoff: false, loadDuringGrace: true },
+]) test(`SABR backoff honors background playback ${continuePlayback ? 'enabled' : 'disabled'}${seekBeforeBackoff ? ' after a startup seek' : ''}${backoffWhileHidden ? ' with a late background response' : ''}${loadWhileHidden ? ' when loading first starts hidden' : ''}${loadDuringGrace ? ' during the visibility grace period' : ''}`, { skip: !enabled }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'otx-sabr-background-'))
   let browser, page, settings, route, server, port, releaseBackoff
   try {
@@ -134,8 +135,18 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       const responses = new Map()
       const nativePromise = window.__sabrBackgroundNativePromise ?? window.Capacitor.nativePromise
       const originalFetch = window.__sabrBackgroundFetch ?? window.fetch
+      let holdAppState = false
+      const pendingAppStates = []
+      window.__sabrHoldBackgroundState = () => { holdAppState = true }
+      window.__sabrReleaseBackgroundState = () => {
+        holdAppState = false
+        for (const resume of pendingAppStates.splice(0)) resume()
+      }
       window.__sabrBackgroundNativePromise = nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => {
+        if (plugin === 'App' && method === 'getState' && holdAppState) {
+          return new Promise((resolve, reject) => pendingAppStates.push(() => nativePromise(plugin, method, options).then(resolve, reject)))
+        }
         if (plugin === 'SabrHttp' && method === 'prepare') return nativePromise('CapacitorHttp', 'request', {
           url: `http://127.0.0.1:${port}/sabr`, method: 'POST', data: options.body, headers: { 'Content-Type': 'text/plain' }, responseType: 'json',
         }).then(({ data: { requestId, body } }) => {
@@ -164,10 +175,13 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       try { return await watch.evaluate(c => c?.proxy.onMountedRun && c.proxy.preparingVideoLoadGeneration === null) }
       finally { await watch.dispose() }
     }).toBe(true)
-    if (loadWhileHidden) {
+    if (loadWhileHidden || loadDuringGrace) {
+      // Extend the native confirmation step, rather than a fixed sleep, so
+      // player setup is guaranteed to reach a still-pending visibility check.
+      if (loadDuringGrace) await page.evaluate(() => window.__sabrHoldBackgroundState())
       adb('shell', 'am', 'start', '-a', 'android.settings.SETTINGS')
-      await expect.poll(() => page.evaluate(() => window.Capacitor.nativePromise('App', 'getState'))).toMatchObject({ isActive: false })
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await expect.poll(() => page.evaluate(() => window.__sabrBackgroundNativePromise('App', 'getState'))).toMatchObject({ isActive: false })
+      if (loadWhileHidden) await new Promise(resolve => setTimeout(resolve, 1000))
     }
     const watch = await page.evaluateHandle(findWatchComponent)
     await watch.evaluate((component, { formats }) => {
@@ -196,12 +210,13 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       releaseBackoff()
     }
     await watch.dispose()
-    if (loadWhileHidden) {
+    if (loadWhileHidden || loadDuringGrace) {
       // Keep the debugger attached to prove the hidden load is deferred,
       // rather than accidentally delayed by a suspended WebView.
       await new Promise(resolve => setTimeout(resolve, 1000))
       assert.equal(requests.length, 0, 'initial SABR loading must wait until foreground protection can start')
       assert.doesNotMatch(adb('shell', 'dumpsys', 'activity', 'services', 'org.opentubex.app.dev'), /isForeground=true/)
+      if (loadDuringGrace) await page.evaluate(() => window.__sabrReleaseBackgroundState())
       launch()
     }
     if (backoffWhileHidden) {
@@ -270,6 +285,9 @@ for (const { continuePlayback, seekBeforeBackoff, backoffWhileHidden = false, lo
       page = browser.contexts()[0].pages()[0]
     }
     if (page && settings) await page.evaluate(({ settings, route }) => {
+      window.__sabrReleaseBackgroundState?.()
+      delete window.__sabrHoldBackgroundState
+      delete window.__sabrReleaseBackgroundState
       document.querySelector('.ftVideoPlayer video')?.pause()
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       location.hash = route

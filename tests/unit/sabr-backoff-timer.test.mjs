@@ -24,6 +24,7 @@ function fixture() {
     AbortController, foregroundLoadAbortController: null, formatSwitchGeneration: 0,
     initialAutoplayCanceled: false, hasPlaybackPosition: { value: false }, isActiveTab: { value: true },
     isAppHidden: () => false, store: { getters: { getContinuePlaybackWhenScreenIsLocked: true } },
+    getAndroidAppActive: () => !context.isAppHidden(),
     shortsNavigationSuspended: { value: false },
     sabrBackoffIntervalId: null, sabrBackoffRemainingMs: remaining, sabrBackoffDurationMs: duration,
     setInterval: callback => { intervals.add(callback); return callback }, clearInterval: id => intervals.delete(id),
@@ -62,7 +63,7 @@ test('Android defers an already-hidden SABR autoplay load until it can establish
   let hidden = true
   f.context.isAppHidden = () => hidden
   const visible = Promise.withResolvers()
-  f.context.waitForAppVisible = () => visible.promise
+  f.context.waitForAndroidAppState = () => visible.promise
   const loads = []
   f.context.player.load = async () => { loads.push(f.playbackStates.at(-1)) }
   f.video.value.autoplay = true
@@ -75,10 +76,31 @@ test('Android defers an already-hidden SABR autoplay load until it can establish
   assert.deepEqual(loads, ['playing'], 'protection must precede loading after returning')
 })
 
-test('Android cancels pending SABR autoplay when loading starts hidden with background playback disabled', async () => {
+test('Android defers SABR autoplay during the visibility grace period', async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
-  f.context.isAppHidden = () => true
+  let active = false
+  f.context.getAndroidAppActive = () => active
+  assert.equal(f.context.isAppHidden(), false, 'the UI remains visible during the grace period')
+  const foreground = Promise.withResolvers()
+  f.context.waitForAndroidAppState = () => foreground.promise
+  const loads = []
+  f.context.player.load = async () => { loads.push(f.playbackStates.at(-1)) }
+  f.video.value.autoplay = true
+  const loading = f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.deepEqual(loads, [], 'a background activity must not load or start a service during the grace period')
+  assert.deepEqual(f.playbackStates, [])
+  active = true
+  foreground.resolve(true)
+  await loading
+  assert.deepEqual(loads, ['playing'])
+})
+
+for (const grace of [false, true]) test(`Android cancels disabled background autoplay${grace ? ' during the visibility grace period' : ' when loading starts hidden'}`, async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.context.isAppHidden = () => !grace
+  f.context.getAndroidAppActive = () => false
   f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = false
   f.video.value.autoplay = true
   f.video.value.paused = true
@@ -89,13 +111,34 @@ test('Android cancels pending SABR autoplay when loading starts hidden with back
   assert.equal(f.context.initialAutoplayCanceled, true)
 })
 
+for (const continuePlayback of [true, false]) test(`an unknown Android startup state preserves foreground autoplay with background playback ${continuePlayback ? 'enabled' : 'disabled'}`, async () => {
+  const f = fixture()
+  f.context.process.env.IS_CAPACITOR = true
+  f.context.store.getters.getContinuePlaybackWhenScreenIsLocked = continuePlayback
+  let active = null
+  f.context.getAndroidAppActive = () => active
+  const snapshot = Promise.withResolvers()
+  f.context.waitForAndroidAppState = () => snapshot.promise
+  let loads = 0
+  f.context.player.load = async () => { loads++ }
+  f.video.value.autoplay = true
+  const loading = f.loadPlaybackSource('fixture', null, 'sabr')
+  assert.equal(loads, 0)
+  assert.equal(f.video.value.autoplay, true, 'an unknown snapshot must not be treated as an inactive activity')
+  active = true
+  snapshot.resolve(true)
+  await loading
+  assert.equal(loads, 1)
+  assert.deepEqual(f.playbackStates, ['playing'])
+})
+
 for (const cancellation of ['abort', 'source replacement', 'player replacement', 'pause']) test(`a deferred Android load respects ${cancellation}`, async () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   let hidden = true
   f.context.isAppHidden = () => hidden
   const visible = Promise.withResolvers()
-  f.context.waitForAppVisible = signal => {
+  f.context.waitForAndroidAppState = signal => {
     signal.addEventListener('abort', () => visible.resolve(false), { once: true })
     return visible.promise
   }

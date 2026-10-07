@@ -4,10 +4,40 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { setImmediate, setTimeout as delay } from 'node:timers/promises'
 
-import { isAppHidden, setAndroidAppVisible, waitForAppVisible } from '../../src/renderer/helpers/appVisibility.js'
+import { isAppHidden, getAndroidAppActive, setAndroidAppActive, setAndroidAppVisible, waitForAndroidAppState } from '../../src/renderer/helpers/appVisibility.js'
 import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
 
-for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']) test(`foreground visibility wait handles ${outcome} and releases listeners`, async () => {
+test('Android activity readiness remains false through UI grace and an unknown startup snapshot', async () => {
+  const originalDocument = globalThis.document
+  globalThis.document = Object.assign(new EventTarget(), { hidden: false })
+  const controller = new AbortController()
+  try {
+    setAndroidAppVisible(true)
+    setAndroidAppActive(null)
+    assert.equal(getAndroidAppActive(), null, 'unknown native state must not permit a service start')
+    setAndroidAppActive(false)
+    assert.equal(isAppHidden(), false, 'the UI can stay visible for PiP handoffs')
+    let ready = false
+    const waiting = waitForAndroidAppState(controller.signal, false).then(result => { ready = result })
+    await Promise.resolve()
+    assert.equal(ready, false)
+    setAndroidAppVisible(false)
+    setAndroidAppVisible(true)
+    await Promise.resolve()
+    assert.equal(ready, false, 'UI visibility must not unblock native loading')
+    setAndroidAppActive(true)
+    await waiting
+    assert.equal(ready, true)
+  } finally {
+    controller.abort()
+    setAndroidAppActive(null)
+    setAndroidAppVisible(null)
+    if (originalDocument === undefined) delete globalThis.document
+    else globalThis.document = originalDocument
+  }
+})
+
+for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']) test(`foreground activity wait handles ${outcome} and releases listeners`, async () => {
   const originalDocument = globalThis.document
   const document = new EventTarget()
   const visibilityListeners = new Set()
@@ -19,20 +49,22 @@ for (const outcome of ['visible', 'abort', 'already visible', 'already aborted']
   globalThis.document = document
   const controller = new AbortController()
   try {
+    setAndroidAppActive(outcome === 'already visible')
     if (outcome === 'already aborted') controller.abort()
     let settled = false
-    const waiting = waitForAppVisible(controller.signal).then(result => { settled = true; return result })
+    const waiting = waitForAndroidAppState(controller.signal, false).then(result => { settled = true; return result })
     if (outcome === 'visible' || outcome === 'abort') {
       await Promise.resolve()
       assert.equal(settled, false)
       assert.equal(visibilityListeners.size, 1)
-      if (outcome === 'visible') setAndroidAppVisible(true)
+      if (outcome === 'visible') setAndroidAppActive(true)
       else controller.abort()
     }
-    assert.equal(await waiting, outcome.includes('visible'))
+    assert.equal(await waiting, outcome.includes('visible') ? true : null)
     assert.equal(visibilityListeners.size, 0)
   } finally {
     controller.abort()
+    setAndroidAppActive(null)
     setAndroidAppVisible(null)
     if (originalDocument === undefined) delete globalThis.document
     else globalThis.document = originalDocument
@@ -78,6 +110,7 @@ for (const eventFirst of [false, true]) {
     const initialState = Promise.withResolvers()
     const requestedState = Promise.withResolvers()
     const changes = []
+    const activityChanges = []
     const listeners = new Map()
     const removedListeners = []
     const wakeCalls = []
@@ -122,6 +155,7 @@ for (const eventFirst of [false, true]) {
       watch: () => () => {},
       locale: {},
       setAndroidAppVisible: visible => changes.push(visible),
+      setAndroidAppActive: active => activityChanges.push(active),
       isAndroidLauncherReturnInProgress: async () => !eventFirst,
       playbackScreenWake,
       shouldPauseAndroidPlaybackOnAppStateChange: active => !active,
@@ -136,10 +170,12 @@ for (const eventFirst of [false, true]) {
     initialState.resolve({ isActive: true })
     const cleanup = await enabling
     assert.deepEqual(changes, eventFirst ? [] : [true])
+    assert.deepEqual(activityChanges, eventFirst ? [false] : [true], 'native activity state takes effect before the grace period')
     if (!eventFirst) {
       // Opening the icon while PiP is playing briefly backgrounds the Activity
       // before bringing the existing task to the foreground again.
       listener({ isActive: false })
+      assert.equal(activityChanges.at(-1), false, 'new loads must wait even during a PiP handoff')
       await delay(350)
       assert.equal(pauses, 0, 'a slow launcher return must not pause PiP')
       listener({ isActive: true })
@@ -161,6 +197,7 @@ for (const eventFirst of [false, true]) {
     await setImmediate()
     assert.equal(wakeCalls.at(-1), false, 'app teardown releases screen wake')
     assert.equal(changes.at(-1), null)
+    assert.equal(activityChanges.at(-1), null)
     assert.ok(removedListeners.includes('backButton'), 'unmount removes the native back listener')
   })
 }
@@ -188,6 +225,7 @@ test('Capacitor integrations do not register the Android back button on iOS', as
     initializeCapacitorLiveReminderActions: async () => () => {},
     addAndroidMediaSessionActionListener: async () => () => {},
     setAndroidAppVisible() {},
+    setAndroidAppActive() {},
     clearTimeout,
   })
 

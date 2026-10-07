@@ -75,6 +75,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     initializeCapacitorLiveReminderActions: async () => () => {},
     addAndroidMediaSessionActionListener: async () => () => {},
     setAndroidAppVisible() {},
+    setAndroidAppActive() {},
     clearTimeout,
     playbackScreenWake: { setAppActive: active => wakeStates.push(active) },
     store: {
