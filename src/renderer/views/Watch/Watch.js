@@ -3193,6 +3193,7 @@ export default defineComponent({
         // the watch page with its loading skeleton still visible.
       }
 
+      let backendFailed = false
       try {
         const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
           ? this.getShortsExtractionKey(videoId, 'local')
@@ -3213,6 +3214,7 @@ export default defineComponent({
           clientInfo,
           adEndTimeUnixMs,
           paidPromotionDurationMs,
+          paidPromotionPromise,
           isPremiere,
           isLiveDvrEnabled,
           watchPageIpBlocked,
@@ -3252,6 +3254,11 @@ export default defineComponent({
         this.adEndTimeUnixMs = adEndTimeUnixMs
         this.hasPaidPromotion = paidPromotionDurationMs !== null
         this.paidPromotionDurationMs = paidPromotionDurationMs ?? 10000
+        paidPromotionPromise?.then(durationMs => {
+          if (durationMs === null || backendFailed || !this.isCurrentVideoLoad(loadGeneration, videoId)) return
+          this.hasPaidPromotion = true
+          this.paidPromotionDurationMs = durationMs
+        })
 
         this.isFamilyFriendly = result.basic_info.is_family_safe
         this.commentsDisabled = areLocalCommentsDisabled(result)
@@ -3496,8 +3503,12 @@ export default defineComponent({
           if (chapters.length > 0) {
             this.finalizeChapters(chapters, result.basic_info.duration)
           } else {
-            chapters = await this.getSponsorBlockCommunityChapters(result.basic_info.duration)
-            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+            // Community chapters are optional: keep playback and the page skeleton
+            // independent of SponsorBlock's response time.
+            this.getSponsorBlockCommunityChapters(result.basic_info.duration).then(chapters => {
+              if (backendFailed || !this.isCurrentVideoLoad(loadGeneration, videoId) || this.hideChapters) return
+              this.videoChapters = chapters
+            })
           }
         }
 
@@ -3851,6 +3862,7 @@ export default defineComponent({
         this.downloadedPlaybackWithoutMetadata = false
         this.updateTitle()
       } catch (err) {
+        backendFailed = true
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         let handledError = err
@@ -3908,6 +3920,7 @@ export default defineComponent({
       const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
         ? this.getShortsExtractionKey(videoId, 'invidious')
         : null
+      let backendFailed = false
       return (this.customShortsPlayerActive && !metadataOnly
         ? this.getShortsVideoInformation(videoId, 'invidious')
         : invidiousGetVideoInformation(videoId))
@@ -4024,8 +4037,10 @@ export default defineComponent({
             if (chapters.length > 0) {
               this.finalizeChapters(chapters, result.lengthSeconds)
             } else {
-              chapters = await this.getSponsorBlockCommunityChapters(result.lengthSeconds)
-              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+              this.getSponsorBlockCommunityChapters(result.lengthSeconds).then(chapters => {
+                if (backendFailed || !this.isCurrentVideoLoad(loadGeneration, videoId) || this.hideChapters) return
+                this.videoChapters = chapters
+              })
             }
           }
           this.videoChapters = chapters
@@ -4126,6 +4141,7 @@ export default defineComponent({
           this.downloadedPlaybackWithoutMetadata = false
         })
         .catch(async err => {
+          backendFailed = true
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
           if (metadataOnly) {

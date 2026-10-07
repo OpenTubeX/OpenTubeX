@@ -626,6 +626,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   },
  *   adEndTimeUnixMs: number,
  *   paidPromotionDurationMs: number | null,
+ *   paidPromotionPromise: Promise<number | null>,
  *   isPremiere: boolean | undefined,
  *   isLiveDvrEnabled: boolean | undefined,
  *   watchPageIpBlocked: boolean,
@@ -705,29 +706,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   )
   htmlExtracts.session.player = player
 
-  // based on the videoId
-  let contentPoToken
-
-  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
-      !watchPageIpBlocked && shouldGeneratePoToken()) {
-    try {
-      contentPoToken = await generateContentPoToken(
-        id,
-        htmlExtracts.session.context,
-        htmlExtracts.initialAttestationData,
-        htmlExtracts.ytConfig
-      )
-
-      player.po_token = contentPoToken
-    } catch (error) {
-      console.error('Local API, poToken generation failed', error)
-      throw error
-    }
-  }
-
   // The current WEB player response does not include the paid-promotion
   // disclosure. ANDROID exposes it as a lightweight player overlay, so fetch
-  // that metadata in parallel; a failure must not fail the video load.
+  // that metadata alongside token generation; a failure must not fail the load.
   const paidPromotionRequest = htmlExtracts.session.actions.execute('/player', {
     videoId: id,
     client: 'ANDROID',
@@ -740,54 +721,75 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     },
     parse: false,
   }).catch(() => null)
+  const paidPromotionPromise = paidPromotionRequest.then(response => {
+    if (response?.data) paidPromotionDurationMs ??= getPaidPromotionDurationMs(response.data)
+    return paidPromotionDurationMs
+  })
 
-  let playerResponse
-  let nextResponse
-  const context = htmlExtracts.session.context
-
-  if (htmlExtracts.playerResponse) {
-    playerResponse = { data: htmlExtracts.playerResponse }
-  } else {
-    playerResponse = await htmlExtracts.session.actions.execute('/player', {
-      videoId: id,
-      racyCheckOk: true,
-      contentCheckOk: true,
-      playbackContext: {
-        contentPlaybackContext: {
-          vis: 0,
-          splay: false,
-          lactMilliseconds: '-1',
-          signatureTimestamp: player.signature_timestamp
-        }
-      },
-      serviceIntegrityDimensions: {
-        poToken: contentPoToken
+  async function loadPlayerResponse() {
+    let contentPoToken
+    if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+        !watchPageIpBlocked && shouldGeneratePoToken()) {
+      try {
+        contentPoToken = await generateContentPoToken(
+          id,
+          htmlExtracts.session.context,
+          htmlExtracts.initialAttestationData,
+          htmlExtracts.ytConfig
+        )
+        player.po_token = contentPoToken
+      } catch (error) {
+        console.error('Local API, poToken generation failed', error)
+        throw error
       }
-    })
+    }
+
+    const playerResponse = htmlExtracts.playerResponse
+      ? { data: htmlExtracts.playerResponse }
+      : await htmlExtracts.session.actions.execute('/player', {
+          videoId: id,
+          racyCheckOk: true,
+          contentCheckOk: true,
+          playbackContext: {
+            contentPlaybackContext: {
+              vis: 0,
+              splay: false,
+              lactMilliseconds: '-1',
+              signatureTimestamp: player.signature_timestamp
+            }
+          },
+          serviceIntegrityDimensions: {
+            poToken: contentPoToken
+          }
+        })
+    const musicMediaType = await resolveMusicMediaType(playerResponse, htmlExtracts.session.actions, id)
+    return { playerResponse, contentPoToken, musicMediaType }
   }
 
-  const musicMediaTypeRequest = resolveMusicMediaType(
-    playerResponse,
-    htmlExtracts.session.actions,
-    id
-  )
+  // /next needs no playback token. Fetch it while preparing the player token
+  // instead of adding another round trip after the player response.
+  const [{ playerResponse, contentPoToken, musicMediaType }, nextResponse] = await Promise.all([
+    loadPlayerResponse(),
+    htmlExtracts.nextResponse
+      ? Promise.resolve({ data: htmlExtracts.nextResponse })
+      : htmlExtracts.session.actions.execute('/next', {
+          videoId: id,
+          racyCheckOk: true,
+          contentCheckOk: true
+        })
+  ])
 
-  if (htmlExtracts.nextResponse) {
-    nextResponse = { data: htmlExtracts.nextResponse }
-  } else {
-    nextResponse = await htmlExtracts.session.actions.execute('/next', {
-      videoId: id,
-      racyCheckOk: true,
-      contentCheckOk: true
-    })
-  }
+  const context = htmlExtracts.session.context
 
   const cpn = Utils.generateRandomString(16)
 
   const isLiveDvrEnabled = getLiveDvrEnabled(playerResponse.data.videoDetails)
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
-  const musicMediaType = await musicMediaTypeRequest
-  const androidPlayerResponse = await paidPromotionRequest
+  // Live streams can need the Android manifest fallback. Regular videos only
+  // need its disclosure metadata, which can arrive after playback has started.
+  const androidPlayerResponse = info.basic_info.is_live || info.basic_info.is_post_live_dvr
+    ? await paidPromotionRequest
+    : null
   /**
    * @param {string | null} manifestUrl
    * @param {boolean} isDash
@@ -867,6 +869,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       poToken: undefined,
       clientInfo,
       paidPromotionDurationMs,
+      paidPromotionPromise,
       isPremiere,
       isLiveDvrEnabled,
       androidLiveHlsManifestUrl,
@@ -941,6 +944,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     clientInfo,
     adEndTimeUnixMs,
     paidPromotionDurationMs,
+    paidPromotionPromise,
     isPremiere,
     isLiveDvrEnabled,
     androidLiveHlsManifestUrl,
