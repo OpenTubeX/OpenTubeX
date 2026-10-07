@@ -396,6 +396,27 @@ test('Chromecast dispatch uses Android or Electron and safely handles iOS and we
   }
 })
 
+test('Android rejects a connection that closes before its promise resolves', async t => {
+  const fixture = nativeFixture()
+  const connect = fixture.native.connect
+  fixture.native.connect = async options => {
+    const result = await connect(options)
+    await fixture.event('castEvent', { event: 'closed' })
+    return result
+  }
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  assert.equal(result.errorCode, 'CAST_DISCONNECTED')
+  assert.match(result.error, /device disconnected/)
+  assert.ok(!fixture.calls.some(([name]) => name === 'openMedia'))
+  assert.equal(fixture.listenerCount(), 0)
+  fixture.native.connect = connect
+  const recovered = await api.start(() => handoff)
+  t.after(() => api.stop(recovered.castId))
+  assert.ok(recovered.castId, recovered.error)
+})
+
 test('native disconnect and failed Android handoffs release relay listeners and wake ownership', async () => {
   for (const failed of [false, true]) {
     const fixture = nativeFixture()

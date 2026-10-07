@@ -30,6 +30,7 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
       })
       if (this.closed) { await this.listener.remove(); throw new Error('Cast device disconnected') }
       const result = await native.connect({ deviceId: this.device.id, castId: this.castId })
+      if (this.closed) throw Object.assign(new Error('Cast device disconnected'), { code: 'CAST_DISCONNECTED' })
       return result.address
     }
 
