@@ -50,8 +50,7 @@ final class CastTransport implements AutoCloseable {
         commands = new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8);
         Thread reader = new Thread(() -> {
             try (BufferedReader lines = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-                for (String line; (line = lines.readLine()) != null;) {
-                    if (line.length() > 1_100_000) throw new IllegalArgumentException("Cast message too large");
+                for (String line; (line = readMessage(lines)) != null;) {
                     JSObject message = new JSObject(line);
                     if ("error".equals(message.getString("event"))) {
                         String code = message.getString("code", "");
@@ -102,6 +101,17 @@ final class CastTransport implements AutoCloseable {
         }, "OpenTubeX Cast reader");
         reader.setDaemon(true);
         reader.start();
+    }
+
+    static String readMessage(BufferedReader lines) throws java.io.IOException {
+        StringBuilder line = new StringBuilder();
+        // The sender emits one JSON object per LF-terminated line.
+        for (int value; (value = lines.read()) != -1;) {
+            if (value == '\n') return line.toString();
+            if (line.length() == 1_100_000) throw new IllegalArgumentException("Cast message too large");
+            line.append((char) value);
+        }
+        return line.length() == 0 ? null : line.toString();
     }
 
     String connect() throws Exception {
