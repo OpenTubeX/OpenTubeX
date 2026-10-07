@@ -34,6 +34,32 @@ async function thumbnailWidth(page) {
   return page.locator('.playlistItemsCard .videoThumbnail').first().evaluate(element => element.getBoundingClientRect().width)
 }
 
+for (const [thumbnailSize, playlistThumbnailSize] of [[150, undefined], [150, 80], [undefined, undefined]]) {
+  test.describe(`saved playlist sizing with global ${thumbnailSize ?? 'default'} and playlist ${playlistThumbnailSize ?? 'unset'}`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          ...(thumbnailSize === undefined ? {} : { thumbnailSize }),
+          ...(playlistThumbnailSize === undefined ? {} : { playlistThumbnailSize })
+        }
+      }
+    })
+
+    test('preserves saved thumbnail sizes across startup and global sizing changes', async ({ app, page }) => {
+      const expectedSize = playlistThumbnailSize ?? thumbnailSize ?? 100
+      let appearance = await goToSettingsSection(page, 'appearance')
+      await expect(appearance.getByRole('slider', { name: /^Playlist Thumbnail Size:/ })).toHaveValue(String(expectedSize))
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateThumbnailSize', 60))
+      await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).playlistThumbnailSize).toBe(expectedSize)
+      const relaunched = await app.relaunch()
+      appearance = await goToSettingsSection(relaunched.page, 'appearance')
+      await expect(appearance.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('60')
+      await expect(appearance.getByRole('slider', { name: /^Playlist Thumbnail Size:/ })).toHaveValue(String(expectedSize))
+    })
+  })
+}
+
 for (const uiScale of [100, 95]) {
   test.describe(`playlist thumbnail sizing at ${uiScale}% UI scale`, () => {
     test.use({

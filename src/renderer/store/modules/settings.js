@@ -1303,6 +1303,13 @@ const customActions = {
         ))
       }
 
+      const hasPlaylistThumbnailSize = userSettings.some(entry => entry._id === 'playlistThumbnailSize')
+      // Playlists inherited the global size before their preference was split out.
+      // Persist even the default so later global changes stay independent on restart.
+      if (!hasPlaylistThumbnailSize) {
+        await dispatch('updatePlaylistThumbnailSize', state.thumbnailSize)
+      }
+
       const preferredCaptionLocaleEntry = userSettings.find(
         entry => entry._id === 'preferredCaptionLocale'
       )
