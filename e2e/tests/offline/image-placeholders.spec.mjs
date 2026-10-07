@@ -120,7 +120,7 @@ test('preserves channel search avatar slots in grid and list layouts', async ({ 
   await expectStableImageSlot(app, page, page.locator('.ft-list-channel .channelThumbnailLink'), pending, ['grid', 'list'])
 })
 
-test('uses muted channel avatar placeholders in dark and light themes', async ({ page }, testInfo) => {
+test('uses channel avatar skeletons in dark and light themes', async ({ page }, testInfo) => {
   const pending = []
   await page.route('https://slot-images.test/**', route => { pending.push(route) })
   await page.evaluate(() => {
@@ -154,7 +154,12 @@ test('uses muted channel avatar placeholders in dark and light themes', async ({
         return color
       })
       await expect(placeholder).toHaveCSS('color', mutedColor)
-      await expect(placeholder.locator('svg')).toHaveCSS('color', mutedColor)
+      await expect(placeholder.locator('svg')).toBeHidden()
+      await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
+      await expect(placeholder).toHaveCSS('border-radius', '50%')
+      await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'reduce' })
+      await expect(placeholder).toHaveCSS('animation-name', 'none')
+      await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })
       await channel.screenshot({ path: testInfo.outputPath(`avatar-color-${iconPack}-${theme}.png`) })
     }
   }
@@ -359,6 +364,8 @@ for (const iconPack of ['material', 'remix']) {
     await expect.poll(() => pending.length).toBeGreaterThan(0)
     await expect(image).toBeHidden()
     await expect(placeholder).toBeVisible()
+    await expect(placeholder).toHaveClass(/ft-shimmer/)
+    await expect(placeholder.locator('svg')).toBeHidden()
     await expect(placeholder).toHaveAttribute('data-icon', 'circle-user')
     await expect(placeholder).toHaveAttribute('data-icon-pack', iconPack)
 
@@ -441,6 +448,31 @@ for (const iconPack of ['material', 'remix']) {
   })
 }
 
+test('shimmers while a thumbnail loads and stops after decoding', async ({ page }, testInfo) => {
+  const pending = []
+  await page.route('https://i.ytimg.com/**', route => { pending.push(route) })
+  await goTo(page, 'history')
+  const video = page.locator('.ft-list-video', { hasText: 'Placeholder video' })
+  const placeholder = video.locator('.retryImagePlaceholder')
+  await expect(placeholder).toBeVisible()
+  await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
+  await expect(placeholder).toHaveAttribute('src', /image_skeleton/)
+  await expect(placeholder).toHaveAttribute('aria-hidden', 'true')
+  const bounds = await placeholder.boundingBox()
+  expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await video.screenshot({ path: testInfo.outputPath(`thumbnail-skeleton-${theme}.png`) })
+  }
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  while (pending.length) await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  const image = video.locator('.thumbnailImage')
+  await expect(image).toBeVisible()
+  expect(await image.boundingBox()).toEqual(bounds)
+})
+
 test('uses the thumbnail placeholder until a video image loads and after retries fail', async ({ page }) => {
   let allowImage = false
   await page.route('https://i.ytimg.com/**', route => allowImage
@@ -452,12 +484,14 @@ test('uses the thumbnail placeholder until a video image loads and after retries
   const image = video.locator('.thumbnailImage:not(.retryImagePlaceholder)')
   await expect(placeholder).toBeVisible()
   await expect(image).toBeHidden()
-  await expect(placeholder).toHaveAttribute('src', /thumbnail_placeholder/)
+  await expect(placeholder).toHaveAttribute('src', /(?:image_skeleton|thumbnail_placeholder)/)
   const bounds = await placeholder.boundingBox()
   expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
   await expect(image).toHaveAttribute('src', /opentubex_retry=/)
   await expect(image).toBeHidden()
   await expect(placeholder).toBeVisible()
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', /thumbnail_placeholder/)
   allowImage = true
   await goTo(page, 'subscribedchannels')
   await goTo(page, 'history')
@@ -487,6 +521,7 @@ test('shows an image icon for an undecodable quick bookmark image', async ({ pag
     await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
     await expect(bookmark.locator('img')).toBeHidden()
     await expect(bookmark.locator('.customImagePlaceholder')).toBeVisible()
+    await expect(bookmark.locator('.customImagePlaceholder')).not.toHaveClass(/ft-shimmer/)
     await bookmark.screenshot({ path: testInfo.outputPath(`${pack}-custom-bookmark-fallback.png`) })
   }
 })
@@ -658,6 +693,8 @@ test('keeps poll image slots stable while loading and after failure', async ({ p
     const option = page.locator('.poll .option', { hasText: choice.text })
     const placeholder = option.locator('.retryImagePlaceholder')
     await expect(placeholder).toBeVisible()
+    await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
+    await expect(placeholder.locator('svg')).toBeHidden()
     const bounds = await placeholder.boundingBox()
     expect(bounds.height).toBe(125)
     expect(bounds.width).toBe(125 * choice.width / choice.height)
@@ -679,6 +716,8 @@ test('keeps poll image slots stable while loading and after failure', async ({ p
       await expect(option.locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /opentubex_retry=/)
       await expect(option.locator('img:not(.retryImagePlaceholder)')).toBeHidden()
       await expect(option.locator('.retryImagePlaceholder')).toBeVisible()
+      await expect(option.locator('.retryImagePlaceholder')).not.toHaveClass(/ft-shimmer/)
+      await expect(option.locator('.retryImagePlaceholder svg')).toBeVisible()
     } else {
       await expect(option.locator('img')).toBeVisible()
       await expect(option.locator('.retryImagePlaceholder')).toHaveCount(0)

@@ -1,15 +1,16 @@
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
+import imageSkeleton from '../assets/img/image_skeleton.svg'
 
 // Sanitized HTML cannot mount Vue components, so keep its images hidden until
-// decoded and reserve their original slot with the same local media placeholder.
+// decoded and reserve their original slot with the shared loading skeleton.
 export function addHtmlImagePlaceholders(element) {
   for (const image of element.querySelectorAll('img')) {
     const placeholder = image.cloneNode()
     for (const attribute of ['srcset', 'sizes', 'id', 'title']) placeholder.removeAttribute(attribute)
-    placeholder.src = thumbnailPlaceholder
+    placeholder.src = imageSkeleton
     placeholder.alt = ''
     placeholder.setAttribute('aria-hidden', 'true')
-    placeholder.classList.add('htmlImagePlaceholder')
+    placeholder.classList.add('htmlImagePlaceholder', 'ft-shimmer')
     // A <picture>'s sources can override even an img without its own srcset.
     const anchor = image.parentElement.tagName === 'PICTURE' ? image.parentElement : image
     const originalStyle = image.getAttribute('style')
@@ -30,14 +31,17 @@ export function addHtmlImagePlaceholders(element) {
         image.remove()
         return
       }
+      placeholder.src = thumbnailPlaceholder
+      placeholder.classList.remove('ft-shimmer')
       image.style.position = 'absolute'
       image.style.visibility = 'hidden'
       image.style.pointerEvents = 'none'
       if (!placeholder.isConnected) anchor.after(placeholder)
     })
-    // A cached image may have completed before the sanitized HTML was inserted.
-    if (image.complete && image.naturalWidth) {
-      image.dispatchEvent(new Event('load'))
+    // Images may have loaded or failed before the helper attached its listeners.
+    // Missing sources are also complete and should keep a permanent fallback.
+    if (image.complete) {
+      image.dispatchEvent(new Event(image.naturalWidth ? 'load' : 'error'))
     }
   }
 }

@@ -16,6 +16,7 @@
     v-if="!hasLoaded && fallbackIcon"
     v-bind="{ ...$attrs, ...parentScope }"
     class="retryImagePlaceholder"
+    :class="{ 'ft-shimmer retryImageSkeleton': isLoading && useSkeleton, retryImageAvatar: isLoading && isAvatar }"
     :icon="fallbackIcon"
     aria-hidden="true"
   />
@@ -23,7 +24,8 @@
     v-else-if="!hasLoaded"
     v-bind="{ ...$attrs, ...parentScope }"
     class="retryImagePlaceholder"
-    :src="thumbnailPlaceholder"
+    :class="{ 'ft-shimmer': isLoading }"
+    :src="isLoading ? imageSkeleton : thumbnailPlaceholder"
     alt=""
     aria-hidden="true"
   >
@@ -35,6 +37,7 @@ import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
+import imageSkeleton from '../assets/img/image_skeleton.svg'
 
 defineOptions({ inheritAttrs: false })
 
@@ -60,6 +63,12 @@ const emit = defineEmits(['error', 'load'])
 const preferredSource = computed(() => getVideoThumbnailSource(props.src, store.getters.getThumbnailDataSaver))
 const imageUrl = ref(preferredSource.value)
 const hasLoaded = ref(false)
+const hasFailed = ref(false)
+const isLoading = computed(() => !hasLoaded.value && !hasFailed.value && !!props.src && props.src !== thumbnailPlaceholder)
+const fallbackIconName = computed(() => Array.isArray(props.fallbackIcon) ? props.fallbackIcon[1] : props.fallbackIcon)
+const isAvatar = computed(() => fallbackIconName.value === 'circle-user')
+// Keep semantic badges and action icons legible while their images load.
+const useSkeleton = computed(() => !['user-check', 'link', 'search', 'magnifying-glass'].includes(fallbackIconName.value))
 let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
@@ -82,6 +91,7 @@ function resetSource(src) {
   retryPending = false
   currentSource = src
   hasLoaded.value = false
+  hasFailed.value = false
   imageUrl.value = src
 }
 
@@ -121,12 +131,16 @@ async function retryImageLoad(event) {
 
   // Embedded images cannot recover through an HTTP retry or a query parameter.
   if (/^(data|blob):/.test(currentSource)) {
+    hasFailed.value = true
     emit('error', event)
     return
   }
 
   if (hasRetried) {
-    if (!retryPending) emit('error', event)
+    if (!retryPending) {
+      hasFailed.value = true
+      emit('error', event)
+    }
     return
   }
 
@@ -173,5 +187,13 @@ onBeforeUnmount(() => {
   block-size: 100%;
   inline-size: 100%;
   scale: 1;
+}
+
+.retryImageSkeleton :deep(.ft-icon__glyph) {
+  visibility: hidden;
+}
+
+.retryImageAvatar {
+  border-radius: 50%;
 }
 </style>

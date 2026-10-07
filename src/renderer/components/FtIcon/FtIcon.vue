@@ -22,12 +22,17 @@
       alt=""
       draggable="false"
       @load="loadedCustomImage = customImageSource"
-      @error="loadedCustomImage = null"
+      @error="failedCustomImage = customImageSource; loadedCustomImage = null"
       @vue:mounted="checkCachedImage"
       @vue:updated="checkCachedImage"
     >
+    <span
+      v-if="!customImageLoaded && failedCustomImage !== customImageSource"
+      class="customImagePlaceholder ft-shimmer"
+      aria-hidden="true"
+    />
     <Icon
-      v-if="!customImageLoaded"
+      v-else-if="!customImageLoaded"
       class="customImagePlaceholder"
       :icon="resolveIconifyId(['fas', 'file-image'])"
       width="100%"
@@ -126,8 +131,12 @@ const customEmoji = computed(() => {
 
 const customImageSource = computed(() => getCustomIconImageSource(props.icon))
 const loadedCustomImage = ref(null)
+const failedCustomImage = ref(null)
 const customImageLoaded = computed(() => loadedCustomImage.value === customImageSource.value)
-watch(customImageSource, () => { loadedCustomImage.value = null })
+watch(customImageSource, () => {
+  loadedCustomImage.value = null
+  failedCustomImage.value = null
+})
 function checkCachedImage({ el: image, props: imageProps }) {
   if (image.complete && image.naturalWidth) {
     loadedCustomImage.value = imageProps.src
@@ -324,6 +333,7 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  border-radius: inherit;
 }
 
 .ft-custom-icon__emoji {
