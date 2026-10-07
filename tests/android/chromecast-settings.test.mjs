@@ -20,6 +20,11 @@ test('Android enables Google Cast from settings and opens the native device menu
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         CurrentLocale: 'en-US',
+        BaseTheme: 'system',
+        SystemDarkTheme: 'dark',
+        SystemLightTheme: 'light',
+        MainColor: 'Red',
+        SecColor: 'Blue',
         ShowChromecastButton: false,
         ShowDlnaCastButton: false,
         VideoPlaybackEngine: 'built-in',
@@ -50,11 +55,18 @@ test('Android enables Google Cast from settings and opens the native device menu
     await goToSettingsSection(page, 'player')
     const toggle = page.locator('[data-setting-key="showChromecastButton"]')
     await expect(toggle).toBeVisible()
-    await expect(toggle).toHaveText('Show Google Cast button')
+    await expect(toggle).toHaveText('Enable Google Cast')
     await expect(toggle.locator('input')).not.toBeChecked()
     await toggle.locator('label').click()
     await expect(toggle.locator('input')).toBeChecked()
-    if (process.env.ANDROID_CAST_SCREENSHOT) await page.screenshot({ path: process.env.ANDROID_CAST_SCREENSHOT })
+    if (process.env.ANDROID_CAST_SCREENSHOT) {
+      for (const scheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme: scheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+        await toggle.screenshot({ path: process.env.ANDROID_CAST_SCREENSHOT.replace(/\.png$/, `-${scheme}.png`) })
+      }
+      await page.emulateMedia({ colorScheme: null })
+    }
     assert.equal(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getShowChromecastButton), true)
     await page.locator('.settingsCloseButton').click()
     await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })

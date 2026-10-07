@@ -216,6 +216,84 @@ public class ChromecastTest {
         }
     }
 
+    @Test public void relayDecodesCompressedManifestsBeforeRewriting() throws Exception {
+        for (String encoding : new String[]{"gzip", "deflate", "gzip, deflate", "gzip|deflate"}) {
+            byte[] encoded = "#EXTM3U\n".getBytes(StandardCharsets.UTF_8);
+            for (String layer : encoding.replace("|", ", ").split(", ")) encoded = compress(encoded, layer);
+            final byte[] bytes = encoded;
+            var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
+                var response = new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1).code(200).message("OK")
+                    .header("Content-Length", Integer.toString(bytes.length)).body(okhttp3.ResponseBody.create(bytes, okhttp3.MediaType.get("application/x-mpegurl")));
+                for (String value : encoding.split("\\|")) response.addHeader("Content-Encoding", value);
+                return response.build();
+            }).build();
+            AtomicReference<CastMediaServer> relay = new AtomicReference<>();
+            try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
+                event -> relay.get().complete(event.getString("requestId"), event.getString("body")), upstream)) {
+                relay.set(server);
+                JSArray resources = new JSArray();
+                resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
+                server.register(resources);
+                assertEquals(encoding, "#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200));
+            }
+        }
+    }
+
+    @Test public void relayPreservesCompressedStreamEncodingAndRangeMetadata() throws Exception {
+        byte[] bytes = compress(compress("WEBVTT\n".getBytes(StandardCharsets.UTF_8), "gzip"), "deflate");
+        var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain ->
+            new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1).code(206).message("Partial Content")
+                .addHeader("Content-Encoding", "gzip").addHeader("Content-Encoding", "deflate").header("Content-Length", Integer.toString(bytes.length))
+                .header("Content-Range", "bytes 0-" + (bytes.length - 1) + "/" + bytes.length).header("Accept-Ranges", "bytes")
+                .body(okhttp3.ResponseBody.create(bytes, okhttp3.MediaType.get("text/vtt"))).build()).build();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {}, upstream)) {
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "https://8.8.8.8/caption.vtt", "text/vtt"));
+            server.register(resources);
+            HttpURLConnection request = (HttpURLConnection) new URL(server.origin() + "/test-token/0/media").openConnection(java.net.Proxy.NO_PROXY);
+            request.setRequestProperty("Accept-Encoding", "identity");
+            request.setRequestProperty("Range", "bytes=0-");
+            request.setReadTimeout(3000);
+            try {
+                assertEquals(206, request.getResponseCode());
+                assertEquals("gzip, deflate", request.getHeaderField("Content-Encoding"));
+                assertEquals(bytes.length, request.getContentLength());
+                assertEquals("bytes 0-" + (bytes.length - 1) + "/" + bytes.length, request.getHeaderField("Content-Range"));
+                assertEquals("bytes", request.getHeaderField("Accept-Ranges"));
+                ByteArrayOutputStream received = new ByteArrayOutputStream();
+                try (InputStream input = request.getInputStream()) {
+                    for (int value; (value = input.read()) != -1;) received.write(value);
+                }
+                assertArrayEquals(bytes, received.toByteArray());
+            } finally { request.disconnect(); }
+        }
+    }
+
+    @Test public void relayLimitsDecodedManifestSize() throws Exception {
+        byte[] decoded = new byte[2_000_001];
+        java.util.Arrays.fill(decoded, (byte) 'A');
+        byte[] bytes = compress(decoded, "gzip");
+        var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain ->
+            new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1).code(200).message("OK")
+                .header("Content-Encoding", "gzip").body(okhttp3.ResponseBody.create(bytes, okhttp3.MediaType.get("application/x-mpegurl"))).build()).build();
+        java.util.concurrent.atomic.AtomicInteger rewrites = new java.util.concurrent.atomic.AtomicInteger();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> rewrites.incrementAndGet(), upstream)) {
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
+            server.register(resources);
+            fetch(server.origin() + "/test-token/0/media", 502);
+            assertEquals(0, rewrites.get());
+        }
+    }
+
+    private static byte[] compress(byte[] bytes, String encoding) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (var encoder = encoding.equals("gzip") ? new java.util.zip.GZIPOutputStream(output) : new java.util.zip.DeflaterOutputStream(output)) {
+            encoder.write(bytes);
+        }
+        return output.toByteArray();
+    }
+
     @Test public void relayRetiresResourcesWithoutChangingRemainingUrls() throws Exception {
         try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {})) {
             JSArray initial = new JSArray();

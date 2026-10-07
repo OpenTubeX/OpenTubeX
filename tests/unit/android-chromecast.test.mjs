@@ -11,8 +11,8 @@ test('Android exposes the Google Cast setting and enabled player action', async 
   assert.equal(compileFunction(`return ${condition}`, ['USING_ELECTRON', 'IS_CAPACITOR', 'IS_IOS'])(false, true, false), true,
     'Google Cast setting is missing on Android')
   const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
-  const action = watch.match(/<WatchChromecast\s[^>]*>/s)?.[0]
-  const visible = action.match(/v-if="([^"]+)"/)[1]
+  const action = watch.match(/<WatchCast\s[^>]*>/s)?.[0]
+  const visible = action.match(/:google-cast-enabled="([^"]+)"/)[1]
   assert.equal(compileFunction(`return ${visible}`, ['supportsChromecast', '$store'])(true,
     { getters: { getShowChromecastButton: true } }), true, 'Enabled Google Cast action is missing on Android')
 })
@@ -208,6 +208,114 @@ test('Android DASH Location refreshes release previous manifest chains', async t
   }
   assert.ok(!fixture.resources.some(resource => resource.candidates[0].url.endsWith('/segment-0.m4s')))
   assert.ok(fixture.resources.some(resource => resource.id === 0), 'The original session URL stays registered')
+})
+
+test('Android drops invalid atomic batches and retries their removals on a valid refresh', async t => {
+  let now = 0
+  t.mock.method(Date, 'now', () => now)
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => handoff)
+  t.after(() => api.stop(result.castId))
+  const register = fixture.native.registerResources
+  const attempts = []
+  t.mock.method(fixture.native, 'registerResources', async options => {
+    attempts.push(options)
+    if (options.resources.some(resource => resource.candidates.some(candidate => candidate.url.length > 16_000))) {
+      throw new Error('Invalid Cast resource URL')
+    }
+    await register(options)
+  })
+  const update = (requestId, segments) => fixture.event('castManifest', { requestId, resourceId: 0,
+    url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl',
+    body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n') })
+  await update('original', ['original.ts'])
+  const original = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/original.ts'))
+  now = 1000
+  await update('empty', [])
+  now = 122_000
+  await update('invalid', ['valid.ts', 'x'.repeat(16_001) + '.ts'])
+  assert.equal(fixture.completed.at(-1).error, true)
+  assert.ok(fixture.resources.includes(original), 'Atomic rejection leaves the failed removal outstanding')
+  const failedValid = attempts.at(-1).resources.find(resource => resource.candidates[0].url.endsWith('/valid.ts'))
+  await update('valid', ['valid.ts'])
+  assert.equal(fixture.completed.at(-1).error, undefined, 'A permanently invalid batch must not poison the next valid reload')
+  assert.ok(!fixture.resources.includes(original), 'Retry the failed removal')
+  const valid = fixture.resources.find(resource => resource.candidates[0].url.endsWith('/valid.ts'))
+  assert.ok(valid, 'Register the valid key from the rejected atomic batch again')
+  assert.notEqual(valid.id, failedValid.id, 'Discard failed local registrations and allocate a fresh ID')
+  assert.ok(!fixture.resources.some(resource => resource.candidates.some(candidate => candidate.url.length > 16_000)))
+})
+
+for (const shared of [false, true]) {
+  test(`Android queued manifests ${shared ? 'reject discarded references' : 'recover independently'} after an invalid write`, async t => {
+    const fixture = nativeFixture()
+    const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+    await api.discover()
+    const result = await api.start(() => handoff)
+    t.after(() => api.stop(result.castId))
+    const register = fixture.native.registerResources
+    const started = Promise.withResolvers()
+    const release = Promise.withResolvers()
+    let first = true
+    let failedValidId
+    t.mock.method(fixture.native, 'registerResources', async options => {
+      if (first) {
+        first = false
+        failedValidId = options.resources.find(resource => resource.candidates[0].url.endsWith('/valid.ts')).id
+        started.resolve()
+        await release.promise
+      }
+      if (options.resources.some(resource => resource.candidates.some(candidate => candidate.url.length > 16_000))) {
+        throw new Error('Invalid Cast resource URL')
+      }
+      await register(options)
+    })
+    const update = (requestId, segments) => fixture.event('castManifest', { requestId, resourceId: 0,
+      url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl',
+      body: '#EXTM3U\n' + segments.map(url => `#EXTINF:6,\n${url}`).join('\n') })
+    const invalid = update('invalid', ['valid.ts', 'x'.repeat(16_001) + '.ts'])
+    await started.promise
+    const queued = update('queued', shared ? ['valid.ts', 'independent.ts'] : ['independent.ts'])
+    release.resolve()
+    await Promise.all([invalid, queued])
+    assert.equal(fixture.completed.find(item => item.requestId === 'invalid').error, true)
+    assert.equal(fixture.completed.find(item => item.requestId === 'queued').error, shared ? true : undefined,
+      'Never reply successfully with a URL discarded by an earlier failed write')
+    assert.ok(!fixture.resources.some(resource => resource.id === failedValidId))
+    await update('reloaded', ['valid.ts', 'independent.ts'])
+    const response = fixture.completed.at(-1)
+    assert.equal(response.error, undefined)
+    for (const url of response.body.split('\n').filter(line => line.startsWith('http:'))) {
+      const id = Number(new URL(url).pathname.split('/')[2])
+      assert.ok(fixture.resources.some(resource => resource.id === id), 'Every successful manifest URL is registered natively')
+    }
+  })
+}
+
+test('Chromecast dispatch uses Android or Electron and safely handles iOS and web', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/player/chromecast.js', import.meta.url), 'utf8')
+  const expression = source.slice(source.indexOf('export const chromecast =') + 'export const chromecast ='.length)
+  const adapter = compileFunction(`return ${expression}`, ['process', 'window', 'createMobileChromecast', 'registerPlugin'])
+  const native = {}
+  const mobile = {}
+  const android = adapter({ env: { IS_CAPACITOR: true, IS_IOS: false, IS_ELECTRON: false } }, undefined,
+    plugin => { assert.equal(plugin, native); return mobile }, name => { assert.equal(name, 'Chromecast'); return native })
+  assert.equal(android, mobile)
+  const calls = []
+  const electron = Object.fromEntries(['discover', 'start', 'status', 'control', 'stop'].map(method => [method, (...args) => { calls.push([method, ...args]); return method }]))
+  const desktop = adapter({ env: { IS_CAPACITOR: false, IS_IOS: false, IS_ELECTRON: true } }, { ftElectron: { chromecast: electron } })
+  for (const method of Object.keys(electron)) assert.equal(await desktop[method]('id', 'seek', 12), method)
+  assert.deepEqual(calls, [['discover'], ['start', 'id'], ['status', 'id'], ['control', 'id', 'seek', 12], ['stop', 'id']])
+  for (const ios of [true, false]) {
+    const unsupported = adapter({ env: { IS_CAPACITOR: ios, IS_IOS: ios, IS_ELECTRON: false } }, undefined)
+    assert.deepEqual(await unsupported.discover(), [])
+    assert.deepEqual(await unsupported.status('id'), { connected: false })
+    assert.deepEqual(await unsupported.stop('id'), { connected: false })
+    assert.match((await unsupported.start(() => assert.fail('Unsupported platforms must not prepare playback'))).error, /not supported/)
+    assert.match((await unsupported.control('id', 'play')).error, /not supported/)
+  }
 })
 
 test('native disconnect and failed Android handoffs release relay listeners and wake ownership', async () => {

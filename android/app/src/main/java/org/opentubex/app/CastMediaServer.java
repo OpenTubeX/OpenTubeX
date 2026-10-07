@@ -142,6 +142,28 @@ final class CastMediaServer implements AutoCloseable {
         return Set.of("application/dash+xml", "application/x-mpegurl", "application/vnd.apple.mpegurl").contains(type);
     }
 
+    private static byte[] manifestBody(Response response) throws Exception {
+        InputStream body = response.body().byteStream();
+        String[] encodings = String.join(",", response.headers("Content-Encoding")).toLowerCase(java.util.Locale.ROOT).split(",");
+        for (int index = encodings.length - 1; index >= 0; index--) {
+            body = switch (encodings[index].trim()) {
+                case "", "identity" -> body;
+                case "gzip" -> new java.util.zip.GZIPInputStream(body);
+                case "deflate" -> new java.util.zip.InflaterInputStream(body);
+                default -> throw new IllegalArgumentException("Unsupported Cast manifest encoding");
+            };
+        }
+        // Bound decoded bytes too, so compressed manifests cannot bypass the limit.
+        try (InputStream decoded = body; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            for (int count; (count = decoded.read(buffer, 0, Math.min(buffer.length, 2_000_001 - output.size()))) != -1;) {
+                output.write(buffer, 0, count);
+                if (output.size() > 2_000_000) throw new IllegalArgumentException("Cast manifest too large");
+            }
+            return output.toByteArray();
+        }
+    }
+
     private static HttpUrl applyHlsReloadQuery(HttpUrl url, String query) throws Exception {
         if (query.length() > 512) throw new IllegalArgumentException("Invalid HLS reload query");
         var names = new HashSet<String>();
@@ -226,15 +248,15 @@ final class CastMediaServer implements AutoCloseable {
                     if (response.request().url().encodedPath().endsWith(".mpd")) type = "application/dash+xml";
                     if (response.request().url().encodedPath().endsWith(".m3u8")) type = "application/x-mpegurl";
                     if (manifest(type) && response.isSuccessful() && !head && response.body() != null) {
-                        byte[] bytes = response.peekBody(2_000_001).bytes();
-                        if (bytes.length > 2_000_000) throw new IllegalArgumentException("Cast manifest too large");
+                        byte[] bytes = manifestBody(response);
                         String body = rewrite(id, new String(bytes, StandardCharsets.UTF_8), finalUrl, type);
                         reply(output, response.code(), type, body.getBytes(StandardCharsets.UTF_8), false); return;
                     }
                     StringBuilder headers = new StringBuilder("HTTP/1.1 " + response.code() + " OK\r\nContent-Type: " + type + "\r\n" + cors());
-                    for (String name : new String[]{"Content-Length", "Content-Range", "Accept-Ranges", "Date"}) {
-                        String value = response.header(name);
-                        if (value != null) headers.append(name).append(": ").append(value).append("\r\n");
+                    // Streams stay encoded, so retain the encoding and matching byte metadata.
+                    for (String name : new String[]{"Content-Encoding", "Content-Length", "Content-Range", "Accept-Ranges", "Date"}) {
+                        String value = name.equals("Content-Encoding") ? String.join(", ", response.headers(name)) : response.header(name);
+                        if (value != null && !value.isEmpty()) headers.append(name).append(": ").append(value).append("\r\n");
                     }
                     output.write(headers.append("Connection: close\r\n\r\n").toString().getBytes(StandardCharsets.US_ASCII));
                     if (!head && response.body() != null) {

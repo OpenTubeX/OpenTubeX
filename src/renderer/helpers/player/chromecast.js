@@ -114,12 +114,34 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
       return `${origin}/${sender.castId}/${resource.id}/${resource.candidates[0].suffix}`
     }
     async function flush() {
-      const batch = pending.filter(resource => resources.has(resource.id))
-      const removeResourceIds = removed
-      pending = []
-      removed = []
-      if (batch.length || removeResourceIds.length) writing = writing.then(() => native.registerResources({ castId: sender.castId, resources: batch, removeResourceIds }))
-      await writing
+      const write = writing.then(async () => {
+        // Snapshot only when this write starts: preceding failures and expiry
+        // can discard registrations while a manifest waits in the queue.
+        const batch = pending.filter(resource => resources.has(resource.id))
+        const removeResourceIds = [...new Set(removed)]
+        pending = []
+        removed = []
+        if (!batch.length && !removeResourceIds.length) return
+        try {
+          await native.registerResources({ castId: sender.castId, resources: batch, removeResourceIds })
+        } catch (error) {
+          // Native writes are atomic. Drop rejected additions so a permanently
+          // invalid resource cannot poison later, valid manifest refreshes.
+          const failedIds = new Set(batch.map(resource => resource.id))
+          for (const id of failedIds) {
+            const resource = resources.get(id)
+            if (resource) { ids.delete(resource.key); resources.delete(id) }
+          }
+          for (const resource of resources.values()) {
+            for (const id of resource.references) if (failedIds.has(id)) resource.references.delete(id)
+          }
+          removed.unshift(...removeResourceIds)
+          throw error
+        }
+      })
+      // Reject this manifest, but let the next reload register fresh resources.
+      writing = write.catch(() => {})
+      await write
     }
     return {
       async listen() {
@@ -151,7 +173,9 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
             }
             resource.references = references
             collectExpiredResources()
+            const referencedIds = [...references]
             await flush()
+            if (referencedIds.some(id => !resources.has(id))) throw new Error('Cast manifest resources were discarded')
             await native.completeManifest({ castId: sender.castId, requestId: event.requestId, body })
           } catch {
             await native.completeManifest({ castId: sender.castId, requestId: event.requestId, error: true }).catch(console.error)
@@ -192,10 +216,18 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
 
 export const chromecast = process.env.IS_CAPACITOR && !process.env.IS_IOS
   ? createMobileChromecast(registerPlugin('Chromecast'))
-  : {
-      discover: () => window.ftElectron.chromecast.discover(),
-      start: prepare => window.ftElectron.chromecast.start(prepare),
-      status: castId => window.ftElectron.chromecast.status(castId),
-      control: (castId, action, value) => window.ftElectron.chromecast.control(castId, action, value),
-      stop: castId => window.ftElectron.chromecast.stop(castId)
-    }
+  : process.env.IS_ELECTRON
+    ? {
+        discover: () => window.ftElectron.chromecast.discover(),
+        start: prepare => window.ftElectron.chromecast.start(prepare),
+        status: castId => window.ftElectron.chromecast.status(castId),
+        control: (castId, action, value) => window.ftElectron.chromecast.control(castId, action, value),
+        stop: castId => window.ftElectron.chromecast.stop(castId)
+      }
+    : {
+        discover: async () => [],
+        start: async () => ({ error: 'Google Cast is not supported on this platform' }),
+        status: async () => ({ connected: false }),
+        control: async () => ({ error: 'Google Cast is not supported on this platform' }),
+        stop: async () => ({ connected: false })
+      }
