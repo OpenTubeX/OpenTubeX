@@ -399,12 +399,13 @@
   .inputTags,
   .sponsorBlockCategory
 )) {
+  --select-outline-inline-start: 9px;
+
   border-inline-start: 3px solid transparent;
   padding-inline-start: 9px;
 }
 
-/* Select labels are absolutely positioned, so the wrapper padding above does
-   not move them with the field unless their inset reserves the same gutter. */
+/* Reserve the marker gutter for labels that still use absolute positioning. */
 .settingsContent.highlightChangedSettings :deep(.select-label) {
   inset-inline-start: 25px;
 }
@@ -416,6 +417,8 @@
 :deep(.pure-checkbox:has(.changedSettingIndicator)),
 :deep(.inputTags:has(.changedSettingIndicator)),
 :deep(.sponsorBlockCategory:has(.changedSettingIndicator)) {
+  --select-outline-inline-start: 9px;
+
   border-inline-start: 3px solid var(--settings-changed-color, var(--primary-color));
   padding-inline-start: 9px;
 }

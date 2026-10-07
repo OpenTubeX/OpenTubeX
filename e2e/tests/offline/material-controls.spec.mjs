@@ -1,5 +1,30 @@
 import { test, expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 
+test('outlined select labels stay transparent on different surfaces', async ({ app, page }, testInfo) => {
+  const section = await goToSettingsSection(page, 'general')
+  const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
+  const root = select.locator('..')
+  for (const width of [1200, 400]) {
+    await setWindowSize(app, page, { width, height: width === 1200 ? 880 : 920 })
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(value => { document.body.dir = value }, direction)
+      for (const surface of ['rgb(30, 30, 30)', 'rgb(240, 230, 210)']) {
+        await root.evaluate((element, surface) => { element.style.background = surface }, surface)
+        await expect.soft(root.locator('.select-label')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', { timeout: 1000 })
+        await select.focus()
+        const geometry = await root.evaluate(element => {
+          const field = element.querySelector('.select-text').getBoundingClientRect()
+          const label = element.querySelector('.select-label').getBoundingClientRect()
+          return { labelTop: label.top + label.height / 2 - field.top, left: label.left - field.left, right: field.right - label.right }
+        })
+        expect.soft(Math.abs(geometry.labelTop)).toBeLessThanOrEqual(1)
+        expect.soft(Math.min(geometry.left, geometry.right)).toBeGreaterThanOrEqual(8)
+      }
+    }
+  }
+  await root.locator('.selectOutline').screenshot({ path: testInfo.outputPath('outlined-select-surface.png') })
+})
+
 const DOWNLOAD_FOLDER_DESCRIPTION = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
 
 for (const baseTheme of ['dark', 'light']) {
@@ -13,7 +38,8 @@ for (const baseTheme of ['dark', 'light']) {
         const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
         await expect(select.locator('..')).toHaveClass(/outlined/)
         await select.hover()
-        const hoverBorders = await select.evaluate(element => {
+        const outline = select.locator('..').locator('.selectOutline')
+        const hoverBorders = await outline.evaluate(element => {
           const style = getComputedStyle(element)
           return [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor]
         })
@@ -23,10 +49,10 @@ for (const baseTheme of ['dark', 'light']) {
           for (const roundness of [0, 50, 100, 200]) {
             await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
             for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
-              await expect(select).toHaveCSS(`border-${corner}-radius`, `${4 * roundness / 100}px`)
+              await expect(outline).toHaveCSS(`border-${corner}-radius`, `${4 * roundness / 100}px`)
             }
             for (const edge of ['top', 'right', 'bottom', 'left']) {
-              expect(await select.evaluate((element, edge) => parseFloat(getComputedStyle(element).getPropertyValue(`border-${edge}-width`)), edge)).toBeGreaterThan(0)
+              expect(await outline.evaluate((element, edge) => parseFloat(getComputedStyle(element).getPropertyValue(`border-${edge}-width`)), edge)).toBeGreaterThan(0)
             }
           }
         }
@@ -216,12 +242,14 @@ for (const uiScale of [100, 95]) {
             await select.scrollIntoViewIfNeeded()
             const geometry = await root.evaluate(element => {
               const field = element.querySelector('.select-text').getBoundingClientRect()
+              const outline = element.querySelector('.selectOutline').getBoundingClientRect()
               const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
               const viewport = element.closest('.settingsContent').getBoundingClientRect()
               const bounds = element.getBoundingClientRect()
               const rtl = getComputedStyle(element).direction === 'rtl'
               return {
                 gap: rtl ? field.left - icons.right : icons.left - field.right,
+                outlineOffset: Math.max(Math.abs(outline.left - field.left), Math.abs(outline.right - field.right)),
                 centers: Math.abs(field.top + field.height / 2 - icons.top - icons.height / 2),
                 overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right),
                 rootOverflow: Math.max(bounds.left - icons.left, icons.right - bounds.right)
@@ -229,6 +257,7 @@ for (const uiScale of [100, 95]) {
             })
             expect(geometry.gap).toBeGreaterThanOrEqual(7)
             expect(geometry.gap).toBeLessThanOrEqual(9)
+            expect(geometry.outlineOffset).toBeLessThanOrEqual(1)
             expect(geometry.centers).toBeLessThanOrEqual(1)
             expect(geometry.overflow).toBeLessThanOrEqual(1)
             expect(geometry.rootOverflow).toBeLessThanOrEqual(1)
@@ -665,11 +694,15 @@ for (const scale of [100, 95]) {
               const field = element.getBoundingClientRect()
               const label = element.parentElement.querySelector('.select-label').getBoundingClientRect()
               const value = element.querySelector('.selectedValue').getBoundingClientRect()
-              return { height: field.height, labelTop: label.top - field.top, labelBottom: label.bottom, valueTop: value.top }
+              return { height: field.height, labelTop: label.top - field.top, labelCenter: label.top + label.height / 2 - field.top, labelBottom: label.bottom, valueTop: value.top }
             })
             expect(geometry.height).toBeCloseTo(45, 1)
             expect(geometry.labelBottom).toBeLessThanOrEqual(geometry.valueTop + 1)
-            expect(geometry.labelTop).toBeCloseTo(variant === 'filled' ? 4 : -7, 0)
+            if (variant === 'filled') {
+              expect(geometry.labelTop).toBeCloseTo(4, 0)
+            } else {
+              expect(Math.abs(geometry.labelCenter)).toBeLessThanOrEqual(1)
+            }
             await expect(field).toHaveValue('/tmp/material-downloads')
           }
         }

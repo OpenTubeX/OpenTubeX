@@ -77,26 +77,33 @@
     />
     <span class="select-highlight" />
     <span class="select-bar" />
-    <label
-      :id="`${id}-label`"
-      class="select-label"
-      :for="id"
-      :title="placeholder"
+    <fieldset
+      class="selectOutline"
+      role="presentation"
     >
-      <FtIcon
-        v-if="showIcon && icon !== null"
-        :icon="icon"
-        class="select-icon"
-        :color="iconColor"
-      />
-      <span class="select-label-text">
-        <span class="select-placeholder">{{ placeholder }}</span>
-        <FtPerformanceImpact
-          compact
-          :setting-key="settingKey"
-        />
-      </span>
-    </label>
+      <legend class="selectLegend">
+        <label
+          :id="`${id}-label`"
+          class="select-label"
+          :for="id"
+          :title="placeholder"
+        >
+          <FtIcon
+            v-if="showIcon && icon !== null"
+            :icon="icon"
+            class="select-icon"
+            :color="iconColor"
+          />
+          <span class="select-label-text">
+            <span class="select-placeholder">{{ placeholder }}</span>
+            <FtPerformanceImpact
+              compact
+              :setting-key="settingKey"
+            />
+          </span>
+        </label>
+      </legend>
+    </fieldset>
     <span
       class="selectIndicators"
     >
