@@ -1462,6 +1462,26 @@ Video:
       SubmitCategoryVote: Gửi phiếu danh mục
       CategoryVoteSuccess: Đã gửi phiếu danh mục.
     Google Cast:
+      Invalid Authentication: "Thiết bị nhận gửi phản hồi xác thực không hợp lệ."
+      Authentication Declined: "Thiết bị nhận từ chối xác thực."
+      Audio Only Receiver: "Thiết bị nhận chỉ hỗ trợ truyền âm thanh."
+      Disconnected: "Thiết bị nhận đã ngắt kết nối."
+      Timeout: "Thiết bị nhận không phản hồi."
+      Busy: "Một cửa sổ khác đang truyền."
+      Not Authorized: "Kích hoạt cửa sổ này và thử lại."
+      Invalid Request: "Yêu cầu truyền không hợp lệ."
+      IPv4 Required: "Cần kết nối IPv4."
+      Launch Failed: "Không thể khởi động thiết bị nhận."
+      Load Failed: "Thiết bị nhận không thể tải video."
+      Cancelled: "Đã hủy truyền."
+      Private Not Authorized: "Quyền truy cập nội dung riêng tư chưa được chấp thuận."
+      Invalid Subtitles: "Phụ đề truyền không hợp lệ."
+      Discovery Failed: "Không thể tìm thiết bị nhận."
+      Preparing Video: "Đang chuẩn bị video để truyền…"
+      Connecting: "Đang kết nối với {device}…"
+      Starting Receiver: "Đang khởi động thiết bị nhận Cast…"
+      Loading Video: "Đang tải video trên thiết bị nhận…"
+      Buffering: "Đang lưu vào bộ đệm trên {device}…"
       Allow Private Instance: "Cho phép phiên truyền này đọc nội dung đa phương tiện từ máy chủ Invidious riêng tư {instance}?"
       Cast: "Truyền tới thiết bị Google Cast"
       Connected: "Đang truyền tới {device}"
@@ -1472,6 +1492,8 @@ Video:
       No Devices: "Không tìm thấy thiết bị Google Cast"
       No Source: "Không có luồng tương thích với Google Cast"
       Error: "Không thể truyền video"
+      Error With Details: "Không thể truyền video: {error}"
+      Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

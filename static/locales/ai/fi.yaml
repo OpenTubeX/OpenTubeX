@@ -1470,6 +1470,26 @@ Video:
       SubmitCategoryVote: Lähetä luokkaääni
       CategoryVoteSuccess: Luokkaääni lähetetty.
     Google Cast:
+      Invalid Authentication: "Vastaanottaja lähetti virheellisen todennusvastauksen."
+      Authentication Declined: "Vastaanottaja hylkäsi todennuksen."
+      Audio Only Receiver: "Vastaanottaja tukee vain äänen lähettämistä."
+      Disconnected: "Vastaanottajan yhteys katkesi."
+      Timeout: "Vastaanottaja ei vastannut."
+      Busy: "Toinen ikkuna lähettää jo."
+      Not Authorized: "Aktivoi tämä ikkuna ja yritä uudelleen."
+      Invalid Request: "Virheellinen lähetyspyyntö."
+      IPv4 Required: "IPv4-yhteys vaaditaan."
+      Launch Failed: "Vastaanottajaa ei voitu käynnistää."
+      Load Failed: "Vastaanottaja ei voinut ladata videota."
+      Cancelled: "Lähetys peruttiin."
+      Private Not Authorized: "Yksityisten medioiden käyttöä ei hyväksytty."
+      Invalid Subtitles: "Virheelliset lähetyksen tekstitykset."
+      Discovery Failed: "Vastaanottajia ei voitu etsiä."
+      Preparing Video: "Valmistellaan videota lähetettäväksi…"
+      Connecting: "Yhdistetään laitteeseen {device}…"
+      Starting Receiver: "Käynnistetään Cast-vastaanotinta…"
+      Loading Video: "Ladataan videota vastaanottimessa…"
+      Buffering: "Puskuroidaan laitteessa {device}…"
       Allow Private Instance: "Sallitaanko tämän lähetyksen lukea mediaa yksityisestä Invidious-palvelusta {instance}?"
       Cast: "Lähetä Google Cast -laitteeseen"
       Connected: "Lähetetään laitteeseen {device}"
@@ -1480,6 +1500,8 @@ Video:
       No Devices: "Google Cast -laitteita ei löytynyt"
       No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
       Error: "Videon lähetys epäonnistui"
+      Error With Details: "Videon lähetys epäonnistui: {error}"
+      Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

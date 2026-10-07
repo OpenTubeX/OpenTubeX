@@ -1446,6 +1446,26 @@ Video:
       SubmitCategoryVote: Изпращане на вот за категория
       CategoryVoteSuccess: Вотът за категория е изпратен.
     Google Cast:
+      Invalid Authentication: "Приемникът изпрати невалиден отговор за удостоверяване."
+      Authentication Declined: "Приемникът отказа удостоверяване."
+      Audio Only Receiver: "Приемникът поддържа само предаване на звук."
+      Disconnected: "Приемникът прекъсна връзката."
+      Timeout: "Приемникът не отговори."
+      Busy: "Друг прозорец вече предава."
+      Not Authorized: "Активирайте този прозорец и опитайте отново."
+      Invalid Request: "Невалидна заявка за предаване."
+      IPv4 Required: "Необходима е IPv4 връзка."
+      Launch Failed: "Приемникът не можа да бъде стартиран."
+      Load Failed: "Приемникът не можа да зареди видеото."
+      Cancelled: "Предаването беше отменено."
+      Private Not Authorized: "Достъпът до частни медии не беше одобрен."
+      Invalid Subtitles: "Невалидни субтитри за предаване."
+      Discovery Failed: "Приемниците не можаха да бъдат намерени."
+      Preparing Video: "Подготовка на видеото за предаване…"
+      Connecting: "Свързване с {device}…"
+      Starting Receiver: "Стартиране на Cast приемника…"
+      Loading Video: "Зареждане на видеото на приемника…"
+      Buffering: "Буфериране на {device}…"
       Allow Private Instance: "Да се разреши ли на това предаване да чете медия от частната инстанция на Invidious {instance}?"
       Cast: "Предаване към устройство Google Cast"
       Connected: "Предаване към {device}"
@@ -1456,6 +1476,8 @@ Video:
       No Devices: "Няма намерени устройства Google Cast"
       No Source: "Няма съвместим поток за Google Cast"
       Error: "Видеото не можа да се предаде"
+      Error With Details: "Видеото не можа да се предаде: {error}"
+      Untrusted Receiver: "Сертификатът на приемника не е доверен. Използвайте удостоверен приемник Google Cast."
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

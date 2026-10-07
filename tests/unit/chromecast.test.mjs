@@ -80,6 +80,26 @@ lines.on('line', async line=>{
 lines.on('close',()=>process.exit(0))
 `
 
+for (const code of ['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION', 'CAST_AUTHENTICATION_DECLINED', 'CAST_AUDIO_ONLY']) {
+  test(`Cast preserves native ${code} when the helper exits`, async t => {
+    if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return }
+    const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-error-'))
+    t.after(() => rm(directory, { recursive: true, force: true }))
+    const executable = path.join(directory, 'sender.mjs')
+    const reason = 'Receiver identity verification failed'
+    await writeFile(executable, `#!/usr/bin/env node\nprocess.stdout.write(${JSON.stringify(JSON.stringify({ event: 'error', error: reason, code }) + '\n')}, () => process.exit(1))\n`)
+    await chmod(executable, 0o755)
+    const sender = new CastSender(executable, { address: '127.0.0.1', port: 8009 })
+    t.after(() => sender.close())
+    await assert.rejects(sender.connect(), { message: reason, code })
+    await assert.rejects(sender.send(CAST_MEDIA, 'receiver', { type: 'LOAD' }), { message: reason, code })
+    const manager = new ChromecastManager(executable)
+    manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
+    t.after(() => manager.stop())
+    assert.deepEqual(await manager.start(42, payload), { error: reason, errorCode: code })
+  })
+}
+
 async function managerForTest(t, powerSaveBlocker) {
   if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return null }
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-'))
@@ -97,6 +117,15 @@ const payload = {
   source: { url: 'data:application/dash+xml,%3CMPD%2F%3E', contentType: 'application/dash+xml' },
   captions: [{ label: 'English', language: 'en', url: 'https://media.test/en.vtt' }], captionIndex: 0
 }
+
+test('Cast reports actual startup stages while connecting and loading media', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const stages = []
+  const result = await manager.start(42, payload, undefined, undefined, undefined, stage => stages.push(stage))
+  assert.ok(result.castId)
+  assert.deepEqual(stages, ['connecting', 'launching', 'loading'])
+})
 
 test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
   const manager = await managerForTest(t)
@@ -252,7 +281,9 @@ test('an empty receiver media status closes the endpoint and releases the sessio
 test('failed loads release resources and allow a subsequent cast', async t => {
   const manager = await managerForTest(t)
   if (!manager) return
-  assert.match((await manager.start(42, { ...payload, title: 'Reject media' })).error, /LOAD_FAILED/)
+  const failure = await manager.start(42, { ...payload, title: 'Reject media' })
+  assert.match(failure.error, /LOAD_FAILED/)
+  assert.equal(failure.errorCode, 'CAST_LOAD_FAILED')
   assert.equal(manager.active, null)
   assert.equal(manager.starting, false)
   const result = await manager.start(42, payload)

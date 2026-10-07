@@ -1465,6 +1465,26 @@ Video:
       SubmitCategoryVote: Trimite votul pentru categorie
       CategoryVoteSuccess: Votul pentru categorie a fost trimis.
     Google Cast:
+      Invalid Authentication: "Receptorul a trimis un răspuns de autentificare nevalid."
+      Authentication Declined: "Receptorul a refuzat autentificarea."
+      Audio Only Receiver: "Receptorul acceptă doar transmiterea audio."
+      Disconnected: "Receptorul s-a deconectat."
+      Timeout: "Receptorul nu a răspuns."
+      Busy: "O altă fereastră transmite deja."
+      Not Authorized: "Activați această fereastră și încercați din nou."
+      Invalid Request: "Cerere de transmitere nevalidă."
+      IPv4 Required: "Este necesară o conexiune IPv4."
+      Launch Failed: "Receptorul nu a putut fi pornit."
+      Load Failed: "Receptorul nu a putut încărca videoclipul."
+      Cancelled: "Transmiterea a fost anulată."
+      Private Not Authorized: "Accesul la conținut privat nu a fost aprobat."
+      Invalid Subtitles: "Subtitrări nevalide pentru transmitere."
+      Discovery Failed: "Receptoarele nu au putut fi căutate."
+      Preparing Video: "Se pregătește videoclipul pentru transmitere…"
+      Connecting: "Se conectează la {device}…"
+      Starting Receiver: "Se pornește receptorul Cast…"
+      Loading Video: "Se încarcă videoclipul pe receptor…"
+      Buffering: "Se stochează în memoria tampon pe {device}…"
       Allow Private Instance: "Permiteți acestei transmisii să citească fișiere media din instanța privată Invidious {instance}?"
       Cast: "Transmite către un dispozitiv Google Cast"
       Connected: "Se transmite către {device}"
@@ -1475,6 +1495,8 @@ Video:
       No Devices: "Nu s-au găsit dispozitive Google Cast"
       No Source: "Nu există un flux compatibil cu Google Cast"
       Error: "Videoclipul nu a putut fi transmis"
+      Error With Details: "Videoclipul nu a putut fi transmis: {error}"
+      Untrusted Receiver: "Certificatul receptorului nu este de încredere. Folosește un receptor Google Cast autentificat."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'

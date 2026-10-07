@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	stdx509 "crypto/x509"
 	_ "embed"
+	"errors"
 	"fmt"
 	"time"
 
@@ -26,6 +27,11 @@ import (
 var castRootPEM []byte
 
 const deviceAuthNamespace = "urn:x-cast:com.google.cast.tp.deviceauth"
+
+var errUntrustedCastCertificate = errors.New("untrusted Cast device certificate")
+var errInvalidCastAuthentication = errors.New("invalid Cast authentication")
+var errCastAuthenticationDeclined = errors.New("Cast receiver did not authenticate")
+var errCastAudioOnly = errors.New("Cast certificate is restricted to audio")
 
 func castRoots() *x509.CertPool {
 	roots := x509.NewCertPool()
@@ -74,7 +80,7 @@ func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *
 	// The ephemeral TLS certificate is the signed challenge's expiration bound.
 	now := time.Now()
 	if now.Before(peer.NotBefore) || now.After(peer.NotAfter) || peer.NotAfter.After(now.Add(4*24*time.Hour)) {
-		return fmt.Errorf("invalid Cast TLS certificate validity")
+		return fmt.Errorf("%w: TLS certificate validity", errInvalidCastAuthentication)
 	}
 	nonce := make([]byte, 16)
 	if _, err := rand.Read(nonce); err != nil {
@@ -104,14 +110,14 @@ func authenticateReceiver(channel *transport, peer *stdx509.Certificate, roots *
 		}
 		if message.GetNamespace() != deviceAuthNamespace || message.GetSourceId() != "receiver-0" ||
 			message.GetDestinationId() != "sender-0" || message.GetPayloadType() != pb.CastMessage_BINARY {
-			return fmt.Errorf("invalid Cast authentication reply")
+			return fmt.Errorf("%w reply", errInvalidCastAuthentication)
 		}
 		reply := &authMessage{}
 		if err := proto.Unmarshal(message.GetPayloadBinary(), reply); err != nil {
 			return err
 		}
 		if reply.Error != nil || reply.Response == nil {
-			return fmt.Errorf("Cast receiver did not authenticate")
+			return errCastAuthenticationDeclined
 		}
 		return verifyReceiver(reply.Response, nonce, peer.Raw, roots, now)
 	}
@@ -122,7 +128,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	// A returned nonce must still match the fresh challenge.
 	if (len(response.SenderNonce) != 0 && !bytes.Equal(response.SenderNonce, nonce)) || (response.HashAlgorithm != nil && *response.HashAlgorithm > 1) ||
 		(response.SignatureAlgorithm != nil && *response.SignatureAlgorithm != 1) {
-		return fmt.Errorf("invalid Cast authentication challenge response")
+		return fmt.Errorf("%w challenge response", errInvalidCastAuthentication)
 	}
 	device, err := x509.ParseCertificate(response.ClientAuthCertificate)
 	if x509.IsFatal(err) {
@@ -130,7 +136,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	}
 	key, ok := device.PublicKey.(*rsa.PublicKey)
 	if !ok || key.N.BitLen() < 2048 || device.IsCA || device.KeyUsage&x509.KeyUsageDigitalSignature == 0 {
-		return fmt.Errorf("invalid Cast device signing certificate")
+		return fmt.Errorf("%w: device signing certificate", errInvalidCastAuthentication)
 	}
 	intermediates := x509.NewCertPool()
 	for _, der := range response.IntermediateCertificate {
@@ -146,12 +152,12 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	chains, err := device.Verify(x509.VerifyOptions{Roots: roots, Intermediates: intermediates,
 		CurrentTime: now, KeyUsages: []x509.ExtKeyUsage{x509.ExtKeyUsageAny}})
 	if err != nil {
-		return fmt.Errorf("untrusted Cast device certificate: %w", err)
+		return fmt.Errorf("%w: %w", errUntrustedCastCertificate, err)
 	}
 	for _, certificate := range chains[0] {
 		for _, policy := range certificate.PolicyIdentifiers {
 			if policy.String() == "1.3.6.1.4.1.11129.2.5.2" {
-				return fmt.Errorf("Cast certificate is restricted to audio")
+				return errCastAudioOnly
 			}
 		}
 	}
@@ -164,7 +170,7 @@ func verifyReceiver(response *authResponse, nonce, peerDER []byte, roots *x509.C
 	}
 	digest.Write(signed)
 	if err := rsa.VerifyPKCS1v15(key, hash, digest.Sum(nil), response.Signature); err != nil {
-		return fmt.Errorf("invalid Cast device authentication signature: %w", err)
+		return fmt.Errorf("%w signature: %w", errInvalidCastAuthentication, err)
 	}
 	return nil
 }

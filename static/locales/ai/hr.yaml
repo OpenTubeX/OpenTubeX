@@ -1450,6 +1450,26 @@ Video:
       SubmitCategoryVote: Pošalji glas za kategoriju
       CategoryVoteSuccess: Glas za kategoriju je poslan.
     Google Cast:
+      Invalid Authentication: "Prijamnik je poslao nevažeći odgovor za provjeru autentičnosti."
+      Authentication Declined: "Prijamnik je odbio provjeru autentičnosti."
+      Audio Only Receiver: "Prijamnik podržava samo emitiranje zvuka."
+      Disconnected: "Prijamnik se odspojio."
+      Timeout: "Prijamnik nije odgovorio."
+      Busy: "Drugi prozor već emitira."
+      Not Authorized: "Aktivirajte ovaj prozor i pokušajte ponovno."
+      Invalid Request: "Nevažeći zahtjev za emitiranje."
+      IPv4 Required: "Potrebna je IPv4 veza."
+      Launch Failed: "Prijamnik nije moguće pokrenuti."
+      Load Failed: "Prijamnik nije mogao učitati video."
+      Cancelled: "Emitiranje je otkazano."
+      Private Not Authorized: "Pristup privatnim medijima nije odobren."
+      Invalid Subtitles: "Nevažeći titlovi za emitiranje."
+      Discovery Failed: "Prijamnike nije moguće potražiti."
+      Preparing Video: "Priprema videozapisa za emitiranje…"
+      Connecting: "Povezivanje s {device}…"
+      Starting Receiver: "Pokretanje Cast prijamnika…"
+      Loading Video: "Učitavanje videozapisa na prijamniku…"
+      Buffering: "Spremanje u međuspremnik na {device}…"
       Allow Private Instance: "Dopustiti ovom emitiranju čitanje medija s privatne instance Invidious {instance}?"
       Cast: "Emitiraj na uređaj Google Cast"
       Connected: "Emitiranje na {device}"
@@ -1460,6 +1480,8 @@ Video:
       No Devices: "Nisu pronađeni uređaji Google Cast"
       No Source: "Nema kompatibilnog toka za Google Cast"
       Error: "Videozapis nije moguće prenijeti"
+      Error With Details: "Videozapis nije moguće prenijeti: {error}"
+      Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

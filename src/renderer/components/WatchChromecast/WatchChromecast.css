@@ -1,0 +1,44 @@
+.castProgress {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  inline-size: max-content;
+  max-inline-size: calc(100% - 32px);
+  padding-block: 12px;
+  padding-inline: 16px;
+  border-radius: calc(8px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  color: var(--primary-text-color);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.castProgress:dir(rtl) {
+  transform: translate(50%, -50%);
+}
+
+.castProgressSpinner {
+  flex-shrink: 0;
+  inline-size: 20px;
+  block-size: 20px;
+  border: 2px solid var(--primary-text-color);
+  border-block-start-color: var(--primary-color);
+  border-radius: 50%;
+  animation: cast-progress-spin 1s linear infinite;
+}
+
+@keyframes cast-progress-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .castProgressSpinner { animation: none; }
+}

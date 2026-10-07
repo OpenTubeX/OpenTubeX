@@ -1909,6 +1909,26 @@ Video:
       SubmitCategoryVote: Envia el vot de categoria
       CategoryVoteSuccess: S’ha enviat el vot de categoria.
     Google Cast:
+      Invalid Authentication: "El receptor ha enviat una resposta d’autenticació no vàlida."
+      Authentication Declined: "El receptor ha rebutjat l’autenticació."
+      Audio Only Receiver: "El receptor només admet la transmissió d’àudio."
+      Disconnected: "El receptor s’ha desconnectat."
+      Timeout: "El receptor no ha respost."
+      Busy: "Una altra finestra ja està transmetent."
+      Not Authorized: "Activeu aquesta finestra i torneu-ho a provar."
+      Invalid Request: "Sol·licitud de transmissió no vàlida."
+      IPv4 Required: "Cal una connexió IPv4."
+      Launch Failed: "No s’ha pogut iniciar el receptor."
+      Load Failed: "El receptor no ha pogut carregar el vídeo."
+      Cancelled: "S’ha cancel·lat la transmissió."
+      Private Not Authorized: "No s’ha aprovat l’accés a contingut privat."
+      Invalid Subtitles: "Subtítols de transmissió no vàlids."
+      Discovery Failed: "No s’han pogut cercar receptors."
+      Preparing Video: "Preparant el vídeo per transmetre…"
+      Connecting: "Connectant amb {device}…"
+      Starting Receiver: "Iniciant el receptor Cast…"
+      Loading Video: "Carregant el vídeo al receptor…"
+      Buffering: "Emmagatzemant a la memòria intermèdia de {device}…"
       Allow Private Instance: "Voleu permetre que aquesta transmissió llegeixi contingut multimèdia de la instància privada d’Invidious {instance}?"
       Cast: "Transmet a un dispositiu Google Cast"
       Connected: "S’està transmetent a {device}"
@@ -1919,6 +1939,8 @@ Video:
       No Devices: "No s’han trobat dispositius Google Cast"
       No Source: "No hi ha cap flux compatible amb Google Cast"
       Error: "No s’ha pogut transmetre el vídeo"
+      Error With Details: "No s’ha pogut transmetre el vídeo: {error}"
+      Untrusted Receiver: "El certificat del receptor no és de confiança. Fes servir un receptor Google Cast autenticat."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'

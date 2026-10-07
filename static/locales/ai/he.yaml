@@ -1472,6 +1472,26 @@ Video:
       SubmitCategoryVote: שליחת הצבעה על קטגוריה
       CategoryVoteSuccess: ההצבעה על הקטגוריה נשלחה.
     Google Cast:
+      Invalid Authentication: "המקלט שלח תגובת אימות לא תקינה."
+      Authentication Declined: "המקלט סירב לאימות."
+      Audio Only Receiver: "המקלט תומך בשידור שמע בלבד."
+      Disconnected: "המקלט התנתק."
+      Timeout: "המקלט לא הגיב."
+      Busy: "חלון אחר כבר משדר."
+      Not Authorized: "יש להפעיל חלון זה ולנסות שוב."
+      Invalid Request: "בקשת שידור לא תקינה."
+      IPv4 Required: "נדרש חיבור IPv4."
+      Launch Failed: "לא ניתן להפעיל את המקלט."
+      Load Failed: "המקלט לא הצליח לטעון את הסרטון."
+      Cancelled: "השידור בוטל."
+      Private Not Authorized: "הגישה למדיה פרטית לא אושרה."
+      Invalid Subtitles: "כתוביות השידור לא תקינות."
+      Discovery Failed: "לא ניתן לחפש מקלטים."
+      Preparing Video: "מכין את הסרטון לשידור…"
+      Connecting: "מתחבר אל {device}…"
+      Starting Receiver: "מפעיל את מקלט Cast…"
+      Loading Video: "טוען את הסרטון במקלט…"
+      Buffering: "טוען למאגר ב־{device}…"
       Allow Private Instance: "לאפשר לשידור הזה לקרוא מדיה ממופע Invidious הפרטי {instance}?"
       Cast: "שידור למכשיר Google Cast"
       Connected: "משדר אל {device}"
@@ -1482,6 +1502,8 @@ Video:
       No Devices: "לא נמצאו מכשירי Google Cast"
       No Source: "אין זרם תואם ל־Google Cast"
       Error: "לא ניתן לשדר את הסרטון"
+      Error With Details: "לא ניתן לשדר את הסרטון: {error}"
+      Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים

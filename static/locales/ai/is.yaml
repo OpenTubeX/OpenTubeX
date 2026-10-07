@@ -1451,6 +1451,26 @@ Video:
       SubmitCategoryVote: Senda atkvæði um flokk
       CategoryVoteSuccess: Atkvæði um flokk sent.
     Google Cast:
+      Invalid Authentication: "Móttakarinn sendi ógilt auðkenningarsvar."
+      Authentication Declined: "Móttakarinn hafnaði auðkenningu."
+      Audio Only Receiver: "Móttakarinn styður aðeins sendingu hljóðs."
+      Disconnected: "Móttakarinn aftengdist."
+      Timeout: "Móttakarinn svaraði ekki."
+      Busy: "Annar gluggi er þegar að senda."
+      Not Authorized: "Virkjaðu þennan glugga og reyndu aftur."
+      Invalid Request: "Ógild sendingarbeiðni."
+      IPv4 Required: "IPv4-tenging er nauðsynleg."
+      Launch Failed: "Ekki tókst að ræsa móttakarann."
+      Load Failed: "Móttakarinn gat ekki hlaðið myndskeiðinu."
+      Cancelled: "Sending var afturkölluð."
+      Private Not Authorized: "Aðgangur að einkamiðlum var ekki samþykktur."
+      Invalid Subtitles: "Ógildir skjátextar fyrir sendingu."
+      Discovery Failed: "Ekki tókst að leita að móttökurum."
+      Preparing Video: "Undirbý myndskeið fyrir sendingu…"
+      Connecting: "Tengist {device}…"
+      Starting Receiver: "Ræsi Cast-móttakara…"
+      Loading Video: "Hleð myndskeiði á móttakara…"
+      Buffering: "Safna í biðminni á {device}…"
       Allow Private Instance: "Leyfa þessari sendingu að lesa miðla frá einkatilviki Invidious {instance}?"
       Cast: "Senda í Google Cast-tæki"
       Connected: "Sendir í {device}"
@@ -1461,6 +1481,8 @@ Video:
       No Devices: "Engin Google Cast-tæki fundust"
       No Source: "Enginn samhæfur straumur fyrir Google Cast"
       Error: "Ekki tókst að senda myndskeiðið"
+      Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
+      Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:
