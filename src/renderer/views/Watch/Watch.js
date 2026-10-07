@@ -6706,8 +6706,15 @@ export default defineComponent({
       if (this.legacyFormats.length > 0) {
         console.error('Unable to recover the SABR stream. Reverting to legacy formats...')
         this.enableLegacyFormat()
-      } else if (!await this.tryPlaybackEngineFallback({ code: 'SABR_RELOAD' })) {
-        this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+      } else {
+        const timestamp = this.getTimestamp()
+        if (timestamp > 0) {
+          this.oneTimeTimestamp = timestamp
+        }
+        this.setPlayerReloadState(payload)
+        if (!await this.tryPlaybackEngineFallback({ code: 'SABR_RELOAD' })) {
+          this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+        }
       }
     },
 
