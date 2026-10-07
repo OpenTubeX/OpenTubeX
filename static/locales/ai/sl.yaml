@@ -1701,7 +1701,7 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
   Player:
-    Cast: "Predvajaj"
+    Cast: "Predvajaj v napravi"
     Music Mode: "Glasbeni način"
     Music Mode Description: "Predvajajte videoposnetke s hitrostjo 1× in nove videoposnetke v tem zavihku začnite od začetka. Shranjene privzete nastavitve predvajanja ostanejo nespremenjene."
     DLNA:

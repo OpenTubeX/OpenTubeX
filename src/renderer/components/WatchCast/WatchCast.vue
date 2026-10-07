@@ -39,7 +39,7 @@
     :force-dropdown="true"
     :disabled="protocolDisabled(selectedProtocol)"
     dropdown-position-x="right"
-    @dropdown-open="refreshDevices"
+    @dropdown-open="openDropdown"
   >
     <template #dropdown-header>
       <div
@@ -160,6 +160,11 @@ function protocolDisabled(protocol) {
 function refreshDevices() {
   discoveredProtocols.add(selectedProtocol.value)
   controller.value?.refreshDevices()
+}
+
+function openDropdown() {
+  discoveredProtocols.clear()
+  refreshDevices()
 }
 
 async function selectProtocol(protocol, focus = false) {

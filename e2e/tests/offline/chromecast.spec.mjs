@@ -147,6 +147,34 @@ test('both casting protocols share one button with Google Cast and DLNA tabs', a
   await expect(castButtons).toHaveCount(0)
 })
 
+test('reopening the casting menu refreshes each receiver list once per opening', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await mockDlna(app)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.discoveryRound = 1
+    globalThis.discoveryCounts = { google: 0, dlna: 0 }
+    for (const [protocol, handler] of [['google', 'cast-discover'], ['dlna', 'dlna-discover']]) {
+      ipcMain.removeHandler(handler)
+      ipcMain.handle(handler, () => {
+        globalThis.discoveryCounts[protocol]++
+        return [{ id: `${protocol}-tv`, name: `${protocol} TV ${globalThis.discoveryRound}` }]
+      })
+    }
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  for (const round of [1, 2]) {
+    await app.electronApp.evaluate((_, value) => { globalThis.discoveryRound = value }, round)
+    await page.locator('.castControl > button').click()
+    for (const [tab, protocol] of [['Google Cast', 'google'], ['DLNA', 'dlna']]) {
+      await page.getByRole('tab', { name: tab, exact: true }).click()
+      await expect(page.getByRole('option', { name: `${protocol} TV ${round}`, exact: true })).toBeVisible()
+    }
+    await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
+    expect(await app.electronApp.evaluate(() => globalThis.discoveryCounts)).toEqual({ google: round, dlna: round })
+    await page.keyboard.press('Escape')
+  }
+})
+
 for (const uiScale of [80, 125]) {
   test(`casting tabs and options retain 48px touch targets at ${uiScale}% scale`, async ({ app, page }) => {
     await openCastVideo(app, page)
