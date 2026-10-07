@@ -2279,6 +2279,58 @@ test('uses configured playback cookies for external streams', async ({ app, page
   }
 })
 
+test('deduplicates cookies separately for parent and subdomain streams', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const server = createServer((request, response) => {
+    const expectedCookie = request.headers.host.startsWith('media.localhost:')
+      ? 'account_session=shared-token'
+      : 'account_session=host-token'
+    response.writeHead(request.headers.cookie === expectedCookie ? 200 : 403).end()
+  })
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+
+  try {
+    const executable = path.join(app.userDataDir, 'external-media-cookie-scopes.sh')
+    const cookiePath = path.join(app.userDataDir, 'external-media-cookie-scopes.txt')
+    const streamUrls = ['localhost', 'media.localhost'].map(host =>
+      `http://${host}:${server.address().port}/video.webm`
+    )
+    const response = JSON.stringify({
+      title: 'Cookie scopes',
+      formats: streamUrls.map((url, index) => ({
+        format_id: String(index), url, protocol: 'http', ext: 'webm', height: 360
+      }))
+    })
+    await writeFile(cookiePath, [
+      '.localhost\tTRUE\t/\tFALSE\t4102444800\taccount_session\tshared-token',
+      'localhost\tFALSE\t/\tFALSE\t4102444800\taccount_session\thost-token',
+      ''
+    ].join('\n'))
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async ({ ytDlpPath, cookiesPath }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+      await store.dispatch('updateYtDlpPlaybackCookiesPath', cookiesPath)
+      await window.ftElectron.ytDlpGetPlaybackInfo('https://media.example.test/video', true, true)
+    }, { ytDlpPath: executable, cookiesPath: cookiePath })
+
+    for (const url of streamUrls) {
+      expect(await page.evaluate(async streamUrl => (await fetch(streamUrl)).status, url), url).toBe(200)
+    }
+  } finally {
+    server.closeAllConnections()
+    await new Promise(resolve => server.close(resolve))
+  }
+})
+
 test('decodes and deduplicates format cookies for browser-authenticated external streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

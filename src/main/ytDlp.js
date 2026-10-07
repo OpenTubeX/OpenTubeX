@@ -185,14 +185,18 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         return entries
       })
     : []
-  // Multiple formats often share the same cookies. Match a cookie jar's
-  // identity rules rather than repeating those cookies in the request header.
-  const cookies = [...new Map([...cookieFileEntries, ...formatEntries].map(cookie => [
-    JSON.stringify([cookie.domain, cookie.path, cookie.name]), cookie
-  ])).values()]
-
+  const cookieEntries = [...cookieFileEntries, ...formatEntries]
   const existing = externalStreamCookies.get(webContents) ?? new Map()
-  for (const host of hosts) existing.set(host, cookies)
+  for (const host of hosts) {
+    // Filter before deduplicating so a host-only cookie cannot replace a
+    // subdomain-inclusive cookie needed by a different stream host.
+    const cookies = [...new Map(cookieEntries
+      .filter(cookie => host === cookie.domain ||
+        (cookie.includeSubdomains && host.endsWith(`.${cookie.domain}`)))
+      .map(cookie => [JSON.stringify([cookie.domain, cookie.path, cookie.name]), cookie])
+    ).values()]
+    existing.set(host, cookies)
+  }
   externalStreamCookies.set(webContents, existing)
 }
 
