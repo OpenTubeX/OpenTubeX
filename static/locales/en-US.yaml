@@ -2520,6 +2520,11 @@ Change Format:
   Built-in Fallback Template: 'The built-in engine could not play the stream, trying
     yt-dlp instead: {error}'
 Share:
+  Shared YouTube Link: "Shared YouTube link"
+  Open in Player: "Open in player"
+  No YouTube Link: "The shared text does not contain a supported YouTube link."
+  Loading Video Information: "Loading video information…"
+  Video Information Failed: "Could not load video information. Try again or open the link."
   Share Link: "Share Link"
   Share failed: "Could not share the link"
   Share Video: Share Video

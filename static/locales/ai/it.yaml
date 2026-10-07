@@ -1522,6 +1522,11 @@ Change Format:
   yt-dlp Default Clients Fallback: I client yt-dlp preferiti non hanno fornito flussi riproducibili, verranno provati i client predefiniti di yt-dlp
   Built-in Fallback Template: 'Il motore integrato non ha riprodotto il flusso, verrà provato yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Link YouTube condiviso"
+  Open in Player: "Apri nel lettore"
+  No YouTube Link: "Il testo condiviso non contiene un link YouTube supportato."
+  Loading Video Information: "Caricamento delle informazioni del video…"
+  Video Information Failed: "Impossibile caricare le informazioni del video. Riprova o apri il link."
   Share Link: "Condividi link"
   Share failed: "Impossibile condividere il link"
   Timestamp Link Copied: Link con indicazione temporale copiato negli appunti

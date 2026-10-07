@@ -1,0 +1,23 @@
+:global(.promptCard.sharedLinkPrompt.fixedLayout) {
+  inline-size: min(360px, 100%);
+  block-size: auto;
+}
+
+.sharedUrl {
+  overflow-wrap: anywhere;
+  margin-block: 0 16px;
+}
+
+.sharedLinkActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sharedLinkActions .btn,
+.sharedLinkCancel {
+  min-block-size: 48px;
+  inline-size: 100%;
+  margin: 0;
+  white-space: normal;
+}

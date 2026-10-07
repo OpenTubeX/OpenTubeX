@@ -1817,6 +1817,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Dei føretrekte yt-dlp-klientane kunne ikkje levere spelbare straumar. Prøver standardklientane til yt-dlp i staden
   Built-in Fallback Template: 'Den innebygde motoren kunne ikkje spele av straumen. Prøver yt-dlp i staden: {error}'
 Share:
+  Shared YouTube Link: "Delt YouTube-lenkje"
+  Open in Player: "Opne i avspelaren"
+  No YouTube Link: "Den delte teksten inneheld inga støtta YouTube-lenkje."
+  Loading Video Information: "Lastar videoinformasjon…"
+  Video Information Failed: "Klarte ikkje å laste videoinformasjon. Prøv igjen eller opne lenkja."
   Share Link: "Del lenkje"
   Share failed: "Klarte ikkje å dele lenkja"
   Share Post: Del innlegget

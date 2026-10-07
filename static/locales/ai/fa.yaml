@@ -1601,6 +1601,11 @@ Change Format:
   yt-dlp Default Clients Fallback: کارخواه‌های ترجیحی yt-dlp نتوانستند جریان قابل پخش فراهم کنند، کارخواه‌های پیش‌فرض yt-dlp امتحان می‌شوند
   Built-in Fallback Template: 'موتور داخلی نتوانست جریان را پخش کند، به‌جای آن yt-dlp امتحان می‌شود: {error}'
 Share:
+  Shared YouTube Link: "پیوند اشتراک‌گذاری‌شدهٔ YouTube"
+  Open in Player: "باز کردن در پخش‌کننده"
+  No YouTube Link: "متن اشتراک‌گذاری‌شده دارای پیوند پشتیبانی‌شدهٔ YouTube نیست."
+  Loading Video Information: "در حال بارگذاری اطلاعات ویدیو…"
+  Video Information Failed: "اطلاعات ویدیو بارگذاری نشد. دوباره تلاش کنید یا پیوند را باز کنید."
   Share Link: "اشتراک‌گذاری پیوند"
   Share failed: "اشتراک‌گذاری پیوند ممکن نشد"
   Share Post: هم‌رسانی پست

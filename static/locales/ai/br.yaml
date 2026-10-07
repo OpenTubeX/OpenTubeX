@@ -1533,6 +1533,11 @@ Change Format:
   yt-dlp Default Clients Fallback: "N'eus ket bet gallet da arvalien yt-dlp gwellañ-garet pourchas gwazhioù lennadus; o klask gant arvalien dre ziouer yt-dlp"
   Built-in Fallback Template: "N'eus ket bet gallet d'ar c'heflusker enframmat lenn ar gwazh; o klask gant yt-dlp en e lec'h: {error}"
 Share:
+  Shared YouTube Link: "Liamm YouTube rannet"
+  Open in Player: "Digeriñ el lenner"
+  No YouTube Link: "N’eus liamm YouTube skoret ebet en destenn rannet."
+  Loading Video Information: "O kargañ titouroù ar video…"
+  Video Information Failed: "N’haller ket kargañ titouroù ar video. Klaskit en-dro pe digorit al liamm."
   Share Link: "Rannañ al liamm"
   Share failed: "N’eus ket bet gallet rannañ al liamm"
   Timestamp Link Copied: "Eilet eo bet al liamm gant ar mare er golver"

@@ -1535,6 +1535,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Klien yt-dlp pilihan tidak dapat menyediakan stream yang bisa diputar, mencoba klien bawaan yt-dlp sebagai gantinya
   Built-in Fallback Template: 'Mesin bawaan tidak dapat memutar stream, mencoba yt-dlp sebagai gantinya: {error}'
 Share:
+  Shared YouTube Link: "Tautan YouTube yang dibagikan"
+  Open in Player: "Buka di pemutar"
+  No YouTube Link: "Teks yang dibagikan tidak berisi tautan YouTube yang didukung."
+  Loading Video Information: "Memuat informasi video…"
+  Video Information Failed: "Tidak dapat memuat informasi video. Coba lagi atau buka tautan."
   Share Link: "Bagikan tautan"
   Share failed: "Tidak dapat membagikan tautan"
   Timestamp Link Copied: Tautan stempel waktu disalin ke papan klip

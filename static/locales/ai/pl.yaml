@@ -1157,6 +1157,11 @@ Channels:
   Load More Channels: "Wczytaj więcej kanałów"
 
 Share:
+  Shared YouTube Link: "Udostępniony link YouTube"
+  Open in Player: "Otwórz w odtwarzaczu"
+  No YouTube Link: "Udostępniony tekst nie zawiera obsługiwanego linku YouTube."
+  Loading Video Information: "Wczytywanie informacji o filmie…"
+  Video Information Failed: "Nie udało się wczytać informacji o filmie. Spróbuj ponownie lub otwórz link."
   Share Link: "Udostępnij link"
   Share failed: "Nie udało się udostępnić linku"
 Theme Discovery:

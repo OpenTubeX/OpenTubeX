@@ -1524,6 +1524,11 @@ Change Format:
   yt-dlp Default Clients Fallback: 優先するyt-dlpクライアントで再生可能なストリームを取得できないため、yt-dlpの既定のクライアントを試します
   Built-in Fallback Template: '内蔵エンジンでストリームを再生できないため、代わりにyt-dlpを試します: {error}'
 Share:
+  Shared YouTube Link: "共有された YouTube リンク"
+  Open in Player: "プレーヤーで開く"
+  No YouTube Link: "共有されたテキストに対応する YouTube リンクが含まれていません。"
+  Loading Video Information: "動画情報を読み込み中…"
+  Video Information Failed: "動画情報を読み込めませんでした。再試行するか、リンクを開いてください。"
   Share Link: "リンクを共有"
   Share failed: "リンクを共有できませんでした"
   Timestamp Link Copied: 再生時刻付きリンクをクリップボードにコピーしました

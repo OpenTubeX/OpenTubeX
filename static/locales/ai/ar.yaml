@@ -1560,6 +1560,11 @@ Change Format:
   yt-dlp Default Clients Fallback: لم يتمكن عملاء yt-dlp المفضلين من توفير تدفقات قابلة للتشغيل، وجربوا عملاء yt-dlp الافتراضيين بدلاً من ذلك
   Built-in Fallback Template: 'لم يتمكن المحرك المدمج من تشغيل البث، جرب yt-dlp بدلاً من ذلك: {error}'
 Share:
+  Shared YouTube Link: "رابط YouTube مشترك"
+  Open in Player: "فتح في المشغّل"
+  No YouTube Link: "لا يحتوي النص المشترك على رابط YouTube مدعوم."
+  Loading Video Information: "جارٍ تحميل معلومات الفيديو…"
+  Video Information Failed: "تعذّر تحميل معلومات الفيديو. حاول مجددًا أو افتح الرابط."
   Share Link: "مشاركة الرابط"
   Share failed: "تعذرت مشاركة الرابط"
   Timestamp Link Copied: تم نسخ رابط الطابع الزمني إلى الحافظة

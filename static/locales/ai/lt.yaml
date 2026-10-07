@@ -1922,6 +1922,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Pageidaujami yt-dlp klientai nepateikė atkuriamų srautų, todėl bandomi numatytieji yt-dlp klientai
   Built-in Fallback Template: 'Integruotas modulis negalėjo paleisti srauto, todėl bandoma naudoti yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Bendrinta YouTube nuoroda"
+  Open in Player: "Atverti leistuvėje"
+  No YouTube Link: "Bendrintame tekste nėra palaikomos YouTube nuorodos."
+  Loading Video Information: "Įkeliama vaizdo įrašo informacija…"
+  Video Information Failed: "Nepavyko įkelti vaizdo įrašo informacijos. Bandykite dar kartą arba atverkite nuorodą."
   Share Link: "Bendrinti nuorodą"
   Share failed: "Nepavyko bendrinti nuorodos"
   Share Post: Bendrinti įrašą
