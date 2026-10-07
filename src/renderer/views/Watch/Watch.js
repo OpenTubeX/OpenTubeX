@@ -6712,7 +6712,13 @@ export default defineComponent({
           this.oneTimeTimestamp = timestamp
         }
         this.setPlayerReloadState(payload)
-        if (!await this.tryPlaybackEngineFallback({ code: 'SABR_RELOAD' })) {
+        let fallbackStarted = false
+        try {
+          fallbackStarted = await this.tryPlaybackEngineFallback({ code: 'SABR_RELOAD' })
+        } catch (error) {
+          console.error('SABR playback-engine fallback failed', error)
+        }
+        if (!fallbackStarted) {
           this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
         }
       }

@@ -1320,6 +1320,25 @@ test('exhausted SABR reload requests use the playback engine fallback once', asy
   expect(result.errorMessage).toBe('')
 })
 
+test('a rejected SABR playback-engine fallback reports the terminal error', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async (view, maxRecoveries) => {
+    view.errorMessage = ''
+    view.isSabrVideoStream = () => true
+    view.sabrErrorRecoveryAttempts = maxRecoveries
+    view.legacyFormats = []
+    view.tryPlaybackEngineFallback = async () => {
+      throw new Error('Synthetic playback-engine teardown failure')
+    }
+    await view.onPlayerReloadRequested({ wasPlaying: false })
+  }, MAX_SABR_ERROR_RECOVERIES)
+  await expect(page.locator('.errorMessage')).toContainText('[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream')
+})
+
 for (const wasPlaying of [false, true]) {
   test(`exhausted SABR reloads preserve ${wasPlaying ? 'playing' : 'paused'} state without saved progress`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
