@@ -128,12 +128,10 @@ function startLoadingTimeout() {
   // Keep the image mounted so a late success can still replace the fallback.
   skeletonTimeoutId = setTimeout(() => {
     hasFailed.value = true
-    // A stalled response never fires error. Queue one browser retry, leaving
-    // the original request alive during the retry delay for a slow success.
+    // A stalled response never fires error. Keep the original request alive
+    // while trying native recovery or waiting for the browser retry.
     if (!hasRetried && /^https?:/.test(currentSource)) {
-      hasRetried = true
-      retryPending = true
-      scheduleBrowserRetry()
+      return recoverImage()
     }
   }, SKELETON_TIMEOUT_MS)
 }
@@ -193,20 +191,25 @@ async function retryImageLoad(event) {
     return
   }
 
+  await recoverImage()
+}
+
+async function recoverImage() {
   hasRetried = true
   retryPending = true
   const failedSourceVersion = sourceVersion
+  const failedSource = currentSource
 
   if (process.env.IS_CAPACITOR) {
     let dataUrl = null
     try {
       const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
-      dataUrl = await fetchCapacitorAvatarDataUrl(currentSource)
+      dataUrl = await fetchCapacitorAvatarDataUrl(failedSource)
     } catch {
       // Native recovery is optional; unexpected failures still get a delayed retry.
     }
 
-    if (failedSourceVersion !== sourceVersion) return
+    if (failedSourceVersion !== sourceVersion || hasLoaded.value) return
     if (dataUrl !== null) {
       retryPending = false
       imageUrl.value = dataUrl
