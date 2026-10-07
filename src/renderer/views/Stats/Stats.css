@@ -32,18 +32,32 @@
 }
 
 .deviceSegments {
-  inline-size: 460px;
+  --device-fade-left: 0%;
+  --device-fade-right: 0%;
+
+  inline-size: max-content;
   max-inline-size: 100%;
   min-inline-size: 0;
   overflow-x: auto;
 }
 
+.deviceSegments.fadeLeft {
+  --device-fade-left: 24px;
+}
+
+.deviceSegments.fadeRight {
+  --device-fade-right: 24px;
+}
+
+.deviceSegments.fadeLeft,
+.deviceSegments.fadeRight {
+  mask-image: linear-gradient(to right, transparent, #000 var(--device-fade-left), #000 calc(100% - var(--device-fade-right)), transparent);
+}
+
 .deviceSegmentTrack {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(var(--device-count), minmax(max-content, 1fr));
+  display: flex;
   inline-size: max-content;
-  min-inline-size: 100%;
   box-sizing: border-box;
   padding: 4px;
   border: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
@@ -51,25 +65,21 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
 }
 
-.deviceSegmentTrack.compact {
-  grid-template-columns: repeat(var(--device-count), minmax(0, 1fr));
-  inline-size: 100%;
-}
-
 .deviceSegmentIndicator {
   position: absolute;
   inset-block: 4px;
-  inset-inline-start: calc(4px + var(--selected-index) * (100% - 8px) / var(--device-count));
-  inline-size: calc((100% - 8px) / var(--device-count));
+  inset-inline-start: 4px;
+  inline-size: 0;
   border-radius: calc(9px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   box-shadow: 0 1px 6px rgb(0 0 0 / 15%);
-  transition: inset-inline-start 180ms ease;
+  transition: inset-inline-start 180ms ease, inline-size 180ms ease;
 }
 
 .deviceSegment {
   position: relative;
   min-inline-size: 0;
+  flex-shrink: 0;
   padding-block: 10px;
   padding-inline: 16px;
   border: 0;
@@ -79,12 +89,6 @@
   font: inherit;
   white-space: nowrap;
   cursor: pointer;
-}
-
-.compact .deviceSegment {
-  padding-inline: 6px;
-  overflow-wrap: anywhere;
-  white-space: normal;
 }
 
 .deviceSegmentIcon {
