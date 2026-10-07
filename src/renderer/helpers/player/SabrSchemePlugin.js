@@ -590,7 +590,7 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
-    if (shouldRetryDueToNextRequestPolicy) {
+    if (shouldRetryDueToNextRequestPolicy && nextRequestPlaybackCookieBytes !== undefined) {
       // Policies received before MEDIA_END can establish the session cookie
       // even when this request succeeds. Subsequent audio/video requests must
       // carry it, including the first segments fetched at a resume position.
@@ -638,8 +638,10 @@ async function doRequest(
   } else if (shouldRetry) {
     if (shouldRetryDueToNextRequestPolicy) {
       currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
-      currentState.sabrStreamState.playbackCookieBytes = nextRequestPlaybackCookieBytes
-      currentState.abrRequest.streamerContext.playbackCookie = nextRequestPlaybackCookieBytes
+      if (nextRequestPlaybackCookieBytes !== undefined) {
+        currentState.sabrStreamState.playbackCookieBytes = nextRequestPlaybackCookieBytes
+      }
+      currentState.abrRequest.streamerContext.playbackCookie = currentState.sabrStreamState.playbackCookieBytes
       currentState.abrRequest.streamerContext.backoffTimeMs = nextRequestBackoffTimeMs
       // Only count on an actual retry, not a policy after a completed segment.
       currentState.cumulativeRetryDueToNextRequestPolicy += 1

@@ -180,6 +180,47 @@ test('resumed audio and video requests retain the playback cookie from a complet
   }
 })
 
+for (const segmentComplete of [true, false]) test(`a cookie-less policy ${segmentComplete ? 'with a completed segment' : 'requiring a retry'} retains the established playback cookie`, async t => {
+  const cookie = Uint8Array.of(0x08, 0x01, 0x10, 0x00, 0x78, 0x02)
+  const requests = []
+  const { createSabrTransport } = load(async (_uri, options) => {
+    const body = protos.VideoPlaybackAbrRequest.decode(options.body)
+    requests.push(body)
+    const formatId = body.clientAbrState.enabledTrackTypesBitfield === 1 ? audioFormatId : videoFormatId
+    if (requests.length === 1) {
+      const policy = new CompositeBuffer([])
+      new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+        Uint8Array.of(0x3a, cookie.length, ...cookie))
+      const media = new Uint8Array(await response([1], true, formatId).arrayBuffer())
+      return new Response(utils.concatenateChunks([...policy.chunks, media]))
+    }
+    if (requests.length === 2) {
+      const policy = new CompositeBuffer([])
+      // An explicit zero keeps the cookie-less policy present on the wire.
+      new UmpWriter(policy).write(protos.UMPPartId.NEXT_REQUEST_POLICY, Uint8Array.of(0x20, 0))
+      const media = segmentComplete
+        ? new Uint8Array(await response([2], false, formatId).arrayBuffer())
+        : new Uint8Array()
+      return new Response(utils.concatenateChunks([...policy.chunks, media]))
+    }
+    return response([2], false, formatId)
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  for (const uri of [
+    'sabr1:audio?formatId=140-123-&init',
+    'sabr1:audio?formatId=140-123-&startTimeMs=600000&sq=1',
+    'sabr1:video?formatId=137-456-&resolution=1080&startTimeMs=600000&sq=1',
+  ]) {
+    await transport.request(uri, request(uri), 1).promise
+  }
+  assert.equal(requests.length, segmentComplete ? 3 : 4)
+  for (const body of requests.slice(1)) {
+    assert.deepEqual(body.streamerContext.playbackCookie, cookie,
+      'omitting a cookie must preserve it in retries and subsequent segment requests')
+  }
+})
+
 function errorWithPolicyResponse(backoffTimeMs, policyFirst) {
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
