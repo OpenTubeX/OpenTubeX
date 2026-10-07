@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.util.Base64;
-import android.view.KeyEvent;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -96,7 +95,7 @@ public class AndroidFileExportTest {
                     awaitValue(scenario, "window.secondPickerResult !== null", "true");
                     assertEquals("true", evaluate(scenario, "typeof window.secondPickerResult.error === 'string'"));
                     assertEquals("null", evaluate(scenario, "window.firstPickerResult"));
-                    InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+                    InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK").close();
                     awaitValue(scenario, "window.firstPickerResult !== null", "true");
                     assertEquals(first.equals("saveFile") ? "{\"saved\":false}" : "{}",
                         evaluate(scenario, "window.firstPickerResult"));
@@ -161,7 +160,7 @@ public class AndroidFileExportTest {
                 "{fileName:'cancel.txt',data:'dGVzdA==',mimeType:'text/plain'}).then(function(result){window.exportResult=result;}," +
                 "function(error){window.exportResult={error:error.message};});");
             awaitPicker();
-            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("input keyevent KEYCODE_BACK").close();
             awaitValue(scenario, "window.exportResult !== null", "true");
             assertEquals("false", evaluate(scenario, "window.exportResult.saved"));
         } finally {
