@@ -346,42 +346,57 @@ for (const uiScale of [100, 125]) {
           const player = document.querySelector('.ftVideoPlayer')
           const video = player.querySelector('video')
           const frames = []
+          let landing = null
+          const removeAttribute = player.removeAttribute
+          player.removeAttribute = function (name) {
+            if (name === 'data-mobile-mini-morph' && this.hasAttribute(name)) {
+              // Capture the final rendered geometry before cleanup in the same
+              // animation callback; a paint sampler can miss that endpoint.
+              const rect = video.getBoundingClientRect()
+              landing = { top: rect.top + window.scrollY, width: rect.width }
+            }
+            return removeAttribute.call(this, name)
+          }
           let started = false
           window.scrollTo({ top: 0, behavior: 'smooth' })
-          for (let i = 0; i < 90; i++) {
-            // Sample after all animation callbacks for this paint have run.
-            await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
-            const morph = player.hasAttribute('data-mobile-mini-morph')
-            if (morph) started = true
-            if (!started) continue
-            const rect = video.getBoundingClientRect()
-            frames.push({
-              morph,
-              // Compare document positions: scrolling continues between paints.
-              top: rect.top + window.scrollY,
-              width: rect.width,
-              controlsVisible: [...player.children].some(element => {
-                if (element.matches('.player, .countdownPoster, .mobileMiniBarOverlay')) return false
-                const style = getComputedStyle(element)
-                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && element.getBoundingClientRect().height > 0
+          try {
+            for (let i = 0; i < 90; i++) {
+              // Sample after all animation callbacks for this paint have run.
+              await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
+              const morph = player.hasAttribute('data-mobile-mini-morph')
+              if (morph) started = true
+              if (!started) continue
+              const rect = video.getBoundingClientRect()
+              frames.push({
+                morph,
+                // Compare document positions: scrolling continues between paints.
+                top: rect.top + window.scrollY,
+                width: rect.width,
+                controlsVisible: [...player.children].some(element => {
+                  if (element.matches('.player, .countdownPoster, .mobileMiniBarOverlay')) return false
+                  const style = getComputedStyle(element)
+                  return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && element.getBoundingClientRect().height > 0
+                })
               })
-            })
-            if (!morph) break
+              if (!morph) break
+            }
+            return { frames, landing }
+          } finally {
+            delete player.removeAttribute
           }
-          return frames
         })
         if (resize) {
           await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
           await setWindowSize(app, page, { width: 640, height: 800 })
         }
-        const frames = await framesPromise
+        const { frames, landing } = await framesPromise
         expect(frames.filter(frame => frame.morph).length).toBeGreaterThan(2)
         expect.soft(frames.filter(frame => frame.morph && frame.controlsVisible), 'only the video may move during the return').toEqual([])
-        const lastMorph = frames.at(-2)
+        expect(landing, 'the restore animation must render its endpoint before cleanup').not.toBeNull()
         const inline = frames.at(-1)
         expect(inline.morph).toBe(false)
-        expect.soft(Math.abs(lastMorph.top - inline.top), 'the animation must land at the current scrolled position').toBeLessThan(10)
-        expect.soft(Math.abs(lastMorph.width - inline.width)).toBeLessThan(10)
+        expect.soft(Math.abs(landing.top - inline.top), 'the animation must land at the current scrolled position').toBeLessThan(10)
+        expect.soft(Math.abs(landing.width - inline.width)).toBeLessThan(10)
       })
     }
   })
