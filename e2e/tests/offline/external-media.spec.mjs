@@ -2334,9 +2334,11 @@ test('deduplicates cookies separately for parent and subdomain streams', async (
 test('decodes and deduplicates format cookies for browser-authenticated external streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
+  const quotedCookies = 'space_token="a b"; quote_token="a\\"b"; slash_token="a\\\\b"; semi_token="a\\073b"; byte_token="a\\351b"'
+  const expectedCookies = `account_session=test-token==; chain_token=test/value=; ${quotedCookies}`
   const media = await readFile(DEMO_MEDIA_PATH)
   const server = createServer((request, response) => {
-    if (request.headers.cookie !== 'account_session=test-token==; chain_token=test/value=') {
+    if (request.headers.cookie !== expectedCookies) {
       response.writeHead(403).end()
       return
     }
@@ -2360,7 +2362,7 @@ test('decodes and deduplicates format cookies for browser-authenticated external
         protocol: 'http',
         ext: 'webm',
         height: Number(formatId),
-        cookies: 'account_session="test-token=="; Domain=127.0.0.1; Path=/; chain_token="test\\057value\\075"; Domain=127.0.0.1; Path=/'
+        cookies: `account_session="test-token=="; Domain=127.0.0.1; Path=/; chain_token="test\\057value\\075"; Domain=127.0.0.1; Path=/; ${quotedCookies}`
       }))
     })
     await writeFile(executable, [
@@ -2378,6 +2380,11 @@ test('decodes and deduplicates format cookies for browser-authenticated external
       await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
       await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
     }, executable)
+
+    await page.evaluate(async () => {
+      await window.ftElectron.ytDlpGetPlaybackInfo('https://media.example.test/video', true, true)
+    })
+    expect(await page.evaluate(async url => (await fetch(url)).status, streamUrl)).toBe(200)
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
     await page.locator(sel.searchInput).press('Enter')

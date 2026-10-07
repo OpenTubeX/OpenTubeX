@@ -154,11 +154,13 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
           const rawValue = separator === -1 ? '' : part.slice(separator + 1)
           // Python's cookie serializer quotes values containing characters such
           // as '=' and can escape characters with three-digit octal sequences.
-          // Cookie request headers need the original value, as in its cookie jar.
           const value = rawValue.startsWith('"') && rawValue.endsWith('"')
             ? rawValue.slice(1, -1).replaceAll(/\\(?:([0-3][0-7]{2})|([\s\S]))/g,
                 (_match, octal, character) => octal ? String.fromCharCode(parseInt(octal, 8)) : character)
             : rawValue
+          // Decode only RFC 6265 cookie octets; retain Python's wire encoding
+          // when the value needs quotes or escapes to be parsed correctly.
+          const cookieValue = /^[\x21\x23-\x2b\x2d-\x3a\x3c-\x5b\x5d-\x7e]+$/.test(value) ? value : rawValue
           if (name === 'Domain' || name === 'Path' || name === 'Expires' || name === 'Secure' || name === 'Version') {
             if (cookie === null) continue
             const domain = value.replace(/^\./, '').toLowerCase()
@@ -168,8 +170,8 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
             } else if (name === 'Path' && value.startsWith('/')) cookie.path = value
             else if (name === 'Expires') cookie.expires = Math.min(Number(value) || Infinity, Date.now() / 1000 + 3600)
             else if (name === 'Secure') cookie.secure = true
-          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && value &&
-        /^[\x20-\x7e]+$/.test(value) && !value.includes(';')) {
+          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && cookieValue &&
+            /^[\x20-\x7e]+$/.test(cookieValue) && !cookieValue.includes(';')) {
             cookie = {
               domain: url.hostname,
               includeSubdomains: false,
@@ -177,7 +179,7 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
               secure: false,
               expires: Date.now() / 1000 + 3600,
               name,
-              value
+              value: cookieValue
             }
             entries.push(cookie)
           }
