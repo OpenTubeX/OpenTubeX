@@ -1470,6 +1470,26 @@ Video:
       SubmitCategoryVote: Υποβολή ψήφου κατηγορίας
       CategoryVoteSuccess: Η ψήφος κατηγορίας υποβλήθηκε.
     Google Cast:
+      Invalid Authentication: "Ο δέκτης έστειλε μη έγκυρη απάντηση ελέγχου ταυτότητας."
+      Authentication Declined: "Ο δέκτης αρνήθηκε τον έλεγχο ταυτότητας."
+      Audio Only Receiver: "Ο δέκτης υποστηρίζει μόνο μετάδοση ήχου."
+      Disconnected: "Ο δέκτης αποσυνδέθηκε."
+      Timeout: "Ο δέκτης δεν απάντησε."
+      Busy: "Ένα άλλο παράθυρο μεταδίδει ήδη."
+      Not Authorized: "Ενεργοποιήστε αυτό το παράθυρο και δοκιμάστε ξανά."
+      Invalid Request: "Μη έγκυρο αίτημα μετάδοσης."
+      IPv4 Required: "Απαιτείται σύνδεση IPv4."
+      Launch Failed: "Δεν ήταν δυνατή η εκκίνηση του δέκτη."
+      Load Failed: "Ο δέκτης δεν μπόρεσε να φορτώσει το βίντεο."
+      Cancelled: "Η μετάδοση ακυρώθηκε."
+      Private Not Authorized: "Δεν εγκρίθηκε η πρόσβαση σε ιδιωτικά πολυμέσα."
+      Invalid Subtitles: "Μη έγκυροι υπότιτλοι μετάδοσης."
+      Discovery Failed: "Δεν ήταν δυνατή η αναζήτηση δεκτών."
+      Preparing Video: "Προετοιμασία βίντεο για μετάδοση…"
+      Connecting: "Σύνδεση με {device}…"
+      Starting Receiver: "Εκκίνηση του δέκτη Cast…"
+      Loading Video: "Φόρτωση βίντεο στον δέκτη…"
+      Buffering: "Αποθήκευση στην προσωρινή μνήμη του {device}…"
       Allow Private Instance: "Να επιτραπεί σε αυτή τη μετάδοση να διαβάζει πολυμέσα από την ιδιωτική εγκατάσταση Invidious {instance};"
       Cast: "Μετάδοση σε συσκευή Google Cast"
       Connected: "Μετάδοση στο {device}"
@@ -1480,6 +1500,8 @@ Video:
       No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
       No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
       Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
+      Error With Details: "Δεν ήταν δυνατή η μετάδοση του βίντεο: {error}"
+      Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

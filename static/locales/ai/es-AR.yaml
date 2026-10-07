@@ -1797,6 +1797,26 @@ Video:
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
+      Invalid Authentication: "El receptor envió una respuesta de autenticación no válida."
+      Authentication Declined: "El receptor rechazó la autenticación."
+      Audio Only Receiver: "El receptor solo admite la transmisión de audio."
+      Disconnected: "El receptor se desconectó."
+      Timeout: "El receptor no respondió."
+      Busy: "Otra ventana ya está transmitiendo."
+      Not Authorized: "Activá esta ventana e intentalo de nuevo."
+      Invalid Request: "Solicitud de transmisión no válida."
+      IPv4 Required: "Se requiere una conexión IPv4."
+      Launch Failed: "No se pudo iniciar el receptor."
+      Load Failed: "El receptor no pudo cargar el video."
+      Cancelled: "Se canceló la transmisión."
+      Private Not Authorized: "No se aprobó el acceso a contenido privado."
+      Invalid Subtitles: "Subtítulos de transmisión no válidos."
+      Discovery Failed: "No se pudieron buscar receptores."
+      Preparing Video: "Preparando el video para transmitir…"
+      Connecting: "Conectando con {device}…"
+      Starting Receiver: "Iniciando el receptor Cast…"
+      Loading Video: "Cargando el video en el receptor…"
+      Buffering: "Almacenando en el búfer de {device}…"
       Allow Private Instance: "¿Permitir que esta transmisión lea contenido multimedia de la instancia privada de Invidious {instance}?"
       Cast: "Transmitir a un dispositivo Google Cast"
       Connected: "Transmitiendo a {device}"
@@ -1807,6 +1827,8 @@ Video:
       No Devices: "No se encontraron dispositivos Google Cast"
       No Source: "No hay un flujo compatible con Google Cast"
       Error: "No se pudo transmitir el video"
+      Error With Details: "No se pudo transmitir el video: {error}"
+      Untrusted Receiver: "El certificado del receptor no es de confianza. Usá un receptor Google Cast autenticado."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tiempo restante previo al anuncio: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'

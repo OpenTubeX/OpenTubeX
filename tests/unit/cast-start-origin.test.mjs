@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { randomUUID } from 'node:crypto'
+import { EventEmitter } from 'node:events'
 import { createCastMediaServer, resolveCastMediaAddresses } from '../../src/main/castMediaServer.js'
 import { applyTwitchPlaylistOrigin } from '../../src/twitchPlaylistOrigin.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
@@ -14,8 +15,12 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
   let focused = true
   let destroyed = false
   let onDestroyed
+  const ipcRenderer = new EventEmitter()
   const sender = { id: 1, isFocused: () => focused, isDestroyed: () => destroyed, once: (_name, callback) => { onDestroyed = callback } }
-  const event = { sender, senderFrame: { url: 'app://opentubex/index.html' } }
+  const sendProgress = (channel, progress) => ipcRenderer.emit(channel, {}, progress)
+  const event = { sender, senderFrame: { url: 'app://opentubex/index.html', send: sendProgress } }
+  ipcRenderer.invoke = (channel, ...args) => handlers.get(channel)(event, ...args)
+  ipcRenderer.send = (channel, ...args) => listeners.get(channel)?.(event, ...args)
   const userActivation = { isActive: true }
   const resolvers = new Map()
   const headers = new Map()
@@ -23,9 +28,9 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
   let allowPrivate = true
   let pendingConsent
   const context = vm.createContext({
-    URL, randomUUID, IpcChannels: { CAST_START: 'start', CAST_PREPARE: 'prepare', CAST_CANCEL_PREPARATION: 'cancel' },
+    URL, randomUUID, IpcChannels: { CAST_START: 'start', CAST_PREPARE: 'prepare', CAST_CANCEL_PREPARATION: 'cancel', CAST_PROGRESS: 'progress' },
     ipcMain: { handle: (channel, handler) => handlers.set(channel, handler), on: (channel, handler) => listeners.set(channel, handler) },
-    ipcRenderer: { on: () => {}, invoke: (channel, ...args) => handlers.get(channel)(event, ...args), send: (channel, ...args) => listeners.get(channel)?.(event, ...args) },
+    ipcRenderer,
     navigator: { userActivation }, document: { body: { dataset: {} } }, webFrame: {},
     process: { argv: [], env: {}, versions: {} }, console,
     isOpenTubeXUrl: url => url === 'app://opentubex/index.html',
@@ -39,7 +44,12 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
     getYtDlpExternalStreamCookieHeader: () => null,
     session: { defaultSession: { getUserAgent: () => 'Cast test', resolveHost: async () => ({ endpoints: [{ address: '192.168.1.10', family: 'ipv4' }] }) } },
     chromecast: {
-      start: async (owner, _payload, getHeaders, resolve) => { resolvers.set(owner, resolve); headers.set(owner, getHeaders); return { castId: 'cast-1' } }
+      start: async (owner, _payload, getHeaders, resolve, _fetch, onProgress) => {
+        resolvers.set(owner, resolve)
+        headers.set(owner, getHeaders)
+        onProgress('connecting')
+        return { castId: 'cast-1' }
+      }
     }
   })
   vm.runInContext(main.slice(main.indexOf('  const castOwners ='), main.indexOf('  ipcMain.handle(IpcChannels.CAST_STATUS')), context)
@@ -57,10 +67,11 @@ async function fixture(defaultInstance = 'http://192.168.1.2:3000') {
     complete: preparationId => handlers.get('start')(event, {}, preparationId),
     cancel: preparationId => listeners.get('cancel')(event, preparationId),
     changeFrame(id) { event.senderFrame.routingId = id },
+    setProgressSender(send) { event.senderFrame.send = send },
     changeOwner(id) { sender.id = id },
     setFocus(value) { focused = value; userActivation.isActive = value },
     async start(instance, owner = 1, focused = true, frame = 'app://opentubex/index.html') {
-      const event = { sender: { id: owner, isFocused: () => focused, isDestroyed: () => false, once: () => {} }, senderFrame: { url: frame } }
+      const event = { sender: { id: owner, isFocused: () => focused, isDestroyed: () => false, once: () => {} }, senderFrame: { url: frame, send: sendProgress } }
       const preparation = await handlers.get('prepare')(event)
       if (preparation.error) return preparation
       return handlers.get('start')(event, { invidiousInstanceUrl: instance }, preparation.preparationId)
@@ -138,12 +149,26 @@ test('unfocused windows and non-app frames cannot authorize a private Cast origi
 test('Cast preparation retains initial focus authorization through the actual preload/main handoff', async () => {
   const f = await fixture('')
   let complete
-  const pending = f.api.start(() => new Promise(resolve => { complete = resolve }))
+  const stages = []
+  const pending = f.api.start(() => new Promise(resolve => { complete = resolve }), stage => stages.push(stage))
   // Allow authorization/preparation to enter before the user changes focus.
   while (!complete) await new Promise(resolve => setImmediate(resolve))
   f.setFocus(false)
   complete({ deviceId: 'tv' })
   assert.equal((await pending).castId, 'cast-1')
+  assert.deepEqual(stages, ['connecting'])
+})
+
+test('a closed frame cannot fail Cast startup when progress delivery throws', async () => {
+  const f = await fixture('')
+  let sends = 0
+  f.setProgressSender(() => {
+    sends++
+    throw new Error('Render frame was disposed before WebFrameMain could be accessed')
+  })
+  const result = await f.api.start(() => ({ deviceId: 'tv' }))
+  assert.equal(sends, 1)
+  assert.equal(result.castId, 'cast-1')
 })
 
 test('renderer payload cannot replace the configured private Cast origin', async () => {

@@ -1497,6 +1497,26 @@ Video:
       SubmitCategoryVote: Indsend kategoristemme
       CategoryVoteSuccess: Kategoristemme indsendt.
     Google Cast:
+      Invalid Authentication: "Modtageren sendte et ugyldigt godkendelsessvar."
+      Authentication Declined: "Modtageren afviste godkendelse."
+      Audio Only Receiver: "Modtageren understøtter kun casting af lyd."
+      Disconnected: "Modtageren blev afbrudt."
+      Timeout: "Modtageren svarede ikke."
+      Busy: "Et andet vindue caster allerede."
+      Not Authorized: "Aktivér dette vindue, og prøv igen."
+      Invalid Request: "Ugyldig cast-anmodning."
+      IPv4 Required: "En IPv4-forbindelse er påkrævet."
+      Launch Failed: "Modtageren kunne ikke startes."
+      Load Failed: "Modtageren kunne ikke indlæse videoen."
+      Cancelled: "Casting blev annulleret."
+      Private Not Authorized: "Adgang til private medier blev ikke godkendt."
+      Invalid Subtitles: "Ugyldige undertekster til casting."
+      Discovery Failed: "Modtagere kunne ikke søges."
+      Preparing Video: "Forbereder video til casting…"
+      Connecting: "Opretter forbindelse til {device}…"
+      Starting Receiver: "Starter Cast-modtageren…"
+      Loading Video: "Indlæser video på modtageren…"
+      Buffering: "Buffer på {device}…"
       Allow Private Instance: "Tillad denne casting at læse medier fra den private Invidious-instans {instance}?"
       Cast: "Cast til en Google Cast-enhed"
       Connected: "Caster til {device}"
@@ -1507,6 +1527,8 @@ Video:
       No Devices: "Ingen Google Cast-enheder fundet"
       No Source: "Ingen kompatibel stream til Google Cast"
       Error: "Videoen kunne ikke castes"
+      Error With Details: "Videoen kunne ikke castes: {error}"
+      Untrusted Receiver: "Modtagerens certifikat er ikke betroet. Brug en godkendt Google Cast-modtager."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tid for preroll-annonce: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'

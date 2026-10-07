@@ -176,7 +176,18 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
             const referencedIds = [...references]
             await flush()
             if (referencedIds.some(id => !resources.has(id))) throw new Error('Cast manifest resources were discarded')
-            await native.completeManifest({ castId: sender.castId, requestId: event.requestId, body })
+            await native.completeManifest({
+              castId: sender.castId,
+              requestId: event.requestId,
+              body,
+              ...(!dash
+                ? {
+                    hlsReadTimeout: /^#EXT-X-(?:TARGETDURATION|PART-INF):/m.test(event.body)
+                      ? Math.min(2_147_483_647, resource.graceMs + 15_000)
+                      : 0
+                  }
+                : {})
+            })
           } catch {
             await native.completeManifest({ castId: sender.castId, requestId: event.requestId, error: true }).catch(console.error)
           } finally { if (resource) resource.active-- }
@@ -204,9 +215,9 @@ export function createMobileChromecast(native, screenWake = playbackScreenWake) 
   })
   return {
     discover: () => manager.discover(),
-    async start(prepare) {
+    async start(prepare, onProgress) {
       const payload = await prepare()
-      return payload ? manager.start(0, payload) : { error: 'Cast cancelled' }
+      return payload ? manager.start(0, payload, undefined, undefined, undefined, onProgress) : { error: 'Cast cancelled', errorCode: 'CAST_CANCELLED' }
     },
     status: castId => manager.status(0, castId),
     control: (castId, action, value) => manager.control(0, castId, action, value),
@@ -219,7 +230,7 @@ export const chromecast = process.env.IS_CAPACITOR && !process.env.IS_IOS
   : process.env.IS_ELECTRON
     ? {
         discover: () => window.ftElectron.chromecast.discover(),
-        start: prepare => window.ftElectron.chromecast.start(prepare),
+        start: (prepare, onProgress) => window.ftElectron.chromecast.start(prepare, onProgress),
         status: castId => window.ftElectron.chromecast.status(castId),
         control: (castId, action, value) => window.ftElectron.chromecast.control(castId, action, value),
         stop: castId => window.ftElectron.chromecast.stop(castId)

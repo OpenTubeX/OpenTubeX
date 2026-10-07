@@ -83,12 +83,42 @@ const handoff = {
   captions: [{ url: 'data:text/vtt;charset=utf-8,WEBVTT%0A%0ACaption', label: 'English', language: 'en' }], captionIndex: 0
 }
 
+test('Android retains native authentication and receiver error codes', async () => {
+  for (const code of ['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION', 'CAST_AUTHENTICATION_DECLINED', 'CAST_AUDIO_ONLY', 'CAST_LOAD_FAILED', 'CAST_TIMEOUT']) {
+    const fixture = nativeFixture()
+    if (code === 'CAST_LOAD_FAILED') fixture.native.send = async () => { throw Object.assign(new Error('Receiver rejected load'), { code }) }
+    else fixture.native.connect = async () => { throw Object.assign(new Error('Connection failed'), { code }) }
+    const api = createMobileChromecast(fixture.native)
+    await api.discover()
+    const result = await api.start(() => handoff)
+    assert.equal(result.errorCode, code)
+    assert.equal(fixture.closed, true)
+    assert.equal(fixture.listenerCount(), 0)
+  }
+})
+
+test('Android supplies playlist timing for blocking HLS reloads', async t => {
+  const fixture = nativeFixture()
+  const api = createMobileChromecast(fixture.native, { acquire() { return () => {} } })
+  await api.discover()
+  const result = await api.start(() => ({ ...handoff, captions: [], source: { url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl' } }))
+  t.after(() => api.stop(result.castId))
+  assert.ok(result.castId, result.error)
+  const resourceId = fixture.resources[0].id
+  for (const [body, timeout] of [['#EXTM3U\nchild.m3u8', 0], ['#EXTM3U\n#EXT-X-TARGETDURATION:180\n#EXTINF:180,\nsegment.ts', 555_000]]) {
+    await fixture.event('castManifest', { resourceId, requestId: 'timing', url: 'https://media.test/live.m3u8', contentType: 'application/x-mpegurl', body })
+    assert.equal(fixture.completed.at(-1).hlsReadTimeout, timeout)
+  }
+})
+
 test('Android uses the native sender and relay for handoff, captions, controls and return', async t => {
   const fixture = nativeFixture()
   const wake = []
   const api = createMobileChromecast(fixture.native, { acquire() { wake.push('awake'); return () => wake.push('sleep') } })
   await api.discover()
-  const result = await api.start(() => handoff)
+  const progress = []
+  const result = await api.start(() => handoff, stage => progress.push(stage))
+  assert.deepEqual(progress, ['connecting', 'launching', 'loading'])
   t.after(() => api.stop(result.castId))
   assert.ok(result.castId, result.error)
   assert.equal(result.status.currentTime, 12)
@@ -307,7 +337,7 @@ test('Chromecast dispatch uses Android or Electron and safely handles iOS and we
   const electron = Object.fromEntries(['discover', 'start', 'status', 'control', 'stop'].map(method => [method, (...args) => { calls.push([method, ...args]); return method }]))
   const desktop = adapter({ env: { IS_CAPACITOR: false, IS_IOS: false, IS_ELECTRON: true } }, { ftElectron: { chromecast: electron } })
   for (const method of Object.keys(electron)) assert.equal(await desktop[method]('id', 'seek', 12), method)
-  assert.deepEqual(calls, [['discover'], ['start', 'id'], ['status', 'id'], ['control', 'id', 'seek', 12], ['stop', 'id']])
+  assert.deepEqual(calls, [['discover'], ['start', 'id', 'seek'], ['status', 'id'], ['control', 'id', 'seek', 12], ['stop', 'id']])
   for (const ios of [true, false]) {
     const unsupported = adapter({ env: { IS_CAPACITOR: ios, IS_IOS: ios, IS_ELECTRON: false } }, undefined)
     assert.deepEqual(await unsupported.discover(), [])

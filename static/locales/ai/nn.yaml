@@ -1706,6 +1706,26 @@ Video:
       SubmitCategoryVote: Send kategorirøyst
       CategoryVoteSuccess: Kategorirøyst sendt.
     Google Cast:
+      Invalid Authentication: "Mottakaren sende eit ugyldig autentiseringssvar."
+      Authentication Declined: "Mottakaren avviste autentisering."
+      Audio Only Receiver: "Mottakaren støttar berre casting av lyd."
+      Disconnected: "Mottakaren vart fråkopla."
+      Timeout: "Mottakaren svarte ikkje."
+      Busy: "Eit anna vindauge castar allereie."
+      Not Authorized: "Aktiver dette vindauget og prøv igjen."
+      Invalid Request: "Ugyldig cast-førespurnad."
+      IPv4 Required: "Ei IPv4-tilkopling er nødvendig."
+      Launch Failed: "Kunne ikkje starte mottakaren."
+      Load Failed: "Mottakaren kunne ikkje laste videoen."
+      Cancelled: "Casting vart avbroten."
+      Private Not Authorized: "Tilgang til private medium vart ikkje godkjend."
+      Invalid Subtitles: "Ugyldige undertekstar for casting."
+      Discovery Failed: "Kunne ikkje søkje etter mottakarar."
+      Preparing Video: "Førebur video for casting…"
+      Connecting: "Koplar til {device}…"
+      Starting Receiver: "Startar Cast-mottakaren…"
+      Loading Video: "Lastar video på mottakaren…"
+      Buffering: "Bufrar på {device}…"
       Allow Private Instance: "Tillate at denne castinga les medium frå den private Invidious-instansen {instance}?"
       Cast: "Cast til ei Google Cast-eining"
       Connected: "Castar til {device}"
@@ -1716,6 +1736,8 @@ Video:
       No Devices: "Fann ingen Google Cast-einingar"
       No Source: "Ingen kompatibel straum for Google Cast"
       Error: "Kunne ikkje strøyme videoen"
+      Error With Details: "Kunne ikkje strøyme videoen: {error}"
+      Untrusted Receiver: "Sertifikatet til mottakaren er ikkje tiltrudd. Bruk ein autentisert Google Cast-mottakar."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

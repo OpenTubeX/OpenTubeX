@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
+import android.net.wifi.WifiManager;
 import android.net.nsd.NsdServiceInfo;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -16,6 +17,14 @@ import java.util.concurrent.TimeUnit;
 /** Android NSD avoids the app UID's restricted network-interface enumeration. */
 final class CastDiscovery {
     static JSArray discover(Context context) throws Exception {
+        WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiManager.MulticastLock lock = wifi.createMulticastLock("OpenTubeX Cast discovery");
+        lock.acquire();
+        try { return discoverNsd(context); }
+        finally { lock.release(); }
+    }
+
+    private static JSArray discoverNsd(Context context) throws Exception {
         NsdManager nsd = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
         var found = new CopyOnWriteArrayList<NsdServiceInfo>();
         var started = new CompletableFuture<Void>();

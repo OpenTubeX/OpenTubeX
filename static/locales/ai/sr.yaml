@@ -1491,6 +1491,26 @@ Video:
       SubmitCategoryVote: Пошаљи глас за категорију
       CategoryVoteSuccess: Глас за категорију је послат.
     Google Cast:
+      Invalid Authentication: "Пријемник је послао неважећи одговор за потврду идентитета."
+      Authentication Declined: "Пријемник је одбио потврду идентитета."
+      Audio Only Receiver: "Пријемник подржава само емитовање звука."
+      Disconnected: "Пријемник се искључио."
+      Timeout: "Пријемник није одговорио."
+      Busy: "Други прозор већ емитује."
+      Not Authorized: "Активирајте овај прозор и покушајте поново."
+      Invalid Request: "Неважећи захтев за емитовање."
+      IPv4 Required: "Потребна је IPv4 веза."
+      Launch Failed: "Пријемник није могао да се покрене."
+      Load Failed: "Пријемник није могао да учита видео."
+      Cancelled: "Емитовање је отказано."
+      Private Not Authorized: "Приступ приватним медијима није одобрен."
+      Invalid Subtitles: "Неважећи титлови за емитовање."
+      Discovery Failed: "Пријемници нису могли да се пронађу."
+      Preparing Video: "Припрема видеа за емитовање…"
+      Connecting: "Повезивање са {device}…"
+      Starting Receiver: "Покретање Cast пријемника…"
+      Loading Video: "Учитавање видеа на пријемнику…"
+      Buffering: "Баферовање на {device}…"
       Allow Private Instance: "Дозволити овом емитовању да чита медије са приватне Invidious инстанце {instance}?"
       Cast: "Емитуј на Google Cast уређај"
       Connected: "Емитовање на {device}"
@@ -1501,6 +1521,8 @@ Video:
       No Devices: "Нису пронађени Google Cast уређаји"
       No Source: "Нема компатибилног тока за Google Cast"
       Error: "Видео није могуће емитовати"
+      Error With Details: "Видео није могуће емитовати: {error}"
+      Untrusted Receiver: "Сертификат пријемника није поуздан. Користите аутентификован Google Cast пријемник."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Преостало време уводног огласа: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'

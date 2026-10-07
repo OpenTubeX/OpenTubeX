@@ -61,8 +61,14 @@ public final class ChromecastPlugin extends Plugin {
                     }
                 });
                 call.resolve(new JSObject().put("address", transport.connect()));
-            } catch (Exception error) { cleanup(); call.reject("Unable to connect to Cast device", error); }
+            } catch (Exception error) { cleanup(); rejectTransport(call, "Unable to connect to Cast device", error); }
         });
+    }
+
+    private static void rejectTransport(PluginCall call, String message, Exception error) {
+        CastTransport.Failure failure = CastTransport.failure(error);
+        if (failure == null) call.reject(message, error);
+        else call.reject(failure.getMessage(), failure.code, error);
     }
 
     private boolean owns(PluginCall call) {
@@ -81,7 +87,7 @@ public final class ChromecastPlugin extends Plugin {
                 call.reject("Invalid Cast command"); return;
             }
             try { call.resolve(transport.send(namespace, destination, payload, call.getBoolean("wait", true))); }
-            catch (Exception error) { call.reject("Cast command failed", error); }
+            catch (Exception error) { rejectTransport(call, "Cast command failed", error); }
         });
     }
 
@@ -116,7 +122,7 @@ public final class ChromecastPlugin extends Plugin {
         mediaWorker.execute(() -> {
             CastMediaServer server = media;
             if (owns(call) && server != null) server.complete(call.getString("requestId"),
-                call.getBoolean("error", false) ? null : call.getString("body"));
+                call.getBoolean("error", false) ? null : call.getString("body"), call.getInt("hlsReadTimeout"));
             call.resolve();
         });
     }

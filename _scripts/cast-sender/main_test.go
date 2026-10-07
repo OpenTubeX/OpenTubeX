@@ -8,6 +8,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math/big"
 	"net"
@@ -17,6 +18,25 @@ import (
 	"testing"
 	"time"
 )
+
+func TestCastErrorMessagePreservesDiagnosticsAndAuthenticationCodes(t *testing.T) {
+	for _, scenario := range []struct {
+		err  error
+		code string
+	}{
+		{errUntrustedCastCertificate, "CAST_UNTRUSTED_CERTIFICATE"},
+		{errInvalidCastAuthentication, "CAST_INVALID_AUTHENTICATION"},
+		{errCastAuthenticationDeclined, "CAST_AUTHENTICATION_DECLINED"},
+		{errCastAudioOnly, "CAST_AUDIO_ONLY"},
+		{fmt.Errorf("Cast certificate is restricted to audio: unrelated diagnostic"), ""},
+	} {
+		err := fmt.Errorf("native details: %w", scenario.err)
+		message := castErrorMessage(err)
+		if message["event"] != "error" || message["error"] != err.Error() || message["code"] != scenario.code {
+			t.Fatalf("unexpected helper error message: %v", message)
+		}
+	}
+}
 
 func TestConnectRejectsUnauthenticatedReceiver(t *testing.T) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)

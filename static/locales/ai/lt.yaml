@@ -1811,6 +1811,26 @@ Video:
       SubmitCategoryVote: Pateikti balsą už kategoriją
       CategoryVoteSuccess: Balsas už kategoriją pateiktas.
     Google Cast:
+      Invalid Authentication: "Imtuvas atsiuntė neteisingą tapatybės patvirtinimo atsakymą."
+      Authentication Declined: "Imtuvas atsisakė patvirtinti tapatybę."
+      Audio Only Receiver: "Imtuvas palaiko tik garso perdavimą."
+      Disconnected: "Imtuvas atsijungė."
+      Timeout: "Imtuvas neatsakė."
+      Busy: "Kitas langas jau perduoda."
+      Not Authorized: "Suaktyvinkite šį langą ir bandykite dar kartą."
+      Invalid Request: "Neteisinga perdavimo užklausa."
+      IPv4 Required: "Reikalingas IPv4 ryšys."
+      Launch Failed: "Nepavyko paleisti imtuvo."
+      Load Failed: "Imtuvas negalėjo įkelti vaizdo įrašo."
+      Cancelled: "Perdavimas atšauktas."
+      Private Not Authorized: "Prieiga prie privačios medijos nebuvo patvirtinta."
+      Invalid Subtitles: "Neteisingi perdavimo subtitrai."
+      Discovery Failed: "Nepavyko ieškoti imtuvų."
+      Preparing Video: "Vaizdo įrašo paruošimas perdavimui…"
+      Connecting: "Jungiamasi prie {device}…"
+      Starting Receiver: "Paleidžiamas Cast imtuvas…"
+      Loading Video: "Vaizdo įrašas įkeliamas imtuve…"
+      Buffering: "Kaupiama buferyje įrenginyje {device}…"
       Allow Private Instance: "Leisti šiam perdavimui skaityti mediją iš privataus „Invidious“ egzemplioriaus {instance}?"
       Cast: "Perduoti į Google Cast įrenginį"
       Connected: "Perduodama į {device}"
@@ -1821,6 +1841,8 @@ Video:
       No Devices: "Google Cast įrenginių nerasta"
       No Source: "Nėra su Google Cast suderinamo srauto"
       Error: "Nepavyko transliuoti vaizdo įrašo"
+      Error With Details: "Nepavyko transliuoti vaizdo įrašo: {error}"
+      Untrusted Receiver: "Imtuvo sertifikatas nėra patikimas. Naudokite autentifikuotą Google Cast imtuvą."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

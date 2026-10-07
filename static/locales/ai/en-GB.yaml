@@ -1413,6 +1413,26 @@ Video:
       SubmitCategoryVote: Submit category vote
       CategoryVoteSuccess: Category vote submitted.
     Google Cast:
+      Invalid Authentication: "The receiver sent an invalid authentication response."
+      Authentication Declined: "The receiver declined authentication."
+      Audio Only Receiver: "The receiver only supports audio casting."
+      Disconnected: "Receiver disconnected."
+      Timeout: "Receiver did not respond."
+      Busy: "Another window is already casting."
+      Not Authorized: "Activate this window and try again."
+      Invalid Request: "Invalid casting request."
+      IPv4 Required: "An IPv4 connection is required."
+      Launch Failed: "Could not start the receiver."
+      Load Failed: "Receiver could not load the video."
+      Cancelled: "Casting was cancelled."
+      Private Not Authorized: "Private media access was not approved."
+      Invalid Subtitles: "Invalid casting subtitles."
+      Discovery Failed: "Could not discover receivers."
+      Preparing Video: "Preparing video for casting…"
+      Connecting: "Connecting to {device}…"
+      Starting Receiver: "Starting the Cast receiver…"
+      Loading Video: "Loading video on the receiver…"
+      Buffering: "Buffering on {device}…"
       Allow Private Instance: "Allow this cast to read media from the private Invidious instance {instance}?"
       Cast: "Cast to a Google Cast device"
       Connected: "Casting to {device}"
@@ -1423,6 +1443,8 @@ Video:
       No Devices: "No Google Cast devices found"
       No Source: "No compatible stream for Google Cast"
       Error: "Could not cast the video"
+      Error With Details: "Could not cast the video: {error}"
+      Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden

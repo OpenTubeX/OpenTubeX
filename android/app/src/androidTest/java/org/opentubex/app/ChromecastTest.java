@@ -90,6 +90,32 @@ public class ChromecastTest {
         }
     }
 
+    @Test public void discoveryReleasesMulticastLockAfterFailure() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Context failing = new android.content.ContextWrapper(context) {
+            @Override public Object getSystemService(String name) {
+                if (Context.NSD_SERVICE.equals(name)) {
+                    assertTrue("Hold multicast reception before browsing", wifiDump().contains("OpenTubeX Cast discovery"));
+                    throw new IllegalStateException("NSD fixture failed");
+                }
+                return super.getSystemService(name);
+            }
+        };
+        try { CastDiscovery.discover(failing); fail("NSD failure must propagate"); }
+        catch (IllegalStateException expected) { assertEquals("NSD fixture failed", expected.getMessage()); }
+        assertFalse("Release multicast reception after failure", wifiDump().contains("OpenTubeX Cast discovery"));
+    }
+
+    private static String wifiDump() {
+        try (var descriptor = InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("dumpsys wifi");
+             var input = new android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
+            var output = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            for (int count; (count = input.read(buffer)) != -1;) output.write(buffer, 0, count);
+            return output.toString(StandardCharsets.UTF_8.name());
+        } catch (Exception error) { throw new IllegalStateException(error); }
+    }
+
     @Test public void androidDiscoversCastServicesWithoutGooglePlayServices() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         NsdManager nsd = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
@@ -148,7 +174,7 @@ public class ChromecastTest {
         try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {
             assertEquals("application/dash+xml", event.getString("contentType"));
             assertEquals("<MPD/>", event.getString("body"));
-            relay.get().complete(event.getString("requestId"), "<MPD><Period/></MPD>");
+            relay.get().complete(event.getString("requestId"), "<MPD><Period/></MPD>", null);
         })) {
             relay.set(server);
             JSArray resources = new JSArray();
@@ -160,6 +186,27 @@ public class ChromecastTest {
             assertEquals("", fetch(server.origin() + "/wrong-token/0/media", 404));
             assertEquals("", fetch(server.origin() + "/test-token/0/other", 502));
         }
+    }
+
+    @Test public void senderPreservesNativeAuthenticationErrors() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File fixture = new File(context.getCacheDir(), "cast-error-fixture.sh");
+        try {
+            for (String code : java.util.List.of("CAST_UNTRUSTED_CERTIFICATE", "CAST_INVALID_AUTHENTICATION",
+                "CAST_AUTHENTICATION_DECLINED", "CAST_AUDIO_ONLY")) {
+                String script = "echo '{\"event\":\"error\",\"error\":\"Receiver identity verification failed\",\"code\":\"" + code + "\"}'\n";
+                java.nio.file.Files.write(fixture.toPath(), script.getBytes(StandardCharsets.UTF_8));
+                try (CastTransport sender = new CastTransport("/system/bin/sh", fixture.getAbsolutePath(), 0, event -> {})) {
+                    try { sender.connect(); fail("Authentication must reject"); }
+                    catch (Exception expected) {
+                        CastTransport.Failure failure = CastTransport.failure(expected);
+                        assertNotNull(failure);
+                        assertEquals(code, failure.code);
+                        assertEquals("Receiver identity verification failed", failure.getMessage());
+                    }
+                }
+            }
+        } finally { fixture.delete(); }
     }
 
     @Test public void rejectedControlDoesNotDisconnectTheNativeSender() throws Exception {
@@ -180,7 +227,7 @@ public class ChromecastTest {
                 sender.send(namespace, "transport", new JSObject().put("type", "LOAD")
                     .put("media", new JSObject().put("contentId", "http://media.test/video.mp4")), true);
                 try { sender.send(namespace, "transport", new JSObject().put("type", "SEEK"), true); fail("Receiver rejected the control"); }
-                catch (Exception expected) { assertTrue("Report the receiver rejection", expected.getMessage().contains("INVALID_REQUEST")); }
+                catch (Exception expected) { assertTrue("Report the receiver rejection", expected.getMessage().contains("INVALID_REQUEST")); assertEquals("CAST_INVALID_REQUEST", CastTransport.failure(expected).code); }
                 JSObject response = sender.send(namespace, "transport", new JSObject().put("type", "GET_STATUS"), true);
                 assertEquals("PLAYING", response.getJSONArray("status").getJSONObject(0).getString("playerState"));
             }
@@ -188,15 +235,17 @@ public class ChromecastTest {
     }
 
     @Test public void relayForwardsOnlyValidHlsReloadParametersAndPreservesSignedQuery() throws Exception {
+        LinkedBlockingQueue<Integer> timeouts = new LinkedBlockingQueue<>();
         LinkedBlockingQueue<String> requests = new LinkedBlockingQueue<>();
         AtomicReference<CastMediaServer> relay = new AtomicReference<>();
         okhttp3.OkHttpClient upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
             requests.add(chain.request().url().encodedPath() + "?" + chain.request().url().encodedQuery());
+            timeouts.add(chain.readTimeoutMillis());
             return new okhttp3.Response.Builder().request(chain.request()).protocol(okhttp3.Protocol.HTTP_1_1)
                 .code(200).message("OK").body(okhttp3.ResponseBody.create("#EXTM3U\n", okhttp3.MediaType.get("application/x-mpegurl"))).build();
         }).build();
         try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
-                 event -> relay.get().complete(event.getString("requestId"), event.getString("body")), upstream)) {
+                 event -> relay.get().complete(event.getString("requestId"), event.getString("body"), 360_000), upstream)) {
             relay.set(server);
             JSArray resources = new JSArray();
             resources.put(resource(0, "https://8.8.8.8/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", "application/x-mpegurl"));
@@ -206,13 +255,40 @@ public class ChromecastTest {
             server.register(resources);
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media", 200));
             assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=1", requests.poll(3, TimeUnit.SECONDS));
+            assertEquals("Unknown timing allows blocking headers", 0, (int) timeouts.poll(3, TimeUnit.SECONDS));
             assertEquals("#EXTM3U\n", fetch(server.origin() + "/test-token/0/media?_HLS_msn=123&_HLS_part=0&_HLS_skip=v2", 200));
             assertEquals("/live.m3u8?token=a%2fb&dup=a&dup=b&_HLS_msn=123&_HLS_part=0&_HLS_skip=v2", requests.poll(3, TimeUnit.SECONDS));
+            assertEquals("Use the manifest-derived blocking wait", 360_000, (int) timeouts.poll(3, TimeUnit.SECONDS));
             for (String query : new String[]{"token=changed", "_HLS_msn=1&_HLS_msn=2", "_HLS_msn=-1", "_HLS_skip=invalid"}) {
                 assertEquals("", fetch(server.origin() + "/test-token/0/media?" + query, 502));
             }
             fetch(server.origin() + "/test-token/1/segment.mp4?number=17&time=2500", 200);
             assertEquals("/segment.mp4?number=17&time=2500", requests.poll(3, TimeUnit.SECONDS));
+            assertEquals("Keep ordinary reads bounded", 30_000, (int) timeouts.poll(3, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test public void abandonedBlockingReloadCancelsItsUpstreamCall() throws Exception {
+        CountDownLatch started = new CountDownLatch(1);
+        CompletableFuture<Boolean> cancelled = new CompletableFuture<>();
+        var upstream = new okhttp3.OkHttpClient.Builder().addInterceptor(chain -> {
+            started.countDown();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
+            while (!chain.call().isCanceled() && System.nanoTime() < deadline) {
+                try { Thread.sleep(10); } catch (InterruptedException error) { Thread.currentThread().interrupt(); break; }
+            }
+            cancelled.complete(chain.call().isCanceled());
+            throw new java.io.IOException("Receiver abandoned reload");
+        }).build();
+        try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null, event -> {}, upstream)) {
+            JSArray resources = new JSArray();
+            resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
+            server.register(resources);
+            try (Socket receiver = new Socket("127.0.0.1", Integer.parseInt(server.origin().split(":")[2]))) {
+                receiver.getOutputStream().write("GET /test-token/0/media?_HLS_msn=100 HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                assertTrue(started.await(2, TimeUnit.SECONDS));
+            }
+            assertTrue("Abandoned reload must release its upstream request", cancelled.get(4, TimeUnit.SECONDS));
         }
     }
 
@@ -229,7 +305,7 @@ public class ChromecastTest {
             }).build();
             AtomicReference<CastMediaServer> relay = new AtomicReference<>();
             try (CastMediaServer server = new CastMediaServer("127.0.0.1", "127.0.0.1", "test-token", null,
-                event -> relay.get().complete(event.getString("requestId"), event.getString("body")), upstream)) {
+                event -> relay.get().complete(event.getString("requestId"), event.getString("body"), null), upstream)) {
                 relay.set(server);
                 JSArray resources = new JSArray();
                 resources.put(resource(0, "https://8.8.8.8/live.m3u8", "application/x-mpegurl"));
@@ -333,7 +409,7 @@ public class ChromecastTest {
             JSArray removals = new JSArray();
             removals.put(0);
             server.register(new JSArray(), removals);
-            server.complete(manifest.getString("requestId"), "<MPD/>");
+            server.complete(manifest.getString("requestId"), "<MPD/>", null);
             assertEquals("<MPD/>", response.get(3, TimeUnit.SECONDS));
             fetch(server.origin() + "/test-token/0/media", 404);
         }

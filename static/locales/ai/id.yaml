@@ -1441,6 +1441,26 @@ Video:
       SubmitCategoryVote: Kirim suara kategori
       CategoryVoteSuccess: Suara kategori terkirim.
     Google Cast:
+      Invalid Authentication: "Penerima mengirim respons autentikasi yang tidak valid."
+      Authentication Declined: "Penerima menolak autentikasi."
+      Audio Only Receiver: "Penerima hanya mendukung casting audio."
+      Disconnected: "Penerima terputus."
+      Timeout: "Penerima tidak merespons."
+      Busy: "Jendela lain sedang melakukan casting."
+      Not Authorized: "Aktifkan jendela ini dan coba lagi."
+      Invalid Request: "Permintaan casting tidak valid."
+      IPv4 Required: "Koneksi IPv4 diperlukan."
+      Launch Failed: "Tidak dapat memulai penerima."
+      Load Failed: "Penerima tidak dapat memuat video."
+      Cancelled: "Casting dibatalkan."
+      Private Not Authorized: "Akses media pribadi tidak disetujui."
+      Invalid Subtitles: "Subtitel casting tidak valid."
+      Discovery Failed: "Tidak dapat mencari penerima."
+      Preparing Video: "Menyiapkan video untuk transmisi…"
+      Connecting: "Menghubungkan ke {device}…"
+      Starting Receiver: "Memulai penerima Cast…"
+      Loading Video: "Memuat video di penerima…"
+      Buffering: "Menyangga di {device}…"
       Allow Private Instance: "Izinkan transmisi ini membaca media dari instans Invidious pribadi {instance}?"
       Cast: "Transmisikan ke perangkat Google Cast"
       Connected: "Mentransmisikan ke {device}"
@@ -1451,6 +1471,8 @@ Video:
       No Devices: "Tidak ditemukan perangkat Google Cast"
       No Source: "Tidak ada aliran yang kompatibel untuk Google Cast"
       Error: "Video tidak dapat ditransmisikan"
+      Error With Details: "Video tidak dapat ditransmisikan: {error}"
+      Untrusted Receiver: "Sertifikat penerima tidak tepercaya. Gunakan penerima Google Cast yang terautentikasi."
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'

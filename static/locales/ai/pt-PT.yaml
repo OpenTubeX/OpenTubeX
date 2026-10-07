@@ -1462,6 +1462,26 @@ Video:
       SubmitCategoryVote: Enviar voto de categoria
       CategoryVoteSuccess: Voto de categoria enviado.
     Google Cast:
+      Invalid Authentication: "O recetor enviou uma resposta de autenticação inválida."
+      Authentication Declined: "O recetor recusou a autenticação."
+      Audio Only Receiver: "O recetor apenas suporta transmissão de áudio."
+      Disconnected: "O recetor desligou-se."
+      Timeout: "O recetor não respondeu."
+      Busy: "Outra janela já está a transmitir."
+      Not Authorized: "Ative esta janela e tente novamente."
+      Invalid Request: "Pedido de transmissão inválido."
+      IPv4 Required: "É necessária uma ligação IPv4."
+      Launch Failed: "Não foi possível iniciar o recetor."
+      Load Failed: "O recetor não conseguiu carregar o vídeo."
+      Cancelled: "A transmissão foi cancelada."
+      Private Not Authorized: "O acesso a conteúdos privados não foi aprovado."
+      Invalid Subtitles: "Legendas de transmissão inválidas."
+      Discovery Failed: "Não foi possível procurar recetores."
+      Preparing Video: "A preparar o vídeo para transmissão…"
+      Connecting: "A ligar a {device}…"
+      Starting Receiver: "A iniciar o recetor Cast…"
+      Loading Video: "A carregar o vídeo no recetor…"
+      Buffering: "A colocar em memória intermédia em {device}…"
       Allow Private Instance: "Permitir que esta transmissão leia conteúdos multimédia da instância privada do Invidious {instance}?"
       Cast: "Transmitir para um dispositivo Google Cast"
       Connected: "A transmitir para {device}"
@@ -1472,6 +1492,8 @@ Video:
       No Devices: "Nenhum dispositivo Google Cast encontrado"
       No Source: "Nenhum fluxo compatível com Google Cast"
       Error: "Não foi possível transmitir o vídeo"
+      Error With Details: "Não foi possível transmitir o vídeo: {error}"
+      Untrusted Receiver: "O certificado do recetor não é de confiança. Usa um recetor Google Cast autenticado."
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos

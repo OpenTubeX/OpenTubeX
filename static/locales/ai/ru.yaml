@@ -1440,6 +1440,26 @@ Video:
       SubmitCategoryVote: Отправить голос за категорию
       CategoryVoteSuccess: Голос за категорию отправлен.
     Google Cast:
+      Invalid Authentication: "Приёмник отправил недопустимый ответ аутентификации."
+      Authentication Declined: "Приёмник отказался от аутентификации."
+      Audio Only Receiver: "Приёмник поддерживает только трансляцию аудио."
+      Disconnected: "Соединение с приёмником потеряно."
+      Timeout: "Приёмник не ответил."
+      Busy: "Другое окно уже транслирует."
+      Not Authorized: "Активируйте это окно и повторите попытку."
+      Invalid Request: "Недопустимый запрос трансляции."
+      IPv4 Required: "Требуется соединение IPv4."
+      Launch Failed: "Не удалось запустить приёмник."
+      Load Failed: "Приёмник не смог загрузить видео."
+      Cancelled: "Трансляция отменена."
+      Private Not Authorized: "Доступ к частным медиа не одобрен."
+      Invalid Subtitles: "Недопустимые субтитры трансляции."
+      Discovery Failed: "Не удалось найти приёмники."
+      Preparing Video: "Подготовка видео к трансляции…"
+      Connecting: "Подключение к {device}…"
+      Starting Receiver: "Запуск приёмника Cast…"
+      Loading Video: "Загрузка видео на приёмнике…"
+      Buffering: "Буферизация на {device}…"
       Allow Private Instance: "Разрешить этой трансляции читать медиа из частного экземпляра Invidious {instance}?"
       Cast: "Транслировать на устройство Google Cast"
       Connected: "Трансляция на {device}"
@@ -1450,6 +1470,8 @@ Video:
       No Devices: "Устройства Google Cast не найдены"
       No Source: "Нет совместимого потока для Google Cast"
       Error: "Не удалось транслировать видео"
+      Error With Details: "Не удалось транслировать видео: {error}"
+      Untrusted Receiver: "Сертификат приёмника не является доверенным. Используйте аутентифицированный приёмник Google Cast."
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто

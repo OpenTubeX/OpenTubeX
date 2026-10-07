@@ -36,7 +36,9 @@ final class CastMediaServer implements AutoCloseable {
     private final String castId;
     private final Consumer<JSObject> manifests;
     private final Map<Integer, JSObject> resources = new ConcurrentHashMap<>();
-    private final Map<String, CompletableFuture<String>> pending = new ConcurrentHashMap<>();
+    private record Manifest(int resourceId, CompletableFuture<String> body) {}
+    private final Map<String, Manifest> pending = new ConcurrentHashMap<>();
+    private final Map<Integer, Integer> hlsReadTimeouts = new ConcurrentHashMap<>();
     private final Set<Socket> sockets = ConcurrentHashMap.newKeySet();
     private final Semaphore slots = new Semaphore(MAX_CONNECTIONS);
     private final ExecutorService workers = Executors.newFixedThreadPool(MAX_CONNECTIONS);
@@ -107,13 +109,17 @@ final class CastMediaServer implements AutoCloseable {
             }
             additions.put(id, resource);
         }
-        removed.forEach(resources::remove);
+        removed.forEach(id -> { resources.remove(id); hlsReadTimeouts.remove(id); });
         resources.putAll(additions);
     }
 
-    void complete(String id, String body) {
-        CompletableFuture<String> future = id == null ? null : pending.remove(id);
-        if (future != null) {
+    synchronized void complete(String id, String body, Integer hlsReadTimeout) {
+        Manifest manifest = id == null ? null : pending.remove(id);
+        if (manifest != null) {
+            CompletableFuture<String> future = manifest.body();
+            if (body != null && hlsReadTimeout != null && resources.containsKey(manifest.resourceId())) {
+                hlsReadTimeouts.put(manifest.resourceId(), Math.max(0, hlsReadTimeout));
+            }
             if (body == null || body.length() > 8_000_000) future.completeExceptionally(new IllegalArgumentException("Invalid Cast manifest"));
             else future.complete(body);
         }
@@ -185,6 +191,22 @@ final class CastMediaServer implements AutoCloseable {
         return builder.build();
     }
 
+    private static Thread watchReceiver(Socket socket, okhttp3.Call call, java.util.concurrent.atomic.AtomicBoolean finished) throws Exception {
+        socket.setSoTimeout(1000);
+        Thread watcher = new Thread(() -> {
+            try {
+                while (!finished.get()) {
+                    try {
+                        if (socket.getInputStream().read() == -1) { call.cancel(); return; }
+                    } catch (java.net.SocketTimeoutException expected) { /* Check request completion. */ }
+                }
+            } catch (Exception error) { if (!finished.get()) call.cancel(); }
+        }, "OpenTubeX Cast blocking reload");
+        watcher.setDaemon(true);
+        watcher.start();
+        return watcher;
+    }
+
     private void serve(Socket socket) throws Exception {
         socket.setSoTimeout(10_000);
         InputStream input = socket.getInputStream();
@@ -241,7 +263,17 @@ final class CastMediaServer implements AutoCloseable {
                 Request.Builder upstream = new Request.Builder().url(target).tag(HttpUrl.class, original).method(request[0], null)
                     .header("Accept-Encoding", "identity");
                 for (String line : lines) if (line.regionMatches(true, 0, "Range:", 0, 6)) upstream.header("Range", line.substring(6).trim());
-                try (Response response = client.newCall(upstream.build()).execute()) {
+                boolean blocking = hls && request[0].equals("GET") && !candidate.optBoolean("template") &&
+                    target.queryParameter("_HLS_msn") != null && target.queryParameter("_HLS_msn").matches("[0-9]{1,20}");
+                // Unknown timing must allow the server to wait for a future segment.
+                OkHttpClient requestClient = blocking ? client.newBuilder()
+                    .readTimeout(hlsReadTimeouts.getOrDefault(id, 0), TimeUnit.MILLISECONDS).build() : client;
+                var call = requestClient.newCall(upstream.build());
+                var finished = new java.util.concurrent.atomic.AtomicBoolean();
+                Thread watcher = blocking ? watchReceiver(socket, call, finished) : null;
+                try (Response response = call.execute()) {
+                    // Only the blocking header wait is extended, not body streaming.
+                    if (response.body() != null) response.body().source().timeout().timeout(30, TimeUnit.SECONDS);
                     if (!response.isSuccessful() && attempt + 1 < candidates.length()) continue;
                     if (type.isEmpty()) type = response.header("Content-Type", "application/octet-stream").split(";", 2)[0].trim().toLowerCase(java.util.Locale.ROOT);
                     String finalUrl = response.request().url().toString();
@@ -265,6 +297,9 @@ final class CastMediaServer implements AutoCloseable {
                         for (int count; (count = body.read(buffer)) != -1;) output.write(buffer, 0, count);
                     }
                     return;
+                } finally {
+                    finished.set(true);
+                    if (watcher != null) watcher.interrupt();
                 }
             } catch (Exception error) { if (attempt + 1 == candidates.length()) throw error; }
         }
@@ -273,7 +308,7 @@ final class CastMediaServer implements AutoCloseable {
     private String rewrite(int resourceId, String body, String url, String type) throws Exception {
         String id = UUID.randomUUID().toString();
         CompletableFuture<String> future = new CompletableFuture<>();
-        pending.put(id, future);
+        pending.put(id, new Manifest(resourceId, future));
         try {
             manifests.accept(new JSObject().put("castId", castId).put("requestId", id).put("resourceId", resourceId)
                 .put("body", body).put("url", url).put("contentType", type));
@@ -293,7 +328,7 @@ final class CastMediaServer implements AutoCloseable {
     @Override public void close() {
         try { server.close(); } catch (Exception ignored) {}
         for (Socket socket : sockets) try { socket.close(); } catch (Exception ignored) {}
-        pending.values().forEach(future -> future.completeExceptionally(new IllegalStateException("Cast relay closed")));
+        pending.values().forEach(manifest -> manifest.body().completeExceptionally(new IllegalStateException("Cast relay closed")));
         pending.clear();
         workers.shutdownNow();
         client.dispatcher().cancelAll();

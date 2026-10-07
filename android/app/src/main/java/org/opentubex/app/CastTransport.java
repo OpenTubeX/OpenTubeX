@@ -25,6 +25,18 @@ final class CastTransport implements AutoCloseable {
     private final Consumer<JSObject> events;
     private final ScheduledExecutorService heartbeat = Executors.newSingleThreadScheduledExecutor();
     private volatile boolean closed;
+    private Failure closeError = new Failure("Cast device disconnected", "CAST_DISCONNECTED");
+    static final class Failure extends IllegalStateException {
+        final String code;
+        Failure(String message, String code) { super(message); this.code = code; }
+    }
+    static Failure failure(Exception error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof Failure failure) return failure;
+            if (cause instanceof java.util.concurrent.TimeoutException) return new Failure("Cast device did not respond", "CAST_TIMEOUT");
+        }
+        return null;
+    }
     private String localAddress;
     private volatile String mediaDestination;
     private volatile int mediaSessionId = -1;
@@ -41,6 +53,14 @@ final class CastTransport implements AutoCloseable {
                 for (String line; (line = lines.readLine()) != null;) {
                     if (line.length() > 1_100_000) throw new IllegalArgumentException("Cast message too large");
                     JSObject message = new JSObject(line);
+                    if ("error".equals(message.getString("event"))) {
+                        String code = message.getString("code", "");
+                        if (java.util.Set.of("CAST_UNTRUSTED_CERTIFICATE", "CAST_INVALID_AUTHENTICATION",
+                            "CAST_AUTHENTICATION_DECLINED", "CAST_AUDIO_ONLY").contains(code)) {
+                            closeError = new Failure(message.getString("error", "Cast authentication failed"), code);
+                        }
+                        close(); return;
+                    }
                     if ("connected".equals(message.getString("event"))) {
                         localAddress = message.getString("address");
                         connected.complete(localAddress);
@@ -68,7 +88,12 @@ final class CastTransport implements AutoCloseable {
                         pending.remove(requestId);
                         CompletableFuture<JSObject> waiting = request.response();
                         if (java.util.Set.of("INVALID_REQUEST", "LOAD_FAILED", "LAUNCH_ERROR").contains(payload.optString("type"))) {
-                            waiting.completeExceptionally(new IllegalStateException("Cast " + payload.optString("type")));
+                            String code = switch (payload.optString("type")) {
+                                case "LOAD_FAILED" -> "CAST_LOAD_FAILED";
+                                case "LAUNCH_ERROR" -> "CAST_LAUNCH_FAILED";
+                                default -> "CAST_INVALID_REQUEST";
+                            };
+                            waiting.completeExceptionally(new Failure("Cast " + payload.optString("type"), code));
                         } else waiting.complete(payload);
                     }
                 }
@@ -99,7 +124,7 @@ final class CastTransport implements AutoCloseable {
         }
         CompletableFuture<JSObject> response = new CompletableFuture<>();
         synchronized (this) {
-            if (closed) throw new IllegalStateException("Cast device disconnected");
+            if (closed) throw closeError;
             if (wait) pending.put(id, new Pending(namespace, response));
             commands.write(new JSObject().put("id", id).put("namespace", namespace).put("destination", destination).put("payload", payload) + "\n");
             commands.flush();
@@ -120,8 +145,8 @@ final class CastTransport implements AutoCloseable {
         closed = true;
         heartbeat.shutdownNow();
         process.destroy();
-        connected.completeExceptionally(new IllegalStateException("Cast device disconnected"));
-        pending.values().forEach(request -> request.response().completeExceptionally(new IllegalStateException("Cast device disconnected")));
+        connected.completeExceptionally(closeError);
+        pending.values().forEach(request -> request.response().completeExceptionally(closeError));
         pending.clear();
         events.accept(new JSObject().put("event", "closed"));
     }

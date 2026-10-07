@@ -1474,6 +1474,26 @@ Video:
       SubmitCategoryVote: Enviar voto de categoría
       CategoryVoteSuccess: Voto de categoría enviado.
     Google Cast:
+      Invalid Authentication: "O receptor enviou unha resposta de autenticación non válida."
+      Authentication Declined: "O receptor rexeitou a autenticación."
+      Audio Only Receiver: "O receptor só admite a transmisión de audio."
+      Disconnected: "O receptor desconectouse."
+      Timeout: "O receptor non respondeu."
+      Busy: "Outra xanela xa está a transmitir."
+      Not Authorized: "Activa esta xanela e téntao de novo."
+      Invalid Request: "Solicitude de transmisión non válida."
+      IPv4 Required: "Precísase unha conexión IPv4."
+      Launch Failed: "Non se puido iniciar o receptor."
+      Load Failed: "O receptor non puido cargar o vídeo."
+      Cancelled: "Cancelouse a transmisión."
+      Private Not Authorized: "Non se aprobou o acceso a contido privado."
+      Invalid Subtitles: "Subtítulos de transmisión non válidos."
+      Discovery Failed: "Non se puideron buscar receptores."
+      Preparing Video: "Preparando o vídeo para transmitir…"
+      Connecting: "Conectando con {device}…"
+      Starting Receiver: "Iniciando o receptor Cast…"
+      Loading Video: "Cargando o vídeo no receptor…"
+      Buffering: "Almacenando no búfer de {device}…"
       Allow Private Instance: "Permitir que esta transmisión lea contido multimedia da instancia privada de Invidious {instance}?"
       Cast: "Transmitir a un dispositivo Google Cast"
       Connected: "Transmitindo a {device}"
@@ -1484,6 +1504,8 @@ Video:
       No Devices: "Non se atoparon dispositivos Google Cast"
       No Source: "Non hai un fluxo compatible con Google Cast"
       Error: "Non se puido transmitir o vídeo"
+      Error With Details: "Non se puido transmitir o vídeo: {error}"
+      Untrusted Receiver: "O certificado do receptor non é de confianza. Usa un receptor Google Cast autenticado."
   Station: Estación
   Playlist:
     Unavailable videos are hidden: 1 vídeo non dispoñible está oculto | {count} vídeos non dispoñibles están ocultos

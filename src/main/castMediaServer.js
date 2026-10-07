@@ -358,7 +358,7 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
   return {
     server,
     async listen(localAddress) {
-      if (isIP(localAddress) !== 4) throw new Error('Cast requires an IPv4 network interface')
+      if (isIP(localAddress) !== 4) throw Object.assign(new Error('Cast requires an IPv4 network interface'), { code: 'CAST_IPV4_REQUIRED' })
       await new Promise((resolve, reject) => {
         server.once('error', reject)
         server.listen(0, localAddress, () => { server.removeListener('error', reject); resolve() })

@@ -1478,6 +1478,26 @@ Video:
       SubmitCategoryVote: Categoriestem versturen
       CategoryVoteSuccess: Categoriestem verstuurd.
     Google Cast:
+      Invalid Authentication: "De ontvanger stuurde een ongeldig authenticatieantwoord."
+      Authentication Declined: "De ontvanger weigerde authenticatie."
+      Audio Only Receiver: "De ontvanger ondersteunt alleen het casten van audio."
+      Disconnected: "De ontvanger is losgekoppeld."
+      Timeout: "De ontvanger reageerde niet."
+      Busy: "Een ander venster cast al."
+      Not Authorized: "Activeer dit venster en probeer opnieuw."
+      Invalid Request: "Ongeldig castverzoek."
+      IPv4 Required: "Een IPv4-verbinding is vereist."
+      Launch Failed: "De ontvanger kon niet worden gestart."
+      Load Failed: "De ontvanger kon de video niet laden."
+      Cancelled: "Het casten is geannuleerd."
+      Private Not Authorized: "Toegang tot privémedia is niet goedgekeurd."
+      Invalid Subtitles: "Ongeldige ondertitels voor casting."
+      Discovery Failed: "Ontvangers konden niet worden gezocht."
+      Preparing Video: "Video voorbereiden voor casten…"
+      Connecting: "Verbinden met {device}…"
+      Starting Receiver: "Cast-ontvanger starten…"
+      Loading Video: "Video laden op de ontvanger…"
+      Buffering: "Bufferen op {device}…"
       Allow Private Instance: "Deze cast toestaan media te lezen van de privé-Invidious-instantie {instance}?"
       Cast: "Casten naar een Google Cast-apparaat"
       Connected: "Casten naar {device}"
@@ -1488,6 +1508,8 @@ Video:
       No Devices: "Geen Google Cast-apparaten gevonden"
       No Source: "Geen compatibele stream voor Google Cast"
       Error: "Kan de video niet casten"
+      Error With Details: "Kan de video niet casten: {error}"
+      Untrusted Receiver: "Het certificaat van de ontvanger wordt niet vertrouwd. Gebruik een geauthenticeerde Google Cast-ontvanger."
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
