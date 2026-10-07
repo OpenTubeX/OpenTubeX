@@ -2279,12 +2279,12 @@ test('uses configured playback cookies for external streams', async ({ app, page
   }
 })
 
-test('uses only format cookies for browser-authenticated external streams', async ({ app, page }) => {
+test('decodes and deduplicates format cookies for browser-authenticated external streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
   const media = await readFile(DEMO_MEDIA_PATH)
   const server = createServer((request, response) => {
-    if (request.headers.cookie !== 'account_session=test-token') {
+    if (request.headers.cookie !== 'account_session=test-token==; chain_token=test/value=') {
       response.writeHead(403).end()
       return
     }
@@ -2302,14 +2302,14 @@ test('uses only format cookies for browser-authenticated external streams', asyn
     const streamUrl = `http://127.0.0.1:${server.address().port}/video.webm`
     const response = JSON.stringify({
       title: 'Browser authenticated stream',
-      formats: [{
-        format_id: '360',
-        url: streamUrl,
+      formats: ['360', '720'].map(formatId => ({
+        format_id: formatId,
+        url: `${streamUrl}?format=${formatId}`,
         protocol: 'http',
         ext: 'webm',
-        height: 360,
-        cookies: 'account_session=test-token; Domain=127.0.0.1; Path=/'
-      }]
+        height: Number(formatId),
+        cookies: 'account_session="test-token=="; Domain=127.0.0.1; Path=/; chain_token="test\\057value\\075"; Domain=127.0.0.1; Path=/'
+      }))
     })
     await writeFile(executable, [
       '#!/bin/sh',

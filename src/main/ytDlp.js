@@ -151,7 +151,14 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         for (const part of format.cookies.split('; ')) {
           const separator = part.indexOf('=')
           const name = separator === -1 ? part : part.slice(0, separator)
-          const value = separator === -1 ? '' : part.slice(separator + 1)
+          const rawValue = separator === -1 ? '' : part.slice(separator + 1)
+          // Python's cookie serializer quotes values containing characters such
+          // as '=' and can escape characters with three-digit octal sequences.
+          // Cookie request headers need the original value, as in its cookie jar.
+          const value = rawValue.startsWith('"') && rawValue.endsWith('"')
+            ? rawValue.slice(1, -1).replaceAll(/\\(?:([0-3][0-7]{2})|([\s\S]))/g,
+                (_match, octal, character) => octal ? String.fromCharCode(parseInt(octal, 8)) : character)
+            : rawValue
           if (name === 'Domain' || name === 'Path' || name === 'Expires' || name === 'Secure' || name === 'Version') {
             if (cookie === null) continue
             const domain = value.replace(/^\./, '').toLowerCase()
@@ -178,7 +185,11 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         return entries
       })
     : []
-  const cookies = [...cookieFileEntries, ...formatEntries]
+  // Multiple formats often share the same cookies. Match a cookie jar's
+  // identity rules rather than repeating those cookies in the request header.
+  const cookies = [...new Map([...cookieFileEntries, ...formatEntries].map(cookie => [
+    JSON.stringify([cookie.domain, cookie.path, cookie.name]), cookie
+  ])).values()]
 
   const existing = externalStreamCookies.get(webContents) ?? new Map()
   for (const host of hosts) existing.set(host, cookies)
