@@ -120,6 +120,9 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
         window.Capacitor.nativePromise = window.__themeSyncNativePromise
         delete window.__themeSyncNativePromise
       }
+      if (saved.settings.syncServerAutoSync) {
+        await store.dispatch('startSyncServerAutoSync')
+      }
     }, saved)
     await page.unroute('https://theme-sync.example/**', routeHandler)
   }
