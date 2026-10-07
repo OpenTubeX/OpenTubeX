@@ -559,7 +559,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
-    Show DLNA Cast Button: "Vis DLNA-castknap"
+    Enable DLNA Casting: "Aktivér DLNA-casting"
     Skip Unavailable Playlist Videos: "Spring utilgængelige videoer over i afspilningslister"
     Lights Off: Sluk lyset
     Show Lights Off Toggle: Vis kontakt til at slukke lyset
@@ -663,7 +663,7 @@ Settings:
     Concurrent Preloads: "Samtidige forudindlæsninger"
     Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
     Swipe Left or Right to Seek in Fullscreen: Stryg til venstre eller højre for at spole i fuld skærm
-    Show Google Cast Button: "Vis Google Cast-knap"
+    Enable Google Cast: "Aktivér Google Cast"
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1339,6 +1339,7 @@ Video:
   Sponsor Block category:
     hook: Introduktion/hilsen
   Player:
+    Cast: "Cast"
     Music Mode: "Musiktilstand"
     Music Mode Description: "Afspil videoer ved 1×, og start nye videoer fra begyndelsen i denne fane. Dine gemte standardindstillinger for afspilning forbliver uændrede."
     DLNA:

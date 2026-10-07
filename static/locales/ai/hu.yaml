@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
-    Show DLNA Cast Button: "DLNA-átküldés gomb megjelenítése"
+    Enable DLNA Casting: "DLNA-átküldés engedélyezése"
     Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
     Lights Off: Fények lekapcsolása
     Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Egyidejű előtöltések"
     Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
     Swipe Left or Right to Seek in Fullscreen: Húzás balra vagy jobbra a tekeréshez teljes képernyőn
-    Show Google Cast Button: "Google Cast gomb megjelenítése"
+    Enable Google Cast: "Google Cast engedélyezése"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1275,6 +1275,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
+    Cast: "Átküldés"
     Music Mode: "Zenei mód"
     Music Mode Description: "A videók lejátszása 1× sebességgel, az új videók indítása az elejéről ezen a lapon. A mentett alapértelmezett lejátszási beállítások változatlanok maradnak."
     DLNA:

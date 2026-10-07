@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
-    Show DLNA Cast Button: "DLNA yayım düyməsini göstər"
+    Enable DLNA Casting: "DLNA yayımını aktivləşdir"
     Skip Unavailable Playlist Videos: "Pleylistdə əlçatan olmayan videoları keç"
     Lights Off: İşıqları söndür
     Show Lights Off Toggle: İşıqları söndürmə keçidini göstər
@@ -641,7 +641,7 @@ Settings:
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
     Ignore System Rotation Lock for Fullscreen: Tam ekran üçün sistemin fırlanma kilidini nəzərə alma
     Swipe Left or Right to Seek in Fullscreen: Tam ekranda irəli və ya geri keçmək üçün sola və ya sağa sürüşdürün
-    Show Google Cast Button: "Google Cast düyməsini göstər"
+    Enable Google Cast: "Google Cast aktivləşdir"
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1287,6 +1287,7 @@ Video:
     music offtopic: Musiqisiz hissə
     filler: Mövzudan kənar söhbətlər
   Player:
+    Cast: "Yayımla"
     Music Mode: "Musiqi rejimi"
     Music Mode Description: "Bu vərəqdə videoları 1× sürətlə oynadın və yeni videoları əvvəldən başladın. Saxlanmış standart oxutma parametrləriniz dəyişmir."
     DLNA:

@@ -531,7 +531,7 @@ Settings:
         Destructive pressed: Destructive pressed
         Text and icons on destructive actions: Text and icons on destructive actions
   Player Settings:
-    Show DLNA Cast Button: "Show DLNA cast button"
+    Enable DLNA Casting: "Enable DLNA casting"
     Skip Unavailable Playlist Videos: "Skip Unavailable Playlist Videos"
     Lights Off: Lights Off
     Show Lights Off Toggle: Show Lights Off Toggle
@@ -626,7 +626,7 @@ Settings:
     Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
-    Show Google Cast Button: "Show Google Cast button"
+    Enable Google Cast: "Enable Google Cast"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1255,6 +1255,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Live chat replay is enabled.  Chat messages will appear here as the video plays.
   Premiere started: Premiere in progress. Started {timeAgo}
   Player:
+    Cast: "Cast"
     Music Mode: "Music Mode"
     Music Mode Description: "Play videos at 1× and start new videos from the beginning in this tab. Your saved playback defaults stay unchanged."
     DLNA:

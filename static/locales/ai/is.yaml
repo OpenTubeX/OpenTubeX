@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
-    Show DLNA Cast Button: "Sýna DLNA-útsendingarhnapp"
+    Enable DLNA Casting: "Virkja DLNA-streymi"
     Skip Unavailable Playlist Videos: "Sleppa óaðgengilegum myndskeiðum í spilunarlistum"
     Lights Off: Slökkva ljósin
     Show Lights Off Toggle: Sýna rofa til að slökkva ljósin
@@ -643,7 +643,7 @@ Settings:
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
     Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
-    Show Google Cast Button: "Sýna Google Cast-hnapp"
+    Enable Google Cast: "Virkja Google Cast"
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.
@@ -1293,6 +1293,7 @@ Video:
     music offtopic: Ekki tónlist
     filler: Útúrdúrar
   Player:
+    Cast: "Streyma"
     Music Mode: "Tónlistarhamur"
     Music Mode Description: "Spilaðu myndskeið á 1× hraða og byrjaðu ný myndskeið frá upphafi á þessum flipa. Vistaðar sjálfgefnar spilunarstillingar haldast óbreyttar."
     DLNA:

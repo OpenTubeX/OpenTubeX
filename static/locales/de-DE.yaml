@@ -869,7 +869,7 @@ Settings:
     Max Video Playback Rate: Maximale Wiedergabegeschwindigkeit
     Skip Silence: Stille überspringen
     Show Skip Silence Toggle: Schalter „Stille überspringen“ anzeigen
-    Show DLNA Cast Button: DLNA-Cast-Schaltfläche anzeigen
+    Enable DLNA Casting: "DLNA-Casting aktivieren"
     Enable Skip Silence by Default: „Stille überspringen“ standardmäßig aktivieren
     Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
     Screenshot:
@@ -952,7 +952,7 @@ Settings:
     Parallel Segment Loading: Paralleles Laden von Segmenten
     Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
     Swipe Left or Right to Seek in Fullscreen: Zum Spulen im Vollbild nach links oder rechts wischen
-    Show Google Cast Button: "Google-Cast-Schaltfläche anzeigen"
+    Enable Google Cast: "Google Cast aktivieren"
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -1918,6 +1918,7 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    Cast: "Übertragen"
     Music Mode: Musikmodus
     Music Mode Description: Videos in diesem Tab mit 1× abspielen und neue Videos von Anfang an starten. Deine gespeicherten Wiedergabeeinstellungen bleiben unverändert.
     DLNA:

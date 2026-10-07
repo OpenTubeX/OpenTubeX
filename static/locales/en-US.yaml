@@ -1059,7 +1059,7 @@ Settings:
     Remember Volume: Remember Volume
     Skip Silence: Skip Silence
     Show Skip Silence Toggle: Show Skip Silence Toggle
-    Show DLNA Cast Button: Show DLNA Cast Button
+    Enable DLNA Casting: "Enable DLNA casting"
     Enable Skip Silence by Default: Enable Skip Silence by Default
     Enable Video Zoom: Enable Video Zoom
     Continue Playback When Screen Is Locked: Continue playback when the screen is locked
@@ -1128,7 +1128,7 @@ Settings:
         Empty File Name: Empty File Name
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
     Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
-    Show Google Cast Button: "Show Google Cast button"
+    Enable Google Cast: "Enable Google Cast"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -2229,6 +2229,7 @@ Video:
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
   Player:
+    Cast: "Cast"
     Music Mode: Music Mode
     Music Mode Description: Play videos at 1× and start new videos from the beginning in this tab. Your saved playback defaults stay unchanged.
     DLNA:

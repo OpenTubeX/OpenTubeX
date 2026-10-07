@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Nedtryckt destruktiv åtgärd
         Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
   Player Settings:
-    Show DLNA Cast Button: "Visa DLNA-castknapp"
+    Enable DLNA Casting: "Aktivera DLNA-casting"
     Skip Unavailable Playlist Videos: "Hoppa över otillgängliga videor i spellistor"
     Lights Off: Släck ljuset
     Show Lights Off Toggle: Visa reglage för att släcka ljuset
@@ -641,7 +641,7 @@ Settings:
     Concurrent Preloads: "Samtidiga förinläsningar"
     Ignore System Rotation Lock for Fullscreen: Ignorera systemets rotationslås för helskärm
     Swipe Left or Right to Seek in Fullscreen: Svep åt vänster eller höger för att spola i helskärm
-    Show Google Cast Button: "Visa Google Cast-knapp"
+    Enable Google Cast: "Aktivera Google Cast"
   Channel Settings:
     Channel Settings: Kanalinställningar
     Channel Settings Description: Kom ihåg inställningarna du väljer när du tittar för varje enskild kanal och använd dem nästa gång du tittar på en av kanalens videor.
@@ -1285,6 +1285,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
+    Cast: "Casta"
     Music Mode: "Musikläge"
     Music Mode Description: "Spela upp videor i 1× hastighet och starta nya videor från början på den här fliken. Dina sparade standardinställningar för uppspelning förblir oförändrade."
     DLNA:

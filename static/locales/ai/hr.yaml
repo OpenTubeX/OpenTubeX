@@ -546,7 +546,7 @@ Settings:
         Destructive pressed: Pritisnuta destruktivna radnja
         Text and icons on destructive actions: Tekst i ikone na destruktivnim radnjama
   Player Settings:
-    Show DLNA Cast Button: "Prikaži gumb za DLNA emitiranje"
+    Enable DLNA Casting: "Omogući DLNA emitiranje"
     Skip Unavailable Playlist Videos: "Preskoči nedostupne videozapise na popisima za reprodukciju"
     Lights Off: Ugasi svjetla
     Show Lights Off Toggle: Prikaži prekidač za gašenje svjetala
@@ -641,7 +641,7 @@ Settings:
     Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
     Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
-    Show Google Cast Button: "Prikaži gumb Google Cast"
+    Enable Google Cast: "Omogući Google Cast"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1292,6 +1292,7 @@ Video:
   Sponsor Block category short:
     filler: Digresije
   Player:
+    Cast: "Emitiraj"
     Music Mode: "Glazbeni način"
     Music Mode Description: "Reproducirajte videozapise brzinom 1× i pokrenite nove videozapise od početka u ovoj kartici. Vaše spremljene zadane postavke reprodukcije ostaju nepromijenjene."
     DLNA:

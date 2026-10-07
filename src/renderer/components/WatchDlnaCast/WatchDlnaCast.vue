@@ -1,24 +1,11 @@
 <template>
-  <FtIconButton
-    ref="button"
-    class="dlnaCastControl shaka-no-propagation"
-    :title="castId ? `${t('Video.Player.DLNA.Cast')} (${deviceName})` : t('Video.Player.DLNA.Cast')"
-    :icon="['fas', 'cast']"
-    :aria-pressed="Boolean(castId)"
-    :dropdown-options="options"
-    :force-dropdown="true"
-    :disabled="disabled"
-    dropdown-position-x="right"
-    @dropdown-open="refreshDevices"
-    @click="handleChoice"
-  />
+  <slot />
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast } from '../../helpers/utils'
 import { dlnaCast, retainIosMediaSources } from '../../helpers/player/dlnaCast'
 import { selectDlnaSource, selectDlnaTracks } from '../../helpers/player/dlnaSource'
@@ -32,21 +19,21 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   getPlayer: { type: Function, required: true }
 })
-const emit = defineEmits(['casting-change'])
+const emit = defineEmits(['casting-change', 'close-menu'])
 
 const { t } = useI18n()
 const store = useStore()
 const mobileAuthorization = () => process.env.IS_CAPACITOR && store.getters.getCurrentInvidiousInstanceAuthorization
   ? { authorization: { url: store.getters.getCurrentInvidiousInstanceUrl, value: store.getters.getCurrentInvidiousInstanceAuthorization } }
   : {}
-const button = useTemplateRef('button')
 const devices = ref([])
 const loading = ref(false)
 const busy = ref(false)
 const castId = ref(null)
 watch(() => busy.value || Boolean(castId.value), active => emit('casting-change', active), { flush: 'sync' })
-watch(() => props.disabled, disabled => { if (disabled) button.value?.hideDropdown() })
+watch(() => props.disabled, disabled => { if (disabled) emit('close-menu') })
 const deviceName = ref('')
+const menuTitle = computed(() => castId.value ? `${t('Video.Player.DLNA.Cast')} (${deviceName.value})` : t('Video.Player.DLNA.Cast'))
 let disposed = false
 let resumeLocalPlayback = false
 let castPayload = null
@@ -175,7 +162,7 @@ async function handleChoice(choice) {
     castId.value = result.castId
     deviceName.value = result.deviceName
     props.getPlayer()?.pause?.()
-    button.value?.hideDropdown()
+    emit('close-menu')
   } catch (error) {
     if (!disposed) {
       console.error('DLNA casting failed', error)
@@ -228,6 +215,8 @@ const failureCheck = setInterval(async () => {
     }
   } finally { busy.value = false }
 }, 1000)
+
+defineExpose({ options, castId, menuTitle, refreshDevices, handleChoice })
 
 onBeforeUnmount(() => {
   disposed = true

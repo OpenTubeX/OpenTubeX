@@ -739,7 +739,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
-    Show DLNA Cast Button: "Prikaži gumb za oddajanje DLNA"
+    Enable DLNA Casting: "Omogoči predvajanje prek DLNA"
     Skip Unavailable Playlist Videos: "Preskoči nedostopne videoposnetke na seznamih predvajanja"
     Lights Off: Ugasni luči
     Show Lights Off Toggle: Prikaži stikalo za ugašanje luči
@@ -854,7 +854,7 @@ Settings:
     Concurrent Preloads: "Sočasno prednalaganje"
     Ignore System Rotation Lock for Fullscreen: Prezri sistemski zaklep vrtenja za celoten zaslon
     Swipe Left or Right to Seek in Fullscreen: Podrsnite levo ali desno za previjanje v celozaslonskem načinu
-    Show Google Cast Button: "Prikaži gumb Google Cast"
+    Enable Google Cast: "Omogoči Google Cast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1701,6 +1701,7 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
   Player:
+    Cast: "Predvajaj"
     Music Mode: "Glasbeni način"
     Music Mode Description: "Predvajajte videoposnetke s hitrostjo 1× in nove videoposnetke v tem zavihku začnite od začetka. Shranjene privzete nastavitve predvajanja ostanejo nespremenjene."
     DLNA:

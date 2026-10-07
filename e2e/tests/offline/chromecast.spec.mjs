@@ -1,4 +1,4 @@
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, DEMO_MEDIA_MIME_TYPE } from '../../helpers/media.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -87,6 +87,26 @@ async function openCastVideo(app, page) {
   return watch
 }
 
+async function mockDlna(app) {
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.dlnaTest = { starts: [], stops: [], stopRequests: 0, finishStop: null, startDelayMs: 0, holdStop: false }
+    for (const name of ['dlna-discover', 'dlna-start', 'dlna-stop', 'yt-dlp-get-playback-info']) ipcMain.removeHandler(name)
+    ipcMain.handle('yt-dlp-get-playback-info', () => ({ formats: [] }))
+    ipcMain.handle('dlna-discover', () => [{ id: 'dlna-tv', name: 'DLNA TV' }])
+    ipcMain.handle('dlna-start', async (_, payload) => {
+      globalThis.dlnaTest.starts.push(payload)
+      await new Promise(resolve => setTimeout(resolve, globalThis.dlnaTest.startDelayMs))
+      return { castId: 'dlna-session', deviceName: 'DLNA TV' }
+    })
+    ipcMain.handle('dlna-stop', async (_, id) => {
+      globalThis.dlnaTest.stopRequests++
+      if (globalThis.dlnaTest.holdStop) await new Promise(resolve => { globalThis.dlnaTest.finishStop = resolve })
+      globalThis.dlnaTest.stops.push(id)
+      return true
+    })
+  })
+}
+
 async function choice(page, name) {
   await page.locator('.chromecastControl > button').click()
   await page.getByRole('option', { name, exact: true }).click()
@@ -100,6 +120,72 @@ async function selectLocalEnglishCaption(page, watch) {
     player.selectTextTrack(english)
   })
   await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
+}
+
+test('both casting protocols share one button with Google Cast and DLNA tabs', async ({ app, page }) => {
+  await openCastVideo(app, page)
+  await mockDlna(app)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  const castButtons = page.locator('.videoOptions .chromecastControl > button, .videoOptions .dlnaCastControl > button')
+  await expect(castButtons).toHaveCount(1)
+  await castButtons.click()
+  await expect(page.getByRole('tab', { name: 'Google Cast', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tab', { name: 'DLNA', exact: true })).toBeVisible()
+  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+  await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
+  await expect(page.getByRole('tab', { name: 'DLNA', exact: true })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
+  await page.getByRole('tab', { name: 'DLNA', exact: true }).press('ArrowLeft')
+  await expect(page.getByRole('tab', { name: 'Google Cast', exact: true })).toBeFocused()
+  await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowChromecastButton', false))
+  await expect(castButtons).toHaveCount(1)
+  await castButtons.click()
+  await expect(page.getByRole('tab', { name: /Google Cast|DLNA/ })).toHaveCount(0)
+  await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', false))
+  await expect(castButtons).toHaveCount(0)
+})
+
+for (const zoom of [1, 1.25]) {
+  test(`casting tabs restore and clamp themed scrolling at ${zoom * 100}% UI scale`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await mockDlna(app)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.castDevices = Array.from({ length: 40 }, (_, index) => ({ id: `tv-${index}`, name: `Google TV ${index}` }))
+      ipcMain.removeHandler('cast-discover')
+      ipcMain.handle('cast-discover', () => globalThis.castDevices)
+    })
+    const browserWindow = await app.electronApp.browserWindow(page)
+    await browserWindow.evaluate((window, zoom) => window.webContents.setZoomFactor(zoom), zoom)
+    await setWindowSize(app, page, { width: 800, height: 650 })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+    await page.locator('.castControl > button').click()
+    const scroller = page.locator('.castControl .iconDropdownContent')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+    await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(scroller)
+    const offset = await scroller.evaluate(element => element.scrollTop)
+    await page.getByRole('tab', { name: 'DLNA', exact: true }).click()
+    await expect(page.getByRole('option', { name: 'DLNA TV', exact: true })).toBeVisible()
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await page.getByRole('tab', { name: 'Google Cast', exact: true }).click()
+    await expect(page.getByRole('option', { name: 'Google TV 39', exact: true })).toHaveCount(1)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeCloseTo(offset, 0)
+    await expectScrollAtRenderedEnd(scroller)
+    await setWindowSize(app, page, { width: 1200, height: 950 })
+    await expectScrollAtRenderedEnd(scroller)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await app.electronApp.evaluate(() => { globalThis.castDevices = [{ id: 'test-tv', name: 'Test TV' }] })
+    // Rediscovery replaces the long list while the menu is still open.
+    await watch.evaluate(vm => vm.$refs.chromecast.$refs.googleCast.refreshDevices())
+    await expect(page.getByRole('option', { name: 'Test TV', exact: true })).toBeVisible()
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+  })
 }
 
 test('casts the current video, controls the receiver and returns to its remote position', async ({ app, page }) => {
@@ -278,52 +364,50 @@ test('casts from the current Invidious instance without a saved default', async 
 
 test('DLNA and Google Cast cannot start overlapping sessions', async ({ app, page }) => {
   const watch = await openCastVideo(app, page)
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.dlnaTest = { starts: [], stops: [], stopRequests: 0, finishStop: null }
-    for (const name of ['dlna-discover', 'dlna-start', 'dlna-stop', 'yt-dlp-get-playback-info']) ipcMain.removeHandler(name)
-    ipcMain.handle('yt-dlp-get-playback-info', () => ({ formats: [] }))
-    ipcMain.handle('dlna-discover', () => [{ id: 'dlna-tv', name: 'DLNA TV' }])
-    ipcMain.handle('dlna-start', async (_, payload) => {
-      globalThis.dlnaTest.starts.push(payload)
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      return { castId: 'dlna-session', deviceName: 'DLNA TV' }
-    })
-    ipcMain.handle('dlna-stop', async (_, id) => {
-      globalThis.dlnaTest.stopRequests++
-      await new Promise(resolve => { globalThis.dlnaTest.finishStop = resolve })
-      globalThis.dlnaTest.stops.push(id)
-      return true
-    })
+  await mockDlna(app)
+  await app.electronApp.evaluate(() => {
+    globalThis.dlnaTest.startDelayMs = 1200
+    globalThis.dlnaTest.holdStop = true
     globalThis.castTest.startDelayMs = 1200
   })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
   await watch.evaluate(vm => vm.$refs.player.play())
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
-  const dlna = page.locator('.dlnaCastControl > button')
-  const googleCast = page.locator('.chromecastControl > button')
-  await dlna.click()
+  const castButton = page.locator('.castControl > button')
+  const googleTab = page.getByRole('tab', { name: 'Google Cast', exact: true })
+  const dlnaTab = page.getByRole('tab', { name: 'DLNA', exact: true })
+  await castButton.click()
+  await dlnaTab.click()
   await page.getByRole('option', { name: 'DLNA TV', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.starts.length)).toBe(1)
-  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
-  await expect(dlna).toHaveAttribute('aria-pressed', 'true')
+  await castButton.click()
+  await expect(googleTab).toBeDisabled()
+  await expect(castButton).toHaveAttribute('aria-pressed', 'true')
   expect(await app.electronApp.evaluate(() => globalThis.castTest.starts)).toEqual([])
-  await dlna.click()
+  await expect(googleTab).toHaveCount(0)
+  await castButton.click()
   await page.getByRole('option', { name: 'Stop casting', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stopRequests)).toBe(1)
-  await expect(googleCast).toHaveAttribute('aria-disabled', 'true')
+  await castButton.click()
+  await expect(googleTab).toBeDisabled()
   expect(await app.electronApp.evaluate(() => globalThis.dlnaTest.stops)).toEqual([])
   await app.electronApp.evaluate(() => globalThis.dlnaTest.finishStop())
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.dlnaTest.stops.length)).toBe(1)
-  await expect(googleCast).toHaveAttribute('aria-disabled', 'false')
+  await expect(googleTab).toBeEnabled()
   await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(false)
-  await choice(page, 'Test TV')
+  await googleTab.click()
+  await page.getByRole('option', { name: 'Test TV', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.starts.length)).toBe(1)
-  await expect(googleCast).toHaveAttribute('aria-pressed', 'true')
-  await expect(dlna).toHaveCount(0)
+  await castButton.click()
+  await expect(dlnaTab).toBeDisabled()
+  await expect(castButton).toHaveAttribute('aria-pressed', 'true')
+  await expect(dlnaTab).toHaveCount(0)
+  await castButton.click()
   const [payload] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(payload.paused).toBe(false)
-  await choice(page, 'Return to local playback')
-  await expect(dlna).toHaveAttribute('aria-disabled', 'false')
+  await page.getByRole('option', { name: 'Return to local playback', exact: true }).click()
+  await castButton.click()
+  await expect(dlnaTab).toBeEnabled()
 })
 
 test('failed casting preserves local playback and paused casting returns paused', async ({ app, page }) => {

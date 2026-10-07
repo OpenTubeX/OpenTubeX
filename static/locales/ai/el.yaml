@@ -548,7 +548,7 @@ Settings:
         Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
         Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
   Player Settings:
-    Show DLNA Cast Button: "Εμφάνιση κουμπιού μετάδοσης DLNA"
+    Enable DLNA Casting: "Ενεργοποίηση μετάδοσης DLNA"
     Skip Unavailable Playlist Videos: "Παράλειψη μη διαθέσιμων βίντεο σε λίστες αναπαραγωγής"
     Lights Off: Σβήσιμο φώτων
     Show Lights Off Toggle: Εμφάνιση διακόπτη σβησίματος φώτων
@@ -652,7 +652,7 @@ Settings:
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
     Ignore System Rotation Lock for Fullscreen: Παράβλεψη κλειδώματος περιστροφής συστήματος για πλήρη οθόνη
     Swipe Left or Right to Seek in Fullscreen: Σύρετε αριστερά ή δεξιά για αναζήτηση σε πλήρη οθόνη
-    Show Google Cast Button: "Εμφάνιση κουμπιού Google Cast"
+    Enable Google Cast: "Ενεργοποίηση Google Cast"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1312,6 +1312,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Η επανάληψη ζωντανής συνομιλίας είναι ενεργοποιημένη. Τα μηνύματα θα εμφανίζονται εδώ κατά την αναπαραγωγή του βίντεο.
   Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
   Player:
+    Cast: "Μετάδοση"
     Music Mode: "Λειτουργία μουσικής"
     Music Mode Description: "Αναπαραγωγή βίντεο με ταχύτητα 1× και έναρξη νέων βίντεο από την αρχή σε αυτήν την καρτέλα. Οι αποθηκευμένες προεπιλογές αναπαραγωγής παραμένουν αμετάβλητες."
     DLNA:

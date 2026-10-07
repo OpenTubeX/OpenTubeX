@@ -550,7 +550,7 @@ Settings:
         Destructive pressed: அழிக்கும் செயல் அழுத்தப்பட்டது
         Text and icons on destructive actions: அழிக்கும் செயல்களிலுள்ள உரையும் படவுருக்களும்
   Player Settings:
-    Show DLNA Cast Button: "DLNA ஒளிபரப்பு பொத்தானைக் காட்டு"
+    Enable DLNA Casting: "DLNA ஒளிபரப்பை இயக்கு"
     Skip Unavailable Playlist Videos: "பிளேலிஸ்ட்களில் கிடைக்காத காணொளிகளைத் தவிர்"
     Lights Off: விளக்குகளை அணை
     Show Lights Off Toggle: விளக்குகளை அணைக்கும் நிலைமாற்றியைக் காட்டு
@@ -652,7 +652,7 @@ Settings:
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
     Ignore System Rotation Lock for Fullscreen: முழுத்திரைக்காக அமைப்பின் சுழற்சிப் பூட்டைப் புறக்கணி
     Swipe Left or Right to Seek in Fullscreen: முழுத்திரையில் முன்னோக்கி அல்லது பின்னோக்கி நகர இடது அல்லது வலது பக்கம் ஸ்வைப் செய்யவும்
-    Show Google Cast Button: "Google Cast பொத்தானைக் காட்டு"
+    Enable Google Cast: "Google Cast-ஐ இயக்கு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1316,6 +1316,7 @@ Video:
   Sponsor Block category short:
     filler: தொடர்பற்றவை
   Player:
+    Cast: "ஒளிபரப்பு"
     Music Mode: "இசை முறை"
     Music Mode Description: "இந்தத் தாவலில் காணொளிகளை 1× வேகத்தில் இயக்கி, புதிய காணொளிகளைத் தொடக்கத்திலிருந்து தொடங்கவும். சேமிக்கப்பட்ட இயல்புநிலை இயக்க அமைப்புகள் மாறாது."
     DLNA:

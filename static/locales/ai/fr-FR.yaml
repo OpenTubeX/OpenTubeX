@@ -544,7 +544,7 @@ Settings:
         Destructive pressed: Action destructive à l’appui
         Text and icons on destructive actions: Texte et icônes des actions destructives
   Player Settings:
-    Show DLNA Cast Button: "Afficher le bouton de diffusion DLNA"
+    Enable DLNA Casting: "Activer la diffusion DLNA"
     Skip Unavailable Playlist Videos: "Ignorer les vidéos indisponibles dans les playlists"
     Lights Off: Éteindre les lumières
     Show Lights Off Toggle: Afficher le bouton pour éteindre les lumières
@@ -639,7 +639,7 @@ Settings:
     Concurrent Preloads: "Préchargements simultanés"
     Ignore System Rotation Lock for Fullscreen: Ignorer le verrouillage de rotation du système pour le plein écran
     Swipe Left or Right to Seek in Fullscreen: Balayer vers la gauche ou la droite pour avancer ou reculer en plein écran
-    Show Google Cast Button: "Afficher le bouton Google Cast"
+    Enable Google Cast: "Activer Google Cast"
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -1274,6 +1274,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: La rediffusion du chat en direct est activée.  Les messages du chat apparaîtront ici pendant la lecture de la vidéo.
   Premiere started: Première en cours. A commencé {timeAgo}
   Player:
+    Cast: "Diffuser"
     Music Mode: "Mode musique"
     Music Mode Description: "Lisez les vidéos à 1× et démarrez les nouvelles vidéos depuis le début dans cet onglet. Vos réglages de lecture par défaut enregistrés restent inchangés."
     DLNA:
