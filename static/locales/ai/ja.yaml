@@ -220,6 +220,7 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Navigation and Controls: "ナビゲーションと操作"
   Fullscreen Actions:
     Recommended Videos: "おすすめ動画"
     Title: "全画面のアクション"

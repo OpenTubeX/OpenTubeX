@@ -220,6 +220,7 @@ History:
   Custom: Personnalisé
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
+  Navigation and Controls: "Navigation et commandes"
   Fullscreen Actions:
     Recommended Videos: "Vidéos recommandées"
     Title: "Actions en plein écran"

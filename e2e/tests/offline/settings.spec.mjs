@@ -976,7 +976,7 @@ test.describe('settings', () => {
     await expect(headings).toHaveText([
       'Theme',
       'Layout',
-      'Navigation / Quick settings / Fullscreen actions',
+      'Navigation & controls',
       'Video lists and thumbnails',
     ])
     const theme = appearance.locator('.settingsSection').filter({

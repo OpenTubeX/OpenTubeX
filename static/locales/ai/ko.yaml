@@ -308,6 +308,7 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Navigation and Controls: "탐색 및 컨트롤"
   Fullscreen Actions:
     Recommended Videos: "추천 동영상"
     Title: "전체 화면 작업"
