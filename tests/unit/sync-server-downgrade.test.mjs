@@ -1534,6 +1534,8 @@ test('a new live device message is delivered after an older activity response fi
         await oldResponse
         return [] // Snapshotted before the newer device message existed.
       }
+      // Delivery can take longer than a short fixed assertion delay.
+      await new Promise(resolve => setTimeout(resolve, 150))
       return [{ id: 'new-message', recipient, payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
     },
   })
@@ -1557,7 +1559,10 @@ test('a new live device message is delivered after an older activity response fi
     assert.equal(f.context.state.syncServerStatus, 'success')
     releaseOldResponse()
     await refreshing
-    await new Promise(resolve => setTimeout(resolve, 100))
+    const deliveryDeadline = Date.now() + 5000
+    while (opened.length === 0 && Date.now() < deliveryDeadline) {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    }
     assert.deepEqual(opened, ['/watch/jNQXAC9IVRw?t=12'])
     assert.equal(downloads, 2)
   } finally {
