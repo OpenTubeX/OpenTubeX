@@ -1,4 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants'
+import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
 import { applySyncServerUserAgent } from '../../syncServerUserAgent'
 import {
@@ -9,6 +10,7 @@ import {
 import {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
@@ -29,7 +31,7 @@ import {
 } from './profile-sync.js'
 import { createSyncServerRequestHeaders } from './sync-server-request'
 import { isValidPlaylistBookmark, playlistBookmarkForSync } from './playlist-bookmarks'
-import { getOtherDeviceSessions, mergeSyncSessions } from './sync-sessions'
+import { getOtherDeviceSessions, getRevokedSyncSessionLogins, mergeSyncSessions } from './sync-sessions'
 import { isValidSyncServerDeviceId } from './sync-server-sessions'
 import { mergeSettingEntry, resolveMergedThemeEntry } from './sync-settings-conflict'
 import { getCapacitorTabService } from '../tabs/CapacitorTabService'
@@ -66,6 +68,7 @@ function syncServerFetch(input, init, timeoutMs) {
 export {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
@@ -1252,7 +1255,7 @@ function getTabSyncAdapter() {
   return null
 }
 
-export async function syncSessions(client, store, previous = null) {
+export async function syncSessions(client, store, previous = null, { accountClient = client } = {}) {
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
 
   const tabs = getTabSyncAdapter()
@@ -1265,6 +1268,26 @@ export async function syncSessions(client, store, previous = null) {
   const remote = await client.getSessions()
   if (process.env.IS_CAPACITOR && store.state.settings.enableMobileTabs === false) return null
   const { deviceId, legacyDeviceIds } = getTabSessionDeviceIdentity(store.state.settings)
+  const revokedLogins = getRevokedSyncSessionLogins(remote, deviceId)
+  let reclaimDeviceSessions = false
+  let activeRevokedLogins = []
+  if (revokedLogins.length > 0) {
+    const response = await accountClient.getAccountSessions()
+    const current = Array.isArray(response?.sessions)
+      ? response.sessions.filter(session => session?.current === true)
+      : []
+    if (current.length !== 1 || current[0].device_id !== deviceId ||
+        response.sessions.some(session => typeof session?.id !== 'string' || session.id.length === 0)) {
+      throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+    }
+    // Block this login's entire upload, including windows opened after cleanup.
+    // Keep local tabs intact while the account-session DELETE is pending.
+    if (revokedLogins.includes(current[0].id)) {
+      throw new SyncServerTabRevocationPendingError(i18n.global.t('Settings.Sync Settings.Tab Sync Revocation Pending'))
+    }
+    activeRevokedLogins = revokedLogins.filter(id => response.sessions.some(session => session.id === id))
+    reclaimDeviceSessions = true
+  }
   const merged = mergeSyncSessions({
     localSessions: local,
     remoteValue: remote,
@@ -1273,6 +1296,8 @@ export async function syncSessions(client, store, previous = null) {
     platform: process.env.IS_CAPACITOR ? 'mobile' : 'desktop',
     preferredMode: store.state.settings.syncServerSharedTabs ? 'shared' : 'separate',
     legacyDeviceIds,
+    reclaimDeviceSessions,
+    activeRevokedLogins,
   })
 
   if (!metadataEquals(local, merged.sessionsToApply) && merged.sessionsToApply.length > 0) {

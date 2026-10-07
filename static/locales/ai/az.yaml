@@ -929,6 +929,9 @@ Settings:
     Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Bu cihazın sinxronlaşdırılmış vərəq dəstləri də silinəcək."
+    Revoke Session Partial Failure: "Sinxronlaşdırılmış vərəq dəstləri silindi, lakin girişin ləğvi təsdiqlənmədi. Girişi ləğv etmək üçün yenidən cəhd edin."
+    Tab Sync Revocation Pending: "Bu girişin ləğvi gözlənilərkən vərəqlərin sinxronlaşdırılması dayandırılıb. Sinxronlaşdırma ayarlarında ləğvi yenidən sınayın."
     Show More: "Daha çox göstər"
     Sync Automatically: "Avtomatik sinxronlaşdır"
     Activity: "Hesab fəaliyyəti"

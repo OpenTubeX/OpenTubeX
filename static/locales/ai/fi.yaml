@@ -950,6 +950,9 @@ Settings:
     Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Myös tämän laitteen synkronoidut välilehtijoukot poistetaan."
+    Revoke Session Partial Failure: "Synkronoidut välilehtijoukot poistettiin, mutta käyttöoikeuden peruuttamista ei voitu vahvistaa. Yritä peruuttaa käyttöoikeus uudelleen."
+    Tab Sync Revocation Pending: "Välilehtien synkronointi on keskeytetty, kun tämän kirjautumisen peruminen on kesken. Yritä perumista uudelleen synkronointiasetuksissa."
     Show More: "Näytä lisää"
     Sync Automatically: "Synkronoi automaattisesti"
     Activity: "Tilin tapahtumat"

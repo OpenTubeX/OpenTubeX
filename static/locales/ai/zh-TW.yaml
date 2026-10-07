@@ -926,6 +926,9 @@ Settings:
     Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "此裝置已同步的分頁集合也將被刪除。"
+    Revoke Session Partial Failure: "已刪除同步的分頁組，但無法確認存取權限是否已撤銷。請重試撤銷存取權限。"
+    Tab Sync Revocation Pending: "此登入的存取權限撤銷尚未完成，分頁同步已暫停。請在同步設定中重試撤銷。"
     Show More: "顯示更多"
     Watch stats: "觀看統計資料"
     Syncing statistics: 正在同步觀看統計資料…

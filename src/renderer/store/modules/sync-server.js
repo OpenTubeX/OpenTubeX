@@ -6,6 +6,7 @@ import { connectionEvents, getConnectionState } from '../../helpers/networkRecov
 import {
   SyncServerClient,
   SyncServerCancelledError,
+  SyncServerTabRevocationPendingError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
@@ -37,7 +38,7 @@ import {
   loadSyncServerDevices,
 } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
-import { getPreviousSyncSessions, getSyncTabRoute, removeSyncSession } from '../../helpers/sync-sessions'
+import { getPreviousSyncSessions, getSyncTabRoute, removeSyncDeviceSessions, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
   dispatchRemoteSyncAction,
@@ -244,6 +245,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const next = { ...previous }
   const result = {}
   const skippedCollections = new Set()
+  let tabRevocationError = null
   const store = {
     state: rootState,
     getters: rootGetters,
@@ -408,11 +410,24 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         result.settings = Object.keys(next.settings).length
         break
       case 'sessionsV2': {
-        const sessions = await syncSessions(
-          targetClient,
-          store,
-          getPreviousSyncSessions(previous)
-        )
+        let sessions
+        try {
+          sessions = await syncSessions(
+            targetClient,
+            store,
+            getPreviousSyncSessions(previous),
+            { accountClient: networkClient }
+          )
+        } catch (error) {
+          if (!(error instanceof SyncServerTabRevocationPendingError)) throw error
+          // Finish the other collections before reporting paused tab sync.
+          skippedCollections.add(collection)
+          tabRevocationError = error
+          if ('sessionsV2' in previous) next.sessionsV2 = previous.sessionsV2
+          else delete next.sessionsV2
+          delete result.sessions
+          break
+        }
         if (sessions !== null) {
           next.sessionsV2 = sessions.document
           result.sessions = sessions.sessionsToApply.reduce(
@@ -665,6 +680,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       await dispatch('setSyncServerAutoSync', true)
     }
     if (progressStarted) commit('setSyncServerLastResult', result)
+    if (tabRevocationError) throw tabRevocationError
     finishProgress()
     if (liveSupported) refreshSyncServerAccount(context)
     return result
@@ -950,10 +966,19 @@ const actions = {
     return true
   },
 
-  async deleteSyncServerSession({ commit, dispatch, rootState }, session) {
-    const { syncDeviceId, sessionId } = session ?? {}
+  deleteSyncServerSession({ dispatch }, session) {
+    if (typeof session?.sessionId !== 'string') throw new Error('Invalid synced tab set')
+    return dispatch('deleteSyncServerSessions', session)
+  },
+
+  deleteSyncServerDeviceSessions({ dispatch }, { syncDeviceId, accountSessionId }) {
+    return dispatch('deleteSyncServerSessions', { syncDeviceId, accountSessionId })
+  },
+
+  async deleteSyncServerSessions({ commit, dispatch, rootState }, { syncDeviceId, sessionId, accountSessionId } = {}) {
     const settings = rootState.settings
-    if (typeof syncDeviceId !== 'string' || typeof sessionId !== 'string') {
+    if (typeof syncDeviceId !== 'string' || (sessionId !== undefined && typeof sessionId !== 'string') ||
+        (sessionId === undefined && typeof accountSessionId !== 'string')) {
       throw new Error('Invalid synced tab set')
     }
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
@@ -984,12 +1009,30 @@ const actions = {
           }
 
           assertSyncEnabled(rootState, client)
-          const nextSessions = removeSyncSession(remoteValue, syncDeviceId, sessionId)
+          const nextSessions = sessionId === undefined
+            ? removeSyncDeviceSessions(remoteValue, syncDeviceId, accountSessionId)
+            : removeSyncSession(remoteValue, syncDeviceId, sessionId)
           const payload = await encryptSyncDocument(
             nextSessions,
             settings.syncServerPrivacyKey,
             settings.syncServerPrivacySalt
           )
+
+          // A reconnect can introduce another login while loading or retrying
+          // the encrypted collection. Preserve its tabs before every upload.
+          if (sessionId === undefined) {
+            const response = await client.getAccountSessions()
+            if (!Array.isArray(response?.sessions)) {
+              throw new Error(i18n.global.t('Settings.Sync Settings.Account Management Failed'))
+            }
+            assertSyncEnabled(rootState, client)
+            if (response.sessions.some(session => (
+              session.id !== accountSessionId && session.device_id === syncDeviceId
+            ))) {
+              commit('setSyncServerStatus', 'idle')
+              return 'preserved'
+            }
+          }
 
           try {
             await client.putEncryptedSyncCollection('sessionsV2', remote.revision, payload)
@@ -1160,8 +1203,8 @@ const actions = {
       await updateWhileEnabled('updateSyncServerDeviceName', deviceName)
       if (!resumesExpiredSession) {
         await updateWhileEnabled('updateSyncServerSnapshot', '{}')
-        await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
       }
+      if (!resumesExpiredSession) await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
       await updateWhileEnabled(
         'updateSyncServerPrivacyMode',
         privacySupported ? 'enhanced' : 'legacy'

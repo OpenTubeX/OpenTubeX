@@ -950,6 +950,9 @@ Settings:
     Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Τα συγχρονισμένα σύνολα καρτελών αυτής της συσκευής θα διαγραφούν επίσης."
+    Revoke Session Partial Failure: "Τα συγχρονισμένα σύνολα καρτελών διαγράφηκαν, αλλά η ανάκληση δεν μπόρεσε να επιβεβαιωθεί. Δοκιμάστε ξανά να ανακαλέσετε την πρόσβαση."
+    Tab Sync Revocation Pending: "Ο συγχρονισμός καρτελών έχει τεθεί σε παύση όσο εκκρεμεί η ανάκληση αυτής της σύνδεσης. Δοκιμάστε ξανά την ανάκληση στις ρυθμίσεις συγχρονισμού."
     Show More: "Εμφάνιση περισσότερων"
     Sync Automatically: "Αυτόματος συγχρονισμός"
     Activity: "Δραστηριότητα λογαριασμού"

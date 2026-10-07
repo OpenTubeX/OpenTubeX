@@ -926,6 +926,9 @@ Settings:
     Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
   Sync Settings:
+    Revoke Session Tabs Warning: "このデバイスの同期されたタブセットも削除されます。"
+    Revoke Session Partial Failure: "同期されたタブセットは削除されましたが、アクセスの取り消しを確認できませんでした。もう一度アクセスの取り消しを試してください。"
+    Tab Sync Revocation Pending: "このログインの取り消しが完了するまで、タブの同期は一時停止されます。同期設定で取り消しを再試行してください。"
     Show More: "もっと見る"
     Sync Automatically: "自動的に同期"
     Activity: "アカウントのアクティビティ"

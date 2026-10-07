@@ -930,6 +930,9 @@ Settings:
     Import playlists formats: 'Podržani formati: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podržani formati: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Sinkronizirani skupovi kartica ovog uređaja također će biti izbrisani."
+    Revoke Session Partial Failure: "Sinkronizirani skupovi kartica su izbrisani, ali opoziv pristupa nije moguće potvrditi. Pokušajte ponovno opozvati pristup."
+    Tab Sync Revocation Pending: "Sinkronizacija kartica je pauzirana dok je opoziv ove prijave na čekanju. Ponovno pokušajte opoziv u postavkama sinkronizacije."
     Show More: "Prikaži više"
     Sync Automatically: "Automatski sinkroniziraj"
     Activity: "Aktivnost računa"

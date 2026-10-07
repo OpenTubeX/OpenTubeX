@@ -932,6 +932,9 @@ Settings:
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Samstilltum flipasöfnum þessa tækis verður einnig eytt."
+    Revoke Session Partial Failure: "Samstilltum flipasöfnum var eytt, en ekki var hægt að staðfesta afturköllun aðgangs. Reyndu aftur að afturkalla aðgang."
+    Tab Sync Revocation Pending: "Samstilling flipa er í bið meðan afturköllun þessarar innskráningar er ólokið. Reyndu afturköllun aftur í samstillingarstillingum."
     Show More: "Sýna meira"
     Sync Automatically: "Samstilla sjálfkrafa"
     Activity: "Virkni reiknings"

@@ -1213,6 +1213,9 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Izbrisani bodo tudi sinhronizirani nabori zavihkov te naprave."
+    Revoke Session Partial Failure: "Sinhronizirani nabori zavihkov so bili izbrisani, vendar preklica dostopa ni bilo mogoče potrditi. Poskusite ponovno preklicati dostop."
+    Tab Sync Revocation Pending: "Sinhronizacija zavihkov je začasno ustavljena, dokler je preklic te prijave v teku. Znova poskusite preklic v nastavitvah sinhronizacije."
     Show More: "Pokaži več"
     Watch stats: "Statistika ogledov"
     Syncing statistics: Sinhroniziranje statistike ogledov …

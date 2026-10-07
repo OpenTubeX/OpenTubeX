@@ -1249,6 +1249,9 @@ Settings:
     Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "També se suprimiran els conjunts de pestanyes sincronitzats d’aquest dispositiu."
+    Revoke Session Partial Failure: "S'han suprimit els conjunts de pestanyes sincronitzats, però no s'ha pogut confirmar la revocació. Torneu a provar de revocar l'accés."
+    Tab Sync Revocation Pending: "La sincronització de pestanyes està en pausa mentre la revocació d’aquest inici de sessió està pendent. Torneu a provar la revocació a la configuració de sincronització."
     Show More: "Mostra'n més"
     Sync Automatically: "Sincronitza automàticament"
     Activity: "Activitat del compte"

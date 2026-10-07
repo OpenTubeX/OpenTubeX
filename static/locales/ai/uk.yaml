@@ -945,6 +945,9 @@ Settings:
     Import playlists formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Підтримувані формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Синхронізовані набори вкладок цього пристрою також буде видалено."
+    Revoke Session Partial Failure: "Синхронізовані набори вкладок видалено, але відкликання доступу не вдалося підтвердити. Повторіть спробу відкликання доступу."
+    Tab Sync Revocation Pending: "Синхронізацію вкладок призупинено, поки очікується відкликання доступу для цього входу. Повторіть відкликання доступу в налаштуваннях синхронізації."
     Show More: "Показати більше"
     Watch stats: "Статистика перегляду"
     Syncing statistics: Синхронізація статистики переглядів…

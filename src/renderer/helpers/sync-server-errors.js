@@ -31,6 +31,8 @@ export class SyncServerCancelledError extends Error {
   }
 }
 
+export class SyncServerTabRevocationPendingError extends Error {}
+
 export class SyncServerDataLossError extends Error {
   constructor(collection, deleted, previous, items) {
     super(

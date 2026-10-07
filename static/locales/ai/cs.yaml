@@ -926,6 +926,9 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Synchronizované sady karet tohoto zařízení budou také odstraněny."
+    Revoke Session Partial Failure: "Synchronizované sady karet byly smazány, ale odebrání přístupu se nepodařilo potvrdit. Zkuste přístup odebrat znovu."
+    Tab Sync Revocation Pending: "Synchronizace panelů je pozastavena, dokud nebude dokončeno odvolání tohoto přihlášení. Zkuste odvolání znovu v nastavení synchronizace."
     Show More: "Zobrazit více"
     Sync Automatically: "Synchronizovat automaticky"
     Activity: "Aktivita účtu"

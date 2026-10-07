@@ -926,6 +926,9 @@ Settings:
     Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Samuti kustutatakse selle seadme sünkroonitud vahelehtede komplektid."
+    Revoke Session Partial Failure: "Sünkroonitud vahekaartide komplektid kustutati, kuid juurdepääsu tühistamist ei saanud kinnitada. Proovi juurdepääs uuesti tühistada."
+    Tab Sync Revocation Pending: "Vahelehtede sünkroonimine on peatatud, kuni selle sisselogimise tühistamine on ootel. Proovi tühistamist uuesti sünkroonimise seadetes."
     Show More: "Näita rohkem"
     Sync Automatically: "Sünkrooni automaatselt"
     Activity: "Konto tegevus"

@@ -1,3 +1,4 @@
+import * as releasedClient from '../helpers/released-sync-sessions.mjs'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
@@ -414,3 +415,129 @@ test('uses legacy sessions as the baseline when the versioned snapshot is null',
 
   assert.deepEqual(result.sessionsToApply, localSessions)
 })
+
+for (const retainedSnapshot of [false, true]) {
+  test(`a new login reclaims a tombstoned mobile session with ${retainedSnapshot ? 'a retained' : 'no'} snapshot`, () => {
+    const local = session('mobile', 2)
+    const previous = normalizeSyncSessionsDocument({ devices: {
+      phone: { platform: 'mobile', sessions: [local] },
+      laptop: { platform: 'desktop', sessions: [session('laptop', 1)] },
+    } })
+    let remote = removeSyncSession(previous, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
+    remote = removeSyncSession(remote, 'other-phone', 'mobile')
+    const merged = mergeSyncSessions({
+      localSessions: [local], remoteValue: remote, previousValue: retainedSnapshot ? previous : null,
+      deviceId: 'phone', platform: 'mobile', preferredMode: 'separate', reclaimDeviceSessions: true,
+    })
+    assert.deepEqual(merged.document.devices.phone.sessions, [local])
+    assert.equal(merged.document.deletedSessions.phone, undefined)
+    assert.deepEqual(merged.document.deletedSessions['other-phone'], ['mobile'])
+    assert.deepEqual(merged.document.devices.laptop, previous.devices.laptop)
+    const again = mergeSyncSessions({
+      localSessions: [local], remoteValue: merged.document, previousValue: merged.document,
+      deviceId: 'phone', platform: 'mobile', preferredMode: 'separate',
+    })
+    assert.deepEqual(again.document.devices.phone.sessions, [local])
+  })
+}
+
+for (const platform of ['mobile', 'desktop']) {
+  test(`a new ${platform} login preserves intentional deletions while reclaiming revoked sets`, () => {
+    const local = [session('deleted', 2), session('revoked', 2)]
+    const previous = normalizeSyncSessionsDocument({ devices: { device: { platform, sessions: local } } })
+    let remote = removeSyncSession(previous, 'device', 'deleted')
+    remote = removeSyncSession(remote, 'device', 'revoked', { revokedAccountSessionId: 'old-login' })
+    const merged = mergeSyncSessions({ localSessions: local, remoteValue: remote, previousValue: previous,
+      deviceId: 'device', platform, reclaimDeviceSessions: true })
+    assert.deepEqual(merged.document.devices.device.sessions, [local[1]])
+    assert.deepEqual(merged.document.deletedSessions.device, ['deleted'])
+    assert.equal(merged.document.deletedSessions['revoked:device'], undefined)
+  })
+}
+
+test('an intentional deletion overrides a revocation marker before reauthentication', () => {
+  const local = [session('mobile', 2)]
+  let remote = removeSyncSession({}, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
+  remote = removeSyncSession(remote, 'phone', 'mobile')
+  const merged = mergeSyncSessions({ localSessions: local, remoteValue: remote,
+    deviceId: 'phone', platform: 'mobile', reclaimDeviceSessions: true })
+  assert.deepEqual(merged.document.devices.phone.sessions, [])
+  assert.deepEqual(merged.document.deletedSessions.phone, ['mobile'])
+})
+
+test('reclamation preserves an existing remote window alongside the revoked local window', () => {
+  const local = session('revoked-window', 2)
+  const newer = session('new-window', 3)
+  const remote = removeSyncSession({ devices: { desktop: { platform: 'desktop', sessions: [newer] } } },
+    'desktop', local.sessionId, { revokedAccountSessionId: 'old-login' })
+  const result = mergeSyncSessions({ localSessions: [local], remoteValue: remote,
+    previousValue: { devices: { desktop: { platform: 'desktop', sessions: [local] } } },
+    deviceId: 'desktop', platform: 'desktop', reclaimDeviceSessions: true })
+  assert.deepEqual(result.sessionsToApply, [newer, local])
+  assert.deepEqual(result.document.devices.desktop.sessions, [newer, local])
+  assert.equal(result.document.deletedSessions['revoked:desktop'], undefined)
+})
+
+test('revocation cleanup cannot reclassify an intentional deletion', () => {
+  const remote = removeSyncSession(removeSyncSession({}, 'phone', 'mobile'), 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
+  assert.equal(remote.deletedSessions['revoked:phone'], undefined)
+})
+
+for (const platform of ['mobile', 'desktop']) {
+  test(`a revoked ${platform} set can be reclaimed after a released client syncs`, () => {
+    const local = [session('revoked', 2), session('deleted', 2)]
+    const initial = normalizeSyncSessionsDocument({ devices: {
+      owner: { platform, sessions: local },
+      older: { platform: 'desktop', sessions: [session('older', 1)] },
+    } })
+    let revoked = removeSyncSession(initial, 'owner', 'revoked', { revokedAccountSessionId: 'old-login' })
+    revoked = releasedClient.removeSyncSession(revoked, 'owner', 'deleted')
+    const roundTrip = releasedClient.mergeSyncSessions({ remoteValue: revoked, previousValue: initial,
+      localSessions: [session('older', 3)], deviceId: 'older', platform: 'desktop', preferredMode: 'separate' }).document
+    const result = mergeSyncSessions({ remoteValue: roundTrip, previousValue: initial,
+      localSessions: local, deviceId: 'owner', platform, reclaimDeviceSessions: true })
+    assert.deepEqual(result.document.devices.owner.sessions, [local[0]])
+    assert.deepEqual(result.document.deletedSessions.owner, ['deleted'])
+    assert.deepEqual(result.document.devices.older.sessions, [session('older', 3)])
+  })
+}
+
+test('an updated explicit Delete overrides revocation after an older client round trip', () => {
+  const local = [session('mobile', 2)]
+  const initial = normalizeSyncSessionsDocument({ devices: {
+    phone: { platform: 'mobile', sessions: local },
+    older: { platform: 'desktop', sessions: [session('older', 1)] },
+  } })
+  const revoked = removeSyncSession(initial, 'phone', 'mobile', { revokedAccountSessionId: 'old-login' })
+  const roundTrip = releasedClient.mergeSyncSessions({ remoteValue: revoked,
+    localSessions: [session('older', 2)], deviceId: 'older', platform: 'desktop' }).document
+  const deleted = removeSyncSession(roundTrip, 'phone', 'mobile')
+  const result = mergeSyncSessions({ remoteValue: deleted, localSessions: local,
+    deviceId: 'phone', platform: 'mobile', reclaimDeviceSessions: true })
+  assert.deepEqual(result.document.devices.phone.sessions, [])
+  assert.deepEqual(result.document.deletedSessions.phone, ['mobile'])
+  assert.equal(result.document.deletedSessions['revoked:phone'], undefined)
+})
+
+test('revocation classification is discarded when the primary tombstone is gone', () => {
+  const document = normalizeSyncSessionsDocument({ deletedSessions: {
+    phone: ['mobile'], 'revoked:phone': ['mobile', 'closed'], 'revoked-login:phone': ['old-login'], 'revoked:desktop': ['closed-window'],
+  } })
+  assert.deepEqual(document.deletedSessions, { phone: ['mobile'], 'revoked:phone': ['mobile'], 'revoked-login:phone': ['old-login'] })
+})
+
+for (const explicitDeletion of [false, true]) {
+  test(`claiming legacy metadata preserves pending logins ${explicitDeletion ? 'alongside intentional deletion' : 'without tab tombstones'}`, () => {
+    const document = mergeSyncSessions({ localSessions: [], remoteValue: {
+      devices: { legacy: { platform: 'desktop', sessions: [] } },
+      deletedSessions: {
+        ...(explicitDeletion ? { legacy: ['deleted'] } : {}),
+        'revoked-login:legacy': ['target-login'],
+        'revoked-login:desktop': ['other-login'],
+      },
+    }, deviceId: 'desktop', legacyDeviceIds: ['legacy'], platform: 'desktop' }).document
+    assert.deepEqual(document.deletedSessions['revoked-login:desktop'], ['other-login', 'target-login'])
+    assert.equal(document.deletedSessions['revoked-login:legacy'], undefined)
+    if (explicitDeletion) assert.deepEqual(document.deletedSessions.desktop, undefined)
+  })
+}

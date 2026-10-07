@@ -134,7 +134,7 @@
             :padding="11"
             :size="20"
             theme="base-no-default"
-            @click="sessionToRevoke = session"
+            @click="openRevokePrompt(session)"
           />
         </div>
       </li>
@@ -193,6 +193,9 @@
             ? t('Settings.Sync Settings.Revoke Current Session Warning')
             : t('Settings.Sync Settings.Revoke Session Warning', { device: sessionToRevoke.deviceInfo.name })
           }}
+        </p>
+        <p v-if="revokeDeletesTabs">
+          {{ t('Settings.Sync Settings.Revoke Session Tabs Warning') }}
         </p>
         <p
           v-if="promptError"
@@ -286,6 +289,9 @@ const sessions = ref([])
 const sessionToRename = ref(null)
 const renamedDeviceName = ref('')
 const sessionToRevoke = ref(null)
+const revokeDeletesTabs = ref(false)
+const revokeTabsDeleted = ref(false)
+const revokeAccessRevoked = ref(false)
 const promptError = ref('')
 
 function client(token = props.token) {
@@ -466,10 +472,22 @@ async function renameDevice() {
   }
 }
 
+function openRevokePrompt(session) {
+  promptError.value = ''
+  revokeTabsDeleted.value = false
+  revokeAccessRevoked.value = false
+  revokeDeletesTabs.value = !hasOtherDeviceLogins(session, sessions.value)
+  sessionToRevoke.value = session
+}
+
 function closeRevokePrompt() {
   if (actionBusy.value) return
   sessionToRevoke.value = null
   promptError.value = ''
+}
+
+function hasOtherDeviceLogins(session, accountSessions) {
+  return accountSessions.some(other => other.id !== session.id && other.device_id === session.device_id)
 }
 
 async function revokeSession() {
@@ -479,7 +497,38 @@ async function revokeSession() {
   promptError.value = ''
   const requestClient = client()
   try {
-    await requestClient.revokeAccountSession(session.id)
+    const response = await requestClient.getAccountSessions()
+    if (!Array.isArray(response?.sessions)) throw new Error(t('Settings.Sync Settings.Account Management Failed'))
+    const accountSessions = response.sessions
+    const sessionActive = accountSessions.some(other => other.id === session.id)
+    const deletesTabs = !hasOtherDeviceLogins(session, accountSessions)
+    if (deletesTabs && !revokeDeletesTabs.value) {
+      revokeDeletesTabs.value = true
+      return
+    }
+    // Clean up while this login can still retry the operation, including when
+    // revoking the current device. Another login may still use the same tabs.
+    if (deletesTabs && (sessionActive || session.current) && !revokeAccessRevoked.value) {
+      const result = await store.dispatch('deleteSyncServerDeviceSessions', {
+        syncDeviceId: session.device_id,
+        accountSessionId: session.id,
+      })
+      if (!result) return
+      if (result === true) revokeTabsDeleted.value = true
+    }
+    if (sessionActive && !revokeAccessRevoked.value) await requestClient.revokeAccountSession(session.id)
+    revokeAccessRevoked.value = true
+    // Released clients cannot honor pending upload blocks. With another
+    // login's credentials, remove anything they uploaded before their DELETE.
+    // Also finish cleanup when revocation succeeded but its response was lost.
+    if (deletesTabs && !session.current) {
+      const result = await store.dispatch('deleteSyncServerDeviceSessions', {
+        syncDeviceId: session.device_id,
+        accountSessionId: session.id,
+      })
+      if (!result) return
+      if (result === true) revokeTabsDeleted.value = true
+    }
     sessionToRevoke.value = null
     showToast({
       message: t('Settings.Sync Settings.Session Revoked'),
@@ -492,6 +541,11 @@ async function revokeSession() {
     await loadSessions()
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token, promptError)
+    if (revokeAccessRevoked.value && promptError.value) {
+      promptError.value = `${t('Settings.Sync Settings.Session Revoked')}: ${promptError.value}`
+    } else if (revokeTabsDeleted.value && promptError.value) {
+      promptError.value = t('Settings.Sync Settings.Revoke Session Partial Failure')
+    }
   } finally {
     requestClient.cancel()
     actionBusy.value = false

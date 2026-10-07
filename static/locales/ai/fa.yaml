@@ -973,6 +973,9 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "مجموعه‌های برگهٔ همگام‌شدهٔ این دستگاه نیز حذف خواهند شد."
+    Revoke Session Partial Failure: "مجموعه‌های زبانهٔ همگام‌شده حذف شدند، اما لغو دسترسی تأیید نشد. برای لغو دسترسی دوباره تلاش کنید."
+    Tab Sync Revocation Pending: "همگام‌سازی زبانه‌ها تا زمان تکمیل لغو دسترسی این ورود متوقف شده است. لغو دسترسی را در تنظیمات همگام‌سازی دوباره امتحان کنید."
     Show More: "نمایش بیشتر"
     Sync Automatically: "همگام‌سازی خودکار"
     Activity: "فعالیت حساب"

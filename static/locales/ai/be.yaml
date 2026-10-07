@@ -973,6 +973,9 @@ Settings:
     Import playlists formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Фарматы, якія падтрымліваюцца: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Revoke Session Tabs Warning: "Сінхранізаваныя наборы ўкладак гэтай прылады таксама будуць выдалены."
+    Revoke Session Partial Failure: "Сінхранізаваныя наборы ўкладак выдалены, але адкліканне доступу не ўдалося пацвердзіць. Паўтарыце спробу адклікання доступу."
+    Tab Sync Revocation Pending: "Сінхранізацыя ўкладак прыпыненая, пакуль чакаецца адкліканне гэтага ўваходу. Паўтарыце адкліканне ў наладах сінхранізацыі."
     Show More: "Паказаць больш"
     Sync Automatically: "Сінхранізаваць аўтаматычна"
     Activity: "Дзеянні ўліковага запісу"
