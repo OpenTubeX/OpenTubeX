@@ -229,6 +229,7 @@ export default defineComponent({
       t,
       isElectron: process.env.IS_ELECTRON,
       isCapacitor: process.env.IS_CAPACITOR,
+      supportsChromecast: process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS),
       phoneLayout: usePhoneLayout(),
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,

@@ -19,8 +19,8 @@ for (const outcome of ['disconnect', 'rejection', 'stale playback']) {
         stop: () => { stops++; return new Promise(resolve => { resolveStop = resolve }) }
       }
       const { poll, stopCasting } = compileFunction(`let disposed = false, pollTimer; ${polling}\nreturn { poll, stopCasting }`,
-        ['window', 'castId', 'status', 'emit', 'releaseLocalPlayer', 'reportError', 'setTimeout', 'clearTimeout'])(
-        { ftElectron: { chromecast: api } }, castId, status, (...args) => events.push(args),
+        ['chromecast', 'castId', 'status', 'emit', 'releaseLocalPlayer', 'reportError', 'setTimeout', 'clearTimeout'])(
+        api, castId, status, (...args) => events.push(args),
         (...args) => releases.push(args), () => errors++, () => { timers++ }, () => {})
       const pendingPoll = poll()
       const stopping = stopCasting()
