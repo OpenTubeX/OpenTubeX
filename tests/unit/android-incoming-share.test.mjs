@@ -57,6 +57,15 @@ test('shared text rejects unsupported hosts, credentials and missing links', () 
   }
 })
 
+test('short YouTube links require exactly one video ID path segment', () => {
+  for (const path of ['invalid', '', `${id}extra`, `${id}/more`, 'watch?v=abcdefghijk']) {
+    assert.equal(extractSharedYoutubeLink(`https://youtu.be/${path}`), null, path)
+  }
+  assert.equal(extractSharedYoutubeLink(`https://youtu.be/${id}/?t=42`), `https://youtu.be/${id}/?t=42`)
+  assert.equal(extractSharedYoutubeLink(`https://youtu.be/invalid https://youtu.be/${id}`), `https://youtu.be/${id}`)
+  assert.equal(extractSharedYoutubeLink('https://youtube.com/@channel'), 'https://youtube.com/@channel')
+})
+
 function shareHandler(dispatch) {
   const state = { value: null }
   const opened = []
@@ -102,6 +111,16 @@ test('invalid shared text and malformed video IDs show feedback without navigati
   assert.deepEqual(h.opened, [])
 })
 
+test('malformed short links cannot be classified as channels or open a prompt', async () => {
+  let lookups = 0
+  const h = shareHandler(async () => { lookups++; return { urlType: 'channel', channelId: 'invalid' } })
+  await h.share('https://youtu.be/invalid')
+  assert.equal(lookups, 0)
+  assert.equal(h.state.value, null)
+  assert.equal(h.toasts[0].message, 'Share.No YouTube Link')
+  assert.deepEqual(h.opened, [])
+})
+
 test('URL resolution failure clears an earlier share prompt and shows feedback', async () => {
   const error = new Error('URL resolution failed')
   const h = shareHandler(async (_, url) => {
@@ -129,7 +148,7 @@ test('an older failed URL resolution cannot clear a newer prompt or show stale f
   assert.deepEqual(h.toasts, [])
 })
 
-function videoActions({ backend = 'local', fallback = false, local, invidious } = {}) {
+function videoActions({ backend = 'local', fallback = false, local, invidious, timeout = AbortSignal.timeout } = {}) {
   const controller = new AbortController()
   const loading = { value: false }
   const failed = { value: false }
@@ -140,11 +159,11 @@ function videoActions({ backend = 'local', fallback = false, local, invidious } 
     dispatch: async (...args) => calls.push(args),
     commit: (...args) => calls.push(args)
   }
-  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console'])(
+  const add = compileFunction(`${actions}\nreturn addVideo`, ['props', 'store', 'controller', 'loading', 'failed', 'getLocalHistoryMetadata', 'getInvidiousHistoryMetadata', 'parseHistoryRepairPlayer', 'emit', 'showToast', 't', 'console', 'AbortSignal'])(
     { videoId: id }, store, controller, loading, failed,
     local ?? (async () => ({ videoDetails: { videoId: id, title: video.title, author: video.author, channelId: video.authorId, lengthSeconds: '120' } })),
     invidious ?? (async () => video), parseHistoryRepairPlayer,
-    event => emitted.push(event), () => {}, key => key, { error() {} }
+    event => emitted.push(event), () => {}, key => key, { error() {} }, { any: AbortSignal.any, timeout }
   )
   return { add, calls, emitted, failed, loading, controller }
 }
@@ -219,6 +238,80 @@ test('cancelled Invidious requests do not attempt a local fallback', async () =>
   })
   await h.add('queue')
   assert.deepEqual(h.calls, [])
+  assert.equal(h.failed.value, false)
+})
+
+test('each fallback backend gets a fresh deadline after a preferred backend times out', async () => {
+  for (const backend of ['local', 'invidious']) {
+    for (const fallback of [false, true]) {
+      for (const action of ['queue', 'playlist']) {
+        const deadlines = []
+        const preferred = async (_, signal) => {
+          deadlines[0].abort(new DOMException('Timed out', 'TimeoutError'))
+          signal.throwIfAborted()
+        }
+        const alternate = async (_, signal) => {
+          assert.equal(deadlines.length, 2)
+          assert.equal(signal.aborted, false)
+          return backend === 'local' ? video : { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
+        }
+        const h = videoActions({
+          backend,
+          fallback,
+          local: backend === 'local' ? preferred : alternate,
+          invidious: backend === 'invidious' ? preferred : alternate,
+          timeout: duration => {
+            assert.equal(duration, 20_000)
+            const deadline = new AbortController()
+            deadlines.push(deadline)
+            return deadline.signal
+          }
+        })
+        await h.add(action)
+        assert.equal(h.failed.value, !fallback)
+        assert.equal(h.calls.length, fallback ? 1 : 0)
+        assert.equal(deadlines.length, fallback ? 2 : 1)
+      }
+    }
+  }
+})
+
+test('the first request deadline cannot abort an already running fallback', async () => {
+  const deadlines = []
+  const h = videoActions({
+    backend: 'invidious',
+    fallback: true,
+    invidious: async () => { throw new Error('Preferred backend failed late') },
+    local: async (_, signal) => {
+      deadlines[0].abort(new DOMException('Timed out', 'TimeoutError'))
+      signal.throwIfAborted()
+      return { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
+    },
+    timeout: () => {
+      const deadline = new AbortController()
+      deadlines.push(deadline)
+      return deadline.signal
+    }
+  })
+  await h.add('queue')
+  assert.equal(h.failed.value, false)
+  assert.equal(h.calls.length, 1)
+})
+
+test('closing the prompt cancels the fallback and prevents its eventual result from being added', async () => {
+  const h = videoActions({
+    backend: 'invidious',
+    fallback: true,
+    invidious: async () => { throw new Error('Preferred backend unavailable') },
+    local: async (_, signal) => {
+      h.controller.abort()
+      assert.equal(signal.aborted, true)
+      return { videoDetails: { videoId: id, title: video.title, lengthSeconds: '120' } }
+    }
+  })
+  await h.add('queue')
+  assert.deepEqual(h.calls, [])
+  assert.deepEqual(h.emitted, [])
   assert.equal(h.failed.value, false)
 })
 

@@ -15,6 +15,7 @@ export function extractSharedYoutubeLink(text) {
     } catch {
       continue
     }
+    if (url.hostname === 'youtu.be' && !/^\/[\w-]{11}\/?$/.test(url.pathname)) continue
     if (['https:', 'http:'].includes(url.protocol) && YOUTUBE_HOSTS.has(url.hostname) && !url.username && !url.password) {
       return href
     }

@@ -76,10 +76,10 @@ function share(text = `A shared video\n${url}`) {
 
 const dialog = () => page.getByRole('dialog', { name: 'Shared YouTube link' })
 
-async function metadataFixtures({ fail = false, failLocal = fail, failInvidious = fail, slow = false } = {}) {
+async function metadataFixtures({ fail = false, failLocal = fail, failInvidious = fail, slow = false, timeoutInvidious = false } = {}) {
   // Exercise both real API adapters with deterministic metadata; keep native
   // intent reception and renderer dispatch unchanged.
-  await page.evaluate(({ id, failLocal, failInvidious, slow }) => {
+  await page.evaluate(({ id, failLocal, failInvidious, slow, timeoutInvidious }) => {
     window.shareTestOriginalFetch ??= window.fetch
     window.shareTestOriginalNativePromise ??= window.Capacitor.nativePromise
     window.shareTestMetadataFinished = false
@@ -87,6 +87,12 @@ async function metadataFixtures({ fail = false, failLocal = fail, failInvidious 
     const metadata = { videoId: id, title: 'Shared video', author: 'Test channel', authorId: 'UC-share-test', lengthSeconds: 120, published: 1700000000, liveNow: false, isUpcoming: false }
     window.fetch = async (input, init) => {
       if (String(input?.url ?? input).startsWith('https://share-fixture.invalid/api/v1/videos/')) {
+        if (timeoutInvidious) {
+          return new Promise((_resolve, reject) => {
+            init.signal.throwIfAborted()
+            init.signal.addEventListener('abort', () => reject(init.signal.reason), { once: true })
+          })
+        }
         if (pending) await pending
         window.shareTestMetadataFinished = true
         return new Response(JSON.stringify(failInvidious ? { error: 'Unavailable' } : metadata), { status: failInvidious ? 503 : 200 })
@@ -108,7 +114,7 @@ async function metadataFixtures({ fail = false, failLocal = fail, failInvidious 
     }
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setCurrentInvidiousInstance', 'https://share-fixture.invalid')
-  }, { id, failLocal, failInvidious, slow })
+  }, { id, failLocal, failInvidious, slow, timeoutInvidious })
 }
 
 try {
@@ -161,6 +167,24 @@ try {
   share()
   await expect(dialog()).toBeVisible()
   console.log('PASS URL resolution failure dismisses the previous prompt and shows feedback')
+
+  await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toHaveCount(0, { timeout: 10_000 })
+  share('https://youtu.be/invalid')
+  await expect(dialog()).toHaveCount(0)
+  await expect(page.getByText('The shared text does not contain a supported YouTube link.', { exact: true })).toBeVisible()
+  share()
+  await expect(dialog()).toBeVisible()
+  console.log('PASS malformed short links show feedback without channel actions')
+
+  await settings({ BackendPreference: 'invidious', BackendFallback: true })
+  await metadataFixtures({ timeoutInvidious: true })
+  const beforeTimeout = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength)
+  await dialog().getByRole('button', { name: 'Add to Queue', exact: true }).click()
+  await page.waitForFunction(length => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength === length + 1, beforeTimeout, { timeout: 30_000 })
+  await expect(dialog()).toHaveCount(0)
+  share()
+  await expect(dialog()).toBeVisible()
+  console.log('PASS an Invidious timeout falls back to local metadata with a fresh deadline')
 
   for (const [backend, fallback] of [['local', false], ['invidious', false], ['local', true], ['invidious', true]]) {
     await settings({ BackendPreference: backend, BackendFallback: fallback })

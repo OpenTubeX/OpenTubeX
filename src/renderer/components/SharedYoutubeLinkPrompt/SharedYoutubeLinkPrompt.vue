@@ -108,12 +108,18 @@ onBeforeUnmount(() => controller.abort())
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
 
 async function loadVideo(signal) {
+  const loadMetadata = async loader => {
+    const requestSignal = AbortSignal.any([signal, AbortSignal.timeout(20_000)])
+    const metadata = await loader(props.videoId, requestSignal)
+    requestSignal.throwIfAborted()
+    return metadata
+  }
   const loadInvidious = async () => {
-    const info = await getInvidiousHistoryMetadata(props.videoId, signal)
+    const info = await loadMetadata(getInvidiousHistoryMetadata)
     if (info?.error || info?.videoId !== props.videoId) throw new Error('Video metadata unavailable')
     return { ...info, published: info.published * 1000, isLive: info.liveNow }
   }
-  const loadLocal = async () => parseHistoryRepairPlayer(await getLocalHistoryMetadata(props.videoId, signal), props.videoId)
+  const loadLocal = async () => parseHistoryRepairPlayer(await loadMetadata(getLocalHistoryMetadata), props.videoId)
   const prefersInvidious = store.getters.getBackendPreference === 'invidious'
   let info
   try {
@@ -131,9 +137,8 @@ async function addVideo(action) {
   loading.value = true
   failed.value = false
   try {
-    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(20_000)])
-    const video = await loadVideo(signal)
-    signal.throwIfAborted()
+    const video = await loadVideo(controller.signal)
+    controller.signal.throwIfAborted()
     if (action === 'playlist') {
       await store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [video] })
     } else {
