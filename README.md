@@ -13,28 +13,28 @@ endorsed by, maintained by, or supported by the FreeTube project.
 
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
-    <img alt="Latest release" src="https://img.shields.io/github/v/release/OpenTubeX/OpenTubeX?filter=%21%2A-nightly-%2A" />
+    <img alt="Latest release" src="https://img.shields.io/github/v/release/OpenTubeX/OpenTubeX?filter=%21%2A-nightly-%2A&amp;style=for-the-badge" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
-    <img alt="Build status" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
+    <img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/build.yml?branch=development&amp;label=Build&amp;style=for-the-badge" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml">
-    <img alt="E2E tests" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml/badge.svg?branch=development" />
+    <img alt="E2E tests" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/e2e.yml?branch=development&amp;label=E2E%20tests&amp;style=for-the-badge" />
   </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
-    <img alt="CodeQL" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml/badge.svg?branch=development" />
+    <img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/codeql.yml?branch=development&amp;label=CodeQL&amp;style=for-the-badge" />
   </a>
   <a href="https://weblate.opentubex.org/engage/opentubex/">
-    <img alt="Translation status" src="https://weblate.opentubex.org/widgets/opentubex/-/svg-badge.svg" />
+    <img alt="Translation status" src="https://img.shields.io/weblate/progress/opentubex?server=https%3A%2F%2Fweblate.opentubex.org&amp;style=for-the-badge&amp;logo=weblate&amp;logoColor=white" />
   </a>
 </p>
 
 <p align="center">
   <a href="https://fluxer.opentubex.org">
-    <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&query=%24.member_count&label=Fluxer&suffix=%20members&color=4641D9&logo=fluxer&logoColor=white" />
+    <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&amp;query=%24.member_count&amp;label=Fluxer&amp;suffix=%20members&amp;color=4641D9&amp;logo=fluxer&amp;logoColor=white&amp;style=for-the-badge" />
   </a>
   <a href="https://matrix.opentubex.org">
-    <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&logoColor=white" />
+    <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&amp;logoColor=white&amp;style=for-the-badge" />
   </a>
 </p>
 
@@ -157,7 +157,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 
 <p>
   <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
-    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads" />
+    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads&amp;style=for-the-badge" />
   </a>
 </p>
 
@@ -175,7 +175,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
-* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/) [![AUR version](https://img.shields.io/aur/version/opentubex-bin?label=AUR)](https://aur.archlinux.org/packages/opentubex-bin/)
+* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/) [![AUR version](https://img.shields.io/aur/version/opentubex-bin?label=AUR&style=for-the-badge)](https://aur.archlinux.org/packages/opentubex-bin/)
 * Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
   OpenTubeX supports [Keep Android Open](https://keepandroidopen.org/) and will never be available on the Google Play Store.
 * iOS / iPadOS (experimental): requires 17.4 or later. See the [installation and update instructions](https://opentubex.org/docs/installing/#ios--ipados-experimental).
