@@ -1213,6 +1213,8 @@ Channel:
   Search Result Types: Hakutulosten tyypit
   All Results: Kaikki
   View All: Näytä kaikki
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Tällä kanavalla on videoita, mutta yhtäkään ei voitu näyttää. Yritä ladata lisää"
 Video:
   External DRM Protected: "DRM-suojattuja videoita ei voida katsoa OpenTubeXissä, koska ne vaativat ei-vapaita, suljetun koodin osia."
   Invalid Media URL: "Virheellinen median URL-osoite"

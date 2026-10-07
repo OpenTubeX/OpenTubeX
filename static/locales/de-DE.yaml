@@ -1726,11 +1726,12 @@ Channel:
   Your search results have returned 0 results: Deine Suche hat 0 Ergebnisse geliefert
   Videos:
     Videos: Videos
-    This channel does not currently have any videos: Dieser Kanal hat aktuell keine Videos
     Sort Types:
       Newest: Neueste
       Oldest: Älteste
       Most Popular: Beliebteste
+    This channel has videos but none could be displayed, try fetching more: "Dieser Kanal hat Videos, aber keines konnte angezeigt werden. Versuche, weitere zu laden"
+    This channel does not currently have any videos: Dieser Kanal hat aktuell keine Videos
   Playlists:
     Playlists: Playlists
     This channel does not currently have any playlists: Dieser Kanal hat derzeit keine Playlists

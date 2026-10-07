@@ -730,11 +730,11 @@ Channel:
   Your search results have returned 0 results: 'Your search results have returned 0 results'
   Videos:
     Videos: 'Videos'
-    This channel does not currently have any videos: 'This channel does not currently have any videos'
     Sort Types:
       Newest: 'Newest'
       Oldest: 'Oldest'
       Most Popular: 'Most Popular'
+    This channel does not currently have any videos: 'This channel does not currently have any videos'
   Playlists:
     Playlists: 'Playlists'
     This channel does not currently have any playlists: 'This channel does not currently have any playlists'

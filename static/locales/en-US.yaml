@@ -1958,12 +1958,13 @@ Channel:
   View All: View All
   Videos:
     Videos: Videos
-    This channel does not currently have any videos: This channel does not currently
-      have any videos
+    This channel has videos but none could be displayed, try fetching more: This channel has videos but none could be displayed, try fetching more
     Sort Types:
       Newest: Newest
       Oldest: Oldest
       Most Popular: Most Popular
+    This channel does not currently have any videos: This channel does not currently
+      have any videos
   Shorts:
     This channel does not currently have any shorts: This channel does not currently have any shorts
   Live:

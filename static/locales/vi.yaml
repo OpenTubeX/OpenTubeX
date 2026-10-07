@@ -644,11 +644,11 @@ Channel:
   Your search results have returned 0 results: 'Kết quả tìm kiếm của bạn là 0 kết quả'
   Videos:
     Videos: 'Video'
-    This channel does not currently have any videos: 'Kênh này hiện chưa có video'
     Sort Types:
       Newest: 'Mới nhất'
       Oldest: 'Cũ nhất'
       Most Popular: 'Phổ biến nhất'
+    This channel does not currently have any videos: 'Kênh này hiện chưa có video'
   Playlists:
     Playlists: 'Danh sách phát'
     This channel does not currently have any playlists: 'Kênh này hiện chưa có danh sách phát'

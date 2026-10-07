@@ -691,11 +691,11 @@ Channel:
   Your search results have returned 0 results: 'Пошук дав 0 результатів'
   Videos:
     Videos: 'Відео'
-    This channel does not currently have any videos: 'Наразі на цьому каналі немає жодного відео'
     Sort Types:
       Newest: 'Найновіші'
       Oldest: 'Найдавніші'
       Most Popular: 'Найпопулярніші'
+    This channel does not currently have any videos: 'Наразі на цьому каналі немає жодного відео'
   Playlists:
     Playlists: 'Добірки'
     This channel does not currently have any playlists: 'Цей канал наразі не має добірок'

@@ -1233,6 +1233,8 @@ Channel:
   Search Result Types: Врсте резултата претраге
   All Results: Све
   View All: Прикажи све
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Овај канал има видео-снимке, али ниједан није могао да се прикаже. Покушајте да учитате још"
 Video:
   External DRM Protected: "Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода."
   Invalid Media URL: "Неважећа URL адреса медија"

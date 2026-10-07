@@ -707,11 +707,11 @@ Channel:
   Your search results have returned 0 results: 'Търсенето върна 0 резултата'
   Videos:
     Videos: 'Видеа'
-    This channel does not currently have any videos: 'В този канал по настоящем няма видеа'
     Sort Types:
       Newest: 'Най-нови'
       Oldest: 'Най-стари'
       Most Popular: 'Най-популярни'
+    This channel does not currently have any videos: 'В този канал по настоящем няма видеа'
   Playlists:
     Playlists: 'Плейлисти'
     This channel does not currently have any playlists: 'В този канал по настоящем няма плейлисти'

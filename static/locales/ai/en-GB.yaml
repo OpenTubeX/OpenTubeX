@@ -1166,6 +1166,8 @@ Channel:
   Channel Name Unavailable: Channel name unavailable
   Search Result Types: Search result types
   All Results: All
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "This channel has videos but none could be displayed, try fetching more"
 Video:
   External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."
   Invalid Media URL: "Invalid media URL"

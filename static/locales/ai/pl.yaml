@@ -653,6 +653,8 @@ Channel:
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Ten kanał ma filmy, ale nie udało się wyświetlić żadnego z nich. Spróbuj wczytać więcej"
 Video:
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"

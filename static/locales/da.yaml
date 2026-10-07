@@ -670,11 +670,11 @@ Channel:
   Your search results have returned 0 results: 'Dine søgeresultater gav 0 resultater'
   Videos:
     Videos: 'Videoer'
-    This channel does not currently have any videos: 'Denne kanal har i øjeblikket ingen videoer'
     Sort Types:
       Newest: 'Nyeste'
       Oldest: 'Ældste'
       Most Popular: 'Mest populære'
+    This channel does not currently have any videos: 'Denne kanal har i øjeblikket ingen videoer'
   Playlists:
     Playlists: 'Playlister'
     This channel does not currently have any playlists: 'Denne kanal har i øjeblikket ingen playlister'

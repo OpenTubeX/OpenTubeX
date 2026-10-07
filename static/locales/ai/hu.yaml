@@ -1180,6 +1180,8 @@ Channel:
   Channel Name Unavailable: A csatorna neve nem érhető el
   Search Result Types: Keresési találatok típusai
   All Results: Összes
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Ezen a csatornán vannak videók, de egyiket sem sikerült megjeleníteni. Próbálj meg többet betölteni"
 Video:
   External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
   Invalid Media URL: "Érvénytelen média-URL"

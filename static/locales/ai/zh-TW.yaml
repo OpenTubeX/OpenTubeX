@@ -1180,6 +1180,8 @@ Channel:
   Channel Name Unavailable: 無法取得頻道名稱
   Search Result Types: 搜尋結果類型
   All Results: 全部
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "此頻道有影片，但無法顯示任何影片，請嘗試載入更多"
 Video:
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
   Invalid Media URL: "無效的媒體網址"

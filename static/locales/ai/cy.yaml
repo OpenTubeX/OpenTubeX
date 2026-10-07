@@ -1190,6 +1190,8 @@ Channel:
   Channel Name Unavailable: Nid yw enw'r sianel ar gael
   Search Result Types: Mathau o ganlyniadau chwilio
   All Results: Pob un
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Mae gan y sianel hon fideos ond ni ellid dangos yr un ohonynt. Ceisiwch lwytho mwy"
 Video:
   External DRM Protected: "Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell gaeedig perchnogol arnynt."
   Invalid Media URL: "URL cyfryngau annilys"

@@ -1187,6 +1187,8 @@ Channel:
   Channel Name Unavailable: Kanalnamnet är inte tillgängligt
   Search Result Types: Typer av sökresultat
   All Results: Alla
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Den här kanalen har videor, men ingen kunde visas. Försök att hämta fler"
 Video:
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."
   Invalid Media URL: "Ogiltig medie-URL"

@@ -1190,6 +1190,8 @@ Channel:
   Channel Name Unavailable: Името на канала не е налично
   Search Result Types: Видове резултати от търсенето
   All Results: Всички
+  Videos:
+    This channel has videos but none could be displayed, try fetching more: "Този канал има видеоклипове, но нито един не може да бъде показан. Опитайте да заредите още"
 Video:
   External DRM Protected: "Видеата, защитени с DRM, не могат да се възпроизвеждат в OpenTubeX, тъй като изискват собствени компоненти със затворен код."
   Invalid Media URL: "Невалиден URL адрес на медия"

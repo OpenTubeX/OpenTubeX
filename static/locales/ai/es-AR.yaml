@@ -1380,11 +1380,12 @@ Channel:
   View All: Ver todo
   Videos:
     Videos: Videos
-    This channel does not currently have any videos: Este canal no tiene actualmente ningún video
     Sort Types:
       Newest: Más recientes
       Oldest: Más antiguos
       Most Popular: Más populares
+    This channel has videos but none could be displayed, try fetching more: "Este canal tiene videos, pero no se pudo mostrar ninguno. Intentá cargar más"
+    This channel does not currently have any videos: Este canal no tiene actualmente ningún video
   Shorts:
     This channel does not currently have any shorts: Este canal no tiene actualmente ningún video corto
   Live:
