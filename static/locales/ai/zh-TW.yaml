@@ -1526,6 +1526,11 @@ Change Format:
   yt-dlp Default Clients Fallback: 偏好的 yt-dlp 用戶端無法提供可播放的串流，改用 yt-dlp 的預設用戶端
   Built-in Fallback Template: '內建引擎無法播放串流，改用 yt-dlp：{error}'
 Share:
+  Shared YouTube Link: "分享的 YouTube 連結"
+  Open in Player: "在播放器中開啟"
+  No YouTube Link: "分享的文字中沒有支援的 YouTube 連結。"
+  Loading Video Information: "正在載入影片資訊…"
+  Video Information Failed: "無法載入影片資訊。請重試或開啟連結。"
   Share Link: "分享連結"
   Share failed: "無法分享連結"
   Timestamp Link Copied: 已將時間戳記連結複製到剪貼簿

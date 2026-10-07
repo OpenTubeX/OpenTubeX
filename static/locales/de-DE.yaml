@@ -2290,6 +2290,11 @@ Change Format:
     Standardclients von yt-dlp versucht
   Built-in Fallback Template: 'Die integrierte Engine konnte den Stream nicht wiedergeben. Stattdessen wird yt-dlp versucht: {error}'
 Share:
+  Shared YouTube Link: "Geteilter YouTube-Link"
+  Open in Player: "Im Player öffnen"
+  No YouTube Link: "Der geteilte Text enthält keinen unterstützten YouTube-Link."
+  Loading Video Information: "Videoinformationen werden geladen…"
+  Video Information Failed: "Videoinformationen konnten nicht geladen werden. Versuche es erneut oder öffne den Link."
   Share Link: "Link teilen"
   Share failed: "Link konnte nicht geteilt werden"
   Share Video: Video teilen

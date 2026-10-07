@@ -1567,6 +1567,11 @@ Change Format:
   yt-dlp Default Clients Fallback: לקוחות yt-dlp המועדפים לא הצליחו לספק סטרימים שניתנים להפעלה, ולכן נעשה ניסיון עם לקוחות ברירת המחדל של yt-dlp
   Built-in Fallback Template: 'המנוע המובנה לא הצליח להפעיל את הסטרים, ולכן נעשה ניסיון עם yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "קישור YouTube ששותף"
+  Open in Player: "פתיחה בנגן"
+  No YouTube Link: "הטקסט ששותף אינו מכיל קישור YouTube נתמך."
+  Loading Video Information: "טוען מידע על הסרטון…"
+  Video Information Failed: "לא ניתן לטעון מידע על הסרטון. נסו שוב או פתחו את הקישור."
   Share Link: "שיתוף קישור"
   Share failed: "לא ניתן לשתף את הקישור"
   Timestamp Link Copied: הקישור לנקודת הזמן הועתק ללוח

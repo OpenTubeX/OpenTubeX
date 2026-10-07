@@ -1522,6 +1522,11 @@ Change Format:
   yt-dlp Default Clients Fallback: 首选的 yt-dlp 客户端无法提供可播放的流，改用 yt-dlp 的默认客户端
   Built-in Fallback Template: '内置引擎无法播放此流，改用 yt-dlp：{error}'
 Share:
+  Shared YouTube Link: "分享的 YouTube 链接"
+  Open in Player: "在播放器中打开"
+  No YouTube Link: "分享的文本中没有受支持的 YouTube 链接。"
+  Loading Video Information: "正在加载视频信息…"
+  Video Information Failed: "无法加载视频信息。请重试或打开链接。"
   Share Link: "分享链接"
   Share failed: "无法分享链接"
   Timestamp Link Copied: 已将带时间戳的链接复制到剪贴板

@@ -1569,6 +1569,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Os clientes preferidos de yt-dlp non puideron fornecer emisións reproducibles; téntase cos clientes predeterminados de yt-dlp
   Built-in Fallback Template: 'O motor integrado non puido reproducir a emisión; téntase con yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Ligazón de YouTube compartida"
+  Open in Player: "Abrir no reprodutor"
+  No YouTube Link: "O texto compartido non contén unha ligazón de YouTube compatible."
+  Loading Video Information: "Cargando información do vídeo…"
+  Video Information Failed: "Non se puido cargar a información do vídeo. Téntao de novo ou abre a ligazón."
   Share Link: "Compartir ligazón"
   Share failed: "Non se puido compartir a ligazón"
   Timestamp Link Copied: Copiouse no portapapeis a ligazón coa marca de tempo

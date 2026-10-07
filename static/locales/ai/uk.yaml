@@ -1560,6 +1560,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Бажані клієнти yt-dlp не надали придатних для відтворення потоків, тому виконується спроба з типовими клієнтами yt-dlp
   Built-in Fallback Template: 'Вбудованому механізму не вдалося відтворити потік, тому виконується спроба через yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Поширене посилання YouTube"
+  Open in Player: "Відкрити у програвачі"
+  No YouTube Link: "Поширений текст не містить підтримуваного посилання YouTube."
+  Loading Video Information: "Завантаження інформації про відео…"
+  Video Information Failed: "Не вдалося завантажити інформацію про відео. Спробуйте знову або відкрийте посилання."
   Share Link: "Поділитися посиланням"
   Share failed: "Не вдалося поділитися посиланням"
   Timestamp Link Copied: Посилання з позначкою часу скопійовано до буфера обміну

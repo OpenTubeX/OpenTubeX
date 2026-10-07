@@ -1538,6 +1538,11 @@ Change Format:
   yt-dlp Default Clients Fallback: De föredragna yt-dlp-klienterna kunde inte tillhandahålla spelbara strömmar. Försöker med yt-dlp:s standardklienter i stället
   Built-in Fallback Template: 'Den inbyggda motorn kunde inte spela upp strömmen. Försöker med yt-dlp i stället: {error}'
 Share:
+  Shared YouTube Link: "Delad YouTube-länk"
+  Open in Player: "Öppna i spelaren"
+  No YouTube Link: "Den delade texten innehåller ingen YouTube-länk som stöds."
+  Loading Video Information: "Läser in videoinformation…"
+  Video Information Failed: "Kunde inte läsa in videoinformation. Försök igen eller öppna länken."
   Share Link: "Dela länk"
   Share failed: "Kunde inte dela länken"
   Timestamp Link Copied: Länken med tidsstämpeln har kopierats till urklipp

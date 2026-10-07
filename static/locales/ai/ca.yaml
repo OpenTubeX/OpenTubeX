@@ -2021,6 +2021,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Els clients preferits de yt-dlp no han pogut proporcionar fluxos reproduïbles; es proven els clients predeterminats de yt-dlp
   Built-in Fallback Template: 'El motor integrat no ha pogut reproduir el flux; es prova yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Enllaç de YouTube compartit"
+  Open in Player: "Obre al reproductor"
+  No YouTube Link: "El text compartit no conté cap enllaç de YouTube compatible."
+  Loading Video Information: "S’està carregant la informació del vídeo…"
+  Video Information Failed: "No s’ha pogut carregar la informació del vídeo. Torna-ho a provar o obre l’enllaç."
   Share Link: "Comparteix l’enllaç"
   Share failed: "No s’ha pogut compartir l’enllaç"
   Share Post: Comparteix la publicació

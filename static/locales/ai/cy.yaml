@@ -1545,6 +1545,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Nid oedd y cleientiaid yt-dlp dewisol yn gallu darparu ffrydiau y gellir eu chwarae; wrthi'n rhoi cynnig ar gleientiaid rhagosodedig yt-dlp yn eu lle
   Built-in Fallback Template: 'Nid oedd y peiriant mewnol yn gallu chwarae''r ffrwd; wrthi''n rhoi cynnig ar yt-dlp yn ei le: {error}'
 Share:
+  Shared YouTube Link: "Dolen YouTube a rannwyd"
+  Open in Player: "Agor yn y chwaraewr"
+  No YouTube Link: "Nid yw’r testun a rannwyd yn cynnwys dolen YouTube a gefnogir."
+  Loading Video Information: "Yn llwytho gwybodaeth y fideo…"
+  Video Information Failed: "Methu llwytho gwybodaeth y fideo. Rhowch gynnig arall arni neu agorwch y ddolen."
   Share Link: "Rhannu dolen"
   Share failed: "Methu rhannu’r ddolen"
   Timestamp Link Copied: Wedi copïo dolen y stamp amser i'r clipfwrdd

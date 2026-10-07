@@ -1563,6 +1563,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Clienții yt-dlp preferați nu au putut furniza fluxuri redabile; se încearcă în schimb clienții impliciți ai yt-dlp
   Built-in Fallback Template: 'Motorul încorporat nu a putut reda fluxul; se încearcă în schimb yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Link YouTube distribuit"
+  Open in Player: "Deschide în player"
+  No YouTube Link: "Textul distribuit nu conține un link YouTube acceptat."
+  Loading Video Information: "Se încarcă informațiile videoclipului…"
+  Video Information Failed: "Nu s-au putut încărca informațiile videoclipului. Încearcă din nou sau deschide linkul."
   Share Link: "Distribuie linkul"
   Share failed: "Linkul nu a putut fi distribuit"
   Share Post: Distribuie postarea

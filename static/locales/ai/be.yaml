@@ -1607,6 +1607,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Выбраныя кліенты yt-dlp не змаглі атрымаць патокі для прайгравання, таму выкарыстоўваюцца прадвызначаныя кліенты yt-dlp
   Built-in Fallback Template: 'Убудаваны рухавік не змог прайграць паток, таму выкарыстоўваецца yt-dlp: {error}'
 Share:
+  Shared YouTube Link: "Абагуленая спасылка YouTube"
+  Open in Player: "Адкрыць у прайгравальніку"
+  No YouTube Link: "Абагулены тэкст не змяшчае спасылкі YouTube, якая падтрымліваецца."
+  Loading Video Information: "Загрузка звестак пра відэа…"
+  Video Information Failed: "Не ўдалося загрузіць звесткі пра відэа. Паспрабуйце зноў або адкрыйце спасылку."
   Share Link: "Падзяліцца спасылкай"
   Share failed: "Не ўдалося падзяліцца спасылкай"
   Share Post: Абагуліць допіс

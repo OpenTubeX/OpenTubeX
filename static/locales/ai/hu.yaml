@@ -1522,6 +1522,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Az előnyben részesített yt-dlp-kliensek nem biztosítottak lejátszható adatfolyamokat, ezért az yt-dlp alapértelmezett klienseivel folytatódik a próbálkozás
   Built-in Fallback Template: 'A beépített motor nem tudta lejátszani az adatfolyamot, ezért az yt-dlp veszi át a lejátszást: {error}'
 Share:
+  Shared YouTube Link: "Megosztott YouTube-hivatkozás"
+  Open in Player: "Megnyitás a lejátszóban"
+  No YouTube Link: "A megosztott szöveg nem tartalmaz támogatott YouTube-hivatkozást."
+  Loading Video Information: "Videóadatok betöltése…"
+  Video Information Failed: "Nem sikerült betölteni a videó adatait. Próbáld újra, vagy nyisd meg a hivatkozást."
   Share Link: "Hivatkozás megosztása"
   Share failed: "Nem sikerült megosztani a hivatkozást"
   Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva

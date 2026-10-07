@@ -1524,6 +1524,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Eelistatud yt-dlp kliendid ei saanud esitatavaid vooge hankida, proovitakse yt-dlp vaikekliente
   Built-in Fallback Template: 'Sisseehitatud mootor ei saanud voogu esitada, selle asemel proovitakse yt-dlp-d: {error}'
 Share:
+  Shared YouTube Link: "Jagatud YouTube’i link"
+  Open in Player: "Ava mängijas"
+  No YouTube Link: "Jagatud tekst ei sisalda toetatud YouTube’i linki."
+  Loading Video Information: "Video teabe laadimine…"
+  Video Information Failed: "Video teavet ei saanud laadida. Proovi uuesti või ava link."
   Share Link: "Jaga linki"
   Share failed: "Linki ei õnnestunud jagada"
   Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale

@@ -1541,6 +1541,11 @@ Change Format:
   yt-dlp Default Clients Fallback: De foretrukne yt-dlp-klientene kunne ikke hente strømmer som kan spilles av. Prøver standardklientene til yt-dlp i stedet
   Built-in Fallback Template: 'Den innebygde motoren kunne ikke spille av strømmen. Prøver yt-dlp i stedet: {error}'
 Share:
+  Shared YouTube Link: "Delt YouTube-lenke"
+  Open in Player: "Åpne i avspilleren"
+  No YouTube Link: "Den delte teksten inneholder ingen støttet YouTube-lenke."
+  Loading Video Information: "Laster videoinformasjon…"
+  Video Information Failed: "Kunne ikke laste videoinformasjon. Prøv igjen eller åpne lenken."
   Share Link: "Del lenke"
   Share failed: "Kunne ikke dele lenken"
   Timestamp Link Copied: Lenken med tidsstempel er kopiert til utklippstavlen

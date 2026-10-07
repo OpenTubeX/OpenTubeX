@@ -1565,6 +1565,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Ensisijaiset yt-dlp-asiakasohjelmat eivät tarjonneet toistettavia mediavirtoja, joten yritetään yt-dlp:n oletusasiakasohjelmia
   Built-in Fallback Template: 'Sisäinen moottori ei voinut toistaa mediavirtaa, joten yritetään yt-dlp:tä: {error}'
 Share:
+  Shared YouTube Link: "Jaettu YouTube-linkki"
+  Open in Player: "Avaa soittimessa"
+  No YouTube Link: "Jaettu teksti ei sisällä tuettua YouTube-linkkiä."
+  Loading Video Information: "Ladataan videon tietoja…"
+  Video Information Failed: "Videon tietoja ei voitu ladata. Yritä uudelleen tai avaa linkki."
   Share Link: "Jaa linkki"
   Share failed: "Linkin jakaminen epäonnistui"
   Timestamp Link Copied: Aikaleiman sisältävä linkki kopioitiin leikepöydälle

@@ -1536,6 +1536,11 @@ Change Format:
   yt-dlp Default Clients Fallback: Üstünlük verilən yt-dlp müştəriləri oynadıla bilən axınlar təmin edə bilmədi, yt-dlp-nin ilkin müştəriləri sınanır
   Built-in Fallback Template: 'Daxili mühərrik axını oynada bilmədi, yt-dlp sınanır: {error}'
 Share:
+  Shared YouTube Link: "Paylaşılan YouTube keçidi"
+  Open in Player: "Pleyerdə aç"
+  No YouTube Link: "Paylaşılan mətndə dəstəklənən YouTube keçidi yoxdur."
+  Loading Video Information: "Video məlumatları yüklənir…"
+  Video Information Failed: "Video məlumatlarını yükləmək olmadı. Yenidən cəhd edin və ya keçidi açın."
   Share Link: Linki paylaş
   Share failed: Link paylaşıla bilmədi
   Timestamp Link Copied: Vaxt göstəricili link buferə köçürüldü

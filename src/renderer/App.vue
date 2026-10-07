@@ -189,6 +189,14 @@
     <FtSearchFilters
       v-if="showSearchFilters"
     />
+    <SharedYoutubeLinkPrompt
+      v-if="sharedYoutubeLink"
+      :key="sharedYoutubeLink.id"
+      :url="sharedYoutubeLink.url"
+      :video-id="sharedYoutubeLink.videoId"
+      @open="openSharedYoutubeLink"
+      @close="sharedYoutubeLink = null"
+    />
     <FtPlaylistAddVideoPrompt
       v-if="showAddToPlaylistPrompt"
     />
@@ -553,6 +561,9 @@ import TabBar from './components/TabBar/TabBar.vue'
 import CapacitorTabletTabBar from './components/TabBar/CapacitorTabletTabBar.vue'
 import TabContent from './components/TabContent/TabContent.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
+import SharedYoutubeLinkPrompt from './components/SharedYoutubeLinkPrompt/SharedYoutubeLinkPrompt.vue'
+import { initializeAndroidIncomingShare } from './helpers/androidIncomingShare'
+import { extractSharedYoutubeLink } from './helpers/sharedYoutubeLink'
 import SubscriptionRefreshErrors from './components/SubscriptionRefreshErrors.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -961,6 +972,8 @@ function closeSideNav() {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isAnyPromptOpen = computed(() => store.getters.isAnyPromptOpen)
+const sharedYoutubeLink = ref(null)
+let sharedYoutubeLinkId = 0
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
@@ -1177,6 +1190,7 @@ let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
 let removeCapacitorIntegrationListeners = null
+let removeAndroidIncomingShare = null
 let capacitorPullToRefreshSetup = null
 let removeCapacitorTabPreviews = null
 let removeYtDlpBinaryUpdatedListener = null
@@ -1710,6 +1724,10 @@ onMounted(async () => {
     }
 
     await nextTick()
+    // Startup prompts teleport into .app, which only exists after dataReady renders.
+    if (isCapacitor) {
+      removeAndroidIncomingShare = await initializeAndroidIncomingShare(handleAndroidSharedText)
+    }
     if (showAutoSyncNotice) {
       showAutoSyncNoticeOnce(release => {
         const dismissNotice = () => {
@@ -1887,6 +1905,7 @@ onBeforeUnmount(() => {
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
   removeCapacitorIntegrationListeners?.()
+  removeAndroidIncomingShare?.()
   capacitorPullToRefreshSetup?.then(remove => remove?.())
   removeYtDlpBinaryUpdatedListener?.()
   removeAndroidYtDlpSettingsListener?.()
@@ -4823,6 +4842,25 @@ function enableOpenUrl() {
       handleYoutubeLink(url, { tabId })
     }
   })
+}
+
+async function handleAndroidSharedText(text) {
+  const id = ++sharedYoutubeLinkId
+  const url = extractSharedYoutubeLink(text)
+  const info = url ? await store.dispatch('getYoutubeUrlInfo', url) : null
+  if (id !== sharedYoutubeLinkId) return
+  sharedYoutubeLink.value = null
+  if (!info || ['invalid_url', 'unknown'].includes(info.urlType) || (info.urlType === 'video' && !/^[\w-]{11}$/.test(info.videoId))) {
+    showToast({ message: t('Share.No YouTube Link'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+  sharedYoutubeLink.value = { id, url, videoId: info.videoId ?? '' }
+}
+
+function openSharedYoutubeLink() {
+  const url = sharedYoutubeLink.value?.url
+  sharedYoutubeLink.value = null
+  if (url) handleYoutubeLink(url)
 }
 
 async function enableCapacitorIntegrations() {
