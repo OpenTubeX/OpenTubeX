@@ -19,20 +19,28 @@ export function addHtmlImagePlaceholders(element) {
     image.style.pointerEvents = 'none'
     anchor.after(placeholder)
 
+    // A stalled response must not leave a permanent animated loading indication.
+    const showFallback = () => {
+      placeholder.src = thumbnailPlaceholder
+      placeholder.classList.remove('ft-shimmer')
+    }
+    const skeletonTimeout = setTimeout(showFallback, 10_000)
+
     image.addEventListener('load', () => {
+      clearTimeout(skeletonTimeout)
       if (!image.naturalWidth) return
       if (originalStyle === null) image.removeAttribute('style')
       else image.setAttribute('style', originalStyle)
       placeholder.remove()
     })
     image.addEventListener('error', () => {
+      clearTimeout(skeletonTimeout)
       if (image.alt) {
         placeholder.replaceWith(document.createTextNode(image.alt))
         image.remove()
         return
       }
-      placeholder.src = thumbnailPlaceholder
-      placeholder.classList.remove('ft-shimmer')
+      showFallback()
       image.style.position = 'absolute'
       image.style.visibility = 'hidden'
       image.style.pointerEvents = 'none'

@@ -138,8 +138,11 @@ watch(customImageSource, () => {
   failedCustomImage.value = null
 })
 function checkCachedImage({ el: image, props: imageProps }) {
-  if (image.complete && image.naturalWidth) {
+  if (!image.complete) return
+  if (image.naturalWidth) {
     loadedCustomImage.value = imageProps.src
+  } else {
+    failedCustomImage.value = imageProps.src
   }
 }
 const iconifyId = computed(() => resolveIconifyId(props.icon))

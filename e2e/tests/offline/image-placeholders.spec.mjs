@@ -806,3 +806,65 @@ test('protects captured tab previews while loading and after failure', async ({ 
   await expect(preview.locator('.tabTooltipFallbackIcon')).toBeVisible()
   await preview.screenshot({ path: testInfo.outputPath('captured-tab-fallback.png') })
 })
+
+test('stalled playlist thumbnails stop shimmering and can still finish loading', async ({ page }, testInfo) => {
+  await page.clock.install()
+  const pending = []
+  await page.route('https://stalled-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'stalled-playlist',
+      data: [{ type: 'playlist', dataSource: 'local', playlistId: 'empty-remote', title: 'Unavailable playlist thumbnail', thumbnail: 'https://stalled-images.test/playlist.jpg', channelName: 'Example channel', channelId: '', videoCount: 0 }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/stalled-playlist' })
+  })
+  const card = page.locator('.ft-list-item', { hasText: 'Unavailable playlist thumbnail' })
+  const placeholder = card.locator('.retryImagePlaceholder')
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect.poll(() => pending.length).toBe(1)
+  await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
+  const bounds = await placeholder.boundingBox()
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', /thumbnail_placeholder/)
+  const fallbackBounds = await placeholder.boundingBox()
+  for (const [key, value] of Object.entries(bounds)) expect(fallbackBounds[key]).toBeCloseTo(value, 1)
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await card.screenshot({ path: testInfo.outputPath(`stalled-playlist-${theme}.png`) })
+  }
+  await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+  await expect(placeholder).toHaveCount(0)
+  await expect(card.locator('.thumbnailImage')).toBeVisible()
+})
+
+test('playlist cards with missing thumbnails use static fallbacks', async ({ page }) => {
+  const rendererErrors = []
+  page.on('pageerror', error => rendererErrors.push(error.message))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'missing-playlist-images',
+      data: [null, undefined, '', '   '].map((thumbnail, index) => ({ type: 'playlist', dataSource: 'local', playlistId: `missing-${index}`, title: `Empty playlist ${index}`, thumbnail, channelName: '', channelId: '', videoCount: 0 })),
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/missing-playlist-images' })
+  })
+  const cards = page.locator('.ft-list-item')
+  await expect(cards).toHaveCount(4)
+  await expect(cards.locator('.ft-shimmer')).toHaveCount(0)
+  for (const card of await cards.all()) {
+    await expect(card.locator('.retryImagePlaceholder')).toBeVisible()
+    await expect(card.locator('.retryImagePlaceholder')).toHaveAttribute('src', /thumbnail_placeholder/)
+  }
+  expect(rendererErrors).toEqual([])
+})

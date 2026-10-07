@@ -63,3 +63,26 @@ test('uses permanent fallbacks for missing sources and failures completed before
   }
   await expect(page.locator('#images')).toContainText('Unavailable image')
 })
+
+test('stalled inline images show static fallbacks and recover on a late load', async ({ page }) => {
+  await page.clock.install()
+  const svg = await installPlaceholderHelper(page)
+  const pending = []
+  await page.route('https://stalled-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const container = document.createElement('div')
+    container.id = 'stalled-images'
+    container.innerHTML = '<img src="https://stalled-images.test/image" width="48" height="48" alt="Example">'
+    document.body.append(container)
+    window.addHtmlImagePlaceholders(container)
+  })
+  const placeholder = page.locator('.htmlImagePlaceholder')
+  await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect.poll(() => pending.length).toBe(1)
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
+  await expect(placeholder).toHaveCount(0)
+  await expect(page.locator('#stalled-images img')).toBeVisible()
+})

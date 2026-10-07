@@ -2,7 +2,7 @@
   <!-- Keep a small box for lazy loading without expanding scroll overflow. -->
   <img
     v-bind="{ ...$attrs, ...parentScope }"
-    :src="imageUrl"
+    :src="imageUrl || undefined"
     :alt="$attrs.alt ?? ''"
     :style="hasLoaded ? null : {
       position: 'absolute', visibility: 'hidden', pointerEvents: 'none', inlineSize: '1px', blockSize: '1px'
@@ -46,11 +46,12 @@ const parentScopeId = getCurrentInstance().vnode.scopeId
 const parentScope = parentScopeId ? { [parentScopeId]: '' } : {}
 
 const RETRY_DELAY_MS = 3000
+const SKELETON_TIMEOUT_MS = 10_000
 
 const props = defineProps({
   src: {
     type: String,
-    required: true
+    default: ''
   },
   fallbackIcon: {
     type: [Array, String, Object],
@@ -60,11 +61,11 @@ const props = defineProps({
 
 const emit = defineEmits(['error', 'load'])
 
-const preferredSource = computed(() => getVideoThumbnailSource(props.src, store.getters.getThumbnailDataSaver))
+const preferredSource = computed(() => getVideoThumbnailSource(typeof props.src === 'string' ? props.src.trim() : '', store.getters.getThumbnailDataSaver))
 const imageUrl = ref(preferredSource.value)
 const hasLoaded = ref(false)
 const hasFailed = ref(false)
-const isLoading = computed(() => !hasLoaded.value && !hasFailed.value && !!props.src && props.src !== thumbnailPlaceholder)
+const isLoading = computed(() => !hasLoaded.value && !hasFailed.value && !!preferredSource.value && preferredSource.value !== thumbnailPlaceholder)
 const fallbackIconName = computed(() => Array.isArray(props.fallbackIcon) ? props.fallbackIcon[1] : props.fallbackIcon)
 const isAvatar = computed(() => fallbackIconName.value === 'circle-user')
 // Keep semantic badges and action icons legible while their images load.
@@ -73,17 +74,21 @@ let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
 let retryTimeoutId
+let skeletonTimeoutId
 let sourceVersion = 0
 
-watch(preferredSource, resetSource)
+watch(preferredSource, src => resetSource(src), { immediate: true })
 // Element hooks run after patching, before paint, without a separate watcher.
 function checkCachedImage({ el: image }) {
-  if (!hasLoaded.value && image.complete && image.naturalWidth) {
+  if (hasLoaded.value || !image.complete || !currentSource) return
+  if (image.naturalWidth) {
     image.dispatchEvent(new Event('load'))
+  } else if (!hasFailed.value) {
+    image.dispatchEvent(new Event('error'))
   }
 }
 
-function resetSource(src) {
+function resetSource(src, isFallback = false) {
   clearTimeout(retryTimeoutId)
   retryTimeoutId = undefined
   sourceVersion++
@@ -91,7 +96,15 @@ function resetSource(src) {
   retryPending = false
   currentSource = src
   hasLoaded.value = false
-  hasFailed.value = false
+  if (!isFallback) {
+    hasFailed.value = false
+    clearTimeout(skeletonTimeoutId)
+    // Bound the loading indication even when the server never finishes its response.
+    // Keep the image mounted so a late success can still replace the fallback.
+    if (src && src !== thumbnailPlaceholder) {
+      skeletonTimeoutId = setTimeout(() => { hasFailed.value = true }, SKELETON_TIMEOUT_MS)
+    }
+  }
   imageUrl.value = src
 }
 
@@ -99,7 +112,7 @@ function useSmallerThumbnail() {
   const fallback = getVideoThumbnailFallbackUrl(currentSource)
   if (!fallback) return false
 
-  resetSource(fallback)
+  resetSource(fallback, true)
   return true
 }
 
@@ -110,6 +123,7 @@ function handleImageLoad(event) {
   if (image.naturalWidth === 120 && image.naturalHeight === 90) {
     if (useSmallerThumbnail()) return
   }
+  clearTimeout(skeletonTimeoutId)
   hasLoaded.value = true
   emit('load', event)
 }
@@ -127,6 +141,8 @@ function addRetryParameter(src) {
 
 async function retryImageLoad(event) {
   hasLoaded.value = false
+  hasFailed.value = true
+  clearTimeout(skeletonTimeoutId)
   if (useSmallerThumbnail()) return
 
   // Embedded images cannot recover through an HTTP retry or a query parameter.
@@ -175,6 +191,7 @@ async function retryImageLoad(event) {
 onBeforeUnmount(() => {
   sourceVersion++
   clearTimeout(retryTimeoutId)
+  clearTimeout(skeletonTimeoutId)
 })
 </script>
 
