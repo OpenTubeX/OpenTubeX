@@ -86,11 +86,11 @@ function checkCachedImage({ el: image }) {
   if (!image.complete) {
     // Lazy images can remain unrequested offscreen. Give them their full loading
     // deadline once visible, without restarting it when scrolling away and back.
-    if (image.loading !== 'lazy' || imageIsVisible) startSkeletonTimeout()
+    if (image.loading !== 'lazy' || imageIsVisible) startLoadingTimeout()
     else if (!visibilityObserver) {
       visibilityObserver = new IntersectionObserver(entries => {
         imageIsVisible = entries.some(entry => entry.isIntersecting)
-        if (imageIsVisible) startSkeletonTimeout()
+        if (imageIsVisible) startLoadingTimeout()
       })
       visibilityObserver.observe(image)
     }
@@ -119,10 +119,19 @@ function resetSource(src, isFallback = false) {
   imageUrl.value = src
 }
 
-function startSkeletonTimeout() {
+function startLoadingTimeout() {
   if (!isLoading.value || skeletonTimeoutId !== undefined) return
   // Keep the image mounted so a late success can still replace the fallback.
-  skeletonTimeoutId = setTimeout(() => { hasFailed.value = true }, SKELETON_TIMEOUT_MS)
+  skeletonTimeoutId = setTimeout(() => {
+    hasFailed.value = true
+    // A stalled response never fires error. Queue one browser retry, leaving
+    // the original request alive during the retry delay for a slow success.
+    if (!hasRetried && /^https?:/.test(currentSource)) {
+      hasRetried = true
+      retryPending = true
+      scheduleBrowserRetry()
+    }
+  }, SKELETON_TIMEOUT_MS)
 }
 
 function useSmallerThumbnail() {
@@ -141,6 +150,9 @@ function handleImageLoad(event) {
     if (useSmallerThumbnail()) return
   }
   clearTimeout(skeletonTimeoutId)
+  clearTimeout(retryTimeoutId)
+  retryTimeoutId = undefined
+  retryPending = false
   hasLoaded.value = true
   emit('load', event)
 }
@@ -198,6 +210,10 @@ async function retryImageLoad(event) {
     }
   }
 
+  scheduleBrowserRetry()
+}
+
+function scheduleBrowserRetry() {
   retryTimeoutId = setTimeout(() => {
     retryTimeoutId = undefined
     retryPending = false

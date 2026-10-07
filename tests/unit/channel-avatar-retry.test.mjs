@@ -34,7 +34,13 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
     imageSkeleton: 'skeleton.svg',
-    setTimeout: (callback, delay) => { const id = {}; callback.delay = delay; timers.set(id, callback); return id },
+    setTimeout: (callback, delay) => {
+      const id = {}
+      const fire = () => { timers.delete(id); return callback() }
+      fire.delay = delay
+      timers.set(id, fire)
+      return id
+    },
     clearTimeout: id => timers.delete(id)
   })
   const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
@@ -367,6 +373,78 @@ test('stalled requests stop shimmering without blocking a late load', async t =>
   await Vue.nextTick()
   assert.equal(placeholder(), undefined)
   assert.equal(f.loads.length, 1)
+  assert.equal(f.timers.size, 0, 'a slow success cancels the pending request retry')
+})
+
+test('stalled remote avatars retry once after the loading deadline and a short grace period', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map(), { fallbackIcon: ['fas', 'circle-user'] })
+  const image = f.find('img')
+  const skeletonDeadline = [...f.timers.values()].find(callback => callback.delay === 10_000)
+  skeletonDeadline()
+  await Vue.nextTick()
+  assert.equal(image.props.src, 'https://yt3.ggpht.com/avatar', 'keep a slow request alive after its shimmer stops')
+  const requestDeadline = [...f.timers.values()].find(callback => callback.delay === 3000)
+  assert.ok(requestDeadline, 'a stalled request must recover without reloading the video')
+  requestDeadline()
+  await Vue.nextTick()
+  assert.match(image.props.src, /^https:\/\/yt3\.ggpht\.com\/avatar\?opentubex_retry=\d+$/)
+  assert.equal(f.requests.length, 0, 'a timeout should retry the browser request')
+  await fail(image)
+  assert.equal(f.timers.size, 0, 'the retry must remain bounded')
+  image.props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
+  assert.equal(f.find('fallback'), undefined)
+})
+
+test('source replacements and unmounting cancel pending timeout retries', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  deadline()
+  await Vue.nextTick()
+  const oldTimers = [...f.timers.values()]
+  assert.equal(oldTimers[0].delay, 3000)
+  f.thumbnail.value = 'https://yt3.ggpht.com/replacement-avatar'
+  await Vue.nextTick()
+  assert.equal(f.timers.size, 1)
+  assert.ok([...f.timers.values()].every(timer => !oldTimers.includes(timer)), 'the old source must not keep any deadline')
+  const [newDeadline] = f.timers.values()
+  newDeadline()
+  await Vue.nextTick()
+  assert.equal([...f.timers.values()][0].delay, 3000)
+  f.unmount()
+  assert.equal(f.timers.size, 0)
+})
+
+test('an error during the timeout grace period does not queue a second retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  const [deadline] = f.timers.values()
+  deadline()
+  await Vue.nextTick()
+  const [retry] = f.timers.values()
+  await fail(f.find('img'))
+  assert.equal(f.requests.length, 0)
+  assert.deepEqual([...f.timers.values()], [retry])
+  retry()
+  await Vue.nextTick()
+  assert.match(f.find('img').props.src, /opentubex_retry=/)
+  await fail(f.find('img'))
+  assert.equal(f.timers.size, 0)
+})
+
+test('pending embedded images never receive an HTTP timeout retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const src of ['data:image/png;base64,AAAA', 'blob:https://localhost/pending']) {
+    f.thumbnail.value = src
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 1)
+    const [deadline] = f.timers.values()
+    assert.equal(deadline.delay, 10_000)
+    deadline()
+    await Vue.nextTick()
+    assert.equal(f.timers.size, 0)
+    assert.equal(f.find('img').props.src, src)
+    assert.equal(f.requests.length, 0)
+  }
 })
 
 test('null, undefined and blank image sources keep a static fallback', async t => {
