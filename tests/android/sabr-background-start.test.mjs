@@ -117,7 +117,8 @@ for (const continuePlayback of [true, false]) test(`SABR backoff honors backgrou
     settings = await page.evaluate(({ port, continuePlayback }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = { AutoplayVideos: true, VideoPlaybackEngine: 'built-in', UseSponsorBlock: false,
-        UseReturnYouTubeDislikes: false, KeepPlayingOnNavigation: false, AndroidAutoPictureInPicture: false, ContinuePlaybackWhenScreenIsLocked: continuePlayback }
+        UseReturnYouTubeDislikes: false, KeepPlayingOnNavigation: false, AndroidAutoPictureInPicture: false,
+        RememberHistory: false, WatchedProgressSavingMode: 'never', ContinuePlaybackWhenScreenIsLocked: continuePlayback }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__sabrBackgroundResponses = new Map()
@@ -192,7 +193,7 @@ for (const continuePlayback of [true, false]) test(`SABR backoff honors backgrou
     const state = await page.locator('.ftVideoPlayer video').evaluate(video => ({ paused: video.paused, time: video.currentTime }))
     assert.equal(state.paused, !continuePlayback, 'respect the background playback preference')
     if (continuePlayback) assert.ok(state.time > 0, 'background playback must advance')
-    else assert.ok(state.time < 0.25, 'loading may align the first sample, but disabled background playback must not advance')
+    else assert.ok(state.time < 0.25, `disabled background playback must not advance past the first sample: ${state.time}`)
   } finally {
     launch()
     if (!browser && page) {

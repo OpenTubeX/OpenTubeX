@@ -6774,7 +6774,7 @@ export default defineComponent({
           const wasPaused = videoElement.paused
           mediaSessionStopped = true
           initialAutoplayCanceled = true
-          if (wasPaused && !hasPlaybackPosition.value) videoElement.autoplay = false
+          if (wasPaused) videoElement.autoplay = false
           videoElement.pause()
           if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
             setCurrentTime(0)
@@ -12642,7 +12642,7 @@ export default defineComponent({
       const videoElement = video.value
       if (!videoElement) return
       const wasPaused = videoElement.paused
-      if (wasPaused && !hasPlaybackPosition.value) videoElement.autoplay = false
+      if (wasPaused) videoElement.autoplay = false
       videoElement.pause()
       // Pending autoplay has no play event yet, so pause() emits no pause event.
       if (wasPaused) handlePause()

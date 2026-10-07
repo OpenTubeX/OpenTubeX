@@ -47,24 +47,26 @@ test('Android starts its playback service while autoplay waits for SABR', () => 
   assert.deepEqual(f.playbackStates, ['playing'], 'background support must start before Android leaves the foreground')
 })
 
-test('pausing pending SABR autoplay updates the session even without a native pause event', () => {
+for (const sought of [false, true]) test(`pausing pending SABR autoplay${sought ? ' after a startup seek' : ''} updates the session even without a native pause event`, () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
   f.startSabrBackoffTimer(20000)
+  f.context.hasPlaybackPosition.value = sought
   f.pause()
   assert.equal(f.video.value.autoplay, false, 'loading must not undo the pause through native autoplay')
   f.startSabrBackoffTimer(10000)
   assert.deepEqual(f.playbackStates, ['playing', 'paused'], 'a later backoff must not reactivate the canceled session')
 })
 
-test('stopping pending SABR autoplay clears the session and prevents a later backoff from restarting it', () => {
+for (const sought of [false, true]) test(`stopping pending SABR autoplay${sought ? ' after a startup seek' : ''} clears the session and prevents a later backoff from restarting it`, () => {
   const f = fixture()
   f.context.process.env.IS_CAPACITOR = true
   f.video.value.autoplay = true
   f.video.value.paused = true
   f.startSabrBackoffTimer(20000)
+  f.context.hasPlaybackPosition.value = sought
   f.registerMediaSessionHandlers()
   f.context.handlers.stop()
   assert.equal(f.video.value.autoplay, false)
