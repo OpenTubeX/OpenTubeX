@@ -2759,7 +2759,12 @@ export class TabManager {
     if (!tab) return
 
     const nextRoute = normalizeRoute(route)
-    if (nextRoute.path !== tab.route.path || (
+    // A channel's content tabs share the same avatar. Retain its decoded image
+    // instead of briefly falling back to the remote thumbnail on each switch.
+    const channelId = tab.route.path.match(/^\/channel\/([^/]+)/)?.[1]
+    const nextChannelId = nextRoute.path.match(/^\/channel\/([^/]+)/)?.[1]
+    const isSameChannel = channelId != null && channelId === nextChannelId
+    if ((nextRoute.path !== tab.route.path && !isSameChannel) || (
       nextRoute.path === '/external-media' && nextRoute.fullPath !== tab.route.fullPath
     )) {
       const avatarFileName = tab.avatarFileName

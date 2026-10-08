@@ -489,6 +489,35 @@ test('navigation metadata shares one bounded session write and explicit saves fl
   assert.equal(saves.mock.callCount(), 2, 'flush cancels the pending timer')
 })
 
+test('channel subtab navigation retains the saved avatar and its file', t => {
+  const manager = createManager(t)
+  const tab = manager.createTab({ route: '/channel/UCchannel' })
+  tab.avatarDataUrl = 'data:image/jpeg;base64,YXZhdGFy'
+  tab.avatarFileName = 'avatar.jpg'
+  const releases = t.mock.method(manager, '_releaseTabAvatarFile', async () => {})
+  for (const path of ['/channel/UCchannel/videos', '/channel/UCchannel/shorts', '/channel/UCchannel/about', '/channel/UCchannel']) {
+    manager.updateTabRoute(tab.id, { path })
+    assert.equal(tab.avatarDataUrl, 'data:image/jpeg;base64,YXZhdGFy')
+    assert.equal(tab.avatarFileName, 'avatar.jpg')
+  }
+  assert.equal(releases.mock.callCount(), 0)
+})
+
+for (const path of ['/channel/UCchannelOther/videos', '/watch/video', '/history']) {
+  test(`leaving a channel for ${path} clears the saved avatar`, t => {
+    const manager = createManager(t)
+    const tab = manager.createTab({ route: '/channel/UCchannel/videos' })
+    tab.avatarDataUrl = 'data:image/jpeg;base64,YXZhdGFy'
+    tab.avatarFileName = 'avatar.jpg'
+    const releases = t.mock.method(manager, '_releaseTabAvatarFile', async () => {})
+    manager.updateTabRoute(tab.id, { path })
+    assert.equal(tab.avatarDataUrl, null)
+    assert.equal(tab.avatarFileName, null)
+    assert.equal(releases.mock.callCount(), 1)
+    assert.equal(releases.mock.calls[0].arguments[0], 'avatar.jpg')
+  })
+}
+
 test('clearing a session cancels pending writes instead of resurrecting it', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const manager = createManager(t)
