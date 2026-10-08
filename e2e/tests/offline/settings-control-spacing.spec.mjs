@@ -80,6 +80,97 @@ for (const uiScale of [100, 95]) {
       }
     })
 
+    test('appearance switches flow across rows in the reading direction', async ({ app, page }, testInfo) => {
+      const appearance = await goToSettingsSection(page, 'appearance')
+      const grid = appearance.locator('.switchColumnGrid').first()
+      for (const locale of ['en-US', 'de-DE']) {
+        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        for (const width of [1000, 800, 650, 400, 1000]) {
+          await resize(app, page, width === 400 ? 480 : 1600, uiScale)
+          await appearance.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
+          for (const direction of ['ltr', 'rtl']) {
+            await page.evaluate(direction => { document.body.dir = direction }, direction)
+            const bounds = await grid.locator('.switch-ctn').evaluateAll(elements => elements.map(element => {
+              const rect = element.getBoundingClientRect()
+              return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, overflow: element.scrollWidth - element.clientWidth }
+            }))
+            expect(bounds.length).toBeGreaterThan(1)
+            for (let index = 1; index < bounds.length; index++) {
+              const previous = bounds[index - 1]
+              const current = bounds[index]
+              if (width > 680 && index % 2 === 1) {
+                expect(Math.abs(current.top - previous.top), `${locale} ${width}px ${direction} row ${index}`).toBeLessThanOrEqual(1)
+                expect(direction === 'rtl' ? previous.left - current.right : current.left - previous.right).toBeGreaterThanOrEqual(0)
+              } else {
+                expect(current.top - previous.bottom).toBeGreaterThanOrEqual(-1)
+                expect(Math.abs(direction === 'rtl' ? current.right - bounds[0].right : current.left - bounds[0].left)).toBeLessThanOrEqual(1)
+              }
+              expect(current.overflow).toBeLessThanOrEqual(1)
+            }
+            if (locale === 'en-US' && uiScale === 100 && width === 1000) {
+              await grid.evaluate(element => {
+                const content = element.closest('.settingsContent')
+                const section = element.closest('.settingsSection')
+                content.scrollTop += section.getBoundingClientRect().top - content.getBoundingClientRect().top - 20
+              })
+              await captureAppFramebuffer(app, testInfo, `appearance-switch-flow-${direction}`)
+            }
+          }
+        }
+      }
+    })
+
+    test('tab width has a full slider and its icon action aligns with the row', async ({ app, page }, testInfo) => {
+      const appearance = await goToSettingsSection(page, 'appearance')
+      const row = appearance.locator('.tabSettingsRow')
+      const content = page.locator('.settingsContent')
+      for (const locale of ['en-US', 'de-DE']) {
+        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        for (const width of [1000, 800, 650, 400, 1000]) {
+          await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await resize(app, page, width === 400 ? 480 : 1600, uiScale)
+          await content.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
+          for (const direction of ['ltr', 'rtl']) {
+            await page.evaluate(direction => { document.body.dir = direction }, direction)
+            const geometry = await row.evaluate(element => {
+              const row = element.getBoundingClientRect()
+              const slider = element.querySelector('.pure-material-slider').getBoundingClientRect()
+              const button = element.querySelector('.btn').getBoundingClientRect()
+              const style = getComputedStyle(element)
+              const container = element.closest('.settingsContent')
+              const containerStyle = getComputedStyle(container)
+              return {
+                width: slider.width,
+                availableWidth: row.width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+                containerWidth: container.clientWidth - parseFloat(containerStyle.paddingLeft) - parseFloat(containerStyle.paddingRight),
+                centerOffset: button.top + button.height / 2 - slider.top - slider.height / 2,
+                gap: button.top - slider.bottom,
+                horizontalOffset: button.left + button.width / 2 - row.left - row.width / 2,
+                overflow: element.scrollWidth - element.clientWidth
+              }
+            })
+            expect.soft(geometry.width, `${locale} ${width}px ${direction} slider width`).toBeCloseTo(Math.min(380, geometry.availableWidth), 0)
+            if (geometry.containerWidth > 760) {
+              expect.soft(Math.abs(geometry.centerOffset), `${locale} ${width}px ${direction} action alignment`).toBeLessThanOrEqual(1)
+            } else {
+              expect.soft(geometry.gap).toBeCloseTo(20, 1)
+              expect.soft(Math.abs(geometry.horizontalOffset)).toBeLessThanOrEqual(1)
+            }
+            expect(geometry.overflow).toBeLessThanOrEqual(1)
+            if (locale === 'en-US' && uiScale === 100 && [800, 400].includes(width)) {
+              await row.scrollIntoViewIfNeeded()
+              await captureAppFramebuffer(app, testInfo, `tab-settings-${width}-${direction}`)
+            }
+          }
+          await expect.poll(() => content.evaluate(element => {
+            const section = element.querySelector(':scope > .section:not([style*="display: none"])')
+            const maximum = Math.max(0, section.offsetTop + section.offsetHeight + Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
+            return element.scrollTop <= maximum + 1
+          })).toBe(true)
+        }
+      }
+    })
+
     test('download controls keep equal empty space after buttons and helper text', async ({ app, page }, testInfo) => {
       const section = await goToSettingsSection(page, 'download')
       for (const width of [1000, 450]) {
