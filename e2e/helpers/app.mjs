@@ -530,7 +530,7 @@ export async function goToSettingsSection(page, section) {
   await expect(content).toBeVisible()
   if (category === 'data' && ['data', 'storage'].includes(section)) {
     const tab = section === 'data' ? 'data' : 'storage'
-    const tabButton = content.locator(`[data-settings-tab="${tab}"]`)
+    const tabButton = page.locator(`.settingsWindow [data-settings-tab="${tab}"]`)
     await tabButton.click()
     await expect(tabButton).toHaveAttribute('aria-selected', 'true')
   }

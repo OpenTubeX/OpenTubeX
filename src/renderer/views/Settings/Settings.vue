@@ -260,63 +260,72 @@
           />
           <div
             v-show="!subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
-            ref="settingsContentRef"
-            v-overlay-scrollbars
-            class="settingsContent"
-            :class="[
-              settingsContentTransitionClass,
-              { highlightChangedSettings }
-            ]"
-            tabindex="-1"
-            @scroll.passive="clampSettingsContentScroll"
+            class="settingsContentPane"
           >
-            <component
-              :is="activeSettingsSection.component"
-              v-if="activeSettingsSection"
-              ref="activeSettingsSectionRef"
-              :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
-              :initial-tab="activeSettingsSection.type === 'data' ? activeDataStorageTab : undefined"
-              class="section"
-              :data-section="activeSettingsSection.type"
-              @update:active-tab="setActiveDataStorageTab"
+            <div
+              v-show="activeSettingsSection?.type === 'data'"
+              :id="contentHeaderTargetId"
+              class="settingsContentHeader"
             />
             <div
-              v-else-if="settingsSearchQuery !== ''"
-              class="settingsSearchResults"
-              :class="{ settingsSearchResultsEmpty: settingsSearchResults.length === 0 }"
+              ref="settingsContentRef"
+              v-overlay-scrollbars
+              class="settingsContent"
+              :class="[
+                settingsContentTransitionClass,
+                { highlightChangedSettings }
+              ]"
+              tabindex="-1"
+              @scroll.passive="clampSettingsContentScroll"
             >
-              <template v-if="settingsSearchResults.length > 0">
-                <section
-                  v-for="result in settingsSearchResults"
-                  :key="result.section.type"
-                  class="settingsSearchResult"
-                >
-                  <h2
-                    class="settingsSearchResultHeading"
-                  >
-                    <FtIcon
-                      :icon="result.section.icon"
-                      aria-hidden="true"
-                    />
-                    {{ result.section.title }}
-                  </h2>
-                  <button
-                    v-for="match in result.matches"
-                    :key="`${match.label}-${match.tab ?? ''}`"
-                    type="button"
-                    class="settingsSearchResultMatch"
-                    @click="openSearchResult(result.section.type, match)"
-                  >
-                    {{ match.label }}
-                  </button>
-                </section>
-              </template>
-              <p
-                v-else
-                class="settingsNoResults"
+              <component
+                :is="activeSettingsSection.component"
+                v-if="activeSettingsSection"
+                ref="activeSettingsSectionRef"
+                :key="activeSettingsSection.renderKey ?? activeSettingsSection.type"
+                :initial-tab="activeSettingsSection.type === 'data' ? activeDataStorageTab : undefined"
+                class="section"
+                :data-section="activeSettingsSection.type"
+                @update:active-tab="setActiveDataStorageTab"
+              />
+              <div
+                v-else-if="settingsSearchQuery !== ''"
+                class="settingsSearchResults"
+                :class="{ settingsSearchResultsEmpty: settingsSearchResults.length === 0 }"
               >
-                {{ t('Settings.No Settings Found') }}
-              </p>
+                <template v-if="settingsSearchResults.length > 0">
+                  <section
+                    v-for="result in settingsSearchResults"
+                    :key="result.section.type"
+                    class="settingsSearchResult"
+                  >
+                    <h2
+                      class="settingsSearchResultHeading"
+                    >
+                      <FtIcon
+                        :icon="result.section.icon"
+                        aria-hidden="true"
+                      />
+                      {{ result.section.title }}
+                    </h2>
+                    <button
+                      v-for="match in result.matches"
+                      :key="`${match.label}-${match.tab ?? ''}`"
+                      type="button"
+                      class="settingsSearchResultMatch"
+                      @click="openSearchResult(result.section.type, match)"
+                    >
+                      {{ match.label }}
+                    </button>
+                  </section>
+                </template>
+                <p
+                  v-else
+                  class="settingsNoResults"
+                >
+                  {{ t('Settings.No Settings Found') }}
+                </p>
+              </div>
             </div>
           </div>
           <div
@@ -500,6 +509,7 @@ const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageBreadcrumbTargetId = `settings-subpage-breadcrumb-${useId().replaceAll(':', '')}`
+const contentHeaderTargetId = `settings-content-header-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
 const subpageIcon = ref(null)
 const subpageFlush = ref(false)
@@ -733,6 +743,7 @@ const unlocked = ref(store.getters.getSettingsPassword === '')
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
+  contentHeaderTargetId,
   open(title, close, persistOnDeactivate = false, icon = null, flush = false) {
     subpageTitle.value = title
     subpageIcon.value = icon

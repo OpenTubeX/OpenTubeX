@@ -1157,7 +1157,7 @@ test.describe('settings', () => {
     })).toBe('expanded')
   })
 
-  test('adds and removes languages that comment translation should ignore', async ({ page }) => {
+  test('adds and removes languages that comment translation should ignore', async ({ app, page }) => {
     const general = await goToSettingsSection(page, 'general')
     const enableTranslations = general.getByRole('checkbox', {
       name: 'Enable comment translations'
@@ -1183,10 +1183,35 @@ test.describe('settings', () => {
     const removeGerman = ignoredLanguages.getByRole('button', {
       name: 'Translate German comments again'
     })
+    const accentColor = await removeGerman.evaluate(element => {
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--accent-color)'
+      element.append(probe)
+      const color = getComputedStyle(probe).color
+      probe.remove()
+      return color
+    })
+    for (const size of [{ width: 1440, height: 800 }, { width: 375, height: 700 }]) {
+      await setWindowSize(app, page, size)
+      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await removeGerman.hover()
+      await expect(removeGerman).toHaveCSS('color', accentColor)
+      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await page.mouse.move(0, 0)
+      await page.keyboard.press('Tab')
+      await removeGerman.focus()
+      await expect(removeGerman).toHaveCSS('color', accentColor)
+      await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+      await removeGerman.evaluate(element => element.blur())
+      await expect(removeGerman).not.toHaveCSS('color', accentColor)
+    }
     await enableTranslations.locator('..').locator('label.switch-label').click()
     await expect(enableTranslations).not.toBeChecked()
     await expect(languageSelect).toBeDisabled()
     await expect(removeGerman).toBeDisabled()
+    await removeGerman.hover()
+    await expect(removeGerman).not.toHaveCSS('color', accentColor)
+    await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await enableTranslations.locator('..').locator('label.switch-label').click()
     await removeGerman.click()

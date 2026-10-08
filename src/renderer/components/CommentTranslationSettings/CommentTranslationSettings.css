@@ -36,3 +36,25 @@
   min-block-size: 44px;
   padding-inline-start: 14px;
 }
+
+.commentTranslationLanguageRemove {
+  align-items: center;
+  align-self: stretch;
+  background: transparent;
+  border: 0;
+  color: var(--tertiary-text-color);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  min-inline-size: 44px;
+  padding: 0;
+}
+
+.commentTranslationLanguageRemove:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.commentTranslationLanguageRemove:is(:hover, :focus-visible, :active):not(:disabled) {
+  color: var(--accent-color);
+}

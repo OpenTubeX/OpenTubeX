@@ -3,56 +3,58 @@
     ref="rootRef"
     class="settingsCategory dataStorageSettings"
   >
-    <div
-      class="dataStorageTabs"
-      role="tablist"
-      :aria-label="t('Settings.Data Settings.Data And Storage')"
-    >
-      <button
-        :id="dataTabId"
-        ref="dataTabRef"
-        type="button"
-        class="dataStorageTab"
-        :class="{ selected: activeTab === 'data' }"
-        role="tab"
-        :aria-controls="dataPanelId"
-        :aria-selected="activeTab === 'data'"
-        :tabindex="activeTab === 'data' ? 0 : -1"
-        data-settings-tab="data"
-        @click="activateTab('data')"
-        @keydown.left.right.prevent="activateTab('storage', true)"
-        @keydown.home.prevent="activateTab('data', true)"
-        @keydown.end.prevent="activateTab('storage', true)"
+    <Teleport :to="`#${settingsWindow.contentHeaderTargetId}`">
+      <div
+        class="dataStorageTabs"
+        role="tablist"
+        :aria-label="t('Settings.Data Settings.Data And Storage')"
       >
-        <FtIcon
-          :icon="['fas', 'layer-group']"
-          aria-hidden="true"
-        />
-        {{ t('Settings.Data Settings.Data Settings') }}
-      </button>
-      <button
-        :id="storageTabId"
-        ref="storageTabRef"
-        type="button"
-        class="dataStorageTab"
-        :class="{ selected: activeTab === 'storage' }"
-        role="tab"
-        :aria-controls="storagePanelId"
-        :aria-selected="activeTab === 'storage'"
-        :tabindex="activeTab === 'storage' ? 0 : -1"
-        data-settings-tab="storage"
-        @click="activateTab('storage')"
-        @keydown.left.right.prevent="activateTab('data', true)"
-        @keydown.home.prevent="activateTab('data', true)"
-        @keydown.end.prevent="activateTab('storage', true)"
-      >
-        <FtIcon
-          :icon="['fas', 'database']"
-          aria-hidden="true"
-        />
-        {{ t('Settings.Storage Settings.Storage') }}
-      </button>
-    </div>
+        <button
+          :id="dataTabId"
+          ref="dataTabRef"
+          type="button"
+          class="dataStorageTab"
+          :class="{ selected: activeTab === 'data' }"
+          role="tab"
+          :aria-controls="dataPanelId"
+          :aria-selected="activeTab === 'data'"
+          :tabindex="activeTab === 'data' ? 0 : -1"
+          data-settings-tab="data"
+          @click="activateTab('data')"
+          @keydown.left.right.prevent="activateTab('storage', true)"
+          @keydown.home.prevent="activateTab('data', true)"
+          @keydown.end.prevent="activateTab('storage', true)"
+        >
+          <FtIcon
+            :icon="['fas', 'layer-group']"
+            aria-hidden="true"
+          />
+          {{ t('Settings.Data Settings.Data Settings') }}
+        </button>
+        <button
+          :id="storageTabId"
+          ref="storageTabRef"
+          type="button"
+          class="dataStorageTab"
+          :class="{ selected: activeTab === 'storage' }"
+          role="tab"
+          :aria-controls="storagePanelId"
+          :aria-selected="activeTab === 'storage'"
+          :tabindex="activeTab === 'storage' ? 0 : -1"
+          data-settings-tab="storage"
+          @click="activateTab('storage')"
+          @keydown.left.right.prevent="activateTab('data', true)"
+          @keydown.home.prevent="activateTab('data', true)"
+          @keydown.end.prevent="activateTab('storage', true)"
+        >
+          <FtIcon
+            :icon="['fas', 'database']"
+            aria-hidden="true"
+          />
+          {{ t('Settings.Storage Settings.Storage') }}
+        </button>
+      </div>
+    </Teleport>
 
     <div
       v-if="activeTab === 'data'"
@@ -77,15 +79,18 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { nextTick, ref, useId, useTemplateRef } from 'vue'
+import { inject, nextTick, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import DataSettings from '../DataSettings/DataSettings.vue'
 import StorageSettings from '../StorageSettings/StorageSettings.vue'
 
+import { settingsSubpageKey } from '../FtSettingsSubpage/settingsSubpage'
+
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const { t } = useI18n()
+const settingsWindow = inject(settingsSubpageKey)
 const props = defineProps({
   initialTab: {
     type: String,

@@ -247,7 +247,21 @@
   overscroll-behavior: contain;
 }
 
+.settingsContentPane {
+  min-block-size: 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.settingsContentHeader {
+  flex: 0 0 auto;
+  padding-block-start: 20px;
+  padding-inline: 20px;
+}
+
 .settingsContent {
+  flex: 1 1 auto;
   container-name: settings-content;
   container-type: inline-size;
   overflow-x: hidden !important;
@@ -477,6 +491,7 @@
 }
 
 .compactSettings .settingsMenu,
+.compactSettings .settingsContentPane,
 .compactSettings .settingsContent,
 .compactSettings .settingsSubpageScroll,
 .compactSettings .settingsPassword {
@@ -490,6 +505,11 @@
 
 .compactSettings .settingsContent {
   padding: 14px;
+}
+
+.compactSettings .settingsContentHeader {
+  padding-block-start: 14px;
+  padding-inline: 14px;
 }
 
 .settingsSectionSlideForward {
