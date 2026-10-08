@@ -129,6 +129,9 @@ test('detects retained players across complete playback and tab disposal cycles'
   await testInfo.attach('player retention fault injection', {
     body: JSON.stringify({ base, candidate }), contentType: 'application/json'
   })
+  // Bounded background work must have released disposed baseline players.
+  // Otherwise its transient heap growth can hide the deliberately retained data.
+  expect(base).toBeLessThan(8)
   expect(candidate - base).toBeGreaterThan(20)
   expect(candidate).toBeGreaterThan(24)
 })

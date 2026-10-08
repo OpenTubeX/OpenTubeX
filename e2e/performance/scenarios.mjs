@@ -165,7 +165,8 @@ export async function measureLargeFeedScroll(page) {
   }
 }
 
-async function collectRendererHeapAfterGcKiB(page) {
+async function collectRendererHeapAfterGcKiB(page, settleMs = 0) {
+  if (settleMs > 0) await page.waitForTimeout(settleMs)
   return page.evaluate(async () => {
     if (typeof globalThis.gc !== 'function') {
       throw new Error('Renderer garbage collection is unavailable')
@@ -263,9 +264,12 @@ export async function measurePlaybackHeapGrowth(page) {
 
   // Exclude one-time player initialization, lazy modules and media caches.
   await cycle()
-  const before = await collectRendererHeapAfterGcKiB(page)
+  // Avatar requests can retain closed players until their five-second deadline.
+  // Sample both sides after that bounded work settles, rather than measuring
+  // timing-dependent temporary retention as a player leak.
+  const before = await collectRendererHeapAfterGcKiB(page, 5000)
   for (let index = 0; index < playbackCycles; index++) await cycle()
-  const after = await collectRendererHeapAfterGcKiB(page)
+  const after = await collectRendererHeapAfterGcKiB(page, 5000)
   return Math.max(0, after - before) / 1024
 }
 
