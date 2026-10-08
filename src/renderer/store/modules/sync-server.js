@@ -96,8 +96,9 @@ function clearSyncServerDevices(commit) {
 }
 
 function activityAccountKey(settings) {
+  // NeDB rejects dots in field names. A JSON escape preserves the account identity.
   return JSON.stringify([settings.syncServerUrl,
-    settings.syncServerUsername, settings.syncServerDeviceId])
+    settings.syncServerUsername, settings.syncServerDeviceId]).replaceAll('.', '\\u002e')
 }
 
 function unclearedActivity(entries, settings) {

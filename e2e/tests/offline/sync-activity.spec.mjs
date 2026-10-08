@@ -1,9 +1,10 @@
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
-async function seedActivity(page, count = 30) {
-  await page.evaluate(count => {
+async function seedActivity(page, count = 30, serverUrl = '') {
+  await page.evaluate(({ count, serverUrl }) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setSyncServerUrl', serverUrl)
     store.commit('setSyncServerToken', 'test-token')
     store.commit('setSyncServerActivity', Array.from({ length: count }, (_, index) => ({
       id: String(index),
@@ -15,7 +16,7 @@ async function seedActivity(page, count = 30) {
     })))
     store.commit('setSyncServerLiveSupported', true)
     store.commit('setSyncServerEnabled', true)
-  }, count)
+  }, { count, serverUrl })
 }
 
 async function scrollActivityToBottom(scroller) {
@@ -254,7 +255,7 @@ for (const uiScale of [100, 125]) {
 
     test('clears activity locally after confirmation and keeps it hidden after restart', async ({ app, page }) => {
       const sync = await goToSettingsSection(page, 'sync')
-      await seedActivity(page)
+      await seedActivity(page, 30, 'https://sync.example')
       const card = sync.locator('.syncActivity')
       const clear = card.getByRole('button', { name: 'Clear on this device' })
       await card.locator('.activityDisclosure').click()
@@ -278,7 +279,7 @@ for (const uiScale of [100, 125]) {
 
       const { page: restartedPage } = await app.relaunch()
       const reloadedSync = await goToSettingsSection(restartedPage, 'sync')
-      await seedActivity(restartedPage)
+      await seedActivity(restartedPage, 30, 'https://sync.example')
       const reloadedCard = reloadedSync.locator('.syncActivity')
       await expect(reloadedCard).toContainText('No recent activity')
       await restartedPage.evaluate(() => {

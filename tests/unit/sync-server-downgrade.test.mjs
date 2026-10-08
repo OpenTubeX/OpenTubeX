@@ -9,6 +9,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import Datastore from '@seald-io/nedb'
 
 import { encryptLegacyDocument } from '../helpers/encrypt-legacy-sync-document.mjs'
 import { CUSTOM_THEMES_SYNC_KEY, DEFAULT_CUSTOM_THEME, normalizeCustomThemes } from '../../src/customTheme.js'
@@ -1463,6 +1464,33 @@ test('activity refresh shares an in-flight download and retries after failure', 
   assert.equal(f.requests.length, 2)
 })
 
+for (const [syncServerUrl, syncServerUsername, syncServerDeviceId] of [
+  ['https://sync.example', 'alice', 'laptop'],
+  ['http://127.0.0.1:8080', 'bob', 'tablet'],
+  ['http://localhost:8080', 'alice.name', 'laptop.1'],
+  ['http://localhost:8080', 'alice\\u002ename', 'laptop'],
+]) {
+  test(`activity cutoffs persist in NeDB for ${syncServerUrl} and ${syncServerUsername}`, async () => {
+    const database = new Datastore()
+    const f = fixture({ syncServerUrl, syncServerUsername, syncServerDeviceId })
+    const dispatch = f.context.dispatch
+    f.context.dispatch = async (action, value) => {
+      if (action === 'updateSyncServerActivityClearedThrough') {
+        const _id = 'syncServerActivityClearedThrough'
+        await database.updateAsync({ _id }, { _id, value }, { upsert: true })
+      }
+      return dispatch(action, value)
+    }
+    f.context.commit('setSyncServerActivity', [{ id: '0001:0', createdAt: Date.now() }])
+    await f.actions.clearSyncServerActivity(f.context)
+    const saved = await database.findOneAsync({ _id: 'syncServerActivityClearedThrough' })
+    const [accountKey] = Object.keys(saved.value)
+    assert.equal(saved.value[accountKey], '0001')
+    assert.deepEqual(JSON.parse(accountKey), [syncServerUrl, syncServerUsername, syncServerDeviceId])
+    assert.equal(f.context.state.syncServerActivity.length, 0)
+  })
+}
+
 test('cleared activity stays hidden after reauthentication while newer activity remains visible', async () => {
   let events = []
   const f = fixture({ syncServerDeviceId: 'laptop' }, { encrypted: true, respond: url => {
@@ -1533,7 +1561,7 @@ test('an in-flight activity refresh cannot commit after the username changes bef
     version: 1, type: 'activity', deviceName: 'Laptop', changes: [{ key: 'autoplayVideos', value: true }],
   }, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt)
   const events = [{ id: '0001', recipient: '', payload, created_at: Date.now(), expires_at: Date.now() + 60000 }]
-  const accountKey = JSON.stringify([f.settings.syncServerUrl, 'alice', 'laptop'])
+  const accountKey = JSON.stringify([f.settings.syncServerUrl, 'alice', 'laptop']).replaceAll('.', '\\u002e')
   f.settings.syncServerActivityClearedThrough = { [accountKey]: '0001' }
 
   const refreshing = f.actions.refreshSyncServerEvents(f.context)
