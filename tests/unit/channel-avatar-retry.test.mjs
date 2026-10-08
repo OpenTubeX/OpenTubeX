@@ -426,7 +426,7 @@ test('unexpected native recovery errors still allow the delayed retry and termin
 test('thumbnail skeletons stop on the first failure while retries continue and restart for a new source', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   const placeholder = () => f.find('img').parent.children.find(node => node.props?.class?.includes('retryImagePlaceholder'))
-  assert.equal(placeholder().props.src, 'skeleton.svg')
+  assert.equal(placeholder().tag, 'span', 'the shimmer needs a container for its composited gradient')
   assert.match(placeholder().props.class, /ft-shimmer/)
   await fail(f.find('img'))
   assert.equal(placeholder().props.src, 'placeholder.svg')
@@ -437,7 +437,7 @@ test('thumbnail skeletons stop on the first failure while retries continue and r
   assert.doesNotMatch(placeholder().props.class, /ft-shimmer/)
   f.thumbnail.value = 'https://images.test/new-thumbnail'
   await Vue.nextTick()
-  assert.equal(placeholder().props.src, 'skeleton.svg')
+  assert.equal(placeholder().tag, 'span')
   f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
   await Vue.nextTick()
   assert.equal(placeholder(), undefined)

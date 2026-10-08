@@ -479,11 +479,17 @@
   display: flow-root;
 }
 
-.changeLogText :deep(img) {
+.changeLogText :deep(img),
+.changeLogText :deep(.htmlImagePlaceholder) {
   display: block;
   max-inline-size: 100%;
   block-size: auto;
   margin-block: 8px;
+}
+
+.changeLogText :deep(.htmlImagePlaceholder > img) {
+  block-size: 100%;
+  margin-block: 0;
 }
 
 .changeLogText :deep(details) {
@@ -699,7 +705,8 @@
   border-radius: calc(6px * var(--ui-roundness));
 }
 
-.tabSwitcherPreview img {
+.tabSwitcherPreview img,
+.tabSwitcherPreview .retryImagePlaceholder {
   inline-size: 100%;
   block-size: 100%;
   object-fit: contain;

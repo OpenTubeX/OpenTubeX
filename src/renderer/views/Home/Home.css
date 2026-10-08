@@ -236,7 +236,8 @@
   background-color: var(--card-bg-color);
 }
 
-.mediaThumbnail img {
+.mediaThumbnail img,
+.mediaThumbnail .retryImagePlaceholder {
   display: block;
   inline-size: 100%;
   block-size: 100%;

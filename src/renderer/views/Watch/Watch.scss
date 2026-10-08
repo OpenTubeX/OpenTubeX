@@ -394,15 +394,24 @@
       position: absolute;
       inset: 0;
       overflow: hidden;
-      background:
-        linear-gradient(
-          105deg,
-          transparent 35%,
-          color-mix(in srgb, var(--primary-text-color) 10%, transparent) 48%,
-          transparent 61%
-        )
-        -200% 0 / 200% 100% no-repeat,
-        var(--side-nav-hover-color);
+      background: var(--side-nav-hover-color);
+    }
+
+    .shortsSkeleton::before {
+      content: '';
+      position: absolute;
+
+      /* stylelint-disable-next-line liberty/use-logical-spec -- Preserve the sweep's physical direction in RTL layouts. */
+      inset: 0 auto 0 0;
+      inline-size: 200%;
+      pointer-events: none;
+      transform: translateX(100%);
+      background: linear-gradient(
+        105deg,
+        transparent 35%,
+        color-mix(in srgb, var(--primary-text-color) 10%, transparent) 48%,
+        transparent 61%
+      );
       animation: shorts-skeleton-sweep 1.2s linear infinite;
     }
 
@@ -1734,8 +1743,12 @@
 }
 
 @keyframes shorts-skeleton-sweep {
+  from {
+    transform: translateX(100%);
+  }
+
   to {
-    background-position: 200% 0, 0 0;
+    transform: translateX(-100%);
   }
 }
 

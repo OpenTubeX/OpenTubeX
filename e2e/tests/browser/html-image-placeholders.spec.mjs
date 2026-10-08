@@ -32,13 +32,14 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   const placeholders = container.locator('.htmlImagePlaceholder')
   await expect(placeholders).toHaveCount(3)
   for (const placeholder of await placeholders.all()) {
+    const sizingImage = placeholder.locator('img')
     await expect(placeholder).toHaveClass(/ft-shimmer/)
-    await expect(placeholder).not.toHaveAttribute('srcset')
-    await expect(placeholder).not.toHaveAttribute('sizes')
-    await expect(placeholder).not.toHaveAttribute('id')
-    await expect(placeholder).toHaveAttribute('alt', '')
+    await expect(sizingImage).not.toHaveAttribute('srcset')
+    await expect(sizingImage).not.toHaveAttribute('sizes')
+    await expect(sizingImage).not.toHaveAttribute('id')
+    await expect(sizingImage).toHaveAttribute('alt', '')
     await expect(placeholder).toHaveAttribute('aria-hidden', 'true')
-    await expect.poll(() => placeholder.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect.poll(() => sizingImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
     expect((await placeholder.boundingBox()).width).toBe(24)
   }
   await expect(container.locator('picture .htmlImagePlaceholder')).toHaveCount(0)
@@ -47,7 +48,102 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   await expect(container).toContainText('Picture image')
   await expect(placeholders).toHaveCount(1)
   await expect(placeholders).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholders).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholders.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+})
+
+test('preserves image layout while loading, after a stall, and on a late load', async ({ page }) => {
+  await page.clock.install()
+  const svg = await installPlaceholderHelper(page)
+  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+  const appCss = await readFile(new URL('../../../src/renderer/App.css', import.meta.url), 'utf8')
+  const changelogCss = appCss.match(/\.changeLogText :deep\([^)]*\)[^{]*\{[^}]+\}/g).join('\n').replace(/:deep\(([^)]+)\)/g, '$1')
+  await page.addStyleTag({ content: css + changelogCss })
+  const pending = []
+  await page.route('https://styled-images.test/**', route => { pending.push(route) })
+  await page.evaluate(svg => {
+    const images = [
+      { style: 'width:100%;height:auto;margin:8px 0;vertical-align:middle' },
+      { style: 'width:50%;height:auto;float:right;margin:12px 8px' },
+      { style: 'position:absolute;left:12px;top:18px;width:60%;height:auto' },
+      { style: 'height:48px;width:auto;padding:4px;border:2px solid red' },
+      { width: 800, height: 450 },
+      { width: 800, height: 200, className: 'changeLogText' }
+    ]
+    for (const [index, { style = '', width = 80, height = 45, className }] of images.entries()) {
+      const pair = document.createElement('section')
+      pair.innerHTML = `<div class="reference"><img width="${width}" height="${height}" alt="" style="${style}"></div><div class="actual"><img width="${width}" height="${height}" alt="" style="${style}"></div>`
+      for (const box of pair.children) {
+        box.style.cssText = 'position:relative;display:flow-root;width:60vw;min-height:240px'
+        if (className) box.classList.add(className)
+      }
+      pair.querySelector('.reference img').src = `data:image/svg+xml,${encodeURIComponent(svg)}`
+      pair.querySelector('.actual img').src = `https://styled-images.test/${index}`
+      document.body.append(pair)
+      window.addHtmlImagePlaceholders(pair.querySelector('.actual'))
+    }
+  }, svg)
+  await expect.poll(() => pending.length).toBe(6)
+  const position = element => {
+    const { x, y, width, height } = element.getBoundingClientRect()
+    const parent = element.parentElement.getBoundingClientRect()
+    return { x: x - parent.x, y: y - parent.y, width, height }
+  }
+  const checkSlots = async selector => {
+    for (const width of [640, 960]) {
+      await page.setViewportSize({ width, height: 720 })
+      for (const section of await page.locator('section').all()) {
+        const expected = await section.locator('.reference img').evaluate(position)
+        const actual = await section.locator(`.actual ${selector}`).evaluate(position)
+        for (const [key, value] of Object.entries(expected)) expect(actual[key], key).toBeCloseTo(value, 1)
+      }
+    }
+  }
+  await checkSlots('.htmlImagePlaceholder')
+  await page.clock.fastForward(10_001)
+  await expect(page.locator('.ft-shimmer')).toHaveCount(0)
+  await checkSlots('.htmlImagePlaceholder')
+  while (pending.length) await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
+  await expect(page.locator('.htmlImagePlaceholder')).toHaveCount(0)
+  await checkSlots('img')
+})
+
+test('keeps rounded inline fallbacks clipped after a stall and failure', async ({ page }, testInfo) => {
+  await page.clock.install()
+  await installPlaceholderHelper(page)
+  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+  await page.addStyleTag({ content: css })
+  let pending
+  await page.route('https://rounded-image.test/image', route => { pending = route })
+  await page.evaluate(() => {
+    const container = document.createElement('div')
+    container.id = 'rounded-images'
+    container.innerHTML = '<img src="https://rounded-image.test/image" alt="" width="80" height="80" style="border-radius:50%">'
+    document.body.append(container)
+    window.addHtmlImagePlaceholders(container)
+  })
+  await expect.poll(() => Boolean(pending)).toBe(true)
+  const placeholder = page.locator('.htmlImagePlaceholder')
+  const checkClipping = async () => {
+    await expect(placeholder.locator('img')).toBeVisible()
+    const hits = await placeholder.evaluate(element => {
+      const { x, y, width, height } = element.getBoundingClientRect()
+      const hitsPlaceholder = (x, y) => Boolean(document.elementFromPoint(x, y)?.closest('.htmlImagePlaceholder'))
+      return [hitsPlaceholder(x + 2, y + 2), hitsPlaceholder(x + width / 2, y + height / 2)]
+    })
+    // The image stays visible in the center and cannot paint into the corners.
+    expect(hits).toEqual([false, true])
+  }
+  await checkClipping()
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await checkClipping()
+  await pending.abort()
+  await expect.poll(() => page.locator('#rounded-images > img').evaluate(image => image.complete)).toBe(true)
+  await checkClipping()
+  await placeholder.locator('img').evaluate(image => image.decode())
+  const screenshot = testInfo.outputPath('rounded-html-fallback.png')
+  await placeholder.screenshot({ path: screenshot, omitBackground: true })
+  await testInfo.attach('rounded HTML fallback', { path: screenshot, contentType: 'image/png' })
 })
 
 test('uses permanent fallbacks for missing sources and failures completed before initialization', async ({ page }) => {
@@ -59,7 +155,7 @@ test('uses permanent fallbacks for missing sources and failures completed before
   const placeholders = page.locator('#images .htmlImagePlaceholder')
   await expect(placeholders).toHaveCount(2)
   for (const placeholder of await placeholders.all()) {
-    await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+    await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
   }
   await expect(page.locator('#images')).toContainText('Unavailable image')
 })
@@ -81,7 +177,7 @@ test('stalled inline images show static fallbacks and recover on a late load', a
   await expect.poll(() => pending.length).toBe(1)
   await page.clock.fastForward(10_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
   await expect(placeholder).toHaveCount(0)
   await expect(page.locator('#stalled-images img')).toBeVisible()
@@ -103,12 +199,12 @@ test('zero-width SVG loads retain the deadline for a static fallback', async ({ 
   await expect.poll(() => pending.length).toBe(1)
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="48"/>' })
   await expect(page.locator('#zero-width-images')).toHaveAttribute('data-loaded', 'true')
-  expect(await page.locator('#zero-width-images img:not(.htmlImagePlaceholder)').evaluate(image => image.naturalWidth)).toBe(0)
+  expect(await page.locator('#zero-width-images > img').evaluate(image => image.naturalWidth)).toBe(0)
   const placeholder = page.locator('.htmlImagePlaceholder')
   await expect(placeholder).toHaveClass(/ft-shimmer/)
   await page.clock.fastForward(10_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
 
 test('lazy inline images keep their skeleton offscreen, then time out and recover', async ({ page }) => {
@@ -136,7 +232,7 @@ test('lazy inline images keep their skeleton offscreen, then time out and recove
   await expect(placeholder).toHaveClass(/ft-shimmer/)
   await page.clock.fastForward(1_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
   await expect(placeholder).toHaveCount(0)

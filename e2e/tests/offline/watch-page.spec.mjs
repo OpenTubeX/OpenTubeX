@@ -180,7 +180,7 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
     await expect(comments).toBeVisible()
     await comments.scrollIntoViewIfNeeded()
     const waitForCommentsShimmer = () => expect.poll(() => comments.locator('.skeletonCommentAvatar').first()
-      .evaluate(element => Number.parseFloat(getComputedStyle(element).backgroundPositionX))).toBeLessThan(60)
+      .evaluate(element => element.getAnimations({ subtree: true }).some(animation => animation.effect.getComputedTiming().progress > 0.4))).toBe(true)
     await waitForCommentsShimmer()
     await attachScreenshot('comments skeleton at 200% roundness')
     await page.setViewportSize({ width: 520, height: 900 })

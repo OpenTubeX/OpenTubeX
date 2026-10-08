@@ -2548,25 +2548,58 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 }
 
 /* shared shimmer for skeleton loading placeholders */
+.htmlImagePlaceholder {
+  overflow: hidden;
+  inline-size: var(--html-image-width, auto);
+  block-size: var(--html-image-height, auto);
+  aspect-ratio: 320 / 180;
+}
+
+.htmlImagePlaceholder > img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
 .ft-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--card-bg-color);
+}
+
+.ft-shimmer::before {
+  content: '';
+  position: absolute;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- Preserve the sweep's physical direction in RTL layouts. */
+  inset: 0 auto 0 0;
+  inline-size: 400%;
+  pointer-events: none;
+
+  /* Keep the gradient anchored on the left in both text directions. Moving
+     this four-wide layer avoids repainting background-position every frame. */
   background: linear-gradient(
     90deg,
     var(--card-bg-color) 25%,
     var(--secondary-card-bg-color) 37%,
     var(--card-bg-color) 63%
   );
-  background-size: 400% 100%;
   animation: ft-shimmer 1.4s ease infinite;
 }
 
 @keyframes ft-shimmer {
   from {
-    background-position: 100% 50%;
+    transform: translateX(-75%);
   }
 
   to {
-    background-position: 0% 50%;
+    transform: translateX(0);
   }
+}
+
+:root[data-reduced-motion='reduce'] .ft-shimmer::before,
+:root[data-reduced-motion='reduce'] .shortsSkeleton::before {
+  animation: none !important;
 }
 
 

@@ -5,10 +5,28 @@ import imageSkeleton from '../assets/img/image_skeleton.svg'
 // decoded and reserve their original slot with the shared loading skeleton.
 export function addHtmlImagePlaceholders(element) {
   for (const image of element.querySelectorAll('img')) {
-    const placeholder = image.cloneNode()
-    for (const attribute of ['srcset', 'sizes', 'id', 'title']) placeholder.removeAttribute(attribute)
-    placeholder.src = imageSkeleton
-    placeholder.alt = ''
+    const placeholder = document.createElement('span')
+    const sizingImage = image.cloneNode()
+    for (const attribute of ['srcset', 'sizes', 'id', 'title']) sizingImage.removeAttribute(attribute)
+    sizingImage.src = imageSkeleton
+    sizingImage.alt = ''
+    const imageStyle = getComputedStyle(image)
+    // The wrapper owns the original image's outer box; applying these styles
+    // to both elements would duplicate margins, padding and positioning.
+    placeholder.style.cssText = image.style.cssText
+    // Presentation attributes must remain overridable by stylesheet sizing.
+    for (const dimension of ['width', 'height']) {
+      const value = image.getAttribute(dimension)
+      if (value !== null) {
+        placeholder.style.setProperty(`--html-image-${dimension}`, value.trim().endsWith('%') ? value : `${Number.parseInt(value, 10)}px`)
+      }
+    }
+    placeholder.style.display = imageStyle.display === 'inline' ? 'inline-block' : imageStyle.display
+    placeholder.style.verticalAlign = imageStyle.verticalAlign
+    sizingImage.removeAttribute('style')
+    sizingImage.style.objectFit = image.style.objectFit
+    sizingImage.style.objectPosition = image.style.objectPosition
+    placeholder.append(sizingImage)
     placeholder.setAttribute('aria-hidden', 'true')
     placeholder.classList.add('htmlImagePlaceholder', 'ft-shimmer')
     // A <picture>'s sources can override even an img without its own srcset.
@@ -21,7 +39,7 @@ export function addHtmlImagePlaceholders(element) {
 
     // A stalled response must not leave a permanent animated loading indication.
     const showFallback = () => {
-      placeholder.src = thumbnailPlaceholder
+      sizingImage.src = thumbnailPlaceholder
       placeholder.classList.remove('ft-shimmer')
     }
     let skeletonTimeout
