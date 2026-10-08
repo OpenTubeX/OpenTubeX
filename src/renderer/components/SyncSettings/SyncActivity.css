@@ -1,4 +1,5 @@
 .syncActivity {
+  container-type: inline-size;
   background-color: var(--secondary-card-bg-color);
   border: 1px solid var(--divider-color);
   border-radius: calc(12px * var(--ui-roundness));
@@ -12,27 +13,45 @@
 
 .activityHeader {
   align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-  margin-block-end: 1rem;
-}
-
-.activityActions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 0.5rem;
-  justify-content: flex-end;
-  margin-inline-start: auto;
-  max-inline-size: 100%;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin-block-end: 1rem;
 }
 
 .activityClear {
   margin-inline: 0;
   max-inline-size: 100%;
+}
+
+.activityMeasure {
+  position: absolute;
+  inline-size: max-content;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.activityStacked {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.activityStacked .activityClear {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: center;
   white-space: normal;
+}
+
+.activityStacked .activityAction {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+@container (width <= 26rem) {
+  .activityTitle .activityIcon {
+    display: none;
+  }
 }
 
 .activityScroller {
@@ -113,6 +132,8 @@
 }
 
 .activityHeader h3 {
+  position: relative;
+  overflow: hidden;
   font-size: 1.25rem;
   margin: 0;
 }
@@ -179,10 +200,6 @@
 }
 
 @media only screen and (width <= 480px) {
-  .activityHeader {
-    align-items: flex-start;
-  }
-
   .activityIcon {
     display: none;
   }

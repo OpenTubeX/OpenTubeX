@@ -1,6 +1,10 @@
 <template>
   <section class="syncActivity">
-    <div class="activityHeader">
+    <div
+      ref="activityHeader"
+      class="activityHeader"
+      :class="{ activityStacked: actionLayout === 'stacked' }"
+    >
       <div class="activityTitle">
         <span
           class="activityIcon"
@@ -8,30 +12,51 @@
         >
           <FtIcon :icon="['fas', 'history']" />
         </span>
-        <h3>{{ t('Settings.Sync Settings.Activity') }}</h3>
+        <h3>
+          {{ t('Settings.Sync Settings.Activity') }}
+          <span
+            ref="titleMeasure"
+            class="activityMeasure"
+            aria-hidden="true"
+          >{{ t('Settings.Sync Settings.Activity') }}</span>
+        </h3>
       </div>
-      <div class="activityActions">
-        <FtButton
-          class="activityClear"
-          :label="t('Settings.Sync Settings.Clear Activity')"
-          :icon="['fas', 'trash']"
-          variant="outlined"
-          :disabled="loading || !entries.length"
-          @click="showClearPrompt = true"
-        />
-        <FtIconButton
-          ref="refreshButton"
-          class="activityAction"
-          :title="t('Theme Discovery.Refresh')"
-          :icon="['fas', 'sync']"
-          :disabled="loading"
-          :use-shadow="false"
-          :padding="11"
-          :size="20"
-          theme="base-no-default"
-          @click="refresh"
-        />
-      </div>
+      <FtButton
+        ref="clearButton"
+        class="activityClear"
+        :aria-label="t('Settings.Sync Settings.Clear Activity')"
+        :title="t('Settings.Sync Settings.Clear Activity')"
+        :icon="['fas', 'trash']"
+        variant="outlined"
+        :disabled="loading || !entries.length"
+        @click="showClearPrompt = true"
+      >
+        <template #label>
+          <span class="activityClearLabel">{{ actionLayout === 'compact' ? t('Tab Organizer.Clear') : t('Settings.Sync Settings.Clear Activity') }}</span>
+          <span
+            ref="fullLabelMeasure"
+            class="activityMeasure"
+            aria-hidden="true"
+          >{{ t('Settings.Sync Settings.Clear Activity') }}</span>
+          <span
+            ref="shortLabelMeasure"
+            class="activityMeasure"
+            aria-hidden="true"
+          >{{ t('Tab Organizer.Clear') }}</span>
+        </template>
+      </FtButton>
+      <FtIconButton
+        ref="refreshButton"
+        class="activityAction"
+        :title="t('Theme Discovery.Refresh')"
+        :icon="['fas', 'sync']"
+        :disabled="loading"
+        :use-shadow="false"
+        :padding="11"
+        :size="20"
+        theme="base-no-default"
+        @click="refresh"
+      />
     </div>
     <FtLoader v-if="loading" />
     <p
@@ -128,7 +153,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, nextTick, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, inject, nextTick, onMounted, onBeforeUnmount, ref, useId, useTemplateRef } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -156,6 +181,49 @@ const activityListId = useId()
 const activityList = useTemplateRef('activityList')
 const activityScroller = useTemplateRef('activityScroller')
 const refreshButton = useTemplateRef('refreshButton')
+const activityHeader = useTemplateRef('activityHeader')
+const clearButton = useTemplateRef('clearButton')
+const titleMeasure = useTemplateRef('titleMeasure')
+const fullLabelMeasure = useTemplateRef('fullLabelMeasure')
+const shortLabelMeasure = useTemplateRef('shortLabelMeasure')
+const actionLayout = ref('full')
+let headerObserver
+
+function updateActionLayout() {
+  const header = activityHeader.value
+  const button = clearButton.value.$el
+  const title = header.querySelector('.activityTitle')
+  const titleIcon = title.querySelector('.activityIcon')
+  const buttonIcon = button.firstElementChild
+  const buttonStyle = getComputedStyle(button)
+  const titleIconWidth = titleIcon.getBoundingClientRect().width
+  const titleWidth = titleMeasure.value.getBoundingClientRect().width + titleIconWidth +
+    (titleIconWidth ? Number.parseFloat(getComputedStyle(title).columnGap) : 0)
+  const controlsWidth = refreshButton.value.$el.getBoundingClientRect().width +
+    buttonIcon.getBoundingClientRect().width +
+    Number.parseFloat(buttonStyle.columnGap) +
+    Number.parseFloat(buttonStyle.paddingLeft) + Number.parseFloat(buttonStyle.paddingRight) +
+    Number.parseFloat(buttonStyle.borderLeftWidth) + Number.parseFloat(buttonStyle.borderRightWidth) +
+    2 * Number.parseFloat(getComputedStyle(header).columnGap)
+  const availableWidth = header.getBoundingClientRect().width - titleWidth - controlsWidth
+  actionLayout.value = fullLabelMeasure.value.getBoundingClientRect().width <= availableWidth
+    ? 'full'
+    : shortLabelMeasure.value.getBoundingClientRect().width <= availableWidth ? 'compact' : 'stacked'
+}
+
+onMounted(() => {
+  headerObserver = new ResizeObserver(updateActionLayout)
+  for (const element of [
+    activityHeader.value, titleMeasure.value, fullLabelMeasure.value, shortLabelMeasure.value,
+    activityHeader.value.querySelector('.activityIcon'), clearButton.value.$el.firstElementChild,
+    refreshButton.value.$el
+  ]) {
+    headerObserver.observe(element)
+  }
+  updateActionLayout()
+})
+onBeforeUnmount(() => headerObserver?.disconnect())
+
 useScrollClamp(activityScroller, activityList)
 const showAll = ref(false)
 const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
