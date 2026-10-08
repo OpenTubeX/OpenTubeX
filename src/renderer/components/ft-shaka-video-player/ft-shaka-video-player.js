@@ -6671,6 +6671,14 @@ export default defineComponent({
       })
     }
 
+    function restoreAndroidStatusBarVisibility() {
+      if (!isActiveTab.value || !ui) return
+      // Android can reveal the bar while the notification shade owns focus.
+      // Reapply the current preference even when the controls never changed.
+      androidStatusBarVisible = null
+      syncAndroidStatusBarVisibility()
+    }
+
     function observeFullscreenControlsVisibility(controlsContainer) {
       fullscreenControlsVisibilityObserver?.disconnect()
       fullscreenControlsVisibilityObserver = new MutationObserver(syncAndroidStatusBarVisibility)
@@ -11862,6 +11870,7 @@ export default defineComponent({
       window.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.addEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
+      window.addEventListener('opentubex:android-window-focus', restoreAndroidStatusBarVisibility)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
       document.addEventListener('click', handlePlaybackRateMenuClick, true)
       document.addEventListener('click', handleQualityMenuClick, true)
@@ -12527,6 +12536,7 @@ export default defineComponent({
       window.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.removeEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
+      window.removeEventListener('opentubex:android-window-focus', restoreAndroidStatusBarVisibility)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
