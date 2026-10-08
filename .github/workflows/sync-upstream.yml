@@ -32,9 +32,6 @@ jobs:
             exit 1
           fi
 
-      # Auto Merge PR / Enable Auto Merge handle this repository's approval
-      # requirements and merge eligible upstream PRs using a merge commit.
-
       - name: Checkout fork
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
