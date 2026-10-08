@@ -393,11 +393,11 @@
                 alt=""
               />
               <FtIcon
-                :icon="['fas', 'heart']"
+                :icon="['fas', 'heart-filled']"
                 class="commentHeartBadgeWhite"
               />
               <FtIcon
-                :icon="['fas', 'heart']"
+                :icon="['fas', 'heart-filled']"
                 class="commentHeartBadgeRed"
               />
             </span>
