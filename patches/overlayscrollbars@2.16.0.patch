@@ -1,5 +1,5 @@
 diff --git a/overlayscrollbars.cjs b/overlayscrollbars.cjs
-index ec871bc71397ef9f5586519c121a65b90907ad9d..8090a41d1f18a455786e41f12f9b440c4a445fc3 100644
+index ec871bc71397ef9f5586519c121a65b90907ad9d..04833655c9f22668a61ca7b8a5b6f5ba22765cfe 100644
 --- a/overlayscrollbars.cjs
 +++ b/overlayscrollbars.cjs
 @@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
@@ -40,8 +40,66 @@ index ec871bc71397ef9f5586519c121a65b90907ad9d..8090a41d1f18a455786e41f12f9b440c
          } else {
            runEachAndClear(i);
            e.delete(c);
+@@ -1549,6 +1555,8 @@ const createObserversSetup = (t, n, o, s) => {
+   let a;
+   let u;
+   let f;
++  let deferContentMutation = false;
++  let contentMutationDestroyed = false;
+   const _ = `[${j}]`;
+   const p = `[${F}]`;
+   const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
+@@ -1673,6 +1681,22 @@ const createObserversSetup = (t, n, o, s) => {
+     }
+     return s;
+   };
++  // Content measurements must be batched before D() forces layout, rather
++  // than only debouncing the subsequent scrollbar update.
++  const contentMutationDebounce = debounce((t => {
++    if (!contentMutationDestroyed) onContentMutation(t);
++  }), { p: 0, v: 33 });
++  const onObservedContentMutation = (t, n) => {
++    if (deferContentMutation && !n) {
++      contentMutationDebounce(t);
++      return;
++    }
++    return onContentMutation(t, n);
++  };
++  const destroyContentMutationDebounce = () => {
++    contentMutationDestroyed = true;
++    contentMutationDebounce.O();
++  };
+   const onHostMutation = (t, n, o) => {
+     const s = {
+       Ht: n
+@@ -1715,6 +1739,7 @@ const createObserversSetup = (t, n, o, s) => {
+       }, i);
+     }));
+     return () => {
++      destroyContentMutationDebounce();
+       if (V) {
+         V.disconnect();
+       }
+@@ -1733,6 +1758,8 @@ const createObserversSetup = (t, n, o, s) => {
+   }, ({Dt: t, zt: n, It: o}) => {
+     const s = {};
+     const [u] = t("update.ignoreMutation");
++    const [defer] = t("update.deferContentMutation");
++    deferContentMutation = !!defer;
+     const [f, d] = t("update.attributes");
+     const [g, h] = t("update.elementEvents");
+     const [y, m] = t("update.debounce");
+@@ -1746,7 +1773,7 @@ const createObserversSetup = (t, n, o, s) => {
+       if (a) {
+         a();
+       }
+-      const [t, n] = createDOMObserver(w || b, true, onContentMutation, {
++      const [t, n] = createDOMObserver(w || b, true, onObservedContentMutation, {
+         et: concat(v, f || []),
+         rt: g,
+         it: _,
 diff --git a/overlayscrollbars.cjs.js b/overlayscrollbars.cjs.js
-index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..d9396993da70a5dc4d0e0f8467f473a587e6925e 100644
+index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..f1c98c8db9eafb91ec6a47a1af312635c1d487b0 100644
 --- a/overlayscrollbars.cjs.js
 +++ b/overlayscrollbars.cjs.js
 @@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
@@ -82,8 +140,66 @@ index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..d9396993da70a5dc4d0e0f8467f473a5
          } else {
            runEachAndClear(i);
            e.delete(c);
+@@ -1549,6 +1555,8 @@ const createObserversSetup = (t, n, o, s) => {
+   let a;
+   let u;
+   let f;
++  let deferContentMutation = false;
++  let contentMutationDestroyed = false;
+   const _ = `[${j}]`;
+   const p = `[${F}]`;
+   const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
+@@ -1673,6 +1681,22 @@ const createObserversSetup = (t, n, o, s) => {
+     }
+     return s;
+   };
++  // Content measurements must be batched before D() forces layout, rather
++  // than only debouncing the subsequent scrollbar update.
++  const contentMutationDebounce = debounce((t => {
++    if (!contentMutationDestroyed) onContentMutation(t);
++  }), { p: 0, v: 33 });
++  const onObservedContentMutation = (t, n) => {
++    if (deferContentMutation && !n) {
++      contentMutationDebounce(t);
++      return;
++    }
++    return onContentMutation(t, n);
++  };
++  const destroyContentMutationDebounce = () => {
++    contentMutationDestroyed = true;
++    contentMutationDebounce.O();
++  };
+   const onHostMutation = (t, n, o) => {
+     const s = {
+       Ht: n
+@@ -1715,6 +1739,7 @@ const createObserversSetup = (t, n, o, s) => {
+       }, i);
+     }));
+     return () => {
++      destroyContentMutationDebounce();
+       if (V) {
+         V.disconnect();
+       }
+@@ -1733,6 +1758,8 @@ const createObserversSetup = (t, n, o, s) => {
+   }, ({Dt: t, zt: n, It: o}) => {
+     const s = {};
+     const [u] = t("update.ignoreMutation");
++    const [defer] = t("update.deferContentMutation");
++    deferContentMutation = !!defer;
+     const [f, d] = t("update.attributes");
+     const [g, h] = t("update.elementEvents");
+     const [y, m] = t("update.debounce");
+@@ -1746,7 +1773,7 @@ const createObserversSetup = (t, n, o, s) => {
+       if (a) {
+         a();
+       }
+-      const [t, n] = createDOMObserver(w || b, true, onContentMutation, {
++      const [t, n] = createDOMObserver(w || b, true, onObservedContentMutation, {
+         et: concat(v, f || []),
+         rt: g,
+         it: _,
 diff --git a/overlayscrollbars.esm.js b/overlayscrollbars.esm.js
-index b05b8043eba78f20754a14e84daa09ff505e2fbc..e935fc9fd54a14a32eb7a9f17f506f040f255700 100644
+index b05b8043eba78f20754a14e84daa09ff505e2fbc..0e54c6d99f591e6a842fb859d22d5d3139aab945 100644
 --- a/overlayscrollbars.esm.js
 +++ b/overlayscrollbars.esm.js
 @@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
@@ -124,8 +240,66 @@ index b05b8043eba78f20754a14e84daa09ff505e2fbc..e935fc9fd54a14a32eb7a9f17f506f04
          } else {
            runEachAndClear(i);
            e.delete(c);
+@@ -1543,6 +1549,8 @@ const createObserversSetup = (t, n, o, s) => {
+   let a;
+   let u;
+   let f;
++  let deferContentMutation = false;
++  let contentMutationDestroyed = false;
+   const _ = `[${B}]`;
+   const p = `[${j}]`;
+   const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
+@@ -1667,6 +1675,22 @@ const createObserversSetup = (t, n, o, s) => {
+     }
+     return s;
+   };
++  // Content measurements must be batched before D() forces layout, rather
++  // than only debouncing the subsequent scrollbar update.
++  const contentMutationDebounce = debounce((t => {
++    if (!contentMutationDestroyed) onContentMutation(t);
++  }), { p: 0, v: 33 });
++  const onObservedContentMutation = (t, n) => {
++    if (deferContentMutation && !n) {
++      contentMutationDebounce(t);
++      return;
++    }
++    return onContentMutation(t, n);
++  };
++  const destroyContentMutationDebounce = () => {
++    contentMutationDestroyed = true;
++    contentMutationDebounce.O();
++  };
+   const onHostMutation = (t, n, o) => {
+     const s = {
+       Ht: n
+@@ -1709,6 +1733,7 @@ const createObserversSetup = (t, n, o, s) => {
+       }, i);
+     }));
+     return () => {
++      destroyContentMutationDebounce();
+       if (V) {
+         V.disconnect();
+       }
+@@ -1727,6 +1752,8 @@ const createObserversSetup = (t, n, o, s) => {
+   }, ({Dt: t, zt: n, It: o}) => {
+     const s = {};
+     const [u] = t("update.ignoreMutation");
++    const [defer] = t("update.deferContentMutation");
++    deferContentMutation = !!defer;
+     const [f, d] = t("update.attributes");
+     const [g, h] = t("update.elementEvents");
+     const [y, m] = t("update.debounce");
+@@ -1740,7 +1767,7 @@ const createObserversSetup = (t, n, o, s) => {
+       if (a) {
+         a();
+       }
+-      const [t, n] = createDOMObserver(w || b, true, onContentMutation, {
++      const [t, n] = createDOMObserver(w || b, true, onObservedContentMutation, {
+         et: concat(v, f || []),
+         rt: g,
+         it: _,
 diff --git a/overlayscrollbars.mjs b/overlayscrollbars.mjs
-index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..6faf6f20920e8b2cfee1b91a252b2b7816cbe16f 100644
+index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..0c79a158cda3cb6b977940352cb1b4f2e9f71ebc 100644
 --- a/overlayscrollbars.mjs
 +++ b/overlayscrollbars.mjs
 @@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
@@ -166,3 +340,74 @@ index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..6faf6f20920e8b2cfee1b91a252b2b78
          } else {
            runEachAndClear(i);
            e.delete(c);
+@@ -1543,6 +1549,8 @@ const createObserversSetup = (t, n, o, s) => {
+   let a;
+   let u;
+   let f;
++  let deferContentMutation = false;
++  let contentMutationDestroyed = false;
+   const _ = `[${B}]`;
+   const p = `[${j}]`;
+   const v = [ "id", "class", "style", "open", "wrap", "cols", "rows" ];
+@@ -1667,6 +1675,22 @@ const createObserversSetup = (t, n, o, s) => {
+     }
+     return s;
+   };
++  // Content measurements must be batched before D() forces layout, rather
++  // than only debouncing the subsequent scrollbar update.
++  const contentMutationDebounce = debounce((t => {
++    if (!contentMutationDestroyed) onContentMutation(t);
++  }), { p: 0, v: 33 });
++  const onObservedContentMutation = (t, n) => {
++    if (deferContentMutation && !n) {
++      contentMutationDebounce(t);
++      return;
++    }
++    return onContentMutation(t, n);
++  };
++  const destroyContentMutationDebounce = () => {
++    contentMutationDestroyed = true;
++    contentMutationDebounce.O();
++  };
+   const onHostMutation = (t, n, o) => {
+     const s = {
+       Ht: n
+@@ -1709,6 +1733,7 @@ const createObserversSetup = (t, n, o, s) => {
+       }, i);
+     }));
+     return () => {
++      destroyContentMutationDebounce();
+       if (V) {
+         V.disconnect();
+       }
+@@ -1727,6 +1752,8 @@ const createObserversSetup = (t, n, o, s) => {
+   }, ({Dt: t, zt: n, It: o}) => {
+     const s = {};
+     const [u] = t("update.ignoreMutation");
++    const [defer] = t("update.deferContentMutation");
++    deferContentMutation = !!defer;
+     const [f, d] = t("update.attributes");
+     const [g, h] = t("update.elementEvents");
+     const [y, m] = t("update.debounce");
+@@ -1740,7 +1767,7 @@ const createObserversSetup = (t, n, o, s) => {
+       if (a) {
+         a();
+       }
+-      const [t, n] = createDOMObserver(w || b, true, onContentMutation, {
++      const [t, n] = createDOMObserver(w || b, true, onObservedContentMutation, {
+         et: concat(v, f || []),
+         rt: g,
+         it: _,
+diff --git a/types/overlayscrollbars.d.ts b/types/overlayscrollbars.d.ts
+index 54a8dfca0bb83b797115e340308d4702bec05fe2..73f28b0a0ac3c063682f4b1833540887812810c4 100644
+--- a/types/overlayscrollbars.d.ts
++++ b/types/overlayscrollbars.d.ts
+@@ -164,6 +164,8 @@ type Options = {
+          * @returns A Truthy value if the mutation shall be ignored, a falsy value otherwise.
+          */
+         ignoreMutation: ((mutation: MutationRecord) => boolean | null | undefined | void) | null;
++        /** Batch content-size measurements before scrollbar updates. */
++        deferContentMutation?: boolean;
+         /**
+          * A function which returns a map of styles which influence the viewports flow direction or `null` if the default behavior shall be used.
+          * The default behavior reads the computed `display`, `flexDirection`, `direction` and `writingMode` styles of the viewport element.

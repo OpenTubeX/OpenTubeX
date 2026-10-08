@@ -19,7 +19,7 @@ on:
         required: false
         default: 'all'
         type: choice
-        options: [ all, offline, browser, network ]
+        options: [ all, offline, performance, browser, network ]
 
 permissions: {}
 
@@ -110,9 +110,9 @@ jobs:
             visit(JSON.parse(input).suites)
 
             const projects = process.env.SELECTED_PROJECT === "all"
-              ? ["offline", "browser", "network"]
+              ? ["offline", "performance", "browser", "network"]
               : process.env.SELECTED_PROJECT === "offline"
-                ? ["offline", "browser"]
+                ? ["offline", "performance", "browser"]
                 : [process.env.SELECTED_PROJECT]
             // Keep full-suite runs short without sharing an X server between workers.
             const testsPerShard = 100
@@ -242,6 +242,13 @@ jobs:
       run: pnpm exec playwright install --with-deps --only-shell chromium
       shell: bash
 
+    # These browser module checks use node:test and are not discovered by
+    # Playwright or the unit-test glob. Run them explicitly on every PR.
+    - name: Test mobile storage and list performance
+      if: ${{ matrix.project == 'browser' }}
+      run: node --test tests/android/mobile-performance.test.mjs
+      shell: bash
+
     - name: Start sync server
       if: ${{ matrix.project == 'network' }}
       run: docker compose -f e2e/sync-server/compose.yml up -d --wait --pull always
@@ -252,7 +259,7 @@ jobs:
     - name: Run E2E tests
       run: |
         test_args=("--shard=${{ matrix.shard }}/${{ matrix.shardTotal }}")
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ matrix.project }}" != "performance" ]; then
           test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
         fi
 

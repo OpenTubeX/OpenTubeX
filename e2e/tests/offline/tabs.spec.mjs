@@ -964,7 +964,7 @@ test.describe('tab bar', () => {
     ])
   })
 
-  test('batches tab drag rendering on a throttled CPU in both layouts', async ({ page }) => {
+  test('batches tab drag rendering on a throttled CPU in both layouts', { tag: '@performance' }, async ({ page }) => {
     await page.evaluate(async () => {
       window.ftElectron.setZoomFactor(0.95)
       for (let index = 0; index < 29; index++) {

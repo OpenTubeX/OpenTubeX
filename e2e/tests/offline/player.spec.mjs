@@ -1912,7 +1912,7 @@ test.describe('scroll mini player', () => {
     test.describe(`mini-player transition at ${uiScale}% UI scale`, () => {
       test.use({ seed: { settings: { ...PLAYER_SEED, uiScale, ambientMode: true } } })
 
-      test('keeps expensive player work out of the mini-player transition', async ({ app, page }) => {
+      test('keeps expensive player work out of the mini-player transition', { tag: '@performance' }, async ({ app, page }) => {
         const video = await openDemoVideo({ app, page })
         if (uiScale === 100) await video.evaluate(element => element.pause())
         const player = page.locator('.ftVideoPlayer')

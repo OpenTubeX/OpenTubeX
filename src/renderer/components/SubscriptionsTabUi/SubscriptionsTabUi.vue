@@ -60,6 +60,7 @@
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
       :stable-item-keys="stableItemKeys"
+      :render-all-items-lazily="isElectron"
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <slot />
@@ -118,6 +119,7 @@ import {
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
+const isElectron = process.env.IS_ELECTRON
 const root = useTemplateRef('root')
 useKeepAliveEffectScope()
 

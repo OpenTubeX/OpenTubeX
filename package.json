@@ -62,7 +62,7 @@
     "test:e2e:pack:preload": "webpack --mode=production --config-node-env=production --config _scripts/webpack.preload.config.js --output-path dist-e2e",
     "test:e2e:pack:botGuardScript": "webpack --config _scripts/webpack.botGuardScript.config.js --output-path dist-e2e",
     "test:e2e": "playwright test -c e2e/playwright.config.mjs",
-    "test:e2e:offline": "playwright test -c e2e/playwright.config.mjs --project=offline --project=browser",
+    "test:e2e:offline": "playwright test -c e2e/playwright.config.mjs --project=offline --project=performance --project=browser",
     "test:e2e:browser": "playwright test -c e2e/playwright.config.mjs --project=browser",
     "test:e2e:network": "playwright test -c e2e/playwright.config.mjs --project=network",
     "test:performance": "node e2e/performance/compare.mjs",

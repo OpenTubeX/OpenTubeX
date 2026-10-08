@@ -2,6 +2,13 @@ import { defineConfig } from '@playwright/test'
 
 const useFixtures = !!process.env.E2E_USE_FIXTURES
 const record = !!process.env.E2E_RECORD
+const performanceTests = [
+  /performance[^/]*\.spec\.mjs/,
+  // Keep interaction coverage beside these layout/work-count assertions.
+  /(?:scrollbar-overlay|inline-mini-player-drag|fullscreen-docks|channel-settings-pagination|utility-window-close|resource-lifecycle|[^/]*responsiveness)\.spec\.mjs/,
+  // Select performance checks from files containing other functional tests.
+  /@performance/
+]
 
 export default defineConfig({
   testDir: './tests',
@@ -21,7 +28,19 @@ export default defineConfig({
   projects: [
     {
       name: 'offline',
-      testMatch: 'offline/**/*.spec.mjs'
+      testMatch: 'offline/**/*.spec.mjs',
+      grepInvert: performanceTests
+    },
+    {
+      // These tests exercise packed code, which Playwright's import-based
+      // --only-changed selection cannot associate with application changes.
+      name: 'performance',
+      testMatch: 'offline/**/*.spec.mjs',
+      grep: performanceTests,
+      // Single-run absolute budgets can pick up host scheduling noise. Keep
+      // recovered failures visible as flaky; the paired comparison has no retry.
+      retries: 1,
+      use: { trace: 'off' }
     },
     {
       name: 'browser',

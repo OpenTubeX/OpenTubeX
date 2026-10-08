@@ -1,7 +1,7 @@
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
 
-test('opens phone settings without repeated scrollbar remeasurement before painting', async ({ page }) => {
+test('opens phone settings without repeated scrollbar remeasurement before painting', { tag: '@performance' }, async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await goTo(page, 'settings')
   const reads = await page.evaluate(() => new Promise(resolve => {
@@ -127,7 +127,7 @@ test.describe('Home subscription processing', () => {
     }
   })
 
-  test('opens Home without copying the cache or repeatedly reading reactive sort keys', async ({ page }) => {
+  test('opens Home without copying the cache or repeatedly reading reactive sort keys', { tag: '@performance' }, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 })
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {
