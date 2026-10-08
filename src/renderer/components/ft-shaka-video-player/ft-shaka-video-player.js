@@ -10704,7 +10704,8 @@ export default defineComponent({
         return false
       }
 
-      if (target.closest('.scrollMiniPlayerControls')) {
+      // The seekbar keeps focus after scrubbing and must still allow player shortcuts.
+      if (target.classList.contains('shaka-seek-bar') || target.closest('.scrollMiniPlayerControls')) {
         return false
       }
 
