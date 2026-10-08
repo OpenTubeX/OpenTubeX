@@ -3891,9 +3891,7 @@ test.describe('settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
 
     const tabLayout = appearance.locator('.themeSelectRow').filter({ hasText: 'Tab Layout' })
-    const tabWidth = appearance.locator('.ft-flex-box').filter({
-      has: page.getByRole('slider', { name: /Tab Width/ })
-    }).locator('.switchColumn')
+    const tabWidth = appearance.locator('.tabSettingsRow .pure-material-slider')
     const loadIcons = appearance.getByRole('button', { name: 'Load Missing Tab Icons' })
     const centerDifference = async () => {
       const centers = await Promise.all([tabLayout, tabWidth, loadIcons].map(async locator => {
