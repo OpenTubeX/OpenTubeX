@@ -384,6 +384,7 @@ const state = {
   hideUploader: false,
   unsubscriptionPopupStatus: false,
   hideLabelsSideBar: false,
+  hideSettingsCategoryDescriptions: false,
   alwaysShowNavigationBar: false,
   compactNavigationLabels: false,
   hideChapters: false,

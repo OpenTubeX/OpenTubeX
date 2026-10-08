@@ -255,11 +255,14 @@ $grab-bar-padding: 1em;
 }
 
 .deArrowToggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   cursor: pointer;
   padding: 10px;
   font-size: 16px;
-  line-height: 1em;
+  line-height: 0;
   transition: background 0.15s ease-out;
   background-color: transparent;
   color: var(--primary-color);

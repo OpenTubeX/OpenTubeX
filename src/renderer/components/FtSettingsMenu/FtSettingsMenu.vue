@@ -1,7 +1,8 @@
 <template>
   <menu
+    ref="menuElement"
     class="settingsMenu"
-    :class="{ filtered }"
+    :class="{ filtered, compact: hideSettingsCategoryDescriptions }"
   >
     <li
       v-for="settingsSection in settingsSections"
@@ -24,7 +25,7 @@
             />
             <span class="titleText">{{ settingsSection.title }}</span>
             <small
-              v-if="settingsSection.description"
+              v-if="settingsSection.description && !hideSettingsCategoryDescriptions"
               class="titleDescription"
             >
               {{ settingsSection.description }}
@@ -46,7 +47,11 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { useTemplateRef } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
+import store from '../../store/index'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+
+const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
 
 defineProps({
   settingsSections: {
@@ -77,6 +82,14 @@ function goToSettingsSection(event) {
 }
 
 const linkRefs = useTemplateRef('linkRefs')
+const menuElement = useTemplateRef('menuElement')
+
+watch(hideSettingsCategoryDescriptions, () => {
+  const menu = menuElement.value
+  if (menu?.offsetHeight) {
+    clampOverlayScrollTop(menu, menu.querySelector('.titleItem:last-of-type'))
+  }
+}, { flush: 'post' })
 
 defineExpose({
   /**

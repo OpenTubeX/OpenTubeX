@@ -747,6 +747,7 @@ Settings:
       System Fonts: System fonts
     Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
+    Compact Settings Categories: Compact Settings Categories
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
     Base Theme:
       Dynamic colors: Dynamic colors
@@ -2892,6 +2893,7 @@ Tooltips:
     Scroll Speed: Changes how far mouse-wheel and touchpad wheel gestures scroll.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
     Use Grid Player Menu: Arranges the video player's settings menu as a grid of tiles instead of a list of rows.
+    Compact Settings Categories: Hides descriptions and reduces the height of settings categories.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
     Disable Hardware Acceleration: Disables GPU hardware acceleration. May fix graphical issues, but will probably perform worse.

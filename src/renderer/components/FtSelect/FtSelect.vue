@@ -133,19 +133,20 @@
         @closed="dropdownShown = false; dropdownRendered = false"
         @close="closeDropdown"
       >
-        <label
+        <div
           v-if="phoneLayout && selectNames.length > 10"
-          class="textInputLabel pickerSearchField"
+          class="pickerSearchField"
         >
-          <span class="textInputLabelText">{{ $t('Search Bar.Search') }}</span>
-          <input
-            v-model="search"
-            class="pickerSearch"
-            type="search"
-            :aria-label="$t('Search Bar.Search')"
+          <FtInput
+            :value="search"
+            input-type="search"
+            :label="$t('Search Bar.Search')"
+            :show-label="false"
             :placeholder="$t('Form Inputs.Search Text Hint')"
-          >
-        </label>
+            :show-action-button="false"
+            @input="search = $event"
+          />
+        </div>
         <!-- Start on the listbox so a long picker does not summon the Android keyboard. -->
         <!-- eslint-disable vuejs-accessibility/no-autofocus -->
         <ul
@@ -237,6 +238,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import FtInput from '../FtInput/FtInput.vue'
 import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'

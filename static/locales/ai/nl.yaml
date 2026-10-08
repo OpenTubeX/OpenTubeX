@@ -384,6 +384,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Compact Settings Categories: "Compacte instellingencategorieën"
     Playlist Thumbnail Size: "Grootte van afspeellijstminiaturen"
     Compact Mobile Mini Player: "Compacte mobiele minispeler"
     Always Show Mobile Search Bar: "Mobiele zoekbalk altijd tonen"
@@ -1835,6 +1836,7 @@ Tooltips:
     Auto Refresh Interval: "Hoe vaak OpenTubeX je abonnementsfeed automatisch vernieuwt terwijl de app geopend is. Op Android vernieuwt een interval dat niet nul is de feed ook wanneer de app gesloten is."
     Refresh Subscriptions While App Is Closed: "Ververst feeds met je gekozen instellingen. Op de computer blijft OpenTubeX in het systeemvak totdat je afsluit. Android bepaalt wanneer verversingen op de achtergrond worden uitgevoerd."
   Theme Settings:
+    Compact Settings Categories: "Verbergt beschrijvingen en verkleint de hoogte van instellingencategorieën."
     Show Progress as Notification: Toont een blijvende melding met actuele voortgang voor achtergrondbewerkingen, zoals het vernieuwen van abonnementen en downloaden van beheerde hulpprogramma's, in plaats van de algemene voortgangsbalk.
     Always Show Scrollbars: Houdt de schuifbalken altijd zichtbaar. Als dit is uitgeschakeld, verdwijnen ze kort nadat je stopt met het bewegen van de muis en verschijnen ze weer zodra je de muis beweegt.
     Scroll Speed: Wijzigt hoe ver muiswiel- en touchpadbewegingen scrollen.

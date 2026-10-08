@@ -156,6 +156,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Compact Settings Categories: "Kompaktowe kategorie ustawień"
     Playlist Thumbnail Size: "Rozmiar miniatur playlisty"
     Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"
     Always Show Mobile Search Bar: "Zawsze pokazuj pasek wyszukiwania na telefonie"
@@ -1011,6 +1012,7 @@ Tooltips:
     Show Scheduled Live Streams / Premieres First: Umieszcza nadchodzące transmisje na żywo i premiery na górze kanału subskrypcji. Po wyłączeniu pozostają na pozycji zgodnej z datą ogłoszenia aż do rozpoczęcia. Po wyłączeniu odśwież kanał subskrypcji, aby pobrać daty ogłoszenia istniejących zaplanowanych pozycji.
     Refresh Subscriptions While App Is Closed: "Odświeża kanały zgodnie z wybranymi ustawieniami. Na komputerze OpenTubeX pozostaje w zasobniku systemowym do zamknięcia programu. Android określa czas odświeżania w tle."
   Theme Settings:
+    Compact Settings Categories: "Ukrywa opisy i zmniejsza wysokość kategorii ustawień."
     Show Progress as Notification: Zamiast ogólnego paska postępu wyświetla stałe powiadomienie z bieżącym postępem operacji w tle, takich jak odświeżanie subskrypcji i pobieranie zarządzanych narzędzi.
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
     Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.

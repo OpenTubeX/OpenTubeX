@@ -502,6 +502,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Compact Settings Categories: "Kompaktiškos nustatymų kategorijos"
     Playlist Thumbnail Size: "Grojaraščio miniatiūrų dydis"
     Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"
     Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
@@ -2200,6 +2201,7 @@ Tooltips:
     Auto Refresh Interval: "Kaip dažnai OpenTubeX automatiškai atnaujina prenumeratų sklaidos kanalą, kol programa atverta. „Android“ sistemoje nenulinis intervalas atnaujina sklaidos kanalą ir tada, kai programa uždaryta."
     Refresh Subscriptions While App Is Closed: "Atnaujina srautus pagal pasirinktus nustatymus. Kompiuteryje OpenTubeX lieka sistemos dėkle, kol išeinate. Android nustato foninių atnaujinimų laiką."
   Theme Settings:
+    Compact Settings Categories: "Paslepia aprašymus ir sumažina nustatymų kategorijų aukštį."
     Show Progress as Notification: Vietoje bendros eigos juostos rodo nuolatinį pranešimą su tikralaike foninių operacijų, pvz., prenumeratų atnaujinimo ir tvarkomų įrankių atsisiuntimo, eiga.
     Always Show Scrollbars: Slinkties juostos visada lieka matomos. Išjungus jos netrukus išblėsta nustojus judinti pelę ir vėl pasirodo vos ją pajudinus.
     Scroll Speed: Keičia, kiek paslenka pelės ratuko ir jutiklinio kilimėlio slinkimo gestai.

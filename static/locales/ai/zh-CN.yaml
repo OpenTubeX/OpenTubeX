@@ -380,6 +380,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Compact Settings Categories: "紧凑设置类别"
     Playlist Thumbnail Size: "播放列表缩略图大小"
     Compact Mobile Mini Player: "紧凑型移动迷你播放器"
     Always Show Mobile Search Bar: "始终显示移动端搜索栏"
@@ -1780,6 +1781,7 @@ Tooltips:
     Auto Refresh Interval: "OpenTubeX 在应用打开期间自动刷新订阅动态的频率。 在 Android 上，非零间隔还会在应用关闭时刷新订阅源。"
     Refresh Subscriptions While App Is Closed: "使用所选设置刷新订阅。在桌面端，OpenTubeX 会留在系统托盘中，直到您退出。Android 系统决定后台刷新的运行时间。"
   Theme Settings:
+    Compact Settings Categories: "隐藏描述并减小设置类别的高度。"
     Show Progress as Notification: 以持续通知实时显示后台操作的进度（例如刷新订阅动态和下载托管工具），而不使用全局进度条。
     Always Show Scrollbars: 始终显示滚动条。禁用后，停止移动鼠标不久，滚动条便会淡出；再次移动鼠标时会立即重新出现。
     Scroll Speed: 更改鼠标滚轮和触控板滚轮手势的滚动距离。

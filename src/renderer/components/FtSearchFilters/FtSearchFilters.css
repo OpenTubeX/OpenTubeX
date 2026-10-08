@@ -28,6 +28,11 @@
 }
 
 .clearFilterButton {
+  --icon-width: 1em;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border-style: none;
   background-color: transparent;
@@ -49,10 +54,6 @@
     color: var(--side-nav-active-text-color);
     transition: background 0.2s ease-in;
   }
-}
-
-.clearFilterIcon {
-  vertical-align: -0.25em;
 }
 
 @media only screen and (width <= 680px) {

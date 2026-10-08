@@ -382,6 +382,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Compact Settings Categories: "Kompakta inställningskategorier"
     Playlist Thumbnail Size: "Storlek på spellistans miniatyrbilder"
     Compact Mobile Mini Player: "Kompakt mobil minispelare"
     Always Show Mobile Search Bar: "Visa alltid sökfältet på mobilen"
@@ -1797,6 +1798,7 @@ Tooltips:
     Auto Refresh Interval: "Hur ofta OpenTubeX automatiskt uppdaterar prenumerationsflödet medan appen är öppen. På Android uppdaterar ett intervall över noll även flödet när appen är stängd."
     Refresh Subscriptions While App Is Closed: "Uppdaterar flöden med dina valda inställningar. På datorn stannar OpenTubeX i systemfältet tills du avslutar. Android bestämmer när bakgrundsuppdateringar körs."
   Theme Settings:
+    Compact Settings Categories: "Döljer beskrivningar och minskar höjden på inställningskategorier."
     Show Progress as Notification: Visar en beständig avisering med aktuellt förlopp för bakgrundsåtgärder, exempelvis uppdatering av prenumerationer och nedladdning av hanterade verktyg, i stället för det globala förloppsfältet.
     Always Show Scrollbars: Håller rullningslisterna synliga hela tiden. När funktionen är inaktiverad tonas de bort en kort stund efter att du slutat röra musen och visas igen så snart du rör den.
     Scroll Speed: Ändrar hur långt mushjulets och pekplattans rullgester rullar.

@@ -48,7 +48,7 @@ for (const uiScale of [100, 95]) {
       await expect(page).toHaveURL(/watch/)
     })
 
-    test('searches a language picker without closing quick settings', async ({ app, page }) => {
+    test('searches a language picker without closing quick settings', async ({ app, page, attachScreenshot }) => {
       await setWindowSize(app, page, { width: 360, height: 760 })
       await page.locator('.profileTrigger').click()
       const quick = page.locator('.quickSettingsMenu')
@@ -60,9 +60,12 @@ for (const uiScale of [100, 95]) {
       expect(quickBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1)
       await quick.locator('.select').filter({ hasText: 'Language' }).getByRole('combobox').click()
       const picker = page.locator('dialog[open]').last()
-      await expect(picker.locator('.pickerSearch')).toBeVisible()
+      await expect(picker.getByRole('searchbox', { name: 'Search', exact: true })).toBeVisible()
+      await expect(picker.getByRole('searchbox', { name: 'Search', exact: true })).not.toBeFocused()
+      await picker.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+      await attachScreenshot('mobile select search')
       await picker.locator('.selectDropdown').evaluate(element => { element.scrollTop = 100000 })
-      await picker.locator('.pickerSearch').fill('Deutsch')
+      await picker.getByRole('searchbox', { name: 'Search', exact: true }).fill('Deutsch')
       await expect(picker.getByRole('option')).toHaveCount(1)
       await expectNoScrollbarOverflow(picker.locator('.selectDropdown'))
       await picker.press('Escape')
@@ -349,7 +352,7 @@ for (const currentLocale of ['en-US', 'de-DE', 'ar']) {
           })).toBe(true)
           await menu.locator('.select').filter({ has: page.locator('option[value="de-DE"]') }).getByRole('combobox').click()
           const sheet = page.locator('dialog[open]').last()
-          await sheet.locator('.pickerSearch').fill('Deutsch')
+          await sheet.getByRole('searchbox').fill('Deutsch')
           await expect(sheet.getByRole('option')).toHaveCount(1)
           await sheet.press('Escape')
           await expect(page.locator('dialog[open]')).toHaveCount(1)

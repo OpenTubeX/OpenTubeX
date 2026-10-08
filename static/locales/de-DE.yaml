@@ -645,6 +645,7 @@ Settings:
     Disable Smooth Scrolling: Gleichmäßiges Scrollen deaktivieren
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
+    Compact Settings Categories: Kompakte Einstellungskategorien
     Hide OpenTubeX Header Logo: OpenTubeX-Titellogo ausblenden
     Hide Side Bar on Watch Pages: Seitenleiste auf den Wiedergabeseiten ausblenden
     Move Downloads to App Header: Downloads in die App-Kopfzeile verschieben
@@ -2588,6 +2589,7 @@ Tooltips:
     Scroll Speed: Ändert die Scrollweite von Mausrad- und Touchpad-Gesten.
     Use Fixed Tab Width: Gibt jedem Tab in der horizontalen Tableiste dieselbe Breite, statt sie an den Titel anzupassen.
     Use Grid Player Menu: Ordnet das Einstellungsmenü des Videoplayers als Kachelraster statt als Liste an.
+    Compact Settings Categories: Blendet die Beschreibungen aus und verringert die Höhe der Einstellungskategorien.
 Playing Next Video Interval: Nächstes Video wird sofort abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken. | Nächstes Video wird in {nextVideoInterval} Sekunden abgespielt. Zum Abbrechen klicken.
 More: Mehr
 Unknown YouTube url type, cannot be opened in app: Unbekannter YouTube URL-Typ, kann in der App nicht geöffnet werden

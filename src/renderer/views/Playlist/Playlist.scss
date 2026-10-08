@@ -12,12 +12,19 @@
 }
 
 .alertButton {
-  padding-inline: 1em;
+  --icon-width: 1em;
+
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  padding: 10px;
   border-radius: 100%;
   border-style: none;
   background-color: transparent;
   color: var(--primary-text-color);
   font-size: 1em;
+  line-height: 0;
   transition: background 0.2s ease-in;
 }
 
