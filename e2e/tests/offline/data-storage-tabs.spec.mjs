@@ -35,6 +35,7 @@ for (const uiScale of [100, 95]) {
       await expect(data).toHaveAttribute('aria-selected', 'true')
       if (uiScale === 100) {
         const header = await page.locator('.settingsContentHeader').boundingBox()
+        expect(header).not.toBeNull()
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
           await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
