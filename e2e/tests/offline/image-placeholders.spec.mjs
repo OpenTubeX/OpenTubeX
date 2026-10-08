@@ -642,10 +642,12 @@ test('lazy inline post emojis wait offscreen before their loading deadline', asy
   await page.clock.fastForward(20_000)
   expect(pending).toHaveLength(0)
   await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveCSS('animation-play-state', 'paused')
   await placeholder.scrollIntoViewIfNeeded()
   await expect.poll(() => pending.length).toBe(1)
   await page.clock.runFor(100)
   await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveCSS('animation-play-state', 'running')
   // Capture at normal scale after checking visibility at a fractional zoom.
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
@@ -1048,11 +1050,17 @@ test('offscreen lazy Home thumbnails keep their skeleton until visible, then tim
   await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top > innerHeight)).toBe(true)
   await page.clock.fastForward(10_001)
   await expect(placeholder).toHaveClass(/ft-shimmer/)
+  await expect(placeholder).toHaveCSS('animation-play-state', 'paused')
   await card.scrollIntoViewIfNeeded()
   await expect.poll(() => pending.length).toBe(1)
   await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top < innerHeight)).toBe(true)
   // Let the intersection notification start the deadline before advancing time.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  await expect(placeholder).toHaveCSS('animation-play-state', 'running')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await expect(placeholder).toHaveCSS('animation-play-state', 'paused')
+  await card.scrollIntoViewIfNeeded()
+  await expect(placeholder).toHaveCSS('animation-play-state', 'running')
   // Capture at normal scale after checking visibility at a fractional zoom.
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1)
