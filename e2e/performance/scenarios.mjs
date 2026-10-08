@@ -1,13 +1,25 @@
 import { readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
-import { expect, goTo, sel } from '../helpers/app.mjs'
+import { abortUnmockedRequest, expect, goTo, sel } from '../helpers/app.mjs'
 import { mockPlayableWatchPage } from '../helpers/watch.mjs'
 import { runLargeSubscriptionsBenchmark } from './subscriptions.mjs'
 
 const actionTimeoutMs = 30_000
 const navigationCycles = 10
 const scrollFrames = 60
+const playbackCycles = 5
+
+export function mockPerformanceServices(page) {
+  return page.route(/^https?:\/\//, route => {
+    // Aborting unrelated channel/trending requests marks the shared YouTube
+    // origin unavailable and makes later mocked playback wait in retry backoff.
+    if (new URL(route.request().url()).hostname === 'www.youtube.com') {
+      return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+    }
+    return abortUnmockedRequest(route)
+  })
+}
 
 function measureRendererAction(page, scenario) {
   const timeoutMessage = scenario === 'navigation'
@@ -92,34 +104,65 @@ async function measureChannelSearch(page) {
   return result
 }
 
-async function measureLargeFeedScroll(page) {
-  await page.evaluate(() => window.scrollTo(0, 0))
+export async function measureLargeFeedScroll(page) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
+  const session = await page.context().newCDPSession(page)
+  try {
+    await session.send('Performance.enable')
+    const before = await session.send('Performance.getMetrics')
+    const result = await page.evaluate(({ scrollFrames, actionTimeoutMs }) => new Promise((resolve, reject) => {
+      const startedAt = performance.now()
+      let previousFrame = startedAt
+      let longestFrame = 0
+      let frame = 0
+      let animationFrame
+      const timeout = setTimeout(() => {
+        cancelAnimationFrame(animationFrame)
+        reject(new Error('Large feed scrolling did not finish within the performance timeout'))
+      }, actionTimeoutMs)
 
-  return page.evaluate(({ scrollFrames }) => new Promise(resolve => {
-    const startedAt = performance.now()
-    let previousFrame = startedAt
-    let longestFrame = 0
-    let frame = 0
+      function sample(timestamp) {
+        longestFrame = Math.max(longestFrame, timestamp - previousFrame)
+        previousFrame = timestamp
+        frame++
 
-    function sample(timestamp) {
-      longestFrame = Math.max(longestFrame, timestamp - previousFrame)
-      previousFrame = timestamp
-      frame++
+        const maximum = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
+        if (maximum === 0) {
+          clearTimeout(timeout)
+          reject(new Error('The large feed has no scroll range'))
+          return
+        }
+        window.scrollTo({ top: maximum * frame / scrollFrames, behavior: 'instant' })
 
-      const maximum = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
-      window.scrollTo(0, maximum * frame / scrollFrames)
-
-      if (frame === scrollFrames) {
-        requestAnimationFrame(finishedAt => resolve({
-          longestFrame: Math.max(longestFrame, finishedAt - previousFrame)
-        }))
-        return
+        if (frame === scrollFrames) {
+          animationFrame = requestAnimationFrame(finishedAt => {
+            clearTimeout(timeout)
+            if (window.scrollY <= 0) {
+              reject(new Error('The large feed did not scroll'))
+              return
+            }
+            resolve({
+              elapsed: finishedAt - startedAt,
+              longestFrame: Math.max(longestFrame, finishedAt - previousFrame)
+            })
+          })
+          return
+        }
+        animationFrame = requestAnimationFrame(sample)
       }
-      requestAnimationFrame(sample)
-    }
 
-    requestAnimationFrame(sample)
-  }), { scrollFrames })
+      animationFrame = requestAnimationFrame(sample)
+    }), { scrollFrames, actionTimeoutMs })
+    const after = await session.send('Performance.getMetrics')
+    const taskDuration = metrics => metrics.metrics.find(metric => metric.name === 'TaskDuration')?.value
+    const taskMs = (taskDuration(after) - taskDuration(before)) * 1000
+    if (!Number.isFinite(taskMs) || taskMs < 0) {
+      throw new Error('Renderer TaskDuration is unavailable')
+    }
+    return { ...result, taskMs }
+  } finally {
+    await session.detach()
+  }
 }
 
 async function collectRendererHeapAfterGcKiB(page) {
@@ -157,6 +200,9 @@ async function measureNavigationHeapGrowth(page) {
 
 async function measurePlaybackStart(electronApp, page) {
   await mockPlayableWatchPage({ electronApp, page }, page)
+  // Keep the watch API/media fixtures, with the performance fallback for other
+  // requests throughout the later playback and disposal measurements.
+  await page.unroute(/^https?:\/\//, abortUnmockedRequest)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
 
   await page.evaluate(() => {
@@ -196,15 +242,42 @@ async function measurePlaybackStart(electronApp, page) {
   return page.evaluate(() => window.__performancePlaybackStart)
 }
 
+export async function measurePlaybackHeapGrowth(page) {
+  const expandNavigation = page.getByRole('button', { name: 'Expand side navigation', exact: true })
+  if (await expandNavigation.isVisible()) await expandNavigation.click()
+  await goTo(page, 'trending')
+  await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+
+  async function cycle() {
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/jNQXAC9IVRw', makeActive: true
+    }))
+    const panel = page.locator(`.tabContent[data-tab-id="${tab.id}"]`)
+    await expect.poll(() => panel.locator('video').evaluateAll(videos => videos.some(video =>
+      !video.paused && video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+    )), { timeout: actionTimeoutMs }).toBe(true)
+    await page.evaluate(id => window.ftElectron.tabs.close(id), tab.id)
+    await expect(panel).toHaveCount(0)
+    await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  }
+
+  // Exclude one-time player initialization, lazy modules and media caches.
+  await cycle()
+  const before = await collectRendererHeapAfterGcKiB(page)
+  for (let index = 0; index < playbackCycles; index++) await cycle()
+  const after = await collectRendererHeapAfterGcKiB(page)
+  return Math.max(0, after - before) / 1024
+}
+
 export async function packedCodeSizeKiB(appRoot) {
   const distRoot = path.join(appRoot, 'dist-e2e')
-  const entries = await readdir(distRoot, { withFileTypes: true })
+  const entries = await readdir(distRoot, { withFileTypes: true, recursive: true })
   const bundleFiles = entries.filter(entry => entry.isFile() && (
     entry.name.endsWith('.css') ||
     entry.name.endsWith('.js')
   ))
   const sizes = await Promise.all(bundleFiles.map(async entry => (
-    await stat(path.join(distRoot, entry.name))
+    await stat(path.join(entry.parentPath, entry.name))
   ).size))
   return sizes.reduce((total, size) => total + size, 0) / 1024
 }
@@ -216,6 +289,7 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
   const scroll = await measureLargeFeedScroll(page)
   const navigationHeapGrowthMiB = await measureNavigationHeapGrowth(page)
   const playbackStart = await measurePlaybackStart(electronApp, page)
+  const playbackHeapGrowthMiB = await measurePlaybackHeapGrowth(page)
 
   return {
     ...startup,
@@ -225,9 +299,12 @@ export async function runPerformanceScenarios({ electronApp, page }, startup, ap
     channelSearchLongestFrameMs: channelSearch.longestFrame,
     ...subscriptionSwitches,
     largeFeedScrollLongestFrameMs: scroll.longestFrame,
+    largeFeedScrollElapsedMs: scroll.elapsed,
+    largeFeedScrollTaskMs: scroll.taskMs,
     navigationHeapGrowthMiB,
     playbackStartElapsedMs: playbackStart.elapsed,
     playbackStartLongestFrameMs: playbackStart.longestFrame,
+    playbackHeapGrowthMiB,
     packedCodeSizeKiB: await packedCodeSizeKiB(appRoot)
   }
 }

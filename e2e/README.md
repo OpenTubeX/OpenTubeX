@@ -114,25 +114,39 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 
 `.github/workflows/e2e.yml`:
 
-- **Pull requests** → changed test files and tests importing changed helpers.
-- **Nightly** → full offline, browser, and network suites.
+- **Pull requests** → the full performance project, plus changed test files and tests importing changed helpers in the other projects.
+- **Nightly** → full offline, performance, browser, and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
 The Electron projects use up to 16 CI shards each, with one Playwright worker
 and a private X server per shard to avoid interference between windows.
 Isolated Chromium checks run in one separate job, so only that runner installs
-Chromium. The offline command and dispatch selection include both offline
-Electron tests and browser checks.
+Chromium. The offline command and dispatch selection include offline and
+performance Electron tests and browser checks.
 
-Pull requests without changed or affected E2E tests pass without running tests.
+Performance tests exercise the packed application, which Playwright's import-based
+`--only-changed` selection cannot associate with source or CSS changes. They always
+run on PRs, including layout/work-count suites and tests tagged `@performance`
+within mixed functional files. Tag new performance checks in such files so they
+run without depending on test-file changes. Run the project locally with
+`pnpm exec playwright test -c e2e/playwright.config.mjs --project=performance`.
+Other projects pass without running tests when no tests are changed or affected.
 Network tests use the fixture fallback on retry.
 
-On failure the Playwright HTML report and traces are uploaded as artifacts.
+The browser job also runs `tests/android/mobile-performance.test.mjs` explicitly
+on every PR. These source-level storage and list checks use `node:test` with
+headless Chromium and are not discovered by the normal unit-test glob or
+Playwright. They do not replace native Android emulator testing.
+
+The Playwright HTML report and functional-test traces are uploaded as artifacts.
+The performance project disables tracing to avoid distorting measurements. Its
+absolute-budget checks retry once for host scheduling noise; recovered failures
+remain marked flaky in the uploaded report. The paired comparison does not retry.
 
 ## Performance comparison
 
 The pull-request performance workflow builds the base and candidate commits,
-then runs the large cached-subscription benchmark against both builds on one
+then measures startup, large cached subscriptions, navigation, scrolling, and local playback against both builds on one
 runner. It alternates between builds, discards two warm-ups per build, and
 compares the median of seven samples. A single pull-request comment and the
 Actions summary show the comparison, and the raw samples are uploaded as
@@ -142,12 +156,26 @@ An absolute gate fails when the base median is below the limit, the candidate's
 lower quartile reaches the limit, and the median increase exceeds the configured
 absolute minimum delta. A relative gate fails when the candidate's lower
 quartile clears the threshold against the base's upper quartile and the
-interquartile increase exceeds the configured minimum delta. This prevents an
-overlapping distribution from failing because of a median flip. Elapsed metrics
-allow 15%, longest-frame metrics 20%, renderer heap growth 50%, and packed code
+interquartile increase exceeds the configured minimum delta. It also catches a
+material slowdown when every adjacent base/candidate pair exceeds both the
+relative and minimum-delta budgets, with at least seven pairs. Overlapping
+distributions with inconsistent changes still pass. Elapsed metrics
+allow 15%, longest-frame metrics 20%, scrolling renderer work 25%, renderer heap growth 50%, and packed code
 size 5%. Each metric's minimum delta lives in `e2e/performance/report.mjs`. A
 trusted follow-up workflow updates the comment so pull requests from forks
 never receive a write-capable token.
+
+Scrolling measures elapsed time for 60 frames to detect sustained slower frame
+delivery, plus renderer CPU work using CDP `TaskDuration`, since extra
+work can fit within a frame without changing its duration. Player heap growth
+measures five open/play/close tab cycles after a warm-up cycle and forced renderer
+garbage collection. Heap metrics cover JavaScript memory, excluding native and GPU
+memory. Packed code size includes JavaScript and CSS in nested output directories.
+Measurements are validated before comparison; enforcing runs require at least
+seven samples. Dependabot PRs also run the comparison. Passing medians above an
+absolute limit are marked above budget so existing slow baselines remain visible.
+Unmocked YouTube services return controlled HTTP errors, so unrelated requests
+cannot put mocked playback into the shared network-recovery backoff queue.
 
 To compare two checkouts locally, build `dist-e2e` in both and run:
 

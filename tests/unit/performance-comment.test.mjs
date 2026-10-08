@@ -45,9 +45,12 @@ function sample (overrides = {}) {
     repeatedSwitchElapsedMs: 80,
     repeatedSwitchLongestFrameMs: 40,
     largeFeedScrollLongestFrameMs: 20,
+    largeFeedScrollElapsedMs: 1000,
+    largeFeedScrollTaskMs: 30,
     navigationHeapGrowthMiB: 6.5,
     playbackStartElapsedMs: 1000,
     playbackStartLongestFrameMs: 50,
+    playbackHeapGrowthMiB: 0,
     packedCodeSizeKiB: 4000,
     ...overrides
   }
@@ -102,6 +105,7 @@ test('does not fail an absolute limit when the candidate improves on an over-lim
   const comment = renderPerformanceComment(input, { headSha, runUrl })
 
   assert.match(comment, /First subscription switch elapsed .+ -2\.1% .+ Pass/)
+  assert.match(comment, /First subscription switch elapsed .+ Pass \(above budget\)/)
   assert.doesNotMatch(comment, /First subscription switch elapsed is .+ at or above/)
 })
 
@@ -243,4 +247,12 @@ test('renders a stable fallback when no valid artifact exists', () => {
       'The benchmark did not produce a valid results artifact.\n\n' +
       `[View workflow run](${runUrl})\n`
   )
+})
+
+test('rejects reports that enforce thresholds with too few samples', () => {
+  const input = result()
+  input.sampleCount = 1
+  input.samples.base.length = 1
+  input.samples.candidate.length = 1
+  assert.throws(() => renderPerformanceComment(input, { headSha, runUrl }), /sample count is invalid/)
 })

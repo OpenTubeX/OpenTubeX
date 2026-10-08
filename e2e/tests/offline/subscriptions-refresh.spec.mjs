@@ -317,7 +317,7 @@ test.describe('incremental subscription feed refresh', () => {
   })
 })
 
-test.describe('subscription refresh performance with many tabs', () => {
+test.describe('subscription refresh performance with many tabs', { tag: '@performance' }, () => {
   const channelCount = 933
   const tabCount = 46
   const loadedTabCount = 17

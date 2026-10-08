@@ -47,13 +47,14 @@ export const largeSubscriptionsSeed = {
     showNewSubscriptionFeed: true,
     generalAutoLoadMorePaginatedItemsEnabled: false,
     reducedMotion: 'off',
-    uiScale: 95
+    uiScale: 95,
+    keepPlayingOnNavigation: false
   },
   profiles,
   subscriptionCache
 }
 
-async function measureVideosSwitch(page) {
+export async function measureVideosSwitch(page) {
   let timeout
   try {
     return await Promise.race([
@@ -74,7 +75,7 @@ async function measureVideosSwitch(page) {
           if (feedIsRendered) {
             requestAnimationFrame(finishedAt => resolve({
               elapsed: finishedAt - startedAt,
-              longestFrame
+              longestFrame: Math.max(longestFrame, finishedAt - previousFrame)
             }))
             return
           }

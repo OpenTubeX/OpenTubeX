@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { comparePerformanceSamples } from '../../e2e/performance/report.mjs'
+import { comparePerformanceSamples, performanceMetrics } from '../../e2e/performance/report.mjs'
 
 function sample (overrides = {}) {
   return {
@@ -19,9 +19,12 @@ function sample (overrides = {}) {
     repeatedSwitchElapsedMs: 80,
     repeatedSwitchLongestFrameMs: 40,
     largeFeedScrollLongestFrameMs: 20,
+    largeFeedScrollElapsedMs: 1000,
+    largeFeedScrollTaskMs: 30,
     navigationHeapGrowthMiB: 6.5,
     playbackStartElapsedMs: 1000,
     playbackStartLongestFrameMs: 50,
+    playbackHeapGrowthMiB: 0,
     packedCodeSizeKiB: 4000,
     ...overrides
   }
@@ -118,3 +121,73 @@ test('reports a stable absolute crossing despite a noisy base upper quartile', (
     failure => /Startup: renderer longest frame is 615\.0 ms/.test(failure)
   ))
 })
+
+test('catches a material slowdown in every paired sample despite overlapping quartiles', () => {
+  const comparison = comparePerformanceSamples(samplesForMetric(
+    'repeatedSwitchElapsedMs',
+    [40, 90, 50, 100, 60, 110, 70],
+    [70, 120, 80, 130, 90, 140, 100]
+  ))
+  const metric = comparison.metrics.find(metric => metric.key === 'repeatedSwitchElapsedMs')
+  assert.ok(metric.candidateLowerQuartile < metric.baseUpperQuartile)
+  assert.equal(metric.passed, false)
+})
+
+test('does not gate a paired shift below the minimum material change', () => {
+  const comparison = comparePerformanceSamples(samplesForMetric(
+    'repeatedSwitchElapsedMs',
+    [40, 90, 50, 100, 60, 110, 70],
+    [55, 105, 65, 115, 75, 125, 85]
+  ))
+  assert.deepEqual(comparison.failures, [])
+})
+
+test('rejects missing, unequal, empty and invalid samples before comparing', () => {
+  for (const input of [
+    {},
+    { base: [], candidate: [] },
+    { base: [sample()], candidate: [] },
+    { base: [sample()], candidate: [sample({ repeatedSwitchElapsedMs: undefined })] },
+    { base: [sample()], candidate: [sample({ repeatedSwitchElapsedMs: NaN })] },
+    { base: [sample()], candidate: [sample({ repeatedSwitchElapsedMs: Infinity })] },
+    { base: [sample()], candidate: [sample({ repeatedSwitchElapsedMs: -1 })] },
+  ]) {
+    assert.throws(() => comparePerformanceSamples(input), /sample/i)
+  }
+})
+
+test('requires seven materially slower pairs before using the paired gate', () => {
+  const base = [40, 90, 50, 100, 60, 110, 70]
+  for (const candidate of [
+    [70, 120, 80, 130, 90, 140, 70],
+    [70, 120, 80, 130, 90, 140],
+  ]) {
+    assert.deepEqual(comparePerformanceSamples(samplesForMetric(
+      'repeatedSwitchElapsedMs', base.slice(0, candidate.length), candidate
+    )).failures, [])
+  }
+})
+
+test('supports shipped artifacts while rejecting partially missing or omitted current metrics', () => {
+  const samples = { base: [sample()], candidate: [sample()] }
+  for (const entry of [...samples.base, ...samples.candidate]) {
+    delete entry.largeFeedScrollTaskMs
+    delete entry.largeFeedScrollElapsedMs
+    delete entry.playbackHeapGrowthMiB
+  }
+  assert.deepEqual(comparePerformanceSamples(samples).failures, [])
+  assert.throws(() => comparePerformanceSamples(samples, { requireAllMetrics: true }), /largeFeedScrollElapsedMs/)
+  samples.base[0].largeFeedScrollTaskMs = 30
+  assert.throws(() => comparePerformanceSamples(samples), /candidate sample largeFeedScrollTaskMs/)
+})
+
+for (const definition of performanceMetrics.filter(metric => metric.gate !== false)) {
+  test(`detects a large injected ${definition.key} regression`, () => {
+    const base = sample()[definition.key]
+    const candidate = Math.max(base * 3, base + definition.minimumDelta * 3)
+    const comparison = comparePerformanceSamples(samplesForMetric(
+      definition.key, Array(7).fill(base), Array(7).fill(candidate)
+    ))
+    assert.equal(comparison.metrics.find(metric => metric.key === definition.key).passed, false)
+  })
+}

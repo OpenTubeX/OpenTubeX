@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { access, rm, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import {
   createUserDataDir,
@@ -9,13 +10,14 @@ import {
   launchApp
 } from '../helpers/app.mjs'
 import { largeSubscriptionsSeed } from './subscriptions.mjs'
-import { runPerformanceScenarios } from './scenarios.mjs'
+import { mockPerformanceServices, runPerformanceScenarios } from './scenarios.mjs'
 import {
   comparePerformanceSamples,
+  minimumPerformanceSamples,
   renderPerformanceSummary
 } from './report.mjs'
 
-function parseArguments(argv) {
+export function parseArguments(argv) {
   const options = {
     samples: 7,
     warmups: 2,
@@ -64,12 +66,15 @@ function parseArguments(argv) {
   if (!options.baseRoot || !options.candidateRoot) {
     throw new Error('Usage: pnpm run test:performance -- --base <path> --candidate <path>')
   }
+  if (!options.reportOnly && options.samples < minimumPerformanceSamples) {
+    throw new Error(`Enforcing regressions requires at least ${minimumPerformanceSamples} samples`)
+  }
 
   return options
 }
 
 function parsePositiveInteger(argument, value) {
-  const parsed = Number.parseInt(value, 10)
+  const parsed = Number(value)
   if (!Number.isSafeInteger(parsed) || parsed < 1) {
     throw new Error(`${argument} must be a positive integer`)
   }
@@ -140,6 +145,8 @@ async function collectSample(target) {
             measurement.animationFrame = requestAnimationFrame(sampleFrame)
             window.__performanceStartupFrames = measurement
           })
+        } else if (phase === 'windowCreated') {
+          await mockPerformanceServices(page)
         } else if (phase === 'interactive') {
           startup.startupLongestFrameMs = await page.evaluate(() => {
             const measurement = window.__performanceStartupFrames
@@ -213,7 +220,7 @@ async function main() {
     base = await targetFor('base', options.baseRoot)
     candidate = await targetFor('candidate', options.candidateRoot)
     const samples = await runSamples(base, candidate, options)
-    const comparison = comparePerformanceSamples(samples)
+    const comparison = comparePerformanceSamples(samples, { requireAllMetrics: true })
     const summary = renderPerformanceSummary(base, candidate, comparison, options.reportOnly)
     const result = {
       base: { root: base.root, commit: base.commit },
@@ -254,4 +261,6 @@ async function main() {
   }
 }
 
-await main()
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main()
+}

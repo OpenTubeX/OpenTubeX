@@ -3,9 +3,9 @@ import { pathToFileURL } from 'node:url'
 
 import {
   comparePerformanceSamples,
-  isValidPerformanceValue,
-  performanceMetrics,
-  renderPerformanceSummary
+  minimumPerformanceSamples,
+  renderPerformanceSummary,
+  validatePerformanceSamples
 } from '../e2e/performance/report.mjs'
 
 export const performanceCommentMarker = '<!-- performance-comparison -->'
@@ -25,16 +25,8 @@ function validateSamples(samples, sampleCount) {
     if (samples[name].length !== sampleCount) {
       throw new Error(`${name} sample count does not match the report`)
     }
-
-    for (const sample of samples[name]) {
-      for (const metric of performanceMetrics) {
-        const value = sample?.[metric.key]
-        if (!isValidPerformanceValue(metric, value)) {
-          throw new Error(`${name} sample ${metric.key} is invalid`)
-        }
-      }
-    }
   }
+  validatePerformanceSamples(samples)
 }
 
 function validateResult(result, headSha) {
@@ -51,7 +43,7 @@ function validateResult(result, headSha) {
   if (!headSha.startsWith(candidateCommit)) {
     throw new Error('Performance result does not match the workflow head')
   }
-  if (!Number.isSafeInteger(result.sampleCount) || result.sampleCount < 1) {
+  if (!Number.isSafeInteger(result.sampleCount) || result.sampleCount < minimumPerformanceSamples) {
     throw new Error('Performance sample count is invalid')
   }
   if (result.reportOnly !== false) {

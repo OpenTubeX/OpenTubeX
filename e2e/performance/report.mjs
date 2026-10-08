@@ -1,4 +1,5 @@
 const longestFrameMinimumDeltaMs = 20
+export const minimumPerformanceSamples = 7
 
 export const performanceMetrics = [
   {
@@ -114,6 +115,23 @@ export const performanceMetrics = [
     minimumDelta: longestFrameMinimumDeltaMs
   },
   {
+    key: 'largeFeedScrollElapsedMs',
+    label: 'Large feed scrolling elapsed (60 frames)',
+    unit: 'ms',
+    relativeLimit: 1.15,
+    minimumDelta: 150,
+    optional: true
+  },
+  {
+    key: 'largeFeedScrollTaskMs',
+    label: 'Large feed scrolling renderer work',
+    unit: 'ms',
+    relativeLimit: 1.25,
+    minimumDelta: 25,
+    // Reports produced by the previously shipped harness lack this metric.
+    optional: true
+  },
+  {
     key: 'navigationHeapGrowthMiB',
     label: 'Renderer heap growth after 10 navigation cycles',
     unit: 'MiB',
@@ -140,6 +158,18 @@ export const performanceMetrics = [
     absoluteMinimumDelta: longestFrameMinimumDeltaMs,
     relativeLimit: 1.2,
     minimumDelta: longestFrameMinimumDeltaMs
+  },
+  {
+    key: 'playbackHeapGrowthMiB',
+    label: 'Renderer heap growth after 5 player tab cycles',
+    unit: 'MiB',
+    minimumValue: 0,
+    absoluteLimit: 24,
+    relativeLimit: 1.5,
+    relativeBaselineFloor: 4,
+    minimumDelta: 4,
+    absoluteChange: true,
+    optional: true
   },
   {
     key: 'packedCodeSizeKiB',
@@ -177,9 +207,29 @@ export function isValidPerformanceValue(definition, value) {
   return Number.isFinite(value) && value >= minimumValue
 }
 
-export function comparePerformanceSamples(samples) {
+export function validatePerformanceSamples(samples, { requireAllMetrics = false } = {}) {
+  if (!samples || !Array.isArray(samples.base) || !Array.isArray(samples.candidate) ||
+      samples.base.length === 0 || samples.base.length !== samples.candidate.length) {
+    throw new Error('Performance samples must contain equal, nonempty base and candidate arrays')
+  }
+  const definitions = performanceMetrics.filter(definition => requireAllMetrics || !definition.optional ||
+    [...samples.base, ...samples.candidate].some(sample => sample?.[definition.key] !== undefined))
+  for (const name of ['base', 'candidate']) {
+    for (const [index, sample] of samples[name].entries()) {
+      for (const definition of definitions) {
+        if (!isValidPerformanceValue(definition, sample?.[definition.key])) {
+          throw new Error(`${name} sample ${definition.key} is invalid (sample ${index + 1})`)
+        }
+      }
+    }
+  }
+  return definitions
+}
+
+export function comparePerformanceSamples(samples, options) {
+  const definitions = validatePerformanceSamples(samples, options)
   const failures = []
-  const metrics = performanceMetrics.map(definition => {
+  const metrics = definitions.map(definition => {
     const baseValues = samples.base.map(sample => sample[definition.key])
     const candidateValues = samples.candidate.map(sample => sample[definition.key])
     const baseMedian = median(baseValues)
@@ -198,9 +248,19 @@ export function comparePerformanceSamples(samples) {
       baseMedian < definition.absoluteLimit &&
       candidateLowerQuartile >= definition.absoluteLimit &&
       delta > (definition.absoluteMinimumDelta ?? 0)
-    const relativeRegression = gated && definition.relativeLimit !== undefined &&
+    // Samples are adjacent base/candidate pairs, with launch order alternating.
+    // An overlapping distribution can still contain a material slowdown in
+    // every pair. Require at least seven pairs, each exceeding both budgets,
+    // so a noisy median flip or one slow pair cannot satisfy this guard.
+    const pairedRegression = gated && definition.relativeLimit !== undefined &&
+      baseValues.length >= minimumPerformanceSamples && baseValues.every((base, index) => {
+      const candidate = candidateValues[index]
+      return candidate > Math.max(base, definition.relativeBaselineFloor ?? 0) * definition.relativeLimit &&
+          candidate - base > definition.minimumDelta
+    })
+    const relativeRegression = pairedRegression || (gated && definition.relativeLimit !== undefined &&
       interquartileThresholdRatio > definition.relativeLimit &&
-      interquartileDelta > definition.minimumDelta
+      interquartileDelta > definition.minimumDelta)
 
     if (crossesAbsoluteLimit) {
       failures.push(
@@ -228,6 +288,7 @@ export function comparePerformanceSamples(samples) {
       interquartileDelta,
       interquartileThresholdRatio,
       crossesAbsoluteLimit,
+      pairedRegression,
       relativeRegression,
       passed: !crossesAbsoluteLimit && !relativeRegression
     }
@@ -284,10 +345,14 @@ export function renderPerformanceSummary(base, candidate, comparison, reportOnly
     '| --- | ---: | ---: | ---: | ---: | --- |'
   )
   for (const metric of comparison.metrics) {
+    const aboveBudget = metric.absoluteLimit !== undefined && metric.candidateMedian >= metric.absoluteLimit
+    const result = metric.gate === false
+      ? 'Reported'
+      : (!metric.passed ? 'Regression' : (aboveBudget ? 'Pass (above budget)' : 'Pass'))
     lines.push(
       `| ${metric.label} | ${metricValue(metric, metric.baseMedian)} | ` +
       `${metricValue(metric, metric.candidateMedian)} | ${formatChange(metric)} | ` +
-      `${formatLimit(metric)} | ${metric.gate === false ? 'Reported' : (metric.passed ? 'Pass' : 'Regression')} |`
+      `${formatLimit(metric)} | ${result} |`
     )
   }
 
@@ -298,14 +363,21 @@ export function renderPerformanceSummary(base, candidate, comparison, reportOnly
     '',
     '- Startup phases are cumulative from launching Electron. Interactive means the top navigation and tab bar are visible. Startup frame sampling runs from the initial route commit until that point.',
     '- Large route navigation opens 933 subscribed channels. Channel search filters that list down to one channel.',
-    '- Subscription switches process 33,588 cached video records. Scrolling moves through the first rendered page for 60 animation frames.',
+    '- Subscription switches process 33,588 cached video records. Scrolling moves through the first rendered page for 60 animation frames; elapsed time detects sustained slower frame delivery even when the worst frame is unchanged.',
+    '- Scrolling renderer work uses CDP TaskDuration, including JavaScript, style and layout work that may fit within a frame and leave frame timing unchanged.',
     '- Renderer heap growth is the used JavaScript heap increase after 10 Subscribed Channels and Trending navigation cycles, with renderer garbage collection before each reading.',
     '- Local playback start runs from submitting a watch URL until the bundled demo video emits `playing`. It makes no network requests.',
+    '- Player heap growth measures five complete open/play/close tab cycles after a warm-up cycle, with renderer garbage collection before each reading. It does not measure native or GPU memory.',
     '- Packed code size totals all emitted JavaScript and CSS, including renderer chunks, the main process, preload, and BotGuard.',
     '',
     '</details>',
     ''
   )
+  if (comparison.metrics.length < performanceMetrics.length) {
+    lines.push('This older benchmark does not include every current metric.', '')
+  }
+  lines.push('Relative gates require separated quartiles, or at least seven adjacent pairs that each exceed both relative and minimum-change budgets.', '')
+  lines.push('Pass means no stable regression was detected. A passing median above an absolute limit is marked above budget; existing slow baselines do not block improvements.', '')
   if (comparison.failures.length === 0) {
     lines.push('No regression crossed the configured thresholds.')
   } else {
