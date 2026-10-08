@@ -1,8 +1,54 @@
-import { expect, expectScrollAtRenderedEnd, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
+import { expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
 
 for (const uiScale of [100, 95]) {
   test.describe(`fixed data and storage tabs at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale } } })
+
+    test('focuses the selected tab when opening Data and Storage with the keyboard in compact mode', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await setWindowSize(app, page, { width: 400, height: 800 })
+      await goTo(page, 'settings')
+      await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
+      const link = page.locator('.settingsMenu [data-section="data"]')
+      const tabs = page.getByRole('tablist', { name: 'Data & Storage' })
+      const data = tabs.getByRole('tab', { name: 'Data', exact: true })
+      const storage = tabs.getByRole('tab', { name: 'Storage', exact: true })
+      const content = page.locator('.settingsContent')
+
+      await link.focus()
+      await link.press('Enter')
+      await expect(data).toBeFocused()
+      await data.press('ArrowRight')
+      await expect(storage).toBeFocused()
+      await expect(storage).toHaveAttribute('aria-selected', 'true')
+      await storage.press('Tab')
+      await expect.poll(() => content.evaluate(element => element.contains(document.activeElement))).toBe(true)
+
+      await page.locator('.settingsBackButton').focus()
+      await page.locator('.settingsBackButton').press('Enter')
+      await expect(link).toBeVisible()
+      await link.focus()
+      await link.press('Enter')
+      await expect(storage).toBeFocused()
+      await storage.press('ArrowLeft')
+      await expect(data).toBeFocused()
+      await expect(data).toHaveAttribute('aria-selected', 'true')
+      if (uiScale === 100) {
+        const header = await page.locator('.settingsContentHeader').boundingBox()
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+          await page.screenshot({ clip: { ...header, height: header.height + 8 }, path: testInfo.outputPath(`compact-tab-focus-${colorScheme}.png`) })
+        }
+      }
+      await data.press('Tab')
+      await expect.poll(() => content.evaluate(element => element.contains(document.activeElement))).toBe(true)
+
+      await page.locator('.settingsBackButton').click()
+      await page.locator('.settingsMenu [data-section="general"]').focus()
+      await page.locator('.settingsMenu [data-section="general"]').press('Enter')
+      await expect(content).toBeFocused()
+    })
 
     test('keeps both tabs above the scroller when scrolling, switching tabs and resizing', async ({ app, page }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })

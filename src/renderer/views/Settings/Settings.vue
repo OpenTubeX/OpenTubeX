@@ -265,6 +265,7 @@
             <div
               v-show="activeSettingsSection?.type === 'data'"
               :id="contentHeaderTargetId"
+              ref="settingsContentHeaderRef"
               class="settingsContentHeader"
             />
             <div
@@ -499,6 +500,7 @@ const settingsContentTransitionClass = ref('')
 const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
+const settingsContentHeaderRef = useTemplateRef('settingsContentHeaderRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
 const settingsSubpageContentRef = useTemplateRef('settingsSubpageContentRef')
 const activeSettingsSectionRef = useTemplateRef('activeSettingsSectionRef')
@@ -1072,7 +1074,13 @@ function navigateToSection(sectionType) {
       settingsContentTransitionClass,
       'settingsCompactSlideForward'
     )
-    nextTick(() => settingsContentRef.value?.focus({ preventScroll: true }))
+    nextTick(() => {
+      const selectedTab = sectionType === 'data'
+        ? settingsContentHeaderRef.value?.querySelector('[role="tab"][aria-selected="true"]')
+        : null
+      const focusTarget = selectedTab ?? settingsContentRef.value
+      focusTarget?.focus({ preventScroll: true })
+    })
   }
 }
 
