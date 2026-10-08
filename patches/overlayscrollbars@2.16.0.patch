@@ -1,0 +1,168 @@
+diff --git a/overlayscrollbars.cjs b/overlayscrollbars.cjs
+index ec871bc71397ef9f5586519c121a65b90907ad9d..8090a41d1f18a455786e41f12f9b440c4a445fc3 100644
+--- a/overlayscrollbars.cjs
++++ b/overlayscrollbars.cjs
+@@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
+   const destroy = () => {
+     s = true;
+   };
++  // Keep each listener outside the iteration scope, which holds the entire
++  // matched element batch and would retain removed siblings through live ones.
++  const addElementListener = (element, eventNames) => {
++    const removeListener = addEventListener(element, eventNames, (event => {
++      if (s) {
++        removeListener();
++        e.delete(element);
++      } else {
++        n(event);
++      }
++    }));
++    return removeListener;
++  };
+   const updateElements = c => {
+     if (e && o) {
+       const r = o.map((n => {
+@@ -1328,15 +1341,8 @@ const createEventContentChange = (t, n, o) => {
+         const i = e.get(c) || [];
+         const l = t.contains(c);
+         if (l && r) {
+-          const t = addEventListener(c, r, (o => {
+-            if (s) {
+-              t();
+-              e.delete(c);
+-            } else {
+-              n(o);
+-            }
+-          }));
+-          e.set(c, push(i, t));
++          // Inlining would recreate the listener inside the batch scope.
++          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
+         } else {
+           runEachAndClear(i);
+           e.delete(c);
+diff --git a/overlayscrollbars.cjs.js b/overlayscrollbars.cjs.js
+index ab9d930b11ea64af9a2d5b7315b554db88cd5bbd..d9396993da70a5dc4d0e0f8467f473a587e6925e 100644
+--- a/overlayscrollbars.cjs.js
++++ b/overlayscrollbars.cjs.js
+@@ -1316,6 +1316,19 @@ const createEventContentChange = (t, n, o) => {
+   const destroy = () => {
+     s = true;
+   };
++  // Keep each listener outside the iteration scope, which holds the entire
++  // matched element batch and would retain removed siblings through live ones.
++  const addElementListener = (element, eventNames) => {
++    const removeListener = addEventListener(element, eventNames, (event => {
++      if (s) {
++        removeListener();
++        e.delete(element);
++      } else {
++        n(event);
++      }
++    }));
++    return removeListener;
++  };
+   const updateElements = c => {
+     if (e && o) {
+       const r = o.map((n => {
+@@ -1328,15 +1341,8 @@ const createEventContentChange = (t, n, o) => {
+         const i = e.get(c) || [];
+         const l = t.contains(c);
+         if (l && r) {
+-          const t = addEventListener(c, r, (o => {
+-            if (s) {
+-              t();
+-              e.delete(c);
+-            } else {
+-              n(o);
+-            }
+-          }));
+-          e.set(c, push(i, t));
++          // Inlining would recreate the listener inside the batch scope.
++          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
+         } else {
+           runEachAndClear(i);
+           e.delete(c);
+diff --git a/overlayscrollbars.esm.js b/overlayscrollbars.esm.js
+index b05b8043eba78f20754a14e84daa09ff505e2fbc..e935fc9fd54a14a32eb7a9f17f506f040f255700 100644
+--- a/overlayscrollbars.esm.js
++++ b/overlayscrollbars.esm.js
+@@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
+   const destroy = () => {
+     s = true;
+   };
++  // Keep each listener outside the iteration scope, which holds the entire
++  // matched element batch and would retain removed siblings through live ones.
++  const addElementListener = (element, eventNames) => {
++    const removeListener = addEventListener(element, eventNames, (event => {
++      if (s) {
++        removeListener();
++        e.delete(element);
++      } else {
++        n(event);
++      }
++    }));
++    return removeListener;
++  };
+   const updateElements = c => {
+     if (e && o) {
+       const r = o.map((n => {
+@@ -1322,15 +1335,8 @@ const createEventContentChange = (t, n, o) => {
+         const i = e.get(c) || [];
+         const l = t.contains(c);
+         if (l && r) {
+-          const t = addEventListener(c, r, (o => {
+-            if (s) {
+-              t();
+-              e.delete(c);
+-            } else {
+-              n(o);
+-            }
+-          }));
+-          e.set(c, push(i, t));
++          // Inlining would recreate the listener inside the batch scope.
++          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
+         } else {
+           runEachAndClear(i);
+           e.delete(c);
+diff --git a/overlayscrollbars.mjs b/overlayscrollbars.mjs
+index ae4c28abc9bbb5a972bdff8889bc552069bcf0fe..6faf6f20920e8b2cfee1b91a252b2b7816cbe16f 100644
+--- a/overlayscrollbars.mjs
++++ b/overlayscrollbars.mjs
+@@ -1310,6 +1310,19 @@ const createEventContentChange = (t, n, o) => {
+   const destroy = () => {
+     s = true;
+   };
++  // Keep each listener outside the iteration scope, which holds the entire
++  // matched element batch and would retain removed siblings through live ones.
++  const addElementListener = (element, eventNames) => {
++    const removeListener = addEventListener(element, eventNames, (event => {
++      if (s) {
++        removeListener();
++        e.delete(element);
++      } else {
++        n(event);
++      }
++    }));
++    return removeListener;
++  };
+   const updateElements = c => {
+     if (e && o) {
+       const r = o.map((n => {
+@@ -1322,15 +1335,8 @@ const createEventContentChange = (t, n, o) => {
+         const i = e.get(c) || [];
+         const l = t.contains(c);
+         if (l && r) {
+-          const t = addEventListener(c, r, (o => {
+-            if (s) {
+-              t();
+-              e.delete(c);
+-            } else {
+-              n(o);
+-            }
+-          }));
+-          e.set(c, push(i, t));
++          // Inlining would recreate the listener inside the batch scope.
++          e.set(c, push(i, /* @__NOINLINE__ */ addElementListener(c, r)));
+         } else {
+           runEachAndClear(i);
+           e.delete(c);

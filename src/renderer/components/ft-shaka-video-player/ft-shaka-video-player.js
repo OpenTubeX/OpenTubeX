@@ -229,10 +229,17 @@ const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z'
 
 // Shaka's UI element registries (Controls/OverflowMenu/ContextMenu) are
-// process-global and shared by every live player instance. Track how many
-// players currently rely on the custom element factories so the shared registry
-// is only reset once the last one unmounts (see cleanUpCustomPlayerControls).
-let liveCustomControlPlayers = 0
+// Restore a surviving player's factories when a tab releases its controls.
+// The process-global registries must not retain factories from disposed players.
+const liveCustomControlPlayers = new Set()
+
+class DefaultCaptionSelectionFactory {
+  create(rootElement, controls) {
+    return new shaka.ui.TextSelection(rootElement, controls)
+  }
+}
+
+const defaultCaptionSelectionFactory = new DefaultCaptionSelectionFactory()
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
@@ -795,7 +802,7 @@ export default defineComponent({
     let pendingUiReconfigure = false
 
     // Whether this instance registered its custom control factories into the
-    // shared global registry, so teardown decrements the live-player count
+    // shared global registry, so teardown removes this player's registrations
     // exactly once (see cleanUpCustomPlayerControls).
     let registeredCustomControls = false
 
@@ -10009,88 +10016,21 @@ export default defineComponent({
         return
       }
       registeredCustomControls = false
-      liveCustomControlPlayers--
+      liveCustomControlPlayers.delete(reRegisterOwnElements)
 
-      // Shaka's element registries are process-global and shared across every
-      // live player. Resetting the custom factories (to shaka defaults / null)
-      // while another player is still mounted would make that player's next
-      // ui.configure() build its control panel against a null factory and throw
-      // — Shaka's control-panel loop only guards `registry.has(name)`, not a
-      // null value — which takes down the whole tab. Only reset once this was
-      // the last player relying on the shared registry.
-      if (liveCustomControlPlayers > 0) {
-        return
+      // Clear exactly what this instance registered, including optional controls.
+      for (const [registry, name] of ownElementRegistrations) {
+        registry.registerElement(name, name === 'captions' ? defaultCaptionSelectionFactory : null)
       }
-
-      class DefaultCaptionSelectionFactory {
-        create(rootElement, controls) {
-          return new shaka.ui.TextSelection(rootElement, controls)
-        }
+      for (const [name] of ownBigElementRegistrations) {
+        shakaControls.registerBigElement(name, null)
       }
+      ownElementRegistrations.length = 0
+      ownBigElementRegistrations.length = 0
 
-      const defaultCaptionSelectionFactory = new DefaultCaptionSelectionFactory()
-      shakaControls.registerElement('captions', defaultCaptionSelectionFactory)
-      shakaOverflowMenu.registerElement('captions', defaultCaptionSelectionFactory)
-
-      shakaControls.registerElement('ft_audio_tracks', null)
-      shakaOverflowMenu.registerElement('ft_audio_tracks', null)
-
-      shakaControls.registerElement('ft_caption_toggle', null)
-
-      shakaControls.registerElement('ft_autoplay_toggle', null)
-      shakaOverflowMenu.registerElement('ft_autoplay_toggle', null)
-
-      shakaControls.registerElement('ft_theatre_mode', null)
-      shakaOverflowMenu.registerElement('ft_theatre_mode', null)
-
-      shakaControls.registerElement('ft_full_window', null)
-      shakaOverflowMenu.registerElement('ft_full_window', null)
-      shakaControls.registerElement('ft_android_picture_in_picture', null)
-      shakaOverflowMenu.registerElement('ft_android_picture_in_picture', null)
-      shakaOverflowMenu.registerElement('ft_shorts_video_info', null)
-
-      shakaControls.registerElement('ft_legacy_quality', null)
-      shakaOverflowMenu.registerElement('ft_legacy_quality', null)
-
-      shakaContextMenu.registerElement('ft_copy_youtube_video_url', null)
-      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', null)
-      shakaContextMenu.registerElement('ft_copy_invidious_video_url', null)
-      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', null)
-      shakaContextMenu.registerElement('ft_loop', null)
-      shakaContextMenu.registerElement('ft_stats', null)
-      shakaOverflowMenu.registerElement('ft_ambient_mode', null)
-      shakaOverflowMenu.registerElement('ft_lights_off', null)
-      shakaOverflowMenu.registerElement('ft_music_visualizer', null)
-      shakaOverflowMenu.registerElement('ft_music_mode', null)
-      shakaOverflowMenu.registerElement('ft_video_zoom', null)
-      shakaOverflowMenu.registerElement('ft_skip_silence', null)
-      shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
-      shakaOverflowMenu.registerElement('ft_sleep_timer', null)
-      shakaOverflowMenu.registerElement('ft_loop', null)
-      shakaOverflowMenu.registerElement('ft_ab_repeat', null)
-
-      shakaControls.registerElement('ft_screenshot', null)
-      shakaOverflowMenu.registerElement('ft_screenshot', null)
-
-      shakaControls.registerElement('ft_sponsorblock_start', null)
-      shakaControls.registerElement('ft_sponsorblock_end', null)
-      shakaControls.registerElement('ft_sponsorblock_open_menu', null)
-      shakaControls.registerElement('ft_sponsorblock_cancel', null)
-      shakaControls.registerElement('ft_sponsorblock_clear', null)
-      shakaControls.registerElement('ft_sponsorblock_highlight', null)
-
-      shakaControls.registerElement('ft_next_previous', null)
-      shakaOverflowMenu.registerElement('ft_next_previous', null)
-
-      shakaControls.registerElement('ft_skip_previous', null)
-      shakaOverflowMenu.registerElement('ft_skip_previous', null)
-      shakaControls.registerElement('ft_skip_next', null)
-      shakaOverflowMenu.registerElement('ft_skip_next', null)
-      shakaControls.registerBigElement('ft_skip_previous', null)
-      shakaControls.registerBigElement('ft_skip_next', null)
-
-      shakaControls.registerElement('ft_playback_adjusted_time', null)
-      shakaControls.registerElement('ft_quick_playback_rate_bar', null)
+      // Reapply a survivor's factories synchronously so its next ui.configure()
+      // never uses a disposed player's closures or a null factory.
+      liveCustomControlPlayers.values().next().value?.()
     }
 
     // #endregion custom player controls
@@ -11886,7 +11826,7 @@ export default defineComponent({
       registerQuickPlaybackRateBar()
 
       registeredCustomControls = true
-      liveCustomControlPlayers++
+      liveCustomControlPlayers.add(reRegisterOwnElements)
 
       if (ui.isMobile()) {
         onlyUseOverFlowMenu.value = true
@@ -12886,6 +12826,7 @@ export default defineComponent({
         video.value.style.aspectRatio = `${video.value.videoWidth} / ${video.value.videoHeight}`
       }
       showPoster.value = true
+      const remotePlayback = video.value?.remote
       await nextTick()
 
       let uiState = {
@@ -12932,6 +12873,10 @@ export default defineComponent({
         await player.destroy()
         player = null
       }
+
+      // Concurrent Shaka UI updates can lose availability-watch IDs. Cancel
+      // every watch on this retired video so RemotePlayback releases its DOM.
+      await remotePlayback?.cancelWatchAvailability().catch(() => {})
 
       // shaka-player doesn't clear these itself, which prevents shaka.ui.Overlay from being garbage collected
       // Should really be fixed in shaka-player but it's easier just to do it ourselves
