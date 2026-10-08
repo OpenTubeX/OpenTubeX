@@ -240,7 +240,7 @@
           :label="$t('Settings.Theme Settings.Compact Settings Categories')"
           :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
           compact
-          :default-value="store.getters.getHideSettingsCategoryDescriptions"
+          :default-value="hideSettingsCategoryDescriptions"
           setting-key="hideSettingsCategoryDescriptions"
           @change="store.dispatch('updateHideSettingsCategoryDescriptions', $event)"
         />
@@ -725,6 +725,8 @@ function updateHideSideBarOnWatchPages(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
+const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
+
 const hideLabelsSideBar = computed(() => {
   return store.getters.getHideLabelsSideBar
 })

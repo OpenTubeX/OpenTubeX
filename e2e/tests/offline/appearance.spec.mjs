@@ -422,7 +422,7 @@ test.describe('default appearance', () => {
     await appFont.click()
 
     const sheet = page.locator('.mobileSheet.compactSheet[open]')
-    await sheet.locator('.pickerSearch').fill('no-such-font-xyz')
+    await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('no-such-font-xyz')
     await expect(sheet.getByRole('option')).toHaveCount(0)
     await sheet.getByRole('button', { name: 'Close' }).click()
     await expect(sheet).toHaveCount(0)
@@ -453,13 +453,13 @@ test.describe('default appearance', () => {
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
     await expect(fontDropdown.getByRole('option').last()).toBeInViewport()
 
-    await sheet.locator('.pickerSearch').fill('Geist')
+    await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('Geist')
     await expect(fontDropdown.getByRole('option')).toHaveCount(1)
     await expect.poll(() => fontDropdown.evaluate(menu =>
       menu.scrollTop <= 1 && menu.scrollHeight <= menu.clientHeight + 1
     )).toBe(true)
     await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-    await sheet.locator('.pickerSearch').fill('')
+    await sheet.getByRole('searchbox', { name: 'Search', exact: true }).fill('')
     await expect.poll(() => fontDropdown.getByRole('option').count()).toBeGreaterThan(1)
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
