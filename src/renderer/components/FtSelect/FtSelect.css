@@ -447,7 +447,18 @@
 
 .select.outlined .select-text:focus ~ .selectOutline {
   border-color: var(--primary-color);
-  border-width: 2px;
+}
+
+/* Thicken keyboard focus without painting across the floating label's notch. */
+.select.outlined .select-text:focus-visible {
+  box-shadow: inset 2px 0 var(--primary-color), inset -2px 0 var(--primary-color), inset 0 -2px var(--primary-color);
+}
+
+@media (forced-colors: active) {
+  .select.outlined .select-text:focus-visible ~ .selectOutline {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 .select-text:disabled ~ .selectOutline :is(.select-icon, .select-label-text) {
