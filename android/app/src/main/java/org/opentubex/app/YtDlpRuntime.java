@@ -23,6 +23,7 @@ final class YtDlpRuntime {
     private static final ReentrantReadWriteLock INSTALL_LOCK = new ReentrantReadWriteLock();
     private static final Map<String, RunningProcess> PROCESSES = new ConcurrentHashMap<>();
     private static boolean initialized;
+    private static String mp3ThumbnailBootstrap;
 
     private static final class RunningProcess {
         final Process process;
@@ -59,6 +60,9 @@ final class YtDlpRuntime {
         if (initialized) return;
         YoutubeDL.getInstance().init(context);
         FFmpeg.getInstance().init(context);
+        try (InputStream input = context.getAssets().open("opentubex_mp3_thumbnail.py")) {
+            mp3ThumbnailBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
+        }
         initialized = true;
     }
 
@@ -104,11 +108,14 @@ final class YtDlpRuntime {
         RunningProcess running = null;
         boolean completed = false;
         try {
+            File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
+            File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
             String marker = "__OPENTUBEX_PROCESS_" + UUID.randomUUID() + "__:";
-            String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nrunpy.run_path(sys.argv[0],run_name='__main__')";
+            String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
+                + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
             List<String> command = new ArrayList<>(asList(nativeDir + "/libpython.so", "-u", "-c", bootstrap,
-                new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp/yt-dlp").getAbsolutePath(),
+                entryPoint.getAbsolutePath(),
                 "--ignore-config", "--no-plugin-dirs", "--no-cache-dir", "--js-runtimes", "quickjs:" + nativeDir + "/libqjs.so",
                 "--ffmpeg-location", nativeDir + "/libffmpeg.so"));
             command.addAll(args);
@@ -196,7 +203,13 @@ final class YtDlpRuntime {
     static YoutubeDL.UpdateStatus update(Context context, String apiUrl) throws Exception {
         initialize(context);
         INSTALL_LOCK.writeLock().lockInterruptibly();
-        try { return YoutubeDL.getInstance().updateYoutubeDL(context, new YoutubeDL.UpdateChannel(apiUrl)); }
+        try {
+            YoutubeDL.UpdateStatus status = YoutubeDL.getInstance().updateYoutubeDL(context, new YoutubeDL.UpdateChannel(apiUrl));
+            if (status == YoutubeDL.UpdateStatus.DONE) {
+                YtDlpCodeCache.invalidate(new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp-code"));
+            }
+            return status;
+        }
         finally { INSTALL_LOCK.writeLock().unlock(); }
     }
 
