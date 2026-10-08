@@ -59,8 +59,10 @@
       <FtElementList
         :data="shownResults"
       />
+      <!-- Recheck visibility after each page, even when the marker stays on screen. -->
       <FtAutoLoadNextPageWrapper
         v-if="hasMoreResults"
+        :key="autoLoadMore ? shownResults.length : 0"
         :loading="isLoadingMore"
         @load-next-page="nextPage"
       >
@@ -123,6 +125,7 @@ const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
 const isLoadingMore = ref(false)
+const autoLoadMore = computed(() => store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled)
 const hasMoreResults = ref(true)
 const apiUsed = ref('local')
 const searchSettings = ref({})
