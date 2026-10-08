@@ -215,6 +215,31 @@ for (const uiScale of [100, 125]) {
   test.describe(`account activity at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, syncServerUrl: '' } } })
 
+    test('shortens clear before moving it below the title and refresh', async ({ app, page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await seedActivity(page, 3)
+      const card = sync.locator('.syncActivity')
+      await setWindowSize(app, page, { width: 1400, height: 1000 })
+      for (const [width, label, below] of [[680, 'Clear on this device', false], [520, 'Clear on this device', false], [400, 'Clear', false], [380, 'Clear', false], [300, 'Clear on this device', true]]) {
+        await card.evaluate((element, width) => { element.style.inlineSize = width + 'px' }, width)
+        await card.scrollIntoViewIfNeeded()
+        await expect.poll(() => card.locator('.activityClear').innerText()).toBe(label)
+        await expect.poll(() => card.evaluate((element, below) => {
+          const header = element.querySelector('.activityHeader').getBoundingClientRect()
+          const title = element.querySelector('.activityTitle').getBoundingClientRect()
+          const clear = element.querySelector('.activityClear').getBoundingClientRect()
+          const refresh = element.querySelector('.activityAction').getBoundingClientRect()
+          const tolerance = 2 / devicePixelRatio
+          return Math.abs(refresh.right - header.right) <= tolerance &&
+            refresh.top < title.bottom && refresh.bottom > title.top &&
+            (below
+              ? clear.top >= Math.max(title.bottom, refresh.bottom) &&
+                Math.abs((clear.left + clear.right) / 2 - (header.left + header.right) / 2) <= tolerance
+              : clear.top < refresh.bottom && clear.bottom > refresh.top)
+        }, below)).toBe(true)
+      }
+    })
+
     test('keeps translated activity actions inside narrow cards', async ({ app, page }, testInfo) => {
       const sync = await goToSettingsSection(page, 'sync')
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
@@ -226,22 +251,31 @@ for (const uiScale of [100, 125]) {
         ['en-US', 'Clear on this device'],
         ['de-DE', 'Auf diesem Gerät leeren'],
         ['it', 'Cancella su questo dispositivo'],
+        ['el', 'Εκκαθάριση σε αυτή τη συσκευή'],
       ]) {
         await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store
           .dispatch('updateCurrentLocale', locale), locale)
-        await expect(card.locator('.activityClear')).toHaveText(label)
-        for (const width of [480, 375, 320]) {
+        await expect(card.locator('.activityClear')).toHaveAccessibleName(label)
+        for (const width of [800, 700, 600, 480, 375, 320]) {
           await setWindowSize(app, page, { width, height: 700 + width })
           await card.scrollIntoViewIfNeeded()
           await expect.poll(() => card.evaluate(element => {
             const bounds = element.querySelector('.activityHeader').getBoundingClientRect()
             const viewport = element.closest('.settingsContent').getBoundingClientRect()
             const tolerance = 2 / devicePixelRatio
-            const buttons = [...element.querySelectorAll('.activityActions button')]
-            return buttons.length === 2 && buttons.every(button => {
+            const buttons = [...element.querySelectorAll('.activityClear, .activityAction button')]
+            const title = element.querySelector('.activityTitle h3')
+            const clear = element.querySelector('.activityClear').getBoundingClientRect()
+            const titleRect = title.getBoundingClientRect()
+            const titleRange = document.createRange()
+            titleRange.selectNode(title.firstChild)
+            const titleLines = [...titleRange.getClientRects()]
+            const stacked = clear.top >= titleRect.bottom
+            return (stacked || (titleLines.length === 1 && titleRect.right <= clear.left + tolerance)) &&
+              buttons.length === 2 && buttons.every(button => {
               const rect = button.getBoundingClientRect()
               const range = document.createRange()
-              range.selectNodeContents(button)
+              range.selectNodeContents(button.querySelector('.activityClearLabel') ?? button)
               const content = range.getBoundingClientRect()
               return rect.left >= bounds.left - tolerance && rect.right <= bounds.right + tolerance &&
                 rect.left >= viewport.left - tolerance && rect.right <= viewport.right + tolerance &&
