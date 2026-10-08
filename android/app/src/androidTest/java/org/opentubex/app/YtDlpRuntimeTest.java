@@ -7,9 +7,24 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Test;
 import java.io.*;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import static org.junit.Assert.*;
 
 public class YtDlpRuntimeTest {
+    @Test public void bundledRuntimeReusesCompiledPythonBetweenOperations() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        String version = YtDlpRuntime.extract(context, asList("--version"));
+        File bytecode = new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp-code/yt_dlp/__pycache__");
+        File[] compiled = bytecode.listFiles((directory, name) -> name.endsWith(".pyc"));
+        assertNotNull("Repeated operations must reuse compiled Python rather than compile the archive again", compiled);
+        assertTrue(compiled.length > 0);
+        java.util.Map<File, Long> written = new java.util.HashMap<>();
+        for (File file : compiled) written.put(file, file.lastModified());
+        assertEquals(version, YtDlpRuntime.extract(context, asList("--version")));
+        for (File file : compiled) assertEquals("Warm startup must reuse bytecode", written.get(file).longValue(), file.lastModified());
+    }
+
     @Test public void packagedQuickJsRunsTheBundledEjsSolverWithoutNetwork() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         YtDlpRuntime.initialize(context);
@@ -22,9 +37,11 @@ public class YtDlpRuntimeTest {
             java.lang.reflect.Method command = YtDlpRuntime.class.getDeclaredMethod("command", Context.class, List.class);
             command.setAccessible(true);
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
+            File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
+            File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
             ProcessBuilder builder = (ProcessBuilder) command.invoke(null, context, asList(
                 nativeDir + "/libpython.so", fixture.getPath(),
-                new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp/yt-dlp").getPath(),
+                entryPoint.getPath(),
                 nativeDir + "/libqjs.so", group.getPath()));
             Process process = builder.redirectErrorStream(true).start();
             try {
@@ -64,6 +81,60 @@ public class YtDlpRuntimeTest {
                 new File(directory, "converted.%(ext)s").getAbsolutePath(), fixture.toURI().toString()), "runtime-test", null);
             assertTrue(new File(directory, "converted.mp3").length() > 0);
         } finally { YtDlpFiles.deleteTree(directory); }
+    }
+
+    @Test public void mp3CoverArtDoesNotRemuxTheAudioAgain() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File directory = new File(context.getCacheDir(), "yt-dlp-mp3-tags-" + java.util.UUID.randomUUID());
+        directory.mkdirs();
+        File fixture = new File(directory, "source.mp3");
+        File cover = new File(directory, "cover.png");
+        File info = new File(directory, "info.json");
+        List<String> log = new java.util.concurrent.CopyOnWriteArrayList<>();
+        try {
+            try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("demo-audio.mp3")) {
+                YtDlpFiles.write(fixture, YtDlpFiles.read(input, 1024 * 1024));
+            }
+            byte[] picture = android.util.Base64.decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMQSTkBAAHQAUHAZ3dkAAAAAElFTkSuQmCC", android.util.Base64.DEFAULT);
+            YtDlpFiles.write(cover, picture);
+            JSONObject metadata = new JSONObject().put("id", "mp3-tags").put("title", "Cover art – Qualität")
+                .put("uploader", "OpenTubeX").put("ext", "mp3").put("extractor", "generic")
+                .put("url", fixture.toURI().toString()).put("webpage_url", "https://example.com/mp3-tags")
+                .put("thumbnails", new JSONArray().put(new JSONObject().put("url", cover.toURI().toString())));
+            YtDlpFiles.write(info, metadata.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            for (boolean embedCover : new boolean[] { false, true }) {
+                List<String> args = new java.util.ArrayList<>(asList("--enable-file-urls", "--load-info-json", info.getPath(),
+                    "--extract-audio", "--audio-format", "mp3", "--embed-metadata", "--verbose", "--output",
+                    new File(directory, (embedCover ? "covered" : "metadata") + ".%(ext)s").getPath()));
+                if (embedCover) args.add("--embed-thumbnail");
+                log.clear();
+                YtDlpRuntime.execute(context, args, "mp3-tags-test", log::add);
+                assertEquals("Cover art must not scan and remux every audio frame", 1,
+                    log.stream().filter(line -> line.startsWith("[debug] ffmpeg command line:") && line.contains("/libffmpeg.so ")).count());
+            }
+            File output = new File(directory, "covered.mp3");
+            assertArrayEquals("Cover art must preserve the encoded audio frames",
+                mp3Frames(new File(directory, "metadata.mp3")), mp3Frames(output));
+            android.media.MediaMetadataRetriever media = new android.media.MediaMetadataRetriever();
+            try {
+                media.setDataSource(output.getPath());
+                assertEquals("Cover art – Qualität", media.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_TITLE));
+                assertEquals("OpenTubeX", media.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_ARTIST));
+                assertArrayEquals(picture, media.getEmbeddedPicture());
+                assertTrue(Long.parseLong(media.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)) > 0);
+            } finally { media.release(); }
+        } finally { YtDlpFiles.deleteTree(directory); }
+    }
+
+    private static byte[] mp3Frames(File file) throws IOException {
+        byte[] bytes = YtDlpFiles.readFile(file);
+        int start = 0, end = bytes.length;
+        if (bytes.length >= 10 && bytes[0] == 'I' && bytes[1] == 'D' && bytes[2] == '3') {
+            start = 10 + ((bytes[6] & 127) << 21) + ((bytes[7] & 127) << 14) + ((bytes[8] & 127) << 7) + (bytes[9] & 127);
+        }
+        if (end >= 128 && bytes[end - 128] == 'T' && bytes[end - 127] == 'A' && bytes[end - 126] == 'G') end -= 128;
+        return java.util.Arrays.copyOfRange(bytes, start, end);
     }
 
     @Test public void cancellationAlsoStopsPostprocessorChildren() throws Exception {
