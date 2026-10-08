@@ -69,13 +69,23 @@ test('maps channel and playlist results into the existing list data formats', ()
     ]
   })
   assert.equal(results[0].type, 'channel')
-  assert.equal(results[0].authorThumbnails[0].url, 'https://example.test/avatar')
-  assert.equal(results[0].subCount, 42)
+  assert.equal(results[0].dataSource, 'local')
+  assert.equal(results[0].thumbnail, 'https://example.test/avatar')
+  assert.equal(results[0].name, 'Creator')
+  assert.equal(results[0].id, 'UC' + 'x'.repeat(22))
+  assert.equal(results[0].subscribers, 42)
   assert.equal(results[1].type, 'playlist')
   assert.equal(results[1].thumbnail, 'https://example.test/playlist')
   assert.equal(results[1].dataSource, 'local')
   assert.equal(results[1].channelId, 'UCcreator')
   assert.equal(results[1].videoCount, 3)
+})
+
+test('normalizes protocol-relative channel avatars for the local card and subscription metadata', () => {
+  const { results } = normalizeYtDlpSearchResults({ entries: [{
+    id: 'UC' + 'x'.repeat(22), title: 'Creator', thumbnails: [{ url: '//yt3.ggpht.com/avatar' }]
+  }] })
+  assert.equal(results[0].thumbnail, 'https://yt3.ggpht.com/avatar')
 })
 
 test('does not report a missing playlist count as zero', () => {

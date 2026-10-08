@@ -1,6 +1,8 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { gunzipSync } from 'node:zlib'
 import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
+import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
 const QUERY = 'age restricted search'
 test.use({
@@ -90,6 +92,79 @@ async function captureSearchNotice(page, filename, animations = 'allow') {
     }
   })
 }
+
+test('cookie search loads video, playlist, and channel avatars and disposes empty Watch hosts', async ({ app, page }) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  const { response } = await configureCookieSearch(app)
+  const channelId = 'UCn_FAXem2-e3HQvmK-mOH4g'
+  const avatar = 'https://yt3.ggpht.com/cookie-search-avatar'
+  const thumbnail = 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg'
+  const channelResponse = gunzipSync(await readFile(new URL('../../fixtures/innertube/channel/loads-the-glitch-channel-home-and-playlists-tabs/browse-4f0ffb6cfdfa.0.json.gz', import.meta.url)))
+  let channelRequests = 0
+  await page.route('**/youtubei/v1/browse*', route => {
+    channelRequests++
+    return route.fulfill({ contentType: 'application/json', body: channelResponse })
+  })
+  await page.route(/https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
+  await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await writeFile(response, JSON.stringify({
+    entries: [
+      { id: 'jNQXAC9IVRw', title: 'Cookie search video', channel: 'GLITCH', channel_id: channelId, duration: 120 },
+      { id: 'PLcookieavatars', ie_key: 'YoutubeTab', title: 'Cookie search playlist', channel: 'GLITCH', channel_id: channelId, playlist_count: 2, thumbnails: [{ url: thumbnail }] },
+      { id: channelId, title: 'Cookie search channel', thumbnails: [{ url: avatar }] }
+    ]
+  }))
+  await searchForAgeGate(page)
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  const bylineAvatars = page.locator('.ft-list-item .channelAvatarImage')
+  await expect(bylineAvatars).toHaveCount(2)
+  await expectImagesLoaded(bylineAvatars)
+  const channelAvatar = page.locator('.ft-list-channel img')
+  await expect(channelAvatar).toHaveAttribute('src', avatar)
+  await expectImagesLoaded(channelAvatar)
+  expect(channelRequests).toBe(1)
+  for (const theme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await page.locator('.ft-list-channel').screenshot({ path: test.info().outputPath(`cookie-search-channel-${theme}.png`), animations: 'disabled' })
+  }
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+  await setWindowSize(app, page, { width: 390, height: 844 })
+  await expectImagesLoaded(channelAvatar)
+  await setWindowSize(app, page, { width: 1600, height: 900 })
+  await page.locator(sel.searchInput).fill('replacement search')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await page.locator(sel.tabs).last().getByRole('button', { name: 'Close Tab', exact: true }).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(1)
+  expect(errors).toEqual([])
+})
+
+test('cookie channel avatars use YouTube URLs with the Invidious backend selected', async ({ app, page }) => {
+  const { response } = await configureCookieSearch(app, 'browser')
+  const avatar = 'https://yt3.googleusercontent.com/cookie-channel-avatar'
+  await page.route(avatar, route => fulfillVisualFixture(route, 'avatar'))
+  await writeFile(response, JSON.stringify({
+    entries: [{
+      id: 'UCn_FAXem2-e3HQvmK-mOH4g', title: 'Cookie search channel', thumbnails: [{ url: avatar }]
+    }]
+  }))
+  await searchForAgeGate(page)
+  // Keep the age-gate notice while changing the preferred backend: the cookie
+  // retry still gets its data from yt-dlp, not from the selected instance.
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    store.commit('setDefaultInvidiousInstance', 'https://invidious.test')
+  })
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  const image = page.locator('.ft-list-channel img')
+  await expect(image).toHaveAttribute('src', avatar)
+  await expectImagesLoaded(image)
+})
 
 test('cookie search shows the playlist thumbnail and total count omitted by flat search', async ({ app, page }) => {
   const { log, response, playlistResponse } = await configureCookieSearch(app)
