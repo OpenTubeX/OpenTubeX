@@ -31,6 +31,11 @@
 
   .app.capacitorPhoneLayout &:where(:has(.capacitorPhoneTabSwitcherButton)) {
     touch-action: none;
+
+    @supports (touch-action: pan-down) {
+      /* An upward finger movement scrolls down; downward pulls open tabs. */
+      touch-action: pan-down;
+    }
   }
 
   @include top-nav-is-colored {

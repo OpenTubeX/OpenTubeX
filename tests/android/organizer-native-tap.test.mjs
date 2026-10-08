@@ -59,7 +59,7 @@ test('the first native Android tap after pulling the organizer selects its card'
       else await exec('adb', ['-s', serial, 'shell', command])
       const events = await page.evaluate(name => window[name].events, traceName)
       assert.ok(events.some(event => event.type === 'pointerdown' && event.card && event.moving),
-        'native tap must reach the card during settlement, not after a test-induced wait')
+        `native tap must reach the card during settlement: ${JSON.stringify(events)}`)
       await expect(dialog, 'one native tap must close the organizer without a second tap').toHaveCount(0)
     }
   } finally {

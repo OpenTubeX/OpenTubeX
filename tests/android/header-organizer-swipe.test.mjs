@@ -307,20 +307,31 @@ test('Android organizer pull follows the finger, settles into its card and prese
   }
 })
 
-test('Android header keeps vertical panning when the phone organizer is unavailable', {
+test('Android header preserves native upward panning alongside organizer gestures', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const page = browser.contexts()[0].pages()[0]
+  const session = await browser.contexts()[0].newCDPSession(page)
+  const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+  const originalScroll = await page.evaluate(() => window.scrollY)
   const keepAlive = setTimeout(() => {}, 60_000)
   const saved = await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return { EnableMobileTabs: store.getters.getEnableMobileTabs, CapacitorLayoutMode: store.getters.getCapacitorLayoutMode }
   })
   try {
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCapacitorLayoutMode', 'phone'))
+    await page.locator('.app > .routerView').waitFor()
+    await page.evaluate(() => {
+      const fixture = document.createElement('div')
+      fixture.id = 'header-pan-fixture'
+      fixture.style.height = '2400px'
+      document.querySelector('.app > .routerView').prepend(fixture)
+    })
     for (const [layout, tabs, expected] of [
-      ['phone', true, 'none'], ['phone', false, 'pan-y'],
-      ['phone', true, 'none'], ['tablet', true, 'pan-y'],
+      ['phone', true, 'pan-down'], ['phone', false, 'pan-y'],
+      ['phone', true, 'pan-down'], ['tablet', true, 'pan-y'],
     ]) {
       await page.evaluate(async ({ layout, tabs }) => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -329,12 +340,30 @@ test('Android header keeps vertical panning when the phone organizer is unavaila
       }, { layout, tabs })
       await expect(page.locator('.topNav'), `${layout} header with tabs ${tabs ? 'enabled' : 'disabled'}`)
         .toHaveCSS('touch-action', expected)
+      if (layout === 'phone') {
+        await page.evaluate(() => window.scrollTo(0, 400))
+        const initial = await page.evaluate(() => window.scrollY)
+        const box = await page.locator('.topNav').boundingBox()
+        const point = { x: box.x + box.width / 2, y: box.y + box.height - 4 }
+        await touch('touchStart', point)
+        for (let step = 1; step <= 8; step++) {
+          await touch('touchMove', { ...point, y: point.y - Math.min(48, point.y - 2) * step / 8 })
+          await page.waitForTimeout(30)
+        }
+        await touch('touchEnd')
+        await expect.poll(() => page.evaluate(() => window.scrollY),
+          { message: `an upward header drag must scroll with mobile tabs ${tabs ? 'enabled' : 'disabled'}` }).toBeGreaterThan(initial + 5)
+        await expect(page.locator('#capacitor-phone-tab-dialog')).toHaveCount(0)
+      }
     }
   } finally {
+    await touch('touchCancel').catch(() => {})
+    await page.evaluate(scroll => { document.querySelector('#header-pan-fixture')?.remove(); window.scrollTo(0, scroll) }, originalScroll)
     await page.evaluate(async saved => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const [key, value] of Object.entries(saved)) await store.dispatch('update' + key, value)
     }, saved)
+    await session.detach()
     await browser.close()
     clearTimeout(keepAlive)
   }
