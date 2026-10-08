@@ -156,6 +156,60 @@ test('Shorts resist dragging past feed boundaries and respect reduced motion', a
   await cdp.detach()
 })
 
+for (const cancel of [false, true]) {
+  test(cancel ? 'Shorts cancel a pending release when resize precedes the DOM update' : 'Shorts animate a new preview created by reversing direction on release', async ({ app, page }) => {
+    const { watch, touch, cdp } = await openShorts({ app, page })
+    await watch.evaluate(component => component.proxy.navigateSubscriptionShort(-1))
+    await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
+    await expect.poll(() => watch.evaluate(component => Date.now() >= component.proxy.shortsNavigationLockedUntil)).toBe(true)
+    const recorded = await page.evaluateHandle(() => {
+      const state = { animate: Element.prototype.animate, animations: [] }
+      Element.prototype.animate = function (...args) {
+        const animation = state.animate.apply(this, args)
+        if (this.matches('.shortsSwipeViewport > .videoPlayer, .shortsSwipePreview')) {
+          state.animations.push({ element: this, animation })
+        }
+        return animation
+      }
+      return state
+    })
+    try {
+      await touch('touchStart')
+      await touch('touchMove', 0, 120)
+      await expect(page.locator('.shortsSwipePreview')).toHaveCount(0)
+      await watch.evaluate((component, cancel) => {
+        const pointer = component.proxy.shortsSwipePointer
+        // Release can include coordinates newer than the last delivered move.
+        component.proxy.$refs.shortsSwipeViewport.querySelector('.videoPlayer').dispatchEvent(new PointerEvent('pointerup', {
+          bubbles: true,
+          cancelable: true,
+          pointerType: 'touch',
+          isPrimary: true,
+          pointerId: pointer.id,
+          clientX: pointer.x,
+          clientY: pointer.y - 120
+        }))
+        if (cancel) window.dispatchEvent(new Event('resize'))
+      }, cancel)
+      await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+      if (cancel) {
+        expect(await recorded.evaluate(state => state.animations.length)).toBe(0)
+        await expect(page).toHaveURL(new RegExp(`/watch/${previous}`))
+        await expect(page.locator('.shortsSwipePreview')).toHaveCount(0)
+      } else {
+        expect(await recorded.evaluate(state => state.animations.some(({ element }) => element.matches('.shortsSwipePreview')))).toBe(true)
+        await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
+      }
+    } finally {
+      await touch('touchCancel')
+      await recorded.evaluate(state => { Element.prototype.animate = state.animate })
+      await recorded.dispose()
+      await watch.dispose()
+      await cdp.detach()
+    }
+  })
+}
+
 test('Shorts settling honors system and forced reduced-motion preferences', async ({ app, page }) => {
   const { watch, touch, bounds, cdp } = await openShorts({ app, page })
   const surface = page.locator('.shortsSwipeViewport > .videoPlayer')

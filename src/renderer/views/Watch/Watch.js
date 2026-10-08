@@ -2970,10 +2970,14 @@ export default defineComponent({
       const reducedMotion = isReducedMotionEnabled()
       this.shortsSwipeSettling = true
       this.shortsSwipeOffset = to
+      const animations = markRaw([])
+      this.shortsSwipeAnimations = animations
+      await this.$nextTick()
+      if (this.shortsSwipeAnimations !== animations) return
       const surfaces = this.shortsSwipePresentationTarget
         ? [...viewport.children]
         : [...viewport.querySelectorAll(':scope > .videoPlayer, :scope > .shortsSwipePreview')]
-      const animations = surfaces.map(element => {
+      animations.push(...surfaces.map(element => {
         const previewOffset = element.classList.contains('shortsSwipePreview') ? direction * this.shortsSwipeHeight : 0
         // Keep the expanded container stationary, including the browser's fullscreen top layer.
         const translateContents = this.shortsSwipePresentationTarget && !previewOffset
@@ -2981,13 +2985,13 @@ export default defineComponent({
           translateContents ? { translate: `0 ${from}px` } : { transform: `translateY(${from + previewOffset}px)` },
           translateContents ? { translate: `0 ${to}px` } : { transform: `translateY(${to + previewOffset}px)` }
         ], { duration: reducedMotion ? 0 : 220, easing: 'cubic-bezier(0.2, 0, 0, 1)' }))
-      })
-      this.shortsSwipeAnimations = markRaw(animations)
+      }))
       try {
         await Promise.all(animations.map(animation => animation.finished))
       } catch {
         return // Resize, tab changes, and navigation cancel the old gesture.
       }
+      if (this.shortsSwipeAnimations !== animations) return
       this.resetShortsSwipe()
       if (navigate) {
         this.navigateSubscriptionShort(direction)
