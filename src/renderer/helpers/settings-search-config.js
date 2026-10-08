@@ -44,6 +44,7 @@ const GENERAL_PRIVACY_KEYS = new Set([
 ])
 
 const GENERAL_PROVIDER_KEYS = new Set([
+  'Automatically switch stream extraction methods',
   'Clear Default Instance',
   'Current instance will be randomized on startup',
   'Current Invidious Instance',

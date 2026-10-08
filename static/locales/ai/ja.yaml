@@ -271,6 +271,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Automatically switch stream extraction methods: "ストリーム抽出方式を自動的に切り替える"
     Enable Tabs: "タブを有効にする"
     Thumbnail Swipe Gestures:
       Left: サムネイルを左にスワイプ
@@ -1505,6 +1506,7 @@ Playlist:
   Playlist Preload Partial: "{requested} 本中 {preloaded} 本を先読みしました。{failed} 本は先読みできませんでした。"
   Playlist Preload Pagination Failed: "再生リスト全体を読み込めなかったため、先読みを中止しました。"
 Change Format:
+  yt-dlp Error Template: "yt-dlpでストリームを取得できませんでした: {error}"
   Local Video File: ローカル動画ファイル
   Local Audio File: ローカル音声ファイル
   Online Video: オンライン動画
@@ -1696,6 +1698,7 @@ Description:
   Games: ゲーム
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "内蔵エンジンで再生できない場合はyt-dlpを、yt-dlpで再生できない場合は内蔵エンジンを試します。"
     Enable Tabs: "現在のページは開いたままになります。他のタブはアプリを再起動するまで保持されます。タブを再度有効にすると復元できます。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"
     Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。

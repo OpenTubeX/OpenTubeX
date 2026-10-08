@@ -154,6 +154,123 @@ test('terminal built-in playback failure falls back to yt-dlp once', async ({ ap
   expect(result.errorMessage).toBe('')
 })
 
+for (const reloadRequest of [false, true]) {
+  test(`disabled playback-engine fallback stops after ${reloadRequest ? 'SABR reload requests' : 'SABR playback errors'}`, async ({ app, page }) => {
+    await mockUnplayableWatchPage(app, page)
+    await goTo(page, 'history')
+    await page.getByText('SABR test video').click()
+    await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(view => view.$store.dispatch('updatePlaybackEngineFallback', false))
+
+    const result = await driveWatchView(page, Array.from({ length: 4 }, () => (
+      reloadRequest ? { reloadRequest: true } : { error: true }
+    )), { legacyFormats: [], enablePlaybackEngineFallback: true })
+
+    expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
+    expect(result.activePlaybackEngine).toBe('built-in')
+    expect(result.playbackEngineFallbackAttempted).toBe(false)
+    expect(result.errorMessage).toContain('Unable to recover the video stream')
+  })
+}
+
+test('disabled playback-engine fallback preserves yt-dlp and allows a manual switch', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async view => {
+    await view.$store.dispatch('updatePlaybackEngineFallback', false)
+    view.activePlaybackEngine = 'yt-dlp'
+    view.activePlaybackEngineVersion = 'test'
+    view.builtInPlaybackSource = {
+      manifestSrc: null,
+      manifestMimeType: 'application/dash+xml',
+      sabrData: null,
+      legacyFormats: [{ itag: 18 }],
+      streamingDataExpiryDate: new Date(Date.now() + 60_000),
+      vrProjection: null
+    }
+    const applied = await view.tryPlaybackEngineFallback({ code: 1002 })
+    const automaticEngine = view.activePlaybackEngine
+    await view.handlePlaybackEngineChange('built-in')
+    return { applied, automaticEngine, manualEngine: view.activePlaybackEngine }
+  })
+  expect(result).toEqual({ applied: false, automaticEngine: 'yt-dlp', manualEngine: 'built-in' })
+})
+
+test('disabled playback-engine fallback reports missing live formats without extracting yt-dlp', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watchView = await watchViewHandle(page)
+  const result = await watchView.evaluate(async view => {
+    await view.$store.dispatch('updatePlaybackEngineFallback', false)
+    view.isLive = true
+    view.manifestSrc = null
+    view.legacyFormats = []
+    let extractions = 0
+    view.extractYtDlpPlaybackSource = async () => { extractions++; return true }
+    await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+    return { extractions, engine: view.activePlaybackEngine, error: view.errorMessage }
+  })
+  expect(result.extractions).toBe(0)
+  expect(result.engine).toBe('built-in')
+  expect(result.error).toContain('missing formats')
+})
+
+for (const fallbackEnabled of [false, true]) {
+  test(`initial yt-dlp extraction failure ${fallbackEnabled ? 'retains default built-in fallback' : 'respects disabled playback-engine fallback'}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => ({ error: 'Synthetic initial extraction failure' }))
+    })
+    await page.evaluate(async enabled => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updatePlaybackEngineFallback', enabled)
+      await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+    }, fallbackEnabled)
+    await goTo(page, 'history')
+    await page.getByText('SABR test video').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    if (fallbackEnabled) {
+      await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+      const watch = await watchViewHandle(page)
+      await expect.poll(() => watch.evaluate(view => ({
+        pending: view.ytDlpStreamsPending,
+        engine: view.activePlaybackEngine,
+        error: view.errorMessage ?? ''
+      }))).toEqual({ pending: false, engine: 'built-in', error: '' })
+    } else {
+      await expect(page.locator('.errorMessage')).toContainText('Synthetic initial extraction failure')
+      await expect(page.locator('.ftVideoPlayer')).not.toBeVisible()
+      await page.getByRole('button', { name: /Retry with built-in extraction/i }).click()
+      await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+      const watch = await watchViewHandle(page)
+      expect(await watch.evaluate(view => view.activePlaybackEngine)).toBe('built-in')
+    }
+  })
+}
+
+for (const defaultEngine of ['built-in', 'yt-dlp']) {
+  test(`disabled playback-engine fallback leaves authenticated retry manual with ${defaultEngine} as default`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchView = await watchViewHandle(page)
+    const result = await watchView.evaluate(async (view, selectedEngine) => {
+      await view.$store.dispatch('updatePlaybackEngineFallback', false)
+      await view.$store.dispatch('updateVideoPlaybackEngine', selectedEngine)
+      view.playbackEngineFallbackTarget = 'built-in'
+      await view.$store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+      await view.$store.dispatch('updateYtDlpPlaybackCookiesPath', '/tmp/test-cookies.txt')
+      let cacheAttempts = 0
+      view.tryCachedRestrictedPlayback = async () => { cacheAttempts++ }
+      view.setRestrictedPlaybackError('age')
+      return { cacheAttempts, engine: view.activePlaybackEngine, canRetry: view.canTryRestrictedPlaybackWithCookies }
+    }, defaultEngine)
+    expect(result).toEqual({ cacheAttempts: 0, engine: 'built-in', canRetry: true })
+  })
+}
+
 test('offline WebKit errors retain the player and reconnect restores error handling', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await goTo(page, 'history')

@@ -271,6 +271,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Automatically switch stream extraction methods: "Changer automatiquement de méthode d’extraction des flux"
     Enable Tabs: "Activer les onglets"
     Thumbnail Swipe Gestures:
       Left: Balayer à gauche sur les miniatures
@@ -1504,6 +1505,7 @@ Playlist:
   Playlist Preload Partial: "{preloaded} vidéos sur {requested} ont été préchargées. Échec pour {failed}."
   Playlist Preload Pagination Failed: "La playlist complète n’a pas pu être chargée, le préchargement a donc été annulé."
 Change Format:
+  yt-dlp Error Template: "yt-dlp n’a pas pu fournir les flux : {error}"
   Local Video File: Fichier vidéo local
   Local Audio File: Fichier audio local
   Online Video: Vidéo en ligne
@@ -1695,6 +1697,7 @@ Description:
   Games: Jeux
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Essayer yt-dlp si la lecture intégrée échoue, ou la lecture intégrée si yt-dlp échoue."
     Enable Tabs: "Garde la page actuelle ouverte. Les autres onglets sont conservés jusqu’au redémarrage de l’application ; réactivez les onglets pour les restaurer."
     Data Saver Thumbnails: "Utiliser des miniatures de résolution inférieure pour réduire la consommation de données."
     Use AI Translation Completions: Complète les traductions humaines avec du texte généré par l’IA. Les traductions humaines sont toujours prioritaires.

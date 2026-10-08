@@ -271,6 +271,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Automatically switch stream extraction methods: "自动切换流提取方法"
     Enable Tabs: "启用标签页"
     Thumbnail Swipe Gestures:
       Left: 在缩略图上向左滑动
@@ -1503,6 +1504,7 @@ Playlist:
   Playlist Preload Partial: "已预加载 {requested} 个视频中的 {preloaded} 个，{failed} 个未能预加载。"
   Playlist Preload Pagination Failed: "无法加载完整播放列表，已取消预加载。"
 Change Format:
+  yt-dlp Error Template: "yt-dlp 无法提供流：{error}"
   Local Video File: 本地视频文件
   Local Audio File: 本地音频文件
   Online Video: 在线视频
@@ -1694,6 +1696,7 @@ Description:
   Games: 游戏
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "内置播放失败时尝试 yt-dlp，yt-dlp 失败时尝试内置播放。"
     Enable Tabs: "保持当前页面打开。其他标签页会保留到应用重启，再次启用标签页即可恢复。"
     Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"
     Use AI Translation Completions: 使用 AI 生成的文本补全人工翻译中的缺失内容。始终优先使用人工翻译。

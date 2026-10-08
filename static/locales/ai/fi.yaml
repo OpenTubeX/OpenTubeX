@@ -275,6 +275,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Automatically switch stream extraction methods: "Vaihda suoratoiston poimintamenetelmiä automaattisesti"
     Enable Tabs: "Ota välilehdet käyttöön"
     Thumbnail Swipe Gestures:
       Left: Pyyhkäisy vasemmalle pikkukuvissa
@@ -1546,6 +1547,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Koko soittolistaa ei voitu ladata, joten esilataus peruttiin."
   Unavailable videos are hidden: Videot, jotka eivät ole saatavilla, on piilotettu
 Change Format:
+  yt-dlp Error Template: "yt-dlp ei voinut toimittaa suoratoistovirtoja: {error}"
   Local Video File: Paikallinen videotiedosto
   Local Audio File: Paikallinen äänitiedosto
   Online Video: Verkkovideo
@@ -1738,6 +1740,7 @@ Description:
   Games: Pelit
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Kokeile yt-dlp:tä, jos sisäänrakennettu toisto epäonnistuu, tai sisäänrakennettua toistoa, jos yt-dlp epäonnistuu."
     Enable Tabs: "Pitää nykyisen sivun auki. Muut välilehdet säilyvät sovelluksen uudelleenkäynnistykseen asti; ota välilehdet uudelleen käyttöön palauttaaksesi ne."
     Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
     Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.

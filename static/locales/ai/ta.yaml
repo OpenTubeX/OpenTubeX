@@ -277,6 +277,7 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Automatically switch stream extraction methods: "ஸ்ட்ரீம் பிரித்தெடுக்கும் முறைகளைத் தானாக மாற்று"
     Enable Tabs: "தாவல்களை இயக்கு"
     Thumbnail Swipe Gestures:
       Left: சிறுபடங்களில் இடதுபுறம் ஸ்வைப் செய்
@@ -1552,6 +1553,7 @@ Playlist:
   Playlist Preload Pagination Failed: "முழு இயக்கப்பட்டியலை ஏற்ற முடியாததால் முன்பே ஏற்றுவது நிறுத்தப்பட்டது."
   Unavailable videos are hidden: கிடைக்காத காணொளிகள் மறைக்கப்பட்டுள்ளன
 Change Format:
+  yt-dlp Error Template: "yt-dlp ஸ்ட்ரீம்களை வழங்க முடியவில்லை: {error}"
   Local Video File: உள்ளகக் காணொளிக் கோப்பு
   Local Audio File: உள்ளக ஒலிக் கோப்பு
   Online Video: இணையக் காணொளி
@@ -1744,6 +1746,7 @@ Description:
   Games: விளையாட்டுகள்
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "உள்ளமைந்த இயக்கம் தோல்வியடைந்தால் yt-dlp ஐ முயற்சிக்கவும்; yt-dlp தோல்வியடைந்தால் உள்ளமைந்த இயக்கத்தை முயற்சிக்கவும்."
     Enable Tabs: "தற்போதைய பக்கம் திறந்தே இருக்கும். செயலியை மறுதொடக்கம் செய்யும் வரை மற்ற தாவல்கள் சேமிக்கப்படும்; அவற்றை மீட்டெடுக்க தாவல்களை மீண்டும் இயக்கவும்."
     Data Saver Thumbnails: "தரவுப் பயன்பாட்டைக் குறைக்க குறைந்த தெளிவுத்திறன் கொண்ட சிறுபடங்களைப் பயன்படுத்தவும்."
     Use AI Translation Completions: மனித மொழிபெயர்ப்புகளில் உள்ள இடைவெளிகளை AI உருவாக்கிய உரையால் நிரப்பும். மனித மொழிபெயர்ப்புகளுக்கே எப்போதும் முன்னுரிமை.

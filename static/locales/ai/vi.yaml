@@ -275,6 +275,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Automatically switch stream extraction methods: "Tự động chuyển đổi phương thức trích xuất luồng"
     Enable Tabs: "Bật thẻ"
     Thumbnail Swipe Gestures:
       Left: Vuốt sang trái trên hình thu nhỏ
@@ -1538,6 +1539,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Không thể tải toàn bộ danh sách phát nên đã hủy tải trước."
   Unavailable videos are hidden: Các video không có sẵn đã bị ẩn
 Change Format:
+  yt-dlp Error Template: "yt-dlp không thể cung cấp các luồng: {error}"
   Local Video File: Tệp video cục bộ
   Local Audio File: Tệp âm thanh cục bộ
   Online Video: Video trực tuyến
@@ -1730,6 +1732,7 @@ Description:
   Games: Trò chơi
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Thử yt-dlp nếu trình phát tích hợp bị lỗi, hoặc trình phát tích hợp nếu yt-dlp bị lỗi."
     Enable Tabs: "Giữ trang hiện tại mở. Các thẻ khác được giữ đến khi khởi động lại ứng dụng; bật lại thẻ để khôi phục chúng."
     Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
     Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.

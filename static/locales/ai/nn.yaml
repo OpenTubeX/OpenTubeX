@@ -285,6 +285,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Automatically switch stream extraction methods: "Byt automatisk mellom metodar for straumuttrekk"
     Enable Tabs: "Slå på faner"
     Thumbnail Swipe Gestures:
       Left: Sveip til venstre på miniatyrbilete
@@ -1797,6 +1798,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Heile spelelista kunne ikkje lastast, så førehandslastinga vart avbroten."
   Unavailable videos are hidden: Utilgjengelege videoar er gøymde
 Change Format:
+  yt-dlp Error Template: "yt-dlp kunne ikkje hente straumane: {error}"
   Local Video File: Lokal videofil
   Local Audio File: Lokal lydfil
   Online Video: Nettvideo
@@ -1999,6 +2001,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prøv yt-dlp dersom innebygd avspeling mislukkast, eller innebygd avspeling dersom yt-dlp mislukkast."
     Enable Tabs: "Held den gjeldande sida open. Andre faner vert tekne vare på til appen vert starta på nytt; slå på faner igjen for å gjenopprette dei."
     Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."
     Use AI Translation Completions: Fyll ut det som manglar i menneskelagde omsetjingar med KI-generert tekst. Menneskelagde omsetjingar vert alltid brukte fyrst.

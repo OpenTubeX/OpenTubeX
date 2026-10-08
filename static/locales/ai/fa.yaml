@@ -289,6 +289,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Automatically switch stream extraction methods: "تغییر خودکار روش‌های استخراج جریان"
     Enable Tabs: "فعال‌سازی زبانه‌ها"
     Thumbnail Swipe Gestures:
       Left: کشیدن به چپ روی تصاویر بندانگشتی
@@ -1582,6 +1583,7 @@ Playlist:
   Playlist Preload Pagination Failed: "فهرست پخش کامل بارگیری نشد، بنابراین پیش‌بارگیری لغو شد."
   Unavailable videos are hidden: ویدیوهای در دسترس‌نبوده پنهان هستند
 Change Format:
+  yt-dlp Error Template: "yt-dlp نتوانست جریان‌ها را فراهم کند: {error}"
   Local Video File: فایل ویدیویی محلی
   Local Audio File: فایل صوتی محلی
   Online Video: ویدیوی آنلاین
@@ -1778,6 +1780,7 @@ Description:
   Games: بازی‌ها
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "اگر پخش داخلی ناموفق بود، yt-dlp را امتحان کنید و اگر yt-dlp ناموفق بود، پخش داخلی را امتحان کنید."
     Enable Tabs: "صفحهٔ فعلی باز می‌ماند. زبانه‌های دیگر تا راه‌اندازی مجدد برنامه نگه داشته می‌شوند؛ برای بازیابی آن‌ها، زبانه‌ها را دوباره فعال کنید."
     Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."
     Use AI Translation Completions: جاهای خالی ترجمه‌های انسانی را با متن تولیدشده با هوش مصنوعی پر می‌کند. ترجمه‌های انسانی همیشه اولویت دارند.

@@ -271,6 +271,7 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Automatically switch stream extraction methods: "Vaheta voo eraldamise meetodeid automaatselt"
     Enable Tabs: "Luba vahekaardid"
     Thumbnail Swipe Gestures:
       Left: Pisipiltidel vasakule pühkimine
@@ -1505,6 +1506,7 @@ Playlist:
   Playlist Preload Partial: "Eellaaditi {preloaded}/{requested} videot. {failed} eellaadimine nurjus."
   Playlist Preload Pagination Failed: "Tervet esitusloendit ei saanud laadida, seega eellaadimine tühistati."
 Change Format:
+  yt-dlp Error Template: "yt-dlp ei saanud vooge hankida: {error}"
   Local Video File: Kohalik videofail
   Local Audio File: Kohalik helifail
   Online Video: Veebivideo
@@ -1697,6 +1699,7 @@ Description:
   Games: Mängud
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Proovi yt-dlp-d, kui sisseehitatud taasesitus ebaõnnestub, või sisseehitatud taasesitust, kui yt-dlp ebaõnnestub."
     Enable Tabs: "Praegune leht jääb avatuks. Muud kaardid säilitatakse rakenduse taaskäivitamiseni; nende taastamiseks luba kaardid uuesti."
     Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
     Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.

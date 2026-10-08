@@ -271,6 +271,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Automatically switch stream extraction methods: "Adatfolyam-kinyerési módszerek automatikus váltása"
     Enable Tabs: "Lapok engedélyezése"
     Thumbnail Swipe Gestures:
       Left: Balra húzás a bélyegképeken
@@ -1503,6 +1504,7 @@ Playlist:
   Playlist Preload Partial: "{requested} videóból {preloaded} előtöltve. {failed} előtöltése sikertelen."
   Playlist Preload Pagination Failed: "A teljes lejátszási lista nem tölthető be, ezért az előtöltés megszakadt."
 Change Format:
+  yt-dlp Error Template: "A yt-dlp nem tudta biztosítani az adatfolyamokat: {error}"
   Local Video File: Helyi videófájl
   Local Audio File: Helyi hangfájl
   Online Video: Online videó
@@ -1695,6 +1697,7 @@ Description:
   Games: Játékok
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "A yt-dlp kipróbálása, ha a beépített lejátszás sikertelen, vagy a beépített lejátszás kipróbálása, ha a yt-dlp sikertelen."
     Enable Tabs: "Nyitva tartja az aktuális oldalt. A többi lap az alkalmazás újraindításáig megmarad; visszaállításukhoz engedélyezd újra a lapokat."
     Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
     Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.

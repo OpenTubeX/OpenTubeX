@@ -273,6 +273,7 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Automatically switch stream extraction methods: "Skipta sjálfkrafa um aðferðir til að sækja streymi"
     Enable Tabs: "Virkja flipa"
     Thumbnail Swipe Gestures:
       Left: Strjúka til vinstri á smámyndum
@@ -1525,6 +1526,7 @@ Playlist:
   Playlist Preload Partial: "Forhlóð {preloaded} af {requested} myndskeiðum. Ekki tókst að forhlaða {failed}."
   Playlist Preload Pagination Failed: "Ekki tókst að hlaða allan spilunarlistann og forhleðslu var hætt."
 Change Format:
+  yt-dlp Error Template: "yt-dlp gat ekki sótt streymið: {error}"
   Local Video File: Staðbundin myndbandsskrá
   Local Audio File: Staðbundin hljóðskrá
   Online Video: Myndband á netinu
@@ -1716,6 +1718,7 @@ Description:
   Games: Leikir
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prófa yt-dlp ef innbyggð spilun bregst, eða innbyggða spilun ef yt-dlp bregst."
     Enable Tabs: "Heldur núverandi síðu opinni. Aðrir flipar eru geymdir þar til forritið er endurræst; virkjaðu flipa aftur til að endurheimta þá."
     Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.

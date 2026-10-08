@@ -273,6 +273,7 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Automatically switch stream extraction methods: "Автоматично превключване на методите за извличане на потоци"
     Enable Tabs: "Включване на разделите"
     Thumbnail Swipe Gestures:
       Left: Плъзгане наляво върху миниатюрите
@@ -1522,6 +1523,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Пълният плейлист не можа да се зареди и предварителното зареждане бе отменено."
   Unavailable videos are hidden: Недостъпните видеоклипове са скрити
 Change Format:
+  yt-dlp Error Template: "yt-dlp не успя да предостави потоците: {error}"
   Local Video File: Локален видеофайл
   Local Audio File: Локален аудиофайл
   Online Video: Онлайн видеоклип
@@ -1714,6 +1716,7 @@ Description:
   Games: Игри
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Опитайте yt-dlp, ако вграденото възпроизвеждане не успее, или вграденото възпроизвеждане, ако yt-dlp не успее."
     Enable Tabs: "Текущата страница остава отворена. Другите раздели се запазват до рестартиране на приложението; включете разделите отново, за да ги възстановите."
     Data Saver Thumbnails: "Използвайте миниатюри с по-ниска разделителна способност, за да намалите потреблението на данни."
     Use AI Translation Completions: Попълва липсващите части в човешките преводи с текст, създаден от ИИ. Човешките преводи винаги са с предимство.

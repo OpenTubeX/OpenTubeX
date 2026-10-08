@@ -403,6 +403,7 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Automatically switch stream extraction methods: "Canvia automàticament els mètodes d’extracció de fluxos"
     Enable Tabs: "Activa les pestanyes"
     Thumbnail Swipe Gestures:
       Left: Lliscar cap a l'esquerra a les miniatures
@@ -2001,6 +2002,7 @@ Playlist:
   Playlist Preload Pagination Failed: "No s’ha pogut carregar la llista sencera i s’ha cancel·lat la precàrrega."
   Unavailable videos are hidden: Els vídeos no disponibles estan ocults
 Change Format:
+  yt-dlp Error Template: "yt-dlp no ha pogut proporcionar els fluxos: {error}"
   Local Video File: Fitxer de vídeo local
   Local Audio File: Fitxer d'àudio local
   Online Video: Vídeo en línia
@@ -2224,6 +2226,7 @@ Description:
   Games: Jocs
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prova yt-dlp si falla la reproducció integrada, o la reproducció integrada si falla yt-dlp."
     Enable Tabs: "Manté oberta la pàgina actual. Les altres pestanyes es conserven fins que es reinicia l’aplicació; torneu a activar les pestanyes per restaurar-les."
     Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.

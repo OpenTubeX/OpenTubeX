@@ -275,6 +275,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Automatically switch stream extraction methods: "החלפה אוטומטית בין שיטות חילוץ זרמים"
     Enable Tabs: "הפעלת לשוניות"
     Thumbnail Swipe Gestures:
       Left: החלקה שמאלה על תמונות ממוזערות
@@ -1548,6 +1549,7 @@ Playlist:
   Playlist Preload Pagination Failed: "לא ניתן היה לטעון את כל רשימת ההשמעה, לכן הטעינה מראש בוטלה."
   Unavailable videos are hidden: סרטונים לא זמינים מוסתרים
 Change Format:
+  yt-dlp Error Template: "yt-dlp לא הצליח לספק את הזרמים: {error}"
   Local Video File: קובץ וידאו מקומי
   Local Audio File: קובץ שמע מקומי
   Online Video: סרטון מקוון
@@ -1740,6 +1742,7 @@ Description:
   Games: משחקים
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "לנסות את yt-dlp אם הניגון המובנה נכשל, או את הניגון המובנה אם yt-dlp נכשל."
     Enable Tabs: "העמוד הנוכחי נשאר פתוח. הלשוניות האחרות נשמרות עד להפעלה מחדש של היישום; יש להפעיל שוב לשוניות כדי לשחזר אותן."
     Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."
     Use AI Translation Completions: השלמת פערים בתרגומים אנושיים באמצעות טקסט שנוצר בבינה מלאכותית. תרגומים אנושיים תמיד מקבלים עדיפות.

@@ -281,6 +281,7 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Automatically switch stream extraction methods: "Аутоматски мењај методе издвајања стримова"
     Enable Tabs: "Омогући картице"
     Thumbnail Swipe Gestures:
       Left: Превлачење улево по сличицама
@@ -1570,6 +1571,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Цела плејлиста није могла да се учита, па је учитавање унапред отказано."
   Unavailable videos are hidden: Недоступни видео-снимци су скривени
 Change Format:
+  yt-dlp Error Template: "yt-dlp није могао да обезбеди стримове: {error}"
   Local Video File: Локална видео-датотека
   Local Audio File: Локална аудио-датотека
   Online Video: Видео-снимак са интернета
@@ -1766,6 +1768,7 @@ Description:
   Games: Игре
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Покушај са yt-dlp ако уграђена репродукција не успе или са уграђеном репродукцијом ако yt-dlp не успе."
     Enable Tabs: "Тренутна страница остаје отворена. Остале картице се чувају до поновног покретања апликације; поново омогућите картице да бисте их вратили."
     Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."
     Use AI Translation Completions: Попуни празнине у људским преводима текстом који је генерисала вештачка интелигенција. Људски преводи увек имају предност.

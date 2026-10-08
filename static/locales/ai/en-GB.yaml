@@ -270,6 +270,7 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
     Enable Tabs: "Enable Tabs"
     Thumbnail Swipe Gestures:
       Left: Swipe left on thumbnails
@@ -1489,6 +1490,7 @@ Playlist:
   Playlist Preload Pagination Failed: "The full playlist could not be loaded, so preloading was cancelled."
   Unavailable videos are hidden: Unavailable videos are hidden
 Change Format:
+  yt-dlp Error Template: "yt-dlp could not provide the streams: {error}"
   Local Video File: Local video file
   Local Audio File: Local audio file
   Online Video: Online video
@@ -1681,6 +1683,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails."
     Enable Tabs: "Keeps the current page open. Other tabs are kept until the app restarts; enable tabs again to restore them."
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.

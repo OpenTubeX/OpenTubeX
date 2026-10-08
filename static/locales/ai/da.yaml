@@ -282,6 +282,7 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Automatically switch stream extraction methods: "Skift automatisk mellem metoder til streamudtræk"
     Enable Tabs: "Aktivér faner"
     Thumbnail Swipe Gestures:
       Left: Stryg til venstre på miniaturebilleder
@@ -1576,6 +1577,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Hele afspilningslisten kunne ikke indlæses, så forudindlæsningen blev annulleret."
   Unavailable videos are hidden: Utilgængelige videoer er skjult
 Change Format:
+  yt-dlp Error Template: "yt-dlp kunne ikke levere streamene: {error}"
   Local Video File: Lokal videofil
   Local Audio File: Lokal lydfil
   Online Video: Onlinevideo
@@ -1772,6 +1774,7 @@ Description:
   Games: Spil
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prøv yt-dlp, hvis den indbyggede afspilning fejler, eller indbygget afspilning, hvis yt-dlp fejler."
     Enable Tabs: "Holder den aktuelle side åben. Andre faner bevares, indtil appen genstartes; aktivér faner igen for at gendanne dem."
     Data Saver Thumbnails: "Brug miniaturebilleder med lavere opløsning for at reducere dataforbruget."
     Use AI Translation Completions: Udfyld huller i menneskelige oversættelser med AI-genereret tekst. Menneskelige oversættelser har altid forrang.

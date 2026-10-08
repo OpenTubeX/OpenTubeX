@@ -51,6 +51,7 @@ test('iOS settings search omits unavailable native services', () => {
     usingElectron: false,
   })
   const labels = [...index.values()].flat().map(entry => entry.label)
+  assert.ok(labels.includes('Automatically switch stream extraction methods'))
   for (const label of ['Swipe to refresh', 'Stream Extraction Method', 'Refresh Subscriptions While App Is Closed', 'Use Proxy', 'Voice-over Translation']) {
     assert.equal(labels.includes(label), false, label)
   }

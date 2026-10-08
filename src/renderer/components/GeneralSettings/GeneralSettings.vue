@@ -68,6 +68,15 @@
         @change="updateOpenDeepLinksInNewWindow"
       />
       <FtToggleSwitch
+        v-if="mode === 'providers' && supportsYtDlp"
+        :label="t('Settings.General Settings.Automatically switch stream extraction methods')"
+        :default-value="store.getters.getPlaybackEngineFallback"
+        setting-key="playbackEngineFallback"
+        :compact="true"
+        :tooltip="t('Tooltips.General Settings.Automatically switch stream extraction methods')"
+        @change="store.dispatch('updatePlaybackEngineFallback', $event)"
+      />
+      <FtToggleSwitch
         v-if="mode === 'providers' && SUPPORTS_LOCAL_API"
         :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
         :default-value="backendFallback"

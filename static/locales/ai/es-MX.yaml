@@ -300,6 +300,7 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Automatically switch stream extraction methods: "Cambiar automáticamente los métodos de extracción de transmisiones"
     Enable Tabs: "Activar pestañas"
     Thumbnail Swipe Gestures:
       Left: Deslizar a la izquierda en las miniaturas
@@ -1831,6 +1832,7 @@ Playlist:
   Playlist Preload Pagination Failed: "No se pudo cargar la lista completa, así que se canceló la precarga."
   Unavailable videos are hidden: Los videos no disponibles están ocultos
 Change Format:
+  yt-dlp Error Template: "yt-dlp no pudo proporcionar las transmisiones: {error}"
   Local Video File: Archivo de video local
   Local Audio File: Archivo de audio local
   Online Video: Video en línea
@@ -2040,6 +2042,7 @@ Description:
   Games: Juegos
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Probar yt-dlp si falla la reproducción integrada, o la reproducción integrada si falla yt-dlp."
     Enable Tabs: "Mantiene abierta la página actual. Las demás pestañas se conservan hasta reiniciar la aplicación; vuelve a activar las pestañas para restaurarlas."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir el consumo de datos."
     Use AI Translation Completions: Completa las partes que faltan en las traducciones humanas con texto generado por IA. Las traducciones humanas siempre tienen prioridad.

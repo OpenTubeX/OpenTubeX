@@ -271,6 +271,7 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Automatically switch stream extraction methods: "自動切換串流擷取方式"
     Enable Tabs: "啟用分頁"
     Thumbnail Swipe Gestures:
       Left: 在縮圖上向左滑動
@@ -1507,6 +1508,7 @@ Playlist:
   Playlist Preload Partial: "已預先載入 {requested} 部影片中的 {preloaded} 部，{failed} 部無法載入。"
   Playlist Preload Pagination Failed: "無法載入完整播放清單，已取消預先載入。"
 Change Format:
+  yt-dlp Error Template: "yt-dlp 無法提供串流：{error}"
   Local Video File: 本機影片檔案
   Local Audio File: 本機音訊檔案
   Online Video: 線上影片
@@ -1698,6 +1700,7 @@ Description:
   Games: 遊戲
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "內建播放失敗時嘗試 yt-dlp，yt-dlp 失敗時嘗試內建播放。"
     Enable Tabs: "保持目前頁面開啟。其他分頁會保留到應用程式重新啟動，再次啟用分頁即可還原。"
     Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。

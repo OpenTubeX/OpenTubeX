@@ -273,6 +273,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Automatically switch stream extraction methods: "Axın çıxarma üsullarını avtomatik dəyiş"
     Enable Tabs: "Vərəqləri aktivləşdir"
     Thumbnail Swipe Gestures:
       Left: Miniatürlərdə sola sürüşdürmə
@@ -1517,6 +1518,7 @@ Playlist:
   Playlist Preload Partial: "{requested} videodan {preloaded} öncədən yükləndi. {failed} video öncədən yüklənə bilmədi."
   Playlist Preload Pagination Failed: Pleylist tam yüklənə bilmədiyi üçün öncədən yükləmə ləğv edildi.
 Change Format:
+  yt-dlp Error Template: "yt-dlp axınları təmin edə bilmədi: {error}"
   Local Video File: Yerli video faylı
   Local Audio File: Yerli səs faylı
   Online Video: Onlayn video
@@ -1709,6 +1711,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Daxili oxutma uğursuz olarsa yt-dlp-ni, yt-dlp uğursuz olarsa daxili oxutmanı sınayın."
     Enable Tabs: "Cari səhifə açıq qalır. Digər vərəqlər tətbiq yenidən başladılana qədər saxlanılır; onları bərpa etmək üçün vərəqləri yenidən aktivləşdirin."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.

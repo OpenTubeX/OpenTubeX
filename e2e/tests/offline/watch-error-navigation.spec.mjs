@@ -161,6 +161,39 @@ function expectNoRenderErrors(errors) {
   expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
 }
 
+test('disabled playback-engine fallback keeps an IP-blocked watch page on built-in playback', async ({ app, page }) => {
+  await mockBlockedVideo({ app, page })
+  await page.route(/^https:\/\/www\.youtube\.com\/(?:watch\?.*)?$/, route => route.fulfill({
+    status: 429,
+    contentType: 'text/html',
+    body: '<html><body>Too many requests</body></html>'
+  }))
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateVideoPlaybackEngine', 'built-in')
+    await store.dispatch('updatePlaybackEngineFallback', false)
+    await store.dispatch('updateBackendFallback', false)
+  })
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__disabledIpBlockExtractions = 0
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle('yt-dlp-get-playback-info', () => {
+      globalThis.__disabledIpBlockExtractions++
+      return { error: 'Unexpected extraction' }
+    })
+  })
+  await goTo(page, 'history')
+  await page.getByText('Blocked test video').click()
+  await expect(page.locator('.errorMessage')).toContainText('blocked')
+  const watch = await watchViewHandle(page)
+  expect(await watch.evaluate(view => ({
+    ipBlocked: view.ipBlockDetectedInCurrentChain,
+    engine: view.activePlaybackEngine,
+    fallback: view.playbackEngineFallbackTarget
+  }))).toEqual({ ipBlocked: true, engine: 'built-in', fallback: null })
+  expect(await app.electronApp.evaluate(() => globalThis.__disabledIpBlockExtractions)).toBe(0)
+})
+
 test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers the title', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

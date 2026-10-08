@@ -271,6 +271,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Automatically switch stream extraction methods: "Aldatu automatikoki korronteak erauzteko metodoak"
     Enable Tabs: "Gaitu fitxak"
     Thumbnail Swipe Gestures:
       Left: Irudi txikietan ezkerrera irristatu
@@ -1523,6 +1524,7 @@ Playlist:
   Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."
   Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
 Change Format:
+  yt-dlp Error Template: "yt-dlp-k ezin izan ditu korronteak eman: {error}"
   Local Video File: Bideo-fitxategi lokala
   Local Audio File: Audio-fitxategi lokala
   Online Video: Lineako bideoa
@@ -1714,6 +1716,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Probatu yt-dlp erreprodukzio integratuak huts egiten badu, edo erreprodukzio integratua yt-dlp-k huts egiten badu."
     Enable Tabs: "Uneko orria irekita mantentzen du. Beste fitxak aplikazioa berrabiarazi arte gordetzen dira; gaitu fitxak berriro berreskuratzeko."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.

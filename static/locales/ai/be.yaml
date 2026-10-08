@@ -288,6 +288,7 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Automatically switch stream extraction methods: "Аўтаматычна пераключаць метады атрымання патоку"
     Enable Tabs: "Уключыць укладкі"
     Thumbnail Swipe Gestures:
       Left: Правесці ўлева па мініяцюрах
@@ -1588,6 +1589,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Не ўдалося загрузіць увесь плэйліст, таму папярэдняя загрузка скасавана."
   Unavailable videos are hidden: Недаступныя відэа схаваныя
 Change Format:
+  yt-dlp Error Template: "yt-dlp не змог атрымаць патокі: {error}"
   Local Video File: Лакальны відэафайл
   Local Audio File: Лакальны аўдыяфайл
   Online Video: Анлайн-відэа
@@ -1784,6 +1786,7 @@ Description:
   Games: Гульні
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Паспрабаваць yt-dlp, калі ўбудаванае прайграванне не працуе, або ўбудаванае прайграванне, калі не працуе yt-dlp."
     Enable Tabs: "Бягучая старонка застаецца адкрытай. Іншыя ўкладкі захоўваюцца да перазапуску праграмы; уключыце ўкладкі зноў, каб аднавіць іх."
     Data Saver Thumbnails: "Выкарыстоўваць мініяцюры ніжэйшай раздзяляльнасці, каб зменшыць расход даных."
     Use AI Translation Completions: Запаўняе прагалы ў перакладах, зробленых людзьмі, тэкстам, створаным ШІ. Пераклады людзей заўсёды маюць перавагу.

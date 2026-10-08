@@ -954,11 +954,11 @@ export default defineComponent({
       return supportsYtDlp ? this.$store.getters.getVideoPlaybackEngine : 'built-in'
     },
     playbackEngineSelection: function () {
+      if (this.playbackEngineFallbackTarget !== null &&
+        (this.ytDlpStreamsPending || this.errorMessage)) {
+        return this.playbackEngineFallbackTarget
+      }
       if (this.ytDlpStreamsPending) {
-        if (this.playbackEngineFallbackTarget !== null) {
-          return this.playbackEngineFallbackTarget
-        }
-
         // A live stream without built-in formats automatically falls back to
         // yt-dlp even when the configured default remains the built-in engine.
         if (
@@ -3028,7 +3028,8 @@ export default defineComponent({
       this.customErrorIcon = type === 'members' ? ['fas', 'money-check-dollar'] : null
       this.skipUnavailablePlaylistVideo = type === 'members' && !this.hasConfiguredRestrictedPlaybackAuthentication
 
-      if (this.hasConfiguredRestrictedPlaybackAuthentication) {
+      if (this.hasConfiguredRestrictedPlaybackAuthentication &&
+        (this.isYtDlpPlaybackRequested() || this.$store.getters.getPlaybackEngineFallback)) {
         this.tryCachedRestrictedPlayback(type).catch(error => {
           console.warn('Could not restore cached authenticated playback', error)
         })
@@ -3228,7 +3229,8 @@ export default defineComponent({
         if (watchPageIpBlocked) {
           this.ipBlockDetectedInCurrentChain = true
 
-          if (process.env.IS_ELECTRON && this.videoPlaybackEngine === 'built-in') {
+          if (process.env.IS_ELECTRON && this.videoPlaybackEngine === 'built-in' &&
+            this.$store.getters.getPlaybackEngineFallback) {
             this.playbackEngineFallbackAttemptedForCurrentVideo = true
             this.playbackEngineFallbackTarget = 'yt-dlp'
             this.showTabToast({
@@ -3783,7 +3785,8 @@ export default defineComponent({
               })
               ?.projection_type ?? null
 
-            if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in') {
+            if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
+              this.$store.getters.getPlaybackEngineFallback) {
               this.playbackEngineFallbackTarget = 'yt-dlp'
             }
           }
@@ -4106,7 +4109,8 @@ export default defineComponent({
               ?.projectionType ?? null
 
             if (!metadataOnly) {
-              if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in') {
+              if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
+                this.$store.getters.getPlaybackEngineFallback) {
                 this.playbackEngineFallbackTarget = 'yt-dlp'
               }
 
@@ -5735,6 +5739,7 @@ export default defineComponent({
     tryPlaybackEngineFallback: async function (error) {
       if (
         !supportsYtDlp ||
+        !this.$store.getters.getPlaybackEngineFallback ||
         this.playbackEngineFallbackAttemptedForCurrentVideo ||
         this.isUpcoming
       ) {
@@ -5895,10 +5900,10 @@ export default defineComponent({
         this.videoPlaybackEngine === 'built-in' &&
         liveSourceMissing
 
-      // A manual Built-in selection is authoritative. If its metadata reload
-      // still has no live source, report that result instead of silently
-      // switching back to yt-dlp or leaving an unexplained empty player area.
-      if (liveSourceMissing && this.playbackEngineFallbackTarget === 'built-in') {
+      // Report missing built-in live formats when automatic fallback is
+      // disabled or Built-in was selected manually.
+      if (liveSourceMissing && (this.playbackEngineFallbackTarget === 'built-in' ||
+        (this.videoPlaybackEngine === 'built-in' && !this.$store.getters.getPlaybackEngineFallback))) {
         this.ytDlpStreamsPending = false
         this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
         return
@@ -5917,9 +5922,10 @@ export default defineComponent({
       }
 
       this.ytDlpStreamsPending = true
+      let sourceApplied = false
 
       try {
-        const sourceApplied = await this.extractYtDlpPlaybackSource(
+        sourceApplied = await this.extractYtDlpPlaybackSource(
           loadGeneration,
           videoId,
           playbackEngineSwitchGeneration
@@ -5971,6 +5977,15 @@ export default defineComponent({
           this.isCurrentVideoLoad(loadGeneration, videoId) &&
           playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
         ) {
+          if (!sourceApplied && !this.$store.getters.getPlaybackEngineFallback &&
+            this.isYtDlpPlaybackRequested()) {
+            this.playbackEngineFallbackTarget = 'yt-dlp'
+            if (!this.errorMessage) {
+              this.errorMessage = this.t('Change Format.yt-dlp Error Template', {
+                error: this.t('Change Format.Not Available For This Video')
+              })
+            }
+          }
           this.ytDlpStreamsPending = false
         }
       }
@@ -6014,10 +6029,16 @@ export default defineComponent({
         ) { return false }
 
         console.error(`yt-dlp could not provide streams for ${videoId}`, error)
+        const message = useAuthentication
+          ? this.t('Video.Restricted Playback Authentication Failed Template', { error: error.message })
+          : this.$store.getters.getPlaybackEngineFallback
+            ? this.t('Change Format.yt-dlp Fallback Template', { error: error.message })
+            : this.t('Change Format.yt-dlp Error Template', { error: error.message })
+        if (!this.$store.getters.getPlaybackEngineFallback && !cachedOnly) {
+          this.errorMessage = message
+        }
         this.showTabToast({
-          message: useAuthentication
-            ? this.t('Video.Restricted Playback Authentication Failed Template', { error: error.message })
-            : this.t('Change Format.yt-dlp Fallback Template', { error: error.message }),
+          message,
           time: 7000,
           icon: ['fas', 'circle-exclamation'],
         })
