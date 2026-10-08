@@ -484,7 +484,7 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
       with:
-        packages: platform-tools
+        packages: platform-tools ndk;28.2.13676358
 
     - name: Install Android runtime packer
       run: sudo apt-get update && sudo apt-get install --yes 7zip

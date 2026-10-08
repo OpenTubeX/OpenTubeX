@@ -89,11 +89,16 @@ test('publishes all architecture APKs alongside the existing desktop artifacts',
 })
 
 for (const file of ['build', 'release']) {
-  test(`${file} workflow requests only available Android SDK packages`, async () => {
+  test(`${file} workflow installs the pinned Cast sender NDK before building APKs`, async () => {
+    const gradle = await readFile('android/app/build.gradle', 'utf8')
+    const ndkVersion = gradle.match(/ndkVersion '([^']+)'/)[1]
     const workflow = load(await readFile(`.github/workflows/${file}.yml`, 'utf8'))
-    const steps = Object.values(workflow.jobs).flatMap(job => job.steps ?? [])
+    const steps = Object.values(workflow.jobs).find(job =>
+      job.steps?.some(step => step.name === 'Build signed Android APKs')
+    ).steps
     const setup = steps.find(step => step.name === 'Set up Android SDK')
-    assert.equal(setup.with?.packages, 'platform-tools')
+    assert.deepEqual(setup.with.packages.split(/\s+/), ['platform-tools', `ndk;${ndkVersion}`])
+    assert.ok(steps.indexOf(setup) < steps.findIndex(step => step.name === 'Build signed Android APKs'))
   })
 
   test(`${file} workflow omits Android build summaries and shrinking report uploads`, async () => {
