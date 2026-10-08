@@ -16,6 +16,7 @@
         </h2>
         <div
           v-if="historyCacheSorted.length > 0 || historyRepairState.running"
+          v-overlay-scrollbars
           class="headingActions"
         >
           <FtButton

@@ -147,6 +147,16 @@
   }
 }
 
+@container route (width <= 220px) {
+  .headingActions {
+    overflow-inline: auto;
+  }
+
+  .headingActions > .historyActionButton {
+    flex: 0 0 auto;
+  }
+}
+
 .cleanupPromptContent {
   box-sizing: border-box;
   inline-size: min(420px, 100%);
