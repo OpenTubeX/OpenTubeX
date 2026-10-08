@@ -89,7 +89,7 @@ test('keeps valid quick settings in the selected order', () => {
 
 test('removes unknown setting identifiers and duplicates', () => {
   assert.deepEqual(
-    normalizeQuickSettings(['useProxy', 'removedSetting', 'useProxy']),
+    normalizeQuickSettings(['useProxy', 'musicMode', 'removedSetting', 'useProxy']),
     ['useProxy']
   )
 })

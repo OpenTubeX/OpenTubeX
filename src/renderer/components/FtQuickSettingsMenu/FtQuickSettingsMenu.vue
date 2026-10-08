@@ -215,16 +215,8 @@
                     :class="{ pairedQuickSetting: isPairedQuickSetting(section.settings, setting.id) }"
                     :data-setting-id="setting.id"
                   >
-                    <FtToggleSwitch
-                      v-if="setting.id === 'musicMode'"
-                      :label="t('Video.Player.Music Mode')"
-                      :default-value="musicMode"
-                      :tooltip="t('Video.Player.Music Mode Description')"
-                      compact
-                      @change="updateMusicMode"
-                    />
                     <FtSelect
-                      v-else-if="setting.id === 'baseTheme'"
+                      v-if="setting.id === 'baseTheme'"
                       class="quickSelect"
                       :placeholder="t('Settings.Theme Settings.Base Theme.Base Theme')"
                       :value="baseTheme"
@@ -522,14 +514,9 @@ const profileList = computed(() => store.getters.getProfileList)
 const activeProfile = computed(() => store.getters.getActiveProfile)
 const musicModeTabId = computed(() => store.getters.getActiveTabId ?? 'web')
 const musicMode = computed(() => store.getters.getTabMusicMode(musicModeTabId.value))
-const showMusicModeToggle = computed(() => store.getters.getShowMusicModeToggle)
 const triggerLabel = computed(() => musicMode.value
   ? `${t('Settings.Quick Settings.Quick Settings')} — ${t('Video.Player.Music Mode')}`
   : t('Settings.Quick Settings.Quick Settings'))
-
-function updateMusicMode(value) {
-  store.commit('setTabMusicMode', { tabId: musicModeTabId.value, value })
-}
 
 const activeProfileInitial = computed(() => activeProfile.value?.name
   ? getFirstCharacter(translateProfileName(activeProfile.value), locale.value)
@@ -615,7 +602,6 @@ const orderedQuickSettingSections = computed(() => {
     .map(settingId => catalogById.get(settingId))
     .filter(setting => setting != null && (
       (setting.id !== 'mainColor' || mainColorAvailable.value) &&
-      (setting.id !== 'musicMode' || showMusicModeToggle.value) &&
       (!['systemLightTheme', 'systemDarkTheme'].includes(setting.id) || baseTheme.value === 'system') &&
       (setting.id !== 'region' || regionValues.value.length > 0)
     ))

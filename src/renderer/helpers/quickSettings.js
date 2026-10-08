@@ -6,7 +6,6 @@ const CORE_QUICK_SETTINGS = [
   ['uiScale', 'appearance', 'Settings.Theme Settings.UI Scale', { control: 'slider', electronOnly: true, capacitorSupported: true, icon: ['fas', 'sliders-h'] }],
   ['thumbnailSize', 'appearance', 'Settings.Theme Settings.Thumbnail Size', { control: 'slider', icon: ['fas', 'photo-film'] }],
   ['playlistThumbnailSize', 'appearance', 'Settings.Theme Settings.Playlist Thumbnail Size', { control: 'slider', icon: ['fas', 'photo-film'] }],
-  ['musicMode', 'playback', 'Video.Player.Music Mode', { control: 'toggle', icon: ['fas', 'headphones'] }],
   ['defaultQuality', 'playback', 'Settings.Player Settings.Default Quality.Default Quality', { control: 'select', icon: ['fas', 'photo-film'] }],
   ['defaultPlayback', 'playback', 'Settings.Player Settings.Default Playback Rate', { control: 'slider', icon: ['fas', 'gauge-high'] }],
   ['playNextVideo', 'playback', 'Settings.Player Settings.Play Next Video', { control: 'toggle', icon: ['fas', 'step-forward'] }],
