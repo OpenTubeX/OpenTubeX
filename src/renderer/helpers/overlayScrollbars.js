@@ -36,6 +36,9 @@ const suspendScrollbarPosition = new WeakMap()
 
 function scrollbarOptions(initialization) {
   const options = {
+    // Delegate image loads instead of installing the library's per-image
+    // listeners, which retain other images from the same observation batch.
+    update: { elementEvents: [] },
     scrollbars: {
       // Our move-to-show handler changes classes only when visibility changes.
       // The library's 'move' mode rewrites them on every scroll frame.
@@ -52,11 +55,11 @@ function scrollbarOptions(initialization) {
     // reading all flow-related computed styles while long feeds are changing;
     // only direction can change at runtime. Tab-bar mutations stay inside its
     // clipped viewport and cannot change the page's scroll range.
-    options.update = {
+    Object.assign(options.update, {
       debounce: { resize: [0, 33] },
       ignoreMutation: ignorePageScrollbarMutation,
       flowDirectionStyles: () => ({ direction: document.documentElement.dir })
-    }
+    })
   }
 
   return options
@@ -82,6 +85,7 @@ function create(initialization) {
   instances.set(instance, initialization)
   updateAutoHideHandler(instance)
   updateScrollSpeedHandler(instance)
+  observeImageLoads(instance)
   instance.on('destroyed', () => {
     instances.delete(instance)
     removeScrollSpeedHandler(instance)
@@ -98,6 +102,25 @@ function create(initialization) {
   }
 
   return instance
+}
+
+/** Remeasure loaded images without keeping references to removed descendants. */
+function observeImageLoads(instance) {
+  const { target } = instance.elements()
+  let frame = null
+  const onLoad = event => {
+    if (!(event.target instanceof HTMLImageElement) || frame != null) return
+    frame = requestAnimationFrame(() => {
+      frame = null
+      instance.update(true)
+    })
+  }
+  // Image load events do not bubble, so observe them during capture.
+  target.addEventListener('load', onLoad, true)
+  instance.on('destroyed', () => {
+    target.removeEventListener('load', onLoad, true)
+    if (frame != null) cancelAnimationFrame(frame)
+  })
 }
 
 /** Change visibility policy without rebuilding observers, tracks or offsets. */

@@ -2235,6 +2235,8 @@ export default defineComponent({
       this.resetShortsSwipe()
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
+      clearTimeout(this.autoplayInterruptionTimeout)
+      this.autoplayInterruptionTimeout = null
       this.abortAutoplayCountdown(true)
     },
 
