@@ -296,7 +296,15 @@ export default defineComponent({
       useCustomShortsPlayerForCurrentVideo: false,
       videoAspectRatio: null,
       shortsLinkedVideo: null,
-      shortsTouchStartY: null,
+      shortsSwipePointer: null,
+      shortsSwipePresentationTarget: null,
+      shortsSwipeOffset: 0,
+      shortsSwipeHeight: 0,
+      shortsSwipeDirection: 0,
+      shortsSwipePreview: '',
+      shortsSwipeSettling: false,
+      shortsSwipeAnimations: markRaw([]),
+      shortsSwipeSuppressClick: false,
       shortsNavigationLockedUntil: 0,
       shortsLastWindowScrollY: window.scrollY,
       shortsScrollResetPending: false,
@@ -1286,6 +1294,7 @@ export default defineComponent({
     },
     videoId() {
       this.showDownloadPrompt = false
+      this.resetShortsSwipe()
     },
     '$store.getters.getThumbnailDataSaver'() {
       const short = this.currentSubscriptionShort
@@ -1780,6 +1789,7 @@ export default defineComponent({
       this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
     },
     updateShortsViewportHeight() {
+      this.resetShortsSwipe()
       this.shortsViewportHeight = window.innerHeight
       requestAnimationFrame(() => this.clampShortsErrorScroll())
       if (this.shortsAuxPanelOpen) {
@@ -2222,6 +2232,7 @@ export default defineComponent({
     },
 
     deactivateWatchRuntime() {
+      this.resetShortsSwipe()
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
       this.abortAutoplayCountdown(true)
@@ -2748,6 +2759,7 @@ export default defineComponent({
     navigateSubscriptionShort: function (offset) {
       if (
         !this.subscriptionShortsFeedActive ||
+        this.shortsSwipeSettling ||
         Date.now() < this.shortsNavigationLockedUntil
       ) {
         return
@@ -2865,33 +2877,137 @@ export default defineComponent({
     },
 
     handleShortsPointerDown: function (event) {
+      this.shortsSwipeSuppressClick = false
       if (
         this.subscriptionShortsFeedActive &&
+        !this.isLoading &&
+        !this.shortsSwipeSettling &&
+        Date.now() >= this.shortsNavigationLockedUntil &&
+        !this.shortsNavigationPanelOpen &&
         !this.isShortsPanelEvent(event) &&
-        event.pointerType === 'touch'
+        !event.target?.closest?.('button, a, input, [role="slider"]') &&
+        event.pointerType === 'touch' &&
+        event.isPrimary
       ) {
-        this.shortsTouchStartY = event.clientY
-      } else {
-        this.shortsTouchStartY = null
+        const presentationTarget = event.target?.closest?.('.ftVideoPlayer:is(.fullWindow, :fullscreen)')
+        this.shortsSwipePresentationTarget = presentationTarget ? markRaw(presentationTarget) : null
+        this.shortsSwipeHeight = (presentationTarget ?? this.$refs.shortsSwipeViewport).getBoundingClientRect().height
+        this.shortsSwipePointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragging: false }
       }
     },
 
+    handleShortsPointerMove: function (event) {
+      const pointer = this.shortsSwipePointer
+      if (!pointer || pointer.id !== event.pointerId) return
+
+      const distance = event.clientY - pointer.y
+      if (!pointer.dragging) {
+        if (Math.max(Math.abs(distance), Math.abs(event.clientX - pointer.x)) < 8) return
+        if (Math.abs(event.clientX - pointer.x) > Math.abs(distance)) {
+          this.resetShortsSwipe()
+          return
+        }
+        pointer.dragging = true
+        this.shortsSwipePresentationTarget?.classList.add('shortsSwipePresentation')
+        event.currentTarget.setPointerCapture(event.pointerId)
+      }
+
+      event.preventDefault()
+      this.shortsSwipeSuppressClick = true
+      const direction = distance < 0 ? 1 : -1
+      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + direction]
+      if (direction !== this.shortsSwipeDirection) {
+        this.shortsSwipeDirection = direction
+        this.shortsSwipePreview = target
+          ? getShortThumbnailUrl(
+            target,
+            this.backendPreference,
+            this.currentInvidiousInstanceUrl,
+            this.thumbnailPreference,
+            this.$store.getters.getThumbnailDataSaver
+          ) ?? ''
+          : ''
+      }
+      this.shortsSwipeOffset = target
+        ? Math.max(-this.shortsSwipeHeight, Math.min(this.shortsSwipeHeight, distance))
+        : distance / (1 + Math.abs(distance) / 60)
+    },
+
     handleShortsPointerUp: function (event) {
-      if (
-        this.shortsTouchStartY === null ||
-        this.isShortsPanelEvent(event) ||
-        event.pointerType !== 'touch'
-      ) {
-        this.shortsTouchStartY = null
+      const pointer = this.shortsSwipePointer
+      if (!pointer || pointer.id !== event.pointerId) return
+      if (!pointer.dragging) {
+        this.resetShortsSwipe()
         return
       }
+      this.handleShortsPointerMove(event)
+      this.shortsSwipePointer = null
+      event.preventDefault()
+      event.stopPropagation()
+      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + this.shortsSwipeDirection]
+      this.settleShortsSwipe(Boolean(target) && Math.abs(event.clientY - pointer.y) >= 50)
+    },
 
-      const distance = this.shortsTouchStartY - event.clientY
-      this.shortsTouchStartY = null
+    handleShortsPointerCancel: function (event) {
+      // Claiming a touch releases its implicit capture on the player surface.
+      if (event.type === 'lostpointercapture' && event.target !== event.currentTarget) return
+      if (this.shortsSwipePointer?.id !== event.pointerId) return
+      this.shortsSwipePointer = null
+      this.settleShortsSwipe(false)
+    },
 
-      if (Math.abs(distance) >= 50) {
-        this.navigateSubscriptionShort(distance > 0 ? 1 : -1)
+    handleShortsClick: function (event) {
+      if (this.shortsSwipeSuppressClick && event.detail > 0) {
+        event.preventDefault()
+        event.stopPropagation()
+        this.shortsSwipeSuppressClick = false
       }
+    },
+
+    async settleShortsSwipe(navigate) {
+      const viewport = this.shortsSwipePresentationTarget ?? this.$refs.shortsSwipeViewport
+      const direction = this.shortsSwipeDirection
+      const from = this.shortsSwipeOffset
+      const to = navigate ? -direction * this.shortsSwipeHeight : 0
+      const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      this.shortsSwipeSettling = true
+      this.shortsSwipeOffset = to
+      const surfaces = this.shortsSwipePresentationTarget
+        ? [...viewport.children]
+        : [...viewport.querySelectorAll(':scope > .videoPlayer, :scope > .shortsSwipePreview')]
+      const animations = surfaces.map(element => {
+        const previewOffset = element.classList.contains('shortsSwipePreview') ? direction * this.shortsSwipeHeight : 0
+        // Keep the expanded container stationary, including the browser's fullscreen top layer.
+        const translateContents = this.shortsSwipePresentationTarget && !previewOffset
+        return applyAnimationSpeed(element.animate([
+          translateContents ? { translate: `0 ${from}px` } : { transform: `translateY(${from + previewOffset}px)` },
+          translateContents ? { translate: `0 ${to}px` } : { transform: `translateY(${to + previewOffset}px)` }
+        ], { duration: reducedMotion ? 0 : 220, easing: 'cubic-bezier(0.2, 0, 0, 1)' }))
+      })
+      this.shortsSwipeAnimations = markRaw(animations)
+      try {
+        await Promise.all(animations.map(animation => animation.finished))
+      } catch {
+        return // Resize, tab changes, and navigation cancel the old gesture.
+      }
+      this.resetShortsSwipe()
+      if (navigate) {
+        this.navigateSubscriptionShort(direction)
+        this.shortsTransitionDirection = 0
+      }
+    },
+
+    resetShortsSwipe() {
+      this.shortsSwipeAnimations.forEach(animation => animation.cancel())
+      this.shortsSwipeAnimations = markRaw([])
+      this.shortsSwipePresentationTarget?.classList.remove('shortsSwipePresentation')
+      this.shortsSwipePresentationTarget = null
+      this.shortsSwipePointer = null
+      this.shortsSwipeOffset = 0
+      this.shortsSwipeDirection = 0
+      this.shortsSwipePreview = ''
+      this.shortsSwipeSettling = false
     },
 
     handleShortsNavigationKeydown: function (event) {
