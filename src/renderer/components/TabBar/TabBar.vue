@@ -1023,7 +1023,11 @@ async function closeTab(tabId) {
  */
 function handleMiddleClick(event, tabId) {
   if (event.button === 1) {
-    closeTab(tabId)
+    if (event.ctrlKey) {
+      window.ftElectron.tabs.runOrganizerAction('unload', [tabId])
+    } else {
+      closeTab(tabId)
+    }
   }
 }
 
