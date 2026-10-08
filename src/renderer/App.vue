@@ -541,6 +541,7 @@ import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
+import { initializeShimmerVisibility } from './helpers/shimmerVisibility.js'
 import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
 import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
 import { playbackScreenWake } from './helpers/playbackScreenWake'
@@ -1575,8 +1576,10 @@ async function completeTutorial() {
 
 let removeInternetConnectivitySettingsListener = null
 let removeIosContextMenu = null
+let removeShimmerVisibility = null
 
 onMounted(async () => {
+  removeShimmerVisibility = initializeShimmerVisibility()
   removeGamepadNavigation = initializeGamepadNavigation({
     onBack: handleGamepadBack,
     onNavigate: () => store.dispatch('showOutlines'),
@@ -1847,6 +1850,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   cancelPageSwipe()
+  removeShimmerVisibility?.()
   removeInternetConnectivitySettingsListener?.()
   if (mobileLinkActionsLocked) {
     store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
