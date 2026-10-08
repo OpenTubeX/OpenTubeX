@@ -447,7 +447,6 @@
 
 .select.outlined .select-text:focus ~ .selectOutline {
   border-color: var(--primary-color);
-  border-width: 2px;
 }
 
 .select-text:disabled ~ .selectOutline :is(.select-icon, .select-label-text) {
