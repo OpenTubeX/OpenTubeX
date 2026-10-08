@@ -323,6 +323,10 @@
     "ri": "heart-line",
     "material": "favorite-outline"
   },
+  "heart-filled": {
+    "ri": "heart-fill",
+    "material": "favorite"
+  },
   "history": {
     "ri": "history-line",
     "material": "history-rounded"
