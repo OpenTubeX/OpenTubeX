@@ -47,7 +47,7 @@ import {
 } from '../../helpers/sync-server-scheduling'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
-import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
+import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
 import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
@@ -611,6 +611,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           let data = client.document[collection]
           if (revision > 0 &&
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
+            if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             continue
           }
           startProgress('upload')
@@ -634,6 +635,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
             try {
               const saved = await networkClient.putEncryptedSyncCollection(collection, revision, payload, activityPayload)
               collectionCache.put(collection, saved.revision, data)
+              assertSyncStillActive()
+              if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
               break
             } catch (error) {
               if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error

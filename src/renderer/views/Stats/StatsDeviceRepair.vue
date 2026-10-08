@@ -68,7 +68,8 @@
           :label="t('Cancel')"
           :icon="['fas', 'xmark']"
           variant="tonal"
-          @click="emit('close')"
+          :disabled="busy"
+          @click="!busy && emit('close')"
         />
         <FtButton
           :label="busy ? t('Settings.Sync Settings.Syncing statistics') : t('Stats.Replace old device')"
@@ -102,12 +103,16 @@ const overlap = ref('')
 const emptyPreview = '—'
 // Freeze the histories shown in the preview. The save rejects changed data.
 const source = JSON.parse(JSON.stringify(props.source))
-const currentDeviceId = store.getters.getSyncServerDeviceId
-const currentDeviceName = store.getters.getSyncServerDeviceName || t('Settings.Sync Settings.This Device')
-const localDays = { ...store.getters.getWatchSecondsByDate }
-const target = store.getters.getSyncedWatchStats.find(device => containsWatchStatsDevice(device, currentDeviceId))
-const replacedDevices = JSON.parse(JSON.stringify(target?.replacedDevices ?? []))
-const localReset = JSON.parse(JSON.stringify(store.getters.getSyncServerWatchStatsReset))
+const preview = computed(() => ({
+  currentDeviceId: store.getters.getSyncServerDeviceId,
+  currentDeviceName: store.getters.getSyncServerDeviceName || t('Settings.Sync Settings.This Device'),
+  localDays: store.getters.getWatchSecondsByDate,
+  devices: store.getters.getSyncedWatchStats,
+  localReset: store.getters.getSyncServerWatchStatsReset,
+}))
+const { currentDeviceId, currentDeviceName, localDays, devices, localReset } = JSON.parse(JSON.stringify(preview.value))
+const target = devices.find(device => containsWatchStatsDevice(device, currentDeviceId))
+const replacedDevices = target?.replacedDevices ?? []
 const currentDays = target
   ? watchStatsDeviceDays(target, currentDeviceId, localDays, localReset)
   : localDays

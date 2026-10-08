@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { createWatchStatsHelpers as createHelpers } from '../helpers/sync-watch-stats.mjs'
 
 test('statistics stay separate by device and combined totals count local time once', () => {
@@ -74,7 +75,7 @@ test('replacement preserves original daily totals and offers an explicit overlap
     { deviceId: 'old', days: { '2026-10-01': 60, '2026-10-02': 100 } },
     { deviceId: 'other', days: { '2026-10-02': 20 } },
   ]
-  const reset = { at: 101, baselines: { new: {}, old: devices[1].days } }
+  const reset = { at: 101, generation: 1, origin: 'new', baselines: { new: {}, old: devices[1].days } }
   for (const [overlap, expected] of [['max', 120], ['sum', 220]]) {
     const repaired = helpers.replaceWatchStatsDevice(devices, 'new', 'old', overlap, 100)
     assert.equal(repaired.length, 2)
@@ -130,7 +131,7 @@ test('resetting a replaced identity clears the entire combined history before an
   const remote = [{ deviceId: 'new', days: { '2026-10-01': 100 }, replacedDevices: [
     { deviceId: 'old', days: { '2026-10-01': 50 }, overlap: 'sum', replacedAt: 100 },
   ] }]
-  const reset = { at: 200, baselines: { new: { '2026-10-01': 100 }, old: {} } }
+  const reset = { at: 200, generation: 1, origin: 'old', baselines: { new: { '2026-10-01': 100 }, old: {} } }
   assert.deepEqual(watchSecondsForDevice({}, remote, 'old', 'local', reset), {})
   const synced = mergeWatchStats(remote, [], 'old', 'Pixel', 'android', reset)
   assert.deepEqual(watchSecondsForDevice({}, synced, 'old', 'local', reset), {})
@@ -153,7 +154,7 @@ test('resets preserve prior subtree resets and explicitly imported later histori
     { deviceId: 'other', days: { [day]: 80 } },
   ]
   const reset = createWatchStatsReset(original, 'old', 200)
-  assert.deepEqual(reset, { at: 200, baselines: { old: {}, root: { [day]: 100 } } })
+  assert.deepEqual(reset, { id: reset.id, at: 200, epochs: { root: null, old: null }, generation: 1, origin: 'old', baselines: { old: {}, root: { [day]: 100 } } })
   const cleared = mergeWatchStats(original, [], 'old', 'Pixel', 'android', reset)
   const imported = replaceWatchStatsDevice(cleared, 'old', 'other', 'sum', 300)
   assert.deepEqual(watchSecondsForDevice({}, imported, 'old', 'local', reset), { [day]: 80 })
@@ -170,7 +171,81 @@ test('resets preserve prior subtree resets and explicitly imported later histori
 
 test('reset metadata copied from reactive settings can be cloned for encrypted sync', () => {
   const { mergeWatchStats } = createHelpers()
-  const reset = new Proxy({ at: 200, baselines: { pixel: {} } }, {})
+  const reset = new Proxy({ at: 200, generation: 1, origin: 'pixel', baselines: { pixel: {} } }, {})
   const merged = mergeWatchStats([], [], 'pixel', 'Pixel', 'android', reset)
-  assert.deepEqual(structuredClone(merged)[0].reset, { at: 200, baselines: { pixel: {} } })
+  assert.deepEqual(structuredClone(merged)[0].reset, { at: 200, generation: 1, origin: 'pixel', baselines: { pixel: {} } })
+})
+
+test('reset while disconnected completes missing repaired baselines on the next sync', () => {
+  const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
+  const remote = [{ deviceId: 'pixel', days: { '2026-10-01': 100 }, replacedDevices: [
+    { deviceId: 'old', days: { '2026-10-02': 50 }, overlap: 'sum', replacedAt: 100 },
+  ] }]
+  const pending = createWatchStatsReset([], 'pixel', 200)
+  const merged = mergeWatchStats(remote, [{ date: '2026-10-03', seconds: 10 }], 'pixel', 'Pixel', 'android', pending)
+  assert.deepEqual(watchSecondsForDevice({}, merged, 'observer', 'pixel'), { '2026-10-03': 10 })
+  assert.deepEqual(merged[0].replacedDevices[0].days, remote[0].replacedDevices[0].days)
+})
+
+test('reset scope follows recorded membership despite a clock behind the replacement', () => {
+  const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
+  const remote = [{ deviceId: 'new', days: { '2026-10-01': 100 }, replacedDevices: [
+    { deviceId: 'old', days: { '2026-10-01': 50 }, overlap: 'sum', replacedAt: 1000 },
+  ] }]
+  const reset = createWatchStatsReset(remote, 'old', 50)
+  const merged = mergeWatchStats(remote, [], 'old', 'Pixel', 'android', reset)
+  assert.deepEqual(watchSecondsForDevice({}, merged, 'observer', 'new'), {})
+})
+
+test('staging an offline reset keeps it pending until the encrypted upload is accepted', async () => {
+  const day = '2026-10-01'
+  const remote = [{ deviceId: 'pixel', days: {}, replacedDevices: [
+    { deviceId: 'old', days: { [day]: 50 }, overlap: 'sum', replacedAt: 100 },
+  ] }]
+  const { createWatchStatsReset, syncWatchStats, persistUploadedWatchStatsReset } = createHelpers({ find: async () => [] }, async () => ({ platform: 'android' }))
+  const pending = createWatchStatsReset([], 'pixel', 200)
+  const settings = { syncServerDeviceId: 'pixel', syncServerDeviceName: 'Pixel', syncServerWatchStatsReset: pending }
+  let saves = 0
+  const store = { state: { settings }, commit: () => {}, dispatch: async (name, value) => {
+    assert.equal(name, 'updateSyncServerWatchStatsReset')
+    settings.syncServerWatchStatsReset = value
+    saves++
+  } }
+  const client = new EncryptedSyncAdapter({ watchStats: remote })
+  await syncWatchStats(client, store)
+  assert.equal(settings.syncServerWatchStatsReset, pending)
+  assert.equal(saves, 0)
+  await persistUploadedWatchStatsReset(client.document.watchStats, store)
+  assert.equal(saves, 1)
+  assert.equal(settings.syncServerWatchStatsReset.pending, undefined)
+  await syncWatchStats(client, store)
+  await persistUploadedWatchStatsReset(client.document.watchStats, store)
+  assert.equal(saves, 1)
+})
+
+test('concurrent resets keep both identities’ new watch time', () => {
+  const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
+  const day = '2026-10-01'
+  const remote = [{ deviceId: 'a', days: { [day]: 100 }, replacedDevices: [
+    { deviceId: 'b', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
+  ] }]
+  const resetA = createWatchStatsReset(remote, 'a', 200)
+  const resetB = createWatchStatsReset(remote, 'b', 50)
+  const a = mergeWatchStats(remote, [{ date: day, seconds: 10 }], 'a', 'Pixel', 'android', resetA)
+  const both = mergeWatchStats(a, [{ date: day, seconds: 10 }], 'b', 'Pixel', 'android', resetB)
+  assert.deepEqual(watchSecondsForDevice({}, both, 'observer', 'a'), { [day]: 20 })
+})
+
+test('retrying an accepted pending reset preserves watching since its upload', () => {
+  const { createWatchStatsReset, mergeWatchStats, watchSecondsForDevice } = createHelpers()
+  const day = '2026-10-01'
+  const remote = [{ deviceId: 'pixel', days: {}, replacedDevices: [
+    { deviceId: 'old', days: { [day]: 100 }, overlap: 'sum', replacedAt: 100 },
+  ] }]
+  const pending = createWatchStatsReset([], 'pixel', 200)
+  const accepted = mergeWatchStats(remote, [], 'pixel', 'Pixel', 'android', pending)
+  const watched = mergeWatchStats(accepted, [{ date: day, seconds: 110 }], 'old', 'Pixel', 'android')
+  const retried = mergeWatchStats(watched, [], 'pixel', 'Pixel', 'android', pending)
+  assert.deepEqual(retried[0].reset, accepted[0].reset)
+  assert.deepEqual(watchSecondsForDevice({}, retried, 'observer', 'pixel'), { [day]: 10 })
 })

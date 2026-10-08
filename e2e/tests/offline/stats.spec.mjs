@@ -345,6 +345,10 @@ test.describe('synced watch stats', () => {
   })
 
   test('repairs duplicate device stats with a preview and preserves the repair after sync', async ({ app, page }, testInfo) => {
+    let failUpload = false
+    let holdUpload = false
+    let uploadStarted
+    let releaseUpload
     let revision = 1
     let devices = [{ deviceId: phone, deviceName: 'Pixel (old)', platform: 'android', days: { [today]: 1800, [yesterday]: 1800 } }]
     let payload = await encryptSyncDocument(devices, key, salt)
@@ -356,6 +360,11 @@ test.describe('synced watch stats', () => {
       if (pathname === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
       if (pathname === '/v1/encrypted_sync/watchStats') {
         if (route.request().method() === 'PUT') {
+          if (failUpload) return route.fulfill({ status: 503, json: { error: 'Upload failed' } })
+          if (holdUpload) {
+            uploadStarted()
+            await new Promise(resolve => { releaseUpload = resolve })
+          }
           const request = route.request().postDataJSON()
           expect(request.revision).toBe(revision)
           payload = request.payload
@@ -402,7 +411,17 @@ test.describe('synced watch stats', () => {
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
     await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    holdUpload = true
+    const uploading = new Promise(resolve => { uploadStarted = resolve })
     await dialog.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    await uploading
+    await expect(dialog.getByRole('button', { name: 'Cancel', exact: true })).toBeDisabled()
+    await expect(dialog).toHaveAttribute('inert', '')
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).evaluate(button => button.click())
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeVisible()
+    holdUpload = false
+    releaseUpload()
     await expect(dialog).toBeHidden()
     await expect(picker.getByRole('button')).toHaveCount(2)
     await expect(total).toContainText('1 hr 30 min')
@@ -418,7 +437,42 @@ test.describe('synced watch stats', () => {
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     await expect(total).toContainText('0 min')
     expect(devices).toHaveLength(1)
-    expect(devices[0].reset.at).toBeGreaterThan(devices[0].replacedDevices[0].replacedAt)
+    expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
+    // Disconnect clears the remote cache, so the offline reset must be completed
+    // from the encrypted repaired tree at the next connection.
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('recordWatchTime', { date: '2026-10-08', seconds: 120 })
+      await store.dispatch('disconnectSyncServer')
+      await store.dispatch('clearWatchStats')
+      await store.dispatch('recordWatchTime', { date: '2026-10-08', seconds: 60 })
+    })
+    await expect(total).toContainText('1 min')
+    failUpload = true
+    await page.evaluate(async ({ key, salt, laptop }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('completeSyncServerPairing', {
+        serverUrl: 'https://sync.example',
+        username: 'test',
+        token: 'test-token',
+        privacyKey: key,
+        privacySalt: salt,
+        deviceId: laptop,
+        deviceName: 'Pixel',
+      })
+      try { await store.dispatch('syncWithSyncServer') } catch {}
+    }, { key, salt, laptop })
+    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getSyncServerWatchStatsReset.pending)).toBe(true)
+    failUpload = false
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getSyncServerWatchStatsReset.pending)).toBeUndefined()
+    await expect(total).toContainText('1 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].reset.baselines[phone]).toEqual({ [today]: 1800, [yesterday]: 1800 })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await expect(total).toContainText('1 min')
   })
 
   test('switches between devices and keeps another device after a local reset', async ({ app, page }) => {
@@ -560,7 +614,7 @@ test.describe('synced watch stats', () => {
     await syncAfterReset.getByRole('button', { name: 'Sync now', exact: true }).click()
     await expect.poll(async () => decryptSyncDocument(payload, key)).toEqual([
       { deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } },
-      { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {}, reset: { at: expect.any(Number), baselines: { [laptop]: {} } } },
+      { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {}, reset: { id: expect.any(String), at: expect.any(Number), epochs: { [laptop]: null }, generation: 1, origin: laptop, baselines: { [laptop]: {} } } },
     ])
     await page.context().setOffline(true)
     await page.reload()

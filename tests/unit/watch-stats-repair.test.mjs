@@ -26,7 +26,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
   const currentDays = helpers.watchStatsDeviceDays(remote[1], 'pixel', localDays)
   const replacedDevices = structuredClone(remote[1].replacedDevices ?? [])
   if (rootChanged) remote[1].days['2026-10-03'] = 1000
-  if (resetChanged) remote[1].reset = { at: 200, baselines: { root: { '2026-10-03': 100 }, pixel: {} } }
+  if (resetChanged) remote[1].reset = { at: 200, generation: 1, origin: 'root', baselines: { root: { '2026-10-03': 100 }, pixel: {} } }
   let visible = remote
   let revision = 1
   let puts = 0
