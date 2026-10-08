@@ -41,6 +41,66 @@ for (const uiScale of [100, 95]) {
       }
     })
 
+    test('keeps draft seekbar ranges and points visible', async ({ app, page }, testInfo) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route('**/api/skipSegments/**', route => route.fulfill({
+        body: JSON.stringify([]),
+        contentType: 'application/json'
+      }))
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => {
+        element.pause()
+        element.currentTime = 7
+      })
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateBaseTheme', 'system')
+        await store.dispatch('updateSponsorBlockDraftSegmentsByVideoId', {
+          jNQXAC9IVRw: [
+            { id: 'range', startTime: 4, endTime: 10, category: 'sponsor', actionType: 'skip' },
+            { id: 'point', startTime: 14, endTime: 14, category: 'poi_highlight', actionType: 'poi' }
+          ]
+        })
+      })
+      const markers = page.locator('.sponsorBlockDraftMarker')
+      await expect(markers).toHaveCount(2)
+      for (const size of [{ width: 1200, height: 860 }, { width: 450, height: 850 }]) {
+        await setWindowSize(app, page, size)
+        for (const scheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme: scheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+          await page.locator('.ftVideoPlayer').hover()
+          const screenshot = await page.screenshot()
+          const samples = await page.evaluate(async screenshotBase64 => {
+            const image = new Image()
+            image.src = `data:image/png;base64,${screenshotBase64}`
+            await image.decode()
+            const canvas = document.createElement('canvas')
+            canvas.width = image.width
+            canvas.height = image.height
+            const context = canvas.getContext('2d')
+            context.drawImage(image, 0, 0)
+            return [...document.querySelectorAll('.sponsorBlockDraftMarker')].flatMap(marker => {
+              const bounds = marker.getBoundingClientRect()
+              // Sample both the played and buffered halves of the range, plus the point.
+              const positions = marker.classList.contains('sponsorBlockPointMarker') ? [0.5] : [0.25, 0.75]
+              return positions.map(position => [...context.getImageData(
+                Math.floor((bounds.left + bounds.width * position) * devicePixelRatio),
+                Math.floor((bounds.top + bounds.height / 2) * devicePixelRatio),
+                1, 1
+              ).data].slice(0, 3))
+            })
+          }, screenshot.toString('base64'))
+          for (const sample of samples) {
+            expect(Math.min(...sample)).toBeGreaterThanOrEqual(240)
+          }
+          await page.locator('.ftVideoPlayer .shaka-bottom-controls').screenshot({
+            path: testInfo.outputPath(`draft-markers-${size.width}-${scheme}.png`)
+          })
+        }
+      }
+    })
+
     test('keeps timestamp inputs and outlined select labels compact', async ({ app, page }, testInfo) => {
       await mockPlayableWatchPage(app, page)
       await page.route('**/api/skipSegments/**', route => route.fulfill({
