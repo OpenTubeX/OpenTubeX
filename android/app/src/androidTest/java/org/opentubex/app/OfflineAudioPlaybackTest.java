@@ -88,12 +88,36 @@ public class OfflineAudioPlaybackTest {
                     Thread.sleep(1000);
                     assertEquals("\"running\"", evaluate(view, "window.__offlineAudioContexts[0].state"));
                 }
+                int beforeLocked = Integer.parseInt(evaluate(view, "window.__offlineAudioProgress"));
                 shell("input keyevent KEYCODE_SLEEP");
                 Thread.sleep(1000);
                 assertTrue("Screen is locked", !context.getSystemService(PowerManager.class).isInteractive());
                 assertEquals("Visualizer keeps its audio graph running behind the lock screen",
                     "\"running\"", evaluate(view, "window.__offlineAudioContexts[0].state"));
                 assertEquals("false", evaluate(view, "document.querySelector('video').paused"));
+                assertTrue("Playback advances while the screen is locked",
+                    Integer.parseInt(evaluate(view, "window.__offlineAudioProgress")) > beforeLocked + 1);
+                evaluate(view, """
+                    (() => {
+                        const context = window.__offlineAudioContexts[0];
+                        const suspend = context.suspend.bind(context);
+                        const pending = new Promise(resolve => window.__offlineAudioFinishSuspension = () => {
+                            context.suspend = suspend;
+                            resolve();
+                        });
+                        context.suspend = () => {
+                            window.__offlineAudioSuspensionRequested = true;
+                            return pending.then(suspend).then(() => window.__offlineAudioSuspensionFinished = true);
+                        };
+                        document.querySelector('video').pause();
+                    })()
+                    """);
+                await(view, "document.querySelector('video').paused && window.__offlineAudioSuspensionRequested");
+                evaluate(view, "document.querySelector('video').play(); true");
+                await(view, "!document.querySelector('video').paused");
+                evaluate(view, "window.__offlineAudioFinishSuspension(); true");
+                await(view, "window.__offlineAudioSuspensionFinished && window.__offlineAudioContexts[0].state === 'running'");
+                assertTrue("Screen remains locked during pause/resume", !context.getSystemService(PowerManager.class).isInteractive());
                 shell("input keyevent KEYCODE_WAKEUP");
                 shell("wm dismiss-keyguard");
                 scenario.moveToState(Lifecycle.State.RESUMED);
@@ -108,8 +132,8 @@ public class OfflineAudioPlaybackTest {
                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
                         app.$router.push('/subscriptions');
                         app.$store.commit('removeYtDlpDownload', 943943);
-                        for (const [key, value] of Object.entries(window.__offlineAudioSaved)) app.$store.commit('set' + key, value);
-                        window.AudioContext = window.__offlineAudioOriginalContext;
+                        for (const [key, value] of Object.entries(window.__offlineAudioSaved ?? {})) app.$store.commit('set' + key, value);
+                        if (window.__offlineAudioOriginalContext) window.AudioContext = window.__offlineAudioOriginalContext;
                     })()
                     """);
             }

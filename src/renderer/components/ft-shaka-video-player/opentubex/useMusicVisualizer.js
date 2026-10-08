@@ -270,7 +270,8 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
   }
 
   function handleAudioContextStateChange() {
-    if (audioContext?.state !== 'running' && canDraw()) {
+    // A queued suspension can finish after lock-screen playback has resumed.
+    if (audioContext?.state !== 'running' && video.value?.paused === false) {
       runVisualizerTask(startDrawing())
     }
   }

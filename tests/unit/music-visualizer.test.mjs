@@ -101,3 +101,26 @@ test('pausing hidden playback suspends analysis and resuming restores it', async
   assert.equal(visualizer.frames.size, 1)
   await visualizer.dispose()
 })
+
+test('hidden playback resumes analysis when an earlier suspension completes late', async () => {
+  const visualizer = await createVisualizer()
+  const [context] = visualizer.contexts
+  let completeSuspension
+  const suspension = new Promise(resolve => { completeSuspension = resolve })
+  context.suspend = async () => {
+    context.suspends++
+    await suspension
+    context.state = 'suspended'
+    context.dispatchEvent(new Event('statechange'))
+  }
+  await visualizer.setHidden(true)
+  await visualizer.setPaused(true)
+  assert.equal(context.suspends, 1)
+  assert.equal(context.state, 'running')
+  await visualizer.setPaused(false)
+  completeSuspension()
+  await setImmediate()
+  assert.equal(context.state, 'running')
+  assert.equal(visualizer.frames.size, 0)
+  await visualizer.dispose()
+})
