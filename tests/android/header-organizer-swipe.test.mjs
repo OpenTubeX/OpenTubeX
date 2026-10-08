@@ -339,3 +339,55 @@ test('Android header keeps vertical panning when the phone organizer is unavaila
     clearTimeout(keepAlive)
   }
 })
+
+test('Android organizer unmount releases its modal lock during committed settlement', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, async () => {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const page = browser.contexts()[0].pages()[0]
+  const session = await browser.contexts()[0].newCDPSession(page)
+  const keepAlive = setTimeout(() => {}, 60_000)
+  const saved = await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const values = { CapacitorLayoutMode: 'phone', EnableMobileTabs: true, ReducedMotion: 'off', AnimationSpeed: 25 }
+    const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
+    for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
+    return { settings, overflow: document.documentElement.style.overflow }
+  })
+  const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+  try {
+    const box = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
+    assert.ok(box)
+    const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    await touch('touchStart', point)
+    for (let step = 1; step <= 8; step++) {
+      await touch('touchMove', { ...point, y: point.y + step * 20 })
+      await page.waitForTimeout(40)
+    }
+    await touch('touchEnd')
+    await expect(page.locator('.organizerGesture')).toHaveCount(0)
+    await expect(page.locator('html')).toHaveCSS('overflow', 'hidden')
+    // Unmount synchronously while settlement is active, without first changing
+    // props and giving the modal watcher a chance to release the lock.
+    const teardown = await page.evaluate(() => {
+      if (!document.querySelector('.organizerSwipePage')) throw new Error('the committed gesture must still be settling')
+      const app = document.querySelector('#app').__vue_app__
+      const store = app.config.globalProperties.$store
+      app.unmount()
+      return { overflow: document.documentElement.style.overflow, promptOpen: store.getters.isAnyPromptOpen }
+    })
+    assert.equal(teardown.overflow, saved.overflow, 'unmount must release the root scroll lock')
+    assert.equal(teardown.promptOpen, false, 'unmount must remove the organizer prompt')
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await page.reload()
+    await page.locator('.profileTrigger').waitFor()
+    await page.evaluate(async saved => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+    }, saved)
+    await session.detach()
+    await browser.close()
+    clearTimeout(keepAlive)
+  }
+})

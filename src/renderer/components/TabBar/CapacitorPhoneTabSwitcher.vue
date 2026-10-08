@@ -1237,9 +1237,18 @@ watch(open, async (isOpen) => {
   }
 })
 
+let modalLocked = false
+function releaseModalLock() {
+  if (!modalLocked) return
+  modalLocked = false
+  store.commit('removeOpenPrompt', promptId)
+  unlockBodyScroll()
+}
+
 watch(() => open.value && !organizerGesture.value, modal => {
   if (modal) {
     lockBodyScroll()
+    modalLocked = true
     store.commit('addOpenPrompt', promptId)
     if (showSyncedTabsView.value) {
       store.dispatch('refreshSyncServerDevices').catch(error => {
@@ -1247,8 +1256,7 @@ watch(() => open.value && !organizerGesture.value, modal => {
       })
     }
   } else {
-    store.commit('removeOpenPrompt', promptId)
-    unlockBodyScroll()
+    releaseModalLock()
   }
 })
 
@@ -1278,10 +1286,7 @@ onBeforeUnmount(() => {
   resetTabSwipe()
   resetTabDrag()
   stopObservingContent()
-  if (!open.value) return
-
-  store.commit('removeOpenPrompt', promptId)
-  unlockBodyScroll()
+  releaseModalLock()
 })
 </script>
 
