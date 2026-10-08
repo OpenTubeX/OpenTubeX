@@ -2880,7 +2880,6 @@ export default defineComponent({
       this.shortsSwipeSuppressClick = false
       if (
         this.subscriptionShortsFeedActive &&
-        !this.isLoading &&
         !this.shortsSwipeSettling &&
         Date.now() >= this.shortsNavigationLockedUntil &&
         !this.shortsNavigationPanelOpen &&

@@ -305,3 +305,46 @@ for (const [zoom, theme] of [[1, 'dark'], [1.25, 'light']]) {
     await cdp.detach()
   })
 }
+
+for (const [stage, theme, direction] of [['metadata', 'dark', -1], ['streams', 'light', 1]]) {
+  test(`Shorts ${stage} loading placeholders follow the finger and allow skipping`, async ({ app, page }, testInfo) => {
+    const { watch, touch, cdp } = await openShorts({ app, page })
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    await watch.evaluate((component, stage) => {
+      if (stage === 'metadata') component.proxy.isLoading = true
+      else component.proxy.ytDlpStreamsPending = true
+      component.proxy.shortsNavigationLockedUntil = Date.now() + 60_000
+    }, stage)
+    const placeholder = page.locator('.shortsSwipeViewport > .videoPlayerPlaceholder')
+    await expect(placeholder).toBeVisible()
+    const bounds = await placeholder.boundingBox()
+    await touch('touchStart')
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipePointer)).toBeNull()
+    await touch('touchEnd')
+    await watch.evaluate(component => { component.proxy.shortsNavigationLockedUntil = Date.now() - 1 })
+    await touch('touchStart')
+    await touch('touchMove', 0, direction * 120)
+    await expect.poll(async () => (await placeholder.boundingBox()).y).toBeCloseTo(bounds.y + direction * 120, 0)
+    await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
+    await touch('touchCancel')
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(async () => (await placeholder.boundingBox()).y).toBeCloseTo(bounds.y, 0)
+    await touch('touchStart')
+    await touch('touchMove', 0, direction * 120)
+    await expect(page.locator('.shortsSwipePreview')).toBeVisible()
+    await expect.poll(() => page.locator('.shortsSwipeViewport img:not(.retryImagePlaceholder)')
+      .evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0))).toBe(true)
+    const screenshotPath = testInfo.outputPath('loading-swipe.png')
+    await page.screenshot({
+      path: screenshotPath,
+      clip: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
+    })
+    await testInfo.attach('Loading Shorts swipe', { path: screenshotPath, contentType: 'image/png' })
+    await touch('touchEnd')
+    await expect(page).toHaveURL(new RegExp(`/watch/${direction < 0 ? next : previous}`))
+    await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+    await watch.dispose()
+    await cdp.detach()
+  })
+}
