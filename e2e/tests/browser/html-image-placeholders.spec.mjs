@@ -32,13 +32,14 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   const placeholders = container.locator('.htmlImagePlaceholder')
   await expect(placeholders).toHaveCount(3)
   for (const placeholder of await placeholders.all()) {
+    const sizingImage = placeholder.locator('img')
     await expect(placeholder).toHaveClass(/ft-shimmer/)
-    await expect(placeholder).not.toHaveAttribute('srcset')
-    await expect(placeholder).not.toHaveAttribute('sizes')
-    await expect(placeholder).not.toHaveAttribute('id')
-    await expect(placeholder).toHaveAttribute('alt', '')
+    await expect(sizingImage).not.toHaveAttribute('srcset')
+    await expect(sizingImage).not.toHaveAttribute('sizes')
+    await expect(sizingImage).not.toHaveAttribute('id')
+    await expect(sizingImage).toHaveAttribute('alt', '')
     await expect(placeholder).toHaveAttribute('aria-hidden', 'true')
-    await expect.poll(() => placeholder.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect.poll(() => sizingImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
     expect((await placeholder.boundingBox()).width).toBe(24)
   }
   await expect(container.locator('picture .htmlImagePlaceholder')).toHaveCount(0)
@@ -47,7 +48,7 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   await expect(container).toContainText('Picture image')
   await expect(placeholders).toHaveCount(1)
   await expect(placeholders).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholders).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholders.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
 
 test('uses permanent fallbacks for missing sources and failures completed before initialization', async ({ page }) => {
@@ -59,7 +60,7 @@ test('uses permanent fallbacks for missing sources and failures completed before
   const placeholders = page.locator('#images .htmlImagePlaceholder')
   await expect(placeholders).toHaveCount(2)
   for (const placeholder of await placeholders.all()) {
-    await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+    await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
   }
   await expect(page.locator('#images')).toContainText('Unavailable image')
 })
@@ -81,7 +82,7 @@ test('stalled inline images show static fallbacks and recover on a late load', a
   await expect.poll(() => pending.length).toBe(1)
   await page.clock.fastForward(10_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
   await expect(placeholder).toHaveCount(0)
   await expect(page.locator('#stalled-images img')).toBeVisible()
@@ -103,12 +104,12 @@ test('zero-width SVG loads retain the deadline for a static fallback', async ({ 
   await expect.poll(() => pending.length).toBe(1)
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="48"/>' })
   await expect(page.locator('#zero-width-images')).toHaveAttribute('data-loaded', 'true')
-  expect(await page.locator('#zero-width-images img:not(.htmlImagePlaceholder)').evaluate(image => image.naturalWidth)).toBe(0)
+  expect(await page.locator('#zero-width-images > img').evaluate(image => image.naturalWidth)).toBe(0)
   const placeholder = page.locator('.htmlImagePlaceholder')
   await expect(placeholder).toHaveClass(/ft-shimmer/)
   await page.clock.fastForward(10_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
 
 test('lazy inline images keep their skeleton offscreen, then time out and recover', async ({ page }) => {
@@ -136,7 +137,7 @@ test('lazy inline images keep their skeleton offscreen, then time out and recove
   await expect(placeholder).toHaveClass(/ft-shimmer/)
   await page.clock.fastForward(1_001)
   await expect(placeholder).not.toHaveClass(/ft-shimmer/)
-  await expect(placeholder).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
+  await expect(placeholder.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 
   await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
   await expect(placeholder).toHaveCount(0)

@@ -28,12 +28,17 @@ for (const { zoom, throttle, width, direction } of [
       await page.locator('.videoPlayerPlaceholder').evaluate((element, direction) => { element.dir = direction }, direction)
       await session.send('Emulation.setCPUThrottlingRate', { rate: throttle })
       await session.send('Performance.enable')
-      // Let initial layout, layer creation and rasterization finish before sampling.
-      await page.waitForTimeout(1500)
+      // Wait for the animation to start and render before sampling.
+      await page.locator('.videoPlayerPlaceholder').evaluate(async element => {
+        const animation = element.getAnimations({ subtree: true }).find(animation => animation.animationName === 'ft-shimmer')
+        await animation.ready
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      })
       const events = []
       session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
       await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })
       const before = await session.send('Performance.getMetrics')
+      // Use a fixed measurement window to compare rendering work.
       await page.waitForTimeout(1500)
       const after = await session.send('Performance.getMetrics')
       const complete = new Promise(resolve => session.once('Tracing.tracingComplete', resolve))
