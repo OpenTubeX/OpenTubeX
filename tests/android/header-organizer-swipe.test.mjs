@@ -226,6 +226,35 @@ test('Android organizer pull follows the finger, settles into its card and prese
       await expect(dialog).toHaveCount(0)
     }
     const last = await presented()
+    // A cancelled pull must not replace the organizer viewport the user left
+    // with the temporary offset used to bring the active card into view.
+    const organizerScroll = page.locator('#capacitor-phone-open-tabs-panel')
+    for (const ending of ['short', 'reverse', 'cancel', 'resize']) {
+      await tap('.capacitorPhoneTabSwitcherButton')
+      await expect(dialog).toBeVisible()
+      await organizerScroll.evaluate(element => { element.scrollTop = 123 })
+      const savedScroll = await organizerScroll.evaluate(element => element.scrollTop)
+      assert.ok(savedScroll > 0)
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(dialog).toHaveCount(0)
+      const start = await pointFor('.capacitorPhoneTabSwitcherButton')
+      await touch('touchStart', start)
+      await touch('touchMove', { ...start, y: start.y + (ending === 'reverse' ? 160 : 40) })
+      await expect(movingPage).toHaveCount(1)
+      assert.ok(await organizerScroll.evaluate(element => element.scrollTop) > savedScroll + 100,
+        'the active card must require a temporary viewport adjustment')
+      if (ending === 'reverse') await touch('touchMove', { ...start, y: start.y + 5 })
+      if (ending === 'resize') await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+      await page.waitForTimeout(400)
+      await touch(ending === 'cancel' ? 'touchCancel' : 'touchEnd')
+      await expect(dialog).toHaveCount(0)
+      await tap('.capacitorPhoneTabSwitcherButton')
+      await expect(dialog).toBeVisible()
+      await expect.poll(async () => Math.abs(await organizerScroll.evaluate(element => element.scrollTop) - savedScroll),
+        { message: `${ending} must preserve the saved organizer viewport` }).toBeLessThan(1)
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(dialog).toHaveCount(0)
+    }
     const point = await pointFor('.capacitorPhoneTabSwitcherButton')
     await touch('touchStart', point)
     await touch('touchMove', { ...point, y: point.y + 320 })

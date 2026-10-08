@@ -657,7 +657,7 @@ const organizerSwipe = {
     if (!props.enabled || open.value || openingSwitcher || organizerTransition || disposed) return false
     const page = document.querySelector('.app > .routerView')
     if (!page) return false
-    const state = { distance: 0, height: window.innerHeight, animation: null, ready: null }
+    const state = { distance: 0, height: window.innerHeight, animation: null, ready: null, restoreScroll: null }
     organizerTransition = state
     window.addEventListener('resize', organizerSwipe.cancel)
     organizerGesture.value = true
@@ -674,6 +674,8 @@ const organizerSwipe = {
       const target = dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(presentedTabId.value)}"]`)
       const scroll = openTabsScrollRef.value
       if (target && scroll) {
+        const scrollTop = scroll.scrollTop
+        state.restoreScroll = () => restoreOverlayScrollTop(scroll, scrollTop)
         const bounds = target.getBoundingClientRect()
         const viewport = scroll.getBoundingClientRect()
         const offset = bounds.top < viewport.top ? bounds.top - viewport.top : Math.max(0, bounds.bottom - viewport.bottom)
@@ -700,10 +702,16 @@ const organizerSwipe = {
     const commit = !cancelled && shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
     // The next touch belongs to the organizer, even while the page is still
     // settling into its card. Selecting a tab cancels the remaining animation.
-    if (commit) organizerGesture.value = false
+    if (commit) {
+      state.restoreScroll = null
+      organizerGesture.value = false
+    }
     await state.animation?.finish(commit)
     if (organizerTransition !== state) return
-    if (!commit) open.value = false
+    if (!commit) {
+      state.restoreScroll?.()
+      open.value = false
+    }
     // Keep the paused final frame until Vue has made the organizer modal (or
     // removed it), so the live page never flashes back over the finished card.
     organizerGesture.value = false
@@ -720,6 +728,7 @@ const organizerSwipe = {
     window.removeEventListener('resize', organizerSwipe.cancel)
     if (!organizerTransition) return
     organizerTransition.animation?.dispose()
+    organizerTransition.restoreScroll?.()
     organizerTransition = null
     open.value = false
     organizerGesture.value = false
