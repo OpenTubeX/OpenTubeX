@@ -66,6 +66,23 @@ public class YtDlpCodeCacheTest {
         assertFalse(staging.exists());
     }
 
+    @Test public void successfulUpdateRebuildsCodeWhenArchiveSizeAndTimestampMatch() throws Exception {
+        File archive = archive("__main__.py", "old");
+        File directory = new File(temporary.getRoot(), "code");
+        YtDlpCodeCache.prepare(archive, directory);
+        File bytecode = new File(directory, "cached.pyc");
+        Files.write(bytecode.toPath(), new byte[] {1});
+        long modified = archive.lastModified();
+        long length = archive.length();
+        archive = archive("__main__.py", "new");
+        assertTrue(archive.setLastModified(modified));
+        assertEquals(length, archive.length());
+        YtDlpCodeCache.invalidate(directory);
+        assertEquals(directory, YtDlpCodeCache.prepare(archive, directory));
+        assertEquals("new", new String(Files.readAllBytes(new File(directory, "__main__.py").toPath()), StandardCharsets.UTF_8));
+        assertFalse(bytecode.exists());
+    }
+
     @Test public void invalidArchivePathsFallBackWithoutWritingOutsideTheDirectory() throws Exception {
         File archive = archive("../escaped.py", "bad");
         File directory = new File(temporary.getRoot(), "code");

@@ -23,6 +23,11 @@ public class YtDlpRuntimeTest {
         for (File file : compiled) written.put(file, file.lastModified());
         assertEquals(version, YtDlpRuntime.extract(context, asList("--version")));
         for (File file : compiled) assertEquals("Warm startup must reuse bytecode", written.get(file).longValue(), file.lastModified());
+        File directory = new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp-code");
+        YtDlpCodeCache.invalidate(directory);
+        assertFalse(new File(directory, ".archive-version").exists());
+        assertEquals(version, YtDlpRuntime.extract(context, asList("--version")));
+        assertTrue(new File(directory, ".archive-version").isFile());
     }
 
     @Test public void packagedQuickJsRunsTheBundledEjsSolverWithoutNetwork() throws Exception {

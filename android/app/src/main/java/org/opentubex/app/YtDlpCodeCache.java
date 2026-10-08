@@ -9,6 +9,10 @@ import java.util.zip.ZipFile;
 
 /** Unpack installed Python code once so imports can reuse their compiled bytecode. */
 final class YtDlpCodeCache {
+    static synchronized void invalidate(File directory) throws IOException {
+        Files.deleteIfExists(new File(directory, ".archive-version").toPath());
+    }
+
     static synchronized File prepare(File archive, File directory) throws InterruptedIOException {
         File staging = new File(directory.getPath() + ".tmp");
         String version = archive.lastModified() + ":" + archive.length();

@@ -203,7 +203,13 @@ final class YtDlpRuntime {
     static YoutubeDL.UpdateStatus update(Context context, String apiUrl) throws Exception {
         initialize(context);
         INSTALL_LOCK.writeLock().lockInterruptibly();
-        try { return YoutubeDL.getInstance().updateYoutubeDL(context, new YoutubeDL.UpdateChannel(apiUrl)); }
+        try {
+            YoutubeDL.UpdateStatus status = YoutubeDL.getInstance().updateYoutubeDL(context, new YoutubeDL.UpdateChannel(apiUrl));
+            if (status == YoutubeDL.UpdateStatus.DONE) {
+                YtDlpCodeCache.invalidate(new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp-code"));
+            }
+            return status;
+        }
         finally { INSTALL_LOCK.writeLock().unlock(); }
     }
 
