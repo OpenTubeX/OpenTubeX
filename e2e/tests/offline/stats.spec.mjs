@@ -257,6 +257,8 @@ test.describe('synced watch stats', () => {
     await picker.screenshot({ path: testInfo.outputPath('devices-overflow.png') })
     await page.evaluate(() => document.querySelector('#app').__vue_app__
       .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    // Wait for the zoomed viewport before choosing its scroll boundary.
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeLessThan(400)
     await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
     await expect(picker).toHaveClass(/fadeLeft/)
     await expect(picker).not.toHaveClass(/fadeRight/)

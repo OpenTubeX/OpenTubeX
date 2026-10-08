@@ -563,7 +563,7 @@ test.describe('tab group previews', () => {
     }, groupId)
     await page.locator('.collapsedTabGroup').hover()
     const item = page.locator('.tabTooltipGridItem').filter({ hasText: 'Channel avatar' })
-    const avatar = item.locator('.tabTooltipGridTitleAvatar')
+    const avatar = item.locator('img.tabTooltipGridTitleAvatar')
     await expect(avatar).toBeVisible()
     await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
     await avatar.dispatchEvent('error')
