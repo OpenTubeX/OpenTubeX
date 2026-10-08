@@ -659,6 +659,54 @@ test.describe('tab bar', () => {
     await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(5)
   })
 
+  test('Ctrl+middle-click unloads only the clicked background tab and plain middle-click closes it', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    const tabs = page.locator(sel.tabs)
+    const targetTab = page.locator(`.tab[data-tab-id="${tabIds[1]}"]`)
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tabs).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+    await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(1)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"] .routerView`)).toHaveCount(0)
+
+    // Repeating the shortcut must leave an unloaded tab open.
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tabs).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+
+    await targetTab.click()
+    await expect(targetTab).not.toHaveClass(/unloaded/)
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"]`)).toBeVisible()
+    await targetTab.click({ button: 'middle' })
+    await expect(targetTab).toHaveCount(0)
+    await expect(tabs).toHaveCount(2)
+  })
+
+  test('Ctrl+middle-click unloads the active tab and presents its neighbor', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+    const targetTab = page.locator(`.tab[data-tab-id="${tabIds[1]}"]`)
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"]`)).toBeVisible()
+
+    await targetTab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(page.locator(sel.tabs)).toHaveCount(3)
+    await expect(targetTab).toHaveClass(/unloaded/)
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[2]}"]`)).toBeVisible()
+    await expect(page.locator(`.tabContent[data-tab-id="${tabIds[1]}"] .routerView`)).toHaveCount(0)
+  })
+
+  test('Ctrl+middle-click preserves the only active tab', async ({ page }) => {
+    const tab = page.locator(sel.tabs)
+    await expect(tab).toHaveCount(1)
+    await tab.click({ button: 'middle', modifiers: ['Control'] })
+    await expect(tab).toHaveCount(1)
+    await expect(tab).not.toHaveClass(/unloaded/)
+    await expect(page.locator('.tabContent')).toBeVisible()
+  })
+
   test('unloads an active selected tab from the tab context menu', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
