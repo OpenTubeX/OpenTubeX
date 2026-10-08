@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: メンバー限定
 Stats:
+  Replace old device: "古いデバイスを置き換える"
+  Replacement explanation: "両方の項目が同じ物理デバイスのものである場合のみ、{device} をこのデバイスと統合してください。"
+  Overlapping days: "両方の履歴にある日数: {count}"
+  Overlapping watch time: "重複する視聴時間"
+  Keep larger daily total: "大きい方の日別合計を保持"
+  Larger total explanation: "重複した履歴向けです。同じ日の追加視聴が含まれない場合があります。"
+  Add daily totals: "日別合計を加算"
+  Add totals explanation: "別々の履歴向けです。重複した視聴を二重に数える場合があります。"
+  Replacement preservation: "片方の履歴にしかない日は保持されます。元の履歴は暗号化された同期に保存されたままです。"
+  Combined watch time: "統合後の視聴時間"
+  Replacement changed: "視聴時間が変わりました。このプレビューを閉じて開き直し、新しい合計を確認してください。"
+  Replacement success: "デバイスの統計を統合しました"
   All devices: すべてのデバイス
   Stats: 統計
   Watch time summary: 視聴時間の概要

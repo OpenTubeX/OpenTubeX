@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Csak tagoknak
 Stats:
+  Replace old device: "Régi eszköz lecserélése"
+  Replacement explanation: "Csak akkor egyesítsd a(z) {device} bejegyzést ezzel az eszközzel, ha mindkét bejegyzés ugyanahhoz a fizikai eszközhöz tartozik."
+  Overlapping days: "Napok mindkét előzményben: {count}"
+  Overlapping watch time: "Átfedő nézési idő"
+  Keep larger daily total: "Nagyobb napi összeg megtartása"
+  Larger total explanation: "Duplikált előzményekhez. Kimaradhat az ugyanazon napi további nézés."
+  Add daily totals: "Napi összegek összeadása"
+  Add totals explanation: "Különálló előzményekhez. Kétszer számolhatja a duplikált nézést."
+  Replacement preservation: "Az egyetlen előzményben szereplő napok megmaradnak. Az eredeti előzmények a titkosított szinkronizálásban maradnak."
+  Combined watch time: "Egyesített nézési idő"
+  Replacement changed: "A nézési idő megváltozott. Zárd be és nyisd meg újra ezt az előnézetet az új összegek ellenőrzéséhez."
+  Replacement success: "Eszközstatisztikák egyesítve"
   All devices: Összes eszköz
   Stats: Statisztika
   Watch time summary: Nézési idő összesítése

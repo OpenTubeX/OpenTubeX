@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 /**
@@ -298,6 +298,129 @@ test.describe('synced watch stats', () => {
     await expectSingleLineLabels()
   })
 
+  test('reconnecting through QR pairing keeps the saved device identity', async ({ page }) => {
+    const requests = []
+    let session
+    await page.route('https://sync.example/**', async route => {
+      const { pathname } = new URL(route.request().url())
+      if (pathname === '/health') {
+        return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 } } })
+      }
+      if (pathname === '/v1/pairing' && route.request().method() === 'POST') {
+        const body = route.request().postDataJSON()
+        requests.push(body)
+        session = {
+          version: 1,
+          id: body.id,
+          account_id: null,
+          recipient_public_key: body.recipient_public_key,
+          recipient_device_id: body.recipient_device_id,
+          recipient_device_name: body.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120000,
+          approved: false
+        }
+        return route.fulfill({ json: session })
+      }
+      if (pathname.startsWith('/v1/pairing/')) return route.fulfill({ json: session })
+      return route.fulfill({ status: 404 })
+    })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerToken', '')
+      store.commit('setSyncServerEnabled', true)
+    })
+    const sync = await goToSettingsSection(page, 'sync')
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await sync.getByRole('button', { name: 'Pair with an existing device' }).click()
+      const receiver = page.getByRole('dialog', { name: 'Pair with an existing device' })
+      await receiver.getByRole('button', { name: 'Create pairing code' }).click()
+      await expect(receiver.locator('.pairingQr')).toBeVisible()
+      expect(requests[attempt].recipient_device_id).toBe(laptop)
+      await receiver.press('Escape')
+      await expect(receiver).toBeHidden()
+    }
+    expect(requests[0].id).not.toBe(requests[1].id)
+    expect(requests[0].recipient_public_key).not.toBe(requests[1].recipient_public_key)
+  })
+
+  test('repairs duplicate device stats with a preview and preserves the repair after sync', async ({ app, page }, testInfo) => {
+    let revision = 1
+    let devices = [{ deviceId: phone, deviceName: 'Pixel (old)', platform: 'android', days: { [today]: 1800, [yesterday]: 1800 } }]
+    let payload = await encryptSyncDocument(devices, key, salt)
+    await page.route('https://sync.example/**', async route => {
+      const { pathname } = new URL(route.request().url())
+      if (pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1, watch_stats: 1 } } })
+      if (pathname === '/v1/encrypted_sync') return route.fulfill({ json: { collections: [{ collection: 'watchStats', revision }], legacy_data: false } })
+      if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+      if (pathname === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
+      if (pathname === '/v1/encrypted_sync/watchStats') {
+        if (route.request().method() === 'PUT') {
+          const request = route.request().postDataJSON()
+          expect(request.revision).toBe(revision)
+          payload = request.payload
+          devices = await decryptSyncDocument(payload, key)
+          revision++
+        }
+        return route.fulfill({ json: { revision, payload } })
+      }
+      return route.fulfill({ status: 404 })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSyncServerDeviceName', 'Pixel')
+      await store.dispatch('updateSyncServerEnabled', true)
+      await store.dispatch('syncWithSyncServer')
+    })
+    await goTo(page, 'stats')
+    const picker = page.getByRole('group', { name: 'Devices' })
+    const total = page.locator('.summaryCard').filter({ hasText: 'Total watch time' })
+    await expect(total).toContainText('2 hr')
+    await picker.getByRole('button', { name: 'Pixel (old)', exact: true }).click()
+    await page.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    let dialog = page.getByRole('dialog', { name: 'Replace old device' })
+    await expect(dialog).toContainText('Days in both histories: 1')
+    await expect(dialog.getByRole('button', { name: 'Replace old device' })).toBeDisabled()
+    await dialog.getByRole('radio', { name: /Keep larger daily total/ }).check()
+    await expect(dialog.locator('.repairResult')).toContainText('1 hr 30 min')
+    await dialog.getByRole('radio', { name: /Add daily totals/ }).check()
+    await expect(dialog.locator('.repairResult')).toContainText('2 hr')
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    expect(devices).toHaveLength(2)
+    await page.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    dialog = page.getByRole('dialog', { name: 'Replace old device' })
+    await dialog.getByRole('radio', { name: /Keep larger daily total/ }).check()
+    await dialog.screenshot({ path: testInfo.outputPath('device-repair-preview.png') })
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(430, 750))
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    const scroller = dialog.locator('.promptContentScroller')
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expectScrollAtRenderedEnd(scroller)
+    await dialog.screenshot({ path: testInfo.outputPath('device-repair-mobile-125.png') })
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(1600, 1000))
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
+    await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
+    await dialog.getByRole('button', { name: 'Replace old device', exact: true }).click()
+    await expect(dialog).toBeHidden()
+    await expect(picker.getByRole('button')).toHaveCount(2)
+    await expect(total).toContainText('1 hr 30 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].replacedDevices[0].deviceId).toBe(phone)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await picker.getByRole('button', { name: 'All devices' }).click()
+    await expect(total).toContainText('1 hr 30 min')
+    await picker.getByRole('button', { name: 'Pixel', exact: true }).click()
+    await page.locator('.resetStatsButton').click()
+    await page.getByRole('button', { name: 'Reset', exact: true }).click()
+    await expect(total).toContainText('0 min')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+    await expect(total).toContainText('0 min')
+    expect(devices).toHaveLength(1)
+    expect(devices[0].reset.at).toBeGreaterThan(devices[0].replacedDevices[0].replacedAt)
+  })
+
   test('switches between devices and keeps another device after a local reset', async ({ app, page }) => {
     const remote = [{ deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } }]
     let revision = 1
@@ -437,7 +560,7 @@ test.describe('synced watch stats', () => {
     await syncAfterReset.getByRole('button', { name: 'Sync now', exact: true }).click()
     await expect.poll(async () => decryptSyncDocument(payload, key)).toEqual([
       { deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } },
-      { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {} },
+      { deviceId: laptop, deviceName: 'Laptop', platform: expect.any(String), days: {}, reset: { at: expect.any(Number), baselines: { [laptop]: {} } } },
     ])
     await page.context().setOffline(true)
     await page.reload()

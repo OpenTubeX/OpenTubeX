@@ -69,6 +69,18 @@ Search Filters:
     Prioritize: Priorizar
     Popularity: Popularidad
 Stats:
+  Replace old device: "Reemplazar dispositivo antiguo"
+  Replacement explanation: "Combina {device} con este dispositivo solo si ambas entradas corresponden al mismo dispositivo físico."
+  Overlapping days: "Días en ambos historiales: {count}"
+  Overlapping watch time: "Tiempo de reproducción coincidente"
+  Keep larger daily total: "Conservar el mayor total diario"
+  Larger total explanation: "Ideal para historiales duplicados. Puede omitir reproducciones adicionales del mismo día."
+  Add daily totals: "Sumar los totales diarios"
+  Add totals explanation: "Ideal para historiales separados. Puede contar dos veces las reproducciones duplicadas."
+  Replacement preservation: "Se conservan los días que solo aparecen en un historial. Los historiales originales siguen guardados en la sincronización cifrada."
+  Combined watch time: "Tiempo de reproducción combinado"
+  Replacement changed: "El tiempo de reproducción cambió. Cierra esta vista previa y vuelve a abrirla para revisar los nuevos totales."
+  Replacement success: "Estadísticas de dispositivos combinadas"
   All devices: Todos los dispositivos
   Stats: Estadísticas
   Watch time summary: Resumen del tiempo de visualización

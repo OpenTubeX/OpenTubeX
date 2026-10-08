@@ -47,7 +47,9 @@ import {
 } from '../../helpers/sync-server-scheduling'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
-import { syncWatchStats } from '../../helpers/sync-watch-stats'
+import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
+import { areJsonValuesEqual } from '../../helpers/jsonValues'
+import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
@@ -1099,6 +1101,66 @@ const actions = {
     }
 
     return withSyncLock(deleteSession)
+  },
+
+  replaceSyncWatchStatsDevice({ commit, dispatch, rootState }, { source, overlap, localDays, currentDays, replacedDevices, localReset }) {
+    const settings = { ...rootState.settings }
+    if (!settings.syncServerEnabled || !settings.syncServerToken ||
+        settings.syncServerPrivacyMode !== 'enhanced' || !settings.syncServerPrivacyKey ||
+        !settings.syncServerSyncWatchStats) {
+      throw new Error('Connect to the sync server first')
+    }
+    const assertCurrentAccount = client => {
+      assertSyncEnabled(rootState, client)
+      if (activityAccountKey(rootState.settings) !== activityAccountKey(settings) ||
+          rootState.settings.syncServerToken !== settings.syncServerToken ||
+          !rootState.settings.syncServerSyncWatchStats) throw new SyncServerCancelledError()
+    }
+    return withSyncLock(async () => {
+      const client = trackSyncClient(new SyncServerClient(settings.syncServerUrl, settings.syncServerToken))
+      try {
+        for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
+          assertCurrentAccount(client)
+          const remote = await client.getEncryptedSyncCollection('watchStats')
+          const devices = remote.payload
+            ? await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+            : []
+          const records = await DBWatchStatsHandlers.find()
+          const days = Object.fromEntries(records.map(record => [record.date, record.seconds]))
+          const current = devices.find(device => containsWatchStatsDevice(device, settings.syncServerDeviceId))
+          const previous = devices.find(device => device.deviceId === source.deviceId)
+          assertCurrentAccount(client)
+          if (!areJsonValuesEqual(previous, source) || !areJsonValuesEqual(days, localDays) ||
+              !areJsonValuesEqual(current?.replacedDevices ?? [], replacedDevices) ||
+              !areJsonValuesEqual(rootState.settings.syncServerWatchStatsReset, localReset) ||
+              !areJsonValuesEqual(current ? watchStatsDeviceDays(current, settings.syncServerDeviceId, days, localReset) : days, currentDays)) {
+            commit('setSyncedWatchStats', devices)
+            throw new Error(i18n.global.t('Stats.Replacement changed'))
+          }
+          const merged = mergeWatchStats(devices, records, settings.syncServerDeviceId,
+            settings.syncServerDeviceName, current?.platform, settings.syncServerWatchStatsReset)
+          const next = replaceWatchStatsDevice(merged, settings.syncServerDeviceId, source.deviceId, overlap, Date.now())
+          const payload = await encryptSyncDocument(next, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt)
+          assertCurrentAccount(client)
+          let saved
+          try {
+            saved = await client.putEncryptedSyncCollection('watchStats', remote.revision, payload)
+          } catch (error) {
+            if (error.status === 409 && attempt < ENCRYPTED_SYNC_RETRIES - 1) continue
+            throw error
+          }
+          assertCurrentAccount(client)
+          collectionCache.put('watchStats', saved.revision, next)
+          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+          snapshot.watchStats = next
+          await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+          commit('setSyncedWatchStats', next)
+          return true
+        }
+      } finally {
+        releaseSyncClient(client)
+      }
+    })
   },
 
   async completeSyncServerPairing(

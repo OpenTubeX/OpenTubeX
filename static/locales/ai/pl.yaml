@@ -1217,6 +1217,18 @@ Tray Icon:
   Follow App Theme: "Używaj motywu aplikacji"
 
 Stats:
+  Replace old device: "Zastąp stare urządzenie"
+  Replacement explanation: "Połącz {device} z tym urządzeniem tylko wtedy, gdy oba wpisy dotyczą tego samego fizycznego urządzenia."
+  Overlapping days: "Dni w obu historiach: {count}"
+  Overlapping watch time: "Nakładający się czas oglądania"
+  Keep larger daily total: "Zachowaj większą sumę dzienną"
+  Larger total explanation: "Dla powielonych historii. Może pominąć dodatkowe oglądanie tego samego dnia."
+  Add daily totals: "Dodaj sumy dzienne"
+  Add totals explanation: "Dla oddzielnych historii. Może policzyć powielone oglądanie dwa razy."
+  Replacement preservation: "Dni występujące tylko w jednej historii zostają zachowane. Oryginalne historie pozostają zapisane w szyfrowanej synchronizacji."
+  Combined watch time: "Łączny czas oglądania"
+  Replacement changed: "Czas oglądania się zmienił. Zamknij i otwórz ponownie ten podgląd, aby sprawdzić nowe sumy."
+  Replacement success: "Statystyki urządzeń połączone"
   All devices: Wszystkie urządzenia
 
 Form Inputs:

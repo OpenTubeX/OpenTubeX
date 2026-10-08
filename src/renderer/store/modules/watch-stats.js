@@ -1,5 +1,7 @@
 import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 
+import { createWatchStatsReset } from '../../helpers/sync-watch-stats'
+
 const state = {
   watchSecondsByDate: {},
   syncedWatchStats: [],
@@ -59,9 +61,11 @@ const actions = {
     }
   },
 
-  async clearWatchStats({ commit }) {
+  async clearWatchStats({ commit, dispatch, rootState, state }) {
     try {
+      const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, Date.now())
       await DBWatchStatsHandlers.deleteAll()
+      await dispatch('updateSyncServerWatchStatsReset', reset)
       commit('resetWatchStats')
       return true
     } catch (errMessage) {

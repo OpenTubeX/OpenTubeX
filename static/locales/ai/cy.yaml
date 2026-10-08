@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Aelodau yn unig
 Stats:
+  Replace old device: "Disodli hen ddyfais"
+  Replacement explanation: "Cyfunwch {device} â'r ddyfais hon dim ond os yw'r ddau gofnod yn perthyn i'r un ddyfais ffisegol."
+  Overlapping days: "Diwrnodau yn y ddau hanes: {count}"
+  Overlapping watch time: "Amser gwylio sy'n gorgyffwrdd"
+  Keep larger daily total: "Cadw'r cyfanswm dyddiol mwyaf"
+  Larger total explanation: "Ar gyfer hanesion dyblyg. Gall hepgor gwylio ychwanegol ar yr un diwrnod."
+  Add daily totals: "Adio cyfansymiau dyddiol"
+  Add totals explanation: "Ar gyfer hanesion ar wahân. Gall gyfrif gwylio dyblyg ddwywaith."
+  Replacement preservation: "Cedwir diwrnodau sydd mewn un hanes yn unig. Mae'r hanesion gwreiddiol yn aros yn y cysoni wedi'i amgryptio."
+  Combined watch time: "Amser gwylio cyfun"
+  Replacement changed: "Mae'r amser gwylio wedi newid. Caewch ac ailagorwch y rhagolwg hwn i adolygu'r cyfansymiau newydd."
+  Replacement success: "Ystadegau dyfeisiau wedi'u cyfuno"
   All devices: Pob dyfais
   Stats: Ystadegau
   Watch time summary: Crynodeb o'r amser gwylio

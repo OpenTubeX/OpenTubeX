@@ -61,6 +61,18 @@ Search Listing:
   Label:
     Members Only: Members only
 Stats:
+  Replace old device: "Replace old device"
+  Replacement explanation: "Combine {device} with this device only if both entries belong to the same physical device."
+  Overlapping days: "Days in both histories: {count}"
+  Overlapping watch time: "Overlapping watch time"
+  Keep larger daily total: "Keep larger daily total"
+  Larger total explanation: "Best for duplicate histories. May miss extra viewing on the same day."
+  Add daily totals: "Add daily totals"
+  Add totals explanation: "Best for separate histories. May count duplicate viewing twice."
+  Replacement preservation: "Days found in only one history are kept. Original histories stay saved in encrypted sync."
+  Combined watch time: "Combined watch time"
+  Replacement changed: "Watch time changed. Close this preview and reopen it to review the new totals."
+  Replacement success: "Device statistics combined"
   All devices: All devices
   Stats: Stats
   Watch time summary: Watch time summary

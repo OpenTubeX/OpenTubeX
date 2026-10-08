@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Khusus anggota
 Stats:
+  Replace old device: "Ganti perangkat lama"
+  Replacement explanation: "Gabungkan {device} dengan perangkat ini hanya jika kedua entri berasal dari perangkat fisik yang sama."
+  Overlapping days: "Hari dalam kedua riwayat: {count}"
+  Overlapping watch time: "Waktu menonton yang tumpang tindih"
+  Keep larger daily total: "Pertahankan total harian terbesar"
+  Larger total explanation: "Untuk riwayat duplikat. Dapat melewatkan tontonan tambahan pada hari yang sama."
+  Add daily totals: "Jumlahkan total harian"
+  Add totals explanation: "Untuk riwayat terpisah. Dapat menghitung tontonan duplikat dua kali."
+  Replacement preservation: "Hari yang hanya ada dalam satu riwayat tetap disimpan. Riwayat asli tetap tersimpan dalam sinkronisasi terenkripsi."
+  Combined watch time: "Waktu menonton gabungan"
+  Replacement changed: "Waktu menonton berubah. Tutup pratinjau ini lalu buka kembali untuk meninjau total baru."
+  Replacement success: "Statistik perangkat digabungkan"
   All devices: Semua perangkat
   Stats: Statistik
   Watch time summary: Ringkasan waktu tonton

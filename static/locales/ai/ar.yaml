@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: الأعضاء فقط
 Stats:
+  Replace old device: "استبدال الجهاز القديم"
+  Replacement explanation: "ادمج {device} مع هذا الجهاز فقط إذا كان الإدخالان يخصان الجهاز الفعلي نفسه."
+  Overlapping days: "الأيام الموجودة في السجلين: {count}"
+  Overlapping watch time: "وقت المشاهدة المتداخل"
+  Keep larger daily total: "الاحتفاظ بالإجمالي اليومي الأكبر"
+  Larger total explanation: "للسجلات المكررة. قد يتجاهل مشاهدة إضافية في اليوم نفسه."
+  Add daily totals: "جمع الإجماليات اليومية"
+  Add totals explanation: "للسجلات المنفصلة. قد يحسب المشاهدة المكررة مرتين."
+  Replacement preservation: "تُحفظ الأيام الموجودة في سجل واحد فقط. تبقى السجلات الأصلية محفوظة في المزامنة المشفرة."
+  Combined watch time: "وقت المشاهدة المدمج"
+  Replacement changed: "تغيّر وقت المشاهدة. أغلق هذه المعاينة وافتحها مجددًا لمراجعة الإجماليات الجديدة."
+  Replacement success: "تم دمج إحصاءات الأجهزة"
   All devices: جميع الأجهزة
   Stats: احصائيات
   Watch time summary: مشاهدة ملخص الوقت

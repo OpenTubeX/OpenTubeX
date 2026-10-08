@@ -298,6 +298,7 @@
           :disabled="pairingActionDisabled"
           :server-url="serverUrl"
           :username="username"
+          :device-id="currentDeviceId"
           @paired="pairingCompleted"
         />
         <FtButton

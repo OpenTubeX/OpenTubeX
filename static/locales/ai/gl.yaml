@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Só para membros
 Stats:
+  Replace old device: "Substituír dispositivo antigo"
+  Replacement explanation: "Combina {device} con este dispositivo só se ambas as entradas pertencen ao mesmo dispositivo físico."
+  Overlapping days: "Días nos dous historiais: {count}"
+  Overlapping watch time: "Tempo de reprodución superposto"
+  Keep larger daily total: "Manter o maior total diario"
+  Larger total explanation: "Para historiais duplicados. Pode omitir reproducións adicionais no mesmo día."
+  Add daily totals: "Sumar os totais diarios"
+  Add totals explanation: "Para historiais separados. Pode contar dúas veces as reproducións duplicadas."
+  Replacement preservation: "Consérvanse os días que só aparecen nun historial. Os historiais orixinais seguen gardados na sincronización cifrada."
+  Combined watch time: "Tempo de reprodución combinado"
+  Replacement changed: "O tempo de reprodución cambiou. Pecha esta vista previa e ábrea de novo para revisar os novos totais."
+  Replacement success: "Estatísticas dos dispositivos combinadas"
   All devices: Todos os dispositivos
   Stats: Estatísticas
   Watch time summary: Resumo do tempo de visualización

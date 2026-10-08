@@ -69,6 +69,18 @@ Search Filters:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
 Stats:
+  Replace old device: "Замяніць старую прыладу"
+  Replacement explanation: "Аб’ядноўвайце {device} з гэтай прыладай толькі калі абодва запісы належаць адной фізічнай прыладзе."
+  Overlapping days: "Дні ў абедзвюх гісторыях: {count}"
+  Overlapping watch time: "Час прагляду, які перакрываецца"
+  Keep larger daily total: "Захаваць большы дзённы вынік"
+  Larger total explanation: "Для дубляваных гісторый. Можа прапусціць дадатковы прагляд у той самы дзень."
+  Add daily totals: "Скласці дзённыя вынікі"
+  Add totals explanation: "Для асобных гісторый. Можа двойчы палічыць дубляваны прагляд."
+  Replacement preservation: "Дні, якія ёсць толькі ў адной гісторыі, захоўваюцца. Зыходныя гісторыі застаюцца ў зашыфраванай сінхранізацыі."
+  Combined watch time: "Аб’яднаны час прагляду"
+  Replacement changed: "Час прагляду змяніўся. Закрыйце і зноў адкрыйце гэты папярэдні прагляд, каб праверыць новыя вынікі."
+  Replacement success: "Статыстыка прылад аб’яднаная"
   All devices: Усе прылады
   Stats: Статыстыка
   Watch time summary: Зводка часу прагляду

@@ -85,6 +85,18 @@ Search Filters:
     HDR: HDR
     VR180: VR180
 Stats:
+  Replace old device: "Pakeisti seną įrenginį"
+  Replacement explanation: "Sujunkite {device} su šiuo įrenginiu tik jei abu įrašai priklauso tam pačiam fiziniam įrenginiui."
+  Overlapping days: "Dienos abiejose istorijose: {count}"
+  Overlapping watch time: "Persidengiantis žiūrėjimo laikas"
+  Keep larger daily total: "Palikti didesnę dienos sumą"
+  Larger total explanation: "Pasikartojančioms istorijoms. Gali praleisti papildomą žiūrėjimą tą pačią dieną."
+  Add daily totals: "Sudėti dienų sumas"
+  Add totals explanation: "Atskiroms istorijoms. Gali du kartus suskaičiuoti pasikartojantį žiūrėjimą."
+  Replacement preservation: "Dienos, esančios tik vienoje istorijoje, išsaugomos. Pradinės istorijos lieka užšifruotame sinchronizavime."
+  Combined watch time: "Sujungtas žiūrėjimo laikas"
+  Replacement changed: "Žiūrėjimo laikas pasikeitė. Uždarykite ir iš naujo atidarykite šią peržiūrą, kad patikrintumėte naujas sumas."
+  Replacement success: "Įrenginių statistika sujungta"
   All devices: Visi įrenginiai
   Stats: Statistika
   Watch time summary: Žiūrėjimo laiko suvestinė

@@ -447,7 +447,7 @@ async function startReceiving() {
     if (capabilities.key_pairing !== 1 || capabilities.encrypted_sync !== 1) {
       throw new Error(t('Settings.Sync Settings.Pairing Unsupported'))
     }
-    const recipient = await createPairingRecipient(requestedName)
+    const recipient = await createPairingRecipient(requestedName, props.deviceId)
     const session = await client.createPairingSession(recipient)
     if (sequence !== receiveSequence || !receivePromptOpen.value) {
       try {

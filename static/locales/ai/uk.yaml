@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Лише для учасників
 Stats:
+  Replace old device: "Замінити старий пристрій"
+  Replacement explanation: "Об’єднуйте {device} із цим пристроєм лише якщо обидва записи належать одному фізичному пристрою."
+  Overlapping days: "Дні в обох історіях: {count}"
+  Overlapping watch time: "Час перегляду, що перетинається"
+  Keep larger daily total: "Зберегти більший денний підсумок"
+  Larger total explanation: "Для дубльованих історій. Може пропустити додатковий перегляд того самого дня."
+  Add daily totals: "Додати денні підсумки"
+  Add totals explanation: "Для окремих історій. Може двічі порахувати дубльований перегляд."
+  Replacement preservation: "Дні, наявні лише в одній історії, зберігаються. Початкові історії залишаються в зашифрованій синхронізації."
+  Combined watch time: "Об’єднаний час перегляду"
+  Replacement changed: "Час перегляду змінився. Закрийте й знову відкрийте цей попередній перегляд, щоб перевірити нові підсумки."
+  Replacement success: "Статистику пристроїв об’єднано"
   All devices: Усі пристрої
   Stats: Статистика
   Watch time summary: Підсумок часу перегляду

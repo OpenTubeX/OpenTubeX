@@ -226,6 +226,12 @@
       </section>
 
       <footer class="statsFooter">
+        <FtButton
+          v-if="syncStatsVisible && selectedOtherDevice"
+          :label="t('Stats.Replace old device')"
+          :icon="['fas', 'devices']"
+          @click="repairSource = selectedOtherDevice"
+        />
         <div
           v-if="hasHistoricalEstimate && isLocalDeviceSelected"
           class="estimateControls"
@@ -303,6 +309,13 @@
           </div>
         </div>
       </FtPrompt>
+      <StatsDeviceRepair
+        v-if="repairSource && syncStatsVisible"
+        :source="repairSource"
+        :format-duration="formatDuration"
+        @close="repairSource = null"
+        @replaced="repairSource = null; selectedDevice = 'local'"
+      />
     </FtCard>
   </div>
 </template>
@@ -317,10 +330,11 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import StatsDeviceRepair from './StatsDeviceRepair.vue'
 import store from '../../store'
 import { showToast } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
-import { watchSecondsForDevice } from '../../helpers/sync-watch-stats'
+import { containsWatchStatsDevice, watchSecondsForDevice } from '../../helpers/sync-watch-stats'
 import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
 import { getCurrentSyncServerDeviceInfo, getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 
@@ -350,7 +364,9 @@ const deviceSegmentTrack = useTemplateRef('deviceSegmentTrack')
 const deviceSegmentIndicatorStyle = ref({})
 const deviceFadeLeft = ref(false)
 const deviceFadeRight = ref(false)
-const otherDevices = computed(() => syncedDevices.value.filter(device => device.deviceId !== currentDeviceId.value))
+const otherDevices = computed(() => syncedDevices.value.filter(device => !containsWatchStatsDevice(device, currentDeviceId.value)))
+const selectedOtherDevice = computed(() => otherDevices.value.find(device => device.deviceId === selectedDevice.value))
+const repairSource = ref(null)
 const deviceValues = computed(() => ['all', 'local', ...otherDevices.value.map(device => device.deviceId)])
 const deviceNames = computed(() => [
   t('Stats.All devices'),
@@ -365,12 +381,13 @@ const deviceIcons = computed(() => [
 ])
 const isLocalDeviceSelected = computed(() => !syncStatsVisible.value || selectedDevice.value === 'local')
 const watchSecondsByDate = computed(() => {
-  if (isLocalDeviceSelected.value) return localSecondsByDate.value
+  if (!syncStatsVisible.value) return localSecondsByDate.value
   return watchSecondsForDevice(
     localSecondsByDate.value,
     syncedDevices.value,
     currentDeviceId.value,
-    selectedDevice.value
+    selectedDevice.value,
+    store.getters.getSyncServerWatchStatsReset
   )
 })
 const hasData = computed(() => Object.values(watchSecondsByDate.value).some(seconds => seconds > 0))

@@ -94,6 +94,18 @@ Search Filters:
     VR180: VR180
   Clear Filters: Neteja els filtres
 Stats:
+  Replace old device: "Substitueix el dispositiu antic"
+  Replacement explanation: "Combina {device} amb aquest dispositiu només si ambdues entrades pertanyen al mateix dispositiu físic."
+  Overlapping days: "Dies en tots dos historials: {count}"
+  Overlapping watch time: "Temps de visualització superposat"
+  Keep larger daily total: "Conserva el total diari més gran"
+  Larger total explanation: "Per a historials duplicats. Pot ometre visualitzacions addicionals el mateix dia."
+  Add daily totals: "Suma els totals diaris"
+  Add totals explanation: "Per a historials separats. Pot comptar dues vegades les visualitzacions duplicades."
+  Replacement preservation: "Es conserven els dies que només apareixen en un historial. Els historials originals continuen desats a la sincronització xifrada."
+  Combined watch time: "Temps de visualització combinat"
+  Replacement changed: "El temps de visualització ha canviat. Tanca aquesta previsualització i torna-la a obrir per revisar els totals nous."
+  Replacement success: "Estadístiques dels dispositius combinades"
   All devices: Tots els dispositius
   Stats: Estadístiques
   Watch time summary: Resum del temps de reproducció

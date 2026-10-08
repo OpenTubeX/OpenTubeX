@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Vain jäsenille
 Stats:
+  Replace old device: "Korvaa vanha laite"
+  Replacement explanation: "Yhdistä {device} tähän laitteeseen vain, jos molemmat merkinnät kuuluvat samalle fyysiselle laitteelle."
+  Overlapping days: "Päivät molemmissa historioissa: {count}"
+  Overlapping watch time: "Päällekkäinen katseluaika"
+  Keep larger daily total: "Säilytä suurempi päiväsumma"
+  Larger total explanation: "Kaksoishistorioille. Voi jättää saman päivän lisäkatselun huomioimatta."
+  Add daily totals: "Laske päiväsummat yhteen"
+  Add totals explanation: "Erillisille historioille. Voi laskea saman katselun kahdesti."
+  Replacement preservation: "Vain yhdessä historiassa olevat päivät säilytetään. Alkuperäiset historiat pysyvät tallessa salatussa synkronoinnissa."
+  Combined watch time: "Yhdistetty katseluaika"
+  Replacement changed: "Katseluaika muuttui. Sulje esikatselu ja avaa se uudelleen tarkistaaksesi uudet summat."
+  Replacement success: "Laitetilastot yhdistetty"
   All devices: Kaikki laitteet
   Stats: Tilastot
   Watch time summary: Katseluajan yhteenveto
