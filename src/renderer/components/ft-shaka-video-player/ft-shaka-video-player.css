@@ -1768,6 +1768,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-seek-bar-container) {
+  --ft-seekbar-radius: min(2.5px, calc(2px * var(--ui-roundness)));
+
+  /* Shaka clips the background inside 4px transparent top/bottom borders. */
+  border-radius: var(--ft-seekbar-radius) / calc(4px + var(--ft-seekbar-radius));
+
   /* Composite Shaka's translucent track colours over a fixed dark surface.
      Its inline background shorthand otherwise resets this to transparent. */
   background-color: #181818 !important;
