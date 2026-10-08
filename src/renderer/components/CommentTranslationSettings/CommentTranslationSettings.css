@@ -45,6 +45,7 @@
   color: var(--tertiary-text-color);
   cursor: pointer;
   display: flex;
+  font-size: 20px;
   justify-content: center;
   min-inline-size: 44px;
   padding: 0;
@@ -57,4 +58,11 @@
 
 .commentTranslationLanguageRemove:is(:hover, :focus-visible, :active):not(:disabled) {
   color: var(--accent-color);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .commentTranslationLanguageRemove {
+    min-inline-size: 48px;
+    min-block-size: 48px;
+  }
 }

@@ -1183,6 +1183,8 @@ test.describe('settings', () => {
     const removeGerman = ignoredLanguages.getByRole('button', {
       name: 'Translate German comments again'
     })
+    await expect(removeGerman.locator('.ft-icon')).toHaveAttribute('aria-hidden', 'true')
+    await expect(removeGerman.locator('.ft-icon__glyph')).toHaveAttribute('aria-hidden', 'true')
     const accentColor = await removeGerman.evaluate(element => {
       const probe = document.createElement('span')
       probe.style.color = 'var(--accent-color)'
@@ -1193,6 +1195,13 @@ test.describe('settings', () => {
     })
     for (const size of [{ width: 1440, height: 800 }, { width: 375, height: 700 }]) {
       await setWindowSize(app, page, size)
+      await expect(removeGerman.locator('.ft-icon')).toHaveCSS('font-size', '20px')
+      if (size.width <= 680) {
+        await expect.poll(() => removeGerman.evaluate(element => {
+          const { width, height } = element.getBoundingClientRect()
+          return Math.min(width, height)
+        })).toBeGreaterThanOrEqual(48)
+      }
       await expect(removeGerman).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await removeGerman.hover()
       await expect(removeGerman).toHaveCSS('color', accentColor)
