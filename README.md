@@ -59,6 +59,16 @@ endorsed by, maintained by, or supported by the FreeTube project.
 
 <hr>
 
+## See OpenTubeX in action
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">
+    <img src="docs/screenshots/OpenTubeX-promo.jpg" alt="Watch the 22-second OpenTubeX promo: Your videos. Your rules." width="400">
+  </a>
+  <br>
+  <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">▶ Watch the promo · 22 seconds</a>
+</p>
+
 <a id="why-opentubex"></a>
 ## ✨ Why OpenTubeX?
 
