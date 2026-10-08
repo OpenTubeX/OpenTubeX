@@ -30,6 +30,8 @@ export function mergeSettingEntry({ key, value, old, remoteEntry, localUpdatedAt
   if (localChanged && (!remoteEntry || (localUpdatedAt ?? now) >= remoteEntry.updatedAt)) {
     return { key, value, updatedAt: localUpdatedAt ?? now }
   }
-  if (remoteEntry && (!old || remoteEntry.updatedAt > old.updatedAt)) return remoteEntry
+  // Equal edit times can have different storage representations. Keep the
+  // server's entry so unchanged device snapshots cannot overwrite each other.
+  if (remoteEntry && (!old || remoteEntry.updatedAt >= old.updatedAt)) return remoteEntry
   return old ?? { key, value, updatedAt: now }
 }
