@@ -1649,7 +1649,7 @@ onMounted(async () => {
   })
   if (isCapacitor) {
     tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
-    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, computed(() => pageSwipe.value || organizerSwipeActive.value))
+    removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store, pageSwipe)
   }
   const customThemesReady = loadCustomThemes().catch((error) => {
     console.error('Failed to load custom theme:', error)

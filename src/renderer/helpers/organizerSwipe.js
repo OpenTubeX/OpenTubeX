@@ -15,7 +15,10 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const from = page.getBoundingClientRect()
   const to = preview.getBoundingClientRect()
   const scale = to.width / from.width
-  const crop = Math.max(0, from.height - to.height / scale)
+  const headerBottom = document.querySelector('.topNav')?.getBoundingClientRect().bottom ?? 0
+  const top = Math.max(0, Math.min(from.height, Math.max(0, headerBottom) - from.top))
+  const bottom = Math.max(0, from.top + from.height - window.innerHeight)
+  const crop = Math.max(0, from.height - top - to.height / scale)
   const radius = getComputedStyle(preview).borderRadius
   const reduced = document.documentElement.dataset.reducedMotion === 'reduce' ||
     matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -23,8 +26,8 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   if (!reduced) {
     page.classList.add('organizerSwipePage')
     animations.push(page.animate([
-      { transform: 'translate(0, 0) scale(1)', clipPath: 'inset(0 round 0px)' },
-      { transform: `translate(${to.left - from.left}px, ${to.top - from.top}px) scale(${scale})`, clipPath: `inset(0 0 ${crop}px round ${radius})` }
+      { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 ${bottom}px round 0px)` },
+      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius})` }
     ], { duration: 1000, fill: 'both' }))
   }
   // Reveal the organizer early so its header never remains superimposed on

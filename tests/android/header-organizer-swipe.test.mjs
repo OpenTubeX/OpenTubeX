@@ -75,6 +75,69 @@ test('Android organizer pull follows the finger, settles into its card and prese
 
     const dialog = page.locator('#capacitor-phone-tab-dialog')
     const movingPage = page.locator('.organizerSwipePage')
+    // Capture a known page region, then scroll before the automatic preview
+    // refresh. The pull must refresh the cached image and morph only the region
+    // below the fixed header, including at fractional layout scales.
+    for (const scale of [100, 125]) {
+      await page.evaluate(async scale => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateUiScale', scale)
+        const fixture = document.createElement('div')
+        fixture.id = 'organizer-scroll-fixture'
+        fixture.style.cssText = 'height:2400px;background:linear-gradient(#f60 0 700px,#0080ff 700px 100%);'
+        document.querySelector('.app > .routerView').prepend(fixture)
+        window.scrollTo(0, 0)
+      }, scale)
+      try {
+        await tap('.capacitorPhoneTabSwitcherButton')
+        const thumbnail = page.locator(`.capacitorPhoneTabTarget[data-tab-id="${second}"] img.capacitorTabThumbnail`)
+        await expect(thumbnail).toBeVisible()
+        await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+        await expect(dialog).toHaveCount(0)
+        const initial = await page.evaluate(() => {
+          window.scrollTo(0, 900.5)
+          const page = document.querySelector('.app > .routerView').getBoundingClientRect()
+          return { scroll: window.scrollY, top: page.top, width: page.width,
+            header: document.querySelector('.topNav').getBoundingClientRect().bottom }
+        })
+        assert.ok(initial.top < 0)
+        const start = await pointFor('.capacitorPhoneTabSwitcherButton')
+        await touch('touchStart', start)
+        await touch('touchMove', { ...start, y: start.y + 45 })
+        await expect(movingPage).toHaveCount(1)
+        const color = await thumbnail.evaluate(async image => {
+          await image.decode()
+          const canvas = document.createElement('canvas')
+          canvas.width = canvas.height = 1
+          const context = canvas.getContext('2d')
+          context.drawImage(image, 0, 0, 1, 1)
+          return [...context.getImageData(0, 0, 1, 1).data]
+        })
+        assert.ok(color[2] > 200 && color[0] < 40, `preview must refresh to the visible blue region: ${color}`)
+        const clipTop = await movingPage.evaluate(element => Number.parseFloat(getComputedStyle(element).clipPath.slice(6)))
+        assert.ok(Math.abs(clipTop - (initial.header - initial.top)) < 1, 'hidden page content must stay clipped throughout the drag')
+        await touch('touchMove', { ...start, y: start.y + 320 })
+        const geometry = await movingPage.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          const style = getComputedStyle(element)
+          const top = Number.parseFloat(style.clipPath.slice(6))
+          const scale = new DOMMatrixReadOnly(style.transform).a
+          return { left: bounds.left, top: bounds.top + top * scale, width: bounds.width }
+        })
+        const preview = await thumbnail.boundingBox()
+        assert.ok(Math.abs(geometry.left - preview.x) < 1 && Math.abs(geometry.top - preview.y) < 1 &&
+          Math.abs(geometry.width - preview.width) < 1, 'the visible scrolled region must land in its card')
+        await touch('touchEnd')
+        await expect(movingPage).toHaveCount(0)
+        await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+        assert.equal(await page.evaluate(() => window.scrollY), initial.scroll, 'returning to the page preserves its viewport')
+      } finally {
+        await touch('touchCancel').catch(() => {})
+        if (await dialog.isVisible()) await dialog.getByRole('button', { name: 'Close', exact: true }).click({ timeout: 1000 }).catch(() => {})
+        await page.evaluate(() => { document.querySelector('#organizer-scroll-fixture')?.remove(); window.scrollTo(0, 0) })
+      }
+    }
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
     // A new touch must select a card immediately after release, while the
     // page is still settling. Use real touch input: locator.click() waits for
     // inert overlays to become interactive and would hide this regression.

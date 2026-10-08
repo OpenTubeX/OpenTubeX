@@ -52,8 +52,6 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
     isElectron: false,
     isCapacitor: true,
     pageSwipe: { value: null },
-    organizerSwipeActive: { value: false },
-    computed: getter => ({ get value() { return getter() } }),
     supportsYtDlp: true,
     route: {},
     ytDlp: { addYtDlpBinaryUpdatedListener: () => {} },

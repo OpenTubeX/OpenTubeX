@@ -639,7 +639,7 @@ const {
 let openingSwitcher = false
 let disposed = false
 async function openSwitcher() {
-  if (openingSwitcher || open.value) return
+  if (openingSwitcher || open.value || organizerTransition) return
   openingSwitcher = true
   await captureBeforeTabOrganizer()
   openingSwitcher = false
@@ -654,7 +654,7 @@ async function openSwitcher() {
 let organizerTransition = null
 const organizerSwipe = {
   begin() {
-    if (!props.enabled || open.value || openingSwitcher || disposed) return false
+    if (!props.enabled || open.value || openingSwitcher || organizerTransition || disposed) return false
     const page = document.querySelector('.app > .routerView')
     if (!page) return false
     const state = { distance: 0, height: window.innerHeight, animation: null, ready: null }
@@ -663,9 +663,12 @@ const organizerSwipe = {
     organizerGesture.value = true
     skipDialogTransition.value = true
     activeView.value = 'open'
-    open.value = true
-    state.ready = nextTick(async () => {
+    state.ready = (async () => {
+      await captureBeforeTabOrganizer()
+      if (organizerTransition !== state || disposed || !props.enabled) return
+      open.value = true
       // Let the open watcher restore the organizer viewport before measuring.
+      await nextTick()
       await nextTick()
       if (organizerTransition !== state) return
       const target = dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(presentedTabId.value)}"]`)
@@ -680,7 +683,7 @@ const organizerSwipe = {
       if (!preview) { organizerSwipe.cancel(); return }
       state.animation = createOrganizerSwipeAnimation(page, preview, dialogRef.value.closest('.capacitorPhoneTabOverlay'))
       state.animation.update(organizerSwipeProgress(state.distance, state.height))
-    })
+    })()
     return true
   },
   update(distance) {
