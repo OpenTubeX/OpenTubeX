@@ -15,21 +15,20 @@
           ref="deviceSegments"
           v-overlay-scrollbars
           class="deviceSegments"
+          :class="{ fadeLeft: deviceFadeLeft, fadeRight: deviceFadeRight }"
           role="group"
           :aria-label="t('Settings.Sync Settings.Devices')"
+          @scroll.passive="updateDeviceSegmentFades"
         >
           <div
             ref="deviceSegmentTrack"
             class="deviceSegmentTrack"
-            :class="{ compact: deviceValues.length <= 3 }"
-            :style="{
-              '--device-count': deviceValues.length,
-              '--selected-index': deviceValues.indexOf(selectedDevice),
-            }"
           >
             <span
               class="deviceSegmentIndicator"
+              :style="deviceSegmentIndicatorStyle"
               aria-hidden="true"
+              @transitionend="updateDeviceSegmentLayout"
             />
             <button
               v-for="(value, index) in deviceValues"
@@ -348,6 +347,9 @@ const syncStatsVisible = computed(() => {
 const selectedDevice = ref('all')
 const deviceSegments = useTemplateRef('deviceSegments')
 const deviceSegmentTrack = useTemplateRef('deviceSegmentTrack')
+const deviceSegmentIndicatorStyle = ref({})
+const deviceFadeLeft = ref(false)
+const deviceFadeRight = ref(false)
 const otherDevices = computed(() => syncedDevices.value.filter(device => device.deviceId !== currentDeviceId.value))
 const deviceValues = computed(() => ['all', 'local', ...otherDevices.value.map(device => device.deviceId)])
 const deviceNames = computed(() => [
@@ -423,13 +425,42 @@ watch(deviceValues, values => {
   if (!values.includes(selectedDevice.value)) selectedDevice.value = 'all'
 })
 
-function clampDeviceSegments() {
+function updateDeviceSegmentFades() {
+  const element = deviceSegments.value
+  if (!element) return
+  const offset = Math.abs(element.scrollLeft)
+  const remaining = element.scrollWidth - element.clientWidth - offset
+  const rtl = getComputedStyle(element).direction === 'rtl'
+  // Fractional scroll boundaries are valid at non-100% UI scales.
+  deviceFadeLeft.value = (rtl ? remaining : offset) > 1
+  deviceFadeRight.value = (rtl ? offset : remaining) > 1
+}
+
+async function updateDeviceSegmentLayout() {
   if (deviceSegments.value && deviceSegmentTrack.value) {
+    const track = deviceSegmentTrack.value
+    const selected = track.querySelector('[aria-pressed="true"]')
+    if (!selected) return
+    const trackBounds = track.getBoundingClientRect()
+    const selectedBounds = selected.getBoundingClientRect()
+    const style = getComputedStyle(track)
+    const offset = style.direction === 'rtl'
+      ? trackBounds.right - selectedBounds.right
+      : selectedBounds.left - trackBounds.left
+    deviceSegmentIndicatorStyle.value = {
+      insetInlineStart: `${offset - Number.parseFloat(style.borderInlineStartWidth)}px`,
+      inlineSize: `${selectedBounds.width}px`,
+    }
+    // Apply the new indicator bounds before measuring the shortened range.
+    // Animated bounds are clamped again when their transition finishes.
+    await nextTick()
+    if (!deviceSegments.value || !deviceSegmentTrack.value) return
     clampOverlayScrollLeft(deviceSegments.value, deviceSegmentTrack.value)
+    updateDeviceSegmentFades()
   }
 }
 
-watch([deviceValues, deviceNames], () => nextTick(clampDeviceSegments), { flush: 'post' })
+watch([deviceValues, deviceNames, selectedDevice], () => nextTick(updateDeviceSegmentLayout), { flush: 'post' })
 
 let deviceSegmentsResizeObserver = null
 watch(syncStatsVisible, async visible => {
@@ -437,7 +468,7 @@ watch(syncStatsVisible, async visible => {
   if (!visible || typeof ResizeObserver !== 'function') return
   await nextTick()
   if (!deviceSegments.value || !deviceSegmentTrack.value) return
-  deviceSegmentsResizeObserver = new ResizeObserver(clampDeviceSegments)
+  deviceSegmentsResizeObserver = new ResizeObserver(updateDeviceSegmentLayout)
   deviceSegmentsResizeObserver.observe(deviceSegments.value)
   deviceSegmentsResizeObserver.observe(deviceSegmentTrack.value)
 }, { immediate: true, flush: 'post' })

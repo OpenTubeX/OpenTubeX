@@ -182,6 +182,122 @@ test.describe('synced watch stats', () => {
     },
   })
 
+  test('device picker grows into available space and fades overflowing edges', async ({ app, page }, testInfo) => {
+    await goTo(page, 'stats')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerWatchStatsSupported', true)
+      store.commit('setSyncedWatchStats', [
+        { deviceId: 'phone', deviceName: 'Pixel 8 Pro', platform: 'android', days: {} },
+        { deviceId: 'tablet', deviceName: 'Living room tablet', platform: 'android', days: {} },
+      ])
+    })
+    const picker = page.getByRole('group', { name: 'Devices' })
+    const scrollbar = picker.locator(':scope > .os-scrollbar-horizontal')
+    const expectIndicatorAligned = async () => {
+      await expect.poll(() => picker.evaluate(group => {
+        const button = group.querySelector('[aria-pressed="true"]').getBoundingClientRect()
+        const indicator = group.querySelector('.deviceSegmentIndicator').getBoundingClientRect()
+        return Math.max(Math.abs(button.left - indicator.left), Math.abs(button.right - indicator.right))
+      })).toBeLessThan(1)
+    }
+    const expectSingleLineLabels = async () => {
+      await expect.poll(() => picker.getByRole('button').evaluateAll(buttons => buttons.every(button => {
+        const range = document.createRange()
+        range.selectNodeContents(button.lastChild)
+        return range.getClientRects().length === 1
+      }))).toBe(true)
+    }
+    const expectNoOverflow = async () => {
+      await expect.poll(() => picker.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await expect.poll(() => picker.evaluate(element => element.scrollLeft)).toBe(0)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+      await expect(picker).not.toHaveClass(/fadeLeft|fadeRight/)
+    }
+    await expect(picker.getByRole('button')).toHaveCount(4)
+    await expect.poll(async () => {
+      const laptop = await picker.getByRole('button', { name: 'Laptop', exact: true }).boundingBox()
+      const tablet = await picker.getByRole('button', { name: 'Living room tablet', exact: true }).boundingBox()
+      return laptop.width / tablet.width
+    }).toBeLessThan(0.8)
+    for (const name of ['Laptop', 'Pixel 8 Pro', 'Living room tablet', 'All devices']) {
+      await picker.getByRole('button', { name, exact: true }).click()
+      await expectIndicatorAligned()
+    }
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+    await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
+    await expectNoOverflow()
+    await expectSingleLineLabels()
+    await picker.screenshot({ path: testInfo.outputPath('devices-wide.png') })
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await expectNoOverflow()
+    await picker.getByRole('button', { name: 'Living room tablet', exact: true }).click()
+    await expectIndicatorAligned()
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 480, height: 800 })
+    })
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    await expect(picker).toHaveCSS('mask-image', /linear-gradient/)
+    await expect(picker).not.toHaveClass(/fadeLeft/)
+    await picker.evaluate(element => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    // Electron's locator screenshot clipping uses unzoomed coordinates.
+    await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.dispatch('updateUiScale', 100))
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBeGreaterThan(400)
+    await picker.evaluate(element => { element.scrollLeft = (element.scrollWidth - element.clientWidth) / 2 })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).toHaveClass(/fadeRight/)
+    await picker.screenshot({ path: testInfo.outputPath('devices-overflow.png') })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
+    await expect(picker).toHaveClass(/fadeLeft/)
+    await expect(picker).not.toHaveClass(/fadeRight/)
+
+    // Expanding the viewport must remove both the stale offset and fades.
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1600, height: 900 })
+    })
+    await expectNoOverflow()
+    await expectIndicatorAligned()
+
+    // Shorter labels and removal can also eliminate an existing scroll range.
+    for (const change of ['rename', 'remove']) {
+      await page.emulateMedia({ reducedMotion: change === 'remove' ? 'reduce' : 'no-preference' })
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
+          ...device, deviceName: 'A device with a very long name that needs horizontal scrolling',
+        })))
+      })
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      await picker.evaluate(element => { element.scrollLeft = element.scrollWidth })
+      await expect(picker).toHaveClass(/fadeLeft/)
+      await page.evaluate(change => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncedWatchStats', change === 'remove'
+          ? []
+          : store.getters.getSyncedWatchStats.map(device => ({ ...device, deviceName: 'Phone' })))
+      }, change)
+      await expectNoOverflow()
+      await expectIndicatorAligned()
+    }
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .commit('setSyncedWatchStats', [{ deviceId: 'tablet', deviceName: 'Living room Android tablet', days: {} }]))
+    await expect(picker.getByRole('button')).toHaveCount(3)
+    await expect.poll(() => picker.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(460)
+    await expectNoOverflow()
+    await expectSingleLineLabels()
+  })
+
   test('switches between devices and keeps another device after a local reset', async ({ app, page }) => {
     const remote = [{ deviceId: phone, deviceName: 'Phone', platform: 'android', days: { [today]: 1800 } }]
     let revision = 1
@@ -347,8 +463,9 @@ test.describe('synced watch stats', () => {
     })
     await expect(selector.getByRole('button')).toHaveCount(3)
     await expect.poll(() => selector.evaluate(element =>
-      element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-    await expect(selector.locator(':scope > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-unusable/)
+      element.scrollWidth - element.clientWidth)).toBeGreaterThan(1)
+    await expect(selector.locator(':scope > .os-scrollbar-horizontal')).not.toHaveClass(/os-scrollbar-unusable/)
+    await expect(selector).toHaveClass(/fadeRight/)
 
     watchStatsSupported = false
     await page.context().setOffline(false)
