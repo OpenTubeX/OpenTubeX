@@ -200,7 +200,7 @@ for (const uiScale of [100, 125]) {
         await expect(menu).toBeVisible()
         await expect(menu.locator('.titleDescription')).toHaveCount(11)
         const category = menu.locator('.titleItem').first()
-        const expandedHeight = (await category.boundingBox()).height
+        const expandedHeight = await category.evaluate(element => element.getBoundingClientRect().height)
         await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
         await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
@@ -210,7 +210,7 @@ for (const uiScale of [100, 125]) {
           .dispatch('updateHideSettingsCategoryDescriptions', true))
         await expect(menu.locator('.titleDescription')).toHaveCount(0)
         await expect(category).toHaveCSS('min-block-size', width === 480 ? '48px' : '36px')
-        expect((await category.boundingBox()).height).toBeLessThan(expandedHeight - 10)
+        expect(await category.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(expandedHeight - 10)
         await expectValidCategoryScrollbars(menu)
 
         await goToSettingsSection(page, 'appearance')
@@ -219,7 +219,7 @@ for (const uiScale of [100, 125]) {
         if (width === 480) await page.locator('.settingsBackButton').click()
         await expect(menu).toBeVisible()
         await expect(menu.locator('.titleDescription')).toHaveCount(11)
-        await expect.poll(async () => (await category.boundingBox()).height).toBeCloseTo(expandedHeight, 0)
+        await expect.poll(() => category.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(expandedHeight, 0)
       })
     })
   }
