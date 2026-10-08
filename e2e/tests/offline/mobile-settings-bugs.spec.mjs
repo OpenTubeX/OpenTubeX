@@ -253,9 +253,8 @@ test.describe('desktop switch layout', () => {
       const textElement = element.querySelector('.switch-label-text')
       const tooltip = element.querySelector('.tooltip').getBoundingClientRect()
       const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
-      const range = document.createRange()
-      range.selectNodeContents(textElement)
-      const textRight = Math.max(...Array.from(range.getClientRects(), rect => rect.right))
+      // Wrapped text leaves unused space inside its box; measure the flex gap.
+      const textRight = textElement.getBoundingClientRect().right
       return {
         textToTooltip: tooltip.left - textRight,
         tooltipToSync: indicator.left - tooltip.right

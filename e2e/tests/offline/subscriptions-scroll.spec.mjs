@@ -141,7 +141,8 @@ test('a background feed refresh preserves its logical tab scroll across restart'
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
 
   const relaunched = await app.relaunch()
-  await expect(relaunched.page.getByText('Feed video 00')).toBeVisible()
+  // The restored viewport can leave the first video unmounted above it.
+  await expect(relaunched.page.locator('.ft-list-video .title').first()).toContainText('Feed video')
   await expect.poll(async () => {
     const state = await relaunched.page.evaluate(() => window.ftElectron.tabs.getState())
     const tab = state.tabs.find(candidate => candidate.id === subscriptionsTabId)

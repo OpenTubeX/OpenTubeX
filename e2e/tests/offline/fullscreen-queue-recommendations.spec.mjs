@@ -288,7 +288,8 @@ for (const { uiScale, iconPack, colorScheme } of [
         const loadComments = comments.locator('.getCommentsTitle')
         if (await loadComments.count() > 0) await loadComments.click()
         await expect(comments.locator('.commentThread').first()).toBeVisible()
-        await expectImagesLoaded(comments.locator('img:visible'))
+        // Offscreen comments still have lazy image placeholders.
+        await expectImagesLoaded(comments.locator('.commentThread').first().locator('img'))
         await queueScroller.evaluate(element => { element.scrollTop = 0 })
         await expectValidScroll(queueScroller, '.queueItemsContent')
         await expect(queueScroller.locator(':scope > .os-scrollbar-vertical')).toBeVisible()

@@ -66,7 +66,8 @@ function defineCase () {
   test('opening the collaborators prompt keeps the sticky app header visible', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
-    await expect(page.getByText('Filler video 9')).toBeAttached()
+    // Offscreen cards mount lazily; wait for their layout wrappers instead.
+    await expect(page.locator('[data-feed-item-key]')).toHaveCount(12)
     const rootOverflowBefore = await page.evaluate(() => {
       document.documentElement.style.overflow = 'auto'
       window.scrollTo(0, 300)
@@ -99,7 +100,7 @@ function defineCase () {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('Collab video')).toBeVisible()
-    await expect(page.getByText('Filler video 9')).toBeAttached()
+    await expect(page.locator('[data-feed-item-key]')).toHaveCount(12)
 
     // Let the feed's initial 300ms enter transition and grid sizing settle
     // before observing changes caused specifically by opening the prompt.
