@@ -313,6 +313,12 @@
   margin-inline-end: 8px;
 }
 
+.commentHeaderActions :deep(.select),
+.noCommentActions :deep(.select) {
+  /* Toolbar controls do not need the spacing between form rows. */
+  margin-block-end: 0;
+}
+
 .commentHeaderIconAction {
   display: inline-flex;
   inline-size: 28px;
