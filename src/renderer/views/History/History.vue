@@ -16,32 +16,54 @@
         </h2>
         <div
           v-if="historyCacheSorted.length > 0 || historyRepairState.running"
+          v-overlay-scrollbars
           class="headingActions"
         >
           <FtButton
             class="historyActionButton"
             :label="t('History.Delete Old History')"
+            :aria-label="t('History.Delete Old History')"
+            :title="t('History.Delete Old History')"
             :icon="['fas', 'trash']"
             theme="destructive"
             @click="showHistoryCleanupPrompt = true"
-          />
+          >
+            <template #label>
+              <span class="historyFullActionLabel">{{ t('History.Delete Old History') }}</span>
+              <span class="historyCompactActionLabel">{{ t('History.Delete Old Compact') }}</span>
+            </template>
+          </FtButton>
           <FtButton
             ref="repairAction"
             class="historyActionButton"
             :label="t('History.Repair')"
+            :aria-label="t('History.Repair')"
+            :title="t('History.Repair')"
             :icon="['fas', 'sync']"
             :disabled="historyRepairState.running"
             @click="showRepairPrompt = true"
-          />
+          >
+            <template #label>
+              <span class="historyFullActionLabel">{{ t('History.Repair') }}</span>
+              <span class="historyCompactActionLabel">{{ t('History.Repair Compact') }}</span>
+            </template>
+          </FtButton>
           <FtButton
             class="historyActionButton"
             :label="t('History.Mark All As Watched')"
+            :aria-label="t('History.Mark All As Watched')"
+            :title="t('History.Mark All As Watched')"
             :icon="['fas', 'eye']"
             :disabled="!hasUnwatchedHistory"
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
             @click="showMarkAllPrompt = true"
-          />
+          >
+            <template #label>
+              <span class="historyFullActionLabel">{{ t('History.Mark All As Watched') }}</span>
+              <span class="historyCompactActionLabel">{{ t('History.Mark All Watched Compact') }}</span>
+            </template>
+          </FtButton>
         </div>
       </div>
       <section

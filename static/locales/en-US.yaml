@@ -468,6 +468,9 @@ History:
   Repair Finished: "Repair finished"
   Repair Stopped: "Repair stopped"
   Repair: "Repair History"
+  Delete Old Compact: Delete old
+  Repair Compact: Repair
+  Mark All Watched Compact: Mark all watched
   Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
   # On History Page
   History: History

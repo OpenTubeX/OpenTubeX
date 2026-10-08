@@ -94,6 +94,7 @@ test.use({
   seed: {
     settings: {
       uiRoundness: 200,
+      useAITranslationCompletions: true,
       quickBookmarkTargetPlaylistId: 'favorites'
     },
     playlists: [{
@@ -202,22 +203,134 @@ test.describe('watch history', () => {
     }
   })
 
-  test('history actions start with cleanup and wrap from the left', async ({ page }) => {
+  test('history actions and labels stay on one line without clipping at narrow widths and fractional zoom', async ({ app, page }) => {
     await goTo(page, 'history')
-    for (const width of [375, 520, 850, 1280]) {
-      await page.setViewportSize({ width, height: 900 })
-      const actions = page.locator('.headingActions')
-      await expect(actions.getByRole('button').first()).toHaveText('Delete Old History')
-      await expect.poll(() => actions.evaluate(element => {
-        const bounds = element.getBoundingClientRect()
-        const rows = new Map()
-        for (const button of element.querySelectorAll('button')) {
-          const rect = button.getBoundingClientRect()
-          if (!rows.has(rect.top)) rows.set(rect.top, rect.left)
-          if (rect.right > bounds.right + 1) return false
+    const actions = page.locator('.headingActions')
+    await expect(actions.locator('.historyFullActionLabel:visible')).toHaveText(['Delete Old History', 'Repair History', 'Mark All As Watched'])
+    const compactLabels = {
+      'en-US': ['Delete old', 'Repair', 'Mark all watched'],
+      'de-DE': ['Alte löschen', 'Reparatur', 'Alle gesehen'],
+      fi: ['Siivoa', 'Korjaa', 'Kaikki katsottu'],
+      cy: ['Dileu hen', 'Trwsio', 'Pob un wedi’i weld'],
+      'fr-FR': ['Suppr. anciens', 'Réparer', 'Tout vu'],
+      ta: ['பழையது அழி', 'சரி', 'யாவும் கண்டது']
+    }
+    for (const [locale, labels] of Object.entries(compactLabels)) {
+      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      for (const zoom of [1, 1.25]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        for (const width of [320, 375, 520, 732]) {
+          await setWindowSize(app, page, { width, height: width === 732 ? 550 : 1200 - width })
+          await expect(actions.locator('.historyCompactActionLabel:visible')).toHaveText(labels)
+          await expect.poll(() => actions.evaluate(element => {
+            const bounds = element.getBoundingClientRect()
+            const row = element.closest('.headingRow').getBoundingClientRect()
+            const buttons = [...element.querySelectorAll('button')]
+            const first = buttons[0].getBoundingClientRect()
+            return bounds.left >= row.left - 1 && bounds.right <= row.right + 1 && buttons.length === 3 && buttons.every(button => {
+              const rect = button.getBoundingClientRect()
+              const range = document.createRange()
+              range.selectNodeContents(button)
+              const contentFits = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).every(content => content.left >= rect.left - 1 && content.right <= rect.right + 1)
+              const textNodes = document.createTreeWalker(button, NodeFilter.SHOW_TEXT)
+              let textNode
+              while ((textNode = textNodes.nextNode())) {
+                if (!textNode.textContent.trim()) continue
+                range.selectNodeContents(textNode)
+                if ([...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0).length > 1) return false
+              }
+              return Math.abs(rect.top - first.top) < 1 && Math.abs(rect.height - first.height) < 1 && rect.height >= 48 &&
+                rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1 && contentFits
+            })
+          })).toBe(true)
         }
-        return [...rows.values()].every(left => Math.abs(left - bounds.left) < 1)
-      })).toBe(true)
+      }
+    }
+  })
+
+  test('keeps longer compact labels inside the action row in every active locale', async ({ app, page }) => {
+    test.slow()
+    await goTo(page, 'history')
+    const activeLocales = JSON.parse(await readFile(new URL('../../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
+    const actions = page.locator('.headingActions')
+    for (const locale of ['br', ...activeLocales.filter(locale => locale !== 'br')]) {
+      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      await page.waitForFunction(locale => document.documentElement.lang === locale, locale)
+      for (const zoom of [1, 1.25]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        for (const width of [320, 375]) {
+          await setWindowSize(app, page, { width, height: 1200 - width })
+          await expect.poll(() => actions.evaluate(element => {
+            const row = element.closest('.headingRow').getBoundingClientRect()
+            const buttons = [...element.querySelectorAll('button')]
+            const first = buttons[0].getBoundingClientRect()
+            return buttons.length === 3 && buttons.every(button => {
+              const rect = button.getBoundingClientRect()
+              const label = button.querySelector('.historyCompactActionLabel')
+              const labelRect = label.getBoundingClientRect()
+              const icon = button.querySelector('svg').getBoundingClientRect()
+              return Math.abs(rect.top - first.top) < 1 && rect.height >= 48 &&
+                rect.left >= row.left - 1 && rect.right <= row.right + 1 &&
+                label.textContent.trim().length > 0 && labelRect.width >= Math.min(20, label.scrollWidth - 1) &&
+                labelRect.left >= rect.left - 1 && labelRect.right <= rect.right + 1 &&
+                icon.left >= rect.left - 1 && icon.right <= rect.right + 1 &&
+                button.getAttribute('aria-label')?.trim().length > 0 &&
+                button.getAttribute('title') === button.getAttribute('aria-label') &&
+                (label.scrollWidth <= label.clientWidth || getComputedStyle(label).textOverflow === 'ellipsis')
+            })
+          }), `${locale}, ${width}px, ${zoom * 100}% zoom`).toBe(true)
+        }
+      }
+    }
+  })
+
+  test('keeps actions usable beside a wide vertical tab bar and clears obsolete scrolling', async ({ app, page }) => {
+    await goTo(page, 'history')
+    const actions = page.locator('.headingActions')
+    const scrollbar = actions.locator(':scope > .os-scrollbar-horizontal')
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', 'left')
+        store.commit('setVerticalTabBarWidth', 260)
+      })
+      await setWindowSize(app, page, { width: 340, height: 880 })
+      await expect(actions).toHaveAttribute('data-overlayscrollbars-viewport')
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+      for (const button of await actions.getByRole('button').all()) {
+        await button.focus()
+        await expect.poll(() => button.evaluate(button => {
+          const rect = button.getBoundingClientRect()
+          const icon = button.querySelector('svg').getBoundingClientRect()
+          const label = button.querySelector('.historyCompactActionLabel')
+          return rect.height >= 48 && icon.left >= rect.left - 1 && icon.right <= rect.right + 1 &&
+            label.scrollWidth <= label.clientWidth + 1
+        })).toBe(true)
+      }
+      for (const trigger of ['resize', 'tab width', 'locale']) {
+        if (trigger === 'locale') {
+          await setWindowSize(app, page, { width: 440, height: 860 })
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 260))
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'br'))
+          await page.waitForFunction(() => document.documentElement.lang === 'br')
+        } else if (trigger === 'tab width') {
+          await setWindowSize(app, page, { width: 340, height: 880 })
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 260))
+        }
+        await actions.evaluate(element => { element.scrollLeft = element.scrollWidth })
+        if (trigger === 'resize') await setWindowSize(app, page, { width: 732, height: 550 })
+        if (trigger === 'tab width') await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 150))
+        if (trigger === 'locale') {
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
+          await page.waitForFunction(() => document.documentElement.lang === 'en-US')
+        }
+        await expect.poll(() => actions.evaluate(element => element.scrollLeft <= Math.max(0, element.scrollWidth - element.clientWidth) + 1)).toBe(true)
+        await expect.poll(() => actions.evaluate(element => {
+          const scrollbar = element.querySelector(':scope > .os-scrollbar-horizontal')
+          return scrollbar.classList.contains('os-scrollbar-unusable') === (element.scrollWidth <= element.clientWidth)
+        })).toBe(true)
+      }
     }
   })
 

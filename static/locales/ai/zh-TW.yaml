@@ -203,6 +203,9 @@ User Playlists:
     This playlist could not be loaded.: 無法載入此播放清單。
     More videos could not be loaded.: 無法載入更多影片。
 History:
+  Delete Old Compact: "刪除舊紀錄"
+  Repair Compact: "修復"
+  Mark All Watched Compact: "全部標為已看"
   Repair Use Cookies: "使用已設定的 yt-dlp Cookie"
   Repair Cookies Hint: "需要檢查超過 500 部影片。請在 yt-dlp 設定中設定 Cookie 並在此處啟用，以降低請求受到速率限制的風險。"
   Repair Description: "在匯入歷史記錄後，或影片資訊缺漏、被錯誤標記為 LIVE 時使用。"

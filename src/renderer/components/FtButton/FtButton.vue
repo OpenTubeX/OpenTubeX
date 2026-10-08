@@ -15,7 +15,9 @@
         :icon="icon"
         aria-hidden="true"
       />
-      {{ label }}
+      <slot name="label">
+        {{ label }}
+      </slot>
     </slot>
   </button>
 </template>

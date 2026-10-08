@@ -323,6 +323,9 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  Delete Old Compact: "Izbriši stare"
+  Repair Compact: "Popravi"
+  Mark All Watched Compact: "Vse ogledano"
   Repair Use Cookies: "Uporabi nastavljene piškotke yt-dlp"
   Repair Cookies Hint: "Preveriti je treba več kot 500 videoposnetkov. Nastavite piškotke v nastavitvah yt-dlp in jih tukaj omogočite, da zmanjšate tveganje omejevanja zahtev."
   Repair Description: "Uporabite po uvozu zgodovine ali ko videoposnetkom manjkajo podatki ali imajo napačno oznako LIVE."

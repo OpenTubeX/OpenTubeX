@@ -203,6 +203,9 @@ User Playlists:
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
 History:
+  Delete Old Compact: "Eskileri sil"
+  Repair Compact: "Onar"
+  Mark All Watched Compact: "Tümü izlendi"
   Repair Use Cookies: "Yapılandırılmış yt-dlp çerezlerini kullan"
   Repair Cookies Hint: "500'den fazla videonun kontrol edilmesi gerekiyor. İstek sınırlaması riskini azaltmak için yt-dlp ayarlarında çerezleri yapılandırın ve burada etkinleştirin."
   Repair Description: "Geçmişi içe aktardıktan sonra veya videoların bilgileri eksikse ya da LIVE etiketi yanlışsa kullanın."

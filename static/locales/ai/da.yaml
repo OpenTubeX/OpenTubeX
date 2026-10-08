@@ -212,6 +212,9 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
 History:
+  Delete Old Compact: "Slet gamle"
+  Repair Compact: "Reparer"
+  Mark All Watched Compact: "Marker alle set"
   Repair Use Cookies: "Brug konfigurerede yt-dlp-cookies"
   Repair Cookies Hint: "Over 500 videoer skal kontrolleres. Konfigurer cookies i yt-dlp-indstillingerne, og aktivér dem her for at mindske risikoen for begrænsning af forespørgsler."
   Repair Description: "Brug dette efter import af historik, eller når videoer mangler oplysninger eller har en forkert LIVE-markering."

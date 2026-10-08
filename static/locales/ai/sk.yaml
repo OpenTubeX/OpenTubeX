@@ -203,6 +203,9 @@ User Playlists:
     This playlist could not be loaded.: Tento zoznam videí sa nepodarilo načítať.
     More videos could not be loaded.: Ďalšie videá sa nepodarilo načítať.
 History:
+  Delete Old Compact: "Zmazať staré"
+  Repair Compact: "Opraviť"
+  Mark All Watched Compact: "Všetky pozreté"
   Repair Use Cookies: "Použiť nastavené cookies yt-dlp"
   Repair Cookies Hint: "Treba skontrolovať viac ako 500 videí. Nastavte cookies v nastaveniach yt-dlp a povoľte ich tu, aby ste znížili riziko obmedzenia požiadaviek."
   Repair Description: "Použite po importe histórie alebo keď videám chýbajú údaje či majú nesprávny štítok LIVE."

@@ -203,6 +203,9 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  Delete Old Compact: "Kustuta vanad"
+  Repair Compact: "Paranda"
+  Mark All Watched Compact: "Kõik vaadatud"
   Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
   Repair Cookies Hint: "Kontrollida tuleb üle 500 video. Seadista küpsised yt-dlp seadetes ja luba need siin, et vähendada päringute piiramise ohtu."
   Repair Description: "Kasuta pärast ajaloo importimist või kui videote andmed puuduvad või LIVE-märgis on vale."

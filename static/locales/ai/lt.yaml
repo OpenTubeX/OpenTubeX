@@ -313,6 +313,9 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  Delete Old Compact: "Šalinti senus"
+  Repair Compact: "Taisyti"
+  Mark All Watched Compact: "Visi peržiūrėti"
   Repair Use Cookies: "Naudoti sukonfigūruotus yt-dlp slapukus"
   Repair Cookies Hint: "Reikia patikrinti daugiau nei 500 vaizdo įrašų. Sukonfigūruokite slapukus yt-dlp nustatymuose ir įjunkite juos čia, kad sumažintumėte užklausų ribojimo riziką."
   Repair Description: "Naudokite importavę istoriją arba kai trūksta vaizdo įrašų duomenų ar neteisingai rodoma LIVE žyma."

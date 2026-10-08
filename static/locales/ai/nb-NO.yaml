@@ -203,6 +203,9 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
 History:
+  Delete Old Compact: "Slett gamle"
+  Repair Compact: "Reparer"
+  Mark All Watched Compact: "Merk alle som sett"
   Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapsler"
   Repair Cookies Hint: "Over 500 videoer må kontrolleres. Konfigurer informasjonskapsler i yt-dlp-innstillingene og aktiver dem her for å redusere risikoen for begrensning av forespørsler."
   Repair Description: "Bruk dette etter import av historikk, eller når videoer mangler opplysninger eller har feil LIVE-merking."

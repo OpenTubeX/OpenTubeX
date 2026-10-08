@@ -207,6 +207,9 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
 History:
+  Delete Old Compact: "حذف القديم"
+  Repair Compact: "إصلاح"
+  Mark All Watched Compact: "تمييز الكل كمشاهَد"
   Repair Use Cookies: "استخدام ملفات تعريف الارتباط المعدّة لـ yt-dlp"
   Repair Cookies Hint: "يلزم فحص أكثر من 500 فيديو. اضبط ملفات تعريف الارتباط في إعدادات yt-dlp وفعّلها هنا لتقليل خطر تقييد الطلبات."
   Repair Description: "استخدم هذا بعد استيراد السجل، أو عندما تفتقد الفيديوهات بعض التفاصيل أو تحمل علامة LIVE بشكل غير صحيح."

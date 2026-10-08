@@ -205,6 +205,9 @@ User Playlists:
     This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
     More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
 History:
+  Delete Old Compact: "Изтрий стари"
+  Repair Compact: "Поправи"
+  Mark All Watched Compact: "Всички гледани"
   Repair Use Cookies: "Използване на настроените бисквитки на yt-dlp"
   Repair Cookies Hint: "Над 500 видеоклипа трябва да бъдат проверени. Настройте бисквитки в настройките на yt-dlp и ги включете тук, за да намалите риска от ограничаване на заявките."
   Repair Description: "Използвайте след импортиране на историята или когато липсват данни за видеоклиповете или имат неправилен етикет LIVE."

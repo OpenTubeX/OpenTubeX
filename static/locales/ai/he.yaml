@@ -207,6 +207,9 @@ User Playlists:
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
 History:
+  Delete Old Compact: "מחיקת ישנים"
+  Repair Compact: "תיקון"
+  Mark All Watched Compact: "סימון הכול כנצפה"
   Repair Use Cookies: "שימוש בעוגיות שהוגדרו ב־yt-dlp"
   Repair Cookies Hint: "יש לבדוק יותר מ־500 סרטונים. יש להגדיר עוגיות בהגדרות yt-dlp ולהפעיל אותן כאן כדי להפחית את הסיכון להגבלת בקשות."
   Repair Description: "יש להשתמש לאחר ייבוא ההיסטוריה, או כאשר חסרים פרטים בסרטונים או שמופיעה בהם תווית LIVE שגויה."

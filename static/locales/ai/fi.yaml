@@ -207,6 +207,9 @@ User Playlists:
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
 History:
+  Delete Old Compact: "Siivoa"
+  Repair Compact: "Korjaa"
+  Mark All Watched Compact: "Kaikki katsottu"
   Repair Use Cookies: "Käytä määritettyjä yt-dlp-evästeitä"
   Repair Cookies Hint: "Yli 500 videota on tarkistettava. Määritä evästeet yt-dlp-asetuksissa ja ota ne käyttöön tässä vähentääksesi pyyntöjen rajoittamisen riskiä."
   Repair Description: "Käytä tätä historian tuonnin jälkeen tai kun videoista puuttuu tietoja tai niissä on virheellinen LIVE-merkintä."
