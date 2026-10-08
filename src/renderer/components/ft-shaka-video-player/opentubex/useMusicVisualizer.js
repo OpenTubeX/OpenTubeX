@@ -87,7 +87,10 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
     lastFrameTime = 0
     clearCanvas()
 
-    if (audioContext?.state === 'running') {
+    // Chromium shares audio output resources with the captured media element.
+    // Suspending/resuming analysis during playback can crackle on Android, so
+    // keep its graph running while only the canvas is hidden or disabled.
+    if (audioContext?.state === 'running' && video.value?.paused !== false) {
       runVisualizerTask(audioContext.suspend())
     }
   }
@@ -242,6 +245,10 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
 
   async function startDrawing() {
     if (!canDraw()) {
+      // Lock-screen controls can resume playback while drawing stays hidden.
+      if (audioContext?.state === 'suspended' && video.value?.paused === false) {
+        await audioContext.resume()
+      }
       return
     }
 
