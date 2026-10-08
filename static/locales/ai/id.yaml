@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Compact Settings Categories: "Kategori Pengaturan Ringkas"
     Playlist Thumbnail Size: "Ukuran thumbnail playlist"
     Compact Mobile Mini Player: "Pemutar mini seluler ringkas"
     Always Show Mobile Search Bar: "Selalu tampilkan bilah pencarian di ponsel"
@@ -1781,6 +1782,7 @@ Tooltips:
     Auto Refresh Interval: "Frekuensi OpenTubeX memperbarui umpan langganan secara otomatis selama aplikasi terbuka. Di Android, interval bukan nol juga memperbarui feed saat aplikasi ditutup."
     Refresh Subscriptions While App Is Closed: "Memperbarui feed sesuai setelan yang dipilih. Di desktop, OpenTubeX tetap di baki sistem sampai Anda keluar. Android menentukan waktu pembaruan latar belakang."
   Theme Settings:
+    Compact Settings Categories: "Menyembunyikan deskripsi dan mengurangi tinggi kategori pengaturan."
     Show Progress as Notification: Menampilkan notifikasi tetap dengan progres langsung untuk operasi latar belakang, seperti pembaruan langganan dan unduhan alat terkelola, sebagai pengganti bilah progres global.
     Always Show Scrollbars: Mempertahankan bilah gulir agar selalu terlihat. Jika dinonaktifkan, bilah memudar sesaat setelah Anda berhenti menggerakkan tetikus dan muncul kembali begitu tetikus digerakkan.
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.

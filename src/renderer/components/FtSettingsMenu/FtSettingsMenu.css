@@ -101,6 +101,23 @@
   min-block-size: 48px;
 }
 
+.settingsMenu.compact .titleItem {
+  min-block-size: 36px;
+}
+
+.settingsMenu.compact .title {
+  padding-block: 6px;
+}
+
+.settingsMenu.compact .iconAndTitleText {
+  align-items: center;
+}
+
+.settingsMenu.compact .titleIcon {
+  grid-row: 1;
+  margin-block-start: 0;
+}
+
 @media (any-pointer: coarse), (width <= 680px) {
   .settingsMenu {
     gap: 8px;
@@ -115,13 +132,26 @@
     padding-block: 12px;
   }
 
+  .title:active {
+    color: var(--side-nav-hover-text-color);
+    background: var(--side-nav-hover-color);
+  }
+
+  .settingsMenu.compact {
+    gap: 4px;
+  }
+
+  .settingsMenu.compact .titleItem {
+    min-block-size: 48px;
+  }
+
+  .settingsMenu.compact .title {
+    padding-block: 8px;
+  }
+
   .titleDescription {
     font-size: 13px;
     margin-block-start: 4px;
   }
 
-  .title:active {
-    color: var(--side-nav-hover-text-color);
-    background: var(--side-nav-hover-color);
-  }
 }

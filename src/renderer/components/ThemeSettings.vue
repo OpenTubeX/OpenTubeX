@@ -237,6 +237,14 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Compact Settings Categories')"
+          :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
+          compact
+          :default-value="store.getters.getHideSettingsCategoryDescriptions"
+          setting-key="hideSettingsCategoryDescriptions"
+          @change="store.dispatch('updateHideSettingsCategoryDescriptions', $event)"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
           compact
           :default-value="hideLabelsSideBar"

@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Compact Settings Categories: "Þéttir stillingaflokkar"
     Playlist Thumbnail Size: "Stærð smámynda spilunarlista"
     Compact Mobile Mini Player: "Þéttur smáspilari í farsíma"
     Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
@@ -1790,6 +1791,7 @@ Tooltips:
     Auto Refresh Interval: "Hversu oft OpenTubeX endurnýjar áskriftarstreymið sjálfkrafa meðan forritið er opið. Í Android endurnýjar bil sem er ekki núll einnig veituna þegar appið er lokað."
     Refresh Subscriptions While App Is Closed: "Endurnýjar efnisveitur með völdum stillingum. Á tölvu helst OpenTubeX í kerfisbakkanum þar til þú hættir. Android stjórnar því hvenær bakgrunnsuppfærslur fara fram."
   Theme Settings:
+    Compact Settings Categories: "Felur lýsingar og minnkar hæð stillingaflokka."
     Show Progress as Notification: Sýnir tilkynningu með framvindu bakgrunnsaðgerða í rauntíma sem hverfur ekki, svo sem við endurnýjun áskriftarstreymis og niðurhal tóla sem forritið sér um, í stað almennu framvindustikunnar.
     Always Show Scrollbars: Heldur skrunstikum alltaf sýnilegum. Ef slökkt er á þessu dofna þær stuttu eftir að músin hættir að hreyfast og birtast aftur um leið og hún er hreyfð.
     Scroll Speed: Breytir hversu langt er skrunað með músarhjóli og snertifleti.

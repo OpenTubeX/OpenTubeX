@@ -372,6 +372,7 @@ Settings:
     Invalid Engine: יש להזין שם וכתובת URL תקינה לחיפוש מסוג HTTP או HTTPS שמכילה את %s.
     Engine Limit: אפשר להוסיף עד {count} מנועי חיפוש מותאמים אישית.
   Theme Settings:
+    Compact Settings Categories: "קטגוריות הגדרות קומפקטיות"
     Playlist Thumbnail Size: "גודל התמונות הממוזערות ברשימת ההשמעה"
     Compact Mobile Mini Player: "נגן קטן קומפקטי לנייד"
     Always Show Mobile Search Bar: "הצגת סרגל החיפוש בנייד תמיד"
@@ -1814,6 +1815,7 @@ Tooltips:
     Auto Refresh Interval: "התדירות שבה OpenTubeX מרעננת אוטומטית את פיד המינויים כשהיישום פתוח. ב-Android, מרווח שאינו אפס מרענן את הפיד גם כשהיישום סגור."
     Refresh Subscriptions While App Is Closed: "מרענן את העדכונים בהתאם להגדרות שבחרת. במחשב, OpenTubeX נשאר במגש המערכת עד ליציאה. Android קובע מתי יבוצעו רענונים ברקע."
   Theme Settings:
+    Compact Settings Categories: "מסתיר תיאורים ומקטין את גובה קטגוריות ההגדרות."
     Show Progress as Notification: מציג התראה קבועה עם התקדמות בזמן אמת של פעולות רקע, כגון רענון מינויים והורדת כלים מנוהלים, במקום סרגל ההתקדמות הכללי.
     Always Show Scrollbars: משאיר את פסי הגלילה גלויים תמיד. כשהאפשרות מושבתת, הם נעלמים זמן קצר לאחר הפסקת תנועת העכבר ומופיעים שוב מיד כשמזיזים אותו.
     Scroll Speed: שינוי מרחק הגלילה של מחוות גלגלת העכבר ומשטח המגע.

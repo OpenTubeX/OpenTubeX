@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Compact Settings Categories: "Rummadoù arventennoù stank"
     Playlist Thumbnail Size: "Ment skeudennoù bihan ar roll-lenn"
     Compact Mobile Mini Player: "Lenner bihan hezoug stank"
     Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
@@ -1779,6 +1780,7 @@ Tooltips:
     Auto Refresh Interval: "Alies ma adkarg OpenTubeX gwazh ho koumanantoù ent emgefreek pa vez digor an arload. War Android, un etremez anvannel a freska ar gwazh ivez pa vez serret an arload."
     Refresh Subscriptions While App Is Closed: "Hizivaat a ra al lanvioù gant an arventennoù dibabet. War an urzhiataer e chom OpenTubeX e takad ar c'hemennoù betek kuitaat. Android a ziviz pegoulz e vez hizivaet en drekleur."
   Theme Settings:
+    Compact Settings Categories: "Kuzhat a ra an deskrivadurioù ha bihanaat a ra uhelder rummadoù an arventennoù."
     Show Progress as Notification: "Diskouez ur rebuad padus gant araokadur diouzhtu evit an oberoù en drekleur, evel adkargañ ar c'houmanantoù ha pellgargañ ostilhoù meret, e-lec'h implijout ar varrenn araokadur hollek."
     Always Show Scrollbars: "Derc'hel ar barrennoù dibunañ gwelus bepred. Pa vez diweredekaet e steuziont nebeut goude ma paouezit da zilec'hiañ al logodenn hag e tistroont kerkent ha ma tilec'hiit anezhi en-dro."
     Scroll Speed: "Kemmañ ar pellder dibunañ gant rod al logodenn ha jestroù rod ar c'horreenn-stok."

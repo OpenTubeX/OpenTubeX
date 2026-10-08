@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Compact Settings Categories: "設定カテゴリをコンパクトに表示"
     Playlist Thumbnail Size: "再生リストのサムネイルサイズ"
     Compact Mobile Mini Player: "モバイルのミニプレーヤーをコンパクトに表示"
     Always Show Mobile Search Bar: "モバイルの検索バーを常に表示"
@@ -1770,6 +1771,7 @@ Tooltips:
     Auto Refresh Interval: "アプリの起動中にOpenTubeXが登録チャンネルのフィードを自動更新する間隔です。 Android では、0 以外の間隔を選ぶと、アプリを閉じている間もフィードが更新されます。"
     Refresh Subscriptions While App Is Closed: "選択した設定でフィードを更新します。デスクトップでは、終了するまでOpenTubeXがシステムトレイに常駐します。Androidでは、バックグラウンド更新の実行時刻をシステムが制御します。"
   Theme Settings:
+    Compact Settings Categories: "説明を非表示にし、設定カテゴリの高さを縮小します。"
     Show Progress as Notification: 登録チャンネルの更新や管理対象ツールのダウンロードなど、バックグラウンド処理の進行状況を共通の進行状況バーではなく、常に表示される通知で示します。
     Always Show Scrollbars: スクロールバーを常に表示します。無効にすると、マウスを止めてから少し後に消え、再び動かすとすぐに表示されます。
     Scroll Speed: マウスホイールとタッチパッドのホイール操作によるスクロール距離を変更します。

@@ -84,6 +84,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding-block: 6.5px;
   padding-inline: 10px;
   color: var(--primary-text-color);
   background: var(--side-nav-color);

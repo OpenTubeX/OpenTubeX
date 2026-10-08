@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Compact Settings Categories: "Yığcam ayar kateqoriyaları"
     Playlist Thumbnail Size: "Pleylist miniatürlərinin ölçüsü"
     Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
@@ -1783,6 +1784,7 @@ Tooltips:
     Auto Refresh Interval: Tətbiq açıq olduqda OpenTubeX-in abunəlik axınınızı hansı tezliklə avtomatik yeniləyəcəyi. Android-də sıfırdan fərqli aralıq tətbiq bağlı olduqda da axını yeniləyir.
     Refresh Subscriptions While App Is Closed: "Lentləri seçdiyiniz parametrlərlə yeniləyir. Masaüstündə OpenTubeX çıxana qədər sistem treyində qalır. Android arxa plan yeniləmələrinin vaxtını müəyyən edir."
   Theme Settings:
+    Compact Settings Categories: "Təsvirləri gizlədir və ayar kateqoriyalarının hündürlüyünü azaldır."
     Show Progress as Notification: Ümumi gedişat zolağı əvəzinə abunəlik yeniləmələri və idarə olunan vasitələrin endirilməsi kimi arxa plan əməliyyatlarının cari gedişatını daimi bildirişdə göstərir.
     Always Show Scrollbars: Sürüşdürmə zolaqlarını həmişə görünən saxlayır. Bağlandıqda, siçanı hərəkət etdirməyi dayandırdıqdan az sonra solub yox olur və onu yenidən hərəkət etdirən kimi görünürlər.
     Scroll Speed: Siçan çarxı və toxunma paneli jestlərinin səhifəni nə qədər sürüşdürdüyünü dəyişir.

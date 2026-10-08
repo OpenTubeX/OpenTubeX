@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Compact Settings Categories: "Kompaktne kategorije postavki"
     Playlist Thumbnail Size: "Veličina sličica popisa za reprodukciju"
     Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
@@ -1792,6 +1793,7 @@ Tooltips:
     Auto Refresh Interval: "Učestalost kojom OpenTubeX automatski osvježava sažetak pretplata dok je aplikacija otvorena. Na Androidu interval koji nije nula osvježava sažetak i dok je aplikacija zatvorena."
     Refresh Subscriptions While App Is Closed: "Osvježava sadržaj prema odabranim postavkama. Na računalu OpenTubeX ostaje u sistemskoj traci do izlaska. Android određuje vrijeme osvježavanja u pozadini."
   Theme Settings:
+    Compact Settings Categories: "Skriva opise i smanjuje visinu kategorija postavki."
     Show Progress as Notification: Umjesto opće trake napretka prikazuje trajnu obavijest s trenutačnim napretkom pozadinskih postupaka, poput osvježavanja pretplata i preuzimanja alata kojima se upravlja.
     Always Show Scrollbars: Drži klizne trake uvijek vidljivima. Kada je isključeno, nestaju ubrzo nakon što prestanete pomicati miš i ponovno se pojavljuju čim ga pomaknete.
     Scroll Speed: Mijenja udaljenost pomicanja gestama kotačića miša i dodirne pločice.

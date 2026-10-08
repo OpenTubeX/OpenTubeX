@@ -372,6 +372,7 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Compact Settings Categories: "فئات إعدادات مدمجة"
     Playlist Thumbnail Size: "حجم الصور المصغرة لقائمة التشغيل"
     Compact Mobile Mini Player: "مشغّل مصغّر مدمج للهاتف"
     Always Show Mobile Search Bar: "إظهار شريط البحث على الهاتف دائمًا"
@@ -1792,6 +1793,7 @@ Tooltips:
     Auto Refresh Interval: "عدد المرات التي يقوم فيها OpenTubeX بتحديث موجز اشتراكك تلقائيًا أثناء فتح التطبيق. على أندرويد، يؤدي اختيار فاصل زمني غير صفري أيضًا إلى تحديث الخلاصة عندما يكون التطبيق مغلقًا."
     Refresh Subscriptions While App Is Closed: "يحدّث الخلاصات وفق إعداداتك. على سطح المكتب، يبقى OpenTubeX في علبة النظام حتى تنهيه. يتحكم Android في توقيت التحديثات في الخلفية."
   Theme Settings:
+    Compact Settings Categories: "يخفي الأوصاف ويقلل ارتفاع فئات الإعدادات."
     Show Progress as Notification: يعرض إشعارًا مستمرًا بالتقدم المباشر لعمليات الخلفية، مثل تحديثات الاشتراك وتنزيلات الأدوات المُدارة، بدلاً من استخدام شريط التقدم العام.
     Always Show Scrollbars: يبقي أشرطة التمرير مرئية في جميع الأوقات. عند تعطيلها، فإنها تتلاشى بعد وقت قصير من التوقف عن تحريك الماوس وتعاود الظهور بمجرد تحريكه مرة أخرى.
     Scroll Speed: يغيّر مسافة التمرير بإيماءات عجلة الفأرة ولوحة اللمس.

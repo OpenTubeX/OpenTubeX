@@ -1765,6 +1765,20 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background: none;
 }
 
+:deep(.shaka-seek-bar-container) {
+  /* Composite Shaka's translucent track colours over a fixed dark surface.
+     Its inline background shorthand otherwise resets this to transparent. */
+  background-color: #181818 !important;
+}
+
+:deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
+:deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+
 :deep(.shaka-controls-button-panel) {
   --ft-controls-fade: 1;
   --ft-control-fade-duration: 600ms;

@@ -398,6 +398,7 @@ Settings:
     Invalid Engine: Introduce un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Puedes agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Compact Settings Categories: "Categorías de ajustes compactas"
     Playlist Thumbnail Size: "Tamaño de las miniaturas de la lista de reproducción"
     Compact Mobile Mini Player: "Minirreproductor móvil compacto"
     Always Show Mobile Search Bar: "Mostrar siempre la barra de búsqueda en el celular"
@@ -2121,6 +2122,7 @@ Tooltips:
     Auto Refresh Interval: "Frecuencia con la que OpenTubeX actualiza automáticamente la fuente de suscripciones mientras la aplicación está abierta. En Android, un intervalo distinto de cero también actualiza el feed mientras la aplicación está cerrada."
     Refresh Subscriptions While App Is Closed: "Actualiza las fuentes de suscripciones con los ajustes seleccionados. En el escritorio, OpenTubeX permanece en la bandeja del sistema hasta que salgas. Android controla cuándo se ejecutan las actualizaciones en segundo plano."
   Theme Settings:
+    Compact Settings Categories: "Oculta las descripciones y reduce la altura de las categorías de ajustes."
     Show Progress as Notification: Muestra una notificación persistente con el progreso en tiempo real de las operaciones en segundo plano, como la actualización de suscripciones y la descarga de herramientas gestionadas, en lugar de usar la barra de progreso global.
     Always Show Scrollbars: Mantiene las barras de desplazamiento visibles en todo momento. Si se desactiva, desaparecen poco después de dejar de mover el mouse y reaparecen en cuanto vuelves a moverlo.
     Scroll Speed: Cambia la distancia que desplazan los gestos de la rueda del mouse y del panel táctil.

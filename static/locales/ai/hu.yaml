@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Compact Settings Categories: "Kompakt beállításkategóriák"
     Playlist Thumbnail Size: "Lejátszási lista bélyegképeinek mérete"
     Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
@@ -1769,6 +1770,7 @@ Tooltips:
     Auto Refresh Interval: "Milyen gyakran frissítse automatikusan az OpenTubeX a feliratkozási hírfolyamot, amíg az alkalmazás nyitva van. Androidon a nullától eltérő időköz akkor is frissíti a hírfolyamot, amikor az alkalmazás be van zárva."
     Refresh Subscriptions While App Is Closed: "A kiválasztott beállításokkal frissíti a hírcsatornákat. Számítógépen az OpenTubeX kilépésig a rendszertálcán marad. Androidon a rendszer határozza meg a háttérfrissítések idejét."
   Theme Settings:
+    Compact Settings Categories: "Elrejti a leírásokat és csökkenti a beállításkategóriák magasságát."
     Show Progress as Notification: Állandó értesítés megjelenítése a háttérműveletek, például a feliratkozások frissítése és a kezelt eszközök letöltése valós idejű állapotával a globális folyamatjelző helyett.
     Always Show Scrollbars: A görgetősávok állandó megjelenítése. Kikapcsolva röviddel az egér mozgatásának befejezése után elhalványulnak, és az egér újbóli megmozdításakor ismét megjelennek.
     Scroll Speed: Megváltoztatja, hogy az egérgörgő és az érintőpad kézmozdulatai milyen messzire görgessenek.

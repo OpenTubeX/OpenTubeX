@@ -424,22 +424,45 @@ test.describe('settings search highlights', () => {
 
   for (const zoom of [1, 0.95]) {
     test(`sizes the actual settings search control at the responsive breakpoint at ${zoom} scale`, async ({ page }, testInfo) => {
+      await page.emulateMedia({ colorScheme: 'dark' })
       await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
       await goTo(page, 'settings')
       const search = page.getByRole('searchbox', { name: 'Search settings' })
+      const session = await page.context().newCDPSession(page)
 
-      for (const width of [681, 680, 390, 681]) {
-        await page.setViewportSize({ width, height: 800 })
-        const compact = await page.evaluate(() => matchMedia('(any-pointer: coarse), (width <= 680px)').matches)
-        await expect.poll(async () => search.evaluate(input => input.getBoundingClientRect().height))
-          .toBeCloseTo(compact ? 48 : 36, 1)
-        const heights = await search.evaluate(input => ({
-          input: input.getBoundingClientRect().height,
-          wrapper: input.closest('.settingsSearch').getBoundingClientRect().height
-        }))
-        expect(heights.input).toBeCloseTo(heights.wrapper, 1)
-        if (width === 390 && zoom === 1) {
-          await page.screenshot({ path: testInfo.outputPath('settings-search-mobile.png') })
+      for (const touch of [true, false]) {
+        await session.send('Emulation.setTouchEmulationEnabled', { enabled: touch })
+        await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(touch)
+
+        for (const width of [1600, 681, 680, 390, 1600]) {
+          await page.setViewportSize({ width, height: 800 })
+          const compact = await page.evaluate(() => matchMedia('(any-pointer: coarse), (width <= 680px)').matches)
+          await expect.poll(async () => search.evaluate(input => input.getBoundingClientRect().height))
+            .toBeCloseTo(compact ? 48 : 36, 1)
+          const heights = await search.evaluate(input => ({
+            input: input.getBoundingClientRect().height,
+            wrapper: input.closest('.settingsSearch').getBoundingClientRect().height
+          }))
+          expect(heights.input).toBeCloseTo(heights.wrapper, 1)
+          const header = page.locator('.settingsWindowHeader')
+          const spacing = await header.evaluate(element => {
+            const header = element.getBoundingClientRect()
+            const controls = [...element.querySelectorAll('.settingsSearch, .settingsHeaderButton')]
+              .map(control => control.getBoundingClientRect())
+            return Math.min(...controls.flatMap(control => [
+              control.top - header.top,
+              header.bottom - control.bottom
+            ]))
+          })
+          const inputMode = touch ? 'touch' : 'mouse'
+          expect(spacing, `${inputMode} ${width}px clearance`).toBeCloseTo(width === 1600 ? 6.5 : 5, 0)
+          if (width === 1600 && !touch) {
+            expect((await header.boundingBox()).height).toBeCloseTo(52, 0)
+          }
+          if (zoom === 1) {
+            if (width === 1600) await header.screenshot({ path: testInfo.outputPath(`settings-header-${inputMode}-desktop.png`) })
+            if (width === 390) await page.screenshot({ path: testInfo.outputPath(`settings-search-${inputMode}-mobile.png`) })
+          }
         }
       }
     })

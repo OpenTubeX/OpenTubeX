@@ -531,20 +531,11 @@
 }
 
 .pickerSearchField {
-  flex: 0 0 auto;
-  margin: 12px;
-}
+  --input-bottom-spacing: 0;
 
-.pickerSearch {
   flex: 0 0 auto;
-  box-sizing: border-box;
-  min-block-size: var(--phone-touch-target, 48px);
-  margin: 0;
-  padding: 12px;
-  border: 1px solid var(--divider-color);
-  background: var(--search-bar-color);
-  color: var(--primary-text-color);
-  font: inherit;
+  margin-block: 4px 0;
+  margin-inline: 12px;
 }
 
 .selectDropdown.phonePicker {
