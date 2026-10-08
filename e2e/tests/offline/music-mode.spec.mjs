@@ -1,6 +1,5 @@
-import { test, expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, setWindowSize, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
-import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
 
 const musicModeSeed = {
   settings: {
@@ -28,12 +27,10 @@ test.use({ seed: { ...musicModeSeed, settings: { ...musicModeSeed.settings, show
 const videoSelector = '.tabContent[aria-hidden="false"] .ftVideoPlayer video'
 
 async function setMusicMode(page, enabled) {
-  await page.locator('.profileTrigger').click()
-  const checkbox = page.locator('.quickSettingsMenu').getByRole('checkbox', { name: /^Music Mode/ })
-  if (await checkbox.isChecked() !== enabled) await checkbox.locator('..').locator('label').click()
-  await expect(checkbox).toBeChecked({ checked: enabled })
-  await checkbox.press('Escape')
-  await expect(page.locator('.quickSettingsMenu')).toBeHidden()
+  await page.evaluate(value => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setTabMusicMode', { tabId: store.getters.getActiveTabId, value })
+  }, enabled)
 }
 
 async function expectPlayback(page, position, rate) {
@@ -44,7 +41,7 @@ async function expectPlayback(page, position, rate) {
   return video
 }
 
-test('player and Quick Settings toggle music mode without rewinding or changing saved defaults', async ({ app, page }) => {
+test('player toggles music mode without rewinding or changing saved defaults', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.locator('a.title').filter({ hasText: watchHistoryEntry.title }).first().click()
@@ -63,13 +60,10 @@ test('player and Quick Settings toggle music mode without rewinding or changing 
   await expect(page.locator('.profileTrigger')).toHaveAccessibleName('Quick settings — Music Mode')
   await page.locator('.shaka-playbackrate-button').click()
   await expect(button).toBeHidden()
-  await page.locator('.profileTrigger').click()
-  const checkbox = page.locator('.quickSettingsMenu').getByRole('checkbox', { name: /^Music Mode/ })
-  await expect(checkbox).toBeChecked()
-  await checkbox.focus()
-  await checkbox.press('Space')
-  await expect(checkbox).not.toBeChecked()
-  await page.locator('.profileTrigger').click()
+  await page.locator('.shaka-playback-rates .shaka-back-to-overflow-button').click()
+  await expect(button).toBeVisible()
+  await button.click()
+  await expect(button).toHaveAttribute('aria-pressed', 'false')
   await expectPlayback(page, 10, 2.5)
   await expect(page.locator('.musicModeIndicator')).toHaveCount(0)
   expect(await watch.evaluate(view => view.$store.getters.getDefaultPlayback)).toBe(2)
@@ -129,8 +123,11 @@ test('music mode stays with its tab and resets after restarting the app', async 
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw$/)
   await expect(page.locator('.musicModeIndicator')).toBeVisible()
   const restarted = await app.relaunch()
-  await restarted.page.locator('.profileTrigger').click()
-  await expect(restarted.page.locator('.quickSettingsMenu').getByRole('checkbox', { name: /^Music Mode/ })).not.toBeChecked()
+  await expect(restarted.page.locator('.musicModeIndicator')).toHaveCount(0)
+  expect(await restarted.page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getTabMusicMode(store.getters.getActiveTabId)
+  })).toBe(false)
 })
 
 async function openShort(page, id) {
@@ -187,46 +184,24 @@ test('inactive Shorts cannot overwrite the active channel speed when music mode 
   await expect.poll(() => watch.evaluate(view => view.currentPlaybackRate)).toBe(2.5)
 })
 
-test('music mode remains accessible in narrow Quick Settings', async ({ app, page }) => {
-  for (const { width, height, scale } of [{ width: 375, height: 850, scale: 100 }, { width: 850, height: 480, scale: 125 }]) {
-    await setWindowSize(app, page, { width, height })
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
-    await page.locator('.profileTrigger').click()
-    const section = page.locator('[data-setting-id="musicMode"]')
-    await expect(section).toBeVisible()
-    expect(await section.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
-    const help = section.locator('.selectTooltip button')
-    await help.focus()
-    const explanation = page.getByRole('tooltip').filter({ hasText: 'Play videos at 1×' })
-    await expect(explanation).toBeVisible()
-    expect(await explanation.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.left >= 0 && bounds.right <= window.innerWidth
-    })).toBe(true)
-    const checkbox = section.getByRole('checkbox', { name: /^Music Mode/ })
-    await checkbox.focus()
-    await expect(explanation).toBeHidden()
-    await checkbox.press('Space')
-    await expect(checkbox).toBeChecked()
-    await checkbox.press('Space')
-    await expect(checkbox).not.toBeChecked()
-    await checkbox.press('Escape')
-    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
-  }
-})
-
-test('adds and removes music mode through the Quick Settings customizer', async ({ page }) => {
+test('excludes music mode from saved Quick Settings and the customizer', async ({ page, attachScreenshot }) => {
+  await page.locator('.profileTrigger').click()
+  const menu = page.locator('.quickSettingsMenu')
+  await expect(menu.locator('.quickSettingControl')).toHaveCount(2)
+  await expect(menu.getByRole('checkbox', { name: /^Music Mode/ })).toHaveCount(0)
+  await expect(menu.locator('[data-setting-id="defaultPlayback"]')).toBeVisible()
+  await attachScreenshot('quick-settings-menu-without-music-mode')
+  await page.locator('.profileTrigger').click()
   const appearance = await goToSettingsSection(page, 'appearance')
   await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
-  await page.getByRole('button', { name: 'Remove Music Mode', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Remove Music Mode', exact: true })).toHaveCount(0)
   await page.getByRole('button', { name: 'Add setting' }).click()
   const search = page.getByLabel('Search settings')
   await search.fill('Music Mode')
-  await page.locator('.settingPicker .optionWrapper').getByText('Music Mode', { exact: true }).click()
-  await search.press('Escape')
-  await page.locator('.settingsCloseButton').click()
-  await setMusicMode(page, true)
-  await expect(page.locator('.musicModeIndicator')).toBeVisible()
+  await expect(page.locator('.settingPicker .optionWrapper')).toHaveCount(0)
+  await attachScreenshot('quick-settings-without-music-mode')
+  await search.fill('Autoplay')
+  await expect(page.locator('.settingPicker .optionWrapper')).not.toHaveCount(0)
 })
 
 test('music mode headphones have a translucent circular background in both icon packs and themes', async ({ page }, testInfo) => {
@@ -250,51 +225,14 @@ test('music mode headphones have a translucent circular background in both icon 
   }
 })
 
-test('clamps Quick Settings when hiding music mode at the bottom at normal and fractional UI scales', async ({ app, page }) => {
-  await setWindowSize(app, page, { width: 1000, height: 700 })
-  for (const scale of [100, 125]) {
-    await page.evaluate(async ({ scale, ids }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      await store.dispatch('updateUiScale', scale)
-      await store.dispatch('updateQuickSettings', [...ids, 'musicMode'])
-      await store.dispatch('updateShowMusicModeToggle', true)
-    }, { scale, ids: DEFAULT_QUICK_SETTINGS })
-    await page.locator('.profileTrigger').click()
-    const menu = page.locator('.quickSettingsMenu')
-    const scroller = menu.locator('.quickSettingsScroll')
-    const scrollbar = scroller.locator('.os-scrollbar-vertical')
-    const thumb = scrollbar.locator('.os-scrollbar-handle')
-    await scroller.evaluate(element => element.scrollTo(0, element.scrollHeight))
-    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await expectScrollAtRenderedEnd(scroller)
-    const originalThumbHeight = await thumb.evaluate(element => element.getBoundingClientRect().height)
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowMusicModeToggle', false))
-    await expect(menu.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
-    await expect.poll(() => thumb.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(originalThumbHeight)
-    await menu.press('Escape')
-    await expect(menu).toBeHidden()
-  }
-})
-
 test.describe('music mode visibility setting', () => {
   test.use({ seed: musicModeSeed })
 
-  test('hides toggles by default while keeping Music Mode customizable and saves the visibility preference', async ({ app, page }, testInfo) => {
+  test('hides the player toggle by default and saves the visibility preference', async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     await page.locator('.profileTrigger').click()
     await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
     await page.locator('.profileTrigger').click()
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
-    await page.getByRole('button', { name: 'Remove Music Mode', exact: true }).click()
-    await page.getByRole('button', { name: 'Add setting' }).click()
-    const search = page.getByLabel('Search settings')
-    await search.fill('Music Mode')
-    await page.locator('.settingPicker .optionWrapper').getByText('Music Mode', { exact: true }).click()
-    await search.press('Escape')
-    await page.locator('.settingsBackButton').click()
     const playback = await goToSettingsSection(page, 'playback')
     const visibility = playback.getByRole('checkbox', { name: /^Show Music Mode Toggle/ })
     await expect(visibility).not.toBeChecked()
@@ -332,15 +270,20 @@ test.describe('music mode visibility setting', () => {
     await expect(page.locator('.music-mode-button')).toHaveCount(0)
     await page.locator('.profileTrigger').click()
     await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
-    expect(await watch.evaluate(view => view.$store.getters.getQuickSettings.includes('musicMode'))).toBe(true)
+    expect(await watch.evaluate(view => view.$store.getters.getQuickSettings.includes('musicMode'))).toBe(false)
     await expect(page.locator('.musicModeIndicator')).toBeVisible()
     await expectPlayback(page, 0, 1)
     await watch.evaluate(view => view.$store.dispatch('updateShowMusicModeToggle', true))
-    await expect(page.locator('[data-setting-id="musicMode"]')).toBeVisible()
-    await expect(page.locator('[data-setting-id="musicMode"]').getByRole('checkbox')).toBeChecked()
+    await expect(page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
+    await page.locator('.profileTrigger').click()
+    await page.locator('.ftVideoPlayer').hover()
+    await page.locator('.shaka-overflow-menu-button').click()
+    await expect(page.locator('.music-mode-button')).toBeVisible()
+    await expect(page.locator('.music-mode-button')).toHaveAttribute('aria-pressed', 'true')
     const restarted = await app.relaunch()
     await restarted.page.locator('.profileTrigger').click()
-    await expect(restarted.page.locator('[data-setting-id="musicMode"]')).toBeVisible()
-    await expect(restarted.page.locator('[data-setting-id="musicMode"]').getByRole('checkbox')).not.toBeChecked()
+    await expect(restarted.page.locator('[data-setting-id="musicMode"]')).toHaveCount(0)
+    expect(await restarted.page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getShowMusicModeToggle)).toBe(true)
+    await expect(restarted.page.locator('.musicModeIndicator')).toHaveCount(0)
   })
 })

@@ -605,8 +605,7 @@ for (const uiScale of [100, 95]) {
         settings: {
           currentLocale: 'en-US',
           uiScale,
-          quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'],
-          showMusicModeToggle: true,
+          quickSettings: ['defaultQuality', 'enableSubtitlesByDefault', 'autoplayVideos', 'autoplayPlaylists', 'defaultPlayback'],
         }
       }
     })
@@ -649,7 +648,7 @@ for (const uiScale of [100, 95]) {
           }
           return { setting: control.dataset.settingId, top, bottom }
         }))
-        expect(rows.map(row => row.setting)).toEqual(['defaultQuality', 'enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists', 'defaultPlayback'])
+        expect(rows.map(row => row.setting)).toEqual(['defaultQuality', 'enableSubtitlesByDefault', 'autoplayVideos', 'autoplayPlaylists', 'defaultPlayback'])
         const rowGap = await menu.locator('.menuSection').evaluate(element => Number.parseFloat(getComputedStyle(element).rowGap))
         expect(rowGap, 'shared visible gap stays at least 16px').toBeGreaterThanOrEqual(16)
         for (let index = 1; index < rows.length; index++) {
@@ -810,8 +809,7 @@ test.describe('quick settings touch spacing below 100% native UI scale', () => {
         currentLocale: 'en-US',
         uiScale: 75,
         bounds: { x: 0, y: 0, width: 360, height: 675, maximized: false },
-        quickSettings: ['enableSubtitlesByDefault', 'musicMode', 'autoplayPlaylists'],
-        showMusicModeToggle: true,
+        quickSettings: ['enableSubtitlesByDefault', 'autoplayVideos', 'autoplayPlaylists'],
       }
     }
   })
