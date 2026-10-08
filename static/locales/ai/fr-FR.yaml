@@ -1201,8 +1201,6 @@ Channel:
   Channel Name Unavailable: Nom de la chaîne indisponible
   Search Result Types: Types de résultats de recherche
   All Results: Tous
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Cette chaîne contient des vidéos, mais aucune n'a pu être affichée. Essayez d'en charger davantage"
 Video:
   External DRM Protected: "Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée."
   Invalid Media URL: "URL du média invalide"

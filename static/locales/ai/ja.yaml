@@ -1202,8 +1202,6 @@ Channel:
   Channel Name Unavailable: チャンネル名を取得できません
   Search Result Types: 検索結果の種類
   All Results: すべて
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "このチャンネルには動画がありますが、表示できませんでした。さらに読み込んでみてください"
 Video:
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"
   Invalid Media URL: "無効なメディアURL"
