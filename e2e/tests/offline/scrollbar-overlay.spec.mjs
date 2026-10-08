@@ -8,6 +8,15 @@ const pageOverflows = (page) => page.evaluate(
   () => document.documentElement.scrollHeight > window.innerHeight
 )
 
+async function pageScrollbarRangeError(page) {
+  return page.evaluate(() => {
+    const root = document.documentElement
+    const handle = document.querySelector('body > .os-scrollbar-vertical .os-scrollbar-handle')
+    const viewportFraction = Number(getComputedStyle(handle).getPropertyValue('--os-viewport-percent'))
+    return Math.abs(root.clientHeight / viewportFraction - root.scrollHeight) * devicePixelRatio
+  })
+}
+
 async function addPageOverflow(page) {
   await page.evaluate(() => {
     const content = document.createElement('div')
@@ -59,6 +68,148 @@ async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
 }
 
 test.describe('overlay scrollbars', () => {
+  test('coalesces page overflow measurements as individual feed enter animations finish', async ({ page }) => {
+    await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    await addPageOverflow(page)
+    const scrollReads = await page.evaluate(async () => {
+      const grid = document.createElement('div')
+      grid.className = 'autoGrid'
+      for (let index = 0; index < 100; index++) {
+        const card = document.createElement('div')
+        card.className = 'grid feed-enter-active feed-enter-to'
+        card.textContent = `Video ${index}`
+        grid.append(card)
+      }
+      document.body.append(grid)
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const root = document.documentElement
+      const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollWidth')
+      let reads = 0
+      Object.defineProperty(root, 'scrollWidth', {
+        configurable: true,
+        get() { reads++; return descriptor.get.call(this) }
+      })
+      try {
+        // Transition end events arrive in separate tasks. The entry remains
+        // in normal flow; only its opacity/transform transition is removed.
+        await Promise.all([...grid.children].map(card => new Promise(resolve => setTimeout(() => {
+          card.classList.remove('feed-enter-active', 'feed-enter-to')
+          resolve()
+        }, 0))))
+        await new Promise(resolve => setTimeout(resolve, 100))
+        return reads
+      } finally {
+        delete root.scrollWidth
+        grid.remove()
+      }
+    })
+    expect(scrollReads).toBeLessThan(10)
+  })
+
+  test('avoids full page scrollbar updates for content changes with stable dimensions', async ({ page }) => {
+    await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    await addPageOverflow(page)
+    const viewportReads = await page.evaluate(async () => {
+      const element = document.createElement('div')
+      element.style.cssText = 'position: fixed; width: 100px; height: 100px'
+      document.body.append(element)
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const root = document.documentElement
+      const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')
+      let reads = 0
+      Object.defineProperty(root, 'clientWidth', {
+        configurable: true,
+        get() { reads++; return descriptor.get.call(this) }
+      })
+      try {
+        for (let index = 0; index < 40; index++) {
+          element.style.opacity = index % 2 ? '0.5' : '1'
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        }
+        return reads
+      } finally {
+        delete root.clientWidth
+        element.remove()
+      }
+    })
+    expect(viewportReads).toBeLessThan(10)
+  })
+
+  test('remeasures settled page overflow after bottom-row feed enter animations at fractional UI scale', async ({ page }) => {
+    await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+    })
+    for (const zoomFactor of [1, 1.25]) {
+      await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoomFactor)
+      await page.evaluate(() => {
+        const style = document.createElement('style')
+        style.dataset.enterOverflowStyle = ''
+        style.textContent = `
+          body { padding-bottom: 0 !important; }
+          [data-enter-overflow] .feed-enter-active { transition: transform 200ms linear; }
+          [data-enter-overflow] .feed-enter-from { transform: translateY(10px); }
+        `
+        document.head.append(style)
+        const grid = document.createElement('div')
+        grid.className = 'autoGrid'
+        grid.dataset.enterOverflow = ''
+        const card = document.createElement('div')
+        card.style.height = '1500px'
+        card.className = 'feed-enter-from'
+        grid.append(card)
+        document.body.append(grid)
+        window.scrollTo(0, document.documentElement.scrollHeight)
+      })
+      await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+      const initialTransform = await page.evaluate(async () => {
+        const card = document.querySelector('[data-enter-overflow] > div')
+        card.classList.add('feed-enter-active')
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        card.classList.remove('feed-enter-from')
+        card.classList.add('feed-enter-to')
+        return new DOMMatrixReadOnly(getComputedStyle(card).transform).m42
+      })
+      expect(initialTransform).toBeGreaterThan(0)
+      const card = page.locator('[data-enter-overflow] > div')
+      await expect(card).toHaveCSS('transform', 'none')
+      await card.evaluate(element => {
+        element.classList.remove('feed-enter-active', 'feed-enter-to')
+      })
+      await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+      await expect.poll(() => page.evaluate(() => {
+        const root = document.documentElement
+        const contentEnd = document.body.getBoundingClientRect().bottom + window.scrollY
+        return Math.abs(root.scrollHeight - Math.max(root.clientHeight, contentEnd)) * devicePixelRatio
+      })).toBeLessThanOrEqual(2)
+      await page.evaluate(() => {
+        document.querySelector('[data-enter-overflow]').remove()
+        document.querySelector('[data-enter-overflow-style]').remove()
+      })
+    }
+  })
+
+  test('updates page overflow when loaded image dimensions grow', async ({ page }) => {
+    await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+    await page.evaluate(async () => {
+      const image = new Image()
+      image.dataset.pageScrollbarImage = ''
+      image.style.display = 'block'
+      image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"/>'
+      document.body.append(image)
+      await image.decode()
+    })
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+    await page.evaluate(async () => {
+      const image = document.querySelector('[data-page-scrollbar-image]')
+      image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="4000"/>'
+      await image.decode()
+    })
+    await expect.poll(() => pageOverflows(page)).toBe(true)
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(2)
+  })
+
   test('page and nested scrollbar handles follow live UI roundness changes', async ({ page }) => {
     await addPageOverflow(page)
     const viewport = await addNestedCustomSpeedScroller(page, 'data-roundness-scrollbar', 0)

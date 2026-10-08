@@ -54,6 +54,8 @@ function scrollbarOptions(initialization) {
     // clipped viewport and cannot change the page's scroll range.
     options.update = {
       debounce: { resize: [0, 33] },
+      // Batch the content-size check too, before it can force page layout.
+      deferContentMutation: true,
       ignoreMutation: ignorePageScrollbarMutation,
       flowDirectionStyles: () => ({ direction: document.documentElement.dir })
     }
