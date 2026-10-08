@@ -330,7 +330,7 @@ function clearMinimizePreview() {
   previewStyle.value = null
   previewViewport = null
   watchRoot.value?.style.removeProperty('opacity')
-  watchRoot.value?.firstElementChild.style.removeProperty('opacity')
+  watchRoot.value?.firstElementChild?.style.removeProperty('opacity')
   window.removeEventListener('scroll', updatePreviewPosition)
   if (watchScroll) {
     return nextTick(() => {

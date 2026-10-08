@@ -102,6 +102,14 @@ function mountWatch(t, { tab = null, paused = false, hasLoaded = true, mounted =
   }
 }
 
+test('cleans up an empty Watch host during browsing tab disposal', async t => {
+  const mounted = mountWatch(t, { mounted: false })
+  await mounted.navigate('/search/query')
+  mounted.previewRoot.firstElementChild = null
+  assert.doesNotThrow(() => mounted.provides.get('navigation').clearMinimizePreview())
+  assert.doesNotThrow(() => mounted.unmount.forEach(callback => callback()))
+})
+
 for (const commit of [false, true]) {
   test(`minimize restores fractional browsing scroll and preserves Watch on ${commit ? 'commit' : 'cancel'}`, async t => {
     const mounted = mountWatch(t)

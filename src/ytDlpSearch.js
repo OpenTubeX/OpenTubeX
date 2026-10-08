@@ -26,7 +26,9 @@ export function normalizeYtDlpSearchResults(info, page = 1) {
     if (!entry || typeof entry.title !== 'string' || !entry.title.trim()) return []
     const thumbnail = entry.thumbnails?.find(item => typeof item.url === 'string')?.url ?? ''
     if (/^UC[\w-]{22}$/.test(entry.id)) {
-      return [{ type: 'channel', authorId: entry.id, author: entry.title, authorThumbnails: [{ url: thumbnail }], subCount: entry.channel_follower_count ?? 0 }]
+      // The Invidious card rewrites YouTube image URLs to its instance. Cookie
+      // search uses YouTube directly, just like the other local channel results.
+      return [{ type: 'channel', dataSource: 'local', id: entry.id, name: entry.title, thumbnail: thumbnail.replace(/^\/\//, 'https://'), subscribers: entry.channel_follower_count ?? 0 }]
     }
     if (entry.ie_key === 'YoutubeTab' && /^[\w-]+$/.test(entry.id)) {
       return [{ type: 'playlist', dataSource: 'local', playlistId: entry.id, title: entry.title, channelName: entry.channel ?? entry.uploader ?? '', channelId: entry.channel_id ?? '', thumbnail, videoCount: entry.playlist_count ?? undefined }]
