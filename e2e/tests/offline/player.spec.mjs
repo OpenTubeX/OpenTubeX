@@ -414,8 +414,117 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
-test('player shortcuts do not run while typing in a focused select', async ({ app, page }) => {
+for (const holdToDoublePlaybackSpeed of [false, true]) {
+  test.describe(`seekbar shortcuts with hold-to-double ${holdToDoublePlaybackSpeed ? 'enabled' : 'disabled'}`, () => {
+    test.use({ seed: { settings: { ...PLAYER_SEED, holdToDoublePlaybackSpeed } } })
+
+    test('Space toggles playback after clicking the seekbar', async ({ app, page }) => {
+      const video = await openDemoVideo({ app, page })
+      const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+      for (const fullscreen of [false, true]) {
+        await setPlayerFullscreen(page, fullscreen)
+        await seekBar.hover()
+        await seekBar.click({ position: { x: 100, y: 1 } })
+        await expect(seekBar).toBeFocused()
+        await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+
+        await page.keyboard.press('Space')
+        await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+        await expect(seekBar).toBeFocused()
+
+        const time = await video.evaluate(element => element.currentTime)
+        await page.keyboard.press('ArrowRight')
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(time + 5, 3)
+        expect(await video.evaluate(element => element.paused)).toBe(true)
+
+        await page.keyboard.press('Space')
+        await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+        await expect(seekBar).toBeFocused()
+
+        if (holdToDoublePlaybackSpeed) {
+          await page.keyboard.down('Space')
+          try {
+            await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(2)
+          } finally {
+            await page.keyboard.up('Space')
+          }
+          await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1)
+          expect(await video.evaluate(element => element.paused)).toBe(false)
+        }
+      }
+    })
+  })
+}
+
+test('other player shortcuts remain available after clicking the seekbar', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
+  const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+  await seekBar.hover()
+  await seekBar.click({ position: { x: 100, y: 1 } })
+  await expect(seekBar).toBeFocused()
+
+  await page.keyboard.press('k')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+
+  const muted = await video.evaluate(element => element.muted)
+  await page.keyboard.press('m')
+  await expect.poll(() => video.evaluate(element => element.muted)).toBe(!muted)
+  await page.keyboard.press('m')
+  await expect.poll(() => video.evaluate(element => element.muted)).toBe(muted)
+
+  await page.keyboard.press('p')
+  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.25)
+  await page.keyboard.press('o')
+  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1)
+
+  await page.keyboard.press('5')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(
+    await video.evaluate(element => element.duration / 2), 3
+  )
+  await page.keyboard.press('Home')
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(0)
+
+  await page.keyboard.press('f')
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+  await expect(seekBar).toBeFocused()
+  await page.keyboard.press('f')
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+
+  await page.keyboard.press('k')
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+})
+
+test('seekbar dragging preserves paused and playing states at different UI scales', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale)
+    }, scale)
+    for (const paused of [true, false]) {
+      await video.evaluate((element, paused) => paused ? element.pause() : element.play(), paused)
+      await seekBar.hover()
+      const bounds = await seekBar.boundingBox()
+      await page.mouse.move(bounds.x + 6 + (bounds.width - 12) * 0.2, bounds.y + bounds.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(bounds.x + 6 + (bounds.width - 12) * 0.6, bounds.y + bounds.height / 2, { steps: 5 })
+      await page.mouse.up()
+      const duration = await video.evaluate(element => element.duration)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(duration * 0.58)
+      expect(await video.evaluate(element => element.currentTime)).toBeLessThan(duration * 0.7)
+      expect(await video.evaluate(element => element.paused)).toBe(paused)
+    }
+  }
+})
+
+test('player shortcuts do not run while typing in focused inputs or selects', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const search = page.locator(sel.searchInput)
+  await search.fill('')
+  await search.pressSequentially('k f m ')
+  await expect(search).toHaveValue('k f m ')
+  expect(await video.evaluate(element => element.paused)).toBe(false)
+  expect(await page.evaluate(() => document.fullscreenElement)).toBeNull()
   await goTo(page, 'settings')
 
   const region = page.getByRole('combobox', { name: 'Region for Trending' })
