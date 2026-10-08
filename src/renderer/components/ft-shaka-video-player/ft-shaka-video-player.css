@@ -3022,7 +3022,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.sponsorBlockDraftMarker) {
-  background-color: #d3d3d3;
+  background-color: #fff;
+  box-shadow: 0 0 0 1px #000;
+
+  /* Keep drafts bright over played/buffered tracks; the dark edge defines their bounds. */
+  mix-blend-mode: normal;
 }
 
 :deep(.chapterMarker) {
