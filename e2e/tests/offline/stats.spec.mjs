@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, waitForAppReady, expectScrollAtRenderedEnd, setWindowSize } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 /**
@@ -22,6 +22,32 @@ const migrationDone = {
   completedAt: Date.now(),
   hadEstimates: false,
   adjustment: null
+}
+
+async function expectStatsActionsLayout(page, count) {
+  const footer = page.locator('.statsFooter')
+  await expect(footer.getByRole('button')).toHaveCount(count)
+  await expect.poll(() => footer.evaluate(element => {
+    const footer = element.getBoundingClientRect()
+    const buttons = [...element.querySelectorAll('button')].map(button => {
+      const bounds = button.getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(button)
+      const content = range.getBoundingClientRect()
+      const style = getComputedStyle(button)
+      const padding = Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight) +
+        Number.parseFloat(style.borderLeftWidth) + Number.parseFloat(style.borderRightWidth)
+      return { bounds, fits: Math.abs(bounds.width - Math.max(64, content.width + padding)) < 1 }
+    })
+    const note = element.querySelector('.estimateNote')?.getBoundingClientRect()
+    return buttons.every(({ bounds, fits }, index) => {
+      const aligned = buttons.length === 1
+        ? Math.abs(bounds.right - footer.right) < 1
+        : Math.abs(bounds.left + bounds.width / 2 - (footer.left + footer.width / 2)) < 1
+      return fits && aligned && bounds.left >= footer.left - 1 && bounds.right <= footer.right + 1 &&
+        (index === 0 ? !note || bounds.top - note.bottom >= 19 : bounds.top - buttons[index - 1].bounds.bottom >= 15)
+    })
+  })).toBe(true)
 }
 
 test.describe('watch stats', () => {
@@ -56,6 +82,17 @@ test.describe('watch stats', () => {
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
 
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
+  })
+
+  test('a single statistics action stays on the right and fits its contents', async ({ app, page }) => {
+    await goTo(page, 'stats')
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [375, 1500]) {
+        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
+        await expectStatsActionsLayout(page, 1)
+      }
+    }
   })
 
   test('active navigation stays readable while the system theme changes', async ({ page }) => {
@@ -131,7 +168,7 @@ test.describe('historical watch time migration', () => {
     }
   })
 
-  test('estimates watch time from history and offers a playback speed adjustment', async ({ page }) => {
+  test('estimates watch time from history and offers a playback speed adjustment', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'stats')
 
     // First visit after the migration: the adjustment prompt opens on its own.
@@ -140,12 +177,23 @@ test.describe('historical watch time migration', () => {
 
     await prompt.getByRole('button', { name: 'Apply playback speed' }).click()
     await expect(prompt).toBeHidden()
+    await expect(page.getByText('Imported watch time has been adjusted', { exact: true })).toBeHidden()
 
     // The estimate is marked as such and contributes to the totals:
     // 600 seconds of saved playback progress become 10 minutes.
     await expect(page.locator('.estimateNote')).toBeVisible()
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('10 min')
     await expect(page.locator('.adjustEstimateButton')).toBeVisible()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [375, 1500]) {
+        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
+        await expectStatsActionsLayout(page, 2)
+        await page.locator('.statsFooter').scrollIntoViewIfNeeded()
+        if (zoom === 1) await attachScreenshot(`statistics action stack at ${width}px`)
+      }
+    }
   })
 })
 
@@ -180,6 +228,30 @@ test.describe('synced watch stats', () => {
         migrationDone,
       ],
     },
+  })
+
+  test('the replace device action uses the reset position and fits its contents', async ({ app, page, attachScreenshot }) => {
+    await goTo(page, 'stats')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerWatchStatsSupported', true)
+      store.commit('setSyncedWatchStats', [
+        { deviceId: 'phone', deviceName: 'Pixel 8 Pro', platform: 'android', days: {} },
+      ])
+    })
+    await page.getByRole('group', { name: 'Devices' }).getByRole('button', { name: 'Pixel 8 Pro', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Replace old device', exact: true })).toBeVisible()
+    await page.emulateMedia({ colorScheme: 'dark' })
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [375, 1500]) {
+        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 900 })
+        await expectStatsActionsLayout(page, 1)
+        await page.locator('.statsFooter').scrollIntoViewIfNeeded()
+        if (zoom === 1) await attachScreenshot(`replace device action at ${width}px`)
+      }
+    }
   })
 
   test('device picker grows into available space and fades overflowing edges', async ({ app, page }, testInfo) => {

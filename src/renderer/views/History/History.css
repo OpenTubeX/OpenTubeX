@@ -1,4 +1,7 @@
 .card {
+  --history-control-gap: 20px;
+  --history-field-label-outset: 7px;
+
   box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: 92dvw;
@@ -7,20 +10,46 @@
 }
 
 .optionsRow {
+  --settings-control-margin: 0;
+
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr;
   align-items: center;
-
-  /* Keep the sort select from sticking to the video grid below it */
-  margin-block-end: 16px;
+  row-gap: var(--history-control-gap);
+  margin-block-end: var(--history-control-gap);
 }
 
 .toggleOptions {
+  --history-switch-hit-height: var(--switch-touch-height);
+  --history-switch-padding: calc((var(--history-switch-hit-height) - var(--switch-track-height)) / 2);
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 24px;
+}
+
+/* Keep the full touch target while spacing the visible track and wrapped text. */
+.toggleOptions :deep(.switch-label) {
+  padding-block: var(--history-switch-padding);
+  margin-block: calc(-1 * var(--history-switch-padding));
+}
+
+.toggleOptions :deep(.switch-label-text) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--switch-track-height);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --history-field-label-outset: 9px;
+  }
+
+  .toggleOptions {
+    --history-switch-hit-height: max(48px, var(--switch-touch-height));
+  }
 }
 
 @media only screen and (width <= 800px) {
@@ -35,6 +64,10 @@
 .sortSelect {
   /* Put it on the right */
   margin-inline-start: auto;
+}
+
+.sortSelect.outlined {
+  margin-block-start: var(--history-field-label-outset);
 }
 
 .headingRow {
@@ -74,7 +107,13 @@
 }
 
 .historySearch {
-  margin-block-start: 12px;
+  --input-bottom-spacing: 0;
+
+  margin-block: var(--history-control-gap);
+}
+
+.historySearch.outlined {
+  margin-block-start: calc(var(--history-control-gap) + var(--history-field-label-outset));
 }
 
 .historyActionButton {

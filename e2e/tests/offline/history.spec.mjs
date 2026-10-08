@@ -184,21 +184,44 @@ test.describe('watch history', () => {
     }).toBeGreaterThanOrEqual(10)
   })
 
-  test('keeps equal space above and below the history actions in portrait and landscape', async ({ app, page, attachScreenshot }) => {
+  test('keeps consistent gaps between history controls and results at narrow widths and fractional zoom', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'history')
     for (const zoom of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
-      for (const width of [375, 732]) {
-        await setWindowSize(app, page, { width, height: width === 375 ? 850 : 550 })
+      for (const width of [320, 375, 732, 1500]) {
+        await setWindowSize(app, page, { width, height: width === 320 ? 820 : width === 375 ? 850 : width === 732 ? 550 : 900 })
         await expect.poll(() => page.locator('.headingActions').evaluate(element => {
           const actions = element.getBoundingClientRect()
-          const heading = element.closest('.headingRow').querySelector('h2').getBoundingClientRect()
-          const search = element.closest('.card').querySelector('.historySearch').getBoundingClientRect()
-          const above = actions.top - heading.bottom
-          const below = search.top - actions.bottom
-          return above >= 11.9 && below >= 11.9 && Math.abs(above - below) < 0.2
-        })).toBe(true)
-        if (zoom === 1) await attachScreenshot(`history actions at ${width}px`)
+          const card = element.closest('.card')
+          const heading = element.closest('.headingRow').getBoundingClientRect()
+          const search = card.querySelector('.historySearch .ft-input').getBoundingClientRect()
+          const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
+          const toggleText = card.querySelector('.toggleOptions .switch-label-text')
+          const text = toggleText.getBoundingClientRect()
+          const trackHeight = Number.parseFloat(getComputedStyle(toggleText, '::before').height)
+          const toggleTop = Math.min(text.top, text.top + (text.height - trackHeight) / 2)
+          const toggleBottom = Math.max(text.bottom, text.top + (text.height + trackHeight) / 2)
+          const sort = card.querySelector('.sortSelect .select-text').getBoundingClientRect()
+          const sortLabel = card.querySelector('.sortSelect .select-label').getBoundingClientRect()
+          const results = card.querySelector('.autoGrid').getBoundingClientRect()
+          const gaps = [Math.min(search.top, searchLabel.top) - heading.bottom, results.top - Math.max(sort.bottom, toggleBottom)]
+          if (getComputedStyle(card.querySelector('.optionsRow')).gridTemplateRows.split(' ').length === 2) {
+            gaps.push(toggleTop - search.bottom, Math.min(sort.top, sortLabel.top) - toggleBottom)
+            gaps.push(Math.min(search.top, searchLabel.top) - actions.bottom)
+          } else {
+            gaps.push(Math.min(toggleTop, sort.top, sortLabel.top) - search.bottom)
+          }
+          return gaps
+        })).toEqual(Array(width / zoom <= 800 ? 5 : 3).fill(expect.closeTo(20, 0)))
+        if (width / zoom <= 680) {
+          const touchTarget = await page.locator('.toggleOptions .switch-label').boundingBox()
+          expect(touchTarget.height).toBeGreaterThanOrEqual(48)
+        }
+        if (width === 320 && zoom === 1.25) {
+          const text = await page.locator('.toggleOptions .switch-label-text').boundingBox()
+          expect(text.height).toBeGreaterThan(24)
+        }
+        if (zoom === 1) await attachScreenshot(`history controls at ${width}px`)
       }
     }
   })

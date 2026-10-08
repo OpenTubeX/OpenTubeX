@@ -226,20 +226,21 @@
       </section>
 
       <footer class="statsFooter">
-        <FtButton
-          v-if="syncStatsVisible && selectedOtherDevice"
-          :label="t('Stats.Replace old device')"
-          :icon="['fas', 'devices']"
-          @click="repairSource = selectedOtherDevice"
-        />
-        <div
+        <p
           v-if="hasHistoricalEstimate && isLocalDeviceSelected"
-          class="estimateControls"
+          class="estimateNote"
         >
-          <p class="estimateNote">
-            {{ t('Stats.Estimate note') }}
-          </p>
+          {{ t('Stats.Estimate note') }}
+        </p>
+        <div class="statsActions">
           <FtButton
+            v-if="syncStatsVisible && selectedOtherDevice"
+            :label="t('Stats.Replace old device')"
+            :icon="['fas', 'devices']"
+            @click="repairSource = selectedOtherDevice"
+          />
+          <FtButton
+            v-if="hasHistoricalEstimate && isLocalDeviceSelected"
             type="button"
             class="adjustEstimateButton"
             @click="openHistoricalAdjustment"
@@ -250,20 +251,20 @@
             />
             {{ t('Stats.Adjust imported watch time') }}
           </FtButton>
+          <FtButton
+            v-if="isLocalDeviceSelected"
+            type="button"
+            theme="destructive"
+            class="resetStatsButton"
+            @click="showResetPrompt = true"
+          >
+            <FtIcon
+              aria-hidden="true"
+              :icon="['fas', 'trash']"
+            />
+            {{ t('Stats.Reset statistics') }}
+          </FtButton>
         </div>
-        <FtButton
-          v-if="isLocalDeviceSelected"
-          type="button"
-          theme="destructive"
-          class="resetStatsButton"
-          @click="showResetPrompt = true"
-        >
-          <FtIcon
-            aria-hidden="true"
-            :icon="['fas', 'trash']"
-          />
-          {{ t('Stats.Reset statistics') }}
-        </FtButton>
       </footer>
       <FtPrompt
         v-if="showResetPrompt"
