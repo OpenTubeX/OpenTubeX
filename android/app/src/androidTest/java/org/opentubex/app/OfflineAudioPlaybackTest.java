@@ -22,6 +22,7 @@ public class OfflineAudioPlaybackTest {
         var instrumentation = InstrumentationRegistry.getInstrumentation();
         var context = instrumentation.getTargetContext();
         File media = new File(context.getCacheDir(), "offline-audio-regression.mp3");
+        String videoId = "audio" + java.util.UUID.randomUUID().toString().substring(0, 6);
         try (var input = instrumentation.getContext().getAssets().open("demo-audio.mp3")) {
             Files.copy(input, media.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }
@@ -36,6 +37,7 @@ public class OfflineAudioPlaybackTest {
             evaluate(view, String.format("""
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const videoId = %s;
                     window.__offlineAudioSaved = {
                         MusicVisualizer: store.getters.getMusicVisualizer,
                         ContinuePlaybackWhenScreenIsLocked: store.getters.getContinuePlaybackWhenScreenIsLocked,
@@ -56,15 +58,15 @@ public class OfflineAudioPlaybackTest {
                         }
                     };
                     store.commit('upsertYtDlpDownload', {
-                        id: 943943, videoId: 'offline943a', status: 'completed', mode: 'audio',
+                        id: 943943, videoId, status: 'completed', mode: 'audio',
                         title: 'Offline MP3 regression',
-                        files: [{videoId: 'offline943a', path: %s, extension: 'mp3', duration: 4}],
+                        files: [{videoId, path: %s, extension: 'mp3', duration: 4}],
                     });
                     document.querySelector('#app').__vue_app__.config.globalProperties.$router.push({
-                        path: '/watch/offline943a', query: {downloadId: '943943'},
+                        path: '/watch/' + videoId, query: {downloadId: '943943'},
                     });
                 })()
-                """, JSONObject.quote(media.getAbsolutePath())));
+                """, JSONObject.quote(videoId), JSONObject.quote(media.getAbsolutePath())));
             try {
                 await(view, "!!document.querySelector('video')");
                 evaluate(view, """
@@ -117,6 +119,30 @@ public class OfflineAudioPlaybackTest {
                 await(view, "!document.querySelector('video').paused");
                 evaluate(view, "window.__offlineAudioFinishSuspension(); true");
                 await(view, "window.__offlineAudioSuspensionFinished && window.__offlineAudioContexts[0].state === 'running'");
+                evaluate(view, "document.querySelector('video').pause(); true");
+                await(view, "document.querySelector('video').paused && window.__offlineAudioContexts[0].state === 'suspended'");
+                evaluate(view, """
+                    (() => {
+                        const context = window.__offlineAudioContexts[0];
+                        const resume = context.resume.bind(context);
+                        const pending = new Promise(resolve => window.__offlineAudioFinishResume = () => {
+                            context.resume = resume;
+                            resolve();
+                        });
+                        context.resume = () => {
+                            window.__offlineAudioResumeRequested = true;
+                            return pending.then(resume).then(() => window.__offlineAudioResumeFinished = true);
+                        };
+                        document.querySelector('video').play();
+                    })()
+                    """);
+                await(view, "window.__offlineAudioResumeRequested");
+                evaluate(view, "document.querySelector('video').pause(); true");
+                await(view, "document.querySelector('video').paused");
+                evaluate(view, "window.__offlineAudioFinishResume(); true");
+                await(view, "window.__offlineAudioResumeFinished && window.__offlineAudioContexts[0].state === 'suspended'");
+                evaluate(view, "document.querySelector('video').play(); true");
+                await(view, "!document.querySelector('video').paused && window.__offlineAudioContexts[0].state === 'running'");
                 assertTrue("Screen remains locked during pause/resume", !context.getSystemService(PowerManager.class).isInteractive());
                 shell("input keyevent KEYCODE_WAKEUP");
                 shell("wm dismiss-keyguard");
@@ -136,6 +162,7 @@ public class OfflineAudioPlaybackTest {
                         if (window.__offlineAudioOriginalContext) window.AudioContext = window.__offlineAudioOriginalContext;
                     })()
                     """);
+                await(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab?.route.path === '/subscriptions'");
             }
         } finally {
             media.delete();
