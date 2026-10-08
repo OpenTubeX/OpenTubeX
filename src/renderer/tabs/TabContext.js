@@ -4,6 +4,7 @@ import store from '../store/index'
 import { getTabNavigationService } from './TabNavigationService'
 import { removeLegacyTabAvatar } from '../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../helpers/tabAvatar'
+import { getTabAvatarPath } from '../../tabAvatarRoute.js'
 
 export const tabIdKey = Symbol('logical-tab-id')
 export const tabPresentedKey = Symbol('logical-tab-presented')
@@ -58,7 +59,7 @@ export function useTabAvatar() {
   })
 
   function getRouteKey(route) {
-    if (route?.path !== '/external-media') return route?.path
+    if (route?.path !== '/external-media') return getTabAvatarPath(route?.path)
     const url = new URL(route.fullPath, 'https://opentubex.invalid')
     return `${url.pathname}${url.searchParams.size ? `?${url.searchParams}` : ''}${url.hash}`
   }

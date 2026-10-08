@@ -1,6 +1,7 @@
 import { BrowserWindow, app, nativeImage, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { normalizeTabGroupIcon } from '../../tabGroupIcons.js'
+import { getTabAvatarPath } from '../../tabAvatarRoute.js'
 import {
   DEFAULT_LANDING_PAGE,
   IpcChannels,
@@ -859,7 +860,7 @@ export class TabManager {
    * @returns {Promise<boolean>}
    */
   async applyTabAvatar(tab, avatarBytes, routePath) {
-    const matchesRoute = () => tab.route.path === routePath || tab.route.fullPath === routePath
+    const matchesRoute = () => getTabAvatarPath(tab.route.path) === getTabAvatarPath(routePath) || tab.route.fullPath === routePath
     if (!this._avatarsEnabled || !matchesRoute()) {
       return false
     }
@@ -2759,7 +2760,9 @@ export class TabManager {
     if (!tab) return
 
     const nextRoute = normalizeRoute(route)
-    if (nextRoute.path !== tab.route.path || (
+    // A channel's content tabs share the same avatar. Retain its decoded image
+    // instead of briefly falling back to the remote thumbnail on each switch.
+    if (getTabAvatarPath(nextRoute.path) !== getTabAvatarPath(tab.route.path) || (
       nextRoute.path === '/external-media' && nextRoute.fullPath !== tab.route.fullPath
     )) {
       const avatarFileName = tab.avatarFileName
