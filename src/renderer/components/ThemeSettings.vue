@@ -241,9 +241,10 @@
           :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
           compact
           controlled
+          :disabled="savingSettingsCategoryDescriptions"
           :default-value="hideSettingsCategoryDescriptions"
           setting-key="hideSettingsCategoryDescriptions"
-          @change="store.dispatch('updateHideSettingsCategoryDescriptions', $event)"
+          @change="updateHideSettingsCategoryDescriptions"
         />
         <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
@@ -727,6 +728,21 @@ function updateHideSideBarOnWatchPages(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSettingsCategoryDescriptions = computed(() => store.getters.getHideSettingsCategoryDescriptions)
+
+const savingSettingsCategoryDescriptions = ref(false)
+
+/**
+ * @param {boolean} value
+ */
+async function updateHideSettingsCategoryDescriptions(value) {
+  if (savingSettingsCategoryDescriptions.value) return
+  savingSettingsCategoryDescriptions.value = true
+  try {
+    await store.dispatch('updateHideSettingsCategoryDescriptions', value)
+  } finally {
+    savingSettingsCategoryDescriptions.value = false
+  }
+}
 
 const hideLabelsSideBar = computed(() => {
   return store.getters.getHideLabelsSideBar
