@@ -576,6 +576,7 @@ Settings:
       Phone: Phone
       Tablet: Tablet
     Update Relative Timestamps: Keep relative timestamps updated
+    Automatically switch stream extraction methods: "Automatically switch stream extraction methods"
     Stream Extraction Method:
       Stream Extraction Method: Stream extraction method
       yt-dlp: yt-dlp
@@ -2501,6 +2502,7 @@ Playlist:
 #* Published
 #& Views
 Change Format:
+  yt-dlp Error Template: "yt-dlp could not provide the streams: {error}"
   Change Media Formats: Change Media Formats
   Use Dash Formats: Use DASH Formats
   Use Legacy Formats: Use Legacy Formats
@@ -2761,6 +2763,7 @@ Tooltips:
     Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
+    Automatically switch stream extraction methods: Try yt-dlp if built-in playback fails, or built-in playback if yt-dlp fails.
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Videos may take longer to start when using yt-dlp.

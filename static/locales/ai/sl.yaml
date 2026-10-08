@@ -407,6 +407,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Automatically switch stream extraction methods: "Samodejno preklapljaj metode pridobivanja tokov"
     Enable Tabs: "Omogoči zavihke"
     Thumbnail Swipe Gestures:
       Left: Podrsanje levo po sličicah
@@ -1991,6 +1992,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Celotnega seznama ni bilo mogoče naložiti, zato je bilo prednalaganje preklicano."
   Unavailable videos are hidden: Nedostopni videoposnetki so skriti
 Change Format:
+  yt-dlp Error Template: "yt-dlp ni mogel zagotoviti tokov: {error}"
   Local Video File: Lokalna videodatoteka
   Local Audio File: Lokalna zvočna datoteka
   Online Video: Spletni videoposnetek
@@ -2199,6 +2201,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Poskusi yt-dlp, če vgrajeno predvajanje ne uspe, ali vgrajeno predvajanje, če yt-dlp ne uspe."
     Enable Tabs: "Trenutna stran ostane odprta. Drugi zavihki se ohranijo do ponovnega zagona aplikacije; znova omogočite zavihke, da jih obnovite."
     Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.

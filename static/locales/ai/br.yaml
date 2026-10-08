@@ -283,6 +283,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Automatically switch stream extraction methods: "Cheñch hentennadoù eztennañ al lanvioù ent emgefre"
     Enable Tabs: "Gweredekaat an ivinelloù"
     Thumbnail Swipe Gestures:
       Left: Riklañ a-gleiz war ar skeudennigoù
@@ -1527,6 +1528,7 @@ Playlist:
   Playlist Preload Partial: "{preloaded} diwar {requested} video rakgarget. C’hwitet ez eus bet war {failed}."
   Playlist Preload Pagination Failed: "N’haller ket kargañ ar roll lenn a-bezh, setu eo bet nullet ar rakgargañ."
 Change Format:
+  yt-dlp Error Template: "N’en deus ket gallet yt-dlp pourchas al lanvioù: {error}"
   Local Video File: "Restr video lec'hel"
   Local Audio File: "Restr son lec'hel"
   Online Video: "Video enlinenn"
@@ -1718,6 +1720,7 @@ Description:
   Games: "C'hoarioù"
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Klask yt-dlp ma c’hwit al lenn enkorfet, pe al lenn enkorfet ma c’hwit yt-dlp."
     Enable Tabs: "Chom a ra ar bajenn vremanel digor. Miret e vez an ivinelloù all betek adlocʼhañ an arload; gweredekait an ivinelloù en-dro evit o adsevel."
     Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
     Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."

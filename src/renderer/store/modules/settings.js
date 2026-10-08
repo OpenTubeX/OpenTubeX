@@ -301,6 +301,7 @@ const state = {
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
   videoPlaybackEngine: 'built-in',
+  playbackEngineFallback: true,
   ytDlpSource: 'system',
   ytDlpChannel: 'stable',
   ytDlpPath: '',
@@ -797,6 +798,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'showAddedExternalPlayerCustomArgs',
   // ExternalSoftwareSettings
   'videoPlaybackEngine',
+  'playbackEngineFallback',
   'ytDlpSource',
   'ytDlpChannel',
   'ytDlpPath',

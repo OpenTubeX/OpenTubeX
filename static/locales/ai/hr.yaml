@@ -285,6 +285,7 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Automatically switch stream extraction methods: "Automatski mijenjaj metode izdvajanja streamova"
     Enable Tabs: "Omogući kartice"
     Thumbnail Swipe Gestures:
       Left: Povlačenje ulijevo po sličicama
@@ -1539,6 +1540,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Cijeli popis nije se mogao učitati pa je predučitavanje otkazano."
   Unavailable videos are hidden: Nedostupni videozapisi su skriveni
 Change Format:
+  yt-dlp Error Template: "yt-dlp nije mogao pružiti streamove: {error}"
   Local Video File: Lokalna videodatoteka
   Local Audio File: Lokalna audiodatoteka
   Online Video: Mrežni videozapis
@@ -1731,6 +1733,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Pokušaj s yt-dlp ako ugrađena reprodukcija ne uspije ili s ugrađenom reprodukcijom ako yt-dlp ne uspije."
     Enable Tabs: "Trenutačna stranica ostaje otvorena. Ostale kartice čuvaju se do ponovnog pokretanja aplikacije; ponovno omogućite kartice da biste ih vratili."
     Data Saver Thumbnails: "Koristite sličice niže razlučivosti kako biste smanjili potrošnju podataka."
     Use AI Translation Completions: Popunjava praznine u ljudskim prijevodima tekstom koji generira umjetna inteligencija. Ljudski prijevodi uvijek imaju prednost.

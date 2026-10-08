@@ -287,6 +287,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Automatically switch stream extraction methods: "Alternar automaticamente os métodos de extração de fluxos"
     Enable Tabs: "Ativar separadores"
     Thumbnail Swipe Gestures:
       Left: Deslizar para a esquerda nas miniaturas
@@ -1551,6 +1552,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Não foi possível carregar a lista completa, por isso o pré-carregamento foi cancelado."
   Unavailable videos are hidden: Os vídeos indisponíveis estão ocultos
 Change Format:
+  yt-dlp Error Template: "O yt-dlp não conseguiu fornecer os fluxos: {error}"
   Local Video File: Ficheiro de vídeo local
   Local Audio File: Ficheiro de áudio local
   Online Video: Vídeo online
@@ -1742,6 +1744,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Tentar yt-dlp se a reprodução integrada falhar, ou a reprodução integrada se yt-dlp falhar."
     Enable Tabs: "Mantém a página atual aberta. Os outros separadores são guardados até reiniciar a aplicação; volte a ativar os separadores para os restaurar."
     Data Saver Thumbnails: "Utilizar miniaturas de menor resolução para reduzir o consumo de dados."
     Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.

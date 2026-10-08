@@ -260,6 +260,7 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Automatically switch stream extraction methods: "Автоматически переключать методы извлечения потока"
     Enable Tabs: "Включить вкладки"
     Thumbnail Swipe Gestures:
       Left: Смахивание влево по миниатюрам
@@ -1529,6 +1530,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Не удалось загрузить весь плейлист, поэтому предзагрузка отменена."
   Unavailable videos are hidden: Недоступные видео скрыты
 Change Format:
+  yt-dlp Error Template: "yt-dlp не смог получить потоки: {error}"
   Local Video File: Локальный видеофайл
   Local Audio File: Локальный аудиофайл
   Online Video: Онлайн-видео
@@ -1721,6 +1723,7 @@ Description:
   Games: Игры
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Попробовать yt-dlp, если встроенное воспроизведение не работает, или встроенное воспроизведение, если yt-dlp не работает."
     Enable Tabs: "Текущая страница остаётся открытой. Другие вкладки сохраняются до перезапуска приложения; включите вкладки снова, чтобы восстановить их."
     Data Saver Thumbnails: "Использовать миниатюры меньшего разрешения для снижения расхода трафика."
     Use AI Translation Completions: Дополняет недостающие фрагменты переводов, сделанных людьми, текстом от ИИ. Переводы людей всегда имеют приоритет.

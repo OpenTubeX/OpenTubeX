@@ -287,6 +287,7 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Automatically switch stream extraction methods: "Αυτόματη εναλλαγή μεθόδων εξαγωγής ροής"
     Enable Tabs: "Ενεργοποίηση καρτελών"
     Thumbnail Swipe Gestures:
       Left: Σάρωση αριστερά στις μικρογραφίες
@@ -1559,6 +1560,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Δεν ήταν δυνατή η φόρτωση ολόκληρης της λίστας, οπότε η προφόρτωση ακυρώθηκε."
   Unavailable videos are hidden: Τα μη διαθέσιμα βίντεο είναι κρυμμένα
 Change Format:
+  yt-dlp Error Template: "Το yt-dlp δεν μπόρεσε να παρέχει τις ροές: {error}"
   Local Video File: Τοπικό αρχείο βίντεο
   Local Audio File: Τοπικό αρχείο ήχου
   Online Video: Διαδικτυακό βίντεο
@@ -1751,6 +1753,7 @@ Description:
   Games: Παιχνίδια
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Δοκιμή του yt-dlp αν αποτύχει η ενσωματωμένη αναπαραγωγή, ή της ενσωματωμένης αναπαραγωγής αν αποτύχει το yt-dlp."
     Enable Tabs: "Η τρέχουσα σελίδα παραμένει ανοιχτή. Οι άλλες καρτέλες διατηρούνται μέχρι την επανεκκίνηση της εφαρμογής· ενεργοποιήστε ξανά τις καρτέλες για να τις επαναφέρετε."
     Data Saver Thumbnails: "Χρησιμοποιήστε μικρογραφίες χαμηλότερης ανάλυσης για να μειώσετε τη χρήση δεδομένων."
     Use AI Translation Completions: Συμπληρώνει τα κενά στις ανθρώπινες μεταφράσεις με κείμενο παραγόμενο από AI. Οι ανθρώπινες μεταφράσεις έχουν πάντα προτεραιότητα.

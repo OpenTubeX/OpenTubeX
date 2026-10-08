@@ -287,6 +287,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Automatically switch stream extraction methods: "Cambiar automaticamente os métodos de extracción de fluxos"
     Enable Tabs: "Activar as lapelas"
     Thumbnail Swipe Gestures:
       Left: Deslizar á esquerda nas miniaturas
@@ -1563,6 +1564,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Non se puido cargar a lista completa, polo que se cancelou a precarga."
   Unavailable videos are hidden: Os vídeos non dispoñibles están ocultos
 Change Format:
+  yt-dlp Error Template: "yt-dlp non puido proporcionar os fluxos: {error}"
   Local Video File: Ficheiro de vídeo local
   Local Audio File: Ficheiro de son local
   Online Video: Vídeo en liña
@@ -1755,6 +1757,7 @@ Description:
   Games: Xogos
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Probar yt-dlp se falla a reprodución integrada, ou a reprodución integrada se falla yt-dlp."
     Enable Tabs: "Mantén aberta a páxina actual. As outras lapelas consérvanse ata reiniciar a aplicación; activa de novo as lapelas para restauralas."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir o consumo de datos."
     Use AI Translation Completions: Completa as lagoas das traducións humanas con texto xerado por IA. As traducións humanas sempre teñen prioridade.

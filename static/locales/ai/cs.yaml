@@ -283,6 +283,7 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Automatically switch stream extraction methods: "Automaticky přepínat metody extrakce streamů"
     Enable Tabs: "Povolit karty"
     Thumbnail Swipe Gestures:
       Left: Přejetí doleva po náhledech
@@ -1518,6 +1519,7 @@ Playlist:
   Playlist Preload Partial: "Přednačteno {preloaded} z {requested} videí. {failed} se nepodařilo přednačíst."
   Playlist Preload Pagination Failed: "Celý playlist se nepodařilo načíst, přednačítání bylo zrušeno."
 Change Format:
+  yt-dlp Error Template: "yt-dlp nemohl poskytnout streamy: {error}"
   Local Video File: Místní soubor videa
   Local Audio File: Místní zvukový soubor
   Online Video: Video na internetu
@@ -1709,6 +1711,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Vyzkoušet yt-dlp, pokud selže vestavěné přehrávání, nebo vestavěné přehrávání, pokud selže yt-dlp."
     Enable Tabs: "Aktuální stránka zůstane otevřená. Ostatní karty se uchovají do restartu aplikace; znovu karty povolte, chcete-li je obnovit."
     Data Saver Thumbnails: "Používat náhledy s nižším rozlišením pro snížení spotřeby dat."
     Use AI Translation Completions: Doplňuje mezery v lidských překladech textem vytvořeným umělou inteligencí. Lidské překlady mají vždy přednost.

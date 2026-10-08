@@ -372,6 +372,7 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Automatically switch stream extraction methods: "스트림 추출 방식 자동 전환"
     Enable Tabs: "탭 활성화"
     Thumbnail Swipe Gestures:
       Left: 썸네일에서 왼쪽으로 스와이프
@@ -1880,6 +1881,7 @@ Playlist:
   Playlist Preload Pagination Failed: "재생목록 전체를 불러오지 못해 미리 불러오기를 취소했습니다."
   Unavailable videos are hidden: 사용할 수 없는 동영상은 숨겨집니다
 Change Format:
+  yt-dlp Error Template: "yt-dlp에서 스트림을 가져오지 못했습니다: {error}"
   Local Video File: 로컬 동영상 파일
   Local Audio File: 로컬 오디오 파일
   Online Video: 온라인 동영상
@@ -2082,6 +2084,7 @@ Description:
   Games: 게임
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "내장 엔진의 재생이 실패하면 yt-dlp를 시도하고, yt-dlp가 실패하면 내장 엔진의 재생을 시도합니다."
     Enable Tabs: "현재 페이지는 열린 상태로 유지됩니다. 다른 탭은 앱을 다시 시작할 때까지 보관되며, 탭을 다시 활성화하면 복원됩니다."
     Data Saver Thumbnails: "낮은 해상도의 썸네일을 사용하여 데이터 사용량을 줄입니다."
     Use AI Translation Completions: 사람이 번역하지 않은 부분을 AI 생성 텍스트로 채웁니다. 사람의 번역을 항상 우선합니다.

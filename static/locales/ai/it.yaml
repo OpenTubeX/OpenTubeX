@@ -283,6 +283,7 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Automatically switch stream extraction methods: "Cambia automaticamente i metodi di estrazione dei flussi"
     Enable Tabs: "Abilita schede"
     Thumbnail Swipe Gestures:
       Left: Scorri a sinistra sulle miniature
@@ -1516,6 +1517,7 @@ Playlist:
   Playlist Preload Partial: "Precaricati {preloaded} video su {requested}. Impossibile precaricarne {failed}."
   Playlist Preload Pagination Failed: "Non è stato possibile caricare l’intera playlist, quindi il precaricamento è stato annullato."
 Change Format:
+  yt-dlp Error Template: "yt-dlp non ha potuto fornire i flussi: {error}"
   Local Video File: File video locale
   Local Audio File: File audio locale
   Online Video: Video online
@@ -1707,6 +1709,7 @@ Description:
   Games: Giochi
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prova yt-dlp se la riproduzione integrata non riesce, o la riproduzione integrata se yt-dlp non riesce."
     Enable Tabs: "Mantiene aperta la pagina attuale. Le altre schede vengono conservate fino al riavvio dell’app; riattiva le schede per ripristinarle."
     Data Saver Thumbnails: "Usa miniature a risoluzione inferiore per ridurre il consumo di dati."
     Use AI Translation Completions: Completa le parti mancanti delle traduzioni umane con testo generato dall'IA. Le traduzioni umane hanno sempre la precedenza.

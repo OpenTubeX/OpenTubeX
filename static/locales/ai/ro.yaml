@@ -285,6 +285,7 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Automatically switch stream extraction methods: "Schimbă automat metodele de extragere a fluxurilor"
     Enable Tabs: "Activează filele"
     Thumbnail Swipe Gestures:
       Left: Glisare la stânga pe miniaturi
@@ -1557,6 +1558,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Lista completă nu a putut fi încărcată, așa că preîncărcarea a fost anulată."
   Unavailable videos are hidden: Videoclipurile indisponibile sunt ascunse
 Change Format:
+  yt-dlp Error Template: "yt-dlp nu a putut furniza fluxurile: {error}"
   Local Video File: Fișier video local
   Local Audio File: Fișier audio local
   Online Video: Videoclip online
@@ -1753,6 +1755,7 @@ Description:
   Games: Jocuri
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Încearcă yt-dlp dacă redarea integrată eșuează, sau redarea integrată dacă yt-dlp eșuează."
     Enable Tabs: "Păstrează pagina curentă deschisă. Celelalte file sunt păstrate până la repornirea aplicației; activați din nou filele pentru a le restaura."
     Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.

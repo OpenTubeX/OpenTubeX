@@ -131,7 +131,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   if (sectionType === 'general') {
     if (group === 'Thumbnail Swipe Gestures') return isCapacitor || phoneLayout
     if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
-    if (group === 'Stream Extraction Method') return usingElectron || isCapacitor
+    if (['Stream Extraction Method', 'Automatically switch stream extraction methods'].includes(group)) return usingElectron || isCapacitor
     if (['Enable Tabs', 'Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
     }

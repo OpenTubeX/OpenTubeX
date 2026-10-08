@@ -287,6 +287,7 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Automatically switch stream extraction methods: "Automatisch wisselen van streamextractiemethode"
     Enable Tabs: "Tabbladen inschakelen"
     Thumbnail Swipe Gestures:
       Left: Naar links vegen op miniaturen
@@ -1570,6 +1571,7 @@ Playlist:
   Playlist Preload Pagination Failed: "De volledige afspeellijst kon niet worden geladen. Vooraf laden is geannuleerd."
   Unavailable videos are hidden: Niet-beschikbare video's zijn verborgen
 Change Format:
+  yt-dlp Error Template: "yt-dlp kon de streams niet leveren: {error}"
   Local Video File: Lokaal videobestand
   Local Audio File: Lokaal audiobestand
   Online Video: Onlinevideo
@@ -1762,6 +1764,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Probeer yt-dlp als de ingebouwde afspeelengine faalt, of de ingebouwde afspeelengine als yt-dlp faalt."
     Enable Tabs: "Houdt de huidige pagina open. Andere tabbladen blijven bewaard totdat de app opnieuw wordt gestart; schakel tabbladen weer in om ze te herstellen."
     Data Saver Thumbnails: "Gebruik miniaturen met een lagere resolutie om het dataverbruik te verminderen."
     Use AI Translation Completions: Vul ontbrekende menselijke vertalingen aan met door AI gegenereerde tekst. Menselijke vertalingen krijgen altijd voorrang.

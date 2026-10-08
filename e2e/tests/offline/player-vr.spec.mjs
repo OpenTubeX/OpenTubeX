@@ -39,6 +39,35 @@ async function mockVrYtDlpInfo(app) {
   }, DEMO_MEDIA_URL)
 }
 
+test('disabled playback-engine fallback keeps a YouTube mesh video on built-in playback', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.route(/\/youtubei\/v1\/player(?:\?|$)/, route => {
+    const videoId = JSON.parse(route.request().postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
+    const response = demoPlayerResponse(videoId)
+    response.streamingData.formats[0].projectionType = 'MESH'
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) })
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    .dispatch('updatePlaybackEngineFallback', false))
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__disabledVrExtractions = 0
+    ipcMain.removeHandler('yt-dlp-get-playback-info')
+    ipcMain.handle('yt-dlp-get-playback-info', () => { globalThis.__disabledVrExtractions++; return { error: 'Unexpected extraction' } })
+  })
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await page.locator('.videoLayout').waitFor()
+  const watch = await watchViewHandle(page)
+  await expect.poll(() => watch.evaluate(view => ({
+    loading: view.isLoading,
+    projection: view.vrProjection,
+    engine: view.activePlaybackEngine,
+    fallback: view.playbackEngineFallbackTarget
+  }))).toEqual({ loading: false, projection: 'MESH', engine: 'built-in', fallback: null })
+  expect(await app.electronApp.evaluate(() => globalThis.__disabledVrExtractions)).toBe(0)
+})
+
 test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   let manifestRequests = 0

@@ -472,6 +472,7 @@ Settings:
       Copy YouTube Link: YouTube-Link kopieren
       Open in YouTube: Auf YouTube öffnen
     Update Relative Timestamps: Relative Zeitangaben aktuell halten
+    Automatically switch stream extraction methods: "Methode zur Stream-Extraktion automatisch wechseln"
     Stream Extraction Method:
       Stream Extraction Method: Methode zur Stream-Extraktion
       yt-dlp: yt-dlp
@@ -2263,6 +2264,7 @@ Playlist:
     PublishedOldest: Veröffentlichungsdatum (älteste)
   Unavailable videos are hidden: Nicht verfügbare Videos sind ausgeblendet
 Change Format:
+  yt-dlp Error Template: "yt-dlp konnte keine Streams bereitstellen: {error}"
   Change Media Formats: Medienformate ändern
   Use Dash Formats: DASH-Formate verwenden
   Use Legacy Formats: Veraltete Formate verwenden
@@ -2486,6 +2488,7 @@ Tooltips:
     Update Relative Timestamps: >-
       Aktualisiert relative Zeitangaben in der gesamten App, während eine Seite geöffnet bleibt. Wenn dies deaktiviert ist,
       werden sie erst nach dem Neuladen oder erneuten Aufrufen der Seite aktualisiert.
+    Automatically switch stream extraction methods: Versucht yt-dlp, wenn die integrierte Wiedergabe fehlschlägt, oder die integrierte Wiedergabe, wenn yt-dlp fehlschlägt.
     Stream Extraction Method: |
       Lege fest, wie OpenTubeX Videostreams abruft. Bei Auswahl von yt-dlp muss es verfügbar sein.
       Die integrierte Methode unterstützt bei Livestreams und Premieren kein Spulen.

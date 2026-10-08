@@ -285,6 +285,7 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Automatically switch stream extraction methods: "Byt automatiskt mellan metoder för strömutvinning"
     Enable Tabs: "Aktivera flikar"
     Thumbnail Swipe Gestures:
       Left: Svep åt vänster på miniatyrbilder
@@ -1532,6 +1533,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Hela spellistan kunde inte läsas in, så förinläsningen avbröts."
   Unavailable videos are hidden: Otillgängliga videor är dolda
 Change Format:
+  yt-dlp Error Template: "yt-dlp kunde inte tillhandahålla strömmarna: {error}"
   Local Video File: Lokal videofil
   Local Audio File: Lokal ljudfil
   Online Video: Onlinevideo
@@ -1724,6 +1726,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Prova yt-dlp om den inbyggda uppspelningen misslyckas, eller inbyggd uppspelning om yt-dlp misslyckas."
     Enable Tabs: "Håller den aktuella sidan öppen. Andra flikar behålls tills appen startas om; aktivera flikar igen för att återställa dem."
     Data Saver Thumbnails: "Använd miniatyrbilder med lägre upplösning för att minska dataförbrukningen."
     Use AI Translation Completions: Fyll luckor i mänskliga översättningar med AI-genererad text. Mänskliga översättningar har alltid företräde.

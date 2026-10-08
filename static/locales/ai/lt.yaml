@@ -397,6 +397,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Automatically switch stream extraction methods: "Automatiškai keisti srauto išgavimo metodus"
     Enable Tabs: "Įjungti skirtukus"
     Thumbnail Swipe Gestures:
       Left: Braukti kairėn per miniatiūras
@@ -1915,6 +1916,7 @@ Playlist:
   Playlist Preload Pagination Failed: "Nepavyko įkelti viso grojaraščio, todėl išankstinis įkėlimas atšauktas."
   Unavailable videos are hidden: Nepasiekiami vaizdo įrašai paslėpti
 Change Format:
+  yt-dlp Error Template: "yt-dlp nepavyko pateikti srautų: {error}"
   Local Video File: Vietinis vaizdo įrašo failas
   Local Audio File: Vietinis garso failas
   Online Video: Internetinis vaizdo įrašas
@@ -2119,6 +2121,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
+    Automatically switch stream extraction methods: "Bandyti yt-dlp, jei integruotas atkūrimas nepavyksta, arba integruotą atkūrimą, jei yt-dlp nepavyksta."
     Enable Tabs: "Dabartinis puslapis lieka atvertas. Kitos kortelės išsaugomos iki programos paleidimo iš naujo; vėl įjunkite korteles, kad jas atkurtumėte."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
