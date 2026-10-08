@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
+import vm from 'node:vm'
 import { Capacitor } from '@capacitor/core'
-import { shallowRef } from 'vue'
+import { nextTick, ref, shallowRef } from 'vue'
 
 // Register the plugins against a native bridge so their real proxies call our mocks.
 globalThis.androidBridge = {}
@@ -242,3 +244,52 @@ test('capture resumes when an invalidated screenshot outlasts the post-swipe tim
   assert.equal(calls, 2, 'the stable page needs a fresh native capture')
   assert.equal(getCapacitorTabPreview(state.tab), state.preview)
 })
+
+for (const cancellation of ['none', 'direct', 'pointercancel']) {
+  const cancelled = cancellation !== 'none'
+  test(`organizer pull captures before showing the overlay (cancellation: ${cancellation})`, async t => {
+    const state = setup(t)
+    await captureBeforeTabOrganizer()
+    assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+    let finishCapture
+    const latest = 'data:image/jpeg;base64,bGF0ZXN0'
+    state.take.mock.mockImplementation(() => new Promise(resolve => { finishCapture = () => resolve({ dataUrl: latest }) }))
+    const open = ref(false)
+    state.document.querySelector = selector => selector === '.app > .routerView' ? {} : null
+    state.document.querySelectorAll = () => open.value ? [{ getBoundingClientRect: () => ({ width: 375 }) }] : []
+    const source = readFileSync(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
+    const methods = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
+    const updates = []
+    const ctx = vm.createContext({
+      props: { enabled: true }, open, openingSwitcher: false, disposed: false,
+      document: state.document, window: globalThis.window,
+      organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
+      captureBeforeTabOrganizer, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
+      dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
+      openTabsScrollRef: ref(null), organizerSwipeProgress: distance => distance / 320,
+      createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
+    })
+    const gesture = vm.runInContext(`${methods}; organizerSwipe`, ctx)
+    assert.equal(gesture.begin(), true)
+    assert.equal(open.value, false, 'the native capture must see the page, not the organizer')
+    await new Promise(setImmediate)
+    assert.ok(finishCapture, 'the gesture must refresh the cached screenshot')
+    gesture.update(160)
+    if (cancellation === 'direct') gesture.cancel()
+    if (cancellation === 'pointercancel') {
+      let finished = false
+      const finish = gesture.finish(20, true).then(() => { finished = true })
+      try {
+        await new Promise(setImmediate)
+        assert.equal(finished, true, 'pointer cancellation must finish without waiting for native capture')
+      } finally {
+        finishCapture()
+        await finish
+      }
+    } else finishCapture()
+    await new Promise(setImmediate)
+    assert.equal(open.value, !cancelled, 'a late native result cannot reopen a cancelled organizer')
+    assert.equal(getCapacitorTabPreview(state.tab), latest)
+    assert.deepEqual(updates, cancelled ? [] : [0.5], 'pending capture must retain the latest finger position')
+  })
+}

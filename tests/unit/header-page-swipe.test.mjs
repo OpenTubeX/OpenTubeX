@@ -14,6 +14,7 @@ function headerGesture(targetSelector = 'button') {
   let sequence = 0
   const context = vm.createContext({
     shallowRef: value => ({ value }), isCapacitor: true,
+    topNav: { value: null }, organizerSwipeActive: { value: false },
     isAnyPromptOpen: { value: false }, activeTabId: { value: 'first' }, presentedTabId: { value: 'first' },
     store: { getters: { getTabs: [{ id: 'first', loadState: 'loaded' }, { id: 'second', loadState: 'loaded' }] } },
     findSwipeTab, shouldFinishPageSwipe,
@@ -183,6 +184,59 @@ test('an uninterrupted swipe still activates the neighboring tab on release', as
   assert.deepEqual(activations, ['second'])
   assert.equal(swipe(), null)
 })
+
+test('downward organizer drags lock direction and suppress the originating icon click', async () => {
+  const { context, event, captures, swipe } = headerGesture()
+  const calls = []
+  context.topNav.value = { organizerSwipe: {
+    begin() { calls.push('begin'); return true },
+    update(distance) { calls.push(distance) },
+    finish(elapsed, cancelled) { calls.push({ cancelled }) },
+  } }
+  context.startPageSwipe(event)
+  context.movePageSwipe({ ...event, clientY: 36 })
+  assert.deepEqual(captures, [], 'tap jitter must not capture a control')
+  context.movePageSwipe({ ...event, clientY: 80 })
+  context.movePageSwipe({ ...event, clientX: 100, clientY: 90 })
+  assert.equal(swipe(), null, 'a downward drag must never switch tabs after locking')
+  assert.deepEqual(captures, [1])
+  assert.deepEqual(calls, ['begin', 50, 60])
+  assert.equal(context.organizerSwipeActive.value, true)
+  let suppressed = false
+  context.suppressPageSwipeClick({ pointerId: 1, detail: 1, preventDefault() { suppressed = true }, stopPropagation() {} })
+  assert.equal(suppressed, true)
+  await context.finishPageSwipe({ ...event, timeStamp: 500 })
+  assert.deepEqual(calls.at(-1), { cancelled: false })
+  assert.equal(context.organizerSwipeActive.value, false)
+})
+
+test('horizontal drags cannot become organizer pulls', () => {
+  const { context, event, swipe } = headerGesture()
+  context.topNav.value = { organizerSwipe: { begin() { assert.fail('horizontal direction must stay locked') } } }
+  context.startPageSwipe(event)
+  context.movePageSwipe({ ...event, clientX: 200 })
+  context.movePageSwipe({ ...event, clientX: 200, clientY: 200 })
+  assert.equal(swipe()?.toId, 'second')
+})
+
+for (const interruption of ['cancel', 'prompt', 'tab']) {
+  test(`organizer pull cleans up after ${interruption}`, async () => {
+    const { context, event } = headerGesture()
+    const calls = []
+    context.topNav.value = { organizerSwipe: {
+      begin: () => true, update() {},
+      cancel() { calls.push('cancel') }, finish(elapsed, cancelled) { calls.push(cancelled) },
+    } }
+    context.startPageSwipe(event)
+    context.movePageSwipe({ ...event, clientY: 100 })
+    if (interruption === 'prompt') context.isAnyPromptOpen.value = true
+    if (interruption === 'tab') context.activeTabId.value = 'second'
+    if (interruption !== 'cancel') context.movePageSwipe({ ...event, clientY: 120 })
+    await context.finishPageSwipe(event, interruption === 'cancel')
+    assert.equal(calls.at(-1), true)
+    assert.equal(context.organizerSwipeActive.value, false)
+  })
+}
 
 function iconGesture(disabled = false) {
   const iconSource = readFileSync(new URL('../../src/renderer/components/FtIconButton/FtIconButton.vue', import.meta.url), 'utf8')

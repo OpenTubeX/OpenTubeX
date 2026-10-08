@@ -30,6 +30,7 @@
       @request-exit="requestAndroidAppExit"
     />
     <TopNav
+      ref="topNav"
       :inert="isAnyPromptOpen"
       @request-android-exit="requestAndroidAppExit"
       @pointerdown.capture="startPageSwipe"
@@ -737,6 +738,8 @@ const pageSwipeNeighborIds = computed(() => {
     .filter(Boolean)
 })
 
+const topNav = useTemplateRef('topNav')
+const organizerSwipeActive = ref(false)
 const pageSwipe = shallowRef(null)
 let pageSwipePointer = null
 let pageSwipeClickPointerId = null
@@ -751,7 +754,7 @@ function clearPageSwipeClick() {
 function startPageSwipe(event) {
   if (event.isPrimary) clearPageSwipeClick()
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
-      pageSwipe.value || isAnyPromptOpen.value ||
+      pageSwipe.value || organizerSwipeActive.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
       !event.target.closest('.topNavInner') ||
       event.target.closest('input, textarea, select, [contenteditable], [role="dialog"], [role="menu"], .dropdownLayer, .ft-input-component .options')) return
@@ -776,15 +779,29 @@ function movePageSwipe(event) {
 
   const distance = event.clientX - pointer.x
   const verticalDistance = Math.abs(event.clientY - pointer.y)
-  if (!pointer.dragging && (Math.abs(distance) < 10 || Math.abs(distance) < verticalDistance * 1.2)) {
-    if (verticalDistance > 10) pageSwipePointer = null
-    return
+  if (!pointer.dragging) {
+    if (Math.max(Math.abs(distance), verticalDistance) < 10) return
+    if (verticalDistance > Math.abs(distance) * 1.2) {
+      const organizer = topNav.value?.organizerSwipe
+      if (event.clientY <= pointer.y || !organizer?.begin()) {
+        pageSwipePointer = null
+        return
+      }
+      pointer.organizer = organizer
+      organizerSwipeActive.value = true
+    } else if (Math.abs(distance) < verticalDistance * 1.2) {
+      return
+    }
   }
 
   if (isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
     // Keep tracking the release so cancellation cannot turn a drag into a click.
     pointer.cancelled = true
     pageSwipe.value = null
+    if (pointer.organizer) {
+      pointer.organizer.cancel()
+      organizerSwipeActive.value = false
+    }
     return
   }
 
@@ -794,6 +811,11 @@ function movePageSwipe(event) {
     event.currentTarget.setPointerCapture(event.pointerId)
   }
   event.preventDefault()
+
+  if (pointer.organizer) {
+    pointer.organizer.update(event.clientY - pointer.y)
+    return
+  }
 
   const direction = distance < 0 ? 1 : -1
   const target = findSwipeTab(store.getters.getTabs, pointer.fromId, direction)
@@ -823,6 +845,14 @@ async function finishPageSwipe(event, cancelled = false) {
   // Keep suppression for the click dispatched with pointerup, then expire it
   // even when capture release or cancellation produces no click.
   if (pointer.dragging) pageSwipeClickTimeout = window.setTimeout(clearPageSwipeClick, 0)
+  if (pointer.organizer) {
+    try {
+      await pointer.organizer.finish(event.timeStamp - pointer.time, cancelled || pointer.cancelled || isAnyPromptOpen.value || activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId)
+    } finally {
+      organizerSwipeActive.value = false
+    }
+    return
+  }
   const swipe = pageSwipe.value
   if (!swipe) return
 
@@ -880,6 +910,8 @@ function cancelPageSwipe(event) {
     return
   }
   clearPageSwipeClick()
+  topNav.value?.organizerSwipe?.cancel()
+  organizerSwipeActive.value = false
   pageSwipePointer = null
   pageSwipe.value = null
 }

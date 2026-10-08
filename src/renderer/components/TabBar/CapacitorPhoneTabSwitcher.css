@@ -628,3 +628,7 @@
   accent-color: var(--primary-color);
   cursor: pointer;
 }
+
+.capacitorPhoneTabOverlay.organizerGesture {
+  pointer-events: none;
+}
