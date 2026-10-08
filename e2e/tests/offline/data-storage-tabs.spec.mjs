@@ -8,7 +8,7 @@ for (const uiScale of [100, 95]) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await setWindowSize(app, page, { width: 400, height: 800 })
       await goTo(page, 'settings')
-      await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
+      await expect(page.locator('.settingsPage')).toContainClass('compactSettings')
       const link = page.locator('.settingsMenu [data-section="data"]')
       const tabs = page.getByRole('tablist', { name: 'Data & Storage' })
       const data = tabs.getByRole('tab', { name: 'Data', exact: true })
@@ -38,7 +38,7 @@ for (const uiScale of [100, 95]) {
         expect(header).not.toBeNull()
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+          await expect(page.locator('body')).toContainClass(colorScheme)
           await page.screenshot({ clip: { ...header, height: header.height + 8 }, path: testInfo.outputPath(`compact-tab-focus-${colorScheme}.png`) })
         }
       }
@@ -112,7 +112,7 @@ for (const uiScale of [100, 95]) {
       await scrollToBottom()
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await expect(page.locator('body')).toContainClass(colorScheme)
         await page.locator('.settingsContentPane').screenshot({ path: testInfo.outputPath(`fixed-tabs-${colorScheme}.png`) })
       }
 
