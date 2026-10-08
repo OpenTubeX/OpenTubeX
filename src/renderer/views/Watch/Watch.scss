@@ -362,7 +362,7 @@
       }
     }
 
-    :deep(.shortsSwipePresentation > :not(.shortsSwipePreview)) {
+    .shortsSwipeActive.shortsSwipeExpanded :deep(.ftVideoPlayer:is(.fullWindow, :fullscreen) > :not(.shortsSwipePreview)) {
       translate: 0 var(--shorts-swipe-offset);
       will-change: translate;
     }

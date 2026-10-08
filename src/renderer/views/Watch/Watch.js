@@ -2907,7 +2907,6 @@ export default defineComponent({
           return
         }
         pointer.dragging = true
-        this.shortsSwipePresentationTarget?.classList.add('shortsSwipePresentation')
         event.currentTarget.setPointerCapture(event.pointerId)
       }
 
@@ -3000,7 +2999,6 @@ export default defineComponent({
     resetShortsSwipe() {
       this.shortsSwipeAnimations.forEach(animation => animation.cancel())
       this.shortsSwipeAnimations = markRaw([])
-      this.shortsSwipePresentationTarget?.classList.remove('shortsSwipePresentation')
       this.shortsSwipePresentationTarget = null
       this.shortsSwipePointer = null
       this.shortsSwipeOffset = 0

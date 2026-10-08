@@ -192,8 +192,11 @@ test('resizing during a Shorts drag cancels navigation and restores the player',
 })
 
 for (const mode of ['fullwindow', 'fullscreen']) {
-  test(`Shorts follow the finger without shrinking in ${mode}`, async ({ app, page }) => {
+  test(`Shorts follow the finger without shrinking in ${mode}`, async ({ app, page }, testInfo) => {
     const { watch, cdp } = await openShorts({ app, page })
+    const theme = mode === 'fullwindow' ? 'dark' : 'light'
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
     else await player.locator('.full-window-button').evaluate(button => button.click())
@@ -210,11 +213,22 @@ for (const mode of ['fullwindow', 'fullscreen']) {
     })
     await touch('touchStart')
     await touch('touchMove', -120)
+    // Playback updates re-render the player's classes while the drag is active.
+    await player.locator('video').evaluate(video => video.play())
+    await expect(player).not.toHaveClass(/\bplayerPaused\b/)
     await expect.poll(async () => (await player.locator('video').boundingBox()).y).toBeCloseTo(bounds.y - 120, 0)
     const draggingBounds = await player.boundingBox()
     expect(draggingBounds.width).toBeCloseTo(bounds.width, 0)
     expect(draggingBounds.height).toBeCloseTo(bounds.height, 0)
     await expect.poll(async () => (await player.locator('.shortsSwipePreview').boundingBox()).y).toBeCloseTo(bounds.y + bounds.height - 120, 0)
+    await player.locator('video').evaluate(video => video.pause())
+    await expect(player).toHaveClass(/\bplayerPaused\b/)
+    await expect.poll(async () => (await player.locator('video').boundingBox()).y).toBeCloseTo(bounds.y - 120, 0)
+    await expect.poll(() => player.locator('.shortsSwipePreview img:not(.retryImagePlaceholder)')
+      .evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    const screenshotPath = testInfo.outputPath('expanded-swipe.png')
+    await page.screenshot({ path: screenshotPath, clip: bounds })
+    await testInfo.attach('Expanded Shorts swipe after playback updates', { path: screenshotPath, contentType: 'image/png' })
     await touch('touchCancel')
     await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
     await expect.poll(async () => (await player.locator('video').boundingBox()).y).toBeCloseTo(bounds.y, 0)
