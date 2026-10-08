@@ -137,6 +137,15 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && bridge != null) {
+            // System gestures can reveal the bars without changing player controls.
+            bridge.triggerWindowJSEvent("opentubex:android-window-focus");
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         // A PiP exit can happen while Chromium is suspended behind the lock
