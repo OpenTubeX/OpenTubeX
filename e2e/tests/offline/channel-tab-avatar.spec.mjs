@@ -12,7 +12,7 @@ test.use({
   }
 })
 
-test('keeps the saved avatar visible while switching channel content tabs', async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   await page.route('https://invidious.test/api/v1/channels/**', route => {
     const channelId = new URL(route.request().url()).pathname.split('/')[4]
     return route.fulfill({
@@ -35,7 +35,9 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
   // The saved avatar uses Electron's native decoder, which needs a raster image.
   const avatar = await readFile(new URL('../../fixtures/media/avatar.png', import.meta.url))
   await page.route('https://invidious.test/avatar/**', route => route.fulfill({ body: avatar, contentType: 'image/png' }))
+})
 
+test('keeps the saved avatar visible while switching channel content tabs', async ({ page }) => {
   const tab = await page.evaluate(() => window.ftElectron.tabs.create({
     route: '/channel/UCaaaaaaaaaaaaaaaaaaaaaa', makeActive: true
   }))
@@ -79,4 +81,45 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
     return window.__channelAvatarFlashes
   })
   expect(flashes, 'loaded avatars must not flash a placeholder when switching channel content tabs').toEqual([])
+})
+
+test('applies a refreshed avatar after switching sections during its download', async ({ page }) => {
+  const channelPath = '/channel/UCaaaaaaaaaaaaaaaaaaaaaa'
+  const tab = await page.evaluate(route => window.ftElectron.tabs.create({
+    route,
+    makeActive: false,
+    lazyLoad: true,
+    avatarDataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+  }), channelPath)
+  const image = page.locator(`.tabBar .tab[data-tab-id="${tab.id}"] img.tabAvatar`)
+  await expectImagesLoaded(image)
+  const oldSource = await image.getAttribute('src')
+
+  let releaseDownload
+  let downloadStarted
+  const pendingDownload = new Promise(resolve => { releaseDownload = resolve })
+  const started = new Promise(resolve => { downloadStarted = resolve })
+  const avatar = await readFile(new URL('../../fixtures/media/avatar.png', import.meta.url))
+  await page.route('https://invidious.test/avatar/**', async route => {
+    if (route.request().resourceType() === 'fetch') {
+      downloadStarted()
+      await pendingDownload
+    }
+    await route.fulfill({ body: avatar, contentType: 'image/png' })
+  })
+
+  try {
+    await page.locator(`.tabBar .tab[data-tab-id="${tab.id}"]`).click()
+    await started
+    await page.locator('.channelDetails:visible #aboutTab').click()
+    await expect(page).toHaveURL(new RegExp(`${channelPath}/about$`))
+    await expect(image).toHaveAttribute('src', oldSource)
+    releaseDownload()
+    await expect(image).not.toHaveAttribute('src', oldSource)
+    await expect(image).toHaveAttribute('src', /^data:image\/jpeg/)
+    await expectImagesLoaded(image)
+    await expect(image).toBeVisible()
+  } finally {
+    releaseDownload()
+  }
 })
