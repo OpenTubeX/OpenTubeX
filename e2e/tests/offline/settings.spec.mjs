@@ -3877,10 +3877,11 @@ test.describe('settings', () => {
       }))
     expect(Math.max(...alignedLabelParts) - Math.min(...alignedLabelParts)).toBeLessThanOrEqual(1)
 
+    // These switches share the second column of the row-major layout.
     const switchPositions = await Promise.all([
       'Expand Side Bar by Default',
       'Disable Smooth Scrolling',
-      'Always Show Scrollbars'
+      'Show toast timeout indicator'
     ].map(label => page.getByRole('checkbox', { name: label }).boundingBox()))
     const switchX = switchPositions.map(position => position.x)
     expect(Math.max(...switchX) - Math.min(...switchX)).toBeLessThanOrEqual(1)
