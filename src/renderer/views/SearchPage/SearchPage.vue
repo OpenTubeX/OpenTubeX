@@ -59,8 +59,10 @@
       <FtElementList
         :data="shownResults"
       />
+      <!-- Recheck visibility when results are appended or replaced. -->
       <FtAutoLoadNextPageWrapper
         v-if="hasMoreResults"
+        :key="autoLoadMore ? paginationRevision : 0"
         :loading="isLoadingMore"
         @load-next-page="nextPage"
       >
@@ -123,6 +125,7 @@ const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
 const isLoadingMore = ref(false)
+const autoLoadMore = computed(() => store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled)
 const hasMoreResults = ref(true)
 const apiUsed = ref('local')
 const searchSettings = ref({})
@@ -130,6 +133,7 @@ const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
 const nextPageRef = shallowRef(null)
 const shownResults = shallowRef([])
+const paginationRevision = ref(0)
 const searchNotice = shallowRef(null)
 const searchParams = ref('')
 const isRetryingWithCookies = ref(false)
@@ -190,6 +194,10 @@ function getRouteSearchSettings() {
     features: features ?? [],
   }
 }
+
+watch(shownResults, () => {
+  paginationRevision.value++
+})
 
 watch(route, () => {
   const query_ = route.params.query.trim()
@@ -389,8 +397,10 @@ async function performSearchWithCookies() {
 }
 
 async function getNextpageLocal(payload) {
+  const requestId = searchRequestId
   try {
     const { results, continuationData } = await getLocalSearchContinuation(payload.options.nextPageRef)
+    if (requestId !== searchRequestId) return
 
     nextPageRef.value = continuationData
     hasMoreResults.value = results.length > 0 && continuationData != null
@@ -411,6 +421,7 @@ async function getNextpageLocal(payload) {
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (requestId !== searchRequestId) return
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -426,6 +437,7 @@ async function getNextpageLocal(payload) {
 }
 
 async function performSearchInvidious(payload, options = { resetSearchPage: false }) {
+  const requestId = searchRequestId
   if (options.resetSearchPage) {
     searchPage.value = 1
   }
@@ -436,6 +448,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
   try {
     const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
+    if (requestId !== searchRequestId) return
     if (!results) {
       return
     }
@@ -467,6 +480,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (requestId !== searchRequestId) return
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -487,6 +501,7 @@ async function nextPage() {
     return
   }
 
+  const requestId = searchRequestId
   const payload = {
     query: processedQuery.value,
     searchSettings: searchSettings.value,
@@ -498,14 +513,14 @@ async function nextPage() {
   if (apiUsed.value === 'yt-dlp') {
     isLoadingMore.value = true
     await performSearchWithCookies()
-    isLoadingMore.value = false
+    if (requestId === searchRequestId) isLoadingMore.value = false
   } else if (apiUsed.value === 'local') {
     if (nextPageRef.value !== null) {
       isLoadingMore.value = true
       try {
         await getNextpageLocal(payload)
       } finally {
-        isLoadingMore.value = false
+        if (requestId === searchRequestId) isLoadingMore.value = false
       }
     } else {
       showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
@@ -515,7 +530,7 @@ async function nextPage() {
     try {
       await performSearchInvidious(payload)
     } finally {
-      isLoadingMore.value = false
+      if (requestId === searchRequestId) isLoadingMore.value = false
     }
   }
 }
