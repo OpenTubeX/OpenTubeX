@@ -2554,6 +2554,8 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 
 .htmlImagePlaceholder > img {
   display: block;
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .ft-shimmer {

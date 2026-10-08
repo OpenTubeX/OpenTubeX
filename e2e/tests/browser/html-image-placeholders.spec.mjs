@@ -51,6 +51,55 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   await expect(placeholders.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
 
+test('preserves inline image layout while loading, after a stall, and on a late load', async ({ page }) => {
+  await page.clock.install()
+  const svg = await installPlaceholderHelper(page)
+  const pending = []
+  await page.route('https://styled-images.test/**', route => { pending.push(route) })
+  await page.evaluate(svg => {
+    const styles = [
+      'width:100%;height:auto;margin:8px 0;vertical-align:middle',
+      'width:50%;height:auto;float:right;margin:12px 8px',
+      'position:absolute;left:12px;top:18px;width:60%;height:auto',
+      'height:48px;width:auto;padding:4px;border:2px solid red'
+    ]
+    for (const [index, style] of styles.entries()) {
+      const pair = document.createElement('section')
+      pair.innerHTML = `<div class="reference"><img width="80" height="45" alt="" style="${style}"></div><div class="actual"><img width="80" height="45" alt="" style="${style}"></div>`
+      for (const box of pair.children) box.style.cssText = 'position:relative;display:flow-root;width:60vw;min-height:240px'
+      pair.querySelector('.reference img').src = `data:image/svg+xml,${encodeURIComponent(svg)}`
+      pair.querySelector('.actual img').src = `https://styled-images.test/${index}`
+      document.body.append(pair)
+      window.addHtmlImagePlaceholders(pair.querySelector('.actual'))
+    }
+  }, svg)
+  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+  await page.addStyleTag({ content: css })
+  await expect.poll(() => pending.length).toBe(4)
+  const position = element => {
+    const { x, y, width, height } = element.getBoundingClientRect()
+    const parent = element.parentElement.getBoundingClientRect()
+    return { x: x - parent.x, y: y - parent.y, width, height }
+  }
+  const checkSlots = async selector => {
+    for (const width of [640, 960]) {
+      await page.setViewportSize({ width, height: 720 })
+      for (const section of await page.locator('section').all()) {
+        const expected = await section.locator('.reference img').evaluate(position)
+        const actual = await section.locator(`.actual ${selector}`).evaluate(position)
+        for (const [key, value] of Object.entries(expected)) expect(actual[key], key).toBeCloseTo(value, 1)
+      }
+    }
+  }
+  await checkSlots('.htmlImagePlaceholder')
+  await page.clock.fastForward(10_001)
+  await expect(page.locator('.ft-shimmer')).toHaveCount(0)
+  await checkSlots('.htmlImagePlaceholder')
+  while (pending.length) await pending.shift().fulfill({ contentType: 'image/svg+xml', body: svg })
+  await expect(page.locator('.htmlImagePlaceholder')).toHaveCount(0)
+  await checkSlots('img')
+})
+
 test('uses permanent fallbacks for missing sources and failures completed before initialization', async ({ page }) => {
   const svg = await installPlaceholderHelper(page)
   await page.setContent('<div id="images"><img><img src="data:image/png;base64,AAAA"><img src="data:image/png;base64,AAAA" alt="Unavailable image"></div>')

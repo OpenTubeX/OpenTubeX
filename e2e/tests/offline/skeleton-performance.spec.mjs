@@ -28,10 +28,17 @@ for (const { zoom, throttle, width, direction } of [
       await page.locator('.videoPlayerPlaceholder').evaluate((element, direction) => { element.dir = direction }, direction)
       await session.send('Emulation.setCPUThrottlingRate', { rate: throttle })
       await session.send('Performance.enable')
+      // Wait for the scrollbars' initial move-to-show activity to become idle.
+      await expect(page.locator('.os-scrollbar:not(.app-scrollbar-idle)')).toHaveCount(0)
       // Wait for the animation to start and render before sampling.
       await page.locator('.videoPlayerPlaceholder').evaluate(async element => {
         const animation = element.getAnimations({ subtree: true }).find(animation => animation.animationName === 'ft-shimmer')
         await animation.ready
+        // Settle time-based entry/focus transitions. Scroll-timeline animations
+        // and the infinite shimmer remain active throughout the measurement.
+        await Promise.all(document.getAnimations()
+          .filter(animation => animation.timeline === document.timeline && animation.effect.getComputedTiming().iterations !== Infinity)
+          .map(animation => animation.finished.catch(() => {})))
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       })
       const events = []
@@ -58,6 +65,8 @@ for (const { zoom, throttle, width, direction } of [
         )
       ), 'The shimmer must still animate').toBe(true)
       expect(measurement.paints, 'A settled skeleton should composite its animation without continuous paint').toBeLessThan(10)
+      // Allow incidental page updates while rejecting per-frame style work.
+      expect(measurement.styleUpdates, 'A settled skeleton should animate without continuous style recalculation').toBeLessThan(20)
 
       // The oversized gradient must cover the placeholder even at the start of
       // its sweep, including in RTL layouts and at fractional UI scales.
