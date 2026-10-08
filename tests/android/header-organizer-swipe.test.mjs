@@ -214,3 +214,36 @@ test('Android organizer pull follows the finger, settles into its card and prese
     clearTimeout(keepAlive)
   }
 })
+
+test('Android header keeps vertical panning when the phone organizer is unavailable', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, async () => {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const page = browser.contexts()[0].pages()[0]
+  const keepAlive = setTimeout(() => {}, 60_000)
+  const saved = await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return { EnableMobileTabs: store.getters.getEnableMobileTabs, CapacitorLayoutMode: store.getters.getCapacitorLayoutMode }
+  })
+  try {
+    for (const [layout, tabs, expected] of [
+      ['phone', true, 'none'], ['phone', false, 'pan-y'],
+      ['phone', true, 'none'], ['tablet', true, 'pan-y'],
+    ]) {
+      await page.evaluate(async ({ layout, tabs }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateCapacitorLayoutMode', layout)
+        await store.dispatch('updateEnableMobileTabs', tabs)
+      }, { layout, tabs })
+      await expect(page.locator('.topNav'), `${layout} header with tabs ${tabs ? 'enabled' : 'disabled'}`)
+        .toHaveCSS('touch-action', expected)
+    }
+  } finally {
+    await page.evaluate(async saved => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(saved)) await store.dispatch('update' + key, value)
+    }, saved)
+    await browser.close()
+    clearTimeout(keepAlive)
+  }
+})

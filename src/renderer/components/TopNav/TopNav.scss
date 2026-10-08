@@ -29,7 +29,7 @@
     touch-action: pan-y;
   }
 
-  .app.capacitorPhoneLayout & {
+  .app.capacitorPhoneLayout &:where(:has(.capacitorPhoneTabSwitcherButton)) {
     touch-action: none;
   }
 
