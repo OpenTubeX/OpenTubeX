@@ -14,13 +14,13 @@ export function addHtmlImagePlaceholders(element) {
     // The wrapper owns the original image's outer box; applying these styles
     // to both elements would duplicate margins, padding and positioning.
     placeholder.style.cssText = image.style.cssText
-    for (const [dimension, logicalDimension] of [['width', 'inline-size'], ['height', 'block-size']]) {
+    // Presentation attributes must remain overridable by stylesheet sizing.
+    for (const dimension of ['width', 'height']) {
       const value = image.getAttribute(dimension)
-      if (value !== null && !placeholder.style.getPropertyValue(dimension) && !placeholder.style.getPropertyValue(logicalDimension)) {
-        placeholder.style.setProperty(dimension, value.trim().endsWith('%') ? value : `${Number.parseInt(value, 10)}px`)
+      if (value !== null) {
+        placeholder.style.setProperty(`--html-image-${dimension}`, value.trim().endsWith('%') ? value : `${Number.parseInt(value, 10)}px`)
       }
     }
-    placeholder.style.aspectRatio ||= '320 / 180'
     placeholder.style.display = imageStyle.display === 'inline' ? 'inline-block' : imageStyle.display
     placeholder.style.verticalAlign = imageStyle.verticalAlign
     sizingImage.removeAttribute('style')

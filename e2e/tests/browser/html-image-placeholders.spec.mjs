@@ -51,31 +51,38 @@ test('isolates inline HTML placeholders from responsive image sources', async ({
   await expect(placeholders.locator('img')).toHaveAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`)
 })
 
-test('preserves inline image layout while loading, after a stall, and on a late load', async ({ page }) => {
+test('preserves image layout while loading, after a stall, and on a late load', async ({ page }) => {
   await page.clock.install()
   const svg = await installPlaceholderHelper(page)
+  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+  const appCss = await readFile(new URL('../../../src/renderer/App.css', import.meta.url), 'utf8')
+  const changelogCss = appCss.match(/\.changeLogText :deep\([^)]*\)[^{]*\{[^}]+\}/g).join('\n').replace(/:deep\(([^)]+)\)/g, '$1')
+  await page.addStyleTag({ content: css + changelogCss })
   const pending = []
   await page.route('https://styled-images.test/**', route => { pending.push(route) })
   await page.evaluate(svg => {
-    const styles = [
-      'width:100%;height:auto;margin:8px 0;vertical-align:middle',
-      'width:50%;height:auto;float:right;margin:12px 8px',
-      'position:absolute;left:12px;top:18px;width:60%;height:auto',
-      'height:48px;width:auto;padding:4px;border:2px solid red'
+    const images = [
+      { style: 'width:100%;height:auto;margin:8px 0;vertical-align:middle' },
+      { style: 'width:50%;height:auto;float:right;margin:12px 8px' },
+      { style: 'position:absolute;left:12px;top:18px;width:60%;height:auto' },
+      { style: 'height:48px;width:auto;padding:4px;border:2px solid red' },
+      { width: 800, height: 450 },
+      { width: 800, height: 200, className: 'changeLogText' }
     ]
-    for (const [index, style] of styles.entries()) {
+    for (const [index, { style = '', width = 80, height = 45, className }] of images.entries()) {
       const pair = document.createElement('section')
-      pair.innerHTML = `<div class="reference"><img width="80" height="45" alt="" style="${style}"></div><div class="actual"><img width="80" height="45" alt="" style="${style}"></div>`
-      for (const box of pair.children) box.style.cssText = 'position:relative;display:flow-root;width:60vw;min-height:240px'
+      pair.innerHTML = `<div class="reference"><img width="${width}" height="${height}" alt="" style="${style}"></div><div class="actual"><img width="${width}" height="${height}" alt="" style="${style}"></div>`
+      for (const box of pair.children) {
+        box.style.cssText = 'position:relative;display:flow-root;width:60vw;min-height:240px'
+        if (className) box.classList.add(className)
+      }
       pair.querySelector('.reference img').src = `data:image/svg+xml,${encodeURIComponent(svg)}`
       pair.querySelector('.actual img').src = `https://styled-images.test/${index}`
       document.body.append(pair)
       window.addHtmlImagePlaceholders(pair.querySelector('.actual'))
     }
   }, svg)
-  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
-  await page.addStyleTag({ content: css })
-  await expect.poll(() => pending.length).toBe(4)
+  await expect.poll(() => pending.length).toBe(6)
   const position = element => {
     const { x, y, width, height } = element.getBoundingClientRect()
     const parent = element.parentElement.getBoundingClientRect()
