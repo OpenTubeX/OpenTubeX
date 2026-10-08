@@ -148,7 +148,6 @@ test('hides settings category descriptions immediately and persists across resta
   await goToSettingsSection(page, 'appearance')
   await expect(page.getByRole('checkbox', { name: LABEL })).toBeChecked()
   await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(0)
-  await page.locator('label.switch-label').filter({ hasText: LABEL }).scrollIntoViewIfNeeded()
   const tooltipButton = page.locator('[data-setting-key="hideSettingsCategoryDescriptions"] .tooltip .button')
   await expect(tooltipButton.locator('[data-icon="circle-question"]')).toBeVisible()
   await tooltipButton.hover()
