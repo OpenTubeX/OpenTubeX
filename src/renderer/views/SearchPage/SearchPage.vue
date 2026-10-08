@@ -59,10 +59,10 @@
       <FtElementList
         :data="shownResults"
       />
-      <!-- Recheck visibility after each page, even when the marker stays on screen. -->
+      <!-- Recheck visibility when results are appended or replaced. -->
       <FtAutoLoadNextPageWrapper
         v-if="hasMoreResults"
-        :key="autoLoadMore ? shownResults.length : 0"
+        :key="autoLoadMore ? paginationRevision : 0"
         :loading="isLoadingMore"
         @load-next-page="nextPage"
       >
@@ -133,6 +133,7 @@ const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
 const nextPageRef = shallowRef(null)
 const shownResults = shallowRef([])
+const paginationRevision = ref(0)
 const searchNotice = shallowRef(null)
 const searchParams = ref('')
 const isRetryingWithCookies = ref(false)
@@ -193,6 +194,10 @@ function getRouteSearchSettings() {
     features: features ?? [],
   }
 }
+
+watch(shownResults, () => {
+  paginationRevision.value++
+})
 
 watch(route, () => {
   const query_ = route.params.query.trim()

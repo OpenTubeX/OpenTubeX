@@ -212,3 +212,58 @@ test('keeps pagination manual when automatic loading is disabled', async ({ page
   await expect(page.getByText('There are no more results for this search')).toBeVisible()
   expect(requests).toHaveLength(3)
 })
+
+for (const uiScale of [100, 95]) {
+  test(`resumes pagination after an equally sized cached search replacement at ${uiScale}% UI scale`, async ({ page, attachScreenshot }) => {
+    await page.evaluate(async scale => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', scale)
+    }, uiScale)
+    const requests = await mockSearchPages(page)
+    let firstContinuationRequested = false
+    let finishPendingRequest
+    const pendingRequest = new Promise(resolve => { finishPendingRequest = resolve })
+    await page.route('https://www.youtube.com/youtubei/v1/search**', async route => {
+      if (route.request().postDataJSON().continuation === 'page-2') {
+        firstContinuationRequested = true
+        await pendingRequest
+        return route.abort()
+      }
+      return route.fallback()
+    })
+
+    try {
+      await page.locator(sel.searchInput).fill('search pagination regression')
+      await page.locator(sel.searchInput).press('Enter')
+      await expect.poll(() => firstContinuationRequested).toBe(true)
+      await expect(page.getByText('Pagination result 1', { exact: true })).toBeVisible()
+
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const history = store.getters.getSessionSearchHistory.find(search => search.query === 'search pagination regression')
+        const continuation = JSON.parse(history.nextPageRef)
+        continuation.payload.token = 'replacement-page-2'
+        store.commit('addToSessionSearchHistory', {
+          ...history,
+          query: 'cached pagination replacement',
+          data: history.data.map(result => ({ ...result, title: 'Cached replacement result' })),
+          nextPageRef: JSON.stringify(continuation)
+        })
+      })
+
+      await page.locator(sel.searchInput).fill('cached pagination replacement')
+      await page.locator(sel.searchInput).press('Enter')
+      await expect(page.getByText('Cached replacement result', { exact: true })).toBeVisible()
+      await expect(page.getByText('Pagination result 2', { exact: true })).toBeVisible()
+      await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+      await expect(page.getByText('There are no more results for this search')).toBeVisible()
+      expect(requests.map(request => request.continuation ?? request.query)).toEqual([
+        'search pagination regression', 'replacement-page-2', 'page-3'
+      ])
+      await expect(page.locator('.feed-enter-active')).toHaveCount(0)
+      await attachScreenshot('completed cached search replacement')
+    } finally {
+      finishPendingRequest()
+    }
+  })
+}
