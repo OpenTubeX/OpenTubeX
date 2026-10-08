@@ -144,6 +144,11 @@ for (const width of [1600, 480]) {
     await expect.poll(commentTexts).toEqual(loadedComments)
     await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeEnabled()
+    if (width === 480) {
+      // A closed mobile sheet excludes its controls from role locators.
+      await watch.evaluate(vm => { vm.openPhonePanel('comments') })
+      await expect(page.locator('.dockedSheet[open] .commentThread').first()).toBeVisible()
+    }
     await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeEnabled()
     await watch.dispose()
   })

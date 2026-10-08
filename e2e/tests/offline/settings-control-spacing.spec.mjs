@@ -4,6 +4,8 @@ import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 async function resize(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
   await expect.poll(() => page.evaluate(({ width, uiScale }) => Math.abs(window.innerWidth - width * 100 / uiScale), { width, uiScale })).toBeLessThanOrEqual(1)
+  // Let ResizeObserver switch the settings layout before selecting a category.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
 }
 
 async function openCategory(page, category) {

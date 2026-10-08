@@ -335,7 +335,9 @@ test.describe('watch history', () => {
         if (trigger === 'locale') {
           await setWindowSize(app, page, { width: 440, height: 860 })
           await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 260))
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'br'))
+          await page.evaluate(() => {
+            document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'br')
+          })
           await page.waitForFunction(() => document.documentElement.lang === 'br')
         } else if (trigger === 'tab width') {
           await setWindowSize(app, page, { width: 340, height: 880 })
@@ -345,7 +347,9 @@ test.describe('watch history', () => {
         if (trigger === 'resize') await setWindowSize(app, page, { width: 732, height: 550 })
         if (trigger === 'tab width') await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setVerticalTabBarWidth', 150))
         if (trigger === 'locale') {
-          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
+          await page.evaluate(() => {
+            document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')
+          })
           await page.waitForFunction(() => document.documentElement.lang === 'en-US')
         }
         await expect.poll(() => actions.evaluate(element => element.scrollLeft <= Math.max(0, element.scrollWidth - element.clientWidth) + 1)).toBe(true)
