@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Playlist Thumbnail Size: "Veličina sličica popisa za reprodukciju"
     Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"
     Always Show Mobile Search Bar: "Uvijek prikaži traku za pretraživanje na mobitelu"
     Frosted Glass Player UI: "Sučelje reproduktora s efektom matiranog stakla"

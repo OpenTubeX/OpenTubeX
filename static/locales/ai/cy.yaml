@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Playlist Thumbnail Size: "Maint mân-luniau’r rhestr chwarae"
     Compact Mobile Mini Player: "Chwaraewr bach cryno ar ffôn symudol"
     Always Show Mobile Search Bar: "Dangos y bar chwilio symudol bob amser"
     Frosted Glass Player UI: "Rhyngwyneb chwaraewr gwydr barugog"

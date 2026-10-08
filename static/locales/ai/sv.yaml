@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Playlist Thumbnail Size: "Storlek på spellistans miniatyrbilder"
     Compact Mobile Mini Player: "Kompakt mobil minispelare"
     Always Show Mobile Search Bar: "Visa alltid sökfältet på mobilen"
     Frosted Glass Player UI: "Spelargränssnitt med frostat glas"

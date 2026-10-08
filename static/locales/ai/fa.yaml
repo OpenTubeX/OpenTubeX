@@ -386,6 +386,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Playlist Thumbnail Size: "اندازهٔ تصاویر بندانگشتی فهرست پخش"
     Compact Mobile Mini Player: "پخش‌کننده کوچک و فشرده موبایل"
     Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
     Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"

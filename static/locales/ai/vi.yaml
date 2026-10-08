@@ -372,6 +372,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Playlist Thumbnail Size: "Kích thước hình thu nhỏ danh sách phát"
     Compact Mobile Mini Player: "Trình phát mini gọn trên di động"
     Always Show Mobile Search Bar: "Luôn hiển thị thanh tìm kiếm trên điện thoại"
     Frosted Glass Player UI: "Giao diện trình phát với hiệu ứng kính mờ"

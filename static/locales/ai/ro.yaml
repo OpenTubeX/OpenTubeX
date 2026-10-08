@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Playlist Thumbnail Size: "Dimensiunea miniaturilor listei de redare"
     Compact Mobile Mini Player: "Mini player mobil compact"
     Always Show Mobile Search Bar: "Afișează mereu bara de căutare pe mobil"
     Frosted Glass Player UI: "Interfață de player cu efect de sticlă mată"

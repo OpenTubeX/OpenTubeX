@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Playlist Thumbnail Size: "播放清單縮圖大小"
     Compact Mobile Mini Player: "精簡行動迷你播放器"
     Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"

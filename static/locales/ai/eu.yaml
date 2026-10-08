@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Playlist Thumbnail Size: "Erreprodukzio-zerrendako miniaturen tamaina"
     Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"
     Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
     Frosted Glass Player UI: "Beira esmerilatu efektuko erreproduzigailuaren interfazea"

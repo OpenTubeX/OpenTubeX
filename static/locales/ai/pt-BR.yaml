@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Insira um nome e um URL de pesquisa HTTP ou HTTPS válido que contenha %s.
     Engine Limit: Pode adicionar até {count} motores de pesquisa personalizados.
   Theme Settings:
+    Playlist Thumbnail Size: "Tamanho das miniaturas da lista de reprodução"
     Compact Mobile Mini Player: "Miniplayer móvel compacto"
     Always Show Mobile Search Bar: "Sempre mostrar a barra de pesquisa no celular"
     Frosted Glass Player UI: "Interface do player com efeito de vidro fosco"

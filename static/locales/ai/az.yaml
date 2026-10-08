@@ -370,6 +370,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Playlist Thumbnail Size: "Pleylist miniatürlərinin ölçüsü"
     Compact Mobile Mini Player: "Yığcam mobil mini pleyer"
     Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
     Frosted Glass Player UI: "Buzlu şüşə effektli pleyer interfeysi"

@@ -126,8 +126,8 @@ test.describe('thumbnail size slider', () => {
         await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
 
         await goToSettingsSection(page, 'theme')
-        await expect(page.getByRole('slider', { name: 'Thumbnail Size' })).toHaveAttribute('max', '110')
-        await expect(page.getByRole('slider', { name: 'Thumbnail Size' })).toHaveValue('110')
+        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveAttribute('max', '110')
+        await expect(page.getByRole('slider', { name: /^Thumbnail Size:/ })).toHaveValue('110')
       }
     })
   }

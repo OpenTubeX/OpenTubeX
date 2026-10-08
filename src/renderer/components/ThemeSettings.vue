@@ -368,6 +368,17 @@
         @change="updateThumbnailSize"
       />
       <FtSlider
+        :label="t('Settings.Theme Settings.Playlist Thumbnail Size')"
+        :default-value="playlistThumbnailSize"
+        setting-key="playlistThumbnailSize"
+        :min-value="MIN_THUMBNAIL_SIZE"
+        :max-value="maxPlaylistThumbnailSize"
+        :step="THUMBNAIL_SIZE_STEP"
+        value-extension="%"
+        @input="previewPlaylistThumbnailSize"
+        @change="updatePlaylistThumbnailSize"
+      />
+      <FtSlider
         :label="t('Settings.Theme Settings.UI Roundness')"
         :default-value="uiRoundness"
         setting-key="uiRoundness"
@@ -898,6 +909,7 @@ function updateUiScale(value) {
 }
 
 const { thumbnailSize, maxThumbnailSize } = useThumbnailSizeSlider()
+const { thumbnailSize: playlistThumbnailSize, maxThumbnailSize: maxPlaylistThumbnailSize } = useThumbnailSizeSlider('playlistThumbnailSize')
 const uiRoundness = computed(() => store.getters.getUiRoundness)
 const scrollbarThumbWidth = computed(
   () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
@@ -936,6 +948,14 @@ function previewThumbnailSize(value) {
  */
 function updateThumbnailSize(value) {
   store.dispatch('updateThumbnailSize', value)
+}
+
+function previewPlaylistThumbnailSize(value) {
+  store.commit('setPlaylistThumbnailSize', value)
+}
+
+function updatePlaylistThumbnailSize(value) {
+  store.dispatch('updatePlaylistThumbnailSize', value)
 }
 
 /**

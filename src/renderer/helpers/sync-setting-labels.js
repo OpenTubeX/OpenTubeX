@@ -331,6 +331,7 @@ export const SYNC_SETTING_LABELS = {
   thumbnailPreference: 'Settings.General Settings.Thumbnail Preference.Thumbnail Preference',
   thumbnailDataSaver: 'Settings.General Settings.Data Saver Thumbnails',
   thumbnailSize: 'Settings.Theme Settings.Thumbnail Size',
+  playlistThumbnailSize: 'Settings.Theme Settings.Playlist Thumbnail Size',
   timeFormat: 'Settings.General Settings.Time Format',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',
   uiRoundness: 'Settings.Theme Settings.UI Roundness',

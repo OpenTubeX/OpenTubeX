@@ -5,7 +5,7 @@ const fixtureTitles = [longTitle, 'Short title', 'A'.repeat(160)]
 
 async function setThumbnailSize(page, size) {
   await page.locator('.profileTrigger').click()
-  const slider = page.locator('.thumbnailSizeSlider .input')
+  const slider = page.locator('.playlistThumbnailSizeSlider .input')
   await expect(slider).toBeVisible()
   await slider.press('Home')
   const step = Number(await slider.getAttribute('step'))
@@ -21,7 +21,7 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
   test.describe(`playlist rows at ${uiScale}% UI scale with ${userPlaylistSortOrder} sorting`, () => {
     test.use({
       seed: {
-        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', extraThumbnailAction: 'copyYoutube', externalPlayer: 'mpv', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
+        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickSettings: ['playlistThumbnailSize'], quickBookmarkTargetPlaylistId: 'bookmarks', extraThumbnailAction: 'copyYoutube', externalPlayer: 'mpv', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
         history: [{
           _id: 'layout00001',
           videoId: 'layout00001',

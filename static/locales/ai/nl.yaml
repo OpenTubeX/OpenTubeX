@@ -372,6 +372,7 @@ Settings:
     Invalid Engine: Voer een naam en een geldige HTTP- of HTTPS-zoek-URL met %s in.
     Engine Limit: Je kunt maximaal {count} aangepaste zoekmachines toevoegen.
   Theme Settings:
+    Playlist Thumbnail Size: "Grootte van afspeellijstminiaturen"
     Compact Mobile Mini Player: "Compacte mobiele minispeler"
     Always Show Mobile Search Bar: "Mobiele zoekbalk altijd tonen"
     Frosted Glass Player UI: "Spelerinterface met matglaseffect"

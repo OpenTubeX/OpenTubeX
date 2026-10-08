@@ -372,6 +372,7 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Playlist Thumbnail Size: "حجم الصور المصغرة لقائمة التشغيل"
     Compact Mobile Mini Player: "مشغّل مصغّر مدمج للهاتف"
     Always Show Mobile Search Bar: "إظهار شريط البحث على الهاتف دائمًا"
     Frosted Glass Player UI: "واجهة مشغل بتأثير الزجاج المصنفر"

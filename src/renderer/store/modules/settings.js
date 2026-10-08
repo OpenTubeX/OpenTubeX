@@ -492,6 +492,7 @@ const state = {
   showThumbnailPreviews: true,
   showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
+  playlistThumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
   animationSpeed: 100,
   showToastTimeoutIndicator: true,
@@ -1319,6 +1320,13 @@ const customActions = {
         await dispatch('updateNavigationItems', navigationItemsFromLegacySettings(
           Object.fromEntries(userSettings.map(({ _id, value }) => [_id, value]))
         ))
+      }
+
+      const hasPlaylistThumbnailSize = userSettings.some(entry => entry._id === 'playlistThumbnailSize')
+      // Playlists inherited the global size before their preference was split out.
+      // Persist even the default so later global changes stay independent on restart.
+      if (!hasPlaylistThumbnailSize) {
+        await dispatch('updatePlaylistThumbnailSize', state.thumbnailSize)
       }
 
       const preferredCaptionLocaleEntry = userSettings.find(

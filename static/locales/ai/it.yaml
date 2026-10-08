@@ -368,6 +368,7 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Playlist Thumbnail Size: "Dimensione miniature della playlist"
     Compact Mobile Mini Player: "Mini lettore mobile compatto"
     Always Show Mobile Search Bar: "Mostra sempre la barra di ricerca su mobile"
     Frosted Glass Player UI: "Interfaccia del lettore con effetto vetro smerigliato"

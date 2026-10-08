@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="playlistPage"
     :class="{
       [listType]: true,
       playlistInEditMode,
@@ -241,7 +242,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -257,6 +258,8 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { getThumbnailListStyles } from '../../constants/thumbnailSize'
+import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
 import {
   extractLocalCacheablePlaylistContinuation,
@@ -295,6 +298,16 @@ import { startProgressBarOperation } from '../../helpers/progressBar'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
+
+provide(thumbnailSizeSettingKey, 'playlistThumbnailSize')
+const playlistPage = useTemplateRef('playlistPage')
+// Update CSS directly so dragging the slider does not re-render every row.
+watch([playlistPage, () => store.getters.getPlaylistThumbnailSize], ([element, size]) => {
+  if (!element) return
+  for (const [property, value] of Object.entries(getThumbnailListStyles(size))) {
+    element.style.setProperty(property, value)
+  }
+})
 
 const { locale, t } = useI18n()
 const route = useRoute()
