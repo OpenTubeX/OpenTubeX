@@ -157,162 +157,158 @@
         @change="store.dispatch('updateCapacitorLayoutMode', $event)"
       />
     </FtFlexBox>
-    <div class="switchColumnGrid">
-      <div class="switchColumn">
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="t('Settings.Theme Settings.Compact Mobile Mini Player')"
-          compact
-          :default-value="compactMobileMiniPlayer"
-          setting-key="compactMobileMiniPlayer"
-          @change="store.dispatch('updateCompactMobileMiniPlayer', $event)"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
-          compact
-          :default-value="alwaysShowMobileSearchBar"
-          setting-key="alwaysShowMobileSearchBar"
-          @change="store.dispatch('updateAlwaysShowMobileSearchBar', $event)"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Match Top Bar with Main Color')"
-          compact
-          :default-value="barColor"
-          setting-key="barColor"
-          @change="updateBarColor"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Expand Side Bar by Default')"
-          compact
-          :default-value="expandSideBar"
-          setting-key="expandSideBar"
-          @change="handleExpandSideBar"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Move Downloads to App Header')"
-          compact
-          :default-value="moveDownloadsToAppHeader"
-          setting-key="moveDownloadsToAppHeader"
-          @change="updateMoveDownloadsToAppHeader"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron"
-          :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
-          compact
-          :default-value="disableSmoothScrollingToggleValue"
-          @change="handleRestartPrompt"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
-          :tooltip="$t('Tooltips.Theme Settings.Always Show Scrollbars')"
-          compact
-          :default-value="alwaysShowScrollbars"
-          setting-key="alwaysShowScrollbars"
-          @change="updateAlwaysShowScrollbars"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Show Toast Timeout Indicator')"
-          compact
-          :default-value="showToastTimeoutIndicator"
-          setting-key="showToastTimeoutIndicator"
-          @change="updateShowToastTimeoutIndicator"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Use Grid Player Menu')"
-          :tooltip="$t('Tooltips.Theme Settings.Use Grid Player Menu')"
-          compact
-          :default-value="usePlayerMenuGrid"
-          setting-key="usePlayerMenuGrid"
-          @change="updateUsePlayerMenuGrid"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Frosted Glass Player UI')"
-          compact
-          :default-value="useFrostedGlassPlayerUi"
-          setting-key="useFrostedGlassPlayerUi"
-          @change="store.dispatch('updateUseFrostedGlassPlayerUi', $event)"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Compact Settings Categories')"
-          :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
-          compact
-          controlled
-          :disabled="savingSettingsCategoryDescriptions"
-          :default-value="hideSettingsCategoryDescriptions"
-          setting-key="hideSettingsCategoryDescriptions"
-          @change="updateHideSettingsCategoryDescriptions"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
-          compact
-          :default-value="hideLabelsSideBar"
-          setting-key="hideLabelsSideBar"
-          @change="updateHideLabelsSideBar"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Hide Side Bar on Watch Pages')"
-          compact
-          :default-value="hideSideBarOnWatchPages"
-          setting-key="hideSideBarOnWatchPages"
-          @change="updateHideSideBarOnWatchPages"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
-          compact
-          :default-value="hideHeaderLogo"
-          setting-key="hideHeaderLogo"
-          @change="updateHideHeaderLogo"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Move Settings to App Header')"
-          compact
-          :default-value="moveSettingsToAppHeader"
-          setting-key="moveSettingsToAppHeader"
-          @change="updateMoveSettingsToAppHeader"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Show Tab Icons')"
-          compact
-          :default-value="showTabIcons"
-          setting-key="showTabIcons"
-          :disabled="!store.getters.getTabsEnabled"
-          @change="updateShowTabIcons"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Show Tab Previews')"
-          compact
-          :default-value="showTabPreviews"
-          setting-key="showTabPreviews"
-          :disabled="!store.getters.getTabsEnabled"
-          @change="updateShowTabPreviews"
-        />
-        <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
-          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
-          compact
-          :default-value="useFixedTabWidth"
-          setting-key="useFixedTabWidth"
-          :disabled="!store.getters.getTabsEnabled"
-          @change="updateUseFixedTabWidth"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Show Progress as Notification')"
-          :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
-          compact
-          :default-value="showProgressBarToast"
-          setting-key="showProgressBarToast"
-          @change="updateShowProgressBarToast"
-        />
-      </div>
+    <div class="switchColumnGrid switchFlowGrid themeSwitchGrid">
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Theme Settings.Compact Mobile Mini Player')"
+        compact
+        :default-value="compactMobileMiniPlayer"
+        setting-key="compactMobileMiniPlayer"
+        @change="store.dispatch('updateCompactMobileMiniPlayer', $event)"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
+        compact
+        :default-value="alwaysShowMobileSearchBar"
+        setting-key="alwaysShowMobileSearchBar"
+        @change="store.dispatch('updateAlwaysShowMobileSearchBar', $event)"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Match Top Bar with Main Color')"
+        compact
+        :default-value="barColor"
+        setting-key="barColor"
+        @change="updateBarColor"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Expand Side Bar by Default')"
+        compact
+        :default-value="expandSideBar"
+        setting-key="expandSideBar"
+        @change="handleExpandSideBar"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Move Downloads to App Header')"
+        compact
+        :default-value="moveDownloadsToAppHeader"
+        setting-key="moveDownloadsToAppHeader"
+        @change="updateMoveDownloadsToAppHeader"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
+        compact
+        :default-value="disableSmoothScrollingToggleValue"
+        @change="handleRestartPrompt"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
+        :tooltip="$t('Tooltips.Theme Settings.Always Show Scrollbars')"
+        compact
+        :default-value="alwaysShowScrollbars"
+        setting-key="alwaysShowScrollbars"
+        @change="updateAlwaysShowScrollbars"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Show Toast Timeout Indicator')"
+        compact
+        :default-value="showToastTimeoutIndicator"
+        setting-key="showToastTimeoutIndicator"
+        @change="updateShowToastTimeoutIndicator"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Use Grid Player Menu')"
+        :tooltip="$t('Tooltips.Theme Settings.Use Grid Player Menu')"
+        compact
+        :default-value="usePlayerMenuGrid"
+        setting-key="usePlayerMenuGrid"
+        @change="updateUsePlayerMenuGrid"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Frosted Glass Player UI')"
+        compact
+        :default-value="useFrostedGlassPlayerUi"
+        setting-key="useFrostedGlassPlayerUi"
+        @change="store.dispatch('updateUseFrostedGlassPlayerUi', $event)"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Compact Settings Categories')"
+        :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
+        compact
+        controlled
+        :disabled="savingSettingsCategoryDescriptions"
+        :default-value="hideSettingsCategoryDescriptions"
+        setting-key="hideSettingsCategoryDescriptions"
+        @change="updateHideSettingsCategoryDescriptions"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
+        compact
+        :default-value="hideLabelsSideBar"
+        setting-key="hideLabelsSideBar"
+        @change="updateHideLabelsSideBar"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide Side Bar on Watch Pages')"
+        compact
+        :default-value="hideSideBarOnWatchPages"
+        setting-key="hideSideBarOnWatchPages"
+        @change="updateHideSideBarOnWatchPages"
+      />
+      <FtToggleSwitch
+        :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
+        compact
+        :default-value="hideHeaderLogo"
+        setting-key="hideHeaderLogo"
+        @change="updateHideHeaderLogo"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Move Settings to App Header')"
+        compact
+        :default-value="moveSettingsToAppHeader"
+        setting-key="moveSettingsToAppHeader"
+        @change="updateMoveSettingsToAppHeader"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Show Tab Icons')"
+        compact
+        :default-value="showTabIcons"
+        setting-key="showTabIcons"
+        :disabled="!store.getters.getTabsEnabled"
+        @change="updateShowTabIcons"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Show Tab Previews')"
+        compact
+        :default-value="showTabPreviews"
+        setting-key="showTabPreviews"
+        :disabled="!store.getters.getTabsEnabled"
+        @change="updateShowTabPreviews"
+      />
+      <FtToggleSwitch
+        v-if="usingElectron || IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+        :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+        compact
+        :default-value="useFixedTabWidth"
+        setting-key="useFixedTabWidth"
+        :disabled="!store.getters.getTabsEnabled"
+        @change="updateUseFixedTabWidth"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="$t('Settings.Theme Settings.Show Progress as Notification')"
+        :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
+        compact
+        :default-value="showProgressBarToast"
+        setting-key="showProgressBarToast"
+        @change="updateShowProgressBarToast"
+      />
     </div>
     <template v-if="usingElectron || IS_CAPACITOR">
       <FtFlexBox
@@ -329,21 +325,19 @@
           @change="updateTabBarPosition"
         />
       </FtFlexBox>
-      <FtFlexBox class="tabSettingsRow">
-        <div class="switchColumn">
-          <FtSlider
-            :label="$t('Settings.Theme Settings.Tab Width')"
-            :default-value="fixedTabWidth"
-            setting-key="fixedTabWidth"
-            :min-value="MIN_FIXED_TAB_WIDTH"
-            :max-value="MAX_FIXED_TAB_WIDTH"
-            :step="FIXED_TAB_WIDTH_STEP"
-            :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
-            value-extension="px"
-            @input="previewFixedTabWidth"
-            @change="updateFixedTabWidth"
-          />
-        </div>
+      <div class="tabSettingsRow">
+        <FtSlider
+          :label="$t('Settings.Theme Settings.Tab Width')"
+          :default-value="fixedTabWidth"
+          setting-key="fixedTabWidth"
+          :min-value="MIN_FIXED_TAB_WIDTH"
+          :max-value="MAX_FIXED_TAB_WIDTH"
+          :step="FIXED_TAB_WIDTH_STEP"
+          :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
+          value-extension="px"
+          @input="previewFixedTabWidth"
+          @change="updateFixedTabWidth"
+        />
         <FtButton
           v-if="usingElectron && showTabIcons"
           :label="loadingTabIcons
@@ -353,7 +347,7 @@
           :disabled="loadingTabIcons || !hasMissingTabIcons"
           @click="loadTabIcons"
         />
-      </FtFlexBox>
+      </div>
     </template>
     <FtSliderGrid>
       <FtSlider
@@ -1099,6 +1093,31 @@ function handleSmoothScrolling(value) {
   max-inline-size: calc(200px + var(--select-indicator-space));
 }
 
+.themeSwitchGrid.themeSwitchGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
+.tabSettingsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 12px;
+}
+
+.tabSettingsRow :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  inline-size: min(380px, 100%);
+  margin-inline: 0;
+}
+
+.tabSettingsRow :deep(.btn) {
+  margin-block: var(--settings-control-margin);
+  margin-inline: 0;
+}
+
 .testToastAction {
   display: flex;
   justify-content: center;
@@ -1110,10 +1129,7 @@ function handleSmoothScrolling(value) {
 
 @container settings-content (width <= 760px) {
   .tabSettingsRow {
-    align-items: center;
     flex-direction: column;
-    column-gap: 12px;
-    justify-content: center;
   }
 
   .themeSelectRow :deep(.select) {
@@ -1121,6 +1137,12 @@ function handleSmoothScrolling(value) {
     inline-size: min(calc(200px + var(--select-indicator-space)), 100%);
   }
 
+}
+
+@container settings-content (width <= 680px) {
+  .themeSwitchGrid.themeSwitchGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @container settings-content (width <= 580px) {

@@ -3877,10 +3877,11 @@ test.describe('settings', () => {
       }))
     expect(Math.max(...alignedLabelParts) - Math.min(...alignedLabelParts)).toBeLessThanOrEqual(1)
 
+    // These switches share the second column of the row-major layout.
     const switchPositions = await Promise.all([
       'Expand Side Bar by Default',
       'Disable Smooth Scrolling',
-      'Always Show Scrollbars'
+      'Show toast timeout indicator'
     ].map(label => page.getByRole('checkbox', { name: label }).boundingBox()))
     const switchX = switchPositions.map(position => position.x)
     expect(Math.max(...switchX) - Math.min(...switchX)).toBeLessThanOrEqual(1)
@@ -3891,9 +3892,7 @@ test.describe('settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
 
     const tabLayout = appearance.locator('.themeSelectRow').filter({ hasText: 'Tab Layout' })
-    const tabWidth = appearance.locator('.ft-flex-box').filter({
-      has: page.getByRole('slider', { name: /Tab Width/ })
-    }).locator('.switchColumn')
+    const tabWidth = appearance.locator('.tabSettingsRow .pure-material-slider')
     const loadIcons = appearance.getByRole('button', { name: 'Load Missing Tab Icons' })
     const centerDifference = async () => {
       const centers = await Promise.all([tabLayout, tabWidth, loadIcons].map(async locator => {
