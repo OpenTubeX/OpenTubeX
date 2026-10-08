@@ -218,6 +218,7 @@
         </button>
         <CapacitorPhoneTabSwitcher
           v-if="store.getters.getTabsEnabled"
+          ref="phoneTabSwitcher"
           @request-exit="emit('request-android-exit')"
         />
         <FtQuickSettingsMenu
@@ -303,6 +304,12 @@ const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
 const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
 const header = useTemplateRef('header')
+const phoneTabSwitcher = useTemplateRef('phoneTabSwitcher')
+defineExpose({
+  organizerSwipe: computed(() => usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
+    ? null
+    : phoneTabSwitcher.value?.organizerSwipe)
+})
 const navigationActions = useTemplateRef('navigationActions')
 const headerActions = useTemplateRef('headerActions')
 const headerMetrics = shallowRef({ width: window.innerWidth, navigation: 0, actions: 0, logoText: 0, shortcutSpace: window.innerWidth })

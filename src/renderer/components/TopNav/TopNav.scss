@@ -29,6 +29,10 @@
     touch-action: pan-y;
   }
 
+  .app.capacitorPhoneLayout & {
+    touch-action: none;
+  }
+
   @include top-nav-is-colored {
     background-color: var(--primary-color);
   }

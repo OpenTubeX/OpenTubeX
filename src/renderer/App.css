@@ -1011,3 +1011,11 @@
 .app.capacitorTabs :deep(.ftVideoPlayer:not(:has(.endedScreen)) .shaka-controls-button-panel > .shaka-play-button) {
   display: none !important;
 }
+
+.app.capacitorPhoneLayout > .routerView.organizerSwipePage {
+  z-index: 1101;
+  transform-origin: top left;
+  pointer-events: none;
+  background: var(--bg-color);
+  will-change: transform, clip-path;
+}

@@ -27,11 +27,14 @@
     <Teleport to="body">
       <Transition
         name="capacitor-tabs-dialog"
+        :css="!skipDialogTransition"
         @after-leave="restoreTriggerFocus"
       >
         <div
           v-if="open"
           class="capacitorPhoneTabOverlay"
+          :class="{ organizerGesture }"
+          :aria-hidden="organizerGesture || undefined"
           @pointerdown.self.stop
           @click.self.stop="closeSwitcher"
           @keydown="handleDialogKeydown"
@@ -43,7 +46,7 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="capacitor-phone-tab-dialog-title"
-            :inert="sessionToDelete !== null || sessionToOpen !== null"
+            :inert="organizerGesture || sessionToDelete !== null || sessionToOpen !== null"
           >
             <header class="capacitorPhoneTabHeader">
               <button
@@ -189,7 +192,7 @@
                     :aria-selected="tab.id === activeTabId"
                     :aria-label="tabAriaLabel(tab)"
                     :tabindex="tab.id === activeTabId ? 0 : -1"
-                    @click="activateTab(tab.id)"
+                    @click="activateTab(tab.id, $event)"
                     @keydown="handleTabTargetKeydown($event, tab.id)"
                   >
                     <CapacitorTabPreview :tab="tab" />
@@ -436,6 +439,7 @@ import { computed, nextTick, onBeforeUnmount, reactive, ref, useId, useTemplateR
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
+import { createOrganizerSwipeAnimation, organizerSwipeProgress, shouldOpenSwipedOrganizer } from '../../helpers/organizerSwipe'
 import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -464,6 +468,8 @@ const props = defineProps({
 const emit = defineEmits(['request-exit'])
 const { t } = useI18n()
 const open = ref(false)
+const organizerGesture = ref(false)
+const skipDialogTransition = ref(false)
 const activeView = ref('open')
 const promptId = useId()
 const syncedSessionIdPrefix = `capacitor-phone-synced-session-${useId().replaceAll(':', '')}`
@@ -530,8 +536,11 @@ const triggerLabel = computed(() => `${t('Tab Organizer.Title')}: ${t(
   { count: tabs.value.length },
   tabs.value.length
 )}`)
+const TAB_HOLD_DELAY = 400
+const TAB_MOVE_THRESHOLD = 8
 let swipeResetTimer = null
 let holdTimer = null
+let activatedTouchPointerId = null
 let dropTimer = null
 let dragFrame = null
 let dragRects = []
@@ -560,6 +569,7 @@ const drag = reactive({
   pointerId: null,
   startX: 0,
   startY: 0,
+  startTime: 0,
   currentX: 0,
   currentY: 0,
   ready: false,
@@ -635,13 +645,84 @@ async function openSwitcher() {
   openingSwitcher = false
   if (disposed || !props.enabled) return
   activeView.value = 'open'
+  skipDialogTransition.value = false
   open.value = true
-  if (showSyncedTabsView.value) {
-    store.dispatch('refreshSyncServerDevices').catch(error => {
-      console.error('Failed to refresh sync device names:', error)
+}
+
+// The header owns pointer capture and direction locking. This component owns
+// the destination geometry and only becomes modal after the gesture commits.
+let organizerTransition = null
+const organizerSwipe = {
+  begin() {
+    if (!props.enabled || open.value || openingSwitcher || disposed) return false
+    const page = document.querySelector('.app > .routerView')
+    if (!page) return false
+    const state = { distance: 0, height: window.innerHeight, animation: null, ready: null }
+    organizerTransition = state
+    window.addEventListener('resize', organizerSwipe.cancel)
+    organizerGesture.value = true
+    skipDialogTransition.value = true
+    activeView.value = 'open'
+    open.value = true
+    state.ready = nextTick(async () => {
+      // Let the open watcher restore the organizer viewport before measuring.
+      await nextTick()
+      if (organizerTransition !== state) return
+      const target = dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(presentedTabId.value)}"]`)
+      const scroll = openTabsScrollRef.value
+      if (target && scroll) {
+        const bounds = target.getBoundingClientRect()
+        const viewport = scroll.getBoundingClientRect()
+        const offset = bounds.top < viewport.top ? bounds.top - viewport.top : Math.max(0, bounds.bottom - viewport.bottom)
+        restoreOverlayScrollTop(scroll, scroll.scrollTop + offset)
+      }
+      const preview = target?.querySelector('.capacitorTabPreview')
+      if (!preview) { organizerSwipe.cancel(); return }
+      state.animation = createOrganizerSwipeAnimation(page, preview, dialogRef.value.closest('.capacitorPhoneTabOverlay'))
+      state.animation.update(organizerSwipeProgress(state.distance, state.height))
     })
+    return true
+  },
+  update(distance) {
+    const state = organizerTransition
+    if (!state) return
+    state.distance = Math.max(0, distance)
+    state.animation?.update(organizerSwipeProgress(state.distance, state.height))
+  },
+  async finish(elapsed, cancelled) {
+    const state = organizerTransition
+    if (!state) return
+    await state.ready
+    if (organizerTransition !== state) return
+    const commit = !cancelled && shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
+    // The next touch belongs to the organizer, even while the page is still
+    // settling into its card. Selecting a tab cancels the remaining animation.
+    if (commit) organizerGesture.value = false
+    await state.animation?.finish(commit)
+    if (organizerTransition !== state) return
+    if (!commit) open.value = false
+    // Keep the paused final frame until Vue has made the organizer modal (or
+    // removed it), so the live page never flashes back over the finished card.
+    organizerGesture.value = false
+    await nextTick()
+    state.animation?.dispose()
+    organizerTransition = null
+    window.removeEventListener('resize', organizerSwipe.cancel)
+    if (commit) {
+      skipDialogTransition.value = false
+      focusActiveTab()
+    }
+  },
+  cancel() {
+    window.removeEventListener('resize', organizerSwipe.cancel)
+    if (!organizerTransition) return
+    organizerTransition.animation?.dispose()
+    organizerTransition = null
+    open.value = false
+    organizerGesture.value = false
   }
 }
+defineExpose({ organizerSwipe })
 
 async function selectView(view, focus = false) {
   clearSelection()
@@ -715,6 +796,7 @@ function stopObservingContent() {
 }
 
 function closeSwitcher() {
+  organizerSwipe.cancel()
   clearSelection()
   closeTabActions()
   resetTabSwipe()
@@ -733,7 +815,8 @@ async function restoreClosedTab() {
   closeSwitcher()
 }
 
-async function activateTab(tabId) {
+async function activateTab(tabId, event) {
+  if (event?.detail !== 0 && event?.pointerId === activatedTouchPointerId) return
   if (swipe.suppressClick) return
   await activateTabAction(tabId)
 }
@@ -826,6 +909,7 @@ function tabCardStyle(tabId) {
 }
 
 function startTabGesture(event, tabId) {
+  activatedTouchPointerId = null
   if (selecting.value || dragSettling.value || event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
 
   resetTabDrag()
@@ -834,6 +918,7 @@ function startTabGesture(event, tabId) {
   drag.pointerId = event.pointerId
   drag.startX = event.clientX
   drag.startY = event.clientY
+  drag.startTime = event.timeStamp
   drag.currentX = event.clientX
   drag.currentY = event.clientY
   const target = event.target.closest('.capacitorPhoneTabTarget')
@@ -860,7 +945,7 @@ function startTabGesture(event, tabId) {
     target?.setPointerCapture(event.pointerId)
     openTabActions(tabId)
     lightHaptic()
-  }, 400)
+  }, TAB_HOLD_DELAY)
 
   const tab = tabs.value.find(candidate => candidate.id === tabId)
   if (tab?.isPinned) return
@@ -876,7 +961,7 @@ function startTabGesture(event, tabId) {
 function moveTabGesture(event) {
   if (dragSettling.value) return
   if (drag.pointerId === event.pointerId) {
-    const moved = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 8
+    const moved = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > TAB_MOVE_THRESHOLD
     if (drag.ready) {
       if (moved) drag.moved = true
       if (drag.moved) {
@@ -924,8 +1009,21 @@ function finishTabGesture(event) {
     }
     return
   }
+  // Android can deliver a complete touch without synthesizing a click just
+  // after the header swipe. Resolve short taps in the existing gesture handler;
+  // moving, holding and cancelled pointers still follow their own paths.
+  const tappedTab = event.pointerType === 'touch' && drag.pointerId === event.pointerId &&
+    event.timeStamp - drag.startTime < TAB_HOLD_DELAY &&
+    Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) <= TAB_MOVE_THRESHOLD &&
+    event.target.closest('.capacitorPhoneTabTarget')?.dataset.tabId === drag.tabId
+    ? drag.tabId
+    : null
   resetTabDrag()
   finishTabSwipe(event)
+  if (tappedTab !== null) {
+    activatedTouchPointerId = event.pointerId
+    activateTab(tappedTab)
+  }
 }
 
 function cancelTabGesture() {
@@ -1015,11 +1113,11 @@ function moveTabSwipe(event) {
   const deltaX = event.clientX - swipe.startX
   const deltaY = event.clientY - swipe.startY
   if (!swipe.dragging) {
-    if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
+    if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > TAB_MOVE_THRESHOLD) {
       cancelTabSwipe()
       return
     }
-    if (Math.abs(deltaX) < 8) return
+    if (Math.abs(deltaX) < TAB_MOVE_THRESHOLD) return
     swipe.dragging = true
     event.currentTarget.setPointerCapture(event.pointerId)
   }
@@ -1115,20 +1213,35 @@ function handleDialogKeydown(event) {
 
 watch(open, async (isOpen) => {
   if (isOpen) {
-    lockBodyScroll()
-    store.commit('addOpenPrompt', promptId)
     await nextTick()
     const scroll = activeScrollRef()
     if (scroll) restoreOverlayScrollTop(scroll, viewScrollTop[activeView.value])
     observeActiveContent()
-    focusActiveTab()
+    if (!organizerGesture.value) focusActiveTab()
   } else {
     const scroll = activeScrollRef()
     if (scroll) viewScrollTop[activeView.value] = scroll.scrollTop
     stopObservingContent()
+  }
+})
+
+watch(() => open.value && !organizerGesture.value, modal => {
+  if (modal) {
+    lockBodyScroll()
+    store.commit('addOpenPrompt', promptId)
+    if (showSyncedTabsView.value) {
+      store.dispatch('refreshSyncServerDevices').catch(error => {
+        console.error('Failed to refresh sync device names:', error)
+      })
+    }
+  } else {
     store.commit('removeOpenPrompt', promptId)
     unlockBodyScroll()
   }
+})
+
+watch(() => [props.enabled, presentedTabId.value, store.getters.isAnyPromptOpen], () => {
+  if (organizerGesture.value) organizerSwipe.cancel()
 })
 
 watch(showSyncedTabsView, (visible) => {
@@ -1149,6 +1262,7 @@ watch(
 
 onBeforeUnmount(() => {
   disposed = true
+  organizerSwipe.cancel()
   resetTabSwipe()
   resetTabDrag()
   stopObservingContent()
