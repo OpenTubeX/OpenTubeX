@@ -3145,7 +3145,8 @@ test.describe('settings', () => {
       : -40
     expect(shift === 40 || initial.tooltipLeft - 40 >= EDGE_MARGIN).toBe(true)
     await settingsWindow.evaluate((element, offset) => {
-      element.style.left = `${element.getBoundingClientRect().left + offset}px`
+      const bounds = element.getBoundingClientRect()
+      element.style.translate = `${bounds.left + offset}px ${bounds.top}px`
     }, shift)
 
     // The tooltip stays anchored to its button: it keeps the same offset from
@@ -5944,19 +5945,19 @@ test.describe('synced setting indicators', () => {
     await goTo(page, 'settings')
     const themeSection = await goToSettingsSection(page, 'appearance')
     const sliders = themeSection.locator('.sliderGrid > *')
-    await expect(sliders).toHaveCount(6)
+    await expect(sliders).toHaveCount(7)
 
     const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
       const { y, width } = element.getBoundingClientRect()
       return { y: Math.round(y), width: Math.round(width) }
     }))
 
-    // Two even rows, rather than four squeezed together and two below.
+    // Fill each row with three controls before starting another row.
     const rowSizes = new Map()
     for (const { y } of boxes) {
       rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
     }
-    expect([...rowSizes.values()]).toEqual([3, 3])
+    expect([...rowSizes.values()]).toEqual([3, 3, 1])
     // The row they landed on doesn't change how much room they get.
     expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
   })

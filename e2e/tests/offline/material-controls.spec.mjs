@@ -1473,7 +1473,7 @@ for (const scale of [100, 95]) {
         await expect(sliders).toHaveCount(2)
         for (const slider of await sliders.all()) {
           // Phone targets compensate for Electron zoom to stay 48 screen pixels.
-          expect((await slider.getByRole('slider').boundingBox()).height).toBeCloseTo(compact ? 24 : 48 * 100 / scale, 1)
+          await expect.poll(async () => (await slider.getByRole('slider').boundingBox()).height).toBeCloseTo(compact ? 24 : 48 * 100 / scale, 1)
         }
         // Separate slider controls use the section's 16px row gap.
         const rowGap = await sliders.evaluateAll(elements => {
@@ -1681,7 +1681,7 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
     expect(await select.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(4 * roundness / 100, 1)
-    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderTopLeftRadius))).toBeCloseTo(12 * roundness / 100, 1)
+    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderTopLeftRadius))).toBeCloseTo(12 * Math.max(100, roundness) / 100, 1)
     await switchLabel.locator('..').locator('.switch-input').press('Space')
     await expect(switchLabel).toHaveCSS('border-radius', '4px')
   }

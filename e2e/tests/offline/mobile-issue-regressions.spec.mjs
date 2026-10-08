@@ -7,7 +7,7 @@ for (const scale of [1, 1.25]) {
     await setWindowSize(app, page, { width: 480, height: 850 })
     await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
     await goToSettingsSection(page, 'appearance')
-    const slider = page.locator('.pure-material-slider').filter({ hasText: 'Thumbnail Size:' }).locator('input')
+    const slider = page.getByRole('slider', { name: /^Thumbnail Size:/ })
     await slider.evaluate(element => element.scrollIntoView({ block: 'center' }))
     const cdp = await page.context().newCDPSession(page)
     await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true })

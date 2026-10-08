@@ -261,9 +261,9 @@ for (const uiScale of [100, 95]) {
             const maximum = Math.max(0, section.offsetTop + section.offsetHeight + Number.parseFloat(getComputedStyle(element).paddingBottom) - element.clientHeight)
             return element.scrollTop <= maximum + 1
           })).toBe(true)
-          if (locale === 'en-US' && uiScale === 100 && width === 650) {
+          if (uiScale === 100 && ((locale === 'en-US' && width === 650) || (locale === 'de-DE' && width === 1000))) {
             await general.locator('.generalSelectGrid').scrollIntoViewIfNeeded()
-            await captureAppFramebuffer(app, testInfo, 'general-readable-captions')
+            await captureAppFramebuffer(app, testInfo, `general-readable-captions-${locale}`)
           }
         }
       }

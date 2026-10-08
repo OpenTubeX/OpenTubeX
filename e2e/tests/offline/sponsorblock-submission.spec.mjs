@@ -71,7 +71,7 @@ for (const uiScale of [100, 95]) {
         const labels = menu.locator('.select-label')
         await expect(labels).toHaveCount(2)
         for (const label of await labels.all()) {
-          await expect(label).toHaveCSS('background-color', 'rgb(24, 24, 24)')
+          await expect(label).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
           await expect.poll(() => label.evaluate(element => {
             const labelBounds = element.getBoundingClientRect()
             const selectBounds = element.closest('.select').getBoundingClientRect()

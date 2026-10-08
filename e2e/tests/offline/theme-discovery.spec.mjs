@@ -444,6 +444,7 @@ test('only offers updates for changes to the theme JSON', async ({ page, app }) 
 for (const fullPreview of [false, true]) {
   test(`keeps the selected screenshot after an outgoing image fails (${fullPreview ? 'full preview' : 'gallery'})`, async ({ page }) => {
     await mockScreenshots(page)
+    await page.route(screenshot, route => route.abort())
     let retry
     await page.route(`${screenshot}?*`, route => { retry = route })
     await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
@@ -452,7 +453,6 @@ for (const fullPreview of [false, true]) {
     if (fullPreview) await gallery.locator('.themePreview button').click()
     const container = fullPreview ? page.getByRole('dialog', { name: 'Community theme 1', exact: true }) : gallery
     await expect(container.locator('img')).toHaveAttribute('src', screenshot)
-    await container.locator('img').evaluate(image => image.dispatchEvent(new Event('error')))
     await expect.poll(() => retry !== undefined).toBe(true)
     await container.evaluate((element, full) => {
       const outgoing = element.querySelector('img')

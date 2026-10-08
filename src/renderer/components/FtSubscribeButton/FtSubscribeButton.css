@@ -261,6 +261,12 @@
   margin-block-start: 7px;
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .dailyVideoLimitSelect {
+    margin-block-start: 8px;
+  }
+}
+
 .feedTypePreferenceIcon,
 .feedTypePreferenceCheck,
 .profileCheck {

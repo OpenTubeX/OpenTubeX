@@ -50,6 +50,18 @@
   margin-inline-end: 24px;
 }
 
+/* Let long captions contribute to the shared field widths. */
+.generalSelectGrid :deep(.select.outlined .selectOutline) {
+  position: relative;
+  inset-block: auto;
+  margin-block-start: -7px;
+}
+
+.generalSelectGrid :deep(.select.outlined .selectLegend) {
+  max-inline-size: none;
+  margin-inline-end: 24px;
+}
+
 .generalSelectGrid :deep(.iconSelect),
 .generalSelectGrid :deep(.selectSearchHighlightFrame) {
   grid-area: 1 / 1 / 2 / 2;

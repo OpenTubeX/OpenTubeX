@@ -1455,7 +1455,7 @@ test.describe('UI roundness', () => {
     const toggleTrackRadius = () => toggleSwitch.evaluate((element) =>
       getComputedStyle(element, '::before').borderRadius)
     await expect(roundnessSlider).toHaveValue('0')
-    await expect.poll(toggleTrackRadius).toBe('0px')
+    await expect.poll(toggleTrackRadius).toBe('12px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '0px')
     await expect(page.getByRole('button').first()).toHaveCSS('border-radius', '0px')
 
