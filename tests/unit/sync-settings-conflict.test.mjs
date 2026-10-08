@@ -32,6 +32,30 @@ test('theme sync does not echo a desktop theme list sorted by name', () => {
   assert.deepEqual(entry, received, 'Storage order must not create another sync update')
 })
 
+test('equivalent theme snapshots with the same edit time keep the server representation', () => {
+  const themes = normalizeCustomThemes([{ ...DEFAULT_CUSTOM_THEME, id: 'theme-1' }])
+  const withoutDefaults = structuredClone(themes)
+  delete withoutDefaults[0].colors.watchedThumbnailOverlay
+  for (const [saved, remote] of [[withoutDefaults, themes], [themes, withoutDefaults]]) {
+    const remoteEntry = { key: 'customThemes', value: remote, updatedAt: 10 }
+    const entry = mergeSettingEntry({
+      key: 'customThemes', value: themes,
+      old: { key: 'customThemes', value: saved, updatedAt: 10 },
+      remoteEntry, localUpdatedAt: 5, now: 100,
+    })
+    assert.deepEqual(entry, remoteEntry, 'An unchanged snapshot must not overwrite the server on a timestamp tie')
+  }
+})
+
+test('unchanged settings accept the server on an edit-time tie and retain a newer snapshot', () => {
+  const old = { key: 'baseTheme', value: 'dark', updatedAt: 10 }
+  const remoteEntry = { key: 'baseTheme', value: 'light', updatedAt: 10 }
+  assert.deepEqual(mergeSettingEntry({ key: 'baseTheme', value: 'dark', old, remoteEntry, now: 100 }), remoteEntry)
+  assert.deepEqual(mergeSettingEntry({
+    key: 'baseTheme', value: 'dark', old: { ...old, updatedAt: 20 }, remoteEntry, now: 100,
+  }), { ...old, updatedAt: 20 })
+})
+
 for (const [change, edit] of [
   ['rename', themes => { themes[0].name = 'Renamed' }],
   ['color', themes => { themes[0].colors.primaryText = '#123456' }],

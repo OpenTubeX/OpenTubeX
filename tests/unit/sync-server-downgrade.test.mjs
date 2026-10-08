@@ -1342,6 +1342,11 @@ for (const [scenario, desktopKeys, phoneKeys] of [
         f.settings.syncServerSnapshot = JSON.stringify({ settings: { [CUSTOM_THEMES_SYNC_KEY]: received } })
         f.settings.syncServerSettingUpdatedAt = { [CUSTOM_THEMES_SYNC_KEY]: 20 }
       }
+      // Existing devices can have equivalent snapshots serialized differently
+      // at the same edit time. Neither snapshot should overwrite the server.
+      b.settings.syncServerSnapshot = JSON.stringify({
+        settings: { [CUSTOM_THEMES_SYNC_KEY]: { ...received, value: themes } },
+      })
       a.context.rootState.utils.customThemes = [...themes].reverse()
       b.context.rootState.utils.customThemes = phoneThemes
     }

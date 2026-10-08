@@ -91,10 +91,18 @@ export async function verifyCustomThemeSync(page, { phone = false } = {}) {
     expect(remote.find(entry => entry.key === 'customThemes')).toEqual(received)
     // The first sync fills in other settings. Subsequent periodic merges must settle.
     uploads.length = 0
+    // A peer may have saved these same themes with defaults and another order
+    // at the same edit time. Adopt its representation rather than echoing ours.
+    remote = remote.map(entry => entry.key === 'customThemes'
+      ? { ...entry, value: [...themes].reverse() }
+      : entry)
+    revision++
+    const peerEntry = structuredClone(remote.find(entry => entry.key === 'customThemes'))
     for (let attempt = 0; attempt < 4; attempt++) {
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
     }
     expect(uploads).toEqual([])
+    expect(remote.find(entry => entry.key === 'customThemes')).toEqual(peerEntry)
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const edited = JSON.parse(JSON.stringify(store.state.utils.customThemes))
