@@ -102,6 +102,73 @@ async function expectStableImageSlot(app, page, container, pending, layouts = ['
   }
 }
 
+test.describe('playlist artwork loading', () => {
+  test.use({
+    seed: {
+      settings: { playlistViewType: 'list' },
+      playlists: [{
+        _id: 'artwork-slots',
+        playlistName: 'Artwork slots',
+        videos: [{ videoId: 'placeholder', title: 'Artwork video', author: 'Example channel', lengthSeconds: 120, type: 'video' }],
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now()
+      }]
+    }
+  })
+
+  test('preserves playlist artwork sizing and narrow-layout visibility while loading', async ({ app, page }) => {
+    const pending = []
+    await page.route('https://i.ytimg.com/**', route => { pending.push(route) })
+    await goTo(page, 'userplaylists')
+    await page.evaluate(() => window.ftElectron.tabs.create({ route: '/playlist/artwork-slots', query: { playlistType: 'user' } }))
+    await expect(page.locator('.playlistInfo.base')).toBeVisible()
+    const container = page.locator('.playlistThumbnail')
+    const placeholder = container.locator('.retryImagePlaceholder')
+    await expect(placeholder).toHaveClass(/ft-shimmer/)
+    const viewports = [[1600, 1], [760, 1], [1600, 1.25], [760, 1.25]]
+    const resize = async ([width, zoom]) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, zoom }) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setMinimumSize(0, 0)
+        window.webContents.setZoomFactor(zoom)
+        window.setBounds({ x: 0, y: 0, width, height: 900 })
+      }, { width, zoom })
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width / zoom, 0)
+      await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
+    }
+    const slots = []
+    for (const viewport of viewports) {
+      await resize(viewport)
+      const visible = viewport[0] / viewport[1] > 800
+      if (visible) await expect(placeholder).toBeVisible()
+      else await expect(placeholder).toBeHidden()
+      const bounds = await placeholder.boundingBox()
+      if (visible) {
+        const parentBounds = await container.boundingBox()
+        expect(bounds.width).toBeCloseTo(parentBounds.width, 0)
+        expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
+      }
+      slots.push(bounds)
+    }
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    while (pending.length) await fulfillVisualFixture(pending.shift(), 'video-thumbnail')
+    await expect(placeholder).toHaveCount(0)
+    const image = container.locator('img')
+    for (const [index, viewport] of viewports.entries()) {
+      await resize(viewport)
+      const slot = slots[index]
+      if (slot === null) await expect(image).toBeHidden()
+      else {
+        await expect(image).toBeVisible()
+        await expect.poll(async () => {
+          const bounds = await image.boundingBox()
+          return Object.entries(slot).every(([key, value]) => Math.abs(bounds[key] - value) < 0.5)
+        }).toBe(true)
+      }
+    }
+  })
+})
+
 test('preserves channel search avatar slots in grid and list layouts', async ({ app, page }) => {
   const pending = []
   let searchRequests = 0
@@ -155,10 +222,10 @@ test('uses channel avatar skeletons in dark and light themes', async ({ page }, 
       })
       await expect(placeholder).toHaveCSS('color', mutedColor)
       await expect(placeholder.locator('svg')).toBeHidden()
-      await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
+      await expect.poll(() => placeholder.evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('ft-shimmer')
       await expect(placeholder).toHaveCSS('border-radius', '50%')
       await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'reduce' })
-      await expect(placeholder).toHaveCSS('animation-name', 'none')
+      await expect.poll(() => placeholder.evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('none')
       await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })
       await channel.screenshot({ path: testInfo.outputPath(`avatar-color-${iconPack}-${theme}.png`) })
     }
@@ -455,8 +522,8 @@ test('shimmers while a thumbnail loads and stops after decoding', async ({ page 
   const video = page.locator('.ft-list-video', { hasText: 'Placeholder video' })
   const placeholder = video.locator('.retryImagePlaceholder')
   await expect(placeholder).toBeVisible()
-  await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
-  await expect(placeholder).toHaveAttribute('src', /image_skeleton/)
+  await expect.poll(() => placeholder.evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('ft-shimmer')
+  await expect(placeholder.locator('svg')).toHaveAttribute('viewBox', '0 0 320 180')
   await expect(placeholder).toHaveAttribute('aria-hidden', 'true')
   const bounds = await placeholder.boundingBox()
   expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
@@ -484,7 +551,7 @@ test('uses the thumbnail placeholder until a video image loads and after retries
   const image = video.locator('.thumbnailImage:not(.retryImagePlaceholder)')
   await expect(placeholder).toBeVisible()
   await expect(image).toBeHidden()
-  await expect(placeholder).toHaveAttribute('src', /(?:image_skeleton|thumbnail_placeholder)/)
+  await expect(placeholder).toHaveAttribute('aria-hidden', 'true')
   const bounds = await placeholder.boundingBox()
   expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
   await expect(image).toHaveAttribute('src', /opentubex_retry=/)
@@ -656,7 +723,7 @@ test('lazy inline post emojis wait offscreen before their loading deadline', asy
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await text.scrollIntoViewIfNeeded()
     await page.clock.runFor(100)
-    await expect.poll(() => placeholder.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect.poll(() => placeholder.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
     await text.screenshot({ path: testInfo.outputPath(`lazy-inline-${theme}.png`) })
   }
   await page.clock.fastForward(10_001)
@@ -753,7 +820,7 @@ test('keeps poll image slots stable while loading and after failure', async ({ p
     const option = page.locator('.poll .option', { hasText: choice.text })
     const placeholder = option.locator('.retryImagePlaceholder')
     await expect(placeholder).toBeVisible()
-    await expect(placeholder).toHaveCSS('animation-name', 'ft-shimmer')
+    await expect.poll(() => placeholder.evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('ft-shimmer')
     await expect(placeholder.locator('svg')).toBeHidden()
     const bounds = await placeholder.boundingBox()
     expect(bounds.height).toBe(125)
@@ -1051,6 +1118,10 @@ test('offscreen lazy Home thumbnails keep their skeleton until visible, then tim
   await card.scrollIntoViewIfNeeded()
   await expect.poll(() => pending.length).toBe(1)
   await expect.poll(() => image.evaluate(element => element.getBoundingClientRect().top < innerHeight)).toBe(true)
+  const thumbnailBounds = await card.locator('.mediaThumbnail').boundingBox()
+  const skeletonBounds = await placeholder.boundingBox()
+  expect(skeletonBounds.width).toBeCloseTo(thumbnailBounds.width, 1)
+  expect(skeletonBounds.height).toBeCloseTo(thumbnailBounds.height, 1)
   // Let the intersection notification start the deadline before advancing time.
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   // Capture at normal scale after checking visibility at a fractional zoom.

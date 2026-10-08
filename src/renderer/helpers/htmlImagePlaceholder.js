@@ -5,10 +5,15 @@ import imageSkeleton from '../assets/img/image_skeleton.svg'
 // decoded and reserve their original slot with the shared loading skeleton.
 export function addHtmlImagePlaceholders(element) {
   for (const image of element.querySelectorAll('img')) {
-    const placeholder = image.cloneNode()
-    for (const attribute of ['srcset', 'sizes', 'id', 'title']) placeholder.removeAttribute(attribute)
-    placeholder.src = imageSkeleton
-    placeholder.alt = ''
+    const placeholder = document.createElement('span')
+    const sizingImage = image.cloneNode()
+    for (const attribute of ['srcset', 'sizes', 'id', 'title']) sizingImage.removeAttribute(attribute)
+    sizingImage.src = imageSkeleton
+    sizingImage.alt = ''
+    const imageStyle = getComputedStyle(image)
+    placeholder.style.display = imageStyle.display === 'inline' ? 'inline-block' : imageStyle.display
+    placeholder.style.verticalAlign = imageStyle.verticalAlign
+    placeholder.append(sizingImage)
     placeholder.setAttribute('aria-hidden', 'true')
     placeholder.classList.add('htmlImagePlaceholder', 'ft-shimmer')
     // A <picture>'s sources can override even an img without its own srcset.
@@ -21,7 +26,7 @@ export function addHtmlImagePlaceholders(element) {
 
     // A stalled response must not leave a permanent animated loading indication.
     const showFallback = () => {
-      placeholder.src = thumbnailPlaceholder
+      sizingImage.src = thumbnailPlaceholder
       placeholder.classList.remove('ft-shimmer')
     }
     let skeletonTimeout

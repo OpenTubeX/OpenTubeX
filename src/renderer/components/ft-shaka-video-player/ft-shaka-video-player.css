@@ -801,7 +801,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background: #000;
 }
 
-.endedPoster img {
+.endedPoster img,
+.endedPoster .retryImagePlaceholder {
   opacity: 0.35;
   inline-size: 100%;
   block-size: 100%;
@@ -841,7 +842,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: auto;
 }
 
-.endedRecommendation img {
+.endedRecommendation img,
+.endedRecommendation .retryImagePlaceholder {
   display: block;
   inline-size: 100%;
   block-size: 100%;
@@ -2541,7 +2543,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
-.countdownPoster img {
+.countdownPoster img,
+.countdownPoster .retryImagePlaceholder {
   width: 100%;
   height: 100%;
   object-fit: contain;

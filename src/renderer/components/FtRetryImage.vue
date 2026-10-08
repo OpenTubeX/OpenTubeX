@@ -20,12 +20,25 @@
     :icon="fallbackIcon"
     aria-hidden="true"
   />
+  <span
+    v-else-if="!hasLoaded && isLoading"
+    v-bind="{ ...$attrs, ...parentScope }"
+    class="retryImagePlaceholder retryImageShimmer ft-shimmer"
+    aria-hidden="true"
+  >
+    <!-- Retain the transparent skeleton's intrinsic size without an image
+         request; replaced elements cannot host the animated pseudo-element. -->
+    <svg
+      :width="$attrs.width ?? 320"
+      :height="$attrs.height ?? 180"
+      viewBox="0 0 320 180"
+    />
+  </span>
   <img
     v-else-if="!hasLoaded"
     v-bind="{ ...$attrs, ...parentScope }"
     class="retryImagePlaceholder"
-    :class="{ 'ft-shimmer': isLoading }"
-    :src="isLoading ? imageSkeleton : thumbnailPlaceholder"
+    :src="thumbnailPlaceholder"
     alt=""
     aria-hidden="true"
   >
@@ -37,7 +50,6 @@ import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../helpers/videoThumbnail.js'
 import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
-import imageSkeleton from '../assets/img/image_skeleton.svg'
 
 defineOptions({ inheritAttrs: false })
 
@@ -261,6 +273,17 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.retryImageShimmer {
+  display: inline-block;
+}
+
+.retryImageShimmer > svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: inherit;
+}
+
 .retryImagePlaceholder[data-icon='circle-user'] {
   color: var(--tertiary-text-color);
 }

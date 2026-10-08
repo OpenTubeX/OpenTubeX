@@ -699,7 +699,8 @@
   border-radius: calc(6px * var(--ui-roundness));
 }
 
-.tabSwitcherPreview img {
+.tabSwitcherPreview img,
+.tabSwitcherPreview .retryImagePlaceholder {
   inline-size: 100%;
   block-size: 100%;
   object-fit: contain;

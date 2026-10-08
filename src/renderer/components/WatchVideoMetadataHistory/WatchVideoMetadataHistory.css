@@ -67,7 +67,8 @@
   overflow: hidden;
 }
 
-.thumbnailFrame img {
+.thumbnailFrame img,
+.thumbnailFrame .retryImagePlaceholder {
   block-size: 100%;
   inline-size: 100%;
   object-fit: contain;

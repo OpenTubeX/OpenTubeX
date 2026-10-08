@@ -2,7 +2,8 @@
   inline-size: 100%;
 }
 
-.playlistThumbnail img {
+.playlistThumbnail img,
+.playlistThumbnail .retryImagePlaceholder {
   aspect-ratio: 16 / 9;
   inline-size: 100%;
   object-fit: cover;

@@ -79,7 +79,7 @@ test('shows a placeholder while theme screenshots load and a text fallback after
   await expect.poll(() => pending.length).toBeGreaterThan(0)
   await expect(card.locator('.themePreview img:not(.retryImagePlaceholder)')).toBeHidden()
   await expect(card.locator('.retryImagePlaceholder')).toBeVisible()
-  await expect(card.locator('.retryImagePlaceholder')).toHaveCSS('animation-name', 'ft-shimmer')
+  await expect.poll(() => card.locator('.retryImagePlaceholder').evaluate(element => getComputedStyle(element, '::before').animationName)).toBe('ft-shimmer')
   await expect(card.locator('.retryImagePlaceholder svg')).toBeHidden()
   await card.screenshot({ path: testInfo.outputPath('theme-screenshot-placeholder.png') })
   while (pending.length) await pending.shift().abort()
