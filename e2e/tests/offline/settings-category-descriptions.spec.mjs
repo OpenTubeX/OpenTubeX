@@ -1,12 +1,68 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { test, expect, goTo, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 
 const LABEL = 'Compact Settings Categories'
 
 test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+for (const initialValue of [false, true]) {
+  test.describe(`compact settings categories initially ${initialValue}`, () => {
+    test.use({ seed: { settings: { currentLocale: 'en-US', hideSettingsCategoryDescriptions: initialValue } } })
+
+    test('keeps the toggle and layout consistent after a failed save and allows retrying', async ({ app, page }) => {
+      const appearance = await goToSettingsSection(page, 'appearance')
+      const toggle = appearance.getByRole('checkbox', { name: LABEL })
+      await expect(toggle).toBeChecked({ checked: initialValue })
+      await app.electronApp.evaluate(({ ipcMain }, { channel, upsert }) => {
+        const original = ipcMain._invokeHandlers.get(channel)
+        globalThis.__restoreCompactCategoryHandler = () => {
+          ipcMain.removeHandler(channel)
+          ipcMain.handle(channel, original)
+          delete globalThis.__rejectCompactCategorySave
+          delete globalThis.__restoreCompactCategoryHandler
+        }
+        ipcMain.removeHandler(channel)
+        ipcMain.handle(channel, (event, request) => {
+          if (request.action === upsert && request.data?._id === 'hideSettingsCategoryDescriptions') {
+            return new Promise((_resolve, reject) => {
+              globalThis.__rejectCompactCategorySave = () => reject(new Error('Compact category save failed'))
+            })
+          }
+          return original(event, request)
+        })
+      }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT })
+
+      try {
+        const errorLogged = page.waitForEvent('console', {
+          predicate: message => message.type() === 'error' && message.text().includes('Compact category save failed')
+        })
+        await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
+        await expect.poll(() => app.electronApp.evaluate(() =>
+          typeof globalThis.__rejectCompactCategorySave === 'function'
+        )).toBe(true)
+        await app.electronApp.evaluate(() => globalThis.__rejectCompactCategorySave())
+        await errorLogged
+        await expect(toggle).toBeChecked({ checked: initialValue })
+        await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 0 : 11)
+        expect(latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+          .hideSettingsCategoryDescriptions).toBe(initialValue)
+      } finally {
+        await app.electronApp.evaluate(() => globalThis.__restoreCompactCategoryHandler())
+      }
+
+      await appearance.locator('label.switch-label').filter({ hasText: LABEL }).click()
+      await expect(toggle).toBeChecked({ checked: !initialValue })
+      await expect(page.locator('.settingsMenu .titleDescription')).toHaveCount(initialValue ? 11 : 0)
+      await expect.poll(async () => latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      ).hideSettingsCategoryDescriptions).toBe(!initialValue)
+    })
+  })
+}
 
 test('hides settings category descriptions immediately and persists across restarts', async ({ app }, testInfo) => {
   let page = app.page

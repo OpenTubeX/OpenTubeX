@@ -56,6 +56,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  controlled: {
+    type: Boolean,
+    default: false
+  },
   compact: {
     type: Boolean,
     default: false
@@ -93,7 +97,9 @@ watch(() => props.defaultValue, (value) => {
 })
 
 function change() {
-  emit('change', currentValue.value)
+  const value = currentValue.value
+  if (props.controlled) currentValue.value = props.defaultValue
+  emit('change', value)
 }
 </script>
 

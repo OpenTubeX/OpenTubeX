@@ -240,6 +240,7 @@
           :label="$t('Settings.Theme Settings.Compact Settings Categories')"
           :tooltip="$t('Tooltips.Theme Settings.Compact Settings Categories')"
           compact
+          controlled
           :default-value="hideSettingsCategoryDescriptions"
           setting-key="hideSettingsCategoryDescriptions"
           @change="store.dispatch('updateHideSettingsCategoryDescriptions', $event)"
