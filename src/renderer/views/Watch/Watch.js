@@ -2967,8 +2967,7 @@ export default defineComponent({
       const direction = this.shortsSwipeDirection
       const from = this.shortsSwipeOffset
       const to = navigate ? -direction * this.shortsSwipeHeight : 0
-      const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const reducedMotion = isReducedMotionEnabled()
       this.shortsSwipeSettling = true
       this.shortsSwipeOffset = to
       const surfaces = this.shortsSwipePresentationTarget
