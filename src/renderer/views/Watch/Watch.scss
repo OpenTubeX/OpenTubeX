@@ -1604,6 +1604,7 @@
     grid-column: 1;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .shortsSwipeViewport),
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
     inline-size: var(--shorts-landscape-player-width);
     justify-self: center;

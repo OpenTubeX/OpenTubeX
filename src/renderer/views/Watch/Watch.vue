@@ -300,110 +300,110 @@
               />
             </div>
           </Teleport>
-        </div>
-        <div
-          v-if="!isLoading && (isUpcoming || errorMessage)"
-          class="videoPlayer"
-          :class="{ videoPlayerError: errorMessage }"
-        >
-          <FtRetryImage
-            v-if="!isUpcoming || playabilityStatus !== 'OK'"
-            :src="thumbnail"
-            class="videoThumbnail"
-            alt=""
-          />
           <div
-            v-if="isUpcoming"
-            class="premiereDate"
-            :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
+            v-if="!isLoading && (isUpcoming || errorMessage)"
+            class="videoPlayer"
+            :class="{ videoPlayerError: errorMessage }"
           >
-            <ft-icon
-              :icon="['fas', 'satellite-dish']"
-              class="premiereIcon"
+            <FtRetryImage
+              v-if="!isUpcoming || playabilityStatus !== 'OK'"
+              :src="thumbnail"
+              class="videoThumbnail"
+              alt=""
             />
-            <p
-              v-if="upcomingTimestamp !== null && !hasScheduledPremiereStarted"
-              class="premiereText"
-            >
-              <span
-                class="premiereTextTimeLeft"
-              >
-                {{ $t("Video.Premieres") }} {{ displayedUpcomingTimeLeft }}
-              </span>
-              <br>
-              <span
-                class="premiereTextTimestamp"
-              >
-                {{ upcomingTimestamp }}
-              </span>
-            </p>
-            <p
-              v-else
-              class="premiereText"
-            >
-              {{ $t("Video.Starting soon, please refresh the page to check again") }}
-            </p>
-            <button
-              v-if="canToggleLiveReminder"
-              type="button"
-              class="liveReminderButton"
-              :class="{ active: liveReminderActive }"
-              :disabled="liveReminderLoading"
-              :aria-pressed="liveReminderActive"
-              @click="toggleLiveReminder"
-            >
-              <ft-icon :icon="['fas', 'calendar-days']" />
-              {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
-            </button>
-          </div>
-          <div
-            v-else-if="errorMessage"
-            ref="errorContainer"
-            v-overlay-scrollbars
-            class="errorContainer"
-          >
             <div
-              class="errorWrapper"
+              v-if="isUpcoming"
+              class="premiereDate"
+              :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
             >
               <ft-icon
-                :icon="customErrorIcon || ['fas', 'exclamation-circle']"
-                aria-hidden="true"
-                class="errorIcon"
+                :icon="['fas', 'satellite-dish']"
+                class="premiereIcon"
               />
-              <div class="errorContent">
-                <p
-                  class="errorMessage"
+              <p
+                v-if="upcomingTimestamp !== null && !hasScheduledPremiereStarted"
+                class="premiereText"
+              >
+                <span
+                  class="premiereTextTimeLeft"
                 >
-                  {{ errorMessage }}
-                </p>
-                <p
-                  v-if="restrictedPlaybackError !== null && !hasConfiguredRestrictedPlaybackAuthentication"
-                  class="restrictedPlaybackHint"
+                  {{ $t("Video.Premieres") }} {{ displayedUpcomingTimeLeft }}
+                </span>
+                <br>
+                <span
+                  class="premiereTextTimestamp"
                 >
-                  {{ $t('Video.Configure Restricted Playback Cookies Hint') }}
-                </p>
-                <div
-                  v-if="canTryRestrictedPlaybackWithCookies || canRetryWithOtherPlaybackEngine"
-                  class="errorActions"
-                >
-                  <FtButton
-                    v-if="canTryRestrictedPlaybackWithCookies"
-                    class="errorActionButton"
-                    :label="$t('Video.Try With Configured Cookies')"
-                    :icon="['fas', 'cookie']"
-                    :text-color="null"
-                    :background-color="null"
-                    @click="tryRestrictedPlaybackWithCookies"
-                  />
-                  <FtButton
-                    v-if="canRetryWithOtherPlaybackEngine"
-                    class="errorActionButton"
-                    :label="retryWithOtherPlaybackEngineLabel"
-                    :icon="['fas', 'sync']"
-                    :text-color="null"
-                    :background-color="null"
-                    @click="retryWithOtherPlaybackEngine"
-                  />
+                  {{ upcomingTimestamp }}
+                </span>
+              </p>
+              <p
+                v-else
+                class="premiereText"
+              >
+                {{ $t("Video.Starting soon, please refresh the page to check again") }}
+              </p>
+              <button
+                v-if="canToggleLiveReminder"
+                type="button"
+                class="liveReminderButton"
+                :class="{ active: liveReminderActive }"
+                :disabled="liveReminderLoading"
+                :aria-pressed="liveReminderActive"
+                @click="toggleLiveReminder"
+              >
+                <ft-icon :icon="['fas', 'calendar-days']" />
+                {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
+              </button>
+            </div>
+            <div
+              v-else-if="errorMessage"
+              ref="errorContainer"
+              v-overlay-scrollbars
+              class="errorContainer"
+            >
+              <div
+                class="errorWrapper"
+              >
+                <ft-icon
+                  :icon="customErrorIcon || ['fas', 'exclamation-circle']"
+                  aria-hidden="true"
+                  class="errorIcon"
+                />
+                <div class="errorContent">
+                  <p
+                    class="errorMessage"
+                  >
+                    {{ errorMessage }}
+                  </p>
+                  <p
+                    v-if="restrictedPlaybackError !== null && !hasConfiguredRestrictedPlaybackAuthentication"
+                    class="restrictedPlaybackHint"
+                  >
+                    {{ $t('Video.Configure Restricted Playback Cookies Hint') }}
+                  </p>
+                  <div
+                    v-if="canTryRestrictedPlaybackWithCookies || canRetryWithOtherPlaybackEngine"
+                    class="errorActions"
+                  >
+                    <FtButton
+                      v-if="canTryRestrictedPlaybackWithCookies"
+                      class="errorActionButton"
+                      :label="$t('Video.Try With Configured Cookies')"
+                      :icon="['fas', 'cookie']"
+                      :text-color="null"
+                      :background-color="null"
+                      @click="tryRestrictedPlaybackWithCookies"
+                    />
+                    <FtButton
+                      v-if="canRetryWithOtherPlaybackEngine"
+                      class="errorActionButton"
+                      :label="retryWithOtherPlaybackEngineLabel"
+                      :icon="['fas', 'sync']"
+                      :text-color="null"
+                      :background-color="null"
+                      @click="retryWithOtherPlaybackEngine"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

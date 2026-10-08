@@ -227,3 +227,81 @@ for (const mode of ['fullwindow', 'fullscreen']) {
     await cdp.detach()
   })
 }
+
+for (const state of ['error', 'upcoming']) {
+  test(`Shorts ${state} cards follow the finger and allow navigation`, async ({ app, page }) => {
+    const { watch, touch, cdp } = await openShorts({ app, page })
+    await watch.evaluate((component, state) => {
+      if (state === 'error') component.proxy.errorMessage = 'Playback failed.'
+      else {
+        component.proxy.isUpcoming = true
+        component.proxy.playabilityStatus = 'LIVE_STREAM_OFFLINE'
+      }
+    }, state)
+    const card = page.locator(state === 'error' ? '.videoPlayerError' : '.videoPlayer:has(.premiereDate)')
+    await expect(card).toBeVisible()
+    const bounds = await card.boundingBox()
+    // Start above the centered error actions so the gesture does not target a button.
+    const startY = -bounds.height / 4
+    await touch('touchStart', 0, startY)
+    await touch('touchMove', 0, startY - 120)
+    await expect.poll(async () => (await card.boundingBox()).y).toBeCloseTo(bounds.y - 120, 0)
+    await expect.poll(async () => (await page.locator('.shortsSwipePreview').boundingBox()).width).toBeCloseTo(bounds.width, 0)
+    await touch('touchCancel')
+    await expect.poll(() => watch.evaluate(component => component.proxy.shortsSwipeSettling)).toBe(false)
+    await expect.poll(async () => (await card.boundingBox()).y).toBeCloseTo(bounds.y, 0)
+    await touch('touchStart', 0, startY)
+    await touch('touchMove', 0, startY - 120)
+    await touch('touchEnd')
+    await expect(page).toHaveURL(new RegExp(`/watch/${next}`))
+    await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+    await watch.dispose()
+    await cdp.detach()
+  })
+}
+
+for (const [zoom, theme] of [[1, 'dark'], [1.25, 'light']]) {
+  test(`landscape Shorts swipe previews match the portrait player at ${zoom * 100}% UI scale in ${theme} theme`, async ({ app, page }, testInfo) => {
+    const { watch, cdp } = await openShorts({ app, page }, zoom)
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+    await setWindowSize(app, page, { width: 915, height: 412 })
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const bounds = await player.boundingBox()
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
+    })
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 - 80 }]
+    })
+    await expect.poll(async () => (await player.boundingBox()).y).toBeCloseTo(bounds.y - 80, 0)
+    const preview = page.locator('.shortsSwipePreview')
+    await expect.poll(async () => (await preview.boundingBox()).width).toBeCloseTo(bounds.width, 0)
+    const previewBounds = await preview.boundingBox()
+    expect(previewBounds.x).toBeCloseTo(bounds.x, 0)
+    expect(previewBounds.height).toBeCloseTo(bounds.height, 0)
+    expect(previewBounds.y).toBeCloseTo(bounds.y + bounds.height - 80, 0)
+    await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
+    await expect.poll(() => preview.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    const screenshotPath = testInfo.outputPath('landscape-swipe.png')
+    await page.screenshot({
+      path: screenshotPath,
+      clip: {
+        x: (bounds.x - 8) * zoom,
+        y: (bounds.y - 8) * zoom,
+        width: (bounds.width + 16) * zoom,
+        height: (bounds.height + 16) * zoom
+      }
+    })
+    await testInfo.attach('Landscape Shorts swipe', { path: screenshotPath, contentType: 'image/png' })
+    await expect(page).toHaveURL(new RegExp(`/watch/${current}`))
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(page).toHaveURL(new RegExp(`/watch/${next}`))
+    await expect(player).toBeVisible()
+    await watch.dispose()
+    await cdp.detach()
+  })
+}
