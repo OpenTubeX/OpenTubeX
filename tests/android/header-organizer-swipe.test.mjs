@@ -391,3 +391,69 @@ test('Android organizer unmount releases its modal lock during committed settlem
     clearTimeout(keepAlive)
   }
 })
+
+test('Android pointer cancellation cannot reopen an organizer waiting for capture', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, async () => {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const page = browser.contexts()[0].pages()[0]
+  const session = await browser.contexts()[0].newCDPSession(page)
+  const keepAlive = setTimeout(() => {}, 60_000)
+  const saved = await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const values = { CapacitorLayoutMode: 'phone', EnableMobileTabs: true, ShowTabPreviews: true, ReducedMotion: 'off' }
+    const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
+    for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
+    const state = { nativePromise: window.Capacitor.nativePromise, pointer: null, cancelled: false, opened: false }
+    window.__organizerPendingCaptureTest = state
+    state.onPointerDown = event => { state.pointer = event }
+    document.addEventListener('pointerdown', state.onPointerDown, true)
+    window.Capacitor.nativePromise = function (plugin, method, ...args) {
+      if (plugin === 'Screenshot' && method === 'take' && state.pointer) {
+        // Cancel in the capture task rather than a later CDP round trip, which
+        // can exceed the 250ms capture timeout on a busy emulator.
+        return new Promise(resolve => queueMicrotask(() => {
+          state.pointer.target.dispatchEvent(new PointerEvent('pointercancel', {
+            bubbles: true, pointerId: state.pointer.pointerId, pointerType: 'touch',
+          }))
+          state.cancelled = true
+          resolve({})
+        }))
+      }
+      return state.nativePromise.call(this, plugin, method, ...args)
+    }
+    state.observer = new MutationObserver(() => {
+      if (document.querySelector('#capacitor-phone-tab-dialog')) state.opened = true
+    })
+    state.observer.observe(document.body, { childList: true, subtree: true })
+    return settings
+  })
+  const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+  try {
+    const box = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
+    assert.ok(box)
+    const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    await touch('touchStart', point)
+    await touch('touchMove', { ...point, y: point.y + 80 })
+    await page.waitForTimeout(500)
+    assert.equal(await page.evaluate(() => window.__organizerPendingCaptureTest.cancelled), true,
+      'the gesture must be cancelled while native capture is pending')
+    assert.equal(await page.evaluate(() => window.__organizerPendingCaptureTest.opened), false,
+      'a late native result must never show the cancelled organizer')
+    await expect(page.locator('#capacitor-phone-tab-dialog, .organizerSwipePage')).toHaveCount(0)
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await page.evaluate(async saved => {
+      const state = window.__organizerPendingCaptureTest
+      state.observer.disconnect()
+      document.removeEventListener('pointerdown', state.onPointerDown, true)
+      window.Capacitor.nativePromise = state.nativePromise
+      delete window.__organizerPendingCaptureTest
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(saved)) await store.dispatch('update' + key, value)
+    }, saved)
+    await session.detach()
+    await browser.close()
+    clearTimeout(keepAlive)
+  }
+})

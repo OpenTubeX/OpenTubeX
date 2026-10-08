@@ -697,9 +697,13 @@ const organizerSwipe = {
   async finish(elapsed, cancelled) {
     const state = organizerTransition
     if (!state) return
+    if (cancelled) {
+      organizerSwipe.cancel()
+      return
+    }
     await state.ready
     if (organizerTransition !== state) return
-    const commit = !cancelled && shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
+    const commit = shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
     // The next touch belongs to the organizer, even while the page is still
     // settling into its card. Selecting a tab cancels the remaining animation.
     if (commit) {

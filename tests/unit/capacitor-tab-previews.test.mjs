@@ -245,8 +245,9 @@ test('capture resumes when an invalidated screenshot outlasts the post-swipe tim
   assert.equal(getCapacitorTabPreview(state.tab), state.preview)
 })
 
-for (const cancelled of [false, true]) {
-  test(`organizer pull captures before showing the overlay (cancelled during capture: ${cancelled})`, async t => {
+for (const cancellation of ['none', 'direct', 'pointercancel']) {
+  const cancelled = cancellation !== 'none'
+  test(`organizer pull captures before showing the overlay (cancellation: ${cancellation})`, async t => {
     const state = setup(t)
     await captureBeforeTabOrganizer()
     assert.equal(getCapacitorTabPreview(state.tab), state.preview)
@@ -266,7 +267,7 @@ for (const cancelled of [false, true]) {
       captureBeforeTabOrganizer, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
       dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
       openTabsScrollRef: ref(null), organizerSwipeProgress: distance => distance / 320,
-      createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {} }),
+      createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
     })
     const gesture = vm.runInContext(`${methods}; organizerSwipe`, ctx)
     assert.equal(gesture.begin(), true)
@@ -274,8 +275,18 @@ for (const cancelled of [false, true]) {
     await new Promise(setImmediate)
     assert.ok(finishCapture, 'the gesture must refresh the cached screenshot')
     gesture.update(160)
-    if (cancelled) gesture.cancel()
-    finishCapture()
+    if (cancellation === 'direct') gesture.cancel()
+    if (cancellation === 'pointercancel') {
+      let finished = false
+      const finish = gesture.finish(20, true).then(() => { finished = true })
+      try {
+        await new Promise(setImmediate)
+        assert.equal(finished, true, 'pointer cancellation must finish without waiting for native capture')
+      } finally {
+        finishCapture()
+        await finish
+      }
+    } else finishCapture()
     await new Promise(setImmediate)
     assert.equal(open.value, !cancelled, 'a late native result cannot reopen a cancelled organizer')
     assert.equal(getCapacitorTabPreview(state.tab), latest)
