@@ -127,18 +127,18 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
 
   const dataAndStorage = await goToSettingsSection(page, 'data')
   expect(await app.electronApp.evaluate(() => globalThis.__storageUsageReadCount)).toBe(0)
-  await expect(dataAndStorage.locator('[data-settings-tab="data"]'))
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"]'))
     .toHaveAttribute('aria-selected', 'true')
-  await expect(dataAndStorage.locator('[data-settings-tab="data"] [data-icon="layer-group"]'))
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"] [data-icon="layer-group"]'))
     .toBeVisible()
-  await expect(dataAndStorage.locator('[data-settings-tab="storage"] [data-icon="database"]'))
+  await expect(page.locator('.settingsWindow [data-settings-tab="storage"] [data-icon="database"]'))
     .toBeVisible()
   await expect(dataAndStorage.locator('.storageBreakdown')).toHaveCount(0)
 
   const settingsContent = page.locator('.settingsContent')
   await settingsContent.evaluate(element => { element.scrollTop = 100 })
-  const storageTab = dataAndStorage.locator('[data-settings-tab="storage"]')
-  await dataAndStorage.locator('[data-settings-tab="data"]').focus()
+  const storageTab = page.locator('.settingsWindow [data-settings-tab="storage"]')
+  await page.locator('.settingsWindow [data-settings-tab="data"]').focus()
   await page.keyboard.press('ArrowRight')
   await expect(storageTab).toBeFocused()
   await expect(storageTab).toHaveAttribute('aria-selected', 'true')
@@ -149,8 +149,8 @@ test('calculates storage usage only after the Storage tab opens', async ({ app, 
 })
 
 test('opens the Storage tab when legacy storage navigation changes while mounted', async ({ page }) => {
-  const dataAndStorage = await goToSettingsSection(page, 'data')
-  await expect(dataAndStorage.locator('[data-settings-tab="data"]'))
+  await goToSettingsSection(page, 'data')
+  await expect(page.locator('.settingsWindow [data-settings-tab="data"]'))
     .toHaveAttribute('aria-selected', 'true')
 
   await page.evaluate(() => {
@@ -158,7 +158,7 @@ test('opens the Storage tab when legacy storage navigation changes while mounted
       .commit('setSettingsWindowSection', 'storage')
   })
 
-  await expect(dataAndStorage.locator('[data-settings-tab="storage"]'))
+  await expect(page.locator('.settingsWindow [data-settings-tab="storage"]'))
     .toHaveAttribute('aria-selected', 'true')
 })
 

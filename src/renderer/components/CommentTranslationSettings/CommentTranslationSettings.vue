@@ -40,15 +40,16 @@
           class="commentTranslationLanguage"
         >
           <bdi :lang="language.code">{{ language.name }}</bdi>
-          <FtIconButton
+          <button
+            type="button"
             class="commentTranslationLanguageRemove"
             :disabled="!commentTranslationsEnabled"
+            :aria-label="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
             :title="t('Settings.General Settings.Comment Translation.Remove Language', { language: language.name })"
-            :icon="['fas', 'xmark']"
-            :use-shadow="false"
-            theme="base"
             @click="removeLanguage(language.code)"
-          />
+          >
+            <FtIcon :icon="['fas', 'xmark']" />
+          </button>
         </li>
       </ul>
     </div>
@@ -56,7 +57,7 @@
 </template>
 
 <script setup>
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import { FtIcon } from '@opentubex/icons'
 import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 

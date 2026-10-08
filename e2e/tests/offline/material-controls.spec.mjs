@@ -4,7 +4,9 @@ test('outlined select labels stay transparent on different surfaces', async ({ a
   const section = await goToSettingsSection(page, 'general')
   const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
   const root = select.locator('..')
-  for (const width of [1200, 400]) {
+  for (const [width, uiScale] of [[1200, 100], [400, 100], [1200, 95], [400, 95]]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
     await setWindowSize(app, page, { width, height: width === 1200 ? 880 : 920 })
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(value => { document.body.dir = value }, direction)
@@ -22,6 +24,13 @@ test('outlined select labels stay transparent on different surfaces', async ({ a
       }
     }
   }
+  // Electron locator clipping uses unzoomed coordinates; capture at 100%.
+  await page.evaluate(() => document.querySelector('#app').__vue_app__
+    .config.globalProperties.$store.dispatch('updateUiScale', 100))
+  await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(400)
+  await page.evaluate(() => { document.body.dir = 'ltr' })
+  await root.evaluate(element => { element.style.removeProperty('background') })
+  await page.screenshot({ path: testInfo.outputPath('compact-general-captions.png') })
   await root.locator('.selectOutline').screenshot({ path: testInfo.outputPath('outlined-select-surface.png') })
 })
 

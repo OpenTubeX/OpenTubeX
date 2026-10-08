@@ -62,6 +62,12 @@
   margin-inline-end: 24px;
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .generalSelectGrid :deep(.select.outlined .selectOutline) {
+    margin-block-start: -9px;
+  }
+}
+
 .generalSelectGrid :deep(.iconSelect),
 .generalSelectGrid :deep(.selectSearchHighlightFrame) {
   grid-area: 1 / 1 / 2 / 2;
