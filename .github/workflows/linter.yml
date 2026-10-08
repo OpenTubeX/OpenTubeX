@@ -64,6 +64,11 @@ jobs:
     - name: Run unit tests
       run: pnpm run test:unit
       shell: bash
+    - name: Test Android MP3 cover-art helper
+      run: |
+        python3 -m venv "$RUNNER_TEMP/android-mp3-tests"
+        "$RUNNER_TEMP/android-mp3-tests/bin/python" -m pip install yt-dlp==2026.08.19 mutagen==1.47.0
+        "$RUNNER_TEMP/android-mp3-tests/bin/python" -m unittest discover -s tests -p 'android_*_test.py'
     - name: Test Cast sender transport
       run: go test -race ./...
       working-directory: _scripts/cast-sender
