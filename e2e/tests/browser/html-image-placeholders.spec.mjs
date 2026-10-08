@@ -107,6 +107,45 @@ test('preserves image layout while loading, after a stall, and on a late load', 
   await checkSlots('img')
 })
 
+test('keeps rounded inline fallbacks clipped after a stall and failure', async ({ page }, testInfo) => {
+  await page.clock.install()
+  await installPlaceholderHelper(page)
+  const css = await readFile(new URL('../../../src/renderer/themes.css', import.meta.url), 'utf8')
+  await page.addStyleTag({ content: css })
+  let pending
+  await page.route('https://rounded-image.test/image', route => { pending = route })
+  await page.evaluate(() => {
+    const container = document.createElement('div')
+    container.id = 'rounded-images'
+    container.innerHTML = '<img src="https://rounded-image.test/image" alt="" width="80" height="80" style="border-radius:50%">'
+    document.body.append(container)
+    window.addHtmlImagePlaceholders(container)
+  })
+  await expect.poll(() => Boolean(pending)).toBe(true)
+  const placeholder = page.locator('.htmlImagePlaceholder')
+  const checkClipping = async () => {
+    await expect(placeholder.locator('img')).toBeVisible()
+    const hits = await placeholder.evaluate(element => {
+      const { x, y, width, height } = element.getBoundingClientRect()
+      const hitsPlaceholder = (x, y) => Boolean(document.elementFromPoint(x, y)?.closest('.htmlImagePlaceholder'))
+      return [hitsPlaceholder(x + 2, y + 2), hitsPlaceholder(x + width / 2, y + height / 2)]
+    })
+    // The image stays visible in the center and cannot paint into the corners.
+    expect(hits).toEqual([false, true])
+  }
+  await checkClipping()
+  await page.clock.fastForward(10_001)
+  await expect(placeholder).not.toHaveClass(/ft-shimmer/)
+  await checkClipping()
+  await pending.abort()
+  await expect.poll(() => page.locator('#rounded-images > img').evaluate(image => image.complete)).toBe(true)
+  await checkClipping()
+  await placeholder.locator('img').evaluate(image => image.decode())
+  const screenshot = testInfo.outputPath('rounded-html-fallback.png')
+  await placeholder.screenshot({ path: screenshot, omitBackground: true })
+  await testInfo.attach('rounded HTML fallback', { path: screenshot, contentType: 'image/png' })
+})
+
 test('uses permanent fallbacks for missing sources and failures completed before initialization', async ({ page }) => {
   const svg = await installPlaceholderHelper(page)
   await page.setContent('<div id="images"><img><img src="data:image/png;base64,AAAA"><img src="data:image/png;base64,AAAA" alt="Unavailable image"></div>')

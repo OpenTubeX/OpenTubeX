@@ -2549,6 +2549,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 
 /* shared shimmer for skeleton loading placeholders */
 .htmlImagePlaceholder {
+  overflow: hidden;
   inline-size: var(--html-image-width, auto);
   block-size: var(--html-image-height, auto);
   aspect-ratio: 320 / 180;
