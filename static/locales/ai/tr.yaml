@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Yalnızca üyelere özel
 Stats:
+  Replace old device: "Eski cihazı değiştir"
+  Replacement explanation: "{device} kaydını bu cihazla yalnızca her iki kayıt aynı fiziksel cihaza aitse birleştirin."
+  Overlapping days: "Her iki geçmişteki günler: {count}"
+  Overlapping watch time: "Çakışan izleme süresi"
+  Keep larger daily total: "Daha büyük günlük toplamı koru"
+  Larger total explanation: "Yinelenen geçmişler için. Aynı günkü ek izlemeyi atlayabilir."
+  Add daily totals: "Günlük toplamları topla"
+  Add totals explanation: "Ayrı geçmişler için. Yinelenen izlemeyi iki kez sayabilir."
+  Replacement preservation: "Yalnızca bir geçmişte bulunan günler korunur. Orijinal geçmişler şifreli eşitlemede kayıtlı kalır."
+  Combined watch time: "Birleştirilmiş izleme süresi"
+  Replacement changed: "İzleme süresi değişti. Yeni toplamları incelemek için bu önizlemeyi kapatıp yeniden açın."
+  Replacement success: "Cihaz istatistikleri birleştirildi"
   All devices: Tüm cihazlar
   Stats: İstatistikler
   Watch time summary: İzleme süresi özeti

@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: 仅限会员
 Stats:
+  Replace old device: "替换旧设备"
+  Replacement explanation: "仅当两条记录属于同一台实际设备时，才将 {device} 与此设备合并。"
+  Overlapping days: "两个历史记录中共有的天数：{count}"
+  Overlapping watch time: "重叠的观看时长"
+  Keep larger daily total: "保留较大的每日总时长"
+  Larger total explanation: "适用于重复的历史记录。可能遗漏同一天的额外观看时长。"
+  Add daily totals: "相加每日总时长"
+  Add totals explanation: "适用于独立的历史记录。可能将重复的观看时长计算两次。"
+  Replacement preservation: "仅在一个历史记录中出现的日期会被保留。原始历史记录仍保存在加密同步中。"
+  Combined watch time: "合并后的观看时长"
+  Replacement changed: "观看时长已变化。请关闭并重新打开此预览，以查看新的总时长。"
+  Replacement success: "设备统计已合并"
   All devices: 所有设备
   Stats: 统计信息
   Watch time summary: 观看时长概览

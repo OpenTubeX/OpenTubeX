@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: 會員專屬
 Stats:
+  Replace old device: "取代舊裝置"
+  Replacement explanation: "僅當兩筆記錄屬於同一台實體裝置時，才將 {device} 與此裝置合併。"
+  Overlapping days: "兩份歷史記錄中共有的天數：{count}"
+  Overlapping watch time: "重疊的觀看時間"
+  Keep larger daily total: "保留較大的每日總時間"
+  Larger total explanation: "適用於重複的歷史記錄。可能遺漏同一天的額外觀看時間。"
+  Add daily totals: "加總每日總時間"
+  Add totals explanation: "適用於獨立的歷史記錄。可能將重複的觀看時間計算兩次。"
+  Replacement preservation: "僅在一份歷史記錄中出現的日期會保留。原始歷史記錄仍儲存在加密同步中。"
+  Combined watch time: "合併後的觀看時間"
+  Replacement changed: "觀看時間已變更。請關閉並重新開啟此預覽，以檢查新的總時間。"
+  Replacement success: "裝置統計已合併"
   All devices: 所有裝置
   Stats: 統計資料
   Watch time summary: 觀看時間摘要

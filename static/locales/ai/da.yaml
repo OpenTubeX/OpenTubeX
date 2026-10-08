@@ -64,6 +64,18 @@ Search Listing:
   Label:
     Members Only: Kun for medlemmer
 Stats:
+  Replace old device: "Erstat gammel enhed"
+  Replacement explanation: "Kombiner kun {device} med denne enhed, hvis begge poster tilhører den samme fysiske enhed."
+  Overlapping days: "Dage i begge historikker: {count}"
+  Overlapping watch time: "Overlappende visningstid"
+  Keep larger daily total: "Behold den største dagssum"
+  Larger total explanation: "Til dubleret historik. Kan udelade ekstra visning samme dag."
+  Add daily totals: "Læg dagssummer sammen"
+  Add totals explanation: "Til adskilt historik. Kan tælle dubleret visning to gange."
+  Replacement preservation: "Dage, der kun findes i én historik, bevares. De oprindelige historikker forbliver gemt i krypteret synkronisering."
+  Combined watch time: "Samlet visningstid"
+  Replacement changed: "Visningstiden er ændret. Luk og genåbn forhåndsvisningen for at se de nye summer."
+  Replacement success: "Enhedsstatistik kombineret"
   All devices: Alle enheder
   Stats: Statistik
   Watch time summary: Oversigt over visningstid

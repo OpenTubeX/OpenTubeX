@@ -42,6 +42,27 @@ async function pairingRequest (deviceName = 'Living room laptop') {
   return { recipient, qrRequest, request, qr }
 }
 
+test('pairing again keeps the saved device identity but refreshes pairing credentials', async () => {
+  const id = randomPairingDeviceId()
+  const first = await createPairingRecipient('Pixel', id)
+  const second = await createPairingRecipient('Pixel', id)
+  assert.equal(first.recipientDeviceId, id)
+  assert.equal(second.recipientDeviceId, id)
+  for (const field of ['sessionId', 'recipientPublicKey', 'pairingSecret', 'recipientToken']) {
+    assert.notEqual(first[field], second[field])
+  }
+  assert.equal(parsePairingQrPayload(createPairingQrPayload(second, ORIGIN)).recipientDeviceId, id)
+})
+
+test('pairing creates a valid identity when the saved one is missing or corrupt', async () => {
+  for (const savedId of ['', 'corrupt', null]) {
+    const recipient = await createPairingRecipient('Pixel', savedId)
+    assert.equal(parsePairingQrPayload(createPairingQrPayload(recipient, ORIGIN)).recipientDeviceId,
+      recipient.recipientDeviceId)
+    assert.notEqual(recipient.recipientDeviceId, savedId)
+  }
+})
+
 test('transfers account authorization and the privacy key with HPKE PSK authentication', async () => {
   const { recipient, request } = await pairingRequest()
   const approvingDeviceId = randomPairingDeviceId()

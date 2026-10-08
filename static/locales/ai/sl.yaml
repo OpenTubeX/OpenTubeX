@@ -93,6 +93,18 @@ Search Filters:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
 Stats:
+  Replace old device: "Zamenjaj staro napravo"
+  Replacement explanation: "Združite {device} s to napravo le, če oba vnosa pripadata isti fizični napravi."
+  Overlapping days: "Dnevi v obeh zgodovinah: {count}"
+  Overlapping watch time: "Prekrivajoči se čas gledanja"
+  Keep larger daily total: "Ohrani večji dnevni seštevek"
+  Larger total explanation: "Za podvojeni zgodovini. Lahko izpusti dodatno gledanje istega dne."
+  Add daily totals: "Seštej dnevna seštevka"
+  Add totals explanation: "Za ločeni zgodovini. Lahko dvakrat šteje podvojeno gledanje."
+  Replacement preservation: "Dnevi, ki so le v eni zgodovini, se ohranijo. Izvirni zgodovini ostaneta shranjeni v šifrirani sinhronizaciji."
+  Combined watch time: "Združeni čas gledanja"
+  Replacement changed: "Čas gledanja se je spremenil. Zaprite in ponovno odprite ta predogled, da preverite nove seštevke."
+  Replacement success: "Statistike naprav združene"
   All devices: Vse naprave
   Stats: Statistika
   Watch time summary: Povzetek časa gledanja

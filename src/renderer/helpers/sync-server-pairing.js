@@ -192,14 +192,16 @@ function parseEncryptedPayload(value) {
   }
 }
 
-export async function createPairingRecipient(deviceName) {
+export async function createPairingRecipient(deviceName, savedDeviceId) {
   const keyPair = await suite.kem.generateKeyPair()
   const recipientPublicKey = await suite.kem.serializePublicKey(keyPair.publicKey)
   const recipientTokenBytes = crypto.getRandomValues(new Uint8Array(RECIPIENT_TOKEN_BYTES))
   const recipientTokenHash = await crypto.subtle.digest('SHA-256', recipientTokenBytes)
   return {
     sessionId: randomBase64Url(SESSION_ID_BYTES),
-    recipientDeviceId: randomBase64Url(DEVICE_ID_BYTES),
+    recipientDeviceId: isCanonicalBase64Url(savedDeviceId, DEVICE_ID_BYTES)
+      ? savedDeviceId
+      : randomBase64Url(DEVICE_ID_BYTES),
     recipientDeviceName: validateSyncServerDeviceName(deviceName),
     recipientPublicKey: bytesToBase64Url(new Uint8Array(recipientPublicKey)),
     pairingSecret: randomBase64Url(PAIRING_SECRET_BYTES),

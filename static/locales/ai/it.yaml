@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Solo membri
 Stats:
+  Replace old device: "Sostituisci il vecchio dispositivo"
+  Replacement explanation: "Combina {device} con questo dispositivo solo se entrambe le voci appartengono allo stesso dispositivo fisico."
+  Overlapping days: "Giorni in entrambe le cronologie: {count}"
+  Overlapping watch time: "Tempo di visione sovrapposto"
+  Keep larger daily total: "Mantieni il totale giornaliero maggiore"
+  Larger total explanation: "Per cronologie duplicate. Potrebbe escludere visioni aggiuntive nello stesso giorno."
+  Add daily totals: "Somma i totali giornalieri"
+  Add totals explanation: "Per cronologie separate. Potrebbe contare due volte le visioni duplicate."
+  Replacement preservation: "I giorni presenti in una sola cronologia vengono mantenuti. Le cronologie originali restano salvate nella sincronizzazione crittografata."
+  Combined watch time: "Tempo di visione combinato"
+  Replacement changed: "Il tempo di visione è cambiato. Chiudi e riapri questa anteprima per controllare i nuovi totali."
+  Replacement success: "Statistiche dei dispositivi combinate"
   All devices: Tutti i dispositivi
   Stats: Statistiche
   Watch time summary: Riepilogo del tempo di visione

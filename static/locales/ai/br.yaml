@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: "Evit an izili hepken"
 Stats:
+  Replace old device: "Erlec'hiañ an trevnad kozh"
+  Replacement explanation: "Kendeuzit {device} gant an trevnad-mañ nemet ma'z eo an daou enmoned eus an hevelep trevnad fizikel."
+  Overlapping days: "Deizioù en daou istor: {count}"
+  Overlapping watch time: "Amzer sellet a grog war an daou"
+  Keep larger daily total: "Mirout ar sammad pemdeziek brasañ"
+  Larger total explanation: "Evit istorioù doubl. Gallout a ra leuskel a-gostez selladennoù ouzhpenn en hevelep deiz."
+  Add daily totals: "Sammañ ar sammadoù pemdeziek"
+  Add totals explanation: "Evit istorioù disparti. Gallout a ra kontañ div wech ar selladennoù doubl."
+  Replacement preservation: "Miret e vez an deizioù a zo en un istor hepken. Miret e chom an istorioù orin er c'henstrollañ sifret."
+  Combined watch time: "Amzer sellet kendeuzet"
+  Replacement changed: "Kemmet eo an amzer sellet. Serrit hag adigorit ar rakwel-mañ evit gwiriañ ar sammadoù nevez."
+  Replacement success: "Stadegoù an trevnadoù kendeuzet"
   All devices: An holl drevnadoù
   Stats: "Stadegoù"
   Watch time summary: "Diverradenn eus an amzer sellout"

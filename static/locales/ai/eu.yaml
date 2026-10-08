@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Kideentzat soilik
 Stats:
+  Replace old device: "Ordeztu gailu zaharra"
+  Replacement explanation: "Batu {device} gailu honekin bi sarrerak gailu fisiko berarenak badira soilik."
+  Overlapping days: "Bi historietan dauden egunak: {count}"
+  Overlapping watch time: "Gainjarritako ikuste-denbora"
+  Keep larger daily total: "Mantendu eguneko guztizko handiena"
+  Larger total explanation: "Historia bikoiztuetarako. Egun bereko ikuste gehigarria gal daiteke."
+  Add daily totals: "Batu eguneko guztizkoak"
+  Add totals explanation: "Historia bereizietarako. Bikoiztutako ikusteak bi aldiz konta ditzake."
+  Replacement preservation: "Historia bakarrean dauden egunak mantentzen dira. Jatorrizko historiak sinkronizazio zifratuan gordeta mantentzen dira."
+  Combined watch time: "Ikuste-denbora bateratua"
+  Replacement changed: "Ikuste-denbora aldatu da. Itxi aurrebista hau eta ireki berriro guztizko berriak berrikusteko."
+  Replacement success: "Gailuen estatistikak bateratu dira"
   All devices: Gailu guztiak
   Stats: Estatistikak
   Watch time summary: Ikustaldi-denboraren laburpena

@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
 Stats:
+  Replace old device: "Skipta út gömlu tæki"
+  Replacement explanation: "Sameinaðu {device} aðeins við þetta tæki ef báðar færslurnar tilheyra sama raunverulega tækinu."
+  Overlapping days: "Dagar í báðum ferlum: {count}"
+  Overlapping watch time: "Áhorfstími sem skarast"
+  Keep larger daily total: "Halda stærri dagssummunni"
+  Larger total explanation: "Fyrir tvítekin ferli. Getur sleppt viðbótaráhorfi sama dag."
+  Add daily totals: "Leggja saman dagssummur"
+  Add totals explanation: "Fyrir aðskilda ferla. Getur talið tvítekið áhorf tvisvar."
+  Replacement preservation: "Dagar sem finnast aðeins í einum ferli haldast. Upprunalegu ferlarnir eru áfram vistaðir í dulkóðaðri samstillingu."
+  Combined watch time: "Sameinaður áhorfstími"
+  Replacement changed: "Áhorfstíminn breyttist. Lokaðu þessari forskoðun og opnaðu hana aftur til að skoða nýju summurnar."
+  Replacement success: "Tækjatölfræði sameinuð"
   All devices: Öll tæki
   Stats: Tölfræði
   Watch time summary: Yfirlit yfir áhorfstíma

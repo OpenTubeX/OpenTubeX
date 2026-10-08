@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Alleen voor leden
 Stats:
+  Replace old device: "Oud apparaat vervangen"
+  Replacement explanation: "Combineer {device} alleen met dit apparaat als beide vermeldingen bij hetzelfde fysieke apparaat horen."
+  Overlapping days: "Dagen in beide geschiedenissen: {count}"
+  Overlapping watch time: "Overlappende kijktijd"
+  Keep larger daily total: "Grootste dagtotaal behouden"
+  Larger total explanation: "Voor dubbele geschiedenissen. Kan extra kijktijd op dezelfde dag missen."
+  Add daily totals: "Dagtotalen optellen"
+  Add totals explanation: "Voor afzonderlijke geschiedenissen. Kan dubbele kijktijd twee keer tellen."
+  Replacement preservation: "Dagen die slechts in één geschiedenis staan blijven behouden. De oorspronkelijke geschiedenissen blijven opgeslagen in versleutelde synchronisatie."
+  Combined watch time: "Gecombineerde kijktijd"
+  Replacement changed: "De kijktijd is gewijzigd. Sluit dit voorbeeld en open het opnieuw om de nieuwe totalen te bekijken."
+  Replacement success: "Apparaatstatistieken gecombineerd"
   All devices: Alle apparaten
   Stats: Statistieken
   Watch time summary: Overzicht van kijktijd

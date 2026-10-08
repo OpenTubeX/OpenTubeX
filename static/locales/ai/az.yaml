@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
 Stats:
+  Replace old device: "Köhnə cihazı əvəz et"
+  Replacement explanation: "{device} qeydini bu cihazla yalnız hər iki qeyd eyni fiziki cihaza aid olduqda birləşdirin."
+  Overlapping days: "Hər iki tarixçədəki günlər: {count}"
+  Overlapping watch time: "Üst-üstə düşən baxış vaxtı"
+  Keep larger daily total: "Daha böyük gündəlik cəmi saxla"
+  Larger total explanation: "Təkrarlanan tarixçələr üçün. Eyni gündəki əlavə baxışı nəzərə almaya bilər."
+  Add daily totals: "Gündəlik cəmləri topla"
+  Add totals explanation: "Ayrı tarixçələr üçün. Təkrarlanan baxışı iki dəfə saya bilər."
+  Replacement preservation: "Yalnız bir tarixçədə olan günlər saxlanılır. Orijinal tarixçələr şifrələnmiş sinxronlaşdırmada saxlanılır."
+  Combined watch time: "Birləşdirilmiş baxış vaxtı"
+  Replacement changed: "Baxış vaxtı dəyişdi. Yeni cəmləri yoxlamaq üçün bu önizləməni bağlayıb yenidən açın."
+  Replacement success: "Cihaz statistikaları birləşdirildi"
   All devices: Bütün cihazlar
   Stats: Statistika
   Watch time summary: Baxış müddətinin xülasəsi

@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: לחברים בלבד
 Stats:
+  Replace old device: "החלפת מכשיר ישן"
+  Replacement explanation: "יש לשלב את {device} עם המכשיר הזה רק אם שתי הרשומות שייכות לאותו מכשיר פיזי."
+  Overlapping days: "ימים בשתי ההיסטוריות: {count}"
+  Overlapping watch time: "זמן צפייה חופף"
+  Keep larger daily total: "שמירת הסכום היומי הגדול יותר"
+  Larger total explanation: "להיסטוריות כפולות. עלול להשמיט צפייה נוספת באותו יום."
+  Add daily totals: "חיבור הסכומים היומיים"
+  Add totals explanation: "להיסטוריות נפרדות. עלול לספור צפייה כפולה פעמיים."
+  Replacement preservation: "ימים שמופיעים רק בהיסטוריה אחת נשמרים. ההיסטוריות המקוריות נשארות שמורות בסנכרון המוצפן."
+  Combined watch time: "זמן צפייה משולב"
+  Replacement changed: "זמן הצפייה השתנה. יש לסגור ולפתוח מחדש את התצוגה המקדימה כדי לבדוק את הסכומים החדשים."
+  Replacement success: "נתוני המכשירים שולבו"
   All devices: כל המכשירים
   Stats: סטטיסטיקה
   Watch time summary: סיכום זמן הצפייה

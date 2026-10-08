@@ -73,6 +73,18 @@ Search Filters:
     3 - 20 minutes: 3 تا 20 دقیقه
     '> 20 minutes': '> 20 دقیقه'
 Stats:
+  Replace old device: "جایگزینی دستگاه قدیمی"
+  Replacement explanation: "فقط زمانی {device} را با این دستگاه ترکیب کنید که هر دو ورودی متعلق به یک دستگاه فیزیکی باشند."
+  Overlapping days: "روزهای موجود در هر دو سابقه: {count}"
+  Overlapping watch time: "زمان تماشای هم‌پوشان"
+  Keep larger daily total: "نگه داشتن مجموع روزانهٔ بزرگ‌تر"
+  Larger total explanation: "برای سابقه‌های تکراری. ممکن است تماشای اضافی در همان روز را نادیده بگیرد."
+  Add daily totals: "جمع کردن مجموع‌های روزانه"
+  Add totals explanation: "برای سابقه‌های جداگانه. ممکن است تماشای تکراری را دو بار بشمارد."
+  Replacement preservation: "روزهایی که فقط در یک سابقه هستند حفظ می‌شوند. سابقه‌های اصلی در همگام‌سازی رمزگذاری‌شده باقی می‌مانند."
+  Combined watch time: "زمان تماشای ترکیبی"
+  Replacement changed: "زمان تماشا تغییر کرد. این پیش‌نمایش را ببندید و دوباره باز کنید تا مجموع‌های جدید را بررسی کنید."
+  Replacement success: "آمار دستگاه‌ها ترکیب شد"
   All devices: همه دستگاه‌ها
   Stats: آمار
   Watch time summary: خلاصه زمان تماشا

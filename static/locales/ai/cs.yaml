@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Pouze pro členy
 Stats:
+  Replace old device: "Nahradit staré zařízení"
+  Replacement explanation: "Spojte {device} s tímto zařízením pouze tehdy, pokud oba záznamy patří stejnému fyzickému zařízení."
+  Overlapping days: "Dny v obou historiích: {count}"
+  Overlapping watch time: "Překrývající se doba sledování"
+  Keep larger daily total: "Ponechat větší denní součet"
+  Larger total explanation: "Pro duplicitní historie. Může vynechat další sledování ve stejný den."
+  Add daily totals: "Sečíst denní součty"
+  Add totals explanation: "Pro oddělené historie. Může započítat duplicitní sledování dvakrát."
+  Replacement preservation: "Dny nalezené jen v jedné historii se zachovají. Původní historie zůstanou uložené v šifrované synchronizaci."
+  Combined watch time: "Sloučená doba sledování"
+  Replacement changed: "Doba sledování se změnila. Zavřete a znovu otevřete tento náhled a zkontrolujte nové součty."
+  Replacement success: "Statistiky zařízení sloučeny"
   All devices: Všechna zařízení
   Stats: Statistiky
   Watch time summary: Přehled doby sledování

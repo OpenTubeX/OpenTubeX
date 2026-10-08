@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Samo za članove
 Stats:
+  Replace old device: "Zamijeni stari uređaj"
+  Replacement explanation: "Spojite {device} s ovim uređajem samo ako oba unosa pripadaju istom fizičkom uređaju."
+  Overlapping days: "Dani u obje povijesti: {count}"
+  Overlapping watch time: "Preklapajuće vrijeme gledanja"
+  Keep larger daily total: "Zadrži veći dnevni zbroj"
+  Larger total explanation: "Za duplicirane povijesti. Može izostaviti dodatno gledanje istog dana."
+  Add daily totals: "Zbroji dnevne iznose"
+  Add totals explanation: "Za odvojene povijesti. Može dvaput brojiti duplicirano gledanje."
+  Replacement preservation: "Dani koji se nalaze samo u jednoj povijesti ostaju sačuvani. Izvorne povijesti ostaju spremljene u šifriranoj sinkronizaciji."
+  Combined watch time: "Spojeno vrijeme gledanja"
+  Replacement changed: "Vrijeme gledanja se promijenilo. Zatvorite i ponovno otvorite ovaj pregled kako biste provjerili nove zbrojeve."
+  Replacement success: "Statistike uređaja spojene"
   All devices: Svi uređaji
   Stats: Statistika
   Watch time summary: Sažetak vremena gledanja

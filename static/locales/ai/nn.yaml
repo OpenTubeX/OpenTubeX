@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Berre for medlemmer
 Stats:
+  Replace old device: "Byt ut gammal eining"
+  Replacement explanation: "Slå berre saman {device} med denne eininga dersom begge oppføringane høyrer til same fysiske eining."
+  Overlapping days: "Dagar i begge historikkane: {count}"
+  Overlapping watch time: "Overlappande sjåartid"
+  Keep larger daily total: "Behald den største dagssummen"
+  Larger total explanation: "For duplisert historikk. Kan utelate ekstra vising same dag."
+  Add daily totals: "Legg saman dagssummane"
+  Add totals explanation: "For separat historikk. Kan telje duplisert vising to gonger."
+  Replacement preservation: "Dagar som berre finst i éin historikk blir bevarte. Opphavleg historikk blir verande lagra i kryptert synkronisering."
+  Combined watch time: "Samla sjåartid"
+  Replacement changed: "Sjåartida er endra. Lukk og opne førehandsvisinga igjen for å sjå dei nye summane."
+  Replacement success: "Einingsstatistikk slått saman"
   All devices: Alle einingar
   Stats: Statistikk
   Watch time summary: Samandrag av sjåtid

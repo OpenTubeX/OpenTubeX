@@ -62,6 +62,18 @@ Search Listing:
   Label:
     Members Only: Numai pentru membri
 Stats:
+  Replace old device: "Înlocuiește dispozitivul vechi"
+  Replacement explanation: "Combină {device} cu acest dispozitiv doar dacă ambele intrări aparțin aceluiași dispozitiv fizic."
+  Overlapping days: "Zile în ambele istorice: {count}"
+  Overlapping watch time: "Timp de vizionare suprapus"
+  Keep larger daily total: "Păstrează totalul zilnic mai mare"
+  Larger total explanation: "Pentru istorice duplicate. Poate omite vizionări suplimentare în aceeași zi."
+  Add daily totals: "Adună totalurile zilnice"
+  Add totals explanation: "Pentru istorice separate. Poate număra de două ori vizionările duplicate."
+  Replacement preservation: "Zilele găsite într-un singur istoric sunt păstrate. Istoricele originale rămân salvate în sincronizarea criptată."
+  Combined watch time: "Timp de vizionare combinat"
+  Replacement changed: "Timpul de vizionare s-a schimbat. Închide și redeschide această previzualizare pentru a verifica noile totaluri."
+  Replacement success: "Statistici ale dispozitivelor combinate"
   All devices: Toate dispozitivele
   Stats: Statistici
   Watch time summary: Rezumatul duratei de vizionare

@@ -1,5 +1,7 @@
 import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 
+import { createWatchStatsReset } from '../../helpers/sync-watch-stats'
+
 const state = {
   watchSecondsByDate: {},
   syncedWatchStats: [],
@@ -59,9 +61,20 @@ const actions = {
     }
   },
 
-  async clearWatchStats({ commit }) {
+  async clearWatchStats({ commit, dispatch, rootState, state }) {
     try {
-      await DBWatchStatsHandlers.deleteAll()
+      const reset = createWatchStatsReset(state.syncedWatchStats, rootState.settings.syncServerDeviceId, Date.now())
+      const previous = rootState.settings.syncServerWatchStatsReset
+      await dispatch('updateSyncServerWatchStatsReset', reset)
+      // Generated settings actions swallow write errors. Confirm persistence
+      // before deleting statistics, so a failed save cannot lose local history.
+      if (rootState.settings.syncServerWatchStatsReset?.id !== reset.id) return false
+      try {
+        await DBWatchStatsHandlers.deleteAll()
+      } catch (error) {
+        await dispatch('updateSyncServerWatchStatsReset', previous)
+        throw error
+      }
       commit('resetWatchStats')
       return true
     } catch (errMessage) {

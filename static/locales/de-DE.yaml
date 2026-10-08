@@ -2910,6 +2910,18 @@ Tab Organizer:
   Drag Tab: Ziehen, um den Tab in eine Gruppe zu verschieben
 
 Stats:
+  Replace old device: "Altes Gerät ersetzen"
+  Replacement explanation: "Führe {device} nur mit diesem Gerät zusammen, wenn beide Einträge zum selben physischen Gerät gehören."
+  Overlapping days: "Tage in beiden Verläufen: {count}"
+  Overlapping watch time: "Überschneidende Wiedergabezeit"
+  Keep larger daily total: "Größere Tagessumme behalten"
+  Larger total explanation: "Für doppelte Verläufe. Zusätzliche Wiedergabe am selben Tag kann fehlen."
+  Add daily totals: "Tagessummen addieren"
+  Add totals explanation: "Für getrennte Verläufe. Doppelte Wiedergabe kann zweimal gezählt werden."
+  Replacement preservation: "Tage, die nur in einem Verlauf vorkommen, bleiben erhalten. Die ursprünglichen Verläufe bleiben in der verschlüsselten Synchronisierung gespeichert."
+  Combined watch time: "Zusammengeführte Wiedergabezeit"
+  Replacement changed: "Die Wiedergabezeit hat sich geändert. Schließe diese Vorschau und öffne sie erneut, um die neuen Summen zu prüfen."
+  Replacement success: "Gerätestatistiken zusammengeführt"
   Stats: Statistik
   All devices: Alle Geräte
   Watch time summary: Übersicht der Wiedergabezeit
