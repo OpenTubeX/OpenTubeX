@@ -91,6 +91,10 @@
     "ri": "line-chart-line",
     "material": "show-chart-rounded"
   },
+  "minus": {
+    "ri": "subtract-line",
+    "material": "remove-rounded"
+  },
   "check": {
     "ri": "check-line",
     "material": "check-rounded"

@@ -21,7 +21,7 @@ test.beforeEach(async ({ app, page }) => {
 test('large switches keep the same thumb diameter when off and on', async ({ page }) => {
   const appearance = await goToSettingsSection(page, 'appearance')
   const label = appearance.locator('.switch-ctn[data-setting-key="moveSettingsToAppHeader"] .switch-label')
-  const diameter = () => label.evaluate(element => getComputedStyle(element, '::after').width)
+  const diameter = () => label.locator('.switch-thumb').evaluate(element => getComputedStyle(element).width)
   const off = await diameter()
   await label.click()
   await page.mouse.move(0, 0)

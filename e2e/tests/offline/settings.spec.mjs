@@ -1524,13 +1524,9 @@ test.describe('settings', () => {
     await expect(submission).toBeVisible()
 
     const centerOffset = await submission.evaluate(element => {
-      const label = element.querySelector('.switch-label-text')
       const text = element.querySelector('.switch-label-text').getBoundingClientRect()
-      const labelBounds = label.getBoundingClientRect()
-      const knob = getComputedStyle(label, '::after')
-      const transform = new DOMMatrix(knob.transform)
-      const knobCenter = labelBounds.top + Number.parseFloat(knob.top) +
-        transform.m42 + Number.parseFloat(knob.height) / 2
+      const knob = element.querySelector('.switch-thumb').getBoundingClientRect()
+      const knobCenter = knob.top + knob.height / 2
       return Math.abs(knobCenter - (text.top + text.height / 2))
     })
 
@@ -1755,9 +1751,8 @@ test.describe('settings', () => {
       const toggleCenterOffset = await tooltipToggle.evaluate(element => {
         const text = element.querySelector('.switch-label-text')
         const textBounds = text.getBoundingClientRect()
-        const knob = getComputedStyle(text, '::after')
-        const knobCenter = textBounds.top + Number.parseFloat(knob.top) +
-          new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
+        const knob = element.querySelector('.switch-thumb').getBoundingClientRect()
+        const knobCenter = knob.top + knob.height / 2
         return Math.abs(knobCenter - (textBounds.top + textBounds.height / 2))
       })
       expect.soft(toggleCenterOffset).toBeLessThanOrEqual(1)
@@ -1803,7 +1798,7 @@ test.describe('settings', () => {
 
   test('places online activity controls in General and Privacy without a separate section', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
-    await expect(general.getByText(/^Auto load next page$/i)).toBeVisible()
+    await expect(general.getByRole('checkbox', { name: /^Auto load next page\b/i })).toBeVisible()
 
     const privacyCategory = await goToSettingsSection(page, 'privacy')
     const privacy = privacyCategory.locator('.settingsSection').first()
@@ -1812,7 +1807,7 @@ test.describe('settings', () => {
       name: 'Online activity',
       exact: true
     })).toHaveCount(0)
-    await expect(privacyCategory.getByText(/^Auto load next page$/i)).toHaveCount(0)
+    await expect(privacyCategory.getByRole('checkbox', { name: /^Auto load next page\b/i })).toHaveCount(0)
     const privacyColumns = privacy.locator('.switchColumn')
     await expect(privacyColumns).toHaveCount(2)
     await expect(privacyColumns.nth(1)).toContainText('Enable search suggestions')

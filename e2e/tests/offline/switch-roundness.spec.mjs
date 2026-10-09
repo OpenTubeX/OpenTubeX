@@ -8,7 +8,7 @@ async function resize(app, page, width, uiScale) {
 async function switchShape(label) {
   return label.locator('.switch-label-text').evaluate(element => {
     const shape = pseudo => {
-      const style = getComputedStyle(element, pseudo)
+      const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element.querySelector('.switch-thumb'))
       return {
         radius: style.borderRadius,
         width: style.width,
@@ -16,7 +16,7 @@ async function switchShape(label) {
         left: style.left
       }
     }
-    return { track: shape('::before'), thumb: shape('::after') }
+    return { track: shape('::before'), thumb: shape() }
   })
 }
 
@@ -53,6 +53,9 @@ for (const uiScale of [100, 95]) {
         for (const checked of [false, true]) {
           if (await input.isChecked() !== checked) await label.click()
           await expect(input).toBeChecked({ checked })
+          await expect(toggle.locator('.switch-thumb')).toHaveAttribute('aria-hidden', 'true')
+          await expect(toggle.locator('.switch-thumb .ft-icon')).toHaveAttribute('data-icon', checked ? 'check' : 'minus')
+          await expect(toggle.locator('.switch-thumb svg')).toBeVisible()
           await setRoundness(page, 100)
           const defaultShape = await switchShape(label)
           for (const roundness of [0, 25, 50, 99, 100]) {
@@ -70,14 +73,17 @@ for (const uiScale of [100, 95]) {
 
       await resize(app, page, 1600, uiScale)
       await setRoundness(page, 0)
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-        const grid = section.locator('.switchFlowGrid')
-        await grid.scrollIntoViewIfNeeded()
-        const screenshot = testInfo.outputPath(`switch-roundness-0-${colorScheme}.png`)
-        await grid.screenshot({ path: screenshot })
-        await testInfo.attach(`switches at 0% roundness (${colorScheme})`, { path: screenshot, contentType: 'image/png' })
+      for (const pack of ['material', 'remix']) {
+        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+          const grid = section.locator('.switchFlowGrid')
+          await grid.scrollIntoViewIfNeeded()
+          const screenshot = testInfo.outputPath(`switch-roundness-0-${pack}-${colorScheme}.png`)
+          await grid.screenshot({ path: screenshot })
+          await testInfo.attach(`switches at 0% roundness (${colorScheme})`, { path: screenshot, contentType: 'image/png' })
+        }
       }
     })
   })

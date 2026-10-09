@@ -355,7 +355,7 @@ test.describe('configured gamepad highlight roundness', () => {
     const measureSwitchPositions = () => switchLabel.evaluate(element => {
       const text = element.querySelector('.switch-label-text')
       const textStart = text.getBoundingClientRect().left
-      const thumbStart = textStart + Number.parseFloat(getComputedStyle(text, '::after').insetInlineStart)
+      const thumbStart = element.querySelector('.switch-thumb').getBoundingClientRect().left
       return {
         ringStartPadding: thumbStart - element.getBoundingClientRect().left,
         textStart,

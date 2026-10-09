@@ -25,6 +25,12 @@
       <span class="switch-label-main">
         <span class="switch-label-text">
           {{ label }}
+          <span
+            class="switch-thumb"
+            aria-hidden="true"
+          >
+            <FtIcon :icon="['fas', currentValue ? 'check' : 'minus']" />
+          </span>
         </span>
         <FtTooltip
           v-if="tooltip !== ''"
@@ -42,6 +48,7 @@
 
 <script setup>
 import { ref, useId, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
