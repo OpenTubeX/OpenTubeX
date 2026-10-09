@@ -62,7 +62,7 @@ for (const offline of [false, true]) {
       await expectImagesLoaded(card.locator('img'))
       for (const colorScheme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        await expect(page.locator('body')).toContainClass(colorScheme)
         await card.screenshot({ path: testInfo.outputPath(`${offline ? 'offline' : 'up-next'}-spacing-${colorScheme}.png`) })
       }
     } finally {
