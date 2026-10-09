@@ -419,6 +419,7 @@ export default defineComponent({
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
       ytDlpStreamsPending: false,
+      vrStreamsPending: false,
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
       chromecastActive: false,
@@ -1255,7 +1256,7 @@ export default defineComponent({
      * only be created once the streams it is supposed to play are known.
      */
     playerReady() {
-      if (this.isLoading || this.ytDlpStreamsPending) {
+      if (this.isLoading || this.ytDlpStreamsPending || (this.vrStreamsPending && !this.isYtDlpPlaybackRequested())) {
         return false
       }
 
@@ -2442,6 +2443,7 @@ export default defineComponent({
       this.sabrPlaybackLoaded = false
       this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
+      this.vrStreamsPending = false
       this.legacyFormats = []
       this.localFilePlayback = false
       this.downloadedPlaybackWithoutMetadata = false
@@ -3906,6 +3908,9 @@ export default defineComponent({
               ?.projection_type ?? null
 
             if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {
+              this.vrStreamsPending = true
+              this.isLoading = false
+              this.updateTitle()
               const switchGeneration = this.playbackEngineSwitchGeneration
               const url = result.streaming_data.hls_manifest_url ?? await videoInfo.getVrHlsManifest?.()
               if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
@@ -4043,6 +4048,10 @@ export default defineComponent({
             this.thumbnail = this.getUnavailableVideoThumbnail()
           }
           this.errorMessage = handledError.message || handledError.toString()
+        }
+      } finally {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          this.vrStreamsPending = false
         }
       }
     },

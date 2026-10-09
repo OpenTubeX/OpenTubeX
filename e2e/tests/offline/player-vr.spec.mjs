@@ -79,19 +79,27 @@ for (const suppliedHls of [true, false]) {
     let vrRequests = 0
     let manifestRequests = 0
     let releaseManifest
-    await page.route('https://vr.example.test/**', route => {
+    let releaseLookup
+    const lookupGate = new Promise(resolve => { releaseLookup = resolve })
+    let releaseProbe
+    const probeGate = new Promise(resolve => { releaseProbe = resolve })
+    await page.route('https://vr.example.test/**', async route => {
       if (++manifestRequests > 1) {
         return new Promise(resolve => {
           releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
         })
       }
+      await probeGate
       return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
     })
-    await page.route(/\/youtubei\/v1\/player(?:\?|$)/, route => {
+    await page.route(/\/youtubei\/v1\/player(?:\?|$)/, async route => {
       const request = JSON.parse(route.request().postData() ?? '{}')
       const response = demoPlayerResponse(request.videoId ?? 'jNQXAC9IVRw')
       response.streamingData.formats[0].projectionType = 'MESH'
-      if (request.context?.client?.clientName === 'VISIONOS') vrRequests++
+      if (request.context?.client?.clientName === 'VISIONOS') {
+        vrRequests++
+        await lookupGate
+      }
       if (suppliedHls || request.context?.client?.clientName === 'VISIONOS') {
         response.streamingData.hlsManifestUrl = 'https://vr.example.test/master.m3u8?expire=4102444800'
       }
@@ -109,6 +117,24 @@ for (const suppliedHls of [true, false]) {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
     await page.locator('.videoLayout').waitFor()
     const watch = await watchViewHandle(page)
+    try {
+      await expect.poll(() => watch.evaluate(view => ({ loading: view.isLoading, pending: view.vrStreamsPending })), { timeout: 3000 })
+        .toEqual({ loading: false, pending: true })
+      await expect(page.locator('.streamPlaceholder')).toBeVisible()
+      await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+      await expect(page.locator('.infoSkeleton')).toHaveCount(0)
+      await expect(page.locator('.watchVideoInfo .videoTitle')).toBeVisible()
+      await expect(page.locator('.streamPlaceholderText')).toHaveText('Loading…')
+    } finally {
+      releaseLookup()
+    }
+    try {
+      await expect.poll(() => manifestRequests, { timeout: 3000 }).toBe(1)
+      await expect.poll(() => watch.evaluate(view => ({ loading: view.isLoading, pending: view.vrStreamsPending })))
+        .toEqual({ loading: false, pending: true })
+    } finally {
+      releaseProbe()
+    }
     await expect.poll(() => watch.evaluate(view => ({
       loading: view.isLoading,
       engine: view.activePlaybackEngine,

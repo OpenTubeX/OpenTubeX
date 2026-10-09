@@ -180,6 +180,7 @@ for (const backend of ['Local', 'Invidious']) {
       const watch = {
         vrProjection: 'MESH', playbackEngineSwitchGeneration: 1, proxyVideos: false,
         isCurrentVideoLoad: () => current, isYtDlpPlaybackRequested: () => false,
+        updateTitle: () => {},
       }
       const pending = select.call(watch)
       current = false
