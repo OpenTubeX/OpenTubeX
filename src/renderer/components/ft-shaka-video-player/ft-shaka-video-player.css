@@ -468,11 +468,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .shortsVolumeSlider {
+  direction: ltr;
   inline-size: 0;
   margin-inline: 0;
   opacity: 0;
-  accent-color: #fff;
-  cursor: pointer;
+  background: linear-gradient(to right, var(--primary-color) var(--shorts-volume), rgb(255 255 255 / 54%) var(--shorts-volume), rgb(255 255 255 / 54%) 100%);
   transition: inline-size 160ms ease, margin-inline 160ms ease, opacity 120ms ease;
 }
 
