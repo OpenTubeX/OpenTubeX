@@ -2,13 +2,13 @@ import { test, expect, setWindowSize, updateInputWithoutScrolling } from '../../
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-for (const uiScale of [100, 95, 125]) {
-  test.describe(`Shorts volume at ${uiScale}% UI scale`, () => {
+for (const [uiScale, currentLocale] of [[100, 'en-US'], [95, 'en-US'], [125, 'en-US'], [100, 'ar']]) {
+  test.describe(`Shorts volume at ${uiScale}% UI scale in ${currentLocale}`, () => {
     test.use({
       launchArgs: ['--disable-gpu'],
       seed: {
         settings: {
-          currentLocale: 'en-US',
+          currentLocale,
           uiScale,
           videoPlaybackEngine: 'built-in',
           ytDlpPlaybackEngineDefaultMigration: true,
@@ -34,6 +34,7 @@ for (const uiScale of [100, 95, 125]) {
       const regularStyle = await regularTrack.evaluate(element => ({
         height: getComputedStyle(element).height,
         background: getComputedStyle(element).backgroundImage,
+        direction: getComputedStyle(element).direction,
       }))
 
       const watch = await page.evaluateHandle(findWatchComponent)
@@ -68,6 +69,7 @@ for (const uiScale of [100, 95, 125]) {
         await button.hover()
         await expectWidth(96)
         await expect(slider).toHaveCSS('appearance', 'none')
+        await expect(slider).toHaveCSS('direction', regularStyle.direction)
         await expect(track).toHaveCSS('height', regularStyle.height)
         await expect(track).toHaveCSS('background-image', regularStyle.background)
         await expect(slider).toHaveValue('40')

@@ -468,6 +468,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .shortsVolumeSlider {
+  direction: ltr;
   inline-size: 0;
   margin-inline: 0;
   opacity: 0;
