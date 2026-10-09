@@ -37,7 +37,7 @@ test('Android Invidious banners recover through the selected proxy after WebView
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const saved = { settings: { ...store.state.settings }, instance: store.getters.getCurrentInvidiousInstance, route: location.hash }
       Object.assign(store.state.settings, { backendPreference: 'invidious', backendFallback: false, currentLocale: 'en-US' })
-      store.commit('setCurrentInvidiousInstance', instance)
+      store.commit('setCurrentInvidiousInstance', `${instance}/`)
       window.__bannerNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
         plugin === 'CapacitorHttp' && method === 'request' && options.url === `${instance}/ggpht/banner`
