@@ -339,17 +339,22 @@
             >
               <ft-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
             </button>
-            <input
-              type="range"
-              class="shortsVolumeSlider"
-              min="0"
-              max="100"
-              step="any"
-              :value="scrollMiniVolumePercent"
-              :aria-label="$t('Settings.Channel Settings.Volume')"
-              @input.stop="updateScrollMiniVolume"
-              @click.stop
+            <div
+              class="shaka-range-container shortsVolumeSlider"
+              :style="{ '--shorts-volume': `${scrollMiniVolumePercent}%` }"
             >
+              <input
+                type="range"
+                class="shaka-range-element"
+                min="0"
+                max="100"
+                step="any"
+                :value="scrollMiniVolumePercent"
+                :aria-label="$t('Settings.Channel Settings.Volume')"
+                @input.stop="updateScrollMiniVolume"
+                @click.stop
+              >
+            </div>
           </div>
         </div>
         <div class="shortsTopControlsGroup">
