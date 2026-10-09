@@ -45,6 +45,7 @@
         <FtButton
           v-if="showViewAllButton"
           theme="channel-view-all"
+          variant="outlined"
           :label="$t('Channel.View All')"
           :icon="['fas', 'arrow-right']"
           @click="router.push(currentTabViewAllRoute)"

@@ -69,23 +69,12 @@
 }
 
 .select-container > :deep(.channel-view-all) {
+  --button-foreground: var(--accent-color);
+  --button-border: var(--accent-color);
+
   flex-shrink: 0;
   max-inline-size: calc(100% - 10px);
   white-space: normal;
-  color: var(--accent-color);
-  background-color: transparent;
-  border-color: var(--accent-color);
-  box-shadow: none;
-}
-
-.select-container > :deep(.channel-view-all:not(:disabled):is(:hover, :focus-visible)) {
-  color: var(--accent-color-hover);
-  border-color: var(--accent-color-hover);
-}
-
-.select-container > :deep(.channel-view-all:not(:disabled):active) {
-  color: var(--accent-color-active);
-  border-color: var(--accent-color-active);
 }
 
 .channelSearchFilters {
