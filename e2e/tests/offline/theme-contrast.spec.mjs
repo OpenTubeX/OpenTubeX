@@ -14,10 +14,11 @@ function contrastRatio(first, second) {
 async function switchContrast(app, label, checked) {
   const height = await label.evaluate(element => element.getBoundingClientRect().height)
   // Sample the exposed half of the track, its adjacent background and the
-  // thumb's center. Avoid rounded edges and the thumb's shadow.
+  // thumb's upper quarter. Avoid rounded edges, the shadow and state glyph.
   const trackX = checked ? 12 : 34
   const [track, surface, thumb] = await sampleColors(app, label, [
-    [trackX, height / 2], [trackX, height / 2 - 15], [checked ? 30 : 15, height / 2]
+    [trackX, height / 2], [trackX, height / 2 - 15],
+    [checked ? 34 : 18, height / 2 - (checked ? 4.5 : 3)]
   ])
   return { track, surface, thumb, trackRatio: contrastRatio(track, surface), thumbRatio: contrastRatio(thumb, track), thumbSurfaceRatio: contrastRatio(thumb, surface) }
 }

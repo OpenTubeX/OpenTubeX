@@ -66,7 +66,7 @@
 
   /* Center the switch on its text even when the label spans several lines. */
   &::before,
-  &::after {
+  .switch-thumb {
     content: '';
     margin: 0;
     position: absolute;
@@ -92,7 +92,13 @@
     }
   }
 
-  &::after {
+  .switch-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--toggle-thumb-icon-color, var(--toggle-thumb-outline-color, var(--card-bg-color)));
+    font-size: calc(var(--switch-unchecked-thumb-size) * 0.8);
+    pointer-events: none;
     background-color: var(--toggle-thumb-color, var(--secondary-text-color));
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent);
@@ -101,6 +107,8 @@
     inline-size: var(--switch-unchecked-thumb-size);
 
     .switch-input:checked + .switch-label & {
+      color: var(--toggle-checked-track-color, var(--accent-color));
+      font-size: calc((var(--switch-track-height) - 2 * var(--switch-thumb-inset)) * 0.8);
       background-color: var(--toggle-checked-thumb-color, var(--text-with-accent-color));
       inset-inline-start: calc(-12px - var(--switch-track-height) + var(--switch-thumb-inset));
       block-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
@@ -135,14 +143,14 @@
   }
 
   .switch-label-text::before,
-  .switch-label-text::after {
+  .switch-label-text .switch-thumb {
     opacity: 0.38;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .switch-label-text::before,
-  .switch-label-text::after {
+  .switch-label-text .switch-thumb {
     transition: none;
   }
 }
@@ -161,20 +169,20 @@
   box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
 }
 
-.switch-input:not(:disabled):is(:hover, :focus-visible) + .switch-label .switch-label-text::after,
-.switch-input:not(:disabled) + .switch-label:hover .switch-label-text::after {
+.switch-input:not(:disabled):is(:hover, :focus-visible) + .switch-label .switch-label-text .switch-thumb,
+.switch-input:not(:disabled) + .switch-label:hover .switch-label-text .switch-thumb {
   box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent),
     0 0 0 6px var(--accent-color-opacity2);
 }
 
-.switch-input:not(:disabled):active + .switch-label .switch-label-text::after,
-.switch-input:not(:disabled) + .switch-label:active .switch-label-text::after {
+.switch-input:not(:disabled):active + .switch-label .switch-label-text .switch-thumb,
+.switch-input:not(:disabled) + .switch-label:active .switch-label-text .switch-thumb {
   block-size: calc(var(--switch-track-height) - 4px);
   inline-size: calc(var(--switch-track-height) - 4px);
   inset-inline-start: calc(-1 * var(--switch-track-width) - 10px);
 }
 
-.switch-input:checked:not(:disabled):active + .switch-label .switch-label-text::after,
-.switch-input:checked:not(:disabled) + .switch-label:active .switch-label-text::after {
+.switch-input:checked:not(:disabled):active + .switch-label .switch-label-text .switch-thumb,
+.switch-input:checked:not(:disabled) + .switch-label:active .switch-label-text .switch-thumb {
   inset-inline-start: calc(-10px - var(--switch-track-height));
 }
