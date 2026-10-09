@@ -318,20 +318,30 @@ test('Android organizer pull follows the finger, settles into its card and prese
     await touch('touchEnd')
     await expect(dialog).toHaveCount(0)
   } finally {
-    clearTimeout(keepAlive)
-    await touch('touchCancel').catch(() => {})
-    const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-    if (await close.isVisible()) await close.click()
-    if (saved) await page.evaluate(async saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-      store.commit('setTabsState', saved.tabs)
-      store.commit('setPresentedTab', saved.tabs.presentedTabId)
-      location.hash = saved.route
-    }, saved)
-    await session.detach()
-    await browser.close()
-    clearTimeout(keepAlive)
+    try {
+      try {
+        await touch('touchCancel').catch(() => {})
+        const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+        if (await close.isVisible()) await close.click()
+      } finally {
+        if (saved) {
+          for (const [key, value] of Object.entries(saved.settings)) {
+            await page.evaluate(({ key, value }) => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('update' + key, value), { key, value })
+              .catch(error => { throw new Error(`Could not restore ${key}`, { cause: error }) })
+          }
+          await page.evaluate(saved => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setTabsState', saved.tabs)
+            store.commit('setPresentedTab', saved.tabs.presentedTabId)
+            location.hash = saved.route
+          }, saved)
+        }
+      }
+    } finally {
+      clearTimeout(keepAlive)
+      await session.detach().catch(() => {})
+      await browser.close()
+    }
   }
 })
 
