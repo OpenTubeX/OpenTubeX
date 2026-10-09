@@ -6,7 +6,7 @@ import { compileFunction } from 'node:vm'
 const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
 const loaderCode = code.slice(code.indexOf('async function loadYtDlpPlaybackSource('))
 
-function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true } = {}) {
+function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true, cacheExpiresDuringExtraction = false } = {}) {
   const attempts = []
   const info = {
     isLive: false, liveStatus: 'not_live', duration: 47, storyboardVtt: null, incomplete,
@@ -19,7 +19,7 @@ function loader({ mesh = true, cached = null, panorama = true, incomplete = fals
   }
   const dependencies = {
     effectivePlaybackSourceCacheKey: () => 'key',
-    playbackSourceCache: { get: () => cached, set: () => true },
+    playbackSourceCache: { get: () => cacheExpiresDuringExtraction && attempts.length > 0 ? null : cached, set: () => true },
     ytDlp: {
       ytDlpPlaybackCacheGet: async () => null,
       ytDlpGetPlaybackInfo: async (_id, defaults) => {
@@ -223,8 +223,23 @@ test('a combined-only mesh stream still retries and prefers a recovered panorama
   assert.deepEqual(attempts, [false, true])
 })
 
-test('failed panorama extraction cannot restore an incompatible flat cache', async () => {
-  const { load } = loader({ unavailable: true, cached: { subtitlesIncluded: true, vrProjection: null } })
+for (const projection of [null, 'MESH']) {
+  test(`failed panorama extraction uses a cached ${projection ?? 'unmarked'} flat source only as the final fallback`, async () => {
+    const cached = {
+      subtitlesIncluded: true, vrProjection: projection,
+      manifestSrc: 'data:application/dash+xml,<MPD/>',
+      legacyFormats: [{ url: 'https://media.test/combined' }],
+    }
+    const { load, attempts } = loader({ unavailable: true, cached })
+    const source = await load(true)
+    assert.deepEqual(attempts, [false, true, true])
+    assert.deepEqual(source, { ...cached, vrProjection: 'MESH' })
+    assert.equal(cached.vrProjection, projection)
+  })
+}
+
+test('failed panorama extraction does not reuse a flat cache that expires during retries', async () => {
+  const { load } = loader({ unavailable: true, cacheExpiresDuringExtraction: true, cached: { subtitlesIncluded: true, vrProjection: null } })
   await assert.rejects(load(true), /extraction failed/)
 })
 

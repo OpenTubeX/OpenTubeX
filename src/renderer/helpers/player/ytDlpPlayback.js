@@ -1082,8 +1082,11 @@ async function loadYtDlpPlaybackSource(
 
   if (flatVrSource !== null) return flatVrSource
 
-  if (cachedSource !== null && (!preferVrHls || cachedSource.vrProjection === 'EQUIRECTANGULAR')) {
-    return cachedSource
+  cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
+  if (cachedSource !== null) {
+    return preferVrHls && cachedSource.vrProjection !== 'EQUIRECTANGULAR'
+      ? { ...cachedSource, vrProjection: 'MESH' }
+      : cachedSource
   }
 
   throw extractionError ?? new Error('yt-dlp did not return any playable formats')
