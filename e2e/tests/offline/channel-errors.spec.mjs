@@ -218,8 +218,15 @@ for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
     await page.mouse.move(0, 0)
     const initial = await button.evaluate(element => {
       const style = getComputedStyle(element)
-      return { color: style.color, border: style.borderColor }
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--accent-color)'
+      element.append(probe)
+      const accent = getComputedStyle(probe).color
+      probe.remove()
+      return { color: style.color, border: style.borderColor, accent }
     })
+    expect(initial.color).toBe(initial.accent)
+    expect(initial.border).toBe(initial.accent)
     const backgroundAlpha = () => button.evaluate(element => {
       const canvas = document.createElement('canvas')
       canvas.width = canvas.height = 1
@@ -244,6 +251,7 @@ for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
       try {
         await expect(button).toHaveCSS('color', initial.color)
         await expect(button).toHaveCSS('border-color', initial.border)
+        // The shared 8% hover/focus and 12% active layers become 20/31 on an 8-bit canvas.
         await expect.poll(backgroundAlpha, { message: `${state} uses the shared translucent state layer` }).toBe(state === 'active' ? 31 : 20)
         if (state === 'hover') {
           await testInfo.attach(`${theme}-view-all-hover`, { body: await button.screenshot(), contentType: 'image/png' })
@@ -256,7 +264,7 @@ for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
       }
     }
     await button.evaluate(element => { element.disabled = true })
-    await button.hover({ force: true })
+    await button.hover()
     await expect.poll(backgroundAlpha).toBe(0)
   })
 }

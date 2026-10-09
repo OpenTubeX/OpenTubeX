@@ -17,6 +17,6 @@ test('centers View All beside the right-aligned sort dropdown', () => {
 })
 
 test('renders View All as an outlined accent button', () => {
-  assert.match(component, /theme="channel-view-all"/)
-  assert.match(styles, /\.channel-view-all[^}]*background-color:\s*transparent;[^}]*border-color:\s*var\(--accent-color\);/s)
+  assert.match(component, /theme="channel-view-all"[^>]*variant="outlined"/s)
+  assert.match(styles, /\.channel-view-all[^}]*--button-foreground:\s*var\(--accent-color\);[^}]*--button-border:\s*var\(--accent-color\);/s)
 })
