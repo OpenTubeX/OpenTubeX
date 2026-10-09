@@ -86,7 +86,7 @@
     inset-inline-start: calc(-1 * var(--switch-track-width) - 12px);
     inline-size: var(--switch-track-width);
 
-    .switch-input:checked + .switch-label & {
+    .switch-input:is(:checked, :indeterminate) + .switch-label & {
       background-color: var(--toggle-checked-track-color, var(--accent-color));
       border-color: var(--toggle-checked-track-color, var(--accent-color));
     }
@@ -113,6 +113,12 @@
       inset-inline-start: calc(-12px - var(--switch-track-height) + var(--switch-thumb-inset));
       block-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
       inline-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
+    }
+
+    .switch-input:indeterminate + .switch-label & {
+      color: var(--toggle-checked-track-color, var(--accent-color));
+      background-color: var(--toggle-checked-thumb-color, var(--text-with-accent-color));
+      inset-inline-start: calc(-12px - (var(--switch-track-width) + var(--switch-unchecked-thumb-size)) / 2);
     }
   }
 }

@@ -237,6 +237,9 @@ History:
   Custom: Anpassad
   History Older Than Days Removed: Visningshistorik äldre än 1 dag har tagits bort | Visningshistorik äldre än {days} dagar har tagits bort
 Settings:
+  Password Settings:
+    Confirm Password: "Bekräfta lösenord"
+    Passwords Do Not Match: "Lösenorden matchar inte."
   Navigation and Controls: "Navigering och kontroller"
   Fullscreen Actions:
     Recommended Videos: "Rekommenderade videor"

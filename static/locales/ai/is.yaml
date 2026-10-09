@@ -237,6 +237,9 @@ History:
   Custom: Sérsniðið
   History Older Than Days Removed: Áhorfsferli eldri en 1 dags hefur verið eytt | Áhorfsferli eldri en {days} daga hefur verið eytt
 Settings:
+  Password Settings:
+    Confirm Password: "Staðfesta lykilorð"
+    Passwords Do Not Match: "Lykilorðin passa ekki saman."
   Navigation and Controls: "Leiðsögn og stjórntæki"
   Fullscreen Actions:
     Recommended Videos: "Ráðlögð myndbönd"

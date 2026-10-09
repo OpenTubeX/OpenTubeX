@@ -24,6 +24,82 @@ test.use({
   }
 })
 
+test('keeps retention label transparent and its indicators inside the card', async ({ app, page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateBaseTheme', 'dark')
+    store.commit('setSyncServerEnabled', true)
+    store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerSyncSettings', true)
+    store.commit('setHighlightChangedSettings', true)
+  })
+  const storage = await goToSettingsSection(page, 'storage')
+  const input = storage.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true })
+  const root = input.locator('../..')
+  await expect(root.locator('.syncedSettingIndicator')).toBeVisible()
+  for (const uiScale of [100, 95]) {
+    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
+    for (const width of [1600, 1000, 375]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+        BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+      }, { width, uiScale })
+      await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(direction => { document.body.dir = direction }, direction)
+        await input.scrollIntoViewIfNeeded()
+        const geometry = await root.evaluate(element => {
+          const card = element.closest('.storageItem')
+          const bounds = card.getBoundingClientRect()
+          const style = getComputedStyle(card)
+          const label = element.querySelector('.selectLabel').getBoundingClientRect()
+          const control = element.querySelector('input').getBoundingClientRect()
+          const outline = element.querySelector('.inputOutline').getBoundingClientRect()
+          const action = element.querySelector('.inputAction').getBoundingClientRect()
+          const indicators = [...element.querySelectorAll('.inputIndicators button')].map(button => {
+            const rect = button.getBoundingClientRect()
+            return { left: rect.left, right: rect.right }
+          })
+          return {
+            left: bounds.left + parseFloat(style.paddingLeft),
+            right: bounds.right - parseFloat(style.paddingRight),
+            indicators,
+            labelBackground: getComputedStyle(element.querySelector('.selectLabel')).backgroundColor,
+            labelCenter: label.top + label.height / 2,
+            inputTop: control.top,
+            outlineLeft: outline.left,
+            outlineRight: outline.right,
+            controlLeft: control.left,
+            controlRight: control.right,
+            actionLeft: action.left,
+            actionRight: action.right
+          }
+        })
+        expect.soft(geometry.labelBackground, 'label reveals the card surface').toBe('rgba(0, 0, 0, 0)')
+        expect.soft(Math.abs(geometry.labelCenter - geometry.inputTop), `${width}px ${uiScale}%: label centered in outline notch`).toBeLessThanOrEqual(1)
+        expect.soft(Math.abs(geometry.outlineLeft - geometry.controlLeft), 'outline starts at input').toBeLessThanOrEqual(1)
+        expect.soft(Math.abs(geometry.outlineRight - geometry.controlRight), 'outline excludes external indicators').toBeLessThanOrEqual(1)
+        expect.soft(geometry.actionLeft, 'save action inside input').toBeGreaterThanOrEqual(geometry.controlLeft)
+        expect.soft(geometry.actionRight, 'save action inside input').toBeLessThanOrEqual(geometry.controlRight)
+        for (const bounds of geometry.indicators) {
+          expect.soft(bounds.left, `${width}px ${uiScale}% ${direction}: indicator left`).toBeGreaterThanOrEqual(geometry.left - 1)
+          expect.soft(bounds.right, `${width}px ${uiScale}% ${direction}: indicator right`).toBeLessThanOrEqual(geometry.right + 1)
+        }
+        await root.locator('.selectLabel').click()
+        await expect(input).toBeFocused()
+        expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'focus does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+        await input.evaluate(element => element.blur())
+        await input.hover()
+        expect(await input.evaluate(element => getComputedStyle(element).borderTopColor), 'hover does not paint across the notch').toBe('rgba(0, 0, 0, 0)')
+      }
+      if (width === 1600 && uiScale === 100) {
+        await page.evaluate(() => { document.body.dir = 'ltr' })
+        await input.locator('xpath=ancestor::article').screenshot({ path: testInfo.outputPath('retention-card.png') })
+      }
+    }
+  }
+})
+
 for (const uiScale of [100, 95]) {
   test.describe(`native number arrows at ${uiScale}%`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, baseTheme: uiScale === 100 ? 'dark' : 'light', historyRetentionDays: '30' } } })

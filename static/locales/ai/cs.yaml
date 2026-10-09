@@ -235,6 +235,9 @@ History:
   Custom: Vlastní
   History Older Than Days Removed: Historie sledování starší než 1 den byla odstraněna | Historie sledování starší než {days} dny byla odstraněna | Historie sledování starší než {days} dní byla odstraněna
 Settings:
+  Password Settings:
+    Confirm Password: "Potvrďte heslo"
+    Passwords Do Not Match: "Hesla se neshodují."
   Navigation and Controls: "Navigace a ovládací prvky"
   Fullscreen Actions:
     Recommended Videos: "Doporučená videa"

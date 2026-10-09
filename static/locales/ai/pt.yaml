@@ -239,6 +239,9 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Password Settings:
+    Confirm Password: "Confirmar palavra-passe"
+    Passwords Do Not Match: "As palavras-passe não coincidem."
   Navigation and Controls: "Navegação e controlos"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"

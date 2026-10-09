@@ -1394,6 +1394,8 @@ Settings:
   Search Settings: Ieškoti nustatymuose
   No Settings Found: Nustatymų nerasta
   Password Settings:
+    Confirm Password: "Patvirtinkite slaptažodį"
+    Passwords Do Not Match: "Slaptažodžiai nesutampa."
     Password Settings: Slaptažodis
     Set Password To Prevent Access: Nustatykite slaptažodį, kad apribotumėte prieigą prie nustatymų
     Set Password: Nustatyti slaptažodį

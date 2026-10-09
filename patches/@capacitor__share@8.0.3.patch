@@ -1,0 +1,52 @@
+diff --git a/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java b/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
+index 9b97dc0135f38236f2733ae82d972ca305f807ef..2b99e3822303eca2f19c8cd03179104daa8bde42 100644
+--- a/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
++++ b/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
+@@ -30,6 +30,7 @@ public class SharePlugin extends Plugin {
+     private BroadcastReceiver broadcastReceiver;
+     private boolean stopped = false;
+     private boolean isPresenting = false;
++    private PluginCall presentingCall;
+     private ComponentName chosenComponent;
+     private String expectedNonce;
+ 
+@@ -57,6 +58,11 @@ public class SharePlugin extends Plugin {
+                 if (component != null) {
+                     chosenComponent = component;
+                     expectedNonce = null;
++                    // Returning to our singleTask activity does not deliver a
++                    // chooser activity result. Complete that share on selection.
++                    if (component.getPackageName().equals(getContext().getPackageName()) && presentingCall != null) {
++                        activityResult(presentingCall, new ActivityResult(Activity.RESULT_OK, null));
++                    }
+                 }
+             }
+         };
+@@ -75,6 +81,10 @@ public class SharePlugin extends Plugin {
+ 
+     @ActivityCallback
+     private void activityResult(PluginCall call, ActivityResult result) {
++        if (call == null || (presentingCall != null && call != presentingCall)) return;
++        presentingCall = null;
++        isPresenting = false;
++        expectedNonce = null;
+         if (result.getResultCode() == Activity.RESULT_CANCELED && !stopped) {
+             call.reject("Share canceled");
+         } else {
+@@ -82,8 +92,6 @@ public class SharePlugin extends Plugin {
+             callResult.put("activityType", chosenComponent != null ? chosenComponent.getPackageName() : "");
+             call.resolve(callResult);
+         }
+-        isPresenting = false;
+-        expectedNonce = null;
+     }
+ 
+     @PluginMethod
+@@ -158,6 +166,7 @@ public class SharePlugin extends Plugin {
+             chooser.addCategory(Intent.CATEGORY_DEFAULT);
+             stopped = false;
+             isPresenting = true;
++            presentingCall = call;
+             startActivityForResult(call, chooser, "activityResult");
+         } else {
+             call.reject("Can't share while sharing is in progress");

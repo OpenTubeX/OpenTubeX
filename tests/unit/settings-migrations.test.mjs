@@ -99,6 +99,58 @@ test('prefers the current AI video summary mode', () => {
   })
 })
 
+const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const summaryDefault = settingsSource.match(/aiVideoSummaryMode: '([^']+)'/)[1]
+const summaryEntriesStart = settingsSource.indexOf('      const legacyHideAiVideoSummariesEntry')
+const summaryEntriesEnd = settingsSource.indexOf('      const legacyPlaybackSpeedSyncEntry', summaryEntriesStart)
+const summaryStartupStart = settingsSource.indexOf('      if (legacyHideAiVideoSummariesEntry)')
+const summaryStartupEnd = settingsSource.indexOf('      // Migrate the legacy auto Picture-in-Picture', summaryStartupStart)
+
+for (const [name, initialSettings, profiles, expectedMode] of [
+  ['fresh installations', {}, [], 'collapsed'],
+  ['existing users without a saved summary preference', { theme: 'dark' }, [], 'hide'],
+  ['existing profiles without saved settings', {}, [{ _id: 'main' }], 'hide'],
+  ['legacy hidden summaries', { hideAiVideoSummaries: true }, [], 'hide'],
+  ['legacy visible summaries', { hideAiVideoSummaries: false }, [], 'collapsed'],
+  ...['hide', 'collapsed', 'expanded'].map(mode => [
+    `explicit ${mode} summaries`, { aiVideoSummaryMode: mode }, [], mode,
+  ]),
+]) {
+  test(`startup preserves AI summary mode for ${name} across restarts`, async () => {
+    const stored = { ...initialSettings }
+    for (let startup = 0; startup < 2; startup++) {
+      const state = { aiVideoSummaryMode: stored.aiVideoSummaryMode ?? summaryDefault }
+      await vm.runInNewContext(`(async () => {
+        ${settingsSource.slice(summaryEntriesStart, summaryEntriesEnd)}
+        ${settingsSource.slice(summaryStartupStart, summaryStartupEnd)}
+      })()`, {
+        state,
+        userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+        DBProfileHandlers: { find: async () => profiles },
+        DBSettingHandlers: {
+          upsert: async (key, value) => { stored[key] = value },
+          delete: async key => { delete stored[key] },
+        },
+        commit: (key, value) => {
+          assert.equal(key, 'setAiVideoSummaryMode')
+          state.aiVideoSummaryMode = value
+        },
+        dispatch: async (key, value) => {
+          assert.equal(key, 'updateAiVideoSummaryMode')
+          stored.aiVideoSummaryMode = value
+          state.aiVideoSummaryMode = value
+        },
+        recordSettingSyncTimestamp: async () => {},
+        migrateStoredAiVideoSummarySetting,
+        console,
+      })
+      assert.equal(state.aiVideoSummaryMode, expectedMode)
+      assert.equal(stored.aiVideoSummaryMode, expectedMode)
+      assert.equal(Object.hasOwn(stored, 'hideAiVideoSummaries'), false)
+    }
+  })
+}
+
 test('keeps the stored legacy AI summary preference when replacement persistence fails', async () => {
   let deletedLegacySetting = false
 

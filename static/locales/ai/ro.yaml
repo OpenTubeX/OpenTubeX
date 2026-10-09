@@ -237,6 +237,9 @@ History:
   Custom: Personalizat
   History Older Than Days Removed: Istoricul vizionărilor mai vechi de 1 zi a fost șters | Istoricul vizionărilor mai vechi de {days} zile a fost șters | Istoricul vizionărilor mai vechi de {days} de zile a fost șters
 Settings:
+  Password Settings:
+    Confirm Password: "Confirmă parola"
+    Passwords Do Not Match: "Parolele nu coincid."
   Navigation and Controls: "Navigare și comenzi"
   Fullscreen Actions:
     Recommended Videos: "Videoclipuri recomandate"

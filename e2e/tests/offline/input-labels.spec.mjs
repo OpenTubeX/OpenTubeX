@@ -12,6 +12,10 @@ async function expectVisibleLabels(scope) {
     .filter(element => !element.placeholder.trim())
     .map(element => ({ id: element.id, label: Array.from(element.labels ?? []).map(label => label.textContent.trim()).join(' '), className: element.className })))
   expect(withoutPlaceholder).toEqual([])
+  const patchedLabels = await scope.locator('.ft-input-component.outlined .selectLabel, .select.outlined .select-label').evaluateAll(labels => labels
+    .filter(label => label.checkVisibility() && getComputedStyle(label).backgroundColor !== 'rgba(0, 0, 0, 0)')
+    .map(label => label.textContent.trim()))
+  expect(patchedLabels, 'outlined labels reveal their surrounding surface').toEqual([])
 }
 
 for (const width of [1600, 480]) {

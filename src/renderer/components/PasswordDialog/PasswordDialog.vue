@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtInput from '../FtInput/FtInput.vue'
@@ -53,9 +53,7 @@ const passwordValue = ref('')
 const invalidPassword = ref(false)
 const verifying = ref(false)
 
-onMounted(() => {
-  password.value.focus()
-})
+defineExpose({ focus: () => password.value?.focus() })
 
 const settingsPassword = computed(() => {
   return store.getters.getSettingsPassword

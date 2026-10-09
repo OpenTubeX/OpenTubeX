@@ -1,4 +1,6 @@
 .settingsWindow {
+  --settings-row-gap: 20px;
+
   position: fixed;
   z-index: 9;
   min-inline-size: min(360px, calc(100vw - 24px));

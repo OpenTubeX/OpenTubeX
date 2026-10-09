@@ -502,7 +502,8 @@ const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
 let pointerDownInsideMenu = false
 let pendingSettingUpdateCount = 0
-let openCommandPaletteAfterClose = false
+/** @type {(() => void) | null} */
+let actionAfterClose = null
 const triggerRef = useTemplateRef('triggerRef')
 const menuRef = useTemplateRef('menuRef')
 const mainScrollRef = useTemplateRef('mainScrollRef')
@@ -652,7 +653,7 @@ const defaultQuality = computed(() => {
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
   if (menuOpen.value) {
-    openCommandPaletteAfterClose = false
+    actionAfterClose = null
     profilePanelOpen.value = false
     nextTick(() => {
       menuRef.value?.$el?.focus()
@@ -684,10 +685,9 @@ function handleSheetClosed() {
   menuRendered.value = false
   menuOpen.value = false
   handleMenuAfterLeave()
-  if (openCommandPaletteAfterClose) {
-    openCommandPaletteAfterClose = false
-    window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
-  }
+  const action = actionAfterClose
+  actionAfterClose = null
+  action?.()
 }
 
 function clampMainContentScroll() {
@@ -840,13 +840,13 @@ function handleMenuFocusOut(event) {
 }
 
 function closeMenu() {
-  openCommandPaletteAfterClose = false
+  actionAfterClose = null
   menuOpen.value = false
   triggerRef.value?.focus()
 }
 
 function closeMenuForAction() {
-  openCommandPaletteAfterClose = false
+  actionAfterClose = null
   menuOpen.value = false
 }
 
@@ -861,6 +861,10 @@ function setActiveProfile(profile) {
 
 function openProfileSettings() {
   closeMenuForAction()
+  if (phoneLayout.value) {
+    actionAfterClose = () => store.dispatch('showSettingsWindow', 'profile')
+    return
+  }
   store.dispatch('showSettingsWindow', 'profile')
 }
 
@@ -927,6 +931,10 @@ function handleHideRecommendedVideos(value) {
 
 function openSettings() {
   closeMenuForAction()
+  if (phoneLayout.value) {
+    actionAfterClose = () => store.dispatch('toggleSettingsWindow')
+    return
+  }
   store.dispatch('toggleSettingsWindow')
 }
 
@@ -942,7 +950,7 @@ function openKeyboardShortcuts() {
 
 function openCommandPalette() {
   if (phoneLayout.value) {
-    openCommandPaletteAfterClose = true
+    actionAfterClose = () => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_PALETTE_EVENT))
     menuOpen.value = false
     return
   }

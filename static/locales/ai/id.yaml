@@ -235,6 +235,9 @@ History:
   Custom: Khusus
   History Older Than Days Removed: Riwayat tontonan yang lebih lama dari {days} hari telah dihapus
 Settings:
+  Password Settings:
+    Confirm Password: "Konfirmasi kata sandi"
+    Passwords Do Not Match: "Kata sandi tidak cocok."
   Navigation and Controls: "Navigasi dan kontrol"
   Fullscreen Actions:
     Recommended Videos: "Video yang direkomendasikan"

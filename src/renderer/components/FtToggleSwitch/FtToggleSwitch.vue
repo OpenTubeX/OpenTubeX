@@ -15,6 +15,8 @@
       name="set-name"
       class="switch-input"
       :checked="currentValue"
+      :indeterminate="indeterminate"
+      :aria-checked="indeterminate ? 'mixed' : undefined"
       :disabled="disabled"
       @change="change"
     >
@@ -29,7 +31,7 @@
             class="switch-thumb"
             aria-hidden="true"
           >
-            <FtIcon :icon="['fas', currentValue ? 'check' : 'minus']" />
+            <FtIcon :icon="['fas', currentValue && !indeterminate ? 'check' : 'minus']" />
           </span>
         </span>
         <FtTooltip
@@ -64,6 +66,10 @@ const props = defineProps({
     default: false
   },
   controlled: {
+    type: Boolean,
+    default: false
+  },
+  indeterminate: {
     type: Boolean,
     default: false
   },

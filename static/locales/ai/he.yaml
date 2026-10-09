@@ -239,6 +239,9 @@ History:
   Custom: בהתאמה אישית
   History Older Than Days Removed: היסטוריית צפייה מלפני יותר מ־1 יום נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה | היסטוריית צפייה מלפני יותר מ־{days} ימים נמחקה
 Settings:
+  Password Settings:
+    Confirm Password: "אישור הסיסמה"
+    Passwords Do Not Match: "הסיסמאות אינן תואמות."
   Navigation and Controls: "ניווט ופקדים"
   Fullscreen Actions:
     Recommended Videos: "סרטונים מומלצים"

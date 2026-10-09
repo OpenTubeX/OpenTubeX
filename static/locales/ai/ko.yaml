@@ -324,6 +324,9 @@ History:
   Custom: 사용자 지정
   History Older Than Days Removed: '{days}일보다 오래된 시청 기록을 제거했습니다'
 Settings:
+  Password Settings:
+    Confirm Password: "비밀번호 확인"
+    Passwords Do Not Match: "비밀번호가 일치하지 않습니다."
   Navigation and Controls: "탐색 및 컨트롤"
   Fullscreen Actions:
     Recommended Videos: "추천 동영상"

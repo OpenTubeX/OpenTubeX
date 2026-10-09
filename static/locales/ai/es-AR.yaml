@@ -1250,6 +1250,8 @@ Settings:
   Search Settings: Buscar ajustes
   No Settings Found: No se encontraron ajustes
   Password Settings:
+    Confirm Password: "Confirmar contraseña"
+    Passwords Do Not Match: "Las contraseñas no coinciden."
     Password Settings: Contraseña
     Set Password To Prevent Access: Establecer una contraseña para impedir el acceso a los ajustes
     Set Password: Establecer contraseña

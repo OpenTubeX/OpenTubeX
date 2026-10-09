@@ -235,6 +235,9 @@ History:
   Custom: カスタム
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
+  Password Settings:
+    Confirm Password: "パスワードの確認"
+    Passwords Do Not Match: "パスワードが一致しません。"
   Navigation and Controls: "ナビゲーションと操作"
   Fullscreen Actions:
     Recommended Videos: "おすすめ動画"

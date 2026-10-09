@@ -43,6 +43,45 @@ async function expectStableLabel(select) {
   await expectUnchanged()
 }
 
+for (const [locale, label] of [
+  ['en-US', 'Save Watched Progress'],
+  ['de-DE', 'Videofortschritt merken'],
+]) {
+  test.describe(`watched progress label in ${locale}`, () => {
+    test.use({ seed: { settings: { currentLocale: locale, baseTheme: 'dark' } } })
+
+    test('widens the watched progress select without clipping its label', async ({ app, page }, testInfo) => {
+      const privacy = await goToSettingsSection(page, 'privacy')
+      const select = privacy.getByRole('combobox', { name: label })
+      for (const uiScale of [100, 95]) {
+        await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
+        for (const width of [1600, 375]) {
+          await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+            BrowserWindow.getAllWindows()[0].setContentSize(Math.round(width * uiScale / 100), Math.round(900 * uiScale / 100))
+          }, { width, uiScale })
+          await expect.poll(() => page.evaluate(width => Math.abs(innerWidth - width), width)).toBeLessThanOrEqual(1)
+          await select.scrollIntoViewIfNeeded()
+          await expect.poll(() => select.evaluate(button => {
+            const root = button.closest('.select')
+            const caption = root.querySelector('.select-placeholder')
+            return caption.scrollWidth - caption.clientWidth
+          })).toBeLessThanOrEqual(1)
+          const bounds = await select.evaluate(button => {
+            const root = button.closest('.select').getBoundingClientRect()
+            return { left: root.left, right: root.right, viewport: innerWidth }
+          })
+          expect(bounds.left).toBeGreaterThanOrEqual(0)
+          expect(bounds.right).toBeLessThanOrEqual(bounds.viewport)
+          await expectStableLabel(select)
+          if (locale === 'en-US' && uiScale === 100 && width === 1600) {
+            await page.screenshot({ path: testInfo.outputPath('watched-progress-label.png') })
+          }
+        }
+      }
+    })
+  })
+}
+
 for (const uiScale of [100, 125]) {
   test.describe(`select labels at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })

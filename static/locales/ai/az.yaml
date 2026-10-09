@@ -237,6 +237,9 @@ History:
   Custom: Fərdi
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
+  Password Settings:
+    Confirm Password: "Şifrəni təsdiqləyin"
+    Passwords Do Not Match: "Şifrələr uyğun gəlmir."
   Navigation and Controls: "Naviqasiya və idarəetmə elementləri"
   Fullscreen Actions:
     Recommended Videos: "Tövsiyə olunan videolar"

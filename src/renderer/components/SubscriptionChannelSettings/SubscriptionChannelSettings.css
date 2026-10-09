@@ -80,52 +80,17 @@
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  margin-block-start: 12px;
+  margin-block-start: var(--settings-row-gap, 20px);
   max-inline-size: 680px;
 }
 
 .bulkMembersOnlySetting {
-  align-items: center;
-  background-color: var(--search-bar-color);
-  border: 1px solid transparent;
-  border-radius: calc(5px * var(--ui-roundness));
-  color: var(--primary-text-color);
-  cursor: pointer;
-  display: grid;
-  font: inherit;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) 14px;
-  min-block-size: 45px;
-  padding-inline: 16px;
-  text-align: start;
-}
-
-.bulkMembersOnlySetting:is(:hover, :focus-visible) {
-  border-color: var(--primary-color);
-}
-
-.bulkMembersOnlySetting:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: -2px;
-}
-
-.bulkMembersOnlySetting:is(.enabled, .mixed) {
-  border-color: color-mix(in srgb, var(--primary-color) 55%, var(--border-color));
-}
-
-.bulkMembersOnlyLabel {
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bulkSettingCheck {
-  color: var(--primary-color);
+  min-block-size: var(--form-control-height);
 }
 
 .bulkDailyLimitSelect {
   inline-size: 100%;
+  margin-block: 7px 0;
 }
 
 .channelSettingsScroller {
@@ -329,7 +294,8 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
-  .dailyLimitSelect {
+  .dailyLimitSelect,
+  .bulkDailyLimitSelect {
     margin-block-start: 9px;
   }
 }

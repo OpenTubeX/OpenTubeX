@@ -242,6 +242,9 @@ History:
   Custom: தனிப்பயன்
   History Older Than Days Removed: 1 நாளுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது | {days} நாட்களுக்கு முந்தைய பார்வை வரலாறு நீக்கப்பட்டது
 Settings:
+  Password Settings:
+    Confirm Password: "கடவுச்சொல்லை உறுதிப்படுத்தவும்"
+    Passwords Do Not Match: "கடவுச்சொற்கள் பொருந்தவில்லை."
   Navigation and Controls: "வழிசெலுத்தல் மற்றும் கட்டுப்பாடுகள்"
   Fullscreen Actions:
     Recommended Videos: "பரிந்துரைக்கப்பட்ட காணொளிகள்"

@@ -235,6 +235,9 @@ History:
   Custom: 自定义
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
+  Password Settings:
+    Confirm Password: "确认密码"
+    Passwords Do Not Match: "密码不匹配。"
   Navigation and Controls: "导航与控件"
   Fullscreen Actions:
     Recommended Videos: "推荐视频"

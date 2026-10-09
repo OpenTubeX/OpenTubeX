@@ -41,23 +41,30 @@
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
       />
-      <label
+      <fieldset
         v-if="showLabel"
-        :for="id"
-        class="selectLabel"
-        :class="{ disabled, hasIcon: icon !== null }"
+        class="inputOutline"
+        role="presentation"
       >
-        <FtIcon
-          v-if="icon !== null"
-          :icon="icon"
-          class="selectLabelIcon"
-          aria-hidden="true"
-        />
-        <span
-          class="selectLabelText"
-          :title="label || placeholder"
-        >{{ label || placeholder }}</span>
-      </label>
+        <legend class="inputLegend">
+          <label
+            :for="id"
+            class="selectLabel"
+            :class="{ disabled, hasIcon: icon !== null }"
+          >
+            <FtIcon
+              v-if="icon !== null"
+              :icon="icon"
+              class="selectLabelIcon"
+              aria-hidden="true"
+            />
+            <span
+              class="selectLabelText"
+              :title="label || placeholder"
+            >{{ label || placeholder }}</span>
+          </label>
+        </legend>
+      </fieldset>
       <slot name="extraAction" />
       <button
         v-if="inputType === 'password'"

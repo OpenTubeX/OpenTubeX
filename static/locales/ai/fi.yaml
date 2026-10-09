@@ -239,6 +239,9 @@ History:
   Custom: Mukautettu
   History Older Than Days Removed: Yli päivän vanha katseluhistoria on poistettu | Yli {days} päivää vanha katseluhistoria on poistettu
 Settings:
+  Password Settings:
+    Confirm Password: "Vahvista salasana"
+    Passwords Do Not Match: "Salasanat eivät täsmää."
   Navigation and Controls: "Navigointi ja säätimet"
   Fullscreen Actions:
     Recommended Videos: "Suositellut videot"
