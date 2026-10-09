@@ -97,7 +97,23 @@ let visibilityObserver
 let imageIsVisible = false
 let sourceVersion = 0
 
-watch(preferredSource, src => resetSource(src), { immediate: true })
+watch(preferredSource, async (src, _previousSource, onCleanup) => {
+  let cancelled = false
+  onCleanup(() => { cancelled = true })
+  // Keep a loaded remote image visible while decoding its embedded cached
+  // copy. Once decoded, the element hook can reveal it before the next paint.
+  if (hasLoaded.value && src.startsWith('data:') && /^https?:/.test(currentSource)) {
+    const image = new Image()
+    image.src = src
+    try {
+      await image.decode()
+    } catch {
+      // Invalid cached images still go through the normal error/fallback path.
+    }
+    if (cancelled) return
+  }
+  resetSource(src)
+}, { immediate: true })
 // Element hooks run after patching, before paint, without a separate watcher.
 function checkCachedImage({ el: image }) {
   if (hasLoaded.value || !currentSource) return
