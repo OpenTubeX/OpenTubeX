@@ -109,6 +109,48 @@ for (const uiScale of [100, 95]) {
       }
     })
 
+    test.describe('playlist-add prompt', () => {
+      test.use({
+        seed: {
+          settings: { uiScale, currentLocale: 'en-US' },
+          playlists: [{
+            _id: 'spacing-source',
+            playlistName: 'Spacing source',
+            protected: false,
+            videos: [{ videoId: 'ccccccccccc', title: 'Spacing video', lengthSeconds: 60, playlistItemId: 'spacing-item', type: 'video' }],
+            createdAt: Date.now(),
+            lastUpdatedAt: Date.now()
+          }, {
+            _id: 'spacing-target',
+            playlistName: 'Spacing target',
+            protected: false,
+            videos: [],
+            createdAt: Date.now(),
+            lastUpdatedAt: Date.now()
+          }]
+        }
+      })
+
+      test('preserves the gap between sort controls and the playlist list', async ({ app, page }, testInfo) => {
+        await goTo(page, 'userplaylists')
+        await page.getByRole('link', { name: 'Spacing source', exact: true }).click()
+        await page.getByTitle('Copy Playlist', { exact: true }).click()
+        const dialog = page.getByRole('dialog').filter({ has: page.locator('.playlists-container') })
+        await expect(dialog.locator('.optionsRow')).toBeVisible()
+        for (const width of [1600, 375, 812]) {
+          await resize(app, page, width, uiScale)
+          await expect.poll(() => dialog.evaluate(element => (
+            element.querySelector('.playlists-container').getBoundingClientRect().top -
+            element.querySelector('.optionsRow').getBoundingClientRect().bottom
+          )), { message: `${width}px options-to-list gap` }).toBeCloseTo(20, 0)
+          if (width === 375 && uiScale === 100) {
+            await page.mouse.move(0, 0)
+            await dialog.screenshot({ path: testInfo.outputPath('playlist-add-spacing.png'), animations: 'disabled' })
+          }
+        }
+      })
+    })
+
     test('settings keep their standard row spacing and quick settings keep their own gaps', async ({ page }) => {
       await page.locator('.profileTrigger').click()
       const quickSelect = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('combobox', { name: 'Base Theme' }).locator('..')
