@@ -1,5 +1,5 @@
 <p align="center">
- <img alt="" src="/_icons/logoColor.svg" width=500 align="center">
+ <img alt="OpenTubeX Logo" src="/_icons/logoColor.svg" width="500" align="center">
 </p>
 
 OpenTubeX is an open-source, highly customizable, privacy-focused YouTube client.
@@ -52,14 +52,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://opentubex.org/privacy/">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 
-> [!NOTE]
-> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
->
-> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
-
 <hr>
-
-## See OpenTubeX in action
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">
@@ -68,6 +61,11 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <br>
   <a href="https://www.youtube.com/watch?v=pzfHWmvY1U0">▶ Watch the promo · 22 seconds</a>
 </p>
+
+> [!NOTE]
+> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
+>
+> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
 <a id="why-opentubex"></a>
 ## ✨ Why OpenTubeX?
