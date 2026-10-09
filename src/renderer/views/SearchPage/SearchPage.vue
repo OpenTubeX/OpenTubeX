@@ -48,14 +48,6 @@
       >
         {{ t('Search Filters.Cookie Search Failed') }}
       </p>
-      <FtButton
-        v-if="cookieSearchFailed && !searchNotice && cookiesConfigured && !showFamilyFriendlyOnly"
-        class="searchRetryButton"
-        :label="t('Video.Try With Configured Cookies')"
-        :icon="['fas', 'cookie']"
-        :disabled="isRetryingWithCookies"
-        @click="retrySearchWithCookies"
-      />
       <FtElementList
         :data="shownResults"
       />
@@ -77,12 +69,31 @@
         </div>
       </FtAutoLoadNextPageWrapper>
       <p
-        v-else-if="!searchNotice && !cookieSearchFailed"
+        v-else-if="!searchNotice && !cookieSearchFailed && !isRetryingWithCookies"
         class="searchStatus"
         role="status"
       >
         {{ exhaustedSearchMessage }}
       </p>
+      <p
+        v-if="isEmptyLocalSearch && !searchNotice && !showFamilyFriendlyOnly && !isRetryingWithCookies"
+        class="searchHint"
+      >
+        {{ t('Search Filters.Possible Age Restriction Hint') }}
+      </p>
+      <FtButton
+        v-if="showCookieRetryWithoutNotice"
+        class="searchRetryButton"
+        :label="t('Video.Try With Configured Cookies')"
+        :icon="['fas', 'cookie']"
+        :disabled="isRetryingWithCookies"
+        @click="retrySearchWithCookies"
+      />
+      <FtLoader
+        v-if="isRetryingWithCookies && !searchNotice"
+        role="status"
+        :aria-label="t('Search Filters[&quot;Fetching results. Please wait&quot;]')"
+      />
     </FtCard>
   </div>
 </template>
@@ -128,6 +139,7 @@ const isLoadingMore = ref(false)
 const autoLoadMore = computed(() => store.getters.getGeneralAutoLoadMorePaginatedItemsEnabled)
 const hasMoreResults = ref(true)
 const apiUsed = ref('local')
+const localSearchCompleted = ref(false)
 const searchSettings = ref({})
 const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
@@ -159,6 +171,13 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showFamilyFriendlyOnly = computed(() => store.getters.getShowFamilyFriendlyOnly)
+
+const isEmptyLocalSearch = computed(() => localSearchCompleted.value && apiUsed.value === 'local' && shownResults.value.length === 0)
+
+// YouTube sometimes returns no usable results without an age-confirmation notice.
+const showCookieRetryWithoutNotice = computed(() => supportsCookieSearch &&
+  cookiesConfigured.value && !showFamilyFriendlyOnly.value && !searchNotice.value &&
+  (cookieSearchFailed.value || isEmptyLocalSearch.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
@@ -260,6 +279,7 @@ function updateSearchHistoryEntry(searchSettings) {
 
 function checkSearchCache(payload) {
   searchRequestId++
+  localSearchCompleted.value = false
   searchNotice.value = null
   searchParams.value = ''
   cookieSearchFailed.value = false
@@ -323,6 +343,7 @@ async function performSearchLocal(payload) {
     searchParams.value = response.searchParams
 
     apiUsed.value = 'local'
+    localSearchCompleted.value = true
 
     shownResults.value = results
     nextPageRef.value = continuationData
@@ -540,6 +561,7 @@ function replaceShownResults(history) {
   shownResults.value = history.data
   searchSettings.value = history.searchSettings
   apiUsed.value = history.apiUsed
+  localSearchCompleted.value = history.apiUsed === 'local'
   searchNotice.value = history.searchNotice ?? null
   searchParams.value = history.searchParams ?? ''
   nextPageRef.value = history.nextPageRef ?? null

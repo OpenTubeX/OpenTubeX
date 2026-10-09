@@ -2043,6 +2043,7 @@ Form Inputs:
   Default Value: "Výchozí: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube mohl pro tento vyhledávací dotaz nastavit věkové omezení."
   Cookie Search Failed: "Vyhledávání s nastavenými cookies selhalo."
 
 Storage Startup Error:

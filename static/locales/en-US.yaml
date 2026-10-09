@@ -133,6 +133,7 @@ Search Listing:
     Closed Captions: Closed Captions
   # In Filter Button
 Search Filters:
+  Possible Age Restriction Hint: "YouTube may have age-restricted this search query."
   Cookie Search Failed: "Search failed with the configured cookies."
   Search Filters: Search Filters
   Prioritize:

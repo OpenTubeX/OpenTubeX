@@ -2051,6 +2051,7 @@ Form Inputs:
   Default Value: "Standart: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube bu axtarış sorğusuna yaş məhdudiyyəti qoymuş ola bilər."
   Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."
 
 Storage Startup Error:

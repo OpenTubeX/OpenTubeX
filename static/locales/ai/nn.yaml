@@ -2432,6 +2432,7 @@ Form Inputs:
   Default Value: "Standard: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube kan ha sett ei aldersgrense for dette søket."
   Cookie Search Failed: "Søk med dei konfigurerte informasjonskapslane mislukkast."
 
 Storage Startup Error:

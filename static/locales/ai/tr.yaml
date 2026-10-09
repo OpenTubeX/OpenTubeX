@@ -2042,6 +2042,7 @@ Form Inputs:
   Default Value: "Varsayılan: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube bu arama sorgusuna yaş kısıtlaması uygulamış olabilir."
   Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."
 
 Storage Startup Error:

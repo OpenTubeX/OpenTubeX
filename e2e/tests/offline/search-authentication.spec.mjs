@@ -51,6 +51,7 @@ async function searchForAgeGate(page) {
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
   await expect(page.getByText('These results may be inappropriate for some users.')).toBeVisible()
   await expect(page.getByText('Your search results have returned 0 results')).toHaveCount(0)
+  await expect(page.locator('.searchHint')).toHaveCount(0)
   return requests
 }
 
@@ -92,6 +93,115 @@ async function captureSearchNotice(page, filename, animations = 'allow') {
     }
   })
 }
+
+for (const responseType of ['empty', 'ads-only']) {
+  test(`offers a cookie retry for ${responseType} search responses without an age notice`, async ({ app, page }) => {
+    const { log, response } = await configureCookieSearch(app, 'file', 1000)
+    const anonymousResponse = structuredClone(ageGate)
+    anonymousResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents =
+      responseType === 'empty' ? [] : [{ searchPyvRenderer: { ads: [] } }, { adSlotRenderer: {} }]
+    let searchRequest
+    await page.route('https://www.youtube.com/youtubei/v1/search**', route => {
+      searchRequest = route.request().postDataJSON()
+      return route.fulfill({ json: anonymousResponse })
+    })
+    await page.locator(sel.searchInput).fill('opentubex')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText('Your search results have returned 0 results')).toBeVisible()
+    const restrictionHint = page.getByText('YouTube may have age-restricted this search query.', { exact: true })
+    await expect(restrictionHint).toBeVisible()
+    await expect(page.locator('.searchNotice')).toHaveCount(0)
+    const retry = page.getByRole('button', { name: 'Try with configured cookies' })
+    await expect(retry).toBeVisible()
+    for (const theme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: theme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+      const messageBox = await page.locator('.searchStatus').boundingBox()
+      const retryBox = await retry.boundingBox()
+      const width = Math.min(750, messageBox.width)
+      await page.screenshot({
+        path: test.info().outputPath(`empty-search-cookie-retry-${theme}.png`),
+        animations: 'disabled',
+        clip: { x: messageBox.x + (messageBox.width - width) / 2, y: messageBox.y - 16, width, height: retryBox.y + retryBox.height - messageBox.y + 32 }
+      })
+    }
+    await page.locator(sel.searchInput).fill('another empty search')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/another%20empty%20search/)
+    await page.locator(sel.searchInput).fill('opentubex')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/\/search\/opentubex/)
+    await expect(retry).toBeVisible()
+    await expect(restrictionHint).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+    await setWindowSize(app, page, { width: 390, height: 844 })
+    await expect(retry).toBeVisible()
+    await expect(restrictionHint).toBeVisible()
+    await retry.click()
+    await expect(retry).toBeDisabled()
+    await expect(page.getByRole('status', { name: 'Fetching results. Please wait' })).toBeVisible()
+    await expect(page.getByRole('alert')).toContainText('Search failed with the configured cookies.')
+    await expect(retry).toBeEnabled()
+    await writeFile(response, JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Recovered cookie search result' }] }))
+    await retry.click()
+    await expect(page.getByRole('heading', { name: 'Recovered cookie search result', exact: true })).toBeVisible()
+    await expect(retry).toHaveCount(0)
+    await expect(restrictionHint).toHaveCount(0)
+    await expect(page.getByRole('status', { name: 'Fetching results. Please wait' })).toHaveCount(0)
+    await expect(page.getByRole('alert')).toHaveCount(0)
+    const args = JSON.parse(await readFile(log, 'utf8'))
+    const url = new URL(args.at(-1))
+    expect(url.searchParams.get('search_query')).toBe('opentubex')
+    expect(url.searchParams.get('sp')).toBe(decodeURIComponent(searchRequest.params))
+    const cache = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSessionSearchHistory)
+    expect(cache.flatMap(entry => entry.data)).toEqual([])
+  })
+}
+
+for (const invalidSearch of ['failed request', 'overlong query']) {
+  test(`does not offer an age hint or cookie retry after ${invalidSearch}`, async ({ app, page }) => {
+    await configureCookieSearch(app)
+    const emptyResponse = structuredClone(ageGate)
+    emptyResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents = []
+    await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: emptyResponse }))
+    await page.locator(sel.searchInput).fill('successful empty search')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toBeVisible()
+    const query = invalidSearch === 'overlong query' ? 'x'.repeat(101) : 'failed filtered search'
+    await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ status: 503, json: { error: { message: 'Search unavailable' } } }))
+    await page.locator('.navFilterButton').click()
+    await page.locator('.searchRadio', { hasText: 'Type' }).getByText('Videos', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await page.locator(sel.searchInput).fill(query)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText(invalidSearch === 'overlong query'
+      ? 'Search query is over the 100 character limit'
+      : 'Local API Error (Click to copy)')).toBeVisible()
+    await expect(page.locator('.card')).toBeVisible()
+    await expect(page.locator('.searchHint')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+  })
+}
+
+test('does not offer an empty-search cookie retry without cookies or with family-friendly search', async ({ app, page }) => {
+  const emptyResponse = structuredClone(ageGate)
+  emptyResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents = []
+  await page.route('https://www.youtube.com/youtubei/v1/search**', route => route.fulfill({ json: emptyResponse }))
+  await page.locator(sel.searchInput).fill('empty search without cookies')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.getByText('Your search results have returned 0 results')).toBeVisible()
+  await expect(page.getByText('YouTube may have age-restricted this search query.', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+  await configureCookieSearch(app)
+  await page.evaluate(async () => {
+    await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+  })
+  await page.locator(sel.searchInput).fill('empty family-friendly search')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.getByText('Your search results have returned 0 results')).toBeVisible()
+  await expect(page.getByText('YouTube may have age-restricted this search query.', { exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+})
 
 test('cookie search loads video, playlist, and channel avatars and disposes empty Watch hosts', async ({ app, page }) => {
   const errors = []

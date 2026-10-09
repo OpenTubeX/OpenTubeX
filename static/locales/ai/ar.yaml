@@ -2071,6 +2071,7 @@ Form Inputs:
   Default Value: "الافتراضي: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "قد يكون YouTube قد فرض قيدًا عمريًا على عبارة البحث هذه."
   Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."
 
 Storage Startup Error:

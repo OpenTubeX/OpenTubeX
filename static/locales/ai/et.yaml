@@ -2044,6 +2044,7 @@ Form Inputs:
   Default Value: "Vaikimisi: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube võib olla sellele otsingupäringule vanusepiirangu kehtestanud."
   Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
 
 Storage Startup Error:

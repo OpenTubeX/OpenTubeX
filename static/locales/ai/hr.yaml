@@ -2071,6 +2071,7 @@ Form Inputs:
   Default Value: "Zadano: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube je možda postavio dobno ograničenje za ovaj upit za pretraživanje."
   Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
 
 Storage Startup Error:

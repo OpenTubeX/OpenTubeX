@@ -2062,6 +2062,7 @@ Form Inputs:
   Default Value: "По умолчанию: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Возможно, YouTube установил возрастное ограничение для этого поискового запроса."
   Cookie Search Failed: "Поиск с настроенными файлами cookie не удался."
 
 Storage Startup Error:

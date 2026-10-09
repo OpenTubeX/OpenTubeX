@@ -2086,6 +2086,7 @@ Form Inputs:
   Default Value: "Типово: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Можливо, YouTube встановив вікове обмеження для цього пошукового запиту."
   Cookie Search Failed: "Пошук із налаштованими файлами cookie не вдався."
 
 Storage Startup Error:

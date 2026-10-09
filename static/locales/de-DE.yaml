@@ -49,6 +49,7 @@ Global:
 Search / Go to URL: Suchen / URL öffnen
   # In Filter Button
 Search Filters:
+  Possible Age Restriction Hint: "YouTube hat diese Suchanfrage möglicherweise mit einer Altersbeschränkung versehen."
   Cookie Search Failed: "Die Suche mit den konfigurierten Cookies ist fehlgeschlagen."
   Search Filters: Suchfilter
   Prioritize:

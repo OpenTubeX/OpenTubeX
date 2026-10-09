@@ -2041,6 +2041,7 @@ Form Inputs:
   Default Value: "Predefinito: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube potrebbe aver applicato una restrizione di età a questa ricerca."
   Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."
 
 Storage Startup Error:

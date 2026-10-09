@@ -2054,6 +2054,7 @@ Form Inputs:
   Default Value: "Default: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube mungkin telah menerapkan batasan usia pada kueri pencarian ini."
   Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."
 
 Storage Startup Error:

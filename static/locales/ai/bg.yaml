@@ -2067,6 +2067,7 @@ Form Inputs:
   Default Value: "По подразбиране: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube може да е наложил възрастово ограничение на тази заявка за търсене."
   Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
 
 Storage Startup Error:

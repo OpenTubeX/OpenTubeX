@@ -2093,6 +2093,7 @@ Form Inputs:
   Default Value: "Προεπιλογή: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Το YouTube ενδέχεται να έχει επιβάλει ηλικιακό περιορισμό σε αυτό το ερώτημα αναζήτησης."
   Cookie Search Failed: "Η αναζήτηση με τα ρυθμισμένα cookies απέτυχε."
 
 Storage Startup Error:

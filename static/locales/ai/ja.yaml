@@ -2041,6 +2041,7 @@ Form Inputs:
   Default Value: "既定: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube がこの検索クエリに年齢制限を適用している可能性があります。"
   Cookie Search Failed: "設定済みの Cookie を使用した検索に失敗しました。"
 
 Storage Startup Error:

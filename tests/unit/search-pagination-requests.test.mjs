@@ -41,6 +41,7 @@ function createSearch (backend) {
     isLoadingMore: { value: false },
     hasMoreResults: { value: true },
     apiUsed: { value: backend },
+    localSearchCompleted: { value: false },
     searchSettings: { value: searchSettings },
     searchPage: { value: 1 },
     nextPageRef: { value: null },

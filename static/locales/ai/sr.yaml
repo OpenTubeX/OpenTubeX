@@ -2121,6 +2121,7 @@ Form Inputs:
   Default Value: "Подразумевано: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube је можда поставио старосно ограничење за овај упит за претрагу."
   Cookie Search Failed: "Претрага са подешеним колачићима није успела."
 
 Storage Startup Error:
