@@ -199,3 +199,72 @@ test('translated view-all labels keep their padding beside the channel sort cont
     return bounds.right - range.getBoundingClientRect().right
   })).toBeGreaterThanOrEqual(15)
 })
+
+for (const theme of ['dark', 'light', 'catppuccinMacchiato']) {
+  test(`view-all uses subtle outlined-button feedback in ${theme}`, async ({ page }, testInfo) => {
+    await page.emulateMedia({ colorScheme: theme === 'light' ? 'light' : 'dark' })
+    if (theme === 'catppuccinMacchiato') {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .dispatch('updateBaseTheme', 'catppuccinMacchiato'))
+    }
+    await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+    const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
+    await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+      json: { author: 'Channel', authorId: CACHED_CHANNEL_ID, authorThumbnails: [], authorBanners: [], description: '', subCount: 0, totalViews: 0, joined: 0, tabs: ['videos'], relatedChannels: [], videos, latestVideos: videos }
+    }))
+    await openChannelTab(page, CACHED_CHANNEL_ID)
+    const button = page.locator('.channel-view-all:visible')
+    await expect(button).toBeVisible()
+    await page.mouse.move(0, 0)
+    const initial = await button.evaluate(element => {
+      const style = getComputedStyle(element)
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--accent-color)'
+      element.append(probe)
+      const accent = getComputedStyle(probe).color
+      probe.remove()
+      return { color: style.color, border: style.borderColor, accent }
+    })
+    expect(initial.color).toBe(initial.accent)
+    expect(initial.border).toBe(initial.accent)
+    const backgroundAlpha = () => button.evaluate(element => {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      const context = canvas.getContext('2d')
+      context.fillStyle = getComputedStyle(element).backgroundColor
+      context.fillRect(0, 0, 1, 1)
+      return context.getImageData(0, 0, 1, 1).data[3]
+    })
+    await expect.poll(backgroundAlpha).toBe(0)
+    for (const state of ['hover', 'focus', 'active']) {
+      if (state === 'hover') await button.hover()
+      if (state === 'focus') {
+        await page.mouse.move(0, 0)
+        await page.keyboard.press('Tab')
+        await button.focus()
+        await expect(button).toBeFocused()
+      }
+      if (state === 'active') {
+        await button.hover()
+        await page.mouse.down()
+      }
+      try {
+        await expect(button).toHaveCSS('color', initial.color)
+        await expect(button).toHaveCSS('border-color', initial.border)
+        // The shared 8% hover/focus and 12% active layers become 20/31 on an 8-bit canvas.
+        await expect.poll(backgroundAlpha, { message: `${state} uses the shared translucent state layer` }).toBe(state === 'active' ? 31 : 20)
+        if (state === 'hover') {
+          await testInfo.attach(`${theme}-view-all-hover`, { body: await button.screenshot(), contentType: 'image/png' })
+        }
+      } finally {
+        if (state === 'active') {
+          await page.mouse.move(0, 0)
+          await page.mouse.up()
+        }
+      }
+    }
+    await button.evaluate(element => { element.disabled = true })
+    await button.hover()
+    await expect.poll(backgroundAlpha).toBe(0)
+  })
+}
