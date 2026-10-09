@@ -3,10 +3,17 @@
     <div
       class="bannerContainer"
       :class="{
-        default: !bannerUrl
+        default: !bannerUrl || bannerLoadFailed
       }"
-      :style="{ '--banner-url': `url('${bannerUrl}')` }"
-    />
+    >
+      <FtRetryImage
+        v-if="bannerUrl && !bannerLoadFailed"
+        class="bannerImage"
+        :src="bannerUrl"
+        alt=""
+        @error="bannerLoadFailed = true"
+      />
+    </div>
 
     <div
       class="infoContainer"
@@ -533,6 +540,11 @@ onDeactivated(() => {
 })
 
 const thumbnailLoadFailed = ref(false)
+const bannerLoadFailed = ref(false)
+
+watch([() => props.id, () => props.bannerUrl], () => {
+  bannerLoadFailed.value = false
+})
 
 watch(() => props.thumbnailUrl, () => {
   thumbnailLoadFailed.value = false
