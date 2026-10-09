@@ -25,7 +25,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
     <img alt="CodeQL" src="https://img.shields.io/github/actions/workflow/status/OpenTubeX/OpenTubeX/codeql.yml?branch=development&amp;label=CodeQL&amp;style=for-the-badge" />
   </a>
   <a href="https://weblate.opentubex.org/engage/opentubex/">
-    <img alt="Translation status" src="https://img.shields.io/weblate/progress/opentubex?server=https%3A%2F%2Fweblate.opentubex.org&amp;style=for-the-badge&amp;logo=weblate&amp;logoColor=white" />
+    <img alt="Translation status" src="https://img.shields.io/weblate/progress/opentubex?server=https%3A%2F%2Fweblate.opentubex.org&amp;style=for-the-badge&amp;logo=weblate&amp;logoColor=white&amp;cacheSeconds=3600" />
   </a>
 </p>
 
@@ -192,7 +192,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
     <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
-    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" align="middle">
+    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" width="188" height="56" align="middle">
   </picture>
 </a>
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
