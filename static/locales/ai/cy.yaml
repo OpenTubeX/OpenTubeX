@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu | Mae hanes gwylio sy'n hŷn nag 1 diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} ddiwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} diwrnod wedi'i ddileu | Mae hanes gwylio sy'n hŷn na {days} o ddiwrnodau wedi'i ddileu
 Settings:
   Password Settings:
+    Failed to Save Password: "Methu cadw’r cyfrinair."
     Confirm Password: "Cadarnhau cyfrinair"
     Passwords Do Not Match: "Nid yw’r cyfrineiriau’n cyfateb."
   Navigation and Controls: "Llywio a rheolyddion"

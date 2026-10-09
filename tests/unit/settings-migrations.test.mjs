@@ -100,6 +100,32 @@ test('prefers the current AI video summary mode', () => {
 })
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const passwordUpdater = settingsSource.slice(settingsSource.indexOf('  updateSettingsPassword:'), settingsSource.indexOf('  grabUserSettings:'))
+
+for (const failure of [null, 'hash', 'write']) {
+  test(`password updater reports ${failure ?? 'success'} without committing a failed save`, async () => {
+    const commits = []
+    const errors = []
+    const writes = []
+    const actions = vm.runInNewContext(`({${passwordUpdater}})`, {
+      hashPassword: async () => {
+        if (failure === 'hash') throw new Error('hash failed')
+        return 'hashed-password'
+      },
+      DBSettingHandlers: { upsert: async (key, value) => {
+        if (failure === 'write') throw new Error('write failed')
+        writes.push([key, value])
+      } },
+      console: { error: error => errors.push(error.message) },
+    })
+    const result = await actions.updateSettingsPassword({ commit: (...args) => commits.push(args) }, 'password')
+    assert.equal(result, failure === null)
+    assert.deepEqual(commits, failure === null ? [['setSettingsPassword', 'hashed-password']] : [])
+    assert.deepEqual(writes, failure === null ? [['settingsPassword', 'hashed-password']] : [])
+    assert.deepEqual(errors, failure ? [`${failure} failed`] : [])
+  })
+}
+
 const tutorialSource = await readFile(new URL('../../src/renderer/helpers/tutorialState.js', import.meta.url), 'utf8')
 const LAST_USED_VERSION_SETTING_ID = tutorialSource.match(/LAST_USED_VERSION_SETTING_ID = '([^']+)'/)[1]
 const TUTORIAL_AUDIENCE_SETTING_ID = tutorialSource.match(/TUTORIAL_AUDIENCE_SETTING_ID = '([^']+)'/)[1]

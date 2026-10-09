@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: 已删除 {days} 天前的观看历史记录
 Settings:
   Password Settings:
+    Failed to Save Password: "无法保存密码。"
     Confirm Password: "确认密码"
     Passwords Do Not Match: "密码不匹配。"
   Navigation and Controls: "导航与控件"

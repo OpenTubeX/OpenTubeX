@@ -11,9 +11,9 @@ overrides:
   yauzl: '>=3.3.1'
 
 patchedDependencies:
-  '@capacitor/android@8.5.2': 12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b
+  '@capacitor/android@8.5.2': 9e4c0a7009f928aa7b8ad13bf587aed559c205aa799b4a8bd69d782fbe9dc33b
   '@capacitor/barcode-scanner@3.1.2': b4c45d0161b7a4f0e708d232e3d2067f01a39f1ffb5497b5c3c7f4df318c50f3
-  '@capacitor/share@8.0.3': 8b9142a7c145e767d460000f6c05041ce24e8d4f258b2dd168b18d53a5665ba4
+  '@capacitor/share@8.0.3': 61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb
   '@capawesome/capacitor-app-shortcuts@8.0.2': 2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a
   '@capawesome/capacitor-clipboard@0.1.2': 729c6071cbf0e196e2212b015677cdd162c287dca48137c24250c0d056c9fd5b
   overlayscrollbars@2.16.0: ae5b9ca0203a8d90d7b5f4593b2501ed0d2cc27665385fb8fbb31a427faa93f6
@@ -33,7 +33,7 @@ importers:
         version: 8.0.0(@capacitor/core@8.5.2)
       '@capacitor/android':
         specifier: ^8.5.2
-        version: 8.5.2(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.2)
+        version: 8.5.2(patch_hash=9e4c0a7009f928aa7b8ad13bf587aed559c205aa799b4a8bd69d782fbe9dc33b)(@capacitor/core@8.5.2)
       '@capacitor/app':
         specifier: ^8.1.2
         version: 8.1.2(@capacitor/core@8.5.2)
@@ -63,7 +63,7 @@ importers:
         version: 8.3.1(@capacitor/core@8.5.2)
       '@capacitor/share':
         specifier: ^8.0.3
-        version: 8.0.3(patch_hash=8b9142a7c145e767d460000f6c05041ce24e8d4f258b2dd168b18d53a5665ba4)(@capacitor/core@8.5.2)
+        version: 8.0.3(patch_hash=61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb)(@capacitor/core@8.5.2)
       '@capawesome/capacitor-app-shortcuts':
         specifier: ^8.0.2
         version: 8.0.2(patch_hash=2581c86d60ce7892c0b3136523994591d24ee7313bbc5fc9b4ad1c710719c70a)(@capacitor/core@8.5.2)
@@ -5163,7 +5163,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.2
 
-  '@capacitor/android@8.5.2(patch_hash=12c2128338ac622453e4a18693e731185c696f8870f9b9a5f4e86c49e948501b)(@capacitor/core@8.5.2)':
+  '@capacitor/android@8.5.2(patch_hash=9e4c0a7009f928aa7b8ad13bf587aed559c205aa799b4a8bd69d782fbe9dc33b)(@capacitor/core@8.5.2)':
     dependencies:
       '@capacitor/core': 8.5.2
 
@@ -5228,7 +5228,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.2
 
-  '@capacitor/share@8.0.3(patch_hash=8b9142a7c145e767d460000f6c05041ce24e8d4f258b2dd168b18d53a5665ba4)(@capacitor/core@8.5.2)':
+  '@capacitor/share@8.0.3(patch_hash=61a10a5a91f7c78b0670870fd26034ee015a175f24f79c0f9890ce03050a8adb)(@capacitor/core@8.5.2)':
     dependencies:
       '@capacitor/core': 8.5.2
 

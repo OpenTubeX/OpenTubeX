@@ -81,6 +81,7 @@ User Playlists:
     More videos could not be loaded.: Nie udało się wczytać kolejnych filmów.
 Settings:
   Password Settings:
+    Failed to Save Password: "Nie udało się zapisać hasła."
     Confirm Password: "Potwierdź hasło"
     Passwords Do Not Match: "Hasła nie są zgodne."
   Navigation and Controls: "Nawigacja i elementy sterujące"

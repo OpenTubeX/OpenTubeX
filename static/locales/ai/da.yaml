@@ -247,6 +247,7 @@ History:
   History Older Than Days Removed: Visningshistorik, der er ældre end 1 dag, er blevet slettet | Visningshistorik, der er ældre end {days} dage, er blevet slettet
 Settings:
   Password Settings:
+    Failed to Save Password: "Kunne ikke gemme adgangskoden."
     Confirm Password: "Bekræft adgangskode"
     Passwords Do Not Match: "Adgangskoderne stemmer ikke overens."
   Navigation and Controls: "Navigation og betjening"

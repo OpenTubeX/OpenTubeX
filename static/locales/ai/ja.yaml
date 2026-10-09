@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: '{days}日より古い視聴履歴を削除しました'
 Settings:
   Password Settings:
+    Failed to Save Password: "パスワードを保存できませんでした。"
     Confirm Password: "パスワードの確認"
     Passwords Do Not Match: "パスワードが一致しません。"
   Navigation and Controls: "ナビゲーションと操作"

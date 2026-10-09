@@ -1333,6 +1333,7 @@ Settings:
   Search Settings: Buscar ajustes
   No Settings Found: No se encontraron ajustes
   Password Settings:
+    Failed to Save Password: "No se pudo guardar la contraseña."
     Confirm Password: "Confirmar contraseña"
     Passwords Do Not Match: "Las contraseñas no coinciden."
     Password Settings: Contraseña

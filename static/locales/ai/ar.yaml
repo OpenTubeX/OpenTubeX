@@ -240,6 +240,7 @@ History:
   History Older Than Days Removed: 'تمت إزالة سجل المشاهدة الأقدم من {days} يوم | تمت إزالة سجل المشاهدة الأقدم من يوم واحد | تمت إزالة سجل المشاهدة الأقدم من يومين ({days}) | تمت إزالة سجل المشاهدة الأقدم من {days} أيام | تمت إزالة سجل المشاهدة الأقدم من {days} يومًا | تمت إزالة سجل المشاهدة الأقدم من {days} يوم'
 Settings:
   Password Settings:
+    Failed to Save Password: "تعذر حفظ كلمة المرور."
     Confirm Password: "تأكيد كلمة المرور"
     Passwords Do Not Match: "كلمتا المرور غير متطابقتين."
   Navigation and Controls: "التنقل وعناصر التحكم"

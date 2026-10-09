@@ -8,14 +8,20 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import androidx.test.runner.lifecycle.Stage;
 import com.capacitorjs.plugins.share.SharePlugin;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginResult;
 import java.lang.reflect.Field;
 import java.io.InputStream;
 import java.util.Map;
@@ -24,6 +30,88 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class CapacitorShareResultTest {
+
+    @Test public void pendingShareSurvivesRepeatedActivityRecreation() throws Exception {
+        assertRestoredShare(false);
+    }
+
+    @Test public void selfShareSurvivesRepeatedActivityRecreation() throws Exception {
+        assertRestoredShare(true);
+    }
+
+    private void assertRestoredShare(boolean selfShare) throws Exception {
+        int[] code = new int[1];
+        Bundle[] saved = new Bundle[1];
+        ActivityLifecycleCallback stopRenderer = (activity, stage) -> {
+            if (activity instanceof MainActivity main && stage == Stage.CREATED) {
+                main.getBridge().getWebView().loadUrl("about:blank");
+            }
+        };
+        ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(stopRenderer);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> {
+                activity.getBridge().getWebView().loadUrl("about:blank");
+                SharePlugin plugin = (SharePlugin) activity.getBridge().getPlugin("Share").getInstance();
+                plugin.share(new RecordingCall("share-result-recreate"));
+                try {
+                    ActivityResultRegistry registry = (ActivityResultRegistry) field(SharePlugin.class, "shareResults").get(plugin);
+                    code[0] = requestCode(registry, launcher(plugin));
+                    Bundle state = new Bundle();
+                    activity.onSaveInstanceState(state);
+                    assertEquals("Capacitor saves the pending share call", "Share", state.getString("capacitorLastActivityPluginId"));
+                    saved[0] = state;
+                } catch (ReflectiveOperationException error) {
+                    throw new AssertionError(error);
+                }
+            });
+            // ActivityScenario cannot foreground an Activity behind a system
+            // chooser. Restore its pending snapshot in a new Activity, as after
+            // process death, then exercise real recreation while still pending.
+            dismissChoosers(1);
+            scenario.recreate();
+            scenario.onActivity(activity -> activity.getBridge().restoreInstanceState(saved[0]));
+            for (int i = 0; i < 2; i++) {
+                scenario.recreate();
+            }
+            scenario.onActivity(activity -> {
+                activity.getBridge().getWebView().loadUrl("about:blank");
+                SharePlugin plugin = (SharePlugin) activity.getBridge().getPlugin("Share").getInstance();
+                PluginResult[] restored = new PluginResult[1];
+                activity.getBridge().getApp().setAppRestoredListener(result -> restored[0] = result);
+                try {
+                    ActivityResultRegistry registry = (ActivityResultRegistry) field(SharePlugin.class, "shareResults").get(plugin);
+                    assertEquals("The recreated chooser keeps its request code", code[0], requestCode(registry, launcher(plugin)));
+                    Bundle pendingState = new Bundle();
+                    activity.onSaveInstanceState(pendingState);
+                    assertEquals("The original share options survive repeated recreation", "https://youtu.be/abcdefghijk", new JSObject(pendingState.getString("capacitorLastPluginCallOptions")).getString("url"));
+                    if (selfShare) {
+                        String nonce = (String) field(SharePlugin.class, "expectedNonce").get(plugin);
+                        BroadcastReceiver receiver = (BroadcastReceiver) field(SharePlugin.class, "broadcastReceiver").get(plugin);
+                        receiver.onReceive(activity, new Intent(Intent.EXTRA_CHOSEN_COMPONENT)
+                            .putExtra("_share_nonce", nonce)
+                            .putExtra(Intent.EXTRA_CHOSEN_COMPONENT, new ComponentName(activity, MainActivity.class)));
+                    } else {
+                        activity.onActivityResult(code[0], Activity.RESULT_OK, null);
+                    }
+                    assertNotNull("Capacitor delivers the restored share result", restored[0]);
+                    assertEquals("Share", restored[0].getWrappedResult().getString("pluginId"));
+                    assertEquals("share", restored[0].getWrappedResult().getString("methodName"));
+                    assertEquals(true, restored[0].getWrappedResult().getBoolean("success"));
+                    assertEquals(selfShare ? activity.getPackageName() : "", restored[0].getWrappedResult().getJSObject("data").getString("activityType"));
+                    assertNoShareRegistryEntries(registry);
+                    Bundle state = new Bundle();
+                    activity.onSaveInstanceState(state);
+                    assertNull("Completed shares are no longer persisted", state.getString("capacitorLastActivityPluginId"));
+                } catch (Exception error) {
+                    throw new AssertionError(error);
+                }
+            });
+        } finally {
+            ActivityLifecycleMonitorRegistry.getInstance().removeLifecycleCallback(stopRenderer);
+            dismissChoosers(2);
+        }
+    }
+
     private static class RecordingCall extends PluginCall {
         int completions;
 
@@ -73,7 +161,7 @@ public class CapacitorShareResultTest {
                 }
             });
         } finally {
-            dismissChoosers();
+            dismissChoosers(2);
         }
     }
 
@@ -119,17 +207,29 @@ public class CapacitorShareResultTest {
                 }
             });
         } finally {
-            dismissChoosers();
+            dismissChoosers(2);
         }
         assertNoShareRegistryEntries(registry[0]);
     }
 
-    private static void dismissChoosers() throws Exception {
+    private static void dismissChoosers(int backPresses) throws Exception {
+        if (backPresses == 1) {
+            long deadline = SystemClock.uptimeMillis() + 10000;
+            boolean chooserVisible = false;
+            while (!chooserVisible && SystemClock.uptimeMillis() < deadline) {
+                AccessibilityNodeInfo root = InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
+                String owner = root == null ? "" : String.valueOf(root.getPackageName());
+                chooserVisible = owner.equals("android") || owner.equals("com.android.intentresolver");
+                if (!chooserVisible) SystemClock.sleep(50);
+            }
+            assertTrue("The system chooser is ready before cancelling it", chooserVisible);
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().waitForIdle(100, 5000);
+        }
         // The chooser belongs to Android, so ordinary instrumentation key
         // injection cannot dismiss it on older releases.
         try (InputStream output = new ParcelFileDescriptor.AutoCloseInputStream(
             InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                .executeShellCommand("input keyevent BACK; input keyevent BACK"))) {
+                .executeShellCommand(backPresses == 1 ? "input keyevent BACK" : "input keyevent BACK; input keyevent BACK"))) {
             while (output.read() != -1) { }
         }
     }

@@ -249,6 +249,7 @@ History:
   History Older Than Days Removed: Sjåhistorikk eldre enn 1 dag er fjerna | Sjåhistorikk eldre enn {days} dagar er fjerna
 Settings:
   Password Settings:
+    Failed to Save Password: "Klarte ikkje å lagre passordet."
     Confirm Password: "Stadfest passord"
     Passwords Do Not Match: "Passorda samsvarar ikkje."
   Navigation and Controls: "Navigasjon og kontrollar"

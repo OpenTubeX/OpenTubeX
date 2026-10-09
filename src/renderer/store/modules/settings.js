@@ -1273,8 +1273,10 @@ const customActions = {
       await DBSettingHandlers.upsert('settingsPassword', hashedPassword)
 
       commit('setSettingsPassword', hashedPassword)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

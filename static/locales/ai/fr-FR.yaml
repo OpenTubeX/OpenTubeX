@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: L’historique de visionnage datant de plus de 1 jour a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé | L’historique de visionnage datant de plus de {days} jours a été supprimé
 Settings:
   Password Settings:
+    Failed to Save Password: "Impossible d’enregistrer le mot de passe."
     Confirm Password: "Confirmer le mot de passe"
     Passwords Do Not Match: "Les mots de passe ne correspondent pas."
   Navigation and Controls: "Navigation et commandes"

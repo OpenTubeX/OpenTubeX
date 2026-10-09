@@ -58,6 +58,7 @@
 
 <script setup>
 import { computed, ref, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import FtInput from '../FtInput/FtInput.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -65,6 +66,9 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 
 import store from '../../store/index'
+import { ERROR_TOAST_ICON, showToast } from '../../helpers/utils'
+
+const { t } = useI18n()
 
 const settingsPassword = computed(() => {
   return store.getters.getSettingsPassword
@@ -76,15 +80,24 @@ const hasStoredPassword = computed(() => {
 
 const password = ref('')
 const confirmedPassword = ref('')
+const savingPassword = ref(false)
 const confirmationInput = useTemplateRef('confirmationInput')
-const canSetPassword = computed(() => password.value !== '' && password.value === confirmedPassword.value)
+const canSetPassword = computed(() => !savingPassword.value && password.value !== '' && password.value === confirmedPassword.value)
 const passwordMismatch = computed(() => confirmedPassword.value !== '' && password.value !== confirmedPassword.value)
 
-function handleSetPassword() {
+async function handleSetPassword() {
   if (!canSetPassword.value) return
-  store.dispatch('updateSettingsPassword', password.value)
-  password.value = ''
-  confirmedPassword.value = ''
+  savingPassword.value = true
+  try {
+    if (!await store.dispatch('updateSettingsPassword', password.value)) {
+      showToast({ message: t('Settings.Password Settings.Failed to Save Password'), icon: ERROR_TOAST_ICON })
+      return
+    }
+    password.value = ''
+    confirmedPassword.value = ''
+  } finally {
+    savingPassword.value = false
+  }
 }
 
 function handleRemovePassword() {

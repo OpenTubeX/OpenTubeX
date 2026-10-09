@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: Egun 1 baino zaharragoa den ikustaldi-historia kendu da | {days} egun baino zaharragoa den ikustaldi-historia kendu da
 Settings:
   Password Settings:
+    Failed to Save Password: "Ezin izan da pasahitza gorde."
     Confirm Password: "Berretsi pasahitza"
     Passwords Do Not Match: "Pasahitzak ez datoz bat."
   Navigation and Controls: "Nabigazioa eta kontrolak"

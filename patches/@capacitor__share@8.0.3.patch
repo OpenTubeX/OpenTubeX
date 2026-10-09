@@ -1,9 +1,12 @@
 diff --git a/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java b/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
-index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4e57b2c14 100644
+index 9b97dc0135f38236f2733ae82d972ca305f807ef..2fd34f71e362cf964b3c0290aa630668fde2fefd 100644
 --- a/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
 +++ b/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java
-@@ -7,6 +7,11 @@ import android.net.Uri;
+@@ -5,8 +5,14 @@ import android.app.PendingIntent;
+ import android.content.*;
+ import android.net.Uri;
  import android.os.Build;
++import android.os.Bundle;
  import android.webkit.MimeTypeMap;
  import androidx.activity.result.ActivityResult;
 +import androidx.activity.result.ActivityResultLauncher;
@@ -14,7 +17,7 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
  import androidx.core.content.ContextCompat;
  import androidx.core.content.FileProvider;
  import com.getcapacitor.JSArray;
-@@ -14,7 +19,6 @@ import com.getcapacitor.JSObject;
+@@ -14,7 +20,6 @@ import com.getcapacitor.JSObject;
  import com.getcapacitor.Plugin;
  import com.getcapacitor.PluginCall;
  import com.getcapacitor.PluginMethod;
@@ -22,36 +25,39 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
  import com.getcapacitor.annotation.CapacitorPlugin;
  import java.io.File;
  import java.util.ArrayList;
-@@ -30,6 +34,16 @@ public class SharePlugin extends Plugin {
+@@ -30,6 +35,19 @@ public class SharePlugin extends Plugin {
      private BroadcastReceiver broadcastReceiver;
      private boolean stopped = false;
      private boolean isPresenting = false;
 +    private PluginCall presentingCall;
 +    private ActivityResultLauncher<Intent> shareLauncher;
 +    private int shareRequestCode = -1;
++    private String shareKey;
 +    private final ActivityResultRegistry shareResults = new ActivityResultRegistry() {
 +        @Override
++        @SuppressWarnings("deprecation")
 +        public <I, O> void onLaunch(int requestCode, ActivityResultContract<I, O> contract, I input, ActivityOptionsCompat options) {
 +            shareRequestCode = requestCode;
-+            getActivity().getActivityResultRegistry().onLaunch(requestCode, contract, input, options);
++            // Record the call in Capacitor's Activity-restoration flow too.
++            bridge.startActivityForPluginWithResult(presentingCall, contract.createIntent(getContext(), input), requestCode);
 +        }
 +    };
      private ComponentName chosenComponent;
      private String expectedNonce;
  
-@@ -57,6 +71,11 @@ public class SharePlugin extends Plugin {
+@@ -57,6 +75,11 @@ public class SharePlugin extends Plugin {
                  if (component != null) {
                      chosenComponent = component;
                      expectedNonce = null;
 +                    // Returning to our singleTask activity does not deliver a
 +                    // chooser activity result. Complete that share on selection.
-+                    if (component.getPackageName().equals(getContext().getPackageName()) && presentingCall != null) {
++                    if (component.getPackageName().equals(getContext().getPackageName()) && isPresenting) {
 +                        dispatchActivityResult(shareRequestCode, Activity.RESULT_OK, null);
 +                    }
                  }
              }
          };
-@@ -73,8 +92,27 @@ public class SharePlugin extends Plugin {
+@@ -73,8 +96,28 @@ public class SharePlugin extends Plugin {
          return intent.getParcelableExtra(string);
      }
  
@@ -67,6 +73,7 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
 +            if (shareLauncher == launcher) {
 +                shareLauncher = null;
 +                shareRequestCode = -1;
++                shareKey = null;
 +            }
 +        }
 +        return handled;
@@ -80,7 +87,7 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
          if (result.getResultCode() == Activity.RESULT_CANCELED && !stopped) {
              call.reject("Share canceled");
          } else {
-@@ -82,8 +120,6 @@ public class SharePlugin extends Plugin {
+@@ -82,8 +125,6 @@ public class SharePlugin extends Plugin {
              callResult.put("activityType", chosenComponent != null ? chosenComponent.getPackageName() : "");
              call.resolve(callResult);
          }
@@ -89,7 +96,7 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
      }
  
      @PluginMethod
-@@ -158,7 +194,18 @@ public class SharePlugin extends Plugin {
+@@ -158,7 +199,19 @@ public class SharePlugin extends Plugin {
              chooser.addCategory(Intent.CATEGORY_DEFAULT);
              stopped = false;
              isPresenting = true;
@@ -99,8 +106,9 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
 +            getActivity().runOnUiThread(() -> {
 +                // Each chooser owns its callback and request code. Capacitor's
 +                // shared callback looks up the latest call, even for old results.
++                shareKey = "capacitor-share-" + nonce;
 +                shareLauncher = shareResults.register(
-+                    "capacitor-share-" + nonce,
++                    shareKey,
 +                    new ActivityResultContracts.StartActivityForResult(),
 +                    result -> activityResult(call, result)
 +                );
@@ -109,10 +117,46 @@ index 9b97dc0135f38236f2733ae82d972ca305f807ef..28572e9030cee93ce74e5a39515cf2c4
          } else {
              call.reject("Can't share while sharing is in progress");
          }
-@@ -207,6 +254,8 @@ public class SharePlugin extends Plugin {
+@@ -204,9 +257,44 @@ public class SharePlugin extends Plugin {
+         }
+     }
+ 
++    @Override
++    protected Bundle saveInstanceState() {
++        if (!isPresenting || shareLauncher == null) return null;
++        Bundle state = new Bundle();
++        shareResults.onSaveInstanceState(state);
++        state.putString("shareKey", shareKey);
++        state.putInt("shareRequestCode", shareRequestCode);
++        state.putString("expectedNonce", expectedNonce);
++        state.putParcelable("chosenComponent", chosenComponent);
++        state.putBoolean("stopped", stopped);
++        return state;
++    }
++
++    @Override
++    @SuppressWarnings("deprecation")
++    protected void restoreState(Bundle state) {
++        shareKey = state.getString("shareKey");
++        shareRequestCode = state.getInt("shareRequestCode");
++        expectedNonce = state.getString("expectedNonce");
++        chosenComponent = state.getParcelable("chosenComponent");
++        stopped = state.getBoolean("stopped");
++        isPresenting = true;
++        shareResults.onRestoreInstanceState(state);
++        shareLauncher = shareResults.register(shareKey, new ActivityResultContracts.StartActivityForResult(), result -> {
++            if (!isPresenting) return;
++            // Leave the restored call in Capacitor until a result arrives so
++            // another recreation can persist it again.
++            presentingCall = bridge.getPluginCallForLastActivity();
++            activityResult(presentingCall, result);
++        });
++    }
++
      @Override
      protected void handleOnDestroy() {
          expectedNonce = null;
++        isPresenting = false;
 +        presentingCall = null;
 +        if (shareLauncher != null) dispatchActivityResult(shareRequestCode, Activity.RESULT_CANCELED, null);
          if (broadcastReceiver != null) {

@@ -1814,6 +1814,7 @@ Settings:
   Search Settings: Search settings
   No Settings Found: No settings found
   Password Settings:
+    Failed to Save Password: "Failed to save password."
     Confirm Password: "Confirm password"
     Passwords Do Not Match: "Passwords do not match."
     Password Settings: Password

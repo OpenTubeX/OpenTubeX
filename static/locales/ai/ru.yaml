@@ -213,6 +213,7 @@ History:
   History Older Than Days Removed: История просмотра старше 1 дня удалена | История просмотра старше {days} дней удалена | История просмотра старше {days} дней удалена
 Settings:
   Password Settings:
+    Failed to Save Password: "Не удалось сохранить пароль."
     Confirm Password: "Подтвердите пароль"
     Passwords Do Not Match: "Пароли не совпадают."
   Navigation and Controls: "Навигация и элементы управления"

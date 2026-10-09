@@ -94,12 +94,14 @@ try {
   assert.ok(page, 'Android WebView is available')
   page.setDefaultTimeout(5000)
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30000 })
-  if (await page.locator('.tutorialOverlay').isVisible()) await page.getByRole('button', { name: 'Skip', exact: true }).click()
   savedSettings = await page.evaluate(() => {
     const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
     return Object.fromEntries(['CurrentLocale', 'BaseTheme', 'SystemDarkTheme', 'SystemLightTheme', 'MainColor', 'SecColor', 'UiScale', 'ReducedMotion', 'EnableDownloads'].map(key => [key, getters[`get${key}`]]))
   })
   await settings({ CurrentLocale: 'en-US', BaseTheme: 'system', SystemDarkTheme: 'dark', SystemLightTheme: 'light', MainColor: 'Red', SecColor: 'Blue', EnableDownloads: true, UiScale: 100, ReducedMotion: 'enabled' })
+  if (await page.locator('.tutorialOverlay').isVisible()) {
+    await page.locator('.tutorialOverlay').getByRole('button', { name: /^(Skip|Got it)$/ }).click()
+  }
   if (await dialog().isVisible()) await dialog().getByRole('button', { name: 'Cancel', exact: true }).press('Enter')
   // Fresh installs can show a managed-tools download notification over Cancel.
   for (const toast of await page.locator('.toast-slot').all()) await toast.locator('..').press('Escape')

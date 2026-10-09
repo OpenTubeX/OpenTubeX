@@ -3,6 +3,36 @@ import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
 const storedTestPassword = await hashPassword('test-settings-password')
 
+test('keeps both password entries after a failed save and allows retrying', async ({ page }, testInfo) => {
+  const privacy = await goToSettingsSection(page, 'privacy')
+  const password = privacy.getByLabel('Password', { exact: true })
+  const confirmation = privacy.getByLabel('Confirm password', { exact: true })
+  const save = privacy.getByRole('button', { name: /^Set password$/i })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const action = store._actions.updateSettingsPassword
+    store._actions.updateSettingsPassword = [() => new Promise(resolve => {
+      window.finishFailedPasswordSave = () => resolve(false)
+    })]
+    window.restorePasswordUpdater = () => { store._actions.updateSettingsPassword = action }
+  })
+  await password.fill('test-settings-password')
+  await confirmation.fill('test-settings-password')
+  await save.click()
+  await expect(save).toBeDisabled()
+  await expect(password).toHaveValue('test-settings-password')
+  await expect(confirmation).toHaveValue('test-settings-password')
+  await page.evaluate(() => window.finishFailedPasswordSave())
+  await expect(password).toHaveValue('test-settings-password')
+  await expect(confirmation).toHaveValue('test-settings-password')
+  await expect(save).toBeEnabled()
+  await expect(page.locator('.toast', { hasText: 'Failed to save password.' })).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath('password-save-failure.png'), animations: 'disabled' })
+  await page.evaluate(() => window.restorePasswordUpdater())
+  await save.click()
+  await expect(privacy.getByRole('button', { name: /^Remove password$/i })).toBeVisible()
+})
+
 test('requires matching password confirmation before protecting settings', async ({ page }, testInfo) => {
   const privacy = await goToSettingsSection(page, 'privacy')
   const password = privacy.getByLabel('Password', { exact: true })

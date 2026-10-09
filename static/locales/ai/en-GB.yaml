@@ -237,6 +237,7 @@ History:
   History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
   Password Settings:
+    Failed to Save Password: "Failed to save password."
     Confirm Password: "Confirm password"
     Passwords Do Not Match: "Passwords do not match."
   Navigation and Controls: "Navigation & controls"

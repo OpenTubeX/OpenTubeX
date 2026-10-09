@@ -1482,6 +1482,7 @@ Settings:
   Search Settings: Cerca a la configuració
   No Settings Found: No s'ha trobat cap opció
   Password Settings:
+    Failed to Save Password: "No s’ha pogut desar la contrasenya."
     Confirm Password: "Confirma la contrasenya"
     Passwords Do Not Match: "Les contrasenyes no coincideixen."
     Password Settings: Contrasenya

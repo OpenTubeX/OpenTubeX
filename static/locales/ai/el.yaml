@@ -240,6 +240,7 @@ History:
   History Older Than Days Removed: Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από 1 ημέρα | Αφαιρέθηκε το ιστορικό παρακολούθησης που ήταν παλαιότερο από {days} ημέρες
 Settings:
   Password Settings:
+    Failed to Save Password: "Αποτυχία αποθήκευσης του κωδικού πρόσβασης."
     Confirm Password: "Επιβεβαίωση κωδικού πρόσβασης"
     Passwords Do Not Match: "Οι κωδικοί πρόσβασης δεν ταιριάζουν."
   Navigation and Controls: "Πλοήγηση και στοιχεία ελέγχου"

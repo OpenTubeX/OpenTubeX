@@ -240,6 +240,7 @@ History:
   History Older Than Days Removed: Історію перегляду, давнішу за 1 день, видалено | Історію перегляду, давнішу за {days} дні, видалено | Історію перегляду, давнішу за {days} днів, видалено
 Settings:
   Password Settings:
+    Failed to Save Password: "Не вдалося зберегти пароль."
     Confirm Password: "Підтвердьте пароль"
     Passwords Do Not Match: "Паролі не збігаються."
   Navigation and Controls: "Навігація та елементи керування"

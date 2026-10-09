@@ -240,6 +240,7 @@ History:
   History Older Than Days Removed: Đã xóa lịch sử xem cũ hơn {days} ngày
 Settings:
   Password Settings:
+    Failed to Save Password: "Không thể lưu mật khẩu."
     Confirm Password: "Xác nhận mật khẩu"
     Passwords Do Not Match: "Mật khẩu không khớp."
   Navigation and Controls: "Điều hướng và điều khiển"

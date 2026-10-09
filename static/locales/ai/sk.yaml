@@ -236,6 +236,7 @@ History:
   History Older Than Days Removed: História sledovania staršia ako 1 deň bola odstránená | História sledovania staršia ako {days} dni bola odstránená | História sledovania staršia ako {days} dní bola odstránená
 Settings:
   Password Settings:
+    Failed to Save Password: "Heslo sa nepodarilo uložiť."
     Confirm Password: "Potvrďte heslo"
     Passwords Do Not Match: "Heslá sa nezhodujú."
   Navigation and Controls: "Navigácia a ovládacie prvky"

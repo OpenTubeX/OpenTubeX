@@ -1394,6 +1394,7 @@ Settings:
   Search Settings: Ieškoti nustatymuose
   No Settings Found: Nustatymų nerasta
   Password Settings:
+    Failed to Save Password: "Nepavyko išsaugoti slaptažodžio."
     Confirm Password: "Patvirtinkite slaptažodį"
     Passwords Do Not Match: "Slaptažodžiai nesutampa."
     Password Settings: Slaptažodis

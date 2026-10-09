@@ -238,6 +238,7 @@ History:
   History Older Than Days Removed: 1 gündən köhnə baxış tarixçəsi silindi | {days} gündən köhnə baxış tarixçəsi silindi
 Settings:
   Password Settings:
+    Failed to Save Password: "Parolu yadda saxlamaq mümkün olmadı."
     Confirm Password: "Şifrəni təsdiqləyin"
     Passwords Do Not Match: "Şifrələr uyğun gəlmir."
   Navigation and Controls: "Naviqasiya və idarəetmə elementləri"
