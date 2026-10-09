@@ -550,18 +550,22 @@ test('Android wide phone layout keeps previews below the header beside vertical 
     })
     assert.ok(image.width > 0 && image.height > 0)
     const preview = await dialog.locator('.capacitorTabPreview').boundingBox()
+    assert.ok(preview, 'the compact preview must have visible bounds')
     assert.ok(Math.abs(preview.width / preview.height - 16 / 9) < 0.01,
       'wide phone previews must keep their compact landscape dimensions')
   } finally {
     clearTimeout(keepAlive)
-    const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-    if (await close.isVisible()) await close.click()
-    if (saved) await page.evaluate(async saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-      store.commit('setTabsState', saved.tabs)
-      store.commit('setPresentedTab', saved.tabs.presentedTabId)
-    }, saved)
-    await browser.close()
+    try {
+      const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+      if (await close.isVisible()) await close.click()
+      if (saved) await page.evaluate(async saved => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+        store.commit('setTabsState', saved.tabs)
+        store.commit('setPresentedTab', saved.tabs.presentedTabId)
+      }, saved)
+    } finally {
+      await browser.close()
+    }
   }
 })
