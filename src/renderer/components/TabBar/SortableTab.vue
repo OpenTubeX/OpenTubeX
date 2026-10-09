@@ -39,20 +39,15 @@
             class="groupBadge"
             aria-hidden="true"
           />
-          <span
-            v-if="tab.isLoading"
-            class="tabLoadingDot"
-            aria-hidden="true"
-          />
           <FtIcon
-            v-else-if="tab.isPlaying"
+            v-if="tab.isPlaying"
             :icon="['fas', 'play']"
             class="playingIcon"
             aria-hidden="true"
           />
           <span
             v-if="showIcon && usableTabAvatarUrl"
-            v-show="!tab.isLoading && !tab.isPlaying"
+            v-show="!tab.isPlaying"
             class="tabAvatarContainer"
           >
             <FtRetryImage
@@ -65,13 +60,18 @@
             />
           </span>
           <FtIcon
-            v-if="!tab.isLoading && !tab.isPlaying && showIcon && !usableTabAvatarUrl && tabPageIcon"
+            v-if="!tab.isPlaying && showIcon && !usableTabAvatarUrl && tabPageIcon"
             :icon="tabPageIcon"
             class="tabPageIcon"
             aria-hidden="true"
           />
           <span class="tabTitleText">{{ displayTitle }}</span>
         </span>
+        <span
+          v-if="tab.isLoading"
+          class="tabLoadingLine"
+          aria-hidden="true"
+        />
         <button
           class="closeButton"
           :aria-label="closeLabel"
@@ -330,10 +330,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   gap: 4px;
 }
 
-.tab.loading {
-  opacity: 0.8;
-}
-
 .tab.unloaded .tabTitle {
   color: var(--secondary-text-color);
   opacity: 0.72;
@@ -479,6 +475,52 @@ watch(tabAvatarUrl, (avatarUrl) => {
   font-size: 10px;
 }
 
-</style>
+/* Clip only the loading streak so it cannot spill into adjacent tabs. */
+.tabLoadingLine {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 6px;
+  overflow: clip;
+  pointer-events: none;
+  border-end-start-radius: inherit;
+  border-end-end-radius: inherit;
+}
 
-<style scoped src="./TabLoadingDot.css" />
+.tabLoadingLine::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  inset-block-end: 0;
+  inline-size: 70%;
+  block-size: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-color) 75%, var(--primary-text-color));
+  filter: drop-shadow(0 -1px 2px var(--accent-color));
+  animation: tab-loading-sweep 1.5s ease-in-out infinite;
+}
+
+@keyframes tab-loading-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(143%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabLoadingLine::after {
+    animation: none;
+    inline-size: 100%;
+    background: var(--accent-color);
+  }
+}
+
+:root[data-reduced-motion='reduce'] .tabLoadingLine::after {
+  animation: none;
+  inline-size: 100%;
+  background: var(--accent-color);
+}
+</style>

@@ -397,7 +397,7 @@ test.describe('tab bar', () => {
   test('uses one utility window for Settings and Downloads', async ({ page }) => {
     const routeBeforeOpening = page.url()
     await goTo(page, 'settings')
-    await expect(page.locator(`${sel.activeTab} .tabLoadingDot`)).toHaveCount(0)
+    await expect(page.locator(`${sel.activeTab} .tabLoadingLine`)).toHaveCount(0)
     await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
 
@@ -433,14 +433,58 @@ test.describe('tab bar', () => {
     await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
   })
 
-  test('does not show a cached watch avatar before its loading indicator settles', async ({ app, page }) => {
+  test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/loading-line',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    const line = tab.locator('.tabLoadingLine')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), watchTab.id)
+    await expect(line).toBeVisible()
+    await expect(tab.locator('.tabPageIcon')).toBeVisible()
+
+    for (const zoom of [1, 0.95, 1.25]) {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      for (const position of ['top', 'bottom', 'left', 'right']) {
+        await page.evaluate(position => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        }, position)
+        await expect.poll(() => line.evaluate(element => {
+          const tab = element.closest('.tab').getBoundingClientRect()
+          const line = element.getBoundingClientRect()
+          return line.left >= tab.left && line.right <= tab.right &&
+            Math.abs(line.bottom - tab.bottom) < 2
+        })).toBe(true)
+      }
+    }
+
+    await page.evaluate(id => window.ftElectron.tabs.setPinned(id, true), watchTab.id)
+    await expect(line).toBeVisible()
+    await page.evaluate(id => window.ftElectron.tabs.setPlaybackState('playing', id), watchTab.id)
+    await expect(tab.locator('.playingIcon')).toBeVisible()
+    await expect(line).toBeVisible()
+
+    const animationName = () => line.evaluate(element => getComputedStyle(element, '::after').animationName)
+    expect(await animationName()).not.toBe('none')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    expect(await animationName()).toBe('none')
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+    expect(await animationName()).toBe('none')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
+    await expect(line).toHaveCount(0)
+    await expect(tab.locator('.playingIcon')).toBeVisible()
+  })
+
+  test('keeps a cached watch avatar visible while loading', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
     const videoId = 'jNQXAC9IVRw'
     await page.evaluate(({ videoId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      // Keep the tab on its avatar after loading so this test observes the
-      // loader/avatar handoff rather than racing the autoplay play icon.
+      // Keep autoplay from replacing the avatar with the playback icon.
       store.commit('setAutoplayVideos', false)
       store.commit('setVideoAvatar', {
         videoId,
@@ -452,7 +496,7 @@ test.describe('tab bar', () => {
         for (const tab of document.querySelectorAll('.tab')) {
           window.__watchTabIconStates.push({
             id: tab.dataset.tabId,
-            loading: tab.querySelector('.tabLoadingDot') != null,
+            loading: tab.querySelector('.tabLoadingLine') != null,
             avatar: tab.querySelector('.tabAvatar')?.checkVisibility({ visibilityProperty: true }) === true
           })
         }
@@ -472,8 +516,8 @@ test.describe('tab bar', () => {
     }, { videoId })
 
     const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
-    await expect(tab.locator('.tabLoadingDot')).toBeVisible()
-    await expect(tab.locator('.tabLoadingDot')).toHaveCount(0)
+    await expect(tab.locator('.tabLoadingLine')).toBeVisible()
+    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
     await expect.poll(() => page.evaluate(tabId => (
       window.__watchTabIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
     ), watchTab.id)).toBe(true)
@@ -485,7 +529,7 @@ test.describe('tab bar', () => {
     const lastLoadingIndex = states.findLastIndex(state => state.loading)
 
     expect(lastLoadingIndex).toBeGreaterThanOrEqual(0)
-    expect(states.slice(0, lastLoadingIndex + 1).some(state => state.avatar)).toBe(false)
+    expect(states.some(state => state.loading && state.avatar)).toBe(true)
     expect(states.slice(lastLoadingIndex + 1).some(state => state.avatar)).toBe(true)
   })
 

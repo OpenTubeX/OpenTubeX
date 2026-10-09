@@ -3146,7 +3146,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
       for (const tab of document.querySelectorAll('.tab')) {
         window.__backgroundWatchIconStates.push({
           id: tab.dataset.tabId,
-          loading: tab.querySelector('.tabLoadingDot') != null,
+          loading: tab.querySelector('.tabLoadingLine') != null,
           avatar: tab.querySelector('.tabAvatar') != null,
           pageIcon: tab.querySelector('.tabPageIcon') != null
         })
@@ -3166,7 +3166,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   }))
   const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
 
-  await expect(tab.locator('.tabLoadingDot')).toBeVisible()
+  await expect(tab.locator('.tabLoadingLine')).toBeVisible()
   const avatarCached = await page.evaluate(async tabId => {
     const avatarBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg=='
     const avatarBytes = Uint8Array.from(atob(avatarBase64), character => character.charCodeAt(0))
@@ -3177,7 +3177,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
     )
   }, watchTab.id)
   expect(avatarCached).toBe(true)
-  await expect(tab.locator('.tabLoadingDot')).toHaveCount(0)
+  await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
   await expect.poll(() => page.evaluate(tabId => (
     window.__backgroundWatchIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
   ), watchTab.id)).toBe(true)
@@ -3188,7 +3188,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   )
   expect(states.some(state => state.loading)).toBe(true)
   expect(states.some(state => !state.loading && state.avatar)).toBe(true)
-  expect(states.some(state => state.loading && state.pageIcon)).toBe(false)
+  expect(states.some(state => state.loading && state.pageIcon)).toBe(true)
 })
 
 test('keeps background comment loading local to the loaded watch page', async ({ app, page }) => {
