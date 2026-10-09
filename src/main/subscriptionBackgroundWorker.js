@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { createSubscriptionBackgroundScheduler } from './subscriptionBackgroundScheduler'
 import { parseAndEnrichBackgroundFeed } from '../renderer/helpers/api/background-feed-parser'
 import { fetchBackgroundSubscriptionChannel } from '../subscriptionBackgroundRequests'
+import { processSubscriptionFeed } from './subscriptionFeedProcessing.js'
 
 const results = createSubscriptionBackgroundResults(process.argv[2])
 const requests = new Map()
@@ -36,6 +37,7 @@ const scheduler = createSubscriptionBackgroundScheduler({
 })
 
 const methods = {
+  processFeed: processSubscriptionFeed,
   async configure(configuration) {
     const encoded = JSON.stringify(configuration)
     if (encoded === configurationJson) return

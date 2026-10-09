@@ -6,18 +6,30 @@ import { createI18n } from 'vue-i18n'
 import { SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../src/renderer/helpers/sync-server-live.js'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../src/renderer/helpers/sync-setting-labels.js'
 
-test('cached collections are immutable, revision-specific and isolated between accounts and keys', () => {
+test('cached collections are immutable, revision-specific and isolated between accounts and keys', async () => {
   const cache = new SyncCollectionCache()
   cache.use('account-a:key-a')
   const original = [{ key: 'baseTheme', value: 'dark' }]
-  cache.put('settings', 3, original)
+  await cache.put('settings', 3, original)
   original[0].value = 'light'
-  assert.equal(cache.get('settings', 3).data[0].value, 'dark')
-  cache.get('settings', 3).data[0].value = 'light'
-  assert.equal(cache.get('settings', 3).data[0].value, 'dark')
-  assert.equal(cache.get('settings', 4), null)
+  assert.equal((await cache.get('settings', 3)).data[0].value, 'dark')
+  const copy = await cache.get('settings', 3)
+  copy.data[0].value = 'light'
+  assert.equal((await cache.get('settings', 3)).data[0].value, 'dark')
+  assert.equal(await cache.get('settings', 4), null)
   cache.use('account-a:key-b')
-  assert.equal(cache.get('settings', 3), null)
+  assert.equal(await cache.get('settings', 3), null)
+})
+
+test('changing accounts discards a collection copy that is still in flight', async () => {
+  let finish
+  const cache = new SyncCollectionCache(value => new Promise(resolve => { finish = () => resolve(structuredClone(value)) }))
+  cache.use('first-account')
+  const pending = cache.put('history', 1, [{ id: 'private' }])
+  cache.use('second-account')
+  finish()
+  await pending
+  assert.equal(await cache.get('history', 1), null)
 })
 
 test('activity describes only changed settings with stable keys and omits initial baselines and noisy collections', () => {

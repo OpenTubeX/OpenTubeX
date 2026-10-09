@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
@@ -12,6 +13,7 @@ import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.j
 
 async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example') {
   const context = vm.createContext({
+    runBackgroundJob,
     ...errors,
     withNetworkRecovery,
     process: { env },

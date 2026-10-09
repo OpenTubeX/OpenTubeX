@@ -1,3 +1,5 @@
+import { DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
@@ -9,7 +11,7 @@ import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ MAIN_PROFILE_ID, ...errors, ...bookmarks, ...profileSync })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote, runBackgroundJob, MAIN_PROFILE_ID, ...errors, ...bookmarks, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')

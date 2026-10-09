@@ -142,7 +142,7 @@ const actions = {
         updates: changes.updates.map(migrateLegacyHistoryRecord),
         deletions: changes.deletions,
       }
-      await DBHistoryHandlers.applySyncChanges(migratedChanges)
+      await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive)
       commit('applyHistorySyncChanges', migratedChanges)
     } catch (errMessage) {
       console.error(errMessage)

@@ -1794,6 +1794,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.SUBSCRIPTION_BACKGROUND, async (event, method, value) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
     switch (method) {
+      case 'processFeed': return backgroundSubscriptions.processFeed(value)
       case 'configure':
         keepRefreshingInBackground = value.enabled === true
         await backgroundSubscriptions.configure(value)
@@ -5296,6 +5297,7 @@ function runApp() {
           return null
 
         case DBActions.HISTORY.APPLY_SYNC_CHANGES:
+          if (typeof data === 'string') data = JSON.parse(data)
           await baseHandlers.history.applySyncChanges(data)
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,

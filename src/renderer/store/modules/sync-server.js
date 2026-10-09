@@ -1,3 +1,4 @@
+import { runBackgroundJob } from '../../helpers/background-jobs.js'
 import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../helpers/sync-server-live'
 import i18n from '../../i18n/index'
 import { showToastOnAllTabs } from '../../helpers/utils'
@@ -69,7 +70,7 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
   'playlistBookmarks',
 ]
 
-const collectionCache = new SyncCollectionCache()
+const collectionCache = new SyncCollectionCache(value => runBackgroundJob('clone', { value }))
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let syncCapabilities = null
@@ -266,6 +267,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     getters: rootGetters,
     commit,
     dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
+    assertActive: assertSyncStillActive,
   }
   const stages = [
     ...(encrypted ? ['download'] : []),
@@ -555,7 +557,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         const entries = await Promise.all(downloadCollections.map(async collection => {
           const manifestRevision = manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
           const cached = !manifest.legacy_data && !legacyEncrypted?.payload
-            ? collectionCache.get(collection, manifestRevision)
+            ? await collectionCache.get(collection, manifestRevision)
             : null
           if (!cached) startProgress('download')
           const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
@@ -565,8 +567,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
               : legacy[collection]
           document[collection] = data ?? document[collection]
-          collectionCache.put(collection, response.revision, document[collection])
-          original[collection] = structuredClone(document[collection])
+          await collectionCache.put(collection, response.revision, document[collection])
+          original[collection] = await runBackgroundJob('clone', { value: document[collection] })
           return [collection, response]
         }))
         if (settings.syncServerSyncSettings &&
@@ -610,7 +612,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
           if (revision > 0 &&
-              JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
+              await runBackgroundJob('equal', { first: data, second: encryptedCollections.original[collection] })) {
             if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
             continue
           }
@@ -633,8 +635,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               settings.syncServerPrivacySalt
             )
             try {
+              assertSyncStillActive()
               const saved = await networkClient.putEncryptedSyncCollection(collection, revision, payload, activityPayload)
-              collectionCache.put(collection, saved.revision, data)
+              await collectionCache.put(collection, saved.revision, data)
               assertSyncStillActive()
               if (collection === 'watchStats') await persistUploadedWatchStatsReset(data, store)
               break
@@ -685,8 +688,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
     await runStage('finishing', async () => {
       const lastSyncAt = Date.now()
+      const snapshot = await runBackgroundJob('stringify', { value: next })
+      assertSyncStillActive()
       await Promise.all([
-        dispatch('updateSyncServerSnapshot', JSON.stringify(next), { root: true }),
+        dispatch('updateSyncServerSnapshot', snapshot, { root: true }),
         dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
       ])
     })
@@ -1153,7 +1158,8 @@ const actions = {
             throw error
           }
           assertCurrentAccount(client)
-          collectionCache.put('watchStats', saved.revision, next)
+          await collectionCache.put('watchStats', saved.revision, next)
+          assertCurrentAccount(client)
           const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
           snapshot.watchStats = next
           await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })

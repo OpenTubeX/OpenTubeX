@@ -870,6 +870,7 @@ export default {
   },
 
   subscriptionAutoRefresh: {
+    processFeed: value => ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_BACKGROUND, 'processFeed', value),
     onBackgroundResultsAvailable: handler => {
       const listener = () => handler()
       ipcRenderer.on(IpcChannels.SUBSCRIPTION_BACKGROUND, listener)

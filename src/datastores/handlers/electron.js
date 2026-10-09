@@ -1,4 +1,5 @@
 import { DBActions } from '../../constants'
+import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
 
 /**
  * Payloads can contain Vue reactivity proxies (e.g. objects taken from Vuex
@@ -68,8 +69,11 @@ class History {
     return dbHistory(DBActions.GENERAL.OVERWRITE, records)
   }
 
-  static applySyncChanges(changes) {
-    return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes)
+  static async applySyncChanges(changes, assertActive) {
+    // Large object graphs also block while crossing Electron's context bridge.
+    const serialized = await runBackgroundJob('stringify', { value: changes })
+    assertActive?.()
+    return window.ftElectron.dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, serialized)
   }
 
   static updateWatchProgress(videoId, watchProgress) {

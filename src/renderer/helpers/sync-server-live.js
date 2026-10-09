@@ -7,7 +7,8 @@ import { parseCaptionSettings } from './player/caption-settings.js'
 // Decrypted collections are cached only for this renderer session. A new account,
 // key, or token starts with an empty cache; snapshots remain merge baselines.
 export class SyncCollectionCache {
-  constructor() {
+  constructor(clone = value => structuredClone(value)) {
+    this.clone = clone
     this.identity = ''
     this.collections = new Map()
     this.syncedRevisions = new Map()
@@ -31,13 +32,18 @@ export class SyncCollectionCache {
     }
   }
 
-  get(collection, revision) {
+  async get(collection, revision) {
+    const identity = this.identity
     const cached = this.collections.get(collection)
-    return cached && cached.revision === revision ? structuredClone(cached) : null
+    if (!cached || cached.revision !== revision) return null
+    const result = await this.clone(cached)
+    return identity === this.identity ? result : null
   }
 
-  put(collection, revision, data) {
-    this.collections.set(collection, { revision, data: structuredClone(data) })
+  async put(collection, revision, data) {
+    const identity = this.identity
+    const copy = await this.clone(data)
+    if (identity === this.identity) this.collections.set(collection, { revision, data: copy })
   }
 }
 
