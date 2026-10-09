@@ -175,7 +175,7 @@ const failedAvatarUrl = ref(null)
 const tabColor = computed(() => getTabAccentColor(props.tab.color))
 const groupColor = computed(() => getTabAccentColor(props.group?.color))
 const showLoadingIndicator = computed(() => (
-  props.tab.isLoading && props.tab.route?.path !== '/subscriptions' && props.tab.route?.path !== '/'
+  props.tab.isLoading && !/^\/(?:subscriptions\/?)?$/i.test(props.tab.route?.path ?? '')
 ))
 
 const tabClasses = computed(() => ({

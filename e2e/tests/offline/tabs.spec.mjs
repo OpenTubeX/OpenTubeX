@@ -434,7 +434,7 @@ test.describe('tab bar', () => {
   })
 
   test('keeps subscription tab text and loading indicators unchanged while fetching', async ({ page }) => {
-    for (const route of ['/subscriptions', '/']) {
+    for (const route of ['/subscriptions', '/', '/subscriptions/', '/Subscriptions', '/Subscriptions/']) {
       const subscriptionsTab = await page.evaluate(route => window.ftElectron.tabs.create({
         route,
         makeActive: false
