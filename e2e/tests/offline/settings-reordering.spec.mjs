@@ -15,6 +15,98 @@ async function visibleBox(locator) {
   return box
 }
 
+async function expectQuickSettingScrollRange(scroller) {
+  let measurements
+  await expect.poll(async () => {
+    measurements = await scroller.evaluate(element => {
+      const content = element.querySelector('.selectedSettings, .emptyState')
+      const end = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+        element.scrollTop + Number.parseFloat(getComputedStyle(content).marginBottom) +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      const maximum = Math.max(0, end - element.clientHeight)
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = scrollbar.querySelector('.os-scrollbar-handle')
+      const thumb = handle.getBoundingClientRect()
+      const expectedRatio = Math.max(element.clientHeight / element.scrollHeight,
+        Number.parseFloat(getComputedStyle(handle).minHeight) / track.height)
+      const validRange = element.scrollTop <= maximum + 1 &&
+        element.scrollHeight - element.clientHeight <= maximum + 1
+      const validScrollbar = maximum <= 1
+        ? scrollbar.classList.contains('os-scrollbar-unusable')
+        : !scrollbar.classList.contains('os-scrollbar-unusable') &&
+          Math.abs(thumb.height / track.height - expectedRatio) < 0.02
+      return {
+        valid: validRange && validScrollbar,
+        maximum,
+        actualRange: element.scrollHeight - element.clientHeight,
+        scrollTop: element.scrollTop,
+        thumbRatio: thumb.height / track.height,
+        expectedRatio,
+        unusable: scrollbar.classList.contains('os-scrollbar-unusable')
+      }
+    })
+    return measurements.valid
+  }, { message: 'quick-settings viewport and scrollbar match the rendered content range' }).toBe(true).catch(error => {
+    error.message += `\nScroll measurements: ${JSON.stringify(measurements)}`
+    throw error
+  })
+}
+
+for (const uiScale of [100, 125]) {
+  test.describe(`quick-settings scroll range at ${uiScale}%`, () => {
+    test.use({
+      seed: {
+        settings: {
+          uiScale,
+          quickSettings: ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize', 'uiRoundness', 'animationSpeed',
+            'defaultQuality', 'playNextVideo', 'enableSubtitlesByDefault', 'listType', 'playlistViewType',
+            'hideComments', 'currentLocale', 'region', 'rememberHistory'],
+        }
+      }
+    })
+
+    test('clamps after removing rows and whole categories, resetting, and resizing', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 500, height: 600 })
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await appearance.getByRole('button', { name: 'Customize quick settings', exact: true }).click()
+      const scroller = page.locator('.settingsSubpageScroll:visible')
+      const scrollToBottom = async () => {
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+        await expectQuickSettingScrollRange(scroller)
+      }
+      for (const id of ['rememberHistory', 'region', 'currentLocale', 'hideComments']) {
+        await scrollToBottom()
+        const setting = page.locator(`[data-setting-id="${id}"]`)
+        await setting.getByRole('button', { name: /^Remove / }).click()
+        await expect(setting).toHaveCount(0)
+        await expectQuickSettingScrollRange(scroller)
+        if (id === 'rememberHistory') {
+          await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+          await scrollToBottom()
+          await page.getByRole('button', { name: /^Reset to defaults$/i }).evaluate(element => element.click())
+          await expect(page.locator('[data-setting-id="animationSpeed"]')).toHaveCount(0)
+          await expectQuickSettingScrollRange(scroller)
+        }
+      }
+      await scrollToBottom()
+      await setWindowSize(app, page, { width: 1000, height: 900 })
+      await expectQuickSettingScrollRange(scroller)
+      await setWindowSize(app, page, { width: 500, height: 600 })
+      await scrollToBottom()
+      const settings = page.locator('.selectedSetting')
+      while (await settings.count() > 0) {
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await settings.last().getByRole('button', { name: /^Remove / }).click()
+        await expectQuickSettingScrollRange(scroller)
+      }
+      await expect(page.locator('.emptyState')).toBeVisible()
+      await expectQuickSettingScrollRange(scroller)
+    })
+  })
+}
+
 for (const [editor, method] of [
   [editors[0], 'pointer'],
   [editors[0], 'button'],

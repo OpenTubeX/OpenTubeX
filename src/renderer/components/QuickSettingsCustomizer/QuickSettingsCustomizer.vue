@@ -20,12 +20,16 @@
     :open="open"
     :title="t('Settings.Quick Settings.Customize Quick Settings')"
     :icon="['fas', 'sliders-h']"
+    grow-with-content
     @close="close"
   >
     <template #breadcrumb-action>
       <FtSyncedSettingIndicator setting-key="quickSettings" />
     </template>
-    <div class="quickSettingsActions">
+    <div
+      ref="quickSettingsActionsRef"
+      class="quickSettingsActions"
+    >
       <div
         ref="settingPickerAnchorRef"
         class="settingPickerAnchor"
@@ -203,7 +207,7 @@
 <script setup>
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -217,6 +221,7 @@ import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/Fullscre
 import store from '../../store/index'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createQuickSettingCatalog,
   createQuickSettingSections,
@@ -231,6 +236,8 @@ const reorderStatus = ref('')
 const settingPickerId = `quick-setting-picker-${useId().replaceAll(':', '')}`
 const settingPickerAnchorRef = useTemplateRef('settingPickerAnchorRef')
 const settingPickerRef = useTemplateRef('settingPickerRef')
+const quickSettingsActionsRef = useTemplateRef('quickSettingsActionsRef')
+let quickSettingsResizeObserver = null
 
 const catalog = computed(() => createQuickSettingCatalog(t, process.env.IS_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS))
 const catalogById = computed(() => new Map(catalog.value.map(setting => [setting.id, setting])))
@@ -294,8 +301,28 @@ function closeSettingPickerFromOutside(event) {
   closeSettingPicker()
 }
 
+function clampQuickSettingsScroll() {
+  const content = quickSettingsActionsRef.value?.parentElement
+  const scroller = content?.closest('.settingsSubpageScroll')
+  if (scroller) clampOverlayScrollTop(scroller, content)
+}
+
+watch(quickSettingsActionsRef, (actions) => {
+  quickSettingsResizeObserver?.disconnect()
+  quickSettingsResizeObserver = null
+  if (!actions) return
+
+  quickSettingsResizeObserver = new ResizeObserver(clampQuickSettingsScroll)
+  quickSettingsResizeObserver.observe(actions.parentElement)
+  quickSettingsResizeObserver.observe(actions.closest('.settingsSubpageScroll'))
+  clampQuickSettingsScroll()
+})
+
 onMounted(() => document.addEventListener('pointerdown', closeSettingPickerFromOutside))
-onBeforeUnmount(() => document.removeEventListener('pointerdown', closeSettingPickerFromOutside))
+onBeforeUnmount(() => {
+  quickSettingsResizeObserver?.disconnect()
+  document.removeEventListener('pointerdown', closeSettingPickerFromOutside)
+})
 
 async function addQuickSetting(_, { dataListIndex }) {
   const setting = availableSettings.value[dataListIndex]
