@@ -1559,7 +1559,7 @@ for (const { name, theme, width, height, scale, rtl } of [
         }
       })
       expect(geometry.duration).toBe('0s')
-      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 12, textClearance: 58 })) {
+      for (const [key, value] of Object.entries({ trackWidth: 40, trackHeight: 24, thumbWidth: 18, textClearance: 58 })) {
         expect(geometry[key]).toBeCloseTo(value, 1)
       }
 
