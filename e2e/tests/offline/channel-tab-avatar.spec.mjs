@@ -43,7 +43,7 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
   }))
   const tabElement = page.locator(`.tabBar .tab[data-tab-id="${tab.id}"]`)
   const image = tabElement.locator('img.tabAvatar')
-  await expect(tabElement.locator('.tabLoadingDot')).toHaveCount(0)
+  await expect(tabElement.locator('.tabLoadingLine')).toHaveCount(0)
   await expect(image).toHaveAttribute('src', /^data:image\/jpeg/)
   await expectImagesLoaded(image)
   await expect(image).toBeVisible()
@@ -55,7 +55,7 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
       const tab = document.querySelector(`.tabBar .tab[data-tab-id="${id}"]`)
       const image = tab.querySelector('img.tabAvatar')
       if (!image?.checkVisibility({ visibilityProperty: true }) || tab.querySelector('.retryImagePlaceholder')) {
-        window.__channelAvatarFlashes.push({ id, src: image?.getAttribute('src'), loading: !!tab.querySelector('.tabLoadingDot') })
+        window.__channelAvatarFlashes.push({ id, src: image?.getAttribute('src'), loading: !!tab.querySelector('.tabLoadingLine') })
       }
     }
     window.__channelAvatarObserver = new MutationObserver(sample)
@@ -71,7 +71,7 @@ test('keeps the saved avatar visible while switching channel content tabs', asyn
       await contentTab.click()
       await expect(contentTab).toHaveAttribute('aria-selected', 'true')
       await expect(page).toHaveURL(new RegExp(`/channel/UCaaaaaaaaaaaaaaaaaaaaaa/${name}$`))
-      await expect(tabElement.locator('.tabLoadingDot')).toHaveCount(0)
+      await expect(tabElement.locator('.tabLoadingLine')).toHaveCount(0)
       await expect(image).toHaveAttribute('src', savedSource)
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     }

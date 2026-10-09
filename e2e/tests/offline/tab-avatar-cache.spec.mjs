@@ -51,7 +51,7 @@ async function createChannelTabWithAvatar(page, channelId, avatarBase64) {
 }
 
 for (const indicator of ['loading', 'playing']) {
-  test(`loads a watch avatar behind the ${indicator} indicator and retains it`, async ({ page }) => {
+  test(`loads and retains a watch avatar with the ${indicator} indicator`, async ({ page }) => {
     let avatarRequest
     await page.route('https://images.test/watch-avatar.png', route => {
       avatarRequest = route
@@ -69,7 +69,7 @@ for (const indicator of ['loading', 'playing']) {
         window.ftElectron.tabs.setPlaybackState(enabled ? 'playing' : 'paused', tabId)
       }
     }, { tabId: watchTab.id, indicator, enabled })
-    const statusIcon = tab.locator(indicator === 'loading' ? '.tabLoadingDot' : '.playingIcon')
+    const statusIcon = tab.locator(indicator === 'loading' ? '.tabLoadingLine' : '.playingIcon')
     await setIndicator(true)
     await expect(statusIcon).toBeVisible()
     await page.evaluate(() => {
@@ -80,7 +80,7 @@ for (const indicator of ['loading', 'playing']) {
     await avatarRequest.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
     const avatar = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
     await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    await expect(avatar).toBeHidden()
+    await expect(avatar).toBeVisible({ visible: indicator === 'loading' })
     const originalImage = await avatar.elementHandle()
 
     for (let transition = 0; transition < 2; transition++) {
@@ -97,7 +97,7 @@ for (const indicator of ['loading', 'playing']) {
       expect(await avatar.evaluate((image, original) => image === original, originalImage)).toBe(true)
       await setIndicator(true)
       await expect(statusIcon).toBeVisible()
-      await expect(avatar).toBeHidden()
+      await expect(avatar).toBeVisible({ visible: indicator === 'loading' })
     }
   })
 }
