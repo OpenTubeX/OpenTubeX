@@ -184,7 +184,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
       await page.locator(`.capacitorPhoneTabTarget[data-tab-id="${second}"]`).click()
       await expect(dialog).toHaveCount(0)
       await expect.poll(presented).toBe(second)
-      await page.waitForTimeout(200)
+      await expect(page.locator('.organizerSwipePage, .capacitorPhoneTabOverlay')).toHaveCount(0)
     }
     for (const [scale, motion] of [[100, 'off'], [125, 'off'], [125, 'on']]) {
       await page.evaluate(async ({ scale, motion }) => {
@@ -511,5 +511,57 @@ test('Android pointer cancellation cannot reopen an organizer waiting for captur
     await session.detach()
     await browser.close()
     clearTimeout(keepAlive)
+  }
+})
+
+// Run on a wide emulator viewport (for example, Android landscape at >680 CSS px).
+test('Android wide phone layout keeps previews below the header beside vertical navigation', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, async t => {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const page = browser.contexts()[0].pages()[0]
+  const keepAlive = setTimeout(() => {}, 60_000)
+  let saved
+  try {
+    if (await page.evaluate(() => innerWidth) <= 680) {
+      t.skip('Requires a viewport wider than 680 CSS pixels')
+      return
+    }
+    saved = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const values = { CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
+        ShowTabPreviews: true, UiScale: 100 }
+      const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
+      const tabs = JSON.parse(JSON.stringify(store.state.tabs))
+      for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
+      store.commit('setTabsState', { ...store.state.tabs, tabs: [store.getters.getPresentedTab] })
+      return { settings, tabs }
+    })
+    const navigation = await page.locator('.app.capacitorPhoneLayout > .sideNav').boundingBox()
+    assert.ok(navigation?.width > 0 && navigation.width < await page.evaluate(() => innerWidth) / 2,
+      'the fixture must use vertical side navigation')
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    const dialog = page.locator('#capacitor-phone-tab-dialog')
+    const thumbnail = dialog.locator('.capacitorTabPageThumbnail')
+    await expect(thumbnail).toBeVisible()
+    const image = await thumbnail.evaluate(async image => {
+      await image.decode()
+      return { width: image.naturalWidth, height: image.naturalHeight }
+    })
+    assert.ok(image.width > 0 && image.height > 0)
+    const preview = await dialog.locator('.capacitorTabPreview').boundingBox()
+    assert.ok(Math.abs(preview.width / preview.height - 16 / 9) < 0.01,
+      'wide phone previews must keep their compact landscape dimensions')
+  } finally {
+    clearTimeout(keepAlive)
+    const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+    if (await close.isVisible()) await close.click()
+    if (saved) await page.evaluate(async saved => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+      store.commit('setTabsState', saved.tabs)
+      store.commit('setPresentedTab', saved.tabs.presentedTabId)
+    }, saved)
+    await browser.close()
   }
 })
