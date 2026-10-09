@@ -231,8 +231,8 @@
 }
 
 /* Each control ships its own spacing for use in a settings page, which would
-   leave the rows here indented by different amounts. Drop FtSelect's top margin
-   too so the select box centres with the slider instead of sitting below it. */
+   leave the rows here indented by different amounts. Drop FtSelect's margins
+   too so the select box centres with the slider. */
 .channelPreference :deep(.pure-material-slider) {
   inline-size: auto;
   margin: 0;
@@ -241,7 +241,7 @@
 
 .channelPreference :deep(.select) {
   inline-size: auto;
-  margin-block-start: 0;
+  margin-block: 0;
 }
 
 .preferenceIcon {

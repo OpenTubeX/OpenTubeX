@@ -26,6 +26,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   align-items: center;
+  margin-block-end: 20px;
 }
 
 .tightOptions {

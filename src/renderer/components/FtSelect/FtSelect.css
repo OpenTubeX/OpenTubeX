@@ -32,7 +32,9 @@
 
   position: relative;
   inline-size: calc(200px + var(--select-indicator-space));
-  margin-block: var(--settings-control-margin, 30px 20px);
+
+  /* Settings define row spacing; standalone layouts own the gap below. */
+  margin-block: var(--settings-control-margin, 30px 0);
 }
 
 .select.contentSized {
