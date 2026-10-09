@@ -1575,7 +1575,7 @@ test.describe('custom Shorts player', () => {
     await expect(topControls).toHaveCSS('opacity', '1')
     await page.mouse.move(0, 0)
     await expect(controls).not.toHaveAttribute('shown', 'true')
-    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(topControls).toBeHidden()
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
 
     const hiddenSeekBarState = await player.evaluate(element => {
@@ -1678,7 +1678,7 @@ test.describe('custom Shorts player', () => {
     await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
-    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(topControls).toBeHidden()
     await expect(actionDock).toHaveCSS('opacity', '1')
     await expect(actionDock).toHaveCSS('pointer-events', 'auto')
     const seekBarBounds = await seekBar.boundingBox()
@@ -1745,10 +1745,10 @@ test.describe('custom Shorts player', () => {
     await expect(video).toHaveAttribute('loop', '')
     await expect(player.locator('.countdownPoster img:not(.retryImagePlaceholder)')).toHaveAttribute('src', FIRST_SHORT_THUMBNAIL)
     await expect(video).toHaveCSS('object-fit', 'cover')
-    await expect(player.locator('.shortsTopControl').first()).toHaveCSS(
-      'backdrop-filter',
-      /blur\(10px\)/
-    )
+    const topControl = player.locator('.shortsTopControl').first()
+    await expect.poll(() => topControl.evaluate(element =>
+      getComputedStyle(element, '::before').backdropFilter
+    )).toMatch(/blur\(10px\)/)
     expect(await player.evaluate(element => {
       return element.ui.getConfiguration().doubleClickForFullscreen
     })).toBe(false)
@@ -1784,7 +1784,7 @@ test.describe('custom Shorts player', () => {
     await page.mouse.move(0, 0)
     await expect(shakaControls).not.toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
-    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(topControls).toBeHidden()
 
     await page.mouse.move(
       playerBounds.x + playerBounds.width / 2,
