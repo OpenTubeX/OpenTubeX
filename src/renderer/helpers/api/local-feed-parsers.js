@@ -621,7 +621,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     }
   }
 
-  const VIEWS_OR_WATCHING_REGEX = /views?|watching|waiting/i
+  const VIEWS_OR_WATCHING_REGEX = /\b(?:views?|watching|waiting)\b/i
 
   const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[bkm]?$/i
 
