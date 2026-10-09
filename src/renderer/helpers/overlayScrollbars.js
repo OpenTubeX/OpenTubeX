@@ -528,16 +528,19 @@ export function clampOverlayScrollTop(element, contentElement = null) {
   const resumeScrollbars = suspendScrollbarPosition.get(instance)?.()
   try {
     const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
+    // Remeasuring a resized viewport can reset its native offset. Preserve the
+    // position reached before that update so it cannot become our clamp target.
+    const previousScrollTop = scrollOffsetElement.scrollTop
     instance?.update(true)
     const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
-    const previousScrollTop = scrollOffsetElement.scrollTop
     // Chromium can retain native overflow after the library has already measured
     // the shorter range. Check both measurements before preserving the offset.
     const retainedOverflow = contentElement && instance && Math.max(
       instance.state().overflowAmount.y,
       scrollOffsetElement.scrollHeight - scrollOffsetElement.clientHeight
     ) > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
-    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || retainedOverflow) {
+    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || retainedOverflow ||
+      Math.abs(scrollOffsetElement.scrollTop - previousScrollTop) > SCROLL_BOUNDARY_TOLERANCE) {
       if (instance) {
         // Chromium can preserve the old overflow range when content shrinks
         // beneath a non-zero offset. Remeasure from the true origin so both the
