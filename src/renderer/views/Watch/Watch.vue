@@ -84,7 +84,7 @@
             data-tab-loading-indicator
           />
           <div
-            v-else-if="ytDlpStreamsPending && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
+            v-else-if="(ytDlpStreamsPending || (vrStreamsPending && !isYtDlpPlaybackRequested())) && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
             class="videoPlayer videoPlayerPlaceholder streamPlaceholder"
             :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
             data-tab-loading-indicator
@@ -99,7 +99,7 @@
               <span class="streamPlaceholderSpinner">
                 <ft-loader />
               </span>
-              <span class="streamPlaceholderText">{{ $t("Video.Fetching Streams") }}</span>
+              <span class="streamPlaceholderText">{{ ytDlpStreamsPending ? $t("Video.Fetching Streams") : $t("Theme Discovery.Loading") }}</span>
             </div>
           </div>
           <KeepAlive

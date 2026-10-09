@@ -1,14 +1,21 @@
 import { DESKTOP_USER_AGENT } from '../api/capacitor-http.js'
 
+/**
+ * @param {URL} url
+ * @returns {boolean} whether iOS playback transports this URL natively
+ */
+export function isIOSNativeMediaUrl(url) {
+  return url.protocol === 'https:' && !url.username && !url.password &&
+    (url.hostname === 'googlevideo.com' || url.hostname.endsWith('.googlevideo.com'))
+}
+
 /** Stream HLS manifests/segments through the same native transport as SABR.
  * Shaka invokes the plugin again on retries, so each attempt gets a fresh URL.
  */
 export function createIOSMediaTransport(shaka, native) {
   return (uri, request, ...args) => {
     const url = new URL(uri)
-    if (url.protocol !== 'https:' || url.username || url.password ||
-        !(url.hostname === 'googlevideo.com' || url.hostname.endsWith('.googlevideo.com')) ||
-        !['GET', 'HEAD'].includes(request.method)) {
+    if (!isIOSNativeMediaUrl(url) || !['GET', 'HEAD'].includes(request.method)) {
       return shaka.net.HttpFetchPlugin.parse(uri, request, ...args)
     }
 

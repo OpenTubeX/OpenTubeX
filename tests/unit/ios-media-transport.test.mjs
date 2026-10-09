@@ -70,10 +70,10 @@ test('active stream abortion reaches both WebKit and native transport', async ()
 
 test('unrelated hosts, HTTP and non-GET media requests keep the standard transport', async () => {
   const f = fixture()
-  for (const url of ['https://example.org/video', 'https://googlevideo.com.attacker.invalid/video', 'http://rr1.googlevideo.com/video']) {
+  for (const url of ['https://example.org/video', 'https://googlevideo.com.attacker.invalid/video', 'http://rr1.googlevideo.com/video', 'https://user:password@rr1.googlevideo.com/video']) {
     await f.request(url, get, 0).promise
   }
   await f.request(manifest, { ...get, method: 'POST' }, 0).promise
   assert.equal(f.prepared.length, 0)
-  assert.equal(f.fetched.length, 4)
+  assert.equal(f.fetched.length, 5)
 })

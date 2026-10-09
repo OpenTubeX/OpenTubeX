@@ -6,6 +6,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { probeHlsManifest } from '../../helpers/player/hlsManifest'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
 import { defineComponent, markRaw } from 'vue'
 import { Capacitor } from '@capacitor/core'
@@ -418,6 +419,7 @@ export default defineComponent({
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
       ytDlpStreamsPending: false,
+      vrStreamsPending: false,
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
       chromecastActive: false,
@@ -1254,7 +1256,7 @@ export default defineComponent({
      * only be created once the streams it is supposed to play are known.
      */
     playerReady() {
-      if (this.isLoading || this.ytDlpStreamsPending) {
+      if (this.isLoading || this.ytDlpStreamsPending || (this.vrStreamsPending && !this.isYtDlpPlaybackRequested())) {
         return false
       }
 
@@ -2441,6 +2443,7 @@ export default defineComponent({
       this.sabrPlaybackLoaded = false
       this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
+      this.vrStreamsPending = false
       this.legacyFormats = []
       this.localFilePlayback = false
       this.downloadedPlaybackWithoutMetadata = false
@@ -3891,6 +3894,7 @@ export default defineComponent({
             this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
           }
 
+          let vrHlsManifestUrl = null
           if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data) {
             this.vrProjection = [
               ...(result.streaming_data.adaptive_formats ?? []),
@@ -3903,13 +3907,38 @@ export default defineComponent({
               })
               ?.projection_type ?? null
 
+            if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {
+              this.vrStreamsPending = true
+              this.isLoading = false
+              this.updateTitle()
+              const switchGeneration = this.playbackEngineSwitchGeneration
+              let url = result.streaming_data.hls_manifest_url
+              let playable = url && await probeHlsManifest(url)
+              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+              if (!playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                url = await videoInfo.getVrHlsManifest?.()
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+                playable = url && await probeHlsManifest(url)
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+              }
+              if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                vrHlsManifestUrl = url
+                this.vrProjection = 'EQUIRECTANGULAR'
+              }
+            }
+
             if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
               this.$store.getters.getPlaybackEngineFallback) {
               this.playbackEngineFallbackTarget = 'yt-dlp'
             }
           }
 
-          if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
+          if (vrHlsManifestUrl !== null) {
+            this.manifestSrc = vrHlsManifestUrl
+            this.manifestMimeType = MANIFEST_TYPE_HLS
+            this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(vrHlsManifestUrl)
+            this.activeFormat = 'dash'
+          } else if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
             if (
               poToken &&
               videoInfo.info.streaming_data?.server_abr_streaming_url &&
@@ -4021,6 +4050,10 @@ export default defineComponent({
             this.thumbnail = this.getUnavailableVideoThumbnail()
           }
           this.errorMessage = handledError.message || handledError.toString()
+        }
+      } finally {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          this.vrStreamsPending = false
         }
       }
     },
@@ -4227,15 +4260,37 @@ export default defineComponent({
               ?.projectionType ?? null
 
             if (!metadataOnly) {
+              let vrHlsManifestUrl = null
+              if (this.vrProjection === 'MESH' && result.hlsUrl && !this.isYtDlpPlaybackRequested()) {
+                const switchGeneration = this.playbackEngineSwitchGeneration
+                let url = result.hlsUrl
+                if (this.proxyVideos) {
+                  const proxyUrl = new URL(url)
+                  proxyUrl.searchParams.set('local', 'true')
+                  url = proxyUrl.toString()
+                }
+                const playable = await probeHlsManifest(url)
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+                if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                  vrHlsManifestUrl = url
+                  this.vrProjection = 'EQUIRECTANGULAR'
+                }
+              }
               if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in' &&
                 this.$store.getters.getPlaybackEngineFallback) {
                 this.playbackEngineFallbackTarget = 'yt-dlp'
               }
 
-              const manifestSrc = await this.createInvidiousDashManifest(result)
-              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-              this.manifestSrc = manifestSrc
-              this.manifestMimeType = MANIFEST_TYPE_DASH
+              if (vrHlsManifestUrl) {
+                this.manifestSrc = vrHlsManifestUrl
+                this.manifestMimeType = MANIFEST_TYPE_HLS
+                this.activeFormat = 'dash'
+              } else {
+                const manifestSrc = await this.createInvidiousDashManifest(result)
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+                this.manifestSrc = manifestSrc
+                this.manifestMimeType = MANIFEST_TYPE_DASH
+              }
             }
           }
 
@@ -6124,8 +6179,9 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
-      const preferVrHls = this.vrProjection === 'MESH' ||
-        (this.activePlaybackEngine === 'yt-dlp' && this.builtInPlaybackSource?.vrProjection === 'MESH')
+      const preferVrHls = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
+        .some(source => source?.vrProjection === 'MESH' ||
+          (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
       try {
         source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
           if (
