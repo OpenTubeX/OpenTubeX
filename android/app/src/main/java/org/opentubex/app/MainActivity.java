@@ -1,6 +1,7 @@
 package org.opentubex.app;
 
 import android.app.PictureInPictureUiState;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.os.Build;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
+import com.capacitorjs.plugins.share.SharePlugin;
 
 public class MainActivity extends BridgeActivity {
     private InputManager inputManager;
@@ -30,6 +32,16 @@ public class MainActivity extends BridgeActivity {
                 notifyHardwareKeyboardState();
             }
         };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (bridge != null) {
+            PluginHandle handle = bridge.getPlugin("Share");
+            if (handle != null && handle.getInstance() instanceof SharePlugin share &&
+                share.dispatchActivityResult(requestCode, resultCode, data)) return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     @Override
     public void onStart() {
