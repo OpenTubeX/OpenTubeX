@@ -55,9 +55,12 @@ for (const uiScale of [100, 95, 125]) {
       const group = player.locator('.shortsVolumeControl')
       const button = group.locator('button')
       const track = group.locator('.shortsVolumeSlider')
-      const slider = group.locator('input')
+      const slider = group.locator('.shortsVolumeSlider input[type="range"]')
       // Fractional UI scales can quantize computed CSS pixels slightly.
       const expectWidth = width => expect.poll(() => track.evaluate(element => Number.parseFloat(getComputedStyle(element).width))).toBeCloseTo(width, 1)
+      // Cover the network test's native volume-change assertion without the API.
+      await video.evaluate(element => { element.volume = 0.37 })
+      await expect(slider).toHaveValue('37')
       await updateInputWithoutScrolling(slider, '40')
 
       for (const width of [1280, 390]) {

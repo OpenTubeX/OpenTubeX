@@ -1591,7 +1591,7 @@ test.describe('custom Shorts player', () => {
     })
     expect(hiddenSeekBarState.seekValue).toBeCloseTo(hiddenSeekBarState.currentTime, 3)
 
-    const volumeSlider = player.locator('.shortsVolumeSlider')
+    const volumeSlider = player.locator('.shortsVolumeSlider input[type="range"]')
     await video.evaluate(element => {
       element.muted = false
       element.volume = 0.37
