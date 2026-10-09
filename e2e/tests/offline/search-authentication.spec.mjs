@@ -118,6 +118,8 @@ for (const responseType of ['empty', 'ads-only']) {
       await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
       const messageBox = await page.locator('.searchStatus').boundingBox()
       const retryBox = await retry.boundingBox()
+      expect(messageBox, 'The empty-search message must have visible bounds').not.toBeNull()
+      expect(retryBox, 'The cookie retry button must have visible bounds').not.toBeNull()
       const width = Math.min(750, messageBox.width)
       await page.screenshot({
         path: test.info().outputPath(`empty-search-cookie-retry-${theme}.png`),
@@ -139,7 +141,7 @@ for (const responseType of ['empty', 'ads-only']) {
     await expect(restrictionHint).toBeVisible()
     await retry.click()
     await expect(retry).toBeDisabled()
-    await expect(page.getByRole('status', { name: 'Fetching results. Please wait' })).toBeVisible()
+    await expect(page.getByRole('status', { name: 'Fetching results. Please wait', exact: true })).toBeVisible()
     await expect(page.getByRole('alert')).toContainText('Search failed with the configured cookies.')
     await expect(retry).toBeEnabled()
     await writeFile(response, JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Recovered cookie search result' }] }))
@@ -147,7 +149,7 @@ for (const responseType of ['empty', 'ads-only']) {
     await expect(page.getByRole('heading', { name: 'Recovered cookie search result', exact: true })).toBeVisible()
     await expect(retry).toHaveCount(0)
     await expect(restrictionHint).toHaveCount(0)
-    await expect(page.getByRole('status', { name: 'Fetching results. Please wait' })).toHaveCount(0)
+    await expect(page.getByRole('status', { name: 'Fetching results. Please wait', exact: true })).toHaveCount(0)
     await expect(page.getByRole('alert')).toHaveCount(0)
     const args = JSON.parse(await readFile(log, 'utf8'))
     const url = new URL(args.at(-1))

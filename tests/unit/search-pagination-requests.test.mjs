@@ -8,6 +8,13 @@ const start = source.indexOf('function checkSearchCache(')
 const end = source.indexOf('/**\n * @param {any[]} results', start)
 assert.ok(start >= 0 && end > start, 'Update the harness after changing the search handler boundaries')
 const handlers = source.slice(start, end)
+const utilsSource = readFileSync(new URL('../../src/renderer/store/modules/utils.js', import.meta.url), 'utf8')
+const mutationStart = utilsSource.indexOf('  addToSessionSearchHistory (')
+const mutationEnd = utilsSource.indexOf('  setShowAddToPlaylistPrompt (', mutationStart)
+assert.ok(mutationStart >= 0 && mutationEnd > mutationStart, 'Update the harness after changing the search cache mutation boundaries')
+const addToSessionSearchHistory = vm.runInNewContext(`({
+  ${utilsSource.slice(mutationStart, mutationEnd)}
+}).addToSessionSearchHistory`, { searchFiltersMatch: () => true })
 
 function deferred () {
   let resolve, reject
@@ -73,11 +80,11 @@ function createSearch (backend) {
     store: {
       commit: (name, payload) => {
         assert.equal(name, 'addToSessionSearchHistory')
-        const index = history.findIndex(entry => entry.query === payload.query)
-        history[index] = payload
+        addToSessionSearchHistory({ sessionSearchHistory: history }, payload)
       }
     },
     getLocalSearchContinuation: continuation,
+    getLocalSearchResults: async () => ({ results: [], continuationData: null, searchNotice: null, searchParams: 'encoded filters' }),
     getInvidiousSearchResults: continuation,
     extractLocalCacheableSearchContinuation: value => value,
     updateSubscriptionDetails: results => updatedChannels.push(results),
@@ -93,6 +100,24 @@ function createSearch (backend) {
     : [{ id }]
   return { state, history, previous, current, requests, errors, notices, updatedChannels, select, nextPage, result }
 }
+
+test('restores the completed empty Local search after an Invidious pagination fallback', async () => {
+  const search = createSearch('invidious')
+  search.select('previous search')
+  const page = search.nextPage()
+  search.previous.reject(new Error('Invidious pagination failed'))
+  await page
+  assert.equal(search.state.apiUsed.value, 'local')
+  assert.equal(search.state.localSearchCompleted.value, true)
+  assert.equal(search.state.shownResults.value.length, 0)
+
+  search.select('cached replacement')
+  search.select('previous search')
+  assert.equal(search.state.apiUsed.value, 'local')
+  assert.equal(search.state.localSearchCompleted.value, true)
+  assert.equal(search.state.shownResults.value.length, 0)
+  assert.equal(search.state.searchParams.value, 'encoded filters')
+})
 
 for (const backend of ['local', 'invidious']) {
   for (const outcome of ['success', 'failure']) {
