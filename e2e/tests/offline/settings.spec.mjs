@@ -1798,7 +1798,7 @@ test.describe('settings', () => {
 
   test('places online activity controls in General and Privacy without a separate section', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
-    await expect(general.getByText(/^Auto load next page$/i)).toBeVisible()
+    await expect(general.getByRole('checkbox', { name: /^Auto load next page\b/i })).toBeVisible()
 
     const privacyCategory = await goToSettingsSection(page, 'privacy')
     const privacy = privacyCategory.locator('.settingsSection').first()
@@ -1807,7 +1807,7 @@ test.describe('settings', () => {
       name: 'Online activity',
       exact: true
     })).toHaveCount(0)
-    await expect(privacyCategory.getByText(/^Auto load next page$/i)).toHaveCount(0)
+    await expect(privacyCategory.getByRole('checkbox', { name: /^Auto load next page\b/i })).toHaveCount(0)
     const privacyColumns = privacy.locator('.switchColumn')
     await expect(privacyColumns).toHaveCount(2)
     await expect(privacyColumns.nth(1)).toContainText('Enable search suggestions')
