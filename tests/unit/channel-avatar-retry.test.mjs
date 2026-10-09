@@ -19,6 +19,8 @@ async function compileComponent(path, bindings = {}) {
 
 async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true } = {}) {
   const requests = []
+  const instances = []
+  const authorizations = []
   const loads = []
   const timers = new Map()
   const observers = []
@@ -31,7 +33,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
       observe(image) { this.image = image }
       disconnect() { this.disconnected = true }
     },
-    loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
+    loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async (src, instance, authorization) => { requests.push(src); instances.push(instance); authorizations.push(authorization); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
     imageSkeleton: 'skeleton.svg',
@@ -95,7 +97,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
-  return { requests, loads, timers, observers, thumbnail, settings, find, unmount: () => app.unmount() }
+  return { requests, instances, authorizations, loads, timers, observers, thumbnail, settings, find, unmount: () => app.unmount() }
 }
 
 async function fail(image) {
@@ -219,6 +221,19 @@ test('channel avatars keep their placeholder until the native HTTP image loads',
   assert.equal(f.find('fallback'), undefined)
 })
 
+test('retry images pass the selected Invidious instance to native recovery', async t => {
+  const f = await mountAvatar(t, 'data:image/png;base64,AA==', 'FtRetryImage.vue')
+  f.settings.getCurrentInvidiousInstanceUrl = 'https://invidious.test'
+  f.settings.getCurrentInvidiousInstanceAuthorization = 'Basic dXNlcjpwYXNzd29yZA=='
+  f.thumbnail.value = 'https://invidious.test/ggpht/banner'
+  await Vue.nextTick()
+  await fail(f.find('img'))
+  assert.deepEqual(f.requests, ['https://invidious.test/ggpht/banner'])
+  assert.deepEqual(f.instances, ['https://invidious.test'])
+  assert.deepEqual(f.authorizations, ['Basic dXNlcjpwYXNzd29yZA=='])
+  assert.equal(f.find('img').props.src, 'data:image/png;base64,AA==')
+})
+
 test('timed-out Capacitor avatars recover through native HTTP before a browser retry', async t => {
   const f = await mountAvatar(t, 'data:image/png;base64,AA==', 'FtRetryImage.vue', new Map(), { fallbackIcon: ['fas', 'circle-user'] })
   const [deadline] = f.timers.values()
@@ -248,6 +263,27 @@ test('failed native timeout recovery still gets one delayed browser retry', asyn
   assert.equal(f.requests.length, 1)
   assert.equal(f.timers.size, 0)
 })
+
+for (const isCapacitor of [false, true]) {
+  test(`a stalled browser retry emits terminal failure (Capacitor: ${isCapacitor})`, async t => {
+    let errors = 0
+    const f = await mountAvatar(t, null, 'FtRetryImage.vue', new Map(), { onError: () => { errors++ } }, { isCapacitor })
+    await [...f.timers.values()].find(timer => timer.delay === 10_000)()
+    await Vue.nextTick()
+    const retry = [...f.timers.values()].find(timer => timer.delay === 3000)
+    retry()
+    await Vue.nextTick()
+    const deadline = [...f.timers.values()].find(timer => timer.delay === 10_000)
+    assert.ok(deadline, 'the retried request needs its own loading deadline')
+    await deadline()
+    await Vue.nextTick()
+    assert.equal(errors, 1)
+    assert.equal(f.timers.size, 0, 'terminal failure must stop recovery timers')
+    f.find('img').props.onLoad({ target: { naturalWidth: 640, naturalHeight: 360 } })
+    await Vue.nextTick()
+    assert.equal(f.loads.length, 1, 'callers that retain the image can still accept a late success')
+  })
+}
 
 test('a never-settling native recovery cannot block the delayed browser retry', async t => {
   const f = await mountAvatar(t, () => new Promise(() => {}), 'FtRetryImage.vue')

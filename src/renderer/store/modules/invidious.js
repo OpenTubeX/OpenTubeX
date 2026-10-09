@@ -93,7 +93,7 @@ const mutations = {
 
     let instanceUrl
 
-    if (url && authorization) {
+    if (url) {
       url.username = ''
       url.password = ''
 

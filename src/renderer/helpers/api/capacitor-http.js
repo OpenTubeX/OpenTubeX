@@ -176,12 +176,18 @@ async function nativeHttpFetch(input, init) {
 
 /**
  * @param {string} src
+ * @param {string} invidiousInstance
  * @returns {URL | null}
  */
-function getYouTubeAvatarUrl(src) {
+function getRecoverableImageUrl(src, invidiousInstance) {
   try {
     const url = new URL(src)
-    if (url.protocol !== 'https:' || !YOUTUBE_AVATAR_HOSTS.has(url.hostname)) return null
+    if (url.protocol !== 'https:') return null
+    if (!YOUTUBE_AVATAR_HOSTS.has(url.hostname)) {
+      const instance = new URL(invidiousInstance)
+      const proxyPath = `${instance.pathname.replace(/\/$/, '')}/ggpht/`
+      if (url.origin !== instance.origin || !url.pathname.startsWith(proxyPath)) return null
+    }
 
     // YouTube serves the same avatar paths from both numbered CDN hosts. Some
     // Android DNS blocklists sinkhole yt4 while leaving the canonical yt3 host
@@ -194,14 +200,17 @@ function getYouTubeAvatarUrl(src) {
 }
 
 /**
- * Fetches small YouTube avatars through Android's native client when WebView
- * blocks the same response with ORB.
+ * Fetches small YouTube images through Android's native client when WebView
+ * blocks the response. Proxied images stay on the selected Invidious instance.
  * @param {string} src
+ * @param {string} [invidiousInstance]
+ * @param {string | null} [invidiousAuthorization]
  * @returns {Promise<string | null>}
  */
-export async function fetchCapacitorAvatarDataUrl(src) {
-  const url = getYouTubeAvatarUrl(src)
+export async function fetchCapacitorAvatarDataUrl(src, invidiousInstance = '', invidiousAuthorization = null) {
+  const url = getRecoverableImageUrl(src, invidiousInstance)
   if (url === null) return null
+  const isProxy = !YOUTUBE_AVATAR_HOSTS.has(url.hostname)
 
   let response
   try {
@@ -209,6 +218,8 @@ export async function fetchCapacitorAvatarDataUrl(src) {
       url: url.toString(),
       method: 'GET',
       responseType: 'blob',
+      headers: isProxy && invidiousAuthorization ? { Authorization: invidiousAuthorization } : undefined,
+      disableRedirects: isProxy,
       connectTimeout: AVATAR_TIMEOUT_MS,
       readTimeout: AVATAR_TIMEOUT_MS
     })
@@ -216,7 +227,7 @@ export async function fetchCapacitorAvatarDataUrl(src) {
     return null
   }
 
-  const responseUrl = getYouTubeAvatarUrl(response.url)
+  const responseUrl = getRecoverableImageUrl(response.url, invidiousInstance)
   const headers = new Headers(response.headers)
   const mimeType = headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase()
   const contentLength = Number(headers.get('content-length'))

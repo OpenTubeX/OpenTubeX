@@ -156,7 +156,7 @@ function resetSource(src, isFallback = false) {
 
 function startLoadingTimeout() {
   // Resolution fallbacks get their own deadline even if the skeleton stopped.
-  if (hasLoaded.value || !currentSource || currentSource === thumbnailPlaceholder || skeletonTimeoutId !== undefined) return
+  if (hasLoaded.value || retryPending || !currentSource || currentSource === thumbnailPlaceholder || skeletonTimeoutId !== undefined) return
   // Keep the image mounted so a late success can still replace the fallback.
   skeletonTimeoutId = setTimeout(() => {
     hasFailed.value = true
@@ -165,6 +165,7 @@ function startLoadingTimeout() {
     if (!hasRetried && /^https?:/.test(currentSource)) {
       return recoverImage()
     }
+    if (hasRetried && !retryPending) emit('error', new Event('error'))
   }, SKELETON_TIMEOUT_MS)
 }
 
@@ -244,7 +245,7 @@ async function recoverImage() {
       dataUrl = await Promise.race([
         (async () => {
           const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
-          return fetchCapacitorAvatarDataUrl(failedSource)
+          return fetchCapacitorAvatarDataUrl(failedSource, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getCurrentInvidiousInstanceAuthorization)
         })(),
         deadline
       ])
@@ -275,6 +276,8 @@ function scheduleBrowserRetry() {
   retryTimeoutId = setTimeout(() => {
     retryTimeoutId = undefined
     retryPending = false
+    clearTimeout(skeletonTimeoutId)
+    skeletonTimeoutId = undefined
     imageUrl.value = addRetryParameter(currentSource)
   }, RETRY_DELAY_MS)
 }
