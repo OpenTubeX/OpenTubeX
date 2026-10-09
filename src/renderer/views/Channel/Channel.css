@@ -52,7 +52,7 @@
 
 .select-container:has(> .select) > :deep(.btn) {
   /* Match the select's margins so their visible controls share a center. */
-  margin-block: var(--channel-sort-label-space) 20px;
+  margin-block: var(--channel-sort-label-space) 0;
 }
 
 @media (any-pointer: coarse), (width <= 680px) {

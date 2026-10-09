@@ -95,6 +95,10 @@ for (const uiScale of [100, 95]) {
         })
         expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(6.95)
         expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9.05)
+        const bottomGap = await popover.locator('.dailyVideoLimitPreference').evaluate(element => (
+          element.getBoundingClientRect().bottom - element.querySelector('.select-text').getBoundingClientRect().bottom
+        ))
+        expect.soft(bottomGap, `${direction} empty space below the daily limit at ${width}px`).toBeCloseTo(0, 0)
         await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
