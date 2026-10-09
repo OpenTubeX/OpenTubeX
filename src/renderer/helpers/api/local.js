@@ -614,6 +614,36 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
 }
 
 /**
+ * Requests the panoramic HLS rendition without changing the metadata session.
+ * @param {string} videoId
+ * @param {import('youtubei.js').Session} session
+ * @param {string | undefined} poToken
+ */
+async function getLocalVrHlsManifest(videoId, session, poToken) {
+  const context = deepCopy(session.context)
+  const vrSession = new Session(context, session.api_key, session.api_version,
+    0, undefined, session.player, undefined, (input, init) => localApiFetch(input, {
+      ...init, signal: AbortSignal.timeout(10000)
+    }))
+  try {
+    const response = await vrSession.actions.execute('/player', {
+      videoId,
+      client: 'VISIONOS',
+      racyCheckOk: true,
+      contentCheckOk: true,
+      playbackContext: { contentPlaybackContext: { signatureTimestamp: session.player.signature_timestamp } },
+      serviceIntegrityDimensions: { poToken },
+      parse: false,
+    })
+    const url = response.data.streamingData?.hlsManifestUrl
+    return typeof url === 'string' ? await decipherManifestUrl(url, session.player, poToken, false) : null
+  } catch (error) {
+    console.warn('Built-in panoramic HLS extraction failed', error)
+    return null
+  }
+}
+
+/**
  * @param {string} id
  * @param {{ shouldGeneratePoToken?: () => boolean }} [options]
  * @returns {Promise<{
@@ -633,6 +663,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   watchPageIpBlocked: boolean,
  *   androidLiveHlsManifestUrl: string | null,
  *   androidLiveDashManifestUrl: string | null,
+ *   getVrHlsManifest: () => Promise<string | null>,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
@@ -952,6 +983,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     androidLiveDashManifestUrl,
     watchPageIpBlocked,
     musicMediaType,
+    getVrHlsManifest: () => getLocalVrHlsManifest(id, htmlExtracts.session, contentPoToken),
   }
 }
 

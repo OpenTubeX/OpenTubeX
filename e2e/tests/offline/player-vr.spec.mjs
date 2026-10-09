@@ -2,41 +2,125 @@ import { test, expect, sel } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_URL, demoPlayerResponse } from '../../helpers/media.mjs'
 
-test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+test.use({
+  seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } },
+  launchArgs: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+})
 
-async function mockVrYtDlpInfo(app) {
-  await app.electronApp.evaluate(({ ipcMain }, mediaUrl) => {
+async function mockVrYtDlpInfo(app, initialHls = true) {
+  await app.electronApp.evaluate(({ ipcMain }, { mediaUrl, initialHls }) => {
+    globalThis.__vrAttempts = []
     ipcMain.removeHandler('yt-dlp-get-playback-info')
-    ipcMain.handle('yt-dlp-get-playback-info', () => ({
-      isLive: false,
-      liveStatus: 'not_live',
-      hlsManifestUrl: 'https://vr.example.test/master.m3u8',
-      formats: [{
-        formatId: '18',
-        url: `${mediaUrl}&expire=4102444800`,
-        protocol: 'https',
-        ext: 'webm',
-        vcodec: 'vp9',
-        acodec: 'opus',
-        width: 640,
-        height: 360,
-        fps: 30,
-        bitrate: 500_000,
-        audioSampleRate: 44_100,
-        audioChannels: 2,
-        language: null,
-        formatNote: '360p',
-        dynamicRange: 'SDR',
-        availableAt: null
-      }],
-      duration: 30,
-      storyboardVtt: null,
-      captions: [],
-      captionTranslations: [],
-      title: '360 video',
-      version: 'test'
-    }))
-  }, DEMO_MEDIA_URL)
+    ipcMain.handle('yt-dlp-get-playback-info', (_event, _id, defaults) => {
+      globalThis.__vrAttempts.push(defaults)
+      return {
+        isLive: false,
+        liveStatus: 'not_live',
+        hlsManifestUrl: initialHls || defaults ? 'https://vr.example.test/master.m3u8' : null,
+        formats: [{
+          formatId: '18',
+          url: `${mediaUrl}&expire=4102444800`,
+          protocol: 'https',
+          ext: 'webm',
+          vcodec: 'vp9',
+          acodec: 'opus',
+          width: 640,
+          height: 360,
+          fps: 30,
+          bitrate: 500_000,
+          audioSampleRate: 44_100,
+          audioChannels: 2,
+          language: null,
+          formatNote: '360s, mesh',
+          dynamicRange: 'SDR',
+          availableAt: null
+        }],
+        duration: 30,
+        storyboardVtt: null,
+        captions: [],
+        captionTranslations: [],
+        title: '360 video',
+        version: 'test'
+      }
+    })
+  }, { mediaUrl: DEMO_MEDIA_URL, initialHls })
+}
+
+test('yt-dlp retries panoramic extraction when backend projection metadata is absent', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let manifestRequests = 0
+  let releaseManifest
+  await page.route('https://vr.example.test/master.m3u8', route => {
+    if (++manifestRequests > 1) {
+      return new Promise(resolve => {
+        releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
+      })
+    }
+    return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    .dispatch('updateVideoPlaybackEngine', 'yt-dlp'))
+  await mockVrYtDlpInfo(app, false)
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await page.locator('.videoLayout').waitFor()
+  const watch = await watchViewHandle(page)
+  await expect.poll(() => watch.evaluate(view => view.vrProjection)).toBe('EQUIRECTANGULAR')
+  await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
+  expect(await app.electronApp.evaluate(() => globalThis.__vrAttempts)).toEqual([false, true])
+  expect(await page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
+  releaseManifest?.()
+})
+
+for (const suppliedHls of [true, false]) {
+  test(`built-in mesh playback uses ${suppliedHls ? 'the supplied' : 'a VR client'} panorama without yt-dlp`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let vrRequests = 0
+    let manifestRequests = 0
+    let releaseManifest
+    await page.route('https://vr.example.test/**', route => {
+      if (++manifestRequests > 1) {
+        return new Promise(resolve => {
+          releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
+        })
+      }
+      return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+    })
+    await page.route(/\/youtubei\/v1\/player(?:\?|$)/, route => {
+      const request = JSON.parse(route.request().postData() ?? '{}')
+      const response = demoPlayerResponse(request.videoId ?? 'jNQXAC9IVRw')
+      response.streamingData.formats[0].projectionType = 'MESH'
+      if (request.context?.client?.clientName === 'VISIONOS') vrRequests++
+      if (suppliedHls || request.context?.client?.clientName === 'VISIONOS') {
+        response.streamingData.hlsManifestUrl = 'https://vr.example.test/master.m3u8?expire=4102444800'
+      }
+      return route.fulfill({ json: response })
+    })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .dispatch('updatePlaybackEngineFallback', false))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__builtinVrExtractions = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => { globalThis.__builtinVrExtractions++; return { error: 'Unexpected extraction' } })
+    })
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await page.locator('.videoLayout').waitFor()
+    const watch = await watchViewHandle(page)
+    await expect.poll(() => watch.evaluate(view => ({
+      loading: view.isLoading,
+      engine: view.activePlaybackEngine,
+      projection: view.vrProjection,
+      manifest: view.manifestSrc?.split('?')[0],
+    }))).toEqual({ loading: false, engine: 'built-in', projection: 'EQUIRECTANGULAR', manifest: 'https://vr.example.test/master.m3u8' })
+    await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
+    expect(await page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
+    expect(await app.electronApp.evaluate(() => globalThis.__builtinVrExtractions)).toBe(0)
+    expect(vrRequests).toBe(suppliedHls ? 0 : 1)
+    releaseManifest?.()
+  })
 }
 
 test('disabled playback-engine fallback keeps a YouTube mesh video on built-in playback', async ({ app, page }) => {
@@ -197,79 +281,99 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   releaseManifest?.()
 })
 
-test('uses panoramic HLS for an Invidious mesh video', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({
-    contentType: 'application/x-mpegURL', body: '#EXTM3U\n'
-  }))
-  await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
-    json: {
-      title: 'Invidious 360 video',
-      viewCount: 1,
-      paid: false,
-      subCountText: '1',
-      likeCount: 1,
-      dislikeCount: 0,
-      genre: 'Entertainment',
-      keywords: [],
-      author: 'Test Channel',
-      authorId: 'UC-test-channel-id',
-      authorThumbnails: [],
-      description: '',
-      descriptionHtml: '',
-      published: 1_700_000_000,
-      recommendedVideos: [],
-      liveNow: false,
-      premiereTimestamp: 0,
-      isFamilyFriendly: true,
-      isPostLiveDvr: false,
-      isListed: true,
-      captions: [],
-      lengthSeconds: 30,
-      formatStreams: [{
-        itag: 43,
-        url: DEMO_MEDIA_URL,
-        type: 'video/webm; codecs="vp9, opus"',
-        quality: 'medium',
-        size: '640x360',
-        projectionType: 'MESH'
-      }],
-      adaptiveFormats: [{
-        itag: 140,
-        url: `${DEMO_MEDIA_URL}&expire=4102444800`,
-        type: 'audio/mp4; codecs="mp4a.40.2"',
-        bitrate: '128000',
-        init: '0-700',
-        index: '701-800',
-        audioQuality: 'AUDIO_QUALITY_MEDIUM',
-        audioSampleRate: '48000',
-        audioChannels: 2
-      }],
-      videoThumbnails: [{ url: '/vi/jNQXAC9IVRw/hqdefault.jpg', width: 480, height: 360 }]
-    }
-  }))
-  await mockVrYtDlpInfo(app)
-  await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await Promise.all([
-      store.dispatch('updateBackendPreference', 'invidious'),
-      store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
-    ])
-  })
+for (const mode of ['yt-dlp', 'built-in', 'proxy']) {
+  test(`uses panoramic HLS for an Invidious mesh video (${mode})`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({
+      contentType: 'application/x-mpegURL', body: '#EXTM3U\n'
+    }))
+    const hlsRequests = []
+    let releaseManifest
+    await page.route('https://invidious.test/api/manifest/hls/**', route => {
+      hlsRequests.push(route.request().url())
+      if (hlsRequests.length > 1) {
+        return new Promise(resolve => {
+          releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
+        })
+      }
+      return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+    })
+    await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
+      json: {
+        title: 'Invidious 360 video',
+        hlsUrl: mode === 'yt-dlp' ? undefined : 'https://invidious.test/api/manifest/hls/id/jNQXAC9IVRw',
+        viewCount: 1,
+        paid: false,
+        subCountText: '1',
+        likeCount: 1,
+        dislikeCount: 0,
+        genre: 'Entertainment',
+        keywords: [],
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        authorThumbnails: [],
+        description: '',
+        descriptionHtml: '',
+        published: 1_700_000_000,
+        recommendedVideos: [],
+        liveNow: false,
+        premiereTimestamp: 0,
+        isFamilyFriendly: true,
+        isPostLiveDvr: false,
+        isListed: true,
+        captions: [],
+        lengthSeconds: 30,
+        formatStreams: [{
+          itag: 43,
+          url: DEMO_MEDIA_URL,
+          type: 'video/webm; codecs="vp9, opus"',
+          quality: 'medium',
+          size: '640x360',
+          projectionType: 'MESH'
+        }],
+        adaptiveFormats: [{
+          itag: 140,
+          url: `${DEMO_MEDIA_URL}&expire=4102444800`,
+          type: 'audio/mp4; codecs="mp4a.40.2"',
+          bitrate: '128000',
+          init: '0-700',
+          index: '701-800',
+          audioQuality: 'AUDIO_QUALITY_MEDIUM',
+          audioSampleRate: '48000',
+          audioChannels: 2
+        }],
+        videoThumbnails: [{ url: '/vi/jNQXAC9IVRw/hqdefault.jpg', width: 480, height: 360 }]
+      }
+    }))
+    await mockVrYtDlpInfo(app)
+    await page.evaluate(async mode => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('updateBackendPreference', 'invidious'),
+        store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),
+        store.dispatch('updateProxyVideos', mode === 'proxy')
+      ])
+    }, mode)
 
-  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await page.locator('.videoLayout').waitFor()
-  const watch = await watchViewHandle(page)
-  await expect.poll(() => watch.evaluate(view => ({
-    activePlaybackEngine: view.activePlaybackEngine,
-    vrProjection: view.vrProjection,
-    builtInProjection: view.builtInPlaybackSource?.vrProjection
-  }))).toEqual({
-    activePlaybackEngine: 'yt-dlp',
-    vrProjection: 'EQUIRECTANGULAR',
-    builtInProjection: 'MESH'
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await page.locator('.videoLayout').waitFor()
+    const watch = await watchViewHandle(page)
+    await expect.poll(() => watch.evaluate(view => ({
+      activePlaybackEngine: view.activePlaybackEngine,
+      vrProjection: view.vrProjection,
+      builtInProjection: view.builtInPlaybackSource?.vrProjection ?? null
+    }))).toEqual({
+      activePlaybackEngine: mode === 'yt-dlp' ? 'yt-dlp' : 'built-in',
+      vrProjection: 'EQUIRECTANGULAR',
+      builtInProjection: mode === 'yt-dlp' ? 'MESH' : null
+    })
+    await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
+    if (mode !== 'yt-dlp') {
+      expect(hlsRequests.length).toBeGreaterThan(0)
+      expect(new URL(hlsRequests[0]).searchParams.get('local')).toBe(mode === 'proxy' ? 'true' : null)
+    }
+    releaseManifest?.()
   })
-  await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
-})
+}

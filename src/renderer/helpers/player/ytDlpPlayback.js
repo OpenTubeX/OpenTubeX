@@ -11,6 +11,7 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
 import { capacitorHttpFetch } from '../api/capacitor-http'
 import { fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
 import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
+import { probeHlsManifest as probeYtDlpHlsManifest } from './hlsManifest'
 
 /** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
 
@@ -620,18 +621,6 @@ export async function checkYtDlpPlaybackUrl(url) {
 }
 
 /**
- * @param {string} url
- */
-async function probeYtDlpHlsManifest(url) {
-  try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(URL_PROBE_TIMEOUT) })
-    return response.ok && (await response.text()).trimStart().startsWith('#EXTM3U')
-  } catch {
-    return false
-  }
-}
-
-/**
  * @param {YtDlpPlaybackFormat[]} formats
  */
 async function convertLegacyFormats(formats) {
@@ -843,18 +832,20 @@ async function loadYtDlpPlaybackSource(
     }
   }
 
-  if (cachedSource !== null && (!includeSubtitles || cachedSource.subtitlesIncluded)) {
+  if (cachedSource !== null && (!includeSubtitles || cachedSource.subtitlesIncluded) &&
+    (!preferVrHls || cachedSource.vrProjection === 'EQUIRECTANGULAR')) {
     return cachedSource
   }
 
   if (cachedOnly) {
-    return cachedSource
+    return !preferVrHls || cachedSource?.vrProjection === 'EQUIRECTANGULAR' ? cachedSource : null
   }
 
   let extractionError = null
   let limitedLiveSource = null
   let incompleteSource = null
   let incompleteSourceHeight = -1
+  let flatVrSource = null
 
   // A fresh extraction with the same default clients can return working URLs after
   // an immediately preceding extraction returned URLs that respond with 403. Give
@@ -948,13 +939,14 @@ async function loadYtDlpPlaybackSource(
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    preferVrHls ||= info.formats.some(format => isVideoFormat(format) && /\bmesh\b/i.test(format.formatNote ?? ''))
     // YouTube's direct mesh streams need their embedded projection mesh to be
     // rendered correctly. Its HLS rendition is a panorama that Shaka can show
     // with the existing equirectangular VR renderer.
-    const usePanoramicHls = preferVrHls && !isLive && info.hlsManifestUrl !== null
+    const needsPanorama = preferVrHls && !isLive
+    const usePanoramicHls = needsPanorama && info.hlsManifestUrl !== null
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
     const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
-    let deferredDashSource = null
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
@@ -974,7 +966,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
-          vrProjection: null,
+          vrProjection: needsPanorama ? 'MESH' : null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -986,8 +978,8 @@ async function loadYtDlpPlaybackSource(
         }
 
         if (deferIncompleteSource(source, [...localFormats, ...legacyFormats])) continue
-        if (usePanoramicHls) {
-          deferredDashSource = source
+        if (needsPanorama) {
+          flatVrSource = source
         } else {
           await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
           return source
@@ -1041,10 +1033,7 @@ async function loadYtDlpPlaybackSource(
       return source
     }
 
-    if (deferredDashSource !== null) {
-      await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, deferredDashSource)
-      return deferredDashSource
-    }
+    if (needsPanorama) continue
 
     if (!isLive) {
       const legacyFormats = await legacyFormatsPromise
@@ -1089,7 +1078,9 @@ async function loadYtDlpPlaybackSource(
     return limitedLiveSource
   }
 
-  if (cachedSource !== null) {
+  if (flatVrSource !== null) return flatVrSource
+
+  if (cachedSource !== null && (!preferVrHls || cachedSource.vrProjection === 'EQUIRECTANGULAR')) {
     return cachedSource
   }
 
