@@ -679,7 +679,10 @@ export function updateVideoListAfterProcessing(videos, now = Date.now()) {
  */
 export async function parseYouTubeRSSFeed(rssString, channelId) {
   try {
-    const { name: channelName, videos } = parseSubscriptionRss(rssString, channelId)
+    const { name: channelName, videos } = process.env.IS_ELECTRON
+      ? await window.ftElectron.subscriptionAutoRefresh.processFeed({ format: 'rss', text: rssString, channelId })
+          .catch(() => parseSubscriptionRss(rssString, channelId))
+      : parseSubscriptionRss(rssString, channelId)
 
     return {
       name: channelName,

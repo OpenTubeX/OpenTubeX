@@ -330,7 +330,8 @@ onBeforeUnmount(() => {
 async function updateItems(items) {
   const saved = await store.dispatch('updateNavigationItems', items)
 
-  if (!saved || store.getters.getNavigationItems.includes('home')) return saved
+  // A failed re-add can roll back to a persisted list without Home.
+  if (store.getters.getNavigationItems.includes('home')) return saved
   if (process.env.IS_ELECTRON) {
     await store.dispatch('redirectHomeTabsToLandingPage')
   } else if (route.path === '/home') {

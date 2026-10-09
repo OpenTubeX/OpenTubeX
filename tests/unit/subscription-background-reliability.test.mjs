@@ -66,7 +66,7 @@ test('desktop transport supports a configured HTTP instance and rejects non-HTTP
   } finally { service.stop() }
 })
 
-async function serviceFixture() {
+async function serviceFixture(timers = { setTimeout, clearTimeout }) {
   const source = (await readFile(new URL('../../src/main/subscriptionBackground.js', import.meta.url), 'utf8'))
     .replace(/^import .*\n/gm, '').replace('export function', 'function')
   const children = []
@@ -76,17 +76,36 @@ async function serviceFixture() {
       this.messages.push(message)
       queueMicrotask(() => this.emit('message', { id: message.id, value: null }))
     }
-    kill() { this.emit('exit') }
+    kill() { this.killed = true; this.emit('exit') }
   }
   const context = vm.createContext({
     path, existsSync: () => true, __dirname: '/fixture', setInterval: () => 0, clearInterval() {},
-    setTimeout, clearTimeout, console,
+    ...timers, console,
     utilityProcess: { fork() { const child = new Worker(); children.push(child); return child } },
     net: { isOnline: () => true }
   })
   vm.runInContext(source, context)
   return { service: context.createSubscriptionBackgroundService('/fixture/data'), children }
 }
+
+test('foreground processing releases its idle utility after a background-state notification', async () => {
+  const timers = new Map()
+  const { service, children } = await serviceFixture({
+    setTimeout(callback, delay) { const handle = {}; timers.set(handle, { callback, delay }); return handle },
+    clearTimeout: handle => timers.delete(handle),
+  })
+  try {
+    await service.processFeed({ format: 'rss', text: '<feed/>' })
+    await service.setBackground(false)
+    assert.equal(timers.size, 1)
+    const [idle] = timers.values()
+    assert.equal(idle.delay, 15_000)
+    idle.callback()
+    assert.equal(children[0].killed, true)
+    await service.processFeed({ format: 'rss', text: '<feed/>' })
+    assert.equal(children.length, 2)
+  } finally { service.stop() }
+})
 
 test('draining results after a worker crash restores configuration before any concurrent operations', async () => {
   const { service, children } = await serviceFixture()

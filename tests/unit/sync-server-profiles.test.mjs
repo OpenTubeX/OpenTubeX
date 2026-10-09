@@ -1,3 +1,4 @@
+import { DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
@@ -9,7 +10,7 @@ import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 
 // Run the real sync code, replacing webpack imports with its profile dependencies.
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ MAIN_PROFILE_ID, SyncServerDataLossError, ...profileSync })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote, MAIN_PROFILE_ID, SyncServerDataLossError, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')

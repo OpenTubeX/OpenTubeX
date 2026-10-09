@@ -1,3 +1,4 @@
+import { DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
@@ -9,7 +10,7 @@ import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry }
 
 const key = subscriptionSync.SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote,
   ...subscriptionSync,
   areSyncSettingValuesEqual,
   mergeSettingEntry,

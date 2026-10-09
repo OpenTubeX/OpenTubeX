@@ -278,6 +278,7 @@ test('a failed retention is retried for an identical worker configuration', asyn
   let attempts = 0
   const context = vm.createContext({
     scheduler: { configure() {} },
+    processSubscriptionFeed: () => {},
     results: { async retain() { if (++attempts === 1) throw new Error('temporary disk failure') } }
   })
   vm.runInContext('let configurationJson = null;\n' + source.slice(source.indexOf('const methods = {'), source.indexOf('\nfunction tick()')) + '\nglobalThis.configure = methods.configure', context)

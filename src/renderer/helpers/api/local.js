@@ -1,5 +1,6 @@
 import { normalizeCommentFetchResponse } from './local-comment-response'
 import { createLocalFeedParsers } from './local-feed-parsers'
+import { runBackgroundJob } from '../background-jobs.js'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
 import Autolinker from 'autolinker'
 import { parseLooseJSON } from 'bgutils-js/utils'
@@ -1228,6 +1229,22 @@ export async function getLocalChannel(id, signal) {
   return result
 }
 
+async function processForegroundSubscriptionResponse(input) {
+  try {
+    // Passing the raw response through Electron's context bridge copies its
+    // entire graph on the renderer thread. Serialize it off-thread instead.
+    const data = await runBackgroundJob('stringify', { value: input.data })
+    return await window.ftElectron.subscriptionAutoRefresh.processFeed({
+      ...input,
+      data,
+      hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
+    })
+  } catch (error) {
+    console.warn('Background feed processing failed; parsing in the renderer:', error)
+    return undefined
+  }
+}
+
 /**
  * @param {string} id
  * @param {boolean} [safetyMode]
@@ -1246,6 +1263,20 @@ export async function getLocalChannelVideos(id, safetyMode = false, signal) {
       // protobuf for the videos tab (this is the one that YouTube uses,
       // it has some empty fields in the protobuf but it doesn't work if you remove them)
     })
+
+    if (process.env.IS_ELECTRON) {
+      const result = await processForegroundSubscriptionResponse({ format: 'local', data: response.data, feedType: 'videos', channelId: id })
+      if (result === null) return null
+      if (result?.needsUploadsPlaylist) {
+        try {
+          const playlist = await innertube.getPlaylist(getChannelPlaylistId(result.channelId, 'videos', 'newest'))
+          result.videos = parseLocalPlaylistVideos(playlist.items)
+        } catch (error) {
+          if (error.message !== 'The playlist does not exist.') throw error
+        }
+      }
+      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, videos: result.videos }
+    }
 
     const videosTab = new YT.Channel(null, response)
     const { id: channelId = id, name, thumbnailUrl } = parseLocalChannelHeader(videosTab, true)
@@ -1305,6 +1336,28 @@ export async function getLocalChannelLiveStreams(id, signal) {
       // it has some empty fields in the protobuf but it doesn't work if you remove them)
     })
 
+    if (process.env.IS_ELECTRON) {
+      let result = await processForegroundSubscriptionResponse({ format: 'local', data: response.data, feedType: 'live', channelId: id })
+      if (result === null) return null
+      while (result && result.videos.length === 0 && result.continuation) {
+        const page = await innertube.actions.execute('/browse', { continuation: result.continuation })
+        const next = await processForegroundSubscriptionResponse({
+          format: 'localContinuation',
+          data: page.data,
+          feedType: 'live',
+          channelId: result.channelId,
+          channelName: result.name,
+        })
+        if (!next) {
+          result = undefined
+          break
+        }
+        result.videos = next.videos
+        result.continuation = next.continuation
+      }
+      if (result) return { name: result.name, thumbnailUrl: result.thumbnailUrl, videos: result.videos }
+    }
+
     let liveStreamsTab = new YT.Channel(innertube.actions, response)
     const { id: channelId = id, name, thumbnailUrl } = parseLocalChannelHeader(liveStreamsTab, true)
 
@@ -1352,6 +1405,11 @@ export async function getLocalChannelCommunity(id, signal) {
       // protobuf for the community tab (this is the one that YouTube uses,
       // it has some empty fields in the protobuf but it doesn't work if you remove them)
     })
+
+    if (process.env.IS_ELECTRON) {
+      const result = await processForegroundSubscriptionResponse({ format: 'local', data: response.data, feedType: 'posts', channelId: id })
+      if (result !== undefined) return result?.posts ?? null
+    }
 
     const communityTab = new YT.Channel(null, response)
 

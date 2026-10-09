@@ -1,3 +1,9 @@
+import { toRaw } from 'vue'
+import {
+  DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar,
+  mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
+} from './sync-history-merge.js'
+import { runBackgroundJob } from './background-jobs.js'
 import { MAIN_PROFILE_ID } from '../../constants'
 import i18n from '../i18n/index'
 import packageDetails from '../../../package.json'
@@ -49,8 +55,6 @@ const BULK_SYNC_CHUNK_SIZE = 100
 const LEGACY_SYNC_CONCURRENCY = 4
 const REQUEST_TIMEOUT_MS = 20_000
 const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
-const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
-const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
 
 function syncServerFetch(input, init, timeoutMs) {
   return process.env.IS_CAPACITOR
@@ -132,7 +136,11 @@ export class SyncServerClient {
         ...options,
         redirect: 'error',
         headers,
-        body: options.body == null ? undefined : JSON.stringify(options.body),
+        body: options.body == null
+          ? undefined
+          : options.body.payload?.length > 65_536
+            ? await runBackgroundJob('stringify', { value: options.body })
+            : JSON.stringify(options.body),
         signal: controller.signal,
       }, timeoutMs)
       const text = await response.text()
@@ -144,8 +152,9 @@ export class SyncServerClient {
       if (!text) return null
 
       try {
-        return JSON.parse(text)
-      } catch {
+        return text.length > 65_536 ? await runBackgroundJob('parse', { value: text }) : JSON.parse(text)
+      } catch (error) {
+        if (error.name !== 'SyntaxError') throw error
         return text
       }
     } catch (error) {
@@ -577,49 +586,8 @@ async function uploadInChunks(items, supportsBulk, uploadBulk, uploadSingle) {
   }
 }
 
-export function mergeIds(
-  localIds,
-  remoteIds,
-  previousIds = [],
-  { allowDataLoss = false, collection = 'data', getItemName = () => null } = {}
-) {
-  const local = new Set(localIds)
-  const remote = new Set(remoteIds)
-  const previous = new Set(previousIds)
-  const allIds = new Set([...local, ...remote, ...previous])
-
-  const merged = new Set(Array.from(allIds).filter(id => {
-    if (!previous.has(id)) {
-      return local.has(id) || remote.has(id)
-    }
-
-    // Once both sides have seen an item, a deletion on either side wins.
-    return local.has(id) && remote.has(id)
-  }))
-  const deletedIds = Array.from(previous).filter(id => !merged.has(id))
-  const deleted = deletedIds.length
-  const oneSideWasEmptied = previous.size > 0 && (
-    (local.size === 0 && remote.size > 0) ||
-    (remote.size === 0 && local.size > 0)
-  )
-  const isMassDeletion = deleted >= 10 && deleted / previous.size >= 0.5
-
-  if (!allowDataLoss && deleted > 0 && (oneSideWasEmptied || isMassDeletion)) {
-    throw new SyncServerDataLossError(collection, deleted, previous.size, deletedIds.map(id => ({
-      id,
-      name: getItemName(id) || id,
-    })))
-  }
-
-  return merged
-}
-
-function normalizeChannelAvatar(avatar) {
-  if (!avatar || avatar === DEFAULT_CHANNEL_AVATAR || YOUTUBE_VIDEO_THUMBNAIL_REGEX.test(avatar)) {
-    return null
-  }
-
-  return avatar
+export function mergeIds(...args) {
+  return mergeSyncIds(...args)
 }
 
 function channelToRemote(channel) {
@@ -640,26 +608,7 @@ function channelToLocal(channel) {
 }
 
 function videoToRemote(video) {
-  const videoId = video.videoId
-  const uploaderId = video.authorId
-
-  if (!videoId || !uploaderId) {
-    return null
-  }
-
-  return {
-    id: videoId,
-    title: video.title || videoId,
-    upload_date: Number.isFinite(video.published) ? video.published : 0,
-    uploader: {
-      id: uploaderId,
-      name: video.author || uploaderId,
-      avatar: normalizeChannelAvatar(video.authorThumbnail) || DEFAULT_CHANNEL_AVATAR,
-      verified: false,
-    },
-    thumbnail_url: video.thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-    duration: Number.isFinite(video.lengthSeconds) ? Math.round(video.lengthSeconds) : 0,
-  }
+  return syncVideoToRemote(video)
 }
 
 function videoToLocal(video, timeAdded = Date.now()) {
@@ -917,141 +866,101 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   return nextSnapshot
 }
 
-function historyToRemote(record) {
-  const video = videoToRemote(record)
-  if (!video) return null
-
-  const watchProgress = Number.isFinite(record.watchProgress) ? record.watchProgress : 0
-  return {
-    video,
-    metadata: {
-      added_date: Number.isFinite(record.timeWatched) ? record.timeWatched : Date.now(),
-      watched_state: record.isWatched ? 'completed' : watchProgress > 0 ? 'watching' : 'planned',
-      position_millis: Math.max(0, Math.round(watchProgress * 1000)),
-    },
-  }
-}
-
-function historyToLocal(entry, local) {
-  return {
-    ...local,
-    videoId: entry.video.id,
-    title: entry.video.title,
-    author: entry.video.uploader.name,
-    authorId: entry.video.uploader.id,
-    published: entry.video.upload_date,
-    description: local?.description ?? '',
-    lengthSeconds: entry.video.duration > 0 ? entry.video.duration : (local?.lengthSeconds ?? 0),
-    watchProgress: (entry.metadata.position_millis ?? 0) / 1000,
-    isWatched: entry.metadata.watched_state === 'completed',
-    timeWatched: entry.metadata.added_date,
-    // Sync stores unknown durations as zero and does not carry live status.
-    isLive: entry.video.duration > 0 ? false : local?.isLive === true,
-    isUpcoming: entry.video.duration > 0 ? false : local?.isUpcoming === true,
-    type: 'video',
-  }
-}
-
-function historyStateEquals(localPayload, remote) {
-  return localPayload.metadata.added_date === remote.metadata.added_date &&
-    localPayload.metadata.watched_state === remote.metadata.watched_state &&
-    localPayload.metadata.position_millis === remote.metadata.position_millis
-}
-
 export async function syncHistory(client, store, previous = {}, options = {}) {
-  // Older snapshots contain only IDs, without a baseline for watch-state edits.
-  const previousIds = Array.isArray(previous) ? previous : Object.keys(previous)
-  const previousStates = Array.isArray(previous) ? {} : previous
-  const next = {}
-  const localHistory = store.state.history.historyCacheSorted
-  const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
-  const localById = mapBy(syncableLocalHistory, record => record.videoId)
-  const remoteHistory = await client.getWatchHistory()
-  if (remoteHistory === null) return null
-  const remoteById = mapBy(remoteHistory, entry => entry.video.id)
-  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
-    ...options,
-    collection: 'history',
-    getItemName: id => localById.get(id)?.title || remoteById.get(id)?.video.title,
-  })
-  const historyToUpload = []
-  const localInsertions = []
-  const localUpdates = []
-  const localDeletions = []
-
-  for (const id of remoteById.keys()) {
-    if (!mergedIds.has(id)) {
-      await client.deleteWatchHistory(id)
+  const historyChanged = new Error('Watch history changed during sync. Try again.')
+  const acknowledgedUpserts = new Map()
+  const acknowledgedDeletions = new Set()
+  const acknowledge = (upserts, deletions = []) => {
+    for (const id of deletions) {
+      acknowledgedUpserts.delete(id)
+      acknowledgedDeletions.add(id)
+    }
+    for (const entry of upserts) {
+      acknowledgedDeletions.delete(entry.video.id)
+      acknowledgedUpserts.set(entry.video.id, entry.metadata)
     }
   }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    store.assertActive?.()
+    const remoteHistory = await client.getWatchHistory()
+    if (remoteHistory === null) return null
+    const revision = store.state.history.historyRevision
+    const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+    const assertHistoryCurrent = () => {
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) throw historyChanged
+    }
+    let merged
+    try {
+      merged = await runBackgroundJob('mergeHistory', {
+        localHistory,
+        remoteHistory,
+        previous,
+        options,
+        acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+      })
+      assertHistoryCurrent()
+    } catch (error) {
+      store.assertActive?.()
+      // Even a failed merge can be based on mixed chunks and report false data
+      // loss. Only retry stale computations; rejected writes have uncertain effects.
+      if (store.state.history.historyRevision !== revision) continue
+      throw error
+    }
+    const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+    const legacy = typeof client.applyWatchHistoryChanges !== 'function'
+    let completed = false
+    try {
+      if (!legacy) {
+        if (historyToUpload.length || remoteDeletions.length) {
+          await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+          acknowledge(historyToUpload, remoteDeletions)
+        }
+      } else {
+        for (const id of remoteDeletions) {
+          await client.deleteWatchHistory(id)
+          acknowledge([], [id])
+        }
+        await uploadInChunks(
+          historyToUpload,
+          await client.supportsBulkSync(),
+          async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+          async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
+        )
+      }
 
-  for (const id of localById.keys()) {
-    if (!mergedIds.has(id)) {
-      localDeletions.push(id)
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) continue
+      if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+        try {
+          await store.dispatch('applyHistorySyncChanges', {
+            insertions,
+            updates,
+            deletions,
+            ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
+          })
+        } catch (error) {
+          if (error !== historyChanged) throw error
+          store.assertActive?.()
+          continue
+        }
+      }
+      completed = true
+      return next
+    } finally {
+      // Legacy requests already changed the server even if a later write,
+      // local application, or collection fails. Encrypted adapter writes only
+      // change its in-memory document and must wait for the actual upload.
+      if (legacy && (completed || acknowledgedUpserts.size || acknowledgedDeletions.size)) {
+        await store.persistHistorySyncBaseline?.({
+          previous,
+          acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+          ...(completed ? { next } : {}),
+        })
+      }
     }
   }
-
-  for (const id of mergedIds) {
-    const local = localById.get(id)
-    const remote = remoteById.get(id)
-    let useLocal = local && (!remote || local.timeWatched > remote.metadata.added_date)
-    if (local && remote && local.timeWatched === remote.metadata.added_date) {
-      const localState = historyToRemote(local)
-      const baseline = previousStates[id]
-      const localChanged = !baseline || !historyStateEquals(localState, { metadata: baseline })
-      const remoteChanged = !baseline || !historyStateEquals(remote, { metadata: baseline })
-      // A sole local edit can move progress backwards or clear watched status.
-      // Concurrent/unknown edits need a stable tie-break, never local-wins on
-      // both devices. Prefer farther progress, then completed watch state.
-      useLocal = localChanged && (!remoteChanged ||
-        localState.metadata.position_millis > remote.metadata.position_millis ||
-        (localState.metadata.position_millis === remote.metadata.position_millis &&
-          localState.metadata.watched_state === 'completed'))
-      if (historyStateEquals(localState, remote)) useLocal = true
-    }
-    let merged = useLocal ? local : historyToLocal(remote, local)
-    // Watch time orders progress, not metadata completeness. Fill an unknown
-    // local duration before uploading so it cannot erase a known server value.
-    // Equal timestamps also refresh metadata without replacing local progress.
-    if (useLocal && remote &&
-        (local.timeWatched === remote.metadata.added_date ||
-          !Number.isFinite(local.lengthSeconds) || local.lengthSeconds <= 0) &&
-        Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
-        (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
-      merged = { ...local, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
-      localUpdates.push(merged)
-    }
-    const localPayload = useLocal ? historyToRemote(merged) : null
-    next[id] = { ...(localPayload ?? remote).metadata }
-
-    if (useLocal && localPayload && (
-      !remote ||
-      local.timeWatched > remote.metadata.added_date ||
-      !historyStateEquals(localPayload, remote)
-    )) {
-      historyToUpload.push(localPayload)
-    } else if (!useLocal) {
-      if (local) localUpdates.push(merged)
-      else localInsertions.push(merged)
-    }
-  }
-
-  await uploadInChunks(
-    historyToUpload,
-    await client.supportsBulkSync(),
-    entries => client.putWatchHistoryBulk(entries),
-    entry => client.putWatchHistory(entry)
-  )
-
-  if (localInsertions.length > 0 || localUpdates.length > 0 || localDeletions.length > 0) {
-    await store.dispatch('applyHistorySyncChanges', {
-      insertions: localInsertions,
-      updates: localUpdates,
-      deletions: localDeletions,
-    })
-  }
-
-  return next
+  throw historyChanged
 }
 
 function profileMetadata(profile, fallback = {}) {

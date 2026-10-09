@@ -10,6 +10,7 @@ export function createSubscriptionBackgroundService(userDataPath) {
   let sequence = 0
   let configuration = null
   let background = false
+  let processingIdleTimer = null
   let stopped = false
   const pending = new Map()
   const requests = new Map()
@@ -79,6 +80,7 @@ export function createSubscriptionBackgroundService(userDataPath) {
   }
 
   function stopWorker() {
+    clearTimeout(processingIdleTimer)
     const child = worker
     if (!child) return
     releaseWorker(child)
@@ -86,6 +88,7 @@ export function createSubscriptionBackgroundService(userDataPath) {
   }
 
   function send(method, value) {
+    clearTimeout(processingIdleTimer)
     return new Promise((resolve, reject) => {
       const id = ++sequence
       const timeout = setTimeout(() => { pending.delete(id); reject(new Error('Background refresh process timed out')) }, 30000)
@@ -100,7 +103,16 @@ export function createSubscriptionBackgroundService(userDataPath) {
     if (!child) throw new Error('Background refresh stopped')
     await ready
     if (worker !== child) throw new Error('Background refresh process exited')
-    return send(method, value)
+    try {
+      return await send(method, value)
+    } finally {
+      if (worker && !configuration?.enabled && pending.size === 0) {
+        clearTimeout(processingIdleTimer)
+        processingIdleTimer = setTimeout(() => {
+          if (!configuration?.enabled && pending.size === 0) stopWorker()
+        }, 15_000)
+      }
+    }
   }
 
   // Restart after crashes, without requiring a renderer to reconfigure the job.
@@ -113,6 +125,7 @@ export function createSubscriptionBackgroundService(userDataPath) {
   }, 30000)
 
   return {
+    processFeed(value) { return call('processFeed', value) },
     async configure(value) {
       configuration = value
       if (!worker && !value.enabled) return
