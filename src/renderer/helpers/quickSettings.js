@@ -206,10 +206,11 @@ export const DEFAULT_QUICK_SETTINGS = Object.freeze([
   'region',
 ])
 
-const QUICK_SETTING_IDS = new Set(QUICK_SETTING_DEFINITIONS.map(({ id }) => id))
+const QUICK_SETTING_SECTIONS = new Map(QUICK_SETTING_DEFINITIONS.map(({ id, section }) => [id, section]))
 
 /**
- * Removes unknown and duplicate entries while preserving the user's order.
+ * Removes unknown and duplicate entries and keeps each category together.
+ * Preserves first-seen category order and setting order within each category.
  *
  * @param {unknown} value
  * @returns {string[]}
@@ -219,5 +220,12 @@ export function normalizeQuickSettings(value) {
     return [...DEFAULT_QUICK_SETTINGS]
   }
 
-  return [...new Set(value.filter(id => QUICK_SETTING_IDS.has(id)))]
+  const sections = new Map()
+  for (const id of new Set(value)) {
+    const section = QUICK_SETTING_SECTIONS.get(id)
+    if (section == null) continue
+    if (!sections.has(section)) sections.set(section, [])
+    sections.get(section).push(id)
+  }
+  return [...sections.values()].flat()
 }

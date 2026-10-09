@@ -97,20 +97,13 @@
         :key="item.id"
         class="selectedItem"
         :data-navigation-item-id="item.id"
-        :class="{
-          dragging: draggedItemId === item.id,
-          dropBefore: dropTarget?.id === item.id && !dropTarget.after,
-          dropAfter: dropTarget?.id === item.id && dropTarget.after,
-        }"
-        @dragover.prevent="handleDragOver($event, item.id)"
-        @drop.prevent="dropItem($event, item.id)"
+        :class="{ dragging: draggedItemId === item.id }"
+        :style="rowStyle(item.id)"
       >
         <span
           class="dragHandle"
-          draggable="true"
           aria-hidden="true"
-          @dragstart="startDragging($event, item.id)"
-          @dragend="stopDragging"
+          @dragstart.prevent
           @pointerdown="startPointerDrag($event, item.id)"
           @pointermove="movePointerDrag"
           @pointerup="endPointerDrag"
@@ -205,7 +198,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
+import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import {
   DEFAULT_NAVIGATION_ITEMS,
@@ -389,16 +382,13 @@ function moveItem(itemId, offset) {
 
 const {
   draggedItemId,
-  dropTarget,
-  dropItem,
-  handleDragOver,
-  startDragging,
+  rowStyle,
   stopDragging,
   startPointerDrag,
   movePointerDrag,
   endPointerDrag,
   cancelPointerDrag,
-} = useOrderedItemDrag({
+} = useOrderedItemReorder({
   items: navigationItems,
   rowSelector: '.selectedItem',
   itemIdAttribute: 'data-navigation-item-id',
@@ -526,28 +516,6 @@ function resetItems() {
   max-inline-size: 720px;
   padding-block: 8px;
   padding-inline: 12px;
-}
-
-.selectedItem.dragging {
-  opacity: 0.5;
-}
-
-.selectedItem.dropBefore::before,
-.selectedItem.dropAfter::after {
-  background: var(--primary-color);
-  block-size: 3px;
-  border-radius: calc(2px * var(--ui-roundness));
-  content: '';
-  inset-inline: 0;
-  position: absolute;
-}
-
-.selectedItem.dropBefore::before {
-  inset-block-start: -6px;
-}
-
-.selectedItem.dropAfter::after {
-  inset-block-end: -6px;
 }
 
 .dragHandle {

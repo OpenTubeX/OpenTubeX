@@ -100,20 +100,13 @@
         :key="item.id"
         class="selectedAction"
         :data-fullscreen-action-id="item.id"
-        :class="{
-          dragging: draggedItemId === item.id,
-          dropBefore: dropTarget?.id === item.id && !dropTarget.after,
-          dropAfter: dropTarget?.id === item.id && dropTarget.after,
-        }"
-        @dragover.prevent="handleDragOver($event, item.id)"
-        @drop.prevent="dropItem($event, item.id)"
+        :class="{ dragging: draggedItemId === item.id }"
+        :style="rowStyle(item.id)"
       >
         <span
           class="dragHandle"
-          draggable="true"
           aria-hidden="true"
-          @dragstart="startDragging($event, item.id)"
-          @dragend="stopDragging"
+          @dragstart.prevent
           @pointerdown="startPointerDrag($event, item.id)"
           @pointermove="movePointerDrag"
           @pointerup="endPointerDrag"
@@ -187,7 +180,7 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
+import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import {
   DEFAULT_FULLSCREEN_ACTIONS,
@@ -358,16 +351,13 @@ function moveItem(itemId, offset) {
 
 const {
   draggedItemId,
-  dropTarget,
-  dropItem,
-  handleDragOver,
-  startDragging,
+  rowStyle,
   stopDragging,
   startPointerDrag,
   movePointerDrag,
   endPointerDrag,
   cancelPointerDrag,
-} = useOrderedItemDrag({
+} = useOrderedItemReorder({
   items: fullscreenActions,
   rowSelector: '.selectedAction',
   itemIdAttribute: 'data-fullscreen-action-id',
@@ -479,28 +469,6 @@ function resetItems() {
   display: grid;
   grid-template-columns: 44px 24px minmax(0, 1fr) auto;
   position: relative;
-}
-
-.selectedAction.dragging {
-  opacity: 0.5;
-}
-
-.selectedAction.dropBefore::before,
-.selectedAction.dropAfter::after {
-  background: var(--primary-color);
-  block-size: 3px;
-  border-radius: calc(2px * var(--ui-roundness));
-  content: '';
-  inset-inline: 0;
-  position: absolute;
-}
-
-.selectedAction.dropBefore::before {
-  inset-block-start: -6px;
-}
-
-.selectedAction.dropAfter::after {
-  inset-block-end: -6px;
 }
 
 .dragHandle {
