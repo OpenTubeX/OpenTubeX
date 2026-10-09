@@ -7,8 +7,8 @@ test.use({
   launchArgs: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 })
 
-async function mockVrYtDlpInfo(app, initialHls = true) {
-  await app.electronApp.evaluate(({ ipcMain }, { mediaUrl, initialHls }) => {
+async function mockVrYtDlpInfo(app, initialHls = true, panoramicHls = true) {
+  await app.electronApp.evaluate(({ ipcMain }, { mediaUrl, initialHls, panoramicHls }) => {
     globalThis.__vrAttempts = []
     ipcMain.removeHandler('yt-dlp-get-playback-info')
     ipcMain.handle('yt-dlp-get-playback-info', (_event, _id, defaults) => {
@@ -16,7 +16,7 @@ async function mockVrYtDlpInfo(app, initialHls = true) {
       return {
         isLive: false,
         liveStatus: 'not_live',
-        hlsManifestUrl: initialHls || defaults ? 'https://vr.example.test/master.m3u8' : null,
+        hlsManifestUrl: panoramicHls && (initialHls || defaults) ? 'https://vr.example.test/master.m3u8' : null,
         formats: [{
           formatId: '18',
           url: `${mediaUrl}&expire=4102444800`,
@@ -43,7 +43,31 @@ async function mockVrYtDlpInfo(app, initialHls = true) {
         version: 'test'
       }
     })
-  }, { mediaUrl: DEMO_MEDIA_URL, initialHls })
+  }, { mediaUrl: DEMO_MEDIA_URL, initialHls, panoramicHls })
+}
+
+for (const rejectedHls of [false, true]) {
+  test(`combined-only mesh streams play when panoramic HLS is ${rejectedHls ? 'rejected' : 'missing'}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({ status: 403, body: 'Unavailable' }))
+    await mockVrYtDlpInfo(app, true, rejectedHls)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .dispatch('updateVideoPlaybackEngine', 'yt-dlp'))
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await page.locator('.videoLayout').waitFor()
+    const watch = await watchViewHandle(page)
+    await expect.poll(() => watch.evaluate(view => ({
+      engine: view.activePlaybackEngine,
+      projection: view.vrProjection,
+      format: view.activeFormat,
+      manifest: view.manifestSrc,
+      error: view.errorMessage,
+    }))).toEqual({ engine: 'yt-dlp', projection: 'MESH', format: 'legacy', manifest: null, error: null })
+    await expect.poll(() => page.locator('.ftVideoPlayer video').first().evaluate(video => video.currentTime)).toBeGreaterThan(0)
+    expect(await app.electronApp.evaluate(() => globalThis.__vrAttempts)).toEqual([false, true, true])
+  })
 }
 
 test('yt-dlp retries panoramic extraction when backend projection metadata is absent', async ({ app, page }) => {

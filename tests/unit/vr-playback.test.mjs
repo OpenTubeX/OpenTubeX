@@ -6,11 +6,13 @@ import { compileFunction } from 'node:vm'
 const code = await readFile(new URL('../../src/renderer/helpers/player/ytDlpPlayback.js', import.meta.url), 'utf8')
 const loaderCode = code.slice(code.indexOf('async function loadYtDlpPlaybackSource('))
 
-function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false } = {}) {
+function loader({ mesh = true, cached = null, panorama = true, incomplete = false, unavailable = false, combinedOnly = false, probePlayable = true } = {}) {
   const attempts = []
   const info = {
     isLive: false, liveStatus: 'not_live', duration: 47, storyboardVtt: null, incomplete,
-    formats: [
+    formats: combinedOnly ? [
+      { protocol: 'https', url: 'https://media.test/combined', vcodec: 'avc1', acodec: 'mp4a', formatNote: '360s, mesh' }
+    ] : [
       { protocol: 'https', url: 'https://media.test/video', vcodec: 'avc1', acodec: 'none', formatNote: mesh ? '1080s60, mesh' : '1080p60' },
       { protocol: 'https', url: 'https://media.test/audio', vcodec: 'none', acodec: 'mp4a' }
     ]
@@ -28,13 +30,13 @@ function loader({ mesh = true, cached = null, panorama = true, incomplete = fals
     },
     isVideoFormat: format => format.vcodec !== 'none',
     isAudioFormat: format => format.acodec !== 'none',
-    convertLegacyFormats: async () => [],
-    convertAdaptiveFormats: async () => [{ has_video: true }, { has_audio: true }],
+    convertLegacyFormats: async formats => formats.map(format => ({ url: format.url })),
+    convertAdaptiveFormats: async formats => formats.map(format => ({ has_video: format.vcodec !== 'none', has_audio: format.acodec !== 'none' })),
     getCompatibleAdaptiveFormats: formats => formats,
     FormatUtils: { toDash: async () => '<MPD/>' },
     getEarliestYtDlpFormatExpiry: () => new Date(Date.now() + 3600_000),
     cacheYtDlpPlaybackSource: async () => {},
-    probeYtDlpHlsManifest: async () => true,
+    probeYtDlpHlsManifest: async () => probePlayable,
     MANIFEST_TYPE_DASH: 'application/dash+xml', MANIFEST_TYPE_HLS: 'application/x-mpegurl',
     console,
   }
@@ -149,6 +151,25 @@ test('an unavailable panorama returns mesh projection for the flat fallback', as
 test('an incomplete flat fallback retains mesh projection', async () => {
   const { load } = loader({ panorama: false, incomplete: true })
   assert.equal((await load(true)).vrProjection, 'MESH')
+})
+
+for (const panorama of [false, true]) {
+  test(`combined-only mesh streams remain playable when panoramic HLS is ${panorama ? 'rejected' : 'missing'}`, async () => {
+    const { load, attempts } = loader({ combinedOnly: true, panorama, probePlayable: false })
+    const source = await load(true)
+    assert.equal(source.manifestSrc, null)
+    assert.equal(source.vrProjection, 'MESH')
+    assert.deepEqual(source.legacyFormats, [{ url: 'https://media.test/combined' }])
+    assert.deepEqual(attempts, [false, true, true])
+  })
+}
+
+test('a combined-only mesh stream still retries and prefers a recovered panorama', async () => {
+  const { load, attempts } = loader({ combinedOnly: true })
+  const source = await load(true)
+  assert.equal(source.vrProjection, 'EQUIRECTANGULAR')
+  assert.equal(source.manifestSrc, 'https://media.test/panorama.m3u8')
+  assert.deepEqual(attempts, [false, true])
 })
 
 test('failed panorama extraction cannot restore an incompatible flat cache', async () => {

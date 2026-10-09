@@ -1033,8 +1033,6 @@ async function loadYtDlpPlaybackSource(
       return source
     }
 
-    if (needsPanorama) continue
-
     if (!isLive) {
       const legacyFormats = await legacyFormatsPromise
       if (legacyFormats.length > 0) {
@@ -1046,7 +1044,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
-          vrProjection: null,
+          vrProjection: needsPanorama ? 'MESH' : null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -1058,6 +1056,10 @@ async function loadYtDlpPlaybackSource(
         }
 
         if (deferIncompleteSource(source, legacyFormats)) continue
+        if (needsPanorama) {
+          flatVrSource ??= source
+          continue
+        }
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
