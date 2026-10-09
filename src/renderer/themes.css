@@ -15,7 +15,7 @@ body {
   --switch-track-width: 40px;
   --switch-track-height: 24px;
   --switch-thumb-inset: 3px;
-  --switch-unchecked-thumb-size: 12px;
+  --switch-unchecked-thumb-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
   --switch-touch-height: 36px;
 
   /* Optional decorative layers, separate from colors used by contrast checks

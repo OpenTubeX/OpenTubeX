@@ -1,4 +1,5 @@
 import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { PALETTE_BASE_THEMES } from '../../../src/constants.js'
 
 async function resize(app, page, width, uiScale) {
   await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 900 }), width)
@@ -37,6 +38,34 @@ for (const uiScale of [100, 95]) {
           systemLightTheme: 'light',
           mainColor: 'Red',
           secColor: 'Blue'
+        }
+      }
+    })
+
+    test('off and on switch thumbs keep the same size across themes', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const section = await goToSettingsSection(page, 'theme')
+      const toggle = section.getByRole('checkbox', { name: /Match top bar with main color/i })
+      const label = toggle.locator('..').locator('.switch-label')
+
+      for (const width of [1600, 480]) {
+        await resize(app, page, width, uiScale)
+        for (const theme of ['oneDark', ...PALETTE_BASE_THEMES.filter(theme => theme !== 'oneDark'), 'catppuccinMacchiato', 'dark', 'light']) {
+          await page.evaluate(theme => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', theme), theme)
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+          for (const checked of [false, true]) {
+            if (await toggle.isChecked() !== checked) await label.click()
+            await expect(toggle).toBeChecked({ checked })
+            await page.mouse.move(0, 0)
+            const shape = await switchShape(label)
+            expect(Number.parseFloat(shape.thumb.width), `${theme}, ${width}px, checked=${checked}`).toBeCloseTo(18, 1)
+            expect(Number.parseFloat(shape.thumb.height), `${theme}, ${width}px, checked=${checked}`).toBeCloseTo(18, 1)
+          }
+          if (theme === 'oneDark' && width === 1600 && uiScale === 100) {
+            const screenshot = testInfo.outputPath('one-dark-switches.png')
+            await label.locator('..').locator('..').screenshot({ path: screenshot })
+            await testInfo.attach('One Dark switch thumbs', { path: screenshot, contentType: 'image/png' })
+          }
         }
       }
     })
