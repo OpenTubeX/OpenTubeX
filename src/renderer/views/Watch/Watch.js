@@ -6179,8 +6179,9 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
-      const preferVrHls = ['MESH', 'EQUIRECTANGULAR'].includes(this.vrProjection) ||
-        (this.activePlaybackEngine === 'yt-dlp' && ['MESH', 'EQUIRECTANGULAR'].includes(this.builtInPlaybackSource?.vrProjection))
+      const preferVrHls = [this, this.activePlaybackEngine === 'yt-dlp' ? this.builtInPlaybackSource : null]
+        .some(source => source?.vrProjection === 'MESH' ||
+          (source?.vrProjection === 'EQUIRECTANGULAR' && source.manifestMimeType === MANIFEST_TYPE_HLS))
       try {
         source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
           if (

@@ -151,12 +151,13 @@ for (const savedPanorama of [false, true]) {
       subtitlesIncluded: true, vrProjection: null, captions: [], captionTranslations: [],
       manifestSrc: 'data:application/dash+xml,<MPD/>', legacyFormats: [], expiryDate: null,
     } })
-    const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource'])(
-      (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls)
+    const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+      (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
     )
     const watch = {
       vrProjection: savedPanorama ? null : 'EQUIRECTANGULAR',
-      builtInPlaybackSource: savedPanorama ? { vrProjection: 'EQUIRECTANGULAR' } : null,
+      manifestMimeType: 'application/x-mpegurl',
+      builtInPlaybackSource: savedPanorama ? { vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/x-mpegurl' } : null,
       activePlaybackEngine: savedPanorama ? 'yt-dlp' : 'built-in',
       playbackEngineSwitchGeneration: 1, playbackEngineFallbackTarget: null,
       captions: [], videoStoryboardSrc: '', hasResolvedVideoTitle: true,
@@ -167,6 +168,29 @@ for (const savedPanorama of [false, true]) {
     assert.equal(watch.vrProjection, 'EQUIRECTANGULAR')
     assert.deepEqual(attempts, [false, true])
   })
+}
+
+for (const savedPanorama of [false, true]) {
+  for (const panorama of [false, true]) {
+    test(`yt-dlp preserves ${savedPanorama ? 'saved' : 'current'} native equirectangular DASH when HLS is ${panorama ? 'rejected' : 'missing'}`, async () => {
+      const { load, attempts } = loader({ mesh: false, panorama, probePlayable: false })
+      const extract = compileFunction(`return ({${watchCode.slice(extractionStart, extractionEnd)}}).extractYtDlpPlaybackSource`, ['getYtDlpPlaybackSource', 'MANIFEST_TYPE_HLS'])(
+        (_id, _key, _callback, _authentication, _cachedOnly, _subtitles, preferVrHls) => load(preferVrHls), 'application/x-mpegurl'
+      )
+      const watch = {
+        vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/dash+xml',
+        builtInPlaybackSource: savedPanorama ? { vrProjection: 'EQUIRECTANGULAR', manifestMimeType: 'application/dash+xml' } : null,
+        activePlaybackEngine: savedPanorama ? 'yt-dlp' : 'built-in',
+        playbackEngineSwitchGeneration: 1, playbackEngineFallbackTarget: null,
+        captions: [], videoStoryboardSrc: '', hasResolvedVideoTitle: true,
+        isCurrentVideoLoad: () => true, alignActiveFormatWithAvailableSources: () => {},
+      }
+      assert.equal(await extract.call(watch, 1, 'vjBrN18wiuE'), true)
+      assert.equal(watch.manifestMimeType, 'application/dash+xml')
+      assert.equal(watch.vrProjection, 'EQUIRECTANGULAR')
+      assert.deepEqual(attempts, [false])
+    })
+  }
 }
 
 test('an unavailable panorama returns mesh projection for the flat fallback', async () => {
