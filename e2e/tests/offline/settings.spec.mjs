@@ -1524,13 +1524,9 @@ test.describe('settings', () => {
     await expect(submission).toBeVisible()
 
     const centerOffset = await submission.evaluate(element => {
-      const label = element.querySelector('.switch-label-text')
       const text = element.querySelector('.switch-label-text').getBoundingClientRect()
-      const labelBounds = label.getBoundingClientRect()
-      const knob = getComputedStyle(label, '::after')
-      const transform = new DOMMatrix(knob.transform)
-      const knobCenter = labelBounds.top + Number.parseFloat(knob.top) +
-        transform.m42 + Number.parseFloat(knob.height) / 2
+      const knob = element.querySelector('.switch-thumb').getBoundingClientRect()
+      const knobCenter = knob.top + knob.height / 2
       return Math.abs(knobCenter - (text.top + text.height / 2))
     })
 
@@ -1755,9 +1751,8 @@ test.describe('settings', () => {
       const toggleCenterOffset = await tooltipToggle.evaluate(element => {
         const text = element.querySelector('.switch-label-text')
         const textBounds = text.getBoundingClientRect()
-        const knob = getComputedStyle(text, '::after')
-        const knobCenter = textBounds.top + Number.parseFloat(knob.top) +
-          new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
+        const knob = element.querySelector('.switch-thumb').getBoundingClientRect()
+        const knobCenter = knob.top + knob.height / 2
         return Math.abs(knobCenter - (textBounds.top + textBounds.height / 2))
       })
       expect.soft(toggleCenterOffset).toBeLessThanOrEqual(1)

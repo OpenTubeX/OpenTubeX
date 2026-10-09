@@ -39,11 +39,8 @@ async function expectBadgeBelowLabel(control, textSelector) {
     const label = element.querySelector('.switch-label')
     let switchCenterOffset
     if (label) {
-      const anchor = text
-      const knob = getComputedStyle(anchor, '::after')
-      const anchorBounds = anchor.getBoundingClientRect()
-      const knobCenter = anchorBounds.top + Number.parseFloat(knob.top) +
-        new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
+      const knob = element.querySelector('.switch-thumb').getBoundingClientRect()
+      const knobCenter = knob.top + knob.height / 2
       switchCenterOffset = Math.abs(knobCenter - textBounds.top - textBounds.height / 2)
     }
     return {
