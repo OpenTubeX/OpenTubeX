@@ -4,7 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = readFileSync(new URL('../../src/renderer/helpers/organizerSwipe.js', import.meta.url), 'utf8')
-  .replace(/^import .*\n/m, '').replaceAll('export function', 'function')
+  .replace(/^import .*\n/gm, '').replaceAll('export function', 'function')
+const regionSource = readFileSync(new URL('../../src/renderer/helpers/capacitorTabPreviewRegion.js', import.meta.url), 'utf8')
+  .replaceAll('export function', 'function')
 const context = vm.createContext({})
 vm.runInContext(source, context)
 
@@ -35,25 +37,30 @@ for (const reduced of [false, true]) {
     }
     const ctx = vm.createContext({
       document: { documentElement: { dataset: { reducedMotion: reduced ? 'reduce' : 'off' } }, querySelector: () => null },
-      window: { innerHeight: 800 },
-      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderRadius: '0px' }),
+      window: { innerWidth: 375.5, innerHeight: 800 },
+      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
       applyAnimationSpeed: animation => animation, requestAnimationFrame: () => 1, cancelAnimationFrame() {},
     })
-    vm.runInContext(source, ctx)
+    vm.runInContext(regionSource + source, ctx)
     const page = { animate, classList: { add: name => classes.add(name), remove: name => classes.delete(name) },
       getBoundingClientRect: () => ({ left: 0, top: 80.5, width: 375.5, height: 700.25 }) }
-    const preview = { getBoundingClientRect: () => ({ left: 16.25, top: 180.75, width: 160.5, height: 90.28125 }) }
+    const previewClasses = new Set()
+    const preview = { classList: { add: name => previewClasses.add(name), remove: name => previewClasses.delete(name) },
+      getBoundingClientRect: () => ({ left: 16.25, top: 180.75, width: 160.5, height: 90.28125 }) }
     const transition = ctx.createOrganizerSwipeAnimation(page, preview, { animate })
     transition.update(0.4)
     assert.ok(animations.every(animation => animation.currentTime === 400))
     if (!reduced) {
+      assert.ok(previewClasses.has('organizerSwipePreview'), 'the moving page replaces its cached image')
       assert.ok(animations[0].frames[1].transform.includes('translate(16.25px, 100.25px)'))
       assert.ok(animations[0].frames[1].transform.includes(`scale(${160.5 / 375.5})`))
+      assert.ok(animations[0].frames[1].clipPath.endsWith(`round ${6 / (160.5 / 375.5)}px ${6 / (160.5 / 375.5)}px 0 0)`))
     }
     await transition.finish(true)
     assert.ok(animations.slice(0, reduced ? 1 : 2).every(animation => animation.currentTime === 1000))
     transition.dispose()
     assert.equal(classes.size, 0)
+    assert.equal(previewClasses.size, 0, 'the cached image returns after settling or cancellation')
     assert.ok(animations.every(animation => animation.cancelled))
     transition.update(0.1)
     assert.equal(animations[0].currentTime, 1000, 'cleanup cannot be undone by an asynchronous continuation')
@@ -73,14 +80,15 @@ for (const zoom of [1, 1.25]) {
     const ctx = vm.createContext({
       document: {
         documentElement: { dataset: { reducedMotion: 'off' } },
-        querySelector: () => ({ getBoundingClientRect: () => ({ bottom: headerBottom }) }),
+        querySelector: selector => selector === '.topNav'
+          ? { getBoundingClientRect: () => ({ width: from.width, bottom: headerBottom }) } : null,
       },
-      window: { innerHeight: 800 * zoom },
-      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderRadius: '8px' }),
+      window: { innerWidth: from.width, innerHeight: 800 * zoom },
+      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '8px' }),
     })
-    vm.runInContext(source, ctx)
+    vm.runInContext(regionSource + source, ctx)
     ctx.createOrganizerSwipeAnimation({ animate, classList: { add() {} }, getBoundingClientRect: () => from },
-      { getBoundingClientRect: () => to }, { animate })
+      { classList: { add() {} }, getBoundingClientRect: () => to }, { animate })
     const [start, end] = animations[0]
     const visibleTop = headerBottom - from.top
     assert.ok(start.clipPath.startsWith(`inset(${visibleTop}px `), 'content hidden above the header must stay clipped from the first frame')

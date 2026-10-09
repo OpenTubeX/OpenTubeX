@@ -1,4 +1,5 @@
 import { applyAnimationSpeed } from './animationSpeed'
+import { getCapacitorTabPreviewRegion } from './capacitorTabPreviewRegion'
 
 export function organizerSwipeProgress(distance, height) {
   return Math.max(0, Math.min(1, distance / Math.min(320, height * 0.45)))
@@ -10,24 +11,25 @@ export function shouldOpenSwipedOrganizer(distance, height, elapsed) {
 }
 
 // Animate the live page rather than a screenshot, preserving video and scroll
-// position. Clip its lower portion to match the organizer's 16:9 preview.
+// position. Use the same viewport bounds as the cached preview.
 export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const from = page.getBoundingClientRect()
   const to = preview.getBoundingClientRect()
   const scale = to.width / from.width
-  const headerBottom = document.querySelector('.topNav')?.getBoundingClientRect().bottom ?? 0
-  const top = Math.max(0, Math.min(from.height, Math.max(0, headerBottom) - from.top))
-  const bottom = Math.max(0, from.top + from.height - window.innerHeight)
+  const region = getCapacitorTabPreviewRegion()
+  const top = Math.max(0, Math.min(from.height, region.top - from.top))
+  const bottom = Math.max(0, from.top + from.height - region.bottom)
   const crop = Math.max(0, from.height - top - to.height / scale)
-  const radius = getComputedStyle(preview).borderRadius
+  const radius = Number.parseFloat(getComputedStyle(preview).borderTopLeftRadius) || 0
   const reduced = document.documentElement.dataset.reducedMotion === 'reduce' ||
     matchMedia('(prefers-reduced-motion: reduce)').matches
   const animations = []
   if (!reduced) {
     page.classList.add('organizerSwipePage')
+    preview.classList.add('organizerSwipePreview')
     animations.push(page.animate([
       { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 ${bottom}px round 0px)` },
-      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius})` }
+      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius / scale}px ${radius / scale}px 0 0)` }
     ], { duration: 1000, fill: 'both' }))
   }
   // Reveal the organizer early so its header never remains superimposed on
@@ -69,6 +71,7 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
       settlement?.cancel()
       for (const animation of animations) animation.cancel()
       page.classList.remove('organizerSwipePage')
+      preview.classList.remove('organizerSwipePreview')
     }
   }
 }

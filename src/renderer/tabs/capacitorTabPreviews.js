@@ -1,5 +1,6 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { shallowReactive, watch } from 'vue'
+import { getCapacitorTabPreviewRegion } from '../helpers/capacitorTabPreviewRegion.js'
 import { canCaptureCapacitorTab, createCapacitorPreviewCache } from './capacitorPreviewCache.js'
 
 const Screenshot = registerPlugin('Screenshot')
@@ -73,22 +74,15 @@ function hasVisibleOverlay() {
 }
 
 async function capturePage() {
-  const width = window.innerWidth
-  const height = window.innerHeight
-  let top = 0
-  for (const selector of ['.topNav', '.capacitorTabletTabBar']) {
-    const rect = document.querySelector(selector)?.getBoundingClientRect()
-    if (rect?.width > 0) top = Math.max(top, rect.bottom)
-  }
-  top = Math.max(0, Math.min(top, height))
-  if (height <= top || width <= 0) return null
+  const { width, top, height } = getCapacitorTabPreviewRegion()
+  if (height <= 0 || width <= 0) return null
   const targetWidth = Math.min(640, Math.round(width))
-  const cropHeight = Math.min(height - top, width * 9 / 16)
+  const cropHeight = Math.min(height, width * 9 / 16)
   const { dataUrl } = await Screenshot.take({
     width: targetWidth,
     height: Math.max(1, Math.round(targetWidth * cropHeight / width)),
-    top: top / height,
-    cropHeight: cropHeight / height,
+    top: top / window.innerHeight,
+    cropHeight: cropHeight / window.innerHeight,
   })
   return hasVisibleOverlay() ? null : dataUrl
 }

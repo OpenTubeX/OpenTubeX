@@ -6,7 +6,7 @@
     <FtRetryImage
       v-if="pagePreview"
       :src="pagePreview"
-      class="capacitorTabThumbnail"
+      class="capacitorTabThumbnail capacitorTabPageThumbnail"
       draggable="false"
       alt=""
       @error="failedPagePreview = pagePreview"

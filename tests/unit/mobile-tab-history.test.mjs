@@ -32,7 +32,7 @@ for (const [name, historyLength, presented, selecting, visible] of [
         drag: {}, swipe: {}, dragSettling: false, suppressDragTransition: false,
         tabCardStyle: () => ({}), tabAriaLabel: () => 'Tab', tabTitle: () => 'Tab', t: key => key,
         startTabGesture() {}, moveTabGesture() {}, finishTabGesture() {}, cancelTabGesture() {},
-        preventHoldScroll() {}, handleTabContextMenu() {}, activateTab() {}, handleTabTargetKeydown() {},
+        preventHoldScroll() {}, finishTabTouch() {}, handleTabContextMenu() {}, activateTab() {}, handleTabTargetKeydown() {},
         toggleTabSelection() {}, closeTab() {}, openTabHistory() {},
         selectActionTab() {}, closeRelatedTabs() {}, closeActionTab() {}, copyActionTabYoutubeLink() {},
         closeTabActions() {}, duplicateActionTab() {}, reloadActionTab() {},

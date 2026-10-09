@@ -155,6 +155,19 @@ test('native thumbnails are bounded and require no renderer encoding or temporar
   assert.equal(state.remove.mock.callCount(), 0)
 })
 
+test('compact capture starts below fixed phone controls', async t => {
+  const state = setup(t)
+  state.document.querySelector = selector => {
+    const bounds = {
+      '.topNav': { width: 375, bottom: 60.25 },
+      '.app.capacitorPhoneLayout > .sideNav': { width: 375, top: 640.5 },
+    }[selector]
+    return bounds ? { getBoundingClientRect: () => bounds } : null
+  }
+  await captureBeforeTabOrganizer()
+  assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 60.25 / 700, cropHeight: (375 * 9 / 16) / 700 }])
+})
+
 test('failed native capture leaves the cache empty', async t => {
   const error = new Error('Capture failed')
   const state = setup(t, { decodeError: error })

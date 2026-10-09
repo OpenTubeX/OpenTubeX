@@ -17,6 +17,14 @@
   object-fit: cover;
 }
 
+.capacitorTabPageThumbnail {
+  object-position: top;
+}
+
+.organizerSwipePreview {
+  visibility: hidden;
+}
+
 .capacitorTabPreviewAvatar {
   inline-size: 40%;
   block-size: auto;

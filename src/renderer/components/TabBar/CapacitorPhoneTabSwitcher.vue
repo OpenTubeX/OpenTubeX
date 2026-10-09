@@ -182,6 +182,7 @@
                   @pointerup="finishTabGesture"
                   @pointercancel="cancelTabGesture"
                   @touchmove="preventHoldScroll"
+                  @touchend="finishTabTouch"
                   @contextmenu.prevent="handleTabContextMenu($event, tab.id)"
                 >
                   <button
@@ -541,6 +542,7 @@ const TAB_MOVE_THRESHOLD = 8
 let swipeResetTimer = null
 let holdTimer = null
 let activatedTouchPointerId = null
+let pendingTouchTabId = null
 let dropTimer = null
 let dragFrame = null
 let dragRects = []
@@ -701,7 +703,8 @@ const organizerSwipe = {
       organizerSwipe.cancel()
       return
     }
-    await state.ready
+    // A ready organizer must accept a new touch immediately on release.
+    if (!state.animation) await state.ready
     if (organizerTransition !== state) return
     const commit = shouldOpenSwipedOrganizer(state.distance, state.height, elapsed)
     // The next touch belongs to the organizer, even while the page is still
@@ -926,6 +929,7 @@ function tabCardStyle(tabId) {
 
 function startTabGesture(event, tabId) {
   activatedTouchPointerId = null
+  pendingTouchTabId = null
   if (selecting.value || dragSettling.value || event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
 
   resetTabDrag()
@@ -1038,11 +1042,22 @@ function finishTabGesture(event) {
   finishTabSwipe(event)
   if (tappedTab !== null) {
     activatedTouchPointerId = event.pointerId
-    activateTab(tappedTab)
+    pendingTouchTabId = tappedTab
   }
 }
 
+function finishTabTouch(event) {
+  if (pendingTouchTabId === null) return
+  // Cancel the compatibility click before removing the organizer, otherwise
+  // Android can send that click to a control on the newly revealed page.
+  event.preventDefault()
+  const tabId = pendingTouchTabId
+  pendingTouchTabId = null
+  activateTab(tabId)
+}
+
 function cancelTabGesture() {
+  pendingTouchTabId = null
   const wasHeld = drag.ready
   resetTabDrag()
   if (wasHeld) {

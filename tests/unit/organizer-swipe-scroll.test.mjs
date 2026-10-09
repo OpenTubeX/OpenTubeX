@@ -43,6 +43,7 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
       if (ending === 'reverse') gesture.update(160)
       gesture.update(committed ? 160 : ending === 'reverse' ? 5 : 40)
       const finish = gesture.finish(1000, ending === 'pointercancel')
+      if (committed) assert.equal(context.organizerGesture.value, false, 'a ready organizer must accept the next touch synchronously on release')
       if (ending === 'select while settling') {
         await new Promise(setImmediate)
         gesture.cancel()

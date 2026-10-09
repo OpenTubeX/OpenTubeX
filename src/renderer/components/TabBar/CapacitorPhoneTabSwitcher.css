@@ -298,6 +298,8 @@
 
 .capacitorPhoneTabTarget :deep(.capacitorTabPreview) {
   flex: 1;
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
 }
 
 .capacitorPhoneTabTitle {
