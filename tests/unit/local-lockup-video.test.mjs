@@ -7,7 +7,7 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 const fixture = JSON.parse(await readFile(new URL('../../e2e/fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
 const { parseLockupView } = createLocalFeedParsers(() => false)
 
-for (const name of ['StudioPreview', 'Preview Channel', 'Overviews', 'WatchingToday', 'Awaiting News']) {
+for (const name of ['StudioPreview', 'Preview Channel', 'Overviews', 'WatchingToday', 'Awaiting News', 'éview', 'viewé', '觀看views', 'watching今日', 'waiting\u0301']) {
   test(`preserves the recommendation channel ${name} and its view count`, () => {
     const raw = structuredClone(fixture)
     raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[0].text.content = name
