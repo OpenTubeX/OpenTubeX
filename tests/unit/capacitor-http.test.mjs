@@ -222,6 +222,48 @@ test('does not send unsupported avatar URLs through native HTTP', async () => {
   assert.equal(requestStarted, false)
 })
 
+test('recovers proxied images through the selected Invidious instance', async () => {
+  let receivedRequest
+  const recoverImage = await loadNativeHttp(async options => {
+    receivedRequest = options
+    return { url: options.url, status: 200, headers: { 'content-type': 'image/jpeg' }, data: '/9j/AA==' }
+  }, null, 'fetchCapacitorAvatarDataUrl')
+
+  const url = 'https://invidious.test/proxy/ggpht/banner=s1024'
+  assert.equal(await recoverImage(url, 'https://invidious.test/proxy'), 'data:image/jpeg;base64,/9j/AA==')
+  assert.equal(receivedRequest.url, url)
+  assert.equal(receivedRequest.disableRedirects, true, 'proxy recovery must not redirect outside the chosen instance')
+})
+
+test('rejects images outside the selected Invidious proxy path', async () => {
+  let requestStarted = false
+  globalThis.fetch = async () => { requestStarted = true }
+  const instance = 'https://invidious.test/proxy'
+  for (const url of [
+    'http://invidious.test/proxy/ggpht/banner',
+    'https://other.test/proxy/ggpht/banner',
+    'https://invidious.test/ggpht/banner',
+    'https://invidious.test/proxy/ggpht-not/banner',
+    'https://invidious.test/proxy/api/banner'
+  ]) {
+    assert.equal(await fetchCapacitorAvatarDataUrl(url, instance), null)
+  }
+  assert.equal(requestStarted, false)
+})
+
+test('rejects redirects and invalid responses from the selected Invidious image proxy', async () => {
+  globalThis.FileReader = TestFileReader
+  for (const response of [
+    { url: 'https://other.test/ggpht/banner' },
+    { url: 'https://invidious.test/api/banner' },
+    { status: 302 },
+    { contentType: 'text/html' }
+  ]) {
+    globalThis.fetch = async () => nativeHttpResponse(response)
+    assert.equal(await fetchCapacitorAvatarDataUrl('https://invidious.test/ggpht/banner', 'https://invidious.test'), null)
+  }
+})
+
 test('rejects invalid native avatar responses', async () => {
   globalThis.FileReader = TestFileReader
   const responses = [
@@ -242,7 +284,7 @@ test('rejects invalid native avatar responses', async () => {
   }
 })
 
-async function loadNativeHttp(request, ios = null) {
+async function loadNativeHttp(request, ios = null, entryPoint = 'capacitorHttpFetch') {
   const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor-http.js', import.meta.url), 'utf8'))
     .replace(/^import .* from .*\n/gm, '')
     .replace(/^export /gm, '')
@@ -253,7 +295,7 @@ async function loadNativeHttp(request, ios = null) {
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
     createAbortError, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
-  vm.runInContext(`${source}\nglobalThis.fetchNative = capacitorHttpFetch`, context)
+  vm.runInContext(`${source}\nglobalThis.fetchNative = ${entryPoint}`, context)
   return context.fetchNative
 }
 

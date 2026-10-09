@@ -19,6 +19,7 @@ async function compileComponent(path, bindings = {}) {
 
 async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue', cachedSources = new Map(), attrs = {}, { isCapacitor = true } = {}) {
   const requests = []
+  const instances = []
   const loads = []
   const timers = new Map()
   const observers = []
@@ -31,7 +32,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
       observe(image) { this.image = image }
       disconnect() { this.disconnected = true }
     },
-    loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
+    loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async (src, instance) => { requests.push(src); instances.push(instance); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     FtIcon: { render: () => Vue.h('fallback') },
     thumbnailPlaceholder: 'placeholder.svg',
     imageSkeleton: 'skeleton.svg',
@@ -95,7 +96,7 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
-  return { requests, loads, timers, observers, thumbnail, settings, find, unmount: () => app.unmount() }
+  return { requests, instances, loads, timers, observers, thumbnail, settings, find, unmount: () => app.unmount() }
 }
 
 async function fail(image) {
@@ -217,6 +218,17 @@ test('channel avatars keep their placeholder until the native HTTP image loads',
   f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
   await Vue.nextTick()
   assert.equal(f.find('fallback'), undefined)
+})
+
+test('retry images pass the selected Invidious instance to native recovery', async t => {
+  const f = await mountAvatar(t, 'data:image/png;base64,AA==', 'FtRetryImage.vue')
+  f.settings.getCurrentInvidiousInstanceUrl = 'https://invidious.test'
+  f.thumbnail.value = 'https://invidious.test/ggpht/banner'
+  await Vue.nextTick()
+  await fail(f.find('img'))
+  assert.deepEqual(f.requests, ['https://invidious.test/ggpht/banner'])
+  assert.deepEqual(f.instances, ['https://invidious.test'])
+  assert.equal(f.find('img').props.src, 'data:image/png;base64,AA==')
 })
 
 test('timed-out Capacitor avatars recover through native HTTP before a browser retry', async t => {

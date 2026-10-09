@@ -244,7 +244,7 @@ async function recoverImage() {
       dataUrl = await Promise.race([
         (async () => {
           const { fetchCapacitorAvatarDataUrl } = await import('../helpers/api/capacitor-http')
-          return fetchCapacitorAvatarDataUrl(failedSource)
+          return fetchCapacitorAvatarDataUrl(failedSource, store.getters.getCurrentInvidiousInstanceUrl)
         })(),
         deadline
       ])
