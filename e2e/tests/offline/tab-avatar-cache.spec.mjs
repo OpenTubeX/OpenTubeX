@@ -80,7 +80,7 @@ for (const indicator of ['loading', 'playing']) {
     await avatarRequest.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
     const avatar = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
     await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
-    await expect(avatar).toBeVisible({ visible: indicator === 'loading' })
+    await expect(avatar).toBeVisible()
     const originalImage = await avatar.elementHandle()
 
     for (let transition = 0; transition < 2; transition++) {
@@ -97,7 +97,7 @@ for (const indicator of ['loading', 'playing']) {
       expect(await avatar.evaluate((image, original) => image === original, originalImage)).toBe(true)
       await setIndicator(true)
       await expect(statusIcon).toBeVisible()
-      await expect(avatar).toBeVisible({ visible: indicator === 'loading' })
+      await expect(avatar).toBeVisible()
     }
   })
 }
