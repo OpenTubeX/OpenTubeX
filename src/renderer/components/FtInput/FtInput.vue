@@ -32,6 +32,7 @@
         :readonly="readonly"
         :spellcheck="false"
         :aria-describedby="descriptionIds"
+        :aria-invalid="invalid"
         :aria-label="showLabel ? null : (label || placeholder)"
         @change="handleChange"
         @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
@@ -207,6 +208,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const { t } = useI18n()
 
 const props = defineProps({
+  invalid: { type: Boolean, default: false },
   multiline: { type: Boolean, default: false },
   selectOnClick: { type: Boolean, default: false },
   changeFilter: { type: Function, default: null },

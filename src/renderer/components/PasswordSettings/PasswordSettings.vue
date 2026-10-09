@@ -32,6 +32,7 @@
         ref="confirmationInput"
         class="passwordConfirmation"
         :class="{ invalid: passwordMismatch }"
+        :invalid="passwordMismatch"
         :icon="['fas', 'lock']"
         :label="$t('Settings.Password Settings.Confirm Password')"
         :placeholder="$t('Form Inputs.Confirm Password Hint')"

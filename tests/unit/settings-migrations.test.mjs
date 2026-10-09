@@ -100,6 +100,9 @@ test('prefers the current AI video summary mode', () => {
 })
 
 const settingsSource = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+const tutorialSource = await readFile(new URL('../../src/renderer/helpers/tutorialState.js', import.meta.url), 'utf8')
+const LAST_USED_VERSION_SETTING_ID = tutorialSource.match(/LAST_USED_VERSION_SETTING_ID = '([^']+)'/)[1]
+const TUTORIAL_AUDIENCE_SETTING_ID = tutorialSource.match(/TUTORIAL_AUDIENCE_SETTING_ID = '([^']+)'/)[1]
 const summaryDefault = settingsSource.match(/aiVideoSummaryMode: '([^']+)'/)[1]
 const summaryEntriesStart = settingsSource.indexOf('      const legacyHideAiVideoSummariesEntry')
 const summaryEntriesEnd = settingsSource.indexOf('      const legacyPlaybackSpeedSyncEntry', summaryEntriesStart)
@@ -108,6 +111,8 @@ const summaryStartupEnd = settingsSource.indexOf('      // Migrate the legacy au
 
 for (const [name, initialSettings, profiles, expectedMode] of [
   ['fresh installations', {}, [], 'collapsed'],
+  ['tutorial-only settings', { [LAST_USED_VERSION_SETTING_ID]: '0.36.0', [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [], 'collapsed'],
+  ['tutorial-only settings with an existing profile', { [TUTORIAL_AUDIENCE_SETTING_ID]: 'new' }, [{ _id: 'main' }], 'hide'],
   ['existing users without a saved summary preference', { theme: 'dark' }, [], 'hide'],
   ['existing profiles without saved settings', {}, [{ _id: 'main' }], 'hide'],
   ['legacy hidden summaries', { hideAiVideoSummaries: true }, [], 'hide'],
@@ -125,6 +130,7 @@ for (const [name, initialSettings, profiles, expectedMode] of [
         ${settingsSource.slice(summaryStartupStart, summaryStartupEnd)}
       })()`, {
         state,
+        TUTORIAL_STATE_SETTING_IDS: new Set([LAST_USED_VERSION_SETTING_ID, TUTORIAL_AUDIENCE_SETTING_ID]),
         userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
         DBProfileHandlers: { find: async () => profiles },
         DBSettingHandlers: {

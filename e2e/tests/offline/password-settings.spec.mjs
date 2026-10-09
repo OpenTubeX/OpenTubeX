@@ -19,6 +19,7 @@ test('requires matching password confirmation before protecting settings', async
   await expect.poll(storedPassword).toBe('')
 
   await confirmation.fill('different-password')
+  await expect(confirmation).toHaveAttribute('aria-invalid', 'true')
   await expect(privacy.getByText('Passwords do not match.', { exact: true })).toBeVisible()
   expect(await confirmation.evaluate(element => getComputedStyle(element).outlineStyle), 'error border leaves the label notch clear').toBe('none')
   await expect(save).toBeDisabled()
@@ -28,6 +29,7 @@ test('requires matching password confirmation before protecting settings', async
   await page.screenshot({ path: testInfo.outputPath('settings-password-confirmation.png') })
 
   await confirmation.fill('test-settings-password')
+  await expect(confirmation).toHaveAttribute('aria-invalid', 'false')
   await expect(privacy.getByText('Passwords do not match.', { exact: true })).toHaveCount(0)
   await expect(save).toBeEnabled()
   await confirmation.press('Enter')
