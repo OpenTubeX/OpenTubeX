@@ -271,7 +271,7 @@ export function prepareManifest({ manifestDirectory, release, topics }) {
   const releaseDate = release.published_at?.slice(0, 10)
   const releaseUrl = release.html_url
   const releaseNotes = cleanReleaseNotes(release.body ?? '')
-  const tags = [...new Set(topics.names)].sort()
+  const tags = [...new Set(topics.names)].slice(0, MAX_WINGET_TAGS).sort()
 
   assert.match(releaseDate ?? '', /^\d{4}-\d{2}-\d{2}$/)
   assert.match(releaseUrl ?? '', /^https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/releases\/tag\//)

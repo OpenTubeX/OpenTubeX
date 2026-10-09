@@ -191,6 +191,42 @@ ManifestVersion: 1.12.0
   assert.match(locale, new RegExp(`ReleaseNotesUrl: https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`))
 })
 
+test('manifest preparation limits repository topics to sixteen unique tags', (context) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
+  context.after(() => fs.rmSync(directory, { recursive: true }))
+
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), installerManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), localeManifest())
+  fs.writeFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.yaml'), `PackageIdentifier: OpenTubeX.OpenTubeX
+PackageVersion: ${VERSION}
+`)
+
+  const topics = ['privacy', 'privacy', 'subscriptions', 'video', 'videos', 'youtube',
+    'electron', 'private-youtube', 'sponsorblock', 'tabbed-browsing', 'tabs',
+    'youtube-client', 'cross-platform', 'youtube-player', 'ad-free', 'android',
+    'capacitor', 'ios', 'yt-dlp']
+  const result = prepareManifest({
+    manifestDirectory: directory,
+    release: {
+      assets: [asset('x64', 'a'), asset('arm64', 'b')],
+      body: '## Fixed bugs\n\n- Fixed a bug.',
+      html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
+      published_at: '2026-08-27T10:00:00Z',
+      tag_name: `v${VERSION}-beta`,
+    },
+    topics: { names: topics },
+  })
+
+  assert.equal(result.tags.length, 16)
+  assert(result.tags.includes('privacy'))
+  assert(result.tags.includes('capacitor'))
+  assert(!result.tags.includes('ios'))
+  assert(!result.tags.includes('yt-dlp'))
+  const locale = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), 'utf8')
+  const tagBlock = locale.split('Tags:\n')[1].split('\nReleaseNotes:')[0]
+  assert.equal(tagBlock.split('\n').length, 16)
+})
+
 test('manifest preparation rejects missing installer scopes', (context) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
   context.after(() => fs.rmSync(directory, { recursive: true }))
