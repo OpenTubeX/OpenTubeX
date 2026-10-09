@@ -1916,8 +1916,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.ft-volume-control-group > .shaka-mute-button) {
+  display: flex;
   position: relative;
   flex: 0 0 48px;
+  align-items: center;
+  justify-content: center;
   inline-size: 48px;
   block-size: 48px;
   padding: 0 2px;
