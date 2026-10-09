@@ -1,3 +1,4 @@
+import { toRaw } from 'vue'
 import { DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import * as releasedClient from '../helpers/released-sync-sessions.mjs'
@@ -61,6 +62,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const common = {
     DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote,
     runBackgroundJob,
+    toRaw,
     ...syncLive,
     ...(connectionChanges ? {
       SyncLiveConnectionState: class extends syncLive.SyncLiveConnectionState {

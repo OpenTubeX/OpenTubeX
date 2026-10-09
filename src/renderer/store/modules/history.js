@@ -29,6 +29,7 @@ const CONTINUE_WATCHING_MUTATIONS = new Set([
 ])
 
 const state = {
+  historyRevision: 0,
   continueWatchingRevision: 0,
   historyCacheSorted: [],
 
@@ -136,17 +137,13 @@ const actions = {
   },
 
   async applyHistorySyncChanges({ commit }, changes) {
-    try {
-      const migratedChanges = {
-        insertions: changes.insertions.map(migrateLegacyHistoryRecord),
-        updates: changes.updates.map(migrateLegacyHistoryRecord),
-        deletions: changes.deletions,
-      }
-      await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive)
-      commit('applyHistorySyncChanges', migratedChanges)
-    } catch (errMessage) {
-      console.error(errMessage)
+    const migratedChanges = {
+      insertions: changes.insertions.map(migrateLegacyHistoryRecord),
+      updates: changes.updates.map(migrateLegacyHistoryRecord),
+      deletions: changes.deletions,
     }
+    await DBHistoryHandlers.applySyncChanges(migratedChanges, changes.assertActive)
+    commit('applyHistorySyncChanges', migratedChanges)
   },
 
   async markAllHistoryAsWatched({ dispatch, state }) {
@@ -377,6 +374,7 @@ export default {
   // edits cannot affect membership or any details displayed by Home.
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
+    state.historyRevision++
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

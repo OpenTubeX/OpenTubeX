@@ -1,5 +1,22 @@
+import { toRaw } from 'vue'
 import { sendJobValue, receiveJobValue } from './background-job-transfer.js'
 import { SyncServerDataLossError } from './sync-server-errors.js'
+
+// Remove nested Vue proxies when a bounded message cannot be structured-cloned.
+function unwrapJobValue(value, seen = new WeakMap()) {
+  const raw = toRaw(value)
+  if (raw === null || typeof raw !== 'object') return raw
+  if (!Array.isArray(raw) && Object.getPrototypeOf(raw) !== Object.prototype && Object.getPrototypeOf(raw) !== null) return raw
+  if (seen.has(raw)) return seen.get(raw)
+  const result = Array.isArray(raw) ? new Array(raw.length) : {}
+  seen.set(raw, result)
+  for (const key of Object.keys(raw)) {
+    Object.defineProperty(result, key, {
+      value: unwrapJobValue(raw[key], seen), enumerable: true, configurable: true, writable: true,
+    })
+  }
+  return result
+}
 
 export class BackgroundJobClient {
   worker = null
@@ -21,9 +38,14 @@ export class BackgroundJobClient {
       this.requests.set(id, { resolve, reject, timer, value: undefined })
       const postMessage = message => {
         if (this.worker !== worker) throw new Error('Background processing stopped')
-        worker.postMessage(message)
+        try {
+          worker.postMessage(message)
+        } catch (error) {
+          if (error.name !== 'DataCloneError') throw error
+          worker.postMessage(unwrapJobValue(message))
+        }
       }
-      sendJobValue(postMessage, id, input, value => JSON.parse(JSON.stringify(value))).then(() => {
+      sendJobValue(postMessage, id, input).then(() => {
         postMessage({ type: 'run', id, operation })
       }).catch(error => this.fail(worker, error))
     })

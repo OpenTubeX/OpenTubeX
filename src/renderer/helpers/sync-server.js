@@ -1,3 +1,4 @@
+import { toRaw } from 'vue'
 import {
   DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar,
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
@@ -866,37 +867,54 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 }
 
 export async function syncHistory(client, store, previous = {}, options = {}) {
-  const localHistory = store.state.history.historyCacheSorted
-  const remoteHistory = await client.getWatchHistory()
-  if (remoteHistory === null) return null
-  const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = await runBackgroundJob('mergeHistory', {
-    localHistory, remoteHistory, previous, options,
-  })
-  store.assertActive?.()
-  if (typeof client.applyWatchHistoryChanges === 'function') {
-    if (historyToUpload.length || remoteDeletions.length) {
-      await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
-    }
-  } else {
-    for (const id of remoteDeletions) await client.deleteWatchHistory(id)
-    await uploadInChunks(
-      historyToUpload,
-      await client.supportsBulkSync(),
-      entries => client.putWatchHistoryBulk(entries),
-      entry => client.putWatchHistory(entry)
-    )
-  }
-
-  if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+  const historyChanged = new Error('Watch history changed during sync. Try again.')
+  for (let attempt = 0; attempt < 3; attempt++) {
     store.assertActive?.()
-    await store.dispatch('applyHistorySyncChanges', {
-      insertions,
-      updates,
-      deletions,
-      ...(store.assertActive ? { assertActive: store.assertActive } : {}),
-    })
+    const remoteHistory = await client.getWatchHistory()
+    if (remoteHistory === null) return null
+    const revision = store.state.history.historyRevision
+    const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+    const assertHistoryCurrent = () => {
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) throw historyChanged
+    }
+    try {
+      const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = await runBackgroundJob('mergeHistory', {
+        localHistory, remoteHistory, previous, options,
+      })
+      assertHistoryCurrent()
+      if (typeof client.applyWatchHistoryChanges === 'function') {
+        if (historyToUpload.length || remoteDeletions.length) {
+          await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+        }
+      } else {
+        for (const id of remoteDeletions) await client.deleteWatchHistory(id)
+        await uploadInChunks(
+          historyToUpload,
+          await client.supportsBulkSync(),
+          entries => client.putWatchHistoryBulk(entries),
+          entry => client.putWatchHistory(entry)
+        )
+      }
+
+      assertHistoryCurrent()
+      if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+        await store.dispatch('applyHistorySyncChanges', {
+          insertions,
+          updates,
+          deletions,
+          ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
+        })
+      }
+      return next
+    } catch (error) {
+      store.assertActive?.()
+      // Even a failed merge can be based on mixed chunks (and report false
+      // data loss). Retry from fresh remote/local state before saving a baseline.
+      if (error !== historyChanged && store.state.history.historyRevision === revision) throw error
+    }
   }
-  return next
+  throw historyChanged
 }
 
 function profileMetadata(profile, fallback = {}) {

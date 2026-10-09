@@ -681,6 +681,7 @@ export async function parseYouTubeRSSFeed(rssString, channelId) {
   try {
     const { name: channelName, videos } = process.env.IS_ELECTRON
       ? await window.ftElectron.subscriptionAutoRefresh.processFeed({ format: 'rss', text: rssString, channelId })
+          .catch(() => parseSubscriptionRss(rssString, channelId))
       : parseSubscriptionRss(rssString, channelId)
 
     return {
