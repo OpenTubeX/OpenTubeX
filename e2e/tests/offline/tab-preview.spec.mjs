@@ -274,7 +274,7 @@ test.describe('tab previews', () => {
     }).toBeLessThanOrEqual(1)
   })
 
-  test('hides tab previews from the page while capturing', async ({ page }) => {
+  test('hides transient overlays while preserving interactive previews during capture', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await hoverTabForPreview(page, 1)
@@ -282,18 +282,26 @@ test.describe('tab previews', () => {
     // The capture stylesheet is injected by the main process on the first
     // capture; applying its class reproduces what a capture sees.
     await expect(page.locator(`#${CAPTURE_STYLE_ID}`)).toHaveCount(1)
-    const hiddenWhileCapturing = await page.evaluate((captureClass) => {
+    const visibilities = await page.evaluate((captureClass) => {
+      const transientOverlay = document.createElement('div')
+      transientOverlay.dataset.tabPreviewOverlay = ''
+      document.body.append(transientOverlay)
       document.documentElement.classList.add(captureClass)
-      const visibilities = Array.from(
-        document.querySelectorAll('[data-tab-preview-overlay]'),
-        (element) => getComputedStyle(element).visibility
-      )
+      const visibilities = {
+        transient: getComputedStyle(transientOverlay).visibility,
+        interactive: Array.from(
+          document.querySelectorAll('[data-tab-preview-preserve-visibility]'),
+          element => getComputedStyle(element).visibility
+        )
+      }
       document.documentElement.classList.remove(captureClass)
+      transientOverlay.remove()
       return visibilities
     }, CAPTURE_CLASS)
 
-    expect(hiddenWhileCapturing.length).toBeGreaterThan(0)
-    expect(hiddenWhileCapturing.every((visibility) => visibility === 'hidden')).toBe(true)
+    expect(visibilities.transient).toBe('hidden')
+    expect(visibilities.interactive.length).toBeGreaterThan(0)
+    expect(visibilities.interactive.every(visibility => visibility === 'visible')).toBe(true)
   })
 
   test('keeps previews when re-enabled during an active transition', async ({ page }) => {

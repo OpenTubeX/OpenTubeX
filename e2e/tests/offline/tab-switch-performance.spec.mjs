@@ -1,5 +1,69 @@
 import { test, expect, sel, abortUnmockedRequest } from '../../helpers/app.mjs'
 
+test.describe('Ctrl+Tab responsiveness', () => {
+  test.use({ seed: { settings: { uiScale: 125, showTabPreviews: true, fetchSubscriptionsAutomatically: false } } })
+
+  test('shows the switcher before a slow background capture finishes', async ({ page, app }) => {
+    await page.route(/^https?:\/\//, abortUnmockedRequest)
+    await page.evaluate(async () => {
+      window.ftElectron.tabs.setPreviewCapturePaused(true)
+      await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect.poll(() => page.evaluate(() => document.documentElement.classList.contains('opentubex-tab-preview-capturing'))).toBe(false)
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    const cachedPreview = await page.evaluate(async id => (await window.ftElectron.tabs.getCachedPreviews([id]))[id], activeTabId)
+
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const contents = BrowserWindow.getAllWindows()[0].webContents
+      const original = contents.capturePage.bind(contents)
+      const capture = { started: false, release: null, original }
+      contents.__delayedPreviewCapture = capture
+      contents.capturePage = async (...args) => {
+        capture.started = true
+        await new Promise(resolve => { capture.release = resolve })
+        return original(...args)
+      }
+    })
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+    try {
+      await page.evaluate(() => {
+        window.ftElectron.tabs.setPreviewCapturePaused(false)
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        window.__slowPreview = window.ftElectron.tabs.capturePreview(store.getters.getActiveTabId)
+      })
+      await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.__delayedPreviewCapture.started)).toBe(true)
+      await page.keyboard.down('Control')
+      await page.keyboard.press('Tab')
+      // The capture is deliberately still pending: keyboard feedback must not
+      // depend on screenshot, encoding, or disk I/O finishing.
+      await expect(page.locator('.tabSwitcher')).toBeVisible({ timeout: 1000 })
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.tabSwitcher')).toHaveCount(0)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', activeTabId)
+      await page.keyboard.press('Shift+Tab')
+      await expect(page.locator('.tabSwitcher')).toBeVisible({ timeout: 1000 })
+      await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.__delayedPreviewCapture.release())
+      const interruptedPreview = await page.evaluate(() => window.__slowPreview)
+      expect(interruptedPreview).toBe(cachedPreview)
+      await page.keyboard.up('Control')
+      await expect(page.locator(sel.activeTab)).toContainText('History')
+    } finally {
+      await page.keyboard.up('Control')
+      await app.electronApp.evaluate(({ BrowserWindow }) => {
+        const contents = BrowserWindow.getAllWindows()[0].webContents
+        const capture = contents.__delayedPreviewCapture
+        contents.capturePage = capture.original
+        capture.release?.()
+        delete contents.__delayedPreviewCapture
+      })
+      await page.evaluate(async () => { await window.__slowPreview; delete window.__slowPreview })
+      await session.detach()
+    }
+  })
+})
+
 for (const uiScale of [100, 125]) {
   for (const currentLocale of ['en-US', 'ar']) {
     test.describe(`desktop tab switching at ${uiScale}% in ${currentLocale}`, () => {
