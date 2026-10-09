@@ -1,9 +1,10 @@
-import { mergeHistory, applyRemoteHistoryChanges } from './sync-history-merge.js'
+import { mergeHistory, applyRemoteHistoryChanges, updateHistorySnapshot } from './sync-history-merge.js'
 import * as privacy from './sync-server-privacy-crypto.js'
 
 export async function executeBackgroundJob(operation, input) {
   switch (operation) {
     case 'mergeHistory': return mergeHistory(input)
+    case 'updateHistorySnapshot': return updateHistorySnapshot(input)
     case 'applyRemoteHistoryChanges': return applyRemoteHistoryChanges(input)
     case 'encryptSyncDocument': return privacy.encryptSyncDocument(input.data, input.exportedKey, input.salt)
     case 'decryptSyncDocument': return privacy.decryptSyncDocument(input.payload, input.exportedKey)

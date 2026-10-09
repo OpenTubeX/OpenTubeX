@@ -37,7 +37,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -61,7 +61,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const storedReceipts = new Map()
   const common = {
     DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote,
-    runBackgroundJob,
+    runBackgroundJob: backgroundJob,
     toRaw,
     ...syncLive,
     ...(connectionChanges ? {
@@ -192,6 +192,73 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+}
+
+for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new privacy key', 'new privacy mode']) {
+  test(`legacy history acknowledges partial writes across ${transition}`, async () => {
+    const metadata = { added_date: 1, watched_state: 'watching', position_millis: 15_000 }
+    const record = id => ({ video: { id, title: id, duration: 120, uploader: { id: 'channel', name: 'Channel' } }, metadata })
+    let remote = ['kept', 'first', 'second'].map(record)
+    let failed = false
+    let snapshots = 0
+    const f = fixture({
+      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerSyncHistory: true,
+      syncServerSyncSubscriptions: false,
+      syncServerSnapshot: JSON.stringify({ history: ['kept', 'first', 'second'], subscriptions: ['old'] }),
+    }, {
+      backgroundJob: async (operation, input) => {
+        const result = await runBackgroundJob(operation, input)
+        if (operation === 'updateHistorySnapshot' && ++snapshots === 1) {
+          if (transition === 'concurrent snapshot') {
+            f.settings.syncServerSnapshot = JSON.stringify({ history: ['kept', 'first', 'second'], subscriptions: ['new'] })
+          } else if (transition === 'disabled') f.settings.syncServerEnabled = false
+          else if (transition === 'new token') f.settings.syncServerToken = 'replacement'
+          else if (transition === 'new privacy key') f.settings.syncServerPrivacyKey = 'replacement'
+          else f.settings.syncServerPrivacyMode = 'enhanced'
+        }
+        return result
+      },
+      respond: (url, options) => {
+        const path = new URL(url).pathname
+        if (path === '/health') return { capabilities: { bulk_sync: 1 } }
+        if (path === '/v1/watch_history/') return remote
+        if (path === '/v1/watch_history/bulk') {
+          remote.push(...JSON.parse(options.body))
+          return {}
+        }
+        if (path.startsWith('/v1/watch_history/') && options.method === 'DELETE') {
+          const id = path.split('/').at(-1)
+          if (id === 'second' && !failed) {
+            failed = true
+            return new Response('Second deletion failed', { status: 500 })
+          }
+          remote = remote.filter(entry => entry.video.id !== id)
+          if (id === 'first') {
+            f.context.rootState.history.historyCacheSorted.push({ videoId: id, authorId: 'channel', timeWatched: 1, watchProgress: 99, lengthSeconds: 120 })
+            f.context.rootState.history.historyRevision++
+          }
+          return {}
+        }
+      },
+    })
+    f.context.rootState.history = {
+      historyCacheSorted: [{ videoId: 'kept', authorId: 'channel', timeWatched: 1, watchProgress: 15, lengthSeconds: 120 }],
+      historyRevision: 0,
+    }
+    await assert.rejects(f.actions.syncWithSyncServer(f.context), /Second deletion failed/)
+    const snapshot = JSON.parse(f.settings.syncServerSnapshot)
+    if (transition.startsWith('new ')) {
+      assert.deepEqual(snapshot.history, ['kept', 'first', 'second'])
+      assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
+      return
+    }
+    assert.deepEqual(snapshot.history, { kept: null, second: null })
+    assert.deepEqual(snapshot.subscriptions, [transition === 'concurrent snapshot' ? 'new' : 'old'])
+    f.settings.syncServerEnabled = true
+    await f.actions.syncWithSyncServer(f.context)
+    assert.equal(f.context.rootState.history.historyCacheSorted.find(entry => entry.videoId === 'first').watchProgress, 99)
+    assert.equal(remote.find(entry => entry.video.id === 'first').metadata.position_millis, 99_000)
+  })
 }
 
 for (const refreshAction of ['refreshSyncServerEvents', 'refreshSyncServerDevices']) {

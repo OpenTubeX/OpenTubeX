@@ -259,6 +259,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
+  const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
+    settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
   const result = {}
   const skippedCollections = new Set()
   let tabRevocationError = null
@@ -268,6 +270,23 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit,
     dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
     assertActive: assertSyncStillActive,
+    async persistHistorySyncBaseline(changes) {
+      const sameAccount = () => {
+        const current = rootState.settings
+        return [current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
+          current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])
+      }
+      // A disable can cancel requests after they succeeded. Record those
+      // effects, but never carry them into a different account/privacy context.
+      while (sameAccount()) {
+        const snapshot = rootState.settings.syncServerSnapshot
+        const updated = await runBackgroundJob('updateHistorySnapshot', { snapshot, ...changes })
+        if (!sameAccount()) return
+        if (snapshot !== rootState.settings.syncServerSnapshot) continue
+        await dispatch('updateSyncServerSnapshot', updated, { root: true })
+        return
+      }
+    },
   }
   const stages = [
     ...(encrypted ? ['download'] : []),

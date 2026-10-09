@@ -868,6 +868,18 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
 export async function syncHistory(client, store, previous = {}, options = {}) {
   const historyChanged = new Error('Watch history changed during sync. Try again.')
+  const acknowledgedUpserts = new Map()
+  const acknowledgedDeletions = new Set()
+  const acknowledge = (upserts, deletions = []) => {
+    for (const id of deletions) {
+      acknowledgedUpserts.delete(id)
+      acknowledgedDeletions.add(id)
+    }
+    for (const entry of upserts) {
+      acknowledgedDeletions.delete(entry.video.id)
+      acknowledgedUpserts.set(entry.video.id, entry.metadata)
+    }
+  }
   for (let attempt = 0; attempt < 3; attempt++) {
     store.assertActive?.()
     const remoteHistory = await client.getWatchHistory()
@@ -878,40 +890,74 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
       store.assertActive?.()
       if (store.state.history.historyRevision !== revision) throw historyChanged
     }
+    let merged
     try {
-      const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = await runBackgroundJob('mergeHistory', {
-        localHistory, remoteHistory, previous, options,
+      merged = await runBackgroundJob('mergeHistory', {
+        localHistory,
+        remoteHistory,
+        previous,
+        options,
+        acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
       })
       assertHistoryCurrent()
-      if (typeof client.applyWatchHistoryChanges === 'function') {
+    } catch (error) {
+      store.assertActive?.()
+      // Even a failed merge can be based on mixed chunks and report false data
+      // loss. Only retry stale computations; rejected writes have uncertain effects.
+      if (store.state.history.historyRevision !== revision) continue
+      throw error
+    }
+    const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+    const legacy = typeof client.applyWatchHistoryChanges !== 'function'
+    let completed = false
+    try {
+      if (!legacy) {
         if (historyToUpload.length || remoteDeletions.length) {
           await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
+          acknowledge(historyToUpload, remoteDeletions)
         }
       } else {
-        for (const id of remoteDeletions) await client.deleteWatchHistory(id)
+        for (const id of remoteDeletions) {
+          await client.deleteWatchHistory(id)
+          acknowledge([], [id])
+        }
         await uploadInChunks(
           historyToUpload,
           await client.supportsBulkSync(),
-          entries => client.putWatchHistoryBulk(entries),
-          entry => client.putWatchHistory(entry)
+          async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+          async entry => { await client.putWatchHistory(entry); acknowledge([entry]) }
         )
       }
 
-      assertHistoryCurrent()
+      store.assertActive?.()
+      if (store.state.history.historyRevision !== revision) continue
       if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
-        await store.dispatch('applyHistorySyncChanges', {
-          insertions,
-          updates,
-          deletions,
-          ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
+        try {
+          await store.dispatch('applyHistorySyncChanges', {
+            insertions,
+            updates,
+            deletions,
+            ...(store.assertActive || revision !== undefined ? { assertActive: assertHistoryCurrent } : {}),
+          })
+        } catch (error) {
+          if (error !== historyChanged) throw error
+          store.assertActive?.()
+          continue
+        }
+      }
+      completed = true
+      return next
+    } finally {
+      // Legacy requests already changed the server even if a later write,
+      // local application, or collection fails. Encrypted adapter writes only
+      // change its in-memory document and must wait for the actual upload.
+      if (legacy && (completed || acknowledgedUpserts.size || acknowledgedDeletions.size)) {
+        await store.persistHistorySyncBaseline?.({
+          previous,
+          acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
+          ...(completed ? { next } : {}),
         })
       }
-      return next
-    } catch (error) {
-      store.assertActive?.()
-      // Even a failed merge can be based on mixed chunks (and report false
-      // data loss). Retry from fresh remote/local state before saving a baseline.
-      if (error !== historyChanged && store.state.history.historyRevision === revision) throw error
     }
   }
   throw historyChanged

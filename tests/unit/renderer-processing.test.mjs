@@ -45,6 +45,12 @@ function historyStore(DBHistoryHandlers) {
   return createStore({ modules: { history } })
 }
 
+const historyRecord = (videoId, watchProgress = 15) => ({ videoId, authorId: 'UCtest', timeWatched: 1, watchProgress, lengthSeconds: 120 })
+const remoteRecord = (videoId, watchProgress = 15) => ({
+  video: { id: videoId, title: videoId, duration: 120, uploader: { id: 'UCtest', name: 'Channel' } },
+  metadata: { added_date: 1, watched_state: 'watching', position_millis: watchProgress * 1000 },
+})
+
 function monitorInputDelay() {
   let previous = performance.now()
   let maximumDelay = 0
@@ -149,6 +155,143 @@ test('history edits during serialization prevent stale writes and retry with fre
     assert.equal(store.state.history.historyCacheById.video.watchProgress, 99)
     assert.equal(snapshot.video.position_millis, 99_000)
     assert.equal(uploads[0].metadata.position_millis, 99_000)
+  } finally { jobs.dispose() }
+})
+
+for (const backend of ['encrypted', 'legacy']) {
+  for (const baseline of ['states', 'ids']) {
+    test(`history re-added during ${backend} deletion survives retry with a ${baseline} baseline`, async () => {
+      const jobs = createJobs()
+      let remote = ['kept', 're-added', 'incoming'].map(id => remoteRecord(id))
+      const previous = baseline === 'ids' ? ['kept', 're-added'] : {
+        kept: remote[0].metadata, 're-added': remote[1].metadata,
+      }
+      const store = historyStore({ applySyncChanges: async (changes, assertActive) => assertActive?.() })
+      store.commit('upsertToHistoryCache', historyRecord('kept'))
+      let edited = false
+      const apply = async (upserts, deletions) => {
+        remote = remote.filter(entry => !deletions.includes(entry.video.id) && !upserts.some(update => update.video.id === entry.video.id)).concat(upserts)
+        if (!edited && deletions.includes('re-added')) {
+          edited = true
+          // Re-watch while the acknowledged deletion is still awaiting return.
+          store.commit('upsertToHistoryCache', { ...historyRecord('re-added'), timeWatched: 2, watchProgress: 99 })
+        }
+      }
+      const client = {
+        getWatchHistory: async () => remote,
+        ...(backend === 'encrypted' ? { applyWatchHistoryChanges: apply } : {
+          deleteWatchHistory: id => apply([], [id]),
+          supportsBulkSync: async () => true,
+          putWatchHistoryBulk: entries => apply(entries, []),
+        }),
+      }
+      try {
+        const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        assert.equal(store.state.history.historyCacheById['re-added']?.watchProgress, 99)
+        assert.equal(remote.find(entry => entry.video.id === 're-added')?.metadata.position_millis, 99_000)
+        assert.equal(snapshot['re-added']?.position_millis, 99_000)
+        assert.ok(store.state.history.historyCacheById.incoming, 'An unapplied remote-only arrival must remain an insertion')
+        assert.ok(remote.some(entry => entry.video.id === 'incoming'))
+      } finally { jobs.dispose() }
+    })
+  }
+}
+
+for (const backend of ['encrypted', 'legacy bulk', 'legacy single']) {
+  for (const edit of ['remove', 'rewind']) {
+    test(`${edit} during ${backend} upload survives the next history attempt`, async () => {
+      const jobs = createJobs()
+      const store = historyStore({ applySyncChanges: async (changes, assertActive) => assertActive?.() })
+      store.commit('upsertToHistoryCache', historyRecord('kept'))
+      store.commit('upsertToHistoryCache', historyRecord('uploaded', 60))
+      let remote = [remoteRecord('kept'), ...(edit === 'rewind' ? [remoteRecord('uploaded')] : [])]
+      const previous = { kept: remote[0].metadata, ...(edit === 'rewind' ? { uploaded: remote[1].metadata } : {}) }
+      let edited = false
+      const apply = async (upserts, deletions) => {
+        remote = remote.filter(entry => !deletions.includes(entry.video.id) && !upserts.some(update => update.video.id === entry.video.id)).concat(upserts)
+        if (!edited && upserts.some(entry => entry.video.id === 'uploaded')) {
+          edited = true
+          if (edit === 'remove') store.commit('removeFromHistoryCacheById', 'uploaded')
+          else store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'uploaded', watchProgress: 5 })
+        }
+      }
+      const client = {
+        getWatchHistory: async () => remote,
+        ...(backend === 'encrypted' ? { applyWatchHistoryChanges: apply } : {
+          deleteWatchHistory: id => apply([], [id]),
+          supportsBulkSync: async () => backend === 'legacy bulk',
+          putWatchHistoryBulk: entries => apply(entries, []),
+          putWatchHistory: entry => apply([entry], []),
+        }),
+      }
+      try {
+        const snapshot = await syncContext((...args) => jobs.run(...args)).syncHistory(client, store, previous)
+        if (edit === 'remove') {
+          assert.equal(store.state.history.historyCacheById.uploaded, undefined)
+          assert.equal(remote.some(entry => entry.video.id === 'uploaded'), false)
+          assert.equal(snapshot.uploaded, undefined)
+        } else {
+          assert.equal(store.state.history.historyCacheById.uploaded.watchProgress, 5)
+          assert.equal(remote.find(entry => entry.video.id === 'uploaded').metadata.position_millis, 5000)
+          assert.equal(snapshot.uploaded.position_millis, 5000)
+        }
+      } finally { jobs.dispose() }
+    })
+  }
+}
+
+test('a rejected remote write is not retried just because history changed', async () => {
+  const jobs = createJobs()
+  const store = historyStore({ applySyncChanges: () => assert.fail('An uncertain write must stop before local changes') })
+  store.commit('upsertToHistoryCache', historyRecord('video', 60))
+  const failure = new Error('Request failed after sending')
+  let downloads = 0
+  try {
+    await assert.rejects(syncContext((...args) => jobs.run(...args)).syncHistory({
+      getWatchHistory: async () => { downloads++; return [remoteRecord('video')] },
+      applyWatchHistoryChanges: async () => {
+        store.commit('updateRecordWatchProgressInHistoryCache', { videoId: 'video', watchProgress: 5 })
+        throw failure
+      },
+    }, store), error => error === failure)
+    assert.equal(downloads, 1)
+    assert.equal(store.state.history.historyCacheById.video.watchProgress, 5)
+  } finally { jobs.dispose() }
+})
+
+test('a partial legacy write failure preserves the error and re-added local history', async () => {
+  const jobs = createJobs()
+  let applyingAllowed = false
+  const store = historyStore({ applySyncChanges: async () => assert.ok(applyingAllowed) })
+  let snapshot = JSON.stringify({ history: ['kept', 'first', 'second'], subscriptions: ['channel'] })
+  store.persistHistorySyncBaseline = async changes => {
+    snapshot = await jobs.run('updateHistorySnapshot', { snapshot, ...changes })
+  }
+  store.commit('upsertToHistoryCache', historyRecord('kept'))
+  let remote = ['kept', 'first', 'second'].map(id => remoteRecord(id))
+  const failure = new Error('Second deletion failed')
+  let downloads = 0
+  try {
+    await assert.rejects(syncContext((...args) => jobs.run(...args)).syncHistory({
+      getWatchHistory: async () => { downloads++; return remote },
+      deleteWatchHistory: async id => {
+        if (id === 'second') throw failure
+        remote = remote.filter(entry => entry.video.id !== id)
+        store.commit('upsertToHistoryCache', historyRecord(id, 99))
+      },
+    }, store, ['kept', 'first', 'second']), error => error === failure)
+    assert.equal(downloads, 1)
+    assert.equal(store.state.history.historyCacheById.first.watchProgress, 99)
+    assert.deepEqual(JSON.parse(snapshot), { history: { kept: null, second: null }, subscriptions: ['channel'] })
+    applyingAllowed = true
+    await syncContext((...args) => jobs.run(...args)).syncHistory({
+      getWatchHistory: async () => remote,
+      deleteWatchHistory: async id => { remote = remote.filter(entry => entry.video.id !== id) },
+      supportsBulkSync: async () => true,
+      putWatchHistoryBulk: async entries => { remote.push(...entries) },
+    }, store, JSON.parse(snapshot).history)
+    assert.equal(store.state.history.historyCacheById.first.watchProgress, 99)
+    assert.equal(remote.find(entry => entry.video.id === 'first').metadata.position_millis, 99_000)
   } finally { jobs.dispose() }
 })
 

@@ -116,10 +116,27 @@ function historyStateEquals(localPayload, remote) {
     localPayload.metadata.position_millis === remote.metadata.position_millis
 }
 
-export function mergeHistory({ localHistory, remoteHistory, previous = {}, options = {} }) {
+function historyBaseline(previous, acknowledged) {
   // Older snapshots contain only IDs, without a baseline for watch-state edits.
-  const previousIds = Array.isArray(previous) ? previous : Object.keys(previous)
-  const previousStates = Array.isArray(previous) ? {} : previous
+  const previousStates = new Map(Array.isArray(previous)
+    ? previous.map(id => [id, null])
+    : Object.entries(previous))
+  // A retry must distinguish our completed writes from new remote edits.
+  // Remote-only arrivals remain outside the baseline until applied locally.
+  for (const id of acknowledged.deletions ?? []) previousStates.delete(id)
+  for (const [id, metadata] of acknowledged.upserts ?? []) previousStates.set(id, metadata)
+  return previousStates
+}
+
+export function updateHistorySnapshot({ snapshot, previous, acknowledged, next }) {
+  let saved
+  try { saved = JSON.parse(snapshot) } catch { saved = {} }
+  return JSON.stringify({ ...saved, history: next ?? Object.fromEntries(historyBaseline(previous, acknowledged)) })
+}
+
+export function mergeHistory({ localHistory, remoteHistory, previous = {}, acknowledged = {}, options = {} }) {
+  const previousStates = historyBaseline(previous, acknowledged)
+  const previousIds = previousStates.keys()
   const next = {}
   const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
   const localById = mapBy(syncableLocalHistory, record => record.videoId)
@@ -153,7 +170,7 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, optio
     let useLocal = local && (!remote || local.timeWatched > remote.metadata.added_date)
     if (local && remote && local.timeWatched === remote.metadata.added_date) {
       const localState = historyToRemote(local)
-      const baseline = previousStates[id]
+      const baseline = previousStates.get(id)
       const localChanged = !baseline || !historyStateEquals(localState, { metadata: baseline })
       const remoteChanged = !baseline || !historyStateEquals(remote, { metadata: baseline })
       // A sole local edit can move progress backwards or clear watched status.
