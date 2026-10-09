@@ -1,3 +1,4 @@
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 const editors = [
@@ -6,6 +7,59 @@ const editors = [
   { name: 'navigation', button: 'Customize navigation', row: '.selectedItem', attribute: 'data-navigation-item-id' },
   { name: 'fullscreen actions', button: 'Customize fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
 ]
+
+for (const [editor, setting] of [[editors[0], 'quickSettings'], [editors[1], 'quickSettings'], [editors[2], 'navigationItems'], [editors[3], 'fullscreenActions']]) {
+  test(`does not announce a failed ${editor.name} reorder and allows retrying`, async ({ app, page }) => {
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: editor.button, exact: true }).click()
+    const rows = page.locator(editor.row)
+    const ids = () => rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), editor.attribute)
+    const initial = await ids()
+    const status = page.locator('.reorderStatus')
+    await app.electronApp.evaluate(({ ipcMain }, { channel, upsert, setting }) => {
+      const original = ipcMain._invokeHandlers.get(channel)
+      globalThis.__restoreReorderHandler = () => {
+        ipcMain.removeHandler(channel)
+        ipcMain.handle(channel, original)
+        delete globalThis.__restoreReorderHandler
+      }
+      ipcMain.removeHandler(channel)
+      ipcMain.handle(channel, (event, request) => {
+        if (request.action === upsert && request.data?._id === setting) {
+          throw new Error('Reorder save failed')
+        }
+        return original(event, request)
+      })
+    }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT, setting })
+
+    const dragFirstDown = async () => {
+      const handle = rows.first().locator('.dragHandle').first()
+      await handle.scrollIntoViewIfNeeded()
+      const start = await handle.boundingBox()
+      const source = await rows.first().boundingBox()
+      const target = await rows.nth(1).boundingBox()
+      const y = start.y + start.height / 2
+      await page.mouse.move(start.x + start.width / 2, y)
+      await page.mouse.down()
+      await page.mouse.move(start.x + start.width / 2, y + target.y + target.height - source.y - source.height, { steps: 10 })
+      await page.mouse.up()
+    }
+    try {
+      const errorLogged = page.waitForEvent('console', {
+        predicate: message => message.type() === 'error' && message.text().includes('Reorder save failed')
+      })
+      await dragFirstDown()
+      await errorLogged
+      await expect.poll(ids).toEqual(initial)
+      await expect(status).toHaveText('')
+    } finally {
+      await app.electronApp.evaluate(() => globalThis.__restoreReorderHandler())
+    }
+    await dragFirstDown()
+    await expect.poll(ids).toEqual([initial[1], initial[0], ...initial.slice(2)])
+    await expect(status).not.toHaveText('')
+  })
+}
 
 for (const uiScale of [100, 125]) {
   test.describe(`in-place settings reordering at ${uiScale}%`, () => {

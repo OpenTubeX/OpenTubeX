@@ -4,10 +4,10 @@ import test from 'node:test'
 import {
   buildCurrentShiftedTabIds,
   buildShiftedTabIds,
-  computeTabOffsets,
   getDraggedTabIds,
   getTabIndexShift
 } from '../../src/renderer/components/TabBar/tabReorder.js'
+import { computeReorderOffsets } from '../../src/renderer/helpers/reorderOffsets.js'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
 
 const tabs = [
@@ -58,7 +58,7 @@ test('computes offsets for the final spacing-preserving order', () => {
     start: index * 102,
     size: 100
   }))
-  const offsets = computeTabOffsets(rects, ['a', 'c', 'b', 'e', 'd'], 2)
+  const offsets = computeReorderOffsets(rects, ['a', 'c', 'b', 'e', 'd'], 2)
 
   assert.deepEqual(offsets, {
     c: -102,

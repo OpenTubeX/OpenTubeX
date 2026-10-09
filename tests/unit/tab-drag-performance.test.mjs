@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { nextTick, ref, watch } from 'vue'
+import { computeReorderOffsets } from '../../src/renderer/helpers/reorderOffsets.js'
 import * as reorder from '../../src/renderer/components/TabBar/tabReorder.js'
 
 const component = readFileSync(new URL('../../src/renderer/components/TabBar/TabBar.vue', import.meta.url), 'utf8')
@@ -40,7 +41,7 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
   })`, {
     ...reorder,
     buildShiftedTabIds(...args) { calls.orders++; return reorder.buildShiftedTabIds(...args) },
-    computeTabOffsets(...args) { calls.offsets++; return reorder.computeTabOffsets(...args) },
+    computeReorderOffsets(...args) { calls.offsets++; return computeReorderOffsets(...args) },
     ref, watch, nextTick,
     Element: TabElement, HTMLElement: TabElement,
     vertical: ref(vertical), tabs, stripItems: tabs,

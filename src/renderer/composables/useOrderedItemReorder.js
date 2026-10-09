@@ -1,6 +1,7 @@
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
-import { computeTabOffsets } from '../components/TabBar/tabReorder'
+import { moveItemByVisibleOffset } from '../../orderedItems'
+import { computeReorderOffsets } from '../helpers/reorderOffsets'
 import { isReducedMotionEnabled } from '../helpers/reducedMotion'
 
 /**
@@ -11,7 +12,7 @@ import { isReducedMotionEnabled } from '../helpers/reducedMotion'
  * @param {import('vue').ComputedRef<string[]>} options.items
  * @param {string} options.rowSelector
  * @param {string} options.itemIdAttribute
- * @param {(items: string[]) => unknown} options.updateItems
+ * @param {(items: string[]) => Promise<boolean>} options.updateItems
  * @param {(itemId: string, position: number) => void} options.announceMoved
  */
 export function useOrderedItemReorder({ items, rowSelector, itemIdAttribute, updateItems, announceMoved }) {
@@ -123,7 +124,7 @@ export function useOrderedItemReorder({ items, rowSelector, itemIdAttribute, upd
     const order = ids.filter(id => id !== draggedItemId.value)
     order.splice(targetIndex, 0, draggedItemId.value)
     session.order = order
-    offsets.value = computeTabOffsets(rects, order, gap, draggedIds, offset)
+    offsets.value = computeReorderOffsets(rects, order, gap, draggedIds, offset)
   }
 
   function scrollNearEdge(time) {
@@ -137,6 +138,7 @@ export function useOrderedItemReorder({ items, rowSelector, itemIdAttribute, upd
       : currentY < bounds.top + edge
         ? -Math.min(1, (bounds.top + edge - currentY) / edge)
         : Math.max(0, Math.min(1, (currentY - bounds.bottom + edge) / edge))
+    if (speed === 0) return
     scroller.scrollBy({ top: speed * 600 * Math.min(time - session.lastScrollTime, 32) / 1000, behavior: 'instant' })
     session.lastScrollTime = time
     updatePosition()
@@ -155,18 +157,16 @@ export function useOrderedItemReorder({ items, rowSelector, itemIdAttribute, upd
     settling.value = true
     cancelAnimationFrame(scrollFrame)
     scrollFrame = null
-    offsets.value = computeTabOffsets(active.rects, active.order, active.gap)
+    offsets.value = computeReorderOffsets(active.rects, active.order, active.gap)
     await nextTick()
     // Wait for the actual transitions, including the user's animation speed.
     await Promise.allSettled(active.rows.flatMap(row => row.getAnimations().map(animation => animation.finished)))
     if (session !== active) return
     const position = active.order.indexOf(id)
     if (position !== active.sourceIndex) {
-      let index = 0
-      const reordered = items.value.map(item => active.ids.includes(item) ? active.order[index++] : item)
+      const reordered = moveItemByVisibleOffset(items.value, active.ids, id, position - active.sourceIndex)
       stopDragging()
-      await updateItems(reordered)
-      announceMoved(id, position)
+      if (await updateItems(reordered)) announceMoved(id, position)
     } else {
       stopDragging()
     }

@@ -328,14 +328,15 @@ onBeforeUnmount(() => {
 })
 
 async function updateItems(items) {
-  await store.dispatch('updateNavigationItems', items)
+  const saved = await store.dispatch('updateNavigationItems', items)
 
-  if (store.getters.getNavigationItems.includes('home')) return
+  if (!saved || store.getters.getNavigationItems.includes('home')) return saved
   if (process.env.IS_ELECTRON) {
     await store.dispatch('redirectHomeTabsToLandingPage')
   } else if (route.path === '/home') {
     await router.replace({ path: `/${store.getters.getLandingPage}` })
   }
+  return saved
 }
 
 async function addItem(itemId) {

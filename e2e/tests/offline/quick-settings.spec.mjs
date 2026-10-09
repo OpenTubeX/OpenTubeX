@@ -380,34 +380,36 @@ for (const uiScale of [100, 95]) {
         }
       })
 
-      test.describe('slider captions', () => {
-        test.use({
-          seed: {
-            settings: {
-              ...settings,
-              quickSettings: ['uiScale', 'defaultQuality', 'uiRoundness'],
+      for (const slider of ['uiScale', 'uiRoundness']) {
+        test.describe(`slider captions starting with ${slider}`, () => {
+          test.use({
+            seed: {
+              settings: {
+                ...settings,
+                quickSettings: [slider, 'defaultQuality'],
+              }
             }
-          }
-        })
+          })
 
-        test('aligns first slider captions with outlined select labels', async ({ page }) => {
-          await page.emulateMedia({ reducedMotion: 'reduce' })
-          await page.locator('.profileTrigger').click()
-          const menu = page.locator('.quickSettingsMenu')
-          await expect(menu).toBeVisible()
-          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-          const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
-            const heading = section.querySelector('h3').getBoundingClientRect()
-            const control = section.querySelector('.quickSettingControl')
-            const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
-            return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
-          }))
-          expect(gaps.map(({ setting }) => setting)).toEqual(['uiScale', 'defaultQuality', 'uiRoundness'])
-          for (const { setting, gap } of gaps) {
-            expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
-          }
+          test('aligns first slider captions with outlined select labels', async ({ page }) => {
+            await page.emulateMedia({ reducedMotion: 'reduce' })
+            await page.locator('.profileTrigger').click()
+            const menu = page.locator('.quickSettingsMenu')
+            await expect(menu).toBeVisible()
+            await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+            const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
+              const heading = section.querySelector('h3').getBoundingClientRect()
+              const control = section.querySelector('.quickSettingControl')
+              const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
+              return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
+            }))
+            expect(gaps.map(({ setting }) => setting)).toEqual([slider, 'defaultQuality'])
+            for (const { setting, gap } of gaps) {
+              expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
+            }
+          })
         })
-      })
+      }
 
       test.describe('control alignment', () => {
         test.use({
@@ -1691,7 +1693,7 @@ test.describe('grouped quick settings at narrow fractional scale', () => {
     await expect(page.locator('[data-section-id="appearance"] .selectedSetting')).toHaveCount(2)
     const movePlayback = page.getByRole('button', { name: 'Move Playback up', exact: true })
     await movePlayback.focus()
-    await page.keyboard.press('Enter')
+    await movePlayback.press('Enter')
     await expect.poll(ids).toEqual(['playback', 'appearance', 'content'])
 
     const playback = page.locator('[data-section-id="playback"]')
