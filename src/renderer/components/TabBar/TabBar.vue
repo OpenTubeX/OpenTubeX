@@ -158,6 +158,7 @@ import { getTabAccentColor } from '../../constants/tabColors'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
+import { computeReorderOffsets } from '../../helpers/reorderOffsets'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
@@ -166,7 +167,6 @@ import { provideTabTooltip } from './useTabTooltip'
 import {
   buildCurrentShiftedTabIds,
   buildShiftedTabIds,
-  computeTabOffsets,
   getDraggedTabIds,
   getTabIndexShift
 } from './tabReorder'
@@ -637,7 +637,7 @@ function updateActiveDragPosition(updateVisuals = true) {
     )
     dragSession.indexShift = indexShift
     dragSession.reorderedTabIds = reorderedTabIds
-    dragSession.neighborOffsets = computeTabOffsets(
+    dragSession.neighborOffsets = computeReorderOffsets(
       rects,
       reorderedTabIds,
       gap,
@@ -690,7 +690,7 @@ function handleDragPointerUp() {
   // Snap the dragged tab to its final slot with an animation, then commit
   // the reorder once the snap finishes. Other tabs are already shifted to
   // their target positions via offsets, so they'll stay put through the swap.
-  const snapOffsets = computeTabOffsets(rects, reorderedTabIds, gap)
+  const snapOffsets = computeReorderOffsets(rects, reorderedTabIds, gap)
 
   tabOffsets.value = snapOffsets
   draggingTabIds.value = new Set()

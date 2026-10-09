@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
-import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
+import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../../src/renderer/helpers/quickSettings.js'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const ALL_QUICK_SETTINGS = [
@@ -380,34 +380,36 @@ for (const uiScale of [100, 95]) {
         }
       })
 
-      test.describe('slider captions', () => {
-        test.use({
-          seed: {
-            settings: {
-              ...settings,
-              quickSettings: ['uiScale', 'defaultQuality', 'uiRoundness'],
+      for (const slider of ['uiScale', 'uiRoundness']) {
+        test.describe(`slider captions starting with ${slider}`, () => {
+          test.use({
+            seed: {
+              settings: {
+                ...settings,
+                quickSettings: [slider, 'defaultQuality'],
+              }
             }
-          }
-        })
+          })
 
-        test('aligns first slider captions with outlined select labels', async ({ page }) => {
-          await page.emulateMedia({ reducedMotion: 'reduce' })
-          await page.locator('.profileTrigger').click()
-          const menu = page.locator('.quickSettingsMenu')
-          await expect(menu).toBeVisible()
-          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-          const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
-            const heading = section.querySelector('h3').getBoundingClientRect()
-            const control = section.querySelector('.quickSettingControl')
-            const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
-            return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
-          }))
-          expect(gaps.map(({ setting }) => setting)).toEqual(['uiScale', 'defaultQuality', 'uiRoundness'])
-          for (const { setting, gap } of gaps) {
-            expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
-          }
+          test('aligns first slider captions with outlined select labels', async ({ page }) => {
+            await page.emulateMedia({ reducedMotion: 'reduce' })
+            await page.locator('.profileTrigger').click()
+            const menu = page.locator('.quickSettingsMenu')
+            await expect(menu).toBeVisible()
+            await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+            const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
+              const heading = section.querySelector('h3').getBoundingClientRect()
+              const control = section.querySelector('.quickSettingControl')
+              const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
+              return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
+            }))
+            expect(gaps.map(({ setting }) => setting)).toEqual([slider, 'defaultQuality'])
+            for (const { setting, gap } of gaps) {
+              expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
+            }
+          })
         })
-      })
+      }
 
       test.describe('control alignment', () => {
         test.use({
@@ -984,7 +986,7 @@ test.describe('additional quick settings', () => {
       await expect(menu).toBeVisible()
     }
 
-    const ids = ADDITIONAL_QUICK_SETTINGS.map(([id]) => id)
+    const ids = normalizeQuickSettings(ADDITIONAL_QUICK_SETTINGS.map(([id]) => id))
     await expect.poll(async () => {
       const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
       return Object.fromEntries(['quickSettings', ...ids].map(id => [id, saved[id]]))
@@ -1542,7 +1544,7 @@ test.describe('customizable quick settings', () => {
 
     const selectedSettings = page.locator('.selectedSettings')
     await expect(selectedSettings.locator('.selectedSetting')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
-    await expect(selectedSettings.locator('.selectedSettingIcon')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
+    await expect(selectedSettings.locator('.selectedSetting .selectedSettingIcon')).toHaveCount(DEFAULT_QUICK_SETTINGS.length)
     await expect.poll(() => selectedSettings.locator('.selectedSetting').evaluateAll(rows => (
       rows.map(row => row.dataset.settingId)
     ))).toEqual(DEFAULT_QUICK_SETTINGS)
@@ -1589,6 +1591,7 @@ test.describe('customizable quick settings', () => {
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
     const iconPack = menu.getByRole('combobox', { name: 'Icon Pack' })
+    await expect(menu.locator('.menuSection').getByRole('heading', { name: 'Appearance', exact: true })).toHaveCount(1)
     await expect(iconPack).toBeVisible()
     await expect(menu.getByRole('slider', { name: 'UI Roundness' })).toBeVisible()
     await expect(menu.getByRole('checkbox', { name: 'Hide Comments' })).toHaveCount(0)
@@ -1609,7 +1612,7 @@ test.describe('customizable quick settings', () => {
     await expect(page.locator('.selectedSettings')).not.toContainText('Icon Pack')
   })
 
-  test('rearranges controls with buttons and drag and drop', async ({ page }) => {
+  test('rearranges categories together and controls within their category', async ({ page, attachScreenshot }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
 
@@ -1627,30 +1630,101 @@ test.describe('customizable quick settings', () => {
     hideCommentsMovedUp.splice(hideCommentsIndex - 1, 0, 'hideComments')
     await expect.poll(settingIds).toEqual(hideCommentsMovedUp)
 
-    const dragData = await page.evaluateHandle(() => new DataTransfer())
-    const hideComments = selectedSettings.locator('[data-setting-id="hideComments"]')
-    const baseTheme = selectedSettings.locator('[data-setting-id="baseTheme"]')
-    await hideComments.locator('.dragHandle').dispatchEvent('dragstart', { dataTransfer: dragData })
-    await baseTheme.dispatchEvent('dragover', { dataTransfer: dragData })
-    await baseTheme.dispatchEvent('drop', { dataTransfer: dragData })
-    await hideComments.locator('.dragHandle').dispatchEvent('dragend', { dataTransfer: dragData })
-    const hideCommentsFirst = [
-      'hideComments',
-      ...DEFAULT_QUICK_SETTINGS.filter(settingId => settingId !== 'hideComments'),
+    await expect(page.getByRole('button', { name: 'Move Default Quality up' })).toBeDisabled()
+    await expect(page.getByRole('button', { name: 'Move Thumbnail Size down' })).toBeDisabled()
+    await expect(selectedSettings.locator('h3')).toHaveText(['Appearance', 'Playback', 'Content', 'Language and region'])
+    await page.getByRole('button', { name: 'Move Playback up', exact: true }).click()
+    await expect.poll(settingIds).toEqual([
+      ...hideCommentsMovedUp.slice(4, 7), ...hideCommentsMovedUp.slice(0, 4), ...hideCommentsMovedUp.slice(7),
+    ])
+
+    const content = selectedSettings.locator('[data-section-id="content"]')
+    const playback = selectedSettings.locator('[data-section-id="playback"]')
+    await content.locator('.dragHandle').first().scrollIntoViewIfNeeded()
+    const handleBounds = await content.locator('.dragHandle').first().boundingBox()
+    const contentBounds = await content.boundingBox()
+    const playbackBounds = await playback.boundingBox()
+    const x = handleBounds.x + handleBounds.width / 2
+    const y = handleBounds.y + handleBounds.height / 2
+    await page.mouse.move(x, y)
+    await page.mouse.down()
+    await page.mouse.move(x, y + playbackBounds.y + playbackBounds.height / 2 - contentBounds.y - contentBounds.height / 2 - 8, { steps: 12 })
+    await page.mouse.up()
+    const contentFirst = [
+      ...hideCommentsMovedUp.slice(7, 11),
+      ...hideCommentsMovedUp.slice(4, 7),
+      ...hideCommentsMovedUp.slice(0, 4),
+      ...hideCommentsMovedUp.slice(11),
     ]
-    await expect.poll(settingIds).toEqual(hideCommentsFirst)
+    await expect.poll(settingIds).toEqual(contentFirst)
+    await attachScreenshot('grouped-quick-settings-editor')
 
     await page.locator('.settingsCloseButton').click()
     await page.locator('.profileTrigger').click()
     const menu = page.getByRole('dialog', { name: 'Quick settings' })
     await expect.poll(() => menu.locator('.quickSettingControl').evaluateAll(controls => (
       controls.map(control => control.dataset.settingId)
-    ))).toEqual(hideCommentsFirst)
+    ))).toEqual(contentFirst)
 
     await menu.getByRole('button', { name: 'All Settings' }).click()
     const reopenedAppearance = await goToSettingsSection(page, 'appearance')
     await reopenedAppearance.getByRole('button', { name: 'Customize quick settings' }).click()
-    await expect.poll(settingIds).toEqual(hideCommentsFirst)
+    await expect.poll(settingIds).toEqual(contentFirst)
+  })
+})
+
+test.describe('grouped quick settings at narrow fractional scale', () => {
+  test.use({
+    seed: {
+      settings: {
+        uiScale: 125,
+        quickSettings: ['baseTheme', 'defaultQuality', 'mainColor', 'playNextVideo', 'hideComments'],
+      }
+    }
+  })
+
+  test('groups saved categories and moves whole groups with touch and keyboard', async ({ app, page, attachScreenshot }) => {
+    await setWindowSize(app, page, { width: 500, height: 850 })
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
+    const sections = page.locator('.selectedSection')
+    const ids = () => sections.evaluateAll(rows => rows.map(row => row.dataset.sectionId))
+    await expect.poll(ids).toEqual(['appearance', 'playback', 'content'])
+    await expect(page.locator('[data-section-id="appearance"] .selectedSetting')).toHaveCount(2)
+    const movePlayback = page.getByRole('button', { name: 'Move Playback up', exact: true })
+    await movePlayback.focus()
+    await movePlayback.press('Enter')
+    await expect.poll(ids).toEqual(['playback', 'appearance', 'content'])
+
+    const playback = page.locator('[data-section-id="playback"]')
+    const appearanceSection = page.locator('[data-section-id="appearance"]')
+    const handle = playback.locator('.dragHandle').first()
+    const target = await appearanceSection.boundingBox()
+    const source = await handle.boundingBox()
+    const sourceRow = await playback.boundingBox()
+    const dropY = source.y + source.height / 2 + target.y + target.height - sourceRow.y - sourceRow.height
+    const session = await page.context().newCDPSession(page)
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart', touchPoints: [{ x: source.x + source.width / 2, y: source.y + source.height / 2 }],
+    })
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [{ x: source.x + source.width / 2, y: dropY }],
+    })
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await session.detach()
+    await expect.poll(ids).toEqual(['appearance', 'playback', 'content'])
+    const viewportWidth = await page.evaluate(() => innerWidth)
+    for (const bounds of await sections.evaluateAll(rows => rows.map(row => row.getBoundingClientRect().toJSON()))) {
+      expect(bounds.x).toBeGreaterThanOrEqual(0)
+      expect(bounds.right).toBeLessThanOrEqual(viewportWidth)
+    }
+    await attachScreenshot('grouped-quick-settings-narrow')
+    await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).quickSettings)
+      .toEqual(['baseTheme', 'mainColor', 'defaultQuality', 'playNextVideo', 'hideComments'])
+    ;({ page } = await app.relaunch())
+    await page.locator('.profileTrigger').click()
+    const menu = page.getByRole('dialog', { name: 'Quick settings' })
+    await expect(menu.locator('.menuSection h3')).toHaveText(['Appearance', 'Playback', 'Content'])
   })
 })
 

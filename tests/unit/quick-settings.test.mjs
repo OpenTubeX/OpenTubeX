@@ -118,3 +118,17 @@ test('iOS quick settings do not offer the unavailable proxy toggle', () => {
   assert.ok(ios.some(setting => setting.id === 'uiScale'))
   assert.ok(!ios.some(setting => setting.id === 'useProxy'))
 })
+
+test('keeps categories adjacent in first-seen order, preserving order within each category', () => {
+  assert.deepEqual(
+    normalizeQuickSettings(['hideComments', 'baseTheme', 'defaultQuality', 'listType', 'mainColor', 'hideComments']),
+    ['hideComments', 'listType', 'baseTheme', 'mainColor', 'defaultQuality']
+  )
+})
+
+test('adds a setting to its existing category instead of splitting the category', () => {
+  assert.deepEqual(
+    normalizeQuickSettings([...DEFAULT_QUICK_SETTINGS, 'iconPack']),
+    [...DEFAULT_QUICK_SETTINGS.slice(0, 4), 'iconPack', ...DEFAULT_QUICK_SETTINGS.slice(4)]
+  )
+})

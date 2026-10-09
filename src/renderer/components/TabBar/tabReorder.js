@@ -114,39 +114,3 @@ export function getTabIndexShift(
   const maxShift = groupEndIndex - Math.max(...draggedIndexes)
   return Math.max(minShift, Math.min(maxShift, targetIndex - sourceIndex))
 }
-
-/**
- * Calculate transforms that visually place tabs in a proposed order.
- * @param {Array<{id: string, start: number, size: number}>} rects
- * @param {string[]} reorderedTabIds
- * @param {number} gap
- * @param {Set<string>} freelyMovingTabIds
- * @param {number} draggedOffset
- * @returns {Record<string, number>}
- */
-export function computeTabOffsets(
-  rects,
-  reorderedTabIds,
-  gap,
-  freelyMovingTabIds = new Set(),
-  draggedOffset = 0
-) {
-  const offsets = {}
-  const rectById = new Map(rects.map(rect => [rect.id, rect]))
-  let cursor = rects[0]?.start ?? 0
-
-  for (const tabId of reorderedTabIds) {
-    const rect = rectById.get(tabId)
-    if (!rect) continue
-
-    const offset = freelyMovingTabIds.has(tabId)
-      ? draggedOffset
-      : cursor - rect.start
-    if (offset !== 0) {
-      offsets[tabId] = offset
-    }
-    cursor += rect.size + gap
-  }
-
-  return offsets
-}

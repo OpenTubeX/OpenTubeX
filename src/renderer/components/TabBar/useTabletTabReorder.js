@@ -1,8 +1,9 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
+import { computeReorderOffsets } from '../../helpers/reorderOffsets'
 import { lightHaptic } from '../../helpers/mobileHaptics.js'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
-import { buildShiftedTabIds, computeTabOffsets, getTabIndexShift } from './tabReorder'
+import { buildShiftedTabIds, getTabIndexShift } from './tabReorder'
 
 /** Hold for actions, then drag along the tablet strip using desktop tab geometry. */
 export function useTabletTabReorder({ tabs, viewport, openActions, closeActions, clampScroll }) {
@@ -93,7 +94,7 @@ export function useTabletTabReorder({ tabs, viewport, openActions, closeActions,
     const shift = getTabIndexShift(rects, draggedIds, sourceIndex, source.start + source.size / 2 + delta, first, last)
     session.targetIndex = sourceIndex + shift
     session.order = buildShiftedTabIds(rects.map(rect => rect.id), [session.tabId], shift)
-    offsets.value = computeTabOffsets(rects, session.order, gap, draggedIds, delta)
+    offsets.value = computeReorderOffsets(rects, session.order, gap, draggedIds, delta)
   }
 
   function autoScroll() {
@@ -144,7 +145,7 @@ export function useTabletTabReorder({ tabs, viewport, openActions, closeActions,
     }
     dragging.value = false
     settling.value = true
-    offsets.value = computeTabOffsets(session.rects, session.order, session.gap)
+    offsets.value = computeReorderOffsets(session.rects, session.order, session.gap)
     const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
       matchMedia('(prefers-reduced-motion: reduce)').matches
     dropTimer = setTimeout(() => {

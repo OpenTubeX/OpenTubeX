@@ -20,12 +20,16 @@
     :open="open"
     :title="t('Settings.Quick Settings.Customize Quick Settings')"
     :icon="['fas', 'sliders-h']"
+    grow-with-content
     @close="close"
   >
     <template #breadcrumb-action>
       <FtSyncedSettingIndicator setting-key="quickSettings" />
     </template>
-    <div class="quickSettingsActions">
+    <div
+      ref="quickSettingsActionsRef"
+      class="quickSettingsActions"
+    >
       <div
         ref="settingPickerAnchorRef"
         class="settingPickerAnchor"
@@ -79,66 +83,108 @@
       class="selectedSettings"
     >
       <li
-        v-for="(setting, index) in selectedSettings"
-        :key="setting.id"
-        class="selectedSetting"
-        :data-setting-id="setting.id"
-        :class="{
-          dragging: draggedSettingId === setting.id,
-          dropBefore: dropTarget?.id === setting.id && !dropTarget.after,
-          dropAfter: dropTarget?.id === setting.id && dropTarget.after,
-        }"
-        @dragover.prevent="handleDragOver($event, setting.id)"
-        @drop.prevent="dropQuickSetting($event, setting.id)"
+        v-for="(section, sectionIndex) in selectedSections"
+        :key="section.id"
+        class="selectedSection"
+        :data-section-id="section.id"
+        :class="{ dragging: draggedSectionId === section.id }"
+        :style="rowStyle(section.id)"
       >
-        <span
-          class="dragHandle"
-          draggable="true"
-          aria-hidden="true"
-          @dragstart="startDragging($event, setting.id)"
-          @dragend="stopDragging"
-          @pointerdown="startPointerDrag($event, setting.id)"
-          @pointermove="movePointerDrag"
-          @pointerup="endPointerDrag"
-          @pointercancel="cancelPointerDrag"
-          @lostpointercapture="cancelPointerDrag"
-        >
-          <FtIcon :icon="['fas', 'grip']" />
-        </span>
-        <FtIcon
-          class="selectedSettingIcon"
-          :icon="setting.icon"
-          aria-hidden="true"
-        />
-        <span>{{ setting.label }}</span>
-        <div class="settingActions">
-          <FtIconButton
-            class="settingAction"
-            :title="t('Home Page.Move section up', { section: setting.label })"
-            :disabled="index === 0"
-            :icon="['fas', 'arrow-up']"
-            :use-shadow="false"
-            theme="base"
-            @click="moveQuickSetting(setting.id, -1)"
+        <div class="sectionHeader">
+          <span
+            class="dragHandle"
+            aria-hidden="true"
+            @dragstart.prevent
+            @pointerdown="startPointerDrag($event, section.id)"
+            @pointermove="movePointerDrag"
+            @pointerup="endPointerDrag"
+            @pointercancel="cancelPointerDrag"
+            @lostpointercapture="cancelPointerDrag"
+          >
+            <FtIcon :icon="['fas', 'grip']" />
+          </span>
+          <FtIcon
+            class="selectedSettingIcon"
+            :icon="section.icon"
+            aria-hidden="true"
           />
-          <FtIconButton
-            class="settingAction"
-            :title="t('Home Page.Move section down', { section: setting.label })"
-            :disabled="index === selectedSettings.length - 1"
-            :icon="['fas', 'arrow-down']"
-            :use-shadow="false"
-            theme="base"
-            @click="moveQuickSetting(setting.id, 1)"
-          />
-          <FtIconButton
-            class="settingAction"
-            :title="`${t('Search Bar.Remove')} ${setting.label}`"
-            :icon="['fas', 'xmark']"
-            :use-shadow="false"
-            theme="base"
-            @click="removeQuickSetting(setting.id)"
-          />
+          <h3>{{ section.label }}</h3>
+          <div class="settingActions">
+            <FtIconButton
+              :title="t('Home Page.Move section up', { section: section.label })"
+              :disabled="sectionIndex === 0"
+              :icon="['fas', 'arrow-up']"
+              :use-shadow="false"
+              theme="base"
+              @click="moveQuickSection(section.id, -1)"
+            />
+            <FtIconButton
+              :title="t('Home Page.Move section down', { section: section.label })"
+              :disabled="sectionIndex === selectedSections.length - 1"
+              :icon="['fas', 'arrow-down']"
+              :use-shadow="false"
+              theme="base"
+              @click="moveQuickSection(section.id, 1)"
+            />
+          </div>
         </div>
+        <ul class="sectionSettings">
+          <li
+            v-for="(setting, index) in section.settings"
+            :key="setting.id"
+            class="selectedSetting"
+            :data-setting-id="setting.id"
+            :class="{ dragging: draggedSettingId === setting.id }"
+            :style="settingRowStyle(setting.id)"
+          >
+            <span
+              class="dragHandle"
+              aria-hidden="true"
+              @dragstart.prevent
+              @pointerdown="startSettingDrag($event, setting.id)"
+              @pointermove="moveSettingDrag"
+              @pointerup="endSettingDrag"
+              @pointercancel="cancelSettingDrag"
+              @lostpointercapture="cancelSettingDrag"
+            >
+              <FtIcon :icon="['fas', 'grip']" />
+            </span>
+            <FtIcon
+              class="selectedSettingIcon"
+              :icon="setting.icon"
+              aria-hidden="true"
+            />
+            <span>{{ setting.label }}</span>
+            <div class="settingActions">
+              <FtIconButton
+                class="settingAction"
+                :title="t('Home Page.Move section up', { section: setting.label })"
+                :disabled="index === 0"
+                :icon="['fas', 'arrow-up']"
+                :use-shadow="false"
+                theme="base"
+                @click="moveQuickSetting(section, setting.id, -1)"
+              />
+              <FtIconButton
+                class="settingAction"
+                :title="t('Home Page.Move section down', { section: setting.label })"
+                :disabled="index === section.settings.length - 1"
+                :icon="['fas', 'arrow-down']"
+                :use-shadow="false"
+                theme="base"
+                @click="moveQuickSetting(section, setting.id, 1)"
+              />
+              <FtIconButton
+                class="settingAction"
+                :title="`${t('Search Bar.Remove')} ${setting.label}`"
+                :icon="['fas', 'xmark']"
+                :use-shadow="false"
+                theme="base"
+                @click="removeQuickSetting(setting.id)"
+              />
+            </div>
+          </li>
+        </ul>
       </li>
     </ul>
     <p
@@ -161,7 +207,7 @@
 <script setup>
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -174,9 +220,11 @@ import FullscreenActionsCustomizer from '../FullscreenActionsCustomizer/Fullscre
 
 import store from '../../store/index'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
-import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
+import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createQuickSettingCatalog,
+  createQuickSettingSections,
   DEFAULT_QUICK_SETTINGS,
 } from '../../helpers/quickSettings'
 
@@ -188,6 +236,8 @@ const reorderStatus = ref('')
 const settingPickerId = `quick-setting-picker-${useId().replaceAll(':', '')}`
 const settingPickerAnchorRef = useTemplateRef('settingPickerAnchorRef')
 const settingPickerRef = useTemplateRef('settingPickerRef')
+const quickSettingsActionsRef = useTemplateRef('quickSettingsActionsRef')
+let quickSettingsResizeObserver = null
 
 const catalog = computed(() => createQuickSettingCatalog(t, process.env.IS_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS))
 const catalogById = computed(() => new Map(catalog.value.map(setting => [setting.id, setting])))
@@ -199,6 +249,16 @@ const isDefaultQuickSettings = computed(() => (
 const selectedSettings = computed(() => quickSettings.value
   .map(id => catalogById.value.get(id))
   .filter(setting => setting != null))
+const sectionDefinitions = computed(() => new Map(
+  createQuickSettingSections(t, process.env.IS_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS)
+    .map(section => [section.id, section])
+))
+const selectedSections = computed(() => sectionIds.value.map(id => ({
+  ...sectionDefinitions.value.get(id),
+  settings: selectedSettings.value.filter(setting => setting.section === id),
+})))
+const sectionIds = computed(() => [...new Set(selectedSettings.value.map(setting => setting.section))])
+
 const availableSettings = computed(() => catalog.value
   .filter(setting => !quickSettings.value.includes(setting.id))
   .toSorted((left, right) => left.label.localeCompare(right.label, locale.value)))
@@ -213,6 +273,7 @@ function close() {
   open.value = false
   closeSettingPicker()
   stopDragging()
+  stopSettingDrag()
 }
 
 async function toggleSettingPicker() {
@@ -240,8 +301,28 @@ function closeSettingPickerFromOutside(event) {
   closeSettingPicker()
 }
 
+function clampQuickSettingsScroll() {
+  const content = quickSettingsActionsRef.value?.parentElement
+  const scroller = content?.closest('.settingsSubpageScroll')
+  if (scroller) clampOverlayScrollTop(scroller, content)
+}
+
+watch(quickSettingsActionsRef, (actions) => {
+  quickSettingsResizeObserver?.disconnect()
+  quickSettingsResizeObserver = null
+  if (!actions) return
+
+  quickSettingsResizeObserver = new ResizeObserver(clampQuickSettingsScroll)
+  quickSettingsResizeObserver.observe(actions.parentElement)
+  quickSettingsResizeObserver.observe(actions.closest('.settingsSubpageScroll'))
+  clampQuickSettingsScroll()
+})
+
 onMounted(() => document.addEventListener('pointerdown', closeSettingPickerFromOutside))
-onBeforeUnmount(() => document.removeEventListener('pointerdown', closeSettingPickerFromOutside))
+onBeforeUnmount(() => {
+  quickSettingsResizeObserver?.disconnect()
+  document.removeEventListener('pointerdown', closeSettingPickerFromOutside)
+})
 
 async function addQuickSetting(_, { dataListIndex }) {
   const setting = availableSettings.value[dataListIndex]
@@ -261,17 +342,17 @@ function removeQuickSetting(settingId) {
   )
 }
 
-function announceQuickSettingMoved(settingId, position) {
+function announceQuickSettingMoved(settingId, position, total) {
   const setting = catalogById.value.get(settingId)
   reorderStatus.value = t('Home Page.Section moved', {
     section: setting?.label ?? settingId,
     position: position + 1,
-    total: quickSettings.value.length,
+    total,
   })
 }
 
-function moveQuickSetting(settingId, offset) {
-  const visibleSettings = selectedSettings.value.map(setting => setting.id)
+function moveQuickSetting(section, settingId, offset) {
+  const visibleSettings = section.settings.map(setting => setting.id)
   const currentIndex = visibleSettings.indexOf(settingId)
   const targetIndex = currentIndex + offset
   const reordered = moveItemByVisibleOffset(
@@ -283,26 +364,66 @@ function moveQuickSetting(settingId, offset) {
   if (reordered === quickSettings.value) return
 
   store.dispatch('updateQuickSettings', reordered)
-  announceQuickSettingMoved(settingId, targetIndex)
+  announceQuickSettingMoved(settingId, targetIndex, visibleSettings.length)
+}
+
+function updateSectionOrder(ids) {
+  // Keep unavailable platform-specific settings when moving visible categories.
+  const allSections = new Map(createQuickSettingCatalog(t, true).map(setting => [setting.id, setting.section]))
+  const allSectionIds = [...new Set(quickSettings.value.map(id => allSections.get(id)))]
+  let visibleIndex = 0
+  const reordered = allSectionIds.map(id => ids.includes(id) ? ids[visibleIndex++] : id)
+  return store.dispatch('updateQuickSettings', reordered.flatMap(sectionId => (
+    quickSettings.value.filter(id => allSections.get(id) === sectionId)
+  )))
+}
+
+function announceSectionMoved(sectionId, position) {
+  reorderStatus.value = t('Home Page.Section moved', {
+    section: sectionDefinitions.value.get(sectionId).label,
+    position: position + 1,
+    total: sectionIds.value.length,
+  })
+}
+
+async function moveQuickSection(sectionId, offset) {
+  const ids = sectionIds.value
+  const reordered = moveItemByVisibleOffset(ids, ids, sectionId, offset)
+  if (reordered === ids) return
+  if (await updateSectionOrder(reordered)) announceSectionMoved(sectionId, reordered.indexOf(sectionId))
 }
 
 const {
-  draggedItemId: draggedSettingId,
-  dropTarget,
-  dropItem: dropQuickSetting,
-  handleDragOver,
-  startDragging,
+  draggedItemId: draggedSectionId,
+  rowStyle,
   stopDragging,
   startPointerDrag,
   movePointerDrag,
   endPointerDrag,
   cancelPointerDrag,
-} = useOrderedItemDrag({
+} = useOrderedItemReorder({
+  items: sectionIds,
+  rowSelector: '.selectedSection',
+  itemIdAttribute: 'data-section-id',
+  updateItems: updateSectionOrder,
+  announceMoved: announceSectionMoved,
+})
+
+const {
+  draggedItemId: draggedSettingId,
+  rowStyle: settingRowStyle,
+  startPointerDrag: startSettingDrag,
+  movePointerDrag: moveSettingDrag,
+  endPointerDrag: endSettingDrag,
+  cancelPointerDrag: cancelSettingDrag,
+  stopDragging: stopSettingDrag,
+} = useOrderedItemReorder({
   items: quickSettings,
   rowSelector: '.selectedSetting',
   itemIdAttribute: 'data-setting-id',
   updateItems: items => store.dispatch('updateQuickSettings', items),
-  announceMoved: announceQuickSettingMoved,
+  announceMoved: (id, position) => announceQuickSettingMoved(id, position,
+    selectedSettings.value.filter(setting => setting.section === catalogById.value.get(id).section).length),
 })
 
 function resetQuickSettings() {
@@ -376,7 +497,7 @@ function resetQuickSettings() {
 
 .selectedSettings {
   display: grid;
-  gap: 8px;
+  gap: 16px;
   inline-size: 100%;
   list-style: none;
   margin-block: 0;
@@ -385,38 +506,47 @@ function resetQuickSettings() {
   padding: 0;
 }
 
-.selectedSetting {
-  align-items: center;
+.selectedSection {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
   border-radius: calc(6px * var(--ui-roundness));
-  display: grid;
-  grid-template-columns: 44px 24px minmax(0, 1fr) auto;
-  min-block-size: 56px;
   position: relative;
   user-select: none;
 }
 
-.selectedSetting.dragging {
-  opacity: 0.5;
+.sectionHeader,
+.selectedSetting {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 44px 24px minmax(0, 1fr) auto;
+  min-block-size: 56px;
 }
 
-.selectedSetting.dropBefore::before,
-.selectedSetting.dropAfter::after {
-  background: var(--primary-color);
-  block-size: 3px;
-  border-radius: calc(2px * var(--ui-roundness));
-  content: '';
-  inset-inline: 0;
-  position: absolute;
+.sectionHeader {
+  padding-inline-end: 8px;
 }
 
-.selectedSetting.dropBefore::before {
-  inset-block-start: -6px;
+.sectionHeader h3 {
+  font-size: 16px;
+  margin: 0;
+  padding-inline: 8px;
 }
 
-.selectedSetting.dropAfter::after {
-  inset-block-end: -6px;
+.sectionSettings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.selectedSetting {
+  border-block-start: 1px solid var(--divider-color);
+  padding-inline-end: 8px;
+  user-select: none;
+}
+
+.selectedSetting > span:not(.dragHandle) {
+  overflow-wrap: anywhere;
+  padding-inline: 8px;
 }
 
 .dragHandle {
