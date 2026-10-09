@@ -2041,6 +2041,7 @@ Form Inputs:
   Default Value: 默认值：{value}
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube 可能对此搜索查询设置了年龄限制。"
   Cookie Search Failed: "使用已配置的 Cookie 搜索失败。"
 
 Storage Startup Error:

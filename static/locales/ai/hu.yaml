@@ -2042,6 +2042,7 @@ Form Inputs:
   Default Value: "Alapértelmezett: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Előfordulhat, hogy a YouTube korhatárt állított be ehhez a keresési lekérdezéshez."
   Cookie Search Failed: "A keresés a beállított sütikkel sikertelen volt."
 
 Storage Startup Error:

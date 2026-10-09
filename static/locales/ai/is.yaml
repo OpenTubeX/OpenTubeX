@@ -2065,6 +2065,7 @@ Form Inputs:
   Default Value: "Sjálfgefið: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube gæti hafa sett aldurstakmörk á þessa leitarfyrirspurn."
   Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."
 
 Storage Startup Error:

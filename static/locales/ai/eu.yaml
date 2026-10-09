@@ -2061,6 +2061,7 @@ Form Inputs:
   Default Value: "Lehenetsia: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Baliteke YouTube-k bilaketa-kontsulta honi adin-murrizketa ezarri izana."
   Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."
 
 Storage Startup Error:

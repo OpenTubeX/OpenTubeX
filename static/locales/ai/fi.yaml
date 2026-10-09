@@ -2093,6 +2093,7 @@ Form Inputs:
   Default Value: "Oletus: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube on saattanut asettaa tälle hakukyselylle ikärajoituksen."
   Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."
 
 Storage Startup Error:

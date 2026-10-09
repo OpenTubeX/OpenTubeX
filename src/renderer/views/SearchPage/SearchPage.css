@@ -38,6 +38,12 @@
   text-align: center;
 }
 
+.searchHint {
+  color: var(--tertiary-text-color);
+  margin-block: 0 16px;
+  text-align: center;
+}
+
 .searchNotice p {
   color: var(--tertiary-text-color);
 }

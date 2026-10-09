@@ -2046,6 +2046,7 @@ Form Inputs:
   Default Value: "Predvolené: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube mohol pre tento vyhľadávací dopyt nastaviť vekové obmedzenie."
   Cookie Search Failed: "Vyhľadávanie s nastavenými súbormi cookie zlyhalo."
 
 Storage Startup Error:

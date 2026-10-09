@@ -2069,6 +2069,7 @@ Form Inputs:
   Default Value: "Diofyn: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Mae’n bosibl bod YouTube wedi gosod cyfyngiad oedran ar yr ymholiad chwilio hwn."
   Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."
 
 Storage Startup Error:

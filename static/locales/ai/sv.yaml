@@ -2064,6 +2064,7 @@ Form Inputs:
   Default Value: "Standard: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube kan ha åldersbegränsat den här sökfrågan."
   Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
 
 Storage Startup Error:

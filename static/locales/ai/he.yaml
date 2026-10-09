@@ -2095,6 +2095,7 @@ Form Inputs:
   Default Value: "ברירת מחדל: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "ייתכן ש-YouTube החיל הגבלת גיל על שאילתת החיפוש הזו."
   Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."
 
 Storage Startup Error:

@@ -2083,6 +2083,7 @@ Form Inputs:
   Default Value: "Mặc định: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube có thể đã áp dụng giới hạn độ tuổi cho truy vấn tìm kiếm này."
   Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."
 
 Storage Startup Error:

@@ -2104,6 +2104,7 @@ Form Inputs:
   Default Value: "Standaard: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube heeft mogelijk een leeftijdsbeperking ingesteld voor deze zoekopdracht."
   Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
 
 Storage Startup Error:

@@ -2040,6 +2040,7 @@ Form Inputs:
   Default Value: "Par défaut : {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "YouTube a peut-être appliqué une restriction d’âge à cette recherche."
   Cookie Search Failed: "La recherche avec les cookies configurés a échoué."
 
 Storage Startup Error:

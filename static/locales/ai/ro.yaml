@@ -2095,6 +2095,7 @@ Form Inputs:
   Default Value: "Implicit: {value}"
 
 Search Filters:
+  Possible Age Restriction Hint: "Este posibil ca YouTube să fi aplicat o restricție de vârstă pentru această căutare."
   Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."
 
 Storage Startup Error:
