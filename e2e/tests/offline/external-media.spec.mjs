@@ -1587,6 +1587,8 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(ratings.locator('.likeBar')).toHaveAttribute('style', /88%/)
   const metricsBox = await page.locator(`${activeTab} .externalMediaMetricsRow`).boundingBox()
   const ratingsBox = await ratings.boundingBox()
+  expect(metricsBox, 'The metadata row must have a visible bounding box').not.toBeNull()
+  expect(ratingsBox, 'The ratings must have a visible bounding box').not.toBeNull()
   expect(Math.abs(metricsBox.x + metricsBox.width - ratingsBox.x - ratingsBox.width)).toBeLessThan(2)
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
