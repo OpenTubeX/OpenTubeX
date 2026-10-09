@@ -235,6 +235,23 @@ test('recovers proxied images through the selected Invidious instance', async ()
   assert.equal(receivedRequest.disableRedirects, true, 'proxy recovery must not redirect outside the chosen instance')
 })
 
+test('scopes Invidious image authorization to the selected proxy', async () => {
+  const requests = []
+  const recoverImage = await loadNativeHttp(async options => {
+    requests.push(options)
+    return { url: options.url, status: 200, headers: { 'content-type': 'image/jpeg' }, data: '/9j/AA==' }
+  }, null, 'fetchCapacitorAvatarDataUrl')
+  const authorization = 'Basic dXNlcjpwYXNzd29yZA=='
+  assert.ok(await recoverImage('https://invidious.test/ggpht/banner', 'https://invidious.test', authorization))
+  assert.equal(requests[0].headers?.Authorization, authorization)
+  assert.equal(requests[0].disableRedirects, true)
+  assert.ok(await recoverImage('https://yt3.ggpht.com/banner', 'https://invidious.test', authorization))
+  assert.equal(requests[1].headers?.Authorization, undefined, 'never send instance credentials to YouTube')
+  assert.equal(await recoverImage('https://other.test/ggpht/banner', 'https://invidious.test', authorization), null)
+  assert.equal(await recoverImage('https://invidious.test/api/banner', 'https://invidious.test', authorization), null)
+  assert.equal(requests.length, 2)
+})
+
 test('rejects images outside the selected Invidious proxy path', async () => {
   let requestStarted = false
   globalThis.fetch = async () => { requestStarted = true }

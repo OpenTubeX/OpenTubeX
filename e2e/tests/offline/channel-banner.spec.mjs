@@ -101,3 +101,20 @@ test('uses the default banner after permanent failure and loads a replacement ba
   await expect.poll(() => image.evaluate(element => element.complete && element.naturalWidth > 0)).toBe(true)
   await expect(page.locator('.bannerContainer:visible')).not.toHaveClass(/default/)
 })
+
+test('uses the default banner when both browser requests remain stalled', async ({ page }) => {
+  await mockChannel(page)
+  await page.clock.install()
+  let requests = 0
+  await page.route('https://invidious.test/ggpht/banner*', () => { requests++ })
+  await openChannel(page)
+  await expect.poll(() => requests).toBe(1)
+  await page.clock.fastForward(10_001)
+  await page.clock.fastForward(3001)
+  await expect.poll(() => requests).toBe(2)
+  await page.clock.fastForward(10_001)
+  await expect(page.locator('.bannerContainer:visible')).toHaveClass(/default/)
+  await expect(page.locator('.bannerContainer:visible img')).toHaveCount(0)
+  await page.clock.fastForward(60_000)
+  expect(requests).toBe(2)
+})

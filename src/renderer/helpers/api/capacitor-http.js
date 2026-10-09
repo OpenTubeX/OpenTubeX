@@ -204,11 +204,13 @@ function getRecoverableImageUrl(src, invidiousInstance) {
  * blocks the response. Proxied images stay on the selected Invidious instance.
  * @param {string} src
  * @param {string} [invidiousInstance]
+ * @param {string | null} [invidiousAuthorization]
  * @returns {Promise<string | null>}
  */
-export async function fetchCapacitorAvatarDataUrl(src, invidiousInstance = '') {
+export async function fetchCapacitorAvatarDataUrl(src, invidiousInstance = '', invidiousAuthorization = null) {
   const url = getRecoverableImageUrl(src, invidiousInstance)
   if (url === null) return null
+  const isProxy = !YOUTUBE_AVATAR_HOSTS.has(url.hostname)
 
   let response
   try {
@@ -216,7 +218,8 @@ export async function fetchCapacitorAvatarDataUrl(src, invidiousInstance = '') {
       url: url.toString(),
       method: 'GET',
       responseType: 'blob',
-      disableRedirects: !YOUTUBE_AVATAR_HOSTS.has(url.hostname),
+      headers: isProxy && invidiousAuthorization ? { Authorization: invidiousAuthorization } : undefined,
+      disableRedirects: isProxy,
       connectTimeout: AVATAR_TIMEOUT_MS,
       readTimeout: AVATAR_TIMEOUT_MS
     })

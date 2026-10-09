@@ -15,32 +15,33 @@ test('Android Invidious banners recover through the selected proxy after WebView
   const bannerUrl = `${instance}/ggpht/banner`
   const data = (await readFile(new URL('../../e2e/fixtures/images/opentubex-playlist.jpg', import.meta.url))).toString('base64')
   const nativeRequests = []
+  let nativeSucceeds = true
   let browserRequests = 0
   let saved
   try {
     await page.locator('.profileTrigger').waitFor()
     await page.route(`${instance}/api/v1/channels/**`, route => route.fulfill({ json: {
-      author: 'Banner channel', authorId: channelId, authorThumbnails: [],
-      authorBanners: [{ url: 'https://yt3.ggpht.com/banner' }], description: '',
+      author: 'Banner channel', authorId: new URL(route.request().url()).pathname.split('/')[4], authorThumbnails: [],
+      authorBanners: [{ url: `https://yt3.ggpht.com/banner${nativeSucceeds ? '' : '?case=stall'}` }], description: '',
       subCount: 10, totalViews: 0, joined: 0, tabs: ['videos'],
       relatedChannels: [], videos: [], latestVideos: []
     } }))
     await page.route(`${bannerUrl}*`, route => {
       browserRequests++
-      return route.abort()
+      if (nativeSucceeds) return route.abort()
     })
     await page.exposeBinding('__bannerNativeRequest', (_source, options) => {
       nativeRequests.push(options)
-      return { status: 200, url: options.url, headers: { 'content-type': 'image/jpeg' }, data }
+      return { status: nativeSucceeds ? 200 : 503, url: options.url, headers: { 'content-type': 'image/jpeg' }, data }
     })
     saved = await page.evaluate(instance => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const saved = { settings: { ...store.state.settings }, instance: store.getters.getCurrentInvidiousInstance, route: location.hash }
       Object.assign(store.state.settings, { backendPreference: 'invidious', backendFallback: false, currentLocale: 'en-US' })
-      store.commit('setCurrentInvidiousInstance', `${instance}/`)
+      store.commit('setCurrentInvidiousInstance', instance.replace('https://', 'https://user:password@') + '/')
       window.__bannerNativePromise = window.Capacitor.nativePromise
       window.Capacitor.nativePromise = (plugin, method, options) => (
-        plugin === 'CapacitorHttp' && method === 'request' && options.url === `${instance}/ggpht/banner`
+        plugin === 'CapacitorHttp' && method === 'request' && options.url.startsWith(`${instance}/ggpht/banner`)
           ? window.__bannerNativeRequest(options)
           : window.__bannerNativePromise(plugin, method, options)
       )
@@ -51,6 +52,7 @@ test('Android Invidious banners recover through the selected proxy after WebView
     await expect.poll(() => nativeRequests.length).toBe(1)
     assert.equal(nativeRequests[0].url, bannerUrl)
     assert.equal(nativeRequests[0].disableRedirects, true)
+    assert.equal(nativeRequests[0].headers?.Authorization, 'Basic dXNlcjpwYXNzd29yZA==')
     assert.equal(nativeRequests[0].responseType, 'blob')
     const image = page.locator('.bannerContainer:visible img').first()
     await expect(image).toHaveAttribute('src', /^data:image\/jpeg;base64,/)
@@ -58,6 +60,23 @@ test('Android Invidious banners recover through the selected proxy after WebView
     await expect(image).toBeVisible()
     assert.equal(browserRequests, 1, 'native success must not retry the blocked WebView request')
     await expect(page.locator('.bannerContainer:visible')).not.toHaveClass(/default/)
+
+    nativeSucceeds = false
+    await page.clock.install()
+    await page.evaluate(() => { location.hash = '#/channel/UCbbbbbbbbbbbbbbbbbbbbbb' })
+    await expect(page.locator('.channelDetails:visible .name')).toHaveText('Banner channel')
+    await expect.poll(() => browserRequests).toBe(2)
+    await page.clock.fastForward(10_001)
+    await expect.poll(() => nativeRequests.length).toBe(2)
+    assert.equal(nativeRequests[1].headers?.Authorization, 'Basic dXNlcjpwYXNzd29yZA==')
+    await page.clock.fastForward(3001)
+    await expect.poll(() => browserRequests).toBe(3)
+    await page.clock.fastForward(10_001)
+    await expect(page.locator('.bannerContainer:visible')).toHaveClass(/default/)
+    await expect(page.locator('.bannerContainer:visible img')).toHaveCount(0)
+    await page.clock.fastForward(60_000)
+    assert.equal(browserRequests, 3)
+    assert.equal(nativeRequests.length, 2)
   } finally {
     if (saved) await page.evaluate(saved => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
