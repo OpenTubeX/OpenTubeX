@@ -1,0 +1,94 @@
+{
+  "contentId": "sampleVid01",
+  "contentType": "LOCKUP_CONTENT_TYPE_VIDEO",
+  "contentImage": {
+    "thumbnailViewModel": {
+      "image": {
+        "sources": [
+          {
+            "url": "https://i.ytimg.com/vi/sampleVid01/hqdefault.jpg",
+            "width": 336,
+            "height": 188
+          }
+        ]
+      },
+      "overlays": [
+        {
+          "thumbnailBottomOverlayViewModel": {
+            "badges": [
+              {
+                "thumbnailBadgeViewModel": {
+                  "text": "4:05",
+                  "badgeStyle": "THUMBNAIL_OVERLAY_BADGE_STYLE_DEFAULT"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "lockupMetadataViewModel": {
+      "title": {
+        "content": "Sample recommendation"
+      },
+      "image": {
+        "decoratedAvatarViewModel": {
+          "avatar": {
+            "avatarViewModel": {
+              "image": {
+                "sources": []
+              }
+            }
+          },
+          "rendererContext": {
+            "commandContext": {
+              "onTap": {
+                "innertubeCommand": {
+                  "commandMetadata": {
+                    "webCommandMetadata": {
+                      "webPageType": "WEB_PAGE_TYPE_CHANNEL"
+                    }
+                  },
+                  "browseEndpoint": {
+                    "browseId": "UC-sample-channel"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "metadata": {
+        "contentMetadataViewModel": {
+          "metadataRows": [
+            {
+              "metadataParts": [
+                {
+                  "text": {
+                    "content": "StudioPreview"
+                  }
+                }
+              ]
+            },
+            {
+              "metadataParts": [
+                {
+                  "text": {
+                    "content": "12K"
+                  }
+                },
+                {
+                  "text": {
+                    "content": "2d ago"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
