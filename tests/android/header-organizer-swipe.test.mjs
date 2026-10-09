@@ -109,6 +109,7 @@ test('Android organizer pull follows the finger, settles into its card and prese
         await touch('touchStart', start)
         await touch('touchMove', { ...start, y: start.y + 45 })
         await expect(movingPage).toHaveCount(1)
+        await expect(thumbnail).toBeAttached()
         await expect(thumbnail).toBeHidden()
         const color = await thumbnail.evaluate(async image => {
           await image.decode()
@@ -556,14 +557,17 @@ test('Android wide phone layout captures compact previews with vertical navigati
   } finally {
     clearTimeout(keepAlive)
     try {
-      const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-      if (await close.isVisible()) await close.click()
-      if (saved) await page.evaluate(async saved => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-        store.commit('setTabsState', saved.tabs)
-        store.commit('setPresentedTab', saved.tabs.presentedTabId)
-      }, saved)
+      try {
+        const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+        if (await close.isVisible()) await close.click()
+      } finally {
+        if (saved) await page.evaluate(async saved => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+          store.commit('setTabsState', saved.tabs)
+          store.commit('setPresentedTab', saved.tabs.presentedTabId)
+        }, saved)
+      }
     } finally {
       await browser.close()
     }
