@@ -8,9 +8,9 @@ export function getCapacitorTabPreviewRegion() {
   }
   top = Math.max(0, Math.min(top, window.innerHeight))
   const navigation = document.querySelector('.app.capacitorPhoneLayout > .sideNav')?.getBoundingClientRect()
-  // Bottom controls span the viewport; a wide phone layout can have a vertical sidebar.
-  // innerWidth rounds to integer CSS pixels, unlike the rendered bounds.
-  const bottom = navigation?.width >= width - 1 && navigation.top >= top
+  // Use the same breakpoint as SideNav.css: safe-area insets can narrow the
+  // bottom bar, and innerWidth can round fractional CSS viewport widths.
+  const bottom = navigation?.width > 0 && matchMedia('(width <= 680px)').matches && navigation.top >= top
     ? Math.min(window.innerHeight, navigation.top)
     : window.innerHeight
   return { width, top, bottom, height: bottom - top }

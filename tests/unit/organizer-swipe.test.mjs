@@ -90,7 +90,7 @@ for (const zoom of [1, 1.25]) {
         },
       },
       window: { innerWidth: from.width, innerHeight: 150 * zoom },
-      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
+      matchMedia: query => ({ matches: query === '(width <= 680px)' }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
     })
     vm.runInContext(regionSource + source, ctx)
     const transition = ctx.createOrganizerSwipeAnimation(
