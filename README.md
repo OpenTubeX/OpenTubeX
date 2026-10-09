@@ -210,7 +210,8 @@ Builds are automatically created from changes to our development branch via [Git
 The first build with a green check mark is the latest build.
 
 > [!IMPORTANT]
-> You will need to have a GitHub account to download these builds.
+> Downloading directly from GitHub Actions requires a GitHub account.
+> You can also download the builds without an account via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development?preview).
 
 * Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
 * Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
