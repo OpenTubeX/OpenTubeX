@@ -1,4 +1,4 @@
-import { DBActions, IpcChannels } from '../../../src/constants.js'
+import { IpcChannels } from '../../../src/constants.js'
 import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 
 const editors = [
@@ -8,35 +8,33 @@ const editors = [
   { name: 'fullscreen actions', button: 'Customize fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
 ]
 
-for (const [editor, setting, method] of [
-  [editors[0], 'quickSettings', 'pointer'],
-  [editors[0], 'quickSettings', 'button'],
-  [editors[1], 'quickSettings', 'pointer'],
-  [editors[2], 'navigationItems', 'pointer'],
-  [editors[3], 'fullscreenActions', 'pointer'],
+/** Return visible geometry with a useful failure instead of a null dereference. */
+async function visibleBox(locator) {
+  const box = await locator.boundingBox()
+  expect(box, `Expected visible geometry for ${locator}`).not.toBeNull()
+  return box
+}
+
+for (const [editor, method] of [
+  [editors[0], 'pointer'],
+  [editors[0], 'button'],
+  [editors[1], 'pointer'],
+  [editors[2], 'pointer'],
+  [editors[3], 'pointer'],
 ]) {
-  test(`does not announce a failed ${editor.name} ${method} reorder and allows retrying`, async ({ app, page }) => {
-    const appearance = await goToSettingsSection(page, 'appearance')
-    await appearance.getByRole('button', { name: editor.button, exact: true }).click()
-    const rows = page.locator(editor.row)
+  test(`does not announce a failed ${editor.name} ${method} reorder and retries after relaunch`, async ({ app, page }) => {
+    const openEditor = async () => {
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await appearance.getByRole('button', { name: editor.button, exact: true }).click()
+      return page.locator(editor.row)
+    }
+    let rows = await openEditor()
     const ids = () => rows.evaluateAll((elements, attribute) => elements.map(element => element.getAttribute(attribute)), editor.attribute)
     const initial = await ids()
-    const status = page.locator('.reorderStatus')
-    await app.electronApp.evaluate(({ ipcMain }, { channel, upsert, setting }) => {
-      const original = ipcMain._invokeHandlers.get(channel)
-      globalThis.__restoreReorderHandler = () => {
-        ipcMain.removeHandler(channel)
-        ipcMain.handle(channel, original)
-        delete globalThis.__restoreReorderHandler
-      }
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
       ipcMain.removeHandler(channel)
-      ipcMain.handle(channel, (event, request) => {
-        if (request.action === upsert && request.data?._id === setting) {
-          throw new Error('Reorder save failed')
-        }
-        return original(event, request)
-      })
-    }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT, setting })
+      ipcMain.handle(channel, () => { throw new Error('Reorder save failed') })
+    }, IpcChannels.DB_SETTINGS)
 
     const moveFirstDown = async () => {
       if (method === 'button') {
@@ -45,29 +43,30 @@ for (const [editor, setting, method] of [
       }
       const handle = rows.first().locator('.dragHandle').first()
       await handle.scrollIntoViewIfNeeded()
-      const start = await handle.boundingBox()
-      const source = await rows.first().boundingBox()
-      const target = await rows.nth(1).boundingBox()
+      const start = await visibleBox(handle)
+      const source = await visibleBox(rows.first())
+      const target = await visibleBox(rows.nth(1))
       const y = start.y + start.height / 2
       await page.mouse.move(start.x + start.width / 2, y)
       await page.mouse.down()
       await page.mouse.move(start.x + start.width / 2, y + target.y + target.height - source.y - source.height, { steps: 10 })
       await page.mouse.up()
     }
-    try {
-      const errorLogged = page.waitForEvent('console', {
-        predicate: message => message.type() === 'error' && message.text().includes('Reorder save failed')
-      })
-      await moveFirstDown()
-      await errorLogged
-      await expect.poll(ids).toEqual(initial)
-      await expect(status).toHaveText('')
-    } finally {
-      await app.electronApp.evaluate(() => globalThis.__restoreReorderHandler())
-    }
+    const errorLogged = page.waitForEvent('console', {
+      predicate: message => message.type() === 'error' && message.text().includes('Reorder save failed')
+    })
+    await moveFirstDown()
+    await errorLogged
+    await expect.poll(ids).toEqual(initial)
+    await expect(page.locator('.reorderStatus')).toHaveText('')
+
+    // Relaunch restores the production handler without inspecting Electron internals.
+    ;({ page } = await app.relaunch())
+    rows = await openEditor()
+    await expect.poll(ids).toEqual(initial)
     await moveFirstDown()
     await expect.poll(ids).toEqual([initial[1], initial[0], ...initial.slice(2)])
-    await expect(status).not.toHaveText('')
+    await expect(page.locator('.reorderStatus')).not.toHaveText('')
   })
 }
 
@@ -94,10 +93,10 @@ for (const uiScale of [100, 125]) {
         const second = rows.nth(1)
         const handle = first.locator('.dragHandle').first()
         await handle.scrollIntoViewIfNeeded()
-        const start = await handle.boundingBox()
-        const source = await first.boundingBox()
-        const target = await second.boundingBox()
-        const last = await rows.last().boundingBox()
+        const start = await visibleBox(handle)
+        const source = await visibleBox(first)
+        const target = await visibleBox(second)
+        const last = await visibleBox(rows.last())
         const x = start.x + start.width / 2
         const y = start.y + start.height / 2
         const distance = target.y + target.height / 2 - source.y - source.height / 2 + 8
@@ -105,9 +104,11 @@ for (const uiScale of [100, 125]) {
         await page.mouse.down()
         await page.mouse.move(x, y + distance, { steps: 12 })
         await expect(first).toHaveClass(/dragging/)
+        await expect(first).toHaveCSS('z-index', '2')
+        await expect(first).not.toHaveCSS('box-shadow', 'none')
         await expect.poll(() => second.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBeLessThan(-10)
         await expect.poll(ids).toEqual(initial)
-        const dragged = await first.boundingBox()
+        const dragged = await visibleBox(first)
         expect(dragged.y - source.y).toBeCloseTo(Math.min(distance, last.y + last.height - source.y - source.height), 0)
         await page.mouse.up()
         const reordered = [initial[1], initial[0], ...initial.slice(2)]
@@ -128,8 +129,8 @@ for (const uiScale of [100, 125]) {
       const ids = () => rows.evaluateAll(elements => elements.map(element => element.dataset.settingId))
       const original = await ids()
       const handle = page.locator('[data-setting-id="baseTheme"] .dragHandle')
-      const start = await handle.boundingBox()
-      const target = await page.locator('[data-section-id="playback"]').boundingBox()
+      const start = await visibleBox(handle)
+      const target = await visibleBox(page.locator('[data-section-id="playback"]'))
       await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
       await page.mouse.down()
       await page.mouse.move(start.x + start.width / 2, target.y + target.height / 2, { steps: 10 })
@@ -155,8 +156,8 @@ for (const cancellation of ['pointercancel', 'lostpointercapture', 'resize']) {
     await handle.evaluate(element => element.addEventListener('pointerdown', event => {
       element.dataset.testPointerId = event.pointerId
     }, { once: true }))
-    const source = await handle.boundingBox()
-    const target = await rows.nth(1).boundingBox()
+    const source = await visibleBox(handle)
+    const target = await visibleBox(rows.nth(1))
     await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
     await page.mouse.down()
     await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
@@ -183,8 +184,8 @@ test('settles without motion when reduced motion is enabled', async ({ page }) =
   await appearance.getByRole('button', { name: 'Customize fullscreen actions', exact: true }).click()
   const rows = page.locator('.selectedAction')
   const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.fullscreenActionId))
-  const source = await rows.first().locator('.dragHandle').boundingBox()
-  const target = await rows.nth(1).boundingBox()
+  const source = await visibleBox(rows.first().locator('.dragHandle'))
+  const target = await visibleBox(rows.nth(1))
   await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
   await page.mouse.down()
   await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
@@ -203,17 +204,17 @@ test.describe('unequal category heights', () => {
     const first = page.locator('.selectedSection').first()
     const last = page.locator('.selectedSection').last()
     const original = await page.locator('.selectedSection').evaluateAll(elements => elements.map(element => element.dataset.sectionId))
-    const source = await first.locator('.dragHandle').first().boundingBox()
-    const listBounds = await page.locator('.selectedSettings').boundingBox()
-    const firstBounds = await first.boundingBox()
-    const lastBounds = await last.boundingBox()
+    const source = await visibleBox(first.locator('.dragHandle').first())
+    const listBounds = await visibleBox(page.locator('.selectedSettings'))
+    const firstBounds = await visibleBox(first)
+    const lastBounds = await visibleBox(last)
     expect(firstBounds.height).toBeGreaterThan(lastBounds.height)
     const x = source.x + source.width / 2
     const y = source.y + source.height / 2
     await page.mouse.move(x, y)
     await page.mouse.down()
     await page.mouse.move(x, y + lastBounds.y + lastBounds.height - firstBounds.y - firstBounds.height, { steps: 15 })
-    const draggingBounds = await first.boundingBox()
+    const draggingBounds = await visibleBox(first)
     expect(draggingBounds.y + draggingBounds.height).toBeLessThanOrEqual(listBounds.y + listBounds.height + 1)
     await page.mouse.up()
     await expect.poll(() => page.locator('.selectedSection').evaluateAll(elements => elements.map(element => element.dataset.sectionId)))
@@ -233,8 +234,8 @@ test.describe('reorder edge scrolling', () => {
     const scroller = page.locator('.settingsSubpageScroll')
     await scroller.evaluate(element => { element.scrollTop = 0 })
     const scrollHeight = await scroller.evaluate(element => element.scrollHeight)
-    const bounds = await scroller.boundingBox()
-    const handle = await rows.first().locator('.dragHandle').boundingBox()
+    const bounds = await visibleBox(scroller)
+    const handle = await visibleBox(rows.first().locator('.dragHandle'))
     await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2)
     await page.mouse.down()
     await page.mouse.move(handle.x + handle.width / 2, bounds.y + bounds.height - 8, { steps: 10 })
@@ -257,8 +258,8 @@ test.describe('explicit reduced motion override', () => {
     await appearance.getByRole('button', { name: 'Customize navigation', exact: true }).click()
     const rows = page.locator('.selectedItem')
     const original = await rows.evaluateAll(elements => elements.map(element => element.dataset.navigationItemId))
-    const source = await rows.first().locator('.dragHandle').boundingBox()
-    const target = await rows.nth(1).boundingBox()
+    const source = await visibleBox(rows.first().locator('.dragHandle'))
+    const target = await visibleBox(rows.nth(1))
     await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2)
     await page.mouse.down()
     await page.mouse.move(source.x + source.width / 2, target.y + target.height / 2 + 8, { steps: 8 })
