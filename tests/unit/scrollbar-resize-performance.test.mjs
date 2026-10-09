@@ -75,7 +75,7 @@ test('nested resize reconciliation clamps an invalid offset without viewport gro
 const clampFunction = source.slice(source.indexOf('export function clampOverlayScrollTop('), source.indexOf('/**\n * Recalculates a nested horizontal scroll'))
 const measurementFunctions = source.slice(source.indexOf('function getMaximumOverlayScrollTop('), source.indexOf('/**\n * `v-overlay-scrollbars`'))
 
-function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false } = {}) {
+function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow, retainedTracks = false, offsetAfterUpdate = null } = {}) {
   const writes = []
   let currentOffset = scrollTop
   let currentOverflow = overflow
@@ -95,6 +95,10 @@ function setupClamp({ scrollTop = 211, overflow = 426, nativeOverflow = overflow
       scrollbarVertical: { scrollbar: scrollbars[1] }
     }),
     update: () => {
+      if (offsetAfterUpdate !== null) {
+        currentOffset = offsetAfterUpdate
+        offsetAfterUpdate = null
+      }
       if (element.scrollTop === 0 && (!retainedTracks || scrollbars.every(bar => bar.style.display === 'none'))) {
         currentOverflow = currentNativeOverflow = 215
       }
@@ -133,6 +137,22 @@ test('clamping discards retained scrollbar track overflow and restores track vis
   assert.equal(fixture.overflow(), 215)
   assert.equal(fixture.element.scrollTop, 215)
   assert.deepEqual(fixture.scrollbars.map(bar => bar.style.display), ['', 'block'])
+})
+
+test('clamping preserves the offset from before the library remeasures the resized viewport', () => {
+  for (const scrollTop of [211, 426]) {
+    const fixture = setupClamp({ scrollTop, offsetAfterUpdate: 0 })
+    fixture.clamp()
+    assert.equal(fixture.element.scrollTop, Math.min(scrollTop, 215))
+    assert.equal(fixture.overflow(), 215)
+  }
+})
+
+test('clamping tolerates fractional offset rounding during a library update', () => {
+  const fixture = setupClamp({ scrollTop: 215.4, overflow: 215.8, offsetAfterUpdate: 215.3 })
+  fixture.clamp()
+  assert.deepEqual(fixture.writes, [])
+  assert.equal(fixture.element.scrollTop, 215.3)
 })
 
 test('clamping leaves an accurate scroll range and valid offset untouched', () => {

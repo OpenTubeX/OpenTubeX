@@ -372,6 +372,10 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await expect(page.locator('.bulkFeedTypeSettings')).toHaveCount(0)
   await expectScrollAtRenderedEnd(scroller)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+  await setWindowSize(app, page, { width: 1600, height: 900 })
+  await expectScrollAtRenderedEnd(scroller)
+  await expect(page.locator('.channelSettings').last()).toBeInViewport()
+  await attachScreenshot('subscription list stays at the bottom after clearing the selection')
 })
 
 test('only offers members-only controls when yt-dlp playback cookies are configured', async ({ page }) => {
