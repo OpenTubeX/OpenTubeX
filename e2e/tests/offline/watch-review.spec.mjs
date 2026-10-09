@@ -134,6 +134,21 @@ test('known zero statistics remain visible without a leading separator when publ
   const info = page.locator('.watchVideoInfo')
   await expect(info.locator('.videoViews')).toHaveText('0 views')
   await expect(info.locator('.likeCount')).toHaveText('0')
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseReturnYouTubeDislikes', true))
+  await expect(info.locator('.dislikeCount')).toHaveText('0')
+  await expect(info.locator('.likeBar')).toHaveCount(0)
+  await watch.evaluate(vm => {
+    vm.videoLikeCount = 15
+    vm.videoDislikeCount = 2
+  })
+  await expect(info.locator('.likeCount')).toHaveText('15')
+  await expect(info.locator('.dislikeCount')).toHaveText('2')
+  await expect(info.locator('.likeBar')).toHaveAttribute('style', /88%/)
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseReturnYouTubeDislikes', false))
+  await expect(info.locator('.dislikeCount')).toHaveCount(0)
+  await expect(info.locator('.likeBar')).toHaveCount(0)
+  await watch.evaluate(vm => vm.$store.dispatch('updateHideVideoLikesAndDislikes', true))
+  await expect(info.locator('.likeBarContainer')).toHaveCount(0)
   for (const zoom of [1, 0.95, 1.25]) {
     await info.evaluate((element, zoom) => { element.style.zoom = zoom }, zoom)
     expect(await info.locator('.videoViews').evaluate(element => {

@@ -157,15 +157,29 @@
                 class="externalMediaBadge"
               >{{ badge }}</span>
             </div>
-            <FtInlineMetadata class="externalMediaMetrics">
-              <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
-              <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-              <time
-                v-if="publishedDate"
-                :datetime="publishedDate"
-              >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
-              <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
-            </FtInlineMetadata>
+            <div class="externalMediaMetricsRow">
+              <FtInlineMetadata class="externalMediaMetrics">
+                <time
+                  v-if="publishedDate"
+                  class="publishedDate"
+                  :datetime="publishedDate"
+                >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
+                <span
+                  v-if="publishedTimeAgo"
+                  class="publishedTimeAgo"
+                >{{ publishedTimeAgo }}</span>
+                <span
+                  v-if="formattedViewCount"
+                  class="videoViews"
+                >{{ formattedViewCount }}</span>
+                <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
+              </FtInlineMetadata>
+              <WatchVideoLikes
+                :like-count="metadata.likeCount"
+                :dislike-count="metadata.dislikeCount"
+              />
+            </div>
             <FtInlineMetadata
               v-if="engagement.length"
               class="externalMediaMetrics"
@@ -331,6 +345,7 @@ import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
@@ -338,7 +353,9 @@ import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
-import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
+import { buildChaptersVttFile, formatDurationAsTimestamp, formatViewCount, getRelativeTimeFromDate } from '../../helpers/utils'
+import { formatDate } from '../../helpers/dateFormat'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { getExternalMediaPosition, saveExternalMediaPosition } from '../../helpers/externalMediaPosition'
 import { useTabAvatar, useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
@@ -346,6 +363,7 @@ import store from '../../store/index'
 
 const route = useRoute()
 const { t, locale } = useI18n()
+const relativeTimeNow = useRelativeTimeClock()
 const setTabTitle = useTabTitle()
 const setTabAvatar = useTabAvatar()
 const { isTabPresented } = useTabContext()
@@ -525,7 +543,11 @@ const musicPlayerArtist = computed(() => metadata.value.artists?.join(', ') || c
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
-const formattedViewCount = computed(() => new Intl.NumberFormat(locale.value).format(info.value?.viewCount ?? 0))
+const formattedViewCount = computed(() => {
+  const count = info.value?.viewCount
+  if (store.getters.getHideVideoViews || count == null) return ''
+  return t('Global.Counts.View Count', { count: formatViewCount(count, store.getters.getShortenViewCounts) }, count)
+})
 const formattedConcurrentViewCount = computed(() => new Intl.NumberFormat(locale.value).format(metadata.value.concurrentViewCount ?? 0))
 function parseYtDlpDate(value) {
   if (typeof value !== 'string' || !/^\d{8}$/.test(value)) return ''
@@ -540,13 +562,23 @@ const publishedDate = computed(() => {
   if (publishedTimestamp.value !== null) return new Date(publishedTimestamp.value * 1000).toISOString()
   return parseYtDlpDate(info.value?.uploadDate)
 })
-const formattedPublishedDate = computed(() => new Intl.DateTimeFormat(locale.value, {
-  dateStyle: 'medium',
-  ...(publishedTimestamp.value === null ? { timeZone: 'UTC' } : { timeStyle: 'short' })
-}).format(new Date(publishedDate.value)))
-const publishedDateLabel = computed(() => ['was_live', 'post_live'].includes(info.value?.liveStatus)
-  ? t('Video.Streamed on')
-  : t('Video.Published on'))
+const formattedPublishedDate = computed(() => formatDate(
+  new Date(publishedDate.value),
+  locale.value,
+  store.getters.getDateFormat,
+  { dateStyle: 'medium', ...(publishedTimestamp.value === null ? { timeZone: 'UTC' } : {}) }
+).replaceAll(' ', '\u00A0'))
+const publishedTimeAgo = computed(() => {
+  const date = new Date(publishedDate.value).getTime()
+  if (!locale.value || !Number.isFinite(date) || date <= 0 || date > relativeTimeNow.value) return ''
+  return getRelativeTimeFromDate(date, false, true, relativeTimeNow.value)
+})
+const publishedDateLabel = computed(() => {
+  if (info.value?.liveStatus === 'is_live') return t('Video.Started streaming on')
+  return ['was_live', 'post_live'].includes(info.value?.liveStatus)
+    ? t('Video.Streamed on')
+    : t('Video.Published on')
+})
 const statusBadges = computed(() => {
   const badges = []
   if (info.value?.liveStatus === 'is_live') badges.push(t('Video.Live Now'))
@@ -561,8 +593,6 @@ function engagementCount(value, label) {
 }
 const engagement = computed(() => {
   const counts = [
-    ['likeCount', value => t('Global.Counts.Like Count', { count: numberFormat.value.format(value) }, value)],
-    ['dislikeCount', value => engagementCount(value, t('Video.External Media.Dislikes', {}, value))],
     ['commentCount', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
     ['repostCount', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
     ['saveCount', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
@@ -1099,6 +1129,32 @@ onBeforeUnmount(() => {
 .externalMediaMetrics {
   color: var(--tertiary-text-color);
   font-size: 14px;
+}
+
+.externalMediaMetricsRow {
+  align-items: center;
+  color: var(--tertiary-text-color);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.externalMediaMetricsRow .externalMediaMetrics {
+  flex: 1 1 240px;
+}
+
+.externalMediaMetricsRow .publishedTimeAgo,
+.externalMediaMetricsRow .videoViews {
+  white-space: nowrap;
+}
+
+@media screen and (width <= 460px) {
+  .externalMediaMetricsRow .externalMediaMetrics {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .externalMediaCreator {

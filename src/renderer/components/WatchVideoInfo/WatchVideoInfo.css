@@ -145,35 +145,6 @@
   white-space: normal;
 }
 
-.likeSection {
-  color: var(--tertiary-text-color);
-  display: flex;
-  flex-direction: column;
-  margin-inline-start: auto;
-  margin-block-start: 4px;
-  max-inline-size: 210px;
-  text-align: end;
-}
-
-.likeBar {
-  border-radius: calc(4px * var(--ui-roundness));
-  block-size: 8px;
-  margin-block-end: 4px;
-}
-
-.likeCounts {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.likeCount,
-.dislikeCount {
-  margin-inline-end: 0;
-  display: flex;
-  gap: 3px;
-}
-
 
 .publishedTimeAgo,
 .videoViews {
@@ -199,13 +170,6 @@
     flex-direction: column;
     align-items: flex-start;
     margin-block-start: 10px;
-  }
-}
-
-@media screen and (width <= 680px) {
-  .likeSection {
-    margin-inline-start: 0;
-    text-align: start;
   }
 }
 

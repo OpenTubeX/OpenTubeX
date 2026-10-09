@@ -1463,6 +1463,7 @@ test('offers cookie retry only after an unauthenticated external extraction', as
 
 test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await page.clock.setFixedTime(new Date('2026-10-09T12:00:00Z'))
 
   const executable = path.join(app.userDataDir, 'external-media-yt-dlp.sh')
   const capturedArgs = path.join(app.userDataDir, 'external-media-args.txt')
@@ -1477,7 +1478,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     channel_avatar: avatarUrl,
     description: 'A video from another site.',
     webpage_url: mediaUrl,
-    view_count: 1234,
+    view_count: 1190,
     concurrent_view_count: 42,
     like_count: 15,
     dislike_count: 2,
@@ -1491,14 +1492,14 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     album: 'Example album',
     genres: ['Documentary'],
     license: 'Creative Commons',
-    categories: ['Education'],
+    categories: ['People & Blogs'],
     tags: ['example'],
     availability: 'unlisted',
     age_limit: 18,
     media_type: 'episode',
     chapters: [{ start_time: 5, title: 'Introduction' }, { title: 'Invalid chapter' }, { start_time: 10, title: 'Main segment' }],
-    upload_date: '20260918',
-    timestamp: 1789743600,
+    upload_date: '20190716',
+    timestamp: Date.parse('2019-07-16T12:00:00Z') / 1000,
     release_date: '20260919',
     formats: [{
       format_id: 'webm-360',
@@ -1515,6 +1516,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   const nextResponse = JSON.stringify({
     ...JSON.parse(response),
     title: 'Another episode',
+    like_count: 1,
+    dislike_count: 0,
+    view_count: 0,
+    timestamp: null,
     channel: null,
     channel_url: null,
     channel_avatar: null,
@@ -1557,6 +1562,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateUseSponsorBlock', true)
+    await store.dispatch('updateCurrentLocale', 'en-US')
   }, executable)
 
   const sponsorBlockRequests = []
@@ -1576,13 +1582,50 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('example')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
-  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('15 likes')
+  const metadata = page.locator(`${activeTab} .externalMediaMetricsRow .externalMediaMetrics`)
+  await expect(metadata.locator(':scope > *')).toHaveText([
+    'Published on Jul 16, 2019',
+    '7 years ago',
+    '1,190 views',
+    '42 watching',
+    'Video Category: People & Blogs'
+  ])
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateDateFormat', 'YYYY-MM-DD')
+    await store.dispatch('updateHideVideoViews', true)
+  })
+  await expect(metadata.locator('.publishedDate')).toHaveText('Published on 2019-07-16')
+  await expect(metadata.locator('.videoViews')).toHaveCount(0)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateDateFormat', 'locale')
+    await store.dispatch('updateHideVideoViews', false)
+  })
+  await expect(page.locator(`${activeTab} .externalMediaDetails .likeCount`)).toHaveText('15')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('42 watching')
-  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('2 dislikes')
+  await expect(page.locator(`${activeTab} .externalMediaDetails .dislikeCount`)).toHaveText('2')
+  const ratings = page.locator(`${activeTab} .externalMediaMetricsRow .likeBarContainer`)
+  await expect(ratings.locator('[data-icon="thumbs-up"] svg')).toBeVisible()
+  await expect(ratings.locator('[data-icon="thumbs-down"] svg')).toBeVisible()
+  await expect(ratings.locator('.likeBar')).toHaveAttribute('style', /88%/)
+  const metricsBox = await page.locator(`${activeTab} .externalMediaMetricsRow`).boundingBox()
+  const ratingsBox = await ratings.boundingBox()
+  expect(metricsBox, 'The metadata row must have a visible bounding box').not.toBeNull()
+  expect(ratingsBox, 'The ratings must have a visible bounding box').not.toBeNull()
+  expect(Math.abs(metricsBox.x + metricsBox.width - ratingsBox.x - ratingsBox.width)).toBeLessThan(2)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUseReturnYouTubeDislikes', false)
+    await store.dispatch('updateHideVideoLikesAndDislikes', true)
+  })
+  await expect(ratings).toHaveCount(0)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideVideoLikesAndDislikes', false))
+  await expect(ratings.locator('.dislikeCount')).toHaveText('2')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('4 comments')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('3 reposts')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 saves')
-  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Education')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('People & Blogs')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Age restricted')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example series')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example album')
@@ -1676,6 +1719,13 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.keyboard.press('s')
   await page.setViewportSize({ width: 375, height: 667 })
   expect(await externalMedia.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await expect(ratings.locator('.likeCount')).toHaveText('15')
+  await expect(ratings.locator('.dislikeCount')).toHaveText('2')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 95))
+  await expect(ratings).toBeVisible()
+  expect(await externalMedia.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await page.locator(`${activeTab} .externalMediaDetails`).screenshot({ path: testInfo.outputPath('external-media-details-phone-95.png') })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
   await page.setViewportSize({ width: 1280, height: 720 })
 
   const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
@@ -1689,6 +1739,12 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.locator(sel.searchInput).fill(nextMediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaDetails h1`)).toHaveText('Another episode')
+  await expect(metadata.locator('.publishedDate')).toHaveText('Published on Jul 16, 2019')
+  await expect(metadata.locator('.publishedTimeAgo')).toHaveText('7 years ago')
+  await expect(metadata.locator('.videoViews')).toHaveText('0 views')
+  await expect(ratings.locator('.likeCount')).toHaveText('1')
+  await expect(ratings.locator('.dislikeCount')).toHaveText('0')
+  await expect(ratings.locator('.likeBar')).toHaveAttribute('style', /100%/)
   await expect(page.locator(`${activeTab} .externalMediaCreator img`)).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -1731,6 +1787,11 @@ test('expands a metadata-only description card', async ({ app, page }) => {
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await waitForPlayback(page)
+  const ratings = page.locator(`${activeTab} .externalMediaDetails .likeBarContainer`)
+  await expect(page.locator(`${activeTab} .publishedDate, ${activeTab} .publishedTimeAgo, ${activeTab} .videoViews`)).toHaveCount(0)
+  await expect(ratings.locator('.likeCount')).toHaveCount(0)
+  await expect(ratings.locator('.dislikeCount')).toHaveText('1')
+  await expect(ratings.locator('.likeBar')).toHaveCount(0)
   const description = page.locator(`${activeTab} .externalMediaDescription`)
   await expect(description.getByRole('button', { name: '...more' })).toBeVisible()
   await description.getByRole('button', { name: '...more' }).click()
@@ -1744,7 +1805,7 @@ test('expands a metadata-only description card', async ({ app, page }) => {
     await store.dispatch('updateUseAITranslationCompletions', true)
     await store.dispatch('updateCurrentLocale', 'uk')
   })
-  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('1 дизлайк')
+  await expect(ratings.locator('.dislikeCount')).toHaveAttribute('aria-label', '1 дизлайк')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 репостів')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 збережень')
 })
@@ -1777,8 +1838,10 @@ test('shows an upcoming external stream before formats are available', async ({ 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaDetails h1`)).toHaveText('Upcoming stream')
+  await expect(page.locator(`${activeTab} .externalMediaDetails .likeBarContainer`)).toHaveCount(0)
   await expect(page.locator(`${activeTab} .externalMediaBadges`)).toContainText('Upcoming')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).not.toContainText('Published on')
+  await expect(page.locator(`${activeTab} .publishedTimeAgo`)).toHaveCount(0)
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('1 Oct 2026')
   const description = page.locator(`${activeTab} .externalMediaDescription`)
