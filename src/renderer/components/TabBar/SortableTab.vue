@@ -74,7 +74,7 @@
           <span class="tabTitleText">{{ displayTitle }}</span>
         </span>
         <span
-          v-if="tab.isLoading"
+          v-if="showLoadingIndicator"
           class="tabLoadingLine"
           aria-hidden="true"
         />
@@ -174,10 +174,13 @@ const failedAvatarUrl = ref(null)
 
 const tabColor = computed(() => getTabAccentColor(props.tab.color))
 const groupColor = computed(() => getTabAccentColor(props.group?.color))
+const showLoadingIndicator = computed(() => (
+  props.tab.isLoading && props.tab.route?.path !== '/subscriptions' && props.tab.route?.path !== '/'
+))
 
 const tabClasses = computed(() => ({
   active: props.tab.isActive,
-  loading: props.tab.isLoading,
+  loading: showLoadingIndicator.value,
   unloaded: props.tab.isUnloaded,
   playing: props.tab.isPlaying,
   pinned: props.tab.isPinned,
@@ -408,6 +411,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tab.loading .tabTitleText {
+  opacity: 0.8;
 }
 
 .tab.pinned .tabTitle {

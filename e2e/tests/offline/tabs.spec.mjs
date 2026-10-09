@@ -433,6 +433,24 @@ test.describe('tab bar', () => {
     await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
   })
 
+  test('keeps subscription tab text and loading indicators unchanged while fetching', async ({ page }) => {
+    for (const route of ['/subscriptions', '/']) {
+      const subscriptionsTab = await page.evaluate(route => window.ftElectron.tabs.create({
+        route,
+        makeActive: false
+      }), route)
+      const tab = page.locator(`.tab[data-tab-id="${subscriptionsTab.id}"]`)
+      await expect(tab).not.toHaveClass(/unloaded|loading/)
+      await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), subscriptionsTab.id)
+      await expect.poll(() => page.evaluate(id => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id).isLoading
+      ), subscriptionsTab.id)).toBe(true)
+      await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
+      await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
+      await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), subscriptionsTab.id)
+    }
+  })
+
   test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/loading-line',
@@ -444,6 +462,7 @@ test.describe('tab bar', () => {
     await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), watchTab.id)
     await expect(line).toBeVisible()
     await expect(tab.locator('.tabPageIcon')).toBeVisible()
+    await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '0.8')
 
     for (const zoom of [1, 0.95, 1.25]) {
       await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
@@ -476,6 +495,7 @@ test.describe('tab bar', () => {
     await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
     await expect(line).toHaveCount(0)
     await expect(tab.locator('.playingIcon')).toBeVisible()
+    await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
   })
 
   test('keeps a cached watch avatar visible while loading', async ({ app, page }) => {
