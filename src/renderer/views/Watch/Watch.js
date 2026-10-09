@@ -3912,15 +3912,18 @@ export default defineComponent({
               this.isLoading = false
               this.updateTitle()
               const switchGeneration = this.playbackEngineSwitchGeneration
-              const url = result.streaming_data.hls_manifest_url ?? await videoInfo.getVrHlsManifest?.()
+              let url = result.streaming_data.hls_manifest_url
+              let playable = url && await probeHlsManifest(url)
               if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-              if (url) {
-                const playable = await probeHlsManifest(url)
+              if (!playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                url = await videoInfo.getVrHlsManifest?.()
                 if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-                if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
-                  vrHlsManifestUrl = url
-                  this.vrProjection = 'EQUIRECTANGULAR'
-                }
+                playable = url && await probeHlsManifest(url)
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+              }
+              if (playable && switchGeneration === this.playbackEngineSwitchGeneration && !this.isYtDlpPlaybackRequested()) {
+                vrHlsManifestUrl = url
+                this.vrProjection = 'EQUIRECTANGULAR'
               }
             }
 

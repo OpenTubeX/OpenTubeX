@@ -4,7 +4,16 @@
  */
 export async function probeHlsManifest(url) {
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(10000) })
+    const options = { signal: AbortSignal.timeout(10000) }
+    let response
+    if (process.env.IS_IOS) {
+      // Small manifest bodies can use native HTTP without streaming media bytes
+      // through the bridge. WebKit cannot always fetch Googlevideo directly.
+      const { capacitorHttpFetch } = await import('../api/capacitor-http')
+      response = await capacitorHttpFetch(url, { ...options, nativeTimeoutMs: 10000, allowHttp: true })
+    } else {
+      response = await fetch(url, options)
+    }
     return response.ok && (await response.text()).trimStart().startsWith('#EXTM3U')
   } catch {
     return false

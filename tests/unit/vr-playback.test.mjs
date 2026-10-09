@@ -118,6 +118,33 @@ test('ordinary videos keep the first playable DASH source', async () => {
 const watchCode = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const extractionStart = watchCode.indexOf('    extractYtDlpPlaybackSource: async function (')
 const extractionEnd = watchCode.indexOf('\n    /**', extractionStart)
+test('a rejected supplied panorama retries the built-in VR client', async () => {
+  const start = watchCode.indexOf("            if (this.vrProjection === 'MESH' && !this.isYtDlpPlaybackRequested()) {")
+  const end = watchCode.indexOf("if (this.vrProjection === 'MESH' && supportsYtDlp", start)
+  const probed = []
+  let lookups = 0
+  const dependencies = {
+    result: { streaming_data: { hls_manifest_url: 'https://media.test/stale.m3u8' } },
+    videoInfo: { getVrHlsManifest: async () => { lookups++; return 'https://media.test/fresh.m3u8' } },
+    probeHlsManifest: async url => { probed.push(url); return url.endsWith('/fresh.m3u8') },
+  }
+  const select = compileFunction(`return async function () {
+    let vrHlsManifestUrl = null
+    const loadGeneration = 1
+    const videoId = 'vjBrN18wiuE'
+    ${watchCode.slice(start, end)}
+    return vrHlsManifestUrl
+  }`, Object.keys(dependencies))(...Object.values(dependencies))
+  const watch = {
+    vrProjection: 'MESH', playbackEngineSwitchGeneration: 1,
+    isCurrentVideoLoad: () => true, isYtDlpPlaybackRequested: () => false, updateTitle: () => {},
+  }
+  assert.equal(await select.call(watch), 'https://media.test/fresh.m3u8')
+  assert.equal(watch.vrProjection, 'EQUIRECTANGULAR')
+  assert.equal(lookups, 1)
+  assert.deepEqual(probed, ['https://media.test/stale.m3u8', 'https://media.test/fresh.m3u8'])
+})
+
 for (const savedPanorama of [false, true]) {
   test(`switching a ${savedPanorama ? 'saved' : 'current'} built-in panorama to yt-dlp ignores cached flat streams`, async () => {
     const { load, attempts } = loader({ cached: {

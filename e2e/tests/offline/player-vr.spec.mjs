@@ -97,8 +97,8 @@ test('yt-dlp retries panoramic extraction when backend projection metadata is ab
   releaseManifest?.()
 })
 
-for (const suppliedHls of [true, false]) {
-  test(`built-in mesh playback uses ${suppliedHls ? 'the supplied' : 'a VR client'} panorama without yt-dlp`, async ({ app, page }) => {
+for (const suppliedHls of ['valid', 'missing', 'rejected']) {
+  test(`built-in mesh playback uses ${suppliedHls === 'valid' ? 'the supplied' : suppliedHls === 'rejected' ? 'a VR client after a rejected supplied' : 'a VR client'} panorama without yt-dlp`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let vrRequests = 0
     let manifestRequests = 0
@@ -108,6 +108,9 @@ for (const suppliedHls of [true, false]) {
     let releaseProbe
     const probeGate = new Promise(resolve => { releaseProbe = resolve })
     await page.route('https://vr.example.test/**', async route => {
+      if (route.request().url().includes('/stale.m3u8')) {
+        return route.fulfill({ status: 403, body: 'Expired manifest' })
+      }
       if (++manifestRequests > 1) {
         return new Promise(resolve => {
           releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
@@ -124,8 +127,10 @@ for (const suppliedHls of [true, false]) {
         vrRequests++
         await lookupGate
       }
-      if (suppliedHls || request.context?.client?.clientName === 'VISIONOS') {
+      if (suppliedHls === 'valid' || request.context?.client?.clientName === 'VISIONOS') {
         response.streamingData.hlsManifestUrl = 'https://vr.example.test/master.m3u8?expire=4102444800'
+      } else if (suppliedHls === 'rejected') {
+        response.streamingData.hlsManifestUrl = 'https://vr.example.test/stale.m3u8?expire=4102444800'
       }
       return route.fulfill({ json: response })
     })
@@ -168,7 +173,7 @@ for (const suppliedHls of [true, false]) {
     await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
     expect(await page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
     expect(await app.electronApp.evaluate(() => globalThis.__builtinVrExtractions)).toBe(0)
-    expect(vrRequests).toBe(suppliedHls ? 0 : 1)
+    expect(vrRequests).toBe(suppliedHls === 'valid' ? 0 : 1)
     releaseManifest?.()
   })
 }
