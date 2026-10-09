@@ -554,6 +554,35 @@ test('Android wide phone layout captures compact previews with vertical navigati
     assert.ok(preview, 'the compact preview must have visible bounds')
     assert.ok(Math.abs(preview.width / preview.height - 16 / 9) < 0.01,
       'wide phone previews must keep their compact landscape dimensions')
+    if (image.width / image.height > 16 / 9 + 0.01) {
+      // A short landscape capture cannot fill its card at the live page's
+      // width scale. Crossfade instead of hiding the cached image.
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+      const button = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
+      assert.ok(button)
+      const session = await browser.contexts()[0].newCDPSession(page)
+      const point = { x: button.x + button.width / 2, y: button.y + button.height / 2 }
+      const touch = (type, y) => session.send('Input.dispatchTouchEvent', {
+        type, touchPoints: y == null ? [] : [{ x: point.x, y }],
+      })
+      try {
+        await touch('touchStart', point.y)
+        await touch('touchMove', point.y + 45)
+        const moving = page.locator('.organizerSwipePage')
+        await expect(moving).toHaveCount(1)
+        await expect(thumbnail).toBeAttached()
+        await expect(thumbnail).toBeVisible()
+        await touch('touchMove', point.y + Math.min(320, await page.evaluate(() => innerHeight * 0.45)))
+        await expect.poll(() => moving.evaluate(element => getComputedStyle(element).opacity)).toBe('0')
+        await expect(thumbnail).toBeVisible()
+        await touch('touchEnd')
+        await expect(moving).toHaveCount(0)
+        await expect(thumbnail).toBeVisible()
+      } finally {
+        await touch('touchCancel').catch(() => {})
+        await session.detach()
+      }
+    }
   } finally {
     clearTimeout(keepAlive)
     try {

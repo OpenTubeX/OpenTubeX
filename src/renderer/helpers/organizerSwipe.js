@@ -19,17 +19,22 @@ export function createOrganizerSwipeAnimation(page, preview, overlay) {
   const region = getCapacitorTabPreviewRegion()
   const top = Math.max(0, Math.min(from.height, region.top - from.top))
   const bottom = Math.max(0, from.top + from.height - region.bottom)
-  const crop = Math.max(0, from.height - top - to.height / scale)
+  const crop = Math.max(bottom, from.height - top - to.height / scale)
+  const fillsPreview = (from.height - top - bottom) * scale >= to.height
   const radius = Number.parseFloat(getComputedStyle(preview).borderTopLeftRadius) || 0
   const reduced = document.documentElement.dataset.reducedMotion === 'reduce' ||
     matchMedia('(prefers-reduced-motion: reduce)').matches
   const animations = []
   if (!reduced) {
     page.classList.add('organizerSwipePage')
-    preview.classList.add('organizerSwipePreview')
+    // Short landscape pages cannot fill a compact card at this width scale.
+    // Crossfade to the cached image, which covers the whole card.
+    if (fillsPreview) {
+      preview.classList.add('organizerSwipePreview')
+    }
     animations.push(page.animate([
-      { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 ${bottom}px round 0px)` },
-      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius / scale}px ${radius / scale}px 0 0)` }
+      { transform: 'translate(0, 0) scale(1)', clipPath: `inset(${top}px 0 ${bottom}px round 0px)`, opacity: 1 },
+      { transform: `translate(${to.left - from.left}px, ${to.top - from.top - top * scale}px) scale(${scale})`, clipPath: `inset(${top}px 0 ${crop}px round ${radius / scale}px ${radius / scale}px 0 0)`, opacity: fillsPreview ? 1 : 0 }
     ], { duration: 1000, fill: 'both' }))
   }
   // Reveal the organizer early so its header never remains superimposed on

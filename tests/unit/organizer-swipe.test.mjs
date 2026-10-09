@@ -52,6 +52,7 @@ for (const reduced of [false, true]) {
     assert.ok(animations.every(animation => animation.currentTime === 400))
     if (!reduced) {
       assert.ok(previewClasses.has('organizerSwipePreview'), 'the moving page replaces its cached image')
+      assert.equal(animations[0].frames[1].opacity, 1, 'a page that fills its card remains visible')
       assert.ok(animations[0].frames[1].transform.includes('translate(16.25px, 100.25px)'))
       assert.ok(animations[0].frames[1].transform.includes(`scale(${160.5 / 375.5})`))
       assert.ok(animations[0].frames[1].clipPath.endsWith(`round ${6 / (160.5 / 375.5)}px ${6 / (160.5 / 375.5)}px 0 0)`))
@@ -68,6 +69,46 @@ for (const reduced of [false, true]) {
 }
 
 for (const zoom of [1, 1.25]) {
+  test(`short page retains its cached preview and fixed-control clipping at ${zoom}x scale`, () => {
+    const animations = []
+    const previewClasses = new Set()
+    const from = { left: 0, top: 60.25 * zoom, width: 376 * zoom, height: 89.75 * zoom }
+    const to = { left: 16 * zoom, top: 90 * zoom, width: 160 * zoom, height: 90 * zoom }
+    const animate = frames => {
+      animations.push(frames)
+      return { pause() {}, cancel() {} }
+    }
+    const ctx = vm.createContext({
+      document: {
+        documentElement: { dataset: { reducedMotion: 'off' } },
+        querySelector: selector => {
+          const bounds = {
+            '.topNav': { width: from.width, bottom: from.top },
+            '.app.capacitorPhoneLayout > .sideNav': { width: from.width, top: 125.5 * zoom },
+          }[selector]
+          return bounds ? { getBoundingClientRect: () => bounds } : null
+        },
+      },
+      window: { innerWidth: from.width, innerHeight: 150 * zoom },
+      matchMedia: () => ({ matches: false }), getComputedStyle: () => ({ borderTopLeftRadius: '6px' }),
+    })
+    vm.runInContext(regionSource + source, ctx)
+    const transition = ctx.createOrganizerSwipeAnimation(
+      { animate, classList: { add() {}, remove() {} }, getBoundingClientRect: () => from },
+      { classList: { add: name => previewClasses.add(name), remove: name => previewClasses.delete(name) },
+        getBoundingClientRect: () => to }, { animate })
+    for (const progress of [0, 0.5, 1]) {
+      transition.update(progress)
+      assert.equal(previewClasses.size, 0, 'the cached image must cover the card throughout a short-page morph')
+    }
+    const clip = animations[0][1].clipPath.match(/inset\(([-\d.]+)px 0 ([-\d.]+)px/)
+    assert.equal(animations[0][0].opacity, 1)
+    assert.equal(animations[0][1].opacity, 0, 'the live page must fade out before disposal to avoid a scale jump')
+    assert.equal(Number(clip[2]), 24.5 * zoom, 'content behind bottom controls must stay clipped at settlement')
+    transition.dispose()
+    assert.equal(previewClasses.size, 0)
+  })
+
   test(`scrolled page keeps the currently visible region throughout the morph at ${zoom}x scale`, () => {
     const animations = []
     const from = { left: 0, top: -620.5 * zoom, width: 375.5 * zoom, height: 2400.25 * zoom }
