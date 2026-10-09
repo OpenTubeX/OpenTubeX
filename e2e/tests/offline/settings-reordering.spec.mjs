@@ -8,8 +8,14 @@ const editors = [
   { name: 'fullscreen actions', button: 'Customize fullscreen actions', row: '.selectedAction', attribute: 'data-fullscreen-action-id' },
 ]
 
-for (const [editor, setting] of [[editors[0], 'quickSettings'], [editors[1], 'quickSettings'], [editors[2], 'navigationItems'], [editors[3], 'fullscreenActions']]) {
-  test(`does not announce a failed ${editor.name} reorder and allows retrying`, async ({ app, page }) => {
+for (const [editor, setting, method] of [
+  [editors[0], 'quickSettings', 'pointer'],
+  [editors[0], 'quickSettings', 'button'],
+  [editors[1], 'quickSettings', 'pointer'],
+  [editors[2], 'navigationItems', 'pointer'],
+  [editors[3], 'fullscreenActions', 'pointer'],
+]) {
+  test(`does not announce a failed ${editor.name} ${method} reorder and allows retrying`, async ({ app, page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: editor.button, exact: true }).click()
     const rows = page.locator(editor.row)
@@ -32,7 +38,11 @@ for (const [editor, setting] of [[editors[0], 'quickSettings'], [editors[1], 'qu
       })
     }, { channel: IpcChannels.DB_SETTINGS, upsert: DBActions.GENERAL.UPSERT, setting })
 
-    const dragFirstDown = async () => {
+    const moveFirstDown = async () => {
+      if (method === 'button') {
+        await rows.first().locator('.sectionHeader').getByRole('button', { name: / down$/ }).click()
+        return
+      }
       const handle = rows.first().locator('.dragHandle').first()
       await handle.scrollIntoViewIfNeeded()
       const start = await handle.boundingBox()
@@ -48,14 +58,14 @@ for (const [editor, setting] of [[editors[0], 'quickSettings'], [editors[1], 'qu
       const errorLogged = page.waitForEvent('console', {
         predicate: message => message.type() === 'error' && message.text().includes('Reorder save failed')
       })
-      await dragFirstDown()
+      await moveFirstDown()
       await errorLogged
       await expect.poll(ids).toEqual(initial)
       await expect(status).toHaveText('')
     } finally {
       await app.electronApp.evaluate(() => globalThis.__restoreReorderHandler())
     }
-    await dragFirstDown()
+    await moveFirstDown()
     await expect.poll(ids).toEqual([initial[1], initial[0], ...initial.slice(2)])
     await expect(status).not.toHaveText('')
   })

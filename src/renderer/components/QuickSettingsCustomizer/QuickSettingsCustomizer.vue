@@ -359,12 +359,11 @@ function announceSectionMoved(sectionId, position) {
   })
 }
 
-function moveQuickSection(sectionId, offset) {
+async function moveQuickSection(sectionId, offset) {
   const ids = sectionIds.value
   const reordered = moveItemByVisibleOffset(ids, ids, sectionId, offset)
   if (reordered === ids) return
-  updateSectionOrder(reordered)
-  announceSectionMoved(sectionId, reordered.indexOf(sectionId))
+  if (await updateSectionOrder(reordered)) announceSectionMoved(sectionId, reordered.indexOf(sectionId))
 }
 
 const {
