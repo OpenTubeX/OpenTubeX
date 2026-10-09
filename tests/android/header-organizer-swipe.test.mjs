@@ -515,7 +515,7 @@ test('Android pointer cancellation cannot reopen an organizer waiting for captur
 })
 
 // Run on a wide emulator viewport (for example, Android landscape at >680 CSS px).
-test('Android wide phone layout keeps previews below the header beside vertical navigation', {
+test('Android wide phone layout captures compact previews with vertical navigation', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async t => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
