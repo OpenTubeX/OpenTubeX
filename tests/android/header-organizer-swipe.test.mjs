@@ -325,16 +325,18 @@ test('Android organizer pull follows the finger, settles into its card and prese
         if (await close.isVisible()) await close.click()
       } finally {
         if (saved) {
+          const errors = []
           for (const [key, value] of Object.entries(saved.settings)) {
             await page.evaluate(({ key, value }) => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('update' + key, value), { key, value })
-              .catch(error => { throw new Error(`Could not restore ${key}`, { cause: error }) })
+              .catch(error => { errors.push(new Error(`Could not restore ${key}`, { cause: error })) })
           }
           await page.evaluate(saved => {
             const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
             store.commit('setTabsState', saved.tabs)
             store.commit('setPresentedTab', saved.tabs.presentedTabId)
             location.hash = saved.route
-          }, saved)
+          }, saved).catch(error => { errors.push(new Error('Could not restore tabs and route', { cause: error })) })
+          if (errors.length) throw new AggregateError(errors, 'Could not fully restore Android test state')
         }
       }
     } finally {
@@ -564,7 +566,9 @@ test('Android wide phone layout captures compact previews with vertical navigati
     assert.ok(preview, 'the compact preview must have visible bounds')
     assert.ok(Math.abs(preview.width / preview.height - 16 / 9) < 0.01,
       'wide phone previews must keep their compact landscape dimensions')
-    if (image.width / image.height > 16 / 9 + 0.01) {
+    await t.test('short landscape page crossfades into its compact preview', {
+      skip: image.width / image.height <= 16 / 9 + 0.01,
+    }, async () => {
       // A short landscape capture cannot fill its card at the live page's
       // width scale. Crossfade instead of hiding the cached image.
       await dialog.getByRole('button', { name: 'Close', exact: true }).click()
@@ -592,7 +596,7 @@ test('Android wide phone layout captures compact previews with vertical navigati
         await touch('touchCancel').catch(() => {})
         await session.detach()
       }
-    }
+    })
   } finally {
     clearTimeout(keepAlive)
     try {
