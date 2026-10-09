@@ -157,15 +157,21 @@
                 class="externalMediaBadge"
               >{{ badge }}</span>
             </div>
-            <FtInlineMetadata class="externalMediaMetrics">
-              <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
-              <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-              <time
-                v-if="publishedDate"
-                :datetime="publishedDate"
-              >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
-              <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
-            </FtInlineMetadata>
+            <div class="externalMediaMetricsRow">
+              <FtInlineMetadata class="externalMediaMetrics">
+                <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
+                <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+                <time
+                  v-if="publishedDate"
+                  :datetime="publishedDate"
+                >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
+                <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
+              </FtInlineMetadata>
+              <WatchVideoLikes
+                :like-count="metadata.likeCount"
+                :dislike-count="metadata.dislikeCount"
+              />
+            </div>
             <FtInlineMetadata
               v-if="engagement.length"
               class="externalMediaMetrics"
@@ -331,6 +337,7 @@ import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoLikes from '../../components/WatchVideoLikes/WatchVideoLikes.vue'
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
@@ -561,8 +568,6 @@ function engagementCount(value, label) {
 }
 const engagement = computed(() => {
   const counts = [
-    ['likeCount', value => t('Global.Counts.Like Count', { count: numberFormat.value.format(value) }, value)],
-    ['dislikeCount', value => engagementCount(value, t('Video.External Media.Dislikes', {}, value))],
     ['commentCount', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
     ['repostCount', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
     ['saveCount', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
@@ -1099,6 +1104,27 @@ onBeforeUnmount(() => {
 .externalMediaMetrics {
   color: var(--tertiary-text-color);
   font-size: 14px;
+}
+
+.externalMediaMetricsRow {
+  align-items: center;
+  color: var(--tertiary-text-color);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 14px;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.externalMediaMetricsRow .externalMediaMetrics {
+  flex: 1 1 240px;
+}
+
+@media screen and (width <= 460px) {
+  .externalMediaMetricsRow .externalMediaMetrics {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .externalMediaCreator {

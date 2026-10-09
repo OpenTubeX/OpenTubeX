@@ -72,32 +72,10 @@
           <strong>{{ t('Description.Video Category') }}</strong> {{ category }}
         </bdi>
       </FtInlineMetadata>
-      <div
-        v-if="!hideVideoLikesAndDislikes && (parsedLikeCount !== null || (useReturnYoutubeDislikes && parsedDislikeCount !== null))"
-        class="likeBarContainer"
-      >
-        <div
-          class="likeSection"
-        >
-          <div
-            v-if="useReturnYoutubeDislikes && likePercentageRatio !== null"
-            class="likeBar"
-            :style="{ background: `linear-gradient(to right, var(--accent-color) ${likePercentageRatio}%, #9E9E9E ${likePercentageRatio}%)` }"
-          />
-          <div class="likeCounts">
-            <span
-              v-if="parsedLikeCount !== null"
-              class="likeCount"
-            ><FtIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
-            <span
-              v-if="useReturnYoutubeDislikes && parsedDislikeCount !== null"
-              class="dislikeCount"
-            >
-              <FtIcon :icon="['fas', 'thumbs-down']" /> {{ parsedDislikeCount }}
-            </span>
-          </div>
-        </div>
-      </div>
+      <WatchVideoLikes
+        :like-count="likeCount"
+        :dislike-count="useReturnYoutubeDislikes ? dislikeCount : null"
+      />
     </div>
     <div class="videoButtons">
       <div
@@ -356,13 +334,14 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMetadataHistory.vue'
+import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
 
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
-import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
+import { escapeHTML, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
@@ -655,17 +634,6 @@ const hideUnsubscribeButton = computed(() => store.getters.getHideUnsubscribeBut
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideUploader = computed(() => store.getters.getHideUploader)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideVideoLikesAndDislikes = computed(() => store.getters.getHideVideoLikesAndDislikes)
-
-const parsedLikeCount = computed(() => {
-  if (hideVideoLikesAndDislikes.value || props.likeCount === null) {
-    return null
-  }
-
-  return formatNumber(props.likeCount)
-})
-
 const hasMultipleCollaborators = computed(() => props.channelCollaborators.length > 1)
 
 const collaboratorSummaryName = computed(() => {
@@ -687,27 +655,6 @@ const collaboratorSummaryName = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useReturnYoutubeDislikes = computed(() => store.getters.getUseReturnYouTubeDislikes)
-
-const parsedDislikeCount = computed(() => {
-  if (hideVideoLikesAndDislikes.value || props.dislikeCount === null) {
-    return null
-  }
-
-  return formatNumber(props.dislikeCount)
-})
-
-const likePercentageRatio = computed(() => {
-  if (hideVideoLikesAndDislikes.value || props.likeCount === null || props.dislikeCount === null) {
-    return null
-  }
-
-  const total = props.likeCount + props.dislikeCount
-  if (total === 0) {
-    return null
-  }
-
-  return Math.round((props.likeCount / total) * 100)
-})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
