@@ -39,18 +39,12 @@
             class="groupBadge"
             aria-hidden="true"
           />
-          <FtIcon
-            v-if="tab.isPlaying"
-            :icon="['fas', 'play']"
-            class="playingIcon"
-            aria-hidden="true"
-          />
           <span
-            v-if="showIcon && usableTabAvatarUrl"
-            v-show="!tab.isPlaying"
-            class="tabAvatarContainer"
+            v-if="showIcon && (usableTabAvatarUrl || tabPageIcon)"
+            class="tabIconContainer"
           >
             <FtRetryImage
+              v-if="usableTabAvatarUrl"
               :fallback-icon="tabPageIcon || ['fas', 'display']"
               :src="tabAvatarUrl"
               class="tabAvatar"
@@ -58,11 +52,23 @@
               draggable="false"
               @error="handleAvatarError"
             />
+            <FtIcon
+              v-else
+              :icon="tabPageIcon"
+              class="tabPageIcon"
+              aria-hidden="true"
+            />
+            <FtIcon
+              v-if="tab.isPlaying"
+              :icon="['fas', 'play']"
+              class="playingIcon playingBadge"
+              aria-hidden="true"
+            />
           </span>
           <FtIcon
-            v-if="!tab.isPlaying && showIcon && !usableTabAvatarUrl && tabPageIcon"
-            :icon="tabPageIcon"
-            class="tabPageIcon"
+            v-else-if="tab.isPlaying"
+            :icon="['fas', 'play']"
+            class="playingIcon"
             aria-hidden="true"
           />
           <span class="tabTitleText">{{ displayTitle }}</span>
@@ -241,7 +247,9 @@ watch(tabAvatarUrl, (avatarUrl) => {
   gap: 6px;
   padding-inline: 10px;
   padding-block: 6px;
-  background-color: var(--tab-surface-color, var(--bg-color));
+  --tab-background-color: var(--tab-surface-color, var(--bg-color));
+
+  background-color: var(--tab-background-color);
   border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
   cursor: pointer;
   block-size: 30px;
@@ -295,22 +303,24 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab:hover {
-  background-color: var(--tab-hover-color, var(--card-bg-color));
+  --tab-background-color: var(--tab-hover-color, var(--card-bg-color));
 }
 
 .tab.active {
-  background-color: var(--tab-active-color, var(--card-bg-color));
+  --tab-background-color: var(--tab-active-color, var(--card-bg-color));
+
   border-color: var(--tab-border-color, var(--border-color));
 }
 
 .tab.selected {
-  background-color: color-mix(in srgb, var(--accent-color) 22%, var(--card-bg-color));
+  --tab-background-color: color-mix(in srgb, var(--accent-color) 22%, var(--card-bg-color));
+
   outline: 2px solid var(--accent-color, var(--primary-text-color));
   outline-offset: -2px;
 }
 
 .tab.selected:hover {
-  background-color: color-mix(in srgb, var(--accent-color) 28%, var(--card-bg-color));
+  --tab-background-color: color-mix(in srgb, var(--accent-color) 28%, var(--card-bg-color));
 }
 
 .tab.colored {
@@ -357,9 +367,8 @@ watch(tabAvatarUrl, (avatarUrl) => {
   align-items: center;
   gap: 6px;
   flex: 1;
+  min-inline-size: 0;
   block-size: 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
   line-height: 16px;
@@ -372,8 +381,10 @@ watch(tabAvatarUrl, (avatarUrl) => {
   font-size: 10px;
 }
 
-.tabAvatarContainer {
+.tabIconContainer {
+  position: relative;
   display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
@@ -418,6 +429,25 @@ watch(tabAvatarUrl, (avatarUrl) => {
   font-size: 8px;
   color: var(--accent-color, var(--primary-text-color));
   flex-shrink: 0;
+}
+
+.playingBadge {
+  position: absolute;
+  inset-inline-end: -3px;
+  inset-block-end: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+  background-color: var(--tab-background-color);
+  font-size: 7px;
+}
+
+.tab.pinned .playingBadge {
+  inset-inline-end: auto;
+  inset-inline-start: -3px;
 }
 
 .closeButton {
