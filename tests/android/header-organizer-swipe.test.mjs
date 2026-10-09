@@ -64,6 +64,10 @@ test('Android organizer pull follows the finger, settles into its card and prese
       await page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(page.locator('#capacitor-phone-tab-dialog')).toHaveCount(0)
     }
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabsState', { ...store.state.tabs, tabs: [store.getters.getPresentedTab] })
+    })
     await goTo(page, 'userplaylists')
     const first = await presented()
     await tap('.capacitorPhoneTabSwitcherButton')
@@ -105,6 +109,8 @@ test('Android organizer pull follows the finger, settles into its card and prese
         await touch('touchStart', start)
         await touch('touchMove', { ...start, y: start.y + 45 })
         await expect(movingPage).toHaveCount(1)
+        await expect(thumbnail).toBeAttached()
+        await expect(thumbnail).toBeHidden()
         const color = await thumbnail.evaluate(async image => {
           await image.decode()
           const canvas = document.createElement('canvas')
@@ -114,6 +120,12 @@ test('Android organizer pull follows the finger, settles into its card and prese
           return [...context.getImageData(0, 0, 1, 1).data]
         })
         assert.ok(color[2] > 200 && color[0] < 40, `preview must refresh to the visible blue region: ${color}`)
+        const aspect = await thumbnail.evaluate(image => {
+          const preview = image.closest('.capacitorTabPreview').getBoundingClientRect()
+          return { image: image.naturalWidth / image.naturalHeight, card: preview.width / preview.height }
+        })
+        assert.ok(Math.abs(aspect.card - 16 / 9) < 0.01, 'phone previews must retain their compact landscape dimensions')
+        assert.ok(Math.abs(aspect.image - aspect.card) < 0.01, 'the preview must preserve the captured viewport without cropping')
         const clipTop = await movingPage.evaluate(element => Number.parseFloat(getComputedStyle(element).clipPath.slice(6)))
         assert.ok(Math.abs(clipTop - (initial.header - initial.top)) < 1, 'hidden page content must stay clipped throughout the drag')
         await touch('touchMove', { ...start, y: start.y + 320 })
@@ -121,12 +133,21 @@ test('Android organizer pull follows the finger, settles into its card and prese
           const bounds = element.getBoundingClientRect()
           const style = getComputedStyle(element)
           const top = Number.parseFloat(style.clipPath.slice(6))
+          const bottom = Number.parseFloat(style.clipPath.split(' ')[2])
           const scale = new DOMMatrixReadOnly(style.transform).a
-          return { left: bounds.left, top: bounds.top + top * scale, width: bounds.width }
+          return { left: bounds.left, top: bounds.top + top * scale, width: bounds.width,
+            height: bounds.height - (top + bottom) * scale }
         })
         const preview = await thumbnail.boundingBox()
         assert.ok(Math.abs(geometry.left - preview.x) < 1 && Math.abs(geometry.top - preview.y) < 1 &&
-          Math.abs(geometry.width - preview.width) < 1, 'the visible scrolled region must land in its card')
+          Math.abs(geometry.width - preview.width) < 1 && Math.abs(geometry.height - preview.height) < 1,
+          'the visible crop must land in its card')
+        const corners = await movingPage.evaluate(element => {
+          const style = getComputedStyle(element)
+          return { radius: Number.parseFloat(style.clipPath.split('round ')[1]), scale: new DOMMatrixReadOnly(style.transform).a }
+        })
+        const targetRadius = await thumbnail.evaluate(image => Number.parseFloat(getComputedStyle(image.closest('.capacitorPhoneTabTarget')).borderTopLeftRadius))
+        assert.ok(Math.abs(corners.radius * corners.scale - targetRadius) < 1, 'the live page must meet the rounded preview corners')
         await touch('touchEnd')
         await expect(movingPage).toHaveCount(0)
         await dialog.getByRole('button', { name: 'Close', exact: true }).click()
@@ -152,14 +173,19 @@ test('Android organizer pull follows the finger, settles into its card and prese
       await expect(movingPage).toHaveCount(1)
       const card = await pointFor(`.capacitorPhoneTabTarget[data-tab-id="${target}"] .capacitorPhoneTabTitle`)
       await touch('touchEnd')
+      await expect(page.locator('.capacitorPhoneTabOverlay')).not.toHaveClass(/organizerGesture/)
       await touch('touchStart', card)
       await page.waitForTimeout(60)
       await touch('touchEnd')
       await expect.poll(presented, { message: `first tap after releasing a pull must select the card at ${speed}% speed` }).toBe(target)
       await expect(dialog).toHaveCount(0)
-      await tap('.capacitorPhoneTabSwitcherButton')
+      await expect(page.locator('dialog.mobileSheet[open]')).toHaveCount(0)
+      await page.locator('.capacitorPhoneTabSwitcherButton').click()
+      await expect(dialog).toBeVisible()
       await page.locator(`.capacitorPhoneTabTarget[data-tab-id="${second}"]`).click()
       await expect(dialog).toHaveCount(0)
+      await expect.poll(presented).toBe(second)
+      await expect(page.locator('.organizerSwipePage, .capacitorPhoneTabOverlay')).toHaveCount(0)
     }
     for (const [scale, motion] of [[100, 'off'], [125, 'off'], [125, 'on']]) {
       await page.evaluate(async ({ scale, motion }) => {
@@ -220,7 +246,8 @@ test('Android organizer pull follows the finger, settles into its card and prese
     }
     // Opening the active card below a long list must scroll the organizer
     // before measuring the destination, without moving the underlying page.
-    for (let index = 0; index < 5; index++) {
+    // Keep the active card below the viewport even in the compact two-column grid.
+    for (let index = 0; index < 10; index++) {
       await tap('.capacitorPhoneTabSwitcherButton')
       await dialog.getByRole('button', { name: 'New Tab', exact: true }).click()
       await expect(dialog).toHaveCount(0)
@@ -291,19 +318,32 @@ test('Android organizer pull follows the finger, settles into its card and prese
     await touch('touchEnd')
     await expect(dialog).toHaveCount(0)
   } finally {
-    await touch('touchCancel').catch(() => {})
-    const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
-    if (await close.isVisible()) await close.click()
-    if (saved) await page.evaluate(async saved => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
-      store.commit('setTabsState', saved.tabs)
-      store.commit('setPresentedTab', saved.tabs.presentedTabId)
-      location.hash = saved.route
-    }, saved)
-    await session.detach()
-    await browser.close()
-    clearTimeout(keepAlive)
+    try {
+      try {
+        await touch('touchCancel').catch(() => {})
+        const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+        if (await close.isVisible()) await close.click()
+      } finally {
+        if (saved) {
+          const errors = []
+          for (const [key, value] of Object.entries(saved.settings)) {
+            await page.evaluate(({ key, value }) => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('update' + key, value), { key, value })
+              .catch(error => { errors.push(new Error(`Could not restore ${key}`, { cause: error })) })
+          }
+          await page.evaluate(saved => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setTabsState', saved.tabs)
+            store.commit('setPresentedTab', saved.tabs.presentedTabId)
+            location.hash = saved.route
+          }, saved).catch(error => { errors.push(new Error('Could not restore tabs and route', { cause: error })) })
+          if (errors.length) throw new AggregateError(errors, 'Could not fully restore Android test state')
+        }
+      }
+    } finally {
+      clearTimeout(keepAlive)
+      await session.detach().catch(() => {})
+      await browser.close()
+    }
   }
 })
 
@@ -484,5 +524,95 @@ test('Android pointer cancellation cannot reopen an organizer waiting for captur
     await session.detach()
     await browser.close()
     clearTimeout(keepAlive)
+  }
+})
+
+// Run on a wide emulator viewport (for example, Android landscape at >680 CSS px).
+test('Android wide phone layout captures compact previews with vertical navigation', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, async t => {
+  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+  const page = browser.contexts()[0].pages()[0]
+  const keepAlive = setTimeout(() => {}, 60_000)
+  let saved
+  try {
+    if (await page.evaluate(() => innerWidth) <= 680) {
+      t.skip('Requires a viewport wider than 680 CSS pixels')
+      return
+    }
+    saved = await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const values = { CapacitorLayoutMode: 'phone', CurrentLocale: 'en-US', EnableMobileTabs: true,
+        ShowTabPreviews: true, UiScale: 100 }
+      const settings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]))
+      const tabs = JSON.parse(JSON.stringify(store.state.tabs))
+      for (const [key, value] of Object.entries(values)) await store.dispatch('update' + key, value)
+      store.commit('setTabsState', { ...store.state.tabs, tabs: [store.getters.getPresentedTab] })
+      return { settings, tabs }
+    })
+    const navigation = await page.locator('.app.capacitorPhoneLayout > .sideNav').boundingBox()
+    assert.ok(navigation?.width > 0 && navigation.width < await page.evaluate(() => innerWidth) / 2,
+      'the fixture must use vertical side navigation')
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    const dialog = page.locator('#capacitor-phone-tab-dialog')
+    const thumbnail = dialog.locator('.capacitorTabPageThumbnail')
+    await expect(thumbnail).toBeVisible()
+    const image = await thumbnail.evaluate(async image => {
+      await image.decode()
+      return { width: image.naturalWidth, height: image.naturalHeight }
+    })
+    assert.ok(image.width > 0 && image.height > 0)
+    const preview = await dialog.locator('.capacitorTabPreview').boundingBox()
+    assert.ok(preview, 'the compact preview must have visible bounds')
+    assert.ok(Math.abs(preview.width / preview.height - 16 / 9) < 0.01,
+      'wide phone previews must keep their compact landscape dimensions')
+    await t.test('short landscape page crossfades into its compact preview', {
+      skip: image.width / image.height <= 16 / 9 + 0.01,
+    }, async () => {
+      // A short landscape capture cannot fill its card at the live page's
+      // width scale. Crossfade instead of hiding the cached image.
+      await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+      const button = await page.locator('.capacitorPhoneTabSwitcherButton').boundingBox()
+      assert.ok(button)
+      const session = await browser.contexts()[0].newCDPSession(page)
+      const point = { x: button.x + button.width / 2, y: button.y + button.height / 2 }
+      const touch = (type, y) => session.send('Input.dispatchTouchEvent', {
+        type, touchPoints: y == null ? [] : [{ x: point.x, y }],
+      })
+      try {
+        await touch('touchStart', point.y)
+        await touch('touchMove', point.y + 45)
+        const moving = page.locator('.organizerSwipePage')
+        await expect(moving).toHaveCount(1)
+        await expect(thumbnail).toBeAttached()
+        await expect(thumbnail).toBeVisible()
+        await touch('touchMove', point.y + Math.min(320, await page.evaluate(() => innerHeight * 0.45)))
+        await expect.poll(() => moving.evaluate(element => getComputedStyle(element).opacity)).toBe('0')
+        await expect(thumbnail).toBeVisible()
+        await touch('touchEnd')
+        await expect(moving).toHaveCount(0)
+        await expect(thumbnail).toBeVisible()
+      } finally {
+        await touch('touchCancel').catch(() => {})
+        await session.detach()
+      }
+    })
+  } finally {
+    clearTimeout(keepAlive)
+    try {
+      try {
+        const close = page.locator('#capacitor-phone-tab-dialog').getByRole('button', { name: 'Close', exact: true })
+        if (await close.isVisible()) await close.click()
+      } finally {
+        if (saved) await page.evaluate(async saved => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          for (const [key, value] of Object.entries(saved.settings)) await store.dispatch('update' + key, value)
+          store.commit('setTabsState', saved.tabs)
+          store.commit('setPresentedTab', saved.tabs.presentedTabId)
+        }, saved)
+      }
+    } finally {
+      await browser.close()
+    }
   }
 })

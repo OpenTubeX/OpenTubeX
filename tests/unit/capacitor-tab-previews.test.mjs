@@ -52,6 +52,7 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
   const globals = {
     document,
     window: Object.assign(new EventTarget(), { innerWidth: 375, innerHeight: 700 }),
+    matchMedia: query => ({ matches: query === '(width <= 680px)' && window.innerWidth <= 680 }),
     Image: class {
       width = 750
       height = 1400
@@ -153,6 +154,89 @@ test('native thumbnails are bounded and require no renderer encoding or temporar
   assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 0, cropHeight: (375 * 9 / 16) / 700 }])
   assert.equal(state.drawImage.mock.callCount(), 0)
   assert.equal(state.remove.mock.callCount(), 0)
+})
+
+test('compact capture starts below fixed phone controls', async t => {
+  const state = setup(t)
+  state.document.querySelector = selector => {
+    const bounds = {
+      '.topNav': { width: 375, bottom: 60.25 },
+      '.app.capacitorPhoneLayout > .sideNav': { width: 375, top: 640.5 },
+    }[selector]
+    return bounds ? { getBoundingClientRect: () => bounds } : null
+  }
+  await captureBeforeTabOrganizer()
+  assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 60.25 / 700, cropHeight: (375 * 9 / 16) / 700 }])
+})
+
+for (const height of [700, 220]) {
+  test(`wide phone capture ignores vertical navigation at ${height}px viewport height`, async t => {
+    const state = setup(t)
+    window.innerWidth = 900
+    window.innerHeight = height
+    state.document.querySelector = selector => {
+      const bounds = {
+        '.topNav': { width: 900, bottom: 60.25 },
+        '.app.capacitorPhoneLayout > .sideNav': { width: 200, top: 60.25 },
+      }[selector]
+      return bounds ? { getBoundingClientRect: () => bounds } : null
+    }
+    await captureBeforeTabOrganizer()
+    const cropHeight = Math.min(height - 60.25, 900 * 9 / 16)
+    assert.equal(getCapacitorTabPreview(state.tab), state.preview)
+    assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 640,
+      height: Math.round(640 * cropHeight / 900), top: 60.25 / height, cropHeight: cropHeight / height }])
+  })
+}
+
+test('fractional full-width bottom controls remain outside a short capture', async t => {
+  const state = setup(t)
+  window.innerWidth = 376
+  window.innerHeight = 150
+  state.document.querySelector = selector => {
+    const bounds = {
+      '.topNav': { width: 375.5, bottom: 60.25 },
+      '.app.capacitorPhoneLayout > .sideNav': { width: 375.5, top: 125.5 },
+    }[selector]
+    return bounds ? { getBoundingClientRect: () => bounds } : null
+  }
+  await captureBeforeTabOrganizer()
+  assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 376, height: 65,
+    top: 60.25 / 150, cropHeight: 65.25 / 150 }])
+})
+
+for (const zoom of [1, 1.25]) {
+  test(`safe-area inset bottom navigation stays outside the capture at ${zoom}x scale`, async t => {
+    const state = setup(t)
+    window.innerWidth = 600 / zoom
+    window.innerHeight = 220 / zoom
+    state.document.querySelector = selector => {
+      const bounds = {
+        '.topNav': { width: 540 / zoom, bottom: 60.25 / zoom },
+        '.app.capacitorPhoneLayout > .sideNav': { width: 540 / zoom, top: 160 / zoom },
+      }[selector]
+      return bounds ? { getBoundingClientRect: () => bounds } : null
+    }
+    await captureBeforeTabOrganizer()
+    assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 600 / zoom,
+      height: Math.round(99.75 / zoom), top: (60.25 / zoom) / (220 / zoom), cropHeight: (99.75 / zoom) / (220 / zoom) }])
+  })
+}
+
+test('navigation follows the CSS breakpoint when innerWidth rounds down', async t => {
+  const state = setup(t)
+  window.innerWidth = 680
+  t.mock.method(globalThis, 'matchMedia', () => ({ matches: false }))
+  state.document.querySelector = selector => {
+    const bounds = {
+      '.topNav': { width: 680.45, bottom: 60.25 },
+      '.app.capacitorPhoneLayout > .sideNav': { width: 80, top: 60.25 },
+    }[selector]
+    return bounds ? { getBoundingClientRect: () => bounds } : null
+  }
+  await captureBeforeTabOrganizer()
+  assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 640, height: 360,
+    top: 60.25 / 700, cropHeight: (680 * 9 / 16) / 700 }])
 })
 
 test('failed native capture leaves the cache empty', async t => {
