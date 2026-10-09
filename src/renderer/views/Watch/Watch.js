@@ -3937,7 +3937,6 @@ export default defineComponent({
             this.manifestSrc = vrHlsManifestUrl
             this.manifestMimeType = MANIFEST_TYPE_HLS
             this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(vrHlsManifestUrl)
-            this.legacyFormats = []
             this.activeFormat = 'dash'
           } else if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
             if (
@@ -4285,7 +4284,6 @@ export default defineComponent({
               if (vrHlsManifestUrl) {
                 this.manifestSrc = vrHlsManifestUrl
                 this.manifestMimeType = MANIFEST_TYPE_HLS
-                this.legacyFormats = []
                 this.activeFormat = 'dash'
               } else {
                 const manifestSrc = await this.createInvidiousDashManifest(result)

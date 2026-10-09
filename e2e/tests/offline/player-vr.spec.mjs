@@ -97,27 +97,35 @@ test('yt-dlp retries panoramic extraction when backend projection metadata is ab
   releaseManifest?.()
 })
 
-for (const suppliedHls of ['valid', 'missing', 'rejected']) {
-  test(`built-in mesh playback uses ${suppliedHls === 'valid' ? 'the supplied' : suppliedHls === 'rejected' ? 'a VR client after a rejected supplied' : 'a VR client'} panorama without yt-dlp`, async ({ app, page }) => {
+for (const suppliedHls of ['valid', 'missing', 'rejected', 'failed-child']) {
+  test(suppliedHls === 'failed-child' ? 'built-in local panorama falls back to progressive playback after a child playlist fails' : `built-in mesh playback uses ${suppliedHls === 'valid' ? 'the supplied' : suppliedHls === 'rejected' ? 'a VR client after a rejected supplied' : 'a VR client'} panorama without yt-dlp`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let vrRequests = 0
     let manifestRequests = 0
+    let childRequests = 0
+    const manifestBody = suppliedHls === 'failed-child'
+      ? '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x360,CODECS="avc1.42E01E,mp4a.40.2"\nhttps://vr.example.test/child.m3u8\n'
+      : '#EXTM3U\n'
     let releaseManifest
     let releaseLookup
     const lookupGate = new Promise(resolve => { releaseLookup = resolve })
     let releaseProbe
     const probeGate = new Promise(resolve => { releaseProbe = resolve })
     await page.route('https://vr.example.test/**', async route => {
+      if (route.request().url().includes('/child.m3u8')) {
+        childRequests++
+        return route.fulfill({ status: 404, body: 'Missing child playlist' })
+      }
       if (route.request().url().includes('/stale.m3u8')) {
         return route.fulfill({ status: 403, body: 'Expired manifest' })
       }
-      if (++manifestRequests > 1) {
+      if (++manifestRequests > 1 && suppliedHls !== 'failed-child') {
         return new Promise(resolve => {
           releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
         })
       }
       await probeGate
-      return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+      return route.fulfill({ contentType: 'application/x-mpegURL', body: manifestBody })
     })
     await page.route(/\/youtubei\/v1\/player(?:\?|$)/, async route => {
       const request = JSON.parse(route.request().postData() ?? '{}')
@@ -127,7 +135,7 @@ for (const suppliedHls of ['valid', 'missing', 'rejected']) {
         vrRequests++
         await lookupGate
       }
-      if (suppliedHls === 'valid' || request.context?.client?.clientName === 'VISIONOS') {
+      if (suppliedHls === 'valid' || suppliedHls === 'failed-child' || request.context?.client?.clientName === 'VISIONOS') {
         response.streamingData.hlsManifestUrl = 'https://vr.example.test/master.m3u8?expire=4102444800'
       } else if (suppliedHls === 'rejected') {
         response.streamingData.hlsManifestUrl = 'https://vr.example.test/stale.m3u8?expire=4102444800'
@@ -163,6 +171,14 @@ for (const suppliedHls of ['valid', 'missing', 'rejected']) {
         .toEqual({ loading: false, pending: true })
     } finally {
       releaseProbe()
+    }
+    if (suppliedHls === 'failed-child') {
+      await expect.poll(() => watch.evaluate(view => ({ format: view.activeFormat, error: view.errorMessage })))
+        .toEqual({ format: 'legacy', error: null })
+      await expect.poll(() => page.locator('.ftVideoPlayer video').first().evaluate(video => video.currentTime)).toBeGreaterThan(0)
+      expect(childRequests).toBeGreaterThan(0)
+      expect(await app.electronApp.evaluate(() => globalThis.__builtinVrExtractions)).toBe(0)
+      return
     }
     await expect.poll(() => watch.evaluate(view => ({
       loading: view.isLoading,
@@ -336,22 +352,30 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   releaseManifest?.()
 })
 
-for (const mode of ['yt-dlp', 'built-in', 'proxy']) {
+for (const mode of ['yt-dlp', 'built-in', 'proxy', 'failed-child']) {
   test(`uses panoramic HLS for an Invidious mesh video (${mode})`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://vr.example.test/master.m3u8', route => route.fulfill({
       contentType: 'application/x-mpegURL', body: '#EXTM3U\n'
     }))
     const hlsRequests = []
+    let childRequests = 0
+    const manifestBody = mode === 'failed-child'
+      ? '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=500000,RESOLUTION=640x360,CODECS="avc1.42E01E,mp4a.40.2"\nhttps://invidious.test/api/manifest/hls/child.m3u8\n'
+      : '#EXTM3U\n'
     let releaseManifest
     await page.route('https://invidious.test/api/manifest/hls/**', route => {
+      if (route.request().url().endsWith('/child.m3u8')) {
+        childRequests++
+        return route.fulfill({ status: 404, body: 'Missing child playlist' })
+      }
       hlsRequests.push(route.request().url())
-      if (hlsRequests.length > 1) {
+      if (hlsRequests.length > 1 && mode !== 'failed-child') {
         return new Promise(resolve => {
           releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
         })
       }
-      return route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' })
+      return route.fulfill({ contentType: 'application/x-mpegURL', body: manifestBody })
     })
     await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
       json: {
@@ -406,7 +430,8 @@ for (const mode of ['yt-dlp', 'built-in', 'proxy']) {
       await Promise.all([
         store.dispatch('updateBackendPreference', 'invidious'),
         store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),
-        store.dispatch('updateProxyVideos', mode === 'proxy')
+        store.dispatch('updateProxyVideos', mode === 'proxy'),
+        store.dispatch('updatePlaybackEngineFallback', mode !== 'failed-child')
       ])
     }, mode)
 
@@ -415,6 +440,13 @@ for (const mode of ['yt-dlp', 'built-in', 'proxy']) {
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
     await page.locator('.videoLayout').waitFor()
     const watch = await watchViewHandle(page)
+    if (mode === 'failed-child') {
+      await expect.poll(() => watch.evaluate(view => ({ engine: view.activePlaybackEngine, format: view.activeFormat, error: view.errorMessage })))
+        .toEqual({ engine: 'built-in', format: 'legacy', error: null })
+      await expect.poll(() => page.locator('.ftVideoPlayer video').first().evaluate(video => video.currentTime)).toBeGreaterThan(0)
+      expect(childRequests).toBeGreaterThan(0)
+      return
+    }
     await expect.poll(() => watch.evaluate(view => ({
       activePlaybackEngine: view.activePlaybackEngine,
       vrProjection: view.vrProjection,
