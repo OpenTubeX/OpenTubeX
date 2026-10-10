@@ -1276,6 +1276,22 @@ test('comparison brackets do not hide prose references while valid HTML stays li
   assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
 })
 
+test('invalid HTML tag names leave references in prose while valid tags stay literal', async () => {
+  for (const example of ['Text <a_b title="Outside REF">', '<a_b title="Outside REF">\nOutside REF', '</a_b>\nOutside REF', 'Text <a-b data_ref="REF">Outside REF</a-b>', '<a1 data_ref="REF">\nREF\n\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('processing instructions declarations and CDATA preserve raw content through closing or EOF', async () => {
   for (const [opening, closing] of [['<?php', '?>'], ['<!DOCTYPE html', '>'], ['<![CDATA[', ']]>']]) {
     for (const close of [false, true]) {

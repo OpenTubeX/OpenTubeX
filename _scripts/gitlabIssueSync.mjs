@@ -142,7 +142,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     // Fold case expansions such as ß/SS without merging the distinct dotless ı.
     const labelKey = label => label.trim().replace(/\s+/g, ' ').replace(/[^\u0131]+/g, text => text.toLowerCase().toUpperCase())
     const referenceLabels = new Set()
-    const htmlTag = /<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
+    const htmlTag = /<\/[a-z][a-z\d-]*\s*>|<[a-z][a-z\d-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
