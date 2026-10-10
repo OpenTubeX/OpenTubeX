@@ -1223,6 +1223,8 @@ function finishTabSwipe(event) {
     swipeCloseQueue = closing.catch(() => {})
     try {
       await closing
+    } catch (error) {
+      console.error('Failed to close swiped tab:', error)
     } finally {
       pendingSwipeCloses.delete(element)
       clearTabSwipeElement(element)
@@ -1355,6 +1357,7 @@ watch(
 
 onBeforeUnmount(() => {
   disposed = true
+  // Honor accepted closes even when the organizer disappears before animation ends.
   for (const { timer, finish } of pendingSwipeCloses.values()) {
     window.clearTimeout(timer)
     finish()

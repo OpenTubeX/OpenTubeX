@@ -10,6 +10,7 @@ const component = readFileSync(new URL('../../src/renderer/components/TabBar/Cap
 const declarations = component.slice(component.indexOf('const TAB_HOLD_DELAY'), component.indexOf('const {\n  selecting,'))
 const handlers = component.slice(component.indexOf('function tabCardStyle'), component.indexOf('function focusActiveTab'))
 const rowClasses = component.match(/class="capacitorPhoneTabRow"\s+:class="(\{[^]*?\})"/)[1]
+const teardown = component.slice(component.indexOf('onBeforeUnmount(() => {'), component.indexOf('</script>'))
 
 function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
   let now = 0
@@ -17,6 +18,8 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
   const timers = new Map()
   const frames = new Map()
   const closed = []
+  const errors = []
+  let unmount
   let layouts = 0
   const tabs = ref(Array.from({ length: 100 }, (_, i) => ({ id: `tab-${i}`, isPinned: pinned && i === 0 })))
   const row = (_, index) => ({
@@ -28,11 +31,15 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
     setPointerCapture() {}, querySelector() { return { dataset: { tabId: `tab-${index}` } } }
   })
   const rows = tabs.value.map(row)
-  const api = vm.runInNewContext(`${declarations}\n${handlers}\n({
+  const api = vm.runInNewContext(`${declarations}\n${handlers}\n${teardown}\n;({
     startTabGesture, moveTabGesture, finishTabGesture, cancelTabGesture, resetTabSwipe,
+    settledCloses: () => swipeCloseQueue,
     renderRows: () => tabs.value.map(tab => [(${rowClasses}), tabCardStyle(tab.id)])
   })`, {
     reactive, ref, nextTick, tabs, shouldCloseSwipedTab, activeTabId: ref('tab-0'),
+    disposed: false, onBeforeUnmount: callback => { unmount = callback },
+    organizerSwipe: { cancel() {} }, stopObservingContent() {}, releaseModalLock() {},
+    console: { error: (...args) => errors.push(args) },
     selecting: ref(false), actionTab: ref(null),
     performance: { now: () => now },
     getTabGridReorder(...args) { layouts++; return getTabGridReorder(...args) },
@@ -54,7 +61,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
       timeStamp: now, currentTarget: rows[index], target: { closest: () => null }, preventDefault() {} }
   }
   return {
-    api, closed, frames, rows, get layouts() { return layouts },
+    api, closed, errors, frames, rows, unmount: () => unmount(), get layouts() { return layouts },
     timers,
     start: (index = 0) => api.startTabGesture(event(0, index), `tab-${index}`),
     move: (x, index = 0) => api.moveTabGesture(event(x, index)),
@@ -118,6 +125,46 @@ test('accepted closes wait for an earlier asynchronous close to finish', async (
     await Promise.all([firstClose, secondClose])
   }
   assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+})
+
+for (const unmount of [false, true]) {
+  test(`a failed swipe close is handled and does not block later closes (unmount: ${unmount})`, async () => {
+    const failure = new Error('Replacement presentation failed')
+    const f = fixture({ close: id => { if (id === 'tab-0') throw failure } })
+    f.start()
+    f.move(100)
+    f.finish(100)
+    f.start(1)
+    f.move(100, 1)
+    f.finish(100, 1)
+    if (unmount) f.unmount()
+    await assert.doesNotReject(f.tick(160))
+    await f.api.settledCloses()
+    assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+    assert.equal(f.errors.length, 1)
+    assert.equal(f.errors[0][1], failure)
+    assert.equal(f.rows[0].attributes.size, 0)
+    assert.equal(f.rows[1].attributes.size, 0)
+    assert.equal(f.timers.size, unmount ? 0 : 1)
+  })
+}
+
+test('unmount finishes accepted closes once and cancels an unfinished gesture', async () => {
+  const f = fixture()
+  f.start()
+  f.move(100)
+  f.finish(100)
+  f.start(1)
+  f.move(40, 1)
+  f.unmount()
+  f.frame()
+  await f.tick(200)
+  await f.api.settledCloses()
+  assert.deepEqual(f.closed, ['tab-0'])
+  assert.equal(f.frames.size, 0)
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.rows[0].attributes.size, 0)
+  assert.equal(f.rows[1].attributes.size, 0)
 })
 
 test('long-press reorder coalesces pointer bursts into one layout per frame', async () => {
