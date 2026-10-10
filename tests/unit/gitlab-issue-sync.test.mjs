@@ -230,6 +230,28 @@ test('matches imported issues and merge requests by unique titles, never by equa
   assert.ok(state.notes[1].body.endsWith('See [Imported issue](https://github.com/OpenTubeX/OpenTubeX/issues/900) ([GitLab #538](https://gitlab.com/opentubex/OpenTubeX/-/work_items/538)) and [Imported PR](https://github.com/OpenTubeX/OpenTubeX/pull/538) ([GitLab !12](https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12))'))
 })
 
+test('GitLab project-only references resolve locally without reinterpreting GitHub or foreign prose', async () => {
+  const { state, client } = fixture()
+  const request = { iid: 12, title: 'Imported PR', imported_from: 'github', web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12' }
+  const pull = { number: 900, title: request.title, pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
+  state.mergeRequests.push(request)
+  state.targets.push(pull)
+  const preserved = ['`OpenTubeX#1 OpenTubeX!12`', 'other/OpenTubeX#1 other/OpenTubeX!12', 'otherproject#1 NotOpenTubeX#1',
+    'https://example.org/OpenTubeX#1', '[OpenTubeX#1](https://example.org)'].join('\n\n')
+  const gitlabBody = `See OpenTubeX#1 and OpenTubeX!12.\n\n${preserved}`
+  state.sources[0].description = gitlabBody
+  state.notes.push({ id: 10, body: gitlabBody, author: { id: 1, username: 'reporter' } })
+  await sync(client)
+  const target = state.targets.find(item => item.user.login === 'github-actions[bot]')
+  const expected = `See [Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url})) and [Imported PR](${request.web_url}) ([GitHub #900](${pull.html_url})).\n\n${preserved}`
+  assert.ok(target.body.endsWith(expected))
+  assert.ok(state.comments[0].body.endsWith(expected))
+  const githubOnly = 'OpenTubeX#1 OpenTubeX!12'
+  state.comments.push({ id: 20, body: `See #${target.number} and #900.\n\n${githubOnly}\n\n${preserved}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}) ([GitLab !12](${request.web_url})).\n\n${githubOnly}\n\n${preserved}`))
+})
+
 test('omits missing, confidential, and ambiguous counterparts without leaking private titles', async () => {
   const { state, client } = fixture()
   state.sources.push({ ...state.sources[0], iid: 2, title: 'Duplicate', imported: true, imported_from: 'github', web_url: 'https://gitlab.com/issue/2' },
