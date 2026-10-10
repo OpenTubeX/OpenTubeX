@@ -481,6 +481,56 @@ test('indented paragraph continuations resolve references while separate code bl
   }
 })
 
+test('HTML tags inside indented code do not protect later prose', async () => {
+  for (const tag of ['<pre>', '<code>', '<!--']) {
+    for (const quote of ['', '> ']) {
+      const { state, client } = fixture()
+      const body = reference => `${quote}    ${tag}\n${quote}Outside ${reference}\nOutside ${reference}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
+test('five-space list padding starts literal indented code', async () => {
+  for (const marker of ['-', '*', '1.', '    -']) {
+    const { state, client } = fixture()
+    const body = reference => `${marker.startsWith(' ') ? '* Parent\n' : ''}${marker}     ${reference}\n\n${' '.repeat(marker.length + 5)}${reference}\n\nOutside ${reference}`
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('unclosed list fences end when their list container exits', async () => {
+  for (const example of ['- ```\n  REF\n\nOutside REF', '1. ~~~\n   REF\n\nOutside REF', '* Parent\n    - ```\n      REF\n\n    Outside REF\nOutside REF', '> - ```\n>   REF\n>\n> Outside REF\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('thematic breaks do not turn following indented code into list prose', async () => {
   for (const rule of ['* * *', '- - -', '_ _ _', '***', '---', '___']) {
     const { state, client } = fixture()
