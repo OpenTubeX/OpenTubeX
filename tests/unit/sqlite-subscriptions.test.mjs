@@ -167,6 +167,23 @@ test('playlist selection searches projected fields with Unicode and literal subs
   assert.deepEqual(await engine.collections.playlists.findAsync({}), before)
 })
 
+test('Shorts filtering uses one clock reading across a premiere boundary', async t => {
+  const engine = memory(t)
+  const shorts = [video(1), video(2), video(3)].map(entry => ({ ...entry, premiereTimestamp: 1.001 }))
+  await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', shorts })
+  await engine.collections.history.insertAsync(shorts.map(entry => ({ _id: entry.videoId, videoId: entry.videoId, isUpcoming: true, premiereTimestamp: 1.001, isWatched: true })))
+  let reads = 0
+  t.mock.method(Date, 'now', () => 1000 + reads++)
+  for (const preferences of [{ hideUpcomingPremieres: true }, { hideWatched: true }]) {
+    reads = 0
+    const result = await subscriptionShortsWindow(engine, {
+      subscriptions: [{ id: 'channel' }], currentVideoId: '', preferences,
+    })
+    assert.deepEqual(result, preferences.hideWatched ? shorts.toReversed() : [])
+    assert.equal(reads, 1)
+  }
+})
+
 test('Shorts playback reads only selected Shorts and batches latest watched history without changing feed semantics', async t => {
   const engine = memory(t)
   const subscriptions = [{ id: 'second', showMembersOnly: true }, { id: 'channel' }, { id: 'disabled', feedTypes: ['videos'] }]

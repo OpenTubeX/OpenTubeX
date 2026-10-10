@@ -24,6 +24,47 @@ function memory(t) {
   return new LibraryEngine(database)
 }
 
+test('playlist pages and windows rebuild views created in a rolled-back transaction', async t => {
+  const engine = memory(t)
+  const videos = [{ videoId: 'b', title: 'B' }, { videoId: 'a', title: 'A' }]
+  await engine.collections.playlists.insertAsync({ _id: 'playlist', videos })
+  const revision = engine.revision('playlists')
+  for (const read of [
+    () => engine.playlistPage({ id: 'playlist', query: 'a' }),
+    () => engine.playlistWindow({ id: 'playlist' }),
+  ]) {
+    let expected
+    await assert.rejects(engine.transaction(() => {
+      expected = read()
+      throw new Error('abort after building the view')
+    }), /abort after building the view/)
+    assert.deepEqual(read(), expected)
+    assert.equal(engine.revision('playlists'), revision)
+    assert.deepEqual(await engine.collections.playlists.findOneAsync({ _id: 'playlist' }), { _id: 'playlist', videos })
+  }
+})
+
+test('dotted normalized array modifiers reject atomically without changing metadata or members', async t => {
+  const engine = memory(t)
+  for (const [name, fields] of [['playlists', ['videos']], ['subscriptionCache', ['videos', 'shorts', 'liveStreams', 'communityPosts']]]) {
+    const collection = engine.collections[name]
+    const record = { _id: 'record', future: { value: 'before' }, ...Object.fromEntries(fields.map(field => [field, [{ videoId: 'video', title: 'Original', unknown: { date: new Date(123) } }]])) }
+    await collection.insertAsync(record)
+    const revision = engine.revision(name)
+    for (const field of fields) {
+      for (const operator of ['$set', '$unset', '$push', '$pull', '$inc']) {
+        const update = { [operator]: { [`${field}.0.title`]: 'Lost' } }
+        update.$set = { 'future.value': 'changed', ...update.$set }
+        await assert.rejects(collection.updateAsync({ _id: record._id }, update), /Unsupported normalized array modifier/)
+        assert.deepEqual(await collection.findOneAsync({ _id: record._id }), record)
+        assert.equal(engine.revision(name), revision)
+      }
+    }
+    await collection.updateAsync({ _id: record._id }, { $set: { 'future.value': 'after' } })
+    assert.deepEqual(await collection.findOneAsync({ _id: record._id }), { ...record, future: { value: 'after' } })
+  }
+})
+
 test('metadata inclusion and exclusion projections preserve the released thumbnail contract', async t => {
   const engine = memory(t)
   const collection = engine.collections.videoMetadataCache

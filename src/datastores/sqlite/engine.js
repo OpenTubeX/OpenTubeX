@@ -239,7 +239,10 @@ export class LibraryEngine {
       if (outermost) this.database.exec('COMMIT')
       return result
     } catch (error) {
-      if (outermost) this.database.exec('ROLLBACK')
+      if (outermost) {
+        this.database.exec('ROLLBACK')
+        this.playlistOrders.clear()
+      }
       throw error
     } finally {
       this.transactionDepth--
@@ -359,7 +362,13 @@ export class LibraryEngine {
     // Apply scalar modifiers to just the metadata row. Array operators use
     // indexed member rows and preserve positions and duplicate membership IDs.
     const normalized = ARRAY_FIELDS[collection] ?? []
-    for (const [operator, values] of Object.entries(update)) if (!['$set', '$unset', '$push', '$pull'].includes(operator) && Object.keys(values).some(field => normalized.includes(field))) throw new Error('Unsupported normalized array modifier')
+    for (const [operator, values] of Object.entries(update)) {
+      for (const field of Object.keys(values)) {
+        const root = field.split('.')[0]
+        if (!normalized.includes(root)) continue
+        if (field !== root || !['$set', '$unset', '$push', '$pull'].includes(operator)) throw new Error('Unsupported normalized array modifier')
+      }
+    }
     const scalarUpdate = Object.fromEntries(Object.entries(update).map(([operator, values]) => [operator,
       Object.fromEntries(Object.entries(values).filter(([field]) => !normalized.includes(field)))
     ]).filter(([, values]) => Object.keys(values).length))

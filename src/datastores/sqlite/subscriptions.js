@@ -55,6 +55,7 @@ export function updateSubscriptionPremieres(engine, { updates }) {
 }
 
 export async function subscriptionShortsWindow(engine, { subscriptions, preferences = {}, currentVideoId }) {
+  const now = Date.now()
   const ids = getSubscriptionsForFeed(subscriptions, 'shorts').map(channel => channel.id)
   const cache = Object.fromEntries(engine.prepare("SELECT record_id, json_group_array(json(data) ORDER BY position) AS entries FROM members WHERE collection = 'subscriptionCache' AND field = 'shorts' AND record_id IN (SELECT value FROM json_each(?)) GROUP BY record_id").all(JSON.stringify(ids)).map(row => [row.record_id, { videos: deserializeEntry(row.entries) }]))
   const historyById = new Map()
@@ -70,8 +71,8 @@ export async function subscriptionShortsWindow(engine, { subscriptions, preferen
   const feed = buildSubscriptionShortsFeed({
     cache,
     subscriptions,
-    isHidden: video => isVideoHiddenByPreferences(video, preferences),
-    isWatched: video => isHistoryEntryWatched(historyById.get(video.videoId)),
+    isHidden: video => isVideoHiddenByPreferences(video, preferences, now),
+    isWatched: video => isHistoryEntryWatched(historyById.get(video.videoId), now),
     hideWatched: preferences.hideWatched,
     restrictedPlaybackConfigured: preferences.restrictedPlaybackConfigured,
     maxPerChannel: preferences.onlyShowLatestFromChannel ? preferences.onlyShowLatestFromChannelNumber : null,
