@@ -142,10 +142,17 @@ const actions = {
     const channelIds = new Set(availableUpdates.map(({ channelId }) => channelId))
     const profiles = state.profileList
       .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
-    const updatedAt = getNextSubscriptionSettingsTimestamp(profiles.flatMap(profile => (
-      profile.subscriptions.filter(channel => channelIds.has(channel.id))
-    )))
-    const patches = availableUpdates.map(({ channelId, settings }) => ({ channelId, settings, updatedAt }))
+    const subscriptionsByChannelId = new Map([...channelIds].map(channelId => [channelId, []]))
+    for (const profile of profiles) {
+      for (const channel of profile.subscriptions) {
+        subscriptionsByChannelId.get(channel.id)?.push(channel)
+      }
+    }
+    const patches = availableUpdates.map(({ channelId, settings }) => ({
+      channelId,
+      settings,
+      updatedAt: getNextSubscriptionSettingsTimestamp(subscriptionsByChannelId.get(channelId))
+    }))
     const profileIds = profiles.map(profile => profile._id)
     try {
       const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(patches, profileIds)

@@ -144,6 +144,46 @@ test('bulk disables 939 subscriptions with one write per profile and synchronize
   assert.equal(write.mock.callCount(), 2)
 })
 
+test('bulk edits keep one channel’s future timestamp out of other channels’ sync records', async t => {
+  const now = Date.now()
+  t.mock.method(Date, 'now', () => now)
+  const future = now + 86400000
+  const subscriptions = ['first', 'second'].map(id => ({
+    id, showMembersOnly: true, subscriptionSettingsUpdatedAt: now - 1000
+  }))
+  const { db, store, createStore } = await profileStore(subscriptions)
+  const other = createStore()
+  const profile = store.state.profileList[1]
+  profile.subscriptions = structuredClone(profile.subscriptions)
+  profile.subscriptions[0].subscriptionSettingsUpdatedAtByField = { showMembersOnly: future }
+  await db.profiles.updateAsync({ _id: profile._id }, profile)
+  other.state.profileList[1] = structuredClone(profile)
+  const old = { value: getSubscriptionSettingsForSync({ state: { profiles: store.state } }) }
+  const write = t.mock.method(db.profiles, 'updateAsync')
+
+  assert.equal(await store.dispatch('batchUpdateChannelSettings', subscriptions.map(channel => ({
+    channelId: channel.id, settings: { showMembersOnly: false }
+  }))), true)
+  assert.equal(write.mock.callCount(), 2)
+  for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+    for (const profile of profiles) {
+      assert.equal(profile.subscriptions[0].subscriptionSettingsUpdatedAt, future + 1)
+      assert.equal(profile.subscriptions[1].subscriptionSettingsUpdatedAt, now)
+      assert.equal(profile.subscriptions[0].showMembersOnly, false)
+      assert.equal(profile.subscriptions[1].showMembersOnly, false)
+    }
+  }
+  const value = getSubscriptionSettingsForSync({ state: { profiles: store.state } })
+  const remoteEntry = { value: {
+    ...value,
+    second: { value: { ...value.second.value, showMembersOnly: true }, updatedAt: now + 1000 }
+  } }
+  const merged = mergeSubscriptionSettingsEntry({ old, value, remoteEntry, now: now + 1000 })
+  assert.equal(merged.value.first.value.showMembersOnly, false)
+  assert.equal(merged.value.second.value.showMembersOnly, true)
+  assert.equal(merged.value.second.updatedAt, now + 1000)
+})
+
 for (const action of ['batchUpdateChannelSettings', 'updateChannelSettings']) {
   test(`${action} applies repeated explicit edits despite future saved timestamps`, async () => {
     const future = Date.now() + 86400000

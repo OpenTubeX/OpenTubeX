@@ -510,12 +510,11 @@ for (const future of [false, true]) {
     if (future) {
       await page.evaluate(async updatedAt => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        for (const channel of [...store.getters.getProfileList[0].subscriptions]) {
-          const saved = await store.dispatch('updateChannelSettings', {
-            channelId: channel.id, settings: { showMembersOnly: channel.showMembersOnly }, fromSync: true, updatedAt
-          })
-          if (!saved) throw new Error('Failed to seed a future subscription timestamp')
-        }
+        const channel = store.getters.getProfileList[0].subscriptions[0]
+        const saved = await store.dispatch('updateChannelSettings', {
+          channelId: channel.id, settings: { showMembersOnly: channel.showMembersOnly }, fromSync: true, updatedAt
+        })
+        if (!saved) throw new Error('Failed to seed a future subscription timestamp')
       }, futureTimestamp)
     }
     const settings = await goToSettingsSection(page, 'subscription')
@@ -537,12 +536,14 @@ for (const future of [false, true]) {
     await members.locator('.switch-label').click()
     await expect(members.getByRole('checkbox')).not.toBeChecked()
     await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
-    await expect.poll(() => page.evaluate(timestamp => (
+    await expect.poll(() => page.evaluate(({ timestamp, channelId }) => (
       document.querySelector('#app').__vue_app__.config.globalProperties.$store
         .getters.getProfileList.every(profile => profile.subscriptions.every(channel => (
-          channel.showMembersOnly === false && channel.subscriptionSettingsUpdatedAt > timestamp
+          channel.showMembersOnly === false && (channel.id === channelId
+            ? channel.subscriptionSettingsUpdatedAt > timestamp
+            : channel.subscriptionSettingsUpdatedAt > 0 && (timestamp === 0 || channel.subscriptionSettingsUpdatedAt < timestamp))
         )))
-    ), futureTimestamp)).toBe(true)
+    ), { timestamp: futureTimestamp, channelId: CHANNEL_ID })).toBe(true)
     expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
     ;({ page } = await app.relaunch())
     expect(await page.evaluate(() => (
