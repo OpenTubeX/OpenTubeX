@@ -6,7 +6,7 @@ import { DatabaseSync } from 'node:sqlite'
 import test from 'node:test'
 import model from '@seald-io/nedb/lib/model.js'
 import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
-import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
+import { COLLECTIONS, SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import { readPersistedDatastore } from '../../e2e/helpers/datastore.mjs'
 
 async function profile(t) {
@@ -53,3 +53,39 @@ test('files outside the library collections remain ordinary files', async t => {
   await writeFile(path, contents)
   assert.equal(await readPersistedDatastore(path, 'utf8'), contents)
 })
+
+for (const collection of ['playlists', 'subscriptionCache', 'videoMetadataCache']) {
+  test(`reading ${collection} keeps one snapshot across a concurrent normalized-record commit`, async t => {
+    const directory = await profile(t)
+    const database = new DatabaseSync(join(directory, 'library.sqlite'))
+    t.after(() => database.close())
+    database.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON')
+    database.exec(SCHEMA_SQL)
+    const writer = new LibraryEngine(database)
+    const original = {
+      _id: 'record', title: 'Before', unknown: { date: new Date(123) },
+      ...(collection === 'videoMetadataCache' ? { thumbnail: 'old thumbnail' } : { videos: [{ videoId: 'old' }] }),
+    }
+    const updated = {
+      ...original, title: 'After',
+      ...(collection === 'videoMetadataCache' ? { thumbnail: 'new thumbnail' } : { videos: [{ videoId: 'new' }] }),
+    }
+    await writer.collections[collection].insertAsync(original)
+    let committed = false
+    const materialize = LibraryEngine.prototype.materialize
+    t.mock.method(LibraryEngine.prototype, 'materialize', function (...args) {
+      if (this.database !== database && !committed) {
+        database.exec('BEGIN IMMEDIATE')
+        try { writer.write(collection, updated, true); writer.touch(collection); database.exec('COMMIT') }
+        catch (error) { database.exec('ROLLBACK'); throw error }
+        committed = true
+      }
+      return Reflect.apply(materialize, this, args)
+    })
+    const path = join(directory, COLLECTIONS[collection] + '.db')
+    const read = async () => (await readPersistedDatastore(path, 'utf8')).trim().split('\n').map(model.deserialize)
+    assert.deepEqual(await read(), [original])
+    assert.equal(committed, true)
+    assert.deepEqual(await read(), [updated])
+  })
+}

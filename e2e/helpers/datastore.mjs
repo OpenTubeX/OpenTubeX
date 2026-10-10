@@ -15,6 +15,8 @@ export async function readPersistedDatastore(file, encoding) {
   const database = new DatabaseSync(path, { readOnly: true })
   try {
     const engine = new LibraryEngine(database)
+    // Metadata, normalized members and blobs must share one WAL snapshot.
+    database.exec('BEGIN')
     const records = await engine.collections[collection].findAsync({})
     const text = records.map(model.serialize).join('\n') + '\n'
     return encoding ? text : Buffer.from(text)
