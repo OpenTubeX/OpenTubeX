@@ -796,6 +796,7 @@ export default defineComponent({
 
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
+    const seekBarTooltipLabels = new WeakMap()
     let iosFullscreenCleanup = null
     let androidFullscreenCleanup = null
     let androidFullscreenEntering = false
@@ -5813,13 +5814,14 @@ export default defineComponent({
         ? t('Video.Player.Most Replayed')
         : ''
       const tooltipLabel = [popularityLabel, sponsorBlockLabel].filter(Boolean).join(' · ')
-      if (tooltipLabel === '') return
-
-      const labelSuffix = ` · ${tooltipLabel}`
       const currentText = thumbnailTime.textContent ?? ''
-      if (!currentText.endsWith(labelSuffix)) {
-        thumbnailTime.textContent = `${currentText}${labelSuffix}`
-      }
+      const previous = seekBarTooltipLabels.get(thumbnailTime)
+      // Reuse the base only while our last write remains intact. Shaka may have
+      // replaced it with a new timestamp and chapter title between updates.
+      const baseText = previous?.text === currentText ? previous.baseText : currentText
+      const text = tooltipLabel ? `${baseText} · ${tooltipLabel}` : baseText
+      if (text !== currentText) thumbnailTime.textContent = text
+      seekBarTooltipLabels.set(thumbnailTime, { baseText, text })
     }
 
     function handleSeekBarInput(event) {
