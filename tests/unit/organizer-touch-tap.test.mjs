@@ -15,6 +15,7 @@ function harness() {
   const target = { dataset: { tabId: 'tab' }, setPointerCapture() {} }
   const context = vm.createContext({
     selecting: { value: false }, dragSettling: { value: false },
+    pendingSwipeCloses: new Map(), swipeElement: null,
     drag: {}, swipe: {}, tabs: { value: [{ id: 'tab' }] },
     holdTimer: null, activatedTouchPointerId: null, pendingTouchTabId: null,
     window: { setTimeout: () => 1 }, performance: { now: () => now },
