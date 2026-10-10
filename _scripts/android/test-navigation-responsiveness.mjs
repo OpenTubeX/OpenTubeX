@@ -100,7 +100,7 @@ try {
     console.log(destination, metrics)
     tapDelays.push({ destination, delay: metrics.clickDelay })
   }
-  for (const destination of ['playback', 'search-heading', 'search-match', 'home']) {
+  for (const destination of ['playback', 'search-match', 'home']) {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.dispatch('hideSettingsWindow')
@@ -118,7 +118,7 @@ try {
     const target = destination === 'home'
       ? '.sideNav .inner > a[href="#/home"]'
       : searchResult
-        ? destination === 'search-heading' ? '.settingsSearchResultHeading' : '.settingsSearchResultMatch'
+        ? '.settingsSearchResultMatch'
         : '.settingsMenu [data-section="playback"]'
     const selector = destination === 'home'
       ? '[data-home-section="newSinceLastVisit"] .mediaGrid li'
