@@ -8,6 +8,7 @@ import { test } from 'node:test'
 import { setImmediate } from 'node:timers/promises'
 import { DatabaseSync } from 'node:sqlite'
 import model from '@seald-io/nedb/lib/model.js'
+import Datastore from '@seald-io/nedb'
 import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
 import { openLibrary } from '../../src/datastores/sqlite/migration.js'
 import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
@@ -22,6 +23,55 @@ function memory(t) {
   t.after(() => database.close())
   return new LibraryEngine(database)
 }
+
+test('metadata inclusion and exclusion projections preserve the released thumbnail contract', async t => {
+  const engine = memory(t)
+  const collection = engine.collections.videoMetadataCache
+  const portable = new Datastore()
+  const record = { _id: 'metadata', title: 'Title', description: 'Description', thumbnail: 'data:image/png;base64,stored', unknown: { date: new Date(123) } }
+  await collection.insertAsync(record)
+  await portable.insertAsync(record)
+  for (const projection of [{}, { description: 0 }, { thumbnail: 0 }, { _id: 0 }, { _id: 1 }, { _id: 1, description: 0 }, { title: 1 }, { thumbnail: 1 }]) {
+    const expected = await portable.findOneAsync({ _id: record._id }, projection)
+    assert.deepEqual(await collection.findAsync({ _id: record._id }, projection), [expected], JSON.stringify(projection))
+    assert.deepEqual(await collection.findOneAsync({ _id: record._id }, projection), expected, JSON.stringify(projection))
+  }
+  assert.deepEqual(await collection.findOneAsync({ _id: record._id }), record)
+})
+
+test('dotted inclusion and exclusion projections match released nested document shapes', async t => {
+  const engine = memory(t)
+  const collection = engine.collections.playlists
+  const portable = new Datastore()
+  const record = { _id: 'playlist', metadata: { title: 'Title', description: 'Description', date: new Date(123) }, videos: [{ videoId: 'video', title: 'Member' }], unknown: true }
+  await collection.insertAsync(record)
+  await portable.insertAsync(record)
+  for (const projection of [{ 'metadata.title': 1 }, { 'metadata.title': 1, 'metadata.date': 1, _id: 0 }, { 'metadata.description': 0 }, { 'videos.videoId': 1 }, { 'videos.title': 0 }, { _id: 1 }]) {
+    const expected = await portable.findOneAsync({ _id: record._id }, projection)
+    assert.deepEqual(await collection.findAsync({ _id: record._id }, projection), [expected], JSON.stringify(projection))
+    assert.deepEqual(await collection.findOneAsync({ _id: record._id }, projection), expected, JSON.stringify(projection))
+  }
+  for (const find of ['findAsync', 'findOneAsync']) {
+    await assert.rejects(Promise.resolve().then(() => collection[find]({ _id: record._id }, { 'metadata.title': 1, unknown: 0 })), /Can't both keep and omit fields/)
+  }
+  assert.deepEqual(await collection.findOneAsync({ _id: record._id }), record)
+})
+
+test('projection cannot omit normalized fields needed to verify the query', async t => {
+  const engine = memory(t)
+  for (const [name, record, query] of [
+    ['playlists', { _id: 'playlist', title: 'Found', videos: [{ videoId: 'video' }] }, { videos: { $elemMatch: { videoId: 'video' } } }],
+    ['videoMetadataCache', { _id: 'metadata', title: 'Found', thumbnail: 'stored thumbnail' }, { thumbnail: 'stored thumbnail' }],
+  ]) {
+    const collection = engine.collections[name]
+    const portable = new Datastore()
+    await collection.insertAsync(record)
+    await portable.insertAsync(record)
+    const expected = await portable.findOneAsync(query, { title: 1 })
+    assert.deepEqual(await collection.findAsync(query, { title: 1 }), [expected])
+    assert.deepEqual(await collection.findOneAsync(query, { title: 1 }), expected)
+  }
+})
 
 test('an independent write waits for a suspended transaction and survives its rollback', async t => {
   const engine = memory(t)

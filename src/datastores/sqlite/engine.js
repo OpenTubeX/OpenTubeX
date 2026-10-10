@@ -56,6 +56,10 @@ function compileQuery(query, alias = 'r', normalizedFields = [], collection = nu
         continue
       }
       if (field.startsWith('$') || field.includes('.')) { add({ sql: '1', parameters: [], verify: true }); continue }
+      // Normalized thumbnails are represented by null in records.data.
+      if (currentAlias === 'r' && collection === 'videoMetadataCache' && field === 'thumbnail') {
+        add({ sql: '1', parameters: [], verify: true }); continue
+      }
       if (condition?.$elemMatch && currentAlias === 'r') {
         if (!normalizedFields.includes(field)) { add({ sql: '1', parameters: [], verify: true }); continue }
         const nested = compile(condition.$elemMatch, 'm')
@@ -156,18 +160,27 @@ function safeModify(record, update) {
 
 function project(record, projection) {
   if (!projection || Object.keys(projection).length === 0) return record
-  const included = Object.entries(projection).filter(([key, value]) => key !== '_id' && value === 1)
-  if (included.length || projection._id === 1) {
-    const result = projection._id === 0 ? {} : { _id: record._id }
-    for (const [key] of included) {
-      const value = model.getDotValue(record, key)
-      if (value !== undefined) result[key] = value
-    }
-    return result
-  }
-  const result = { ...record }
-  for (const [key, value] of Object.entries(projection)) if (value === 0) delete result[key]
+  const entries = Object.entries(projection).filter(([key]) => key !== '_id')
+  const action = entries[0]?.[1]
+  if (entries.some(([, value]) => value !== action)) throw new Error("Can't both keep and omit fields except for _id")
+  const result = action === 1
+    ? safeModify({}, { $set: Object.fromEntries(entries.map(([key]) => [key, model.getDotValue(record, key)]).filter(([, value]) => value !== undefined)) })
+    : safeModify(record, { $unset: Object.fromEntries(entries.map(([key]) => [key, true])) })
+  if (projection._id === 0) delete result._id
+  else result._id = record._id
   return result
+}
+
+function projectionOptions(collection, projection, query = {}) {
+  const included = Object.entries(projection ?? {}).filter(([key, value]) => key !== '_id' && value === 1)
+  const needsField = field => included.length
+    ? included.some(([key]) => key.split('.')[0] === field)
+    : projection?.[field] !== 0
+  const fields = ARRAY_FIELDS[collection] ?? []
+  return {
+    arrays: fields.some(needsField) || queryReferencesFields(query, fields),
+    blobs: needsField('thumbnail') || queryReferencesFields(query, ['thumbnail']),
+  }
 }
 
 export class LibraryEngine {
@@ -664,10 +677,8 @@ class Collection {
         const sql = `SELECT r.id, r.data FROM records r WHERE r.collection = ? AND (${compiled.sql})` + (order ? ` ORDER BY ${order}, r.id` : ' ORDER BY r.id') +
           (!compiled.verify ? ' LIMIT ? OFFSET ?' : '')
         const args = [this.name, ...compiled.parameters, ...(!compiled.verify ? [options.limit ?? -1, options.skip] : [])]
-        let records = this.engine.prepare(sql).all(...args).map(row => this.engine.materialize(this.name, row, {
-          arrays: !projection || Object.keys(projection).every(key => projection[key] !== 1) || (ARRAY_FIELDS[this.name] ?? []).some(field => projection[field] === 1),
-          blobs: !projection || projection.thumbnail === 1,
-        }))
+        const materialization = projectionOptions(this.name, projection, compiled.verify ? query : {})
+        let records = this.engine.prepare(sql).all(...args).map(row => this.engine.materialize(this.name, row, materialization))
         if (compiled.verify) {
           records = records.filter(record => match(record, query)).slice(options.skip, options.limit === null ? undefined : options.skip + options.limit)
         }
@@ -680,10 +691,7 @@ class Collection {
   async findOneAsync(query, projection) {
     const rows = this.rows(query, 1, this.name === 'history' && Object.hasOwn(query ?? {}, 'videoId'))
     return rows.length
-      ? project(this.engine.materialize(this.name, rows[0], {
-          arrays: !projection || Object.keys(projection).every(key => projection[key] !== 1) || (ARRAY_FIELDS[this.name] ?? []).some(field => projection[field] === 1),
-          blobs: !projection || projection.thumbnail === 1
-        }), projection)
+      ? project(this.engine.materialize(this.name, rows[0], projectionOptions(this.name, projection)), projection)
       : null
   }
 
