@@ -990,6 +990,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de actualización automática de publicaciones
     Refresh Subscriptions While App Is Closed: "Actualizar suscripciones con la aplicación cerrada"
   Distraction Free Settings:
+    Hide Popularity Graph: "Ocultar gráfico de popularidad"
     Enable Block Lists: "Activar listas de bloqueo"
     AI Video Summaries: Resúmenes de vídeos con IA
     Hide: Ocultar

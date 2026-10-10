@@ -909,6 +909,7 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovenia príspevkov
     Refresh Subscriptions While App Is Closed: "Obnovovať odbery, keď je aplikácia zatvorená"
   Distraction Free Settings:
+    Hide Popularity Graph: "Skryť graf popularity"
     Enable Block Lists: "Povoliť zoznamy blokovaných"
     AI Video Summaries: Zhrnutia videí od AI
     Hide: Skryť

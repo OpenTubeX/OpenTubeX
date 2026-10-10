@@ -328,6 +328,13 @@
           @change="updateHideChapters"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Popularity Graph')"
+          :compact="true"
+          :default-value="hidePopularityGraph"
+          setting-key="hidePopularityGraph"
+          @change="updateHidePopularityGraph"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Disable A-B Repeat')"
           :compact="true"
           :default-value="disableAbRepeat"
@@ -661,6 +668,14 @@ const hideChapters = computed(() => store.getters.getHideChapters)
  */
 function updateHideChapters(value) {
   store.dispatch('updateHideChapters', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hidePopularityGraph = computed(() => store.getters.getHidePopularityGraph)
+
+/** @param {boolean} value */
+function updateHidePopularityGraph(value) {
+  store.dispatch('updateHidePopularityGraph', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

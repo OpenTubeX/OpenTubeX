@@ -1790,6 +1790,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   height: 40px;
   fill: rgb(255 255 255 / 40%);
   pointer-events: none;
+  visibility: hidden;
+  transform: translateY(100%);
+  clip-path: inset(0 0 100%);
+  transition: transform 180ms ease-out, clip-path 180ms ease-out, visibility 0s linear 180ms;
+}
+
+:deep(.shaka-seek-bar-container:hover .ft-popularity-graph) {
+  visibility: visible;
+  transform: translateY(0);
+  clip-path: inset(0);
+  transition-delay: 0s;
+}
+
+:global([data-reduced-motion='reduce'] .ft-popularity-graph) {
+  transition: none;
 }
 
 :deep(.ft-has-popularity .shaka-player-ui-thumbnail-container) {

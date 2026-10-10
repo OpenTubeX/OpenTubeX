@@ -913,6 +913,7 @@ Settings:
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
   Distraction Free Settings:
+    Hide Popularity Graph: "Ascunde graficul de popularitate"
     Enable Block Lists: "Activează listele de blocare"
     AI Video Summaries: Rezumate video generate de IA
     Hide: Ascunde

@@ -934,6 +934,7 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Opdater abonnementer, mens appen er lukket"
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
   Distraction Free Settings:
+    Hide Popularity Graph: "Skjul popularitetsgraf"
     Enable Block Lists: "Aktivér blokeringslister"
     AI Video Summaries: AI-videoresuméer
     Hide: Skjul

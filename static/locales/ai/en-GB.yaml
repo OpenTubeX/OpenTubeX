@@ -895,6 +895,7 @@ Settings:
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
   Distraction Free Settings:
+    Hide Popularity Graph: "Hide Popularity Graph"
     Enable Block Lists: "Enable block lists"
     AI Video Summaries: AI video summaries
     Hide: Hide
