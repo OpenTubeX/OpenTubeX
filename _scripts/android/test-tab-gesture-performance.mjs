@@ -34,11 +34,12 @@ try {
       layout: store.state.settings.capacitorLayoutMode,
       enabled: store.state.settings.enableMobileTabs,
       uiScale: store.state.settings.uiScale,
+      tabCloseFocus: store.state.settings.tabCloseFocus,
       storage: localStorage.getItem('opentubex-capacitor-tabs'),
     }
     store.state.settings.capacitorLayoutMode = 'phone'
     store.state.settings.enableMobileTabs = true
-    const active = store.getters.getPresentedTab
+    const active = { ...store.getters.getPresentedTab, isPinned: false }
     const extraTabs = Array.from({ length: 99 }, (_, index) => ({
       ...active,
       id: `gesture-test-${index}`,
@@ -54,6 +55,7 @@ try {
     store.commit('setTabsState', {
       ...store.state.tabs, tabs: [active, ...extraTabs], presentedTabId: active.id,
     })
+    window.tabGestureSeededState = { ...store.state.tabs }
   })
   await page.locator('.capacitorPhoneTabSwitcherButton').click()
   await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(100)
@@ -64,6 +66,12 @@ try {
     })
   }
   function row(id) { return page.locator(`.capacitorPhoneTabRow:has([data-tab-id="${id}"])`) }
+  async function visibleBounds(locator) {
+    await expect(locator).toBeVisible()
+    const bounds = await locator.boundingBox()
+    assert.ok(bounds, `Visible bounds are unavailable for ${locator}`)
+    return bounds
+  }
 
   // Count actual component renders, and measure event-to-next-frame latency.
   await page.evaluate(() => {
@@ -115,7 +123,7 @@ try {
     }, scale)
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     await row('gesture-test-0').scrollIntoViewIfNeeded()
-    const bounds = await row('gesture-test-0').boundingBox()
+    const bounds = await visibleBounds(row('gesture-test-0'))
     const x = bounds.x + bounds.width * 0.4
     const y = bounds.y + bounds.height * 0.4
     await touch('touchStart', x, y)
@@ -128,6 +136,7 @@ try {
       renders: window.tabGestureProbe.renders,
       frames: window.tabGestureProbe.frames,
     }))
+    await expect(row('gesture-test-0')).not.toHaveCSS('transform', 'none')
     const transform = await row('gesture-test-0').evaluate(element => getComputedStyle(element).transform)
     console.log(`swipe scale ${scale}`, {
       renders: metrics.renders,
@@ -135,7 +144,6 @@ try {
       maxEventToFrameMs: Math.max(...metrics.frames).toFixed(1),
       transform,
     })
-    assert.notEqual(transform, 'none', 'The card follows the real Android touch')
     if (!baseline) assert.ok(metrics.renders <= 1, 'Moving the card must not repeatedly render the tab grid')
     await touch('touchCancel')
     await expect(row('gesture-test-0')).toHaveCSS('opacity', '1')
@@ -147,8 +155,8 @@ try {
     document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.settings.uiScale = 100
   })
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-  const first = await row('gesture-test-0').boundingBox()
-  const second = await row('gesture-test-1').boundingBox()
+  const first = await visibleBounds(row('gesture-test-0'))
+  const second = await visibleBounds(row('gesture-test-1'))
   for (const bounds of [first, second]) {
     const x = bounds.x + bounds.width * 0.4
     const y = bounds.y + bounds.height * 0.4
@@ -157,17 +165,17 @@ try {
     await touch('touchMove', x + 100, y)
     await touch('touchEnd')
   }
-  await delay(500)
+  if (baseline) await delay(500)
+  else await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(98)
   const remaining = await page.locator('.capacitorPhoneTabRow').count()
   console.log('consecutive closes', { remaining, expected: 98 })
   if (!baseline) {
     await expect(row('gesture-test-0')).toHaveCount(0)
     await expect(row('gesture-test-1')).toHaveCount(0)
-    assert.equal(remaining, 98)
 
     const source = row('gesture-test-2')
-    const bounds = await source.boundingBox()
-    const destination = await page.locator('.capacitorPhoneTabRow').first().boundingBox()
+    const bounds = await visibleBounds(source)
+    const destination = await visibleBounds(page.locator('.capacitorPhoneTabRow').first())
     const y = bounds.y + bounds.height * 0.4
     await touch('touchStart', bounds.x + bounds.width / 2, y)
     await delay(450)
@@ -186,6 +194,33 @@ try {
     await expect.poll(() => page.locator('.capacitorPhoneTabList').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(98)
     console.log('vertical scrolling', { tabs: 98 })
+
+    // Closing the active card can wait for its unloaded replacement to mount.
+    // The next accepted close must not interrupt that presentation.
+    const activeId = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.state.settings.tabCloseFocus = 'nextTab'
+      store.commit('setTabsState', window.tabGestureSeededState)
+      return store.getters.getPresentedTabId
+    })
+    await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(100)
+    await row(activeId).scrollIntoViewIfNeeded()
+    const activeBounds = await visibleBounds(row(activeId))
+    const replacementBounds = await visibleBounds(row('gesture-test-0'))
+    for (const [index, bounds] of [activeBounds, replacementBounds].entries()) {
+      const x = bounds.x + bounds.width * 0.4
+      const y = bounds.y + bounds.height * 0.4
+      // Move the left card away from its neighbor so it cannot cover its touch target.
+      const direction = index === 0 ? -1 : 1
+      await touch('touchStart', x, y)
+      await touch('touchMove', x + direction * 50, y)
+      await touch('touchMove', x + direction * 100, y)
+      await touch('touchEnd')
+    }
+    await expect(row(activeId)).toHaveCount(0)
+    await expect(row('gesture-test-0')).toHaveCount(0)
+    await expect(page.locator('.capacitorPhoneTabRow')).toHaveCount(98)
+    console.log('active and replacement closes', { remaining: 98 })
   }
 } finally {
   try {
@@ -204,12 +239,14 @@ try {
           store.state.settings.capacitorLayoutMode = saved.layout
           store.state.settings.enableMobileTabs = saved.enabled
           store.state.settings.uiScale = saved.uiScale
+          store.state.settings.tabCloseFocus = saved.tabCloseFocus
           // Allow queued persistence/budget work to settle before restoring storage.
           await new Promise(resolve => setTimeout(resolve, 1000))
           if (saved.storage === null) localStorage.removeItem('opentubex-capacitor-tabs')
           else localStorage.setItem('opentubex-capacitor-tabs', saved.storage)
         }
         delete window.tabGestureSavedState
+        delete window.tabGestureSeededState
         delete window.tabGestureProbe
         delete window.tabGestureOnMove
       })

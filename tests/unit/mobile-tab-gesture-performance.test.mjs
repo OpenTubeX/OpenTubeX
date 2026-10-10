@@ -98,6 +98,28 @@ test('a second gesture cannot cancel a tab close that is animating', async () =>
   assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
 })
 
+test('accepted closes wait for an earlier asynchronous close to finish', async () => {
+  let finishFirst
+  const f = fixture({ close: id => id === 'tab-0' ? new Promise(resolve => { finishFirst = resolve }) : undefined })
+  f.start()
+  f.move(100)
+  f.finish(100)
+  const firstClose = f.tick(160)
+  await Promise.resolve()
+  f.start(1)
+  f.move(100, 1)
+  f.finish(100, 1)
+  const secondClose = f.tick(160)
+  await Promise.resolve()
+  try {
+    assert.deepEqual(f.closed, ['tab-0'], 'The second close must not interrupt replacement-tab presentation')
+  } finally {
+    finishFirst()
+    await Promise.all([firstClose, secondClose])
+  }
+  assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+})
+
 test('long-press reorder coalesces pointer bursts into one layout per frame', async () => {
   const f = fixture()
   f.start()
@@ -157,6 +179,7 @@ test('completion of an older close does not reset the next swipe', async () => {
   f.move(100)
   f.finish(100)
   const closing = f.tick(160)
+  await Promise.resolve()
   f.start(1)
   f.move(-40, 1)
   f.frame()

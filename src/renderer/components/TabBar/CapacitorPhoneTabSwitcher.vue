@@ -541,6 +541,7 @@ let swipeResetTimer = null
 let swipeFrame = null
 let swipeElement = null
 const pendingSwipeCloses = new Map()
+let swipeCloseQueue = Promise.resolve()
 let holdTimer = null
 let activatedTouchPointerId = null
 let pendingTouchTabId = null
@@ -1217,8 +1218,11 @@ function finishTabSwipe(event) {
   const finish = async () => {
     if (finishing) return
     finishing = true
+    // Presenting an active tab's replacement must finish before another close.
+    const closing = swipeCloseQueue.then(() => closeTab(tabId))
+    swipeCloseQueue = closing.catch(() => {})
     try {
-      await closeTab(tabId)
+      await closing
     } finally {
       pendingSwipeCloses.delete(element)
       clearTabSwipeElement(element)
