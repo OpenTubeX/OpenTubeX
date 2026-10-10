@@ -60,26 +60,141 @@ function githubBody(header, body) {
   return `${header}\n\n${notice}${excerpt}`
 }
 
-function issueBody(issue) {
+function issueBody(issue, references) {
   const header = `${marker('issue', issue.iid)}\nReported by ${content(issue.author.username)} on [GitLab](${issue.web_url}).`
-  return githubBody(header, content(issue.description, true))
+  return githubBody(header, references(content(issue.description, true), 'gitlab'))
 }
 
-function commentBody(comment, side, issue) {
+function commentBody(comment, side, issue, references) {
   const gitlab = side === 'gitlab'
   const author = gitlab ? comment.author.username : comment.user.login
   const url = gitlab ? `${issue.web_url}#note_${comment.id}` : comment.html_url
   const header = `${marker(side, comment.id)}\n${content(author)} on [${gitlab ? 'GitLab' : 'GitHub'}](${url}):`
-  const body = content(comment.body, gitlab)
+  const body = references(content(comment.body, gitlab), side)
   return gitlab ? githubBody(header, body) : `${header}\n\n${body}`
+}
+
+function referenceResolver(sources, targets, mergeRequests) {
+  const gitlab = new Map(sources.filter(issue => issue.confidential === false).map(issue => [`#${issue.iid}`, issue]))
+  for (const request of mergeRequests) {
+    if (!request.confidential) gitlab.set(`!${request.iid}`, request)
+  }
+  const gitlabReferences = new Map([...gitlab].map(([reference, item]) => [item.web_url, reference]))
+  const github = new Map(targets.map(issue => [`#${issue.number}`, issue]))
+  const counterparts = new Map()
+  const pair = (source, target) => {
+    counterparts.set(source.web_url, target)
+    counterparts.set(target.html_url, source)
+    github.set(`#${target.number}`, target)
+  }
+  for (const target of targets) {
+    const source = !target.pull_request && target.user.login === githubBot && gitlab.get(`#${markedId(target.body, 'issue')}`)
+    if (source) pair(source, target)
+  }
+  // GitLab's importer renumbers issues and merge requests. A unique title of
+  // the same item type is evidence of a match; equal numbers are not.
+  for (const [reference, source] of gitlab) {
+    if (source.imported_from !== 'github') continue
+    const request = reference.startsWith('!')
+    const matches = targets.filter(target => Boolean(target.pull_request) === request && target.title === source.title)
+    const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
+    if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
+  }
+  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>]/g, '\\$&')
+  const render = (reference, side, suffix = '') => {
+    const item = (side === 'gitlab' ? gitlab : github).get(reference)
+    const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
+    const url = item?.web_url ?? item?.html_url ?? (side === 'gitlab'
+      ? `https://gitlab.com/${project}/-/${reference[0] === '!' ? 'merge_requests' : 'issues'}/${reference.slice(1)}`
+      : `https://github.com/${repository}/issues/${reference.slice(1)}`)
+    const other = counterparts.get(url)
+    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${url}${suffix})`
+    if (!other) return link
+    const otherSide = side === 'gitlab' ? 'GitHub' : 'GitLab'
+    const otherReference = side === 'gitlab' ? `#${other.number}` : gitlabReferences.get(other.web_url)
+    return `${link} ([${otherSide} ${otherReference}](${other.html_url ?? other.web_url}))`
+  }
+  const urlReference = (url, side) => {
+    const pattern = side === 'gitlab'
+      ? /^https:\/\/gitlab\.com\/opentubex\/OpenTubeX\/-\/(issues|work_items|merge_requests)\/(\d+)([?#][^\s<>]*)?$/i
+      : /^https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/(issues|pull)\/(\d+)([?#][^\s<>]*)?$/i
+    const match = url.match(pattern)
+    return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '')
+  }
+  const rewrite = (body, side) => {
+    let fence = null
+    let htmlCode = null
+    const listIndents = []
+    const result = []
+    let prose = []
+    const flush = () => {
+      if (!prose.length) return
+      // Consume code, escapes, Markdown links, HTML, and URLs before considering
+      // shorthand references, so fragments and reproduction commands stay intact.
+      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?-->|<(code|pre)\b[^>]*>[^]*?<\/\2>|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+        if (/^https?:/i.test(token)) {
+          const url = token.replace(/[.,;:!?)\]]+$/, '')
+          return (urlReference(url, side) ?? url) + token.slice(url.length)
+        }
+        if (/^<https?:/i.test(token)) return urlReference(token.slice(1, -1), side) ?? token
+        if (token.startsWith('[')) {
+          const url = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)?.[1]
+          return url ? urlReference(url, side) ?? token : token
+        }
+        const reference = token.match(/([#!]\d+)$/)?.[1]
+        return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
+      }))
+      prose = []
+    }
+    for (const line of body.split('\n')) {
+      if (!fence) {
+        const opening = line.match(/<(code|pre)\b[^>]*>/i)
+        if (htmlCode || opening) {
+          htmlCode ??= opening[1]
+          prose.push(line)
+          if (new RegExp(`</${htmlCode}>`, 'i').test(line)) htmlCode = null
+          continue
+        }
+      }
+      const expanded = line.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+      const indent = expanded.match(/^ */)[0].length
+      if (!fence && line.trim()) {
+        while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop()
+      }
+      const contentIndent = listIndents.at(-1) ?? 0
+      const indentedCode = indent >= contentIndent + 4
+      const delimiter = expanded.slice(contentIndent).match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
+      if (delimiter || fence || indentedCode) {
+        flush()
+        result.push(line)
+        if (delimiter) {
+          if (!fence) fence = delimiter[1]
+          else if (delimiter[1][0] === fence[0] && delimiter[1].length >= fence.length && !delimiter[2].trim()) fence = null
+        }
+      } else {
+        const listItem = expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
+        if (listItem) listIndents.push(listItem[0].length)
+        prose.push(line)
+      }
+    }
+    flush()
+    return result.join('\n')
+  }
+  return { rewrite, pair }
 }
 
 export function createClient(token) {
   return {
     async gl(path, method = 'GET', body) {
+      const headers = { 'Content-Type': 'application/json' }
+      // Public MR metadata needs no authentication; keep the existing Work Item
+      // sync token usable without adding Merge Request permissions.
+      if (method !== 'GET' || path.split('?')[0] !== `projects/${encodeURIComponent(project)}/merge_requests`) {
+        headers['PRIVATE-TOKEN'] = token
+      }
       const response = await fetch(`https://gitlab.com/api/v4/${path}`, {
         method,
-        headers: { 'PRIVATE-TOKEN': token, 'Content-Type': 'application/json' },
+        headers,
         body: body ? JSON.stringify(body) : undefined,
         redirect: 'error',
         signal: AbortSignal.timeout(30000),
@@ -124,10 +239,16 @@ export async function sync(client) {
   const ghBase = `repos/${repository}/issues`
   const bot = await client.gl('user')
   const sources = await list(client, 'gl', `${glBase}?scope=all&state=all&order_by=created_at&sort=asc`)
-  const targets = (await list(client, 'gh', `${ghBase}?state=all&sort=created&direction=asc`))
+  const allTargets = await list(client, 'gh', `${ghBase}?state=all&sort=created&direction=asc`)
+  const mergeRequests = await list(client, 'gl', `projects/${encodeURIComponent(project)}/merge_requests?scope=all&state=all`)
+  const references = referenceResolver(sources, allTargets, mergeRequests)
+  const targets = allTargets
     .filter(issue => !issue.pull_request && issue.user.login === githubBot)
   let synced = 0
   const failures = []
+  const prepared = []
+  // Establish every native issue's counterpart before rendering references,
+  // including references to reports created later in the same sync run.
   for (const source of sources) {
     // Only native public reports. Imported GitHub issues already have originals.
     if (source.confidential !== false || source.imported || source.imported_from === 'github') continue
@@ -141,12 +262,23 @@ export async function sync(client) {
         : targets.find(issue => markedId(issue.body, 'issue') === String(source.iid))
       // Never silently duplicate a linked issue that was deleted or transferred.
       if (linkedNumber && !target) throw new SyncError(`Missing linked GitHub issue for GitLab #${source.iid}`)
-      const body = issueBody(source)
       if (!target) {
-        target = await client.gh(ghBase, 'POST', { title: source.title, body })
+        target = await client.gh(ghBase, 'POST', { title: source.title, body: issueBody(source, references.rewrite) })
         targets.push(target)
-      } else if (target.title !== source.title || target.body !== body) {
+      }
+      references.pair(source, target)
+      prepared.push({ source, target, notes, link })
+    } catch (error) {
+      failures.push(`GitLab #${source.iid}: ${error instanceof SyncError ? error.message : 'request failed'}`)
+    }
+  }
+  for (const { source, target, notes, link } of prepared) {
+    try {
+      const glIssue = `${glBase}/${source.iid}`
+      const body = issueBody(source, references.rewrite)
+      if (target.title !== source.title || target.body !== body) {
         await client.gh(`${ghBase}/${target.number}`, 'PATCH', { title: source.title, body })
+        Object.assign(target, { title: source.title, body })
       }
       // Read status again after content updates, so a concurrent triage change wins.
       const current = await client.gh(`${ghBase}/${target.number}`)
@@ -176,7 +308,7 @@ export async function sync(client) {
           (note.author.id === bot.id && (markedId(note.body, 'github') || markedId(note.body, 'link')))) continue
         const existing = comments.find(comment => comment.user.login === githubBot &&
           markedId(comment.body, 'gitlab') === String(note.id))
-        const body = commentBody(note, 'gitlab', source)
+        const body = commentBody(note, 'gitlab', source, references.rewrite)
         if (!existing) {
           await client.gh(`${ghBase}/${target.number}/comments`, 'POST', { body })
         } else if (existing.body !== body) {
@@ -187,7 +319,7 @@ export async function sync(client) {
         if (comment.user.login === githubBot && markedId(comment.body, 'gitlab')) continue
         const existing = notes.find(note => note.author.id === bot.id &&
           markedId(note.body, 'github') === String(comment.id))
-        const body = commentBody(comment, 'github', source)
+        const body = commentBody(comment, 'github', source, references.rewrite)
         if (!existing) {
           await client.gl(`${glIssue}/notes`, 'POST', { body })
         } else if (existing.body !== body) {
