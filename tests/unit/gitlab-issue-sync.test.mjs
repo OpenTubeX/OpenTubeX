@@ -743,6 +743,38 @@ test('unclosed HTML regions end when their list container exits', async () => {
   }
 })
 
+test('raw HTML blocks preserve the full closing line and resume on the next line', async () => {
+  for (const [opening, closing] of [['<pre>', '</pre>'], ['<script>', '</script>'], ['<!--', '-->']]) {
+    for (const singleLine of [false, true]) {
+      const { state, client } = fixture()
+      const body = reference => `${opening}${singleLine ? '' : '\n'}${reference}${closing} Trailing ${reference}\nOutside ${reference}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
+test('undefined reference links rewrite prose labels while defined references stay intact', async () => {
+  const { state, client } = fixture()
+  const body = reference => `[see Outside ${reference}][missing]\n[Outside ${reference}][]\n![Outside ${reference}][missing]\n[see ${reference}][known]\n\n[known]: https://example.org`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
 test('bare local URLs retain balanced parentheses and leave unmatched punctuation outside links', async () => {
   const { state, client } = fixture()
   const body = url => `See ${url}?x=(a)\nSee (${url}#note_(a)).\nSee ${url}?x=((a))).`

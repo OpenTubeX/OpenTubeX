@@ -162,18 +162,19 @@ function referenceResolver(sources, targets, mergeRequests) {
           if (labelEnd !== -1) {
             let end = labelEnd
             if (text[end] === '(') end = balancedEnd(text, end, '(', ')')
-            else if (text[end] === '[') end = balancedEnd(text, end, '[', ']')
-            else if (text[end] === ':') end = text.indexOf('\n', end) === -1 ? text.length : text.indexOf('\n', end)
+            else if (text[end] === '[') {
+              const referenceEnd = balancedEnd(text, end, '[', ']')
+              const referenceLabel = referenceEnd === -1 ? null : text.slice(end + 1, referenceEnd - 1) || text.slice(start + 1, labelEnd - 1)
+              if (referenceLabel !== null && referenceLabels.has(labelKey(referenceLabel))) end = referenceEnd
+            } else if (text[end] === ':') end = text.indexOf('\n', end) === -1 ? text.length : text.indexOf('\n', end)
             if (end === -1) end = labelEnd
             tokens.lastIndex = end
             token = text.slice(match.index, end)
-            if (!image) {
-              const label = text.slice(start + 1, labelEnd - 1)
-              const suffix = text.slice(labelEnd, end)
-              const link = suffix.match(/^\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
-              if (link) token = urlReference(link[1], side, link[2] ?? '') ?? token
-              else if (!suffix && !referenceLabels.has(labelKey(label))) token = `[${rewriteProse(label)}]`
-            }
+            const label = text.slice(start + 1, labelEnd - 1)
+            const suffix = text.slice(labelEnd, end)
+            const link = suffix.match(/^\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
+            if (link && !image) token = urlReference(link[1], side, link[2] ?? '') ?? token
+            else if (!suffix && !referenceLabels.has(labelKey(label))) token = `${image ? '!' : ''}[${rewriteProse(label)}]`
           }
         } else if (token === '<') {
           const remaining = text.slice(match.index)
@@ -249,8 +250,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         indent = expanded.match(/^ */)[0].length
       }
       if (htmlEnd) {
-        if (htmlEnd.literal) result.push({ literal: line })
-        else prose.push(line)
+        result.push({ literal: line })
         if (htmlEnd.pattern.test(text)) htmlEnd = null
         continue
       }
@@ -288,25 +288,26 @@ function referenceResolver(sources, targets, mergeRequests) {
             : /^ {0,3}<![A-Z]/.test(lineContent) ? />/ : null
         if (rawEnd) {
           flush()
-          htmlEnd = { pattern: rawEnd, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          htmlEnd = { pattern: rawEnd, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
           result.push({ literal: line })
           if (rawEnd.test(lineContent)) htmlEnd = null
           continue
         }
-        const opening = lineContent.match(/^ {0,3}(?:<(code|pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
+        const opening = lineContent.match(/^ {0,3}(?:<(pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
         if (opening) {
+          flush()
           htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
-          prose.push(line)
+          result.push({ literal: line })
           if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
           continue
         }
         const blockTag = /^ {0,3}<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?=[ \t>]|\/>|$)/i.test(lineContent)
-        const completeTag = !paragraph && /^ {0,3}</.test(lineContent) && lineContent.trim().match(htmlTag)?.[0] === lineContent.trim()
+        const completeTag = (!paragraph || listItem) && /^ {0,3}</.test(lineContent) && lineContent.trim().match(htmlTag)?.[0] === lineContent.trim()
         if (blockTag || completeTag) {
           flush()
-          htmlEnd = { pattern: /^[ \t]*$/, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          htmlEnd = { pattern: /^[ \t]*$/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
           result.push({ literal: line })
           continue
