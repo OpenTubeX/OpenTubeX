@@ -3,7 +3,8 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
-import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
+import { activeTab, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
@@ -680,14 +681,54 @@ test('offers in-app playback for YouTube URL downloads only', async ({ page }) =
   await expect(page.locator('.downloadRow').filter({ hasText: 'Other site download' }).getByRole('button', { name: 'Play download' })).toHaveCount(0)
 })
 
-test('offers download options for external media', async ({ app, page }) => {
+test('offers download options for external media with the watch page button styling', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const buttonAppearance = button => button.evaluate(element => {
+    const style = getComputedStyle(element)
+    return {
+      background: style.backgroundColor,
+      color: style.color,
+      width: style.width,
+      height: style.height,
+      borderRadius: style.borderRadius,
+      fontSize: style.fontSize
+    }
+  })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateVideoPlaybackEngine', 'built-in')
+  })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watchButton = page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Download Video' })
+  const watchAppearance = {}
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    watchAppearance[colorScheme] = await buttonAppearance(watchButton)
+  }
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
   await prepareTwitchYtDlp(app, page, mediaUrl, false)
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
-  await externalMedia.getByRole('button', { name: 'Download Video' }).click()
+  const downloadButton = externalMedia.getByRole('button', { name: 'Download Video' })
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expect.poll(() => buttonAppearance(downloadButton)).toEqual(watchAppearance[colorScheme])
+    await testInfo.attach(`External media download button (${colorScheme})`, {
+      body: await externalMedia.locator('.externalMediaDetails').screenshot(),
+      contentType: 'image/png'
+    })
+  }
+  await page.setViewportSize({ width: 375, height: 667 })
+  for (const colorScheme of ['dark', 'light']) {
+    await page.emulateMedia({ colorScheme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+    await expect.poll(() => buttonAppearance(downloadButton)).toEqual(watchAppearance[colorScheme])
+  }
+  await downloadButton.click()
   await expect(page.getByRole('dialog', { name: 'A Twitch broadcast' })).toBeVisible()
 })
 

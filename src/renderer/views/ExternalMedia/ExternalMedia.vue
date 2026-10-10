@@ -218,6 +218,7 @@
                   v-if="enableDownloads && source && !source.twitchSubOnlyVod"
                   :title="t('Downloads.Download Video')"
                   :icon="['fas', 'download']"
+                  theme="secondary"
                   @click="showDownloadPrompt = true"
                 />
                 <FtIconButton
