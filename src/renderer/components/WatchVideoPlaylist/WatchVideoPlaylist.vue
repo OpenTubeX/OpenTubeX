@@ -251,12 +251,14 @@
           />
           <FtButton
             v-if="isPagedPlaylist && userWindow.offset > 0"
+            class="playlistPagination"
             :label="t('Playing Previous Video')"
             :icon="['fas', 'step-backward']"
             @click="loadUserPlaylistWindow(Math.max(0, userWindow.offset - 100))"
           />
           <FtButton
             v-if="isPagedPlaylist && userWindow.offset + playlistItems.length < userWindow.total"
+            class="playlistPagination"
             :label="t('Subscriptions.Load More Videos')"
             :icon="['fas', 'arrow-down']"
             @click="loadUserPlaylistWindow(userWindow.offset + playlistItems.length)"
@@ -1345,7 +1347,7 @@ watch(playlistItemsWrapper, (wrapper) => {
   const scheduleClamp = () => {
     playlistItemsClampFrame ??= requestAnimationFrame(() => {
       playlistItemsClampFrame = null
-      const items = container.querySelectorAll(':scope > .playlistItem')
+      const items = container.querySelectorAll(':scope > .playlistItem, :scope > .playlistPagination')
       clampOverlayScrollTop(
         container,
         items[items.length - 1] ?? null

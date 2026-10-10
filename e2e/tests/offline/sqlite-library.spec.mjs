@@ -117,6 +117,57 @@ async function residentState(page) {
   })
 }
 
+for (const zoom of [0.95, 1.25]) {
+  test(`keeps Watch playlist paging controls in view after content shrinks at ${zoom} scale`, async ({ page }) => {
+    await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const item = await page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistWindow', { id: 'large', offset: 19750, limit: 1 })).records[0])
+    await page.evaluate(item => window.ftElectron.tabs.create({ route: `/watch/${item.videoId}?playlistId=large&playlistType=user&playlistItemId=${item.playlistItemId}&libraryMemberId=${item._libraryMemberId}`, makeActive: true }), item)
+    const panel = page.locator('.watchVideoPlaylist.resizablePlaylist')
+    const scroller = panel.locator('.playlistItemsWrapper')
+    const more = scroller.getByRole('button', { name: 'Load More Videos', exact: true })
+    const previous = scroller.getByRole('button', { name: 'Playing Previous Video', exact: true })
+    const endState = button => button.evaluate(button => {
+      const container = button.closest('.playlistItemsWrapper')
+      const maximum = Math.max(0, container.scrollHeight - container.clientHeight)
+      const scrollbar = container.querySelector('.os-scrollbar-vertical')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      const expectedOffset = maximum ? container.scrollTop / maximum * (track.height - handle.height) : 0
+      const renderedMaximum = Math.max(0, button.getBoundingClientRect().bottom - container.getBoundingClientRect().top + container.scrollTop + Number.parseFloat(getComputedStyle(button).marginBottom) + Number.parseFloat(getComputedStyle(container).paddingBottom) - container.clientHeight)
+      return {
+        valid: container.scrollTop <= maximum + 2 / devicePixelRatio,
+        noEmptyRange: Math.abs(maximum - renderedMaximum) * devicePixelRatio <= 2,
+        atEnd: Math.abs(container.scrollTop - maximum) * devicePixelRatio <= 2,
+        buttonInView: (button.getBoundingClientRect().bottom - container.getBoundingClientRect().bottom) * devicePixelRatio <= 2,
+        scrollbar: !scrollbar.classList.contains('os-scrollbar-unusable') && Math.abs(handle.top - track.top - expectedOffset) * devicePixelRatio <= 2,
+      }
+    })
+    const expected = { valid: true, noEmptyRange: true, atEnd: true, buttonInView: true, scrollbar: true }
+    const scrollToEnd = async button => {
+      await expect.poll(async () => {
+        await scroller.evaluate(element => { element.scrollTop = Number.MAX_SAFE_INTEGER })
+        return endState(button)
+      }).toEqual(expected)
+    }
+    await expect(panel.locator('.playlistItem')).toHaveCount(100)
+    await scrollToEnd(more)
+    await more.click()
+    await expect(panel.locator('.playlistItem').first()).toContainText('Playlist entry 19830')
+    await scrollToEnd(more)
+    await more.click()
+    await expect(panel.locator('.playlistItem')).toHaveCount(70)
+    await expect.poll(async () => {
+      const { valid, noEmptyRange, scrollbar } = await endState(previous)
+      return { valid, noEmptyRange, scrollbar }
+    }).toEqual({ valid: true, noEmptyRange: true, scrollbar: true })
+    await scrollToEnd(previous)
+    await scroller.evaluate(element => { element.style.height = '480px' })
+    await expect.poll(() => scroller.evaluate(element => element.clientHeight)).toBe(480)
+    await expect.poll(() => endState(previous)).toEqual(expected)
+  })
+}
+
 async function expectDocumentScrollToMatchContent(page) {
   await expect.poll(() => page.evaluate(() => {
     const content = document.querySelector('.app > .routerView')

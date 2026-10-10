@@ -143,8 +143,9 @@ test('a missing concurrent count keeps the cached audience instead of using tota
 
 // Run the real refresh function without the renderer's platform singletons.
 const source = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
-const start = source.indexOf('export async function refreshSubscriptionPremieres(')
-const refreshSource = source.slice(start, source.indexOf('\n/**', start)).replace('export ', '')
+const start = source.indexOf('async function fetchSubscriptionPremiereUpdate(')
+const refreshStart = source.indexOf('export async function refreshSubscriptionPremieres(')
+const refreshSource = source.slice(start, source.indexOf('\n/**', refreshStart)).replace('export ', '')
 
 function createRefresh(fetch, { electron = false, query, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
   const video = { videoId, isPremiere: true, liveNow: true, viewCount: 1000, isNewInSubscriptionFeed: false }

@@ -81,6 +81,18 @@ const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
 const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
 
+async function fetchSubscriptionPremiereUpdate(videoId) {
+  const signal = AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
+  const remote = !process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious'
+  const response = remote
+    ? await invidiousFetch(`${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(videoId)}`, signal)
+    : await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, { signal, headers: { 'Accept-Language': 'en-US' }, nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS })
+  if (!response.ok) return null
+  return remote
+    ? getInvidiousSubscriptionPremiereUpdate(await response.json(), videoId)
+    : getLocalSubscriptionPremiereUpdate(await response.text(), videoId)
+}
+
 /**
  * Refresh only due premieres, preserving the channel's full-refresh timestamp
  * and any newer cache data written while the request was in flight.
@@ -110,13 +122,7 @@ export async function refreshSubscriptionPremieres(isActive) {
           await mapConcurrently(page.records, RSS_ENRICHMENT_CONCURRENCY, async ({ video, memberId }) => {
             if (!isActive()) return
             try {
-              const signal = AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
-              const remote = !process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious'
-              const response = remote
-                ? await invidiousFetch(`${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`, signal)
-                : await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`, { signal, headers: { 'Accept-Language': 'en-US' }, nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS })
-              if (!response.ok) return
-              const update = remote ? getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId) : getLocalSubscriptionPremiereUpdate(await response.text(), video.videoId)
+              const update = await fetchSubscriptionPremiereUpdate(video.videoId)
               if (update) updates.push({ memberId, previous: video, update })
             } catch { /* Retain the previous state for the next poll. */ }
           })
@@ -135,22 +141,7 @@ export async function refreshSubscriptionPremieres(isActive) {
       await mapConcurrently(candidates, RSS_ENRICHMENT_CONCURRENCY, async video => {
         if (!isActive()) return
         try {
-          const options = { signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS) }
-          let update
-          if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
-            const url = `${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`
-            const response = await invidiousFetch(url, options.signal)
-            if (!response.ok) return
-            update = getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId)
-          } else {
-            const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`, {
-              ...options,
-              headers: { 'Accept-Language': 'en-US' },
-              nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
-            })
-            if (!response.ok) return
-            update = getLocalSubscriptionPremiereUpdate(await response.text(), video.videoId)
-          }
+          const update = await fetchSubscriptionPremiereUpdate(video.videoId)
           if (update !== null) updates.set(video.videoId, update)
         } catch {
           // Keep the last known state and retry on the next poll.
