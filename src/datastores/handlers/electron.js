@@ -172,6 +172,10 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel, profileIds })
   }
 
+  static batchUpdateChannelSettings(channels, profileIds) {
+    return dbProfiles(DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS, { channels, profileIds })
+  }
+
   static updateSubscriptionDetails(channels) {
     return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
   }

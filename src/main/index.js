@@ -5518,16 +5518,17 @@ function runApp() {
           )
           return null
 
-        case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS: {
-          const profileIds = await baseHandlers.profiles
-            .updateChannelSettings(data.channel, data.profileIds)
+        case DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS:
+        case DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS: {
+          const channels = data.channels ?? [data.channel]
+          const profileIds = await baseHandlers.profiles.batchUpdateChannelSettings(channels, data.profileIds)
           if (profileIds.length > 0) {
             syncOtherWindows(
               IpcChannels.SYNC_PROFILES,
               event,
               {
                 event: SyncEvents.PROFILES.UPDATE_CHANNEL_SETTINGS,
-                data: { channel: data.channel, profileIds }
+                data: { channels, profileIds }
               }
             )
           }

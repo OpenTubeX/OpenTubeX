@@ -140,11 +140,15 @@ test.describe('subscriptions feed from cache', () => {
       window.subscriptionDetailsUpdates = []
       store.dispatch = (action, payload) => {
         const result = dispatch(action, payload)
-        if (action === 'updateChannelSettings' && payload.settings.showMembersOnly === false) {
-          window.subscriptionDetailsUpdates.push(dispatch('batchUpdateSubscriptionDetails', [{
-            channelId: payload.channelId,
-            channelThumbnailUrl: 'https://yt3.googleusercontent.com/refreshed-avatar=s88'
-          }]))
+        if (action === 'updateChannelSettings' || action === 'batchUpdateChannelSettings') {
+          for (const update of action === 'updateChannelSettings' ? [payload] : payload) {
+            if (update.settings.showMembersOnly === false) {
+              window.subscriptionDetailsUpdates.push(dispatch('batchUpdateSubscriptionDetails', [{
+                channelId: update.channelId,
+                channelThumbnailUrl: 'https://yt3.googleusercontent.com/refreshed-avatar=s88'
+              }]))
+            }
+          }
         }
         return result
       }

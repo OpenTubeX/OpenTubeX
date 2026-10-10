@@ -11,12 +11,12 @@ import { copySubscriptionChannelSettings } from '../../src/renderer/helpers/subs
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
 const handlersSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
-async function profileStore() {
+async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', thumbnail: '', showMembersOnly: true }]) {
   const db = { profiles: new Datastore({ inMemoryOnly: true }) }
   const profiles = ['allChannels', 'custom'].map(_id => ({
     _id,
     name: _id,
-    subscriptions: [{ id: 'channel', name: 'Old name', thumbnail: '', showMembersOnly: true }]
+    subscriptions
   }))
   await db.profiles.insertAsync(profiles)
   const DBProfileHandlers = vm.runInNewContext(
@@ -39,6 +39,11 @@ async function profileStore() {
     handlers.updateChannelSettings = async (channel, requestedProfileIds) => {
       const profileIds = await DBProfileHandlers.updateChannelSettings(channel, requestedProfileIds)
       broadcast('updateChannelSettings', { channel, profileIds })
+      return profileIds
+    }
+    handlers.batchUpdateChannelSettings = async (channels, requestedProfileIds) => {
+      const profileIds = await DBProfileHandlers.batchUpdateChannelSettings(channels, requestedProfileIds)
+      broadcast('updateChannelSettings', { channels, profileIds })
       return profileIds
     }
     handlers.updateSubscriptionDetails = async channels => {
@@ -109,7 +114,36 @@ test('metadata saves report success for changed, unchanged, and empty updates', 
   assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [channel]), true)
 })
 
-for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetails', 'updateChannelSettings']) {
+test('bulk disables 939 subscriptions with one write per profile and synchronizes other windows', async t => {
+  const subscriptions = Array.from({ length: 939 }, (_, index) => ({
+    id: `channel-${index}`, name: `Channel ${index}`, thumbnail: '', showMembersOnly: true,
+    feedTypes: index % 2 ? ['videos'] : ['shorts', 'live'], dailyVideoLimit: index % 3 + 1
+  }))
+  const { db, store, createStore } = await profileStore(subscriptions)
+  const other = createStore()
+  const write = t.mock.method(db.profiles, 'updateAsync')
+  assert.equal(await store.dispatch('batchUpdateChannelSettings', subscriptions.map(channel => ({
+    channelId: channel.id, settings: { showMembersOnly: false }
+  }))), true)
+  assert.equal(write.mock.callCount(), 2)
+  for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+    for (const profile of profiles) {
+      assert.equal(profile.subscriptions.length, 939)
+      for (const [index, channel] of profile.subscriptions.entries()) {
+        assert.equal(channel.showMembersOnly, false)
+        assert.equal(channel.name, subscriptions[index].name)
+        assert.deepEqual([...channel.feedTypes], subscriptions[index].feedTypes)
+        assert.equal(channel.dailyVideoLimit, subscriptions[index].dailyVideoLimit)
+        assert.ok(channel.subscriptionSettingsUpdatedAt > 0)
+      }
+    }
+  }
+  assert.equal(await store.dispatch('batchUpdateChannelSettings', []), true)
+  assert.equal(await store.dispatch('batchUpdateChannelSettings', [{ channelId: 'missing', settings: {} }]), false)
+  assert.equal(write.mock.callCount(), 2)
+})
+
+for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetails', 'updateChannelSettings', 'batchUpdateChannelSettings']) {
   for (const failure of ['write error', 'retry exhaustion']) {
     test(`${action} synchronizes saved profiles after a later ${failure}`, async t => {
       const { db, store, createStore } = await profileStore()
@@ -128,14 +162,17 @@ for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetai
       }
 
       const channel = { channelId: 'channel', channelName: 'New name' }
-      assert.equal(await store.dispatch(action, action === 'updateChannelSettings'
-        ? { channelId: 'channel', settings: { showMembersOnly: false } }
+      const settingsUpdate = { channelId: 'channel', settings: { showMembersOnly: false } }
+      assert.equal(await store.dispatch(action, action === 'batchUpdateChannelSettings'
+        ? [settingsUpdate]
+        : action === 'updateChannelSettings'
+          ? settingsUpdate
         : action === 'batchUpdateSubscriptionDetails' ? [channel] : channel), false)
       assert.ok(savedProfileId)
       for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
         for (const profile of profiles) {
           const saved = profile._id === savedProfileId
-          if (action === 'updateChannelSettings') {
+          if (action === 'updateChannelSettings' || action === 'batchUpdateChannelSettings') {
             assert.equal(profile.subscriptions[0].showMembersOnly, !saved)
           } else {
             assert.equal(profile.subscriptions[0].name, saved ? 'New name' : 'Old name')

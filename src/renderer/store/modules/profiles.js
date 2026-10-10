@@ -66,6 +66,21 @@ function profileSort(a, b) {
   return collator.compare(nameA, nameB)
 }
 
+function getChannelWithUpdatedSettings(subscription, settings, updatedAt) {
+  const channel = deepCopy(subscription)
+  if (Array.isArray(settings.feedTypes)) channel.feedTypes = [...settings.feedTypes]
+  for (const key of ['dailyVideoLimit', 'showMembersOnly']) {
+    if (!Object.hasOwn(settings, key)) continue
+    if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
+      delete channel[key]
+    } else {
+      channel[key] = settings[key]
+    }
+  }
+  channel.subscriptionSettingsUpdatedAt = updatedAt
+  return channel
+}
+
 const actions = {
   async grabAllProfiles({ rootState, commit, state }, defaultName = null) {
     let profiles
@@ -135,6 +150,31 @@ const actions = {
     return dispatch('batchUpdateSubscriptionDetails', [channel])
   },
 
+  async batchUpdateChannelSettings({ commit, state }, updates) {
+    if (updates.length === 0) return true
+    const subscriptionsById = new Map(state.profileList[0].subscriptions.map(channel => [channel.id, channel]))
+    if (updates.some(({ channelId }) => !subscriptionsById.has(channelId))) return false
+    const updatedAt = Date.now()
+    const channels = updates.map(({ channelId, settings }) => (
+      getChannelWithUpdatedSettings(subscriptionsById.get(channelId), settings, updatedAt)
+    ))
+    const channelIds = new Set(channels.map(channel => channel.id))
+    const profileIds = state.profileList
+      .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
+      .map(profile => profile._id)
+    try {
+      const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(channels, profileIds)
+      if (!Array.isArray(updatedProfileIds)) return false
+      if (updatedProfileIds.length > 0) {
+        commit('updateChannelSettings', { channels, profileIds: updatedProfileIds })
+      }
+      return updatedProfileIds.length === profileIds.length
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  },
+
   async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
     if (fromSync && (!Number.isFinite(updatedAt) || updatedAt < 0)) return false
 
@@ -142,31 +182,13 @@ const actions = {
       .find(channel => channel.id === channelId)
     if (primarySubscription === undefined) return false
 
-    const channel = deepCopy(primarySubscription)
-    if (Array.isArray(settings.feedTypes)) {
-      channel.feedTypes = [...settings.feedTypes]
-    }
-    if (Object.hasOwn(settings, 'dailyVideoLimit')) {
-      if (settings.dailyVideoLimit === undefined) {
-        delete channel.dailyVideoLimit
-      } else {
-        channel.dailyVideoLimit = settings.dailyVideoLimit
-      }
-    }
-    if (Object.hasOwn(settings, 'showMembersOnly')) {
-      if (typeof settings.showMembersOnly === 'boolean') {
-        channel.showMembersOnly = settings.showMembersOnly
-      } else {
-        delete channel.showMembersOnly
-      }
-    }
+    const channel = getChannelWithUpdatedSettings(primarySubscription, settings, fromSync ? updatedAt : Date.now())
 
     const profileIds = state.profileList
       .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
       .map(profile => profile._id)
 
     try {
-      channel.subscriptionSettingsUpdatedAt = fromSync ? updatedAt : Date.now()
       const updatedProfileIds = await DBProfileHandlers.updateChannelSettings(channel, profileIds)
       if (!Array.isArray(updatedProfileIds)) return false
 
@@ -308,13 +330,14 @@ const mutations = {
     }
   },
 
-  updateChannelSettings(state, { channel, profileIds }) {
+  updateChannelSettings(state, { channel, channels = [channel], profileIds }) {
+    const channelsById = new Map(channels.map(channel => [channel.id, channel]))
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
       if (!profile) continue
 
-      profile.subscriptions = profile.subscriptions.map(subscription => subscription.id === channel.id
-        ? copySubscriptionChannelSettings(subscription, channel)
+      profile.subscriptions = profile.subscriptions.map(subscription => channelsById.has(subscription.id)
+        ? copySubscriptionChannelSettings(subscription, channelsById.get(subscription.id))
         : subscription)
     }
   },

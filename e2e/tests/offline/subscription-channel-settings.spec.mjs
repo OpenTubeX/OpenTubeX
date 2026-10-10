@@ -502,6 +502,38 @@ test('reports subscription setting write failures from the settings manager', as
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
 
+test('saves Select All members-only changes together before leaving the manager', async ({ app, page }) => {
+  const settings = await goToSettingsSection(page, 'subscription')
+  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    window.subscriptionSettingsSaves = 0
+    store.subscribeAction(({ type }) => {
+      if (type === 'updateChannelSettings' || type === 'batchUpdateChannelSettings') {
+        window.subscriptionSettingsSaves += 1
+      }
+    })
+  })
+  const members = page.locator('.bulkMembersOnlySetting')
+  await expect(members.getByRole('checkbox')).toHaveAttribute('aria-checked', 'mixed')
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).toBeChecked()
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).not.toBeChecked()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+  ))).toBe(true)
+  expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
+  ;({ page } = await app.relaunch())
+  expect(await page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+  ))).toBe(true)
+})
+
 test('reports one failure toast for a failed batch update', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
@@ -509,7 +541,7 @@ test('reports one failure toast for a failed batch update', async ({ page }) => 
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     let updateCount = 0
-    store._actions.updateChannelSettings = [() => {
+    store._actions.batchUpdateChannelSettings = [() => {
       updateCount += 1
       return Promise.resolve(false)
     }]
@@ -523,7 +555,7 @@ test('reports one failure toast for a failed batch update', async ({ page }) => 
     .click()
 
   await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount()))
-    .toBe(subscriptions.length)
+    .toBe(1)
   await expect(page.locator('.toast', {
     hasText: 'Failed to save channel settings'
   })).toHaveCount(1)
@@ -533,7 +565,7 @@ test('preserves the mixed members-only switch after a failed bulk save', async (
   const settings = await goToSettingsSection(page, 'subscription')
   await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
   await page.evaluate(() => {
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store._actions.updateChannelSettings = [() => Promise.resolve(false)]
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store._actions.batchUpdateChannelSettings = [() => Promise.resolve(false)]
   })
   await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
   const members = page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Members only' })
