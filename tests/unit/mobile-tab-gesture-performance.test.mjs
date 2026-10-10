@@ -7,10 +7,19 @@ import { getTabGridReorder } from '../../src/renderer/components/TabBar/tabGridR
 import { shouldCloseSwipedTab } from '../../src/renderer/helpers/capacitorTabSwipe.js'
 
 const component = readFileSync(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
-const declarations = component.slice(component.indexOf('const TAB_HOLD_DELAY'), component.indexOf('const {\n  selecting,'))
-const handlers = component.slice(component.indexOf('function tabCardStyle'), component.indexOf('function focusActiveTab'))
-const rowClasses = component.match(/class="capacitorPhoneTabRow"\s+:class="(\{[^]*?\})"/)[1]
-const teardown = component.slice(component.indexOf('onBeforeUnmount(() => {'), component.indexOf('</script>'))
+function sourceBetween(start, end) {
+  const startIndex = component.indexOf(start)
+  assert.ok(startIndex >= 0, `Gesture fixture source marker is missing: ${start}`)
+  const endIndex = component.indexOf(end, startIndex + start.length)
+  assert.ok(endIndex > startIndex, `Gesture fixture end marker is missing after ${start}: ${end}`)
+  return component.slice(startIndex, endIndex)
+}
+const declarations = sourceBetween('const TAB_HOLD_DELAY', 'const {\n  selecting,')
+const handlers = sourceBetween('function tabCardStyle', 'function focusActiveTab')
+const rowClassMatch = component.match(/class="capacitorPhoneTabRow"\s+:class="(\{[^]*?\})"/)
+assert.ok(rowClassMatch, 'Gesture fixture tab row class binding is missing')
+const rowClasses = rowClassMatch[1]
+const teardown = sourceBetween('onBeforeUnmount(() => {', '</script>')
 
 function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
   let now = 0
@@ -18,6 +27,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
   const timers = new Map()
   const frames = new Map()
   const closed = []
+  const moved = []
   const errors = []
   let unmount
   let layouts = 0
@@ -53,6 +63,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
       clearTimeout(id) { timers.delete(id) }
     },
     closeTab: async id => { closed.push(id); if (close) await close(id) },
+    getCapacitorTabService: () => ({ moveTab(tabId, index) { moved.push({ tabId, index }); return true } }),
     openTabsContentRef: ref({ querySelectorAll: () => rows, getBoundingClientRect: () => ({ bottom: 12025 }) }),
     openTabsScrollRef: ref({ scrollTop: 0, clientHeight: 600, getBoundingClientRect: () => ({ top: 0, bottom: 600 }) }),
     openTabActions() {}, closeTabActions() {}, lightHaptic() {}, clampOverlayScrollTop() {},
@@ -62,7 +73,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
       timeStamp: now, currentTarget: rows[index], target: { closest: () => null }, preventDefault() {} }
   }
   return {
-    api, closed, errors, frames, rows, unmount: () => unmount(), get layouts() { return layouts },
+    api, closed, moved, errors, frames, rows, unmount: () => unmount(), get layouts() { return layouts },
     timers,
     start: (index = 0) => api.startTabGesture(event(0, index), `tab-${index}`),
     move: (x, index = 0) => api.moveTabGesture(event(x, index)),
@@ -191,7 +202,10 @@ test('long-press reorder coalesces pointer bursts into one layout per frame', as
   assert.equal(f.frames.size, 1)
   f.frame()
   assert.equal(f.layouts, 1)
+  f.move(80)
+  assert.equal(f.frames.size, 1)
   f.api.cancelTabGesture()
+  assert.equal(f.frames.size, 0, 'Cancellation discards the pending reorder frame')
   f.frame()
   assert.equal(f.layouts, 1, 'Cancelled frames do not update the grid')
 })
@@ -268,8 +282,11 @@ test('release before the reorder frame still commits the newest drop slot', asyn
   const f = fixture()
   f.start()
   await f.tick(400)
+  f.move(10)
   f.move(192.5)
   f.finish(192.5)
   assert.equal(f.layouts, 1, 'Release flushes the pending layout synchronously')
   assert.equal(f.frames.size, 0)
+  await f.tick(160)
+  assert.deepEqual(f.moved, [{ tabId: 'tab-0', index: 1 }], 'The newest position drops the first card into the second slot')
 })

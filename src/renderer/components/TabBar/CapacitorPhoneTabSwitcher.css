@@ -275,6 +275,10 @@
   z-index: 2;
 }
 
+.capacitorPhoneTabRow[data-tab-closing] {
+  pointer-events: none;
+}
+
 .capacitorPhoneTabRow.active {
   border-color: var(--primary-color);
   background-color: var(--side-nav-hover-color);
