@@ -3,6 +3,7 @@ package org.opentubex.app;
 import static java.util.Arrays.asList;
 
 import android.content.Context;
+import android.os.SystemClock;
 import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import java.io.*;
@@ -198,6 +199,20 @@ final class YtDlpRuntime {
             return future.get(timeout, unit).trim();
         }
         finally { future.cancel(true); }
+    }
+
+    static String extractBeforeDeadline(Callable<String> operation, long deadline) throws Exception {
+        if (SystemClock.elapsedRealtime() >= deadline) throw new TimeoutException("Extraction deadline expired");
+        Future<String> future = EXTRACTORS.submit(() -> {
+            if (SystemClock.elapsedRealtime() >= deadline) throw new TimeoutException("Extraction deadline expired");
+            return operation.call();
+        });
+        try {
+            return future.get(Math.max(0, deadline - SystemClock.elapsedRealtime()), TimeUnit.MILLISECONDS).trim();
+        } finally {
+            // Interrupting execute stops its process group in its finally block.
+            future.cancel(true);
+        }
     }
 
     static YoutubeDL.UpdateStatus update(Context context, String apiUrl) throws Exception {

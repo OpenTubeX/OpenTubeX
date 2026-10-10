@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.Context;
 import android.net.Uri;
+import android.os.SystemClock;
 import androidx.activity.result.ActivityResult;
 import com.getcapacitor.*;
 import com.getcapacitor.annotation.ActivityCallback;
@@ -21,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -137,7 +139,14 @@ public final class YtDlpPlugin extends Plugin {
         });
     }
     @PluginMethod public void extract(PluginCall call) {
+        Integer timeoutMs = call.getInt("timeoutMs");
+        if (call.getData().has("timeoutMs") && (timeoutMs == null || timeoutMs < 1 || timeoutMs > 60_000)) {
+            call.reject("Invalid extraction timeout");
+            return;
+        }
+        long deadline = timeoutMs == null ? 0 : SystemClock.elapsedRealtime() + timeoutMs;
         run(call, () -> {
+            if (deadline != 0 && SystemClock.elapsedRealtime() >= deadline) throw new TimeoutException("Extraction deadline expired");
             List<String> args = YtDlpArguments.validate(call.getArray("args"));
             String cookies = call.getString("cookies", "");
             boolean externalMedia = call.getBoolean("externalMedia", false);
@@ -155,7 +164,10 @@ public final class YtDlpPlugin extends Plugin {
                 args.add("--simulate");
                 boolean detectTimeoutWarnings = call.getBoolean("detectTimeoutWarnings", false);
                 AtomicBoolean incomplete = new AtomicBoolean();
-                String stdout = YtDlpRuntime.extract(getContext(), args, detectTimeoutWarnings ? incomplete : null);
+                String stdout = deadline == 0
+                    ? YtDlpRuntime.extract(getContext(), args, detectTimeoutWarnings ? incomplete : null)
+                    : YtDlpRuntime.extractBeforeDeadline(() -> YtDlpRuntime.execute(getContext(), args, null, null,
+                        detectTimeoutWarnings ? incomplete : null), deadline);
                 if (externalMedia) {
                     File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;
                     String extractedCookies;
