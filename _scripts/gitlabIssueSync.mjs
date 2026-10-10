@@ -151,17 +151,26 @@ function referenceResolver(sources, targets, mergeRequests) {
     for (const line of body.split('\n')) {
       let text = line
       let depth = 0
-      while (/^ {0,3}> ?/.test(text)) {
+      const container = fence ?? htmlEnd
+      const quoteLimit = container?.quoteDepth ?? Infinity
+      while (depth < quoteLimit && /^ {0,3}> ?/.test(text)) {
         text = text.replace(/^ {0,3}> ?/, '')
         depth++
       }
-      const expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
-      const indent = expanded.match(/^ */)[0].length
+      let expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+      let indent = expanded.match(/^ */)[0].length
       if (fence && (depth < fence.quoteDepth || (text.trim() && indent < fence.listIndent))) fence = null
-      if (htmlEnd && depth < htmlEnd.quoteDepth) {
+      if (htmlEnd && (depth < htmlEnd.quoteDepth || (text.trim() && indent < htmlEnd.listIndent))) {
         flush()
         htmlEnd = null
-        listIndents.length = 0
+      }
+      if (container && !fence && !htmlEnd) {
+        while (/^ {0,3}> ?/.test(text)) {
+          text = text.replace(/^ {0,3}> ?/, '')
+          depth++
+        }
+        expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+        indent = expanded.match(/^ */)[0].length
       }
       if (htmlEnd) {
         prose.push(line)
@@ -188,14 +197,14 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!fence && !indentedCode) {
         const opening = lineContent.match(/<(code|pre)\b[^>]*>|<!--/i)
         if (opening) {
-          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth }
+          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
           prose.push(line)
           if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
           continue
         }
       }
-      let delimiter = lineContent.match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
+      let delimiter = lineContent.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
       if (!fence && delimiter?.[1][0] === '`' && delimiter[2].includes('`')) delimiter = null
       if (delimiter || fence || indentedCode) {
         paragraph = false
