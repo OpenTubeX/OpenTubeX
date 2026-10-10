@@ -556,14 +556,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tabLoadingLine::after {
-    animation: none;
-    inline-size: 100%;
-    background: var(--accent-color);
-  }
-}
-
 :global(:root[data-reduced-motion='reduce']) .tabLoadingLine::after {
   animation: none;
   inline-size: 100%;
