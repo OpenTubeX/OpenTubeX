@@ -7,6 +7,7 @@ import os
 import subprocess
 import urllib.parse
 import urllib.request
+from http.cookies import SimpleCookie
 from types import SimpleNamespace
 
 
@@ -50,7 +51,18 @@ def install_rumble_http():
             for attempt in range(11):
                 self.validate(request)
                 cookie_request = urllib.request.Request(request.url, headers=request.headers)
+                caller_cookie = request.headers.get('Cookie') if attempt else None
+                if caller_cookie:
+                    cookie_request.remove_header('Cookie')
                 jar.add_cookie_header(cookie_request)
+                if caller_cookie:
+                    # The updated jar takes precedence after a redirect. Preserve
+                    # caller cookies that the server has not replaced.
+                    jar_cookie = cookie_request.get_header('Cookie', '')
+                    jar_cookies = SimpleCookie(jar_cookie)
+                    remaining = [cookie.OutputString() for name, cookie in SimpleCookie(caller_cookie).items()
+                                 if name not in jar_cookies]
+                    cookie_request.add_header('Cookie', '; '.join(filter(None, [jar_cookie, *remaining])))
                 headers = dict(cookie_request.header_items())
                 timeout = max(1, min(60000, int(self._calculate_timeout(request) * 1000)))
                 payload = json.dumps({

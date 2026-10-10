@@ -28,14 +28,22 @@ def fake_run(command, *, input, **kwargs):
     calls.append(payload)
     if payload['url'] == 'https://rumble.com/first':
         assert headers['authorization'] == 'Bearer fixture'
-        assert headers['cookie'] == 'caller=fixture'
+        assert headers['cookie'] == 'caller=fixture; kept=fixture'
         response = {'status': 302, 'headers': {
             'Location': [redirect_url],
             'Set-Cookie': ['session=fixture; Domain=.rumble.com; Path=/', 'other=value; Domain=.rumble.com; Path=/'],
         }, 'body': ''}
+        if redirect_url == 'https://rumble.com/second':
+            response['headers']['Set-Cookie'].append('caller=updated; Path=/')
     else:
         assert payload['url'] == redirect_url
-        assert 'authorization' not in headers
+        if redirect_url == 'https://rumble.com/second':
+            assert headers['authorization'] == 'Bearer fixture'
+            assert 'caller=updated' in headers['cookie']
+            assert 'kept=fixture' in headers['cookie']
+        else:
+            assert 'authorization' not in headers
+            assert 'kept=fixture' not in headers['cookie']
         assert 'caller=fixture' not in headers['cookie']
         assert 'session=fixture' in headers['cookie'] and 'other=value' in headers['cookie']
         response = {'status': 403, 'headers': {}, 'body': base64.b64encode(b'blocked fixture').decode()}
@@ -44,8 +52,8 @@ def fake_run(command, *, input, **kwargs):
 
 subprocess.run = fake_run
 try:
-    credentials = {'Authorization': 'Bearer fixture', 'Cookie': 'caller=fixture'}
-    for redirect_url in ('https://www.rumble.com/second', 'http://rumble.com/second'):
+    credentials = {'Authorization': 'Bearer fixture', 'Cookie': 'caller=fixture; kept=fixture'}
+    for redirect_url in ('https://rumble.com/second', 'https://www.rumble.com/second', 'http://rumble.com/second'):
         for default_headers in (False, True):
             calls.clear()
             with YoutubeDL({'quiet': True, 'http_headers': {'Authorization': credentials['Authorization']} if default_headers else {}}) as ydl:
@@ -57,7 +65,7 @@ try:
                 except UnsupportedRequest:
                     pass
                 try:
-                    ydl.urlopen(Request('https://rumble.com/first', headers={'Cookie': credentials['Cookie']} if default_headers else credentials))
+                    handler.send(Request('https://rumble.com/first', headers={'Cookie': credentials['Cookie']} if default_headers else credentials))
                     raise AssertionError('HTTP 403 was silently accepted')
                 except HTTPError as error:
                     assert error.status == 403 and error.response.read() == b'blocked fixture'
