@@ -128,7 +128,7 @@ export function parseTakeoutPlaylistCsv(content, filename) {
   }
   const videos = []
   for (const row of rows.slice(1)) {
-    const match = row.match(/^(?:"([\w-]{11})"|([\w-]{11})),(?:"([^"]+)"|([^,]+))$/)
+    const match = row.trimStart().match(/^(?:"([\w-]{11})"|([\w-]{11})),(?:"([^"]+)"|([^,]+))$/)
     if (match === null) {
       return null
     }
