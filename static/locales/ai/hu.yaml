@@ -1305,6 +1305,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
+    Most Replayed: "Legtöbbször újrajátszott"
     Cast: "Átküldés"
     Music Mode: "Zenei mód"
     Music Mode Description: "A videók lejátszása 1× sebességgel, az új videók indítása az elejéről ezen a lapon. A mentett alapértelmezett lejátszási beállítások változatlanok maradnak."

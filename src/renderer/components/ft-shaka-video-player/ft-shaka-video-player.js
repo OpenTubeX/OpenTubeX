@@ -15,6 +15,7 @@ import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
 import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
+import { createPopularityPath, isMostReplayed } from '../../helpers/player/videoPopularity'
 
 import store from '../../store/index'
 import { getAvailableFullscreenActions } from '../../helpers/fullscreenActions'
@@ -359,6 +360,10 @@ export default defineComponent({
       default: () => ([])
     },
     chapters: {
+      type: Array,
+      default: () => ([])
+    },
+    popularityMarkers: {
       type: Array,
       default: () => ([])
     },
@@ -5773,12 +5778,11 @@ export default defineComponent({
     /**
      * @param {MouseEvent} event
      */
-    function handleSponsorBlockSeekBarMouseMove(event) {
+    function handleSeekBarTooltipMouseMove(event) {
       if (!container.value || !player) return
 
       const seekBarContainer = event.currentTarget
-      const thumbnailTime = seekBarContainer?.querySelector('.shaka-player-ui-thumbnail-time')
-      if (!seekBarContainer || !thumbnailTime) return
+      if (!seekBarContainer) return
 
       const rect = seekBarContainer.getBoundingClientRect()
       if (rect.width === 0) return
@@ -5790,10 +5794,28 @@ export default defineComponent({
       const offsetX = event.clientX - rect.left
       const percentage = Math.max(0, Math.min(1, offsetX / rect.width))
       const hoverTime = seekRange.start + (duration * percentage)
-      const sponsorBlockLabel = getSponsorBlockSeekBarTooltipLabel(hoverTime, duration / rect.width)
-      if (sponsorBlockLabel === '') return
+      updateSeekBarTooltip(seekBarContainer, hoverTime, duration / rect.width)
+    }
 
-      const labelSuffix = ` · ${sponsorBlockLabel}`
+    function handleSeekBarValueChange(event) {
+      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
+      if (!seekBarContainer || !player) return
+      const width = seekBarContainer.getBoundingClientRect().width
+      const { start, end } = player.seekRange()
+      if (width > 0) updateSeekBarTooltip(seekBarContainer, event.time, (end - start) / width)
+    }
+
+    function updateSeekBarTooltip(seekBarContainer, hoverTime, secondsPerPixel) {
+      const thumbnailTime = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-time')
+      if (!thumbnailTime) return
+      const sponsorBlockLabel = getSponsorBlockSeekBarTooltipLabel(hoverTime, secondsPerPixel)
+      const popularityLabel = !isLive.value && isMostReplayed(props.popularityMarkers, hoverTime)
+        ? t('Video.Player.Most Replayed')
+        : ''
+      const tooltipLabel = [popularityLabel, sponsorBlockLabel].filter(Boolean).join(' · ')
+      if (tooltipLabel === '') return
+
+      const labelSuffix = ` · ${tooltipLabel}`
       const currentText = thumbnailTime.textContent ?? ''
       if (!currentText.endsWith(labelSuffix)) {
         thumbnailTime.textContent = `${currentText}${labelSuffix}`
@@ -5872,15 +5894,43 @@ export default defineComponent({
       seekBarContainer.addEventListener('mouseleave', handleSeekBarMouseLeave)
     }
 
-    function setupSponsorBlockSeekBarTooltip() {
+    function setupSeekBarTooltip() {
       if (!container.value) return
 
       const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
       if (!seekBarContainer) return
 
-      seekBarContainer.removeEventListener('mousemove', handleSponsorBlockSeekBarMouseMove)
-      seekBarContainer.addEventListener('mousemove', handleSponsorBlockSeekBarMouseMove)
+      seekBarContainer.removeEventListener('mousemove', handleSeekBarTooltipMouseMove)
+      seekBarContainer.addEventListener('mousemove', handleSeekBarTooltipMouseMove)
+      const controls = ui.getControls()
+      controls.removeEventListener('seekbarvaluechange', handleSeekBarValueChange)
+      controls.addEventListener('seekbarvaluechange', handleSeekBarValueChange)
     }
+
+    function refreshPopularityGraph() {
+      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
+      if (!seekBarContainer) return
+      seekBarContainer.querySelector('.ft-popularity-graph')?.remove()
+      seekBarContainer.classList.remove('ft-has-popularity')
+      if (!hasLoaded.value || isLive.value || !player) return
+
+      const path = createPopularityPath(props.popularityMarkers, player.seekRange())
+      if (!path) return
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      svg.classList.add('ft-popularity-graph')
+      svg.setAttribute('viewBox', '0 0 1000 40')
+      svg.setAttribute('preserveAspectRatio', 'none')
+      svg.setAttribute('role', 'img')
+      const peak = props.popularityMarkers.reduce((peak, marker) => marker.intensity > peak.intensity ? marker : peak)
+      svg.setAttribute('aria-label', `${t('Video.Player.Most Replayed')}: ${formatDurationAsTimestamp(peak.startSeconds)}`)
+      const area = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      area.setAttribute('d', path)
+      svg.appendChild(area)
+      seekBarContainer.appendChild(svg)
+      seekBarContainer.classList.add('ft-has-popularity')
+    }
+
+    watch([() => props.popularityMarkers, hasLoaded, isLive, () => t('Video.Player.Most Replayed')], refreshPopularityGraph, { flush: 'post' })
 
     function addUICustomizations() {
       /** @type {HTMLDivElement} */
@@ -5962,7 +6012,8 @@ export default defineComponent({
       refreshAbRepeatMarkers()
 
       setupChapterPreview()
-      setupSponsorBlockSeekBarTooltip()
+      setupSeekBarTooltip()
+      refreshPopularityGraph()
 
       const fullscreenButton = controlsContainer.querySelector('.shaka-fullscreen-button')
       if (fullscreenButton instanceof HTMLElement) {

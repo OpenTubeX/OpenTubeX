@@ -1320,6 +1320,7 @@ Video:
   Sponsor Block category short:
     filler: Avsporinger
   Player:
+    Most Replayed: "Mest spilt på nytt"
     Cast: "Cast"
     Music Mode: "Musikkmodus"
     Music Mode Description: "Spill av videoer med 1× hastighet og start nye videoer fra begynnelsen i denne fanen. De lagrede standardinnstillingene for avspilling forblir uendret."

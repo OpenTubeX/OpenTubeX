@@ -1307,6 +1307,7 @@ Video:
   Sponsor Block category:
     hook: Sissejuhatus/tervitus
   Player:
+    Most Replayed: "Enim uuesti vaadatud"
     Cast: "Edasta"
     Music Mode: "Muusikarežiim"
     Music Mode Description: "Esita videoid kiirusel 1× ja alusta sellel vahelehel uusi videoid algusest. Sinu salvestatud taasesituse vaikeseaded jäävad muutmata."

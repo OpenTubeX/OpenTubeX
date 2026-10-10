@@ -1309,6 +1309,7 @@ Video:
   Sponsor Block category:
     hook: 開場／問候
   Player:
+    Most Replayed: "重播次數最多"
     Cast: "投放"
     Music Mode: "音樂模式"
     Music Mode Description: "在此分頁中以1倍速播放影片，並從頭開始播放新影片。已儲存的預設播放設定維持不變。"

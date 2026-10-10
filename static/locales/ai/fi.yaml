@@ -1344,6 +1344,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Livechatin tallenne on käytössä.  Chat-viestit näkyvät tässä videon toiston aikana.
   Premiere started: Ensi-ilta on käynnissä. Alkoi {timeAgo}
   Player:
+    Most Replayed: "Eniten uudelleen katsottu"
     Cast: "Suoratoista"
     Music Mode: "Musiikkitila"
     Music Mode Description: "Toista videot nopeudella 1× ja aloita uudet videot alusta tässä välilehdessä. Tallennetut toiston oletusasetukset pysyvät ennallaan."

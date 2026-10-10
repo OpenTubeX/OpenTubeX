@@ -6,6 +6,7 @@ import { ClientType, Constants, Utils, YT } from 'youtubei.js'
 
 import { getPaidPromotionDurationMs } from '../../src/renderer/helpers/player/paidPromotion.js'
 import { getLocalPremiereState } from '../../src/renderer/helpers/premiere.js'
+import { getVideoPopularity, normalizeVideoPopularityResponse } from '../../src/renderer/helpers/player/videoPopularity.js'
 import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvrEnabled } from '../../src/renderer/helpers/player/liveManifest.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/api/local.js', import.meta.url), 'utf8')
@@ -45,6 +46,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     generateContentPoToken: () => { requests.push('token'); return token },
     process: { env: { IS_ELECTRON: true } },
     getPaidPromotionDurationMs,
+    normalizeVideoPopularityResponse,
     getLocalPremiereState,
     getLiveDvrEnabled,
     getAndroidLiveHlsManifestUrl,
@@ -143,6 +145,25 @@ test('reuses embedded watch metadata and honors skipped token generation', async
   const result = await load('testVideo01', { shouldGeneratePoToken: () => false })
   assert.deepEqual(requests, ['ANDROID'])
   assert.equal(result.poToken, undefined)
+})
+
+test('normalizes legacy popularity markers before parsing watch metadata', async () => {
+  const { load } = loader({ next: Promise.resolve({ data: {
+    contents: { twoColumnWatchNextResults: {
+      results: { results: { contents: [] } }, secondaryResults: { secondaryResults: { results: [] } }
+    } },
+    playerOverlays: { playerOverlayRenderer: { decoratedPlayerBarRenderer: { decoratedPlayerBarRenderer: {
+      playerBar: { multiMarkersPlayerBarRenderer: { markersMap: [{
+        key: 'HEATSEEKER', value: { heatmap: { heatmapRenderer: { heatMarkers: [{
+          heatMarkerRenderer: {
+            timeRangeStartMillis: 1000, markerDurationMillis: 1000, heatMarkerIntensityScoreNormalized: 1
+          }
+        }] } } }
+      }] } }
+    } } } }
+  } }) })
+  const result = await load('testVideo01')
+  assert.deepEqual(getVideoPopularity(result.info), [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
 })
 
 test('propagates a metadata failure while token generation is pending', async () => {

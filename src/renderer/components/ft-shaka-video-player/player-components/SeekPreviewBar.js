@@ -23,6 +23,12 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
   setValue(time) {
     super.setValue(this.previewTime ?? time)
   }
+
+  // Notify after Shaka updates the preview text for mouse, touch and keyboard.
+  onChange() {
+    super.onChange()
+    this.controls.dispatchEvent(new shaka.util.FakeEvent('seekbarvaluechange', { time: this.getValue() }))
+  }
 }
 
 shaka.ui.Controls.registerSeekBar({

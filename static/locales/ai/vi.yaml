@@ -1336,6 +1336,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
+    Most Replayed: "Được phát lại nhiều nhất"
     Cast: "Truyền phát"
     Music Mode: "Chế độ âm nhạc"
     Music Mode Description: "Phát video ở tốc độ 1× và bắt đầu video mới từ đầu trong thẻ này. Các thiết lập phát mặc định đã lưu của bạn không thay đổi."

@@ -1623,6 +1623,7 @@ Video:
     Show Original Details: 원본 정보 표시
     Show Modified Details: 수정된 정보 표시
   Player:
+    Most Replayed: "가장 많이 다시 본 부분"
     Cast: "전송"
     Music Mode: "음악 모드"
     Music Mode Description: "이 탭에서 동영상을 1배속으로 재생하고 새 동영상을 처음부터 시작합니다. 저장된 기본 재생 설정은 변경되지 않습니다."

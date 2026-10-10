@@ -1305,6 +1305,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa ao vivo está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
+    Most Replayed: "Mais repetido"
     Cast: "Transmitir"
     Music Mode: "Modo de música"
     Music Mode Description: "Reproduza vídeos a 1× e inicie novos vídeos desde o começo nesta aba. Suas configurações padrão de reprodução salvas permanecem inalteradas."
