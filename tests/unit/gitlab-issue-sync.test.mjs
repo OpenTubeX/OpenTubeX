@@ -432,6 +432,22 @@ test('invalid reference definitions rewrite prose without defining shortcut link
   }
 })
 
+test('unescaped opening brackets prevent reference definitions from hiding prose', async () => {
+  for (const example of ['[foo[REF]: /url', '> [foo[REF]: /url', '- [foo[REF]: /url']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('#1', gitlabReference)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`#${target.number}`, githubReference)))
+  }
+})
+
 test('validated definitions preserve balanced destinations and multiline titles', async () => {
   for (const example of ['[REF]: /url(a) "title REF"\n\n[REF]', '[REF]: <my url> (title REF)\n\n[REF]', '[REF]: <>\n\n[REF]', '[REF]: /url\\(a\\) \'title REF\'\n\n[REF]', '[REF]:\n  https://example.org\n  (title REF)\n\n[REF]', '[REF]: /url "title\nREF"\n\n[REF]', '> [REF]:\n> https://example.org\n> "title REF"\n>\n> [REF]', '- [REF]:\n  https://example.org\n  "title REF"\n\n  [REF]']) {
     const { state, client } = fixture()
@@ -983,6 +999,20 @@ test('bare local URLs retain balanced parentheses and leave unmatched punctuatio
   state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
   checkLinks(state.notes[1].body, target.html_url, state.sources[0].web_url)
+})
+
+test('quoted bare local URLs leave quotes and punctuation outside converted links', async () => {
+  const { state, client } = fixture()
+  const examples = [['"', ''], ["'", ''], ['"', '?x=(a)'], ["'", '#note_(a)']]
+  const body = url => examples.map(([quote, suffix]) => `See ${quote}${url}${suffix}${quote}.`).join('\n')
+  const expected = (url, otherLabel, other) => examples.map(([quote, suffix]) => `See ${quote}[Report](${url}${suffix}) ([${otherLabel}](${other}))${quote}.`).join('\n')
+  state.sources[0].description = body(state.sources[0].web_url)
+  await sync(client)
+  const target = state.targets[0]
+  assert.ok(target.body.endsWith(expected(state.sources[0].web_url, `GitHub #${target.number}`, target.html_url)))
+  state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  assert.ok(state.notes[1].body.endsWith(expected(target.html_url, 'GitLab #1', state.sources[0].web_url)))
 })
 
 test('setext headings end paragraphs before indented code', async () => {

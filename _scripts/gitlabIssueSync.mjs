@@ -228,7 +228,7 @@ function referenceResolver(sources, targets, mergeRequests) {
             ']': (token.match(/\]/g) ?? []).length - (token.match(/\[/g) ?? []).length,
           }
           let url = token
-          while (/[.,;:!?)\]]$/.test(url)) {
+          while (/[.,;:!?)\]"']$/.test(url)) {
             const last = url.at(-1)
             if (last in excess) {
               if (excess[last] <= 0) break
@@ -285,7 +285,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const definitionEnd = (index, text, depth, listIndent) => {
-      const label = text.match(/^ {0,3}\[((?:\\.|[^\]\\])+)\]:[ \t]*/)
+      const label = text.match(/^ {0,3}\[((?:\\.|[^[\]\\])+)\]:[ \t]*/)
       if (!label || !label[1].trim() || label[1].length > 999) return null
       let destinationLine = text.slice(label[0].length)
       if (!destinationLine.trim()) {
