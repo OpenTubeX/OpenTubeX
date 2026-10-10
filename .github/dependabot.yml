@@ -65,6 +65,7 @@ updates:
       - dependency-name: "qrcode"
       - dependency-name: "quickjs-emscripten-core"
       - dependency-name: "sax"
+      - dependency-name: "srcset"
       - dependency-name: "unist-util-visit"
       - dependency-name: "vfile"
       - dependency-name: "vue-sonner"

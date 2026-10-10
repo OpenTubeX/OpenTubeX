@@ -11,6 +11,7 @@ import { fromHtml } from 'hast-util-from-html'
 import { visit, SKIP } from 'unist-util-visit'
 import { VFile } from 'vfile'
 import { escapeAttribute } from 'entities'
+import { parseSrcset, stringifySrcset } from 'srcset'
 
 const project = 'opentubex/OpenTubeX'
 // GitLab serves uploads through the stable project ID, not the repository path.
@@ -51,7 +52,7 @@ function markdown(body, transform) {
   })
   const protectedHtml = []
   visit(raw(html, { file: new VFile(body) }), 'element', node => {
-    if (htmlStarts.get(node.position?.start.offset) === node.tagName) protectedHtml.push(node.position)
+    if (['a', 'code', 'pre', 'script', 'style', 'textarea'].includes(node.tagName) && htmlStarts.get(node.position?.start.offset) === node.tagName) protectedHtml.push(node.position)
   })
   const edits = []
   visit(tree, (node, index, parent) => {
@@ -82,12 +83,15 @@ export function content(body = '', fromGitlab = false) {
         if (element.type === 'comment' && element.value.trimStart().startsWith(`${prefix}:`)) {
           edits.push({ ...element.position, replacement: '' })
         }
-        for (const key of ['src', 'href', 'poster']) {
+        for (const key of ['src', 'href', 'poster', 'srcSet']) {
           const value = element.properties?.[key]
           const position = element.data?.position?.properties[key]
-          if (typeof value === 'string' && upload(value) !== value && position) {
-            edits.push({ ...position, replacement: `${key}="${escapeAttribute(upload(value))}"` })
-          }
+          if (typeof value !== 'string' || !position) continue
+          const candidates = key === 'srcSet' ? parseSrcset(value) : [{ url: value }]
+          if (!candidates.some(({ url }) => upload(url) !== url)) continue
+          const updated = candidates.map(candidate => ({ ...candidate, url: upload(candidate.url) }))
+          const attribute = key === 'srcSet' ? stringifySrcset(updated) : updated[0].url
+          edits.push({ ...position, replacement: `${key.toLowerCase()}="${escapeAttribute(attribute)}"` })
         }
       })
       for (const { start, end, replacement } of edits.sort((a, b) => b.start.offset - a.start.offset)) {

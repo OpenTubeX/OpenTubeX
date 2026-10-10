@@ -187,11 +187,11 @@ test('mirrors issue 1993 references with GitLab titles and the actual GitHub num
   await sync(client)
   const target = state.targets[0]
   state.sources[0].description = '* [ ] #538\n* [ ] https://gitlab.com/opentubex/OpenTubeX/-/work_items/538\n\n`open\n\nOutside #538`\n\n<a href="https://example.org">#538</a> Outside #538'
-  state.notes.push({ id: 10, body: 'See #538', author: { id: 1, username: 'reporter' } })
+  state.notes.push({ id: 10, body: 'See <span>#538</span> and <strong>#538</strong>', author: { id: 1, username: 'reporter' } })
   await sync(client)
   const reference = `[Smart pull for "View All" playlists](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
   assert.ok(target.body.endsWith(`* [ ] ${reference}\n* [ ] ${reference}\n\n` + '`open\n\nOutside ' + reference + '`\n\n<a href="https://example.org">#538</a> Outside ' + reference))
-  assert.ok(state.comments[0].body.endsWith(`See ${reference}`))
+  assert.ok(state.comments[0].body.endsWith(`See <span>${reference}</span> and <strong>${reference}</strong>`))
   state.writes = []
   await sync(client)
   assert.deepEqual(state.writes, [])
@@ -203,10 +203,10 @@ test('GitHub references mirrored back to GitLab keep their actual issue and PR U
   const target = state.targets[0]
   state.targets.push({ number: 538, title: 'Unrelated pull request', body: '', state: 'open',
     pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/538' })
-  state.comments.push({ id: 20, body: `See #${target.number} and #538`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  state.comments.push({ id: 20, body: `See <span>#${target.number}</span> and <strong>#538</strong>`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
   assert.ok(state.notes[1].body.endsWith(
-    `See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Unrelated pull request](https://github.com/OpenTubeX/OpenTubeX/pull/538)`))
+    `See <span>[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))</span> and <strong>[Unrelated pull request](https://github.com/OpenTubeX/OpenTubeX/pull/538)</strong>`))
   state.writes = []
   await sync(client)
   assert.deepEqual(state.writes, [])
@@ -425,6 +425,7 @@ test('converts upload links and image dimensions without changing unrelated link
   assert.equal(content('<img src="/uploads/hash/image.png" width="900">', true), `<img src="${url}" width="900">`)
   assert.equal(content('Text <a href="/uploads/hash/image.png">attachment</a>', true), `Text <a href="${url}">attachment</a>`)
   assert.equal(content('<div><img src="/uploads/hash/image.png"><a href="https://example.org/uploads/other">/uploads/literal</a></div>', true), `<div><img src="${url}"><a href="https://example.org/uploads/other">/uploads/literal</a></div>`)
+  assert.equal(content('<source srcset="/uploads/hash/image.png 1x, https://example.org/uploads/other.png 2x, /uploads/hash/large.png 3x">', true), `<source srcset="${url} 1x, https://example.org/uploads/other.png 2x, https://gitlab.com/-/project/85121418/uploads/hash/large.png 3x">`)
   assert.equal(fromMarkdown(content('![image](/uploads/hash/image(1).png){width=100}', true)).children[0].children[0].url, 'https://gitlab.com/-/project/85121418/uploads/hash/image(1).png')
   const unchanged = '[link](https://example.org){width=100}\n![image](https://example.org/image.png){custom=100}\nText {width=100}\n![image](https://example.org/image.png) [link](https://example.org){width=100}'
   assert.equal(content(unchanged, true), unchanged)
