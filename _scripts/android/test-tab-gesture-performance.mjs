@@ -21,7 +21,11 @@ try {
       page = browser.contexts()[0].pages()[0]
       if (page) break
       await browser.close()
-    } catch { /* The app's WebView may still be starting. */ }
+    } catch {
+      // The app's WebView may still be starting. Release a partial connection.
+      await browser?.close().catch(() => {})
+      browser = undefined
+    }
     await delay(100)
   }
   assert.ok(page, 'Android WebView is available')
