@@ -124,6 +124,7 @@ function referenceResolver(sources, targets, mergeRequests) {
   const rewrite = (body, side) => {
     let fence = null
     let htmlCode = null
+    let quoteDepth = 0
     const listIndents = []
     const result = []
     let prose = []
@@ -156,7 +157,15 @@ function referenceResolver(sources, targets, mergeRequests) {
           continue
         }
       }
-      const expanded = line.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+      let text = line
+      let depth = 0
+      while (/^ {0,3}> ?/.test(text)) {
+        text = text.replace(/^ {0,3}> ?/, '')
+        depth++
+      }
+      if (!fence && depth !== quoteDepth) listIndents.length = 0
+      quoteDepth = depth
+      const expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
       const indent = expanded.match(/^ */)[0].length
       if (!fence && line.trim()) {
         while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop()

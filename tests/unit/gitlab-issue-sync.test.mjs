@@ -358,6 +358,21 @@ test('list-item fences preserve literal references and resume conversion after c
   }
 })
 
+test('blockquote containers preserve indented and fenced code while converting prose', async () => {
+  const { state, client } = fixture()
+  const quoted = reference => ['* Parent', '', `>     ${reference}`, `> >     ${reference}`, `> \t${reference}`,
+    '> - ```text', `>   ${reference}`, '>   ```', `> See ${reference}`, '', `See ${reference}`].join('\n')
+  state.sources[0].description = quoted('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(quoted('#1').replaceAll('See #1', `See ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: quoted(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(quoted(`#${target.number}`).replaceAll(`See #${target.number}`, `See ${githubReference}`)))
+})
+
 test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', () => {
   const body = content('![video](/uploads/hash/video.mp4)\n@person\n/close', true)
   assert.match(body, /https:\/\/gitlab.com\/-\/project\/85121418\/uploads\/hash\/video.mp4/)
