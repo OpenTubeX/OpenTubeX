@@ -228,7 +228,7 @@ test.describe('failed subscription refresh summary', () => {
     const summary = page.locator('.toast', { hasText: 'Channels that could not be refreshed' })
     const indicator = summary.locator('..').locator('.timeout-indicator .embeddedProgressPath')
     await expect(summary).toBeVisible()
-    await expect(page.locator('.tab.active .tabLoadingLine')).toBeVisible()
+    await expect(page.locator('.tab.active .tabLoadingLine')).toHaveCount(0)
     await expect(indicator).toHaveCount(0)
 
     releaseSecondFeed()
@@ -259,7 +259,7 @@ test.describe('incremental subscription feed refresh', () => {
     await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
-    await expect(page.locator('.tab.active .tabLoadingLine')).toBeVisible()
+    await expect(page.locator('.tab.active .tabLoadingLine')).toHaveCount(0)
 
     // Channel 0 is done well before the pending channel 1, which keeps its
     // cached entry in the meantime
@@ -543,7 +543,7 @@ test.describe('subscription refresh bottom progress', () => {
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
     const progressBar = page.locator('.app > .progressBar')
     await expect(progressBar).toBeVisible()
-    await expect(page.locator('.tab.active .tabLoadingLine')).toBeVisible()
+    await expect(page.locator('.tab.active .tabLoadingLine')).toHaveCount(0)
     await expect(page.locator('.tabsProgressBar')).toHaveCount(0)
 
     await goTo(page, 'history')

@@ -234,10 +234,10 @@ test.describe('desktop switch layout', () => {
       const textElement = element.querySelector('.switch-label-text')
       const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
       const range = document.createRange()
-      range.selectNodeContents(textElement)
+      range.selectNodeContents(textElement.firstChild)
       const textRects = Array.from(range.getClientRects())
       return {
-        lineCount: textRects.length,
+        lineCount: new Set(textRects.filter(rect => rect.width > 0).map(rect => Math.round(rect.top))).size,
         indicatorGap: indicator.left - Math.max(...textRects.map(rect => rect.right)),
         labelMaxInlineSize: getComputedStyle(element.querySelector('.switch-label')).maxInlineSize
       }

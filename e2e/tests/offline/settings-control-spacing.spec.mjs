@@ -228,7 +228,7 @@ for (const uiScale of [100, 95]) {
       }
     })
 
-    test('API and private ID fields center their outlines and tag labels blend into their panel', async ({ app, page }, testInfo) => {
+    test('API and private ID fields center their outlines and tag labels preserve their outlined notch', async ({ app, page }, testInfo) => {
       const section = await goToSettingsSection(page, 'add-ons')
       for (const [width, viewportWidth] of [[1000, 1600], [450, 480], [360, 480], [360, 1600]]) {
         await resize(app, page, viewportWidth, uiScale)
@@ -269,7 +269,8 @@ for (const uiScale of [100, 95]) {
           label: getComputedStyle(element).backgroundColor,
           panel: getComputedStyle(element.closest('.ft-input-tags-component')).backgroundColor
         }))
-        expect.soft(colors.label).toBe(colors.panel)
+        expect.soft(colors.label).toBe('rgba(0, 0, 0, 0)')
+        expect.soft(colors.panel).not.toBe('rgba(0, 0, 0, 0)')
         await section.getByLabel('Private user ID (optional)', { exact: true }).scrollIntoViewIfNeeded()
         await captureAppFramebuffer(app, testInfo, `sponsorblock-spacing-${width}-${viewportWidth}`)
       }
@@ -540,7 +541,7 @@ for (const uiScale of [100, 95]) {
 
     test('keeps password eyes smaller on desktop while preserving mobile size', async ({ app, page }) => {
       const section = await goToSettingsSection(page, 'privacy')
-      const toggle = section.locator('.passwordVisibilityToggle')
+      const toggle = section.getByLabel('Password', { exact: true }).locator('..').getByRole('button', { name: 'Show password', exact: true })
       expect(await toggle.evaluate(element => getComputedStyle(element).fontSize)).toBe('20px')
       await resize(app, page, 480, uiScale)
       await expect(toggle).toHaveCSS('font-size', '24px')

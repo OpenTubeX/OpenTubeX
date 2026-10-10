@@ -38,8 +38,8 @@ for (const uiScale of [100, 125]) {
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
       await goTo(page, 'settings')
       const actions = page.locator('.settingsHeaderActions')
-      expect(await actions.locator('button').evaluateAll(buttons => {
-        const bounds = buttons.map(button => button.getBoundingClientRect())
+      await expect.poll(() => actions.locator('button').evaluateAll(buttons => {
+        const bounds = buttons.map(button => button.getBoundingClientRect()).filter(rect => rect.width > 0)
         return bounds.every((rect, index) => index === 0 || rect.left - bounds[index - 1].right >= 7.99)
       })).toBe(true)
       const category = page.locator('.settingsMenu .title[data-section="appearance"]')

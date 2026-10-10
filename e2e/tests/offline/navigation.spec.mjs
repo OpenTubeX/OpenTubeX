@@ -57,6 +57,10 @@ for (const uiScale of [100, 125]) {
           return Math.abs(track.bottom - handle.bottom) * devicePixelRatio
         })).toBeLessThanOrEqual(2)
       }
+      // Ensure widening reduces wrapped content rather than only changing its width.
+      await page.locator('.fixedNavigationOptions .switch-label-text').first().evaluate(element => {
+        element.firstChild.textContent = 'Always display the navigation sidebar while playing videos and scrolling through the current page'
+      })
       await scrollToEnd()
       const narrowHeight = await content.evaluate(element => element.getBoundingClientRect().height)
       const narrowThumb = await thumb.evaluate(element => element.getBoundingClientRect().height)
@@ -70,7 +74,7 @@ for (const uiScale of [100, 125]) {
       // Use a verbose translated label so the language switch actually reduces
       // the scroll range even when the standard captions fit the same rows.
       await page.locator('.fixedNavigationOptions .switch-label-text').first().evaluate(element => {
-        element.textContent = 'Navigationsleiste auch während der Wiedergabe und beim Scrollen immer anzeigen'
+        element.firstChild.textContent = 'Navigationsleiste auch während der Wiedergabe und beim Scrollen immer anzeigen'
       })
       await scrollToEnd()
       const germanHeight = await content.evaluate(element => element.getBoundingClientRect().height)

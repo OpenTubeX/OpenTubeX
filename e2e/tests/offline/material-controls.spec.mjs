@@ -766,10 +766,18 @@ for (const scale of [100, 95]) {
             await expect(field).toHaveCSS('outline-style', 'none')
             const focused = await field.evaluate(element => {
               const style = getComputedStyle(element)
-              return { shadow: style.boxShadow, caret: style.caretColor, border: style.borderBottomColor }
+              return { shadow: style.boxShadow, caret: style.caretColor, border: element.closest('.outlined') ? getComputedStyle(element.parentElement.querySelector('.inputOutline')).borderBottomColor : style.borderBottomColor }
             })
-            expect(focused.shadow).toContain(variant === 'filled' ? '0px -2px' : '0px 0px 0px 2px')
-            expect(focused.caret).toBe(focused.border)
+            if (variant === 'filled') expect(focused.shadow).toContain('0px -2px')
+            else {
+              expect(focused.shadow).toContain('2px 0px 0px 0px inset')
+              expect(focused.shadow).toContain('-2px 0px 0px 0px inset')
+              expect(focused.shadow).toContain('0px -2px 0px 0px inset')
+            }
+            await expect.poll(() => field.evaluate(element => {
+              const outline = element.closest('.outlined') ? element.parentElement.querySelector('.inputOutline') : element
+              return getComputedStyle(element).caretColor === getComputedStyle(outline).borderBottomColor
+            })).toBe(true)
             await field.fill('/tmp/material-downloads')
             await field.blur()
             await expect(label).toBeVisible()
@@ -1252,7 +1260,7 @@ for (const scale of [100, 95]) {
 
     test('shows the complete password guidance without truncating the field label', async ({ page }) => {
       const section = await goToSettingsSection(page, 'privacy')
-      const input = section.locator('input[type="password"]')
+      const input = section.locator('input[type="password"]').first()
       await expect(input).toHaveAccessibleName('Password')
       await input.focus()
       await expect(input).toHaveAttribute('placeholder', 'Choose a password')
