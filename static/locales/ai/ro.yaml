@@ -2114,3 +2114,6 @@ Storage Startup Error:
   Retry: "Încearcă din nou"
 Native Permissions:
   Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."
+Library:
+  CouldNotOpen: "OpenTubeX nu a putut deschide biblioteca. Nu modificați fișierele de date."
+  RestoreProfile: "Închideți complet OpenTubeX și restaurați o copie de siguranță completă a profilului, inclusiv library.sqlite și fișierele asociate."

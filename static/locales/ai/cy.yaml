@@ -2088,3 +2088,6 @@ Storage Startup Error:
   Retry: "Ceisio eto"
 Native Permissions:
   Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."
+Library:
+  CouldNotOpen: "Ni allai OpenTubeX agor eich llyfrgell. Peidiwch â newid eich ffeiliau data."
+  RestoreProfile: "Caewch OpenTubeX yn llwyr ac adferwch gopi wrth gefn cyflawn o’r proffil, gan gynnwys library.sqlite a’r ffeiliau cysylltiedig."

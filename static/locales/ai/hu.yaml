@@ -2064,3 +2064,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."
+Library:
+  CouldNotOpen: "Az OpenTubeX nem tudta megnyitni a könyvtáradat. Hagyd változatlanul az adatfájlokat."
+  RestoreProfile: "Lépj ki teljesen az OpenTubeX alkalmazásból, és állítsd vissza a profil teljes biztonsági mentését, beleértve a library.sqlite fájlt és a hozzá tartozó fájlokat."

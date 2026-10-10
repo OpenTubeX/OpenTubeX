@@ -2083,3 +2083,6 @@ Storage Startup Error:
   Retry: "Försök igen"
 Native Permissions:
   Local Network: "Hitta enheter i ditt lokala nätverk och casta videor till dem, och synkronisera inställningar och data mellan enheter."
+Library:
+  CouldNotOpen: "OpenTubeX kunde inte öppna ditt bibliotek. Lämna dina datafiler oförändrade."
+  RestoreProfile: "Avsluta OpenTubeX helt och återställ en fullständig säkerhetskopia av profilen, inklusive library.sqlite och tillhörande filer."

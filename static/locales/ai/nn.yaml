@@ -2454,3 +2454,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."
+Library:
+  CouldNotOpen: "OpenTubeX kunne ikkje opne biblioteket ditt. La datafilene vere uendra."
+  RestoreProfile: "Avslutt OpenTubeX heilt og gjenopprett ein fullstendig tryggingskopi av profilen, inkludert library.sqlite og tilhøyrande filer."

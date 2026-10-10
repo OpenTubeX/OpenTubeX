@@ -2102,3 +2102,6 @@ Storage Startup Error:
   Retry: "Thử lại"
 Native Permissions:
   Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."
+Library:
+  CouldNotOpen: "OpenTubeX không thể mở thư viện của bạn. Giữ nguyên các tệp dữ liệu."
+  RestoreProfile: "Thoát hoàn toàn OpenTubeX và khôi phục bản sao lưu toàn bộ hồ sơ, bao gồm library.sqlite và các tệp đi kèm."

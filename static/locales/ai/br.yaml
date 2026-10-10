@@ -2074,3 +2074,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Kavout trevnadoù war ho rouedad lec'hel ha skignañ videoioù warno, ha goubredañ an arventennoù hag ar roadennoù etre trevnadoù."
+Library:
+  CouldNotOpen: "N'eus ket bet gallet digeriñ ho levraoueg gant OpenTubeX. Na gemmit ket ho restroù roadennoù."
+  RestoreProfile: "Kuitait OpenTubeX penn-da-benn hag adlakait un eilskrid klok eus ho profil, ennañ library.sqlite hag ar restroù a ya gantañ."

@@ -2067,3 +2067,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "尋找區域網路中的裝置並向其投放影片，同時在裝置之間同步設定和資料。"
+Library:
+  CouldNotOpen: "OpenTubeX 無法開啟您的資料庫。請勿變更資料檔案。"
+  RestoreProfile: "請完全結束 OpenTubeX，然後還原完整的設定檔備份，包括 library.sqlite 及其相關檔案。"

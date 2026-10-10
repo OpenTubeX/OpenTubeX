@@ -8,16 +8,7 @@ import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
-
-const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
-const premiereStart = subscriptionsSource.indexOf('export function isUpcomingPremiere(')
-const premiereSource = subscriptionsSource.slice(premiereStart, subscriptionsSource.indexOf('\n}\n', premiereStart) + 2)
-const isUpcomingPremiere = compileFunction(`${premiereSource.replace('export ', '')}\nreturn isUpcomingPremiere`,
-  ['getUpcomingPremiereTimestamp', 'isRssUpcomingPremiere'])(getUpcomingPremiereTimestamp, () => false)
-const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
-const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
-const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,
-  ['isUpcomingPremiere'])(isUpcomingPremiere)
+import { isVideoHiddenByPreferences } from '../../src/renderer/helpers/subscription-visibility.js'
 
 const source = (await readFile(new URL('../../src/renderer/composables/useHomeRecommendations.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

@@ -2515,3 +2515,6 @@ Storage Startup Error:
   Retry: "다시 시도"
 Native Permissions:
   Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."
+Library:
+  CouldNotOpen: "OpenTubeX가 라이브러리를 열지 못했습니다. 데이터 파일을 변경하지 마세요."
+  RestoreProfile: "OpenTubeX를 완전히 종료하고 library.sqlite 및 관련 파일을 포함한 전체 프로필 백업을 복원하세요."

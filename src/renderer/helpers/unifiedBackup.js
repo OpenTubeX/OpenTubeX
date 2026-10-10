@@ -15,12 +15,38 @@ export function mergeBackupProfile(current, imported) {
 export function mergeBackupPlaylist(current, imported) {
   if (!current) return imported
   const videos = [...current.videos]
-  for (const video of imported.videos) {
-    const exists = videos.some(saved => video.playlistItemId != null
-      ? saved.playlistItemId === video.playlistItemId
-      : saved.videoId === video.videoId && saved.timeAdded === video.timeAdded)
-    if (!exists) videos.push(video)
+  const itemKey = video => JSON.stringify([video.playlistItemId, video.videoId])
+  const timeKey = video => JSON.stringify([video.videoId, video.timeAdded])
+  const byItem = new Map()
+  const byTime = new Map()
+  const add = (map, key, index) => {
+    const positions = map.get(key)
+    if (positions) positions.push(index)
+    else map.set(key, [index])
   }
+  // Consume each saved occurrence once. Imports without membership IDs,
+  // including Takeout CSV, still match saved members by video and timestamp.
+  for (let index = current.videos.length - 1; index >= 0; index--) {
+    const video = current.videos[index]
+    if (video.playlistItemId != null) add(byItem, itemKey(video), index)
+    add(byTime, timeKey(video), index)
+  }
+  const matched = new Set()
+  const consume = positions => {
+    while (positions?.length && matched.has(positions.at(-1))) positions.pop()
+    if (!positions?.length) return false
+    matched.add(positions.pop())
+    return true
+  }
+  const matchedItems = new Set()
+  imported.videos.forEach((video, index) => {
+    if (video.playlistItemId != null && consume(byItem.get(itemKey(video)))) matchedItems.add(index)
+  })
+  imported.videos.forEach((video, index) => {
+    if (matchedItems.has(index)) return
+    if (video.playlistItemId == null && consume(byTime.get(timeKey(video)))) return
+    videos.push(video)
+  })
   return { ...current, ...imported, protected: current.protected, videos }
 }
 
@@ -28,6 +54,8 @@ export function mergeBackupHistoryRecord(current, imported) {
   if (!current) return imported
   const newer = imported.timeWatched > current.timeWatched ? imported : current
   return {
+    ...current,
+    ...imported,
     ...newer,
     timeWatched: Math.max(current.timeWatched, imported.timeWatched),
     watchProgress: Math.max(current.watchProgress ?? 0, imported.watchProgress ?? 0),
