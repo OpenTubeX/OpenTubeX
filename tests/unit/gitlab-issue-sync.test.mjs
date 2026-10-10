@@ -500,8 +500,41 @@ test('invalid inline links rewrite prose labels and parenthesized contents', asy
   }
 })
 
+test('invalid backslash-whitespace destinations do not shield prose references', async () => {
+  for (const example of ['[Outside REF](bad\\ destination)', '[Outside REF](bad\\\tdestination)', '[Outside REF]: bad\\ destination\n\n[Outside REF]', '[Outside REF]: bad\\\tdestination\n\n[Outside REF]']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('active nested links leave outer labels as prose that rewrites references', async () => {
+  for (const inner of ['[inner REF](https://example.org)', '[inner REF](LOCAL)', '[inner REF][known]', '[known]', '<https://example.org>']) {
+    const { state, client } = fixture()
+    const body = (reference, url) => `[outer ${inner} Outside REF](https://other.example)\n\n[known]: https://example.org`.replaceAll('REF', reference).replace('LOCAL', url)
+    state.sources[0].description = body('#1', state.sources[0].web_url)
+    await sync(client)
+    const target = state.targets[0]
+    const expected = (reference, url, replacement) => body(reference, url).replace(`Outside ${reference}`, `Outside ${replacement}`).replace(`[inner ${reference}](${url})`, replacement)
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(expected('#1', state.sources[0].web_url, gitlabReference)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`, target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(expected(`#${target.number}`, target.html_url, githubReference)))
+  }
+})
+
 test('valid inline links keep their labels destinations and tooltip contents intact', async () => {
-  for (const example of ['[REF](good(foo))', '[REF](<good destination>)', '[REF](<good(foo>)', '[REF](<good)foo>)', '[REF]()', '![REF](good)', '[REF](good\\(foo\\))', '[REF](good "title REF")', "[REF](good 'title REF')", '[REF](good (title REF))', '[REF](good "title\nREF")']) {
+  for (const example of ['[REF](good(foo))', '[REF](<good destination>)', '[REF](<good(foo>)', '[REF](<good)foo>)', '[REF]()', '![REF](good)', '[REF](good\\(foo\\))', '[REF](bad\\q)', '[REF](<bad\\ destination>)', '[outer ![REF](good) REF](good)', '[outer `[inner](good)` REF](good)', '[outer [inner](bad destination) REF](good)', '[outer https://example.org REF](good)', '![outer [inner REF](good)](image)', '[REF](good "title REF")', "[REF](good 'title REF')", '[REF](good (title REF))', '[REF](good "title\nREF")']) {
     const { state, client } = fixture()
     const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
     state.sources[0].description = body('#1')
@@ -908,6 +941,22 @@ test('HTML comments preserve references across code-looking lines and through EO
     await sync(client)
     const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
     assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('unfinished inline comments remain prose while closed comments stay literal', async () => {
+  for (const example of ['Text <!-- Outside REF', 'Text <!-- Outside REF\nOutside REF', 'Text <!-- REF --> Outside REF', 'Text <!-- REF --!> Outside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
   }
 })
 

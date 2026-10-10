@@ -101,13 +101,13 @@ function referenceResolver(sources, targets, mergeRequests) {
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
   const linkDestination = text => {
-    const destination = text.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
+    const destination = text.match(/^<(?:\\[!-/:-@[-`{-~]|[^<>\n])*>|^(?:\\[!-/:-@[-`{-~]|[^\s<>])+/)?.[0]
     if (!destination) return null
     if (!destination.startsWith('<')) {
       if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
       let parentheses = 0
       for (let position = 0; position < destination.length; position++) {
-        if (destination[position] === '\\') position++
+        if (destination[position] === '\\' && /[!-/:-@[-`{-~]/.test(destination[position + 1] ?? '')) position++
         else if (destination[position] === '(') parentheses++
         else if (destination[position] === ')' && --parentheses < 0) return null
       }
@@ -188,8 +188,9 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?--!?>|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
       let output = ''
+      let hasLink = false
       let position = 0
       let match
       while ((match = tokens.exec(text))) {
@@ -215,9 +216,21 @@ function referenceResolver(sources, targets, mergeRequests) {
             tokens.lastIndex = end
             token = text.slice(match.index, end)
             const label = text.slice(start + 1, labelEnd - 1)
+            const nested = image ? null : rewriteProse(label)
+            if (nested?.hasLink) {
+              link = null
+              end = labelEnd
+              tokens.lastIndex = end
+            }
             const suffix = text.slice(labelEnd, end)
-            if (link && !image) token = urlReference(link.url, side, link.tooltip) ?? token
-            else if (!suffix && !referenceLabels.has(labelKey(label))) token = `${image ? '!' : ''}[${rewriteProse(label)}]`
+            if (link && !image) {
+              hasLink = true
+              token = urlReference(link.url, side, link.tooltip) ?? token
+            } else if (nested?.hasLink || (!suffix && !referenceLabels.has(labelKey(label)))) {
+              const rewritten = nested ?? rewriteProse(label)
+              hasLink ||= rewritten.hasLink
+              token = `${image ? '!' : ''}[${rewritten.body}]`
+            } else if (!image) hasLink = true
           }
         } else if (token === '<') {
           const remaining = text.slice(match.index)
@@ -226,6 +239,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           const autolink = remaining.match(/^<(?:[a-z][a-z\d+.-]{1,31}:[^\s<>]*|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)*)>/i)
           const end = raw?.[0] ?? autolink?.[0] ?? (tag?.index === 0 ? tag[0] : null)
           if (end) {
+            hasLink ||= Boolean(autolink)
             tokens.lastIndex = match.index + end.length
             token = urlReference(end.slice(1, -1), side) ?? end
           }
@@ -254,7 +268,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         output += token
         position = tokens.lastIndex
       }
-      return output + text.slice(position)
+      return { body: output + text.slice(position), hasLink }
     }
     const expandIndent = text => text.replace(/^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])[ \t]+)?/, prefix => {
       let column = 0
@@ -438,7 +452,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
     }
     flush()
-    return result.map(part => part.literal ?? rewriteProse(part.prose)).join('\n')
+    return result.map(part => part.literal ?? rewriteProse(part.prose).body).join('\n')
   }
   return { rewrite, pair }
 }
