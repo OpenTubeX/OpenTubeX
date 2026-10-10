@@ -596,6 +596,38 @@ test('unclosed HTML regions end when their list container exits', async () => {
   }
 })
 
+test('raw-text HTML blocks preserve their contents until closing or EOF', async () => {
+  for (const tag of ['script', 'style', 'textarea']) {
+    for (const close of [false, true]) {
+      const { state, client } = fixture()
+      const body = reference => `See ${reference}\n\n<${tag}>\nconst issue = "${reference}"\n    ${reference}\n\`\`\`\n${reference}${close ? `\n</${tag}>\nOutside ${reference}` : ''}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replace('See #1', `See ${gitlabReference}`).replace('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
+test('multiple blank lines retain list paragraphs and their indented code threshold', async () => {
+  const { state, client } = fixture()
+  const body = reference => `- item\n\n\n    Outside ${reference}\n\n      ${reference}\n\nOutside ${reference}`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
 test('thematic breaks do not turn following indented code into list prose', async () => {
   for (const rule of ['* * *', '- - -', '_ _ _', '***', '---', '___']) {
     const { state, client } = fixture()

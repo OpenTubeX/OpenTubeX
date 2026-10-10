@@ -135,7 +135,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!prose.length) return
       // Consume code, escapes, Markdown links, HTML, and URLs before considering
       // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      result.push(prose.join('\n').replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
         if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           return (urlReference(url, side) ?? url) + token.slice(url.length)
@@ -199,7 +199,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         if (/^ {4}/.test(lineContent)) indentedCode = true
       }
       if (!fence && !indentedCode) {
-        const opening = lineContent.match(/<(code|pre)\b[^>]*>|<!--/i)
+        const opening = lineContent.match(/<(code|pre|script|style|textarea)\b[^>]*>|<!--/i)
         if (opening) {
           htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
