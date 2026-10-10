@@ -305,8 +305,8 @@ test('tabs of the same channel share one cached avatar file', async ({ app, page
   const previewTab = await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
   await expect.poll(async () => {
     const state = await page.evaluate(() => window.ftElectron.tabs.getState())
-    return state.tabs.find(tab => tab.id === previewTab.id)?.loadState
-  }).toBe('loaded')
+    return state.presentedTabId
+  }).toBe(previewTab.id)
   const preview = await page.evaluate(tabId => window.ftElectron.tabs.capturePreview(tabId), previewTab.id)
   expect(preview).toMatch(/^data:image\/jpeg/)
 
