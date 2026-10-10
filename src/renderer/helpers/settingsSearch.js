@@ -335,6 +335,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       'Disable Smooth Scrolling',
       'Show Tab Previews',
       'Tab Layout',
+      'Tab Loading Indicator',
       'Load Missing Tab Icons'
     ].includes(group)) {
       return usingElectron && (

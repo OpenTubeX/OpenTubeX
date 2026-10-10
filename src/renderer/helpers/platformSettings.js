@@ -26,6 +26,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'showProgressBarToast',
   'showTabPreviews',
   'tabBarPosition',
+  'tabLoadingIndicator',
   'thumbnailLeftSwipeAction',
   'thumbnailRightSwipeAction',
   'ytDlpDownloadFolderPath',

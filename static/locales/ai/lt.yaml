@@ -507,6 +507,10 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Kortelės įkėlimo indikatorius
+      Bar: Juosta
+      Dot: Taškas (klasikinis)
     Compact Settings Categories: "Kompaktiškos nustatymų kategorijos"
     Playlist Thumbnail Size: "Grojaraščio miniatiūrų dydis"
     Compact Mobile Mini Player: "Kompaktiškas mobilusis mini leistuvas"

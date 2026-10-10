@@ -410,6 +410,10 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indikator for fanelasting
+      Bar: Linje
+      Dot: Prikk (klassisk)
     Compact Settings Categories: "Kompakte innstillingskategoriar"
     Playlist Thumbnail Size: "Storleik på miniatyrbilete i spelelister"
     Compact Mobile Mini Player: "Kompakt mobil minispelar"

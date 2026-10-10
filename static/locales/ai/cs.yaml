@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: Zadejte název a platnou adresu URL vyhledávání s protokolem HTTP nebo HTTPS, která obsahuje %s.
     Engine Limit: Můžete přidat až {count} vlastních vyhledávačů.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indikátor načítání karty
+      Bar: Pruh
+      Dot: Tečka (klasická)
     Compact Settings Categories: "Kompaktní kategorie nastavení"
     Playlist Thumbnail Size: "Velikost miniatur playlistu"
     Compact Mobile Mini Player: "Kompaktní mobilní minipřehrávač"

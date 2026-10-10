@@ -365,6 +365,10 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Индикатор загрузки вкладки
+      Bar: Полоса
+      Dot: Точка (классическая)
     Compact Settings Categories: "Компактные категории настроек"
     Playlist Thumbnail Size: "Размер миниатюр плейлиста"
     Compact Mobile Mini Player: "Компактный мобильный мини-плеер"

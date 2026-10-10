@@ -392,6 +392,10 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Chỉ báo tải thẻ
+      Bar: Thanh
+      Dot: Chấm (cổ điển)
     Compact Settings Categories: "Danh mục cài đặt nhỏ gọn"
     Playlist Thumbnail Size: "Kích thước hình thu nhỏ danh sách phát"
     Compact Mobile Mini Player: "Trình phát mini gọn trên di động"

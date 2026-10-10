@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: 分頁載入指示器
+      Bar: 進度條
+      Dot: 圓點（經典）
     Compact Settings Categories: "精簡設定類別"
     Playlist Thumbnail Size: "播放清單縮圖大小"
     Compact Mobile Mini Player: "精簡行動迷你播放器"

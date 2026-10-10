@@ -22,12 +22,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tabLoadingDot {
-    animation: none;
-  }
-}
-
 :global(:root[data-reduced-motion='reduce']) .tabLoadingDot {
   animation: none;
 }

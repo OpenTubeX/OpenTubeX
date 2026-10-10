@@ -695,6 +695,10 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Tab Loading Style
+      Bar: Bar
+      Dot: Dot (classic)
     Compact Mobile Mini Player: "Compact mobile mini player"
     Always Show Mobile Search Bar: "Always show mobile search bar"
     Theme Settings: Theme

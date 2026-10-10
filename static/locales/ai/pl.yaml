@@ -161,6 +161,10 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Wskaźnik ładowania karty
+      Bar: Pasek
+      Dot: Kropka (klasyczna)
     Compact Settings Categories: "Kompaktowe kategorie ustawień"
     Playlist Thumbnail Size: "Rozmiar miniatur playlisty"
     Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"

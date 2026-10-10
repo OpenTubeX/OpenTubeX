@@ -40,7 +40,12 @@
             aria-hidden="true"
           />
           <span
-            v-if="showIcon && (usableTabAvatarUrl || tabPageIcon)"
+            v-if="showLoadingDot"
+            class="tabLoadingDot"
+            aria-hidden="true"
+          />
+          <span
+            v-else-if="showIcon && (usableTabAvatarUrl || tabPageIcon)"
             class="tabIconContainer"
           >
             <FtRetryImage
@@ -74,7 +79,7 @@
           <span class="tabTitleText">{{ displayTitle }}</span>
         </span>
         <span
-          v-if="showLoadingIndicator"
+          v-if="showLoadingIndicator && !showLoadingDot"
           class="tabLoadingLine"
           aria-hidden="true"
         />
@@ -99,6 +104,7 @@
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
+import store from '../../store/index'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
 import { formatTabTitle } from '../../tabs/tabTitle'
@@ -177,6 +183,7 @@ const groupColor = computed(() => getTabAccentColor(props.group?.color))
 const showLoadingIndicator = computed(() => (
   props.tab.isLoading && !/^\/(?:subscriptions\/?)?$/i.test(props.tab.route?.path ?? '')
 ))
+const showLoadingDot = computed(() => showLoadingIndicator.value && store.getters.getTabLoadingIndicator === 'dot')
 
 const tabClasses = computed(() => ({
   active: props.tab.isActive,
@@ -241,6 +248,8 @@ watch(tabAvatarUrl, (avatarUrl) => {
   }
 })
 </script>
+
+<style scoped src="./TabLoadingDot.css" />
 
 <style scoped>
 .tab {
@@ -547,15 +556,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .tabLoadingLine::after {
-    animation: none;
-    inline-size: 100%;
-    background: var(--accent-color);
-  }
-}
-
-:root[data-reduced-motion='reduce'] .tabLoadingLine::after {
+:global(:root[data-reduced-motion='reduce']) .tabLoadingLine::after {
   animation: none;
   inline-size: 100%;
   background: var(--accent-color);

@@ -390,6 +390,10 @@ Settings:
     Invalid Engine: Unesite naziv i valjani HTTP ili HTTPS URL za pretraživanje koji sadrži %s.
     Engine Limit: Možete dodati najviše {count} prilagođenih tražilica.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Pokazatelj učitavanja kartice
+      Bar: Traka
+      Dot: Točka (klasična)
     Compact Settings Categories: "Kompaktne kategorije postavki"
     Playlist Thumbnail Size: "Veličina sličica popisa za reprodukciju"
     Compact Mobile Mini Player: "Kompaktni mobilni mini reproduktor"

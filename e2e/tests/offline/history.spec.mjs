@@ -124,6 +124,33 @@ test.use({
 })
 
 test.describe('watch history', () => {
+  for (const preference of ['on', 'system']) {
+    test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: preference === 'system' ? 'reduce' : 'no-preference' })
+      await page.evaluate(preference => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', preference), preference)
+      await goTo(page, 'history')
+      const thumbnail = page.locator('.ft-list-video.watched .thumbnailLink').first()
+      await expect(thumbnail).toBeVisible()
+      await page.mouse.move(0, 0)
+      await page.evaluate(() => {
+        window.__thumbnailTransitions = []
+        document.addEventListener('transitionrun', event => {
+          if (event.target.matches('.thumbnailLink') && event.pseudoElement === '::after') {
+            window.__thumbnailTransitions.push(event.propertyName)
+          }
+        }, true)
+      })
+      await thumbnail.hover()
+      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').transitionDuration)).toBe('0s')
+      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('0')
+      await page.mouse.move(0, 0)
+      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('1')
+      await thumbnail.focus()
+      expect(await thumbnail.evaluate(element => getComputedStyle(element, '::after').opacity)).toBe('0')
+      expect(await page.evaluate(() => window.__thumbnailTransitions)).toEqual([])
+    })
+  }
+
   test('omits an unknown publication date after a failed video load', async ({ page }) => {
     await goTo(page, 'history')
     await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHistory', record),

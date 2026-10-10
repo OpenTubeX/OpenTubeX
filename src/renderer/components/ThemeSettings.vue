@@ -324,6 +324,18 @@
           :icon="['fac', 'horizontal-tabs']"
           @change="updateTabBarPosition"
         />
+        <FtSelect
+          :placeholder="t('Settings.Theme Settings.Tab Loading Indicator.Tab Loading Indicator')"
+          :value="store.getters.getTabLoadingIndicator"
+          setting-key="tabLoadingIndicator"
+          :select-names="[
+            t('Settings.Theme Settings.Tab Loading Indicator.Bar'),
+            t('Settings.Theme Settings.Tab Loading Indicator.Dot')
+          ]"
+          :select-values="['bar', 'dot']"
+          :icon="['fas', 'gauge']"
+          @change="store.dispatch('updateTabLoadingIndicator', $event)"
+        />
       </FtFlexBox>
       <div class="tabSettingsRow">
         <FtSlider

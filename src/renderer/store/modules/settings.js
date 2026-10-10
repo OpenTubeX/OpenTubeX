@@ -407,6 +407,7 @@ const state = {
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
   showTabPreviews: true,
+  tabLoadingIndicator: 'bar',
   updateRelativeTimestamps: true,
   tabBarPosition: 'top',
   verticalTabBarWidth: 220,

@@ -392,6 +392,10 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Ένδειξη φόρτωσης καρτέλας
+      Bar: Γραμμή
+      Dot: Κουκκίδα (κλασική)
     Compact Settings Categories: "Συμπαγείς κατηγορίες ρυθμίσεων"
     Playlist Thumbnail Size: "Μέγεθος μικρογραφιών λίστας αναπαραγωγής"
     Compact Mobile Mini Player: "Συμπαγής μίνι αναπαραγωγέας κινητού"
