@@ -373,6 +373,38 @@ test('blockquote containers preserve indented and fenced code while converting p
   assert.ok(state.notes[1].body.endsWith(quoted(`#${target.number}`).replaceAll(`See #${target.number}`, `See ${githubReference}`)))
 })
 
+test('unterminated HTML code blocks preserve references through the end of the document', async () => {
+  for (const tag of ['pre', 'code']) {
+    const { state, client } = fixture()
+    const body = reference => `See ${reference}\n\n<${tag}>\n${reference}\n    ${reference}\n\`\`\`text\n${reference}`
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('See #1', `See ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`)))
+  }
+})
+
+test('thematic breaks do not turn following indented code into list prose', async () => {
+  for (const rule of ['* * *', '- - -', '_ _ _', '***', '---', '___']) {
+    const { state, client } = fixture()
+    const body = reference => `${rule}\n\n    ${reference}\n\n> ${rule}\n>\n>     ${reference}\n\nSee ${reference}`
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('See #1', `See ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`)))
+  }
+})
+
 test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', () => {
   const body = content('![video](/uploads/hash/video.mp4)\n@person\n/close', true)
   assert.match(body, /https:\/\/gitlab.com\/-\/project\/85121418\/uploads\/hash\/video.mp4/)
