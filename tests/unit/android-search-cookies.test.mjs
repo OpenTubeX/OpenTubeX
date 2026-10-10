@@ -14,6 +14,7 @@ const getters = { getYtDlpPlaybackAuthMode: 'file', getYtDlpPlaybackCookiesPath:
 function searchSupport(env, settings = getters) {
   const start = pageSource.indexOf('const supportsCookieSearch =')
   const end = pageSource.indexOf('let searchRequestId', start)
+  assert.ok(start >= 0 && end > start, 'Search support declarations must be present in the SFC')
   return vm.runInNewContext(`${pageSource.slice(start, end)}\n;({ supportsCookieSearch, configured: cookiesConfigured.value })`, {
     process: { env },
     store: { getters: settings },
@@ -68,14 +69,17 @@ test('Android cookie search uses the saved session, filters and requested page',
   assert.equal(result.hasMoreResults, true)
 })
 
-test('Android cookie search rejects unavailable authentication and invalid requests before extraction', async () => {
+test('Android cookie search rejects unavailable authentication and invalid requests before extraction', async t => {
+  const extract = t.mock.fn(() => assert.fail('Unexpected native extraction'))
   for (const settings of [{}, { getYtDlpPlaybackAuthMode: 'browser' }, { ...getters, getYtDlpPlaybackCookiesPath: '' }]) {
-    const result = await adapter(settings, () => assert.fail('Unexpected native extraction')).ytDlpSearch('query')
+    const result = await adapter(settings, extract).ytDlpSearch('query')
     assert.ok(result.error)
+    assert.equal(extract.mock.callCount(), 0)
   }
   for (const args of [[''], ['x'.repeat(101)], ['query', '', 0]]) {
-    const result = await adapter(getters, () => assert.fail('Unexpected native extraction')).ytDlpSearch(...args)
+    const result = await adapter(getters, extract).ytDlpSearch(...args)
     assert.ok(result.error)
+    assert.equal(extract.mock.callCount(), 0)
   }
 })
 
