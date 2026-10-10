@@ -1651,7 +1651,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   -webkit-line-clamp: 2;
 }
 
-/* A quality badge stays beside its label even when the label needs two lines. */
+/* Keep room for Shaka's superscript badge even when the label needs two lines. */
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution) {
   flex-wrap: nowrap;
   align-items: center;
@@ -1664,8 +1664,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-sub-menu.ft-menu-grid > button.explicit-resolution > .shaka-quality-mark) {
   flex: 0 0 auto;
-  block-size: auto;
-  line-height: 1;
 }
 
 :deep(.ab-repeat-button[aria-pressed='true'] .shaka-ui-icon) {
