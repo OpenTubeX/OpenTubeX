@@ -1,6 +1,6 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { once } from 'node:events'
 import { createServer } from 'node:http'
-import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
@@ -197,7 +197,7 @@ test('stores and presents every previous metadata version', async ({ app, page }
     })
 
     const cachePath = path.join(app.userDataDir, 'video-metadata-cache.db')
-    const cacheDocuments = (await readFile(cachePath, 'utf8')).trim().split('\n')
+    const cacheDocuments = (await readPersistedDatastore(cachePath, 'utf8')).trim().split('\n')
       .map(line => JSON.parse(line))
       .filter(document => document._id && !document.$$deleted)
     expect(cacheDocuments).toHaveLength(6)

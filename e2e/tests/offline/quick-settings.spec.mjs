@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
@@ -858,7 +858,7 @@ test.describe('quick system themes', () => {
       await expect(menu).toBeVisible()
     }
     await expect.poll(async () => {
-      const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+      const saved = latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8'))
       return [saved.quickSettings, saved.systemLightTheme, saved.systemDarkTheme]
     }).toEqual([['baseTheme', 'systemLightTheme', 'systemDarkTheme'], 'solarizedLight', 'solarizedDark'])
 
@@ -988,7 +988,7 @@ test.describe('additional quick settings', () => {
 
     const ids = normalizeQuickSettings(ADDITIONAL_QUICK_SETTINGS.map(([id]) => id))
     await expect.poll(async () => {
-      const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+      const saved = latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8'))
       return Object.fromEntries(['quickSettings', ...ids].map(id => [id, saved[id]]))
     }).toEqual({ quickSettings: ids, ...expected })
 
@@ -1476,7 +1476,7 @@ test.describe('customizable quick settings', () => {
       await expect(distraction.getByText('spoiler')).toBeVisible()
 
       await expect.poll(async () => {
-        const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+        const saved = latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8'))
         return [saved.enableBlockLists, saved.channelsHidden, saved.forbiddenTitles]
       }).toEqual([false, channelsHidden, forbiddenTitles])
 
@@ -1719,7 +1719,7 @@ test.describe('grouped quick settings at narrow fractional scale', () => {
       expect(bounds.right).toBeLessThanOrEqual(viewportWidth)
     }
     await attachScreenshot('grouped-quick-settings-narrow')
-    await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).quickSettings)
+    await expect.poll(async () => latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')).quickSettings)
       .toEqual(['baseTheme', 'mainColor', 'defaultQuality', 'playNextVideo', 'hideComments'])
     ;({ page } = await app.relaunch())
     await page.locator('.profileTrigger').click()

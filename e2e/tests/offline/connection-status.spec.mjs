@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import { createInternetProbe, INTERNET_CHECK_URL } from '../../../src/renderer/helpers/internetConnectivity.js'
@@ -313,7 +313,7 @@ test.describe('internet check privacy setting', () => {
     await label.click()
     await expect(toggle).toBeChecked()
     await expect.poll(() => requests).toBe(1)
-    const saved = async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).internetConnectivityChecks
+    const saved = async () => latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')).internetConnectivityChecks
     await expect.poll(saved).toBe(true)
     await label.click()
     await expect(toggle).not.toBeChecked()

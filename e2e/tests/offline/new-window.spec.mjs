@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { openNewWindowFromTabBar, test, expect, waitForAppReady } from '../../helpers/app.mjs'
@@ -128,7 +128,7 @@ test.describe('multi-tab window close confirmation', () => {
       await secondaryClosed
 
       await expect.poll(async () => {
-        const contents = await readFile(path.join(app.userDataDir, 'tab-session.db'), 'utf8')
+        const contents = await readPersistedDatastore(path.join(app.userDataDir, 'tab-session.db'), 'utf8')
         const sessions = new Map()
         for (const record of contents.trim().split('\n').map(line => JSON.parse(line))) {
           if (record.$$deleted) sessions.delete(record._id)
