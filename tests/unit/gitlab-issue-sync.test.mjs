@@ -413,7 +413,7 @@ test('unterminated HTML code blocks preserve references through the end of the d
 })
 
 test('HTML comments preserve references across code-looking lines and through EOF', async () => {
-  for (const ending of ['', '\n-->\nOutside REF']) {
+  for (const ending of ['', '\n-->\nOutside REF', '\n--!>\nOutside REF']) {
     const { state, client } = fixture()
     const body = reference => `See REF\n\n<!--\nREF\n    REF\n\`\`\`\nREF${ending}`.replaceAll('REF', reference)
     state.sources[0].description = body('#1')
@@ -425,6 +425,59 @@ test('HTML comments preserve references across code-looking lines and through EO
     await sync(client)
     const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
     assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('HTML regions end with their containing blockquote', async () => {
+  for (const tag of ['<pre>', '<code>', '<!--']) {
+    for (const quote of ['>', '> >']) {
+      const { state, client } = fixture()
+      const body = reference => `${quote} ${tag}\n${quote} ${reference}\n> Outside ${reference}\nOutside ${reference}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      const expected = (reference, link) => quote === '>'
+        ? body(reference).replace(`\nOutside ${reference}`, `\nOutside ${link}`)
+        : body(reference).replaceAll(`Outside ${reference}`, `Outside ${link}`)
+      assert.ok(target.body.endsWith(expected('#1', gitlabReference)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(expected(`#${target.number}`, githubReference)))
+    }
+  }
+})
+
+test('backtick fence info strings reject backticks while tilde fences allow them', async () => {
+  for (const example of ['```foo`bar\nOutside REF', '~~~foo`bar\nREF\n~~~\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('indented paragraph continuations resolve references while separate code blocks stay literal', async () => {
+  for (const quote of ['', '> ']) {
+    const { state, client } = fixture()
+    const body = reference => ['Text', `    Continuation ${reference}`, '', `    ${reference}`, '', '# Heading', `    ${reference}`, '', `Outside ${reference}`].map(line => quote + line).join('\n')
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Continuation #1', `Continuation ${gitlabReference}`).replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Continuation #${target.number}`, `Continuation ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
   }
 })
 
