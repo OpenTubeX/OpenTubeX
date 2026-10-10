@@ -2,7 +2,8 @@ import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { setTimeout } from 'node:timers/promises'
 import { fromMarkdown } from 'mdast-util-from-markdown'
-import { gfmFromMarkdown } from 'mdast-util-gfm'
+import { toMarkdown } from 'mdast-util-to-markdown'
+import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
 
 const project = 'opentubex/OpenTubeX'
@@ -103,23 +104,23 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_~[\]<>|&]/g, '\\$&')
-  const render = (reference, side, suffix = '', tooltip = '') => {
+  const link = (value, url, title = null) => toMarkdown({
+    type: 'link', url, title, children: [{ type: 'text', value: value.replace(/\s+/g, ' ') }],
+  }, { extensions: [gfmToMarkdown()], unsafe: [{ character: '|' }] }).trimEnd()
+  const render = (reference, side, suffix = '', tooltip = null) => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
     const url = item?.web_url ?? item?.html_url ?? (side === 'gitlab'
       ? `https://gitlab.com/${project}/-/${reference[0] === '!' ? 'merge_requests' : 'issues'}/${reference.slice(1)}`
       : `https://github.com/${repository}/issues/${reference.slice(1)}`)
     const other = counterparts.get(url)
-    const target = url + suffix
-    const destination = /[()\s<>]/.test(target) ? `<${target}>` : target
-    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${destination}${tooltip})`
-    if (!other) return link
+    const original = link(item?.title ?? `${host} ${reference}`, url + suffix, tooltip)
+    if (!other) return original
     const otherSide = side === 'gitlab' ? 'GitHub' : 'GitLab'
     const otherReference = side === 'gitlab' ? `#${other.number}` : gitlabReferences.get(other.web_url)
-    return `${link} ([${otherSide} ${otherReference}](${other.html_url ?? other.web_url}))`
+    return `${original} (${link(`${otherSide} ${otherReference}`, other.html_url ?? other.web_url)})`
   }
-  const urlReference = (url, side, tooltip = '') => {
+  const urlReference = (url, side, tooltip = null) => {
     const pattern = side === 'gitlab'
       ? /^https:\/\/gitlab\.com\/opentubex\/OpenTubeX\/-\/(issues|work_items|merge_requests)\/(\d+)([?#][^\s<>]*)?$/i
       : /^https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/(issues|pull)\/(\d+)([?#][^\s<>]*)?$/i
@@ -129,13 +130,13 @@ function referenceResolver(sources, targets, mergeRequests) {
   const rewrite = (body, side) => {
     const tree = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })
     const edits = []
-    const visit = node => {
+    const visit = (node, codeRegion = { tag: null }) => {
       const { start, end } = node.position
       const original = body.slice(start.offset, end.offset)
       if (['html', 'code', 'inlineCode', 'image', 'imageReference', 'definition', 'linkReference'].includes(node.type)) return
       if (node.type === 'link') {
-        const tooltip = node.title === null ? '' : ` "${node.title.replace(/[\\"]/g, '\\$&')}"`
-        const replacement = urlReference(node.url, side, tooltip)
+        if (codeRegion.tag) return
+        const replacement = urlReference(node.url, side, node.title)
         if (replacement) edits.push({ start: start.offset, end: end.offset, replacement })
         return
       }
@@ -153,12 +154,12 @@ function referenceResolver(sources, targets, mergeRequests) {
         })
         if (replacement !== original) edits.push({ start: start.offset, end: end.offset, replacement })
       } else {
-        let codeTag = null
+        const phrasing = ['paragraph', 'heading', 'tableCell', 'emphasis', 'strong', 'delete'].includes(node.type)
         for (const child of node.children ?? []) {
-          if (child.type === 'html' && ['paragraph', 'heading', 'tableCell'].includes(node.type)) {
-            if (codeTag && new RegExp(`</${codeTag}\\s*>`, 'i').test(child.value)) codeTag = null
-            else if (!codeTag && !child.value.endsWith('/>')) codeTag = child.value.match(/^<(code|pre|script|style|textarea)(?=[\s>])/i)?.[1] ?? null
-          } else if (!codeTag) visit(child)
+          if (child.type === 'html' && phrasing) {
+            if (codeRegion.tag && new RegExp(`</${codeRegion.tag}\\s*>`, 'i').test(child.value)) codeRegion.tag = null
+            else if (!codeRegion.tag && !child.value.endsWith('/>')) codeRegion.tag = child.value.match(/^<(code|pre|script|style|textarea)(?=[\s>])/i)?.[1] ?? null
+          } else if (!codeRegion.tag || child.children) visit(child, phrasing ? codeRegion : undefined)
         }
       }
     }

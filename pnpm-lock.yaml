@@ -293,6 +293,9 @@ importers:
       mdast-util-gfm:
         specifier: ^3.1.0
         version: 3.1.0(supports-color@10.2.2)
+      mdast-util-to-markdown:
+        specifier: ^2.2.0
+        version: 2.2.0
       micromark-extension-gfm:
         specifier: ^3.0.0
         version: 3.0.0

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { marked } from 'marked'
+import { fromMarkdown } from 'mdast-util-from-markdown'
 import { content, createClient, list, sync } from '../../_scripts/gitlabIssueSync.mjs'
 
 function fixture() {
@@ -321,7 +321,7 @@ test('reference conversion preserves code, escapes, foreign references, and unre
     '[ref]: /url\n  "tooltip #1"\n\n[ref]',
     '/search?issue=#1', 'mailto:reporter@example.test?subject=#1', 'urn:example:report#note=#1',
     '[ref]: https://example.org/#1',
-    'Text <code title=">">#1</code>', '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
+    'Text <code title=">">#1</code>', '*<code>#1</code>*', '~~<code>**#1**</code>~~', '*<code>*#1*</code>*', '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
     '<pre>\n    #1\n#1\n</pre>', '<pre>\n```\n#1\n```\n#1\n</pre>', '&#123;', '#123abc',
   ].join('\n\n')
   state.sources[0].description = preserved
@@ -338,11 +338,11 @@ test('explicit local links retain comment fragments and escape title Markdown', 
   state.sources[0].description = '[old title](https://gitlab.com/opentubex/OpenTubeX/-/issues/1#note_10)\n<https://gitlab.com/opentubex/OpenTubeX/-/work_items/1>\n(opentubex/OpenTubeX#1).'
   await sync(client)
   const body = state.targets[0].body
-  assert.ok(body.includes('[A \\[title\\] \\*with\\* \\~\\~removed\\~\\~ \\_format\\_ \\<tag\\> \\`code\\` \\\\ path]'))
+  const links = fromMarkdown(body.slice(body.indexOf('\n\n') + 2)).children.flatMap(node => node.children ?? []).filter(node => node.type === 'link' && node.url.startsWith(state.sources[0].web_url))
+  for (const link of links) assert.deepEqual(link.children.map(({ type, value }) => ({ type, value })), [{ type: 'text', value: state.sources[0].title }])
   assert.ok(body.includes(`${state.sources[0].web_url}#note_10)`))
   assert.equal((body.match(/GitHub #/g) ?? []).length, 3)
-  assert.match(marked.parse(body), /~~removed~~/)
-  assert.doesNotMatch(marked.parse(body), /<del>/)
+  assert.equal(links.length, 3)
 })
 
 test('public merge-request lookups do not require additional sync token permissions', async t => {
@@ -363,12 +363,16 @@ test('public merge-request lookups do not require additional sync token permissi
 test('generated title links display named and numeric entity syntax literally', async () => {
   const { state, client } = fixture()
   state.sources[0].title = 'Show &copy; &#91; &#x5b; &amp; literally'
-  state.sources[0].description = '#1'
+  state.sources[0].description = `#1\n\n[report](${state.sources[0].web_url} "Show \\&copy; \\&#91; \\&#x5b; \\&amp; literally")`
   await sync(client)
   const target = state.targets[0]
-  const check = body => assert.ok(marked.parse(body).includes('>Show &amp;copy; &amp;#91; &amp;#x5b; &amp;amp; literally</a>'))
+  const check = body => {
+    const links = fromMarkdown(body).children.flatMap(node => node.children ?? []).filter(node => node.type === 'link')
+    assert.ok(links.some(node => node.children.length === 1 && node.children[0].value === state.sources[0].title))
+    assert.ok(links.some(node => node.title === state.sources[0].title))
+  }
   check(target.body)
-  state.comments.push({ id: 20, body: `#${target.number}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  state.comments.push({ id: 20, body: `#${target.number}\n\n[report](${target.html_url} "Show \\&copy; \\&#91; \\&#x5b; \\&amp; literally")`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
   check(state.notes[1].body)
 })

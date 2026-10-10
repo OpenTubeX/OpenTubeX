@@ -54,6 +54,7 @@ updates:
       - dependency-name: "font-list"
       - dependency-name: "mdast-util-from-markdown"
       - dependency-name: "mdast-util-gfm"
+      - dependency-name: "mdast-util-to-markdown"
       - dependency-name: "micromark-extension-gfm"
       - dependency-name: "node-gyp"
       - dependency-name: "overlayscrollbars"
