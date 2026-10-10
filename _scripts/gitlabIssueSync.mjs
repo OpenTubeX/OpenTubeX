@@ -132,7 +132,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!prose.length) return
       // Consume code, escapes, Markdown links, HTML, and URLs before considering
       // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?-->|<(code|pre)\b[^>]*>[^]*?<\/\2>|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?-->|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
         if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           return (urlReference(url, side) ?? url) + token.slice(url.length)
@@ -142,7 +142,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           const url = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)?.[1]
           return url ? urlReference(url, side) ?? token : token
         }
-        const reference = token.match(/([#!]\d+)$/)?.[1]
+        const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
         return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
       }))
       prose = []
@@ -172,7 +172,8 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
       const contentIndent = listIndents.at(-1) ?? 0
       const indentedCode = indent >= contentIndent + 4
-      const listItem = !fence && !indentedCode && expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
+      const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
+      const listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
       const delimiter = expanded.slice(listItem ? listItem[0].length : contentIndent).match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
       if (delimiter || fence || indentedCode) {
         flush()
