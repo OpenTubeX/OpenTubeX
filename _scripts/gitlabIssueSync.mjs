@@ -188,7 +188,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?--!?>|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?--!?>|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<![\w/&#@-])GH-\d+\b(?![@-])|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
       let output = ''
       let hasLink = false
       let position = 0
@@ -262,8 +262,10 @@ function referenceResolver(sources, targets, mergeRequests) {
           if (closing && url.endsWith(closing)) url = url.slice(0, -closing.length)
           token = (urlReference(url, side) ?? url) + token.slice(url.length)
         } else {
+          const githubReference = side === 'github' && token.match(/^GH-(\d+)$/i)
           const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)
-          if (reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))) token = render(reference[2], side)
+          if (githubReference) token = render(`#${githubReference[1]}`, side)
+          else if (reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))) token = render(reference[2], side)
         }
         output += token
         position = tokens.lastIndex

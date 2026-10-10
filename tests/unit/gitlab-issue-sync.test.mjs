@@ -252,6 +252,25 @@ test('GitLab project-only references resolve locally without reinterpreting GitH
   assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}) ([GitLab !12](${request.web_url})).\n\n${githubOnly}\n\n${preserved}`))
 })
 
+test('GitHub GH-number references map issues and PRs while GitLab and literal text stay intact', async () => {
+  const { state, client } = fixture()
+  const request = { iid: 12, title: 'Imported PR', imported_from: 'github', web_url: 'https://gitlab.com/opentubex/OpenTubeX/-/merge_requests/12' }
+  const pull = { number: 900, title: request.title, pull_request: {}, user: { login: 'maintainer' }, html_url: 'https://github.com/OpenTubeX/OpenTubeX/pull/900' }
+  state.mergeRequests.push(request)
+  state.targets.push(pull)
+  const preserved = ['`GH-101 GH-900`', '```\nGH-101\n```', '\\GH-101', 'https://example.org/GH-101', '/search?q=GH-101', '[GH-101](https://example.org)', 'XGH-101 GH-101suffix OTHER-GH-101 GH-101@example.org'].join('\n\n')
+  const gitlabBody = `See GH-101 and GH-900.\n\n${preserved}`
+  state.sources[0].description = gitlabBody
+  state.notes.push({ id: 10, body: gitlabBody, author: { id: 1, username: 'reporter' } })
+  await sync(client)
+  const target = state.targets.find(item => item.user.login === 'github-actions[bot]')
+  assert.ok(target.body.endsWith(gitlabBody))
+  assert.ok(state.comments[0].body.endsWith(gitlabBody))
+  state.comments.push({ id: 20, body: `See GH-${target.number} and GH-900.\n\n${preserved}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  assert.ok(state.notes[2].body.endsWith(`See [Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url})) and [Imported PR](${pull.html_url}) ([GitLab !12](${request.web_url})).\n\n${preserved}`))
+})
+
 test('omits missing, confidential, and ambiguous counterparts without leaking private titles', async () => {
   const { state, client } = fixture()
   state.sources.push({ ...state.sources[0], iid: 2, title: 'Duplicate', imported: true, imported_from: 'github', web_url: 'https://gitlab.com/issue/2' },
