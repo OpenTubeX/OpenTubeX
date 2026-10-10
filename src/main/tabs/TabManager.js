@@ -742,6 +742,7 @@ export class TabManager {
     /** @type {Promise<void>} */
     this._previewCaptureLock = Promise.resolve()
     this._previewCapturePaused = false
+    this._previewCaptureRevision = 0
     this._tabPreviewsEnabled = true
     this._tabPreviewTransitionId = 0
     this._avatarsEnabled = true
@@ -2169,6 +2170,9 @@ export class TabManager {
 
     this._previewCapturePaused = paused
     if (paused) {
+      // Invalidate captures even if the switcher closes before their IPC
+      // round-trip returns. Their screenshot may already contain the overlay.
+      this._previewCaptureRevision++
       for (const tab of this.tabs.values()) {
         this._clearTabPreviewRefresh(tab)
       }
@@ -2260,6 +2264,7 @@ export class TabManager {
    * @returns {Promise<string | null>}
    */
   async _captureTabPreviewSerialized(tab) {
+    const captureRevision = this._previewCaptureRevision
     const previousCapture = this._previewCaptureLock
     /** @type {() => void} */
     let releaseLock = () => {}
@@ -2276,6 +2281,7 @@ export class TabManager {
       if (
         !this._tabPreviewsEnabled ||
         this._previewCapturePaused ||
+        captureRevision !== this._previewCaptureRevision ||
         tab.id !== this.presentedTabId ||
         this.browserWindow.webContents.isDestroyed() ||
         this._getTabLoadingState(tab)
@@ -2293,13 +2299,13 @@ export class TabManager {
         // process stays unblocked and another tab may have been activated. If so,
         // the renderer is now painting a different tab, so capturing here would
         // save the wrong content as this tab's preview. Bail out with the cache.
-        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId) {
+        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         const image = await this.browserWindow.webContents.capturePage()
         // capturePage awaits another round-trip; the presented tab may have
         // changed again. Never persist a screenshot captured for a stale tab.
-        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId) {
+        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         if (image.isEmpty()) {
@@ -2307,6 +2313,9 @@ export class TabManager {
         }
 
         const contentBounds = await this._getTabPreviewContentBounds()
+        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId || captureRevision !== this._previewCaptureRevision) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
         const contentImage = contentBounds == null ? image : cropTabPreviewToContent(image, contentBounds)
         if (contentImage == null || contentImage.isEmpty()) {
           return await this._getCachedTabPreviewDataUrl(tab)
@@ -2367,8 +2376,8 @@ export class TabManager {
     const script = enabled
       ? `
         (() => {
-          // Hover handoffs must stay visible even when a scheduled refresh
-          // reaches the renderer. Reuse the cache instead of hiding the tooltip.
+          // Interactive preview UI takes priority over background captures.
+          // Reuse the cache while a tooltip or keyboard switcher is visible.
           if (document.querySelector('[data-tab-preview-preserve-visibility]')) {
             return false
           }
@@ -2376,7 +2385,7 @@ export class TabManager {
           if (!style) {
             style = document.createElement('style')
             style.id = ${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)}
-            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
+            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay]:not([data-tab-preview-preserve-visibility]) { visibility: hidden !important; }'
             document.head.appendChild(style)
           }
           document.documentElement.classList.add(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})

@@ -757,6 +757,49 @@ for (const action of ['select', 'close', 'navigate', 'unload queued']) {
   })
 }
 
+for (const phase of ['capture mode', 'screenshot', 'content bounds']) {
+  test(`opening and closing the switcher during ${phase} discards the interrupted preview`, async t => {
+    const manager = createManager(t)
+    const tab = manager.createTab({ route: '/history', makeActive: false })
+    manager.presentedTabId = tab.id
+    manager._tabPreviewsEnabled = true
+    t.mock.method(manager, '_getTabLoadingState', () => false)
+    t.mock.method(manager, '_getCachedTabPreviewDataUrl', async () => 'cached-preview')
+    t.mock.method(manager, '_scheduleTabPreviewRefresh', () => {})
+    const interrupt = () => {
+      manager.setPreviewCapturePaused(true)
+      manager.setPreviewCapturePaused(false)
+    }
+    const captureModes = []
+    t.mock.method(manager, '_setTabPreviewCaptureMode', async enabled => {
+      captureModes.push(enabled)
+      if (enabled && phase === 'capture mode') interrupt()
+      return true
+    })
+    let screenshots = 0
+    let encodes = 0
+    t.mock.method(tabPreviewStorage, 'writePreview', async () => 'preview.jpg')
+    manager.browserWindow.webContents.capturePage = async () => {
+      screenshots++
+      if (phase === 'screenshot') interrupt()
+      return {
+        isEmpty: () => false,
+        getSize: () => ({ width: 300, height: 200 }),
+        toJPEG: () => { encodes++; return Buffer.from([0xff, 0xd8, 0xff]) }
+      }
+    }
+    t.mock.method(manager, '_getTabPreviewContentBounds', async () => {
+      if (phase === 'content bounds') interrupt()
+      return null
+    })
+    assert.equal(await manager._refreshTabPreview(tab), 'cached-preview')
+    assert.equal(screenshots, phase === 'capture mode' ? 0 : 1)
+    assert.equal(encodes, 0, 'must not encode a screenshot interrupted by the switcher')
+    assert.deepEqual(captureModes, [true, false], 'capture mode is always cleaned up')
+    assert.equal(tab.previewCapturePromise, null)
+  })
+}
+
 test('retries a scheduled preview refresh after the hover tooltip closes', async (t) => {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const manager = createManager(t)

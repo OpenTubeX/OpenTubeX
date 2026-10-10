@@ -440,6 +440,7 @@
       v-if="tabSwitcherVisible"
       class="tabSwitcherOverlay"
       data-tab-preview-overlay
+      data-tab-preview-preserve-visibility
       @mousedown.prevent
       @wheel.prevent="handleTabSwitcherWheel"
     >
