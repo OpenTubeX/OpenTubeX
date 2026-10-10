@@ -74,6 +74,11 @@ public class SearchCookiesTest {
                         }
                         if (plugin === 'YtDlp' && method === 'extract') {
                             window.__searchCookieRequests.push(options);
+                            if (new URL(options.args.at(-1)).pathname === '/playlist') {
+                                return Promise.resolve({ stdout: JSON.stringify({ playlist_count: 10,
+                                    thumbnails: [{ url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMQSTkBAAHQAUHAZ3dkAAAAAElFTkSuQmCC' }],
+                                    entries: [{ id: 'dQw4w9WgXcQ' }] }) });
+                            }
                             return new Promise((resolve, reject) => {
                                 window.__searchCookieResolve = resolve;
                                 window.__searchCookieReject = reject;
@@ -125,14 +130,20 @@ public class SearchCookiesTest {
                 await(view, "!!document.querySelector('[role=alert]') && !document.querySelector('.searchRetryButton').disabled");
                 evaluate(view, "document.querySelector('.searchRetryButton').click()");
                 await(view, "window.__searchCookieRequests.length === 2");
-                evaluate(view, "window.__searchCookieResolve({ stdout: JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Recovered cookie search result' }] }) })");
+                evaluate(view, "window.__searchCookieResolve({ stdout: JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Recovered cookie search result' }, { id: 'PLfixture', ie_key: 'YoutubeTab', title: 'Recovered playlist' }] }) })");
                 await(view, "!!document.querySelector('.ft-list-item') && !document.querySelector('.searchRetryButton') && !document.querySelector('.searchNotice')");
+                await(view, "[...document.querySelectorAll('.ft-list-item')].some(card => card.textContent.includes('Recovered playlist') && card.querySelector('.videoCountContainer .inner')?.textContent.trim() === '10' && card.querySelector('.thumbnailImage')?.naturalWidth > 0)");
+                JSONArray playlistArgs = new JSONArray(evaluate(view, "window.__searchCookieRequests[2].args"));
+                assertEquals("Playlist options pass native validation", playlistArgs.toString(),
+                    new JSONArray(YtDlpArguments.validate(playlistArgs)).toString());
+                assertEquals("Playlist metadata uses the saved session", "true", evaluate(view,
+                    "window.__searchCookieRequests[2].cookies === '/private/yt-dlp-cookies.txt'"));
                 assertEquals("Recovered results stay out of the shared search cache", "false", evaluate(view,
                     STORE + ".getters.getSessionSearchHistory.some(entry => entry.data.some(result => result.title === 'Recovered cookie search result'))"));
                 evaluate(view, "window.__searchCookieEmpty = true; window.__searchCookieRouter.push('/search/empty%20search')");
                 await(view, "!!document.querySelector('.searchHint') && !!document.querySelector('.searchRetryButton')");
                 evaluate(view, "document.querySelector('.searchRetryButton').click()");
-                await(view, "window.__searchCookieRequests.length === 3");
+                await(view, "window.__searchCookieRequests.length === 4");
                 evaluate(view, "window.__searchCookieResolve({ stdout: JSON.stringify({ entries: [] }) })");
                 await(view, "!!document.querySelector('[role=alert]') && !document.querySelector('.searchRetryButton').disabled");
             } finally {

@@ -9,7 +9,7 @@ import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../yt
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
-import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults } from '../../ytDlpSearch'
+import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults, completeYtDlpSearchPlaylists } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
 
 const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
@@ -139,7 +139,26 @@ const capacitor = {
       // its allowlist accepts the fixed HTTPS target without a -- separator.
       const args = buildYtDlpSearchArguments(query, params, page)
         .filter(arg => arg !== '--ignore-config' && arg !== '--')
-      return normalizeYtDlpSearchResults(await extract(args, true), page)
+      const response = normalizeYtDlpSearchResults(await extract(args, true), page)
+      response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
+        const playlistArgs = args.slice(0, -1)
+        playlistArgs[playlistArgs.indexOf('--playlist-start') + 1] = '1'
+        playlistArgs[playlistArgs.indexOf('--playlist-end') + 1] = '1'
+        playlistArgs.push(`https://www.youtube.com/playlist?list=${playlistId}`)
+        // Native extraction has its own timeout; optional metadata must not
+        // delay the search beyond the shared enrichment budget.
+        let onAbort
+        const aborted = new Promise((_resolve, reject) => {
+          onAbort = () => reject(signal.reason)
+        })
+        signal.addEventListener('abort', onAbort, { once: true })
+        try {
+          return await Promise.race([extract(playlistArgs, true), aborted])
+        } finally {
+          signal.removeEventListener('abort', onAbort)
+        }
+      })
+      return response
     } catch {
       return { error: 'Unable to search with configured cookies' }
     }
