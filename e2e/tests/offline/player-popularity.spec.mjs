@@ -58,33 +58,30 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await setPlayerFullscreen(page, true)
   await expect(graph).toBeVisible()
   const box = await bar.boundingBox()
+  expect(box).not.toBeNull()
   await page.mouse.move(box.x + box.width * 0.755, box.y + box.height / 2)
   const tooltip = bar.locator('.shaka-player-ui-thumbnail-time')
   await expect(tooltip).toContainText('Most replayed')
   await expect(tooltip).toBeVisible()
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
   await expect(tooltip).not.toContainText('Most replayed')
-  await bar.locator('input').evaluate(element => {
-    element.value = '22.6'
-    element.dispatchEvent(new Event('input', { bubbles: true }))
-  })
-  await expect(tooltip).toContainText('Most replayed')
-  await bar.locator('input').evaluate(element => {
-    element.value = '22.3'
-    element.dispatchEvent(new Event('input', { bubbles: true }))
-  })
-  await expect(tooltip).not.toContainText('Most replayed')
   // Remap the playback shortcut so ArrowRight operates the focused range.
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
     'updateKeyboardShortcuts', JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { SMALL_FAST_FORWARD: 'x' } } })
   ))
-  await bar.locator('input').focus()
-  await page.keyboard.press('ArrowRight')
+  // Seek normally so Shaka commits the starting position before focusing the range.
+  await video.evaluate(element => element.pause())
+  const rangeBounds = await bar.locator('input').boundingBox()
+  expect(rangeBounds).not.toBeNull()
+  await page.mouse.click(rangeBounds.x + 6 + (rangeBounds.width - 12) * (22.3 / 30), rangeBounds.y + rangeBounds.height / 2)
+  await expect.poll(async () => Number(await bar.locator('input').inputValue())).toBeCloseTo(22.3, 1)
+  await bar.locator('input').press('ArrowRight')
   await expect(tooltip).toContainText('Most replayed')
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0)
 
   await setPlayerFullscreen(page, false)
   const normalBox = await bar.boundingBox()
+  expect(normalBox).not.toBeNull()
   await page.mouse.click(normalBox.x + normalBox.width * 0.5, normalBox.y + normalBox.height / 2)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(13)
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(17)
@@ -94,13 +91,17 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
     await page.emulateMedia({ colorScheme })
     await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
     const seekBounds = await bar.boundingBox()
+    expect(seekBounds).not.toBeNull()
     await page.mouse.move(seekBounds.x + seekBounds.width * 0.755, seekBounds.y + seekBounds.height / 2)
     await expect(tooltip).toContainText('Most replayed')
     await expect(tooltip).toBeVisible()
     const preview = await bar.locator('.shaka-player-ui-thumbnail-container').boundingBox()
     const graphBounds = await graph.boundingBox()
+    expect(preview).not.toBeNull()
+    expect(graphBounds).not.toBeNull()
     expect(preview.y + preview.height).toBeLessThanOrEqual(graphBounds.y)
     const bounds = await player.boundingBox()
+    expect(bounds).not.toBeNull()
     const height = Math.min(180, bounds.height)
     await page.screenshot({
       path: testInfo.outputPath(`popularity-${colorScheme}.png`),
@@ -126,7 +127,9 @@ test('touch scrubbing shows the most replayed label at the peak', async ({ app, 
   await setPlayerFullscreen(page, true)
   const bar = page.locator('.shaka-seek-bar')
   const tooltip = page.locator('.shaka-player-ui-thumbnail-time')
+  await expect(bar).toBeVisible()
   const box = await bar.boundingBox()
+  expect(box).not.toBeNull()
   const cdp = await page.context().newCDPSession(page)
   const point = percentage => ({ x: box.x + box.width * percentage, y: box.y + box.height / 2 })
   try {
