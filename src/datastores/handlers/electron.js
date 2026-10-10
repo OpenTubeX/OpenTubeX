@@ -172,6 +172,10 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel, profileIds })
   }
 
+  static updateSubscriptionDetails(channels) {
+    return dbProfiles(DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, channels)
+  }
+
   static delete(id) {
     return dbProfiles(DBActions.GENERAL.DELETE, id)
   }

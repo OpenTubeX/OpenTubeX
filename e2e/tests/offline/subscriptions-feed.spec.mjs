@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 import { IpcChannels } from '../../../src/constants.js'
 
 const now = Date.now()
@@ -20,6 +20,7 @@ function feedVideo(videoId, title, authorId, published, extra = {}) {
     lengthSeconds: 120,
     liveNow: false,
     type: 'video',
+    isNewInSubscriptionFeed: true,
     ...extra
   }
 }
@@ -33,7 +34,9 @@ const seed = {
     hideUpcomingPremieres: true,
     thumbnailSize: 180,
     ytDlpPlaybackAuthMode: 'browser',
-    ytDlpPlaybackCookiesBrowser: 'firefox'
+    ytDlpPlaybackCookiesBrowser: 'firefox',
+    showNewSubscriptionFeed: true,
+    newSubscriptionFeedView: 'tabbed'
   },
   profiles: [
     {
@@ -110,6 +113,99 @@ for (const theme of ['openTubeXLight', 'openTubeXDark']) {
 }
 
 test.describe('subscriptions feed from cache', () => {
+  test('hides cached members-only videos after enabling and disabling them with Select All during channel-detail updates', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const membersVideo = page.locator('.ft-list-video').filter({ hasText: 'Video A newer' })
+    await expect(membersVideo).toBeVisible()
+
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+    const bulkToggle = page.locator('.bulkMembersOnlySetting')
+    const checkbox = bulkToggle.getByRole('checkbox', { name: 'Members only' })
+    await expect(checkbox).toHaveAttribute('aria-checked', 'mixed')
+    await bulkToggle.locator('.switch-label').click()
+    await expect(checkbox).toBeChecked()
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .getters.getActiveProfile.subscriptions.map(channel => channel.showMembersOnly)
+    ))).toEqual([true, true])
+
+    // A subscription refresh can publish new names/avatars while the bulk
+    // settings writes are still in flight. Exercise that overlap on each save.
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const dispatch = store.dispatch.bind(store)
+      window.subscriptionDetailsUpdates = []
+      store.dispatch = (action, payload) => {
+        const result = dispatch(action, payload)
+        if (action === 'updateChannelSettings' && payload.settings.showMembersOnly === false) {
+          window.subscriptionDetailsUpdates.push(dispatch('batchUpdateSubscriptionDetails', [{
+            channelId: payload.channelId,
+            channelThumbnailUrl: 'https://yt3.googleusercontent.com/refreshed-avatar=s88'
+          }]))
+        }
+        return result
+      }
+    })
+    await bulkToggle.locator('.switch-label').click()
+    await expect(checkbox).not.toBeChecked()
+    await expect.poll(() => page.evaluate(() => window.subscriptionDetailsUpdates.length)).toBe(2)
+    await page.evaluate(() => Promise.all(window.subscriptionDetailsUpdates))
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(membersVideo).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .getters.getActiveProfile.subscriptions.map(channel => channel.showMembersOnly)
+    ))).toEqual([false, false])
+    await expect(page.getByText('Video A older')).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await expect(membersVideo).toHaveCount(0)
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.getByText('Video A newer')).toHaveCount(0)
+    await expect(page.getByText('Video A older')).toBeVisible()
+  })
+
+  test('preserves a members-only disable when another window refreshes channel details', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    await goTo(other, 'subscriptions')
+    await other.locator('[data-subscription-feed-tab="all"]').click()
+    for (const window of [page, other]) {
+      await expect(window.getByText('Video A newer')).toBeVisible()
+    }
+
+    await Promise.all([
+      page.evaluate(channelId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+        'updateChannelSettings', { channelId, settings: { showMembersOnly: false } }
+      ), CHANNEL_A),
+      other.evaluate(channelId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+        'batchUpdateSubscriptionDetails', [{ channelId, channelName: 'Refreshed Channel A' }]
+      ), CHANNEL_A)
+    ])
+    for (const window of [page, other]) {
+      await expect(window.getByText('Video A newer')).toHaveCount(0)
+      await expect.poll(() => window.evaluate(channelId => {
+        const channel = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .getters.getActiveProfile.subscriptions.find(channel => channel.id === channelId)
+        return { name: channel.name, showMembersOnly: channel.showMembersOnly }
+      }, CHANNEL_A)).toEqual({ name: 'Refreshed Channel A', showMembersOnly: false })
+    }
+
+    await other.close()
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.getByText('Video A newer')).toHaveCount(0)
+    await expect(page.getByText('Video A older')).toBeVisible()
+  })
+
   test('does not animate cards while calculating the initial grid size', async ({ page }) => {
     await page.evaluate(() => {
       window.__subscriptionFeedMoveClasses = []

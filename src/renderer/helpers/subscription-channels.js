@@ -46,6 +46,21 @@ export function normalizeSubscriptionChannelSettings(channel) {
 }
 
 /**
+ * Copies saved preferences without replacing refreshed channel metadata.
+ * Missing fields in the saved channel reset their corresponding overrides.
+ * @param {object} channel
+ * @param {object} savedChannel
+ */
+export function copySubscriptionChannelSettings(channel, savedChannel) {
+  const updated = { ...channel }
+  for (const key of ['feedTypes', 'dailyVideoLimit', 'showMembersOnly', 'subscriptionSettingsUpdatedAt']) {
+    if (Object.hasOwn(savedChannel, key)) updated[key] = savedChannel[key]
+    else delete updated[key]
+  }
+  return updated
+}
+
+/**
  * @param {number | null | undefined} limit
  */
 export function formatSubscriptionDailyVideoLimit(limit) {

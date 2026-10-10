@@ -2,6 +2,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { deepCopy } from '../../helpers/utils'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
+import { copySubscriptionChannelSettings } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 const state = {
@@ -117,61 +118,21 @@ const actions = {
     return true
   },
 
-  async batchUpdateSubscriptionDetails({ dispatch, state }, channels) {
-    if (channels.length === 0) { return }
+  async batchUpdateSubscriptionDetails({ commit }, channels) {
+    if (channels.length === 0) { return true }
 
-    const profileList = state.profileList
-
-    for (const profile of profileList) {
-      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(profile, channels)
-
-      if (updatedProfile !== null) {
-        await dispatch('updateProfile', updatedProfile)
-      }
+    try {
+      const { profileIds, success } = await DBProfileHandlers.updateSubscriptionDetails(channels)
+      if (profileIds.length > 0) commit('updateSubscriptionDetails', { channels, profileIds })
+      return success
+    } catch (error) {
+      console.error(error)
+      return false
     }
   },
 
-  async updateSubscriptionDetails({ dispatch, state }, { channelThumbnailUrl, channelName, channelId }) {
-    const thumbnail = channelThumbnailUrl
-      // change thumbnail size if different
-      ?.replace(/=s\d*/, '=s176')
-      // If this is an Invidious URL, convert it to a YouTube one
-      .replace(/^https?:\/\/[^/]+\/ggpht/, 'https://yt3.googleusercontent.com') ??
-      null
-    const profileList = state.profileList
-
-    for (const profile of profileList) {
-      const index = profile.subscriptions.findIndex((channel) => {
-        return channel.id === channelId
-      })
-
-      if (index === -1) { continue }
-
-      // Only copied when something has actually changed
-      let currentProfileCopy
-
-      if (channelName != null && profile.subscriptions[index].name !== channelName) {
-        if (currentProfileCopy === undefined) {
-          currentProfileCopy = deepCopy(profile)
-        }
-
-        currentProfileCopy.subscriptions[index].name = channelName
-      }
-
-      if (thumbnail != null && profile.subscriptions[index].thumbnail !== thumbnail) {
-        if (currentProfileCopy === undefined) {
-          currentProfileCopy = deepCopy(profile)
-        }
-
-        currentProfileCopy.subscriptions[index].thumbnail = thumbnail
-      }
-
-      if (currentProfileCopy !== undefined) {
-        await dispatch('updateProfile', currentProfileCopy)
-      } else { // channel has not been updated, stop iterating through profiles
-        break
-      }
-    }
+  async updateSubscriptionDetails({ dispatch }, channel) {
+    return dispatch('batchUpdateSubscriptionDetails', [channel])
   },
 
   async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
@@ -352,9 +313,19 @@ const mutations = {
       const profile = state.profileList.find(profile => profile._id === id)
       if (!profile) continue
 
-      profile.subscriptions = profile.subscriptions
-        .filter(subscription => subscription.id !== channel.id)
-      profile.subscriptions.push(deepCopy(channel))
+      profile.subscriptions = profile.subscriptions.map(subscription => subscription.id === channel.id
+        ? copySubscriptionChannelSettings(subscription, channel)
+        : subscription)
+    }
+  },
+
+  updateSubscriptionDetails(state, { channels, profileIds }) {
+    for (const id of profileIds) {
+      const profile = state.profileList.find(profile => profile._id === id)
+      if (!profile) continue
+
+      const updatedProfile = getProfileWithUpdatedSubscriptionDetails(profile, channels)
+      if (updatedProfile !== null) profile.subscriptions = updatedProfile.subscriptions
     }
   },
 
