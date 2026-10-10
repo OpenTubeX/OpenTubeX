@@ -149,6 +149,70 @@ public class WebViewScreenshotTest {
     }
 
     @Test
+    public void thumbnailWaitsForNewlyPresentedTabToPaint() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app')");
+            evaluate(webView, """
+                window.__tabPreviewPixels = null;
+                (async () => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const originalScale = store.state.settings.uiScale;
+                    const stage = document.createElement('div');
+                    stage.style.cssText = 'position:fixed;inset:0;background:black;z-index:2147483647';
+                    const tab = document.createElement('div');
+                    tab.style.cssText = 'position:absolute;inset:0;background:lime;opacity:0';
+                    stage.append(tab);
+                    document.body.append(stage);
+                    const pixels = [];
+                    try {
+                        for (const scale of [100, 125]) {
+                            store.state.settings.uiScale = scale;
+                            for (let attempt = 0; attempt < 10; attempt++) {
+                                // Prewarmed neighbors keep their layout with opacity zero.
+                                tab.style.opacity = '0';
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                tab.style.opacity = '1';
+                                // Opening the organizer can request a thumbnail immediately
+                                // after the swipe makes the target page visible.
+                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take({
+                                    width:320, height:180, top:0.1, cropHeight:0.3
+                                });
+                                const image = new Image();
+                                image.src = dataUrl;
+                                await image.decode();
+                                const canvas = document.createElement('canvas');
+                                canvas.width = 320;
+                                canvas.height = 180;
+                                const context = canvas.getContext('2d');
+                                context.drawImage(image, 0, 0);
+                                pixels.push(context.getImageData(160, 90, 1, 1).data[1]);
+                            }
+                        }
+                        window.__tabPreviewPixels = {green:pixels};
+                    } catch (error) {
+                        window.__tabPreviewPixels = {error:String(error)};
+                    } finally {
+                        stage.remove();
+                        store.state.settings.uiScale = originalScale;
+                    }
+                })();
+                """);
+            awaitCondition(webView, "window.__tabPreviewPixels !== null", 45000);
+            JSONObject result = new JSONObject((String) new JSONTokener(evaluate(webView,
+                "JSON.stringify(window.__tabPreviewPixels)")).nextValue());
+            assertTrue("Thumbnail succeeds: " + result, !result.has("error"));
+            assertEquals(20, result.getJSONArray("green").length());
+            for (int index = 0; index < 20; index++) {
+                assertTrue("Capture " + index + " shows the presented green tab, not its previous black frame: " + result,
+                    result.getJSONArray("green").getInt(index) > 220);
+            }
+        }
+    }
+
+    @Test
     public void thumbnailIsCroppedAndEncodedAtBoundedDimensions() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> view = new AtomicReference<>();
@@ -322,7 +386,11 @@ public class WebViewScreenshotTest {
     }
 
     private static void awaitCondition(WebView view, String script) throws Exception {
-        long deadline = android.os.SystemClock.uptimeMillis() + 15000;
+        awaitCondition(view, script, 15000);
+    }
+
+    private static void awaitCondition(WebView view, String script, long timeoutMs) throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + timeoutMs;
         while (android.os.SystemClock.uptimeMillis() < deadline) {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);

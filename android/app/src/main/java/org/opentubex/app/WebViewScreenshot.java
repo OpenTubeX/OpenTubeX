@@ -28,6 +28,23 @@ final class WebViewScreenshot {
             failure.accept(new IllegalStateException("WebView is not ready for capture"));
             return;
         }
+        // Revealing a prewarmed tab updates the DOM before Chromium submits its
+        // pixels. Wait for that visual state and a draw before copying the window.
+        webView.postVisualStateCallback(0, new WebView.VisualStateCallback() {
+            @Override public void onComplete(long requestId) {
+                webView.postOnAnimation(() -> webView.postOnAnimation(() -> copyRendered(
+                    activity, webView, top, height, width, targetHeight, success, failure
+                )));
+            }
+        });
+    }
+
+    private static void copyRendered(Activity activity, WebView webView, double top, double height,
+                                     int width, int targetHeight, Consumer<Bitmap> success, Consumer<Exception> failure) {
+        if (!webView.isAttachedToWindow() || webView.getWidth() <= 0 || webView.getHeight() <= 0) {
+            failure.accept(new IllegalStateException("WebView is not ready for capture"));
+            return;
+        }
         int[] location = new int[2];
         webView.getLocationInWindow(location);
         Rect bounds = new Rect(location[0], location[1] + (int) Math.floor(top * webView.getHeight()),
