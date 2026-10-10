@@ -3886,7 +3886,9 @@ test.describe('settings', () => {
     await expect(selectRows.nth(0).locator('.select')).toHaveCount(3)
     await expect(selectRows.nth(1).locator('.select')).toHaveCount(2)
     await expect(selectRows.nth(2).locator('.select')).toHaveCount(3)
-    await expect(layout.locator('.themeSelectRow .select')).toHaveCount(1)
+    await expect(layout.locator('.themeSelectRow .select')).toHaveCount(2)
+    await expect(layout.getByRole('combobox', { name: 'Tab Layout', exact: true })).toBeVisible()
+    await expect(layout.getByRole('combobox', { name: 'Tab Loading Style', exact: true })).toBeVisible()
 
     const baseThemeLabel = selectRows.first().locator('.select').first().locator('.select-label')
     const alignedLabelParts = await baseThemeLabel
