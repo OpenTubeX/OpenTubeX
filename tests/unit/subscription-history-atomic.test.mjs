@@ -3,13 +3,16 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import { migrateLegacyHistoryRecord } from '../../src/history.js'
 import * as seenVideos from '../../src/subscriptionSeenVideos.js'
 
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 
-async function fixture(marks = []) {
-  const db = {
+async function fixture(marks = [], suppliedDb) {
+  const db = suppliedDb ?? {
     settings: new Datastore({ inMemoryOnly: true }),
     history: new Datastore({ inMemoryOnly: true }),
   }
@@ -21,6 +24,34 @@ async function fixture(marks = []) {
     { db, ...seenVideos, migrateLegacyHistoryRecord, console: { error: error => errors.push(error) } }
   )
   return { db, Settings, History, errors }
+}
+
+for (const desktop of [false, true]) {
+  for (const newestWatched of [false, true]) {
+    test(`${desktop ? 'SQLite' : 'NeDB'} seen merges use the newest duplicate history occurrence when watched=${newestWatched}`, async t => {
+      let suppliedDb
+      if (desktop) {
+        const database = new DatabaseSync(':memory:')
+        database.exec(SCHEMA_SQL)
+        t.after(() => database.close())
+        suppliedDb = new LibraryEngine(database).collections
+      }
+      const { db, Settings } = await fixture([], suppliedDb)
+      await db.history.removeAsync({}, { multi: true })
+      const records = [
+        { _id: 'z-old', videoId: 'video', timeWatched: 1000, isWatched: !newestWatched, unknown: { keep: true } },
+        { _id: 'a-new', videoId: 'video', timeWatched: 2000, isWatched: newestWatched, watchProgress: 12 },
+        { _id: 'a-tied', videoId: 'tied', timeWatched: 3000, isWatched: true },
+        { _id: 'z-tied', videoId: 'tied', timeWatched: 3000, isWatched: false },
+      ]
+      await db.history.insertAsync(records)
+      const marks = [{ videoId: 'video', seenAt: 4000 }, { videoId: 'tied', seenAt: 4000 }]
+      const expected = [{ videoId: 'tied', seenAt: 4000, isMembersOnly: false }, ...newestWatched ? [] : [{ videoId: 'video', seenAt: 4000, isMembersOnly: false }]]
+      assert.deepEqual(JSON.parse(await Settings.mergeSeenVideos(marks)), expected)
+      assert.deepEqual(JSON.parse((await db.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })).value), expected)
+      assert.deepEqual(await db.history.findAsync({}).sort({ _id: 1 }), [...records].sort((a, b) => a._id < b._id ? -1 : 1))
+    })
+  }
 }
 
 for (const marks of [[], [{ videoId: 'video', seenAt: 1000, unseenAt: 1000 }]]) {
@@ -192,4 +223,30 @@ test('metadata repair returns partial success when an individual database write 
   assert.equal(result.failedCount, 1)
   assert.equal(errors.length, 1)
   assert.equal((await db.history.findOneAsync({ videoId: 'second' })).lengthSeconds, undefined)
+})
+
+test('metadata repair targets exact duplicate occurrences without recreating missing or mismatched IDs on both adapters', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec('PRAGMA foreign_keys = ON')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  for (const suppliedDb of [undefined, engine.collections]) {
+    const { db, History } = await fixture([], suppliedDb)
+    await db.history.removeAsync({}, { multi: true })
+    const older = [
+      { _id: 'old-first', videoId: 'video', timeWatched: 1, watchProgress: 12, isWatched: true, unknown: { keep: 'first' } },
+      { _id: 'old-second', videoId: 'video', timeWatched: 2, watchProgress: 34, isWatched: false, unknown: { keep: 'second' } },
+    ]
+    const latest = { _id: 'latest', videoId: 'video', timeWatched: 3, lengthSeconds: 600, unknown: 'keep' }
+    await db.history.insertAsync([...older, latest])
+    const result = await History.updateSubscriptionState({ metadata: [
+      ...older.map(record => ({ _id: record._id, videoId: record.videoId, lengthSeconds: 120, watchProgress: 0, timeWatched: 0, isWatched: false })),
+      { _id: 'deleted', videoId: 'video', lengthSeconds: 50 },
+      { _id: 'latest', videoId: 'different', lengthSeconds: 50 },
+    ] })
+    assert.deepEqual(Array.from(result.records, record => record._id), ['old-first', 'old-second'])
+    const records = await db.history.findAsync({})
+    assert.deepEqual(records.sort((a, b) => a._id.localeCompare(b._id)), [...older.map(record => ({ ...record, lengthSeconds: 120 })), latest].sort((a, b) => a._id.localeCompare(b._id)))
+  }
 })

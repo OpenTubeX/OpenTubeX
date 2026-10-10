@@ -194,7 +194,7 @@ const effectiveDisplayValue = computed(() => {
 function getResultKey(result, index) {
   const type = props.dataType || result.type
   const id = result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title
-  const occurrence = props.stableItemKeys ? '' : result.playlistItemId || index
+  const occurrence = result._libraryMemberId || (props.stableItemKeys ? result._id || '' : result.playlistItemId || index)
 
   return `${type}-${id}-${occurrence}-${result.lastUpdatedAt || 0}`
 }
@@ -205,40 +205,40 @@ const resultKeys = computed(() => props.data.map(getResultKey))
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
-  emit('move-video-up', videoId, playlistItemId)
+function moveVideoUp(videoId, playlistItemId, memberId) {
+  emit('move-video-up', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoDown(videoId, playlistItemId) {
-  emit('move-video-down', videoId, playlistItemId)
+function moveVideoDown(videoId, playlistItemId, memberId) {
+  emit('move-video-down', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheTop(videoId, playlistItemId) {
-  emit('move-video-to-the-top', videoId, playlistItemId)
+function moveVideoToTheTop(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-top', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheBottom(videoId, playlistItemId) {
-  emit('move-video-to-the-bottom', videoId, playlistItemId)
+function moveVideoToTheBottom(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-bottom', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function removeFromPlaylist(videoId, playlistItemId) {
-  emit('remove-from-playlist', videoId, playlistItemId)
+function removeFromPlaylist(videoId, playlistItemId, memberId) {
+  emit('remove-from-playlist', videoId, playlistItemId, memberId)
 }
 
 /** @import { VideoData } from '../../helpers/dragAndDrop' */

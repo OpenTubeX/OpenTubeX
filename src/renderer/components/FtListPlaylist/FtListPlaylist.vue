@@ -272,11 +272,11 @@ const playlistTypeIcon = computed(() => {
 const playlistMetadata = computed(() => {
   if (isUserPlaylist.value) {
     let thumbnailUrl = thumbnailPlaceholder
-    if (props.data.videos.length > 0) {
+    if ((props.data.videoCount ?? props.data.videos.length) > 0) {
       const origin = backendPreference.value === 'invidious'
         ? currentInvidiousInstanceUrl.value
         : 'https://i.ytimg.com'
-      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/maxresdefault.jpg`
+      thumbnailUrl = `${origin}/vi/${(props.data.firstVideo ?? props.data.videos[0]).videoId}/maxresdefault.jpg`
     }
 
     return {
@@ -285,7 +285,7 @@ const playlistMetadata = computed(() => {
       thumbnailUrl,
       channelName: '',
       channelId: '',
-      videoCount: props.data.videos.length,
+      videoCount: (props.data.videoCount ?? props.data.videos.length),
     }
   }
 

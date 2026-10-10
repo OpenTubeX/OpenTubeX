@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
-import { settings } from '../datastores/handlers/base'
+import { settings } from '../datastores/handlers/main'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels, UnsupportedPlayerActions } from '../constants'
 

@@ -103,6 +103,7 @@ export async function runLargeSubscriptionsBenchmark(page) {
   await goTo(page, 'subscriptions')
 
   await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
+  await expect(page.locator('#subscriptionsPanel.newFeed .ft-list-video').first()).toBeVisible()
   const firstSwitch = await measureVideosSwitch(page)
   await expect(page.getByText('Video 0-0')).toBeVisible()
 

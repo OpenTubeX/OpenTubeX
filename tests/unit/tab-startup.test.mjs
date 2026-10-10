@@ -11,7 +11,7 @@ const hooks = registerHooks({
         export const app = { getName: () => 'OpenTubeX' };
       `) }
     }
-    if (specifier.endsWith('/datastores/handlers/base.js')) {
+    if (specifier.endsWith('/datastores/handlers/main.js')) {
       return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
         export const settings = { _findOne: async () => null };
         export const tabSession = {
@@ -26,7 +26,7 @@ const hooks = registerHooks({
   }
 })
 const { TabManager } = await import('../../src/main/tabs/TabManager.js')
-const { tabSession } = await import('../../src/datastores/handlers/base.js')
+const { tabSession } = await import('../../src/datastores/handlers/main.js')
 const { tabPreviewStorage } = await import('../../src/main/tabs/TabPreviewStorage.js')
 const { setupTabsIPC } = await import('../../src/main/tabs/tabIpc.js')
 const { BrowserWindow, ipcMain, nativeImage } = await import('electron')

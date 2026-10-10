@@ -29,7 +29,7 @@ function harness({ laterPageError = null } = {}) {
   let failContinuation
   const continuation = new Promise((resolve, reject) => { finishContinuation = resolve; failContinuation = reject })
   const context = {
-    props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
+    isPagedPlaylist: ref(false), props, randomizedPlaylistItems, shuffleEnabled, loopEnabled,
     isFetchingPlaylistContinuation, hasUnloadedPlaylistVideos, computed, watch: observe,
     isLoading, playlistItems, getPlaylistInfoRun: false,
     playlistTitle: ref(''), playlistTotalVideoCount: ref(0), channelName: ref(''), channelId: ref(''),
@@ -84,7 +84,7 @@ function harness({ laterPageError = null } = {}) {
     replayVideo: () => replay.call(watch),
     items, playlistItems, isLoading, errors, watch, loopEnabled,
     nextVideo: state.nextVideo, unavailableCount: state.playlistUnavailableVideoCount,
-    props, randomizedPlaylistItems,
+    isPagedPlaylist: ref(false), props, randomizedPlaylistItems,
     enableShuffle: () => { shuffleEnabled.value = true; shuffle() },
     load: () => load({ id: 'youtube-playlist', title: 'YouTube playlist', totalVideoCount: 100,
       channelName: 'Test', channelId: 'channel', items, continuationData: 'continuation' }),

@@ -120,6 +120,7 @@ const IpcChannels = {
 
   DB_SETTINGS: 'db-settings',
   DB_HISTORY: 'db-history',
+  LIBRARY_QUERY: 'library-query',
   DB_WATCH_STATS: 'db-watch-stats',
   DB_RECOMMENDATIONS: 'db-recommendations',
   SYNC_RECOMMENDATIONS: 'sync-recommendations',
@@ -289,6 +290,7 @@ const SyncEvents = {
   // The other groups however are usually not mixed (e.g. HISTORY and PROFILES),
   // so they can have similar values (as long as they don't overlap with the GENERAL group).
   GENERAL: {
+    INVALIDATE: 7,
     CREATE: 0,
     UPSERT: 1,
     DELETE: 2,

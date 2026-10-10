@@ -74,7 +74,8 @@ class Settings {
         premiereTimestamp: 1,
         watchProgress: 1,
         lengthSeconds: 1,
-      })
+      }).sort({ timeWatched: 1, _id: 1 })
+      // The last occurrence must agree with the newest-history lookup.
       for (const entry of history) historyById[entry.videoId] = entry
     }
     const value = JSON.stringify(mergeSubscriptionSeenVideos(local, incoming, historyById))
@@ -208,8 +209,10 @@ class History {
           }
           if (Object.keys(fields).length === 0) continue
           try {
+            const query = { videoId: patch.videoId }
+            if (Object.hasOwn(patch, '_id')) query._id = patch._id
             const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: patch.videoId }, { $set: fields }, { returnUpdatedDocs: true }
+              query, { $set: fields }, { returnUpdatedDocs: true }
             )
             if (affectedDocuments) updatedRecords.push(affectedDocuments)
           } catch (error) {
@@ -362,12 +365,26 @@ class History {
     return db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true })
   }
 
-  static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
+  static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId, retainedVideos = []) {
+    const query = {
+      ...createIdQuery('videoId', videoIds),
+      lastViewedPlaylistId: lastViewedPlaylistId
+    }
+    if (retainedVideos.length) {
+      const retained = new Map()
+      for (const video of retainedVideos) {
+        if (!retained.has(video.videoId)) retained.set(video.videoId, new Set())
+        retained.get(video.videoId).add(video.playlistItemId)
+      }
+      query.$and = [{
+        $where() {
+          const members = retained.get(this.videoId)
+          return !members || (this.lastViewedPlaylistItemId != null && !members.has(this.lastViewedPlaylistItemId))
+        }
+      }]
+    }
     return db.history.updateAsync(
-      {
-        ...createIdQuery('videoId', videoIds),
-        lastViewedPlaylistId: lastViewedPlaylistId
-      },
+      query,
       { $unset: { lastViewedPlaylistId: '', lastViewedPlaylistType: '', lastViewedPlaylistItemId: '' } },
       { multi: true }
     )

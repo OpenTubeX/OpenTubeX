@@ -14,7 +14,7 @@ const source = await readFile(new URL('../../src/datastores/handlers/base.js', i
 const start = source.indexOf('class SubscriptionCache {')
 const cacheSource = source.slice(start, source.indexOf('\nclass ', start + 1))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
-const moduleSource = storeSource.slice(storeSource.indexOf('const MAX_CONCURRENT_CACHE_WRITES'))
+const moduleSource = 'const process = { env: { IS_ELECTRON: false } };\n' + storeSource.slice(storeSource.indexOf('const MAX_CONCURRENT_CACHE_WRITES'))
   .replace('export default', 'globalThis.cacheModule =')
 
 for (const [tab, field, cacheKey, update, mark] of [

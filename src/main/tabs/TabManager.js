@@ -13,7 +13,7 @@ import {
   normalizeNavigationItems,
 } from '../../navigationItems.js'
 import { filterAvailableNavigationItems } from '../../navigationAvailability.js'
-import * as baseHandlers from '../../datastores/handlers/base.js'
+import * as baseHandlers from '../../datastores/handlers/main.js'
 import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
   clearTabSession,

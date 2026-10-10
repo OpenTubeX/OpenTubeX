@@ -1,3 +1,4 @@
+import { SyncServerDataLossError } from '../../renderer/helpers/sync-server-errors.js'
 import { DBActions } from '../../constants'
 import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
 
@@ -18,6 +19,14 @@ const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlai
 const dbHistory = (action, data) => window.ftElectron.dbHistory(action, toPlain(data))
 const dbWatchStats = (action, data) => window.ftElectron.dbWatchStats(action, toPlain(data))
 const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(action, toPlain(data))
+
+const library = {
+  query: async (method, data) => {
+    const result = await window.ftElectron.libraryQuery(method, method === 'importChunk' ? data : toPlain(data))
+    if (result?.libraryError) { const error = result.libraryError; throw new SyncServerDataLossError(error.collection, error.deleted, error.previous, error.items) }
+    return result
+  },
+}
 
 export const recommendations = {
   find: () => dbRecommendations(DBActions.GENERAL.FIND),
@@ -333,6 +342,7 @@ function compactAllDatastores() {
 }
 
 export {
+  library,
   Settings as settings,
   History as history,
   WatchStats as watchStats,
