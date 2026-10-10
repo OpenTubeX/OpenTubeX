@@ -101,27 +101,29 @@ function referenceResolver(sources, targets, mergeRequests) {
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
   const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>]/g, '\\$&')
-  const render = (reference, side, suffix = '') => {
+  const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
     const url = item?.web_url ?? item?.html_url ?? (side === 'gitlab'
       ? `https://gitlab.com/${project}/-/${reference[0] === '!' ? 'merge_requests' : 'issues'}/${reference.slice(1)}`
       : `https://github.com/${repository}/issues/${reference.slice(1)}`)
     const other = counterparts.get(url)
-    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${url}${suffix})`
+    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${url}${suffix}${tooltip})`
     if (!other) return link
     const otherSide = side === 'gitlab' ? 'GitHub' : 'GitLab'
     const otherReference = side === 'gitlab' ? `#${other.number}` : gitlabReferences.get(other.web_url)
     return `${link} ([${otherSide} ${otherReference}](${other.html_url ?? other.web_url}))`
   }
-  const urlReference = (url, side) => {
+  const urlReference = (url, side, tooltip = '') => {
     const pattern = side === 'gitlab'
       ? /^https:\/\/gitlab\.com\/opentubex\/OpenTubeX\/-\/(issues|work_items|merge_requests)\/(\d+)([?#][^\s<>]*)?$/i
       : /^https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/(issues|pull)\/(\d+)([?#][^\s<>]*)?$/i
     const match = url.match(pattern)
-    return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '')
+    return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '', tooltip)
   }
   const rewrite = (body, side) => {
+    const labelKey = label => label.trim().replace(/\s+/g, ' ').toLowerCase()
+    const referenceLabels = new Set(Array.from(body.matchAll(/^ {0,3}\[([^\]\n]+)\]:/gm), match => labelKey(match[1])))
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
@@ -133,15 +135,17 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!prose.length) return
       // Consume code, escapes, Markdown links, HTML, and URLs before considering
       // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      result.push(prose.join('\n').replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
         if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           return (urlReference(url, side) ?? url) + token.slice(url.length)
         }
         if (/^<https?:/i.test(token)) return urlReference(token.slice(1, -1), side) ?? token
         if (token.startsWith('[')) {
-          const url = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?(?:[ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)?.[1]
-          return url ? urlReference(url, side) ?? token : token
+          const link = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
+          if (link) return urlReference(link[1], side, link[2] ?? '') ?? token
+          const label = token.match(/^\[([^\]]*)\]$/)?.[1]
+          return label && !referenceLabels.has(labelKey(label)) ? `[${rewrite(label, side)}]` : token
         }
         const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
         return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
