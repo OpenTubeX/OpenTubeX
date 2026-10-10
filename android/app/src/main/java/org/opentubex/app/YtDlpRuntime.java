@@ -25,6 +25,7 @@ final class YtDlpRuntime {
     private static final Map<String, RunningProcess> PROCESSES = new ConcurrentHashMap<>();
     private static boolean initialized;
     private static String mp3ThumbnailBootstrap;
+    private static String rumbleHttpBootstrap;
 
     private static final class RunningProcess {
         final Process process;
@@ -64,6 +65,9 @@ final class YtDlpRuntime {
         try (InputStream input = context.getAssets().open("opentubex_mp3_thumbnail.py")) {
             mp3ThumbnailBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
         }
+        try (InputStream input = context.getAssets().open("opentubex_rumble_http.py")) {
+            rumbleHttpBootstrap = new String(YtDlpFiles.read(input, 64 * 1024), StandardCharsets.UTF_8);
+        }
         initialized = true;
     }
 
@@ -74,6 +78,7 @@ final class YtDlpRuntime {
         builder.environment().put("LD_LIBRARY_PATH", python + "/lib:" + new File(packages, "ffmpeg/usr/lib").getAbsolutePath());
         builder.environment().put("SSL_CERT_FILE", python + "/etc/tls/cert.pem");
         builder.environment().put("PYTHONHOME", python);
+        builder.environment().put("OPENTUBEX_RUMBLE_HTTP", new File(context.getApplicationInfo().nativeLibraryDir, "libopentubex_rumble_http.so").getAbsolutePath());
         builder.environment().put("HOME", context.getNoBackupFilesDir().getAbsolutePath());
         builder.environment().put("TMPDIR", context.getCacheDir().getAbsolutePath());
         builder.environment().put("PATH", System.getenv("PATH") + ":" + context.getApplicationInfo().nativeLibraryDir);
@@ -84,6 +89,11 @@ final class YtDlpRuntime {
         builder.environment().put("no_proxy", "");
         builder.environment().put("NO_PROXY", "");
         return builder;
+    }
+
+    static ProcessBuilder rumbleHttpCommand(Context context) throws Exception {
+        initialize(context);
+        return command(context, asList(context.getApplicationInfo().nativeLibraryDir + "/libopentubex_rumble_http.so"));
     }
 
     static Process startDlnaFfmpeg(Context context, List<String> args) throws Exception {
@@ -114,7 +124,8 @@ final class YtDlpRuntime {
             String nativeDir = context.getApplicationInfo().nativeLibraryDir;
             String marker = "__OPENTUBEX_PROCESS_" + UUID.randomUUID() + "__:";
             String bootstrap = "import os,sys,runpy\nos.setsid()\nprint('" + marker + "'+str(os.getpid()),flush=True)\nsys.argv=sys.argv[1:]\nsys.path.insert(0,sys.argv[0])\n"
-                + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
+                + mp3ThumbnailBootstrap + "\ninstall_mp3_thumbnail_writer()\n"
+                + rumbleHttpBootstrap + "\ninstall_rumble_http()\nrunpy.run_path(sys.argv[0],run_name='__main__')";
             List<String> command = new ArrayList<>(asList(nativeDir + "/libpython.so", "-u", "-c", bootstrap,
                 entryPoint.getAbsolutePath(),
                 "--ignore-config", "--no-plugin-dirs", "--no-cache-dir", "--js-runtimes", "quickjs:" + nativeDir + "/libqjs.so",

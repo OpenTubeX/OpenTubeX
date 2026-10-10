@@ -53,6 +53,8 @@ public class InterceptedMediaWebViewTest {
                         headers.put("Content-Length", Integer.toString(end - offset + 1));
                         headers.put("Content-Range", "bytes " + offset + "-" + end + "/" + media.length);
                         headers.put("Accept-Ranges", "bytes");
+                        headers.put("access-control-allow-origin", "*");
+                        headers.put("access-control-allow-headers", "range");
                         return mediaResponse(request, "video/webm", 206, "Partial Content", headers,
                             new ByteArrayInputStream(media, offset, end - offset + 1));
                     }

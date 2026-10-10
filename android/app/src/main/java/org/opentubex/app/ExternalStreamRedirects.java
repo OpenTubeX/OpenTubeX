@@ -23,7 +23,11 @@ final class ExternalStreamRedirects implements Interceptor {
     static OkHttpClient client() { return CLIENT; }
 
     static Response fetchForWebView(Request request) throws IOException {
-        Response response = CLIENT.newCall(request).execute();
+        return fetchForWebView(request, CLIENT);
+    }
+
+    static Response fetchForWebView(Request request, OkHttpClient client) throws IOException {
+        Response response = client.newCall(request).execute();
         if (response.code() != 304 || (request.header("If-None-Match") == null &&
             request.header("If-Modified-Since") == null)) return response;
         if (response.body() != null) response.close();
@@ -31,7 +35,7 @@ final class ExternalStreamRedirects implements Interceptor {
             .removeHeader("If-None-Match")
             .removeHeader("If-Modified-Since")
             .build();
-        return CLIENT.newCall(unconditional).execute();
+        return client.newCall(unconditional).execute();
     }
 
     @Override public Response intercept(Chain chain) throws IOException {
