@@ -11,6 +11,49 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class RumbleManifestTransportTest {
+    @Test public void appliesDomainCookiesToUnregisteredManifestRedirects() throws Exception {
+        URL source = new URL("https://rumble.com/challenge/master.m3u8");
+        ExternalStreamRequestRegistry registry = ExternalStreamRequestRegistry.shared();
+        for (String destination : new String[] { "https://challengecdn.rumble.com/challenge/final.m3u8",
+            "http://challengecdn.rumble.com/challenge/final.m3u8",
+            "https://unrelated.example/challenge/final.m3u8",
+            "https://challengecdn.rumble.com/elsewhere/final.m3u8" }) {
+            registry.register(new JSONArray().put(new JSONObject().put("url", source.toString())
+                .put("protocol", "m3u8_native").put("http_headers", new JSONObject()
+                    .put("User-Agent", "fixture-agent").put("Referer", "https://rumble.com/private"))),
+                "rumble.com\tFALSE\t/challenge\tTRUE\t0\thostOnly\tfixture\n");
+            List<Request> requests = new ArrayList<>();
+            var client = ExternalStreamRedirects.client().newBuilder().addInterceptor(chain -> {
+                Request request = chain.request();
+                requests.add(request);
+                try {
+                    boolean redirect = requests.size() == 1;
+                    JSONObject headers = redirect ? new JSONObject().put("Location", new JSONArray().put(destination))
+                        .put("Set-Cookie", new JSONArray().put("domainChallenge=fixture; Domain=.rumble.com; Path=/challenge; Secure"))
+                        : new JSONObject();
+                    return RumbleManifestTransport.responseFromPayload(request, new JSONObject()
+                        .put("status", redirect ? 302 : 200).put("headers", headers).put("body", ""));
+                } catch (org.json.JSONException error) { throw new java.io.IOException(error); }
+            }).build();
+            Request.Builder request = new Request.Builder().url(source);
+            registry.headersFor(source).forEach(request::header);
+            request.header("Cookie", "caller=private").header("Authorization", "Bearer private");
+            try (Response response = ExternalStreamRedirects.fetchForWebView(request.build(), client)) {
+                assertEquals(200, response.code());
+            }
+            assertEquals(2, requests.size());
+            Request redirected = requests.get(1);
+            assertEquals("fixture-agent", redirected.header("User-Agent"));
+            assertNull(redirected.header("Referer"));
+            assertNull(redirected.header("Authorization"));
+            if (destination.equals("https://challengecdn.rumble.com/challenge/final.m3u8")) {
+                assertEquals("domainChallenge=fixture", redirected.header("Cookie"));
+            } else {
+                assertNull(redirected.header("Cookie"));
+            }
+        }
+    }
+
     @Test public void followsManifestRedirectWithNewAndReplacedCookies() throws Exception {
         URL source = new URL("https://rumble.com/media/master.m3u8");
         ExternalStreamRequestRegistry registry = ExternalStreamRequestRegistry.shared();

@@ -174,7 +174,8 @@ final class ExternalStreamRequestRegistry {
             if (Set.of("accept", "accept-language", "sec-fetch-mode", "user-agent")
                 .contains(header.getKey().toLowerCase(Locale.ROOT))) safe.put(header.getKey(), header.getValue());
         }
-        return safe;
+        // Jar cookies follow their destination domain/path, never the caller's Cookie header.
+        return stripCookies ? safe : withCookies(safe, destination);
     }
 
     private Map<String, String> sourceHeadersFor(URL url) {
