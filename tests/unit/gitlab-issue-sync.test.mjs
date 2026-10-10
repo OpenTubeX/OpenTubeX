@@ -330,14 +330,45 @@ test('nested tracking lists resolve references while indented list code remains 
 test('Markdown link tooltips do not prevent title and counterpart conversion', async () => {
   const { state, client } = fixture()
   const url = state.sources[0].web_url
+  const tooltips = [' "Tooltip"', " 'Tooltip'", ' (Tooltip)']
   state.sources[0].description = `[old label](${url} "Tooltip")\n[old label](<${url}> 'Tooltip')\n[old label](${url} (Tooltip))`
   await sync(client)
   const target = state.targets[0]
-  const reference = `[Report](${url}) ([GitHub #${target.number}](${target.html_url}))`
-  assert.ok(target.body.endsWith([reference, reference, reference].join('\n')))
-  state.comments.push({ id: 20, body: `[old label](${target.html_url} "Tooltip")`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  assert.ok(target.body.endsWith(tooltips.map(tooltip => `[Report](${url}${tooltip}) ([GitHub #${target.number}](${target.html_url}))`).join('\n')))
+  state.comments.push({ id: 20, body: tooltips.map(tooltip => `[old label](${target.html_url}${tooltip})`).join('\n'), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
-  assert.ok(state.notes[1].body.endsWith(`[Report](${target.html_url}) ([GitLab #1](${url}))`))
+  assert.ok(state.notes[1].body.endsWith(tooltips.map(tooltip => `[Report](${target.html_url}${tooltip}) ([GitLab #1](${url}))`).join('\n')))
+})
+
+test('defined shortcut reference labels containing issue numbers stay intact', async () => {
+  const { state, client } = fixture()
+  const preserved = '[#1] and [REF #1] and ![#1]\n\n[#1]: https://example.org\n[ref #1]: https://example.org/other'
+  state.sources[0].description = preserved + '\n\nSee #1'
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(`${preserved}\n\nSee ${gitlabReference}`))
+  const githubBody = preserved.replaceAll('#1', `#${target.number}`)
+  state.comments.push({ id: 20, body: `${githubBody}\n\nSee #${target.number}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(`${githubBody}\n\nSee ${githubReference}`))
+})
+
+test('inline code uses entire backtick runs as delimiters', async () => {
+  for (const example of ['Text ``` Outside REF ` end', 'Text ` Outside REF ``` end', 'Text ``REF ` inside`` Outside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
 })
 
 test('list-item fences preserve literal references and resume conversion after closing', async () => {
