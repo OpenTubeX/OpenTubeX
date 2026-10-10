@@ -58,17 +58,20 @@ for (const uiScale of [100, 125]) {
             const crop = await poster.evaluate(element => {
               const previous = element.style.pointerEvents
               element.style.pointerEvents = 'auto'
-              const image = element.querySelector('img')
-              const box = element.getBoundingClientRect()
-              const hitsImage = (x, y) => document.elementsFromPoint(x, y).includes(image)
-              // Stay outside the antialiased edge even at fractional positions.
-              const corners = [
-                [box.left + 0.25, box.top + 0.25], [box.right - 0.25, box.top + 0.25],
-                [box.left + 0.25, box.bottom - 0.25], [box.right - 0.25, box.bottom - 0.25]
-              ].map(([x, y]) => hitsImage(x, y))
-              const center = hitsImage(box.left + box.width / 2, box.top + box.height / 2)
-              element.style.pointerEvents = previous
-              return { center, corners, radius: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) }
+              try {
+                const image = element.querySelector('img')
+                const box = element.getBoundingClientRect()
+                const hitsImage = (x, y) => document.elementsFromPoint(x, y).includes(image)
+                // Stay outside the antialiased edge even at fractional positions.
+                const corners = [
+                  [box.left + 0.25, box.top + 0.25], [box.right - 0.25, box.top + 0.25],
+                  [box.left + 0.25, box.bottom - 0.25], [box.right - 0.25, box.bottom - 0.25]
+                ].map(([x, y]) => hitsImage(x, y))
+                const center = hitsImage(box.left + box.width / 2, box.top + box.height / 2)
+                return { center, corners, radius: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) }
+              } finally {
+                element.style.pointerEvents = previous
+              }
             })
             expect(crop.center).toBe(true)
             expect(crop.radius).toBeCloseTo(12 * roundness / 100, 1)
