@@ -29,8 +29,10 @@ try {
     await delay(100)
   }
   assert.ok(page, 'Android WebView is available')
+  await page.addLocatorHandler(page.locator('.tutorialOverlay'), async () => {
+    await page.locator('.tutorialActions button').first().click()
+  })
   await expect(page.locator('.topNav')).toBeVisible({ timeout: 30000 })
-  if (await page.locator('.tutorialOverlay').isVisible()) await page.locator('.tutorialActions button').first().click()
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     window.tabGestureSavedState = {
