@@ -404,6 +404,24 @@ test('invalid UTF-8 across a stream boundary fails closed with and without a fin
   }
 })
 
+test('migration retains escaped date markers, prototype keys and plain JSON values through restart', async t => {
+  const path = await directory(t)
+  const lines = [
+    String.raw`{"_id":"escaped","videos":[{"videoId":"same","unknown":{"\u0024\u0024date":0}},{"videoId":"same","unknown":{"\u0024\u0024date":123}}],"__proto__":{"retained":true},"unknown":"backslash \\ and emoji \ud83d\ude00"}`,
+    '{"_id":"plain","videos":[null,false,0,"text",{"videoId":"plain"}],"unknown":{"constructor":"keep","prototype":"keep"}}',
+  ]
+  const original = lines.join('\n') + '\n'
+  const expected = lines.map(model.deserialize)
+  await writeFile(join(path, 'playlists.db'), original)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const engine = await openLibrary(path)
+    try {
+      assert.deepEqual(await engine.collections.playlists.findAsync({}), expected)
+      assert.equal(await readFile(join(path, 'playlists.db'), 'utf8'), original)
+    } finally { engine.database.close() }
+  }
+})
+
 test('migration preserves append-log semantics, dates, unknown fields, duplicates, order and blobs without modifying sources', async t => {
   const path = await directory(t)
   const playlist = {

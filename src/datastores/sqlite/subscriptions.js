@@ -108,7 +108,8 @@ export async function subscriptionPage(engine, options) {
   const { subscriptions, category = 'videos', onlyNew = false, cursor = null, limit = 100, preferences = {}, enabledCategories = ['videos', 'shorts', 'live', 'posts'] } = options
   const now = Number.isFinite(options.now) ? options.now : Date.now()
   const revisions = [engine.revision('subscriptionCache'), engine.revision('history'), engine.revision('settings')]
-  const revisionFor = (isNew, tab) => JSON.stringify([...revisions, subscriptions, isNew, isNew ? null : tab, preferences, enabledCategories])
+  const keyPreferences = { ...preferences, hiddenChannelNames: preferences.hiddenChannelNames instanceof Set ? [...preferences.hiddenChannelNames].toSorted() : preferences.hiddenChannelNames }
+  const revisionFor = (isNew, tab) => JSON.stringify([...revisions, subscriptions, isNew, isNew ? null : tab, keyPreferences, enabledCategories])
   const revision = revisionFor(onlyNew, category)
   if (cursor && cursor.revision !== revision) return { records: [], cursor: null, stale: true }
   const channels = getSubscriptionsForFeed(subscriptions, category)

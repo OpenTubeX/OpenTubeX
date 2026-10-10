@@ -118,6 +118,33 @@ function memory(t) {
 }
 const video = (index, fields = {}) => ({ videoId: String(index).padStart(11, '0'), authorId: 'channel', title: `Video ${index}`, author: 'Author', published: 1000 + index, lengthSeconds: 100, isNewInSubscriptionFeed: true, ...fields })
 
+for (const onlyNew of [false, true]) {
+  test(`${onlyNew ? 'New-prepared' : 'classic'} subscription views invalidate hidden-channel changes and canonicalize equivalent Sets`, async t => {
+    const engine = memory(t)
+    const subscriptions = [{ id: 'alpha', name: 'Alpha' }, { id: 'beta', name: 'Beta' }]
+    const persisted = subscriptions.map((channel, index) => ({
+      _id: channel.id, videos: [video(index + 1, { authorId: channel.id, author: channel.name })], videosTimestamp: new Date(3000),
+    }))
+    await engine.collections.subscriptionCache.insertAsync(persisted)
+    const options = { subscriptions, category: 'videos', onlyNew, limit: 1, now: 10000, enabledCategories: ['videos'] }
+    const page = async hiddenChannelNames => {
+      // New keeps the released helper's filtering rules, and also primes the
+      // classic view. Both keys must preserve the Set for the later tab switch.
+      if (onlyNew) await subscriptionPage(engine, { ...options, preferences: { hiddenChannelNames } })
+      return subscriptionPage(engine, { ...options, onlyNew: false, preferences: { hiddenChannelNames } })
+    }
+    assert.deepEqual((await page(new Set(['Alpha']))).records.map(entry => entry.author), ['Beta'])
+    assert.deepEqual((await page(new Set(['Beta']))).records.map(entry => entry.author), ['Alpha'])
+    const visible = await page(new Set(['Unrelated 1', 'Unrelated 2']))
+    assert.equal(visible.total, 2)
+    assert.ok(visible.cursor)
+    const equivalent = await page(new Set(['Unrelated 2', 'Unrelated 1']))
+    assert.deepEqual(equivalent.cursor, visible.cursor, 'equivalent memberships should retain the existing view')
+    assert.equal(engine.revision('subscriptionCache'), 1)
+    assert.deepEqual(await engine.collections.subscriptionCache.findAsync({}), persisted)
+  })
+}
+
 test('playlist selection searches projected fields with Unicode and literal substring semantics without deserializing members', async t => {
   const engine = memory(t)
   const records = [

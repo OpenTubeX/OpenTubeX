@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 import { DatabaseSync } from 'node:sqlite'
 import model from '@seald-io/nedb/lib/model.js'
-import { LibraryEngine } from './engine.js'
+import { LibraryEngine, deserialize } from './engine.js'
 import { COLLECTIONS, LIBRARY_FILE_NAME, LIBRARY_SCHEMA_VERSION, SCHEMA_SQL } from './schema.js'
 
 async function exists(path) {
@@ -168,15 +168,16 @@ export async function openLibrary(directory, { onCheckpoint, batchSize = 250 } =
               if (!line.text.trim()) continue
               let record
               try {
-                record = model.deserialize(line.text)
+                record = deserialize(line.text)
                 if (!record || typeof record !== 'object' || Array.isArray(record)) throw new Error('Expected an object')
                 if (typeof record._id === 'string' && record._id) {
                   if (record.$$deleted === true) {
                     engine.prepare('DELETE FROM records WHERE collection = ? AND id = ?').run(collection, record._id)
                     engine.prepare('DELETE FROM migration_expected WHERE collection = ? AND id = ?').run(collection, record._id)
                   } else {
-                    engine.write(collection, record, true)
-                    engine.prepare('INSERT INTO migration_expected VALUES (?, ?, ?) ON CONFLICT(collection, id) DO UPDATE SET data = excluded.data').run(collection, record._id, model.serialize(record))
+                    const serialized = model.serialize(record)
+                    engine.writeSerialized(collection, serialized, true)
+                    engine.prepare('INSERT INTO migration_expected VALUES (?, ?, ?) ON CONFLICT(collection, id) DO UPDATE SET data = excluded.data').run(collection, record._id, serialized)
                   }
                 } else if (record.$$indexCreated || record.$$indexRemoved) {
                 // Retain the original index declaration for recovery/export.
@@ -206,7 +207,7 @@ export async function openLibrary(directory, { onCheckpoint, batchSize = 250 } =
       // thumbnail byte, with an independent copy of the replayed source records.
       for (const expected of engine.prepare('SELECT collection, id, data FROM migration_expected').iterate()) {
         const row = engine.prepare('SELECT id, data FROM records WHERE collection = ? AND id = ?').get(expected.collection, expected.id)
-        if (!row || !isDeepStrictEqual(model.deserialize(expected.data), engine.materialize(expected.collection, row))) throw new Error(`Lossless migration verification failed for ${expected.collection}/${expected.id}`)
+        if (!row || !isDeepStrictEqual(deserialize(expected.data), engine.materialize(expected.collection, row))) throw new Error(`Lossless migration verification failed for ${expected.collection}/${expected.id}`)
       }
       if (engine.prepare('SELECT count(*) AS count FROM migration_expected').get().count !== engine.prepare('SELECT count(*) AS count FROM records').get().count) throw new Error('Lossless migration record counts do not match')
       verifyDatabase(database)

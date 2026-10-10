@@ -11,7 +11,7 @@ import { getSortedPlaylistItems } from '../../renderer/helpers/playlists.js'
 const { serialize, modify, match } = model
 const MAX_PAGE_SIZE = 250
 
-function deserialize(data) {
+export function deserialize(data) {
   // Engine rows use NeDB's canonical serialization. Retain its Date reviver
   // for date markers and escaped strings; plain JSON needs no per-field walk.
   return data.includes('$$date') || data.includes('\\') ? model.deserialize(data) : JSON.parse(data)
@@ -269,12 +269,14 @@ export class LibraryEngine {
   }
 
   write(collection, input, replace = false) {
-    const serializedInput = serialize(input)
+    // Serialization validates every field before any persisted row changes.
+    return this.writeSerialized(collection, serialize(input), replace)
+  }
+
+  writeSerialized(collection, serializedInput, replace = false) {
     const record = deserialize(serializedInput)
     record._id ??= randomUUID()
     if (typeof record._id !== 'string' || !record._id) throw new TypeError('A record must have a nonempty string ID')
-    // Validate before changing any rows, including members and blob values.
-    serialize(record)
     const arrays = new Map()
     for (const field of ARRAY_FIELDS[collection] ?? []) {
       if (Array.isArray(record[field])) {
@@ -298,7 +300,9 @@ export class LibraryEngine {
     for (const [field, entries] of arrays) this.replaceArray(collection, record._id, field, entries, record[field + 'Timestamp'])
     for (const [field, data] of blobs) this.prepare('INSERT INTO record_blobs VALUES (?, ?, ?, ?, ?)').run(collection, record._id, field, serialize(data), createHash('sha256').update(data).digest('hex'))
     if (collection === 'history') this.indexSearch(record)
-    return { ...deserialize(serializedInput), _id: record._id }
+    for (const [field, entries] of arrays) record[field] = entries
+    for (const [field, data] of blobs) record[field] = data
+    return record
   }
 
   indexSearch(record) {
