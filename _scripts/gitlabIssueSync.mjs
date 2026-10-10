@@ -223,8 +223,9 @@ function referenceResolver(sources, targets, mergeRequests) {
         indent = expanded.match(/^ */)[0].length
       }
       if (htmlEnd) {
-        prose.push(line)
-        if (htmlEnd.pattern.test(line)) htmlEnd = null
+        if (htmlEnd.literal) result.push({ literal: line })
+        else prose.push(line)
+        if (htmlEnd.pattern.test(text)) htmlEnd = null
         continue
       }
       if (!fence && depth !== quoteDepth) {
@@ -251,12 +252,21 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!fence && !indentedCode) {
         const definition = lineContent.match(/^ {0,3}\[([^\]]+)\]:/)
         if (definition) referenceLabels.add(labelKey(definition[1]))
-        const opening = lineContent.match(/<(code|pre|script|style|textarea)\b[^>]*>|<!--/i)
+        const opening = lineContent.match(/^ {0,3}(?:<(code|pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
         if (opening) {
           htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           paragraph = false
           prose.push(line)
           if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
+          continue
+        }
+        const blockTag = /^ {0,3}<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?=[ \t>]|\/>|$)/i.test(lineContent)
+        const completeTag = !paragraph && /^ {0,3}(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>)[ \t]*$/i.test(lineContent)
+        if (blockTag || completeTag) {
+          flush()
+          htmlEnd = { pattern: /^[ \t]*$/, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          paragraph = false
+          result.push({ literal: line })
           continue
         }
       }

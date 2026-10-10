@@ -657,6 +657,38 @@ test('unclosed HTML regions end when their list container exits', async () => {
   }
 })
 
+test('generic HTML blocks preserve references until a blank line or container exit', async () => {
+  for (const example of ['<div>\nREF\n</div>\n\nOutside REF', '<table>\nREF\n</table>\n\nOutside REF', '<details>\nREF\n</details>\n\nOutside REF', '<DIV class="example"\nREF\n\nOutside REF', '> <div>\n> REF\nOutside REF', '- <table>\n  REF\nOutside REF', '<custom data-ref="example">\nREF\n</custom>\n\nOutside REF', '</div>\nREF\n\nOutside REF', '<div>\nREF\n\nOutside REF', 'Text\n<span>\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('inline-code HTML openers do not swallow subsequent indented code or prose', async () => {
+  for (const tag of ['<pre>', '<code>', '<script>', '<!--']) {
+    const { state, client } = fixture()
+    const body = reference => `\`${tag}\`\n\n    ${reference}\n\nOutside ${reference}`
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('raw-text HTML blocks preserve their contents until closing or EOF', async () => {
   for (const tag of ['script', 'style', 'textarea']) {
     for (const close of [false, true]) {
