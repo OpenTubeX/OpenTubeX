@@ -64,8 +64,45 @@ async function profileStore() {
     stores.push(store)
     return store
   }
-  return { db, store: createStore(), createStore }
+  return { db, store: createStore(), createStore, DBProfileHandlers }
 }
+
+test('subscription writes fail after bounded contention instead of retrying indefinitely', async () => {
+  const { db, DBProfileHandlers } = await profileStore()
+  let attempts = 0
+  db.profiles.updateAsync = async () => {
+    attempts++
+    // Prevent the old implementation from hanging the regression run.
+    if (attempts > 10) throw new Error('Test stopped an unbounded retry')
+    return { numAffected: 0 }
+  }
+
+  await assert.rejects(DBProfileHandlers.updateSubscriptionDetails([
+    { channelId: 'channel', channelName: 'New name' }
+  ]), /Unable to update subscriptions.*concurrent changes/)
+  assert.equal(attempts, 5)
+})
+
+for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetails']) {
+  test(`${action} reports failed persistence without changing renderer metadata`, async t => {
+    const { db, store } = await profileStore()
+    t.mock.method(console, 'error', () => {})
+    db.profiles.updateAsync = async () => { throw new Error('Save failed') }
+    const channel = { channelId: 'channel', channelName: 'New name' }
+    assert.equal(await store.dispatch(action, action === 'batchUpdateSubscriptionDetails' ? [channel] : channel), false)
+    for (const profile of store.state.profileList) {
+      assert.equal(profile.subscriptions[0].name, 'Old name')
+    }
+  })
+}
+
+test('metadata saves report success for changed, unchanged, and empty updates', async () => {
+  const { store } = await profileStore()
+  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', []), true)
+  const channel = { channelId: 'channel', channelName: 'New name' }
+  assert.equal(await store.dispatch('updateSubscriptionDetails', channel), true)
+  assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [channel]), true)
+})
 
 for (const settingsFirst of [true, false]) {
   test(`a metadata refresh in another window preserves a members-only disable with settings first: ${settingsFirst}`, async () => {

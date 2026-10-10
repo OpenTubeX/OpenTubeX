@@ -731,16 +731,21 @@ class Profiles {
 
   /**
    * Retry against current subscriptions when another window changes them
-   * between reading and saving. Never write a stale whole-profile snapshot.
+   * between reading and saving, up to five attempts per profile.
+   * Never write a stale whole-profile snapshot.
    * @param {object[]} profiles
    * @param {(profile: object) => object[] | null} update
    */
   static async updateSubscriptions(profiles, update) {
     const updatedProfileIds = []
     for (let profile of profiles) {
+      let attempts = 0
       while (profile != null) {
         const subscriptions = update(profile)
         if (subscriptions === null) break
+        if (++attempts > 5) {
+          throw new Error(`Unable to update subscriptions for profile ${profile._id}: repeated concurrent changes`)
+        }
         const { numAffected } = await db.profiles.updateAsync(
           { _id: profile._id, subscriptions: profile.subscriptions },
           { $set: { subscriptions } }

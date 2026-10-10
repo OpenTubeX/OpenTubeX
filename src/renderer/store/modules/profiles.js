@@ -119,13 +119,15 @@ const actions = {
   },
 
   async batchUpdateSubscriptionDetails({ commit }, channels) {
-    if (channels.length === 0) { return }
+    if (channels.length === 0) { return true }
 
     try {
       const profileIds = await DBProfileHandlers.updateSubscriptionDetails(channels)
       if (profileIds.length > 0) commit('updateSubscriptionDetails', { channels, profileIds })
+      return true
     } catch (error) {
       console.error(error)
+      return false
     }
   },
 
