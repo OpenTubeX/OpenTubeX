@@ -2,6 +2,8 @@ package org.opentubex.app;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,6 +102,21 @@ final class ExternalStreamRequestRegistry {
         if (isTwitchVodPath(url)) return Map.of();
         Map<String, String> source = sourceHeadersFor(url);
         return source == null ? null : withCookies(source, url);
+    }
+
+    synchronized void saveResponseCookies(URL url, Headers headers) {
+        long now = System.currentTimeMillis() / 1000;
+        long maximumExpiry = now + 3600;
+        for (okhttp3.Cookie incoming : okhttp3.Cookie.parseAll(HttpUrl.get(url), headers)) {
+            if (!incoming.name().matches("[!#$%&'*+.^_`|~0-9A-Za-z-]+") ||
+                incoming.value().contains(";") || !isSafeHeaderValue(incoming.value())) continue;
+            cookies.removeIf(cookie -> cookie.domain.equals(incoming.domain()) &&
+                cookie.path.equals(incoming.path()) && cookie.value.startsWith(incoming.name() + "="));
+            long expiry = Math.min(incoming.expiresAt() / 1000, maximumExpiry);
+            if (expiry > now) cookies.add(new Cookie(incoming.domain(), !incoming.hostOnly(),
+                incoming.path(), incoming.secure(), expiry, incoming.name() + "=" + incoming.value()));
+        }
+        if (cookies.size() > 1024) cookies.subList(0, cookies.size() - 1024).clear();
     }
 
     synchronized String registerTwitchVod(JSONArray urls) {

@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.json.JSONArray;
@@ -46,22 +47,30 @@ final class RumbleManifestTransport implements Interceptor {
             try (var input = process.getOutputStream()) { input.write(payload.toString().getBytes(StandardCharsets.UTF_8)); }
             if (!process.waitFor(35, TimeUnit.SECONDS) || process.exitValue() != 0) throw new IOException("Rumble manifest request failed");
             JSONObject result = new JSONObject(new String(output.get(1, TimeUnit.SECONDS), StandardCharsets.UTF_8));
-            Headers.Builder responseHeaders = new Headers.Builder();
-            JSONObject rawHeaders = result.getJSONObject("headers");
-            for (var names = rawHeaders.keys(); names.hasNext();) {
-                String name = names.next();
-                JSONArray values = rawHeaders.getJSONArray(name);
-                for (int index = 0; index < values.length(); index++) responseHeaders.add(name, values.getString(index));
-            }
-            int status = result.getInt("status");
-            return new Response.Builder().request(request).protocol(Protocol.HTTP_2).code(status)
-                .message("HTTP " + status).headers(responseHeaders.build())
-                .body(ResponseBody.create(Base64.getDecoder().decode(result.getString("body")), null)).build();
+            return responseFromPayload(request, result);
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
             throw new IOException("Rumble manifest request interrupted", error);
         } catch (Exception error) {
             throw new IOException("Rumble manifest request failed", error);
         } finally { if (process != null) process.destroy(); }
+    }
+
+    static Response responseFromPayload(Request request, JSONObject result) throws org.json.JSONException {
+        Headers.Builder responseHeaders = new Headers.Builder();
+        JSONObject rawHeaders = result.getJSONObject("headers");
+        for (var names = rawHeaders.keys(); names.hasNext();) {
+            String name = names.next();
+            JSONArray values = rawHeaders.getJSONArray(name);
+            for (int index = 0; index < values.length(); index++) responseHeaders.add(name, values.getString(index));
+        }
+        int status = result.getInt("status");
+        Response response = new Response.Builder().request(request).protocol(Protocol.HTTP_2).code(status)
+            .message("HTTP " + status).headers(responseHeaders.build())
+            .body(ResponseBody.create(Base64.getDecoder().decode(result.getString("body")), null)).build();
+        // The helper bypasses OkHttp's cookie interceptor. Save cookies before
+        // ExternalStreamRedirects builds the next request from the registry.
+        ExternalStreamRequestRegistry.shared().saveResponseCookies(request.url().url(), response.headers());
+        return response;
     }
 }

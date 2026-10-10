@@ -43,8 +43,7 @@ public class YtDlpRuntimeTest {
             }
             awaitRumble(view, "document.querySelector('.externalMediaPlayer video')?.currentTime > 1");
             double before = Double.parseDouble(evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').currentTime"));
-            Thread.sleep(1500);
-            assertTrue("Rumble playback must advance", Double.parseDouble(evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').currentTime")) > before + 0.5);
+            awaitRumble(view, "document.querySelector('.externalMediaPlayer video').currentTime > " + (before + 0.5));
             awaitRumble(view, "((v) => !('webkitAudioDecodedByteCount' in v) || v.webkitAudioDecodedByteCount > 0)(document.querySelector('.externalMediaPlayer video'))");
             evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').pause()");
         }
