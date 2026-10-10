@@ -235,6 +235,10 @@ History:
   Custom: 自訂
   History Older Than Days Removed: 已移除超過 {days} 天的觀看記錄
 Settings:
+  Password Settings:
+    Failed to Save Password: "無法儲存密碼。"
+    Confirm Password: "確認密碼"
+    Passwords Do Not Match: "密碼不相符。"
   Navigation and Controls: "導覽與控制項"
   Fullscreen Actions:
     Recommended Videos: "推薦影片"

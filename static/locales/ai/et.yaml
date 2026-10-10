@@ -235,6 +235,10 @@ History:
   Custom: Kohandatud
   History Older Than Days Removed: Ühest päevast vanem vaatamisajalugu on eemaldatud | {days} päevast vanem vaatamisajalugu on eemaldatud
 Settings:
+  Password Settings:
+    Failed to Save Password: "Parooli salvestamine ebaõnnestus."
+    Confirm Password: "Kinnita parool"
+    Passwords Do Not Match: "Paroolid ei ühti."
   Navigation and Controls: "Navigeerimine ja juhtelemendid"
   Fullscreen Actions:
     Recommended Videos: "Soovitatud videod"

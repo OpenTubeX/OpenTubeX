@@ -235,6 +235,10 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Foi removido o histórico de reprodução com mais de 1 dia | Foi removido o histórico de reprodução com mais de {days} dias | Foi removido o histórico de reprodução com mais de {days} dias
 Settings:
+  Password Settings:
+    Failed to Save Password: "Não foi possível salvar a senha."
+    Confirm Password: "Confirmar senha"
+    Passwords Do Not Match: "As senhas não coincidem."
   Navigation and Controls: "Navegação e controles"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"

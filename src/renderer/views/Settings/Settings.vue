@@ -344,7 +344,10 @@
         v-overlay-scrollbars
         class="settingsPassword"
       >
-        <PasswordDialog @unlocked="handleUnlock" />
+        <PasswordDialog
+          ref="passwordDialogRef"
+          @unlocked="handleUnlock"
+        />
       </div>
     </div>
     <div
@@ -507,6 +510,7 @@ const activeSettingsSectionRef = useTemplateRef('activeSettingsSectionRef')
 const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
 const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
 const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
+const passwordDialogRef = useTemplateRef('passwordDialogRef')
 const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
@@ -864,6 +868,10 @@ function handleMounted() {
   nextTick(observeProfileManager)
   nextTick(observeStandaloneContent)
   nextTick(() => {
+    if (!unlocked.value) {
+      passwordDialogRef.value?.focus()
+      return
+    }
     const initialFocus = isNarrowLayout.value || (IS_CAPACITOR && !props.hardwareKeyboardAttached)
       ? settingsCloseButtonRef.value
       : settingsSearchInputRef.value ?? settingsCloseButtonRef.value

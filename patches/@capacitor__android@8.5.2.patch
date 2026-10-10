@@ -1,3 +1,17 @@
+diff --git a/capacitor/src/main/java/com/getcapacitor/Bridge.java b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+index 9a3c6e0739682c9ff3b1254324ef59bb4fb2f4bd..0cca9fb306c9a5ff8b7450a132bb2427cc979c2b 100644
+--- a/capacitor/src/main/java/com/getcapacitor/Bridge.java
++++ b/capacitor/src/main/java/com/getcapacitor/Bridge.java
+@@ -939,7 +939,8 @@ public class Bridge {
+         return this.savedCalls.get(callbackId);
+     }
+ 
+-    PluginCall getPluginCallForLastActivity() {
++    /** Consume the restored call from a plugin with custom activity-result handling. */
++    public PluginCall getPluginCallForLastActivity() {
+         PluginCall pluginCallForLastActivity = this.pluginCallForLastActivity;
+         this.pluginCallForLastActivity = null;
+         return pluginCallForLastActivity;
 diff --git a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java b/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java
 index 69278bc63b3fc8b2489ac3cf88b37c0330d3e516..ad8b13c9b5ed38346fc5506739dc6481fd56a123 100644
 --- a/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java

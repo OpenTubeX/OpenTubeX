@@ -14,13 +14,13 @@
 
 .sectionBody {
   /* Each regular control contributes half of the shared 20px row gap. */
-  --settings-control-margin: 10px;
+  --settings-control-margin: calc(var(--settings-row-gap, 20px) / 2);
   --input-bottom-spacing: 0;
 
   background-color: var(--settings-section-bg-color, var(--card-bg-color));
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(8px * var(--ui-roundness));
-  padding-block: 10px;
+  padding-block: calc(var(--settings-row-gap, 20px) / 2);
 
   > :deep(div) {
     box-sizing: border-box;

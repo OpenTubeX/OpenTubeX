@@ -245,9 +245,10 @@
 .outlined.floatingLabel .ft-input {
   /* The label floats into the outline; the value stays vertically centered. */
   padding-block: 0;
+  border-color: transparent;
 }
 
-.outlined .ft-input:not(:disabled):hover {
+.outlined:not(.floatingLabel) .ft-input:not(:disabled):hover {
   border-color: var(--primary-text-color);
 }
 
@@ -260,14 +261,59 @@
   --input-label-scale: 1;
 }
 
-.outlined.floatingLabel .selectLabel {
-  inset-block-start: 0;
-  padding-inline: 4px;
+.inputOutline,
+.inputLegend {
+  display: contents;
+}
+
+/* A legend leaves a real notch, revealing any surrounding surface. */
+.outlined .inputOutline {
+  display: block;
+  position: absolute;
+  grid-area: 1 / 1 / 2 / 2;
+  inset-block: -7px 0;
+  inset-inline: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--secondary-text-color);
+  border-radius: calc(4px * var(--ui-roundness));
+  pointer-events: none;
+  transition: border-color 150ms ease;
+}
+
+.outlined .inputLegend {
+  display: block;
+  min-block-size: 14px;
+  max-inline-size: calc(100% - var(--input-label-reserved-space));
   margin-inline-start: 12px;
+  padding: 0;
+}
+
+.outlined.floatingLabel .selectLabel {
+  display: flex;
+  position: static;
+  max-inline-size: 100%;
+  padding-inline: 4px;
+  margin: 0;
   font-size: 12px;
   line-height: 14px;
-  background-color: var(--input-label-surface, var(--card-bg-color));
-  transform: translateY(-50%);
+  transform: none;
+  pointer-events: auto;
+}
+
+.outlined.floatingLabel .ft-input:not(:disabled):hover ~ .inputOutline {
+  border-color: var(--primary-text-color);
+}
+
+.outlined.floatingLabel .ft-input:focus ~ .inputOutline {
+  border-color: var(--primary-color);
+}
+
+/* Keep the thicker focus border out of the label's notch. */
+.outlined.floatingLabel .ft-input:focus {
+  border-color: transparent;
+  box-shadow: inset 2px 0 var(--primary-color), inset -2px 0 var(--primary-color), inset 0 -2px var(--primary-color);
 }
 
 .outlined .selectLabelIcon :deep(.ft-icon__glyph) {
@@ -275,6 +321,14 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
+  .outlined .inputOutline {
+    inset-block-start: -9px;
+  }
+
+  .outlined .inputLegend {
+    min-block-size: 18px;
+  }
+
   .outlined.floatingLabel .selectLabel {
     font-size: 14px;
     line-height: 18px;

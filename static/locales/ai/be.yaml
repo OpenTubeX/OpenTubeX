@@ -253,6 +253,10 @@ History:
   Custom: Уласны перыяд
   History Older Than Days Removed: Гісторыя прагляду, старэйшая за 1 дзень, выдаленая | Гісторыя прагляду, старэйшая за {days} дні, выдаленая | Гісторыя прагляду, старэйшая за {days} дзён, выдаленая
 Settings:
+  Password Settings:
+    Failed to Save Password: "Не ўдалося захаваць пароль."
+    Confirm Password: "Пацвердзіце пароль"
+    Passwords Do Not Match: "Паролі не супадаюць."
   Navigation and Controls: "Навігацыя і элементы кіравання"
   Fullscreen Actions:
     Recommended Videos: "Рэкамендаваныя відэа"

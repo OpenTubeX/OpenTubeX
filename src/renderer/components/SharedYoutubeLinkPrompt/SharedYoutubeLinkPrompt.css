@@ -1,9 +1,11 @@
 :global(.promptCard.sharedLinkPrompt.fixedLayout) {
   inline-size: min(360px, 100%);
   block-size: auto;
+  margin-inline: auto;
 }
 
 .sharedUrl {
+  text-align: center;
   overflow-wrap: anywhere;
   margin-block: 0 16px;
 }

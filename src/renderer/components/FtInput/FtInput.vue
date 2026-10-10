@@ -32,6 +32,7 @@
         :readonly="readonly"
         :spellcheck="false"
         :aria-describedby="descriptionIds"
+        :aria-invalid="invalid"
         :aria-label="showLabel ? null : (label || placeholder)"
         @change="handleChange"
         @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
@@ -41,23 +42,30 @@
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
       />
-      <label
+      <fieldset
         v-if="showLabel"
-        :for="id"
-        class="selectLabel"
-        :class="{ disabled, hasIcon: icon !== null }"
+        class="inputOutline"
+        role="presentation"
       >
-        <FtIcon
-          v-if="icon !== null"
-          :icon="icon"
-          class="selectLabelIcon"
-          aria-hidden="true"
-        />
-        <span
-          class="selectLabelText"
-          :title="label || placeholder"
-        >{{ label || placeholder }}</span>
-      </label>
+        <legend class="inputLegend">
+          <label
+            :for="id"
+            class="selectLabel"
+            :class="{ disabled, hasIcon: icon !== null }"
+          >
+            <FtIcon
+              v-if="icon !== null"
+              :icon="icon"
+              class="selectLabelIcon"
+              aria-hidden="true"
+            />
+            <span
+              class="selectLabelText"
+              :title="label || placeholder"
+            >{{ label || placeholder }}</span>
+          </label>
+        </legend>
+      </fieldset>
       <slot name="extraAction" />
       <button
         v-if="inputType === 'password'"
@@ -200,6 +208,7 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const { t } = useI18n()
 
 const props = defineProps({
+  invalid: { type: Boolean, default: false },
   multiline: { type: Boolean, default: false },
   selectOnClick: { type: Boolean, default: false },
   changeFilter: { type: Function, default: null },

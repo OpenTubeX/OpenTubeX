@@ -245,6 +245,10 @@ History:
   Custom: Прилагођено
   History Older Than Days Removed: Историја гледања старија од 1 дана је обрисана | Историја гледања старија од {days} дана је обрисана | Историја гледања старија од {days} дана је обрисана
 Settings:
+  Password Settings:
+    Failed to Save Password: "Чување лозинке није успело."
+    Confirm Password: "Потврдите лозинку"
+    Passwords Do Not Match: "Лозинке се не подударају."
   Navigation and Controls: "Навигација и контроле"
   Fullscreen Actions:
     Recommended Videos: "Препоручени видео-снимци"

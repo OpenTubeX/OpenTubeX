@@ -239,6 +239,10 @@ History:
   Custom: Personalizado
   History Older Than Days Removed: Eliminouse o historial de visualización de máis de 1 día | Eliminouse o historial de visualización de máis de {days} días
 Settings:
+  Password Settings:
+    Failed to Save Password: "Non se puido gardar o contrasinal."
+    Confirm Password: "Confirmar contrasinal"
+    Passwords Do Not Match: "Os contrasinais non coinciden."
   Navigation and Controls: "Navegación e controis"
   Fullscreen Actions:
     Recommended Videos: "Vídeos recomendados"

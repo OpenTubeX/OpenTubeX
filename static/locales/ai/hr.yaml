@@ -237,6 +237,10 @@ History:
   Custom: Prilagođeno
   History Older Than Days Removed: Uklonjena je povijest gledanja starija od 1 dana | Uklonjena je povijest gledanja starija od {days} dana | Uklonjena je povijest gledanja starija od {days} dana
 Settings:
+  Password Settings:
+    Failed to Save Password: "Spremanje lozinke nije uspjelo."
+    Confirm Password: "Potvrdite lozinku"
+    Passwords Do Not Match: "Lozinke se ne podudaraju."
   Navigation and Controls: "Navigacija i kontrole"
   Fullscreen Actions:
     Recommended Videos: "Preporučeni videozapisi"

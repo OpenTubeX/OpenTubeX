@@ -235,6 +235,10 @@ History:
   Custom: Egyéni
   History Older Than Days Removed: Az 1 napnál régebbi megtekintési előzmények eltávolítva | A(z) {days} napnál régebbi megtekintési előzmények eltávolítva
 Settings:
+  Password Settings:
+    Failed to Save Password: "Nem sikerült menteni a jelszót."
+    Confirm Password: "Jelszó megerősítése"
+    Passwords Do Not Match: "A jelszavak nem egyeznek."
   Navigation and Controls: "Navigáció és vezérlők"
   Fullscreen Actions:
     Recommended Videos: "Ajánlott videók"

@@ -235,6 +235,10 @@ History:
   Custom: Özel
   History Older Than Days Removed: 1 günden eski izleme geçmişi kaldırıldı | {days} günden eski izleme geçmişi kaldırıldı
 Settings:
+  Password Settings:
+    Failed to Save Password: "Parola kaydedilemedi."
+    Confirm Password: "Parolayı doğrulayın"
+    Passwords Do Not Match: "Parolalar eşleşmiyor."
   Navigation and Controls: "Gezinme ve kontroller"
   Fullscreen Actions:
     Recommended Videos: "Önerilen videolar"

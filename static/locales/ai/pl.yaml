@@ -80,6 +80,10 @@ User Playlists:
     This playlist could not be loaded.: Nie udało się wczytać tej playlisty.
     More videos could not be loaded.: Nie udało się wczytać kolejnych filmów.
 Settings:
+  Password Settings:
+    Failed to Save Password: "Nie udało się zapisać hasła."
+    Confirm Password: "Potwierdź hasło"
+    Passwords Do Not Match: "Hasła nie są zgodne."
   Navigation and Controls: "Nawigacja i elementy sterujące"
   Fullscreen Actions:
     Recommended Videos: "Polecane filmy"

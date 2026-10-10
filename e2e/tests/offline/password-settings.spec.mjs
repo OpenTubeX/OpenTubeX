@@ -1,73 +1,106 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { hashPassword } from '../../../src/renderer/helpers/passwords.js'
+import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 
-test.describe('password protected settings', () => {
-  test('settings lock behind a password until it is removed', async ({ app }) => {
-    let page = app.page
-    await goTo(page, 'settings')
+const storedTestPassword = await hashPassword('test-settings-password')
 
-    // Set a password. The settings page stays unlocked for this visit.
-    await page.locator('.settingsMenu [data-section="privacy"]').click()
-    await expect(page.locator('.settingsMenu [data-section="password"]')).toHaveCount(0)
-    await page.getByLabel('Password', { exact: true }).fill('hunter2')
-    const setPasswordButton = page.getByRole('button', { name: /^Set password$/i })
-    await expect(setPasswordButton.locator('[data-icon="key"]')).toBeVisible()
-    await setPasswordButton.click()
-    await page.waitForTimeout(1000)
+test('keeps both password entries after a failed save and allows retrying', async ({ page }, testInfo) => {
+  const privacy = await goToSettingsSection(page, 'privacy')
+  const password = privacy.getByLabel('Password', { exact: true })
+  const confirmation = privacy.getByLabel('Confirm password', { exact: true })
+  const save = privacy.getByRole('button', { name: /^Set password$/i })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const action = store._actions.updateSettingsPassword
+    store._actions.updateSettingsPassword = [() => new Promise(resolve => {
+      window.finishFailedPasswordSave = () => resolve(false)
+    })]
+    window.restorePasswordUpdater = () => { store._actions.updateSettingsPassword = action }
+  })
+  await password.fill('test-settings-password')
+  await confirmation.fill('test-settings-password')
+  await save.click()
+  await expect(save).toBeDisabled()
+  await expect(password).toHaveValue('test-settings-password')
+  await expect(confirmation).toHaveValue('test-settings-password')
+  await page.evaluate(() => window.finishFailedPasswordSave())
+  await expect(password).toHaveValue('test-settings-password')
+  await expect(confirmation).toHaveValue('test-settings-password')
+  await expect(save).toBeEnabled()
+  await expect(page.locator('.toast', { hasText: 'Failed to save password.' })).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath('password-save-failure.png'), animations: 'disabled' })
+  await page.evaluate(() => window.restorePasswordUpdater())
+  await save.click()
+  await expect(privacy.getByRole('button', { name: /^Remove password$/i })).toBeVisible()
+})
 
-    // After a restart the settings page asks for the password.
-    ;({ page } = await app.relaunch())
-    await goTo(page, 'settings')
-    const passwordInput = page.getByLabel('Password', { exact: true })
-    const unlockButton = page.getByRole('button', { name: 'Unlock' })
-    await expect(passwordInput).toBeVisible()
-    await expect(unlockButton).toBeDisabled()
-    await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toHaveCount(0)
-    await expect(async () => {
-      // Read related bounds in one frame during the page entrance animation.
-      const gaps = await unlockButton.evaluate(button => {
-        const pageBounds = document.querySelector('.settingsPage').getBoundingClientRect()
-        const passwordBounds = document.querySelector('.settingsPassword').getBoundingClientRect()
-        const cardBounds = document.querySelector('.settingsPassword .card').getBoundingClientRect()
-        const unlockBounds = button.getBoundingClientRect()
-        return {
-          width: passwordBounds.width - pageBounds.width,
-          left: passwordBounds.x - pageBounds.x,
-          center: unlockBounds.x + unlockBounds.width / 2 - (cardBounds.x + cardBounds.width / 2)
+test('requires matching password confirmation before protecting settings', async ({ page }, testInfo) => {
+  const privacy = await goToSettingsSection(page, 'privacy')
+  const password = privacy.getByLabel('Password', { exact: true })
+  const confirmation = privacy.getByLabel('Confirm password', { exact: true })
+  const save = privacy.getByRole('button', { name: /^Set password$/i })
+  const storedPassword = () => page.evaluate(() => {
+    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getSettingsPassword
+  })
+
+  await password.fill('test-settings-password')
+  await expect(save).toBeDisabled()
+  await password.press('Enter')
+  await expect(confirmation).toBeFocused()
+  await expect.poll(storedPassword).toBe('')
+
+  await confirmation.fill('different-password')
+  await expect(confirmation).toHaveAttribute('aria-invalid', 'true')
+  await expect(privacy.getByText('Passwords do not match.', { exact: true })).toBeVisible()
+  expect(await confirmation.evaluate(element => getComputedStyle(element).outlineStyle), 'error border leaves the label notch clear').toBe('none')
+  await expect(save).toBeDisabled()
+  await confirmation.press('Enter')
+  await expect.poll(storedPassword).toBe('')
+  await confirmation.scrollIntoViewIfNeeded()
+  await page.screenshot({ path: testInfo.outputPath('settings-password-confirmation.png') })
+
+  await confirmation.fill('test-settings-password')
+  await expect(confirmation).toHaveAttribute('aria-invalid', 'false')
+  await expect(privacy.getByText('Passwords do not match.', { exact: true })).toHaveCount(0)
+  await expect(save).toBeEnabled()
+  await confirmation.press('Enter')
+  await expect.poll(storedPassword).toMatch(/^pbkdf2-sha256\$/)
+  await privacy.getByRole('button', { name: /^Remove password$/i }).click()
+  await expect(password).toHaveValue('')
+  await expect(confirmation).toHaveValue('')
+  await expect(save).toBeDisabled()
+})
+
+for (const width of [1600, 375]) {
+  test.describe(`protected settings at ${width}px`, () => {
+    test.use({ seed: { settings: { settingsPassword: storedTestPassword } } })
+
+    for (const entry of ['All settings', 'Profile settings']) {
+      test(`focuses the password input on opening and reopening through ${entry}`, async ({ app, page }) => {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          BrowserWindow.getAllWindows()[0].setContentSize(width, 900)
+        }, width)
+        for (let opening = 0; opening < 2; opening++) {
+          if (entry === 'All settings') {
+            await goTo(page, 'settings')
+          } else {
+            await page.locator('.profileTrigger').click()
+            await page.locator('.quickSettingsMenu .profileSummary').click()
+            await page.getByRole('button', { name: 'Profile', exact: true }).click()
+            await expect(page.locator('.settingsWindow')).toBeVisible()
+            await expect(page.locator('.quickSettingsMenu')).toBeHidden()
+          }
+          const password = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+          await expect(password).toBeFocused()
+          await page.keyboard.type('wrong-password')
+          await page.keyboard.press('Enter')
+          await expect(page.getByRole('alert')).toHaveText('Incorrect password')
+          await page.keyboard.type('test-settings-password')
+          await page.keyboard.press('Enter')
+          await expect(page.locator('.settingsPassword')).toHaveCount(0)
+          await page.locator('.settingsCloseButton').click()
+          await expect(page.locator('.settingsWindow')).toBeHidden()
         }
       })
-      expect(gaps.width).toBeCloseTo(0, 0)
-      expect(gaps.left).toBeCloseTo(0, 0)
-      expect(gaps.center).toBeCloseTo(0, 0)
-    }).toPass()
-
-    // A wrong password keeps it locked.
-    await passwordInput.fill('wrong')
-    const visibilityToggle = page.getByRole('button', { name: 'Show password', exact: true })
-    await visibilityToggle.click()
-    await expect(passwordInput).toHaveAttribute('type', 'text')
-    await expect(unlockButton).toBeEnabled()
-    await page.getByRole('button', { name: 'Hide password', exact: true }).click()
-    await expect(passwordInput).toHaveAttribute('type', 'password')
-    await passwordInput.press('Enter')
-    await expect(passwordInput).toBeVisible()
-    await expect(page.getByRole('alert')).toHaveText('Incorrect password')
-    await expect(page.locator('.passwordInput')).toHaveClass(/invalid/)
-    await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toHaveCount(0)
-
-    // The correct password unlocks the sections.
-    await passwordInput.fill('hunter2')
-    await expect(unlockButton).toBeEnabled()
-    await unlockButton.click()
-    await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeVisible()
-
-    // Removing the password unlocks settings permanently.
-    await page.locator('.settingsMenu [data-section="privacy"]').click()
-    const removePasswordButton = page.getByRole('button', { name: /^Remove password$/i })
-    await expect(removePasswordButton.locator('[data-icon="trash"]')).toBeVisible()
-    await removePasswordButton.click()
-    await page.waitForTimeout(1000)
-    ;({ page } = await app.relaunch())
-    await goTo(page, 'settings')
-    await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeVisible()
+    }
   })
-})
+}

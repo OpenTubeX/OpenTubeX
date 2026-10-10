@@ -1450,6 +1450,9 @@ Settings:
   Search Settings: Iskanje po nastavitvah
   No Settings Found: Ni najdenih nastavitev
   Password Settings:
+    Failed to Save Password: "Gesla ni bilo mogoče shraniti."
+    Confirm Password: "Potrdite geslo"
+    Passwords Do Not Match: "Gesli se ne ujemata."
     Password Settings: Geslo
     Set Password To Prevent Access: Nastavite geslo, da preprečite dostop do nastavitev
     Set Password: Nastavi geslo

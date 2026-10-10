@@ -17,6 +17,28 @@ import {
   waitForAppReady
 } from '../../helpers/app.mjs'
 
+test.describe('fresh AI video summary default', () => {
+  test.use({ seed: { freshProfile: true }, showTutorial: true })
+
+  test('defaults AI video summaries to collapsed and preserves that on restart', async ({ app, page }, testInfo) => {
+    await page.locator('.tutorialCard').getByRole('button', { name: 'Skip', exact: true }).click()
+    await expect(page.locator('.tutorialOverlay')).toBeHidden()
+    const focus = await goToSettingsSection(page, 'focus')
+    const summaryMode = focus.getByRole('combobox', { name: 'AI video summaries' })
+    await expect(summaryMode).toHaveText('Collapsed')
+    await summaryMode.scrollIntoViewIfNeeded()
+    await page.screenshot({ path: testInfo.outputPath('summary-default-collapsed.png') })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateConfirmCloseApp', false)
+    })
+
+    const { page: relaunchedPage } = await app.relaunch()
+    const relaunchedFocus = await goToSettingsSection(relaunchedPage, 'focus')
+    await expect(relaunchedFocus.getByRole('combobox', { name: 'AI video summaries' })).toHaveText('Collapsed')
+  })
+})
+
 async function expectCompactCustomThemeEditor(page) {
   const appearance = await goToSettingsSection(page, 'appearance')
   await appearance.getByRole('button', { name: 'Create custom theme' }).click()
@@ -1164,7 +1186,7 @@ test.describe('settings', () => {
     })).toBe(true)
   })
 
-  test('sets the default AI video summary display mode', async ({ page }) => {
+  test('preserves the existing AI video summary display mode and saves changes', async ({ app, page }) => {
     const focus = await goToSettingsSection(page, 'focus')
     const summaryMode = focus.getByRole('combobox', { name: 'AI video summaries' })
 
@@ -1178,6 +1200,9 @@ test.describe('settings', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getAiVideoSummaryMode
     })).toBe('expanded')
+    const { page: relaunchedPage } = await app.relaunch()
+    const relaunchedFocus = await goToSettingsSection(relaunchedPage, 'focus')
+    await expect(relaunchedFocus.getByRole('combobox', { name: 'AI video summaries' })).toHaveText('Expanded')
   })
 
   test('adds and removes languages that comment translation should ignore', async ({ app, page }) => {

@@ -68,7 +68,23 @@
 }
 
 .storageActions :deep(.ft-input-component) {
-  inline-size: min(100%, 360px);
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+.storageActions :deep(.inputWrapper:has(.inputIndicators)) {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  column-gap: 8px;
+}
+
+.storageActions :deep(.inputAction) {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.storageActions :deep(.inputIndicators) {
+  grid-area: 1 / 2;
+  position: static;
+  transform: none;
 }
 
 .storageActions :deep(.pure-material-slider) {

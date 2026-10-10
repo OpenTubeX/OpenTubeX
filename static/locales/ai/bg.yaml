@@ -237,6 +237,10 @@ History:
   Custom: По избор
   History Older Than Days Removed: Историята на гледане отпреди повече от 1 ден е премахната | Историята на гледане отпреди повече от {days} дни е премахната
 Settings:
+  Password Settings:
+    Failed to Save Password: "Паролата не можа да бъде запазена."
+    Confirm Password: "Потвърдете паролата"
+    Passwords Do Not Match: "Паролите не съвпадат."
   Navigation and Controls: "Навигация и контроли"
   Fullscreen Actions:
     Recommended Videos: "Препоръчани видеоклипове"

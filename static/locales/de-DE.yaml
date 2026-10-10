@@ -1449,6 +1449,9 @@ Settings:
     Unlock: Entsperren
     Unlocking: Wird entsperrt…
   Password Settings:
+    Failed to Save Password: "Das Passwort konnte nicht gespeichert werden."
+    Confirm Password: "Passwort bestätigen"
+    Passwords Do Not Match: "Die Passwörter stimmen nicht überein."
     Remove Password: Passwort entfernen
     Password Settings: Passwort
     Set Password To Prevent Access: Passwort festlegen, um den Zugriff auf die Einstellungen zu verhindern

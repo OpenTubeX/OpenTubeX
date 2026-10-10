@@ -107,33 +107,16 @@
             </button>
           </div>
           <div class="bulkAdditionalSettings">
-            <button
+            <FtToggleSwitch
               v-if="restrictedPlaybackConfigured"
-              type="button"
               class="bulkMembersOnlySetting"
-              :class="{
-                enabled: selectedMembersOnlyState === true,
-                mixed: selectedMembersOnlyState === 'mixed'
-              }"
-              role="checkbox"
-              :aria-checked="selectedMembersOnlyState"
-              @click="updateSelectedShowMembersOnly"
-            >
-              <span class="bulkMembersOnlyLabel">
-                {{ t('Search Listing.Label.Members Only') }}
-              </span>
-              <FtIcon
-                v-if="selectedMembersOnlyState === true"
-                class="bulkSettingCheck"
-                :icon="['fas', 'check']"
-                aria-hidden="true"
-              />
-              <span
-                v-else-if="selectedMembersOnlyState === 'mixed'"
-                class="feedTypeMixedIndicator"
-                aria-hidden="true"
-              />
-            </button>
+              :label="t('Search Listing.Label.Members Only')"
+              :default-value="selectedMembersOnlyState === true"
+              :indeterminate="selectedMembersOnlyState === 'mixed'"
+              compact
+              controlled
+              @change="updateSelectedShowMembersOnly"
+            />
             <FtSelect
               class="bulkDailyLimitSelect"
               :placeholder="t('Channel.Videos per day')"

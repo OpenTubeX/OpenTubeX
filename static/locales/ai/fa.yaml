@@ -254,6 +254,10 @@ History:
   Custom: سفارشی
   History Older Than Days Removed: تاریخچه تماشای قدیمی‌تر از 1 روز حذف شد | تاریخچه تماشای قدیمی‌تر از {days} روز حذف شد
 Settings:
+  Password Settings:
+    Failed to Save Password: "ذخیره گذرواژه ناموفق بود."
+    Confirm Password: "تأیید گذرواژه"
+    Passwords Do Not Match: "گذرواژه‌ها مطابقت ندارند."
   Navigation and Controls: "پیمایش و کنترل‌ها"
   Fullscreen Actions:
     Recommended Videos: "ویدیوهای پیشنهادی"

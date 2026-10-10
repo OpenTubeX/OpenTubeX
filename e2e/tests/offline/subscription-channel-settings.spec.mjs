@@ -117,6 +117,7 @@ for (const uiScale of [100, 95]) {
 for (const uiScale of [100, 95, 125]) {
   test(`keeps the selection toolbar fixed with equal search and list gaps at ${uiScale}%`, async ({ app, page }, testInfo) => {
     await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'dark'))
     const settings = await goToSettingsSection(page, 'subscription')
     await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
     const toolbar = page.locator('.channelSelectionToolbar')
@@ -141,6 +142,14 @@ for (const uiScale of [100, 95, 125]) {
       await expectScrollAtRenderedEnd(scroller)
       await toolbar.getByRole('button', { name: 'Select All' }).click()
       await expect(toolbar).toContainText(`${subscriptions.length} selected`)
+      const bulkMembers = toolbar.getByRole('checkbox', { name: 'Members only' })
+      expect.soft(await bulkMembers.evaluate(element => element.tagName), 'bulk members setting uses the standard switch').toBe('INPUT')
+      const bulkGap = await toolbar.evaluate(element => {
+        const buttons = element.querySelector('.bulkFeedTypeOptions').getBoundingClientRect()
+        const additional = element.querySelector('.bulkAdditionalSettings').getBoundingClientRect()
+        return additional.top - buttons.bottom
+      })
+      expect.soft(bulkGap, 'bulk controls use the regular 20px settings gap').toBeCloseTo(20, 0)
       await expect(toolbar).toBeInViewport({ ratio: 0.999 })
       await page.locator('.settingsWindow').screenshot({ path: testInfo.outputPath(`subscription-settings-selected-${width}.png`) })
       await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -315,6 +324,7 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await expect(bulkVideos).toHaveAttribute('aria-checked', 'true')
   await expect(bulkShorts).toHaveAttribute('aria-checked', 'mixed')
   await expect(bulkMembersOnly).toHaveAttribute('aria-checked', 'mixed')
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', true)
   await expect(bulkDailyLimit).toHaveText('Different values')
 
   await setWindowSize(app, page, { width: 375, height: 700 })
@@ -329,12 +339,20 @@ test('changes subscription settings for selected channels', async ({ app, attach
 
   await bulkVideos.click()
   await bulkShorts.click()
-  await bulkMembersOnly.click()
+  await bulkMembersOnly.focus()
+  await bulkMembersOnly.press('Space')
+  await expect(bulkMembersOnly).toBeChecked()
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', false)
+  await bulkSettings.locator('.bulkMembersOnlySetting .switch-label').click()
+  await expect(bulkMembersOnly).not.toBeChecked()
+  await bulkMembersOnly.focus()
+  await bulkMembersOnly.press('Space')
   await bulkDailyLimit.click()
   await page.getByRole('option', { name: '2', exact: true }).click()
   await expect(bulkVideos).toHaveAttribute('aria-checked', 'false')
   await expect(bulkShorts).toHaveAttribute('aria-checked', 'true')
-  await expect(bulkMembersOnly).toHaveAttribute('aria-checked', 'true')
+  await expect(bulkMembersOnly).toBeChecked()
+  await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', false)
   await expect(bulkDailyLimit).toHaveText('2')
 
   await expect.poll(async () => {
@@ -509,6 +527,23 @@ test('reports one failure toast for a failed batch update', async ({ page }) => 
   await expect(page.locator('.toast', {
     hasText: 'Failed to save channel settings'
   })).toHaveCount(1)
+})
+
+test('preserves the mixed members-only switch after a failed bulk save', async ({ page }) => {
+  const settings = await goToSettingsSection(page, 'subscription')
+  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store._actions.updateChannelSettings = [() => Promise.resolve(false)]
+  })
+  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+  const members = page.locator('.bulkFeedTypeSettings').getByRole('checkbox', { name: 'Members only' })
+  await expect(members).toHaveJSProperty('indeterminate', true)
+  await members.focus()
+  await members.press('Space')
+  await expect(page.locator('.toast', { hasText: 'Failed to save channel settings' })).toHaveCount(1)
+  await expect(members).toHaveJSProperty('indeterminate', true)
+  await expect(members).toHaveJSProperty('checked', false)
+  await expect(members).toHaveAttribute('aria-checked', 'mixed')
 })
 
 test('reports a partial write when a requested profile no longer exists', async ({ page }) => {

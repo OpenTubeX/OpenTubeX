@@ -82,6 +82,7 @@
     </FtFlexBox>
     <FtFlexBox>
       <FtSelect
+        class="privacyWatchedProgressSelect"
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
         :value="watchedProgressSavingMode"
         setting-key="watchedProgressSavingMode"
@@ -90,6 +91,7 @@
         :icon="['fas', 'bars-progress']"
         :tooltip="$t('Settings.Privacy Settings.Watched Progress Saving Mode.Tooltip')"
         :disabled="!rememberHistory"
+        size-to-content
         @change="updateWatchedProgressSavingMode"
       />
     </FtFlexBox>
@@ -215,6 +217,23 @@ function updateWatchedPercentageThreshold(value) {
 </script>
 
 <style scoped>
+.privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {
+  position: relative;
+  inset-block: auto;
+  margin-block-start: -7px;
+}
+
+.privacyWatchedProgressSelect.select.outlined :deep(.selectLegend) {
+  max-inline-size: none;
+  margin-inline-end: 40px;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .privacyWatchedProgressSelect.select.outlined :deep(.selectOutline) {
+    margin-block-start: -9px;
+  }
+}
+
 .privacyExternalLinkHandling {
   display: flex;
   justify-content: center;

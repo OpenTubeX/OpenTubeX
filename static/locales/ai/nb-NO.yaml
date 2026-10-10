@@ -235,6 +235,10 @@ History:
   Custom: Egendefinert
   History Older Than Days Removed: Seerlogg eldre enn 1 dag er fjernet | Seerlogg eldre enn {days} dager er fjernet
 Settings:
+  Password Settings:
+    Failed to Save Password: "Kunne ikke lagre passordet."
+    Confirm Password: "Bekreft passord"
+    Passwords Do Not Match: "Passordene samsvarer ikke."
   Navigation and Controls: "Navigasjon og kontroller"
   Fullscreen Actions:
     Recommended Videos: "Anbefalte videoer"

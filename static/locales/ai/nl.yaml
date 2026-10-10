@@ -239,6 +239,10 @@ History:
   Custom: Aangepast
   History Older Than Days Removed: Kijkgeschiedenis ouder dan 1 dag is verwijderd | Kijkgeschiedenis ouder dan {days} dagen is verwijderd
 Settings:
+  Password Settings:
+    Failed to Save Password: "Wachtwoord opslaan mislukt."
+    Confirm Password: "Wachtwoord bevestigen"
+    Passwords Do Not Match: "De wachtwoorden komen niet overeen."
   Navigation and Controls: "Navigatie en bediening"
   Fullscreen Actions:
     Recommended Videos: "Aanbevolen video’s"
