@@ -143,6 +143,11 @@ function referenceResolver(sources, targets, mergeRequests) {
     const labelKey = label => label.trim().replace(/\s+/g, ' ').replace(/[^\u0131]+/g, text => text.toLowerCase().toUpperCase())
     const referenceLabels = new Set()
     const htmlTag = /<\/[a-z][a-z\d-]*\s*>|<[a-z][a-z\d-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
+    const inlineHtml = text => {
+      const raw = text.match(/^(?:<!--[^]*?--!?>|<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>)/)
+      const tag = text.match(htmlTag)
+      return raw?.[0] ?? (tag?.index === 0 ? tag[0] : null)
+    }
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
@@ -164,17 +169,21 @@ function referenceResolver(sources, targets, mergeRequests) {
     }
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
-    const balancedEnd = (text, start, open, close, codeSpans = false) => {
+    const balancedEnd = (text, start, open, close, inlineContent = false) => {
       let depth = 0
       let quote = null
       for (let index = start; index < text.length; index++) {
         const char = text[index]
         if (char === '\\') { index++; continue }
-        if (codeSpans && char === '`') {
+        if (inlineContent && char === '`') {
           const remaining = text.slice(index)
           const code = remaining.match(/^(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/)
           index += (code?.[0] ?? remaining.match(/^`+/)[0]).length - 1
           continue
+        }
+        if (inlineContent && char === '<') {
+          const html = inlineHtml(text.slice(index))
+          if (html) { index += html.length - 1; continue }
         }
         if (quote) { if (char === quote) quote = null; continue }
         if (open === '(' && /[\s]/.test(text[index - 1]) && /["']/.test(char)) { quote = char; continue }
@@ -234,10 +243,9 @@ function referenceResolver(sources, targets, mergeRequests) {
           }
         } else if (token === '<') {
           const remaining = text.slice(match.index)
-          const raw = remaining.match(/^(?:<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>)/)
-          const tag = remaining.match(htmlTag)
+          const html = inlineHtml(remaining)
           const autolink = remaining.match(/^<(?:[a-z][a-z\d+.-]{1,31}:[^\s<>]*|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)*)>/i)
-          const end = raw?.[0] ?? autolink?.[0] ?? (tag?.index === 0 ? tag[0] : null)
+          const end = html ?? autolink?.[0]
           if (end) {
             hasLink ||= Boolean(autolink)
             tokens.lastIndex = match.index + end.length

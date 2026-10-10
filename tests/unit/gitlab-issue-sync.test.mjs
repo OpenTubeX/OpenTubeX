@@ -614,6 +614,23 @@ test('local inline links find their real destination after code spans in their l
   assert.ok(state.notes[1].body.endsWith(Array(labels.length).fill(githubReference).join('\n')))
 })
 
+test('HTML brackets in link labels preserve unrelated links and resolve local links', async () => {
+  for (const html of ['<span title="]">', '<span title="[">', '<!-- ] -->', '<? ] ?>', '<![CDATA[] ]]>', '<!DOCTYPE html "]">']) {
+    const { state, client } = fixture()
+    const body = (reference, url) => `[old ${html} ${reference}](https://example.org)\n![old ${html} ${reference}](https://example.org)\n[old ${html} ${reference}](${url})\n\nOutside ${reference}`
+    const expected = (reference, url, replacement) => body(reference, url).replace(`[old ${html} ${reference}](${url})`, replacement).replace(`Outside ${reference}`, `Outside ${replacement}`)
+    state.sources[0].description = body('#1', state.sources[0].web_url)
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(expected('#1', state.sources[0].web_url, gitlabReference)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`, target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(expected(`#${target.number}`, target.html_url, githubReference)))
+  }
+})
+
 test('full reference labels treat backticks as literal label characters', async () => {
   const { state, client } = fixture()
   const body = reference => `[see ${reference}][key \`] tail \`\n\n[key \`]: https://example.org\n\nOutside ${reference}`
