@@ -316,7 +316,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.shortsPlayer:not(.scrollMiniPlayer, [data-inline-mini-drag]) {
   /*
     Keep the container from becoming a focus-scroll area and let the seek
-    thumb extend below the video. The video itself owns the rounded crop.
+    thumb extend below the video. The video and poster own the rounded crop.
   */
   overflow: visible !important;
 }
@@ -2561,6 +2561,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: absolute;
   inset: 0;
   z-index: 0;
+  border-radius: inherit;
+  overflow: hidden;
   background: #000;
   pointer-events: none;
 }
@@ -5837,10 +5839,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background: #000;
   object-fit: cover !important;
   transform: none !important;
-}
-
-.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .countdownPoster {
-  overflow: hidden;
 }
 
 .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar:not([data-mobile-mini-morph]) > .countdownPoster img {
