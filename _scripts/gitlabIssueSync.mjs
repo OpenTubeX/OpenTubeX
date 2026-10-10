@@ -148,7 +148,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
       let output = ''
       let position = 0
       let match
@@ -177,15 +177,28 @@ function referenceResolver(sources, targets, mergeRequests) {
           }
         } else if (token === '<') {
           const remaining = text.slice(match.index)
+          const raw = remaining.match(/^(?:<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>)/)
           const tag = remaining.match(htmlTag)
           const autolink = remaining.match(/^<(?:[a-z][a-z\d+.-]{1,31}:[^\s<>]*|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)*)>/i)
-          const end = autolink?.[0] ?? (tag?.index === 0 ? tag[0] : null)
+          const end = raw?.[0] ?? autolink?.[0] ?? (tag?.index === 0 ? tag[0] : null)
           if (end) {
             tokens.lastIndex = match.index + end.length
             token = urlReference(end.slice(1, -1), side) ?? end
           }
         } else if (/^https?:/i.test(token)) {
-          const url = token.replace(/[.,;:!?)\]]+$/, '')
+          const excess = {
+            ')': (token.match(/\)/g) ?? []).length - (token.match(/\(/g) ?? []).length,
+            ']': (token.match(/\]/g) ?? []).length - (token.match(/\[/g) ?? []).length,
+          }
+          let url = token
+          while (/[.,;:!?)\]]$/.test(url)) {
+            const last = url.at(-1)
+            if (last in excess) {
+              if (excess[last] <= 0) break
+              excess[last]--
+            }
+            url = url.slice(0, -1)
+          }
           token = (urlReference(url, side) ?? url) + token.slice(url.length)
         } else {
           const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
@@ -259,6 +272,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
       if (paragraph && listItem?.[1] && Number(listItem[1]) !== 1) listItem = null
       const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
+      const setextHeading = paragraph && /^ {0,3}(?:=+|-+)[ \t]*$/.test(lineContent)
       if (listItem) {
         listIndents.push(listItem[0].length)
         if (/^ {4}/.test(lineContent)) indentedCode = true
@@ -271,7 +285,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           ? /\?>/
           : /^ {0,3}<!\[CDATA\[/.test(lineContent)
             ? /\]\]>/
-            : /^ {0,3}<![A-Z]/i.test(lineContent) ? />/ : null
+            : /^ {0,3}<![A-Z]/.test(lineContent) ? />/ : null
         if (rawEnd) {
           flush()
           htmlEnd = { pattern: rawEnd, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
@@ -310,7 +324,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {
-        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !definition && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
+        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !setextHeading && !definition && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
         prose.push(line)
       }
     }

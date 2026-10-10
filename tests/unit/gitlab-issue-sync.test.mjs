@@ -743,6 +743,55 @@ test('unclosed HTML regions end when their list container exits', async () => {
   }
 })
 
+test('bare local URLs retain balanced parentheses and leave unmatched punctuation outside links', async () => {
+  const { state, client } = fixture()
+  const body = url => `See ${url}?x=(a)\nSee (${url}#note_(a)).\nSee ${url}?x=((a))).`
+  state.sources[0].description = body(state.sources[0].web_url)
+  await sync(client)
+  const target = state.targets[0]
+  const checkLinks = (text, url, other) => {
+    const links = [...marked.parse(text.slice(text.indexOf('See '))).matchAll(/<a href="([^"]+)">/g)].map(match => match[1])
+    assert.deepEqual(links, [`${url}?x=(a)`, other, `${url}#note_(a)`, other, `${url}?x=((a))`, other])
+    assert.ok(text.endsWith(').'))
+  }
+  checkLinks(target.body, state.sources[0].web_url, target.html_url)
+  state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  checkLinks(state.notes[1].body, target.html_url, state.sources[0].web_url)
+})
+
+test('setext headings end paragraphs before indented code', async () => {
+  for (const example of ['Heading\n===\n    REF', 'Heading\n-\n    REF', 'Heading\n---\n    REF', '> Heading\n> ===\n>     REF', '- Heading\n  ===\n      REF']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('lowercase pseudo-declarations remain prose references', async () => {
+  for (const example of ['<!foo\nOutside REF', '<!foo Outside REF>\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('comparison brackets do not hide prose references while valid HTML stays literal', async () => {
   const { state, client } = fixture()
   const body = reference => `Expected x < 3 and Outside ${reference} > 0\nExpected x < 3\nand Outside ${reference} > 0\n<span data-ref="${reference}">Outside ${reference}</span>\n<https://example.org/${reference}>`
