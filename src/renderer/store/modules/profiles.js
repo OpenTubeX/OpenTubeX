@@ -1,8 +1,7 @@
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
-import { deepCopy } from '../../helpers/utils'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
-import { copySubscriptionChannelSettings } from '../../helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 const state = {
@@ -64,21 +63,6 @@ function profileSort(a, b) {
   const nameB = b.name.normalize('NFC')
 
   return collator.compare(nameA, nameB)
-}
-
-function getChannelWithUpdatedSettings(subscription, settings, updatedAt) {
-  const channel = deepCopy(subscription)
-  if (Array.isArray(settings.feedTypes)) channel.feedTypes = [...settings.feedTypes]
-  for (const key of ['dailyVideoLimit', 'showMembersOnly']) {
-    if (!Object.hasOwn(settings, key)) continue
-    if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
-      delete channel[key]
-    } else {
-      channel[key] = settings[key]
-    }
-  }
-  channel.subscriptionSettingsUpdatedAt = updatedAt
-  return channel
 }
 
 const actions = {
@@ -156,18 +140,16 @@ const actions = {
     const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
     if (availableUpdates.length === 0) return false
     const updatedAt = Date.now()
-    const channels = availableUpdates.map(({ channelId, settings }) => (
-      getChannelWithUpdatedSettings(subscriptionsById.get(channelId), settings, updatedAt)
-    ))
-    const channelIds = new Set(channels.map(channel => channel.id))
+    const patches = availableUpdates.map(({ channelId, settings }) => ({ channelId, settings, updatedAt }))
+    const channelIds = new Set(patches.map(({ channelId }) => channelId))
     const profileIds = state.profileList
       .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
       .map(profile => profile._id)
     try {
-      const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(channels, profileIds)
+      const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(patches, profileIds)
       if (!Array.isArray(updatedProfileIds)) return false
       if (updatedProfileIds.length > 0) {
-        commit('updateChannelSettings', { channels, profileIds: updatedProfileIds })
+        commit('updateChannelSettings', { updates: patches, profileIds: updatedProfileIds })
       }
       return availableUpdates.length === updates.length && updatedProfileIds.length === profileIds.length
     } catch (error) {
@@ -331,15 +313,20 @@ const mutations = {
     }
   },
 
-  updateChannelSettings(state, { channel, channels = [channel], profileIds }) {
-    const channelsById = new Map(channels.map(channel => [channel.id, channel]))
+  updateChannelSettings(state, { channel, updates, profileIds }) {
+    const updatesById = new Map(updates?.map(update => [update.channelId, update]))
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
       if (!profile) continue
 
-      profile.subscriptions = profile.subscriptions.map(subscription => channelsById.has(subscription.id)
-        ? copySubscriptionChannelSettings(subscription, channelsById.get(subscription.id))
-        : subscription)
+      profile.subscriptions = profile.subscriptions.map(subscription => {
+        const update = updatesById.get(subscription.id)
+        if (update) {
+          const updatedAt = Math.max(update.updatedAt, subscription.subscriptionSettingsUpdatedAt ?? 0)
+          return getChannelWithUpdatedSettings(subscription, update.settings, updatedAt)
+        }
+        return subscription.id === channel?.id ? copySubscriptionChannelSettings(subscription, channel) : subscription
+      })
     }
   },
 

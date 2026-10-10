@@ -6,7 +6,8 @@ import Datastore from '@seald-io/nedb'
 
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
-import { copySubscriptionChannelSettings } from '../../src/renderer/helpers/subscription-channels.js'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../src/renderer/helpers/subscription-channels.js'
+import { getSubscriptionSettingsForSync, mergeSubscriptionSettingsEntry } from '../../src/renderer/helpers/subscription-settings-sync.js'
 
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
 const handlersSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -21,7 +22,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
   await db.profiles.insertAsync(profiles)
   const DBProfileHandlers = vm.runInNewContext(
     handlersSource.slice(handlersSource.indexOf('class Profiles {'), handlersSource.indexOf('class Playlists {')) + '\nProfiles',
-    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getProfileWithUpdatedSubscriptionDetails, console }
+    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getProfileWithUpdatedSubscriptionDetails, console }
   )
   const stores = []
   function createStore() {
@@ -41,9 +42,9 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
       broadcast('updateChannelSettings', { channel, profileIds })
       return profileIds
     }
-    handlers.batchUpdateChannelSettings = async (channels, requestedProfileIds) => {
-      const profileIds = await DBProfileHandlers.batchUpdateChannelSettings(channels, requestedProfileIds)
-      broadcast('updateChannelSettings', { channels, profileIds })
+    handlers.batchUpdateChannelSettings = async (updates, requestedProfileIds) => {
+      const profileIds = await DBProfileHandlers.batchUpdateChannelSettings(updates, requestedProfileIds)
+      broadcast('updateChannelSettings', { updates, profileIds })
       return profileIds
     }
     handlers.updateSubscriptionDetails = async channels => {
@@ -54,7 +55,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
     }
     const context = vm.createContext({
       MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
-      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings,
+      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings,
       deepCopy: value => JSON.parse(JSON.stringify(value)), console
     })
     vm.runInContext(profileSource
@@ -142,6 +143,55 @@ test('bulk disables 939 subscriptions with one write per profile and synchronize
   assert.equal(await store.dispatch('batchUpdateChannelSettings', [{ channelId: 'missing', settings: {} }]), false)
   assert.equal(write.mock.callCount(), 2)
 })
+
+for (const dailyVideoLimit of [7, undefined]) {
+  test(`a bulk members-only save preserves another window's concurrent daily limit: ${dailyVideoLimit}`, async t => {
+    const subscriptions = ['first', 'second'].map(id => ({
+      id, name: id, showMembersOnly: true, dailyVideoLimit: 3, feedTypes: ['shorts']
+    }))
+    const { db, store, createStore } = await profileStore(subscriptions)
+    const other = createStore()
+    const old = { value: getSubscriptionSettingsForSync({ state: { profiles: store.state } }) }
+    const laterUpdatedAt = Date.now() + 1000
+    let remoteEntry
+    const update = db.profiles.updateAsync.bind(db.profiles)
+    let changed = false
+    const write = t.mock.method(db.profiles, 'updateAsync', async (...args) => {
+      if (!changed) {
+        changed = true
+        assert.equal(await other.dispatch('updateChannelSettings', {
+          channelId: 'first', settings: { dailyVideoLimit }, fromSync: true, updatedAt: laterUpdatedAt
+        }), true)
+        remoteEntry = { value: getSubscriptionSettingsForSync({ state: { profiles: other.state } }) }
+      }
+      return update(...args)
+    })
+    assert.equal(await store.dispatch('batchUpdateChannelSettings', subscriptions.map(channel => ({
+      channelId: channel.id, settings: { showMembersOnly: false }
+    }))), true)
+    // Two writes by the other window, one failed CAS and one batch write per profile.
+    assert.equal(write.mock.callCount(), 6)
+    for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+      for (const profile of profiles) {
+        assert.equal(profile.subscriptions[0].dailyVideoLimit, dailyVideoLimit)
+        assert.equal(profile.subscriptions[0].subscriptionSettingsUpdatedAt, laterUpdatedAt)
+        assert.equal(Object.hasOwn(profile.subscriptions[0], 'dailyVideoLimit'), dailyVideoLimit !== undefined)
+        assert.equal(profile.subscriptions[1].dailyVideoLimit, 3)
+        for (const channel of profile.subscriptions) {
+          assert.equal(channel.showMembersOnly, false)
+          assert.deepEqual([...channel.feedTypes], ['shorts'])
+          assert.equal(channel.name, channel.id)
+        }
+      }
+    }
+    const merged = mergeSubscriptionSettingsEntry({
+      old, remoteEntry, now: Date.now(),
+      value: getSubscriptionSettingsForSync({ state: { profiles: store.state } })
+    })
+    assert.equal(merged.value.first.value.showMembersOnly, false)
+    assert.equal(merged.value.first.value.dailyVideoLimit, dailyVideoLimit)
+  })
+}
 
 for (const removeAll of [false, true]) {
   test(`a queued bulk edit keeps surviving updates after unsubscribe, all removed: ${removeAll}`, async t => {

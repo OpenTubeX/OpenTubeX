@@ -172,8 +172,18 @@ class Profiles {
     return dbProfiles(DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel, profileIds })
   }
 
-  static batchUpdateChannelSettings(channels, profileIds) {
-    return dbProfiles(DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS, { channels, profileIds })
+  static batchUpdateChannelSettings(updates, profileIds) {
+    // Preserve explicit undefined overrides through IPC; JSON would drop resets.
+    const plainUpdates = updates.map(({ channelId, settings, updatedAt }) => ({
+      channelId,
+      updatedAt,
+      settings: Object.fromEntries(Object.entries(settings).map(([key, value]) => [
+        key, Array.isArray(value) ? [...value] : value
+      ]))
+    }))
+    return window.ftElectron.dbProfiles(DBActions.PROFILES.BATCH_UPDATE_CHANNEL_SETTINGS, {
+      updates: plainUpdates, profileIds: [...profileIds]
+    })
   }
 
   static updateSubscriptionDetails(channels) {

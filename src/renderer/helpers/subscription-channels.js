@@ -61,6 +61,27 @@ export function copySubscriptionChannelSettings(channel, savedChannel) {
 }
 
 /**
+ * Applies only requested preferences, preserving concurrent edits to other fields.
+ * @param {object} subscription
+ * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
+ * @param {number} updatedAt
+ */
+export function getChannelWithUpdatedSettings(subscription, settings, updatedAt) {
+  const channel = { ...subscription }
+  if (Array.isArray(settings.feedTypes)) channel.feedTypes = [...settings.feedTypes]
+  for (const key of ['dailyVideoLimit', 'showMembersOnly']) {
+    if (!Object.hasOwn(settings, key)) continue
+    if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
+      delete channel[key]
+    } else {
+      channel[key] = settings[key]
+    }
+  }
+  channel.subscriptionSettingsUpdatedAt = updatedAt
+  return channel
+}
+
+/**
  * @param {number | null | undefined} limit
  */
 export function formatSubscriptionDailyVideoLimit(limit) {
