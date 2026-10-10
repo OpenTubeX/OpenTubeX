@@ -43,9 +43,12 @@ def fake_run(command, *, input, **kwargs):
             assert 'kept=fixture' in headers['cookie']
         else:
             assert 'authorization' not in headers
-            assert 'kept=fixture' not in headers['cookie']
-        assert 'caller=fixture' not in headers['cookie']
-        assert 'session=fixture' in headers['cookie'] and 'other=value' in headers['cookie']
+            assert 'kept=fixture' not in headers.get('cookie', '')
+        assert 'caller=fixture' not in headers.get('cookie', '')
+        if redirect_url == 'https://cdn.example.com/second':
+            assert 'cookie' not in headers
+        else:
+            assert 'session=fixture' in headers['cookie'] and 'other=value' in headers['cookie']
         response = {'status': 403, 'headers': {}, 'body': base64.b64encode(b'blocked fixture').decode()}
     return subprocess.CompletedProcess(command, 0, json.dumps(response).encode())
 
@@ -53,14 +56,15 @@ def fake_run(command, *, input, **kwargs):
 subprocess.run = fake_run
 try:
     credentials = {'Authorization': 'Bearer fixture', 'Cookie': 'caller=fixture; kept=fixture'}
-    for redirect_url in ('https://rumble.com/second', 'https://www.rumble.com/second', 'http://rumble.com/second'):
+    for redirect_url in ('https://rumble.com/second', 'https://www.rumble.com/second', 'http://rumble.com/second',
+                         'https://cdn.example.com/second', 'file:///fixture', 'ftp://cdn.example.com/second'):
         for default_headers in (False, True):
             calls.clear()
             with YoutubeDL({'quiet': True, 'http_headers': {'Authorization': credentials['Authorization']} if default_headers else {}}) as ydl:
                 handler = ydl._request_director.handlers['AndroidRumble']
                 assert not ydl._get_available_impersonate_targets(), 'Rumble support must not advertise impersonation for other sites'
                 try:
-                    handler.validate(Request('https://example.com/video'))
+                    handler.send(Request('https://example.com/video'))
                     raise AssertionError('Native Rumble handler accepted another site')
                 except UnsupportedRequest:
                     pass
@@ -69,7 +73,10 @@ try:
                     raise AssertionError('HTTP 403 was silently accepted')
                 except HTTPError as error:
                     assert error.status == 403 and error.response.read() == b'blocked fixture'
-                assert len(calls) == 2
+                    assert redirect_url.startswith(('http://', 'https://'))
+                except UnsupportedRequest:
+                    assert redirect_url.startswith(('file:', 'ftp:'))
+                assert len(calls) == (1 if redirect_url.startswith(('file:', 'ftp:')) else 2)
 finally:
     subprocess.run = original_run
 

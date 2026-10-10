@@ -48,8 +48,9 @@ def install_rumble_http():
             for name, value in std_headers.items():
                 if request.headers.get(name) == value:
                     request.headers.pop(name)
+            self.validate(request)
             for attempt in range(11):
-                self.validate(request)
+                self._check_url_scheme(request)
                 cookie_request = urllib.request.Request(request.url, headers=request.headers)
                 caller_cookie = request.headers.get('Cookie') if attempt else None
                 if caller_cookie:
