@@ -17,7 +17,8 @@ try {
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
       const pid = adb('shell', 'pidof', 'org.opentubex.app.dev')
-      if (!port) port = adb('forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
+      const forwardedPort = adb('forward', port ? `tcp:${port}` : 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
+      port ||= forwardedPort
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
       page = browser.contexts()[0].pages()[0]
       if (page) break
