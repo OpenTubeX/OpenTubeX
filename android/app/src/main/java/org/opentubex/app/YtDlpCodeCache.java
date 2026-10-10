@@ -3,9 +3,8 @@ package org.opentubex.app;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /** Unpack installed Python code once so imports can reuse their compiled bytecode. */
 final class YtDlpCodeCache {
@@ -24,20 +23,30 @@ final class YtDlpCodeCache {
             deleteTree(staging);
             Files.createDirectories(staging.toPath());
             String prefix = staging.getCanonicalPath() + File.separator;
-            // ZipFile also supports the shebang prepended to yt-dlp's executable ZIP.
-            try (ZipFile zip = new ZipFile(archive)) {
-                Enumeration<? extends ZipEntry> entries = zip.entries();
-                byte[] buffer = new byte[32 * 1024];
-                while (entries.hasMoreElements()) {
-                    if (Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
-                    ZipEntry entry = entries.nextElement();
-                    File file = new File(staging, entry.getName());
-                    if (!file.getCanonicalPath().startsWith(prefix)) throw new IOException("Invalid yt-dlp archive path");
-                    if (entry.isDirectory()) { Files.createDirectories(file.toPath()); continue; }
-                    Files.createDirectories(file.getParentFile().toPath());
-                    try (InputStream input = zip.getInputStream(entry); OutputStream output = new FileOutputStream(file)) {
-                        int count;
-                        while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            // Android's ZipFile rejects executable ZIPs with a shebang. Read
+            // their local entries after the bounded interpreter line instead.
+            try (BufferedInputStream input = new BufferedInputStream(new FileInputStream(archive))) {
+                input.mark(2);
+                if (input.read() == '#' && input.read() == '!') {
+                    int length = 2, value;
+                    do {
+                        value = input.read();
+                        if (value < 0 || ++length > 8192) throw new IOException("Invalid yt-dlp shebang");
+                    } while (value != '\n');
+                } else { input.reset(); }
+                try (ZipInputStream zip = new ZipInputStream(input)) {
+                    byte[] buffer = new byte[32 * 1024];
+                    ZipEntry entry;
+                    while ((entry = zip.getNextEntry()) != null) {
+                        if (Thread.currentThread().isInterrupted()) throw new InterruptedIOException();
+                        File file = new File(staging, entry.getName());
+                        if (!file.getCanonicalPath().startsWith(prefix)) throw new IOException("Invalid yt-dlp archive path");
+                        if (entry.isDirectory()) { Files.createDirectories(file.toPath()); continue; }
+                        Files.createDirectories(file.getParentFile().toPath());
+                        try (OutputStream output = new FileOutputStream(file)) {
+                            int count;
+                            while ((count = zip.read(buffer)) != -1) output.write(buffer, 0, count);
+                        }
                     }
                 }
             }

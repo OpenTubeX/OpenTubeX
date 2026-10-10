@@ -116,7 +116,7 @@ public class YtDlpRuntimeTest {
                 log.clear();
                 YtDlpRuntime.execute(context, args, "mp3-tags-test", log::add);
                 assertEquals("Cover art must not scan and remux every audio frame", 1,
-                    log.stream().filter(line -> line.startsWith("[debug] ffmpeg command line:") && line.contains("/libffmpeg.so ")).count());
+                    log.stream().filter(line -> line.startsWith("[debug] ffmpeg command line:") && line.contains("/libffmpeg.so")).count());
             }
             File output = new File(directory, "covered.mp3");
             assertArrayEquals("Cover art must preserve the encoded audio frames",
