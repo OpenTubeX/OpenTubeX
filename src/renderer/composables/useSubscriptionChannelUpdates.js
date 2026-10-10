@@ -3,12 +3,11 @@ import { computed, onActivated, onBeforeUnmount, onDeactivated, reactive, watch 
 import { SUBSCRIPTION_REFRESH_CHANNEL_EVENT } from '../helpers/subscriptions'
 import { useTabContext } from '../tabs/TabContext'
 import store from '../store/index'
-import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
+import { getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../helpers/subscription-channels'
 
 // Rebuilding and sorting the whole feed for every channel would be wasteful
 // with hundreds of subscriptions, so updates are coalesced.
 const FEED_UPDATE_INTERVAL_MS = 100
-const MAX_INCREMENTAL_CHANNELS = 20
 const updateVersions = reactive({
   videos: 0,
   shorts: 0,
@@ -32,7 +31,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   const { isTabPresented } = useTabContext()
   const deferDuringRefresh = computed(() => store.getters.getSubscriptionFeedRefreshInProgress &&
     store.getters.getSubscriptionFeedRefreshTab === tab &&
-    getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, tab).length > MAX_INCREMENTAL_CHANNELS)
+    getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, tab).length > MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS)
   let timeout = null
   let lastRun = 0
   let updatePending = false

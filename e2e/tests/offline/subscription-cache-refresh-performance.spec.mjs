@@ -32,15 +32,10 @@ for (const feed of ['videos', 'new', 'shorts']) {
       await cdp.send('Profiler.enable')
       await cdp.send('Profiler.start')
     }
-    const metrics = await page.evaluate(async (feed) => {
+    const metrics = await page.evaluate(async ({ feed, responses }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       // Replay fetched channel responses through the real cache IPC, persistence,
       // Vuex mutation and incremental-feed event, without network variability.
-      const responses = Object.entries(store.getters.getVideoCache).slice(0, feed === 'shorts' ? 933 : 80)
-        .map(([channelId, cache]) => ({
-          channelId,
-          videos: JSON.parse(JSON.stringify(cache.videos))
-        }))
       responses[0].videos[0].title = 'Refreshed video 0-0'
       // Remote responses do not know about this device's synced seen marks.
       responses[0].videos[1].isNewInSubscriptionFeed = true
@@ -84,13 +79,13 @@ for (const feed of ['videos', 'new', 'shorts']) {
       steadyTimerGaps.sort((a, b) => a - b)
       return {
         elapsedMs,
-        seenVideoIsNew: store.getters.getVideoCache[responses[0].channelId].videos[1].isNewInSubscriptionFeed,
+        seenVideoIsNew: (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: responses[0].channelId }], onlyNew: true, limit: 250 })).records.some(entry => entry.videoId === 'video-0-1'),
         updates: durations.length,
         medianUpdateMs: durations.sort((a, b) => a - b)[Math.floor(durations.length / 2)],
         p95SteadyTimerGapMs: steadyTimerGaps[Math.floor(steadyTimerGaps.length * 0.95)],
         maxTimerGapMs: timerGaps.at(-1)
       }
-    }, feed)
+    }, { feed, responses: largeSubscriptionsSeed.subscriptionCache.slice(0, feed === 'shorts' ? 933 : 80).map(channel => ({ channelId: channel._id, videos: channel.videos })) })
     if (cdp) {
       const { profile } = await cdp.send('Profiler.stop')
       await cdp.detach()
@@ -138,13 +133,8 @@ test.describe('large cached feed with most entries hidden', () => {
     await page.locator('[data-subscription-feed-tab="videos"]').click()
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
-    const metrics = await page.evaluate(async () => {
+    const metrics = await page.evaluate(async responses => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const responses = Object.entries(store.getters.getVideoCache).slice(0, 80)
-        .map(([channelId, cache]) => ({
-          channelId,
-          videos: JSON.parse(JSON.stringify(cache.videos))
-        }))
       responses[0].videos[0].title = 'Refreshed video 0-0'
       store.commit('setSubscriptionFeedRefreshInProgress', true)
       const started = performance.now()
@@ -167,7 +157,7 @@ test.describe('large cached feed with most entries hidden', () => {
         detail: { tab: 'videos' }
       }))
       return { elapsed, updatedDuringRefresh }
-    })
+    }, largeSubscriptionsSeed.subscriptionCache.slice(0, 80).map((channel, channelIndex) => ({ channelId: channel._id, videos: channel.videos.map((video, videoIndex) => ({ ...video, liveNow: channelIndex !== 0 || videoIndex !== 0 })) })))
 
     expect(metrics.updatedDuringRefresh).toBe(false)
     expect(metrics.elapsed).toBeLessThan(10_000)
@@ -181,10 +171,10 @@ test('updates watched state in the New feed during a large refresh', async ({ pa
   await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
   await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setSubscriptionFeedRefreshInProgress', true)
-    store.commit('upsertToHistoryCache', {
+    await store.dispatch('updateHistory', {
       videoId: 'video-0-0',
       isWatched: true,
       timeWatched: Date.now()
@@ -215,16 +205,13 @@ test('rechecks premiere history after the clock advances and the Home feed recom
   await page.clock.setFixedTime(new Date(published))
   await page.evaluate(async timestamp => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    const history = {
-      ...store.getters.getHistoryCacheById,
-      'video-0-0': {
-        videoId: 'video-0-0',
-        isUpcoming: true,
-        isWatched: true,
-        premiereTimestamp: (timestamp + 60_000) / 1000
-      }
-    }
-    store.commit('setHistoryCacheById', history)
+    await store.dispatch('updateHistory', {
+      videoId: 'video-0-0',
+      isUpcoming: true,
+      isWatched: true,
+      premiereTimestamp: (timestamp + 60_000) / 1000,
+      timeWatched: timestamp
+    })
   }, published)
   await goTo(page, 'home')
   await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
@@ -257,8 +244,8 @@ test.describe('consecutive refreshes with a changing cache size', () => {
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
-      const videos = JSON.parse(JSON.stringify(cache.videos))
+      const channelId = store.getters.getActiveProfile.subscriptions[0].id
+      const videos = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], limit: 250 })).records
       store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
       await store.dispatch('updateSubscriptionVideosCacheByChannel', {
@@ -277,8 +264,9 @@ test.describe('consecutive refreshes with a changing cache size', () => {
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
-      const videos = JSON.parse(JSON.stringify(cache.videos))
+      const channelId = store.getters.getActiveProfile.subscriptions[0].id
+      const [first] = await window.ftElectron.libraryQuery('subscriptionEntries', { channelId, ids: ['video-0-0'] })
+      const videos = [first, ...Array.from({ length: 5000 }, (_, index) => ({ ...first, videoId: `hidden-${index}`, isNewInSubscriptionFeed: false }))]
       videos[0].title = 'Pending large-cache update'
       await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', { detail: { tab: 'shorts' } }))
@@ -290,17 +278,19 @@ test.describe('consecutive refreshes with a changing cache size', () => {
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
-      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos: [cache.videos[0]] })
+      const channelId = store.getters.getActiveProfile.subscriptions[0].id
+      const videos = (await window.ftElectron.libraryQuery('subscriptionEntries', { channelId, ids: ['video-0-0'] }))
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos })
       store.commit('setSubscriptionFeedRefreshTab', 'live')
     })
     await expect(page.getByText('Pending large-cache update', { exact: true })).toBeVisible()
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
+      const channelId = store.getters.getActiveProfile.subscriptions[0].id
+      const [video] = await window.ftElectron.libraryQuery('subscriptionEntries', { channelId, ids: ['video-0-0'] })
       await store.dispatch('updateSubscriptionVideosCacheByChannel', {
-        channelId, videos: [{ ...cache.videos[0], title: 'Incremental small-cache update' }]
+        channelId, videos: [{ ...video, title: 'Incremental small-cache update' }]
       })
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', { detail: { tab: 'live' } }))
     })

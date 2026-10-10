@@ -7,6 +7,7 @@ import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.j
 
 const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
 const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+const view = await readFile(new URL('../../src/renderer/views/Playlist/Playlist.vue', import.meta.url), 'utf8')
 
 function playlist(_id, playlistName, protectedValue = false) {
   return {
@@ -14,6 +15,17 @@ function playlist(_id, playlistName, protectedValue = false) {
     videos: [{ videoId: `${_id}-video`, playlistItemId: `${_id}-item`, timeAdded: 1, type: 'video' }],
   }
 }
+
+test('playlist view counts retained browser/mobile members and bounded desktop summaries', () => {
+  const expression = view.match(/^const selectedUserPlaylistVideoCount = (.+)$/m)[1]
+  const count = value => vm.runInNewContext(expression, {
+    computed: getter => ({ value: getter() }),
+    selectedUserPlaylist: { value },
+  }).value
+  assert.equal(count(playlist('portable', 'Mobile and browser')), 1)
+  assert.equal(count({ _id: 'desktop', videoCount: 20000, videos: [] }), 20000)
+  assert.equal(count(undefined), 0)
+})
 
 async function fixture(records) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
@@ -34,7 +46,7 @@ async function fixture(records) {
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, console: { error: error => errors.push(error) } }
+    { process: { env: { IS_ELECTRON: false } }, DBPlaylistHandlers, ...videoCounts, console: { error: error => errors.push(error) } }
   )
   const context = {
     state: module.state,

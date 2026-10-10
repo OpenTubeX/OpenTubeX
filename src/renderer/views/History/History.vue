@@ -120,7 +120,7 @@
         </p>
       </section>
       <FtInput
-        v-show="fullData.length > 1"
+        v-show="historyCount > 1"
         ref="searchBar"
         class="historySearch"
         input-type="search"
@@ -132,7 +132,7 @@
         @input="handleQueryChange"
       />
       <div
-        v-if="fullData.length > 1"
+        v-if="historyCount > 1"
         class="optionsRow"
       >
         <div
@@ -158,14 +158,14 @@
       </div>
       <div :aria-busy="isSearching">
         <FtLoader
-          v-if="isSearching"
+          v-if="isSearching && (showSearchFeedback || activeData.length === 0)"
           class="historySearchLoader"
           role="progressbar"
           :aria-label="t('History.Search bar placeholder')"
         />
         <template v-else>
           <FtFlexBox
-            v-if="fullData.length === 0"
+            v-if="historyCount === 0"
           >
             <p class="message">
               {{ t("History['Your history list is currently empty.']") }}
@@ -355,7 +355,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { needsHistoryRepair } from '../../../historyRepair'
-import { filterVideosWithQueryAsync } from '../../helpers/historySearch'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -376,7 +376,10 @@ const doCaseSensitiveSearch = ref(false)
 const showLoadMoreButton = ref(false)
 const query = ref('')
 const isSearching = ref(false)
+const showSearchFeedback = ref(true)
 const activeData = ref([])
+const historyCacheSorted = computed(() => store.getters.getHistoryCacheSorted)
+const historyCount = computed(() => store.state.history.libraryPaged ? store.state.history.historyTotal : historyCacheSorted.value.length)
 const historyContent = useTemplateRef('historyContent')
 const historyHeading = useTemplateRef('historyHeading')
 const searchBar = useTemplateRef('searchBar')
@@ -392,10 +395,20 @@ const repairCookiesConfigured = computed(() => {
     : process.env.IS_ELECTRON && getters.getYtDlpPlaybackAuthMode === 'browser' && !!getters.getYtDlpPlaybackCookiesBrowser?.trim()
 })
 const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
-const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
-watch(showRepairPrompt, open => {
-  if (open) repairOptions.value = []
+const repairCandidateCount = ref(0)
+const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && (process.env.IS_ELECTRON ? repairCandidateCount.value : historyCacheSorted.value.filter(needsHistoryRepair).length) > 500)
+watch([showRepairPrompt, () => store.state.history.historyRevision], async ([open], _previous, onCleanup) => {
+  if (!open) return
+  let current = true
+  onCleanup(() => { current = false })
+  if (process.env.IS_ELECTRON) {
+    try {
+      const page = await DBLibraryHandlers.query('historyRepairPage', { limit: 1 })
+      if (current) repairCandidateCount.value = page.total
+    } catch (error) { console.error(error) }
+  }
 })
+watch(showRepairPrompt, open => { if (open) repairOptions.value = [] })
 const repairAction = useTemplateRef('repairAction')
 const repairCancel = useTemplateRef('repairCancel')
 const repairClose = useTemplateRef('repairClose')
@@ -496,19 +509,7 @@ function updateUserHistorySortBy(value) {
   store.dispatch('updateUserHistorySortBy', value)
 }
 
-const historyCacheSorted = computed(() => {
-  const historySorted = store.getters.getHistoryCacheSorted
-
-  if (sortBy.value === HISTORY_SORT_BY_VALUES.DateAddedOldest) {
-    return historySorted.toReversed()
-  } else {
-    return historySorted
-  }
-})
-
-const hasUnwatchedHistory = computed(() => {
-  return historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
-})
+const hasUnwatchedHistory = computed(() => process.env.IS_ELECTRON ? store.getters.getHistoryHasUnwatched : historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record)))
 
 async function markAllAsWatched() {
   const markedCount = await store.dispatch('markAllHistoryAsWatched')
@@ -526,17 +527,10 @@ function handleMarkAllPrompt(value) {
   }
 }
 
-const fullData = computed(() => {
-  // Always copy, so that structural changes (added/removed/reordered entries)
-  // produce a new array and trigger the watcher below without it having to
-  // deep watch every record. In-place record field updates (e.g. watch
-  // progress) don't affect the filtering, the list items react to those
-  // themselves.
-  return historyCacheSorted.value.slice(0, dataLimit.value)
-})
-
-watch(fullData, filterHistory)
-watch(locale, scheduleHistorySearch)
+// A durable update can refresh the same query without remounting its cards.
+watch(() => store.state.history.historyRevision, () => scheduleHistorySearch(false))
+watch(sortBy, () => scheduleHistorySearch(false))
+watch(locale, () => scheduleHistorySearch())
 watch(doCaseSensitiveSearch, () => {
   if (query.value.trim().length > 0) {
     scheduleHistorySearch()
@@ -572,47 +566,79 @@ function handleQueryChange(query_, limit = undefined, doCaseSensitiveSearch_ = u
   saveStateInRouter()
 
   if (filterNow) {
+    showSearchFeedback.value = true
     filterHistory()
   } else {
     scheduleHistorySearch()
   }
 }
 
-function increaseLimit() {
-  if (query.value.trim().length > 0) {
-    searchDataLimit.value += 100
-    filterHistory()
-  } else {
-    dataLimit.value += 100
-    sessionStorage.setItem(dataLimitStorageKey, dataLimit.value.toFixed(0))
+let pageCursor = null
+let searchGeneration = 0
+
+async function increaseLimit() {
+  if (!pageCursor || isSearching.value) return
+  const generation = searchGeneration
+  isSearching.value = true
+  try {
+    const page = await DBLibraryHandlers.query('historyPage', {
+      cursor: pageCursor,
+      limit: 100,
+      oldest: sortBy.value === HISTORY_SORT_BY_VALUES.DateAddedOldest,
+      query: query.value,
+      caseSensitive: doCaseSensitiveSearch.value,
+      locale: locale.value,
+    })
+    if (generation !== searchGeneration) return
+    if (page.stale) return filterHistory()
+    activeData.value = activeData.value.concat(page.records)
+    if (process.env.IS_ELECTRON) store.commit('cacheHistoryRecords', page.records)
+    pageCursor = page.cursor
+    showLoadMoreButton.value = pageCursor !== null
+    if (query.value.trim()) {
+      searchDataLimit.value = activeData.value.length
+      saveStateInRouter()
+    } else {
+      dataLimit.value = activeData.value.length
+      sessionStorage.setItem(dataLimitStorageKey, String(dataLimit.value))
+    }
+  } finally {
+    if (generation === searchGeneration) { isSearching.value = false; showSearchFeedback.value = false }
   }
 }
 
-let searchGeneration = 0
 async function filterHistory() {
   filterHistoryAsync.cancel()
   const generation = ++searchGeneration
-  if (query.value.trim().length === 0) {
-    isSearching.value = false
-    activeData.value = fullData.value
-    showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
-    clampHistoryScroll()
-    return
-  }
-
   isSearching.value = true
-  const filteredQuery = await filterVideosWithQueryAsync(
-    historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value,
-    () => generation !== searchGeneration,
-  )
-  if (!filteredQuery || generation !== searchGeneration) return
-  isSearching.value = false
-
-  const filteredResultCount = filteredQuery.length
-
-  showLoadMoreButton.value = filteredResultCount > searchDataLimit.value
-  activeData.value = filteredResultCount < searchDataLimit.value ? filteredQuery : filteredQuery.slice(0, searchDataLimit.value)
-  clampHistoryScroll()
+  try {
+    const requestedLimit = query.value.trim() ? searchDataLimit.value : dataLimit.value
+    const records = []
+    let cursor = null
+    do {
+      const page = await DBLibraryHandlers.query('historyPage', {
+        limit: Math.min(100, Math.max(1, requestedLimit - records.length)),
+        cursor,
+        oldest: sortBy.value === HISTORY_SORT_BY_VALUES.DateAddedOldest,
+        query: query.value,
+        caseSensitive: doCaseSensitiveSearch.value,
+        locale: locale.value,
+      })
+      if (generation !== searchGeneration) return
+      if (page.stale) return filterHistory()
+      records.push(...page.records)
+      cursor = page.cursor
+    } while (cursor && records.length < requestedLimit)
+    activeData.value = records
+    if (process.env.IS_ELECTRON) store.commit('cacheHistoryRecords', records)
+    pageCursor = cursor
+    showLoadMoreButton.value = pageCursor !== null
+    clampHistoryScroll()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    if (generation === searchGeneration) { isSearching.value = false; showSearchFeedback.value = false }
+  }
 }
 
 function clampHistoryScroll() {
@@ -626,9 +652,10 @@ function clampHistoryScroll() {
 
 const filterHistoryAsync = debounce(filterHistory, 250)
 
-function scheduleHistorySearch() {
+function scheduleHistorySearch(showFeedback = true) {
   searchGeneration++
   isSearching.value = true
+  showSearchFeedback.value ||= showFeedback
   clampHistoryScroll()
   filterHistoryAsync()
 }

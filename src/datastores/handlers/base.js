@@ -402,7 +402,7 @@ class History {
 
   static async delete(videoId) {
     await recommendations.remove([videoId])
-    return db.history.removeAsync({ videoId })
+    return db.history.removeAsync({ videoId }, { multi: true })
   }
 
   static async deleteOlderThan(cutoff, excludedVideoIds = []) {
@@ -411,12 +411,16 @@ class History {
       query.videoId = { $nin: excludedVideoIds }
     }
 
-    const records = await db.history.findAsync(query)
+    const records = await db.history.findAsync(query, { _id: 1, videoId: 1 })
     const videoIds = records.map(record => record.videoId)
 
     if (videoIds.length > 0) {
-      await recommendations.remove(videoIds)
-      await db.history.removeAsync(createIdQuery('videoId', videoIds), { multi: true })
+      // A restored video can have newer occurrences. Delete only the selected
+      // record identities, rechecking the cutoff in case playback updated one.
+      await db.history.removeAsync({ ...query, ...createIdQuery('_id', records.map(record => record._id)) }, { multi: true })
+      const retained = new Set((await db.history.findAsync(createIdQuery('videoId', videoIds), { videoId: 1, _id: 0 })).map(record => record.videoId))
+      const removed = videoIds.filter(videoId => !retained.has(videoId))
+      if (removed.length > 0) await recommendations.remove(removed)
     }
 
     return videoIds

@@ -465,7 +465,7 @@ test.describe('seeded playlists', () => {
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'e2eseeded').at(-1)?.$$deleted
+      return records.every((record) => record._id !== 'e2eseeded')
     }).toBe(true)
   })
 
@@ -558,10 +558,10 @@ test.describe('playlist cleanup', () => {
     await expect(dialog).toContainText('remove 1 watched video')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
     await expect(page.getByText('live0000000')).toHaveCount(0)
-    const state = await page.evaluate(() => {
+    const state = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return {
-        ids: store.getters.getPlaylist('cleanup').videos.map(video => video.videoId),
+        ids: (await window.ftElectron.libraryQuery('playlistPage', { id: 'cleanup' })).records.map(video => video.videoId),
         watched: store.getters.getHistoryCacheById.live0000000?.isWatched,
         sourcePlaylistId: store.getters.getPlaylist('cleanup').sourcePlaylistId,
         quickBookmarkIcon: store.getters.getPlaylist('cleanup').quickBookmarkIcon,
@@ -591,8 +591,7 @@ test.describe('playlist cleanup', () => {
     await expect(dialog).toContainText('Found: 2')
     await expect(dialog).toContainText('Could not check: 1')
     await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
-    const ids = await page.evaluate(() => document.querySelector('#app').__vue_app__
-      .config.globalProperties.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId))
+    const ids = await page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'cleanup' })).videos.map(video => video.videoId))
     expect(ids).toEqual(['live0000000', 'unknown00000'])
   })
 })
@@ -771,10 +770,7 @@ test.describe('custom playlist order', () => {
         await expect(rows.first().locator('.h3Title')).toHaveText('Custom playlist video 2')
         await touch('touchEnd')
         await expect(page.locator('.pointerDragging, .draggedVideo')).toHaveCount(0)
-        await expect.poll(() => page.evaluate(() => {
-          return document.querySelector('#app').__vue_app__.config.globalProperties.$store
-            .getters.getPlaylist('large-custom-playlist').videos[0].title
-        })).toBe('Custom playlist video 2')
+        await expect.poll(() => page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistPage', { id: 'large-custom-playlist', limit: 1 })).records[0].title)).toBe('Custom playlist video 2')
 
         // Cancelling a subsequent gesture releases capture and leaves reordering usable.
         const next = await rows.first().locator('.grabBar').boundingBox()
@@ -821,8 +817,7 @@ test.describe('custom playlist order', () => {
     await touch('touchMove', third)
     await touch('touchEnd')
     await expect(rows.nth(2).locator('.h3Title')).toHaveText('Custom playlist video 1')
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      .getters.getPlaylist('large-custom-playlist').videos[2].title)).toBe('Custom playlist video 1')
+    await expect.poll(() => page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistPage', { id: 'large-custom-playlist', limit: 3 })).records[2].title)).toBe('Custom playlist video 1')
   })
 
   test('keeps the grid grab bars in place during the removal undo period', async ({ page }) => {
@@ -892,3 +887,45 @@ test.describe('custom playlist order', () => {
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
   })
 })
+
+for (const playlistViewType of ['grid', 'list']) {
+  test.describe(`legacy duplicate member identity in ${playlistViewType} view`, () => {
+    test.use({
+      seed: {
+        settings: { playlistViewType, userPlaylistSortOrder: 'custom' },
+        playlists: [{
+          _id: 'duplicate-members',
+          playlistName: 'Duplicate members',
+          createdAt: 1,
+          lastUpdatedAt: 1,
+          videos: ['First duplicate', 'Second duplicate', 'Other member'].map((title, index) => ({
+            videoId: index < 2 ? 'abcdefghijk' : 'other000001',
+            playlistItemId: 'legacy-repeated-id',
+            title,
+            author: 'Test channel',
+            lengthSeconds: 120,
+            timeAdded: 1,
+            type: 'video'
+          }))
+        }]
+      }
+    })
+
+    test('moves and removes the selected duplicate without changing the other copy', async ({ page }) => {
+      await goTo(page, 'userplaylists')
+      await page.getByText('Duplicate members', { exact: true }).click()
+      const second = page.locator('.ft-list-video').filter({ has: page.getByText('Second duplicate', { exact: true }) })
+      await second.locator('.videoThumbnail').hover()
+      await second.getByTitle('Move Video Up').click()
+      await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Second duplicate')
+      await second.locator('.videoThumbnail').hover()
+      await second.getByTitle('Remove from Playlist').click()
+      await expect(second).toHaveCount(0)
+      await expect(page.locator('.playlistItemsCard .h3Title')).toHaveText(['First duplicate', 'Other member'])
+      await expect.poll(async () => page.evaluate(async () => {
+        const page = await window.ftElectron.libraryQuery('playlistPage', { id: 'duplicate-members' })
+        return page.records.map(entry => entry.title)
+      })).toEqual(['First duplicate', 'Other member'])
+    })
+  })
+}

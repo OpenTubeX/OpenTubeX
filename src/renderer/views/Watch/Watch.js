@@ -104,6 +104,7 @@ import {
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
 import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
@@ -314,6 +315,8 @@ export default defineComponent({
       shortsTransitionDirection: 0,
       shortsViewportHeight: window.innerHeight,
       shortsPlaybackCompleted: false,
+      libraryShortsFeed: [],
+      libraryShortsGeneration: 0,
       shortsCompletionBlockedBySeek: false,
       shortsPlaybackAfterSeekSeconds: 0,
       shortsPlaybackCache: markRaw(new ShortsPlaybackCache()),
@@ -803,6 +806,23 @@ export default defineComponent({
     subscriptionShortsFeedActive: function () {
       return this.customShortsPlayerActive
     },
+    libraryShortsRequest: function () {
+      if (!process.env.IS_ELECTRON || !this.subscriptionShortsFeedActive || this.tabRoute.query.shortSource === 'channel') return null
+      return {
+        subscriptions: this.$store.getters.getActiveProfile.subscriptions,
+        currentVideoId: this.videoId,
+        revision: [this.$store.state.subscriptionCache.subscriptionVideosFeedVersion, this.$store.state.history.historyRevision],
+        preferences: {
+          hideLiveStreams: this.$store.getters.getHideLiveStreams,
+          hideUpcomingPremieres: this.$store.getters.getHideUpcomingPremieres,
+          forbiddenTitles: this.forbiddenTitles,
+          hideWatched: this.$store.getters.getHideWatchedSubs,
+          restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters),
+          onlyShowLatestFromChannel: this.$store.getters.getOnlyShowLatestFromChannel,
+          onlyShowLatestFromChannelNumber: this.$store.getters.getOnlyShowLatestFromChannelNumber
+        }
+      }
+    },
     subscriptionShortsFeed: function () {
       if (!this.subscriptionShortsFeedActive) {
         return []
@@ -816,6 +836,8 @@ export default defineComponent({
         feed = getChannelShortsNavigationContext(
           this.tabRoute.query.shortChannelId
         )
+      } else if (process.env.IS_ELECTRON) {
+        feed = this.libraryShortsFeed.slice()
       } else {
         const maxPerChannel = this.$store.getters.getOnlyShowLatestFromChannel
           ? this.$store.getters.getOnlyShowLatestFromChannelNumber
@@ -1293,6 +1315,17 @@ export default defineComponent({
     }
   },
   watch: {
+    libraryShortsRequest: {
+      immediate: true,
+      async handler(request) {
+        const generation = ++this.libraryShortsGeneration
+        if (!request) { this.libraryShortsFeed = []; return }
+        try {
+          const records = await DBLibraryHandlers.query('subscriptionShortsWindow', request)
+          if (generation === this.libraryShortsGeneration) this.libraryShortsFeed = records
+        } catch (error) { console.error(error) }
+      }
+    },
     downloadAvailable(available) {
       if (!available) this.showDownloadPrompt = false
     },
@@ -3310,6 +3343,7 @@ export default defineComponent({
       }
 
       const videoId = this.tabRoute.params.id
+      if (this.$store?.state?.history?.libraryPaged) await this.$store.dispatch('hydrateVideoState', [videoId])
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
@@ -4068,6 +4102,7 @@ export default defineComponent({
       }
 
       const videoId = this.tabRoute.params.id
+      if (this.$store?.state?.history?.libraryPaged) await this.$store.dispatch('hydrateVideoState', [videoId])
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
@@ -5139,9 +5174,31 @@ export default defineComponent({
 
       // `playlistId` present
       if (this.selectedUserPlaylist != null) {
+        if (this.$store.state.playlists.libraryPaged && this.$store.getters.getPlaylistMemberships[this.videoId] === undefined) {
+          // Restored tabs and direct links may open an off-page member before
+          // any visible card has requested its membership state.
+          const videoId = this.videoId
+          const playlistId = this.playlistId
+          this.playlistType = 'user'
+          this.watchingPlaylist = true
+          this.$store.dispatch('hydrateVideoState', [videoId]).then(() => {
+            if (this.videoId === videoId && this.tabRoute.query.playlistId === playlistId) this.checkIfPlaylist()
+          }).catch(error => {
+            console.error(error)
+            if (this.videoId !== videoId || this.tabRoute.query.playlistId !== playlistId) return
+            this.playlistId = ''
+            this.playlistType = ''
+            this.playlistItemId = null
+            this.watchingPlaylist = false
+          })
+          return
+        }
         // If the page is accessed through navigation via router history, 'playlistId' is still specified
         // but the video could have been removed from the playlist in the meantime
-        if (!this.selectedUserPlaylist.videos.some((video) => video.videoId === this.videoId)) {
+        const containsVideo = this.$store.state.playlists.libraryPaged
+          ? this.$store.getters.getPlaylistMemberships[this.videoId]?.[this.selectedUserPlaylist._id] > 0
+          : this.selectedUserPlaylist.videos.some(video => video.videoId === this.videoId)
+        if (!containsVideo) {
           this.playlistId = ''
           this.playlistType = ''
           this.playlistItemId = null

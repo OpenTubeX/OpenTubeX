@@ -1,3 +1,5 @@
+import { prepareHistorySync, historySyncPage, applyHistorySync, cancelHistorySync, syncPlaylistMembers } from './librarySync'
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { toRaw } from 'vue'
 import {
   DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar,
@@ -508,6 +510,14 @@ export class SyncServerClient {
 
   async getWatchHistory() {
     const history = []
+    for await (const entries of this.getWatchHistoryPages()) {
+      if (entries === null) return null
+      history.push(...entries)
+    }
+    return history
+  }
+
+  async * getWatchHistoryPages() {
     const capabilities = await this.getCapabilities()
     const pageSize = Number.isInteger(capabilities.history_page_size)
       ? capabilities.history_page_size
@@ -521,12 +531,12 @@ export class SyncServerClient {
           `/watch_history/?page=${page}&order=added_date_desc${pageSizeQuery}`
         )
       } catch (error) {
-        if (error.status === 404) return null
+        if (error.status === 404) { yield null; return }
         throw error
       }
-      history.push(...entries)
+      yield entries
       if (entries.length < pageSize) {
-        return history
+        return
       }
     }
   }
@@ -755,12 +765,16 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
 }
 
 export async function syncPlaylists(client, store, previous = {}, options = {}) {
-  const localPlaylists = store.state.playlists.playlists
+  const localPlaylists = store.state.playlists.libraryPaged
+    ? await DBLibraryHandlers.query('playlistSummaries')
+    : store.state.playlists.playlists
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
-  const remotePlaylists = await Promise.all(
-    remotePlaylistHeaders.map(playlist => client.getPlaylist(playlist.id))
-  )
+  const remotePlaylists = store.state.playlists.libraryPaged
+    ? remotePlaylistHeaders.map(playlist => ({ playlist, videos: null, lazy: true }))
+    : await Promise.all(
+        remotePlaylistHeaders.map(playlist => client.getPlaylist(playlist.id))
+      )
   const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
     return [snapshot.remoteId ?? localId, localId]
   }))
@@ -791,6 +805,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
   for (const id of mergedIds) {
     let local = localById.get(id)
     let remote = remoteById.get(id)
+    if (remote?.lazy) remote = { ...await client.getPlaylist(remote.remoteId), remoteId: remote.remoteId }
     const remoteMetadata = remote ? { ...remote.playlist, id } : null
     const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
     let remoteId = remote?.remoteId ?? id
@@ -803,6 +818,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       await client.updatePlaylist(remoteId, metadata)
     }
 
+    if (store.state.playlists.libraryPaged) {
+      nextSnapshot[id] = await syncPlaylistMembers(client, store, { localId: id, remoteId, remoteVideos: remote.videos, previousVideos: previous[id]?.videos, metadata, options })
+      continue
+    }
     const localVideos = local?.videos ?? []
     const localVideosById = mapBy(
       localVideos.filter(video => videoToRemote(video) !== null),
@@ -882,36 +901,60 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
   }
   for (let attempt = 0; attempt < 3; attempt++) {
     store.assertActive?.()
-    const remoteHistory = await client.getWatchHistory()
+    const paged = store.state.history.libraryPaged
+    const remoteHistory = paged && typeof client.getWatchHistoryPages === 'function'
+      ? client.getWatchHistoryPages()
+      : await client.getWatchHistory()
     if (remoteHistory === null) return null
     const revision = store.state.history.historyRevision
-    const localHistory = toRaw(store.state.history.historyCacheSorted).slice()
+    const localHistory = paged ? null : toRaw(store.state.history.historyCacheSorted)
     const assertHistoryCurrent = () => {
       store.assertActive?.()
       if (store.state.history.historyRevision !== revision) throw historyChanged
     }
     let merged
     try {
-      merged = await runBackgroundJob('mergeHistory', {
+      merged = await (paged ? prepareHistorySync : input => runBackgroundJob('mergeHistory', input))({
         localHistory,
         remoteHistory,
         previous,
         options,
         acknowledged: { upserts: Array.from(acknowledgedUpserts), deletions: Array.from(acknowledgedDeletions) },
       })
+      if (merged === null) return null
       assertHistoryCurrent()
     } catch (error) {
       store.assertActive?.()
       // Even a failed merge can be based on mixed chunks and report false data
       // loss. Only retry stale computations; rejected writes have uncertain effects.
+      if (merged?.id) await cancelHistorySync(merged.id)
       if (store.state.history.historyRevision !== revision) continue
       throw error
     }
-    const { next, historyToUpload, remoteDeletions, insertions, updates, deletions } = merged
+    const { next = {}, historyToUpload = [], remoteDeletions = [], insertions = [], updates = [], deletions = [] } = merged
     const legacy = typeof client.applyWatchHistoryChanges !== 'function'
     let completed = false
     try {
-      if (!legacy) {
+      if (paged) {
+        for (const section of ['remoteDeletions', 'historyToUpload']) {
+          const bulk = section === 'historyToUpload' && legacy ? await client.supportsBulkSync() : false
+          for (let offset = 0; offset < merged.counts[section]; offset += 100) {
+            store.assertActive?.()
+            const page = await historySyncPage(merged.id, section, offset)
+            if (!page.current || store.state.history.historyRevision !== revision) throw historyChanged
+            if (!legacy) {
+              await client.applyWatchHistoryChanges(section === 'historyToUpload' ? page.records : [], section === 'remoteDeletions' ? page.records : [])
+              acknowledge(section === 'historyToUpload' ? page.records : [], section === 'remoteDeletions' ? page.records : [])
+            } else if (section === 'remoteDeletions') {
+              for (const id of page.records) { await client.deleteWatchHistory(id); acknowledge([], [id]) }
+            } else {
+              await uploadInChunks(page.records, bulk,
+                async entries => { await client.putWatchHistoryBulk(entries); acknowledge(entries) },
+                async entry => { await client.putWatchHistory(entry); acknowledge([entry]) })
+            }
+          }
+        }
+      } else if (!legacy) {
         if (historyToUpload.length || remoteDeletions.length) {
           await client.applyWatchHistoryChanges(historyToUpload, remoteDeletions)
           acknowledge(historyToUpload, remoteDeletions)
@@ -931,7 +974,14 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
 
       store.assertActive?.()
       if (store.state.history.historyRevision !== revision) continue
-      if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
+      if (paged) {
+        if (!await applyHistorySync(merged.id)) continue
+        await store.dispatch('grabHistory')
+        for (let offset = 0; offset < merged.counts.next; offset += 100) {
+          const page = await historySyncPage(merged.id, 'next', offset)
+          for (const [id, metadata] of page.records) Object.defineProperty(next, id, { value: metadata, enumerable: true, configurable: true, writable: true })
+        }
+      } else if (insertions.length > 0 || updates.length > 0 || deletions.length > 0) {
         try {
           await store.dispatch('applyHistorySyncChanges', {
             insertions,
@@ -947,7 +997,11 @@ export async function syncHistory(client, store, previous = {}, options = {}) {
       }
       completed = true
       return next
+    } catch (error) {
+      if (error === historyChanged && paged) { store.assertActive?.(); continue }
+      throw error
     } finally {
+      if (paged) await cancelHistorySync(merged.id).catch(console.error)
       // Legacy requests already changed the server even if a later write,
       // local application, or collection fails. Encrypted adapter writes only
       // change its in-memory document and must wait for the actual upload.

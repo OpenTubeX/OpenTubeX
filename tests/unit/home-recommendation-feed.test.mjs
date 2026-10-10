@@ -8,13 +8,18 @@ import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
+import { recommendationSubscriptionCandidates } from '../../src/datastores/sqlite/operations.js'
+
 import { isVideoHiddenByPreferences } from '../../src/renderer/helpers/subscription-visibility.js'
 
 const source = (await readFile(new URL('../../src/renderer/composables/useHomeRecommendations.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function ', 'function ')
 
-function createFeed({ records = [], candidates = [], playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
+function createFeed({ records = [], candidates = [], playlists = [], settings = {}, desktop = false, query, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
   const state = reactive({ recommendations: { recommendationRecords: Object.fromEntries(records.map(record => [record.videoId, record])) } })
   const getters = reactive({
     getEnableHomeRecommendations: true,
@@ -53,6 +58,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     },
     collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources: 0 } },
     requestAnimationFrame: callback => setTimeout(callback, 0),
+    process: { env: { IS_ELECTRON: desktop } }, DBLibraryHandlers: { query },
   }
   const useHomeRecommendations = compileFunction(`${source}\nreturn useHomeRecommendations`, Object.keys(dependencies))(...Object.values(dependencies))
   function mount() {
@@ -74,6 +80,41 @@ async function waitForFeed(feed) {
   }
   assert.equal(feed.isLoading.value, false)
 }
+
+test('Home applies the same membership authentication policy to desktop and portable cached candidates', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const videos = [{ videoId: 'public', title: 'Public' }, { videoId: 'member', title: 'Member', isMembersOnly: true }]
+  await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', videos })
+  for (const desktop of [false, true]) {
+    for (const configured of [false, true]) {
+      const subscriptionQueries = []
+      const instance = createFeed({
+        desktop,
+        settings: {
+          getActiveProfile: { subscriptions: [{ id: 'channel', showMembersOnly: false, feedTypes: [] }] },
+          getVideoCache: { channel: { videos } },
+          getYtDlpPlaybackAuthMode: configured ? 'file' : 'none', getYtDlpPlaybackCookiesPath: '/fixture/cookies.txt',
+        },
+        query: async (method, options) => {
+          if (method === 'recommendationInputs') return { history: [], favorites: [], saved: [] }
+          if (method === 'videoState') return { history: [] }
+          assert.equal(method, 'recommendationSubscriptionCandidates')
+          subscriptionQueries.push(structuredClone(options))
+          return recommendationSubscriptionCandidates(engine, structuredClone(options))
+        },
+      })
+      try {
+        await waitForFeed(instance.feed)
+        assert.equal(subscriptionQueries.length, desktop ? 1 : 0)
+        if (desktop) assert.deepEqual(subscriptionQueries[0].channelIds, ['channel'])
+        assert.deepEqual(instance.feed.recommendations.value.map(video => video.videoId), configured ? ['public', 'member'] : ['public'])
+      } finally { instance.stop() }
+    }
+  }
+})
 
 test('revisiting Home restores the completed feed immediately without fetching or ranking again', async () => {
   const first = createFeed({ candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })) })

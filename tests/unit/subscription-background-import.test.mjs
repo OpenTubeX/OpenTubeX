@@ -73,6 +73,8 @@ test('an imported background completion prevents an unnecessary foreground refre
 test('background playlist imports restore missing authors and keep explicit bylines', async () => {
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
+  let finishEnrichment
+  const enrichment = new Promise(resolve => { finishEnrichment = resolve })
   const context = vm.createContext({
     console, Date,
     store: {
@@ -85,11 +87,11 @@ test('background playlist imports restore missing authors and keep explicit byli
     getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
     shouldHideMembersOnlyContent: () => false,
     enrichSubscriptionRssEntries: async entries => entries,
-    enrichSubscriptionShortDates: async entries => entries.map(entry => ({ ...entry, published: 123456 })),
+    enrichSubscriptionShortDates: async entries => { await enrichment; return entries.map(entry => ({ ...entry, published: 123456 })) },
     reconcileFetchedSubscriptionEntries: entries => entries
   })
   vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
-  await context.reconcileAndroidSubscriptionRefreshChannelResult({
+  const pending = context.reconcileAndroidSubscriptionRefreshChannelResult({
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
       { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
@@ -97,6 +99,10 @@ test('background playlist imports restore missing authors and keep explicit byli
       { videoId: 'explicit', author: 'Explicit creator', authorId: 'UCexplicit' }
     ] }
   })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(saved, undefined, 'background imports must wait for asynchronous Shorts enrichment before persisting')
+  finishEnrichment()
+  await pending
   assert.equal(saved[0].author, 'Subscribed creator')
   assert.equal(saved[0].authorId, 'UCchannel')
   assert.equal(saved[0].thumbnailUrl, 'https://images.example/portrait.jpg')

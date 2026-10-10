@@ -1,5 +1,5 @@
 import { PlaylistVideoAddResult } from '../../../constants'
-import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
+import { DBPlaylistHandlers, DBLibraryHandlers } from '../../../datastores/handlers/index'
 import {
   decrementPlaylistVideoCounts,
   incrementPlaylistVideoCounts,
@@ -63,7 +63,7 @@ function removeUndesiredVideoAttributes(videoData) {
 *  This is a good default quick bookmark target if one needs to be set.
 */
 function findEmptyOrLatestPlayedPlaylist(playlists) {
-  const emptyPlaylist = playlists.find((playlist) => playlist.videos.length === 0)
+  const emptyPlaylist = playlists.find((playlist) => (playlist.videoCount ?? playlist.videos.length) === 0)
   if (emptyPlaylist) return emptyPlaylist
 
   let max = -1
@@ -133,6 +133,8 @@ const state = {
       _id: 'watchLater',
     },
   ],
+  libraryPaged: !!process.env.IS_ELECTRON,
+  playlistMemberships: {}
 }
 
 const getters = {
@@ -179,6 +181,7 @@ const actions = {
       }
 
       commit('addPlaylist', payload)
+      if (process.env.IS_ELECTRON) await dispatch('hydrateVideoState', Object.keys(state.playlistMemberships), { root: true })
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -197,6 +200,7 @@ const actions = {
       }
 
       commit('addPlaylists', payload)
+      if (process.env.IS_ELECTRON) await dispatch('hydrateVideoState', Object.keys(state.playlistMemberships), { root: true })
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -292,6 +296,7 @@ const actions = {
       const newVideoObjects = videos.map((video) => {
         // Create a new object to prevent changing existing values outside
         const videoData = Object.assign({}, video)
+        delete videoData._libraryMemberId
         if (videoData.timeAdded == null) {
           videoData.timeAdded = currentTime
         }
@@ -465,8 +470,14 @@ const actions = {
     }
   },
 
-  async removeVideo({ commit, dispatch }, payload) {
+  async removeVideo({ commit, dispatch, state }, payload) {
     try {
+      if (state.libraryPaged && payload.memberId) {
+        const removed = await DBLibraryHandlers.query('removePlaylistMember', { id: payload._id, memberId: payload.memberId })
+        await dispatch('grabAllPlaylists')
+        await dispatch('grabHistory')
+        return removed
+      }
       const { _id, videoId, playlistItemId } = payload
 
       await dispatch('unsetLastViewedPlaylistForVideos', { videoIds: [videoId], lastViewedPlaylistId: _id })
@@ -629,6 +640,136 @@ const mutations = {
   setPlaylistsReady(state, payload) {
     state.playlistsReady = payload
   },
+}
+
+function summarizePlaylist(playlist) {
+  const { videos = [], ...metadata } = playlist
+  return { ...metadata, _librarySummary: true, videoCount: playlist.videoCount ?? videos.length, firstVideo: playlist.firstVideo ?? videos[0] ?? null, videos: [] }
+}
+const desktopGetters = {
+  getPlaylistMemberships: state => state.playlistMemberships,
+  getQuickBookmarkVideoIds(state, getters) {
+    const id = getters.getQuickBookmarkPlaylist?._id
+    return new Set(Object.entries(state.playlistMemberships).filter(([, playlists]) => playlists[id] > 0).map(([videoId]) => videoId))
+  }
+}
+
+const desktopActions = {
+  async updatePlaylist({ commit }, input) {
+    const playlist = { ...input }
+    if (playlist._librarySummary) {
+      delete playlist.videos
+      delete playlist.videoCount
+      delete playlist.firstVideo
+      delete playlist._librarySummary
+    }
+    if (typeof playlist.playlistName === 'string') playlist.playlistName = playlist.playlistName.trim()
+    if (typeof playlist.description === 'string') playlist.description = playlist.description.trim()
+    playlist.lastUpdatedAt = Date.now()
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
+    return true
+  },
+  async updatePlaylistLastPlayedAt({ commit }, input) {
+    const playlist = { _id: input._id, lastPlayedAt: Date.now() }
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
+  },
+  async grabAllPlaylists({ rootState, commit, dispatch, state }) {
+    try {
+      const payload = (await DBLibraryHandlers.query('playlistSummaries')).filter(entry => entry != null)
+      if (payload.length === 0) {
+        await Promise.all(state.defaultPlaylists.map(playlist => dispatch('addPlaylist', deepCopy(playlist))))
+      } else {
+        // if no quick bookmark is set, try to find another playlist
+        const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+        if (noQuickBookmarkSet && payload.length > 0) {
+          const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
+          dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+        }
+
+        commit('setAllPlaylists', payload)
+      }
+      await dispatch('hydrateVideoState', [...new Set([...Object.keys(state.playlistMemberships), ...Object.keys(rootState.history.activeVideoIds)])], { root: true })
+      commit('setPlaylistsReady', true)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+  }
+}
+
+const desktopMutations = {
+  cachePlaylistMemberships(state, { ids, memberships, retained = [] }) {
+    for (const id of ids) {
+      state.playlistMemberships[id] = {}
+      state.playlistVideoCounts.delete(id)
+    }
+    for (const membership of memberships) {
+      state.playlistMemberships[membership.videoId][membership.playlistId] = membership.count
+      state.playlistVideoCounts.set(membership.videoId, (state.playlistVideoCounts.get(membership.videoId) ?? 0) + membership.count)
+    }
+    const active = new Set(retained)
+    const cached = Object.keys(state.playlistMemberships).filter(id => !active.has(id))
+    for (const id of cached.slice(0, Math.max(0, cached.length - 2000))) {
+      delete state.playlistMemberships[id]
+      state.playlistVideoCounts.delete(id)
+    }
+  },
+  addPlaylist(state, payload) {
+    state.playlists.push(summarizePlaylist(payload))
+    incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
+  },
+  addPlaylists(state, payload) {
+    state.playlists.push(...payload.map(summarizePlaylist))
+    for (const playlist of payload) {
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+    }
+  },
+  upsertPlaylistToList(state, updatedPlaylist) {
+    const i = state.playlists.findIndex((p) => {
+      return p._id === updatedPlaylist._id
+    })
+
+    if (i === -1) {
+      state.playlists.push(summarizePlaylist(updatedPlaylist))
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
+    } else {
+      const foundPlaylist = state.playlists[i]
+      // Playback timestamps and metadata edits leave membership unchanged.
+      // Recount only when the update actually replaces the video list.
+      const replacesVideos = Object.hasOwn(updatedPlaylist, 'videos')
+      if (replacesVideos) decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
+      state.playlists.splice(i, 1, Object.assign(foundPlaylist, Object.hasOwn(updatedPlaylist, 'videos') ? summarizePlaylist(updatedPlaylist) : updatedPlaylist))
+      if (replacesVideos) incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
+    }
+  },
+  addVideo(state, payload) {
+    const playlist = state.playlists.find(playlist => playlist._id === payload._id)
+    if (playlist) {
+      playlist.videoCount++
+      playlist.firstVideo ??= payload.videoData
+      playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
+    }
+  },
+  addVideos(state, payload) {
+    const playlist = state.playlists.find(playlist => playlist._id === payload._id)
+    if (playlist) {
+      playlist.videoCount += payload.videos.length
+      playlist.firstVideo ??= payload.videos[0] ?? null
+      playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
+    }
+  },
+  setAllPlaylists(state, payload) {
+    state.playlists = payload.map(summarizePlaylist)
+  }
+}
+
+if (process.env.IS_ELECTRON) {
+  Object.assign(getters, desktopGetters)
+  Object.assign(actions, desktopActions)
+  Object.assign(mutations, desktopMutations)
 }
 
 export default {

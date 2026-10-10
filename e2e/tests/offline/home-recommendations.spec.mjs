@@ -1,4 +1,6 @@
 import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { DatabaseSync } from 'node:sqlite'
 
 import { test, expect, goTo, setWindowSize, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 import { mockWatchPage } from '../../helpers/watch.mjs'
@@ -1409,19 +1411,16 @@ test('broadcasts expired learning removals when another window reloads its snaps
   const feedback = target => target.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback ?? null)
   await expect.poll(() => feedback(second)).toBe('dismiss')
-  const restoreClock = await app.electronApp.evaluateHandle(() => {
-    const original = Date.now
-    Date.now = () => original() + 181 * 86_400_000
-    return () => { Date.now = original }
-  })
+  // Age the persisted fixture in the worker-owned library, whose clock is
+  // independent of Electron's main process.
+  const database = new DatabaseSync(join(app.userDataDir, 'library.sqlite'))
   try {
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('loadRecommendations'))
-    await expect.poll(() => feedback(page)).toBe(null)
-    await expect.poll(() => feedback(second)).toBe(null)
-  } finally {
-    await restoreClock.evaluate(restore => restore())
-    await restoreClock.dispose()
-  }
+    database.prepare("UPDATE records SET data = json_set(data, '$.updatedAt', ?) WHERE collection = 'recommendations' AND id = ?")
+      .run(Date.now() - 181 * 86_400_000, 'recchan0001')
+  } finally { database.close() }
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('loadRecommendations'))
+  await expect.poll(() => feedback(page)).toBe(null)
+  await expect.poll(() => feedback(second)).toBe(null)
 })
 
 for (const subscriptions of [{ invalid: true }, [null, { id: CHANNEL_ID }]]) {

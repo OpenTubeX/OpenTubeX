@@ -218,22 +218,22 @@
         >
           <FtListVideoNumbered
             v-for="(item, index) in playlistItems"
-            :key="item.playlistItemId || item.videoId"
+            :key="item._libraryMemberId || item.playlistItemId || item.videoId"
             ref="playlistItem"
             class="playlistItem"
             :data="item"
             :playlist-id="playlistId"
             :playlist-type="playlistType"
-            :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
+            :playlist-index="isPagedPlaylist ? (reversePlaylist ? userWindow.total - userWindow.offset - index - 1 : userWindow.offset + index) : (reversePlaylist ? playlistItems.length - index - 1 : index)"
             :playlist-item-id="item.playlistItemId"
             :download-id="downloadId"
             :playlist-reverse="reversePlaylist"
             :playlist-shuffle="shuffleEnabled"
             :playlist-loop="loopEnabled"
-            :video-index="index"
+            :video-index="isPagedPlaylist ? userWindow.offset + index : index"
             :is-current-video="currentVideoIndexZeroBased === index"
-            :can-move-video-up="index > 0 && canMoveVideos"
-            :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
+            :can-move-video-up="(isPagedPlaylist ? userWindow.offset + index : index) > 0 && canMoveVideos"
+            :can-move-video-down="(isPagedPlaylist ? userWindow.offset + index < userWindow.total - 1 : index < playlistItems.length - 1) && canMoveVideos"
             :can-remove-from-playlist="isUserPlaylist"
             :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
             :dragged-video="draggedVideo"
@@ -248,6 +248,18 @@
             @move-video-down="moveVideoDown"
             @remove-from-playlist="removeVideoFromPlaylist"
             @pause-player="pausePlayer"
+          />
+          <FtButton
+            v-if="isPagedPlaylist && userWindow.offset > 0"
+            :label="t('Playing Previous Video')"
+            :icon="['fas', 'step-backward']"
+            @click="loadUserPlaylistWindow(Math.max(0, userWindow.offset - 100))"
+          />
+          <FtButton
+            v-if="isPagedPlaylist && userWindow.offset + playlistItems.length < userWindow.total"
+            :label="t('Subscriptions.Load More Videos')"
+            :icon="['fas', 'arrow-down']"
+            @click="loadUserPlaylistWindow(userWindow.offset + playlistItems.length)"
           />
         </component>
         <FtPrompt
@@ -282,6 +294,9 @@ import FtListVideoNumbered from '../FtListVideoNumbered/FtListVideoNumbered.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
+import { usePlaylistStatistics } from '../../composables/usePlaylistStatistics'
+import FtButton from '../FtButton/FtButton.vue'
 
 import { deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
 import {
@@ -313,6 +328,7 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  libraryMemberId: { type: String, default: null },
   downloadId: {
     type: String,
     default: '',
@@ -371,6 +387,8 @@ const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const showProgressBarPreview = ref(false)
 const previewPositionPixels = ref(0)
 const previewVideoIndex = ref(1)
+const userPreviewVideo = shallowRef(null)
+let userPreviewGeneration = 0
 
 const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
@@ -389,6 +407,13 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
 const isUserPlaylist = computed(() => props.playlistType === 'user')
+const isPagedPlaylist = computed(() => process.env.IS_ELECTRON && isUserPlaylist.value)
+const userWindow = shallowRef({ offset: 0, index: -1, total: 0, revision: 0, next: null, previous: null })
+const userShuffleSeed = ref('')
+let userShuffleAnchor = null
+let userWindowGeneration = 0
+const userStatistics = usePlaylistStatistics(store, () => props.playlistId, () => isPagedPlaylist.value)
+const userAnchor = () => ({ memberId: props.libraryMemberId, itemId: props.playlistItemId, videoId: props.videoId })
 
 const playlistReverseStateKey = computed(() => {
   if (props.playlistId == null || props.playlistId === '') { return null }
@@ -423,13 +448,14 @@ const quickBookmarkButtonEnabled = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<number | undefined>} */
-const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value?.videos?.length)
+const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value?.videoCount ?? selectedUserPlaylist.value?.videos?.length)
 
 /** @type {import('vue').ComputedRef<number | undefined>} */
 const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.value?.lastUpdatedAt)
 
 const userPlaylistWatchedVideoCount = computed(() => {
   if (!isUserPlaylist.value) { return 0 }
+  if (isPagedPlaylist.value) return userStatistics.value.watchedCount
 
   const historyCacheById = store.getters.getHistoryCacheById
   return selectedUserPlaylist.value?.videos.reduce((count, video) => {
@@ -456,23 +482,24 @@ const currentVideoIndexZeroBased = computed(() => {
   return findIndexOfCurrentVideoInPlaylist(playlistItems.value)
 })
 
-const currentVideoIndexOneBased = computed(() => currentVideoIndexZeroBased.value + 1)
+const currentVideoIndexOneBased = computed(() => isPagedPlaylist.value ? userWindow.value.index + 1 : currentVideoIndexZeroBased.value + 1)
 
 const currentVideo = computed(() => playlistItems.value[currentVideoIndexZeroBased.value])
 
-const playlistVideoCount = computed(() => playlistItems.value.length)
+const playlistVideoCount = computed(() => isPagedPlaylist.value ? userWindow.value.total : playlistItems.value.length)
 
 const playlistUnavailableVideoCount = computed(() => hasUnloadedPlaylistVideos.value
   ? 0
   : playlistTotalVideoCount.value - playlistVideoCount.value)
 
 const videoIndexInPlaylistItems = computed(() => {
+  if (isPagedPlaylist.value) return userWindow.value.index
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   return findIndexOfCurrentVideoInPlaylist(items)
 })
 
 const videoIsLastPlaylistItem = computed(() => {
-  return videoIndexInPlaylistItems.value === (playlistItems.value.length - 1)
+  return videoIndexInPlaylistItems.value === (playlistVideoCount.value - 1)
 })
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
@@ -480,6 +507,7 @@ const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value ==
 const isWaitingForNextVideo = computed(() => isFetchingPlaylistContinuation.value && videoIsLastPlaylistItem.value)
 
 const nextVideo = computed(() => {
+  if (isPagedPlaylist.value) return userWindow.value.next
   if (isWaitingForNextVideo.value) return null
   const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
@@ -519,7 +547,7 @@ const sortOrder = computed(() => isUserPlaylist.value ? userPlaylistSortOrder.va
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
 const canMoveVideos = computed(() => {
-  return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1
+  return isUserPlaylist.value && isSortOrderCustom.value && (isPagedPlaylist.value ? userWindow.value.total : playlistItems.value.length) > 1
 })
 
 const MAX_ENHANCED_PLAYLIST_ITEMS = 200
@@ -545,6 +573,7 @@ const previewStyle = computed(() => ({
 }))
 
 const previewVideoTitle = computed(() => {
+  if (isPagedPlaylist.value) return userPreviewVideo.value?.title ?? ''
   const index = previewVideoIndex.value - 1
 
   if (index >= 0 && index < playlistItems.value.length) {
@@ -554,6 +583,7 @@ const previewVideoTitle = computed(() => {
 })
 
 const previewVideoThumbnail = computed(() => {
+  if (isPagedPlaylist.value) return userPreviewVideo.value?.videoId ? getVideoThumbnailUrl(userPreviewVideo.value.videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value) : null
   const index = previewVideoIndex.value - 1
 
   if (index >= 0 && index < playlistItems.value.length) {
@@ -588,7 +618,7 @@ watch(selectedUserPlaylistLastUpdatedAt, () => {
 watch(() => props.videoId, (newId, oldId) => {
   // Check if next video is from the shuffled list or if the user clicked a different video
   // Automatic skips retain one order until playback succeeds or every entry has failed.
-  if (shuffleEnabled.value && expectedAutoSkipItem !== (props.playlistItemId || newId)) {
+  if (!isPagedPlaylist.value && shuffleEnabled.value && expectedAutoSkipItem !== (props.playlistItemId || newId)) {
     const newVideoIndex = randomizedPlaylistItems.value.findIndex((item) => {
       return item.videoId === newId
     })
@@ -605,7 +635,11 @@ watch(() => props.videoId, (newId, oldId) => {
 })
 
 function playlistItemKey(item) {
-  return item?.playlistItemId || item?.videoId || null
+  return item?._libraryMemberId || item?.playlistItemId || item?.videoId || null
+}
+
+function currentPlaylistItemKey() {
+  return props.libraryMemberId || (isPagedPlaylist.value ? currentVideo.value?._libraryMemberId : null) || props.playlistItemId || props.videoId
 }
 
 function resetUnavailableSkipChain() {
@@ -613,8 +647,9 @@ function resetUnavailableSkipChain() {
   expectedAutoSkipItem = null
 }
 
-watch([() => props.videoId, () => props.playlistItemId], () => {
-  const currentKey = props.playlistItemId || props.videoId
+// Route membership arrives before Watch finishes copying video/item IDs.
+// Observe one identity transition rather than resetting again for those copies.
+watch(currentPlaylistItemKey, currentKey => {
   if (expectedAutoSkipItem !== currentKey) resetUnavailableSkipChain()
   expectedAutoSkipItem = null
 }, { flush: 'post' })
@@ -646,6 +681,7 @@ if (isTabPresented != null) {
 }
 
 watch(() => props.playlistId, () => {
+  if (isPagedPlaylist.value) { parseUserPlaylist(selectedUserPlaylist.value); return }
   isFetchingPlaylistContinuation.value = false
   hasUnloadedPlaylistVideos.value = false
   resetUnavailableSkipChain()
@@ -661,12 +697,19 @@ watch(() => props.playlistId, () => {
 watch(storedReversePlaylist, (newVal) => {
   if (reversePlaylist.value !== newVal) {
     reversePlaylist.value = newVal
-    playlistItems.value = playlistItems.value.toReversed()
+    if (isPagedPlaylist.value) parseUserPlaylist(selectedUserPlaylist.value)
+    else playlistItems.value = playlistItems.value.toReversed()
   }
 })
 
 onMounted(() => {
   reversePlaylist.value = storedReversePlaylist.value
+
+  if (isPagedPlaylist.value) {
+    store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
+    getPlaylistInfoWithDelay()
+    return
+  }
 
   const cachedPlaylist = store.getters.getCachedPlaylist(playlistCacheTabId)
 
@@ -681,6 +724,12 @@ onMounted(() => {
  * @param {any[]} videoList
  */
 function findIndexOfCurrentVideoInPlaylist(videoList) {
+  if (props.libraryMemberId) {
+    const index = videoList.findIndex(item => item._libraryMemberId === props.libraryMemberId)
+    if (index !== -1) return index
+    if (prevVideoBeforeDeletion.value?._libraryMemberId) return videoList.findIndex(item => item._libraryMemberId === prevVideoBeforeDeletion.value._libraryMemberId)
+    return -1
+  }
   const playlistItemId = props.playlistItemId
   const videoId = props.videoId
   const prevVideoBeforeDeletionPlaylistItemId = prevVideoBeforeDeletion.value?.playlistItemId
@@ -761,6 +810,7 @@ function toggleShuffle() {
     showToast({ message: t('Shuffle is now enabled'), icon: ['fas', 'random'] })
     shufflePlaylistItems()
   }
+  if (isPagedPlaylist.value) parseUserPlaylist(selectedUserPlaylist.value)
 }
 
 function toggleReversePlaylist() {
@@ -771,6 +821,7 @@ function toggleReversePlaylist() {
   persistReversePlaylistState()
   // Create a new array to avoid changing array in data store state
   // it could be user playlist or cache playlist
+  if (isPagedPlaylist.value) { parseUserPlaylist(selectedUserPlaylist.value); return }
   playlistItems.value = playlistItems.value.toReversed()
 
   nextTick(() => {
@@ -805,6 +856,14 @@ function applyReversePlaylistState(items) {
 async function persistPlaylistOrder(items) {
   const selectedPlaylist = selectedUserPlaylist.value
   if (selectedPlaylist == null) { return }
+  if (isPagedPlaylist.value) {
+    try {
+      await DBLibraryHandlers.query('reorderPlaylistMembers', { id: props.playlistId, memberIds: (reversePlaylist.value ? items.toReversed() : items).map(item => item._libraryMemberId), revision: userWindow.value.revision })
+      await store.dispatch('grabAllPlaylists')
+      await loadUserPlaylistWindow()
+    } catch (error) { console.error(error); await loadUserPlaylistWindow() }
+    return
+  }
 
   const playlist = {
     playlistName: selectedPlaylist.playlistName,
@@ -830,7 +889,17 @@ async function persistPlaylistOrder(items) {
  * @param {string} playlistItemId
  * @param {-1 | 1} offset
  */
-function moveVideo(videoId, playlistItemId, offset) {
+async function moveVideo(videoId, playlistItemId, offset, memberId) {
+  if (isPagedPlaylist.value) {
+    const item = playlistItems.value.find(item => memberId ? item._libraryMemberId === memberId : item.videoId === videoId && item.playlistItemId === playlistItemId)
+    if (!item) return
+    try {
+      await DBLibraryHandlers.query('movePlaylistMember', { id: props.playlistId, memberId: item._libraryMemberId, direction: reversePlaylist.value ? -offset : offset, revision: userWindow.value.revision })
+      await store.dispatch('grabAllPlaylists')
+      await loadUserPlaylistWindow()
+    } catch (error) { console.error(error); await loadUserPlaylistWindow() }
+    return
+  }
   const items = playlistItems.value.slice()
   const index = items.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
@@ -844,24 +913,25 @@ function moveVideo(videoId, playlistItemId, offset) {
   persistPlaylistOrder(items)
 }
 
-function moveVideoUp(videoId, playlistItemId) {
-  moveVideo(videoId, playlistItemId, -1)
+function moveVideoUp(videoId, playlistItemId, memberId) {
+  moveVideo(videoId, playlistItemId, -1, memberId)
 }
 
-function moveVideoDown(videoId, playlistItemId) {
-  moveVideo(videoId, playlistItemId, 1)
+function moveVideoDown(videoId, playlistItemId, memberId) {
+  moveVideo(videoId, playlistItemId, 1, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-async function removeVideoFromPlaylist(videoId, playlistItemId) {
+async function removeVideoFromPlaylist(videoId, playlistItemId, memberId) {
   try {
     await store.dispatch('removeVideo', {
       _id: props.playlistId,
       videoId,
       playlistItemId,
+      memberId,
     })
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.Video has been removed'),
@@ -882,6 +952,12 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
   showRemoveWatchedVideosPrompt.value = false
   if (option !== 'delete' || selectedUserPlaylist.value == null) { return }
 
+  if (isPagedPlaylist.value) {
+    await DBLibraryHandlers.query('cleanupPlaylist', { id: props.playlistId, mode: 'watched' })
+    await store.dispatch('grabAllPlaylists')
+    await store.dispatch('grabHistory')
+    return
+  }
   const historyCacheById = store.getters.getHistoryCacheById
   const watchedVideos = selectedUserPlaylist.value.videos
     .filter((video) => isHistoryEntryWatched(historyCacheById[video.videoId]))
@@ -959,6 +1035,17 @@ function onMoveDraggedVideo(video, source) {
 }
 
 function playNextVideo() {
+  if (isPagedPlaylist.value) {
+    if (!canPlayNextVideo.value) { showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] }); return }
+    const next = userWindow.value.next
+    if (shuffleEnabled.value && (userWindow.value.index < 0 || userWindow.value.index === userWindow.value.total - 1) && expectedAutoSkipItem === null) {
+      userShuffleSeed.value = crypto.randomUUID()
+      userShuffleAnchor = { memberId: next?._libraryMemberId }
+    }
+    playUserPlaylistItem(next)
+    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+    return
+  }
   if (isWaitingForNextVideo.value) return
   const videoIndex = videoIndexInPlaylistItems.value
   const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value) ? 0 : videoIndex + 1
@@ -1014,6 +1101,10 @@ function playNextVideo() {
 }
 
 function playPreviousVideo() {
+  if (isPagedPlaylist.value) {
+    if (canPlayPreviousVideo.value) playUserPlaylistItem(userWindow.value.previous)
+    return
+  }
   // At the start of the playlist there is nothing to go back to, unless loop wraps us around
   if (!canPlayPreviousVideo.value) {
     showToast({ message: t('The playlist is at the beginning. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
@@ -1163,6 +1254,15 @@ async function getPlaylistInformationInvidious() {
 }
 
 function parseUserPlaylist(playlist) {
+  if (!playlist) return
+  if (isPagedPlaylist.value) {
+    playlistTitle.value = playlist.playlistName
+    playlistTotalVideoCount.value = playlist.videoCount
+    channelName.value = ''
+    channelId.value = ''
+    loadUserPlaylistWindow().catch(console.error)
+    return
+  }
   playlistTitle.value = playlist.playlistName
   channelName.value = ''
   channelId.value = ''
@@ -1193,6 +1293,12 @@ function shuffleItems(items) {
 }
 
 function shufflePlaylistItems() {
+  if (isPagedPlaylist.value) {
+    userShuffleSeed.value = crypto.randomUUID()
+    userShuffleAnchor = userAnchor()
+    loadUserPlaylistWindow().catch(console.error)
+    return
+  }
   // Prevents the array from affecting the original object
   const items = playlistItems.value.slice()
 
@@ -1400,7 +1506,7 @@ onBeforeUnmount(cancelProgressBarPreview)
 /**
  * @param {PointerEvent} event
  */
-function handleProgressBarClick(event) {
+async function handleProgressBarClick(event) {
   const rect = event.currentTarget.getBoundingClientRect()
   const clickX = event.clientX - rect.left
   const progressBarWidth = rect.width
@@ -1409,12 +1515,19 @@ function handleProgressBarClick(event) {
   const targetVideoIndex = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil(clickPercentage * playlistVideoCount.value)))
   const targetArrayIndex = targetVideoIndex - 1
 
+  if (isPagedPlaylist.value) {
+    await loadUserPlaylistWindow(Math.max(0, targetArrayIndex - 20))
+    await nextTick()
+    scrollToVideo(targetArrayIndex - userWindow.value.offset)
+    return
+  }
   if (targetArrayIndex >= 0 && targetArrayIndex < playlistItems.value.length) {
     scrollToVideo(targetArrayIndex)
   }
 }
 
 const videoIsLastInInPlaylistItems = computed(() => {
+  if (isPagedPlaylist.value) return userWindow.value.index === userWindow.value.total - 1
   if (shuffleEnabled.value) {
     return videoIndexInPlaylistItems.value === randomizedPlaylistItems.value.length - 1
   } else {
@@ -1447,7 +1560,7 @@ const skipAvailability = computed(() => {
   const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
 
   return getPlaylistSkipAvailability({
-    itemCount: items.length,
+    itemCount: isPagedPlaylist.value ? userWindow.value.total : items.length,
     currentIndex: videoIndexInPlaylistItems.value,
     loopEnabled: loopEnabled.value && !isFetchingPlaylistContinuation.value,
     previousVideoSourceIndex: previousVideoSourceIndex.value
@@ -1463,7 +1576,7 @@ watch(
   ([shouldSkip, playlistLoading, watchViewLoading, nextItem, canPlayNext]) => {
     if (!shouldSkip || playlistLoading || watchViewLoading || !canPlayNext) return
 
-    const currentKey = props.playlistItemId || props.videoId
+    const currentKey = currentPlaylistItemKey()
     const nextKey = playlistItemKey(nextItem)
     if (!nextKey || nextKey === currentKey || skippedUnavailableItems.has(currentKey) ||
       skippedUnavailableItems.has(nextKey)) return
@@ -1480,6 +1593,43 @@ watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious])
   emit('skip-availability-change', { canPlayNext, canPlayPrevious })
 }, { immediate: true })
 
+function userPlaylistWindowOptions(offset = null, limit = 100) {
+  return { id: props.playlistId, sort: sortOrder.value, locale: locale.value, reverse: reversePlaylist.value, shuffleSeed: shuffleEnabled.value ? userShuffleSeed.value : '', shuffleAnchor: userShuffleAnchor, anchor: userAnchor(), offset, limit }
+}
+async function loadUserPlaylistWindow(offset = null) {
+  const generation = ++userWindowGeneration
+  let result = await DBLibraryHandlers.query('playlistWindow', userPlaylistWindowOptions(offset))
+  if (result.index < 0 && userWindow.value.index >= 0 && userWindow.value.previous) {
+    prevVideoBeforeDeletion.value = userWindow.value.previous
+    result = await DBLibraryHandlers.query('playlistWindow', { ...userPlaylistWindowOptions(offset), anchor: { memberId: prevVideoBeforeDeletion.value._libraryMemberId } })
+  } else if (result.index >= 0) prevVideoBeforeDeletion.value = null
+  if (generation !== userWindowGeneration) return
+  userWindow.value = result
+  playlistItems.value = result.records
+  isLoading.value = false
+}
+function playUserPlaylistItem(item) {
+  if (!item?.videoId) return
+  router.push({ path: `/watch/${item.videoId}`, query: { playlistId: props.playlistId, playlistType: props.playlistType, playlistItemId: item.playlistItemId, libraryMemberId: item._libraryMemberId, ...(props.downloadId ? { downloadId: props.downloadId } : {}) } })
+}
+watch([() => props.videoId, () => props.playlistItemId, () => props.libraryMemberId, sortOrder, locale], () => {
+  if (isPagedPlaylist.value) loadUserPlaylistWindow().catch(console.error)
+})
+let userPreviewBusy = false
+watch(previewVideoIndex, async () => {
+  if (!isPagedPlaylist.value || !showProgressBarPreview.value) return
+  userPreviewGeneration++
+  if (userPreviewBusy) return
+  userPreviewBusy = true
+  try {
+    while (showProgressBarPreview.value) {
+      const generation = userPreviewGeneration
+      const result = await DBLibraryHandlers.query('playlistWindow', userPlaylistWindowOptions(previewVideoIndex.value - 1, 1))
+      if (generation === userPreviewGeneration) { userPreviewVideo.value = result.records[0] ?? null; break }
+    }
+  } catch (error) { console.error(error) } finally { userPreviewBusy = false }
+})
+
 defineExpose({
   centerCurrentVideo,
   getScrollTop,
@@ -1494,8 +1644,8 @@ defineExpose({
   isWaitingForNextVideo,
   getState: () => ({
     index: reversePlaylist.value
-      ? playlistItems.value.length - currentVideoIndexOneBased.value
-      : currentVideoIndexZeroBased.value,
+      ? playlistVideoCount.value - currentVideoIndexOneBased.value
+      : (isPagedPlaylist.value ? userWindow.value.index : currentVideoIndexZeroBased.value),
     reverse: reversePlaylist.value,
     shuffle: shuffleEnabled.value,
     loop: loopEnabled.value

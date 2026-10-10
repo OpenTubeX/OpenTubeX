@@ -292,7 +292,7 @@ async function loadPostsForSubscriptionsFromRemote() {
 
 defineExpose({
   refresh: loadPostsForSubscriptionsFromRemote,
-  isLoading,
+  isLoading: computed(() => isLoading.value || tabUi.value?.isLoading === true),
   lastRefreshTimestamp: lastPostsRefreshTimestamp,
   nextAutoRefreshTimestamp,
   nextAutoRefreshTooltip,

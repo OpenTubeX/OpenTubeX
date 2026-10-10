@@ -995,6 +995,24 @@ const currentTabPanel = computed(() => {
   }
 })
 
+const restoredFeedTab = currentTab.value
+const restoredLogicalTab = isElectron && tabId ? store.getters.getTabById(tabId) : null
+let pendingInitialScroll = restoredLogicalTab?.history[restoredLogicalTab.historyIndex]?.scroll
+pendingInitialScroll = pendingInitialScroll?.top > 0 ? { ...pendingInitialScroll } : null
+watch([() => currentTabPanel.value?.isLoading, () => isTabPresented?.value, currentTab], async ([loading, presented, feedTab]) => {
+  if (feedTab !== restoredFeedTab) pendingInitialScroll = null
+  if (!pendingInitialScroll || loading !== false || presented !== true) return
+  const scroll = pendingInitialScroll
+  // The first SQLite page arrives after navigation's initial scroll restore.
+  // Wait for its eager first screen to give the viewport its actual range.
+  await nextTick()
+  await nextAnimationFrame()
+  if (pendingInitialScroll !== scroll || !isMounted || isTabPresented.value !== true || currentTab.value !== restoredFeedTab) return
+  pendingInitialScroll = null
+  window.scrollTo({ ...scroll, behavior: 'instant' })
+  resetHeaderScrollVisibility()
+}, { flush: 'post' })
+
 const currentTabHasNewContent = computed(() => {
   if (currentTab.value === 'new') {
     return showNewSubscriptionFeed.value && currentTabPanel.value?.hasNewContent === true

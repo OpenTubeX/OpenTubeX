@@ -173,7 +173,7 @@ test('playlist preview measures one pointer position per frame and uses the late
   const previewPositionPixels = ref(0)
   const showProgressBarPreview = ref(true)
   const declarations = source.match(/^let preview\w* = .*$/gm).join('\n')
-  const method = source.slice(source.indexOf('function updateProgressBarPreview('), source.indexOf('function handleProgressBarClick('))
+  const method = source.slice(source.indexOf('function updateProgressBarPreview('), source.indexOf('async function handleProgressBarClick('))
   const api = vm.runInNewContext(`${declarations}\n${method}\n;({ updateProgressBarPreview })`, {
     ...frames, nextTick: async () => {}, watch() {}, onBeforeUnmount() {},
     playlistProgressBar: { value: bar }, progressBarPreview: { value: preview },

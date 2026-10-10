@@ -408,7 +408,7 @@
                       loading="lazy"
                     />
                     <span class="playlistCount">
-                      {{ playlist.videos.length }}
+                      {{ (playlist.videoCount ?? playlist.videos.length) }}
                       <FtIcon :icon="['fas', 'list']" />
                     </span>
                   </span>
@@ -417,7 +417,7 @@
                       dir="auto"
                       :title="playlist.playlistName"
                     >{{ playlist.playlistName }}</strong>
-                    <span>{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
+                    <span>{{ t('Global.Counts.Video Count', { count: (playlist.videoCount ?? playlist.videos.length) }, (playlist.videoCount ?? playlist.videos.length)) }}</span>
                   </span>
                 </RouterLink>
               </li>
@@ -566,6 +566,7 @@ import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/res
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { useHomeRecommendations } from '../../composables/useHomeRecommendations'
+import { useSubscriptionPage } from '../../composables/useSubscriptionPage'
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
@@ -642,7 +643,7 @@ function recommendationReason(video) {
 const continueWatching = computed(() => store.getters.getContinueWatchingHistory())
 const watchQueue = computed(() => store.getters.getWatchQueue)
 const recentPlaylists = computed(() => store.getters.getAllPlaylists
-  .filter(playlist => playlist.videos.length > 0 || !['favorites', 'watchLater'].includes(playlist._id))
+  .filter(playlist => (playlist.videoCount ?? playlist.videos.length) > 0 || !['favorites', 'watchLater'].includes(playlist._id))
   .toSorted((a, b) => {
     const aTimestamp = a.lastPlayedAt ?? a.lastUpdatedAt ?? a.createdAt ?? 0
     const bTimestamp = b.lastPlayedAt ?? b.lastUpdatedAt ?? b.createdAt ?? 0
@@ -651,18 +652,26 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
 const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads))
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
-const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
-  feeds: enabledSubscriptionFeeds.value,
-  activeSubscriptions: activeSubscriptions.value,
-  historyCacheById: store.getters.getHistoryCacheById,
-  hideLiveStreams: store.getters.getHideLiveStreams,
-  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getActiveForbiddenTitles,
-  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
-  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
-  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-  sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
-}))
+const pagedNewContent = Object.fromEntries(['videos', 'shorts', 'live', 'posts'].map(category => [category, useSubscriptionPage(
+  () => category,
+  () => true,
+  () => store.getters.getShowNewSubscriptionFeed,
+  () => 100
+)]))
+const newSubscriptionContent = computed(() => IS_ELECTRON
+  ? Object.fromEntries(Object.entries(pagedNewContent).map(([category, page]) => [category, page.records.value]))
+  : getNewSubscriptionFeedEntries({
+      feeds: enabledSubscriptionFeeds.value,
+      activeSubscriptions: activeSubscriptions.value,
+      historyCacheById: store.getters.getHistoryCacheById,
+      hideLiveStreams: store.getters.getHideLiveStreams,
+      hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+      forbiddenTitles: store.getters.getActiveForbiddenTitles,
+      onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
+      onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
+      restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+      sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
+    }))
 const newSubscriptionEntries = computed(() => (
   Object.entries(newSubscriptionContent.value)
     .flatMap(([category, entries]) => entries.map(entry => ({
@@ -752,8 +761,8 @@ function videoThumbnail(video) {
 }
 
 function playlistThumbnail(playlist) {
-  return playlist.videos.length > 0
-    ? videoThumbnail(playlist.videos[0])
+  return (playlist.videoCount ?? playlist.videos.length) > 0
+    ? videoThumbnail(playlist.firstVideo ?? playlist.videos[0])
     : thumbnailPlaceholder
 }
 

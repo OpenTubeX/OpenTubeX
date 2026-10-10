@@ -2,6 +2,10 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
+import { subscriptionPremieres, updateSubscriptionPremieres } from '../../src/datastores/sqlite/subscriptions.js'
 
 import { getLocalSubscriptionPremiereUpdate, getInvidiousSubscriptionPremiereUpdate, shouldRefreshSubscriptionPremiere } from '../../src/renderer/helpers/subscription-premieres.js'
 import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
@@ -142,7 +146,7 @@ const source = await readFile(new URL('../../src/renderer/helpers/subscriptions.
 const start = source.indexOf('export async function refreshSubscriptionPremieres(')
 const refreshSource = source.slice(start, source.indexOf('\n/**', start)).replace('export ', '')
 
-function createRefresh(fetch) {
+function createRefresh(fetch, { electron = false, query, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
   const video = { videoId, isPremiere: true, liveNow: true, viewCount: 1000, isNewInSubscriptionFeed: false }
   const getters = {
     getSubscriptionCacheReady: true,
@@ -153,10 +157,17 @@ function createRefresh(fetch) {
     getVideoCache: { channel: { videos: [video], timestamp: new Date(1000) } }
   }
   const writes = []
+  const actions = []
+  const notifications = []
+  const errors = []
   const refresh = vm.runInNewContext(`${refreshSource}\nrefreshSubscriptionPremieres`, {
-    store: { getters, dispatch: async (action, payload) => writes.push(payload) },
-    process: { env: { SUPPORTS_LOCAL_API: true } },
+    store: { getters, dispatch: async (action, payload) => { actions.push(action); writes.push(payload) } },
+    process: { env: { SUPPORTS_LOCAL_API: true, IS_ELECTRON: electron } },
+    DBLibraryHandlers: { query },
     AbortSignal,
+    setTimeout: setTimer,
+    clearTimeout: clearTimer,
+    console: { error: error => errors.push(error) },
     RSS_ENRICHMENT_TIMEOUT_MS: 15_000,
     RSS_ENRICHMENT_CONCURRENCY: 3,
     getSubscriptionsForFeed,
@@ -166,9 +177,108 @@ function createRefresh(fetch) {
     invidiousFetch: fetch,
     getLocalSubscriptionPremiereUpdate,
     getInvidiousSubscriptionPremiereUpdate,
-    notifySubscriptionChannelRefreshed() {}
+    notifySubscriptionChannelRefreshed(feed) { notifications.push(feed) }
   })
-  return { refresh, getters, writes }
+  return { refresh, getters, writes, actions, notifications, errors }
+}
+
+test('desktop premiere reads report a stall without cancelling, retrying, or applying a late result to an inactive poll', async () => {
+  let finish
+  let requests = 0
+  let active = true
+  const timers = new Map()
+  const page = new Promise(resolve => { finish = resolve })
+  const app = createRefresh(() => { throw new Error('An inactive poll must not fetch metadata') }, {
+    electron: true,
+    query(method) { assert.equal(method, 'subscriptionPremieres'); requests++; return page },
+    setTimer(callback, delay) { const id = Symbol(); timers.set(id, { callback, delay }); return id },
+    clearTimer(id) { timers.delete(id) },
+  })
+  let settled = false
+  const pending = app.refresh(() => active).then(() => { settled = true })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(timers.size, 1)
+  const timer = [...timers.values()][0]
+  assert.equal(timer.delay, 15000)
+  timer.callback()
+  assert.equal(app.errors.length, 1)
+  assert.match(String(app.errors[0]), /library.*pending/i)
+  assert.equal(settled, false)
+  assert.equal(requests, 1)
+  active = false
+  finish({ records: [{ video: { videoId }, memberId: 'late' }], cursor: null })
+  await pending
+  assert.equal(timers.size, 0)
+  assert.deepEqual(app.actions, [])
+  assert.deepEqual(app.notifications, [])
+})
+
+for (const fails of [false, true]) {
+  test(`desktop premiere reads clear their stall diagnostic after ${fails ? 'rejection' : 'completion'}`, async () => {
+    let cleared = 0
+    const failure = new Error('The library worker stopped')
+    const app = createRefresh(() => { throw new Error('An empty page must not fetch metadata') }, {
+      electron: true,
+      query: async () => { if (fails) throw failure; return { records: [], cursor: null } },
+      setTimer: () => 'read',
+      clearTimer(id) { assert.equal(id, 'read'); cleared++ },
+    })
+    if (fails) await assert.rejects(app.refresh(() => true), failure)
+    else await app.refresh(() => true)
+    assert.equal(cleared, 1)
+    assert.deepEqual(app.errors, [])
+  })
+}
+
+for (const outcome of ['complete', 'inactive', 'profile', 'error', 'no updates']) {
+  test(`desktop premiere polling reloads summaries once after changed pages: ${outcome}`, async t => {
+    const database = new DatabaseSync(':memory:')
+    database.exec('PRAGMA foreign_keys = ON')
+    database.exec(SCHEMA_SQL)
+    t.after(() => database.close())
+    const engine = new LibraryEngine(database)
+    const channels = Array.from({ length: 3 }, (_, index) => ({ id: `channel-${index}` }))
+    const videos = Array.from({ length: 101 }, (_, index) => ({
+      videoId, title: `Premiere ${index}`, isPremiere: true, liveNow: true, viewCount: 1000,
+      published: 500, isNewInSubscriptionFeed: false, unknown: { index, date: new Date(index) }
+    }))
+    await engine.collections.subscriptionCache.insertAsync(channels.map(channel => ({
+      _id: channel.id, videos, videosTimestamp: new Date(1000), unknownChannel: { keep: true }
+    })))
+    let active = true
+    let changedPages = 0
+    const failure = new Error('A later page failed')
+    const app = createRefresh(async () => outcome === 'no updates' ? new Response('', { status: 503 }) : new Response(html()), {
+      electron: true,
+      async query(method, payload) {
+        if (method === 'subscriptionPremieres') {
+          if (outcome === 'error' && changedPages) throw failure
+          return subscriptionPremieres(engine, payload)
+        }
+        assert.equal(method, 'updateSubscriptionPremieres')
+        const changed = await engine.transaction(() => updateSubscriptionPremieres(engine, payload))
+        if (changed) changedPages++
+        if (outcome === 'inactive') active = false
+        if (outcome === 'profile') app.getters.getActiveProfile = { _id: 'another-profile', subscriptions: [] }
+        return changed
+      }
+    })
+    app.getters.getActiveProfile.subscriptions = channels
+    if (outcome === 'error') await assert.rejects(app.refresh(() => active), failure)
+    else await app.refresh(() => active)
+    const publishes = !['no updates', 'profile'].includes(outcome)
+    assert.deepEqual(app.actions, publishes ? ['grabAllSubscriptions'] : [])
+    assert.deepEqual(app.notifications, publishes ? ['videos'] : [])
+    assert.equal(changedPages, outcome === 'complete' ? 6 : outcome === 'no updates' ? 0 : 1)
+    const update = getLocalSubscriptionPremiereUpdate(html(), videoId)
+    for (const [channelIndex, channel] of channels.entries()) {
+      const updatedCount = outcome === 'complete' ? videos.length : outcome !== 'no updates' && channelIndex === 0 ? 100 : 0
+      assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: channel.id }), {
+        _id: channel.id, videos: videos.map((video, index) => index < updatedCount ? { ...video, ...update } : video),
+        videosTimestamp: new Date(1000), unknownChannel: { keep: true }
+      })
+    }
+  })
 }
 
 for (const backend of ['local', 'invidious']) {

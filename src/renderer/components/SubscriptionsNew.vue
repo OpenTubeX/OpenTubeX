@@ -3,6 +3,7 @@
     class="newFeed"
     :is-loading="isLoading"
     :video-list="displayedEntries"
+    :paged-feed="isElectron ? pagedFeeds[activeCategory ?? 'videos'] : null"
     :data-overrides="newFeedDataOverrides"
     :subscription-feed-type="activeCategory ?? 'videos'"
     :error-channels="errorChannels"
@@ -35,6 +36,12 @@
           :youtube-style-shorts="useCustomShortsPlayer"
           :use-channels-hidden-preference="false"
         />
+        <FtButton
+          v-if="isElectron && pagedFeeds.shorts.cursor.value"
+          :label="$t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
+          @click="pagedFeeds.shorts.more()"
+        />
       </section>
     </Transition>
     <Transition name="new-feed-section">
@@ -50,6 +57,12 @@
           :render-all-items-lazily="isElectron"
           stable-item-keys
           :use-channels-hidden-preference="false"
+        />
+        <FtButton
+          v-if="isElectron && pagedFeeds.live.cursor.value"
+          :label="$t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
+          @click="pagedFeeds.live.more()"
         />
       </section>
     </Transition>
@@ -67,6 +80,12 @@
           display="list"
           stable-item-keys
           :use-channels-hidden-preference="false"
+        />
+        <FtButton
+          v-if="isElectron && pagedFeeds.posts.cursor.value"
+          :label="$t('Subscriptions.Load More Posts')"
+          :icon="['fas', 'arrow-down']"
+          @click="pagedFeeds.posts.more()"
         />
       </section>
     </Transition>
@@ -92,6 +111,8 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useSubscriptionPage } from '../composables/useSubscriptionPage'
+import FtButton from './FtButton/FtButton.vue'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
@@ -109,6 +130,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
+const pagedFeeds = Object.fromEntries(['videos', 'shorts', 'live', 'posts'].map(category => [category, useSubscriptionPage(() => category, () => true, () => props.activeCategory === null || props.activeCategory === category, () => category === 'posts' ? 20 : 100)]))
 const newFeedDataOverrides = {
   hideNewSubscriptionFeedIndicator: true,
   isInNewSubscriptionFeed: true,
@@ -212,10 +234,10 @@ watch(watchedHistoryState, (current, previous) => {
 
 // The feed builder tracks fields used for selection and ordering. Downstream
 // pagination should scan raw entries and make only rendered cards reactive.
-const newVideos = computed(() => newContentByCategory.value.videos.map(toRaw))
-const newShorts = computed(() => newContentByCategory.value.shorts.map(toRaw))
-const newLive = computed(() => newContentByCategory.value.live.map(toRaw))
-const newPosts = computed(() => newContentByCategory.value.posts.map(toRaw))
+const newVideos = computed(() => isElectron ? pagedFeeds.videos.records.value : newContentByCategory.value.videos.map(toRaw))
+const newShorts = computed(() => isElectron ? pagedFeeds.shorts.records.value : newContentByCategory.value.shorts.map(toRaw))
+const newLive = computed(() => isElectron ? pagedFeeds.live.records.value : newContentByCategory.value.live.map(toRaw))
+const newPosts = computed(() => isElectron ? pagedFeeds.posts.records.value : newContentByCategory.value.posts.map(toRaw))
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 const showCombinedView = computed(() => props.activeCategory === null)
 const displayedEntries = computed(() => {
@@ -236,7 +258,8 @@ const hasAdditionalContent = computed(() => {
 })
 
 const isLoading = computed(() => {
-  return !store.getters.getSubscriptionCacheReady || isRefreshing.value
+  return !store.getters.getSubscriptionCacheReady || isRefreshing.value ||
+    (isElectron && Object.values(pagedFeeds).some(feed => feed.busy.value))
 })
 
 const hasNewContent = computed(() => {
@@ -247,12 +270,19 @@ const hasNewContent = computed(() => {
   return newVideos.value.length > 0 || hasAdditionalContent.value
 })
 
-const hasNewContentByCategory = computed(() => ({
-  videos: newVideos.value.length > 0,
-  shorts: newShorts.value.length > 0,
-  live: newLive.value.length > 0,
-  posts: newPosts.value.length > 0
-}))
+const hasNewContentByCategory = computed(() => {
+  if (isElectron) {
+    return Object.fromEntries(
+      Object.entries(pagedFeeds[props.activeCategory ?? 'videos'].categoryCounts.value).map(([category, count]) => [category, count > 0])
+    )
+  }
+  return {
+    videos: newVideos.value.length > 0,
+    shorts: newShorts.value.length > 0,
+    live: newLive.value.length > 0,
+    posts: newPosts.value.length > 0
+  }
+})
 
 defineExpose({
   refresh,

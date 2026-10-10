@@ -1,4 +1,5 @@
 import { isUpcomingPremiere } from './subscription-visibility.js'
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { enrichShortPublicationDates } from './api/short-publication'
 import { parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate } from './api/feed-rss'
 import { shallowReactive } from 'vue'
@@ -89,46 +90,88 @@ export async function refreshSubscriptionPremieres(isActive) {
   if (!store.getters.getSubscriptionCacheReady || store.getters.getSubscriptionFeedRefreshInProgress) return
   const profile = store.getters.getActiveProfile
   const channels = getSubscriptionsForFeed(profile.subscriptions, 'videos')
-  for (const channel of channels) {
-    if (!isActive() || store.getters.getActiveProfile._id !== profile._id) return
-    const cache = store.getters.getVideoCache[channel.id]
-    const entries = cache?.videos
-    const candidates = entries?.filter(video => shouldRefreshSubscriptionPremiere(video, Date.now())) ?? []
-    if (candidates.length === 0) continue
-    const updates = new Map()
-    await mapConcurrently(candidates, RSS_ENRICHMENT_CONCURRENCY, async video => {
-      if (!isActive()) return
-      try {
-        const options = { signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS) }
-        let update
-        if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
-          const url = `${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`
-          const response = await invidiousFetch(url, options.signal)
-          if (!response.ok) return
-          update = getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId)
-        } else {
-          const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`, {
-            ...options,
-            headers: { 'Accept-Language': 'en-US' },
-            nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
+  let electronPremieresChanged = false
+  try {
+    for (const channel of channels) {
+      if (!isActive() || store.getters.getActiveProfile._id !== profile._id) return
+      if (process.env.IS_ELECTRON) {
+        let cursor = -1
+        do {
+          // Imports can queue this read. Surface a stall while preserving the
+          // worker's ownership of all pending transactions.
+          const timer = setTimeout(() => console.error('Subscription premiere library read is still pending after 15 seconds'), RSS_ENRICHMENT_TIMEOUT_MS)
+          let page
+          try {
+            page = await DBLibraryHandlers.query('subscriptionPremieres', { channelId: channel.id, cursor, now: Date.now() })
+          } finally {
+            clearTimeout(timer)
+          }
+          const updates = []
+          await mapConcurrently(page.records, RSS_ENRICHMENT_CONCURRENCY, async ({ video, memberId }) => {
+            if (!isActive()) return
+            try {
+              const signal = AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS)
+              const remote = !process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious'
+              const response = remote
+                ? await invidiousFetch(`${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`, signal)
+                : await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`, { signal, headers: { 'Accept-Language': 'en-US' }, nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS })
+              if (!response.ok) return
+              const update = remote ? getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId) : getLocalSubscriptionPremiereUpdate(await response.text(), video.videoId)
+              if (update) updates.push({ memberId, previous: video, update })
+            } catch { /* Retain the previous state for the next poll. */ }
           })
-          if (!response.ok) return
-          update = getLocalSubscriptionPremiereUpdate(await response.text(), video.videoId)
-        }
-        if (update !== null) updates.set(video.videoId, update)
-      } catch {
-        // Keep the last known state and retry on the next poll.
+          if (!isActive() || store.getters.getActiveProfile._id !== profile._id || store.getters.getSubscriptionFeedRefreshInProgress) return
+          if (updates.length && await DBLibraryHandlers.query('updateSubscriptionPremieres', { updates })) electronPremieresChanged = true
+          if (!isActive() || store.getters.getActiveProfile._id !== profile._id) return
+          cursor = page.cursor
+        } while (cursor !== null)
+        continue
       }
-    })
-    if (!isActive() || store.getters.getActiveProfile._id !== profile._id) return
-    if (updates.size === 0 || store.getters.getVideoCache[channel.id]?.videos !== entries ||
-      store.getters.getSubscriptionFeedRefreshInProgress) continue
-    await store.dispatch('updateSubscriptionVideosCacheByChannel', {
-      channelId: channel.id,
-      videos: entries.map(video => updates.has(video.videoId) ? { ...video, ...updates.get(video.videoId) } : video),
-      timestamp: cache.timestamp
-    })
-    notifySubscriptionChannelRefreshed('videos')
+      const cache = store.getters.getVideoCache[channel.id]
+      const entries = cache?.videos
+      const candidates = entries?.filter(video => shouldRefreshSubscriptionPremiere(video, Date.now())) ?? []
+      if (candidates.length === 0) continue
+      const updates = new Map()
+      await mapConcurrently(candidates, RSS_ENRICHMENT_CONCURRENCY, async video => {
+        if (!isActive()) return
+        try {
+          const options = { signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS) }
+          let update
+          if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
+            const url = `${store.getters.getCurrentInvidiousInstanceUrl}/api/v1/videos/${encodeURIComponent(video.videoId)}`
+            const response = await invidiousFetch(url, options.signal)
+            if (!response.ok) return
+            update = getInvidiousSubscriptionPremiereUpdate(await response.json(), video.videoId)
+          } else {
+            const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`, {
+              ...options,
+              headers: { 'Accept-Language': 'en-US' },
+              nativeTimeoutMs: RSS_ENRICHMENT_TIMEOUT_MS
+            })
+            if (!response.ok) return
+            update = getLocalSubscriptionPremiereUpdate(await response.text(), video.videoId)
+          }
+          if (update !== null) updates.set(video.videoId, update)
+        } catch {
+          // Keep the last known state and retry on the next poll.
+        }
+      })
+      if (!isActive() || store.getters.getActiveProfile._id !== profile._id) return
+      if (updates.size === 0 || store.getters.getVideoCache[channel.id]?.videos !== entries ||
+        store.getters.getSubscriptionFeedRefreshInProgress) continue
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+        channelId: channel.id,
+        videos: entries.map(video => updates.has(video.videoId) ? { ...video, ...updates.get(video.videoId) } : video),
+        timestamp: cache.timestamp
+      })
+      notifySubscriptionChannelRefreshed('videos')
+    }
+  } finally {
+    // Publish committed pages once, including when a later page is interrupted.
+    if (electronPremieresChanged && store.getters.getActiveProfile._id === profile._id) {
+      await store.dispatch('grabAllSubscriptions')
+      if (store.getters.getActiveProfile._id === profile._id) notifySubscriptionChannelRefreshed('videos')
+    }
   }
 }
 
@@ -516,6 +559,10 @@ function fetchRssVideoUpcomingInfo(videoId) {
  */
 async function fetchRssVideoUpcomingInfoUncached(videoId) {
   try {
+    if (process.env.IS_ELECTRON) {
+      const cached = await DBLibraryHandlers.query('subscriptionEntry', { videoId })
+      if (cached?.isUpcoming === false) return { isUpcoming: false }
+    }
     // Bounded because the enrichment workers await these one at a time: a
     // request that never settles would hold its worker forever, leaving the
     // channel's feed permanently unresolved. A timeout counts as a failed
@@ -549,8 +596,18 @@ async function enrichRssVideoIfNeeded(video) {
   return applyRssPremiereVerdict(video, await fetchRssVideoUpcomingInfo(video.videoId))
 }
 
+async function getCachedSubscriptionShorts(entries, channelId) {
+  if (!process.env.IS_ELECTRON) return store.getters.getShortsCache[channelId]?.videos ?? []
+  const offsets = Array.from({ length: Math.ceil(entries.length / 250) }, (_, index) => index * 250)
+  const pages = await mapConcurrently(offsets, 4, offset => DBLibraryHandlers.query('subscriptionEntries', {
+    channelId, field: 'shorts', ids: entries.slice(offset, offset + 250).map(entry => entry.videoId)
+  }))
+  return pages.flat()
+}
+
 /** Restore missing Local Shorts dates before importing native background results. */
-export function enrichSubscriptionShortDates(entries, channelId) {
+export async function enrichSubscriptionShortDates(entries, channelId) {
+  const previous = await getCachedSubscriptionShorts(entries, channelId)
   return enrichShortPublicationDates(entries, async videoId => {
     const response = await localApiFetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, {
       signal: AbortSignal.timeout(RSS_ENRICHMENT_TIMEOUT_MS),
@@ -558,7 +615,7 @@ export function enrichSubscriptionShortDates(entries, channelId) {
     })
     checkSubscriptionFeedResponse(response)
     return response.text()
-  }, store.getters.getShortsCache[channelId]?.videos ?? [])
+  }, previous)
 }
 
 /** Enrich imported RSS entries using the same cache and limits as foreground refreshes. */
@@ -730,13 +787,15 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       if (videos != null) {
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getVideoCache[channel.id]
-        videos = reconcileFetchedSubscriptionEntries(
-          videos,
-          previousCache?.videos,
-          'videoId',
-          previousCache?.timestamp,
-          store.getters.getHistoryCacheById
-        )
+        if (!process.env.IS_ELECTRON) {
+          videos = reconcileFetchedSubscriptionEntries(
+            videos,
+            previousCache?.videos,
+            'videoId',
+            previousCache?.timestamp,
+            store.getters.getHistoryCacheById
+          )
+        }
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
           videos
@@ -829,13 +888,15 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       if (videos != null) {
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getShortsCache[channel.id]
-        videos = reconcileFetchedSubscriptionEntries(
-          videos,
-          previousCache?.videos,
-          'videoId',
-          previousCache?.timestamp,
-          store.getters.getHistoryCacheById
-        )
+        if (!process.env.IS_ELECTRON) {
+          videos = reconcileFetchedSubscriptionEntries(
+            videos,
+            previousCache?.videos,
+            'videoId',
+            previousCache?.timestamp,
+            store.getters.getHistoryCacheById
+          )
+        }
         await store.dispatch('updateSubscriptionShortsCacheByChannel', {
           channelId: channel.id,
           videos
@@ -930,13 +991,15 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       if (videos != null) {
         activeRefresh.errors.delete(channel.id)
         const previousCache = store.getters.getLiveCache[channel.id]
-        videos = reconcileFetchedSubscriptionEntries(
-          videos,
-          previousCache?.videos,
-          'videoId',
-          previousCache?.timestamp,
-          store.getters.getHistoryCacheById
-        )
+        if (!process.env.IS_ELECTRON) {
+          videos = reconcileFetchedSubscriptionEntries(
+            videos,
+            previousCache?.videos,
+            'videoId',
+            previousCache?.timestamp,
+            store.getters.getHistoryCacheById
+          )
+        }
         await store.dispatch('updateSubscriptionLiveCacheByChannel', {
           channelId: channel.id,
           videos
@@ -1028,12 +1091,14 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       if (posts === null) return
       activeRefresh.errors.delete(channel.id)
       const previousCache = store.getters.getPostsCache[channel.id]
-      posts = reconcileFetchedSubscriptionEntries(
-        posts,
-        previousCache?.posts,
-        'postId',
-        previousCache?.timestamp
-      )
+      if (!process.env.IS_ELECTRON) {
+        posts = reconcileFetchedSubscriptionEntries(
+          posts,
+          previousCache?.posts,
+          'postId',
+          previousCache?.timestamp
+        )
+      }
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
         channelId: channel.id,
         posts
@@ -1338,10 +1403,12 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
         // Some channels have Shorts even though their automatic playlist is missing.
         const shortsTab = await channelPage.getShorts()
         const videos = parseLocalChannelShorts(shortsTab.videos, channel.id, channel.name)
-        const cachedVideos = store.getters.getShortsCache[channel.id]?.videos ?? []
+        const cachedVideos = await getCachedSubscriptionShorts(videos, channel.id)
+        const cachedById = new Map()
+        for (const video of cachedVideos) if (!cachedById.has(video.videoId)) cachedById.set(video.videoId, video)
         // The Shorts tab omits dates, which subscriptions need for sorting and New badges.
         await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, async video => {
-          const cached = cachedVideos.find(entry => entry.videoId === video.videoId)
+          const cached = cachedById.get(video.videoId)
           if (Number.isFinite(cached?.published)) {
             video.published = cached.published
             return

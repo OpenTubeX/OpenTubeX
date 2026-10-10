@@ -79,8 +79,9 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
   })
 
   await dataSection.getByRole('button', { name: 'Import Playlists' }).click()
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')?.videos.map(video => video.videoId)
+    const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')
+    return playlist ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })).videos.map(video => video.videoId) : []
   })).toEqual(['abcdefghijk'])
 })

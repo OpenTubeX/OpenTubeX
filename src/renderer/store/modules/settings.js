@@ -56,6 +56,7 @@ import {
   normalizeNavigationItems,
 } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+import { syncSnapshotPreview } from '../../../syncSnapshot.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -1583,6 +1584,9 @@ const customActions = {
 
       window.ftElectron.handleSyncHistory((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabHistory').catch(console.error)
+            break
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertToHistoryCache', data)
             break
@@ -1631,6 +1635,9 @@ const customActions = {
 
       window.ftElectron.handleSyncWatchStats((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabWatchStats').catch(console.error)
+            break
           case SyncEvents.GENERAL.OVERWRITE:
             commit('setWatchStats', data.records)
             commit('setHasHistoricalWatchTimeEstimate', data.records.some(record => record.historyEstimateApplied === true))
@@ -1660,6 +1667,9 @@ const customActions = {
 
       window.ftElectron.handleSyncSearchHistory((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabSearchHistoryEntries').catch(console.error)
+            break
           case SyncEvents.GENERAL.UPSERT:
             commit('upsertSearchHistoryEntryToList', data)
             break
@@ -1684,6 +1694,9 @@ const customActions = {
 
       window.ftElectron.handleSyncProfiles((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabAllProfiles').catch(console.error)
+            break
           case SyncEvents.GENERAL.CREATE:
             commit('addProfileToList', data)
             break
@@ -1719,6 +1732,9 @@ const customActions = {
 
       window.ftElectron.handleSyncPlaylists((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabAllPlaylists').catch(console.error)
+            break
           case SyncEvents.GENERAL.CREATE:
             commit('addPlaylists', data)
             break
@@ -1754,6 +1770,9 @@ const customActions = {
 
       window.ftElectron.handleSyncSubscriptionCache((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.INVALIDATE:
+            dispatch('grabAllSubscriptions').catch(console.error)
+            break
           case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
             commit('markSubscriptionEntriesAsSeenInCache', [data])
             break
@@ -1813,7 +1832,9 @@ for (const settingId of Object.keys(state)) {
   const updaterId = defaultUpdaterId(settingId)
 
   getters[getterId] = (state) => state[settingId]
-  mutations[mutationId] = (state, value) => { state[settingId] = value }
+  mutations[mutationId] = (state, value) => {
+    state[settingId] = process.env.IS_ELECTRON && settingId === 'syncServerSnapshot' ? syncSnapshotPreview(value) : value
+  }
 
   if (settingsWithSideEffects.includes(settingId)) {
     const triggerId = defaultSideEffectsTriggerId(settingId)

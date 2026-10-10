@@ -154,7 +154,7 @@
           >
             <FtListVideoNumbered
               v-for="(item, index) in visiblePlaylistItems"
-              :key="`${item.videoId}-${item.playlistItemId || index}`"
+              :key="item._libraryMemberId || `${item.videoId}-${item.playlistItemId || index}`"
               class="playlistItem"
               :data="item"
               :playlist-id="playlistId"
@@ -242,7 +242,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
@@ -258,6 +258,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { getThumbnailListStyles } from '../../constants/thumbnailSize'
 import { thumbnailSizeSettingKey } from '../../composables/useThumbnailSizeSlider'
 
@@ -478,14 +479,11 @@ const selectedUserPlaylist = computed(() => {
 /** @type {import('vue').ComputedRef<number | undefined>} */
 const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.value?.lastUpdatedAt)
 
-/** @type {import('vue').ComputedRef<any[]>} */
-const selectedUserPlaylistVideos = computed(() => selectedUserPlaylist.value?.videos ?? [])
-
-const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylistVideos.value.length)
+const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value?.videoCount ?? selectedUserPlaylist.value?.videos?.length ?? 0)
 
 const moreVideoDataAvailable = computed(() => {
   if (isUserPlaylistRequested.value) {
-    return userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
+    return userPageCursor.value !== null
   }
   if (infoSource.value === 'invidious') {
     return nextInvidiousPlaylistPage.value !== null
@@ -725,6 +723,7 @@ const sometimesFilteredUserPlaylistItems = computed(() => {
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
 
 const sortedPlaylistItems = computed(() => {
+  if (isUserPlaylistRequested.value) return shownPlaylistItems.value
   if (
     sortOrder.value === SORT_BY_VALUES.VideoDurationAscending ||
     sortOrder.value === SORT_BY_VALUES.VideoDurationDescending
@@ -793,12 +792,14 @@ function updateUserPlaylistSortOrder(value) {
 
 /** @type {import('vue').ComputedRef<number>} */
 const totalPlaylistDuration = computed(() => {
+  if (isUserPlaylistRequested.value) return userStatistics.value.duration
   return shownPlaylistItems.value.reduce((acc, video) => {
     return typeof video.lengthSeconds === 'number' ? acc + video.lengthSeconds : acc
   }, 0)
 })
 
 const isDurationApproximate = computed(() => {
+  if (isUserPlaylistRequested.value) return userStatistics.value.missingDuration > 0
   return shownPlaylistItems.value.some((video) => typeof video.lengthSeconds !== 'number')
 })
 
@@ -811,15 +812,13 @@ const shownPlaylistItems = computed(() => {
   }
 
   const toBeDeletedPlaylistItemIds_ = toBeDeletedPlaylistItemIds.value
-  return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(v.playlistItemId))
+  return playlistItems.value.filter((v) => !toBeDeletedPlaylistItemIds_.includes(process.env.IS_ELECTRON ? v._libraryMemberId : v.playlistItemId))
 })
 
-const shownPlaylistItemCount = computed(() => shownPlaylistItems.value)
-
-const shownVideoCount = computed(() => isUserPlaylistRequested.value ? shownPlaylistItemCount.value.length : videoCount.value)
+const shownVideoCount = computed(() => isUserPlaylistRequested.value ? selectedUserPlaylistVideoCount.value - toBeDeletedPlaylistItemIds.value.length : videoCount.value)
 
 function getPlaylistInfo() {
-  isLoading.value = true
+  if (!isUserPlaylistRequested.value || infoSource.value !== 'user' || !playlistTitle.value) isLoading.value = true
   playlistError.value = ''
   playlistErrorRetryable.value = false
   nextPageError.value = ''
@@ -1020,32 +1019,51 @@ async function getPlaylistInvidious() {
   }
 }
 
-function parseUserPlaylist(playlist) {
-  playlistTitle.value = playlist.playlistName
-  playlistDescription.value = playlist.description ?? ''
+const userPageCursor = ref(null)
+let userPageRevision = 0
+let userPageGeneration = 0
+const userStatistics = ref({ duration: 0, missingDuration: 0 })
 
-  if (playlist.videos.length > 0) {
-    firstVideoId.value = playlist.videos[0].videoId
-    firstVideoPlaylistItemId.value = playlist.videos[0].playlistItemId
-  } else {
-    firstVideoId.value = ''
-    firstVideoPlaylistItemId.value = ''
-  }
-
-  lastUpdatedDate.value = new Date(playlist.lastUpdatedAt)
-  updateLastUpdatedDate()
-  viewCount.value = 0
-  channelName.value = ''
-  channelThumbnail.value = ''
-  channelId.value = ''
-  infoSource.value = 'user'
-
-  playlistItems.value = playlist.videos
-
-  updatePageTitle()
-
-  isLoading.value = false
+function userPageOptions(cursor = null) {
+  return { id: playlistId.value, cursor, limit: 100, sort: sortOrder.value, locale: locale.value, query: videoSearchQuery.value }
 }
+
+async function parseUserPlaylist(playlist) {
+  const generation = ++userPageGeneration
+  try {
+    const [page, statistics] = await Promise.all([
+      DBLibraryHandlers.query('playlistPage', userPageOptions()),
+      DBLibraryHandlers.query('playlistStatistics', { id: playlist._id }),
+    ])
+    if (generation !== userPageGeneration || playlist._id !== playlistId.value) return
+    userPageCursor.value = page.cursor
+    userPageRevision = page.revision
+    userStatistics.value = statistics
+    playlistTitle.value = playlist.playlistName
+    playlistDescription.value = playlist.description ?? ''
+    firstVideoId.value = (playlist.firstVideo ?? playlist.videos?.[0])?.videoId ?? ''
+    firstVideoPlaylistItemId.value = (playlist.firstVideo ?? playlist.videos?.[0])?.playlistItemId ?? ''
+    lastUpdatedDate.value = new Date(playlist.lastUpdatedAt)
+    updateLastUpdatedDate()
+    viewCount.value = 0
+    channelName.value = ''
+    channelThumbnail.value = ''
+    channelId.value = ''
+    infoSource.value = 'user'
+    playlistItems.value = page.records
+    userPlaylistVisibleLimit.value = page.records.length
+    updatePageTitle()
+  } catch (error) {
+    console.error(error)
+    playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+  } finally {
+    if (generation === userPageGeneration) isLoading.value = false
+  }
+}
+
+watch([sortOrder, processedVideoSearchQuery, locale], () => {
+  if (isUserPlaylistRequested.value && selectedUserPlaylist.value) parseUserPlaylist(selectedUserPlaylist.value)
+})
 
 // react to route changes...
 watch(playlistId, () => {
@@ -1116,18 +1134,17 @@ async function getNextPage() {
   if (process.env.SUPPORTS_LOCAL_API && infoSource.value === 'local') {
     return await getNextPageLocal()
   } else if (infoSource.value === 'user') {
-    // Stop users from spamming the load more button, by replacing it with a loading symbol until the newly added items are renderered
+    if (!userPageCursor.value) return
+    const generation = userPageGeneration
     isLoadingMore.value = true
-
-    nextTick(() => {
-      if (userPlaylistVisibleLimit.value + 100 < shownVideoCount.value) {
-        userPlaylistVisibleLimit.value += 100
-      } else {
-        userPlaylistVisibleLimit.value = shownVideoCount.value
-      }
-
-      isLoadingMore.value = false
-    })
+    try {
+      const page = await DBLibraryHandlers.query('playlistPage', userPageOptions(userPageCursor.value))
+      if (generation !== userPageGeneration) return
+      if (page.stale) return parseUserPlaylist(selectedUserPlaylist.value)
+      playlistItems.value = playlistItems.value.concat(page.records)
+      userPageCursor.value = page.cursor
+      userPlaylistVisibleLimit.value = playlistItems.value.length
+    } finally { isLoadingMore.value = false }
   } else if (infoSource.value === 'invidious') {
     return await getNextPageInvidious()
   }
@@ -1242,206 +1259,36 @@ const videoDraggingPossible = computed(() => {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
-  const playlistItems_ = playlistItems.value.slice()
-  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
-
-  if (shownIndex === -1) {
-    return
-  }
-
-  if (shownIndex === 0) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    return
-  }
-
-  const previousPlaylistItemId = shownPlaylistItems.value[shownIndex - 1].playlistItemId
-  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
-  const previousIndex = playlistItems_.findIndex(video => video.playlistItemId === previousPlaylistItemId)
-  const video = playlistItems_[index]
-
-  playlistItems_[index] = playlistItems_[previousIndex]
-  playlistItems_[previousIndex] = video
-
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
+async function moveUserVideo(videoId, playlistItemId, direction, memberId) {
+  const member = playlistItems.value.find(video => memberId ? video._libraryMemberId === memberId : video.videoId === videoId && video.playlistItemId === playlistItemId)
+  if (!member) return
   try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+    const excludedMemberIds = process.env.IS_ELECTRON
+      ? [...toBeDeletedPlaylistItemIds.value]
+      : playlistItems.value.filter(video => toBeDeletedPlaylistItemIds.value.includes(video.playlistItemId)).map(video => video._libraryMemberId)
+    await DBLibraryHandlers.query('movePlaylistMember', { id: playlistId.value, memberId: member._libraryMemberId, direction, revision: userPageRevision, excludedMemberIds })
+    await store.dispatch('grabAllPlaylists')
+    await parseUserPlaylist(selectedUserPlaylist.value)
+  } catch (error) { console.error(error) }
 }
 
-/**
- * @param {string} videoId
- * @param {string} playlistItemId
- */
-function moveVideoDown(videoId, playlistItemId) {
-  const playlistItems_ = playlistItems.value.slice()
-  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
+function moveVideoUp(videoId, playlistItemId, memberId) { return moveUserVideo(videoId, playlistItemId, -1, memberId) }
+function moveVideoDown(videoId, playlistItemId, memberId) { return moveUserVideo(videoId, playlistItemId, 1, memberId) }
+function moveVideoToTheTop(videoId, playlistItemId, memberId) { return moveUserVideo(videoId, playlistItemId, 'top', memberId) }
+function moveVideoToTheBottom(videoId, playlistItemId, memberId) { return moveUserVideo(videoId, playlistItemId, 'bottom', memberId) }
 
-  if (shownIndex === -1) {
-    return
-  }
-
-  if (shownIndex + 1 >= shownPlaylistItems.value.length) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    return
-  }
-
-  const nextPlaylistItemId = shownPlaylistItems.value[shownIndex + 1].playlistItemId
-  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
-  const nextIndex = playlistItems_.findIndex(video => video.playlistItemId === nextPlaylistItemId)
-  const video = playlistItems_[index]
-
-  playlistItems_[index] = playlistItems_[nextIndex]
-  playlistItems_[nextIndex] = video
-
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
-}
-
-/**
- * @param {string} videoId
- * @param {string} playlistItemId
- */
-function moveVideoToTheTop(videoId, playlistItemId) {
-  const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
-
-  if (index === -1) {
-    return
-  }
-
-  if (index === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'))
-    return
-  }
-
-  const videoObject = playlistItems_[index]
-  playlistItems_.splice(index, 1)
-  playlistItems_.unshift(videoObject)
-
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
-}
-
-/**
- * @param {string} videoId
- * @param {string} playlistItemId
- */
-function moveVideoToTheBottom(videoId, playlistItemId) {
-  const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
-    return video.videoId === videoId && video.playlistItemId === playlistItemId
-  })
-
-  if (index === -1) {
-    return
-  }
-
-  if (index === playlistItems_.length - 1) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'))
-    return
-  }
-
-  const videoObject = playlistItems_[index]
-  playlistItems_.splice(index, 1)
-  playlistItems_.push(videoObject)
-
-  const playlist = {
-    playlistName: playlistTitle.value,
-    protected: selectedUserPlaylist.value.protected,
-    description: playlistDescription.value,
-    videos: deepCopy(playlistItems_),
-    _id: playlistId.value
-  }
-
-  try {
-    store.dispatch('updatePlaylist', playlist)
-    playlistItems.value = playlistItems_
-  } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
-    console.error(e)
-  }
-}
-
-/**
- * @param {VideoData} video
- */
-function setDraggedVideo(video) {
-  draggedVideo.value = video
-}
+function setDraggedVideo(video) { draggedVideo.value = video }
 
 async function onDragVideoEnd() {
   if (tempShownPlaylistItems.value != null) {
-    // Save on drag end ONLY
-    const playlist = {
-      playlistName: playlistTitle.value,
-      protected: selectedUserPlaylist.value.protected,
-      description: playlistDescription.value,
-      // Save whatever is shown
-      videos: deepCopy(tempShownPlaylistItems.value),
-      _id: playlistId.value
-    }
-
     try {
-      await store.dispatch('updatePlaylist', playlist)
-      playlistItems.value = tempShownPlaylistItems.value
+      await DBLibraryHandlers.query('reorderPlaylistMembers', {
+        id: playlistId.value,
+        revision: userPageRevision,
+        memberIds: tempShownPlaylistItems.value.map(video => video._libraryMemberId),
+      })
+      await store.dispatch('grabAllPlaylists')
+      await parseUserPlaylist(selectedUserPlaylist.value)
     } catch (e) {
       showToast({
         message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
@@ -1509,14 +1356,14 @@ function onMoveDraggedVideo(video, source) {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function removeVideoFromPlaylist(videoId, playlistItemId) {
+function removeVideoFromPlaylist(videoId, playlistItemId, memberId) {
   try {
     const foundVideo = playlistItems.value.some((video) => {
       return video.videoId === videoId && video.playlistItemId === playlistItemId
     })
 
     if (foundVideo) {
-      toBeDeletedPlaylistItemIds.value.push(playlistItemId)
+      toBeDeletedPlaylistItemIds.value.push(process.env.IS_ELECTRON ? memberId : playlistItemId)
       videosWithPlaylistToUnset.value.push(videoId)
 
       // Only show toast when no existing toast shown
@@ -1563,12 +1410,18 @@ async function removeToBeDeletedVideosSometimes() {
     pendingDeletionRemovalInProgress.value = true
 
     try {
-      await store.dispatch('removeVideos', {
-        _id: playlistId.value,
-        // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
-        playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
-        videoIds: [...videosWithPlaylistToUnset.value],
-      })
+      if (process.env.IS_ELECTRON) {
+        await DBLibraryHandlers.query('removePlaylistMembers', { id: playlistId.value, memberIds: [...toBeDeletedPlaylistItemIds.value] })
+        await store.dispatch('grabAllPlaylists')
+        await store.dispatch('grabHistory')
+      } else {
+        await store.dispatch('removeVideos', {
+          _id: playlistId.value,
+          // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
+          playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
+          videoIds: [...videosWithPlaylistToUnset.value],
+        })
+      }
     } catch (e) {
       showToast({
         message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),

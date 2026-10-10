@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 import { getContinueWatchingCandidates } from '../../helpers/homeSections'
-import { DBHistoryHandlers } from '../../../datastores/handlers/index'
+import { DBHistoryHandlers, DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
 import {
   canMarkHistoryEntryAsWatched,
@@ -35,7 +35,12 @@ const state = {
 
   // Vuex doesn't support Maps, so we have to use an object here instead
   // TODO: switch to a Map during the Pinia migration
-  historyCacheById: {}
+  historyCacheById: {},
+  libraryPaged: !!process.env.IS_ELECTRON,
+  activeVideoIds: {},
+  historyTotal: 0,
+  historyHasUnwatched: false,
+  continuedHistory: []
 }
 
 const getters = {
@@ -91,7 +96,14 @@ const actions = {
 
   async updateSubscriptionHistory({ commit, dispatch }, update) {
     const result = await DBHistoryHandlers.updateSubscriptionState(update)
-    if (result.records.length === 1) {
+    if (process.env.IS_ELECTRON && update.metadata) {
+      if (result.records.length > 0) {
+        // Repaired older occurrences must not replace the newest per-video
+        // state. Refresh once per repair batch from the durable library.
+        await dispatch('grabHistory')
+        await dispatch('hydrateVideoState', result.records.map(record => record.videoId))
+      }
+    } else if (result.records.length === 1) {
       commit('upsertToHistoryCache', result.records[0])
     } else if (result.records.length > 1) {
       commit('applyHistorySyncChanges', { insertions: [], updates: result.records, deletions: [] })
@@ -168,7 +180,7 @@ const actions = {
     }
   },
 
-  async removeHistoryOlderThan({ commit }, days) {
+  async removeHistoryOlderThan({ commit, dispatch, state }, days) {
     const cutoff = getRetentionCutoff(days)
     if (cutoff === null) {
       return 0
@@ -178,6 +190,10 @@ const actions = {
       const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
       removeExternalMediaPositionsBefore(cutoff)
       commit('removeMultipleFromHistoryCache', videoIds)
+      if (videoIds.length > 0) {
+        await dispatch('grabHistory')
+        if (process.env.IS_ELECTRON) await dispatch('hydrateVideoState', Object.keys(state.activeVideoIds))
+      }
       return videoIds.length
     } catch (errMessage) {
       console.error(errMessage)
@@ -366,6 +382,73 @@ const mutations = {
   }
 }
 
+const desktopGetters = {
+  getHistoryTotal: state => state.historyTotal,
+  getHistoryHasUnwatched: state => state.historyHasUnwatched,
+  getContinueWatchingHistory: state => () => state.continuedHistory.filter(canMarkHistoryEntryAsWatched),
+}
+
+const desktopActions = {
+  async grabHistory({ commit, rootGetters }) {
+    const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
+    if (cutoff !== null) {
+      await DBHistoryHandlers.deleteOlderThan(cutoff)
+      removeExternalMediaPositionsBefore(cutoff)
+    }
+    const [page, summary] = await Promise.all([
+      DBLibraryHandlers.query('historyPage', { limit: 100 }),
+      DBLibraryHandlers.query('historySummary'),
+    ])
+    commit('setHistoryCacheSorted', page.records)
+    commit('cacheHistoryRecords', { records: page.records })
+    commit('setHistorySummary', summary)
+  },
+  async overwriteHistory({ dispatch }, records) {
+    const values = records instanceof Map ? [...records.values()] : records
+    await DBHistoryHandlers.overwrite(values.map(migrateLegacyHistoryRecord))
+    await dispatch('grabHistory')
+    return true
+  },
+  async markAllHistoryAsWatched({ dispatch }) {
+    const result = await DBLibraryHandlers.query('markAllHistory')
+    if (result.seenVideos !== null) await dispatch('applySubscriptionSeenVideos', result.seenVideos)
+    await dispatch('grabHistory')
+    return result.count
+  },
+  async applySubscriptionUnseenHistory({ dispatch, state }) {
+    const count = await DBLibraryHandlers.query('applySubscriptionUnseenHistory')
+    if (count) {
+      await dispatch('grabHistory')
+      await dispatch('hydrateVideoState', Object.keys(state.activeVideoIds))
+    }
+    return count
+  },
+}
+
+const desktopMutations = {
+  retainVideoState(state, ids) { for (const id of ids) state.activeVideoIds[id] = (state.activeVideoIds[id] ?? 0) + 1 },
+  releaseVideoState(state, ids) { for (const id of ids) { if (state.activeVideoIds[id] > 1) state.activeVideoIds[id]--; else delete state.activeVideoIds[id] } },
+  setHistorySummary(state, summary) {
+    state.historyTotal = summary.total
+    state.historyHasUnwatched = summary.unwatched
+    state.continuedHistory = summary.continued
+  },
+  cacheHistoryRecords(state, payload) {
+    const { records, ids = [] } = Array.isArray(payload) ? { records: payload } : payload
+    for (const id of ids) delete state.historyCacheById[id]
+    // The service returns newest first, including duplicate legacy video IDs.
+    for (const record of records.slice().reverse()) state.historyCacheById[record.videoId] = record
+    const cached = Object.keys(state.historyCacheById).filter(id => !state.activeVideoIds[id])
+    for (const id of cached.slice(0, Math.max(0, cached.length - 2000))) delete state.historyCacheById[id]
+  },
+}
+
+if (process.env.IS_ELECTRON) {
+  Object.assign(getters, desktopGetters)
+  Object.assign(actions, desktopActions)
+  Object.assign(mutations, desktopMutations)
+}
+
 export default {
   state,
   getters,
@@ -374,7 +457,12 @@ export default {
   // edits cannot affect membership or any details displayed by Home.
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
-    state.historyRevision++
+    if (!['setHistorySummary', 'cacheHistoryRecords', 'retainVideoState', 'releaseVideoState'].includes(name)) state.historyRevision++
+    if (state.libraryPaged) {
+      const recent = Object.keys(state.historyCacheById).filter(id => !state.activeVideoIds[id])
+      for (const id of recent.slice(0, Math.max(0, recent.length - 2000))) delete state.historyCacheById[id]
+    }
+    if (state.libraryPaged && state.historyCacheSorted.length > 100) state.historyCacheSorted = state.historyCacheSorted.slice(0, 100)
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

@@ -1,6 +1,6 @@
-import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { once } from 'node:events'
 import { createServer } from 'node:http'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
@@ -70,9 +70,12 @@ test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) 
       .toBeNull()
     revision = 1
     const history = await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata)
-    expect(history?.revisions).toHaveLength(2)
+    expect(history?.revisionCount).toBe(2)
     expect(requests).toBe(2)
-    expect(history.revisions[0].thumbnail).not.toBe(history.revisions[1].thumbnail)
+    const previous = await page.evaluate(videoId => window.ftElectron.libraryQuery('metadataPage', { videoId, field: 'thumbnail' }), metadata.videoId)
+    expect(previous.records).toHaveLength(1)
+    const thumbnail = await page.evaluate(id => window.ftElectron.libraryQuery('metadataThumbnail', { id }), previous.records[0].thumbnailRevisionId)
+    expect(thumbnail).toBe(`data:image/png;base64,${THUMBNAILS[0].toString('base64')}`)
   } finally {
     thumbnailServer.close()
     await once(thumbnailServer, 'close')
@@ -153,11 +156,14 @@ test('stores and presents every previous metadata version', async ({ app, page }
         thumbnailUrl: `${thumbnailBaseUrl}/redirect.png`
       }
       await window.ftElectron.videoMetadataCache.update(redirectedMetadata)
-      const redirectedHistory = await window.ftElectron.videoMetadataCache.update({
+      await window.ftElectron.videoMetadataCache.update({
         ...redirectedMetadata,
         title: 'Redirect test changed'
       })
-      const privateRedirectRejected = redirectedHistory.revisions.every(revision => revision.thumbnail === null)
+      const redirectedPage = await window.ftElectron.libraryQuery('metadataPage', { videoId: 'redirect001', field: 'thumbnail' })
+      const privateRedirectRejected = (await Promise.all(redirectedPage.records.map(record =>
+        window.ftElectron.libraryQuery('metadataThumbnail', { id: record.thumbnailRevisionId })
+      ))).every(thumbnail => thumbnail === null)
       await window.ftElectron.videoMetadataCache.clear()
 
       const observedAt = Date.now() - 10_000

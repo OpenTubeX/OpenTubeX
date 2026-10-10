@@ -70,7 +70,7 @@ for (const feed of ['videos', 'new']) {
       await page.getByRole('button', { name: feed === 'new' ? /Refresh New content/ : /Refresh Videos/ }).click()
       await expect.poll(() => page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        return Object.values(store.getters.getVideoCache).filter(cache => cache.videos.length === 30).length
+        return Object.values(store.getters.getVideoCache).filter(cache => cache.count === 30).length
       }), { timeout: 30_000 }).toBe(channelCount)
       await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
       await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()

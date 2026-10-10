@@ -2,7 +2,7 @@ import { app, session } from 'electron'
 import { lstat, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 
-import * as baseHandlers from '../datastores/handlers/base'
+import { libraryRequest } from '../datastores/sqlite/client.js'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
@@ -166,6 +166,11 @@ export async function getStorageUsage() {
   const fileEntries = Object.entries(USER_DATA_FILES).map(([key, fileName]) => (
     [key, sumEntries(entrySizes, [fileName])]
   ))
+  const libraryBytes = await readSize(() => libraryRequest('engine', 'storageUsage'), 'library')
+  const collections = { videoMetadata: 'videoMetadataCache', tabSessions: 'tabSession', history: 'history', watchStats: 'watchStats', recommendations: 'recommendations', playlists: 'playlists', profiles: 'profiles', settings: 'settings', subscriptionCache: 'subscriptionCache', searchHistory: 'searchHistory', liveReminders: 'liveReminders' }
+  for (const entry of fileEntries) {
+    if (collections[entry[0]]) entry[1] = libraryBytes === null ? null : libraryBytes[collections[entry[0]]] ?? 0
+  }
   const categorizedUsage = {
     ...Object.fromEntries(fileEntries),
     httpCache: sumEntries(entrySizes, ['Cache']),
@@ -211,6 +216,10 @@ export async function clearStorage(category) {
 }
 
 export async function compactStorageDatabases() {
-  const results = await baseHandlers.compactAllDatastores()
-  return results.every(result => result.status === 'fulfilled')
+  try {
+    return await libraryRequest('engine', 'compact')
+  } catch (error) {
+    console.error('Failed to compact library storage', error)
+    return false
+  }
 }

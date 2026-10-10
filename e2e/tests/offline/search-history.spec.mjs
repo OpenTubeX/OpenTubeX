@@ -160,7 +160,7 @@ test.describe('search history suggestions', () => {
 
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records
         .filter((entry) => entry.query === 'daily news' && !entry.$$deleted)
         .map((entry) => entry.searchSettings.time)
@@ -206,7 +206,7 @@ test.describe('search history suggestions', () => {
 
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return [...new Set(records
         .filter(entry => !entry.$$deleted && (
           entry._id === 'android tutorial' || entry.query === 'android tutorial'
@@ -216,7 +216,7 @@ test.describe('search history suggestions', () => {
 
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
       return records.filter(entry => entry._id === 'android tutorial').at(-1)?.query
     }).toBe('android tutorial')
   })
@@ -370,9 +370,9 @@ test.describe('search history suggestions', () => {
 
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'android tutorial').at(-1)?.$$deleted
-    }).toBe(true)
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some(record => record._id === 'android tutorial' && !record.$$deleted)
+    }).toBe(false)
 
     ;({ page } = await app.relaunch())
     await page.locator(sel.searchInput).click()

@@ -5,6 +5,7 @@ const key = Buffer.alloc(32, 1).toString('base64')
 const salt = Buffer.alloc(16, 2).toString('base64')
 const count = 20_000
 const history = Array.from({ length: count }, (_, index) => ({
+  _id: `history-${index}`,
   videoId: `video-${index}`,
   title: `Video ${index}`,
   authorId: 'UCtest',
@@ -86,7 +87,7 @@ test('large encrypted history sync keeps renderer input responsive', async ({ pa
       await store.dispatch('syncWithSyncServer')
       // Let the observer deliver the final task as well.
       await new Promise(resolve => setTimeout(resolve, 20))
-      const record = store.state.history.historyCacheById['video-0']
+      const record = (await window.ftElectron.libraryQuery('videoState', { ids: ['video-0'] })).history[0]
       return {
         inputTurns,
         durations,

@@ -1,31 +1,13 @@
 import Datastore from '@seald-io/nedb'
 
 let dbPath = null
-let createWorkerCollection
+let createElectronCollection
 
 if (process.env.IS_ELECTRON_MAIN) {
   const { isMainThread } = require('node:worker_threads')
-  if (isMainThread) {
-    const { app } = require('electron')
-    const { join } = require('path')
-    // this code only runs in the electron main process, so hopefully using sync fs code here should be fine 😬
-    const { statSync, realpathSync } = require('fs')
-    const userDataPath = app.getPath('userData') // This is based on the user's OS
-    dbPath = (dbName) => {
-      let path = join(userDataPath, `${dbName}.db`)
-
-      // returns undefined if the path doesn't exist
-      if (statSync(path, { throwIfNoEntry: false })?.isSymbolicLink) {
-        path = realpathSync(path)
-      }
-
-      return path
-    }
-  } else {
-    const { COLLECTIONS } = require('./sqlite/schema.js')
-    const { localCollection } = require('./sqlite/instance.js')
-    createWorkerCollection = name => localCollection(Object.keys(COLLECTIONS).find(key => COLLECTIONS[key] === name))
-  }
+  const { COLLECTIONS } = require('./sqlite/schema.js')
+  const create = isMainThread ? require('./sqlite/client.js').remoteCollection : require('./sqlite/instance.js').localCollection
+  createElectronCollection = name => create(Object.keys(COLLECTIONS).find(key => COLLECTIONS[key] === name))
 } else {
   dbPath = (dbName) => `${dbName}.db`
 }
@@ -34,7 +16,7 @@ if (process.env.IS_ELECTRON_MAIN) {
  * @param {string} name
  */
 function createDatastore(name) {
-  if (createWorkerCollection) return createWorkerCollection(name)
+  if (process.env.IS_ELECTRON_MAIN) return createElectronCollection(name)
   const datastore = new Datastore({
     filename: dbPath(name),
     autoload: !process.env.IS_ELECTRON_MAIN,
@@ -46,21 +28,6 @@ function createDatastore(name) {
     // Automatically clean up corrupted data, instead of crashing
     corruptAlertThreshold: 1
   })
-
-  // Background refreshes append whole channel records. Compact during long
-  // sessions so an interrupted shutdown cannot leave gigabytes to replay.
-  if (process.env.IS_ELECTRON_MAIN && name === 'subscription-cache') {
-    let compactionInProgress = false
-    setInterval(() => {
-      if (compactionInProgress) return
-      compactionInProgress = true
-      datastore.compactDatafileAsync().catch(error => {
-        console.error('Failed to compact subscription cache:', error)
-      }).finally(() => {
-        compactionInProgress = false
-      })
-    }, 5 * 60 * 1000).unref()
-  }
 
   return datastore
 }
