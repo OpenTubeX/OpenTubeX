@@ -911,6 +911,7 @@ Settings:
     Posts Auto Refresh Interval: Интервал за автоматично опресняване на публикациите
     Refresh Subscriptions While App Is Closed: "Опресняване на абонаментите при затворено приложение"
   Distraction Free Settings:
+    Hide Popularity Graph: "Скриване на графиката на популярността"
     Enable Block Lists: "Активиране на списъците за блокиране"
     AI Video Summaries: Резюмета на видеоклипове от ИИ
     Hide: Скриване

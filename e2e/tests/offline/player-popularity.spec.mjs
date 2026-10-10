@@ -1,4 +1,4 @@
-import { test, expect, setPlayerFullscreen } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -34,6 +34,9 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   }
   await expect(graph).toHaveAttribute('aria-label', 'Most replayed: 0:22')
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.locator('.shaka-play-button').hover()
+  await expect(graph).toBeHidden()
+  expect(await graph.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBe(40)
 
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
@@ -41,13 +44,17 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
       await resize(width, scale)
       for (const frosted of [true, false]) {
         await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+        await bar.hover()
         await expect(graph).toBeVisible()
+        await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
         expect(await graph.evaluate(element => {
           const graph = element.getBoundingClientRect()
           const bar = element.parentElement.getBoundingClientRect()
           return Math.max(Math.abs(graph.left - bar.left), Math.abs(graph.right - bar.right))
         })).toBeLessThan(1)
         await expect(graph).toHaveCSS('pointer-events', 'none')
+        await player.locator('.shaka-play-button').hover()
+        await expect(graph).toBeHidden()
       }
     }
   }
@@ -56,13 +63,14 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await resize(1300)
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
   await setPlayerFullscreen(page, true)
-  await expect(graph).toBeVisible()
+  await expect(graph).toBeHidden()
   const box = await bar.boundingBox()
   expect(box).not.toBeNull()
   await page.mouse.move(box.x + box.width * 0.755, box.y + box.height / 2)
   const tooltip = bar.locator('.shaka-player-ui-thumbnail-time')
   await expect(tooltip).toContainText('Most replayed')
   await expect(tooltip).toBeVisible()
+  await expect(graph).toBeVisible()
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
   await expect(tooltip).not.toContainText('Most replayed')
   // Remap the playback shortcut so ArrowRight operates the focused range.
@@ -115,6 +123,64 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await expect(bar).not.toHaveClass(/ft-has-popularity/)
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
   await expect(graph).toHaveCount(0)
+})
+
+test('reduced motion reveals the popularity graph without a slide transition', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockPlayableWatchPage(app, page, { popularity })
+  await openMockedVideo(page)
+  const graph = page.locator('.ft-popularity-graph')
+  await expect(graph).toBeHidden()
+  await expect(graph).toHaveCSS('transition-duration', '0s')
+  await page.locator('.shaka-seek-bar-container').hover()
+  await expect(graph).toBeVisible()
+  await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+  await page.locator('.shaka-play-button').hover()
+  await expect(graph).toBeHidden()
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect(graph).toHaveCSS('transition-duration', '0.18s, 0.18s, 0s')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+  await expect(graph).toHaveCSS('transition-duration', '0s')
+  await page.locator('.shaka-seek-bar-container').hover()
+  await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+})
+
+test('Distraction Free hides popularity and saves the preference', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { popularity })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const bar = page.locator('.shaka-seek-bar-container')
+  const graph = page.locator('.ft-popularity-graph')
+  const tooltip = bar.locator('.shaka-player-ui-thumbnail-time')
+  const bounds = await bar.boundingBox()
+  expect(bounds).not.toBeNull()
+  await bar.hover({ position: { x: bounds.width * 0.755, y: bounds.height / 2 } })
+  await expect(tooltip).toContainText('Most replayed')
+
+  const focus = await goToSettingsSection(page, 'focus')
+  const toggle = focus.getByRole('checkbox', { name: 'Hide Popularity Graph' })
+  await expect(toggle).not.toBeChecked()
+  await toggle.locator('..').locator('label.switch-label').click()
+  await expect(toggle).toBeChecked()
+  await expect(graph).toHaveCount(0)
+  await expect(tooltip).not.toContainText('Most replayed')
+  await expect(bar).not.toHaveClass(/ft-has-popularity/)
+
+  await toggle.locator('..').locator('label.switch-label').click()
+  await expect(toggle).not.toBeChecked()
+  await expect(graph).toHaveCount(1)
+  await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
+  await page.locator('.shaka-play-button').hover()
+  await expect(graph).toBeHidden()
+  await bar.hover()
+  await expect(graph).toBeVisible()
+
+  const reopened = await goToSettingsSection(page, 'focus')
+  await reopened.getByRole('checkbox', { name: 'Hide Popularity Graph' }).locator('..').locator('label.switch-label').click()
+  await expect(graph).toHaveCount(0)
+  const { page: relaunched } = await app.relaunch()
+  const restored = await goToSettingsSection(relaunched, 'focus')
+  await expect(restored.getByRole('checkbox', { name: 'Hide Popularity Graph' })).toBeChecked()
 })
 
 test('touch scrubbing shows the most replayed label at the peak', async ({ app, page }) => {

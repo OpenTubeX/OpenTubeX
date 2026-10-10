@@ -909,6 +909,7 @@ Settings:
     Posts Auto Refresh Interval: 貼文自動重新整理間隔
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
   Distraction Free Settings:
+    Hide Popularity Graph: "隱藏熱門程度圖"
     Enable Block Lists: "啟用封鎖清單"
     AI Video Summaries: AI 影片摘要
     Hide: 隱藏

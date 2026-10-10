@@ -136,6 +136,7 @@ export const SYNC_SETTING_LABELS = {
   hidePaidPromotion: 'Settings.Distraction Free Settings.Hide Paid Promotion Badge',
   hidePlaylists: 'Settings.Distraction Free Settings.Hide Playlists',
   hidePopularVideos: 'Settings.Distraction Free Settings.Hide Popular Videos',
+  hidePopularityGraph: 'Settings.Distraction Free Settings.Hide Popularity Graph',
   hideRecommendedVideos: 'Settings.Distraction Free Settings.Hide Recommended Videos',
   hideRepeatStats: 'Settings.Distraction Free Settings.Hide Repeat Stats',
   hideSearchBar: 'Settings.Parental Control Settings.Hide Search Bar',

@@ -1034,6 +1034,7 @@ Settings:
     To: A
     Confirm Before Unsubscribing: Evitar bajas accidentales
   Distraction Free Settings:
+    Hide Popularity Graph: "Ocultar gráfico de popularidad"
     Enable Block Lists: "Activar listas de bloqueo"
     AI Video Summaries: Resúmenes de videos con IA
     Hide: Ocultar

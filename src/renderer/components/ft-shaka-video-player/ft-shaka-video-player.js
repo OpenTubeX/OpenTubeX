@@ -797,6 +797,7 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
     const seekBarTooltipLabels = new WeakMap()
+    const hidePopularityGraph = computed(() => store.getters.getHidePopularityGraph)
     let iosFullscreenCleanup = null
     let androidFullscreenCleanup = null
     let androidFullscreenEntering = false
@@ -5810,7 +5811,7 @@ export default defineComponent({
       const thumbnailTime = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-time')
       if (!thumbnailTime) return
       const sponsorBlockLabel = getSponsorBlockSeekBarTooltipLabel(hoverTime, secondsPerPixel)
-      const popularityLabel = !isLive.value && isMostReplayed(props.popularityMarkers, hoverTime)
+      const popularityLabel = !hidePopularityGraph.value && !isLive.value && isMostReplayed(props.popularityMarkers, hoverTime)
         ? t('Video.Player.Most Replayed')
         : ''
       const tooltipLabel = [popularityLabel, sponsorBlockLabel].filter(Boolean).join(' · ')
@@ -5821,7 +5822,7 @@ export default defineComponent({
       const baseText = previous?.text === currentText ? previous.baseText : currentText
       const text = tooltipLabel ? `${baseText} · ${tooltipLabel}` : baseText
       if (text !== currentText) thumbnailTime.textContent = text
-      seekBarTooltipLabels.set(thumbnailTime, { baseText, text })
+      seekBarTooltipLabels.set(thumbnailTime, { baseText, text, hoverTime, secondsPerPixel })
     }
 
     function handleSeekBarInput(event) {
@@ -5914,7 +5915,10 @@ export default defineComponent({
       if (!seekBarContainer) return
       seekBarContainer.querySelector('.ft-popularity-graph')?.remove()
       seekBarContainer.classList.remove('ft-has-popularity')
-      if (!hasLoaded.value || isLive.value || !player) return
+      const thumbnailTime = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-time')
+      const preview = seekBarTooltipLabels.get(thumbnailTime)
+      if (preview) updateSeekBarTooltip(seekBarContainer, preview.hoverTime, preview.secondsPerPixel)
+      if (hidePopularityGraph.value || !hasLoaded.value || isLive.value || !player) return
 
       const path = createPopularityPath(props.popularityMarkers, player.seekRange())
       if (!path) return
@@ -5932,7 +5936,7 @@ export default defineComponent({
       seekBarContainer.classList.add('ft-has-popularity')
     }
 
-    watch([() => props.popularityMarkers, hasLoaded, isLive, () => t('Video.Player.Most Replayed')], refreshPopularityGraph, { flush: 'post' })
+    watch([() => props.popularityMarkers, hasLoaded, isLive, hidePopularityGraph, () => t('Video.Player.Most Replayed')], refreshPopularityGraph, { flush: 'post' })
 
     function addUICustomizations() {
       /** @type {HTMLDivElement} */

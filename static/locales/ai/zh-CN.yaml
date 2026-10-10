@@ -909,6 +909,7 @@ Settings:
     Posts Auto Refresh Interval: 帖子自动刷新间隔
     Refresh Subscriptions While App Is Closed: "应用关闭时刷新订阅"
   Distraction Free Settings:
+    Hide Popularity Graph: "隐藏热度图"
     Enable Block Lists: "启用屏蔽列表"
     AI Video Summaries: AI 视频摘要
     Hide: 隐藏

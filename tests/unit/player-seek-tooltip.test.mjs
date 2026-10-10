@@ -11,6 +11,7 @@ function createTooltip() {
   const state = {
     seekBarTooltipLabels: new WeakMap(),
     isLive: { value: false },
+    hidePopularityGraph: { value: false },
     props: { popularityMarkers: [] },
     isMostReplayed: () => state.mostReplayed,
     getSponsorBlockSeekBarTooltipLabel: () => state.sponsorBlockLabel,
@@ -50,6 +51,15 @@ test('removes only the changed label from a combined tooltip', () => {
   state.sponsorBlockLabel = ''
   update()
   assert.equal(thumbnailTime.textContent, '0:22 · Chapter · Most replayed')
+})
+
+test('disabling the popularity graph removes its label while preserving SponsorBlock', () => {
+  const { state, thumbnailTime, update } = createTooltip()
+  state.sponsorBlockLabel = 'Sponsor'
+  update()
+  state.hidePopularityGraph.value = true
+  update()
+  assert.equal(thumbnailTime.textContent, '0:22 · Chapter · Sponsor')
 })
 
 test('preserves fresh Shaka timestamps and chapter titles, even when they end with a label', () => {

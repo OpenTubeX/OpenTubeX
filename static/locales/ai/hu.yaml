@@ -909,6 +909,7 @@ Settings:
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
   Distraction Free Settings:
+    Hide Popularity Graph: "Népszerűségi grafikon elrejtése"
     Enable Block Lists: "Tiltólisták engedélyezése"
     AI Video Summaries: MI-videóösszefoglalók
     Hide: Elrejtés

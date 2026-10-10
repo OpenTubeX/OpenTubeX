@@ -389,6 +389,7 @@ const state = {
   alwaysShowNavigationBar: false,
   compactNavigationLabels: false,
   hideChapters: false,
+  hidePopularityGraph: false,
   homeSectionLayout: DEFAULT_HOME_SECTION_LAYOUT.map(section => ({ ...section })),
   enableHomeRecommendations: false,
   recommendationExploration: 0.2,

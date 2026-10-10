@@ -913,6 +913,7 @@ Settings:
     Posts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna færslna
     Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
   Distraction Free Settings:
+    Hide Popularity Graph: "Fela vinsældarit"
     Enable Block Lists: "Virkja blokkunarlista"
     AI Video Summaries: Myndbandsyfirlit gervigreindar
     Hide: Fela

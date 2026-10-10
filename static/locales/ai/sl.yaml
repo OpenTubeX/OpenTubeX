@@ -1141,6 +1141,7 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
   Distraction Free Settings:
+    Hide Popularity Graph: "Skrij graf priljubljenosti"
     Enable Block Lists: "Omogoči sezname blokiranih"
     AI Video Summaries: Povzetki videoposnetkov z UI
     Hide: Skrij
