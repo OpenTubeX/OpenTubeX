@@ -1,5 +1,6 @@
 export const SUBSCRIPTION_FEED_TYPES = Object.freeze(['videos', 'shorts', 'live', 'posts'])
 export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
+const CHANNEL_SETTING_KEYS = ['feedTypes', 'dailyVideoLimit', 'showMembersOnly']
 
 /**
  * @param {(key: string) => string} t
@@ -53,7 +54,7 @@ export function normalizeSubscriptionChannelSettings(channel) {
  */
 export function copySubscriptionChannelSettings(channel, savedChannel) {
   const updated = { ...channel }
-  for (const key of ['feedTypes', 'dailyVideoLimit', 'showMembersOnly', 'subscriptionSettingsUpdatedAt']) {
+  for (const key of [...CHANNEL_SETTING_KEYS, 'subscriptionSettingsUpdatedAt', 'subscriptionSettingsUpdatedAtByField']) {
     if (Object.hasOwn(savedChannel, key)) updated[key] = savedChannel[key]
     else delete updated[key]
   }
@@ -65,19 +66,30 @@ export function copySubscriptionChannelSettings(channel, savedChannel) {
  * @param {object} subscription
  * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
  * @param {number} updatedAt
+ * @param {boolean} [preserveNewerSettings] Keep fields edited after this patch.
  */
-export function getChannelWithUpdatedSettings(subscription, settings, updatedAt) {
+export function getChannelWithUpdatedSettings(subscription, settings, updatedAt, preserveNewerSettings = false) {
   const channel = { ...subscription }
-  if (Array.isArray(settings.feedTypes)) channel.feedTypes = [...settings.feedTypes]
-  for (const key of ['dailyVideoLimit', 'showMembersOnly']) {
+  const fieldUpdatedAt = Object.fromEntries(CHANNEL_SETTING_KEYS.map(key => [
+    key, subscription.subscriptionSettingsUpdatedAtByField?.[key] ?? subscription.subscriptionSettingsUpdatedAt ?? 0
+  ]))
+  for (const key of CHANNEL_SETTING_KEYS) {
     if (!Object.hasOwn(settings, key)) continue
-    if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
+    if (key === 'feedTypes' && !Array.isArray(settings[key])) continue
+    if (preserveNewerSettings && fieldUpdatedAt[key] > updatedAt) continue
+    if (key === 'feedTypes') {
+      channel[key] = [...settings[key]]
+    } else if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
       delete channel[key]
     } else {
       channel[key] = settings[key]
     }
+    fieldUpdatedAt[key] = updatedAt
   }
-  channel.subscriptionSettingsUpdatedAt = updatedAt
+  channel.subscriptionSettingsUpdatedAtByField = fieldUpdatedAt
+  channel.subscriptionSettingsUpdatedAt = preserveNewerSettings
+    ? Math.max(updatedAt, subscription.subscriptionSettingsUpdatedAt ?? 0)
+    : updatedAt
   return channel
 }
 

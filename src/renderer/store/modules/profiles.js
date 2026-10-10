@@ -322,8 +322,7 @@ const mutations = {
       profile.subscriptions = profile.subscriptions.map(subscription => {
         const update = updatesById.get(subscription.id)
         if (update) {
-          const updatedAt = Math.max(update.updatedAt, subscription.subscriptionSettingsUpdatedAt ?? 0)
-          return getChannelWithUpdatedSettings(subscription, update.settings, updatedAt)
+          return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
         }
         return subscription.id === channel?.id ? copySubscriptionChannelSettings(subscription, channel) : subscription
       })

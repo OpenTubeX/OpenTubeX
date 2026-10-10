@@ -193,6 +193,42 @@ for (const dailyVideoLimit of [7, undefined]) {
   })
 }
 
+for (const [key, olderValue, newerValue] of [
+  ['showMembersOnly', false, true],
+  ['dailyVideoLimit', undefined, 7],
+  ['feedTypes', ['videos'], ['shorts']]
+]) {
+  test(`a bulk save preserves a newer same-value edit to ${key} in another window`, async t => {
+    const subscriptions = ['first', 'second'].map(id => ({
+      id, showMembersOnly: true, dailyVideoLimit: 7, feedTypes: ['shorts']
+    }))
+    const { db, store, createStore } = await profileStore(subscriptions)
+    const other = createStore()
+    const laterUpdatedAt = Date.now() + 1000
+    const update = db.profiles.updateAsync.bind(db.profiles)
+    let changed = false
+    t.mock.method(db.profiles, 'updateAsync', async (...args) => {
+      if (!changed) {
+        changed = true
+        assert.equal(await other.dispatch('updateChannelSettings', {
+          channelId: 'first', settings: { [key]: newerValue }, fromSync: true, updatedAt: laterUpdatedAt
+        }), true)
+      }
+      return update(...args)
+    })
+    assert.equal(await store.dispatch('batchUpdateChannelSettings', subscriptions.map(channel => ({
+      channelId: channel.id, settings: { [key]: olderValue }
+    }))), true)
+    for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+      for (const profile of profiles) {
+        assert.equal(JSON.stringify(profile.subscriptions[0][key]), JSON.stringify(newerValue))
+        assert.equal(profile.subscriptions[0].subscriptionSettingsUpdatedAt, laterUpdatedAt)
+        assert.equal(JSON.stringify(profile.subscriptions[1][key]), JSON.stringify(olderValue))
+      }
+    }
+  })
+}
+
 for (const removeAll of [false, true]) {
   test(`a queued bulk edit keeps surviving updates after unsubscribe, all removed: ${removeAll}`, async t => {
     const subscriptions = ['removed', 'remaining'].map(id => ({ id, showMembersOnly: true }))

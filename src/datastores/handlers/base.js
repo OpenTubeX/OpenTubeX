@@ -734,8 +734,7 @@ class Profiles {
       return profile.subscriptions.map(subscription => {
         const update = updatesById.get(subscription.id)
         if (!update) return subscription
-        const updatedAt = Math.max(update.updatedAt, subscription.subscriptionSettingsUpdatedAt ?? 0)
-        return getChannelWithUpdatedSettings(subscription, update.settings, updatedAt)
+        return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
       })
     })
     return updatedProfileIds

@@ -582,60 +582,62 @@ test('keeps queued bulk changes for remaining channels after another window unsu
   })).toEqual({ count: subscriptions.length - 1, allDisabled: true })
 })
 
-test('merges a pending bulk save with another window’s daily limit and preserves explicit resets', async ({ app, page }) => {
-  const other = await openNewWindowFromTabBar(app, page)
-  await waitForAppReady(other)
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    const handler = ipcMain._invokeHandlers.get('db-profiles')
-    ipcMain.removeHandler('db-profiles')
-    ipcMain.handle('db-profiles', async (event, request) => {
-      if (request.action === 24) {
-        await new Promise(resolve => { globalThis.releaseBulkSettingsSave = resolve })
-        ipcMain.removeHandler('db-profiles')
-        ipcMain.handle('db-profiles', handler)
-      }
-      return handler(event, request)
-    })
-  })
-  const settings = await goToSettingsSection(page, 'subscription')
-  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
-  await page.locator('.bulkMembersOnlySetting .switch-label').click()
-  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseBulkSettingsSave)).toBe('function')
-  expect(await other.evaluate(channelId => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateChannelSettings', {
-      channelId, settings: { dailyVideoLimit: 7 }
-    })
-  ), CHANNEL_ID)).toBe(true)
-  await app.electronApp.evaluate(() => globalThis.releaseBulkSettingsSave())
-  for (const window of [page, other]) {
-    await expect.poll(() => window.evaluate(channelId => (
-      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
-        .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === true) &&
-          profile.subscriptions.find(channel => channel.id === channelId)?.dailyVideoLimit === 7)
-    ), CHANNEL_ID)).toBe(true)
-  }
-  // A reset must survive the real renderer-to-main IPC boundary.
-  expect(await page.evaluate(channelId => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('batchUpdateChannelSettings', [
-      { channelId, settings: { dailyVideoLimit: undefined } },
-      { channelId: 'UC0000000000000000000001', settings: { dailyVideoLimit: null } }
-    ])
-  ), CHANNEL_ID)).toBe(true)
-  ;({ page } = await app.relaunch())
-  expect(await page.evaluate(channelId => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
-      .every(profile => {
-        const channel = profile.subscriptions.find(channel => channel.id === channelId)
-        return !Object.hasOwn(channel, 'dailyVideoLimit') && channel.showMembersOnly === true &&
-          channel.feedTypes.join(',') === 'videos'
+for (const overlapping of [false, true]) {
+  test(`merges a pending bulk save with another window’s preferences and preserves explicit resets, overlapping: ${overlapping}`, async ({ app, page }) => {
+    const other = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(other)
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('db-profiles')
+      ipcMain.removeHandler('db-profiles')
+      ipcMain.handle('db-profiles', async (event, request) => {
+        if (request.action === 24) {
+          await new Promise(resolve => { globalThis.releaseBulkSettingsSave = resolve })
+          ipcMain.removeHandler('db-profiles')
+          ipcMain.handle('db-profiles', handler)
+        }
+        return handler(event, request)
       })
-  ), CHANNEL_ID)).toBe(true)
-  expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList[0]
-      .subscriptions[1].dailyVideoLimit
-  ))).toBe(null)
-})
+    })
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+    await page.locator('.bulkMembersOnlySetting .switch-label').click()
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseBulkSettingsSave)).toBe('function')
+    expect(await other.evaluate(({ channelId, overlapping }) => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateChannelSettings', {
+        channelId, settings: { dailyVideoLimit: 7, ...(overlapping ? { showMembersOnly: false } : {}) }
+      })
+    ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    await app.electronApp.evaluate(() => globalThis.releaseBulkSettingsSave())
+    for (const window of [page, other]) {
+      await expect.poll(() => window.evaluate(({ channelId, overlapping }) => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+          .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === !(overlapping && channel.id === channelId)) &&
+            profile.subscriptions.find(channel => channel.id === channelId)?.dailyVideoLimit === 7)
+      ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    }
+    // A reset must survive the real renderer-to-main IPC boundary.
+    expect(await page.evaluate(channelId => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('batchUpdateChannelSettings', [
+        { channelId, settings: { dailyVideoLimit: undefined } },
+        { channelId: 'UC0000000000000000000001', settings: { dailyVideoLimit: null } }
+      ])
+    ), CHANNEL_ID)).toBe(true)
+    ;({ page } = await app.relaunch())
+    expect(await page.evaluate(({ channelId, overlapping }) => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+        .every(profile => {
+          const channel = profile.subscriptions.find(channel => channel.id === channelId)
+          return !Object.hasOwn(channel, 'dailyVideoLimit') && channel.showMembersOnly === !overlapping &&
+            channel.feedTypes.join(',') === 'videos'
+        })
+    ), { channelId: CHANNEL_ID, overlapping })).toBe(true)
+    expect(await page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList[0]
+        .subscriptions[1].dailyVideoLimit
+    ))).toBe(null)
+  })
+}
 
 test('reports one failure toast for a failed batch update', async ({ page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
