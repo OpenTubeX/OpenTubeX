@@ -428,6 +428,38 @@ test('validated definitions preserve balanced destinations and multiline titles'
   }
 })
 
+test('invalid inline links rewrite prose labels and parenthesized contents', async () => {
+  for (const example of ['[see Outside REF](bad destination)', '![Outside REF](bad destination)', '[nested [Outside REF]](bad destination)', '[Outside REF](url "tooltip" extra)', '[Outside REF](<bad destination)', '[Outside REF](bad Outside REF)']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('valid inline links keep their labels destinations and tooltip contents intact', async () => {
+  for (const example of ['[REF](good(foo))', '[REF](<good destination>)', '[REF](<good(foo>)', '[REF](<good)foo>)', '[REF]()', '![REF](good)', '[REF](good\\(foo\\))', '[REF](good "title REF")', "[REF](good 'title REF')", '[REF](good (title REF))', '[REF](good "title\nREF")']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('nested tracking lists resolve references while indented list code remains intact', async () => {
   const { state, client } = fixture()
   const description = '* Parent\n    * [ ] #1\n    * Child\n      See #1\n\n          #1\n    * [ ] #1\n\nOutside\n\n    #1'

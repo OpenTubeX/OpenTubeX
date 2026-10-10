@@ -133,6 +133,31 @@ function referenceResolver(sources, targets, mergeRequests) {
     const result = []
     let prose = []
     let definitionEndIndex = -1
+    const completeTitle = /^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/
+    const linkDestination = text => {
+      const destination = text.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
+      if (!destination) return null
+      if (!destination.startsWith('<')) {
+        if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
+        let parentheses = 0
+        for (let position = 0; position < destination.length; position++) {
+          if (destination[position] === '\\') position++
+          else if (destination[position] === '(') parentheses++
+          else if (destination[position] === ')' && --parentheses < 0) return null
+        }
+        if (parentheses) return null
+      }
+      return destination
+    }
+    const validInlineLink = suffix => {
+      if (/\n[ \t]*\n/.test(suffix)) return false
+      const text = suffix.slice(1, -1).trim()
+      if (!text) return true
+      const destination = linkDestination(text)
+      if (!destination) return false
+      const title = text.slice(destination.length)
+      return !title || (/^[ \t\n]+/.test(title) && completeTitle.test(title.trim()))
+    }
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
     const balancedEnd = (text, start, open, close) => {
@@ -143,6 +168,10 @@ function referenceResolver(sources, targets, mergeRequests) {
         if (char === '\\') { index++; continue }
         if (quote) { if (char === quote) quote = null; continue }
         if (open === '(' && /[\s]/.test(text[index - 1]) && /["']/.test(char)) { quote = char; continue }
+        if (open === '(' && depth === 1 && char === '<') {
+          const destination = linkDestination(text.slice(index))
+          if (destination) { index += destination.length - 1; continue }
+        }
         if (char === open) depth++
         else if (char === close && --depth === 0) return index + 1
       }
@@ -162,8 +191,10 @@ function referenceResolver(sources, targets, mergeRequests) {
           const labelEnd = balancedEnd(text, start, '[', ']')
           if (labelEnd !== -1) {
             let end = labelEnd
-            if (text[end] === '(') end = balancedEnd(text, end, '(', ')')
-            else if (text[end] === '[') {
+            if (text[end] === '(') {
+              const linkEnd = balancedEnd(text, end, '(', ')')
+              if (linkEnd !== -1 && validInlineLink(text.slice(end, linkEnd))) end = linkEnd
+            } else if (text[end] === '[') {
               const referenceEnd = balancedEnd(text, end, '[', ']')
               const referenceLabel = referenceEnd === -1 ? null : text.slice(end + 1, referenceEnd - 1) || text.slice(start + 1, labelEnd - 1)
               if (referenceLabel !== null && referenceLabels.has(labelKey(referenceLabel))) end = referenceEnd
@@ -239,7 +270,6 @@ function referenceResolver(sources, targets, mergeRequests) {
       return expanded.slice(listIndent)
     }
     const titleEnd = (start, candidate, depth, listIndent) => {
-      const completeTitle = /^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/
       if (completeTitle.test(candidate)) return start - 1
       for (let index = start; index < lines.length; index++) {
         const titleLine = containerLine(index, depth, listIndent)
@@ -258,18 +288,8 @@ function referenceResolver(sources, targets, mergeRequests) {
         destinationLine = containerLine(++index, depth, listIndent)?.trimStart()
         if (!destinationLine) return null
       }
-      const destination = destinationLine.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
+      const destination = linkDestination(destinationLine)
       if (!destination) return null
-      if (!destination.startsWith('<')) {
-        if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
-        let parentheses = 0
-        for (let position = 0; position < destination.length; position++) {
-          if (destination[position] === '\\') position++
-          else if (destination[position] === '(') parentheses++
-          else if (destination[position] === ')' && --parentheses < 0) return null
-        }
-        if (parentheses) return null
-      }
       const suffix = destinationLine.slice(destination.length)
       let end
       if (suffix.trim()) {
