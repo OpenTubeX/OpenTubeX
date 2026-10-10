@@ -181,7 +181,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
       let output = ''
       let position = 0
       let match
@@ -236,6 +236,9 @@ function referenceResolver(sources, targets, mergeRequests) {
             }
             url = url.slice(0, -1)
           }
+          const opening = text.slice(0, match.index).match(/[*_~]+$/)?.[0]
+          const closing = opening && [...opening].reverse().join('')
+          if (closing && url.endsWith(closing)) url = url.slice(0, -closing.length)
           token = (urlReference(url, side) ?? url) + token.slice(url.length)
         } else {
           const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)

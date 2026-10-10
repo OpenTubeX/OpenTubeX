@@ -1015,6 +1015,42 @@ test('quoted bare local URLs leave quotes and punctuation outside converted link
   assert.ok(state.notes[1].body.endsWith(expected(target.html_url, 'GitLab #1', state.sources[0].web_url)))
 })
 
+test('relative and alternate-scheme URLs preserve issue-shaped query and fragment values', async () => {
+  const { state, client } = fixture()
+  const examples = ['/search?issue=REF', '//example.test/?issue=REF', './search?issue=REF', '../search#note=REF', 'docs/search?issue=REF', 'search?issue=REF', 'search#note=REF', 'ftp://example.test/?issue=REF', 'mailto:reporter@example.test?subject=REF', 'urn:example:report#note=REF']
+  const body = reference => `${examples.join('\n')}\n\nOutside REF`.replaceAll('REF', reference)
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
+test('emphasized bare local URLs convert without absorbing formatting delimiters', async () => {
+  const { state, client } = fixture()
+  const examples = ['*', '**', '***', '_', '__', '~~', '*_']
+  const suffixes = ['', '#note_(a)', '?value=trailing_']
+  const closing = opening => [...opening].reverse().join('')
+  const body = url => examples.flatMap(opening => suffixes.map(suffix => `See ${opening}${url}${suffix}${closing(opening)}.`)).join('\n')
+  const expected = (url, otherLabel, other) => examples.flatMap(opening => suffixes.map(suffix => `See ${opening}[Report](${url}${suffix}) ([${otherLabel}](${other}))${closing(opening)}.`)).join('\n')
+  state.sources[0].description = body(state.sources[0].web_url)
+  await sync(client)
+  const target = state.targets[0]
+  assert.ok(target.body.endsWith(expected(state.sources[0].web_url, `GitHub #${target.number}`, target.html_url)))
+  state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  assert.ok(state.notes[1].body.endsWith(expected(target.html_url, 'GitLab #1', state.sources[0].web_url)))
+  for (const text of [target.body, state.notes[1].body]) {
+    assert.match(marked.parse(text), /<em><a href=/)
+    assert.match(marked.parse(text), /<strong><a href=/)
+    assert.match(marked.parse(text), /<del><a href=/)
+  }
+})
+
 test('setext headings end paragraphs before indented code', async () => {
   for (const example of ['Heading\n===\n    REF', 'Heading\n-\n    REF', 'Heading\n---\n    REF', '> Heading\n> ===\n>     REF', '- Heading\n  ===\n      REF']) {
     const { state, client } = fixture()
