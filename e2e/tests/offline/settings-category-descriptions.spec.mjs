@@ -195,10 +195,13 @@ for (const uiScale of [100, 125]) {
 
       test('preserves category navigation and valid scrollbars after hiding descriptions at the bottom', async ({ app, page }) => {
         await setWindowSize(app, page, { width, height: 650 })
+        // Slow the opening transition to exercise measurement during animation.
+        await page.addStyleTag({ content: '.settingsWindow.settings-window-enter-active { transition-duration: 2s !important; }' })
         await goTo(page, 'settings')
         const menu = page.locator('.settingsMenu')
         await expect(menu).toBeVisible()
         await expect(menu.locator('.titleDescription')).toHaveCount(11)
+        await expect(page.locator('.settingsWindow')).toHaveCSS('transform', 'none')
         const category = menu.locator('.titleItem').first()
         const expandedHeight = await category.evaluate(element => element.getBoundingClientRect().height)
         await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
