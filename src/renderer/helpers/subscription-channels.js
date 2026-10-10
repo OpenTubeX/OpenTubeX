@@ -62,15 +62,30 @@ export function copySubscriptionChannelSettings(channel, savedChannel) {
 }
 
 /**
+ * Accepts nonnegative millisecond timestamps whose next integer is still safe.
+ * @param {unknown} timestamp
+ * @returns {boolean}
+ */
+export function isValidSubscriptionSettingsTimestamp(timestamp) {
+  return Number.isSafeInteger(timestamp) && timestamp >= 0 && timestamp < Number.MAX_SAFE_INTEGER
+}
+
+/**
  * Orders an explicit local edit after observed settings even with clock skew.
+ * Rejects timestamps that cannot be safely advanced.
  * @param {object[]} subscriptions
  * @returns {number}
  */
 export function getNextSubscriptionSettingsTimestamp(subscriptions) {
-  return subscriptions.reduce((updatedAt, channel) => {
+  const updatedAt = subscriptions.reduce((updatedAt, channel) => {
     const timestamps = [channel.subscriptionSettingsUpdatedAt, ...Object.values(channel.subscriptionSettingsUpdatedAtByField ?? {})]
-    return Math.max(updatedAt, ...timestamps.filter(Number.isFinite).map(timestamp => timestamp + 1))
+    return Math.max(updatedAt, ...timestamps.filter(timestamp => timestamp !== undefined).map(timestamp => {
+      if (!isValidSubscriptionSettingsTimestamp(timestamp)) throw new Error('Invalid subscription settings timestamp')
+      return timestamp + 1
+    }))
   }, Date.now())
+  if (!isValidSubscriptionSettingsTimestamp(updatedAt)) throw new Error('Invalid subscription settings timestamp')
+  return updatedAt
 }
 
 /**

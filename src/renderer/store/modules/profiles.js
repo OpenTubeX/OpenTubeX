@@ -1,7 +1,7 @@
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 const state = {
@@ -148,13 +148,13 @@ const actions = {
         subscriptionsByChannelId.get(channel.id)?.push(channel)
       }
     }
-    const patches = availableUpdates.map(({ channelId, settings }) => ({
-      channelId,
-      settings,
-      updatedAt: getNextSubscriptionSettingsTimestamp(subscriptionsByChannelId.get(channelId))
-    }))
-    const profileIds = profiles.map(profile => profile._id)
     try {
+      const patches = availableUpdates.map(({ channelId, settings }) => ({
+        channelId,
+        settings,
+        updatedAt: getNextSubscriptionSettingsTimestamp(subscriptionsByChannelId.get(channelId))
+      }))
+      const profileIds = profiles.map(profile => profile._id)
       const updatedProfileIds = await DBProfileHandlers.batchUpdateChannelSettings(patches, profileIds)
       if (!Array.isArray(updatedProfileIds)) return false
       if (updatedProfileIds.length > 0) {
@@ -168,7 +168,7 @@ const actions = {
   },
 
   async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
-    if (fromSync && (!Number.isFinite(updatedAt) || updatedAt < 0)) return false
+    if (fromSync && !isValidSubscriptionSettingsTimestamp(updatedAt)) return false
 
     const primarySubscription = state.profileList[0].subscriptions
       .find(channel => channel.id === channelId)
@@ -176,15 +176,14 @@ const actions = {
 
     const profiles = state.profileList
       .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
-    const editTimestamp = fromSync
-      ? updatedAt
-      : getNextSubscriptionSettingsTimestamp(profiles.map(profile => (
-          profile.subscriptions.find(subscription => subscription.id === channelId)
-        )))
-    const channel = getChannelWithUpdatedSettings(primarySubscription, settings, editTimestamp)
-    const profileIds = profiles.map(profile => profile._id)
-
     try {
+      const editTimestamp = fromSync
+        ? updatedAt
+        : getNextSubscriptionSettingsTimestamp(profiles.map(profile => (
+            profile.subscriptions.find(subscription => subscription.id === channelId)
+          )))
+      const channel = getChannelWithUpdatedSettings(primarySubscription, settings, editTimestamp)
+      const profileIds = profiles.map(profile => profile._id)
       const updatedProfileIds = await DBProfileHandlers.updateChannelSettings(channel, profileIds)
       if (!Array.isArray(updatedProfileIds)) return false
 

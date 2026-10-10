@@ -6,7 +6,7 @@ import Datastore from '@seald-io/nedb'
 
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import { getSubscriptionSettingsForSync, mergeSubscriptionSettingsEntry } from '../../src/renderer/helpers/subscription-settings-sync.js'
 
 const profileSource = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
@@ -55,7 +55,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
     }
     const context = vm.createContext({
       MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
-      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp,
+      DEFAULT_PROFILE_ICON, DBProfileHandlers: handlers, getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp,
       deepCopy: value => JSON.parse(JSON.stringify(value)), console
     })
     vm.runInContext(profileSource
@@ -185,6 +185,33 @@ test('bulk edits keep one channel’s future timestamp out of other channels’ 
 })
 
 for (const action of ['batchUpdateChannelSettings', 'updateChannelSettings']) {
+  test(`${action} reports timestamps that cannot safely advance without writing settings`, async t => {
+    const errors = t.mock.method(console, 'error', () => {})
+    const subscriptions = [Number.MAX_SAFE_INTEGER - 1, Number.MAX_SAFE_INTEGER, 1e300, Infinity].map(timestamp => ({
+      id: 'channel', showMembersOnly: true, subscriptionSettingsUpdatedAt: timestamp
+    }))
+    subscriptions.push({
+      id: 'channel', showMembersOnly: true, subscriptionSettingsUpdatedAt: 100,
+      subscriptionSettingsUpdatedAtByField: { showMembersOnly: 1e300 }
+    })
+    for (const subscription of subscriptions) {
+      const { db, store } = await profileStore([subscription])
+      const write = t.mock.method(db.profiles, 'updateAsync')
+      const update = { channelId: 'channel', settings: { showMembersOnly: false } }
+      assert.equal(await store.dispatch(action, action === 'batchUpdateChannelSettings' ? [update] : update), false)
+      assert.equal(write.mock.callCount(), 0)
+      for (const profiles of [store.state.profileList, await db.profiles.findAsync({})]) {
+        for (const profile of profiles) {
+          assert.equal(profile.subscriptions[0].showMembersOnly, true)
+          assert.equal(profile.subscriptions[0].subscriptionSettingsUpdatedAt, subscription.subscriptionSettingsUpdatedAt)
+          assert.deepEqual(profile.subscriptions[0].subscriptionSettingsUpdatedAtByField, subscription.subscriptionSettingsUpdatedAtByField)
+        }
+      }
+    }
+    assert.equal(errors.mock.callCount(), subscriptions.length)
+    assert.ok(errors.mock.calls.every(call => /Invalid subscription settings timestamp/.test(call.arguments[0].message)))
+  })
+
   test(`${action} applies repeated explicit edits despite future saved timestamps`, async () => {
     const future = Date.now() + 86400000
     const subscriptions = ['first', 'second'].map(id => ({
