@@ -78,7 +78,7 @@ export function getNextSubscriptionSettingsTimestamp(subscriptions) {
  * @param {object} subscription
  * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
  * @param {number} updatedAt
- * @param {boolean} [preserveNewerSettings] Keep fields edited after this patch.
+ * @param {boolean} [preserveNewerSettings] Keep fields edited at or after this patch.
  */
 export function getChannelWithUpdatedSettings(subscription, settings, updatedAt, preserveNewerSettings = false) {
   const channel = { ...subscription }
@@ -88,7 +88,7 @@ export function getChannelWithUpdatedSettings(subscription, settings, updatedAt,
   for (const key of CHANNEL_SETTING_KEYS) {
     if (!Object.hasOwn(settings, key)) continue
     if (key === 'feedTypes' && !Array.isArray(settings[key])) continue
-    if (preserveNewerSettings && fieldUpdatedAt[key] > updatedAt) continue
+    if (preserveNewerSettings && fieldUpdatedAt[key] >= updatedAt) continue
     if (key === 'feedTypes') {
       channel[key] = [...settings[key]]
     } else if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
