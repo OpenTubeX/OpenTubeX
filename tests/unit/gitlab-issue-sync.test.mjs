@@ -355,6 +355,38 @@ test('defined shortcut reference labels containing issue numbers stay intact', a
   assert.ok(state.notes[1].body.endsWith(`${githubBody}\n\nSee ${githubReference}`))
 })
 
+test('shortcut reference definitions work inside blockquotes and lists', async () => {
+  for (const example of ['> [REF]\n>\n> [REF]: https://example.org', '- [REF]: https://example.org\n\n  [REF]', '- item\n    [REF]: https://example.org\n\n    [REF]']) {
+    const { state, client } = fixture()
+    const preserved = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = `${preserved('#1')}\n\nSee #1`
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(`${preserved('#1')}\n\nSee ${gitlabReference}`))
+    state.comments.push({ id: 20, body: `${preserved(`#${target.number}`)}\n\nSee #${target.number}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(`${preserved(`#${target.number}`)}\n\nSee ${githubReference}`))
+  }
+})
+
+test('ordered lists interrupt paragraphs only when starting at one', async () => {
+  for (const example of ['Text\n2. item\n\n    REF\n\nOutside REF', 'Text\n2) item\n\n    REF\n\nOutside REF', 'Text\n1. item\n\n    Outside REF', '2. item\n\n    Outside REF', '1. item\n2. item\n\n    Outside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('inline code uses entire backtick runs as delimiters', async () => {
   for (const example of ['Text ``` Outside REF ` end', 'Text ` Outside REF ``` end', 'Text ``REF ` inside`` Outside REF']) {
     const { state, client } = fixture()

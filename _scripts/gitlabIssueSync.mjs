@@ -123,7 +123,7 @@ function referenceResolver(sources, targets, mergeRequests) {
   }
   const rewrite = (body, side) => {
     const labelKey = label => label.trim().replace(/\s+/g, ' ').toLowerCase()
-    const referenceLabels = new Set(Array.from(body.matchAll(/^ {0,3}\[([^\]\n]+)\]:/gm), match => labelKey(match[1])))
+    const referenceLabels = new Set()
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
@@ -131,25 +131,26 @@ function referenceResolver(sources, targets, mergeRequests) {
     const listIndents = []
     const result = []
     let prose = []
+    // Consume code, escapes, Markdown links, HTML, and URLs before considering
+    // shorthand references, so fragments and reproduction commands stay intact.
+    const rewriteProse = text => text.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      if (/^https?:/i.test(token)) {
+        const url = token.replace(/[.,;:!?)\]]+$/, '')
+        return (urlReference(url, side) ?? url) + token.slice(url.length)
+      }
+      if (/^<https?:/i.test(token)) return urlReference(token.slice(1, -1), side) ?? token
+      if (token.startsWith('[')) {
+        const link = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
+        if (link) return urlReference(link[1], side, link[2] ?? '') ?? token
+        const label = token.match(/^\[([^\]]*)\]$/)?.[1]
+        return label && !referenceLabels.has(labelKey(label)) ? `[${rewrite(label, side)}]` : token
+      }
+      const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
+      return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
+    })
     const flush = () => {
       if (!prose.length) return
-      // Consume code, escapes, Markdown links, HTML, and URLs before considering
-      // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
-        if (/^https?:/i.test(token)) {
-          const url = token.replace(/[.,;:!?)\]]+$/, '')
-          return (urlReference(url, side) ?? url) + token.slice(url.length)
-        }
-        if (/^<https?:/i.test(token)) return urlReference(token.slice(1, -1), side) ?? token
-        if (token.startsWith('[')) {
-          const link = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
-          if (link) return urlReference(link[1], side, link[2] ?? '') ?? token
-          const label = token.match(/^\[([^\]]*)\]$/)?.[1]
-          return label && !referenceLabels.has(labelKey(label)) ? `[${rewrite(label, side)}]` : token
-        }
-        const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
-        return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
-      }))
+      result.push({ prose: prose.join('\n') })
       prose = []
     }
     for (const line of body.split('\n')) {
@@ -187,18 +188,24 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
       quoteDepth = depth
       if (!fence && line.trim()) {
-        while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop()
+        while (listIndents.length && indent < listIndents.at(-1)) {
+          listIndents.pop()
+          paragraph = false
+        }
       }
       const contentIndent = listIndents.at(-1) ?? 0
       let indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
-      const listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|\d+[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
+      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d+)[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
+      if (paragraph && listItem?.[1] && Number(listItem[1]) !== 1) listItem = null
       const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
       if (listItem) {
         listIndents.push(listItem[0].length)
         if (/^ {4}/.test(lineContent)) indentedCode = true
       }
       if (!fence && !indentedCode) {
+        const definition = lineContent.match(/^ {0,3}\[([^\]]+)\]:/)
+        if (definition) referenceLabels.add(labelKey(definition[1]))
         const opening = lineContent.match(/<(code|pre|script|style|textarea)\b[^>]*>|<!--/i)
         if (opening) {
           htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
@@ -213,7 +220,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (delimiter || fence || indentedCode) {
         paragraph = false
         flush()
-        result.push(line)
+        result.push({ literal: line })
         if (delimiter) {
           if (!fence) {
             fence = { marker: delimiter[1], quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
@@ -225,7 +232,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
     }
     flush()
-    return result.join('\n')
+    return result.map(part => part.literal ?? rewriteProse(part.prose)).join('\n')
   }
   return { rewrite, pair }
 }
