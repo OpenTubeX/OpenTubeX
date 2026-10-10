@@ -10,7 +10,7 @@ import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../su
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
-import { copySubscriptionChannelSettings } from '../../renderer/helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
 
 const recommendations = createRecommendationStore(db.recommendations)
@@ -719,6 +719,23 @@ class Profiles {
       return profile.subscriptions.map(subscription => subscription.id === channel.id
         ? copySubscriptionChannelSettings(subscription, channel)
         : subscription)
+    })
+    return updatedProfileIds
+  }
+
+  static async batchUpdateChannelSettings(updates, profileIds) {
+    const updatesById = new Map(updates.map(update => [update.channelId, update]))
+    const profiles = await db.profiles.findAsync({
+      _id: { $in: profileIds },
+      subscriptions: { $elemMatch: { id: { $in: [...updatesById.keys()] } } }
+    })
+    const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
+      if (!profile.subscriptions.some(subscription => updatesById.has(subscription.id))) return null
+      return profile.subscriptions.map(subscription => {
+        const update = updatesById.get(subscription.id)
+        if (!update) return subscription
+        return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
+      })
     })
     return updatedProfileIds
   }

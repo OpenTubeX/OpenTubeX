@@ -1,5 +1,6 @@
 export const SUBSCRIPTION_FEED_TYPES = Object.freeze(['videos', 'shorts', 'live', 'posts'])
 export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
+const CHANNEL_SETTING_KEYS = ['feedTypes', 'dailyVideoLimit', 'showMembersOnly']
 
 /**
  * @param {(key: string) => string} t
@@ -53,11 +54,70 @@ export function normalizeSubscriptionChannelSettings(channel) {
  */
 export function copySubscriptionChannelSettings(channel, savedChannel) {
   const updated = { ...channel }
-  for (const key of ['feedTypes', 'dailyVideoLimit', 'showMembersOnly', 'subscriptionSettingsUpdatedAt']) {
+  for (const key of [...CHANNEL_SETTING_KEYS, 'subscriptionSettingsUpdatedAt', 'subscriptionSettingsUpdatedAtByField']) {
     if (Object.hasOwn(savedChannel, key)) updated[key] = savedChannel[key]
     else delete updated[key]
   }
   return updated
+}
+
+/**
+ * Accepts nonnegative millisecond timestamps whose next integer is still safe.
+ * @param {unknown} timestamp
+ * @returns {boolean}
+ */
+export function isValidSubscriptionSettingsTimestamp(timestamp) {
+  return Number.isSafeInteger(timestamp) && timestamp >= 0 && timestamp < Number.MAX_SAFE_INTEGER
+}
+
+/**
+ * Orders an explicit local edit after observed settings even with clock skew.
+ * Rejects timestamps that cannot be safely advanced.
+ * @param {object[]} subscriptions
+ * @returns {number}
+ */
+export function getNextSubscriptionSettingsTimestamp(subscriptions) {
+  const updatedAt = subscriptions.reduce((updatedAt, channel) => {
+    const timestamps = [channel.subscriptionSettingsUpdatedAt, ...Object.values(channel.subscriptionSettingsUpdatedAtByField ?? {})]
+    return Math.max(updatedAt, ...timestamps.filter(timestamp => timestamp !== undefined).map(timestamp => {
+      if (!isValidSubscriptionSettingsTimestamp(timestamp)) throw new Error('Invalid subscription settings timestamp')
+      return timestamp + 1
+    }))
+  }, Date.now())
+  if (!isValidSubscriptionSettingsTimestamp(updatedAt)) throw new Error('Invalid subscription settings timestamp')
+  return updatedAt
+}
+
+/**
+ * Applies only requested preferences, preserving concurrent edits to other fields.
+ * @param {object} subscription
+ * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
+ * @param {number} updatedAt
+ * @param {boolean} [preserveNewerSettings] Keep fields edited at or after this patch.
+ */
+export function getChannelWithUpdatedSettings(subscription, settings, updatedAt, preserveNewerSettings = false) {
+  const channel = { ...subscription }
+  const fieldUpdatedAt = Object.fromEntries(CHANNEL_SETTING_KEYS.map(key => [
+    key, subscription.subscriptionSettingsUpdatedAtByField?.[key] ?? subscription.subscriptionSettingsUpdatedAt ?? 0
+  ]))
+  for (const key of CHANNEL_SETTING_KEYS) {
+    if (!Object.hasOwn(settings, key)) continue
+    if (key === 'feedTypes' && !Array.isArray(settings[key])) continue
+    if (preserveNewerSettings && fieldUpdatedAt[key] >= updatedAt) continue
+    if (key === 'feedTypes') {
+      channel[key] = [...settings[key]]
+    } else if (settings[key] === undefined || (key === 'showMembersOnly' && typeof settings[key] !== 'boolean')) {
+      delete channel[key]
+    } else {
+      channel[key] = settings[key]
+    }
+    fieldUpdatedAt[key] = updatedAt
+  }
+  channel.subscriptionSettingsUpdatedAtByField = fieldUpdatedAt
+  channel.subscriptionSettingsUpdatedAt = preserveNewerSettings
+    ? Math.max(updatedAt, subscription.subscriptionSettingsUpdatedAt ?? 0)
+    : updatedAt
+  return channel
 }
 
 /**

@@ -512,20 +512,21 @@ const selectedFeedTypeStates = computed(() => Object.fromEntries(
  */
 function updateSelectedFeedType(feedType) {
   const enabled = selectedFeedTypeState(feedType) !== true
-  selectedChannels.value.forEach((channel) => {
-    if (isFeedTypeEnabled(channel, feedType) !== enabled) {
-      updateFeedType(channel, feedType, enabled)
-    }
-  })
+  persistChannelSettingsUpdates(selectedChannels.value
+    .filter(channel => isFeedTypeEnabled(channel, feedType) !== enabled)
+    .map(channel => ({
+      channel,
+      patch: {
+        feedTypes: getUpdatedSubscriptionFeedTypes(channelSettings(channel).feedTypes, feedType, enabled)
+      }
+    })))
 }
 
 function updateSelectedShowMembersOnly() {
   const enabled = selectedMembersOnlyState.value !== true
-  selectedChannels.value.forEach((channel) => {
-    if (channelSettings(channel).showMembersOnly !== enabled) {
-      updateShowMembersOnly(channel, enabled)
-    }
-  })
+  persistChannelSettingsUpdates(selectedChannels.value
+    .filter(channel => channelSettings(channel).showMembersOnly !== enabled)
+    .map(channel => ({ channel, patch: { showMembersOnly: enabled } })))
 }
 
 /**
@@ -534,11 +535,9 @@ function updateSelectedShowMembersOnly() {
 function updateSelectedChannelLimit(value) {
   if (value === 'mixed') return
 
-  selectedChannels.value.forEach((channel) => {
-    if (channelLimitValue(channel) !== value) {
-      updateChannelLimit(channel, value)
-    }
-  })
+  persistChannelSettingsUpdates(selectedChannels.value
+    .filter(channel => channelLimitValue(channel) !== value)
+    .map(channel => ({ channel, patch: { dailyVideoLimit: parseSubscriptionDailyVideoLimit(value) } })))
 }
 
 /**
@@ -588,29 +587,41 @@ function channelSettings(channel) {
  * @param {{ feedTypes?: string[], dailyVideoLimit?: number|null|undefined, showMembersOnly?: boolean }} patch
  */
 function persistChannelSettings(channel, patch) {
-  const settings = { ...channelSettings(channel), ...patch }
+  persistChannelSettingsUpdates([{ channel, patch }])
+}
+
+/**
+ * @param {{ channel: SubscriptionChannel, patch: object }[]} updates
+ */
+function persistChannelSettingsUpdates(updates) {
+  if (updates.length === 0) return
   const sequence = ++updateSequence
   pendingChannelSettingsUpdates += 1
-  latestUpdateByChannel.set(channel.id, sequence)
-  optimisticChannelSettings.value = new Map(optimisticChannelSettings.value)
-    .set(channel.id, settings)
+  const optimisticSettings = new Map(optimisticChannelSettings.value)
+  for (const { channel, patch } of updates) {
+    optimisticSettings.set(channel.id, { ...channelSettings(channel), ...patch })
+    latestUpdateByChannel.set(channel.id, sequence)
+  }
+  optimisticChannelSettings.value = optimisticSettings
 
   channelSettingsUpdateQueue = channelSettingsUpdateQueue.then(async () => {
     let saved = false
     try {
-      saved = await store.dispatch('updateChannelSettings', {
-        channelId: channel.id,
-        settings: patch
-      })
+      const payload = updates.map(({ channel, patch }) => ({ channelId: channel.id, settings: patch }))
+      saved = updates.length === 1
+        ? await store.dispatch('updateChannelSettings', payload[0])
+        : await store.dispatch('batchUpdateChannelSettings', payload)
     } catch (error) {
       console.error(error)
     } finally {
-      if (latestUpdateByChannel.get(channel.id) === sequence) {
-        const nextSettings = new Map(optimisticChannelSettings.value)
-        nextSettings.delete(channel.id)
-        optimisticChannelSettings.value = nextSettings
-        latestUpdateByChannel.delete(channel.id)
+      const nextSettings = new Map(optimisticChannelSettings.value)
+      for (const { channel } of updates) {
+        if (latestUpdateByChannel.get(channel.id) === sequence) {
+          nextSettings.delete(channel.id)
+          latestUpdateByChannel.delete(channel.id)
+        }
       }
+      optimisticChannelSettings.value = nextSettings
       if (!saved) hasFailedChannelSettingsUpdate = true
       pendingChannelSettingsUpdates -= 1
       if (pendingChannelSettingsUpdates === 0 && hasFailedChannelSettingsUpdate) {

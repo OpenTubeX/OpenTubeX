@@ -1,4 +1,4 @@
-import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
+import { isValidSubscriptionSettingsTimestamp, normalizeSubscriptionChannelSettings } from './subscription-channels.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { mergeSettingEntry } from './sync-settings-conflict.js'
 
@@ -47,7 +47,7 @@ export async function applySubscriptionSettingsSync(store, value) {
   for (const channel of store.state.profiles.profileList[0].subscriptions) {
     if (!Object.hasOwn(value, channel.id)) continue
     const updatedAt = value[channel.id]?.updatedAt
-    if (!Number.isFinite(updatedAt) || updatedAt < 0) {
+    if (!isValidSubscriptionSettingsTimestamp(updatedAt)) {
       throw new Error('Invalid subscription settings timestamp')
     }
     const settings = normalizeSubscriptionChannelSettings(value[channel.id].value)
