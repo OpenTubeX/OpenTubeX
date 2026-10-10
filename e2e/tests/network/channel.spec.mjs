@@ -28,7 +28,11 @@ test.describe('channel page', () => {
       await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
       await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
         return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-      }), { message: `20px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(20)
+      }), { message: `56px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(56)
+      await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
+        const header = card.previousElementSibling.getBoundingClientRect()
+        return Math.round(card.getBoundingClientRect().top - header.bottom)
+      }), { message: `20px between Home cards at ${width}px and ${scale}% UI scale` }).toBe(20)
     }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()

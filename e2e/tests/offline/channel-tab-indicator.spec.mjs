@@ -228,7 +228,7 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
   }
 })
 
-test('keeps channel content rows 20px below the tabs', async ({ app, page }, testInfo) => {
+test('separates the content card on every channel tab', async ({ app, page }, testInfo) => {
   const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
   let description = 'Channel description'
   await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
@@ -241,7 +241,7 @@ test('keeps channel content rows 20px below the tabs', async ({ app, page }, tes
       subCount: 0,
       totalViews: 0,
       joined: 0,
-      tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts'],
+      tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts', 'podcasts', 'releases', 'courses'],
       relatedChannels: [],
       videos,
       latestVideos: videos,
@@ -262,6 +262,9 @@ test('keeps channel content rows 20px below the tabs', async ({ app, page }, tes
       ['liveTab', '.select-container'],
       ['playlistsTab', '.elementList .message:visible'],
       ['communityTab', '.elementList .message:visible'],
+      ['podcastsTab', '.elementList .message:visible'],
+      ['releasesTab', '.elementList .message:visible'],
+      ['coursesTab', '.elementList .message:visible'],
       ['aboutTab', '#aboutPanel h2:first-child']
     ]) {
       await page.locator(`#${tabId}`).click()
@@ -276,7 +279,12 @@ test('keeps channel content rows 20px below the tabs', async ({ app, page }, tes
       await expect.poll(() => page.locator(contentSelector).evaluate(content => {
         const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
         return Math.round(content.getBoundingClientRect().top - tabs.bottom)
-      }), { message: `20px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(20)
+      }), { message: `56px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(56)
+      await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
+        const header = card.previousElementSibling.getBoundingClientRect()
+        const bounds = card.getBoundingClientRect()
+        return Math.round(bounds.top - header.bottom)
+      }), { message: `20px between cards on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(20)
     }
   }
   await page.locator('#videosTab').click()
@@ -303,7 +311,7 @@ test('keeps channel content rows 20px below the tabs', async ({ app, page }, tes
   await expect(firstHeading).toHaveText('Details')
   await expect.poll(() => firstHeading.evaluate(heading => {
     return Math.round(heading.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-  })).toBe(20)
+  })).toBe(56)
 })
 
 test('slides the active channel line with the feed timing and configured animation speed', async ({ page }) => {
