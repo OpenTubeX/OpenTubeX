@@ -102,7 +102,7 @@
     "@vot.js/core": "^3.1.5",
     "autolinker": "^4.1.5",
     "bgutils-js": "^4.0.3",
-    "dbus-native": "^0.16.0",
+    "dbus-native": "^0.16.1",
     "dompurify": "^3.4.16",
     "eld": "^2.1.0",
     "fflate": "^0.8.3",
