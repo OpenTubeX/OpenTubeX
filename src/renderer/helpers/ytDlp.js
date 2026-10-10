@@ -51,12 +51,12 @@ function configuration() {
   }
 }
 
-async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse, detectTimeoutWarnings = false) {
+async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse, detectTimeoutWarnings = false, timeoutMs) {
   const cookies = useAuthentication && store.getters.getYtDlpPlaybackAuthMode === 'file'
     ? store.getters.getYtDlpPlaybackCookiesPath
     : ''
   if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
-  const { stdout, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings })
+  const { stdout, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings, ...(timeoutMs === undefined ? {} : { timeoutMs }) })
   const info = parse(stdout)
   if (detectTimeoutWarnings) info.incomplete = incomplete === true
   return info
@@ -140,20 +140,21 @@ const capacitor = {
       const args = buildYtDlpSearchArguments(query, params, page)
         .filter(arg => arg !== '--ignore-config' && arg !== '--')
       const response = normalizeYtDlpSearchResults(await extract(args, true), page)
+      const metadataDeadline = Date.now() + 10_000
       response.results = await completeYtDlpSearchPlaylists(response.results, async (playlistId, signal) => {
         const playlistArgs = args.slice(0, -1)
         playlistArgs[playlistArgs.indexOf('--playlist-start') + 1] = '1'
         playlistArgs[playlistArgs.indexOf('--playlist-end') + 1] = '1'
         playlistArgs.push(`https://www.youtube.com/playlist?list=${playlistId}`)
-        // Native extraction has its own timeout; optional metadata must not
-        // delay the search beyond the shared enrichment budget.
+        // Include native queue time and interrupt the process at the remaining
+        // metadata deadline, as well as bounding the renderer's wait.
         let onAbort
         const aborted = new Promise((_resolve, reject) => {
           onAbort = () => reject(signal.reason)
         })
         signal.addEventListener('abort', onAbort, { once: true })
         try {
-          return await Promise.race([extract(playlistArgs, true), aborted])
+          return await Promise.race([extract(playlistArgs, true, false, JSON.parse, false, Math.max(1, metadataDeadline - Date.now())), aborted])
         } finally {
           signal.removeEventListener('abort', onAbort)
         }

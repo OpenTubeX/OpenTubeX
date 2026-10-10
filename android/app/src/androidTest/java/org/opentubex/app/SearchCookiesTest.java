@@ -138,6 +138,8 @@ public class SearchCookiesTest {
                     new JSONArray(YtDlpArguments.validate(playlistArgs)).toString());
                 assertEquals("Playlist metadata uses the saved session", "true", evaluate(view,
                     "window.__searchCookieRequests[2].cookies === '/private/yt-dlp-cookies.txt'"));
+                assertEquals("Playlist metadata has a native deadline", "true", evaluate(view,
+                    "window.__searchCookieRequests[2].timeoutMs > 0 && window.__searchCookieRequests[2].timeoutMs <= 10000"));
                 assertEquals("Recovered results stay out of the shared search cache", "false", evaluate(view,
                     STORE + ".getters.getSessionSearchHistory.some(entry => entry.data.some(result => result.title === 'Recovered cookie search result'))"));
                 evaluate(view, "window.__searchCookieEmpty = true; window.__searchCookieRouter.push('/search/empty%20search')");

@@ -86,7 +86,7 @@ test('Android cookie search rejects unavailable authentication and invalid reque
 test('Android enriches incomplete playlist cards with the saved session and preserves complete cards', async () => {
   const requested = []
   const thumbnail = 'https://i.ytimg.com/playlist.jpg'
-  const bridge = adapter(getters, async ({ args, cookies }) => {
+  const bridge = adapter(getters, async ({ args, cookies, timeoutMs }) => {
     assert.equal(cookies, getters.getYtDlpPlaybackCookiesPath)
     const url = new URL(args.at(-1))
     if (url.pathname === '/results') return { stdout: JSON.stringify({ entries: [
@@ -96,6 +96,7 @@ test('Android enriches incomplete playlist cards with the saved session and pres
     ] }) }
     assert.equal(url.origin, 'https://www.youtube.com')
     assert.equal(url.pathname, '/playlist')
+    assert.ok(timeoutMs > 0 && timeoutMs <= 10_000, 'Native metadata extraction must use the remaining time budget')
     assert.equal(args[args.indexOf('--playlist-start') + 1], '1')
     assert.equal(args[args.indexOf('--playlist-end') + 1], '1')
     requested.push(url.searchParams.get('list'))
@@ -139,6 +140,24 @@ test('Android bounds optional playlist metadata waits and leaves queued lookups 
   const response = await pending
   assert.equal(response.results.length, 20)
   assert.equal(lookups, 2)
+})
+
+test('Android gives later playlist lookups only the remaining native metadata budget', async t => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 0 })
+  const budgets = []
+  const bridge = adapter(getters, async ({ args, timeoutMs }) => {
+    if (new URL(args.at(-1)).pathname === '/results') return { stdout: JSON.stringify({
+      entries: Array.from({ length: 3 }, (_, index) => ({ id: `PL${index}`, ie_key: 'YoutubeTab', title: `Playlist ${index}` }))
+    }) }
+    budgets.push(timeoutMs)
+    if (budgets.length <= 2) await new Promise(resolve => setTimeout(resolve, 3000))
+    return { stdout: JSON.stringify({ playlist_count: 10 }) }
+  })
+  const pending = bridge.ytDlpSearch('query')
+  await new Promise(setImmediate)
+  t.mock.timers.tick(3000)
+  assert.equal((await pending).results.length, 3)
+  assert.deepEqual(budgets, [10_000, 10_000, 7000])
 })
 
 test('Android cookie search reports extraction and malformed-response failures', async () => {
