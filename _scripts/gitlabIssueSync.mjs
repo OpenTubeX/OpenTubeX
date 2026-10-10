@@ -155,37 +155,46 @@ function referenceResolver(sources, targets, mergeRequests) {
         text = text.replace(/^ {0,3}> ?/, '')
         depth++
       }
-      if (fence && depth < fence.quoteDepth) fence = null
+      const expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+      const indent = expanded.match(/^ */)[0].length
+      if (fence && (depth < fence.quoteDepth || (text.trim() && indent < fence.listIndent))) fence = null
       if (htmlEnd && depth < htmlEnd.quoteDepth) {
         flush()
         htmlEnd = null
         listIndents.length = 0
       }
-      if (!fence) {
-        const opening = line.match(/<(code|pre)\b[^>]*>|<!--/i)
-        if (htmlEnd || opening) {
-          htmlEnd ??= { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth }
-          paragraph = false
-          prose.push(line)
-          if (htmlEnd.pattern.test(line)) htmlEnd = null
-          continue
-        }
+      if (htmlEnd) {
+        prose.push(line)
+        if (htmlEnd.pattern.test(line)) htmlEnd = null
+        continue
       }
       if (!fence && depth !== quoteDepth) {
         listIndents.length = 0
         paragraph = false
       }
       quoteDepth = depth
-      const expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
-      const indent = expanded.match(/^ */)[0].length
       if (!fence && line.trim()) {
         while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop()
       }
       const contentIndent = listIndents.at(-1) ?? 0
-      const indentedCode = !paragraph && indent >= contentIndent + 4
+      let indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
-      const listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
+      const listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|\d+[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
       const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
+      if (listItem) {
+        listIndents.push(listItem[0].length)
+        if (/^ {4}/.test(lineContent)) indentedCode = true
+      }
+      if (!fence && !indentedCode) {
+        const opening = lineContent.match(/<(code|pre)\b[^>]*>|<!--/i)
+        if (opening) {
+          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth }
+          paragraph = false
+          prose.push(line)
+          if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
+          continue
+        }
+      }
       let delimiter = lineContent.match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
       if (!fence && delimiter?.[1][0] === '`' && delimiter[2].includes('`')) delimiter = null
       if (delimiter || fence || indentedCode) {
@@ -194,12 +203,10 @@ function referenceResolver(sources, targets, mergeRequests) {
         result.push(line)
         if (delimiter) {
           if (!fence) {
-            if (listItem) listIndents.push(listItem[0].length)
-            fence = { marker: delimiter[1], quoteDepth: depth }
+            fence = { marker: delimiter[1], quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
           } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {
-        if (listItem) listIndents.push(listItem[0].length)
         paragraph = Boolean(lineContent.trim()) && !thematicBreak && !/^ {0,3}(?:#{1,6}(?:\s|$)|\[[^\]]+\]:)/.test(lineContent)
         prose.push(line)
       }
