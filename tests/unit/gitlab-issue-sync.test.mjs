@@ -373,6 +373,29 @@ test('blockquote containers preserve indented and fenced code while converting p
   assert.ok(state.notes[1].body.endsWith(quoted(`#${target.number}`).replaceAll(`See #${target.number}`, `See ${githubReference}`)))
 })
 
+test('fences end when their blockquote container exits, preserving root fence contents', async () => {
+  const examples = [
+    '> ```text\n> REF\nOutside REF',
+    '> ~~~\n> > REF\n> REF\n\nOutside REF',
+    '> > ```\n> > REF\n> Outside REF\nOutside REF',
+    '> - ```\n>   REF\nOutside REF',
+    '```\n> REF\nREF\n```\nOutside REF',
+  ]
+  for (const example of examples) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('unterminated HTML code blocks preserve references through the end of the document', async () => {
   for (const tag of ['pre', 'code']) {
     const { state, client } = fixture()
