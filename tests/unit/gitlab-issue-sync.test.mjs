@@ -487,6 +487,31 @@ test('Markdown link tooltips do not prevent title and counterpart conversion', a
   assert.ok(state.notes[1].body.endsWith(tooltips.map(tooltip => `[Report](${target.html_url}${tooltip}) ([GitLab #1](${url}))`).join('\n')))
 })
 
+test('explicit local links retain balanced query and fragment parentheses with tooltips', async () => {
+  for (const angle of [false, true]) {
+    const { state, client } = fixture()
+    const examples = [['?x=(a)', ''], ['#note_(a)', ' "Tooltip"'], ['?x=((a))', " 'Tooltip'"], ['?x=(a)', ' (Tooltip)'], ['?x=\\(a\\)', '']]
+    if (angle) examples.push(['?x=(a', ' "Tooltip"'], ['?x=a)', ''], ['?x=)(a', ''])
+    const body = url => examples.map(([suffix, tooltip]) => `[old](${angle ? '<' : ''}${url}${suffix}${angle ? '>' : ''}${tooltip})`).join('\n')
+    const expected = (url, otherLabel, other) => examples.map(([suffix, tooltip]) => `[Report](${['?x=(a', '?x=a)', '?x=)(a'].includes(suffix) ? `<${url}${suffix}>` : `${url}${suffix}`}${tooltip}) ([${otherLabel}](${other}))`).join('\n')
+    const check = (text, url, other) => {
+      const links = [...marked.parse(text).matchAll(/<a href="([^"]+)"/g)].map(match => match[1])
+      assert.deepEqual(links, examples.flatMap(([suffix]) => [`${url}${suffix.replaceAll('\\', '')}`, other]))
+    }
+    state.sources[0].description = body(state.sources[0].web_url)
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabBody = expected(state.sources[0].web_url, `GitHub #${target.number}`, target.html_url)
+    assert.ok(target.body.endsWith(gitlabBody))
+    check(gitlabBody, state.sources[0].web_url, target.html_url)
+    state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubBody = expected(target.html_url, 'GitLab #1', state.sources[0].web_url)
+    assert.ok(state.notes[1].body.endsWith(githubBody))
+    check(githubBody, target.html_url, state.sources[0].web_url)
+  }
+})
+
 test('defined shortcut reference labels containing issue numbers stay intact', async () => {
   const { state, client } = fixture()
   const preserved = '[#1] and [REF #1] and ![#1]\n\n[#1]: https://example.org\n[ref #1]: https://example.org/other'

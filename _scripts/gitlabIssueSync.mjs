@@ -100,6 +100,21 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
+  const linkDestination = text => {
+    const destination = text.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
+    if (!destination) return null
+    if (!destination.startsWith('<')) {
+      if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
+      let parentheses = 0
+      for (let position = 0; position < destination.length; position++) {
+        if (destination[position] === '\\') position++
+        else if (destination[position] === '(') parentheses++
+        else if (destination[position] === ')' && --parentheses < 0) return null
+      }
+      if (parentheses) return null
+    }
+    return destination
+  }
   const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|&]/g, '\\$&')
   const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
@@ -108,7 +123,9 @@ function referenceResolver(sources, targets, mergeRequests) {
       ? `https://gitlab.com/${project}/-/${reference[0] === '!' ? 'merge_requests' : 'issues'}/${reference.slice(1)}`
       : `https://github.com/${repository}/issues/${reference.slice(1)}`)
     const other = counterparts.get(url)
-    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${url}${suffix}${tooltip})`
+    const target = url + suffix
+    const destination = linkDestination(target) === target ? target : `<${target}>`
+    const link = `[${title(item?.title ?? `${host} ${reference}`)}](${destination}${tooltip})`
     if (!other) return link
     const otherSide = side === 'gitlab' ? 'GitHub' : 'GitLab'
     const otherReference = side === 'gitlab' ? `#${other.number}` : gitlabReferences.get(other.web_url)
@@ -134,29 +151,15 @@ function referenceResolver(sources, targets, mergeRequests) {
     let prose = []
     let definitionEndIndex = -1
     const completeTitle = /^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/
-    const linkDestination = text => {
-      const destination = text.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
-      if (!destination) return null
-      if (!destination.startsWith('<')) {
-        if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
-        let parentheses = 0
-        for (let position = 0; position < destination.length; position++) {
-          if (destination[position] === '\\') position++
-          else if (destination[position] === '(') parentheses++
-          else if (destination[position] === ')' && --parentheses < 0) return null
-        }
-        if (parentheses) return null
-      }
-      return destination
-    }
-    const validInlineLink = suffix => {
-      if (/\n[ \t]*\n/.test(suffix)) return false
+    const inlineLink = suffix => {
+      if (/\n[ \t]*\n/.test(suffix)) return null
       const text = suffix.slice(1, -1).trim()
-      if (!text) return true
+      if (!text) return { url: '', tooltip: '' }
       const destination = linkDestination(text)
-      if (!destination) return false
-      const title = text.slice(destination.length)
-      return !title || (/^[ \t\n]+/.test(title) && completeTitle.test(title.trim()))
+      if (!destination) return null
+      const tooltip = text.slice(destination.length)
+      if (tooltip && (!/^[ \t\n]+/.test(tooltip) || !completeTitle.test(tooltip.trim()))) return null
+      return { url: destination.startsWith('<') ? destination.slice(1, -1) : destination, tooltip }
     }
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
@@ -191,9 +194,11 @@ function referenceResolver(sources, targets, mergeRequests) {
           const labelEnd = balancedEnd(text, start, '[', ']')
           if (labelEnd !== -1) {
             let end = labelEnd
+            let link = null
             if (text[end] === '(') {
               const linkEnd = balancedEnd(text, end, '(', ')')
-              if (linkEnd !== -1 && validInlineLink(text.slice(end, linkEnd))) end = linkEnd
+              if (linkEnd !== -1) link = inlineLink(text.slice(end, linkEnd))
+              if (link) end = linkEnd
             } else if (text[end] === '[') {
               const referenceEnd = balancedEnd(text, end, '[', ']')
               const referenceLabel = referenceEnd === -1 ? null : text.slice(end + 1, referenceEnd - 1) || text.slice(start + 1, labelEnd - 1)
@@ -204,8 +209,7 @@ function referenceResolver(sources, targets, mergeRequests) {
             token = text.slice(match.index, end)
             const label = text.slice(start + 1, labelEnd - 1)
             const suffix = text.slice(labelEnd, end)
-            const link = suffix.match(/^\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
-            if (link && !image) token = urlReference(link[1], side, link[2] ?? '') ?? token
+            if (link && !image) token = urlReference(link.url, side, link.tooltip) ?? token
             else if (!suffix && !referenceLabels.has(labelKey(label))) token = `${image ? '!' : ''}[${rewriteProse(label)}]`
           }
         } else if (token === '<') {
