@@ -72,6 +72,9 @@ jobs:
     - name: Test Cast sender transport
       run: go test -race ./...
       working-directory: _scripts/cast-sender
+    - name: Test Android Rumble HTTP transport
+      run: go test -race ./...
+      working-directory: _scripts/yt-dlp-http
     - run: pnpm run lint
       shell: bash
     # let's verify that webpack is able to package the project

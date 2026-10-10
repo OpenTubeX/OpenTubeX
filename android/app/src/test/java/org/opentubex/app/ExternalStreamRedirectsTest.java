@@ -55,14 +55,14 @@ public class ExternalStreamRedirectsTest {
         }
     }
 
-    @Test public void stripsCredentialsWhenRedirectLeavesTheSourceOrigin() throws Exception {
+    @Test public void stripsCredentialsWhenRedirectLeavesTheCookieHost() throws Exception {
         try (MockWebServer source = new MockWebServer(); MockWebServer target = new MockWebServer()) {
             source.start();
             target.start();
             source.enqueue(new MockResponse().setResponseCode(302)
-                .addHeader("Location", target.url("/video.mp4")));
+                .addHeader("Location", target.url("/video.mp4").newBuilder().host("localhost").build()));
             target.enqueue(new MockResponse().setResponseCode(200));
-            URL sourceUrl = source.url("/video.mp4").url();
+            URL sourceUrl = source.url("/video.mp4").newBuilder().host("127.0.0.1").build().url();
             ExternalStreamRequestRegistry.shared().register(new JSONArray().put(new JSONObject()
                 .put("url", sourceUrl.toString()).put("protocol", "http")
                 .put("http_headers", new JSONObject().put("Referer", "http://127.0.0.1/private?token=secret")

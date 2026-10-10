@@ -2,6 +2,8 @@ package org.opentubex.app;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,6 +104,21 @@ final class ExternalStreamRequestRegistry {
         return source == null ? null : withCookies(source, url);
     }
 
+    synchronized void saveResponseCookies(URL url, Headers headers) {
+        long now = System.currentTimeMillis() / 1000;
+        long maximumExpiry = now + 3600;
+        for (okhttp3.Cookie incoming : okhttp3.Cookie.parseAll(HttpUrl.get(url), headers)) {
+            if (!incoming.name().matches("[!#$%&'*+.^_`|~0-9A-Za-z-]+") ||
+                incoming.value().contains(";") || !isSafeHeaderValue(incoming.value())) continue;
+            cookies.removeIf(cookie -> cookie.domain.equals(incoming.domain()) &&
+                cookie.path.equals(incoming.path()) && cookie.value.startsWith(incoming.name() + "="));
+            long expiry = Math.min(incoming.expiresAt() / 1000, maximumExpiry);
+            if (expiry > now) cookies.add(new Cookie(incoming.domain(), !incoming.hostOnly(),
+                incoming.path(), incoming.secure(), expiry, incoming.name() + "=" + incoming.value()));
+        }
+        if (cookies.size() > 1024) cookies.subList(0, cookies.size() - 1024).clear();
+    }
+
     synchronized String registerTwitchVod(JSONArray urls) {
         if (urls == null || urls.length() == 0 || urls.length() > 7 || twitchVodRegistrations.size() >= 256) {
             throw new IllegalArgumentException("Invalid Twitch VOD qualities");
@@ -157,7 +174,8 @@ final class ExternalStreamRequestRegistry {
             if (Set.of("accept", "accept-language", "sec-fetch-mode", "user-agent")
                 .contains(header.getKey().toLowerCase(Locale.ROOT))) safe.put(header.getKey(), header.getValue());
         }
-        return safe;
+        // Jar cookies follow their destination domain/path, never the caller's Cookie header.
+        return stripCookies ? safe : withCookies(safe, destination);
     }
 
     private Map<String, String> sourceHeadersFor(URL url) {
@@ -178,7 +196,9 @@ final class ExternalStreamRequestRegistry {
         if (isHttpStoryboardUrl(url)) return result;
         StringBuilder cookieHeader = new StringBuilder();
         long now = System.currentTimeMillis() / 1000;
-        for (Cookie cookie : cookies) {
+        List<Cookie> ordered = new ArrayList<>(cookies);
+        ordered.sort((left, right) -> Integer.compare(right.path.length(), left.path.length()));
+        for (Cookie cookie : ordered) {
             if (cookie.expires <= now) continue;
             if (!domainMatches(url.getHost().toLowerCase(Locale.ROOT), cookie.domain, cookie.includeSubdomains)) continue;
             if (cookie.secure && !"https".equals(url.getProtocol())) continue;

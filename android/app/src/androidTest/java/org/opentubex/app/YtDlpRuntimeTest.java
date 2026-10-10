@@ -12,6 +12,110 @@ import org.json.JSONObject;
 import static org.junit.Assert.*;
 
 public class YtDlpRuntimeTest {
+    @Test public void rumbleLinkPlaysInWebView() throws Exception {
+        String url = InstrumentationRegistry.getArguments().getString("rumbleUrl");
+        org.junit.Assume.assumeNotNull(url);
+        try (var scenario = androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
+            java.util.concurrent.atomic.AtomicReference<android.webkit.WebView> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            android.webkit.WebView view = reference.get();
+            awaitRumble(view, "!!document.querySelector('.app.capacitorTabs')");
+            awaitRumble(view, "!document.getElementById('startup-splash')");
+            evaluateRumble(view, "document.querySelector('.tutorialActions button')?.click()");
+            awaitRumble(view, "!document.querySelector('.tutorialOverlay')");
+            evaluateRumble(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push({path:'/external-media',query:{url:" + JSONObject.quote(url) + "}})");
+            awaitRumble(view, "document.querySelector('.externalMediaPlayer video')?.readyState >= 1");
+            if ("true".equals(evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').paused"))) {
+                JSONObject point = new JSONObject((String) new org.json.JSONTokener(evaluateRumble(view,
+                    "JSON.stringify((() => { const b = document.querySelector('.shaka-play-button') ?? document.querySelector('.externalMediaPlayer video'); const r = b.getBoundingClientRect(); return {x:r.x+r.width/2,y:r.y+r.height/2}; })())")).nextValue());
+                int[] origin = new int[2];
+                InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.getLocationOnScreen(origin));
+                double scale = view.getWidth() / Double.parseDouble(evaluateRumble(view, "window.innerWidth"));
+                float x = origin[0] + (float) (point.getDouble("x") * scale);
+                float y = origin[1] + (float) (point.getDouble("y") * scale);
+                long now = android.os.SystemClock.uptimeMillis();
+                android.view.MotionEvent down = android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_DOWN, x, y, 0);
+                android.view.MotionEvent up = android.view.MotionEvent.obtain(now, now + 50, android.view.MotionEvent.ACTION_UP, x, y, 0);
+                try {
+                    InstrumentationRegistry.getInstrumentation().sendPointerSync(down);
+                    InstrumentationRegistry.getInstrumentation().sendPointerSync(up);
+                } finally { down.recycle(); up.recycle(); }
+            }
+            awaitRumble(view, "document.querySelector('.externalMediaPlayer video')?.currentTime > 1");
+            double before = Double.parseDouble(evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').currentTime"));
+            awaitRumble(view, "document.querySelector('.externalMediaPlayer video').currentTime > " + (before + 0.5));
+            awaitRumble(view, "((v) => !('webkitAudioDecodedByteCount' in v) || v.webkitAudioDecodedByteCount > 0)(document.querySelector('.externalMediaPlayer video'))");
+            evaluateRumble(view, "document.querySelector('.externalMediaPlayer video').pause()");
+        }
+    }
+
+    private static String evaluateRumble(android.webkit.WebView view, String script) throws Exception {
+        java.util.concurrent.CompletableFuture<String> result = new java.util.concurrent.CompletableFuture<>();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> view.evaluateJavascript(script, result::complete));
+        return result.get(5, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
+    private static void awaitRumble(android.webkit.WebView view, String condition) throws Exception {
+        long deadline = System.currentTimeMillis() + 60000;
+        while (System.currentTimeMillis() < deadline) {
+            if ("true".equals(evaluateRumble(view, condition))) return;
+            if (condition.contains("video") && "true".equals(evaluateRumble(view, "!!document.querySelector('.externalMediaDiagnostic')"))) break;
+            Thread.sleep(100);
+        }
+        fail("Rumble UI condition failed: " + condition + "; " + evaluateRumble(view,
+            "JSON.stringify({diagnostic:document.querySelector('.externalMediaDiagnostic')?.textContent,video:(() => {const v=document.querySelector('.externalMediaPlayer video');return v && {ready:v.readyState,paused:v.paused,time:v.currentTime,audio:v.webkitAudioDecodedByteCount,error:v.error?.message};})()})"));
+    }
+
+    @Test public void packagedRumbleTransportPreservesCookiesRedirectsAndHttpErrors() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        YtDlpRuntime.initialize(context);
+        File directory = new File(context.getCacheDir(), "rumble-http-test-" + java.util.UUID.randomUUID());
+        directory.mkdirs();
+        File fixture = new File(directory, "smoke.py");
+        File bootstrap = new File(directory, "bootstrap.py");
+        File group = new File(directory, "group");
+        try {
+            try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("yt-dlp-rumble-http-smoke.py")) {
+                YtDlpFiles.write(fixture, YtDlpFiles.read(input, 64 * 1024));
+            }
+            try (InputStream input = context.getAssets().open("opentubex_rumble_http.py")) {
+                YtDlpFiles.write(bootstrap, YtDlpFiles.read(input, 64 * 1024));
+            }
+            File installation = new File(context.getNoBackupFilesDir(), "youtubedl-android");
+            File entryPoint = YtDlpCodeCache.prepare(new File(installation, "yt-dlp/yt-dlp"), new File(installation, "yt-dlp-code"));
+            var command = YtDlpRuntime.class.getDeclaredMethod("command", Context.class, List.class);
+            command.setAccessible(true);
+            ProcessBuilder builder = (ProcessBuilder) command.invoke(null, context, asList(
+                context.getApplicationInfo().nativeLibraryDir + "/libpython.so", fixture.getPath(),
+                entryPoint.getPath(), bootstrap.getPath(), group.getPath()));
+            Process process = builder.redirectErrorStream(true).start();
+            try {
+                assertTrue("Rumble transport smoke test timed out", process.waitFor(20, java.util.concurrent.TimeUnit.SECONDS));
+                String output = new String(YtDlpFiles.read(process.getInputStream(), 64 * 1024), java.nio.charset.StandardCharsets.UTF_8);
+                assertEquals(output, 0, process.exitValue());
+                assertTrue(output, output.contains("RUMBLE_HTTP_OK"));
+            } finally {
+                try {
+                    if (group.isFile()) {
+                        int pid = Integer.parseInt(new String(YtDlpFiles.readFile(group), java.nio.charset.StandardCharsets.US_ASCII));
+                        try { android.system.Os.kill(-pid, android.system.OsConstants.SIGKILL); }
+                        catch (android.system.ErrnoException ignored) { /* Already exited. */ }
+                    }
+                } finally { process.destroy(); }
+            }
+        } finally { YtDlpFiles.deleteTree(directory); }
+    }
+
+    @Test public void rumblePlaybackExtractsFormats() throws Exception {
+        String url = InstrumentationRegistry.getArguments().getString("rumbleUrl");
+        org.junit.Assume.assumeNotNull(url);
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        JSONObject info = new JSONObject(YtDlpRuntime.extract(context, asList(
+            "--no-playlist", "--socket-timeout", "15", "--skip-download", "--dump-single-json", url)));
+        assertFalse(info.getString("title").isEmpty());
+        assertTrue("Rumble must return playable formats", info.getJSONArray("formats").length() > 0);
+    }
+
     @Test public void bundledRuntimeReusesCompiledPythonBetweenOperations() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         String version = YtDlpRuntime.extract(context, asList("--version"));

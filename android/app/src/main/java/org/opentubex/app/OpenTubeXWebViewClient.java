@@ -28,11 +28,14 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     private static final int READ_TIMEOUT_MS = 30_000;
     private final SabrRequestRegistry sabrRequests;
     private final ExternalStreamRequestRegistry externalStreams;
+    private final okhttp3.OkHttpClient externalStreamClient;
 
     public OpenTubeXWebViewClient(Bridge bridge) {
         super(bridge);
         sabrRequests = SabrRequestRegistry.shared();
         externalStreams = ExternalStreamRequestRegistry.shared();
+        externalStreamClient = ExternalStreamRedirects.client().newBuilder()
+            .addInterceptor(new RumbleManifestTransport(bridge.getContext())).build();
     }
 
     @Override
@@ -127,7 +130,7 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         }
 
         try {
-            Response response = ExternalStreamRedirects.fetchForWebView(builder.build());
+            Response response = ExternalStreamRedirects.fetchForWebView(builder.build(), externalStreamClient);
             int statusCode = response.code();
             if (statusCode >= 300 && statusCode < 400) {
                 // WebResourceResponse rejects every 3xx code, including 304.
@@ -235,7 +238,10 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         // WebView adds Content-Type from WebResourceResponse's MIME type.
         // Supplying it again produces an invalid "video/mp4, video/mp4".
         removeHeader(headers, "Content-Type");
-        headers.putAll(corsHeaders());
+        for (Map.Entry<String, String> header : corsHeaders().entrySet()) {
+            removeHeader(headers, header.getKey());
+            headers.put(header.getKey(), header.getValue());
+        }
         if (statusCode == HttpURLConnection.HTTP_PARTIAL && headerValue(request.getRequestHeaders(), "Range") == null) {
             // Keep Shaka's query-ranged responses opaque. Native media needs
             // the original range headers to load and seek.

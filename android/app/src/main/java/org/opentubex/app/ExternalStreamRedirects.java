@@ -2,7 +2,9 @@ package org.opentubex.app;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -23,15 +25,51 @@ final class ExternalStreamRedirects implements Interceptor {
     static OkHttpClient client() { return CLIENT; }
 
     static Response fetchForWebView(Request request) throws IOException {
-        Response response = CLIENT.newCall(request).execute();
+        return fetchForWebView(request, CLIENT);
+    }
+
+    static Response fetchForWebView(Request request, OkHttpClient client) throws IOException {
+        var registry = ExternalStreamRequestRegistry.shared();
+        Map<String, String> previous = registry.headersFor(request.url().url());
+        Response response = client.newCall(request).execute();
         if (response.code() != 304 || (request.header("If-None-Match") == null &&
             request.header("If-Modified-Since") == null)) return response;
         if (response.body() != null) response.close();
-        Request unconditional = request.newBuilder()
+        Request.Builder unconditional = request.newBuilder()
             .removeHeader("If-None-Match")
-            .removeHeader("If-Modified-Since")
-            .build();
-        return CLIENT.newCall(unconditional).execute();
+            .removeHeader("If-Modified-Since");
+        Map<String, String> current = registry.headersFor(request.url().url());
+        if (current != null) {
+            String jarCookies = current.get("Cookie");
+            Set<String> replaced = new HashSet<>();
+            addCookieNames(replaced, previous == null ? null : previous.get("Cookie"));
+            addCookieNames(replaced, jarCookies);
+            // Include deletions even when the cookie originally came from the caller.
+            for (okhttp3.Cookie cookie : okhttp3.Cookie.parseAll(response.request().url(), response.headers())) {
+                if (cookie.matches(request.url())) replaced.add(cookie.name());
+            }
+            StringBuilder merged = new StringBuilder(jarCookies == null ? "" : jarCookies);
+            String callerCookies = request.header("Cookie");
+            if (callerCookies != null) {
+                for (String cookie : callerCookies.split(";")) {
+                    int equals = cookie.indexOf('=');
+                    if (equals < 1 || replaced.contains(cookie.substring(0, equals).trim())) continue;
+                    if (merged.length() > 0) merged.append("; ");
+                    merged.append(cookie.trim());
+                }
+            }
+            unconditional.removeHeader("Cookie");
+            if (merged.length() > 0) unconditional.header("Cookie", merged.toString());
+        }
+        return client.newCall(unconditional.build()).execute();
+    }
+
+    private static void addCookieNames(Set<String> names, String header) {
+        if (header == null) return;
+        for (String cookie : header.split(";")) {
+            int equals = cookie.indexOf('=');
+            if (equals > 0) names.add(cookie.substring(0, equals).trim());
+        }
     }
 
     @Override public Response intercept(Chain chain) throws IOException {

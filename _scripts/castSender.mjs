@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
@@ -25,17 +25,10 @@ export async function prepareCastSender(output = 'dist', platform = process.plat
 
 export async function writeCastSenderLicenses(directory, options) {
   await mkdir(directory, { recursive: true })
-  // Include the licenses of modules actually linked into this target.
-  const { stdout } = await execFileAsync('go', ['list', '-mod=readonly', '-deps', '-f',
-    '{{if and .Module (not .Module.Main)}}{{.Module.Path}}|{{.Module.Dir}}{{end}}', '.'], options)
-  const licenses = []
-  for (const module of [...new Set(stdout.trim().split('\n').filter(Boolean))].sort()) {
-    const [name, moduleDirectory] = module.split('|')
-    const files = (await readdir(moduleDirectory)).filter(file => /^(license|copying|notice)(\.|$)/i.test(file)).sort()
-    if (!files.length) throw new Error(`Missing Cast dependency license: ${name}`)
-    for (const file of files) licenses.push(`${name} (${file})\n${await readFile(join(moduleDirectory, file), 'utf8')}`)
-  }
-  licenses.push(`Go standard library\n${await readFile(resolve(root, '_scripts/cast-sender/Go.LICENSE'), 'utf8')}`)
+  const helper = new URL('./goBuild.mjs', import.meta.url)
+  helper.search = new URL(import.meta.url).search
+  const { readGoDependencyLicenses } = await import(helper.href)
+  const licenses = await readGoDependencyLicenses(options)
   licenses.push(`Chromium Cast protocol definitions\n${await readFile(resolve(root, '_scripts/cast-sender/CastProtocol.LICENSE'), 'utf8')}`)
   licenses.push(`OpenScreen Cast trust roots\n${await readFile(resolve(root, '_scripts/cast-sender/OpenScreen.LICENSE'), 'utf8')}`)
   await writeFile(join(directory, 'cast-sender-licenses.txt'), licenses.join('\n\n'))
