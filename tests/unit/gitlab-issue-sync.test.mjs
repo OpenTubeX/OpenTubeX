@@ -372,6 +372,40 @@ test('shortcut reference definitions work inside blockquotes and lists', async (
   }
 })
 
+test('escaped brackets in shortcut reference labels keep their unrelated destination', async () => {
+  for (const label of ['REF\\]', 'REF\\[label\\]']) {
+    const { state, client } = fixture()
+    const body = reference => `[${label}]: https://example.org\n\n[${label}]\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    assert.match(marked.parse(target.body), /href="https:\/\/example.org"/)
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    assert.match(marked.parse(state.notes[1].body), /href="https:\/\/example.org"/)
+  }
+})
+
+test('lazy blockquote continuations stay prose while blank-separated indentation stays code', async () => {
+  for (const example of ['> Text\n    Outside REF', '> > Text\n    Outside REF\n>     Outside REF', '> Text\n    Outside REF\n>     Outside REF', '> Text\n\n    REF\n\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('ordered lists interrupt paragraphs only when starting at one', async () => {
   for (const example of ['Text\n2. item\n\n    REF\n\nOutside REF', 'Text\n2) item\n\n    REF\n\nOutside REF', 'Text\n1. item\n\n    Outside REF', '2. item\n\n    Outside REF', '1. item\n2. item\n\n    Outside REF']) {
     const { state, client } = fixture()

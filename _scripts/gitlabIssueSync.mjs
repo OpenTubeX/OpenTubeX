@@ -241,11 +241,12 @@ function referenceResolver(sources, targets, mergeRequests) {
         if (htmlEnd.pattern.test(text)) htmlEnd = null
         continue
       }
-      if (!fence && depth !== quoteDepth) {
+      const lazyQuote = paragraph && depth < quoteDepth && Boolean(text.trim())
+      if (!fence && depth !== quoteDepth && !lazyQuote) {
         listIndents.length = 0
         paragraph = false
       }
-      quoteDepth = depth
+      if (!lazyQuote) quoteDepth = depth
       if (!fence && line.trim()) {
         while (listIndents.length && indent < listIndents.at(-1)) {
           listIndents.pop()
@@ -262,8 +263,9 @@ function referenceResolver(sources, targets, mergeRequests) {
         listIndents.push(listItem[0].length)
         if (/^ {4}/.test(lineContent)) indentedCode = true
       }
+      let definition = null
       if (!fence && !indentedCode) {
-        const definition = lineContent.match(/^ {0,3}\[([^\]]+)\]:/)
+        definition = lineContent.match(/^ {0,3}\[((?:\\.|[^\]\\])+)\]:/)
         if (definition) referenceLabels.add(labelKey(definition[1]))
         const rawEnd = /^ {0,3}<\?/.test(lineContent)
           ? /\?>/
@@ -308,7 +310,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {
-        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !/^ {0,3}(?:#{1,6}(?:\s|$)|\[[^\]]+\]:)/.test(lineContent)
+        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !definition && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
         prose.push(line)
       }
     }
