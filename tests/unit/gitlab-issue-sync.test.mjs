@@ -340,6 +340,24 @@ test('Markdown link tooltips do not prevent title and counterpart conversion', a
   assert.ok(state.notes[1].body.endsWith(`[Report](${target.html_url}) ([GitLab #1](${url}))`))
 })
 
+test('list-item fences preserve literal references and resume conversion after closing', async () => {
+  for (const marker of ['-', '*', '1.', '    -']) {
+    const { state, client } = fixture()
+    const code = reference => [marker.startsWith(' ') ? '* Parent' : '',
+      `${marker} \`\`\`text`, `${' '.repeat(marker.length + 1)}${reference}`,
+      `${' '.repeat(marker.length + 1)}\`\`\``, '', `See ${reference}`].filter((line, index) => index !== 0 || line).join('\n')
+    state.sources[0].description = code('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(code('#1').replace('See #1', `See ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: code(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(code(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`)))
+  }
+})
+
 test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', () => {
   const body = content('![video](/uploads/hash/video.mp4)\n@person\n/close', true)
   assert.match(body, /https:\/\/gitlab.com\/-\/project\/85121418\/uploads\/hash\/video.mp4/)

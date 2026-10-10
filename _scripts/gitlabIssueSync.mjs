@@ -163,16 +163,18 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
       const contentIndent = listIndents.at(-1) ?? 0
       const indentedCode = indent >= contentIndent + 4
-      const delimiter = expanded.slice(contentIndent).match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
+      const listItem = !fence && !indentedCode && expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
+      const delimiter = expanded.slice(listItem ? listItem[0].length : contentIndent).match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
       if (delimiter || fence || indentedCode) {
         flush()
         result.push(line)
         if (delimiter) {
-          if (!fence) fence = delimiter[1]
-          else if (delimiter[1][0] === fence[0] && delimiter[1].length >= fence.length && !delimiter[2].trim()) fence = null
+          if (!fence) {
+            if (listItem) listIndents.push(listItem[0].length)
+            fence = delimiter[1]
+          } else if (delimiter[1][0] === fence[0] && delimiter[1].length >= fence.length && !delimiter[2].trim()) fence = null
         }
       } else {
-        const listItem = expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
         if (listItem) listIndents.push(listItem[0].length)
         prose.push(line)
       }
