@@ -125,6 +125,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
+    let paragraph = false
     const listIndents = []
     const result = []
     let prose = []
@@ -132,7 +133,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!prose.length) return
       // Consume code, escapes, Markdown links, HTML, and URLs before considering
       // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?(?:-->|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
         if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           return (urlReference(url, side) ?? url) + token.slice(url.length)
@@ -155,16 +156,25 @@ function referenceResolver(sources, targets, mergeRequests) {
         depth++
       }
       if (fence && depth < fence.quoteDepth) fence = null
+      if (htmlEnd && depth < htmlEnd.quoteDepth) {
+        flush()
+        htmlEnd = null
+        listIndents.length = 0
+      }
       if (!fence) {
         const opening = line.match(/<(code|pre)\b[^>]*>|<!--/i)
         if (htmlEnd || opening) {
-          htmlEnd ??= opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /-->/
+          htmlEnd ??= { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth }
+          paragraph = false
           prose.push(line)
-          if (htmlEnd.test(line)) htmlEnd = null
+          if (htmlEnd.pattern.test(line)) htmlEnd = null
           continue
         }
       }
-      if (!fence && depth !== quoteDepth) listIndents.length = 0
+      if (!fence && depth !== quoteDepth) {
+        listIndents.length = 0
+        paragraph = false
+      }
       quoteDepth = depth
       const expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
       const indent = expanded.match(/^ */)[0].length
@@ -172,11 +182,14 @@ function referenceResolver(sources, targets, mergeRequests) {
         while (listIndents.length && indent < listIndents.at(-1)) listIndents.pop()
       }
       const contentIndent = listIndents.at(-1) ?? 0
-      const indentedCode = indent >= contentIndent + 4
+      const indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
       const listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|\d+[.)])[ \t]+/)
-      const delimiter = expanded.slice(listItem ? listItem[0].length : contentIndent).match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
+      const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
+      let delimiter = lineContent.match(/^ {0,3}(?:> ?)*(`{3,}|~{3,})(.*)$/)
+      if (!fence && delimiter?.[1][0] === '`' && delimiter[2].includes('`')) delimiter = null
       if (delimiter || fence || indentedCode) {
+        paragraph = false
         flush()
         result.push(line)
         if (delimiter) {
@@ -187,6 +200,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         }
       } else {
         if (listItem) listIndents.push(listItem[0].length)
+        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !/^ {0,3}(?:#{1,6}(?:\s|$)|\[[^\]]+\]:)/.test(lineContent)
         prose.push(line)
       }
     }
