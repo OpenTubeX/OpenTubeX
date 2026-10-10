@@ -336,9 +336,9 @@ test('mobile video actions follow background updates and close with their source
     await expect(menu).toBeVisible()
   }
   await openMenu()
-  await page.evaluate(videoId => {
+  await page.evaluate(async videoId => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    store.commit('upsertToHistoryCache', { ...store.getters.getHistoryCacheById[videoId], isWatched: true })
+    await store.dispatch('updateHistory', { ...store.getters.getHistoryCacheById[videoId], isWatched: true })
   }, VIDEO_ID)
   await expect(menu.getByRole('menuitem', { name: 'Unmark As Watched', exact: true })).toBeVisible()
   await menu.getByRole('menuitem', { name: 'Open Link', exact: true }).click()
@@ -349,7 +349,7 @@ test('mobile video actions follow background updates and close with their source
   await expect(menu).toHaveCount(0)
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history'))
   await openMenu()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHistoryCacheSorted', []))
+  await page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeFromHistory', videoId), VIDEO_ID)
   await expect(title).toHaveCount(0)
   await expect(menu).toHaveCount(0)
 })

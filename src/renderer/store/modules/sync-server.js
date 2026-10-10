@@ -50,7 +50,7 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
-import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBWatchStatsHandlers, DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
@@ -198,9 +198,13 @@ function parseSnapshot(value) {
   }
 }
 
+async function savedSnapshot(settings) {
+  return process.env.IS_ELECTRON ? DBLibraryHandlers.query('syncSnapshotRead') : settings.syncServerSnapshot
+}
+
 async function clearUnsupportedWatchStats({ commit, dispatch, rootState }) {
   commit('setSyncedWatchStats', [])
-  const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+  const snapshot = parseSnapshot(await savedSnapshot(rootState.settings))
   if (!('watchStats' in snapshot)) return
   delete snapshot.watchStats
   await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
@@ -257,7 +261,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let client = networkClient
   let encryptedCollections = null
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
-  const previous = parseSnapshot(settings.syncServerSnapshot)
+  const previous = parseSnapshot(await savedSnapshot(settings))
   const next = { ...previous }
   const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
     settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
@@ -278,11 +282,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       // A disable can cancel requests after they succeeded. Record those
       // effects, but never carry them into a different account/privacy context.
+      if (process.env.IS_ELECTRON) {
+        if (!sameAccount()) return
+        const result = await DBLibraryHandlers.query('syncSnapshotHistory', { account: historyAccount, changes })
+        if (result.updated && sameAccount()) commit('setSyncServerSnapshot', result.value)
+        return
+      }
       while (sameAccount()) {
-        const snapshot = rootState.settings.syncServerSnapshot
+        const preview = rootState.settings.syncServerSnapshot
+        const snapshot = await savedSnapshot(rootState.settings)
         const updated = await runBackgroundJob('updateHistorySnapshot', { snapshot, ...changes })
         if (!sameAccount()) return
-        if (snapshot !== rootState.settings.syncServerSnapshot) continue
+        if (preview !== rootState.settings.syncServerSnapshot) continue
         await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
       }
@@ -1103,7 +1114,7 @@ const actions = {
           }
 
           assertSyncEnabled(rootState, client)
-          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+          const snapshot = parseSnapshot(await savedSnapshot(rootState.settings))
           snapshot.sessionsV2 = nextSessions
           await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
           commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions(snapshot, settings))
@@ -1179,7 +1190,7 @@ const actions = {
           assertCurrentAccount(client)
           await collectionCache.put('watchStats', saved.revision, next)
           assertCurrentAccount(client)
-          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+          const snapshot = parseSnapshot(await savedSnapshot(rootState.settings))
           snapshot.watchStats = next
           await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
           commit('setSyncedWatchStats', next)

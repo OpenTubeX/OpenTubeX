@@ -23,7 +23,7 @@
       >
         <div class="background" />
         <div class="inner">
-          <div>{{ playlist.videos.length }}</div>
+          <div>{{ videoCount }}</div>
           <div><FtIcon :icon="['fas', 'list']" /></div>
         </div>
       </div>
@@ -83,6 +83,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  presenceCount: {
+    type: Number,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['selected'])
@@ -99,6 +103,7 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 
 /** @type {import('vue').ComputedRef<object[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
+const videoCount = computed(() => props.playlist.videoCount ?? props.playlist.videos.length)
 
 const titleForDisplay = computed(() => {
   const title = props.playlist.playlistName
@@ -115,6 +120,7 @@ const titleForDisplay = computed(() => {
 /** @type {import('vue').ComputedRef<number>} */
 const loneVideoPresenceCountInPlaylist = computed(() => {
   if (toBeAddedToPlaylistVideoList.value.length !== 1) { return 0 }
+  if (props.presenceCount != null) return props.presenceCount
 
   const loneToBeAddedToPlaylistVideoVideoId = toBeAddedToPlaylistVideoList.value[0].videoId
 
@@ -138,6 +144,7 @@ const loneVideoPresenceCountInPlaylistText = computed(() => {
 /** @type {import('vue').ComputedRef<number>} */
 const multiVideoPresenceCountInPlaylist = computed(() => {
   if (toBeAddedToPlaylistVideoList.value.length < 2) { return 0 }
+  if (props.presenceCount != null) return props.presenceCount
 
   // Count of to be added videos already present in this playlist
   return toBeAddedToPlaylistVideoList.value.reduce((accumulator, toBeAddedToVideo) => {
@@ -175,11 +182,10 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
     videoPresenceCountInPlaylistText.value != null
 })
 
-const thumbnail = ref(thumbnailPlaceholder)
-
-if (props.playlist.videos.length > 0) {
-  thumbnail.value = getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
-}
+const thumbnail = computed(() => {
+  const first = props.playlist.firstVideo ?? props.playlist.videos[0]
+  return first ? getVideoThumbnailUrl(first.videoId, backendPreference.value, currentInvidiousInstanceUrl.value) : thumbnailPlaceholder
+})
 
 function toggleSelection() {
   if (!props.disabled) {

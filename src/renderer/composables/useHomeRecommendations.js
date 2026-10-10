@@ -1,5 +1,6 @@
 import { computed, onBeforeUnmount, ref, shallowRef, toRaw, watch } from 'vue'
 import store from '../store/index'
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecommendationLearningEntries } from '../helpers/recommendations'
 import { runCooperatively } from '../helpers/cooperativeTask'
 import { collectRecommendationCandidates, fetchRecommendationSource, mergeRecommendationCandidates } from '../helpers/recommendationCandidates'
@@ -32,9 +33,10 @@ export function useHomeRecommendations(visible) {
   const presented = computed(() => isTabPresented?.value ?? true)
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
   const history = computed(() => store.getters.getHistoryCacheSorted)
-  const eligibleHistory = computed(() => getRecommendationLearningEntries(history.value, isVisible))
-  const favorites = computed(() => getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
-  const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
+  const libraryInputs = shallowRef({ history: [], favorites: [], saved: [] })
+  const eligibleHistory = computed(() => process.env.IS_ELECTRON ? libraryInputs.value.history : getRecommendationLearningEntries(history.value, isVisible))
+  const favorites = computed(() => process.env.IS_ELECTRON ? libraryInputs.value.favorites : getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
+  const saved = computed(() => process.env.IS_ELECTRON ? libraryInputs.value.saved : getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
   function * savedPlaylistVideos() {
     for (const playlist of store.getters.getAllPlaylists) {
       if (playlist._id !== 'favorites') yield * playlist.videos
@@ -45,6 +47,7 @@ export function useHomeRecommendations(visible) {
   const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
   const hasSeeds = computed(() => store.getters.getRememberHistory && (
     history.value.some(isVisible) || favorites.value.length > 0 || saved.value.length > 0 ||
+    (process.env.IS_ELECTRON && (store.state.history.historyTotal > 0 || store.getters.getAllPlaylists.some(playlist => playlist.videoCount > 0))) ||
     records.value.some(record => record.feedback === 'positive') || subscriptions.value.length > 0
   ))
   // Dismissals affect the next ranking; channel blocks still hide cards immediately.
@@ -77,6 +80,19 @@ export function useHomeRecommendations(visible) {
       })
   }
   async function makeProfile(isCancelled) {
+    if (process.env.IS_ELECTRON) {
+      const inputs = await DBLibraryHandlers.query('recommendationInputs', {
+        preferences: {
+          hideLiveStreams: store.getters.getHideLiveStreams,
+          hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+          hiddenChannelNames: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
+          forbiddenTitles: store.getters.getActiveForbiddenTitles,
+          restrictedPlaybackConfigured: !shouldHideMembersOnlyContent(true, store.getters)
+        }
+      })
+      if (isCancelled()) return null
+      libraryInputs.value = inputs
+    }
     // Snapshot only the bounded learning inputs. Do not track every field of
     // every history record while Home mounts or serialize the entire library.
     const inputGroups = { history: eligibleHistory.value, records: records.value, favorites: favorites.value, saved: saved.value }
@@ -110,8 +126,16 @@ export function useHomeRecommendations(visible) {
         ? { ...record, impressions: record.impressions?.slice(0, -1) }
         : record]))
     }
+    const watched = new Set()
+    if (process.env.IS_ELECTRON) {
+      for (let offset = 0; offset < candidates.length; offset += 250) {
+        const state = await DBLibraryHandlers.query('videoState', { ids: candidates.slice(offset, offset + 250).map(video => video.videoId) })
+        if (isCancelled()) return
+        state.history.forEach(video => watched.add(video.videoId))
+      }
+    }
     const result = await rankRecommendationCandidatesAsync(candidates.filter(video => isVisible(video) &&
-      !store.getters.getHistoryCacheById[video.videoId]), learned, { limit, exploration: exploration.value }, isCancelled)
+      !watched.has(video.videoId) && !store.getters.getHistoryCacheById[video.videoId]), learned, { limit, exploration: exploration.value }, isCancelled)
     if (!result || isCancelled()) return
     // History can change while ranking yields to the event loop.
     ranked.value = result.filter(item => !store.getters.getHistoryCacheById[item.video.videoId])
@@ -217,11 +241,19 @@ export function useHomeRecommendations(visible) {
     if (!learned || generation !== requestGeneration) return
     if (!learned.channels.length) learned.channels = subscriptions.value.slice(0, 3)
     const subscriptionIds = new Set(subscriptions.value)
-    candidates = mergeRecommendationCandidates([...candidates, ...Object.entries(store.getters.getVideoCache)
-      .filter(([id]) => subscriptionIds.has(id))
-      .toSorted(([a], [b]) => (learned.channelWeights.get(b) ?? 0) - (learned.channelWeights.get(a) ?? 0))
-      .slice(0, 12).flatMap(([id, entry]) => (entry.videos ?? []).slice(0, 30)
-        .map(video => ({ ...video, recommendationSources: [{ type: 'subscription', id }] })))])
+    let subscriptionCandidates
+    if (process.env.IS_ELECTRON) {
+      const channels = [...subscriptionIds].toSorted((a, b) => (learned.channelWeights.get(b) ?? 0) - (learned.channelWeights.get(a) ?? 0)).slice(0, 12)
+      subscriptionCandidates = await DBLibraryHandlers.query('recommendationSubscriptionCandidates', { channelIds: channels })
+      if (requestGeneration !== generation) return
+    } else {
+      subscriptionCandidates = Object.entries(store.getters.getVideoCache)
+        .filter(([id]) => subscriptionIds.has(id))
+        .toSorted(([a], [b]) => (learned.channelWeights.get(b) ?? 0) - (learned.channelWeights.get(a) ?? 0))
+        .slice(0, 12).flatMap(([id, entry]) => (entry.videos ?? []).slice(0, 30)
+          .map(video => ({ ...video, recommendationSources: [{ type: 'subscription', id }] })))
+    }
+    candidates = mergeRecommendationCandidates([...candidates, ...subscriptionCandidates])
     requestController = new AbortController()
     const signal = requestController.signal
     const backend = process.env.SUPPORTS_LOCAL_API ? store.getters.getBackendPreference : 'invidious'

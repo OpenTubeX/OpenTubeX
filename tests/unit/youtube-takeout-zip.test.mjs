@@ -1,8 +1,46 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { strToU8, zipSync } from 'fflate'
+import Datastore from '@seald-io/nedb'
 
 import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+import { importTakeoutPlaylist } from '../../src/renderer/helpers/takeout-playlist-import.js'
+import { processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
+
+test('portable Takeout imports retain duplicate members and unrelated fields across repeated merges', async () => {
+  const playlists = new Datastore({ inMemoryOnly: true })
+  const timeAdded = Date.parse('2025-01-01T00:00:00Z')
+  const saved = [
+    { videoId: 'abcdefghijk', timeAdded, playlistItemId: 'first', unknown: { keep: true } },
+    { videoId: 'abcdefghijk', timeAdded, playlistItemId: 'second' },
+    { videoId: 'saved-video', timeAdded: 1, playlistItemId: 'off-page' },
+  ]
+  await playlists.insertAsync({ _id: 'saved', playlistName: 'Shared name', videos: saved, protected: true, future: { keep: true } })
+  const storage = {
+    find: () => playlists.findAsync({}),
+    create: playlist => {
+      for (const video of playlist.videos) processToBeAddedPlaylistVideo(video)
+      return playlists.insertAsync(playlist)
+    },
+    update: playlist => playlists.updateAsync({ _id: playlist._id }, { $set: playlist }),
+  }
+  const entry = { path: 'Takeout/YouTube/playlists/Shared name.csv', content: 'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\nmnopqrstuvw,2025-01-02T00:00:00Z\n' }
+  await importTakeoutPlaylist(entry, 'Shared name', storage)
+  const merged = await playlists.findOneAsync({ _id: 'saved' })
+  assert.deepEqual(merged.videos.slice(0, saved.length), saved)
+  assert.equal(merged.videos.length, saved.length + 1)
+  assert.equal(merged.protected, true)
+  assert.deepEqual(merged.future, { keep: true })
+  assert.equal(merged.videos.at(-1).type, 'video')
+  assert.equal(typeof merged.videos.at(-1).playlistItemId, 'string')
+  await importTakeoutPlaylist(entry, 'Shared name', storage)
+  assert.deepEqual(await playlists.findOneAsync({ _id: 'saved' }), merged)
+  await importTakeoutPlaylist(entry, 'New imported playlist', storage)
+  const created = await playlists.findOneAsync({ playlistName: 'New imported playlist' })
+  assert.equal(created.videos.length, 2)
+  await importTakeoutPlaylist(entry, 'New imported playlist', storage)
+  assert.deepEqual(await playlists.findOneAsync({ _id: created._id }), created)
+})
 
 test('detects supported Takeout entries under the archive root', () => {
   const root = 'takeout-001/Takeout/YouTube and YouTube Music'

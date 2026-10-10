@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { shallowReactive } from 'vue'
 import { isRssUpcomingPremiere, isUpcomingPremiere } from '../../src/renderer/helpers/subscription-visibility.js'
+import { shallowReactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { load } from 'js-yaml'
 import { YTNodes } from 'youtubei.js'
@@ -26,12 +26,12 @@ const networkSource = (await readFile(new URL('../../src/renderer/helpers/networ
 
 const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
-  .replace(/^export \{[^\n]* from [^\n]*\n/gm, '')
+  .replace(/^export \{.*\} from .*\n/gm, '')
   .replace(/^export /gm, '')
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
 // platform APIs. Webpack-only imports are supplied in the isolated context.
-function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, finishNative = async () => {} } = {}) {
+function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('Failed to fetch'), webCors = false, backend = 'local', fallbackWorks = false, rssStatus = 200, channelInfo = { has_shorts: true, getShorts: async () => ({ videos: [] }) }, playlistError = null, playlistItems = [], stallChannelProbe = false, channelStatus = rssStatus, scraperError = null, shortPublishDate = '2026-09-06T12:00:00Z', beforeShortMetadata = async () => {}, finishNative = async () => {}, electron = false, libraryQuery } = {}) {
   const window = new EventTarget()
   const navigator = { onLine: online }
   const toasts = []
@@ -78,7 +78,8 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
   const context = vm.createContext({
     shallowReactive, subscriptionRefreshErrors, window, navigator, CustomEvent, AbortController, AbortSignal, Request, Response, URL, EventTarget, createAbortError,
     location: { href: 'https://localhost/', origin: 'https://localhost' }, setTimeout, clearTimeout, console: { error() {}, warn() {} },
-    process: { env: { IS_CAPACITOR: true, SUPPORTS_LOCAL_API: true } },
+    process: { env: { IS_CAPACITOR: !electron, IS_ELECTRON: electron, SUPPORTS_LOCAL_API: true } },
+    DBLibraryHandlers: { query: libraryQuery },
     store: {
       getters,
       commit(key, value) { if (key === 'setSubscriptionFeedRefreshInProgress') getters.getSubscriptionFeedRefreshInProgress = value },
@@ -134,7 +135,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
       init?.signal?.addEventListener('abort', () => reject(createAbortError()), { once: true })
     })
   }
-  vm.runInContext(`${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, cancelSubscriptionRefresh, updateVideoListAfterProcessing }`, context)
+  vm.runInContext(`${source}\nglobalThis.api = { refreshSubscriptionVideosFromRemote, refreshSubscriptionShortsFromRemote, refreshSubscriptionLiveFromRemote, refreshSubscriptionPostsFromRemote, cancelSubscriptionRefresh, updateVideoListAfterProcessing, getChannelShortsLocal }`, context)
   return {
     get details() { return [...subscriptionRefreshErrors.value.values()].map(channel => channel.trace).join('\n') },
     ...context.api, refresh: context.api[`refreshSubscription${feed}FromRemote`], navigator, requests, fallbackRequests, toasts, copied, writes, events, getters, recovery: sharedRecovery,
@@ -425,6 +426,74 @@ test('Shorts refresh loads the channel tab when its automatic playlist does not 
     ...update.value.videos
   ])
   assert.equal(sorted.map(video => video.videoId).join(','), 'C9wafAQcub0,middle,cached-short')
+})
+
+test('portable Shorts fallback retains its first matching cached date before refresh reconciliation', async () => {
+  const channelId = 'portable-channel'
+  const cachedPublished = Date.parse('2026-09-01T12:00:00Z')
+  const cached = [{ videoId: 'cached-short', published: cachedPublished }, { videoId: 'cached-short', published: cachedPublished + 1000 }]
+  const app = createRefresh({
+    rssStatus: 404,
+    playlistError: new Error('The playlist does not exist.'),
+    channelInfo: {
+      has_shorts: true,
+      getShorts: async () => ({ videos: [new YTNodes.ReelItem({
+        videoId: 'cached-short', headline: { simpleText: 'Cached Short' }, thumbnail: { thumbnails: [] }
+      })] })
+    }
+  })
+  app.getters.getShortsCache[channelId] = { videos: cached }
+  app.reconnect()
+  const result = await app.getChannelShortsLocal({ id: channelId, name: 'Channel' }, key => key, [])
+  assert.deepEqual(Array.from(result.videos, video => ({ videoId: video.videoId, published: video.published })), [cached[0]])
+  assert.deepEqual(app.getters.getShortsCache[channelId].videos, cached)
+  assert.deepEqual(app.requests.filter(url => url.includes('/watch?v=')), [])
+})
+
+test('desktop Shorts fallback reuses durable publication dates with bounded matching reads', async () => {
+  const channelId = 'durable-channel'
+  const cachedPublished = Date.parse('2026-09-01T12:00:00Z')
+  const cachedIds = Array.from({ length: 1251 }, (_, i) => `cached-short-${i}`)
+  const videoIds = [...cachedIds, 'fresh-short']
+  const queries = []
+  let activeQueries = 0
+  let peakQueries = 0
+  const app = createRefresh({
+    electron: true,
+    rssStatus: 404,
+    playlistError: new Error('The playlist does not exist.'),
+    channelInfo: {
+      has_shorts: true,
+      getShorts: async () => ({ videos: videoIds.map(videoId => new YTNodes.ReelItem({
+        videoId, headline: { simpleText: videoId }, thumbnail: { thumbnails: [] }
+      })) })
+    },
+    async libraryQuery(method, payload) {
+      queries.push({ method, ...payload, ids: Array.from(payload.ids) })
+      activeQueries++
+      peakQueries = Math.max(peakQueries, activeQueries)
+      await new Promise(resolve => setImmediate(resolve))
+      activeQueries--
+      return payload.ids.filter(id => cachedIds.includes(id)).map(videoId => ({ videoId, published: cachedPublished }))
+    }
+  })
+  // Desktop summaries deliberately leave the renderer's normalized members empty.
+  app.getters.getShortsCache[channelId] = { videos: [] }
+  app.reconnect()
+  const errorChannels = []
+  const result = await app.getChannelShortsLocal({ id: channelId, name: 'Channel' }, key => key, errorChannels)
+  assert.deepEqual(queries, Array.from({ length: Math.ceil(videoIds.length / 250) }, (_, index) => ({
+    method: 'subscriptionEntries', channelId, field: 'shorts', ids: videoIds.slice(index * 250, (index + 1) * 250)
+  })))
+  assert.ok(peakQueries > 1, 'cache reads must overlap rather than pay sequential IPC round trips')
+  assert.ok(peakQueries <= 4, 'cache reads must have bounded concurrency')
+  assert.equal(activeQueries, 0)
+  assert.deepEqual(errorChannels, [])
+  assert.equal(app.toasts.length, 0)
+  assert.deepEqual(Array.from(result.videos, video => ({ videoId: video.videoId, published: video.published })),
+    videoIds.map(videoId => ({ videoId, published: videoId === 'fresh-short' ? Date.parse('2026-09-06T12:00:00Z') : cachedPublished })))
+  assert.deepEqual(app.requests.filter(url => url.includes('/watch?v=')), ['https://www.youtube.com/watch?v=fresh-short'])
+  assert.deepEqual(app.getters.getShortsCache[channelId].videos, [])
 })
 
 test('Shorts fallback overlaps date requests with bounded concurrency and preserves tab order', async () => {

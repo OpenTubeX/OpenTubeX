@@ -194,14 +194,14 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
   await expect(page.locator('.toast', {
     hasText: 'All playlists has been successfully imported'
   })).toBeVisible()
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     const playlists = store.getters.getAllPlaylists
       .filter(({ _id }) => _id.startsWith('issue866-playlist-'))
     const mixedPlaylist = playlists.find(({ _id }) => _id === 'issue866-playlist-mixed-videos')
     return {
       ids: playlists.map(({ _id }) => _id).sort(),
-      mixedVideoIds: mixedPlaylist?.videos.map(({ videoId }) => videoId)
+      mixedVideoIds: mixedPlaylist ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: mixedPlaylist._id })).videos.map(({ videoId }) => videoId) : []
     }
   })).toEqual({
     ids: [

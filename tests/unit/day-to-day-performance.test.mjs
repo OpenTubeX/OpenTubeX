@@ -17,7 +17,7 @@ function withoutImports(code) {
 function playlistStore(playlists) {
   const module = vm.runInNewContext(
     withoutImports(source('store/modules/playlists.js')).replace('export default', 'const module =') + '\nmodule',
-    { ...videoCounts }
+    { process: { env: { IS_ELECTRON: false } }, ...videoCounts }
   )
   module.state.targetId = 'favorites'
   module.getters.getQuickBookmarkTargetPlaylistId = state => state.targetId
@@ -28,13 +28,14 @@ function playlistStore(playlists) {
   return store
 }
 
-function overview(store) {
+function overview(store, { desktop = false, query = async () => ({ matches: [] }) } = {}) {
   const code = withoutImports(source('views/UserPlaylists/UserPlaylists.vue').split('<script setup>')[1].split('</script>')[0])
   const pending = new Set()
   const cleanups = []
   const scope = effectScope()
   const api = scope.run(() => vm.runInNewContext(`${code}\n;({ activeData, query, handleQueryChange, filterPlaylist, doSearchPlaylistsWithMatchingVideos })`, {
-    computed, ref, watch, store,
+    computed, ref, watch, store, console,
+    process: { env: { IS_ELECTRON: desktop } }, DBLibraryHandlers: { query },
     onMounted() {}, onBeforeUnmount: callback => cleanups.push(callback),
     useTemplateRef: () => ref(null),
     useI18n: () => ({ locale: ref('en-US'), t: key => key }),
@@ -56,6 +57,32 @@ function overview(store) {
     stop() { for (const cleanup of cleanups) cleanup(); scope.stop() },
   }
 }
+
+test('desktop playlist overview finds saved video metadata using worker matches and discards stale responses', async () => {
+  const store = playlistStore([
+    { _id: 'first', playlistName: 'First', videoCount: 20000, videos: [] },
+    { _id: 'second', playlistName: 'Second', videoCount: 20000, videos: [] },
+  ])
+  let finishFirst
+  const harness = overview(store, { desktop: true, query: async (method, options) => {
+    assert.equal(method, 'playlistSelection')
+    assert.deepEqual([...options.ids], [])
+    if (options.query === 'tail author') return new Promise(resolve => { finishFirst = resolve })
+    return { matches: ['second'] }
+  } })
+  try {
+    harness.api.handleQueryChange('Tail author', undefined, true, true)
+    await nextTick()
+    harness.api.handleQueryChange('Other author', undefined, true, true)
+    await new Promise(resolve => setImmediate(resolve))
+    await nextTick()
+    assert.deepEqual(Array.from(harness.api.activeData.value, playlist => playlist._id), ['second'])
+    finishFirst({ matches: ['first'] })
+    await new Promise(resolve => setImmediate(resolve))
+    await nextTick()
+    assert.deepEqual(Array.from(harness.api.activeData.value, playlist => playlist._id), ['second'])
+  } finally { harness.stop() }
+})
 
 test('100 quick-bookmark controls share one scan of a 10,000-video playlist', () => {
   let reads = 0

@@ -70,10 +70,10 @@ function cachedChannel(index) {
 }
 
 function cachedVideoTitle(page, index) {
-  return page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getVideoCache[id]?.videos?.[0]?.title
-  }, channelId(index))
+  return page.evaluate(async ({ id, videoId }) => {
+    const entries = await window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: [videoId] })
+    return entries[0]?.title
+  }, { id: channelId(index), videoId: `cached${index}` })
 }
 
 function cachedCollaboratorChannel(index) {

@@ -296,17 +296,17 @@ test.describe('subscriptions feed tab indicator', () => {
 
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
-    await page.evaluate(channelId => {
+    await page.evaluate(async channelId => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const replacement = {
-        ...store.getters.getVideoCache[channelId].videos[0],
+        ...(await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], limit: 1 })).records[0],
         videoId: 'background-update',
         title: 'Background update'
       }
 
-      store.commit('updateVideoCacheByChannel', {
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
         channelId,
-        entries: [replacement],
+        videos: [replacement],
         timestamp: new Date()
       })
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {

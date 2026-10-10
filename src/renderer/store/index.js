@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import { hydrateVideoState, installLibraryState } from '../helpers/libraryState'
 // import createPersistedState from 'vuex-persistedstate'
 
 import downloads from './modules/downloads'
@@ -97,7 +98,10 @@ function reloadRecommendationEvidenceAfterHistoryRemoval(store) {
   })
 }
 
-export default createStore({
+const store = createStore({
+  actions: {
+    hydrateVideoState: (_context, ids) => hydrateVideoState(store, ids)
+  },
   modules: {
     downloads,
     history,
@@ -120,8 +124,11 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, reloadRecommendationEvidenceAfterHistoryRemoval]
+  plugins: [syncOnLocalChanges, reloadRecommendationEvidenceAfterHistoryRemoval,
+    ...(process.env.IS_ELECTRON ? [installLibraryState] : [])]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]
 })
+
+export default store

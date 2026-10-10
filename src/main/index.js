@@ -40,7 +40,9 @@ import {
 } from '../customTheme'
 import { resolveSystemTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { applySyncServerUserAgent } from '../syncServerUserAgent'
-import * as baseHandlers from '../datastores/handlers/base'
+import * as baseHandlers from '../datastores/handlers/main'
+import { LibraryJobs } from './libraryJobs.js'
+import { libraryRequest } from '../datastores/sqlite/client.js'
 import { liveReminders } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
@@ -95,6 +97,7 @@ import { supportsNativeNotifications } from './nativeNotifications'
 
 const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
 const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'), powerSaveBlocker)
+const libraryJobs = new LibraryJobs((method, data) => libraryRequest('engine', method, [data]))
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
   console.log(`v${packageDetails.version} Beta`) // eslint-disable-line no-console
@@ -108,8 +111,135 @@ if (process.argv.includes('--version')) {
   if (process.env.NODE_ENV !== 'development' && !app.requestSingleInstanceLock()) {
     app.exit()
   } else {
-    baseHandlers.loadDatastores()
+    baseHandlers.loadDatastores().catch(async error => {
+      await app.whenReady()
+      const t = await createMainTranslator({ locale: error.locale ?? app.getLocale().replace('_', '-'), useAITranslationCompletions: error.useAITranslationCompletions })
+      const guidance = [t('Library.CouldNotOpen')]
+      if (['LIBRARY_MISSING', 'LIBRARY_IDENTITY_MISMATCH'].includes(error.code)) {
+        guidance.push(t('Library.RestoreProfile'))
+      }
+      dialog.showErrorBox(app.getName(), `${guidance.join('\n\n')}\n\n${error.message}`)
+      app.exit(1)
+    })
     runApp()
+  }
+}
+
+/**
+ * @param {string} key
+ * @param {Record<string, unknown>} messages
+ * @returns {string | undefined}
+ */
+function getLocaleMessage(key, messages) {
+  const value = key.split('.').reduce((current, segment) => {
+    return current != null && typeof current === 'object' ? current[segment] : undefined
+  }, messages)
+
+  return typeof value === 'string' ? value : undefined
+}
+
+/**
+ * @param {string} locale
+ * @param {'human' | 'ai'} source
+ * @returns {Promise<Record<string, unknown>>}
+ */
+async function loadLocaleMessages(locale, source = 'human') {
+  const directory = source === 'ai' ? 'locales/ai' : 'locales'
+  const localePath = process.env.NODE_ENV === 'development'
+    ? path.resolve(__dirname, `../../static/${directory}`, `${locale}.yaml`)
+    : path.resolve(__dirname, `static/${directory}`, `${locale}.json.br`)
+
+  if (process.env.NODE_ENV === 'development') {
+    const contents = await asyncFs.readFile(localePath, 'utf8')
+    return loadYaml(contents)
+  }
+
+  const contents = await asyncFs.readFile(localePath)
+  const decompressed = await brotliDecompressAsync(contents)
+  return JSON.parse(decompressed.toString('utf8'))
+}
+
+/**
+ * @returns {Promise<(key: string, parameters?: Record<string, string | number>, pluralChoice?: number) => string>}
+ */
+async function createMainTranslator({ locale, useAITranslationCompletions: explicitAITranslationPreference } = {}) {
+  const fallbackLocale = 'en-US'
+  const storedLocale = locale ?? (await baseHandlers.settings._findOne('currentLocale'))?.value
+  const storedAITranslationPreference = locale == null
+    ? (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value
+    : explicitAITranslationPreference
+  const useAITranslationCompletions = storedAITranslationPreference == null
+    ? true
+    : storedAITranslationPreference === true
+  const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
+    ? storedLocale
+    : app.getLocale().replace('_', '-')
+
+  const baseLocale = currentLocale.split('-')[0]
+  const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
+  const humanMessages = new Map()
+  const aiMessages = new Map()
+
+  for (const locale of candidateLocales) {
+    try {
+      humanMessages.set(locale, await loadLocaleMessages(locale))
+    } catch (error) {
+      if (locale === fallbackLocale) {
+        console.error('Failed to load fallback locale for main-process dialog:', error)
+      }
+    }
+  }
+
+  if (useAITranslationCompletions) {
+    for (const locale of [currentLocale, baseLocale]) {
+      if (!locale || aiMessages.has(locale)) continue
+      try {
+        aiMessages.set(locale, await loadLocaleMessages(locale, 'ai'))
+      } catch {
+        // Complete locales do not have an AI overlay.
+      }
+    }
+  }
+
+  const messagesByLocale = []
+  const currentMessages = composeLocaleMessages({
+    locale: currentLocale,
+    humanMessages,
+    aiMessages,
+    includeAI: useAITranslationCompletions,
+  })
+  if (Object.keys(currentMessages).length > 0) {
+    messagesByLocale.push({
+      locale: currentLocale,
+      messages: expandMultipleOnlyPluralMessages(currentLocale, currentMessages),
+    })
+  }
+
+  if (currentLocale !== fallbackLocale && humanMessages.has(fallbackLocale)) {
+    messagesByLocale.push({
+      locale: fallbackLocale,
+      messages: expandMultipleOnlyPluralMessages(fallbackLocale, humanMessages.get(fallbackLocale)),
+    })
+  }
+
+  return (key, parameters = {}, pluralChoice) => {
+    for (const { locale, messages } of messagesByLocale) {
+      const message = getLocaleMessage(key, messages)
+      if (message) {
+        const selectedMessage = pluralChoice == null
+          ? message
+          : selectPluralForm(locale, message, pluralChoice)
+
+        if (selectedMessage == null) continue
+
+        return Object.entries(parameters).reduce(
+          (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+          selectedMessage
+        )
+      }
+    }
+
+    return key
   }
 }
 
@@ -520,122 +650,6 @@ function runApp() {
     await Promise.all(Object.entries(resolvedSettings).map(([key, value]) => (
       value === currentSettings[key] ? null : updateSettingFromMain(key, value, currentSettings[key])
     )))
-  }
-
-  /**
-   * @param {string} key
-   * @param {Record<string, unknown>} messages
-   * @returns {string | undefined}
-   */
-  function getLocaleMessage(key, messages) {
-    const value = key.split('.').reduce((current, segment) => {
-      return current != null && typeof current === 'object' ? current[segment] : undefined
-    }, messages)
-
-    return typeof value === 'string' ? value : undefined
-  }
-
-  /**
-   * @param {string} locale
-   * @param {'human' | 'ai'} source
-   * @returns {Promise<Record<string, unknown>>}
-   */
-  async function loadLocaleMessages(locale, source = 'human') {
-    const directory = source === 'ai' ? 'locales/ai' : 'locales'
-    const localePath = process.env.NODE_ENV === 'development'
-      ? path.resolve(__dirname, `../../static/${directory}`, `${locale}.yaml`)
-      : path.resolve(__dirname, `static/${directory}`, `${locale}.json.br`)
-
-    if (process.env.NODE_ENV === 'development') {
-      const contents = await asyncFs.readFile(localePath, 'utf8')
-      return loadYaml(contents)
-    }
-
-    const contents = await asyncFs.readFile(localePath)
-    const decompressed = await brotliDecompressAsync(contents)
-    return JSON.parse(decompressed.toString('utf8'))
-  }
-
-  /**
-   * @returns {Promise<(key: string, parameters?: Record<string, string | number>, pluralChoice?: number) => string>}
-   */
-  async function createMainTranslator() {
-    const fallbackLocale = 'en-US'
-    const storedLocale = (await baseHandlers.settings._findOne('currentLocale'))?.value
-    const storedAITranslationPreference = (await baseHandlers.settings._findOne('useAITranslationCompletions'))?.value
-    const useAITranslationCompletions = storedAITranslationPreference == null
-      ? true
-      : storedAITranslationPreference === true
-    const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
-      ? storedLocale
-      : app.getLocale().replace('_', '-')
-
-    const baseLocale = currentLocale.split('-')[0]
-    const candidateLocales = [...new Set([currentLocale, baseLocale, fallbackLocale].filter(Boolean))]
-    const humanMessages = new Map()
-    const aiMessages = new Map()
-
-    for (const locale of candidateLocales) {
-      try {
-        humanMessages.set(locale, await loadLocaleMessages(locale))
-      } catch (error) {
-        if (locale === fallbackLocale) {
-          console.error('Failed to load fallback locale for close confirmation dialog:', error)
-        }
-      }
-    }
-
-    if (useAITranslationCompletions) {
-      for (const locale of [currentLocale, baseLocale]) {
-        if (!locale || aiMessages.has(locale)) continue
-        try {
-          aiMessages.set(locale, await loadLocaleMessages(locale, 'ai'))
-        } catch {
-          // Complete locales do not have an AI overlay.
-        }
-      }
-    }
-
-    const messagesByLocale = []
-    const currentMessages = composeLocaleMessages({
-      locale: currentLocale,
-      humanMessages,
-      aiMessages,
-      includeAI: useAITranslationCompletions,
-    })
-    if (Object.keys(currentMessages).length > 0) {
-      messagesByLocale.push({
-        locale: currentLocale,
-        messages: expandMultipleOnlyPluralMessages(currentLocale, currentMessages),
-      })
-    }
-
-    if (currentLocale !== fallbackLocale && humanMessages.has(fallbackLocale)) {
-      messagesByLocale.push({
-        locale: fallbackLocale,
-        messages: expandMultipleOnlyPluralMessages(fallbackLocale, humanMessages.get(fallbackLocale)),
-      })
-    }
-
-    return (key, parameters = {}, pluralChoice) => {
-      for (const { locale, messages } of messagesByLocale) {
-        const message = getLocaleMessage(key, messages)
-        if (message) {
-          const selectedMessage = pluralChoice == null
-            ? message
-            : selectPluralForm(locale, message, pluralChoice)
-
-          if (selectedMessage == null) continue
-
-          return Object.entries(parameters).reduce(
-            (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
-            selectedMessage
-          )
-        }
-      }
-
-      return key
-    }
   }
 
   /**
@@ -5127,6 +5141,39 @@ function runApp() {
 
   // ************************************************* //
   // DB related IPC calls
+  ipcMain.handle(IpcChannels.LIBRARY_QUERY, async (event, { method, data }) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return
+    const methods = ['recommendationInputs', 'recommendationSubscriptionCandidates', 'subscriptionEntries', 'subscriptionPremieres', 'updateSubscriptionPremieres', 'subscriptionShortsWindow', 'syncPlaylistStart', 'syncPlaylistChunk', 'syncPlaylistPlan', 'syncPlaylistPage', 'syncPlaylistApply', 'syncPlaylistCancel', 'syncHistoryStart', 'syncHistoryChunk', 'syncHistoryPlan', 'syncHistoryPage', 'syncHistoryApply', 'syncHistoryCancel', 'historyRepairPage', 'historyRepairRecord', 'markAllHistory', 'applySubscriptionUnseenHistory', 'playlistSelection', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers', 'metadataPage', 'metadataThumbnail', 'subscriptionPage', 'subscriptionSummaries', 'markSubscriptionEntries', 'subscriptionEntry', 'historyPage', 'playlistSummaries', 'playlistPage', 'videoState', 'historySummary', 'playlistSnapshot', 'playlistWindow', 'playlistStatistics', 'movePlaylistMember', 'cleanupPlaylist', 'reorderPlaylistMembers', 'exportStart', 'exportNext', 'exportCancel', 'importStart', 'importChunk', 'importFinish', 'importApply', 'importCancel']
+    if (!methods.includes(method) && !['syncSnapshotRead', 'syncSnapshotHistory'].includes(method)) throw new Error('Unknown library query')
+    const isJob = /^(export|import|syncHistory|syncPlaylist)(Start|Next|Chunk|Finish|Plan|Page|Apply|Cancel)$/.test(method)
+    if (isJob && !method.endsWith('Start') && !libraryJobs.access(event.sender, method, data?.id)) return true
+    let result
+    try { result = await libraryRequest('engine', method, [data]) } catch (error) {
+      if (error.name === 'SyncServerDataLossError') return { libraryError: { name: error.name, collection: error.collection, deleted: error.deleted, previous: error.previous, items: error.items } }
+      if (isJob && !method.endsWith('Start')) libraryJobs.release(data.id)
+      throw error
+    }
+    if (isJob && method.endsWith('Start')) libraryJobs.track(event.sender, method, result.id)
+    if (isJob && (method.endsWith('Cancel') || (method === 'exportNext' && result.done) || method === 'importApply')) libraryJobs.complete(data.id)
+    if (['syncPlaylistApply', 'movePlaylistMember', 'cleanupPlaylist', 'reorderPlaylistMembers', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers'].includes(method)) syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
+    if (['syncHistoryApply', 'markAllHistory', 'cleanupPlaylist', 'removePlaylistMember', 'removePlaylistMembers'].includes(method)) syncOtherWindows(IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.GENERAL.INVALIDATE })
+    if (method === 'applySubscriptionUnseenHistory' && result > 0) syncOtherWindows(IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.GENERAL.INVALIDATE })
+    if (method === 'markAllHistory' && result.seenVideos !== null) syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, { event: SyncEvents.GENERAL.UPSERT, data: { _id: 'subscriptionSeenVideos', value: result.seenVideos } })
+    if (method === 'syncSnapshotHistory' && result.updated) syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, { event: SyncEvents.GENERAL.UPSERT, data: { _id: 'syncServerSnapshot', value: result.value } })
+    if (method === 'updateSubscriptionPremieres') syncOtherWindows(IpcChannels.SYNC_SUBSCRIPTION_CACHE, event, { event: SyncEvents.GENERAL.INVALIDATE })
+    if (method === 'markSubscriptionEntries') {
+      syncOtherWindows(IpcChannels.SYNC_SUBSCRIPTION_CACHE, event, { event: SyncEvents.GENERAL.INVALIDATE })
+      for (const [key, value] of Object.entries(result.settings)) syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, { event: SyncEvents.GENERAL.UPSERT, data: { _id: key, value } })
+    }
+    if (method === 'importApply') {
+      syncOtherWindows(IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.GENERAL.INVALIDATE })
+      syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
+      syncOtherWindows(IpcChannels.SYNC_PROFILES, event, { event: SyncEvents.GENERAL.INVALIDATE })
+      syncOtherWindows(IpcChannels.SYNC_WATCH_STATS, event, { event: SyncEvents.GENERAL.INVALIDATE })
+      syncOtherWindows(IpcChannels.SYNC_SEARCH_HISTORY, event, { event: SyncEvents.GENERAL.INVALIDATE })
+    }
+    return result
+  })
   // *********** //
 
   // Settings
@@ -5156,9 +5203,9 @@ function runApp() {
         }
 
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.settings.find()
+          return await libraryRequest('engine', 'rendererSettings')
 
-        case DBActions.GENERAL.UPSERT:
+        case DBActions.GENERAL.UPSERT: {
           // This one is only allowed to be changed by the CHOOSE_DEFAULT_FOLDER IPC action
           // to avoid the "write to default folder" IPC calls being abused to write to arbitrary locations
           if (data._id === 'screenshotFolderPath') {
@@ -5166,10 +5213,13 @@ function runApp() {
           }
 
           await baseHandlers.settings.upsert(data._id, data.value)
+          const syncData = data._id === 'syncServerSnapshot'
+            ? { ...data, value: await libraryRequest('engine', 'syncSnapshotSummary') }
+            : data
           syncOtherWindows(
             IpcChannels.SYNC_SETTINGS,
             event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
+            { event: SyncEvents.GENERAL.UPSERT, data: syncData }
           )
           switch (data._id) {
             case 'contextMenuSearchEngines':
@@ -5229,6 +5279,7 @@ function runApp() {
               // Do nothing for unmatched settings
           }
           return null
+        }
 
         case DBActions.GENERAL.DELETE:
           await baseHandlers.settings.delete(data)
@@ -5259,12 +5310,7 @@ function runApp() {
         case DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE: {
           const result = await baseHandlers.history.updateSubscriptionState(data)
           if (result.records.length > 0) {
-            syncOtherWindows(IpcChannels.SYNC_HISTORY, event, result.records.length === 1
-              ? { event: SyncEvents.GENERAL.UPSERT, data: result.records[0] }
-              : {
-                  event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES,
-                  data: { insertions: [], updates: result.records, deletions: [] }
-                })
+            syncOtherWindows(IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.GENERAL.INVALIDATE })
           }
           if (result.seenVideos != null) {
             syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
@@ -5283,7 +5329,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5292,7 +5338,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.OVERWRITE, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5302,7 +5348,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5311,7 +5357,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.HISTORY.UPDATE_WATCH_PROGRESS, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5320,7 +5366,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.HISTORY.UPDATE_PLAYLIST, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5329,7 +5375,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5338,7 +5384,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.HISTORY.UNSET_PLAYLISTS, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5347,7 +5393,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.DELETE, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5366,7 +5412,7 @@ function runApp() {
             syncOtherWindows(
               IpcChannels.SYNC_HISTORY,
               event,
-              { event: SyncEvents.GENERAL.DELETE_MULTIPLE, data: videoIds }
+              { event: SyncEvents.GENERAL.INVALIDATE }
             )
           }
           return videoIds
@@ -5377,7 +5423,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.DELETE_ALL }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5586,7 +5632,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.GENERAL.CREATE, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5598,7 +5644,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5611,7 +5657,7 @@ function runApp() {
             syncOtherWindows(
               IpcChannels.SYNC_PLAYLISTS,
               event,
-              { event: SyncEvents.PLAYLISTS.UPSERT_VIDEO, data }
+              { event: SyncEvents.GENERAL.INVALIDATE }
             )
           }
 
@@ -5623,7 +5669,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.PLAYLISTS.UPSERT_VIDEOS, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5632,7 +5678,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.GENERAL.DELETE, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5641,7 +5687,7 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.PLAYLISTS.DELETE_VIDEO, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
@@ -5650,26 +5696,23 @@ function runApp() {
           syncOtherWindows(
             IpcChannels.SYNC_PLAYLISTS,
             event,
-            { event: SyncEvents.PLAYLISTS.DELETE_VIDEOS, data }
+            { event: SyncEvents.GENERAL.INVALIDATE }
           )
           return null
 
         case DBActions.PLAYLISTS.DELETE_ALL_VIDEOS:
           await baseHandlers.playlists.deleteAllVideosByPlaylistId(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
           return null
 
         case DBActions.GENERAL.DELETE_MULTIPLE:
           await baseHandlers.playlists.deleteMultiple(data)
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
           return null
 
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.playlists.deleteAll()
-          // TODO: Syncing (implement only when it starts being used)
-          // syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: '_', data })
+          syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
           return null
 
         default:

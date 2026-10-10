@@ -4,6 +4,9 @@ import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { createStore } from 'vuex'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 import * as externalMediaPositions from '../../src/renderer/helpers/externalMediaPosition.js'
@@ -82,6 +85,56 @@ const video = (videoId, timeWatched = Date.now()) => ({
   watchProgress: 500,
   timeWatched,
   isWatched: true,
+})
+
+test('removing one history video deletes all restored occurrences on both storage adapters', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec('PRAGMA foreign_keys = ON')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const portable = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
+  for (const db of [engine.collections, portable]) {
+    const { history, recommendations } = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
+    const removed = [{ ...video('removed'), _id: 'first' }, { ...video('removed'), _id: 'second', unknown: 'preserved duplicate' }]
+    const retained = { ...video('retained'), _id: 'retained', unknown: { keep: true } }
+    await db.history.insertAsync([...removed, retained])
+    await recommendations.record({ type: 'positive', video: removed[0] })
+    assert.equal(await history.delete('removed'), 2)
+    assert.deepEqual(await db.history.findAsync({}), [retained])
+    assert.deepEqual((await recommendations.find()).records, [])
+    assert.equal(await history.delete('removed'), 0)
+  }
+})
+
+test('age-based cleanup retains newer duplicate history and its recommendation evidence on both adapters', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec('PRAGMA foreign_keys = ON')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const portable = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
+  for (const db of [engine.collections, portable]) {
+    const { history, recommendations } = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
+    const retained = [
+      { ...video('duplicate', 100), _id: 'boundary', unknown: { keep: true } },
+      { ...video('duplicate', 200), _id: 'recent', watchProgress: 550 },
+      { ...video('playing', 1), _id: 'playing' },
+      { ...video('unrelated', 300), _id: 'unrelated' },
+    ]
+    await db.history.insertAsync([
+      { ...video('duplicate', 1), _id: 'old-first' },
+      { ...video('duplicate', 2), _id: 'old-second' },
+      { ...video('expired', 3), _id: 'expired' },
+      ...retained,
+    ])
+    const evidence = ['duplicate', 'expired', 'playing'].map(_id => ({ _id, updatedAt: Date.now(), feedback: 'positive', unknown: 'keep' }))
+    await db.recommendations.insertAsync(evidence)
+    assert.deepEqual((await history.deleteOlderThan(100, ['playing'])).sort(), ['duplicate', 'duplicate', 'expired'])
+    assert.deepEqual((await db.history.findAsync({})).sort((a, b) => a._id.localeCompare(b._id)), retained.sort((a, b) => a._id.localeCompare(b._id)))
+    assert.deepEqual((await recommendations.find()).records.sort((a, b) => a._id.localeCompare(b._id)), evidence.filter(record => record._id !== 'expired'))
+    assert.deepEqual(await history.deleteOlderThan(100, ['playing']), [])
+  }
 })
 const evidenceIds = records => records.map(record => record.videoId).sort()
 const seeds = store => buildRecommendationProfile(store.getters.getHistoryCacheSorted, {

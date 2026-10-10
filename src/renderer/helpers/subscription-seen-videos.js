@@ -106,10 +106,14 @@ export async function syncSubscriptionSeenVideos(client, store) {
   if (unseenById.size > 0) {
     // History sync runs first. An older completed record must not undo the
     // reverse action, while watching again after it still counts as watched.
-    for (const history of store.state.history.historyCacheSorted) {
-      if (isHistoryEntryWatched(history) &&
-          unseenById.get(history.videoId) > (history.timeWatched ?? 0)) {
-        await store.dispatch('updateHistory', { ...history, isWatched: false })
+    if (store.state.history.libraryPaged) {
+      await store.dispatch('applySubscriptionUnseenHistory')
+    } else {
+      for (const history of store.state.history.historyCacheSorted) {
+        if (isHistoryEntryWatched(history) &&
+            unseenById.get(history.videoId) > (history.timeWatched ?? 0)) {
+          await store.dispatch('updateHistory', { ...history, isWatched: false })
+        }
       }
     }
     for (const history of await client.getWatchHistory() ?? []) {

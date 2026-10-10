@@ -44,6 +44,43 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest,
   return vm.runInContext(`new SyncServerClient(${JSON.stringify(serverUrl)})`, context)
 }
 
+test('history pages are fetched on demand and retain the collecting API for portable storage', async () => {
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', [])
+  const requests = []
+  const pages = [[{ video_id: 'first' }, { video_id: 'second' }], [{ video_id: 'third' }]]
+  client.getCapabilities = async () => ({ history_page_size: 2 })
+  client.apiRequest = async path => {
+    requests.push(path)
+    return pages[Number(new URL(path, 'https://sync.example').searchParams.get('page')) - 1]
+  }
+  const iterator = client.getWatchHistoryPages()
+  assert.equal(requests.length, 0)
+  assert.deepEqual((await iterator.next()).value, pages[0])
+  assert.equal(requests.length, 1)
+  assert.match(requests[0], /page=1&order=added_date_desc&page_size=2$/)
+  assert.deepEqual((await iterator.next()).value, pages[1])
+  assert.equal(requests.length, 2)
+  assert.equal((await iterator.next()).done, true)
+  assert.equal(requests.length, 2)
+  assert.deepEqual(Array.from(await client.getWatchHistory()), pages.flat())
+})
+
+test('history page failures are surfaced without presenting a partial library as complete', async () => {
+  const client = await loadClient({ IS_ELECTRON: true }, '0.36.0', [])
+  client.getCapabilities = async () => ({ history_page_size: 1 })
+  client.apiRequest = async path => {
+    if (path.includes('page=1&')) return [{ video_id: 'first' }]
+    throw new Error('connection interrupted')
+  }
+  const iterator = client.getWatchHistoryPages()
+  assert.equal((await iterator.next()).value[0].video_id, 'first')
+  await assert.rejects(iterator.next(), /connection interrupted/)
+  await assert.rejects(client.getWatchHistory(), /connection interrupted/)
+  client.apiRequest = async () => { throw Object.assign(new Error('unsupported'), { status: 404 }) }
+  assert.equal((await client.getWatchHistoryPages().next()).value, null)
+  assert.equal(await client.getWatchHistory(), null)
+})
+
 for (const [operation, run] of [
   ['small collection upload', client => client.putEncryptedSyncCollection('settings', 1, 'encrypted')],
   ['manifest', client => client.getEncryptedSyncManifest()],

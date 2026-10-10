@@ -155,17 +155,15 @@ test.describe('Home subscription processing', () => {
     expect(await page.evaluate(() => window.navigationCopies)).toBe(0)
     expect(await page.evaluate(() => window.navigationTimestampReads)).toBeLessThanOrEqual(3 * 300 * 36)
 
-    // The shelf keeps the source entries reactive after skipping decoration.
-    await page.evaluate(() => {
+    await page.evaluate(async ({ channelId, videos }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const channel = store.getters.getActiveProfile.subscriptions[0].id
-      store.getters.getVideoCache[channel].videos[0].title = 'Updated Home video'
-    })
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos, timestamp: new Date() })
+    }, { channelId: largeSubscriptionsSeed.profiles[0].subscriptions[0].id, videos: largeSubscriptionsSeed.subscriptionCache[0].videos.map((entry, index) => index ? entry : { ...entry, title: 'Updated Home video' }) })
     await expect(page.getByText('Updated Home video', { exact: true })).toBeVisible()
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const channel = store.getters.getActiveProfile.subscriptions[0].id
-      store.getters.getVideoCache[channel].videos[0].isNewInSubscriptionFeed = false
+      const [entry] = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: JSON.parse(JSON.stringify(store.getters.getActiveProfile.subscriptions)), category: 'videos', limit: 1 })).records
+      await store.dispatch('markSubscriptionVideoAsSeen', entry.videoId)
     })
     await expect(page.getByText('Updated Home video', { exact: true })).toHaveCount(0)
     await expect(page.getByText('Video 1-0', { exact: true })).toBeVisible()
@@ -209,13 +207,13 @@ for (const limit of ['global', 'daily']) {
       const cards = page.locator('[data-home-section="newSinceLastVisit"] .mediaGrid li')
       await expect(cards).toHaveCount(1)
       await expect(cards).toContainText('Limited Short 0')
-      await page.evaluate(thumbnailUrl => {
+      await page.evaluate(async thumbnailUrl => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         const channelId = store.getters.getActiveProfile.subscriptions[0].id
-        const video = store.state.subscriptionCache.shortsCache[channelId].videos[0]
-        store.commit('updateShortsCacheWithChannelPageShorts', {
+        const [video] = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: JSON.parse(JSON.stringify(store.getters.getActiveProfile.subscriptions)), category: 'shorts', limit: 1 })).records
+        await store.dispatch('updateSubscriptionShortsCacheWithChannelPageShorts', {
           channelId,
-          entries: [{ ...video, title: 'Refreshed Limited Short', thumbnailUrl }]
+          videos: [{ ...video, title: 'Refreshed Limited Short', thumbnailUrl }]
         })
       }, refreshedThumbnail)
       await expect(cards).toHaveCount(1)

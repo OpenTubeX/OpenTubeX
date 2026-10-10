@@ -391,6 +391,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
@@ -400,6 +401,7 @@ const props = defineProps({
   externalUrl: { type: String, default: '' },
   videoIds: { type: Array, default: () => [] },
   playlistId: { type: String, default: '' },
+  userPlaylistId: { type: String, default: '' },
   playlistKey: { type: String, default: '' },
   isPlaylist: { type: Boolean, default: false },
   title: { type: String, required: true },
@@ -636,11 +638,14 @@ async function chooseDownloadFolder() {
   if (typeof path === 'string' && path.length > 0) store.dispatch('updateYtDlpDownloadFolderPath', path)
 }
 async function startDownload() {
+  const videoIds = props.userPlaylistId
+    ? (await DBLibraryHandlers.query('playlistSnapshot', { id: props.userPlaylistId }))?.videos.map(video => video.videoId) ?? []
+    : [...props.videoIds]
   const result = await ytDlp.ytDlpDownload({
     ...normalizeOptions(options),
     videoId: props.videoId,
     ...(props.externalUrl ? { externalUrl: props.externalUrl } : {}),
-    videoIds: [...props.videoIds],
+    videoIds,
     playlistId: props.playlistId,
     playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,

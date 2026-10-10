@@ -226,7 +226,8 @@ for (const zoom of [1, 0.95]) {
     await expectValidScrollRange(list)
     await list.evaluate(el => { el.scrollTop = el.scrollHeight })
     await watch.evaluate(async vm => {
-      for (const video of vm.$store.getters.getPlaylist('layout-playlist').videos.slice(1)) {
+      const playlist = await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'layout-playlist' })
+      for (const video of playlist.videos.slice(1)) {
         await vm.$store.dispatch('removeVideo', { _id: 'layout-playlist', videoId: video.videoId, playlistItemId: video.playlistItemId })
       }
     })

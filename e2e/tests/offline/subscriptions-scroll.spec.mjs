@@ -198,10 +198,7 @@ test('finishing a refresh keeps the position reached while scrolling the mobile 
   await scrollFeedTo(page, 600)
   response.resolve()
   await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
-  await expect.poll(() => page.evaluate(channelId => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getVideoCache[channelId]?.videos?.[0]?.viewCount
-  }, CHANNEL_ID)).toBe(2000)
+  await expect.poll(() => page.evaluate(async ({ channelId, videoId }) => (await window.ftElectron.libraryQuery('subscriptionEntries', { channelId, ids: [videoId] }))[0]?.viewCount, { channelId: CHANNEL_ID, videoId: videos[0].videoId })).toBe(2000)
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
 })
 
@@ -226,7 +223,7 @@ for (const uiScale of [100, 95]) {
       response.resolve()
       await expect.poll(() => page.evaluate(channelId => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        return store.getters.getVideoCache[channelId]?.videos?.length
+        return store.getters.getVideoCache[channelId]?.count
       }, CHANNEL_ID)).toBe(remainingCount)
       await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
       await expect.poll(() => page.evaluate(() => {

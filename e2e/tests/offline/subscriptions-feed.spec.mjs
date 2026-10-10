@@ -328,12 +328,12 @@ test.describe('subscriptions feed from cache', () => {
 
   test('rechecks a cached premiere after the clock moves backward', async ({ page }) => {
     await goTo(page, 'userplaylists')
-    await page.evaluate(({ channelId, start }) => {
+    await page.evaluate(async ({ channelId, start }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
+      const entries = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], preferences: {}, limit: 250 })).records.map(entry => (
         entry.videoId === 'aaaaaaaaaa3' ? { ...entry, premiereDate: new Date(start).toISOString() } : entry
       ))
-      store.commit('updateVideoCacheByChannel', { channelId, entries })
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos: entries })
     }, { channelId: CHANNEL_A, start: now + 1000 })
     await page.clock.setFixedTime(now)
     await goTo(page, 'subscriptions')
@@ -345,10 +345,10 @@ test.describe('subscriptions feed from cache', () => {
     await goTo(page, 'userplaylists')
     await page.clock.setFixedTime(now)
     await goTo(page, 'subscriptions')
-    expect(await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getSubscriptionVideosFeed.videos.some(entry => entry.videoId === 'aaaaaaaaaa3')
-    })).toBe(false)
+    expect(await page.evaluate(async channelId => {
+      const result = await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], now: Date.now(), preferences: { hideUpcomingPremieres: true } })
+      return result.records.some(entry => entry.videoId === 'aaaaaaaaaa3')
+    }, CHANNEL_A)).toBe(false)
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
@@ -571,7 +571,7 @@ test.describe('relative timestamp updates disabled', () => {
     await page.evaluate(async ({ channelId, published }) => {
       const app = document.querySelector('#app').__vue_app__
       const store = app.config.globalProperties.$store
-      const videos = store.getters.getVideoCache[channelId].videos.map(video => ({
+      const videos = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], preferences: {}, limit: 250 })).records.map(video => ({
         ...video,
         published
       }))
@@ -597,23 +597,21 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
 
   test('updates seen state in a cached legacy premiere after visiting Playlists', async ({ page }) => {
     await goTo(page, 'userplaylists')
-    await page.evaluate(channelId => {
+    await page.evaluate(async channelId => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setShowNewSubscriptionFeedIndicators', true)
-      const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
-        entry.videoId === 'aaaaaaaaaa3' ? { ...entry, videoId: 'premiere-seen-test', isNewInSubscriptionFeed: true } : entry
+      const entries = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], preferences: {}, limit: 250 })).records.map(entry => (
+        entry.videoId === 'aaaaaaaaaa3' ? { ...entry, videoId: 'premiere-seen-test', isNewInSubscriptionFeed: true } : { ...entry, isNewInSubscriptionFeed: entry.isNewInSubscriptionFeed === true }
       ))
-      store.commit('updateVideoCacheByChannel', { channelId, entries })
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos: entries })
     }, CHANNEL_A)
     await goTo(page, 'subscriptions')
     const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(premiere.locator('.newContentDot')).toBeVisible()
     await goTo(page, 'userplaylists')
-    await page.evaluate(channelId => {
+    await page.evaluate(async channelId => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('markSubscriptionEntriesAsSeenInCache', [{
-        tab: 'videos', channelId, entries: [{ videoId: 'premiere-seen-test', isNewInSubscriptionFeed: false }]
-      }])
+      await store.dispatch('markSubscriptionVideoAsSeen', 'premiere-seen-test')
     }, CHANNEL_A)
     await goTo(page, 'subscriptions')
     await expect(premiere.locator('.newContentDot')).toHaveCount(0)
@@ -721,7 +719,7 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
       await page.evaluate(async ({ channelId, updates }) => {
         const app = document.querySelector('#app').__vue_app__
         const store = app.config.globalProperties.$store
-        const videos = store.getters.getVideoCache[channelId].videos.map(video => {
+        const videos = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], preferences: {}, limit: 250 })).records.map(video => {
           if (video.videoId !== 'aaaaaaaaaa3') return video
 
           const updatedVideo = { ...video, ...updates }

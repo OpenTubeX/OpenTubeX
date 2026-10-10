@@ -38,9 +38,10 @@ async function openPlaylist(page, route = '/playlist/fork-source') {
 }
 
 async function getCopy(page) {
-  return page.evaluate(() => {
+  return page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My copy')
+    const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My copy')
+    return playlist ? window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id }) : undefined
   })
 }
 
@@ -86,9 +87,10 @@ test('forks a complete saved playlist and refreshes its editable local snapshot 
   // Exercise the normal local editing actions, preserving a custom order and an added video.
   await page.evaluate(async id => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    const playlist = store.getters.getPlaylist(id)
+    const playlist = await window.ftElectron.libraryQuery('playlistSnapshot', { id })
     await store.dispatch('removeVideo', { _id: id, playlistItemId: playlist.videos[101].playlistItemId })
-    await store.dispatch('updatePlaylist', { _id: id, videos: [...store.getters.getPlaylist(id).videos].reverse() })
+    const page = await window.ftElectron.libraryQuery('playlistPage', { id, limit: 250 })
+    await window.ftElectron.libraryQuery('reorderPlaylistMembers', { id, revision: page.revision, memberIds: page.records.map(video => video._libraryMemberId).reverse() })
     await store.dispatch('addVideo', { _id: id, videoData: { videoId: 'local-added', title: 'Local addition', lengthSeconds: 60 } })
   }, copy._id)
   copy = await getCopy(page)

@@ -1,3 +1,4 @@
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { reactive } from 'vue'
 import store from '../store'
 import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, parseHistoryRepairYtDlp, repairHistory } from '../../historyRepair'
@@ -48,15 +49,37 @@ export async function startHistoryRepair({ useCookies = false } = {}) {
   controller = new AbortController()
   Object.assign(historyRepairState, { running: true, started: true, total: 0, checked: 0, repaired: 0, failed: 0, phase: 'checking', error: '' })
   try {
-    await repairHistory({
-      records: store.getters.getHistoryCacheSorted,
-      getRecord: id => store.getters.getHistoryCacheById[id],
-      fetchMetadata: (videoId, signal) => fetchMetadata(videoId, signal, useCookies),
-      saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
-      signal: controller.signal,
-      onProgress: progress => Object.assign(historyRepairState, progress),
-      onPhase: phase => { historyRepairState.phase = phase },
-    })
+    if (store.state.history.libraryPaged) {
+      let cursor = null
+      const totals = { checked: 0, repaired: 0, failed: 0 }
+      do {
+        const page = await DBLibraryHandlers.query('historyRepairPage', { cursor })
+        if (controller.signal.aborted) break
+        // The cursor retains the initial count because successful repairs remove candidates.
+        historyRepairState.total = page.total
+        const result = await repairHistory({
+          records: page.records,
+          getRecord: (videoId, id) => DBLibraryHandlers.query('historyRepairRecord', { id, videoId }),
+          fetchMetadata: (videoId, signal) => fetchMetadata(videoId, signal, useCookies),
+          saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
+          signal: controller.signal,
+          onProgress: progress => { for (const key of Object.keys(totals)) historyRepairState[key] = totals[key] + progress[key] },
+          onPhase: phase => { historyRepairState.phase = phase }
+        })
+        for (const key of Object.keys(totals)) totals[key] += result[key]
+        cursor = page.cursor
+      } while (cursor && !controller.signal.aborted)
+    } else {
+      await repairHistory({
+        records: store.getters.getHistoryCacheSorted,
+        getRecord: id => store.getters.getHistoryCacheById[id],
+        fetchMetadata: (videoId, signal) => fetchMetadata(videoId, signal, useCookies),
+        saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
+        signal: controller.signal,
+        onProgress: progress => Object.assign(historyRepairState, progress),
+        onPhase: phase => { historyRepairState.phase = phase },
+      })
+    }
     historyRepairState.phase = controller.signal.aborted ? 'stopped' : 'finished'
   } catch (error) {
     historyRepairState.phase = 'stopped'

@@ -512,9 +512,9 @@ test.describe('browsing scroll during mobile minimize', () => {
       const history = page.locator('.tabContent > .routerView').first()
       await expect(history.locator('.ft-list-video').first()).toBeVisible()
       if (trigger === 'search locale change') {
-        await page.evaluate(() => {
+        await page.evaluate(async () => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          store.commit('setHistoryCacheSorted', store.getters.getHistoryCacheSorted.map((entry, index) => ({
+          await store.dispatch('overwriteHistory', store.getters.getHistoryCacheSorted.map((entry, index) => ({
             ...entry, title: index < 8 ? 'istanbul' : 'Istanbul', author: 'Channel'
           })))
         })
@@ -536,10 +536,11 @@ test.describe('browsing scroll during mobile minimize', () => {
       await video.evaluate(element => element.pause())
       await enableMobileTouch(app, page, true, false)
       if (trigger === 'remove' || trigger === 'replace') {
-        await page.evaluate(trigger => {
+        await page.evaluate(async trigger => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          store.commit('setHistoryCacheSorted', trigger === 'replace' ? [] : store.getters.getHistoryCacheSorted.slice(0, 8))
+          await store.dispatch('overwriteHistory', trigger === 'replace' ? [] : store.getters.getHistoryCacheSorted.slice(0, 8))
         }, trigger)
+        await expect(history.locator('.ft-list-video')).toHaveCount(trigger === 'replace' ? 0 : 8)
       } else if (trigger === 'search locale change') {
         await page.evaluate(async () => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

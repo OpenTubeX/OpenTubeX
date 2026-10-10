@@ -785,8 +785,8 @@ test.describe('watch history with an immediate watched threshold', () => {
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-      return records.filter(record => record._id === 'ddddddddddd').at(-1)?.$$deleted
-    }).toBe(true)
+      return records.some(record => record._id === 'ddddddddddd')
+    }).toBe(false)
   })
 
   test('removes and cleanly re-adds a history entry from the subscriptions feed', async ({ app, page }) => {
@@ -843,9 +843,9 @@ test.describe('history cleanup', () => {
 
     await expect.poll(async () => {
       const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
-      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
-      return records.filter((record) => record._id === 'ooooooooooo').at(-1)?.$$deleted
-    }).toBe(true)
+      const records = contents.trim().split('\n').filter(Boolean).map((line) => JSON.parse(line))
+      return records.some((record) => record._id === 'ooooooooooo')
+    }).toBe(false)
   })
 
   test('selects a history cutoff from the modal dropdown', async ({ page }) => {

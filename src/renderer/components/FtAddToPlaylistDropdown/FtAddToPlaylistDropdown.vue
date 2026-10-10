@@ -53,7 +53,7 @@
             />
             <span class="playlistDetails">
               <span class="playlistName">{{ playlist.playlistName }}</span>
-              <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
+              <span class="videoCount">{{ t('Global.Counts.Video Count', { count: (playlist.videoCount ?? playlist.videos.length) }, (playlist.videoCount ?? playlist.videos.length)) }}</span>
             </span>
             <FtIcon
               class="stateIcon"
@@ -160,7 +160,9 @@ const containedIds = computed(() => {
 
   return new Set(
     allPlaylists.value
-      .filter((playlist) => playlist.videos.some((video) => video.videoId === videoId))
+      .filter(playlist => store.state.playlists.libraryPaged
+        ? store.getters.getPlaylistMemberships[videoId]?.[playlist._id] > 0
+        : playlist.videos.some(video => video.videoId === videoId))
       .map((playlist) => playlist._id)
   )
 })
@@ -169,11 +171,11 @@ const containedIds = computed(() => {
  * @param {object} playlist
  */
 function playlistThumbnail(playlist) {
-  if (playlist.videos.length === 0) {
+  if ((playlist.videoCount ?? playlist.videos.length) === 0) {
     return thumbnailPlaceholder
   }
 
-  return getVideoThumbnailUrl(playlist.videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
+  return getVideoThumbnailUrl((playlist.firstVideo ?? playlist.videos[0]).videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
 }
 
 /**

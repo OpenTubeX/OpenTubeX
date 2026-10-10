@@ -115,6 +115,7 @@ import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
@@ -267,6 +268,20 @@ const fullData = computed(() => {
 
 const lowerCaseQuery = computed(() => query.value.toLowerCase())
 const appliedQuery = ref('')
+const libraryMatches = ref(new Set())
+let searchGeneration = 0
+if (process.env.IS_ELECTRON) {
+  watch([appliedQuery, doSearchPlaylistsWithMatchingVideos, allPlaylists], async () => {
+    const generation = ++searchGeneration
+    libraryMatches.value = new Set()
+    if (!appliedQuery.value || !doSearchPlaylistsWithMatchingVideos.value) return
+    try {
+      const result = await DBLibraryHandlers.query('playlistSelection', { ids: [], query: appliedQuery.value })
+      if (generation === searchGeneration) libraryMatches.value = new Set(result.matches)
+    } catch (error) { console.error(error) }
+  }, { immediate: true })
+}
+onBeforeUnmount(() => { searchGeneration++ })
 
 // Track only fields used by the applied search. An idle overview must not
 // deep-watch thousands of saved videos, including in background tabs.
@@ -277,9 +292,11 @@ const filteredPlaylists = computed(() => {
   return allPlaylists.value.filter(playlist => {
     if (typeof playlist.playlistName !== 'string') return false
     return playlist.playlistName.toLowerCase().includes(needle) ||
-      (findMatchingVideos && playlist.videos.some(video => (
-        video.author?.toLowerCase().includes(needle) || video.title.toLowerCase().includes(needle)
-      )))
+      (findMatchingVideos && (process.env.IS_ELECTRON
+        ? libraryMatches.value.has(playlist._id)
+        : playlist.videos.some(video => (
+            video.author?.toLowerCase().includes(needle) || video.title.toLowerCase().includes(needle)
+          ))))
   })
 })
 

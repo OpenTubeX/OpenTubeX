@@ -70,7 +70,7 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
       SyncServerSyncSessions: false,
       SyncServerSyncSettings: false,
       SyncServerSnapshot: JSON.stringify({ subscriptions: ['base', 'removed-remotely'] }),
-    })) store.commit(`set${setting}`, value)
+    })) await store.dispatch(`update${setting}`, value)
     await store.dispatch('syncWithSyncServer')
     await store.dispatch('syncWithSyncServer')
   }, { key, salt })
@@ -114,7 +114,7 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
   ['posts', 'updateSubscriptionPostsCacheByChannel', 'postsCache', 'posts', 'communityPosts', 'postId'],
 ]) {
   test(`${feed} cache rejects stale results including overlapping writes`, async ({ app, page }) => {
-    const result = await page.evaluate(async ({ action, cache, entriesKey, idKey }) => {
+    const result = await page.evaluate(async ({ action, cache, entriesKey, storedKey, idKey }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const save = (time, ids) => store.dispatch(action, {
         channelId: 'audit-channel',
@@ -123,10 +123,11 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
       })
       await save(2000, ['old', 'new'])
       await save(1000, ['old'])
-      const afterStale = store.state.subscriptionCache[cache]['audit-channel'][entriesKey].map(entry => entry[idKey])
+      const entries = () => window.ftElectron.libraryQuery('subscriptionEntries', { channelId: 'audit-channel', field: storedKey, ids: ['old', 'new', 'newest', 'older-overlap'] })
+      const afterStale = (await entries()).map(entry => entry[idKey])
       await Promise.all([save(4000, ['newest']), save(3000, ['older-overlap'])])
-      return { afterStale, final: store.state.subscriptionCache[cache]['audit-channel'] }
-    }, { action, cache, entriesKey, idKey })
+      return { afterStale, final: { ...store.state.subscriptionCache[cache]['audit-channel'], [entriesKey]: await entries() } }
+    }, { action, cache, entriesKey, storedKey, idKey })
     expect(result.afterStale).toEqual(['old', 'new'])
     expect(result.final[entriesKey].map(entry => entry[idKey])).toEqual(['newest'])
     const records = (await readPersistedDatastore(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
@@ -150,7 +151,7 @@ test('Shorts metadata enrichment cannot replace a concurrent feed refresh', asyn
         channelId: 'audit-channel', videos: [{ videoId: 'old', title: 'Updated title' }],
       }),
     ])
-    return store.state.subscriptionCache.shortsCache['audit-channel'].videos
+    return window.ftElectron.libraryQuery('subscriptionEntries', { channelId: 'audit-channel', field: 'shorts', ids: ['new'] })
   })
   expect(result.map(video => video.videoId)).toEqual(['new'])
   const records = (await readPersistedDatastore(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
@@ -215,7 +216,7 @@ for (const mode of ['all', 'video', 'post']) {
         ? store.dispatch('markSubscriptionEntriesAsSeen', { tab: 'videos', channelIds: ['audit-seen'] })
         : store.dispatch(isPost ? 'markSubscriptionPostAsSeen' : 'markSubscriptionVideoAsSeen', 'existing')
       await Promise.all([refresh, seen])
-      return store.state.subscriptionCache[isPost ? 'postsCache' : 'videoCache']['audit-seen'][key]
+      return window.ftElectron.libraryQuery('subscriptionEntries', { channelId: 'audit-seen', field: isPost ? 'communityPosts' : 'videos', ids: ['existing', 'new'] })
     }, mode)
     expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
     const records = (await readPersistedDatastore(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
@@ -252,7 +253,7 @@ test('failed Home re-addition redirects when removal was already persisted', asy
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$route.path)).not.toBe('/home')
 })
 
-test('queued bulk seen writes and their final mutation retain the original snapshot', async ({ app, page }) => {
+test('an atomic bulk seen write and its delayed response preserve a concurrent feed refresh', async ({ app, page }) => {
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     for (let i = 0; i < 9; i++) {
@@ -264,18 +265,11 @@ test('queued bulk seen writes and their final mutation retain the original snaps
     }
   })
   await app.electronApp.evaluate(({ ipcMain }) => {
-    const original = ipcMain._invokeHandlers.get('db-subscription-cache')
-    let seenRequests = 0
-    globalThis.blockedSeenWrites = []
-    globalThis.finishedSeenWrites = 0
-    ipcMain.removeHandler('db-subscription-cache')
-    ipcMain.handle('db-subscription-cache', async (event, request) => {
-      const seen = request.data?.channelId?.startsWith('audit-bulk-') && request.data.entries?.every(entry => entry.isNewInSubscriptionFeed === false)
-      if (seen && ++seenRequests <= 8) {
-        await new Promise(resolve => globalThis.blockedSeenWrites.push(resolve))
-      }
+    const original = ipcMain._invokeHandlers.get('library-query')
+    ipcMain.removeHandler('library-query')
+    ipcMain.handle('library-query', async (event, request) => {
       const result = await original(event, request)
-      if (seen) globalThis.finishedSeenWrites++
+      if (request.method === 'markSubscriptionEntries') await new Promise(resolve => { globalThis.releaseSeenResponse = resolve })
       return result
     })
   })
@@ -285,25 +279,22 @@ test('queued bulk seen writes and their final mutation retain the original snaps
       tab: 'videos', channelIds: Array.from({ length: 9 }, (_, i) => `audit-bulk-${i}`),
     })
   })
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.blockedSeenWrites.length)).toBe(8)
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseSeenResponse)).toBe('function')
   const refresh = id => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateSubscriptionVideosCacheByChannel', {
     channelId: `audit-bulk-${id}`,
     timestamp: new Date(2000),
     videos: [{ videoId: 'new', isNewInSubscriptionFeed: true }],
   }), id)
-  // The ninth write has not started; it must not borrow the new timestamp.
   await refresh(8)
-  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.shift()())
-  await expect.poll(() => app.electronApp.evaluate(() => globalThis.finishedSeenWrites)).toBeGreaterThan(0)
-  // The first write has finished, but the final bulk mutation is still pending.
   await refresh(0)
-  await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.splice(0).forEach(resolve => resolve()))
+  await app.electronApp.evaluate(() => globalThis.releaseSeenResponse())
   await page.evaluate(() => window.bulkSeenWrite)
   const records = (await readPersistedDatastore(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
     .trim().split('\n').map(line => JSON.parse(line))
   for (const id of [0, 8]) {
     const expected = [{ videoId: 'new', isNewInSubscriptionFeed: true }]
     expect(records.filter(record => record._id === `audit-bulk-${id}`).at(-1).videos).toEqual(expected)
-    expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.subscriptionCache.videoCache[`audit-bulk-${id}`].videos, id)).toEqual(expected)
+    expect(await page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.subscriptionCache.videoCache[`audit-bulk-${id}`].videos, id)).toEqual([])
+    expect(await page.evaluate(id => window.ftElectron.libraryQuery('subscriptionEntries', { channelId: `audit-bulk-${id}`, field: 'videos', ids: ['new'] }), id)).toEqual(expected)
   }
 })

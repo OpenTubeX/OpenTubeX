@@ -40,13 +40,13 @@ test.describe('Videos feed navigation', () => {
 
   test('uses cache updates and profile changes made while visiting Playlists', async ({ page }) => {
     await goTo(page, 'userplaylists')
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const channelId = store.getters.getActiveProfile.subscriptions[0].id
-      store.commit('updateVideoCacheByChannel', {
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
         channelId,
-        entries: [{
-          ...store.getters.getVideoCache[channelId].videos[0],
+        videos: [{
+          ...(await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], limit: 1 })).records[0],
           videoId: 'newly-cached',
           title: 'Newly cached video',
           published: Date.now()
@@ -57,7 +57,7 @@ test.describe('Videos feed navigation', () => {
     await expect(page.getByText('Newly cached video', { exact: true })).toBeVisible()
 
     await goTo(page, 'userplaylists')
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('upsertProfileToList', { ...store.getters.getActiveProfile, subscriptions: [] })
     })

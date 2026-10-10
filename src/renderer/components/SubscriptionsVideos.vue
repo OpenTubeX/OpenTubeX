@@ -385,7 +385,7 @@ async function loadVideosForSubscriptionsFromRemote() {
 
 defineExpose({
   refresh: loadVideosForSubscriptionsFromRemote,
-  isLoading,
+  isLoading: computed(() => isLoading.value || tabUi.value?.isLoading === true),
   lastRefreshTimestamp: lastVideoRefreshTimestamp,
   nextAutoRefreshTimestamp: nextVideoAutoRefreshTimestamp,
   nextAutoRefreshTooltip: nextVideoAutoRefreshTooltip,

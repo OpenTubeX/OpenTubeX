@@ -62,7 +62,7 @@ for (const windowAction of ['destroy', 'hide']) {
     } else {
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show())
     }
-    await expect.poll(() => nextPage.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getVideoCache[id]?.videos[0]?.title, channelId)).toBe('Fetched with the window closed')
+    await expect.poll(() => nextPage.evaluate(async id => (await window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: ['background1'] }))[0]?.title, channelId)).toBe('Fetched with the window closed')
     await expect.poll(() => nextPage.evaluate(() => window.ftElectron.subscriptionAutoRefresh.nextBackgroundResult())).toBeNull()
     const quit = app.electronApp.waitForEvent('close')
     await app.electronApp.evaluate(({ app }) => { app.quit() })
