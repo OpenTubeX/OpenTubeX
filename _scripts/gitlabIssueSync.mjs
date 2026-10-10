@@ -139,7 +139,8 @@ function referenceResolver(sources, targets, mergeRequests) {
     return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '', tooltip)
   }
   const rewrite = (body, side) => {
-    const labelKey = label => label.trim().replace(/\s+/g, ' ').toLowerCase()
+    // Fold case expansions such as ß/SS without merging the distinct dotless ı.
+    const labelKey = label => label.trim().replace(/\s+/g, ' ').replace(/[^\u0131]+/g, text => text.toLowerCase().toUpperCase())
     const referenceLabels = new Set()
     const htmlTag = /<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
     let fence = null
@@ -288,8 +289,14 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const definitionEnd = (index, text, depth, listIndent) => {
-      const label = text.match(/^ {0,3}\[((?:\\.|[^[\]\\])+)\]:[ \t]*/)
-      if (!label || !label[1].trim() || label[1].length > 999) return null
+      let label
+      while (!(label = text.match(/^ {0,3}\[((?:\\.|[^[\]\\])+)\]:[ \t]*/))) {
+        if (text.length > 1003 || !/^ {0,3}\[(?:\\.|[^[\]\\])*$/.test(text)) return null
+        const continuation = containerLine(++index, depth, listIndent)
+        if (continuation === null) return null
+        text += `\n${continuation}`
+      }
+      if (!label[1].trim() || label[1].length > 999) return null
       let destinationLine = text.slice(label[0].length)
       if (!destinationLine.trim()) {
         destinationLine = containerLine(++index, depth, listIndent)?.trimStart()
@@ -357,16 +364,17 @@ function referenceResolver(sources, targets, mergeRequests) {
       const contentIndent = listIndents.at(-1) ?? 0
       let indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
-      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
+      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t]|$)/)
       if (paragraph && listItem && ((listItem[1] && Number(listItem[1]) !== 1) || !expanded.slice(listItem[0].length).trim())) listItem = null
-      const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
+      const listIndent = listItem ? (!expanded.slice(listItem[0].length).trim() ? expanded.trimEnd().length + 1 : listItem[0].length) : contentIndent
+      const lineContent = expanded.slice(listIndent)
       const setextHeading = paragraph && /^ {0,3}(?:=+|-+)[ \t]*$/.test(lineContent)
       if (listItem) {
-        listIndents.push(listItem[0].length)
+        listIndents.push(listIndent)
         if (/^ {4}/.test(lineContent)) indentedCode = true
       }
       if (!fence && !indentedCode) {
-        const definition = (!paragraph || listItem) && definitionEnd(index, lineContent, depth, listItem ? listItem[0].length : contentIndent)
+        const definition = (!paragraph || listItem) && definitionEnd(index, lineContent, depth, listIndent)
         if (definition) {
           referenceLabels.add(labelKey(definition.label))
           definitionEndIndex = definition.end
@@ -382,7 +390,7 @@ function referenceResolver(sources, targets, mergeRequests) {
             : /^ {0,3}<![A-Z]/.test(lineContent) ? />/ : null
         if (rawEnd) {
           flush()
-          htmlEnd = { pattern: rawEnd, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          htmlEnd = { pattern: rawEnd, quoteDepth: depth, listIndent }
           paragraph = false
           result.push({ literal: line })
           if (rawEnd.test(lineContent)) htmlEnd = null
@@ -391,7 +399,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         const opening = lineContent.match(/^ {0,3}(?:<(pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
         if (opening) {
           flush()
-          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent }
           paragraph = false
           result.push({ literal: line })
           if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
@@ -401,7 +409,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         const completeTag = (!paragraph || listItem) && /^ {0,3}</.test(lineContent) && lineContent.trim().match(htmlTag)?.[0] === lineContent.trim()
         if (blockTag || completeTag) {
           flush()
-          htmlEnd = { pattern: /^[ \t]*$/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          htmlEnd = { pattern: /^[ \t]*$/, quoteDepth: depth, listIndent }
           paragraph = false
           result.push({ literal: line })
           continue
@@ -415,7 +423,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         result.push({ literal: line })
         if (delimiter) {
           if (!fence) {
-            fence = { marker: delimiter[1], quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+            fence = { marker: delimiter[1], quoteDepth: depth, listIndent }
           } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {

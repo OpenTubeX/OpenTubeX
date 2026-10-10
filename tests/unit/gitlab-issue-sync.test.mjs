@@ -401,7 +401,7 @@ test('paired backslashes allow references while odd backslash runs keep them esc
 })
 
 test('empty list markers cannot interrupt paragraphs and change subsequent code indentation', async () => {
-  for (const example of ['Text\n-   \n\n    REF', 'Text\n+   \n\n    REF', 'Text\n*   \n\n    REF', 'Text\n1.   \n\n    REF', '> Text\n> -   \n>\n>     REF', '- Text\n  -   \n\n      REF']) {
+  for (const example of ['Text\n-   \n\n    REF', 'Text\n+   \n\n    REF', 'Text\n*   \n\n    REF', 'Text\n1.   \n\n    REF', 'Text\n+\n\n    REF', 'Text\n*\n\n    REF', 'Text\n1.\n\n    REF', '> Text\n> -   \n>\n>     REF', '- Text\n  -   \n\n      REF']) {
     const { state, client } = fixture()
     const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
     state.sources[0].description = body('#1')
@@ -416,8 +416,26 @@ test('empty list markers cannot interrupt paragraphs and change subsequent code 
   }
 })
 
+test('end-of-line empty list markers preserve indented code and allow prose continuations', async () => {
+  for (const marker of ['-', '+', '*', '1.', '2)', '123.', '-   ', '1.\t']) {
+    for (const quote of ['', '> ']) {
+      const { state, client } = fixture()
+      const body = reference => `${quote}${marker}\n${quote}${' '.repeat(marker.trimEnd().length + 5)}${reference}\n\n${quote}${marker}\n${quote}${' '.repeat(marker.trimEnd().length + 1)}Outside ${reference}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
 test('invalid reference definitions rewrite prose without defining shortcut links', async () => {
-  for (const example of ['[foo]: /url extra REF', '[REF]: /url extra\n\n[REF]', '[foo]: /url "title" extra REF', '[foo]: /url(broken REF', '[foo]: <url REF', 'Text\n[foo]: /url REF', '- item\n    [REF]: /url\n\n    [REF]']) {
+  for (const example of ['[foo]: /url extra REF', '[REF]: /url extra\n\n[REF]', '[foo]: /url "title" extra REF', '[foo]: /url(broken REF', '[foo]: <url REF', 'Text\n[foo]: /url REF', '- item\n    [REF]: /url\n\n    [REF]', '[Foo\n\n REF]: /url', '> [Foo\nREF]: /url', '[Foo\n [REF]: /url']) {
     const { state, client } = fixture()
     const body = reference => example.replaceAll('REF', reference)
     state.sources[0].description = body('#1')
@@ -578,6 +596,39 @@ test('shortcut reference definitions work inside blockquotes and lists', async (
     await sync(client)
     const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
     assert.ok(state.notes[1].body.endsWith(`${preserved(`#${target.number}`)}\n\nSee ${githubReference}`))
+  }
+})
+
+test('Unicode case-fold equivalents preserve references while distinct labels still rewrite', async () => {
+  for (const [definition, shortcut, matches] of [['SS', 'ẞ', true], ['Σ', 'ς', true], ['FF', 'ﬀ', true], ['İ', 'i\u0307', true], ['I', 'ı', false]]) {
+    const { state, client } = fixture()
+    const body = reference => `[${definition} ${reference}]: /url\n\n[${shortcut} ${reference}]\n\nOutside ${reference}`
+    const expected = (reference, replacement) => body(reference).replace(`Outside ${reference}`, `Outside ${replacement}`).replace(`[${shortcut} ${reference}]`, matches ? `[${shortcut} ${reference}]` : `[${shortcut} ${replacement}]`)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(expected('#1', gitlabReference)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(expected(`#${target.number}`, githubReference)))
+  }
+})
+
+test('multiline reference-definition labels remain literal across container lines', async () => {
+  for (const example of ['[Foo\n REF]: /url\n\n[Foo REF]', '[Foo\n REF]:\n https://example.org\n "title REF"\n\n[Foo REF]', '> [Foo\n> REF]: /url\n>\n> [Foo REF]', '- [Foo\n  REF]: /url\n\n  [Foo REF]', '[Foo REF]\n\n[Foo\n  REF]: /url']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
   }
 })
 
