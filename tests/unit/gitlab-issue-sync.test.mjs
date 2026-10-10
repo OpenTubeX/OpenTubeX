@@ -186,11 +186,11 @@ test('mirrors issue 1993 references with GitLab titles and the actual GitHub num
   state.sources[0].web_url = 'https://gitlab.com/opentubex/OpenTubeX/-/work_items/538'
   await sync(client)
   const target = state.targets[0]
-  state.sources[0].description = '* [ ] #538\n* [ ] https://gitlab.com/opentubex/OpenTubeX/-/work_items/538\n\n`open\n\nOutside #538`'
+  state.sources[0].description = '* [ ] #538\n* [ ] https://gitlab.com/opentubex/OpenTubeX/-/work_items/538\n\n`open\n\nOutside #538`\n\n<a href="https://example.org">#538</a> Outside #538'
   state.notes.push({ id: 10, body: 'See #538', author: { id: 1, username: 'reporter' } })
   await sync(client)
   const reference = `[Smart pull for "View All" playlists](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
-  assert.ok(target.body.endsWith(`* [ ] ${reference}\n* [ ] ${reference}\n\n` + '`open\n\nOutside ' + reference + '`'))
+  assert.ok(target.body.endsWith(`* [ ] ${reference}\n* [ ] ${reference}\n\n` + '`open\n\nOutside ' + reference + '`\n\n<a href="https://example.org">#538</a> Outside ' + reference))
   assert.ok(state.comments[0].body.endsWith(`See ${reference}`))
   state.writes = []
   await sync(client)
@@ -321,12 +321,12 @@ test('reference conversion preserves code, escapes, foreign references, and unre
     '[ref]: /url\n  "tooltip #1"\n\n[ref]',
     '/search?issue=#1', 'mailto:reporter@example.test?subject=#1', 'urn:example:report#note=#1',
     '[ref]: https://example.org/#1',
-    'Text <code title=">">#1</code>', '*<code>#1</code>*', '~~<code>**#1**</code>~~', '*<code>*#1*</code>*', '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
+    'Text <code title=">">#1</code>', '*<code>#1</code>*', '~~<code>**#1**</code>~~', '*<code>*#1*</code>*', 'Text <a href="https://example.org">#1</a>', '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
     '<pre>\n    #1\n#1\n</pre>', '<pre>\n```\n#1\n```\n#1\n</pre>', '&#123;', '#123abc',
   ].join('\n\n')
   state.sources[0].description = preserved
   await sync(client)
-  assert.ok(state.targets[0].body.endsWith(preserved))
+  assert.equal(state.targets[0].body.split('\n\n').slice(1).join('\n\n'), preserved)
   state.comments.push({ id: 20, body: preserved, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
   await sync(client)
   assert.ok(state.notes[1].body.endsWith(preserved))
@@ -418,9 +418,10 @@ test('converts upload links and image dimensions without changing unrelated link
   }
   assert.equal(content('/uploads/hash/image.png', true), url)
   assert.equal(content('[attachment](/uploads/hash/image.png)', true), `[attachment](${url})`)
-  assert.equal(content('[image]: </uploads/hash/image.png>', true), `[image]: <${url}>`)
+  assert.equal(fromMarkdown(content('[image]: </uploads/hash/image.png>', true)).children[0].url, url)
   assert.equal(content('<img src="/uploads/hash/image.png" width="900">', true), `<img src="${url}" width="900">`)
-  assert.equal(content('![image](/uploads/hash/image(1).png){width=100}', true), '![image](https://gitlab.com/-/project/85121418/uploads/hash/image(1).png)')
+  assert.equal(content('Text <a href="/uploads/hash/image.png">attachment</a>', true), `Text <a href="${url}">attachment</a>`)
+  assert.equal(fromMarkdown(content('![image](/uploads/hash/image(1).png){width=100}', true)).children[0].children[0].url, 'https://gitlab.com/-/project/85121418/uploads/hash/image(1).png')
   const unchanged = '[link](https://example.org){width=100}\n![image](https://example.org/image.png){custom=100}\nText {width=100}\n![image](https://example.org/image.png) [link](https://example.org){width=100}'
   assert.equal(content(unchanged, true), unchanged)
   const githubImage = '![image](https://github.com/user-attachments/assets/example){width=100}'
@@ -453,9 +454,12 @@ test('links GitLab video formats while preserving images and GitHub content', ()
   for (const extension of ['mp4', 'm4v', 'mov', 'webm', 'ogv', 'MP4']) {
     const url = `https://example.org/recording(1).${extension}`
     for (const target of [url, `${url}?download=1#t=2`, `<${url}>`, `${url} "Recording"`]) {
-      assert.equal(content(`![Video](${target}){width=900 height=507}`, true), `[Video](${target})`)
+      const link = fromMarkdown(content(`![Video](${target}){width=900 height=507}`, true)).children[0].children[0]
+      assert.equal(link.type, 'link')
+      assert.equal(link.url, fromMarkdown(`![Video](${target})`).children[0].children[0].url)
+      assert.equal(link.children[0].value, 'Video')
     }
-    assert.equal(content(`![](${url})`, true), `[Video](${url})`)
+    assert.equal(fromMarkdown(content(`![](${url})`, true)).children[0].children[0].children[0].value, 'Video')
   }
   const unchanged = '![Screenshot](https://example.org/image.png?name=video.mp4)\n![Image](https://example.org/video.mp4.png)'
   assert.equal(content(unchanged, true), unchanged)

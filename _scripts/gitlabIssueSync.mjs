@@ -5,6 +5,11 @@ import { fromMarkdown } from 'mdast-util-from-markdown'
 import { toMarkdown } from 'mdast-util-to-markdown'
 import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
+import { toHast } from 'mdast-util-to-hast'
+import { raw } from 'hast-util-raw'
+import { fromHtml } from 'hast-util-from-html'
+import { visit, SKIP } from 'unist-util-visit'
+import { VFile } from 'vfile'
 
 const project = 'opentubex/OpenTubeX'
 // GitLab serves uploads through the stable project ID, not the repository path.
@@ -27,32 +32,69 @@ function linkBody(issue, state) {
   return `${marker('link', issue.number)}\n<!-- ${prefix}:state:${state} -->\nThis report is tracked on [GitHub](${issue.html_url}). Comments, comment edits, and status changes are mirrored both ways. Edit this GitLab report to update its GitHub title and description. Triage is managed on GitHub.`
 }
 
-// Only escape GitLab quick-action syntax outside code fences. Preserve mentions,
-// URLs, email addresses and reproduction commands verbatim.
-export function content(body = '', fromGitlab = false) {
-  let result = (body ?? '').replace(/<!-- opentubex-sync:[\s\S]*?-->/g, '')
-  if (fromGitlab) {
-    result = result.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)
-    // GitHub does not support GitLab's image dimension attributes.
-    result = result.replace(/(!\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\))\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/g, '$1')
-    // GitLab renders video image syntax as a player; GitHub needs a normal link.
-    result = result.replace(/!\[([^\]\n]*)\]\(((?:[^()\n]|\([^()\n]*\))*)\)/g, (image, label, target) => {
-      const path = target.match(/^<?([^>\s?#]+)/)?.[1] ?? ''
-      return /\.(mp4|m4v|mov|webm|ogv)$/i.test(path) ? `[${label || 'Video'}](${target})` : image
+const serialize = node => toMarkdown(node, { extensions: [gfmToMarkdown()], unsafe: [{ character: '|' }] }).trimEnd()
+
+// Libraries parse Markdown and embedded HTML; source edits preserve untouched text.
+function markdown(body, transform) {
+  const tree = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })
+  const htmlStarts = new Map()
+  visit(tree, 'html', node => {
+    visit(fromHtml(node.value, { fragment: true }), 'element', element => {
+      if (element.position) htmlStarts.set(node.position.start.offset + element.position.start.offset, element.tagName)
     })
-  } else {
-    let fence = null
-    result = result.split('\n').map(line => {
-      const delimiter = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
-      if (delimiter) {
-        if (!fence) fence = delimiter[1]
-        else if (delimiter[1][0] === fence[0] && delimiter[1].length >= fence.length && !delimiter[2].trim()) fence = null
-        return line
-      }
-      return fence ? line : line.replace(/^( {0,3})\/(?=[a-z_]+(?:\s|$))/, '$1&#47;')
-    }).join('\n')
-  }
-  return result
+  })
+  const protectedHtml = []
+  visit(raw(toHast(tree, { allowDangerousHtml: true }), { file: new VFile(body) }), 'element', node => {
+    if (htmlStarts.get(node.position?.start.offset) === node.tagName) protectedHtml.push(node.position)
+  })
+  const edits = []
+  visit(tree, (node, index, parent) => {
+    if (!node.position) return
+    const { start, end } = node.position
+    if (['code', 'inlineCode'].includes(node.type)) return SKIP
+    if (['text', 'link', 'image'].includes(node.type) && protectedHtml.some(region => start.offset >= region.start.offset && end.offset <= region.end.offset)) return SKIP
+    const original = body.slice(start.offset, end.offset)
+    const replacement = transform(node, original, index, parent)
+    if (replacement != null && replacement !== original) edits.push({ start: start.offset, end: end.offset, replacement })
+    if (['html', 'image', 'imageReference', 'definition', 'link', 'linkReference'].includes(node.type)) return SKIP
+  })
+  for (const edit of edits.reverse()) body = body.slice(0, edit.start) + edit.replacement + body.slice(edit.end)
+  return body
+}
+
+export function content(body = '', fromGitlab = false) {
+  const upload = url => fromGitlab && url.startsWith('/uploads/') ? uploadsUrl + url.slice('/uploads/'.length) : url
+  return markdown(body ?? '', (node, original, index, parent) => {
+    if (node.type === 'html') {
+      const html = fromHtml(original, { fragment: true })
+      const markers = []
+      let hasUploads = false
+      visit(html, element => {
+        if (element.type === 'comment' && element.value.trimStart().startsWith(`${prefix}:`)) {
+          markers.push(element.position)
+        }
+        for (const key of ['src', 'href', 'poster']) {
+          const value = element.properties?.[key]
+          if (typeof value === 'string' && upload(value) !== value) hasUploads = true
+        }
+      })
+      for (const { start, end } of markers.reverse()) original = original.slice(0, start.offset) + original.slice(end.offset)
+      return hasUploads ? original.replaceAll('/uploads/', uploadsUrl) : original
+    }
+    if (node.url) {
+      const url = upload(node.url)
+      // GitLab video embeds use image nodes; GitHub needs a normal link.
+      const video = fromGitlab && node.type === 'image' && URL.canParse(url, 'https://gitlab.com') && ['mp4', 'm4v', 'mov', 'webm', 'ogv'].includes(new URL(url, 'https://gitlab.com').pathname.split('.').at(-1).toLowerCase())
+      if (video) return serialize({ type: 'link', url, title: node.title, children: [{ type: 'text', value: node.alt || 'Video' }] })
+      if (url !== node.url) return serialize({ ...node, url })
+    }
+    if (node.type === 'text') {
+      if (!fromGitlab) return original.replace(/^( {0,3})\/(?=[a-z_]+(?:\s|$))/gm, '$1&#47;')
+      // These attributes are GitLab-specific image metadata, not Markdown grammar.
+      if (parent?.children[index - 1]?.type === 'image') original = original.replace(/^\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/, '')
+      return original.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)
+    }
+  })
 }
 
 function githubBody(header, body) {
@@ -104,9 +146,9 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const link = (value, url, title = null) => toMarkdown({
+  const link = (value, url, title = null) => serialize({
     type: 'link', url, title, children: [{ type: 'text', value: value.replace(/\s+/g, ' ') }],
-  }, { extensions: [gfmToMarkdown()], unsafe: [{ character: '|' }] }).trimEnd()
+  })
   const render = (reference, side, suffix = '', tooltip = null) => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
@@ -121,53 +163,29 @@ function referenceResolver(sources, targets, mergeRequests) {
     return `${original} (${link(`${otherSide} ${otherReference}`, other.html_url ?? other.web_url)})`
   }
   const urlReference = (url, side, tooltip = null) => {
-    const pattern = side === 'gitlab'
-      ? /^https:\/\/gitlab\.com\/opentubex\/OpenTubeX\/-\/(issues|work_items|merge_requests)\/(\d+)([?#][^\s<>]*)?$/i
-      : /^https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/(issues|pull)\/(\d+)([?#][^\s<>]*)?$/i
-    const match = url.match(pattern)
-    return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '', tooltip)
+    if (!URL.canParse(url)) return
+    const parsed = new URL(url)
+    const base = side === 'gitlab' ? `https://gitlab.com/${project}/-/` : `https://github.com/${repository}/`
+    if (!(parsed.origin + parsed.pathname).toLowerCase().startsWith(base.toLowerCase())) return
+    const [kind, id, extra] = parsed.pathname.slice(new URL(base).pathname.length).split('/')
+    const kinds = side === 'gitlab' ? ['issues', 'work_items', 'merge_requests'] : ['issues', 'pull']
+    if (extra !== undefined || !kinds.includes(kind.toLowerCase()) || !/^\d+$/.test(id)) return
+    return render(`${kind.toLowerCase() === 'merge_requests' ? '!' : '#'}${id}`, side, parsed.search + parsed.hash, tooltip)
   }
-  const rewrite = (body, side) => {
-    const tree = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })
-    const edits = []
-    const visit = (node, codeRegion = { tag: null }) => {
-      const { start, end } = node.position
-      const original = body.slice(start.offset, end.offset)
-      if (['html', 'code', 'inlineCode', 'image', 'imageReference', 'definition', 'linkReference'].includes(node.type)) return
-      if (node.type === 'link') {
-        if (codeRegion.tag) return
-        const replacement = urlReference(node.url, side, node.title)
-        if (replacement) edits.push({ start: start.offset, end: end.offset, replacement })
-        return
-      }
-      if (node.type === 'text') {
-        // Markdown syntax is handled by the parser. Only prose references and
-        // non-HTTP URL fragments need to be distinguished here.
-        const tokens = /\\.|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<![\w/&#@-])GH-\d+\b(?![@-])|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+|[?#][^\s<>]+/gi
-        const replacement = original.replace(tokens, token => {
-          const gh = side === 'github' && token.match(/^GH-(\d+)$/i)
-          if (gh) return render(`#${gh[1]}`, side)
-          const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)
-          return reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))
-            ? render(reference[2], side)
-            : token
-        })
-        if (replacement !== original) edits.push({ start: start.offset, end: end.offset, replacement })
-      } else {
-        const phrasing = ['paragraph', 'heading', 'tableCell', 'emphasis', 'strong', 'delete'].includes(node.type)
-        for (const child of node.children ?? []) {
-          if (child.type === 'html' && phrasing) {
-            if (codeRegion.tag && new RegExp(`</${codeRegion.tag}\\s*>`, 'i').test(child.value)) codeRegion.tag = null
-            else if (!codeRegion.tag && !child.value.endsWith('/>')) codeRegion.tag = child.value.match(/^<(code|pre|script|style|textarea)(?=[\s>])/i)?.[1] ?? null
-          } else if (!codeRegion.tag || child.children) visit(child, phrasing ? codeRegion : undefined)
-        }
-      }
-    }
-    visit(tree)
-    // Apply source edits backwards; all untouched Markdown stays byte-for-byte.
-    for (const edit of edits.reverse()) body = body.slice(0, edit.start) + edit.replacement + body.slice(edit.end)
-    return body
-  }
+  const rewrite = (body, side) => markdown(body, (node, original) => {
+    if (node.type === 'link') return urlReference(node.url, side, node.title)
+    if (node.type !== 'text') return
+    // Tracker syntax and non-HTTP URL fragments are application-specific.
+    const tokens = /\\.|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<![\w/&#@-])GH-\d+\b(?![@-])|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+|[?#][^\s<>]+/gi
+    return original.replace(tokens, token => {
+      const gh = side === 'github' && token.match(/^GH-(\d+)$/i)
+      if (gh) return render(`#${gh[1]}`, side)
+      const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)
+      return reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))
+        ? render(reference[2], side)
+        : token
+    })
+  })
   return { rewrite, pair }
 }
 
