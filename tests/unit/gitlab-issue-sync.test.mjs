@@ -387,6 +387,35 @@ test('ordered lists interrupt paragraphs only when starting at one', async () =>
   }
 })
 
+test('nested Markdown link labels keep unrelated destinations and convert local links', async () => {
+  const { state, client } = fixture()
+  const preserved = reference => [`[outer [${reference}]](https://example.org)`, `![outer [${reference}]](https://example.org/image.png)`,
+    `[outer [middle [${reference}]]](https://example.org)`, `[outer [${reference}]][ref]`, '[ref]: https://example.org'].join('\n\n')
+  state.sources[0].description = `${preserved('#1')}\n\n[outer [#1]](${state.sources[0].web_url} "Tooltip")\nSee #1`
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = tooltip => `[Report](${state.sources[0].web_url}${tooltip}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(`${preserved('#1')}\n\n${gitlabReference(' "Tooltip"')}\nSee ${gitlabReference('')}`))
+  state.comments.push({ id: 20, body: `${preserved(`#${target.number}`)}\n\n[outer [#${target.number}]](${target.html_url} "Tooltip")\nSee #${target.number}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = tooltip => `[Report](${target.html_url}${tooltip}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(`${preserved(`#${target.number}`)}\n\n${githubReference(' "Tooltip"')}\nSee ${githubReference('')}`))
+})
+
+test('mixed indentation tabs advance to the next four-column stop', async () => {
+  const { state, client } = fixture()
+  const body = reference => `- item\n\n  \tOutside ${reference}\n\n  \t  ${reference}\n\nOutside ${reference}`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
 test('inline code uses entire backtick runs as delimiters', async () => {
   for (const example of ['Text ``` Outside REF ` end', 'Text ` Outside REF ``` end', 'Text ``REF ` inside`` Outside REF']) {
     const { state, client } = fixture()

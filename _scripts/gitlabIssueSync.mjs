@@ -133,20 +133,65 @@ function referenceResolver(sources, targets, mergeRequests) {
     let prose = []
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
-    const rewriteProse = text => text.replace(/(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|!?\[[^\]\n]*\]|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
-      if (/^https?:/i.test(token)) {
-        const url = token.replace(/[.,;:!?)\]]+$/, '')
-        return (urlReference(url, side) ?? url) + token.slice(url.length)
+    const balancedEnd = (text, start, open, close) => {
+      let depth = 0
+      let quote = null
+      for (let index = start; index < text.length; index++) {
+        const char = text[index]
+        if (char === '\\') { index++; continue }
+        if (quote) { if (char === quote) quote = null; continue }
+        if (open === '(' && /[\s]/.test(text[index - 1]) && /["']/.test(char)) { quote = char; continue }
+        if (char === open) depth++
+        else if (char === close && --depth === 0) return index + 1
       }
-      if (/^<https?:/i.test(token)) return urlReference(token.slice(1, -1), side) ?? token
-      if (token.startsWith('[')) {
-        const link = token.match(/^\[[^\]]*\]\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
-        if (link) return urlReference(link[1], side, link[2] ?? '') ?? token
-        const label = token.match(/^\[([^\]]*)\]$/)?.[1]
-        return label && !referenceLabels.has(labelKey(label)) ? `[${rewrite(label, side)}]` : token
+      return -1
+    }
+    const rewriteProse = text => {
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
+      let output = ''
+      let position = 0
+      let match
+      while ((match = tokens.exec(text))) {
+        output += text.slice(position, match.index)
+        let token = match[0]
+        if (token === '[' || token === '![') {
+          const image = token === '!['
+          const start = match.index + (image ? 1 : 0)
+          const labelEnd = balancedEnd(text, start, '[', ']')
+          if (labelEnd !== -1) {
+            let end = labelEnd
+            if (text[end] === '(') end = balancedEnd(text, end, '(', ')')
+            else if (text[end] === '[') end = balancedEnd(text, end, '[', ']')
+            else if (text[end] === ':') end = text.indexOf('\n', end) === -1 ? text.length : text.indexOf('\n', end)
+            if (end === -1) end = labelEnd
+            tokens.lastIndex = end
+            token = text.slice(match.index, end)
+            if (!image) {
+              const label = text.slice(start + 1, labelEnd - 1)
+              const suffix = text.slice(labelEnd, end)
+              const link = suffix.match(/^\(<?(https?:\/\/[^\s)>]+)>?([ \t]+(?:"[^"\n]*"|'[^'\n]*'|\([^()\n]*\)))?\)$/i)
+              if (link) token = urlReference(link[1], side, link[2] ?? '') ?? token
+              else if (!suffix && !referenceLabels.has(labelKey(label))) token = `[${rewriteProse(label)}]`
+            }
+          }
+        } else if (/^https?:/i.test(token)) {
+          const url = token.replace(/[.,;:!?)\]]+$/, '')
+          token = (urlReference(url, side) ?? url) + token.slice(url.length)
+        } else if (/^<https?:/i.test(token)) {
+          token = urlReference(token.slice(1, -1), side) ?? token
+        } else {
+          const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
+          if (reference && (side === 'gitlab' || reference[0] === '#')) token = render(reference, side)
+        }
+        output += token
+        position = tokens.lastIndex
       }
-      const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
-      return reference && (side === 'gitlab' || reference[0] === '#') ? render(reference, side) : token
+      return output + text.slice(position)
+    }
+    const expandIndent = text => text.replace(/^[ \t]*/, prefix => {
+      let column = 0
+      for (const char of prefix) column += char === '\t' ? 4 - column % 4 : 1
+      return ' '.repeat(column)
     })
     const flush = () => {
       if (!prose.length) return
@@ -162,7 +207,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         text = text.replace(/^ {0,3}> ?/, '')
         depth++
       }
-      let expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+      let expanded = expandIndent(text)
       let indent = expanded.match(/^ */)[0].length
       if (fence && (depth < fence.quoteDepth || (text.trim() && indent < fence.listIndent))) fence = null
       if (htmlEnd && (depth < htmlEnd.quoteDepth || (text.trim() && indent < htmlEnd.listIndent))) {
@@ -174,7 +219,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           text = text.replace(/^ {0,3}> ?/, '')
           depth++
         }
-        expanded = text.replace(/^[ \t]*/, indent => indent.replaceAll('\t', '    '))
+        expanded = expandIndent(text)
         indent = expanded.match(/^ */)[0].length
       }
       if (htmlEnd) {
