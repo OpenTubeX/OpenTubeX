@@ -164,12 +164,18 @@ function referenceResolver(sources, targets, mergeRequests) {
     }
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
-    const balancedEnd = (text, start, open, close) => {
+    const balancedEnd = (text, start, open, close, codeSpans = false) => {
       let depth = 0
       let quote = null
       for (let index = start; index < text.length; index++) {
         const char = text[index]
         if (char === '\\') { index++; continue }
+        if (codeSpans && char === '`') {
+          const remaining = text.slice(index)
+          const code = remaining.match(/^(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/)
+          index += (code?.[0] ?? remaining.match(/^`+/)[0]).length - 1
+          continue
+        }
         if (quote) { if (char === quote) quote = null; continue }
         if (open === '(' && /[\s]/.test(text[index - 1]) && /["']/.test(char)) { quote = char; continue }
         if (open === '(' && depth === 1 && char === '<') {
@@ -192,7 +198,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         if (token === '[' || token === '![') {
           const image = token === '!['
           const start = match.index + (image ? 1 : 0)
-          const labelEnd = balancedEnd(text, start, '[', ']')
+          const labelEnd = balancedEnd(text, start, '[', ']', true)
           if (labelEnd !== -1) {
             let end = labelEnd
             let link = null

@@ -516,6 +516,51 @@ test('valid inline links keep their labels destinations and tooltip contents int
   }
 })
 
+test('brackets inside code spans do not hide prose behind apparent inline links', async () => {
+  for (const ticks of ['`', '``', '```']) {
+    const { state, client } = fixture()
+    const body = reference => `[see Outside ${reference} ${ticks}](/uri)${ticks}\n![Outside ${reference} ${ticks}](/uri)${ticks}`
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('local inline links find their real destination after code spans in their labels', async () => {
+  const { state, client } = fixture()
+  const labels = ['old `](/uri)`', 'old ``](/uri)``', 'old ```](/uri)```', 'old `` unmatched ` tick ](/uri)``']
+  const body = url => labels.map(label => `[${label}](${url})`).join('\n')
+  state.sources[0].description = body(state.sources[0].web_url)
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(Array(labels.length).fill(gitlabReference).join('\n')))
+  state.comments.push({ id: 20, body: body(target.html_url), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(Array(labels.length).fill(githubReference).join('\n')))
+})
+
+test('full reference labels treat backticks as literal label characters', async () => {
+  const { state, client } = fixture()
+  const body = reference => `[see ${reference}][key \`] tail \`\n\n[key \`]: https://example.org\n\nOutside ${reference}`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
 test('nested tracking lists resolve references while indented list code remains intact', async () => {
   const { state, client } = fixture()
   const description = '* Parent\n    * [ ] #1\n    * Child\n      See #1\n\n          #1\n    * [ ] #1\n\nOutside\n\n    #1'
