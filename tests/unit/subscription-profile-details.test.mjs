@@ -143,6 +143,30 @@ test('bulk disables 939 subscriptions with one write per profile and synchronize
   assert.equal(write.mock.callCount(), 2)
 })
 
+for (const removeAll of [false, true]) {
+  test(`a queued bulk edit keeps surviving updates after unsubscribe, all removed: ${removeAll}`, async t => {
+    const subscriptions = ['removed', 'remaining'].map(id => ({ id, showMembersOnly: true }))
+    const { db, store, createStore, DBProfileHandlers } = await profileStore(subscriptions)
+    const other = createStore()
+    const updates = subscriptions.map(channel => ({ channelId: channel.id, settings: { showMembersOnly: false } }))
+    const profileIds = ['allChannels', 'custom']
+    // Another window's unsubscribe reaches the store before the queued edit starts.
+    for (const channelId of removeAll ? ['removed', 'remaining'] : ['removed']) {
+      await DBProfileHandlers.removeChannelFromProfiles(channelId, profileIds)
+      for (const window of [store, other]) window.commit('removeChannelFromProfiles', { channelId, profileIds })
+    }
+    const write = t.mock.method(db.profiles, 'updateAsync')
+    assert.equal(await store.dispatch('batchUpdateChannelSettings', updates), false)
+    for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+      for (const profile of profiles) {
+        assert.deepEqual(profile.subscriptions.map(channel => channel.id), removeAll ? [] : ['remaining'])
+        assert.ok(profile.subscriptions.every(channel => channel.showMembersOnly === false))
+      }
+    }
+    assert.equal(write.mock.callCount(), removeAll ? 0 : 2)
+  })
+}
+
 for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetails', 'updateChannelSettings', 'batchUpdateChannelSettings']) {
   for (const failure of ['write error', 'retry exhaustion']) {
     test(`${action} synchronizes saved profiles after a later ${failure}`, async t => {

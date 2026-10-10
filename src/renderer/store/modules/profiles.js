@@ -153,9 +153,10 @@ const actions = {
   async batchUpdateChannelSettings({ commit, state }, updates) {
     if (updates.length === 0) return true
     const subscriptionsById = new Map(state.profileList[0].subscriptions.map(channel => [channel.id, channel]))
-    if (updates.some(({ channelId }) => !subscriptionsById.has(channelId))) return false
+    const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
+    if (availableUpdates.length === 0) return false
     const updatedAt = Date.now()
-    const channels = updates.map(({ channelId, settings }) => (
+    const channels = availableUpdates.map(({ channelId, settings }) => (
       getChannelWithUpdatedSettings(subscriptionsById.get(channelId), settings, updatedAt)
     ))
     const channelIds = new Set(channels.map(channel => channel.id))
@@ -168,7 +169,7 @@ const actions = {
       if (updatedProfileIds.length > 0) {
         commit('updateChannelSettings', { channels, profileIds: updatedProfileIds })
       }
-      return updatedProfileIds.length === profileIds.length
+      return availableUpdates.length === updates.length && updatedProfileIds.length === profileIds.length
     } catch (error) {
       console.error(error)
       return false

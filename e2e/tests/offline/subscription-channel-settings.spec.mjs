@@ -7,6 +7,8 @@ import {
   expectScrollAtRenderedEnd,
   goTo,
   goToSettingsSection,
+  openNewWindowFromTabBar,
+  waitForAppReady,
   setWindowSize
 } from '../../helpers/app.mjs'
 
@@ -532,6 +534,52 @@ test('saves Select All members-only changes together before leaving the manager'
     document.querySelector('#app').__vue_app__.config.globalProperties.$store
       .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
   ))).toBe(true)
+})
+
+test('keeps queued bulk changes for remaining channels after another window unsubscribes', async ({ app, page }) => {
+  const other = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(other)
+  const settings = await goToSettingsSection(page, 'subscription')
+  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const save = store._actions.batchUpdateChannelSettings[0]
+    let first = true
+    store._actions.batchUpdateChannelSettings = [async updates => {
+      if (first) {
+        first = false
+        await new Promise(resolve => { window.releaseBulkSave = resolve })
+      }
+      return save(updates)
+    }]
+  })
+  const members = page.locator('.bulkMembersOnlySetting')
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).toBeChecked()
+  await members.locator('.switch-label').click()
+  await expect(members.getByRole('checkbox')).not.toBeChecked()
+  await other.evaluate(channelId => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeChannelFromProfiles', {
+      channelId, profileIds: ['allChannels', 'profile-1']
+    })
+  ), CHANNEL_ID)
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveProfile.subscriptions.length
+  ))).toBe(subscriptions.length - 1)
+  await page.evaluate(() => window.releaseBulkSave())
+  for (const window of [page, other]) {
+    await expect.poll(() => window.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getProfileList
+        .every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+    ))).toBe(true)
+  }
+  await expect(page.locator('.toast', { hasText: 'Failed to save channel settings' })).toHaveCount(1)
+  ;({ page } = await app.relaunch())
+  expect(await page.evaluate(() => {
+    const channels = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveProfile.subscriptions
+    return { count: channels.length, allDisabled: channels.every(channel => channel.showMembersOnly === false) }
+  })).toEqual({ count: subscriptions.length - 1, allDisabled: true })
 })
 
 test('reports one failure toast for a failed batch update', async ({ page }) => {
