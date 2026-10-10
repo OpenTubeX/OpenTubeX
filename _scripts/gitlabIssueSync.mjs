@@ -124,6 +124,7 @@ function referenceResolver(sources, targets, mergeRequests) {
   const rewrite = (body, side) => {
     const labelKey = label => label.trim().replace(/\s+/g, ' ').toLowerCase()
     const referenceLabels = new Set()
+    const htmlTag = /<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
     let fence = null
     let htmlEnd = null
     let quoteDepth = 0
@@ -147,7 +148,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
       let output = ''
       let position = 0
       let match
@@ -174,11 +175,18 @@ function referenceResolver(sources, targets, mergeRequests) {
               else if (!suffix && !referenceLabels.has(labelKey(label))) token = `[${rewriteProse(label)}]`
             }
           }
+        } else if (token === '<') {
+          const remaining = text.slice(match.index)
+          const tag = remaining.match(htmlTag)
+          const autolink = remaining.match(/^<(?:[a-z][a-z\d+.-]{1,31}:[^\s<>]*|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)*)>/i)
+          const end = autolink?.[0] ?? (tag?.index === 0 ? tag[0] : null)
+          if (end) {
+            tokens.lastIndex = match.index + end.length
+            token = urlReference(end.slice(1, -1), side) ?? end
+          }
         } else if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           token = (urlReference(url, side) ?? url) + token.slice(url.length)
-        } else if (/^<https?:/i.test(token)) {
-          token = urlReference(token.slice(1, -1), side) ?? token
         } else {
           const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
           if (reference && (side === 'gitlab' || reference[0] === '#')) token = render(reference, side)
@@ -252,6 +260,19 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!fence && !indentedCode) {
         const definition = lineContent.match(/^ {0,3}\[([^\]]+)\]:/)
         if (definition) referenceLabels.add(labelKey(definition[1]))
+        const rawEnd = /^ {0,3}<\?/.test(lineContent)
+          ? /\?>/
+          : /^ {0,3}<!\[CDATA\[/.test(lineContent)
+            ? /\]\]>/
+            : /^ {0,3}<![A-Z]/i.test(lineContent) ? />/ : null
+        if (rawEnd) {
+          flush()
+          htmlEnd = { pattern: rawEnd, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
+          paragraph = false
+          result.push({ literal: line })
+          if (rawEnd.test(lineContent)) htmlEnd = null
+          continue
+        }
         const opening = lineContent.match(/^ {0,3}(?:<(code|pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
         if (opening) {
           htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }
@@ -261,7 +282,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           continue
         }
         const blockTag = /^ {0,3}<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?=[ \t>]|\/>|$)/i.test(lineContent)
-        const completeTag = !paragraph && /^ {0,3}(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>)[ \t]*$/i.test(lineContent)
+        const completeTag = !paragraph && /^ {0,3}</.test(lineContent) && lineContent.trim().match(htmlTag)?.[0] === lineContent.trim()
         if (blockTag || completeTag) {
           flush()
           htmlEnd = { pattern: /^[ \t]*$/, literal: true, quoteDepth: depth, listIndent: listItem ? listItem[0].length : contentIndent }

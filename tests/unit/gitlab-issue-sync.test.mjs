@@ -657,6 +657,38 @@ test('unclosed HTML regions end when their list container exits', async () => {
   }
 })
 
+test('comparison brackets do not hide prose references while valid HTML stays literal', async () => {
+  const { state, client } = fixture()
+  const body = reference => `Expected x < 3 and Outside ${reference} > 0\nExpected x < 3\nand Outside ${reference} > 0\n<span data-ref="${reference}">Outside ${reference}</span>\n<https://example.org/${reference}>`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
+test('processing instructions declarations and CDATA preserve raw content through closing or EOF', async () => {
+  for (const [opening, closing] of [['<?php', '?>'], ['<!DOCTYPE html', '>'], ['<![CDATA[', ']]>']]) {
+    for (const close of [false, true]) {
+      const { state, client } = fixture()
+      const body = reference => `See ${reference}\n\n${opening}\n$x = "${reference}";\n\n    ${reference}\n\`\`\`\n${reference}${close ? `\n${closing}\nOutside ${reference}` : ''}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replace('See #1', `See ${gitlabReference}`).replace('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
 test('generic HTML blocks preserve references until a blank line or container exit', async () => {
   for (const example of ['<div>\nREF\n</div>\n\nOutside REF', '<table>\nREF\n</table>\n\nOutside REF', '<details>\nREF\n</details>\n\nOutside REF', '<DIV class="example"\nREF\n\nOutside REF', '> <div>\n> REF\nOutside REF', '- <table>\n  REF\nOutside REF', '<custom data-ref="example">\nREF\n</custom>\n\nOutside REF', '</div>\nREF\n\nOutside REF', '<div>\nREF\n\nOutside REF', 'Text\n<span>\nOutside REF']) {
     const { state, client } = fixture()
