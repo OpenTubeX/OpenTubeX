@@ -181,7 +181,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b/gi
       let output = ''
       let position = 0
       let match
@@ -238,8 +238,8 @@ function referenceResolver(sources, targets, mergeRequests) {
           }
           token = (urlReference(url, side) ?? url) + token.slice(url.length)
         } else {
-          const reference = token.match(/^(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?([#!]\d+)$/i)?.[1]
-          if (reference && (side === 'gitlab' || reference[0] === '#')) token = render(reference, side)
+          const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)
+          if (reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))) token = render(reference[2], side)
         }
         output += token
         position = tokens.lastIndex
