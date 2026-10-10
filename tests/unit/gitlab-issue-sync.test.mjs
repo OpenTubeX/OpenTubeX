@@ -412,6 +412,22 @@ test('unterminated HTML code blocks preserve references through the end of the d
   }
 })
 
+test('HTML comments preserve references across code-looking lines and through EOF', async () => {
+  for (const ending of ['', '\n-->\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => `See REF\n\n<!--\nREF\n    REF\n\`\`\`\nREF${ending}`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('See #1', `See ${gitlabReference}`).replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`See #${target.number}`, `See ${githubReference}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('thematic breaks do not turn following indented code into list prose', async () => {
   for (const rule of ['* * *', '- - -', '_ _ _', '***', '---', '___']) {
     const { state, client } = fixture()
