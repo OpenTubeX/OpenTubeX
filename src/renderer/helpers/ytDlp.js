@@ -9,6 +9,7 @@ import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../yt
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
+import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults } from '../../ytDlpSearch'
 import { chooseAndroidDirectory } from './androidStorage'
 
 const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
@@ -132,6 +133,17 @@ const capacitor = {
   handleYtDlpBinaryDownloadProgress: callback => listen('binaryProgress', callback),
   addYtDlpBinaryDownloadProgressListener: callback => listen('binaryProgress', callback),
   addYtDlpBinaryUpdatedListener: callback => listen('binaryUpdated', callback),
+  async ytDlpSearch(query, params = '', page = 1) {
+    try {
+      // The native runtime ignores config files and validates each argument;
+      // its allowlist accepts the fixed HTTPS target without a -- separator.
+      const args = buildYtDlpSearchArguments(query, params, page)
+        .filter(arg => arg !== '--ignore-config' && arg !== '--')
+      return normalizeYtDlpSearchResults(await extract(args, true), page)
+    } catch {
+      return { error: 'Unable to search with configured cookies' }
+    }
+  },
   async ytDlpGetSubtitle(url) {
     if (!isYouTubeSubtitleUrl(url) || store.getters.getYtDlpPlaybackAuthMode !== 'file' ||
       !store.getters.getYtDlpPlaybackCookiesPath) return null

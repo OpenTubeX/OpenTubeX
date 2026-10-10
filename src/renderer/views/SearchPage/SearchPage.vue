@@ -150,7 +150,7 @@ const searchNotice = shallowRef(null)
 const searchParams = ref('')
 const isRetryingWithCookies = ref(false)
 const cookieSearchFailed = ref(false)
-const supportsCookieSearch = !!process.env.IS_ELECTRON
+const supportsCookieSearch = !!(process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS))
 const cookiesConfigured = computed(() => hasConfiguredRestrictedPlaybackAuthentication(store.getters, supportsCookieSearch))
 let searchRequestId = 0
 
