@@ -165,12 +165,14 @@ try {
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const first = await visibleBounds(row('gesture-test-0'))
   const second = await visibleBounds(row('gesture-test-1'))
-  for (const bounds of [first, second]) {
+  for (const [index, bounds] of [first, second].entries()) {
     const x = bounds.x + bounds.width * 0.4
     const y = bounds.y + bounds.height * 0.4
+    // Keep the first outgoing card away from the second card's touch target.
+    const direction = index === 0 && first.x < second.x ? -1 : 1
     await touch('touchStart', x, y)
-    await touch('touchMove', x + 50, y)
-    await touch('touchMove', x + 100, y)
+    await touch('touchMove', x + direction * 50, y)
+    await touch('touchMove', x + direction * 100, y)
     await touch('touchEnd')
   }
   if (baseline) await delay(500)
