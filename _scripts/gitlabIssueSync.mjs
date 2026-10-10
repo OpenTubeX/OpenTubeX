@@ -100,7 +100,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|]/g, '\\$&')
+  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|&]/g, '\\$&')
   const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
@@ -132,6 +132,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     const listIndents = []
     const result = []
     let prose = []
+    let definitionTitleEnd = -1
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
     const balancedEnd = (text, start, open, close) => {
@@ -225,7 +226,30 @@ function referenceResolver(sources, targets, mergeRequests) {
       result.push({ prose: prose.join('\n') })
       prose = []
     }
-    for (const line of body.split('\n')) {
+    const lines = body.split('\n')
+    const continuationTitleEnd = (start, depth, listIndent) => {
+      let candidate = ''
+      for (let index = start; index < lines.length; index++) {
+        let text = lines[index]
+        for (let quote = 0; quote < depth; quote++) {
+          if (!/^ {0,3}> ?/.test(text)) return -1
+          text = text.replace(/^ {0,3}> ?/, '')
+        }
+        const expanded = expandIndent(text)
+        if (!expanded.trim() || expanded.match(/^ */)[0].length < listIndent) return -1
+        const titleLine = expanded.slice(listIndent)
+        if (!candidate && !/^[ \t]*["'(]/.test(titleLine)) return -1
+        candidate += `${candidate ? '\n' : ''}${titleLine}`
+        if (/^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/.test(candidate)) return index
+      }
+      return -1
+    }
+    for (const [index, line] of lines.entries()) {
+      if (index <= definitionTitleEnd) {
+        flush()
+        result.push({ literal: line })
+        continue
+      }
       let text = line
       let depth = 0
       const container = fence ?? htmlEnd
@@ -280,7 +304,12 @@ function referenceResolver(sources, targets, mergeRequests) {
       let definition = null
       if (!fence && !indentedCode) {
         definition = lineContent.match(/^ {0,3}\[((?:\\.|[^\]\\])+)\]:/)
-        if (definition) referenceLabels.add(labelKey(definition[1]))
+        if (definition) {
+          referenceLabels.add(labelKey(definition[1]))
+          if ((!paragraph || listItem) && /^[ \t]*(?:<[^<>\n]*>|(?:\\.|[^\s\\])+)[ \t]*$/.test(lineContent.slice(definition[0].length))) {
+            definitionTitleEnd = continuationTitleEnd(index + 1, depth, listItem ? listItem[0].length : contentIndent)
+          }
+        }
         const rawEnd = /^ {0,3}<\?/.test(lineContent)
           ? /\?>/
           : /^ {0,3}<!\[CDATA\[/.test(lineContent)
