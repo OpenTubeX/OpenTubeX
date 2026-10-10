@@ -11,6 +11,70 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class RumbleManifestTransportTest {
+    @Test public void refreshesCookiesWhenRetryingNotModifiedManifests() throws Exception {
+        URL source = new URL("https://rumble.com/retry/master.m3u8");
+        ExternalStreamRequestRegistry registry = ExternalStreamRequestRegistry.shared();
+        for (String conditional : new String[] { "If-None-Match", "If-Modified-Since" }) {
+            registry.register(new JSONArray().put(new JSONObject().put("url", source.toString())
+                .put("protocol", "m3u8_native")),
+                "rumble.com\tFALSE\t/retry\tTRUE\t0\tsession\told\n");
+            List<Request> requests = new ArrayList<>();
+            var client = ExternalStreamRedirects.client().newBuilder().addInterceptor(chain -> {
+                Request request = chain.request();
+                requests.add(request);
+                try {
+                    boolean retry = requests.size() == 1;
+                    JSONObject headers = retry ? new JSONObject().put("Set-Cookie", new JSONArray()
+                        .put("session=new; Path=/retry; Secure")
+                        .put("challenge=fixture; Path=/retry; Secure")
+                        .put("removed=expired; Path=/retry; Max-Age=0")) : new JSONObject();
+                    return RumbleManifestTransport.responseFromPayload(request, new JSONObject()
+                        .put("status", retry ? 304 : 200).put("headers", headers).put("body", ""));
+                } catch (org.json.JSONException error) { throw new java.io.IOException(error); }
+            }).build();
+            Request request = new Request.Builder().url(source).header(conditional, "fixture")
+                .header("Cookie", "session=old; caller=retained; removed=old")
+                .header("Range", "bytes=100-").build();
+            try (Response response = ExternalStreamRedirects.fetchForWebView(request, client)) {
+                assertEquals(200, response.code());
+            }
+            assertEquals(2, requests.size());
+            Request retried = requests.get(1);
+            assertNull(retried.header("If-None-Match"));
+            assertNull(retried.header("If-Modified-Since"));
+            assertEquals("bytes=100-", retried.header("Range"));
+            assertEquals("session=new; challenge=fixture; caller=retained", retried.header("Cookie"));
+        }
+    }
+
+    @Test public void sendsNarrowerPathCookiesBeforeBroaderCookies() throws Exception {
+        URL source = new URL("https://rumble.com/specific/master.m3u8");
+        ExternalStreamRequestRegistry registry = ExternalStreamRequestRegistry.shared();
+        registry.register(new JSONArray().put(new JSONObject().put("url", source.toString())
+            .put("protocol", "m3u8_native")),
+            "rumble.com\tFALSE\t/\tTRUE\t0\tsession\tbroad\n" +
+            "rumble.com\tFALSE\t/specific\tTRUE\t0\tretained\tfixture\n");
+        List<Request> requests = new ArrayList<>();
+        var client = ExternalStreamRedirects.client().newBuilder().addInterceptor(chain -> {
+            Request request = chain.request();
+            requests.add(request);
+            try {
+                boolean redirect = requests.size() == 1;
+                JSONObject headers = redirect ? new JSONObject().put("Location", new JSONArray().put("/specific/final.m3u8"))
+                    .put("Set-Cookie", new JSONArray().put("session=narrow; Path=/specific; Secure")) : new JSONObject();
+                return RumbleManifestTransport.responseFromPayload(request, new JSONObject()
+                    .put("status", redirect ? 302 : 200).put("headers", headers).put("body", ""));
+            } catch (org.json.JSONException error) { throw new java.io.IOException(error); }
+        }).build();
+        Request.Builder request = new Request.Builder().url(source);
+        registry.headersFor(source).forEach(request::header);
+        try (Response response = ExternalStreamRedirects.fetchForWebView(request.build(), client)) {
+            assertEquals(200, response.code());
+        }
+        assertEquals(2, requests.size());
+        assertEquals("retained=fixture; session=narrow; session=broad", requests.get(1).header("Cookie"));
+    }
+
     @Test public void appliesDomainCookiesToUnregisteredManifestRedirects() throws Exception {
         URL source = new URL("https://rumble.com/challenge/master.m3u8");
         ExternalStreamRequestRegistry registry = ExternalStreamRequestRegistry.shared();

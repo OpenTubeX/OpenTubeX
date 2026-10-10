@@ -196,7 +196,9 @@ final class ExternalStreamRequestRegistry {
         if (isHttpStoryboardUrl(url)) return result;
         StringBuilder cookieHeader = new StringBuilder();
         long now = System.currentTimeMillis() / 1000;
-        for (Cookie cookie : cookies) {
+        List<Cookie> ordered = new ArrayList<>(cookies);
+        ordered.sort((left, right) -> Integer.compare(right.path.length(), left.path.length()));
+        for (Cookie cookie : ordered) {
             if (cookie.expires <= now) continue;
             if (!domainMatches(url.getHost().toLowerCase(Locale.ROOT), cookie.domain, cookie.includeSubdomains)) continue;
             if (cookie.secure && !"https".equals(url.getProtocol())) continue;
