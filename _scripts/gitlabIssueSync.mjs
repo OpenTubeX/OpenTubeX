@@ -148,6 +148,13 @@ function referenceResolver(sources, targets, mergeRequests) {
       prose = []
     }
     for (const line of body.split('\n')) {
+      let text = line
+      let depth = 0
+      while (/^ {0,3}> ?/.test(text)) {
+        text = text.replace(/^ {0,3}> ?/, '')
+        depth++
+      }
+      if (fence && depth < fence.quoteDepth) fence = null
       if (!fence) {
         const opening = line.match(/<(code|pre)\b[^>]*>/i)
         if (htmlCode || opening) {
@@ -156,12 +163,6 @@ function referenceResolver(sources, targets, mergeRequests) {
           if (new RegExp(`</${htmlCode}>`, 'i').test(line)) htmlCode = null
           continue
         }
-      }
-      let text = line
-      let depth = 0
-      while (/^ {0,3}> ?/.test(text)) {
-        text = text.replace(/^ {0,3}> ?/, '')
-        depth++
       }
       if (!fence && depth !== quoteDepth) listIndents.length = 0
       quoteDepth = depth
@@ -181,8 +182,8 @@ function referenceResolver(sources, targets, mergeRequests) {
         if (delimiter) {
           if (!fence) {
             if (listItem) listIndents.push(listItem[0].length)
-            fence = delimiter[1]
-          } else if (delimiter[1][0] === fence[0] && delimiter[1].length >= fence.length && !delimiter[2].trim()) fence = null
+            fence = { marker: delimiter[1], quoteDepth: depth }
+          } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {
         if (listItem) listIndents.push(listItem[0].length)
