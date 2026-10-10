@@ -5,6 +5,7 @@ import YAML from 'yaml'
 import { createI18n } from 'vue-i18n'
 import { SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../src/renderer/helpers/sync-server-live.js'
 import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../src/renderer/helpers/sync-setting-labels.js'
+import { createSettingsSearchIndex, findSettingsSearchTarget } from '../../src/renderer/helpers/settingsSearch.js'
 
 test('cached collections are immutable, revision-specific and isolated between accounts and keys', async () => {
   const cache = new SyncCollectionCache()
@@ -78,6 +79,25 @@ test('navigation preferences describe translated control labels in sync activity
   ]) {
     const activity = createSyncActivity('settings', [{ key, value: false }], [{ key, value: true }], 'device', 'Phone')
     assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], `Settings.General Settings.Navigation.${label}`)
+  }
+})
+
+test('popularity visibility sync activity identifies and links to the translated setting', async () => {
+  const key = 'hidePopularityGraph'
+  const activity = createSyncActivity('settings', [{ key, value: false }], [{ key, value: true }], 'device', 'Phone')
+  const entry = activity.changes[0]
+  for (const locale of ['en-US', 'de-DE']) {
+    const messages = YAML.parse(await readFile(new URL(`../../static/locales/${locale}.yaml`, import.meta.url), 'utf8'))
+    const { t, te, tm } = createI18n({ legacy: false, locale, messages: { [locale]: messages } }).global
+    const labels = [SYNC_SETTING_LABELS[entry.key]].filter(label => label && te(label)).map(label => t(label))
+    assert.deepEqual(labels, [locale === 'en-US' ? 'Hide Popularity Graph' : 'Beliebtheitsdiagramm ausblenden'])
+    const index = createSettingsSearchIndex({
+      sections: [{ type: 'focus', title: 'Focus', description: '' }],
+      tm, store: { getters: { getChannelsHiddenParsed: [], getForbiddenTitlesParsed: [] } }, usingElectron: true,
+    })
+    const target = findSettingsSearchTarget(index, labels, entry.key)
+    assert.equal(target?.section, 'focus')
+    assert.equal(target?.match.settingKey, key)
   }
 })
 
