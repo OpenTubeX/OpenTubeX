@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { marked } from 'marked'
 import { content, createClient, list, sync } from '../../_scripts/gitlabIssueSync.mjs'
 
 function fixture() {
@@ -400,6 +401,57 @@ test('nested Markdown link labels keep unrelated destinations and convert local 
   await sync(client)
   const githubReference = tooltip => `[Report](${target.html_url}${tooltip}) ([GitLab #1](${state.sources[0].web_url}))`
   assert.ok(state.notes[1].body.endsWith(`${preserved(`#${target.number}`)}\n\n${githubReference(' "Tooltip"')}\nSee ${githubReference('')}`))
+})
+
+test('pipes in issue titles do not split rendered table cells', async () => {
+  const { state, client } = fixture()
+  state.sources[0].title = 'A | title'
+  const body = reference => `| Issue | Status |\n| --- | --- |\n| ${reference} | Kept |`
+  const checkTable = text => {
+    const table = marked.lexer(text).find(token => token.type === 'table')
+    assert.equal(table.rows[0].length, 2)
+    assert.equal(table.rows[0][1].text, 'Kept')
+    assert.match(marked.parse(text), />A \| title<\/a>/)
+  }
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  checkTable(target.body)
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  checkTable(state.notes[1].body)
+})
+
+test('tabs after list markers set the content column without changing literal code', async () => {
+  for (const example of ['-\titem\n\n      Outside REF\n\n        REF', '1.\titem\n\n      Outside REF\n\n        REF', '- \titem\n\n      Outside REF\n\n        REF']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('ordered list markers allow at most nine digits', async () => {
+  for (const example of ['1234567890.     Outside REF', '1234567890)     Outside REF', '123456789.     REF\n\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
 })
 
 test('mixed indentation tabs advance to the next four-column stop', async () => {

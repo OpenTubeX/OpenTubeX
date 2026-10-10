@@ -100,7 +100,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>]/g, '\\$&')
+  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|]/g, '\\$&')
   const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
@@ -196,10 +196,15 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
       return output + text.slice(position)
     }
-    const expandIndent = text => text.replace(/^[ \t]*/, prefix => {
+    const expandIndent = text => text.replace(/^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])[ \t]+)?/, prefix => {
       let column = 0
-      for (const char of prefix) column += char === '\t' ? 4 - column % 4 : 1
-      return ' '.repeat(column)
+      let expanded = ''
+      for (const char of prefix) {
+        const width = char === '\t' ? 4 - column % 4 : 1
+        column += width
+        expanded += char === '\t' ? ' '.repeat(width) : char
+      }
+      return expanded
     })
     const flush = () => {
       if (!prose.length) return
@@ -250,7 +255,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       const contentIndent = listIndents.at(-1) ?? 0
       let indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
-      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d+)[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
+      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
       if (paragraph && listItem?.[1] && Number(listItem[1]) !== 1) listItem = null
       const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
       if (listItem) {
