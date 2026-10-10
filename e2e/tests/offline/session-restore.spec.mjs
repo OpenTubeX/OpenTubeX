@@ -390,10 +390,22 @@ test.describe('restored watch tab startup priority', () => {
       const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
       const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
       await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ACTIVE_WATCH_TAB_ID)
+      await expect(backgroundWatchTab).toHaveClass(/loading/)
+      // Subscription tabs hide the spinner even while queued at startup.
+      await expect(subscriptionsTab).not.toHaveClass(/loading/)
       for (const tab of [backgroundWatchTab, subscriptionsTab]) {
-        await expect(tab).toHaveClass(/loading/)
         await expect(tab).not.toHaveClass(/unloaded/)
       }
+      await expect.poll(async () => {
+        const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+        return [BACKGROUND_WATCH_TAB_ID, SUBSCRIPTIONS_TAB_ID].map(id => {
+          const tab = state.tabs.find(tab => tab.id === id)
+          return { loadState: tab?.loadState, isLoading: tab?.isLoading, isUnloaded: tab?.isUnloaded }
+        })
+      }).toEqual([
+        { loadState: 'unloaded', isLoading: true, isUnloaded: false },
+        { loadState: 'unloaded', isLoading: true, isUnloaded: false }
+      ])
       await page.evaluate(activeTabId => {
         window.ftElectron.tabs.setLoading(true, activeTabId)
         window.ftElectron.tabs.setLoading(false, activeTabId)

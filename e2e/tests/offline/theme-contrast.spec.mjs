@@ -236,12 +236,16 @@ for (const scale of [100, 125]) {
         tracks.push(contrast.track)
         thumbs.push(contrast.thumb)
         const label = toggle.locator('..').locator('.switch-label')
-        const height = await label.evaluate(element => element.getBoundingClientRect().height)
         // The outline separates the white thumb from the light off track.
-        // Sample its vertical edge where it crosses the track.
-        const edge = await sampleColors(app, label, [-0.5, 0.5, 1.5].map(offset => [
-          (checked ? 21 : 24) + offset, height / 2
-        ]))
+        // Locate its rendered edge, including fractional geometry at UI zoom.
+        const points = await label.evaluate((element, checked) => {
+          const rect = element.getBoundingClientRect()
+          const thumb = element.querySelector('.switch-thumb').getBoundingClientRect()
+          const x = (checked ? thumb.left : thumb.right) - rect.left
+          const y = thumb.top - rect.top + thumb.height / 2
+          return [-1.5, -0.5, 0.5, 1.5].map(offset => [x + offset, y])
+        }, checked)
+        const edge = await sampleColors(app, label, points)
         const thumbRatio = Math.max(contrast.thumbRatio, ...edge.map(color => contrastRatio(color, contrast.track)))
         expect.soft(contrast.trackRatio, `track and background ${JSON.stringify(contrast)}`).toBeGreaterThanOrEqual(3)
         expect.soft(thumbRatio, `thumb boundary and track ${JSON.stringify({ contrast, edge })}`).toBeGreaterThanOrEqual(3)
