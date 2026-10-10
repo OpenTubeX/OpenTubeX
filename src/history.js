@@ -7,9 +7,10 @@ export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
 
 /**
  * @param {object | undefined} historyEntry
+ * @param {{ now?: number }} [options]
  * @returns {boolean}
  */
-export function canMarkHistoryEntryAsWatched(historyEntry) {
+export function canMarkHistoryEntryAsWatched(historyEntry, { now = Date.now() } = {}) {
   if (historyEntry?.isLive === true) {
     return false
   }
@@ -23,15 +24,16 @@ export function canMarkHistoryEntryAsWatched(historyEntry) {
   }
 
   const premiereTimestamp = Number(historyEntry.premiereTimestamp) * 1000
-  return Number.isFinite(premiereTimestamp) && premiereTimestamp <= Date.now()
+  return Number.isFinite(premiereTimestamp) && premiereTimestamp <= now
 }
 
 /**
  * @param {object | undefined} historyEntry
+ * @param {number} [now]
  * @returns {boolean}
  */
-export function isHistoryEntryWatched(historyEntry) {
-  if (!historyEntry || !canMarkHistoryEntryAsWatched(historyEntry)) {
+export function isHistoryEntryWatched(historyEntry, now = Date.now()) {
+  if (!historyEntry || !canMarkHistoryEntryAsWatched(historyEntry, { now })) {
     return false
   }
 

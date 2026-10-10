@@ -2083,3 +2083,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."
+Library:
+  CouldNotOpen: "OpenTubeX-ek ezin izan du zure liburutegia ireki. Ez aldatu datu-fitxategiak."
+  RestoreProfile: "Itxi OpenTubeX erabat eta leheneratu profilaren babeskopia osoa, library.sqlite eta hari lotutako fitxategiak barne."

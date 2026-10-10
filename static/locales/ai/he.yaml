@@ -2114,3 +2114,6 @@ Storage Startup Error:
   Retry: "ניסיון חוזר"
 Native Permissions:
   Local Network: "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים."
+Library:
+  CouldNotOpen: "OpenTubeX לא הצליח לפתוח את הספרייה שלך. אין לשנות את קובצי הנתונים."
+  RestoreProfile: "יש לסגור את OpenTubeX לחלוטין ולשחזר גיבוי מלא של הפרופיל, כולל library.sqlite והקבצים הנלווים אליו."

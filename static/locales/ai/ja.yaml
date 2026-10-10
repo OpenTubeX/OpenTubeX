@@ -2063,3 +2063,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"
+Library:
+  CouldNotOpen: "OpenTubeX はライブラリを開けませんでした。データファイルを変更しないでください。"
+  RestoreProfile: "OpenTubeX を完全に終了し、library.sqlite とその関連ファイルを含む、プロファイル全体のバックアップを復元してください。"

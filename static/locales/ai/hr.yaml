@@ -2090,3 +2090,6 @@ Storage Startup Error:
   Retry: "Pokušaj ponovno"
 Native Permissions:
   Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."
+Library:
+  CouldNotOpen: "OpenTubeX nije mogao otvoriti vašu knjižnicu. Nemojte mijenjati podatkovne datoteke."
+  RestoreProfile: "Potpuno zatvorite OpenTubeX i vratite potpunu sigurnosnu kopiju profila, uključujući library.sqlite i pripadajuće datoteke."

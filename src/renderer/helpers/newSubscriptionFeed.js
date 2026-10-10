@@ -1,12 +1,12 @@
-import { isHistoryEntryWatched } from './history'
+import { isHistoryEntryWatched } from '../../history.js'
 import {
   applySubscriptionVideoLimit,
   getValidSubscriptionChannels,
   isMembersOnlySubscriptionVideoVisible,
   isSubscriptionFeedTypeEnabled
-} from './subscription-channels'
-import { isVideoHiddenByPreferences } from './subscriptions'
-import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot'
+} from './subscription-channels.js'
+import { isVideoHiddenByPreferences } from './subscription-visibility.js'
+import { getNewSubscriptionEntriesSnapshot } from './subscription-entry-snapshot.js'
 
 /**
  * Returns the locally cached subscription feeds enabled by the current
@@ -48,6 +48,7 @@ export function getEnabledSubscriptionFeedSources(getters) {
  * @param {number} options.onlyShowLatestFromChannelNumber
  * @param {boolean} options.restrictedPlaybackConfigured
  * @param {'newest' | 'oldest'} options.sortBy
+ * @param {number} [options.now]
  */
 export function getNewSubscriptionFeedEntries({
   feeds,
@@ -60,6 +61,7 @@ export function getNewSubscriptionFeedEntries({
   onlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured,
   sortBy,
+  now = Date.now(),
 }) {
   const entries = {
     videos: [],
@@ -92,7 +94,7 @@ export function getNewSubscriptionFeedEntries({
 
         // Premiere history depends on the clock, so recheck it even when this
         // channel's entry snapshot has not changed.
-        if (entry.videoId != null && isHistoryEntryWatched(historyCacheById[entry.videoId])) {
+        if (entry.videoId != null && isHistoryEntryWatched(historyCacheById[entry.videoId], now)) {
           return
         }
 
@@ -115,7 +117,7 @@ export function getNewSubscriptionFeedEntries({
     hideLiveStreams,
     hideUpcomingPremieres,
     forbiddenTitles,
-  }))
+  }, now))
 
   mediaEntries.sort((a, b) => b.timestamp - a.timestamp)
 

@@ -2112,3 +2112,6 @@ Storage Startup Error:
   Retry: "Yritä uudelleen"
 Native Permissions:
   Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."
+Library:
+  CouldNotOpen: "OpenTubeX ei voinut avata kirjastoasi. Jätä datatiedostot ennalleen."
+  RestoreProfile: "Sulje OpenTubeX kokonaan ja palauta profiilin täydellinen varmuuskopio, mukaan lukien library.sqlite ja siihen liittyvät tiedostot."

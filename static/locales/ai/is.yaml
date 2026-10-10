@@ -2087,3 +2087,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."
+Library:
+  CouldNotOpen: "OpenTubeX gat ekki opnað safnið þitt. Haltu gagnaskránum óbreyttum."
+  RestoreProfile: "Lokaðu OpenTubeX alveg og endurheimtu fullkomið öryggisafrit af notandasniðinu, þar á meðal library.sqlite og meðfylgjandi skrár."
