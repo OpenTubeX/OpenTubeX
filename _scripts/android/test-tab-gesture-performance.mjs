@@ -13,6 +13,7 @@ let page
 let port
 try {
   adb('shell', 'am', 'start', '--user', '0', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
+  let connectionError
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
       const pid = adb('shell', 'pidof', 'org.opentubex.app.dev')
@@ -20,15 +21,16 @@ try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { noDefaults: true })
       page = browser.contexts()[0].pages()[0]
       if (page) break
-      await browser.close()
-    } catch {
+      throw new Error('Android WebView has no page yet')
+    } catch (error) {
+      connectionError = error
       // The app's WebView may still be starting. Release a partial connection.
       await browser?.close().catch(() => {})
       browser = undefined
     }
     await delay(100)
   }
-  assert.ok(page, 'Android WebView is available')
+  if (!page) throw new Error('Android WebView is unavailable after 100 connection attempts', { cause: connectionError })
   await page.addLocatorHandler(page.locator('.tutorialOverlay'), async () => {
     await page.locator('.tutorialActions button').first().click()
   })
