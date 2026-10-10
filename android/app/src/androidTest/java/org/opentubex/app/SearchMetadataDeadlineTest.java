@@ -10,9 +10,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.json.JSONObject;
 import org.junit.Test;
 
 public class SearchMetadataDeadlineTest {
+    @Test public void malformedOrOutOfRangeTimeoutsAreRejected() throws Exception {
+        YtDlpPlugin plugin = new YtDlpPlugin();
+        var field = YtDlpPlugin.class.getDeclaredField("executor");
+        field.setAccessible(true);
+        try {
+            for (Object timeout : new Object[] {JSONObject.NULL, "500", 1.5, true, Long.MAX_VALUE, new JSArray(), new JSObject(), 0, -1, 60_001}) {
+                assertEquals("Invalid timeout: " + timeout, "Invalid extraction timeout",
+                    rejection(plugin, new JSObject().put("timeoutMs", timeout)));
+            }
+            for (JSObject options : new JSObject[] {new JSObject(), new JSObject().put("timeoutMs", 60_000)}) {
+                assertEquals("Omitted and valid timeouts proceed to argument validation", "unsupported-custom-argument",
+                    rejection(plugin, options));
+            }
+            // The minimum accepted deadline can legitimately expire in the executor queue.
+            assertTrue(List.of("unsupported-custom-argument", "Extraction deadline expired")
+                .contains(rejection(plugin, new JSObject().put("timeoutMs", 1))));
+        } finally { ((ExecutorService) field.get(plugin)).shutdownNow(); }
+    }
+
+    private static String rejection(YtDlpPlugin plugin, JSObject options) throws Exception {
+        CompletableFuture<String> result = new CompletableFuture<>();
+        options.put("args", new JSArray().put("--unsupported-test-argument"));
+        plugin.extract(new PluginCall(null, "YtDlp", "test", "extract", options) {
+            @Override public void resolve(JSObject value) { result.complete("unexpected success"); }
+            @Override public void reject(String message) { result.complete(message); }
+        });
+        return result.get(3, TimeUnit.SECONDS);
+    }
+
     @Test public void deadlineInterruptsRunningExtraction() throws Exception {
         CountDownLatch started = new CountDownLatch(1);
         CountDownLatch interrupted = new CountDownLatch(1);

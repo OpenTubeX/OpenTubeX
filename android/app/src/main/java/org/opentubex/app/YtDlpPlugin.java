@@ -140,7 +140,7 @@ public final class YtDlpPlugin extends Plugin {
     }
     @PluginMethod public void extract(PluginCall call) {
         Integer timeoutMs = call.getInt("timeoutMs");
-        if (timeoutMs != null && (timeoutMs < 1 || timeoutMs > 60_000)) {
+        if (call.getData().has("timeoutMs") && (timeoutMs == null || timeoutMs < 1 || timeoutMs > 60_000)) {
             call.reject("Invalid extraction timeout");
             return;
         }
