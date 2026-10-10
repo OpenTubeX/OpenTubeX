@@ -123,7 +123,7 @@ function referenceResolver(sources, targets, mergeRequests) {
   }
   const rewrite = (body, side) => {
     let fence = null
-    let htmlCode = null
+    let htmlEnd = null
     let quoteDepth = 0
     const listIndents = []
     const result = []
@@ -132,7 +132,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       if (!prose.length) return
       // Consume code, escapes, Markdown links, HTML, and URLs before considering
       // shorthand references, so fragments and reproduction commands stay intact.
-      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?-->|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
+      result.push(prose.join('\n').replace(/(`+)(?!`)[\s\S]*?\1(?!`)|\\.|<!--[^]*?(?:-->|$)|<(code|pre)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\)|!?\[[^\]\n]*\]\[[^\]\n]*\]|\[[^\]\n]*\]:[^\n]*|<[^>]*>|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi, token => {
         if (/^https?:/i.test(token)) {
           const url = token.replace(/[.,;:!?)\]]+$/, '')
           return (urlReference(url, side) ?? url) + token.slice(url.length)
@@ -156,11 +156,11 @@ function referenceResolver(sources, targets, mergeRequests) {
       }
       if (fence && depth < fence.quoteDepth) fence = null
       if (!fence) {
-        const opening = line.match(/<(code|pre)\b[^>]*>/i)
-        if (htmlCode || opening) {
-          htmlCode ??= opening[1]
+        const opening = line.match(/<(code|pre)\b[^>]*>|<!--/i)
+        if (htmlEnd || opening) {
+          htmlEnd ??= opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /-->/
           prose.push(line)
-          if (new RegExp(`</${htmlCode}>`, 'i').test(line)) htmlCode = null
+          if (htmlEnd.test(line)) htmlEnd = null
           continue
         }
       }
