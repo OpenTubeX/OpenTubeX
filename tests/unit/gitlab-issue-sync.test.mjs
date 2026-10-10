@@ -363,6 +363,71 @@ test('invalid reference-title continuations remain prose and respect container b
   }
 })
 
+test('paired backslashes allow references while odd backslash runs keep them escaped', async () => {
+  const { state, client } = fixture()
+  const body = reference => Array.from({ length: 7 }, (_, count) => `${'\\'.repeat(count)}${reference}`).join('\n')
+  const expected = (reference, replacement) => Array.from({ length: 7 }, (_, count) => `${'\\'.repeat(count)}${count % 2 ? reference : replacement}`).join('\n')
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(expected('#1', gitlabReference)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(expected(`#${target.number}`, githubReference)))
+})
+
+test('empty list markers cannot interrupt paragraphs and change subsequent code indentation', async () => {
+  for (const example of ['Text\n-   \n\n    REF', 'Text\n+   \n\n    REF', 'Text\n*   \n\n    REF', 'Text\n1.   \n\n    REF', '> Text\n> -   \n>\n>     REF', '- Text\n  -   \n\n      REF']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('invalid reference definitions rewrite prose without defining shortcut links', async () => {
+  for (const example of ['[foo]: /url extra REF', '[REF]: /url extra\n\n[REF]', '[foo]: /url "title" extra REF', '[foo]: /url(broken REF', '[foo]: <url REF', 'Text\n[foo]: /url REF', '- item\n    [REF]: /url\n\n    [REF]']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replaceAll('#1', gitlabReference)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`#${target.number}`, githubReference)))
+  }
+})
+
+test('validated definitions preserve balanced destinations and multiline titles', async () => {
+  for (const example of ['[REF]: /url(a) "title REF"\n\n[REF]', '[REF]: <my url> (title REF)\n\n[REF]', '[REF]: <>\n\n[REF]', '[REF]: /url\\(a\\) \'title REF\'\n\n[REF]', '[REF]:\n  https://example.org\n  (title REF)\n\n[REF]', '[REF]: /url "title\nREF"\n\n[REF]', '> [REF]:\n> https://example.org\n> "title REF"\n>\n> [REF]', '- [REF]:\n  https://example.org\n  "title REF"\n\n  [REF]']) {
+    const { state, client } = fixture()
+    const body = reference => `${example}\n\nOutside REF`.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    assert.ok(marked.parse(target.body).includes('>#1</a>'))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    assert.ok(marked.parse(state.notes[1].body).includes(`>#${target.number}</a>`))
+  }
+})
+
 test('nested tracking lists resolve references while indented list code remains intact', async () => {
   const { state, client } = fixture()
   const description = '* Parent\n    * [ ] #1\n    * Child\n      See #1\n\n          #1\n    * [ ] #1\n\nOutside\n\n    #1'
@@ -406,7 +471,7 @@ test('defined shortcut reference labels containing issue numbers stay intact', a
 })
 
 test('shortcut reference definitions work inside blockquotes and lists', async () => {
-  for (const example of ['> [REF]\n>\n> [REF]: https://example.org', '- [REF]: https://example.org\n\n  [REF]', '- item\n    [REF]: https://example.org\n\n    [REF]']) {
+  for (const example of ['> [REF]\n>\n> [REF]: https://example.org', '- [REF]: https://example.org\n\n  [REF]', '- item\n\n    [REF]: https://example.org\n\n    [REF]']) {
     const { state, client } = fixture()
     const preserved = reference => example.replaceAll('REF', reference)
     state.sources[0].description = `${preserved('#1')}\n\nSee #1`

@@ -132,7 +132,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     const listIndents = []
     const result = []
     let prose = []
-    let definitionTitleEnd = -1
+    let definitionEndIndex = -1
     // Consume code, escapes, Markdown links, HTML, and URLs before considering
     // shorthand references, so fragments and reproduction commands stay intact.
     const balancedEnd = (text, start, open, close) => {
@@ -149,7 +149,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       return -1
     }
     const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/\\&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
+      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?(?:--!?>|$)|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX)?[#!]\d+\b/gi
       let output = ''
       let position = 0
       let match
@@ -167,7 +167,7 @@ function referenceResolver(sources, targets, mergeRequests) {
               const referenceEnd = balancedEnd(text, end, '[', ']')
               const referenceLabel = referenceEnd === -1 ? null : text.slice(end + 1, referenceEnd - 1) || text.slice(start + 1, labelEnd - 1)
               if (referenceLabel !== null && referenceLabels.has(labelKey(referenceLabel))) end = referenceEnd
-            } else if (text[end] === ':') end = text.indexOf('\n', end) === -1 ? text.length : text.indexOf('\n', end)
+            }
             if (end === -1) end = labelEnd
             tokens.lastIndex = end
             token = text.slice(match.index, end)
@@ -227,25 +227,62 @@ function referenceResolver(sources, targets, mergeRequests) {
       prose = []
     }
     const lines = body.split('\n')
-    const continuationTitleEnd = (start, depth, listIndent) => {
-      let candidate = ''
+    const containerLine = (index, depth, listIndent) => {
+      let text = lines[index]
+      if (text === undefined) return null
+      for (let quote = 0; quote < depth; quote++) {
+        if (!/^ {0,3}> ?/.test(text)) return null
+        text = text.replace(/^ {0,3}> ?/, '')
+      }
+      const expanded = expandIndent(text)
+      if (!expanded.trim() || expanded.match(/^ */)[0].length < listIndent) return null
+      return expanded.slice(listIndent)
+    }
+    const titleEnd = (start, candidate, depth, listIndent) => {
+      const completeTitle = /^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/
+      if (completeTitle.test(candidate)) return start - 1
       for (let index = start; index < lines.length; index++) {
-        let text = lines[index]
-        for (let quote = 0; quote < depth; quote++) {
-          if (!/^ {0,3}> ?/.test(text)) return -1
-          text = text.replace(/^ {0,3}> ?/, '')
-        }
-        const expanded = expandIndent(text)
-        if (!expanded.trim() || expanded.match(/^ */)[0].length < listIndent) return -1
-        const titleLine = expanded.slice(listIndent)
+        const titleLine = containerLine(index, depth, listIndent)
+        if (titleLine === null) return -1
         if (!candidate && !/^[ \t]*["'(]/.test(titleLine)) return -1
         candidate += `${candidate ? '\n' : ''}${titleLine}`
-        if (/^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/.test(candidate)) return index
+        if (completeTitle.test(candidate)) return index
       }
       return -1
     }
+    const definitionEnd = (index, text, depth, listIndent) => {
+      const label = text.match(/^ {0,3}\[((?:\\.|[^\]\\])+)\]:[ \t]*/)
+      if (!label || !label[1].trim() || label[1].length > 999) return null
+      let destinationLine = text.slice(label[0].length)
+      if (!destinationLine.trim()) {
+        destinationLine = containerLine(++index, depth, listIndent)?.trimStart()
+        if (!destinationLine) return null
+      }
+      const destination = destinationLine.match(/^<(?:\\.|[^<>\\\n])*>|^(?:\\.|[^\s\\<>])+/)?.[0]
+      if (!destination) return null
+      if (!destination.startsWith('<')) {
+        if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
+        let parentheses = 0
+        for (let position = 0; position < destination.length; position++) {
+          if (destination[position] === '\\') position++
+          else if (destination[position] === '(') parentheses++
+          else if (destination[position] === ')' && --parentheses < 0) return null
+        }
+        if (parentheses) return null
+      }
+      const suffix = destinationLine.slice(destination.length)
+      let end
+      if (suffix.trim()) {
+        if (!/^[ \t]+["'(]/.test(suffix)) return null
+        end = titleEnd(index + 1, suffix.trimStart(), depth, listIndent)
+        if (end === -1) return null
+      } else {
+        end = Math.max(index, titleEnd(index + 1, '', depth, listIndent))
+      }
+      return { label: label[1], end }
+    }
     for (const [index, line] of lines.entries()) {
-      if (index <= definitionTitleEnd) {
+      if (index <= definitionEndIndex) {
         flush()
         result.push({ literal: line })
         continue
@@ -294,21 +331,22 @@ function referenceResolver(sources, targets, mergeRequests) {
       let indentedCode = !paragraph && indent >= contentIndent + 4
       const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
       let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t])/)
-      if (paragraph && listItem?.[1] && Number(listItem[1]) !== 1) listItem = null
+      if (paragraph && listItem && ((listItem[1] && Number(listItem[1]) !== 1) || !expanded.slice(listItem[0].length).trim())) listItem = null
       const lineContent = expanded.slice(listItem ? listItem[0].length : contentIndent)
       const setextHeading = paragraph && /^ {0,3}(?:=+|-+)[ \t]*$/.test(lineContent)
       if (listItem) {
         listIndents.push(listItem[0].length)
         if (/^ {4}/.test(lineContent)) indentedCode = true
       }
-      let definition = null
       if (!fence && !indentedCode) {
-        definition = lineContent.match(/^ {0,3}\[((?:\\.|[^\]\\])+)\]:/)
+        const definition = (!paragraph || listItem) && definitionEnd(index, lineContent, depth, listItem ? listItem[0].length : contentIndent)
         if (definition) {
-          referenceLabels.add(labelKey(definition[1]))
-          if ((!paragraph || listItem) && /^[ \t]*(?:<[^<>\n]*>|(?:\\.|[^\s\\])+)[ \t]*$/.test(lineContent.slice(definition[0].length))) {
-            definitionTitleEnd = continuationTitleEnd(index + 1, depth, listItem ? listItem[0].length : contentIndent)
-          }
+          referenceLabels.add(labelKey(definition.label))
+          definitionEndIndex = definition.end
+          paragraph = false
+          flush()
+          result.push({ literal: line })
+          continue
         }
         const rawEnd = /^ {0,3}<\?/.test(lineContent)
           ? /\?>/
@@ -354,7 +392,7 @@ function referenceResolver(sources, targets, mergeRequests) {
           } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
         }
       } else {
-        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !setextHeading && !definition && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
+        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !setextHeading && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
         prose.push(line)
       }
     }
