@@ -58,3 +58,25 @@ test('parses Takeout playlist CSV and rejects other CSV files', () => {
   assert.notEqual(parseTakeoutPlaylistCsv('影片 ID,播放清單影片的建立時間戳記\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
   assert.equal(parseTakeoutPlaylistCsv('Video,Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
 })
+
+test('parses Takeout playlist CSV with spaces before dash-prefixed video IDs', () => {
+  for (const idField of [' -abcdefghij', '   -abcdefghij', '  "-abcdefghij"']) {
+    for (const newline of ['\n', '\r\n']) {
+      const content = `Video ID,Playlist video creation timestamp${newline}abcdefghijk,2025-01-01T00:00:00+00:00${newline}${idField},2025-01-02T00:00:00+00:00${newline}`
+      assert.deepEqual(parseTakeoutPlaylistCsv(content, 'Favorites.csv'), {
+        playlistName: 'Favorites',
+        videos: [
+          { videoId: 'abcdefghijk', title: 'abcdefghijk', lengthSeconds: 0, timeAdded: Date.parse('2025-01-01T00:00:00+00:00') },
+          { videoId: '-abcdefghij', title: '-abcdefghij', lengthSeconds: 0, timeAdded: Date.parse('2025-01-02T00:00:00+00:00') },
+        ],
+      })
+      assert.equal(isSupportedTakeoutEntry({ type: 'playlists', path: 'playlists/Favorites.csv', content }), true)
+    }
+  }
+})
+
+test('still rejects malformed Takeout playlist rows after removing leading spaces', () => {
+  for (const row of [' -abcdefghi,2025-01-01T00:00:00+00:00', ' -abcd efghi,2025-01-01T00:00:00+00:00', ' -abcdefghij,invalid date']) {
+    assert.equal(parseTakeoutPlaylistCsv(`Video ID,Playlist video creation timestamp\n${row}\n`, 'Favorites.csv'), null)
+  }
+})

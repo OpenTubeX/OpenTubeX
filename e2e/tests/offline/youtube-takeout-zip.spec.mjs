@@ -18,7 +18,7 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
       titleUrl: 'https://www.youtube.com/results?search_query=example',
       time: '2025-01-01T00:00:00Z'
     }])),
-    [`${root}/playlists/My list.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n'),
+    [`${root}/playlists/My list.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n -abcdefghij,2025-01-02T00:00:00+00:00\n'),
     [`${root}/playlists/My list (2).csv`]: strToU8('Video ID,Playlist video creation timestamp\nzzzzzzzzzzz,2025-01-03T00:00:00+00:00\n'),
     'Another account/playlists/My list.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00+00:00\n'),
     [`${root}/videos/unrelated.mp4`]: new Uint8Array(1024),
@@ -55,9 +55,10 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
       subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCtakeouttest'),
       watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
       playlists: store.getters.getAllPlaylists.filter(playlist => playlist.playlistName.startsWith('My list')).map(playlist => playlist.playlistName).sort(),
+      playlistVideoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list')?.videos.map(video => video.videoId),
       search: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'example'),
     }
-  })).toEqual({ subscribed: true, watched: true, playlists: ['My list', 'My list (2)', 'My list (3)'], search: false })
+  })).toEqual({ subscribed: true, watched: true, playlists: ['My list', 'My list (2)', 'My list (3)'], playlistVideoIds: ['abcdefghijk', '-abcdefghij'], search: false })
 })
 
 test('imports a Takeout playlist CSV through Import Playlists', async ({ page }) => {
@@ -69,7 +70,7 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
         if (!Array.isArray(options.types[0].accept['text/csv'])) { throw new Error('Invalid CSV picker accept option') }
         return [{
           getFile: async () => new File(
-            ['Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n'],
+            ['Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n  -abcdefghij,2025-01-02T00:00:00+00:00\n'],
             'Takeout favorites.csv',
             { type: 'text/csv' }
           )
@@ -82,5 +83,5 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
   await expect.poll(() => page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')?.videos.map(video => video.videoId)
-  })).toEqual(['abcdefghijk'])
+  })).toEqual(['abcdefghijk', '-abcdefghij'])
 })
