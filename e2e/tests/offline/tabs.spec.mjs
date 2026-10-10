@@ -524,7 +524,8 @@ test.describe('tab bar', () => {
         }, width)
         await savedIndicator.scrollIntoViewIfNeeded()
         await expect(savedIndicator).toBeVisible()
-        expect(await savedIndicator.locator('..').locator('.select-label-text').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+        await expect.poll(() => savedIndicator.locator('..').locator('.select-label-text')
+          .evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
       }
     }
     await app.electronApp.evaluate(({ BrowserWindow }) => {
