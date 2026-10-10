@@ -21,7 +21,7 @@ async function profileStore() {
   await db.profiles.insertAsync(profiles)
   const DBProfileHandlers = vm.runInNewContext(
     handlersSource.slice(handlersSource.indexOf('class Profiles {'), handlersSource.indexOf('class Playlists {')) + '\nProfiles',
-    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getProfileWithUpdatedSubscriptionDetails }
+    { db, loadProfilesDatastore: async () => {}, copySubscriptionChannelSettings, getProfileWithUpdatedSubscriptionDetails, console }
   )
   const stores = []
   function createStore() {
@@ -42,9 +42,10 @@ async function profileStore() {
       return profileIds
     }
     handlers.updateSubscriptionDetails = async channels => {
-      const profileIds = await DBProfileHandlers.updateSubscriptionDetails(channels)
+      const result = await DBProfileHandlers.updateSubscriptionDetails(channels)
+      const { profileIds } = result
       broadcast('updateSubscriptionDetails', { channels, profileIds })
-      return profileIds
+      return result
     }
     const context = vm.createContext({
       MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
@@ -67,8 +68,9 @@ async function profileStore() {
   return { db, store: createStore(), createStore, DBProfileHandlers }
 }
 
-test('subscription writes fail after bounded contention instead of retrying indefinitely', async () => {
+test('subscription writes fail after bounded contention instead of retrying indefinitely', async t => {
   const { db, DBProfileHandlers } = await profileStore()
+  const errors = t.mock.method(console, 'error', () => {})
   let attempts = 0
   db.profiles.updateAsync = async () => {
     attempts++
@@ -77,9 +79,12 @@ test('subscription writes fail after bounded contention instead of retrying inde
     return { numAffected: 0 }
   }
 
-  await assert.rejects(DBProfileHandlers.updateSubscriptionDetails([
+  const result = await DBProfileHandlers.updateSubscriptionDetails([
     { channelId: 'channel', channelName: 'New name' }
-  ]), /Unable to update subscriptions.*concurrent changes/)
+  ])
+  assert.equal(result.success, false)
+  assert.equal(result.profileIds.length, 0)
+  assert.match(errors.mock.calls[0].arguments[0].message, /Unable to update subscriptions.*concurrent changes/)
   assert.equal(attempts, 5)
 })
 
@@ -103,6 +108,43 @@ test('metadata saves report success for changed, unchanged, and empty updates', 
   assert.equal(await store.dispatch('updateSubscriptionDetails', channel), true)
   assert.equal(await store.dispatch('batchUpdateSubscriptionDetails', [channel]), true)
 })
+
+for (const action of ['updateSubscriptionDetails', 'batchUpdateSubscriptionDetails', 'updateChannelSettings']) {
+  for (const failure of ['write error', 'retry exhaustion']) {
+    test(`${action} synchronizes saved profiles after a later ${failure}`, async t => {
+      const { db, store, createStore } = await profileStore()
+      const other = createStore()
+      t.mock.method(console, 'error', () => {})
+      const update = db.profiles.updateAsync.bind(db.profiles)
+      let savedProfileId
+      db.profiles.updateAsync = async (...args) => {
+        if (savedProfileId === undefined) {
+          const result = await update(...args)
+          savedProfileId = args[0]._id
+          return result
+        }
+        if (failure === 'write error') throw new Error('Later profile write failed')
+        return { numAffected: 0 }
+      }
+
+      const channel = { channelId: 'channel', channelName: 'New name' }
+      assert.equal(await store.dispatch(action, action === 'updateChannelSettings'
+        ? { channelId: 'channel', settings: { showMembersOnly: false } }
+        : action === 'batchUpdateSubscriptionDetails' ? [channel] : channel), false)
+      assert.ok(savedProfileId)
+      for (const profiles of [store.state.profileList, other.state.profileList, await db.profiles.findAsync({})]) {
+        for (const profile of profiles) {
+          const saved = profile._id === savedProfileId
+          if (action === 'updateChannelSettings') {
+            assert.equal(profile.subscriptions[0].showMembersOnly, !saved)
+          } else {
+            assert.equal(profile.subscriptions[0].name, saved ? 'New name' : 'Old name')
+          }
+        }
+      }
+    })
+  }
+}
 
 for (const settingsFirst of [true, false]) {
   test(`a metadata refresh in another window preserves a members-only disable with settings first: ${settingsFirst}`, async () => {

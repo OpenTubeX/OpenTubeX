@@ -714,12 +714,13 @@ class Profiles {
       _id: { $in: profileIds },
       subscriptions: { $elemMatch: { id: channel.id } }
     })
-    return this.updateSubscriptions(profiles, profile => {
+    const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
       if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) return null
       return profile.subscriptions.map(subscription => subscription.id === channel.id
         ? copySubscriptionChannelSettings(subscription, channel)
         : subscription)
     })
+    return updatedProfileIds
   }
 
   static async updateSubscriptionDetails(channels) {
@@ -733,31 +734,38 @@ class Profiles {
    * Retry against current subscriptions when another window changes them
    * between reading and saving, up to five attempts per profile.
    * Never write a stale whole-profile snapshot.
+   * Retain completed writes if a later profile fails so windows can sync them.
    * @param {object[]} profiles
    * @param {(profile: object) => object[] | null} update
+   * @returns {Promise<{profileIds: string[], success: boolean}>}
    */
   static async updateSubscriptions(profiles, update) {
     const updatedProfileIds = []
-    for (let profile of profiles) {
-      let attempts = 0
-      while (profile != null) {
-        const subscriptions = update(profile)
-        if (subscriptions === null) break
-        if (++attempts > 5) {
-          throw new Error(`Unable to update subscriptions for profile ${profile._id}: repeated concurrent changes`)
+    try {
+      for (let profile of profiles) {
+        let attempts = 0
+        while (profile != null) {
+          const subscriptions = update(profile)
+          if (subscriptions === null) break
+          if (++attempts > 5) {
+            throw new Error(`Unable to update subscriptions for profile ${profile._id}: repeated concurrent changes`)
+          }
+          const { numAffected } = await db.profiles.updateAsync(
+            { _id: profile._id, subscriptions: profile.subscriptions },
+            { $set: { subscriptions } }
+          )
+          if (numAffected > 0) {
+            updatedProfileIds.push(profile._id)
+            break
+          }
+          profile = await db.profiles.findOneAsync({ _id: profile._id })
         }
-        const { numAffected } = await db.profiles.updateAsync(
-          { _id: profile._id, subscriptions: profile.subscriptions },
-          { $set: { subscriptions } }
-        )
-        if (numAffected > 0) {
-          updatedProfileIds.push(profile._id)
-          break
-        }
-        profile = await db.profiles.findOneAsync({ _id: profile._id })
       }
+    } catch (error) {
+      console.error(error)
+      return { profileIds: updatedProfileIds, success: false }
     }
-    return updatedProfileIds
+    return { profileIds: updatedProfileIds, success: true }
   }
 
   static delete(id) {

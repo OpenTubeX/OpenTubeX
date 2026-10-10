@@ -122,9 +122,9 @@ const actions = {
     if (channels.length === 0) { return true }
 
     try {
-      const profileIds = await DBProfileHandlers.updateSubscriptionDetails(channels)
+      const { profileIds, success } = await DBProfileHandlers.updateSubscriptionDetails(channels)
       if (profileIds.length > 0) commit('updateSubscriptionDetails', { channels, profileIds })
-      return true
+      return success
     } catch (error) {
       console.error(error)
       return false

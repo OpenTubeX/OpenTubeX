@@ -98,7 +98,10 @@ async function profileChangeFixture() {
     THEME_BG_COLOR: 'theme', THEME_TEXT_COLOR: 'theme',
     getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings,
     deepCopy: value => JSON.parse(JSON.stringify(value)),
-    DBProfileHandlers: { upsert: async () => {}, updateSubscriptionDetails: async () => [MAIN_PROFILE_ID, 'profile'] },
+    DBProfileHandlers: {
+      upsert: async () => {},
+      updateSubscriptionDetails: async () => ({ profileIds: [MAIN_PROFILE_ID, 'profile'], success: true }),
+    },
   })
   const channel = { id: 'channel', name: 'Old channel name', thumbnail: 'old-avatar' }
   profiles.state.profileList = [
