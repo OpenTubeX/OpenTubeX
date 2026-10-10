@@ -535,6 +535,21 @@ test('invalid backslash-whitespace destinations do not shield prose references',
   }
 })
 
+test('long escaped destinations preserve valid links and reject unterminated angle links', async () => {
+  const escaped = '\\!'.repeat(256)
+  const { state, client } = fixture()
+  const body = reference => `[${reference}](<${escaped}>)\n\n[Outside ${reference}](<${escaped})`
+  state.sources[0].description = body('#1')
+  await sync(client)
+  const target = state.targets[0]
+  const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+  assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+  state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+  assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+})
+
 test('active nested links leave outer labels as prose that rewrites references', async () => {
   for (const inner of ['[inner REF](https://example.org)', '[inner REF](LOCAL)', '[inner REF][known]', '[known]', '<https://example.org>']) {
     const { state, client } = fixture()

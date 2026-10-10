@@ -101,7 +101,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
   const linkDestination = text => {
-    const destination = text.match(/^<(?:\\[!-/:-@[-`{-~]|[^<>\n])*>|^(?:\\[!-/:-@[-`{-~]|[^\s<>])+/)?.[0]
+    const destination = text.match(/^<(?:\\[!-/:-@[-`{-~]|\\(?![!-/:-@[-`{-~])|[^\\<>\n])*>|^(?:\\[!-/:-@[-`{-~]|\\(?![!-/:-@[-`{-~])|[^\\\s<>])+/)?.[0]
     if (!destination) return null
     if (!destination.startsWith('<')) {
       if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
