@@ -1,6 +1,9 @@
 import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { setTimeout } from 'node:timers/promises'
+import { fromMarkdown } from 'mdast-util-from-markdown'
+import { gfmFromMarkdown } from 'mdast-util-gfm'
+import { gfm } from 'micromark-extension-gfm'
 
 const project = 'opentubex/OpenTubeX'
 // GitLab serves uploads through the stable project ID, not the repository path.
@@ -100,21 +103,6 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const linkDestination = text => {
-    const destination = text.match(/^<(?:\\[!-/:-@[-`{-~]|\\(?![!-/:-@[-`{-~])|[^\\<>\n])*>|^(?:\\[!-/:-@[-`{-~]|\\(?![!-/:-@[-`{-~])|[^\\\s<>])+/)?.[0]
-    if (!destination) return null
-    if (!destination.startsWith('<')) {
-      if ([...destination].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return null
-      let parentheses = 0
-      for (let position = 0; position < destination.length; position++) {
-        if (destination[position] === '\\' && /[!-/:-@[-`{-~]/.test(destination[position + 1] ?? '')) position++
-        else if (destination[position] === '(') parentheses++
-        else if (destination[position] === ')' && --parentheses < 0) return null
-      }
-      if (parentheses) return null
-    }
-    return destination
-  }
   const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|&]/g, '\\$&')
   const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
@@ -124,7 +112,7 @@ function referenceResolver(sources, targets, mergeRequests) {
       : `https://github.com/${repository}/issues/${reference.slice(1)}`)
     const other = counterparts.get(url)
     const target = url + suffix
-    const destination = linkDestination(target) === target ? target : `<${target}>`
+    const destination = /[()\s<>]/.test(target) ? `<${target}>` : target
     const link = `[${title(item?.title ?? `${host} ${reference}`)}](${destination}${tooltip})`
     if (!other) return link
     const otherSide = side === 'gitlab' ? 'GitHub' : 'GitLab'
@@ -139,330 +127,45 @@ function referenceResolver(sources, targets, mergeRequests) {
     return match && render(`${match[1] === 'merge_requests' ? '!' : '#'}${match[2]}`, side, match[3] ?? '', tooltip)
   }
   const rewrite = (body, side) => {
-    // Fold case expansions such as ß/SS without merging the distinct dotless ı.
-    const labelKey = label => label.trim().replace(/\s+/g, ' ').replace(/[^\u0131]+/g, text => text.toLowerCase().toUpperCase())
-    const referenceLabels = new Set()
-    const htmlTag = /<\/[a-z][a-z\d-]*\s*>|<[a-z][a-z\d-]*(?:\s+[a-z_:][\w.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/i
-    const inlineHtml = text => {
-      const raw = text.match(/^(?:<!--[^]*?--!?>|<\?[\s\S]*?\?>|<![A-Z][^>]*>|<!\[CDATA\[[\s\S]*?\]\]>)/)
-      const tag = text.match(htmlTag)
-      return raw?.[0] ?? (tag?.index === 0 ? tag[0] : null)
-    }
-    let fence = null
-    let htmlEnd = null
-    let quoteDepth = 0
-    let paragraph = false
-    const listIndents = []
-    const result = []
-    let prose = []
-    let definitionEndIndex = -1
-    const completeTitle = /^[ \t]*(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^()\\])*\))[ \t]*$/
-    const inlineLink = suffix => {
-      if (/\n[ \t]*\n/.test(suffix)) return null
-      const text = suffix.slice(1, -1).trim()
-      if (!text) return { url: '', tooltip: '' }
-      const destination = linkDestination(text)
-      if (!destination) return null
-      const tooltip = text.slice(destination.length)
-      if (tooltip && (!/^[ \t\n]+/.test(tooltip) || !completeTitle.test(tooltip.trim()))) return null
-      return { url: destination.startsWith('<') ? destination.slice(1, -1) : destination, tooltip }
-    }
-    // Consume code, escapes, Markdown links, HTML, and URLs before considering
-    // shorthand references, so fragments and reproduction commands stay intact.
-    const balancedEnd = (text, start, open, close, inlineContent = false) => {
-      let depth = 0
-      let quote = null
-      for (let index = start; index < text.length; index++) {
-        const char = text[index]
-        if (char === '\\') { index++; continue }
-        if (inlineContent && char === '`') {
-          const remaining = text.slice(index)
-          const code = remaining.match(/^(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)/)
-          index += (code?.[0] ?? remaining.match(/^`+/)[0]).length - 1
-          continue
-        }
-        if (inlineContent && char === '<') {
-          const html = inlineHtml(text.slice(index))
-          if (html) { index += html.length - 1; continue }
-        }
-        if (quote) { if (char === quote) quote = null; continue }
-        if (open === '(' && /[\s]/.test(text[index - 1]) && /["']/.test(char)) { quote = char; continue }
-        if (open === '(' && depth === 1 && char === '<') {
-          const destination = linkDestination(text.slice(index))
-          if (destination) { index += destination.length - 1; continue }
-        }
-        if (char === open) depth++
-        else if (char === close && --depth === 0) return index + 1
+    const tree = fromMarkdown(body, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })
+    const edits = []
+    const visit = node => {
+      const { start, end } = node.position
+      const original = body.slice(start.offset, end.offset)
+      if (['html', 'code', 'inlineCode', 'image', 'imageReference', 'definition', 'linkReference'].includes(node.type)) return
+      if (node.type === 'link') {
+        const tooltip = node.title === null ? '' : ` "${node.title.replace(/[\\"]/g, '\\$&')}"`
+        const replacement = urlReference(node.url, side, tooltip)
+        if (replacement) edits.push({ start: start.offset, end: end.offset, replacement })
+        return
       }
-      return -1
-    }
-    const rewriteProse = text => {
-      const tokens = /(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)|\\.|<!--[^]*?--!?>|<(code|pre|script|style|textarea)\b[^>]*>[^]*?(?:<\/\2>|$)|!?\[|<|https?:\/\/[^\s<>]+|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<![\w/&#@-])GH-\d+\b(?![@-])|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+/gi
-      let output = ''
-      let hasLink = false
-      let position = 0
-      let match
-      while ((match = tokens.exec(text))) {
-        output += text.slice(position, match.index)
-        let token = match[0]
-        if (token === '[' || token === '![') {
-          const image = token === '!['
-          const start = match.index + (image ? 1 : 0)
-          const labelEnd = balancedEnd(text, start, '[', ']', true)
-          if (labelEnd !== -1) {
-            let end = labelEnd
-            let link = null
-            if (text[end] === '(') {
-              const linkEnd = balancedEnd(text, end, '(', ')')
-              if (linkEnd !== -1) link = inlineLink(text.slice(end, linkEnd))
-              if (link) end = linkEnd
-            } else if (text[end] === '[') {
-              const referenceEnd = balancedEnd(text, end, '[', ']')
-              const referenceLabel = referenceEnd === -1 ? null : text.slice(end + 1, referenceEnd - 1) || text.slice(start + 1, labelEnd - 1)
-              if (referenceLabel !== null && referenceLabels.has(labelKey(referenceLabel))) end = referenceEnd
-            }
-            if (end === -1) end = labelEnd
-            tokens.lastIndex = end
-            token = text.slice(match.index, end)
-            const label = text.slice(start + 1, labelEnd - 1)
-            const nested = image ? null : rewriteProse(label)
-            if (nested?.hasLink) {
-              link = null
-              end = labelEnd
-              tokens.lastIndex = end
-            }
-            const suffix = text.slice(labelEnd, end)
-            if (link && !image) {
-              hasLink = true
-              token = urlReference(link.url, side, link.tooltip) ?? token
-            } else if (nested?.hasLink || (!suffix && !referenceLabels.has(labelKey(label)))) {
-              const rewritten = nested ?? rewriteProse(label)
-              hasLink ||= rewritten.hasLink
-              token = `${image ? '!' : ''}[${rewritten.body}]`
-            } else if (!image) hasLink = true
-          }
-        } else if (token === '<') {
-          const remaining = text.slice(match.index)
-          const html = inlineHtml(remaining)
-          const autolink = remaining.match(/^<(?:[a-z][a-z\d+.-]{1,31}:[^\s<>]*|[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)*)>/i)
-          const end = html ?? autolink?.[0]
-          if (end) {
-            hasLink ||= Boolean(autolink)
-            tokens.lastIndex = match.index + end.length
-            token = urlReference(end.slice(1, -1), side) ?? end
-          }
-        } else if (/^https?:/i.test(token)) {
-          const excess = {
-            ')': (token.match(/\)/g) ?? []).length - (token.match(/\(/g) ?? []).length,
-            ']': (token.match(/\]/g) ?? []).length - (token.match(/\[/g) ?? []).length,
-          }
-          let url = token
-          while (/[.,;:!?)\]"']$/.test(url)) {
-            const last = url.at(-1)
-            if (last in excess) {
-              if (excess[last] <= 0) break
-              excess[last]--
-            }
-            url = url.slice(0, -1)
-          }
-          const opening = text.slice(0, match.index).match(/[*_~]+$/)?.[0]
-          const closing = opening && [...opening].reverse().join('')
-          if (closing && url.endsWith(closing)) url = url.slice(0, -closing.length)
-          token = (urlReference(url, side) ?? url) + token.slice(url.length)
-        } else {
-          const githubReference = side === 'github' && token.match(/^GH-(\d+)$/i)
+      if (node.type === 'text') {
+        // Markdown syntax is handled by the parser. Only prose references and
+        // non-HTTP URL fragments need to be distinguished here.
+        const tokens = /\\.|(?<![\w/&#])(?:opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?[#!]\d+\b|(?<![\w/&#@-])GH-\d+\b(?![@-])|(?<!\w)(?:[a-z][a-z\d+.-]*:|\.{0,2}\/|[\w.-]+[/?#])[^\s<>]+|[?#][^\s<>]+/gi
+        const replacement = original.replace(tokens, token => {
+          const gh = side === 'github' && token.match(/^GH-(\d+)$/i)
+          if (gh) return render(`#${gh[1]}`, side)
           const reference = token.match(/^(opentubex\/OpenTubeX|OpenTubeX\/OpenTubeX|OpenTubeX)?([#!]\d+)$/i)
-          if (githubReference) token = render(`#${githubReference[1]}`, side)
-          else if (reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))) token = render(reference[2], side)
-        }
-        output += token
-        position = tokens.lastIndex
-      }
-      return { body: output + text.slice(position), hasLink }
-    }
-    const expandIndent = text => text.replace(/^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])[ \t]+)?/, prefix => {
-      let column = 0
-      let expanded = ''
-      for (const char of prefix) {
-        const width = char === '\t' ? 4 - column % 4 : 1
-        column += width
-        expanded += char === '\t' ? ' '.repeat(width) : char
-      }
-      return expanded
-    })
-    const flush = () => {
-      if (!prose.length) return
-      result.push({ prose: prose.join('\n') })
-      prose = []
-    }
-    const lines = body.split('\n')
-    const containerLine = (index, depth, listIndent) => {
-      let text = lines[index]
-      if (text === undefined) return null
-      for (let quote = 0; quote < depth; quote++) {
-        if (!/^ {0,3}> ?/.test(text)) return null
-        text = text.replace(/^ {0,3}> ?/, '')
-      }
-      const expanded = expandIndent(text)
-      if (!expanded.trim() || expanded.match(/^ */)[0].length < listIndent) return null
-      return expanded.slice(listIndent)
-    }
-    const titleEnd = (start, candidate, depth, listIndent) => {
-      if (completeTitle.test(candidate)) return start - 1
-      for (let index = start; index < lines.length; index++) {
-        const titleLine = containerLine(index, depth, listIndent)
-        if (titleLine === null) return -1
-        if (!candidate && !/^[ \t]*["'(]/.test(titleLine)) return -1
-        candidate += `${candidate ? '\n' : ''}${titleLine}`
-        if (completeTitle.test(candidate)) return index
-      }
-      return -1
-    }
-    const definitionEnd = (index, text, depth, listIndent) => {
-      let label
-      while (!(label = text.match(/^ {0,3}\[((?:\\.|[^[\]\\])+)\]:[ \t]*/))) {
-        if (text.length > 1003 || !/^ {0,3}\[(?:\\.|[^[\]\\])*$/.test(text)) return null
-        const continuation = containerLine(++index, depth, listIndent)
-        if (continuation === null) return null
-        text += `\n${continuation}`
-      }
-      if (!label[1].trim() || label[1].length > 999) return null
-      let destinationLine = text.slice(label[0].length)
-      if (!destinationLine.trim()) {
-        destinationLine = containerLine(++index, depth, listIndent)?.trimStart()
-        if (!destinationLine) return null
-      }
-      const destination = linkDestination(destinationLine)
-      if (!destination) return null
-      const suffix = destinationLine.slice(destination.length)
-      let end
-      if (suffix.trim()) {
-        if (!/^[ \t]+["'(]/.test(suffix)) return null
-        end = titleEnd(index + 1, suffix.trimStart(), depth, listIndent)
-        if (end === -1) return null
+          return reference && (side === 'gitlab' || (reference[2][0] === '#' && reference[1]?.toLowerCase() !== 'opentubex'))
+            ? render(reference[2], side)
+            : token
+        })
+        if (replacement !== original) edits.push({ start: start.offset, end: end.offset, replacement })
       } else {
-        end = Math.max(index, titleEnd(index + 1, '', depth, listIndent))
-      }
-      return { label: label[1], end }
-    }
-    for (const [index, line] of lines.entries()) {
-      if (index <= definitionEndIndex) {
-        flush()
-        result.push({ literal: line })
-        continue
-      }
-      let text = line
-      let depth = 0
-      const container = fence ?? htmlEnd
-      const quoteLimit = container?.quoteDepth ?? Infinity
-      while (depth < quoteLimit && /^ {0,3}> ?/.test(text)) {
-        text = text.replace(/^ {0,3}> ?/, '')
-        depth++
-      }
-      let expanded = expandIndent(text)
-      let indent = expanded.match(/^ */)[0].length
-      if (fence && (depth < fence.quoteDepth || (text.trim() && indent < fence.listIndent))) fence = null
-      if (htmlEnd && (depth < htmlEnd.quoteDepth || (text.trim() && indent < htmlEnd.listIndent))) {
-        flush()
-        htmlEnd = null
-      }
-      if (container && !fence && !htmlEnd) {
-        while (/^ {0,3}> ?/.test(text)) {
-          text = text.replace(/^ {0,3}> ?/, '')
-          depth++
+        let codeTag = null
+        for (const child of node.children ?? []) {
+          if (child.type === 'html' && ['paragraph', 'heading', 'tableCell'].includes(node.type)) {
+            if (codeTag && new RegExp(`</${codeTag}\\s*>`, 'i').test(child.value)) codeTag = null
+            else if (!codeTag) codeTag = child.value.match(/^<(code|pre|script|style|textarea)(?:\s[^>]*)?>$/i)?.[1] ?? null
+          } else if (!codeTag) visit(child)
         }
-        expanded = expandIndent(text)
-        indent = expanded.match(/^ */)[0].length
-      }
-      if (htmlEnd) {
-        result.push({ literal: line })
-        if (htmlEnd.pattern.test(text)) htmlEnd = null
-        continue
-      }
-      const lazyQuote = paragraph && depth < quoteDepth && Boolean(text.trim())
-      if (!fence && depth !== quoteDepth && !lazyQuote) {
-        listIndents.length = 0
-        paragraph = false
-      }
-      if (!lazyQuote) quoteDepth = depth
-      if (!fence && line.trim()) {
-        while (listIndents.length && indent < listIndents.at(-1)) {
-          listIndents.pop()
-          paragraph = false
-        }
-      }
-      const contentIndent = listIndents.at(-1) ?? 0
-      let indentedCode = !paragraph && indent >= contentIndent + 4
-      const thematicBreak = /^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|(?:_[ \t]*){3,})$/.test(expanded.slice(contentIndent))
-      let listItem = !fence && !indentedCode && !thematicBreak && expanded.match(/^ *(?:[-+*]|(\d{1,9})[.)])(?:[ \t]{1,4}(?![ \t])|[ \t]|$)/)
-      if (paragraph && listItem && ((listItem[1] && Number(listItem[1]) !== 1) || !expanded.slice(listItem[0].length).trim())) listItem = null
-      const listIndent = listItem ? (!expanded.slice(listItem[0].length).trim() ? expanded.trimEnd().length + 1 : listItem[0].length) : contentIndent
-      const lineContent = expanded.slice(listIndent)
-      const setextHeading = paragraph && /^ {0,3}(?:=+|-+)[ \t]*$/.test(lineContent)
-      if (listItem) {
-        listIndents.push(listIndent)
-        if (/^ {4}/.test(lineContent)) indentedCode = true
-      }
-      if (!fence && !indentedCode) {
-        const definition = (!paragraph || listItem) && definitionEnd(index, lineContent, depth, listIndent)
-        if (definition) {
-          referenceLabels.add(labelKey(definition.label))
-          definitionEndIndex = definition.end
-          paragraph = false
-          flush()
-          result.push({ literal: line })
-          continue
-        }
-        const rawEnd = /^ {0,3}<\?/.test(lineContent)
-          ? /\?>/
-          : /^ {0,3}<!\[CDATA\[/.test(lineContent)
-            ? /\]\]>/
-            : /^ {0,3}<![A-Z]/.test(lineContent) ? />/ : null
-        if (rawEnd) {
-          flush()
-          htmlEnd = { pattern: rawEnd, quoteDepth: depth, listIndent }
-          paragraph = false
-          result.push({ literal: line })
-          if (rawEnd.test(lineContent)) htmlEnd = null
-          continue
-        }
-        const opening = lineContent.match(/^ {0,3}(?:<(pre|script|style|textarea)(?=[ \t>]|$)|<!--)/i)
-        if (opening) {
-          flush()
-          htmlEnd = { pattern: opening[1] ? new RegExp(`</${opening[1]}>`, 'i') : /--!?>/, quoteDepth: depth, listIndent }
-          paragraph = false
-          result.push({ literal: line })
-          if (htmlEnd.pattern.test(lineContent)) htmlEnd = null
-          continue
-        }
-        const blockTag = /^ {0,3}<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?=[ \t>]|\/>|$)/i.test(lineContent)
-        const completeTag = (!paragraph || listItem) && /^ {0,3}</.test(lineContent) && lineContent.trim().match(htmlTag)?.[0] === lineContent.trim()
-        if (blockTag || completeTag) {
-          flush()
-          htmlEnd = { pattern: /^[ \t]*$/, quoteDepth: depth, listIndent }
-          paragraph = false
-          result.push({ literal: line })
-          continue
-        }
-      }
-      let delimiter = lineContent.match(/^ {0,3}(`{3,}|~{3,})(.*)$/)
-      if (!fence && delimiter?.[1][0] === '`' && delimiter[2].includes('`')) delimiter = null
-      if (delimiter || fence || indentedCode) {
-        paragraph = false
-        flush()
-        result.push({ literal: line })
-        if (delimiter) {
-          if (!fence) {
-            fence = { marker: delimiter[1], quoteDepth: depth, listIndent }
-          } else if (delimiter[1][0] === fence.marker[0] && delimiter[1].length >= fence.marker.length && !delimiter[2].trim()) fence = null
-        }
-      } else {
-        paragraph = Boolean(lineContent.trim()) && !thematicBreak && !setextHeading && !/^ {0,3}#{1,6}(?:\s|$)/.test(lineContent)
-        prose.push(line)
       }
     }
-    flush()
-    return result.map(part => part.literal ?? rewriteProse(part.prose).body).join('\n')
+    visit(tree)
+    // Apply source edits backwards; all untouched Markdown stays byte-for-byte.
+    for (const edit of edits.reverse()) body = body.slice(0, edit.start) + edit.replacement + body.slice(edit.end)
+    return body
   }
   return { rewrite, pair }
 }
