@@ -568,6 +568,54 @@ test('unpersisted history and unchanged session snapshots do not write again', a
   assert.equal(saves.mock.callCount(), 2)
 })
 
+for (const initialization of ['creation', 'restore', 'sync replacement']) {
+  test(`local session metadata preserves synchronized timestamps after ${initialization}`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    let now = 1000
+    t.mock.method(Date, 'now', () => now)
+    const manager = createManager(t, 'desktop')
+    if (initialization !== 'creation') {
+      await manager.restoreFromData({ ...session(1), updatedAt: 500 })
+      if (initialization === 'sync replacement') {
+        await manager.replaceFromSyncData({ ...manager.getSyncSession(), updatedAt: 750 })
+      }
+    } else {
+      manager.createTab({ route: '/history', title: 'History' })
+    }
+    const before = structuredClone(manager.getSyncSession())
+    const tab = manager.tabs.values().next().value
+    now = 2000
+    tab.previewFileName = '00000000-0000-4000-8000-000000000001.jpg'
+    tab.previewCapturedAt = now
+    manager._scheduleSessionSave()
+    assert.deepEqual(manager.getSyncSession(), before)
+    await manager._saveSession()
+    assert.deepEqual(manager.getSyncSession(), before)
+    assert.equal(tabSession.saved.tabs[0].previewFileName, '00000000-0000-4000-8000-000000000001.jpg')
+    assert.equal(tabSession.saved.updatedAt, before.updatedAt)
+
+    now = 3000
+    tab.skipSilence = true
+    await manager._saveSession()
+    assert.deepEqual(manager.getSyncSession(), before)
+    assert.equal(tabSession.saved.tabs[0].skipSilence, true)
+
+    now = 4000
+    manager.applyTabTitle(tab, 'Changed title')
+    assert.equal(manager.getSyncSession().updatedAt, now)
+    now = 5000
+    await manager._saveSession()
+    assert.equal(tabSession.saved.updatedAt, 4000)
+    assert.equal(tabSession.saved.tabs[0].title, 'Changed title')
+
+    now = 6000
+    tab.title = 'Changed before closing'
+    await manager._saveSession()
+    assert.equal(manager.getSyncSession().updatedAt, now)
+    assert.equal(tabSession.saved.updatedAt, now)
+  })
+}
+
 test('extracted IPC handlers keep tab commands scoped to the sender window', async t => {
   const first = createManager(t, 'first', 1)
   const second = createManager(t, 'second', 2)

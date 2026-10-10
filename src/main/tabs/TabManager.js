@@ -716,6 +716,7 @@ export class TabManager {
     this.contextMenuTabBarVertical = false
     this._sessionSaveTimer = null
     this._lastSessionSaveContent = null
+    this._lastSyncSessionContent = null
     this._sessionSavePromise = Promise.resolve()
     this._sessionPersistenceDisabled = false
     this.sessionUpdatedAt = 0
@@ -3031,13 +3032,22 @@ export class TabManager {
     }
   }
 
+  // Local previews and window metadata must not make unchanged synced tabs newer.
+  _updateSessionTimestamp(preserveUpdatedAt = false) {
+    const content = JSON.stringify({ ...this.getSyncSession(), updatedAt: undefined })
+    if (content !== this._lastSyncSessionContent) {
+      if (!preserveUpdatedAt) this.sessionUpdatedAt = Date.now()
+      this._lastSyncSessionContent = content
+    }
+  }
+
   _scheduleSessionSave() {
     if (this._sessionPersistenceDisabled) return
     if (this._batchDepth > 0) {
       this._batchedSessionSavePending = true
       return
     }
-    this.sessionUpdatedAt = Date.now()
+    this._updateSessionTimestamp()
     // Do not restart the timer: even continuous updates must reach disk.
     if (this._sessionSaveTimer != null) return
     this._sessionSaveTimer = setTimeout(() => {
@@ -3052,11 +3062,10 @@ export class TabManager {
     this._sessionSaveTimer = null
     if (this._sessionPersistenceDisabled) return
 
+    this._updateSessionTimestamp()
     const session = this.getSessionData()
-    const content = JSON.stringify({ ...session, updatedAt: undefined })
+    const content = JSON.stringify(session)
     if (content === this._lastSessionSaveContent) return this._sessionSavePromise
-    this.sessionUpdatedAt = Date.now()
-    session.updatedAt = this.sessionUpdatedAt
     // Compare with the last queued snapshot, not the last completed write. A
     // reversion while a write is pending must enqueue the reverted state too.
     this._lastSessionSaveContent = content
@@ -3137,28 +3146,27 @@ export class TabManager {
    * @returns {object}
    */
   getSyncSession() {
-    const state = this.getState()
-    const tabs = state.tabs
+    const tabs = Array.from(this.tabs.values())
       .filter(tab => !this._deferredCloseTabIds.has(tab.id))
       .map(tab => ({
         id: tab.id,
         url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
         title: tab.title,
-        isPinned: tab.isPinned,
-        color: tab.color,
+        isPinned: tab.isPinned || false,
+        color: TabManager.normalizeTabColor(tab.color),
         groupId: tab.groupId,
-        isUnloaded: (tab.isUnloaded && !this._deferredStartupTabIds.has(tab.id)) ||
+        isUnloaded: (tab.loadState === 'unloaded' && !this._deferredStartupTabIds.has(tab.id)) ||
           this._deferredUnloadTabIds.has(tab.id),
-        ...(this.tabs.get(tab.id)?.placementOpenerTabId != null && {
-          placementOpenerTabId: this.tabs.get(tab.id).placementOpenerTabId
+        ...(tab.placementOpenerTabId != null && {
+          placementOpenerTabId: tab.placementOpenerTabId
         }),
-        ...(this.tabs.get(tab.id)?.persistNavigationHistory && tab.history != null && {
-          history: tab.history,
-          historyIndex: tab.historyIndex
+        ...(tab.persistNavigationHistory && tab.navigationHistory != null && {
+          history: tab.navigationHistory,
+          historyIndex: tab.navigationHistoryIndex
         })
       }))
-    const activeTabId = tabs.some(tab => tab.id === state.activeTabId)
-      ? state.activeTabId
+    const activeTabId = tabs.some(tab => tab.id === this.activeTabId)
+      ? this.activeTabId
       : tabs[0]?.id ?? null
 
     return {
@@ -3312,6 +3320,7 @@ export class TabManager {
 
       return this.tabs.size > 0
     } finally {
+      this._updateSessionTimestamp(true)
       this._sessionPersistenceDisabled = false
     }
   }
@@ -3464,6 +3473,7 @@ export class TabManager {
 
       return this.tabs.size > 0
     } finally {
+      if (preserveUpdatedAt) this._updateSessionTimestamp(true)
       this._sessionPersistenceDisabled = persistenceWasDisabled
     }
   }
