@@ -12,10 +12,7 @@
   margin-block-end: 0;
 }
 
-.channelContent {
-  padding-block-start: 0;
-}
-
+.channelContent,
 .channelError {
   margin-block-start: 20px;
   padding-block: 16px;
