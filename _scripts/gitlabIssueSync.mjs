@@ -103,7 +103,7 @@ function referenceResolver(sources, targets, mergeRequests) {
     const originals = [...gitlab].filter(([ref, item]) => ref.startsWith('!') === request && item.title === source.title)
     if (matches.length === 1 && originals.length === 1) pair(source, matches[0])
   }
-  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_[\]<>|&]/g, '\\$&')
+  const title = value => value.replace(/\s+/g, ' ').replace(/[\\`*_~[\]<>|&]/g, '\\$&')
   const render = (reference, side, suffix = '', tooltip = '') => {
     const item = (side === 'gitlab' ? gitlab : github).get(reference)
     const host = side === 'gitlab' ? 'GitLab' : 'GitHub'
@@ -157,7 +157,7 @@ function referenceResolver(sources, targets, mergeRequests) {
         for (const child of node.children ?? []) {
           if (child.type === 'html' && ['paragraph', 'heading', 'tableCell'].includes(node.type)) {
             if (codeTag && new RegExp(`</${codeTag}\\s*>`, 'i').test(child.value)) codeTag = null
-            else if (!codeTag) codeTag = child.value.match(/^<(code|pre|script|style|textarea)(?:\s[^>]*)?>$/i)?.[1] ?? null
+            else if (!codeTag && !child.value.endsWith('/>')) codeTag = child.value.match(/^<(code|pre|script|style|textarea)(?=[\s>])/i)?.[1] ?? null
           } else if (!codeTag) visit(child)
         }
       }

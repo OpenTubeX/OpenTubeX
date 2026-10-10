@@ -321,7 +321,7 @@ test('reference conversion preserves code, escapes, foreign references, and unre
     '[ref]: /url\n  "tooltip #1"\n\n[ref]',
     '/search?issue=#1', 'mailto:reporter@example.test?subject=#1', 'urn:example:report#note=#1',
     '[ref]: https://example.org/#1',
-    '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
+    'Text <code title=">">#1</code>', '<span data-ref="#1">', '<!-- example\n#1\n-->', '<code>#1</code>', '<pre>\n#1\n</pre>',
     '<pre>\n    #1\n#1\n</pre>', '<pre>\n```\n#1\n```\n#1\n</pre>', '&#123;', '#123abc',
   ].join('\n\n')
   state.sources[0].description = preserved
@@ -334,13 +334,15 @@ test('reference conversion preserves code, escapes, foreign references, and unre
 
 test('explicit local links retain comment fragments and escape title Markdown', async () => {
   const { state, client } = fixture()
-  state.sources[0].title = 'A [title] *with* _format_ <tag> `code` \\ path'
+  state.sources[0].title = 'A [title] *with* ~~removed~~ _format_ <tag> `code` \\ path'
   state.sources[0].description = '[old title](https://gitlab.com/opentubex/OpenTubeX/-/issues/1#note_10)\n<https://gitlab.com/opentubex/OpenTubeX/-/work_items/1>\n(opentubex/OpenTubeX#1).'
   await sync(client)
   const body = state.targets[0].body
-  assert.ok(body.includes('[A \\[title\\] \\*with\\* \\_format\\_ \\<tag\\> \\`code\\` \\\\ path]'))
+  assert.ok(body.includes('[A \\[title\\] \\*with\\* \\~\\~removed\\~\\~ \\_format\\_ \\<tag\\> \\`code\\` \\\\ path]'))
   assert.ok(body.includes(`${state.sources[0].web_url}#note_10)`))
   assert.equal((body.match(/GitHub #/g) ?? []).length, 3)
+  assert.match(marked.parse(body), /~~removed~~/)
+  assert.doesNotMatch(marked.parse(body), /<del>/)
 })
 
 test('public merge-request lookups do not require additional sync token permissions', async t => {
