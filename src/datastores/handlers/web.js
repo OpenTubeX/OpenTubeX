@@ -1,6 +1,9 @@
 import * as baseHandlers from './base'
 import { loadLegacySubscriptionCache, removeLegacySubscriptionCache } from '../index'
 import { createBrowserSubscriptionCache } from '../browserSubscriptionCache'
+import { createPortableLibrary } from './library-web.js'
+
+export const library = createPortableLibrary({ history: baseHandlers.history, playlists: baseHandlers.playlists })
 
 export const subscriptionCache = createBrowserSubscriptionCache(
   loadLegacySubscriptionCache,

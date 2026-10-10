@@ -20,6 +20,33 @@ test('confirmed duration repairs false live flags without changing personal data
   assert.equal(historyRepairPatch(record, { ...metadata, lengthSeconds: 0 }), null)
 })
 
+test('repair retains duplicate record identities through retries and emits only metadata changes', async () => {
+  const rows = [{ ...record, _id: 'first' }, { ...record, _id: 'second', watchProgress: 99 }]
+  const current = new Map(rows.map(row => [row._id, { ...row }]))
+  const saved = []
+  let requests = 0
+  const result = await repairHistory({
+    records: rows, signal: new AbortController().signal, onProgress: () => {},
+    getRecord: (videoId, id) => {
+      assert.equal(videoId, record.videoId)
+      return current.get(id)
+    },
+    fetchMetadata: async () => {
+      if (++requests === 1) throw new TypeError('Temporary network failure')
+      return metadata
+    },
+    saveMetadata: async patches => {
+      saved.push(...patches)
+      for (const patch of patches) Object.assign(current.get(patch._id), patch)
+      return { repaired: patches.length, failed: 0 }
+    },
+  })
+  assert.deepEqual(result, { total: 2, checked: 2, repaired: 2, failed: 0 })
+  assert.deepEqual(saved.sort((a, b) => a._id.localeCompare(b._id)), rows.map(row => ({ _id: row._id, videoId: row.videoId, ...metadata, liveNow: false })))
+  assert.equal(historyRepairPatch(current.get('first'), metadata), null, 'record identity alone must not count as a metadata change')
+  assert.deepEqual([...current.values()].map(row => row.watchProgress), [12, 99])
+})
+
 test('ended streams are not identified as currently live from isLiveContent', () => {
   const parsed = parseHistoryRepairPlayer({ videoDetails: { videoId: record.videoId, isLiveContent: true, lengthSeconds: '120' } }, record.videoId)
   assert.equal(parsed.isLive, false)

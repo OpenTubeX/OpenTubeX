@@ -464,6 +464,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { useVideoState } from '../../helpers/libraryState'
 
 import {
   copyToClipboard,
@@ -669,6 +670,8 @@ const liveReminderActive = ref(false)
 const liveReminderLoading = ref(false)
 let liveReminderLoadGeneration = 0
 let removeLiveReminderUpdatedListener = null
+
+useVideoState(store, () => [id.value])
 
 const historyEntry = computed(() => store.getters.getHistoryCacheById[id.value])
 
@@ -1560,10 +1563,10 @@ function handleOptionsClick(option) {
       removeFromHistory()
       break
     case 'moveVideoTop':
-      emit('move-video-to-the-top', id.value, props.playlistItemId)
+      emit('move-video-to-the-top', id.value, props.playlistItemId, props.data._libraryMemberId)
       break
     case 'moveVideoBottom':
-      emit('move-video-to-the-bottom', id.value, props.playlistItemId)
+      emit('move-video-to-the-bottom', id.value, props.playlistItemId, props.data._libraryMemberId)
       break
     case 'copyYoutube': {
       let videoUrl = `https://youtu.be/${id.value}`
@@ -1810,6 +1813,7 @@ const watchPageLinkQuery = computed(() => {
   if (playlistItemIdFinal.value) {
     query.playlistItemId = playlistItemIdFinal.value
   }
+  if (props.data._libraryMemberId && playlistTypeFinal.value === 'user') query.libraryMemberId = props.data._libraryMemberId
 
   if (props.downloadId) {
     query.downloadId = props.downloadId
@@ -2370,15 +2374,15 @@ async function removeFromQuickBookmarkPlaylist() {
 }
 
 function moveVideoUp() {
-  emit('move-video-up', id.value, props.playlistItemId)
+  emit('move-video-up', id.value, props.playlistItemId, props.data._libraryMemberId)
 }
 
 function moveVideoDown() {
-  emit('move-video-down', id.value, props.playlistItemId)
+  emit('move-video-down', id.value, props.playlistItemId, props.data._libraryMemberId)
 }
 
 function removeFromPlaylist() {
-  emit('remove-from-playlist', id.value, props.playlistItemId)
+  emit('remove-from-playlist', id.value, props.playlistItemId, props.data._libraryMemberId)
 }
 
 /**

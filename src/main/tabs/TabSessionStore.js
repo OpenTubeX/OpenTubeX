@@ -5,7 +5,7 @@
  * per-window session id, so that launching with multiple windows open
  * (e.g. Ctrl+Q on a multi-window session) restores every window.
  */
-import * as baseHandlers from '../../datastores/handlers/base.js'
+import * as baseHandlers from '../../datastores/handlers/main.js'
 
 /**
  * @typedef {object} TabSessionBounds

@@ -714,6 +714,8 @@ export default {
     return ipcRenderer.invoke(IpcChannels.DB_HISTORY, data ? { action, data } : { action })
   },
 
+  libraryQuery: (method, data) => ipcRenderer.invoke(IpcChannels.LIBRARY_QUERY, { method, data }),
+
   /**
    * @param {number} action
    * @param {any} [data]

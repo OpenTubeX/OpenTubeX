@@ -241,32 +241,32 @@ function pausePlayer() {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
-  emit('move-video-up', videoId, playlistItemId)
+function moveVideoUp(videoId, playlistItemId, memberId) {
+  emit('move-video-up', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoDown(videoId, playlistItemId) {
-  emit('move-video-down', videoId, playlistItemId)
+function moveVideoDown(videoId, playlistItemId, memberId) {
+  emit('move-video-down', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheTop(videoId, playlistItemId) {
-  emit('move-video-to-the-top', videoId, playlistItemId)
+function moveVideoToTheTop(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-top', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheBottom(videoId, playlistItemId) {
-  emit('move-video-to-the-bottom', videoId, playlistItemId)
+function moveVideoToTheBottom(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-bottom', videoId, playlistItemId, memberId)
 }
 
 function onDragVideo(event) {
@@ -288,8 +288,8 @@ const videoData = {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function removeFromPlaylist(videoId, playlistItemId) {
-  emit('remove-from-playlist', videoId, playlistItemId)
+function removeFromPlaylist(videoId, playlistItemId, memberId) {
+  emit('remove-from-playlist', videoId, playlistItemId, memberId)
 }
 </script>
 

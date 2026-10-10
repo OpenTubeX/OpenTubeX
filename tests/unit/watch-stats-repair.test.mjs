@@ -57,7 +57,7 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
     activityAccountKey: value => JSON.stringify([value.syncServerUrl, value.syncServerUsername, value.syncServerDeviceId]),
     assertSyncEnabled: () => {}, SyncServerCancelledError: Error, withSyncLock: callback => callback(),
     trackSyncClient: value => value, releaseSyncClient: () => {},
-    collectionCache: { put: () => {} }, parseSnapshot: JSON.parse, DBWatchStatsHandlers: { find: async () => records } }
+    collectionCache: { put: () => {} }, parseSnapshot: JSON.parse, savedSnapshot: async settings => settings.syncServerSnapshot, DBWatchStatsHandlers: { find: async () => records } }
   const actions = compileFunction(`return ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
   const context = { rootState: { settings }, commit(name, value) {
     if (name === 'setSyncedWatchStats') visible = value

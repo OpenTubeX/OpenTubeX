@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import { readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { settings } from '../datastores/handlers/base'
+import { settings } from '../datastores/handlers/main'
 import {
   DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   normalizeYtDlpPlaybackCacheMaxEntrySize

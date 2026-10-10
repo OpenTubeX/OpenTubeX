@@ -60,6 +60,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const storedReceipts = new Map()
   const common = {
+    DBLibraryHandlers: { query: async method => {
+      assert.equal(method, 'syncSnapshotRead')
+      return settings.syncServerSnapshot
+    } },
     DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote,
     runBackgroundJob: backgroundJob,
     toRaw,

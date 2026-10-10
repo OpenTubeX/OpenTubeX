@@ -120,6 +120,7 @@ async function settingsFixture(history = []) {
 function cacheFixture(applied = true, logger = console) {
   const recorded = []
   const context = vm.createContext({
+    process: { env: { IS_ELECTRON: false } },
     console: logger,
     ...seenVideos,
     ...feedState,

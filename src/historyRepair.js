@@ -29,7 +29,9 @@ export function historyRepairPatch(record, metadata) {
   for (const key of Object.keys(patch)) {
     if (key !== 'videoId' && record[key] === patch[key]) delete patch[key]
   }
-  return Object.keys(patch).length > 1 ? patch : null
+  if (Object.keys(patch).length <= 1) return null
+  if (typeof record._id === 'string' && record._id) patch._id = record._id
+  return patch
 }
 
 class HistoryRepairRateLimitError extends Error {}
@@ -115,7 +117,7 @@ function waitForRepair(milliseconds, signal) {
 }
 
 export async function repairHistory({ records, getRecord, fetchMetadata, saveMetadata, signal, onProgress, onPhase = () => {}, wait = waitForRepair }) {
-  let pending = records.filter(needsHistoryRepair).map(({ videoId }) => ({ videoId, checked: false, failed: false, failures: 0 }))
+  let pending = records.filter(needsHistoryRepair).map(({ videoId, _id }) => ({ videoId, _id, checked: false, failed: false, failures: 0 }))
   let cooldowns = 0
   let cooldownPending = false
   const result = { total: pending.length, checked: 0, repaired: 0, failed: 0 }
@@ -145,7 +147,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
       const patches = await Promise.all(batch.map(async target => {
         try {
           if (target.checked) {
-            const current = getRecord(target.videoId)
+            const current = await getRecord(target.videoId, target._id)
             if (!current || !needsHistoryRepair(current)) {
               if (target.failed) result.failed--
               target.failed = false
@@ -154,7 +156,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
           }
           const metadata = await fetchMetadata(target.videoId, signal)
           if (signal.aborted) return null
-          const current = getRecord(target.videoId)
+          const current = await getRecord(target.videoId, target._id)
           const patch = current && needsHistoryRepair(current) ? historyRepairPatch(current, metadata) : null
           if (target.failed) result.failed--
           target.failed = false

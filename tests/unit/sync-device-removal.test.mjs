@@ -71,6 +71,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     normalizeSyncSessionsDocument,
     i18n: { global: { t: key => key } },
     parseSnapshot: JSON.parse,
+    savedSnapshot: async settings => settings.syncServerSnapshot,
     getSavedOtherDeviceSessions: snapshot => getOtherDeviceSessions(snapshot.sessionsV2, settings.syncServerDeviceId),
     SyncServerCancelledError: class extends Error {}, isSessionExpiredError: () => false,
   })
