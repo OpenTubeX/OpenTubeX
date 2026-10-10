@@ -38,7 +38,14 @@ try {
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     window.tabGestureSavedState = {
-      tabs: { ...store.state.tabs },
+      tabs: {
+        ...store.state.tabs,
+        currentWatchTimestamps: { ...store.state.tabs.currentWatchTimestamps },
+        videoZoomByTabId: { ...store.state.tabs.videoZoomByTabId },
+        lightsOffByTabId: { ...store.state.tabs.lightsOffByTabId },
+        musicModeByTabId: { ...store.state.tabs.musicModeByTabId },
+        skipSilenceByTabId: { ...store.state.tabs.skipSilenceByTabId },
+      },
       layout: store.state.settings.capacitorLayoutMode,
       enabled: store.state.settings.enableMobileTabs,
       uiScale: store.state.settings.uiScale,
@@ -245,13 +252,13 @@ try {
         const saved = window.tabGestureSavedState
         if (saved) {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          // Let the budget callback and its delayed persistence settle on the test session.
+          await new Promise(resolve => setTimeout(resolve, 1250))
           store.state.tabs = saved.tabs
           store.state.settings.capacitorLayoutMode = saved.layout
           store.state.settings.enableMobileTabs = saved.enabled
           store.state.settings.uiScale = saved.uiScale
           store.state.settings.tabCloseFocus = saved.tabCloseFocus
-          // Allow queued persistence/budget work to settle before restoring storage.
-          await new Promise(resolve => setTimeout(resolve, 1000))
           if (saved.storage === null) localStorage.removeItem('opentubex-capacitor-tabs')
           else localStorage.setItem('opentubex-capacitor-tabs', saved.storage)
         }

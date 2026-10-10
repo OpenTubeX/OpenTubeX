@@ -33,6 +33,7 @@ function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
   const rows = tabs.value.map(row)
   const api = vm.runInNewContext(`${declarations}\n${handlers}\n${teardown}\n;({
     startTabGesture, moveTabGesture, finishTabGesture, cancelTabGesture, resetTabSwipe,
+    pendingSwipeCloses,
     settledCloses: () => swipeCloseQueue,
     renderRows: () => tabs.value.map(tab => [(${rowClasses}), tabCardStyle(tab.id)])
   })`, {
@@ -103,6 +104,20 @@ test('a second gesture cannot cancel a tab close that is animating', async () =>
   f.finish(-100, 1)
   await f.tick(200)
   assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+})
+
+test('a card with a pending close rejects another gesture', async () => {
+  const f = fixture()
+  f.api.pendingSwipeCloses.set(f.rows[0], {})
+  f.start()
+  f.move(100)
+  f.finish(100)
+  f.frame()
+  await f.tick(200)
+  assert.deepEqual(f.closed, [])
+  assert.equal(f.frames.size, 0)
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.rows[0].attributes.size, 0)
 })
 
 test('accepted closes wait for an earlier asynchronous close to finish', async () => {
