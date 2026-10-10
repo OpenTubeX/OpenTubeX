@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
@@ -33,7 +34,7 @@ test('tray icon choices persist and follow the active app palette', async ({ app
   await choices.locator('input[value="dracula"]').check()
   await expect.poll(() => cachedIcon(app)).not.toBeNull()
   const fixedIcon = await cachedIcon(app)
-  await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).trayIconPreset).toBe('dracula')
+  await expect.poll(async () => latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')).trayIconPreset).toBe('dracula')
   await setSetting(page, 'BaseTheme', 'light')
   await expect.poll(() => cachedIcon(app)).toBe(fixedIcon)
   await choices.locator('input[value="theme"]').check()

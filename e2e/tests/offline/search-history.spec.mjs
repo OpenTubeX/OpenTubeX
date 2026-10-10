@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
@@ -159,7 +159,7 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).press('Enter')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records
         .filter((entry) => entry.query === 'daily news' && !entry.$$deleted)
@@ -205,7 +205,7 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).press('Enter')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return [...new Set(records
         .filter(entry => !entry.$$deleted && (
@@ -215,7 +215,7 @@ test.describe('search history suggestions', () => {
     }).toEqual(['android tutorial'])
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter(entry => entry._id === 'android tutorial').at(-1)?.query
     }).toBe('android tutorial')
@@ -369,7 +369,7 @@ test.describe('search history suggestions', () => {
     await expect(suggestions(page).first()).toContainText('baking bread')
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'android tutorial').at(-1)?.$$deleted
     }).toBe(true)

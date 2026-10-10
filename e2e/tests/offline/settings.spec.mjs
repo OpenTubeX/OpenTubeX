@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -997,7 +998,7 @@ test.describe('settings', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return {
         mode: settings.ytDlpPlaybackAuthMode,
@@ -1589,7 +1590,7 @@ test.describe('settings', () => {
       .toHaveCSS('color', 'rgb(18, 52, 86)')
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return settings.sponsorBlockSponsor
     }).toEqual({ color: '#123456', skip: 'autoSkip' })
@@ -5003,7 +5004,7 @@ test.describe('preferred caption language migration', () => {
   test('persists the equivalent YouTube language code for existing users', async ({ app, page }) => {
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return settings.preferredCaptionLocale
     }).toBe('zh-Hant')
@@ -5053,7 +5054,7 @@ test.describe('managed external software update controls', () => {
     await expect(updateMode).toHaveValue('manual')
     await expect.poll(async () => {
       return latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       ).externalSoftwareUpdateMode
     }).toBe('manual')
   })
@@ -5109,7 +5110,7 @@ test.describe('live chat replay visibility migration', () => {
   test('preserves the old live chat visibility choice for replays', async ({ app }) => {
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return {
         liveChat: settings.hideLiveChat,
@@ -5173,7 +5174,7 @@ test.describe('SponsorBlock highlight settings', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return settings.sponsorBlockHighlight
     }).toEqual({
@@ -5627,7 +5628,7 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return settings.syncServerToken
     }).toBe('')
@@ -5736,7 +5737,7 @@ test.describe('sync settings', () => {
     try {
       await postLoginSyncRequested
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       expect(settings.syncServerSnapshot).toBe('{"subscriptions":[]}')
       expect(settings.syncServerLastSyncAt).toBe(1234)
@@ -5785,7 +5786,7 @@ test.describe('invalid icon pack', () => {
     await expect(page.locator('[data-icon-pack="material"]').first()).toBeVisible()
     await expect.poll(async () => {
       return latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       ).iconPack
     }).toBe('material')
   })
@@ -6300,7 +6301,7 @@ test.describe('performance impact indicators', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return settings.showPerformanceImpactIndicators
     }).toBe(true)

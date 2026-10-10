@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import {
@@ -202,7 +202,7 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await page.getByRole('option', { name: '2', exact: true }).click()
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const contents = await readPersistedDatastore(path.join(app.userDataDir, 'profiles.db'), 'utf8')
     const records = contents.trim().split('\n').map(line => JSON.parse(line))
     const latestProfiles = new Map(records.map(record => [record._id, record]))
     return ['allChannels', 'profile-1'].map(profileId => {
@@ -266,7 +266,7 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await popoverLimit.click()
   await page.getByRole('option', { name: 'Unlimited' }).click()
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const contents = await readPersistedDatastore(path.join(app.userDataDir, 'profiles.db'), 'utf8')
     const records = contents.trim().split('\n').map(line => JSON.parse(line))
     const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
       .find(subscription => subscription.id === CHANNEL_ID)
@@ -358,7 +358,7 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await expect(bulkDailyLimit).toHaveText('2')
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const contents = await readPersistedDatastore(path.join(app.userDataDir, 'profiles.db'), 'utf8')
     const records = contents.trim().split('\n').map(line => JSON.parse(line))
     const latestProfiles = new Map(records.map(record => [record._id, record]))
     return ['allChannels', 'profile-1'].map(profileId => (
@@ -471,7 +471,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
   await page.evaluate(() => window.resolveFirstChannelSettingsWrite())
 
   await expect.poll(async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const contents = await readPersistedDatastore(path.join(app.userDataDir, 'profiles.db'), 'utf8')
     const records = contents.trim().split('\n').map(line => JSON.parse(line))
     const channel = records.filter(record => record._id === 'allChannels').at(-1).subscriptions
       .find(subscription => subscription.id === CHANNEL_ID)

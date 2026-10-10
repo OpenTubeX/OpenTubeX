@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { chmod, copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -82,7 +83,7 @@ test('marks progress fully seen from the menu and the configurable thumbnail act
   await goTo(page, 'history')
   const video = page.locator('.ft-list-video').filter({ hasText: 'Bookmarkable video' })
   const persistedProgress = async () => {
-    const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+    const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
     const records = contents.trim().split('\n').map(line => JSON.parse(line))
     const latest = records.filter(record => record.videoId === 'eeeeeeeeeee').at(-1)
     return { watchProgress: latest.watchProgress, isWatched: latest.isWatched }
@@ -362,7 +363,7 @@ test('prefers evicting yt-dlp playback entries without open tabs', async ({ page
 })
 
 async function readPlaylist(app, id) {
-  const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+  const contents = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
   const records = contents.trim().split('\n').map((line) => JSON.parse(line))
   return records.filter((record) => record._id === id).at(-1)
 }
@@ -2104,7 +2105,7 @@ test.describe('list video actions', () => {
     await page.getByRole('button', { name: 'Create', exact: true }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       const created = records.filter((record) => record.playlistName === 'Cool clips').at(-1)
       return created?.videos?.map((entry) => entry.videoId)
@@ -2159,7 +2160,7 @@ test.describe('list video actions', () => {
 
     await expect(page.getByText('Bookmarkable video')).toBeVisible()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'eeeeeeeeeee').at(-1)?.isWatched
     }).toBe(false)
@@ -2172,7 +2173,7 @@ test.describe('list video actions', () => {
     await expect(page.getByText('Your history list is currently empty.')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'eeeeeeeeeee').at(-1)?.$$deleted
     }).toBe(true)

@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, goTo } from '../../helpers/app.mjs'
@@ -25,7 +25,7 @@ test('a reactive store object can be persisted over IPC', async ({ app, page }) 
   expect(result).toBe('ok')
 
   await expect(async () => {
-    const db = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+    const db = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
     expect(db).toContain('"description":"reactive roundtrip"')
   }).toPass({ timeout: 10_000 })
 })

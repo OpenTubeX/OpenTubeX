@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { cloneDefaultCustomTheme } from '../../../src/customTheme.js'
@@ -1582,7 +1583,7 @@ test.describe('tab layout shortcut', () => {
     })
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(appHandle.userDataDir, 'settings.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(appHandle.userDataDir, 'settings.db'), 'utf8')
       return Object.fromEntries(contents.trim().split('\n')
         .map(line => JSON.parse(line))
         .map(record => [record._id, record.value]))
