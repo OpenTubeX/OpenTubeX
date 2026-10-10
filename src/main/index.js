@@ -5534,6 +5534,18 @@ function runApp() {
           return profileIds
         }
 
+        case DBActions.PROFILES.UPDATE_SUBSCRIPTION_DETAILS: {
+          const profileIds = await baseHandlers.profiles.updateSubscriptionDetails(data)
+          if (profileIds.length > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_PROFILES,
+              event,
+              { event: SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS, data: { channels: data, profileIds } }
+            )
+          }
+          return profileIds
+        }
+
         case DBActions.GENERAL.DELETE:
           await baseHandlers.profiles.delete(data)
           syncOtherWindows(

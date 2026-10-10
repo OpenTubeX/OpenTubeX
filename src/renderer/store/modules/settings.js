@@ -1702,6 +1702,10 @@ const customActions = {
             commit('updateChannelSettings', data)
             break
 
+          case SyncEvents.PROFILES.UPDATE_SUBSCRIPTION_DETAILS:
+            commit('updateSubscriptionDetails', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeProfileFromList', data)
             break

@@ -10,6 +10,8 @@ import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../su
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
+import { copySubscriptionChannelSettings } from '../../renderer/helpers/subscription-channels'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -708,19 +710,49 @@ class Profiles {
   }
 
   static async updateChannelSettings(channel, profileIds) {
-    const { affectedDocuments } = await db.profiles.updateAsync(
-      {
-        _id: { $in: profileIds },
-        subscriptions: { $elemMatch: { id: channel.id } }
-      },
-      {
-        $pull: { subscriptions: { id: channel.id } },
-        $push: { subscriptions: channel }
-      },
-      { multi: true, returnUpdatedDocs: true }
-    )
+    const profiles = await db.profiles.findAsync({
+      _id: { $in: profileIds },
+      subscriptions: { $elemMatch: { id: channel.id } }
+    })
+    return this.updateSubscriptions(profiles, profile => {
+      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) return null
+      return profile.subscriptions.map(subscription => subscription.id === channel.id
+        ? copySubscriptionChannelSettings(subscription, channel)
+        : subscription)
+    })
+  }
 
-    return affectedDocuments.map(profile => profile._id)
+  static async updateSubscriptionDetails(channels) {
+    const profiles = await db.profiles.findAsync({})
+    return this.updateSubscriptions(profiles, profile => (
+      getProfileWithUpdatedSubscriptionDetails(profile, channels)?.subscriptions ?? null
+    ))
+  }
+
+  /**
+   * Retry against current subscriptions when another window changes them
+   * between reading and saving. Never write a stale whole-profile snapshot.
+   * @param {object[]} profiles
+   * @param {(profile: object) => object[] | null} update
+   */
+  static async updateSubscriptions(profiles, update) {
+    const updatedProfileIds = []
+    for (let profile of profiles) {
+      while (profile != null) {
+        const subscriptions = update(profile)
+        if (subscriptions === null) break
+        const { numAffected } = await db.profiles.updateAsync(
+          { _id: profile._id, subscriptions: profile.subscriptions },
+          { $set: { subscriptions } }
+        )
+        if (numAffected > 0) {
+          updatedProfileIds.push(profile._id)
+          break
+        }
+        profile = await db.profiles.findOneAsync({ _id: profile._id })
+      }
+    }
+    return updatedProfileIds
   }
 
   static delete(id) {

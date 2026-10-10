@@ -7,6 +7,7 @@ import test from 'node:test'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
+import { copySubscriptionChannelSettings } from '../../src/renderer/helpers/subscription-channels.js'
 
 import {
   AUTO_SYNC_INTERVAL_MS,
@@ -95,8 +96,9 @@ async function profileChangeFixture() {
     .replace('export default {', 'globalThis.profiles = {') + '\nprofiles', {
     MAIN_PROFILE_ID, DEFAULT_PROFILE_ICON: {},
     THEME_BG_COLOR: 'theme', THEME_TEXT_COLOR: 'theme',
-    getProfileWithUpdatedSubscriptionDetails, deepCopy: value => JSON.parse(JSON.stringify(value)),
-    DBProfileHandlers: { upsert: async () => {} },
+    getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings,
+    deepCopy: value => JSON.parse(JSON.stringify(value)),
+    DBProfileHandlers: { upsert: async () => {}, updateSubscriptionDetails: async () => [MAIN_PROFILE_ID, 'profile'] },
   })
   const channel = { id: 'channel', name: 'Old channel name', thumbnail: 'old-avatar' }
   profiles.state.profileList = [
