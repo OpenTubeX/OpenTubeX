@@ -250,10 +250,12 @@
   border-radius: calc(8px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   touch-action: pan-y;
+  transform: var(--tab-swipe-transform, none);
+  opacity: var(--tab-swipe-opacity, 1);
   transition: transform 160ms ease, opacity 160ms ease;
 }
 
-.capacitorPhoneTabRow.swiping,
+.capacitorPhoneTabRow[data-tab-swiping],
 .capacitorPhoneTabRow.dragging,
 .capacitorPhoneTabRow.noTransition {
   transition: none;
@@ -269,8 +271,12 @@
   cursor: grabbing;
 }
 
-.capacitorPhoneTabRow:is(.swiping, .closing, .dragging, .settling) {
+.capacitorPhoneTabRow:is([data-tab-swiping], [data-tab-closing], .dragging, .settling) {
   z-index: 2;
+}
+
+.capacitorPhoneTabRow[data-tab-closing] {
+  pointer-events: none;
 }
 
 .capacitorPhoneTabRow.active {

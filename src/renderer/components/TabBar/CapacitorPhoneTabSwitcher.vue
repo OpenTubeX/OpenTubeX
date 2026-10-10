@@ -172,9 +172,7 @@
                     holding: drag.tabId === tab.id && drag.ready,
                     dragging: drag.tabId === tab.id && drag.moved && !dragSettling,
                     settling: drag.tabId === tab.id && dragSettling,
-                    noTransition: suppressDragTransition,
-                    swiping: swipe.tabId === tab.id && swipe.dragging,
-                    closing: swipe.tabId === tab.id && swipe.closing
+                    noTransition: suppressDragTransition
                   }"
                   :style="tabCardStyle(tab.id)"
                   @pointerdown="startTabGesture($event, tab.id)"
@@ -540,11 +538,16 @@ const triggerLabel = computed(() => `${t('Tab Organizer.Title')}: ${t(
 const TAB_HOLD_DELAY = 400
 const TAB_MOVE_THRESHOLD = 8
 let swipeResetTimer = null
+let swipeFrame = null
+let swipeElement = null
+const pendingSwipeCloses = new Map()
+let swipeCloseQueue = Promise.resolve()
 let holdTimer = null
 let activatedTouchPointerId = null
 let pendingTouchTabId = null
 let dropTimer = null
 let dragFrame = null
+let dragDirty = false
 let dragRects = []
 let dragScrollStart = 0
 let dragMaximumScrollTop = 0
@@ -554,7 +557,8 @@ const dragSettling = ref(false)
 const suppressDragTransition = ref(false)
 let contentResizeObserver = null
 const viewScrollTop = { open: 0, synced: 0, history: 0 }
-const swipe = reactive({
+// Pointer samples are transient: updating them must not render the entire grid.
+const swipe = {
   tabId: null,
   pointerId: null,
   startX: 0,
@@ -565,7 +569,7 @@ const swipe = reactive({
   closing: false,
   suppressClick: false,
   rowWidth: 0,
-})
+}
 const drag = reactive({
   tabId: null,
   pointerId: null,
@@ -919,18 +923,14 @@ async function handleDeleteSessionPrompt(option) {
 function tabCardStyle(tabId) {
   const offset = dragOffsets.value[tabId]
   if (offset) return { transform: `translate3d(${offset.x}px, ${offset.y}px, 0)` }
-  if (swipe.tabId !== tabId) return undefined
-
-  return {
-    transform: `translateX(${swipe.deltaX}px)`,
-    opacity: String(Math.max(0.25, 1 - Math.abs(swipe.deltaX) / Math.max(swipe.rowWidth, 1)))
-  }
+  return undefined
 }
 
 function startTabGesture(event, tabId) {
   activatedTouchPointerId = null
   pendingTouchTabId = null
-  if (selecting.value || dragSettling.value || event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
+  if (selecting.value || dragSettling.value || pendingSwipeCloses.has(event.currentTarget) ||
+      event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
 
   resetTabDrag()
   resetTabSwipe()
@@ -970,6 +970,7 @@ function startTabGesture(event, tabId) {
   const tab = tabs.value.find(candidate => candidate.id === tabId)
   if (tab?.isPinned) return
 
+  swipeElement = event.currentTarget
   swipe.tabId = tabId
   swipe.pointerId = event.pointerId
   swipe.startX = event.clientX
@@ -989,7 +990,7 @@ function moveTabGesture(event) {
         if (actionTab.value) closeTabActions()
         drag.currentX = event.clientX
         drag.currentY = event.clientY
-        updateTabDrag()
+        dragDirty = true
         startDragAutoScroll()
       }
       return
@@ -1011,6 +1012,7 @@ function finishTabGesture(event) {
     swipe.suppressClick = true
     if (drag.moved) {
       stopDragAutoScroll()
+      if (dragDirty) updateTabDrag()
       const tabId = drag.tabId
       const targetIndex = dragLayout.targetIndex
       dragSettling.value = true
@@ -1074,6 +1076,7 @@ function handleTabContextMenu(event, tabId) {
 }
 
 function updateTabDrag() {
+  dragDirty = false
   const scrollDelta = openTabsScrollRef.value.scrollTop - dragScrollStart
   dragLayout = getTabGridReorder(
     dragRects, drag.tabId,
@@ -1099,7 +1102,7 @@ function startDragAutoScroll() {
     viewport.scrollTop = Math.max(0, Math.min(dragMaximumScrollTop,
       before + speed * Math.min(time - previousTime, 32) * 0.6))
     previousTime = time
-    if (viewport.scrollTop !== before) updateTabDrag()
+    if (dragDirty || viewport.scrollTop !== before) updateTabDrag()
     dragFrame = requestAnimationFrame(scroll)
   }
   dragFrame = requestAnimationFrame(scroll)
@@ -1120,6 +1123,7 @@ function resetTabDrag() {
   dragOffsets.value = {}
   dragRects = []
   dragLayout = null
+  dragDirty = false
   window.clearTimeout(holdTimer)
   holdTimer = null
   drag.tabId = null
@@ -1150,11 +1154,28 @@ function moveTabSwipe(event) {
     }
     if (Math.abs(deltaX) < TAB_MOVE_THRESHOLD) return
     swipe.dragging = true
+    swipeElement.setAttribute('data-tab-swiping', '')
     event.currentTarget.setPointerCapture(event.pointerId)
   }
 
   event.preventDefault()
   swipe.deltaX = deltaX
+  if (swipeFrame === null) swipeFrame = requestAnimationFrame(renderTabSwipe)
+}
+
+function renderTabSwipe() {
+  swipeFrame = null
+  if (!swipeElement) return
+  swipeElement.style.setProperty('--tab-swipe-transform', `translate3d(${swipe.deltaX}px, 0, 0)`)
+  swipeElement.style.setProperty('--tab-swipe-opacity',
+    String(Math.max(0.25, 1 - Math.abs(swipe.deltaX) / Math.max(swipe.rowWidth, 1))))
+}
+
+function clearTabSwipeElement(element) {
+  element.removeAttribute('data-tab-swiping')
+  element.removeAttribute('data-tab-closing')
+  element.style.removeProperty('--tab-swipe-transform')
+  element.style.removeProperty('--tab-swipe-opacity')
 }
 
 function finishTabSwipe(event) {
@@ -1164,7 +1185,13 @@ function finishTabSwipe(event) {
     return
   }
 
+  cancelAnimationFrame(swipeFrame)
+  swipeFrame = null
+  // Release may arrive before the queued frame, with a newer pointer sample.
+  swipe.deltaX = event.clientX - swipe.startX
+  swipe.pointerId = null
   swipe.suppressClick = true
+  swipeElement.removeAttribute('data-tab-swiping')
   const close = shouldCloseSwipedTab({
     distance: swipe.deltaX,
     elapsed: performance.now() - swipe.startTime,
@@ -1173,6 +1200,7 @@ function finishTabSwipe(event) {
   if (!close) {
     swipe.dragging = false
     swipe.deltaX = 0
+    renderTabSwipe()
     scheduleSwipeReset()
     return
   }
@@ -1181,18 +1209,42 @@ function finishTabSwipe(event) {
   swipe.dragging = false
   swipe.closing = true
   swipe.deltaX = Math.sign(swipe.deltaX || 1) * swipe.rowWidth
+  swipeElement.setAttribute('data-tab-closing', '')
+  renderTabSwipe()
+  const element = swipeElement
   const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160
-  swipeResetTimer = window.setTimeout(async () => {
-    swipeResetTimer = null
-    await closeTab(tabId)
-    resetTabSwipe()
-  }, delay)
+  // An accepted close belongs to this card, not to the next pointer session.
+  let finishing = false
+  const finish = async () => {
+    if (finishing) return
+    finishing = true
+    // Presenting an active tab's replacement must finish before another close.
+    const closing = swipeCloseQueue.then(() => closeTab(tabId))
+    swipeCloseQueue = closing.catch(() => {})
+    try {
+      await closing
+    } catch (error) {
+      console.error('Failed to close swiped tab:', error)
+    } finally {
+      pendingSwipeCloses.delete(element)
+      clearTabSwipeElement(element)
+    }
+  }
+  const timer = window.setTimeout(finish, delay)
+  pendingSwipeCloses.set(element, { timer, finish })
+  scheduleSwipeReset()
 }
 
 function cancelTabSwipe() {
   if (swipe.tabId === null) return
+  if (swipe.closing) return
+  cancelAnimationFrame(swipeFrame)
+  swipeFrame = null
+  swipe.pointerId = null
   swipe.dragging = false
   swipe.deltaX = 0
+  swipeElement?.removeAttribute('data-tab-swiping')
+  renderTabSwipe()
   scheduleSwipeReset()
 }
 
@@ -1202,6 +1254,10 @@ function scheduleSwipeReset() {
 }
 
 function resetTabSwipe() {
+  cancelAnimationFrame(swipeFrame)
+  swipeFrame = null
+  if (swipeElement && !pendingSwipeCloses.has(swipeElement)) clearTabSwipeElement(swipeElement)
+  swipeElement = null
   window.clearTimeout(swipeResetTimer)
   swipeResetTimer = null
   swipe.tabId = null
@@ -1301,6 +1357,11 @@ watch(
 
 onBeforeUnmount(() => {
   disposed = true
+  // Honor accepted closes even when the organizer disappears before animation ends.
+  for (const { timer, finish } of pendingSwipeCloses.values()) {
+    window.clearTimeout(timer)
+    finish()
+  }
   organizerSwipe.cancel()
   resetTabSwipe()
   resetTabDrag()

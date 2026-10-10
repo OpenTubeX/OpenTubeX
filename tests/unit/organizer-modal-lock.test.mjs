@@ -18,6 +18,7 @@ for (const state of ['closed', 'dragging', 'settling', 'open', 'closed after com
     let unmount
     const prompts = new Set(['other'])
     const context = vm.createContext({
+      pendingSwipeCloses: new Map(),
       open, organizerGesture, disposed: false, promptId: 'organizer',
       watch, showSyncedTabsView: ref(false),
       lockBodyScroll: () => { locks++ }, unlockBodyScroll: () => { locks-- },

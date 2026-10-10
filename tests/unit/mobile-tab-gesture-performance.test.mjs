@@ -1,0 +1,292 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import test from 'node:test'
+import vm from 'node:vm'
+import { nextTick, reactive, ref, watchEffect } from 'vue'
+import { getTabGridReorder } from '../../src/renderer/components/TabBar/tabGridReorder.js'
+import { shouldCloseSwipedTab } from '../../src/renderer/helpers/capacitorTabSwipe.js'
+
+const component = readFileSync(new URL('../../src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.vue', import.meta.url), 'utf8')
+function sourceBetween(start, end) {
+  const startIndex = component.indexOf(start)
+  assert.ok(startIndex >= 0, `Gesture fixture source marker is missing: ${start}`)
+  const endIndex = component.indexOf(end, startIndex + start.length)
+  assert.ok(endIndex > startIndex, `Gesture fixture end marker is missing after ${start}: ${end}`)
+  return component.slice(startIndex, endIndex)
+}
+const declarations = sourceBetween('const TAB_HOLD_DELAY', 'const {\n  selecting,')
+const handlers = sourceBetween('function tabCardStyle', 'function focusActiveTab')
+const rowClassMatch = component.match(/class="capacitorPhoneTabRow"\s+:class="(\{[^]*?\})"/)
+assert.ok(rowClassMatch, 'Gesture fixture tab row class binding is missing')
+const rowClasses = rowClassMatch[1]
+const teardown = sourceBetween('onBeforeUnmount(() => {', '</script>')
+
+function fixture({ reducedMotion = false, close = null, pinned = false } = {}) {
+  let now = 0
+  let nextId = 0
+  const timers = new Map()
+  const frames = new Map()
+  const closed = []
+  const moved = []
+  const errors = []
+  let unmount
+  let layouts = 0
+  const tabs = ref(Array.from({ length: 100 }, (_, i) => ({ id: `tab-${i}`, isPinned: pinned && i === 0 })))
+  const row = (_, index) => ({
+    attributes: new Map(),
+    setAttribute(name, value) { this.attributes.set(name, value) },
+    removeAttribute(name) { this.attributes.delete(name) },
+    style: { setProperty(name, value) { this[name] = value }, removeProperty(name) { delete this[name] } },
+    getBoundingClientRect: () => ({ left: (index % 2) * 192.5, top: Math.floor(index / 2) * 240.5, width: 180.5, height: 228.5 }),
+    setPointerCapture() {}, querySelector() { return { dataset: { tabId: `tab-${index}` } } }
+  })
+  const rows = tabs.value.map(row)
+  const api = vm.runInNewContext(`${declarations}\n${handlers}\n${teardown}\n;({
+    startTabGesture, moveTabGesture, finishTabGesture, cancelTabGesture, resetTabSwipe,
+    pendingSwipeCloses,
+    settledCloses: () => swipeCloseQueue,
+    renderRows: () => tabs.value.map(tab => [(${rowClasses}), tabCardStyle(tab.id)])
+  })`, {
+    reactive, ref, nextTick, tabs, shouldCloseSwipedTab, activeTabId: ref('tab-0'),
+    disposed: false, onBeforeUnmount: callback => { unmount = callback },
+    organizerSwipe: { cancel() {} }, stopObservingContent() {}, releaseModalLock() {},
+    console: { error: (...args) => errors.push(args) },
+    selecting: ref(false), actionTab: ref(null),
+    performance: { now: () => now },
+    getTabGridReorder(...args) { layouts++; return getTabGridReorder(...args) },
+    getComputedStyle: () => ({ paddingBottom: '88px' }),
+    matchMedia: () => ({ matches: reducedMotion }),
+    requestAnimationFrame(callback) { frames.set(++nextId, callback); return nextId },
+    cancelAnimationFrame(id) { frames.delete(id) },
+    window: {
+      setTimeout(callback, delay) { timers.set(++nextId, { callback, at: now + delay }); return nextId },
+      clearTimeout(id) { timers.delete(id) }
+    },
+    closeTab: async id => { closed.push(id); if (close) await close(id) },
+    getCapacitorTabService: () => ({ moveTab(tabId, index) { moved.push({ tabId, index }); return true } }),
+    openTabsContentRef: ref({ querySelectorAll: () => rows, getBoundingClientRect: () => ({ bottom: 12025 }) }),
+    openTabsScrollRef: ref({ scrollTop: 0, clientHeight: 600, getBoundingClientRect: () => ({ top: 0, bottom: 600 }) }),
+    openTabActions() {}, closeTabActions() {}, lightHaptic() {}, clampOverlayScrollTop() {},
+  })
+  function event(x, index = 0) {
+    return { button: 0, pointerId: index + 1, pointerType: 'touch', clientX: x, clientY: 100,
+      timeStamp: now, currentTarget: rows[index], target: { closest: () => null }, preventDefault() {} }
+  }
+  return {
+    api, closed, moved, errors, frames, rows, unmount: () => unmount(), get layouts() { return layouts },
+    timers,
+    start: (index = 0) => api.startTabGesture(event(0, index), `tab-${index}`),
+    move: (x, index = 0) => api.moveTabGesture(event(x, index)),
+    finish: (x, index = 0) => api.finishTabGesture(event(x, index)),
+    async tick(ms) {
+      now += ms
+      const pending = [...timers].filter(([, timer]) => timer.at <= now)
+      for (const [id, timer] of pending) { timers.delete(id); await timer.callback() }
+    },
+    frame() { const pending = [...frames.values()]; frames.clear(); for (const callback of pending) callback(now) }
+  }
+}
+
+test('closing swipe does not render every tab card for every movement', async () => {
+  const f = fixture()
+  let renders = 0
+  const stop = watchEffect(() => { f.api.renderRows(); renders++ })
+  try {
+    f.start()
+    await nextTick()
+    const before = renders
+    for (let i = 0; i < 20; i++) {
+      f.move(10 + i * 2)
+      await nextTick()
+      f.frame()
+    }
+    assert.ok(renders - before <= 1, `Gesture recognition may render once; movements must not render the 100-card list (got ${renders - before})`)
+  } finally { stop() }
+})
+
+test('a second gesture cannot cancel a tab close that is animating', async () => {
+  const f = fixture()
+  f.start()
+  f.move(100)
+  f.finish(100)
+  await f.tick(50)
+  f.start(1)
+  f.move(-100, 1)
+  f.finish(-100, 1)
+  await f.tick(200)
+  assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+})
+
+test('a card with a pending close rejects another gesture', async () => {
+  const f = fixture()
+  f.api.pendingSwipeCloses.set(f.rows[0], {})
+  f.start()
+  f.move(100)
+  f.finish(100)
+  f.frame()
+  await f.tick(200)
+  assert.deepEqual(f.closed, [])
+  assert.equal(f.frames.size, 0)
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.rows[0].attributes.size, 0)
+})
+
+test('accepted closes wait for an earlier asynchronous close to finish', async () => {
+  let finishFirst
+  const f = fixture({ close: id => id === 'tab-0' ? new Promise(resolve => { finishFirst = resolve }) : undefined })
+  f.start()
+  f.move(100)
+  f.finish(100)
+  const firstClose = f.tick(160)
+  await Promise.resolve()
+  f.start(1)
+  f.move(100, 1)
+  f.finish(100, 1)
+  const secondClose = f.tick(160)
+  await Promise.resolve()
+  try {
+    assert.deepEqual(f.closed, ['tab-0'], 'The second close must not interrupt replacement-tab presentation')
+  } finally {
+    finishFirst()
+    await Promise.all([firstClose, secondClose])
+  }
+  assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+})
+
+for (const unmount of [false, true]) {
+  test(`a failed swipe close is handled and does not block later closes (unmount: ${unmount})`, async () => {
+    const failure = new Error('Replacement presentation failed')
+    const f = fixture({ close: id => { if (id === 'tab-0') throw failure } })
+    f.start()
+    f.move(100)
+    f.finish(100)
+    f.start(1)
+    f.move(100, 1)
+    f.finish(100, 1)
+    if (unmount) f.unmount()
+    await assert.doesNotReject(f.tick(160))
+    await f.api.settledCloses()
+    assert.deepEqual(f.closed, ['tab-0', 'tab-1'])
+    assert.equal(f.errors.length, 1)
+    assert.equal(f.errors[0][1], failure)
+    assert.equal(f.rows[0].attributes.size, 0)
+    assert.equal(f.rows[1].attributes.size, 0)
+    assert.equal(f.timers.size, unmount ? 0 : 1)
+  })
+}
+
+test('unmount finishes accepted closes once and cancels an unfinished gesture', async () => {
+  const f = fixture()
+  f.start()
+  f.move(100)
+  f.finish(100)
+  f.start(1)
+  f.move(40, 1)
+  f.unmount()
+  f.frame()
+  await f.tick(200)
+  await f.api.settledCloses()
+  assert.deepEqual(f.closed, ['tab-0'])
+  assert.equal(f.frames.size, 0)
+  assert.equal(f.timers.size, 0)
+  assert.equal(f.rows[0].attributes.size, 0)
+  assert.equal(f.rows[1].attributes.size, 0)
+})
+
+test('long-press reorder coalesces pointer bursts into one layout per frame', async () => {
+  const f = fixture()
+  f.start()
+  await f.tick(400)
+  for (let i = 0; i < 50; i++) f.move(10 + i)
+  assert.equal(f.layouts, 0, 'Pointer handlers only record the newest position')
+  assert.equal(f.frames.size, 1)
+  f.frame()
+  assert.equal(f.layouts, 1)
+  f.move(80)
+  assert.equal(f.frames.size, 1)
+  f.api.cancelTabGesture()
+  assert.equal(f.frames.size, 0, 'Cancellation discards the pending reorder frame')
+  f.frame()
+  assert.equal(f.layouts, 1, 'Cancelled frames do not update the grid')
+})
+
+test('swipe bursts paint only the latest fractional position in one frame', () => {
+  const f = fixture()
+  f.start()
+  for (let i = 0; i < 50; i++) f.move(10.25 + i)
+  assert.equal(f.frames.size, 1)
+  assert.equal(f.rows[0].style['--tab-swipe-transform'], undefined)
+  f.frame()
+  assert.equal(f.rows[0].style['--tab-swipe-transform'], 'translate3d(59.25px, 0, 0)')
+  assert.equal(f.rows[1].style['--tab-swipe-transform'], undefined)
+})
+
+for (const cancel of ['cancelTabGesture', 'resetTabSwipe']) {
+  test(`${cancel} discards queued swipe work and restores the card`, async () => {
+    const f = fixture()
+    f.start()
+    f.move(40)
+    f.api[cancel]()
+    f.frame()
+    await f.tick(170)
+    assert.equal(f.frames.size, 0)
+    assert.equal(f.rows[0].style['--tab-swipe-transform'], undefined)
+    assert.equal(f.rows[0].attributes.size, 0)
+    assert.deepEqual(f.closed, [])
+  })
+}
+
+for (const reducedMotion of [false, true]) {
+  test(`release uses the newest pointer sample before the frame (reduced motion: ${reducedMotion})`, async () => {
+    const f = fixture({ reducedMotion })
+    f.start()
+    f.move(10)
+    f.finish(100)
+    assert.equal(f.frames.size, 0)
+    await f.tick(reducedMotion ? 0 : 160)
+    assert.deepEqual(f.closed, ['tab-0'])
+  })
+}
+
+test('completion of an older close does not reset the next swipe', async () => {
+  let finishClose
+  const f = fixture({ close: () => new Promise(resolve => { finishClose = resolve }) })
+  f.start()
+  f.move(100)
+  f.finish(100)
+  const closing = f.tick(160)
+  await Promise.resolve()
+  f.start(1)
+  f.move(-40, 1)
+  f.frame()
+  finishClose()
+  await closing
+  f.move(-60.5, 1)
+  f.frame()
+  assert.equal(f.rows[1].style['--tab-swipe-transform'], 'translate3d(-60.5px, 0, 0)')
+  assert.equal(f.rows[1].attributes.has('data-tab-swiping'), true)
+})
+
+test('a pinned card cannot be swiped closed', async () => {
+  const f = fixture({ pinned: true })
+  f.start()
+  f.move(100)
+  f.finish(100)
+  f.frame()
+  await f.tick(200)
+  assert.deepEqual(f.closed, [])
+  assert.equal(f.rows[0].style['--tab-swipe-transform'], undefined)
+})
+
+test('release before the reorder frame still commits the newest drop slot', async () => {
+  const f = fixture()
+  f.start()
+  await f.tick(400)
+  f.move(10)
+  f.move(192.5)
+  f.finish(192.5)
+  assert.equal(f.layouts, 1, 'Release flushes the pending layout synchronously')
+  assert.equal(f.frames.size, 0)
+  await f.tick(160)
+  assert.deepEqual(f.moved, [{ tabId: 'tab-0', index: 1 }], 'The newest position drops the first card into the second slot')
+})
