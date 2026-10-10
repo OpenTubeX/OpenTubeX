@@ -5,6 +5,7 @@ import { syncBuiltinESMExports } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { setImmediate } from 'node:timers/promises'
 import { DatabaseSync } from 'node:sqlite'
 import model from '@seald-io/nedb/lib/model.js'
 import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
@@ -21,6 +22,56 @@ function memory(t) {
   t.after(() => database.close())
   return new LibraryEngine(database)
 }
+
+test('an independent write waits for a suspended transaction and survives its rollback', async t => {
+  const engine = memory(t)
+  const entered = Promise.withResolvers()
+  const resume = Promise.withResolvers()
+  const failure = new Error('import failed after awaiting its handler')
+  const importTransaction = engine.transaction(async () => {
+    await engine.collections.history.insertAsync({ _id: 'imported', videoId: 'imported' })
+    entered.resolve()
+    await resume.promise
+    throw failure
+  })
+  const rejected = assert.rejects(importTransaction, failure)
+  await entered.promise
+  const independent = { _id: 'independent', videoId: 'saved', unknown: { date: new Date(123) } }
+  let saved = false
+  const write = engine.collections.history.insertAsync(independent).then(record => { saved = true; return record })
+  await setImmediate()
+  const savedBeforeRollback = saved
+  resume.resolve()
+  await rejected
+  assert.deepEqual(await write, independent)
+  assert.deepEqual(await engine.collections.history.findAsync({}), [independent])
+  assert.equal(savedBeforeRollback, false, 'the independent write must not resolve inside another request\'s transaction')
+  assert.equal(engine.revision('history'), 1)
+  assert.equal(engine.transactionDepth, 0)
+})
+
+test('nested writes share their owner while independent successful transactions commit separately', async t => {
+  const engine = memory(t)
+  const entered = Promise.withResolvers()
+  const resume = Promise.withResolvers()
+  const exec = engine.database.exec.bind(engine.database)
+  const boundaries = []
+  t.mock.method(engine.database, 'exec', sql => { boundaries.push(sql); return exec(sql) })
+  const first = engine.transaction(async () => {
+    await engine.collections.history.insertAsync({ _id: 'first', videoId: 'first' })
+    entered.resolve()
+    await resume.promise
+    await engine.transaction(() => engine.collections.history.insertAsync({ _id: 'nested', videoId: 'nested' }))
+  })
+  await entered.promise
+  const second = engine.collections.history.insertAsync({ _id: 'second', videoId: 'second' })
+  resume.resolve()
+  await Promise.all([first, second])
+  assert.deepEqual(boundaries, ['BEGIN IMMEDIATE', 'COMMIT', 'BEGIN IMMEDIATE', 'COMMIT'])
+  assert.deepEqual(await engine.collections.history.findAsync({}), [
+    { _id: 'first', videoId: 'first' }, { _id: 'nested', videoId: 'nested' }, { _id: 'second', videoId: 'second' },
+  ])
+})
 
 test('large member writes preserve dates, unknown fields, duplicate identities and complete rollback', async t => {
   const engine = memory(t)

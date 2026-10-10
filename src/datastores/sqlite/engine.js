@@ -1,4 +1,5 @@
 import model from '@seald-io/nedb/lib/model.js'
+import { AsyncLocalStorage } from 'node:async_hooks'
 import { createHash, randomUUID } from 'node:crypto'
 import { ARRAY_FIELDS, COLLECTIONS } from './schema.js'
 import { filterVideosWithQuery } from '../../renderer/helpers/historySearch.js'
@@ -175,6 +176,8 @@ export class LibraryEngine {
     this.statements = new Map()
     this.searchCharacterFolds = new Map()
     this.transactionDepth = 0
+    this.transactionContext = new AsyncLocalStorage()
+    this.pendingTransaction = Promise.resolve()
     this.playlistOrders = new Map()
     this.database.exec('CREATE TEMP TABLE playlist_orders (view_id TEXT NOT NULL, rank INTEGER NOT NULL, position INTEGER NOT NULL, PRIMARY KEY(view_id, rank)) WITHOUT ROWID')
     this.database.function('history_watched', data => Number(data ? isHistoryEntryWatched(deserialize(data)) : false))
@@ -207,6 +210,14 @@ export class LibraryEngine {
   }
 
   async transaction(operation) {
+    const context = this.transactionContext.getStore()
+    if (!context?.active) {
+      // Only async descendants of the active owner may join its transaction.
+      // Independent requests wait even when that owner yields to a handler.
+      const result = this.pendingTransaction.then(() => this.transactionContext.run({ active: true }, () => this.transaction(operation)))
+      this.pendingTransaction = result.then(() => {}, () => {})
+      return result
+    }
     const outermost = this.transactionDepth === 0
     if (outermost) this.database.exec('BEGIN IMMEDIATE')
     this.transactionDepth++
@@ -217,7 +228,10 @@ export class LibraryEngine {
     } catch (error) {
       if (outermost) this.database.exec('ROLLBACK')
       throw error
-    } finally { this.transactionDepth-- }
+    } finally {
+      this.transactionDepth--
+      if (outermost) context.active = false
+    }
   }
 
   touch(collection) {
