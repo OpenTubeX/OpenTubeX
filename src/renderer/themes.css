@@ -2461,7 +2461,11 @@ a:visited {
 
 /* stylelint-disable no-descending-specificity */
 :root[data-reduced-motion='reduce'],
-:root[data-reduced-motion='reduce'] * {
+:root[data-reduced-motion='reduce']::before,
+:root[data-reduced-motion='reduce']::after,
+:root[data-reduced-motion='reduce'] *,
+:root[data-reduced-motion='reduce'] *::before,
+:root[data-reduced-motion='reduce'] *::after {
   transition: none !important;
   animation: none !important;
 }

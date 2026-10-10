@@ -498,6 +498,72 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.tabTitleText')).toHaveCSS('opacity', '1')
   })
 
+  test('restores the loading dot from Appearance settings and remembers the choice', async ({ app, page }) => {
+    await goToSettingsSection(page, 'appearance')
+    const indicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
+    await expect(indicator).toHaveText('Bar')
+    await indicator.click()
+    await page.locator(`#${await indicator.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Dot (classic)', exact: true }).click()
+    await expect(indicator).toHaveText('Dot (classic)')
+    const next = await app.relaunch()
+    page = next.page
+    await goToSettingsSection(page, 'appearance')
+    const savedIndicator = page.getByRole('combobox', { name: 'Tab Loading Style', exact: true })
+    await expect(savedIndicator).toHaveText('Dot (classic)')
+    for (const zoom of [1, 1.25]) {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      for (const width of [1600, 732, 520]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), width, height: 800 })
+        }, width)
+        await savedIndicator.scrollIntoViewIfNeeded()
+        await expect(savedIndicator).toBeVisible()
+        expect(await savedIndicator.locator('..').locator('.select-label-text').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      }
+    }
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setBounds({ ...window.getBounds(), width: 1600, height: 900 })
+    })
+    await page.locator('.settingsCloseButton').click()
+
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/loading-dot',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(true, id), watchTab.id)
+    const dot = tab.locator('.tabLoadingDot')
+    await expect(dot).toBeVisible()
+    await expect(tab.locator('.tabLoadingLine')).toHaveCount(0)
+    await expect(tab.locator('.tabPageIcon')).toHaveCount(0)
+    for (const zoom of [1, 1.25]) {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      for (const position of ['top', 'bottom', 'left', 'right']) {
+        await page.evaluate(position => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position), position)
+        await expect(dot).toBeVisible()
+        expect(await dot.evaluate(element => {
+          const tab = element.closest('.tab').getBoundingClientRect()
+          const dot = element.getBoundingClientRect()
+          return dot.left >= tab.left && dot.right <= tab.right && dot.top >= tab.top && dot.bottom <= tab.bottom
+        })).toBe(true)
+      }
+    }
+    const animationName = () => dot.evaluate(element => getComputedStyle(element).animationName)
+    expect(await animationName()).not.toBe('none')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    expect(await animationName()).toBe('none')
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+    expect(await animationName()).toBe('none')
+    await page.evaluate(id => window.ftElectron.tabs.setLoading(false, id), watchTab.id)
+    await expect(dot).toHaveCount(0)
+    await expect(tab.locator('.tabPageIcon')).toBeVisible()
+  })
+
   test('keeps a cached watch avatar visible while loading', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))

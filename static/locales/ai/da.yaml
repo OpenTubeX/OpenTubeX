@@ -400,6 +400,10 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indikator for faneindlæsning
+      Bar: Bjælke
+      Dot: Prik (klassisk)
     Compact Settings Categories: "Kompakte indstillingskategorier"
     Playlist Thumbnail Size: "Størrelse på afspilningslistens miniaturebilleder"
     Compact Mobile Mini Player: "Kompakt mobil miniafspiller"

@@ -392,6 +392,10 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Välilehden latausilmaisin
+      Bar: Palkki
+      Dot: Piste (perinteinen)
     Compact Settings Categories: "Tiiviit asetuskategoriat"
     Playlist Thumbnail Size: "Soittolistan pikkukuvien koko"
     Compact Mobile Mini Player: "Kompakti mobiiliminisoitin"

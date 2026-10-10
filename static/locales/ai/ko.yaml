@@ -486,6 +486,10 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: 탭 로딩 표시
+      Bar: 막대
+      Dot: 점 (클래식)
     Compact Settings Categories: "설정 카테고리 간결하게 표시"
     Playlist Thumbnail Size: "재생목록 썸네일 크기"
     Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"

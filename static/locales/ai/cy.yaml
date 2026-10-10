@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Dangosydd llwytho tab
+      Bar: Bar
+      Dot: Dot (clasurol)
     Compact Settings Categories: "Categorïau Gosodiadau Cryno"
     Playlist Thumbnail Size: "Maint mân-luniau’r rhestr chwarae"
     Compact Mobile Mini Player: "Chwaraewr bach cryno ar ffôn symudol"

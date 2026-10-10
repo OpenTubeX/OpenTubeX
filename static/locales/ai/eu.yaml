@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Fitxaren karga-adierazlea
+      Bar: Barra
+      Dot: Puntua (klasikoa)
     Compact Settings Categories: "Ezarpen-kategoria trinkoak"
     Playlist Thumbnail Size: "Erreprodukzio-zerrendako miniaturen tamaina"
     Compact Mobile Mini Player: "Mugikorreko erreproduzitzaile txiki trinkoa"

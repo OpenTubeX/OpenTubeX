@@ -525,6 +525,10 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indicador de càrrega de la pestanya
+      Bar: Barra
+      Dot: Punt (clàssic)
     Compact Settings Categories: "Categories de configuració compactes"
     Playlist Thumbnail Size: "Mida de les miniatures de la llista de reproducció"
     Compact Mobile Mini Player: "Minireproductor mòbil compacte"

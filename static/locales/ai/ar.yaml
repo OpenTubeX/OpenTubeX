@@ -392,6 +392,10 @@ Settings:
     Invalid Engine: أدخل اسمًا وعنوان URL صالحًا للبحث HTTP أو HTTPS يحتوي على %s.
     Engine Limit: يمكنك إضافة ما يصل إلى {count} محرك بحث مخصص.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: مؤشر تحميل علامة التبويب
+      Bar: شريط
+      Dot: نقطة (كلاسيكي)
     Compact Settings Categories: "فئات إعدادات مدمجة"
     Playlist Thumbnail Size: "حجم الصور المصغرة لقائمة التشغيل"
     Compact Mobile Mini Player: "مشغّل مصغّر مدمج للهاتف"

@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Merker kargañ an ivinell
+      Bar: Barrenn
+      Dot: Pik (klasel)
     Compact Settings Categories: "Rummadoù arventennoù stank"
     Playlist Thumbnail Size: "Ment skeudennoù bihan ar roll-lenn"
     Compact Mobile Mini Player: "Lenner bihan hezoug stank"

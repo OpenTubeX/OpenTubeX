@@ -395,6 +395,10 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: தாவல் ஏற்றுதல் குறிகாட்டி
+      Bar: பட்டை
+      Dot: புள்ளி (பழைய பாணி)
     Compact Settings Categories: "சுருக்கமான அமைப்பு வகைகள்"
     Playlist Thumbnail Size: "பிளேலிஸ்ட் சிறுபட அளவு"
     Compact Mobile Mini Player: "சிறிய மொபைல் மினி பிளேயர்"

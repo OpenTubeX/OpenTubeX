@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indikator pemuatan tab
+      Bar: Bilah
+      Dot: Titik (klasik)
     Compact Settings Categories: "Kategori Pengaturan Ringkas"
     Playlist Thumbnail Size: "Ukuran thumbnail playlist"
     Compact Mobile Mini Player: "Pemutar mini seluler ringkas"

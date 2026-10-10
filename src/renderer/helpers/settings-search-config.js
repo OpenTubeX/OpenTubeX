@@ -274,6 +274,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   },
   theme: {
     'Tab Layout': ['Tab Layout'],
+    'Tab Loading Indicator': ['Tab Loading Indicator'],
     'Toast Position': ['Toast Position'],
     'Base Theme': ['Base Theme'],
     'Icon Pack': ['Icon Pack'],

@@ -390,6 +390,10 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Vərəqin yüklənmə göstəricisi
+      Bar: Zolaq
+      Dot: Nöqtə (klassik)
     Compact Settings Categories: "Yığcam ayar kateqoriyaları"
     Playlist Thumbnail Size: "Pleylist miniatürlərinin ölçüsü"
     Compact Mobile Mini Player: "Yığcam mobil mini pleyer"

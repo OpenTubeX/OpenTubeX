@@ -494,6 +494,10 @@ Settings:
       Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Tab-Ladeanzeige
+      Bar: Balken
+      Dot: Punkt (klassisch)
     Compact Mobile Mini Player: "Kompakter mobiler Mini-Player"
     Always Show Mobile Search Bar: "Mobile Suchleiste immer anzeigen"
     Theme Settings: Farbschema

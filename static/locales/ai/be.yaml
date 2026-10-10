@@ -407,6 +407,10 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Індыкатар загрузкі ўкладкі
+      Bar: Паласа
+      Dot: Кропка (класічная)
     Compact Settings Categories: "Кампактныя катэгорыі налад"
     Playlist Thumbnail Size: "Памер мініяцюр плэйліста"
     Compact Mobile Mini Player: "Кампактны мабільны міні-прайгравальнік"

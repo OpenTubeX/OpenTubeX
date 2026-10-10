@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: タブの読み込み表示
+      Bar: バー
+      Dot: ドット（従来）
     Compact Settings Categories: "設定カテゴリをコンパクトに表示"
     Playlist Thumbnail Size: "再生リストのサムネイルサイズ"
     Compact Mobile Mini Player: "モバイルのミニプレーヤーをコンパクトに表示"

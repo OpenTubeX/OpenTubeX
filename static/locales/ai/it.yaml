@@ -388,6 +388,10 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Tab Loading Indicator:
+      Tab Loading Indicator: Indicatore di caricamento scheda
+      Bar: Barra
+      Dot: Punto (classico)
     Compact Settings Categories: "Categorie delle impostazioni compatte"
     Playlist Thumbnail Size: "Dimensione miniature della playlist"
     Compact Mobile Mini Player: "Mini lettore mobile compatto"
