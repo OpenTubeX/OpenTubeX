@@ -22,6 +22,7 @@ import { getLocalPremiereState } from '../premiere'
 import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvrEnabled } from '../player/liveManifest'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
+import { normalizeVideoPopularityResponse } from '../player/videoPopularity'
 import { parseLocalVideoChannels } from '../video-collaborators'
 
 import { evaluatePlayerScript, generateContentPoToken } from './local-api-platform'
@@ -815,6 +816,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
 
   const cpn = Utils.generateRandomString(16)
 
+  normalizeVideoPopularityResponse(nextResponse.data)
   const isLiveDvrEnabled = getLiveDvrEnabled(playerResponse.data.videoDetails)
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
   // Live streams can need the Android manifest fallback. Regular videos only

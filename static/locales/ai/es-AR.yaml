@@ -1643,6 +1643,7 @@ Video:
       shuffling playlists: aleatorizar las listas de reproducción
       looping playlists: reproducir en bucle las listas de reproducción
   Player:
+    Most Replayed: "Más reproducido"
     Cast: "Transmitir"
     Music Mode: "Modo música"
     Music Mode Description: "Reproducí videos a 1× e iniciá los videos nuevos desde el principio en esta pestaña. Tus ajustes de reproducción predeterminados guardados no cambian."

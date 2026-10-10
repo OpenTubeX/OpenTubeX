@@ -5,7 +5,7 @@ import { gunzipSync } from 'node:zlib'
 
 import { abortUnmockedRequest, repoRoot } from './app.mjs'
 import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
-import { demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
+import { DEMO_MEDIA_DURATION_SECONDS, demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
 const watchFixtures = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -135,6 +135,7 @@ function blankCommentLikeCount(body) {
  * @param {boolean} [options.creatorReply] mark the first loaded reply as written by the video creator
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
+ * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -144,7 +145,8 @@ export async function mockWatchPage(app, page, {
   ownerReply = false,
   creatorReply = false,
   commentTimestamp = false,
-  blankCommentLikes = false
+  blankCommentLikes = false,
+  popularity
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
@@ -279,6 +281,32 @@ export async function mockWatchPage(app, page, {
         }
         if (blankCommentLikes && body.includes("We're so honored")) {
           body = blankCommentLikeCount(body)
+        }
+        if (popularity !== undefined && url.includes('/next')) {
+          const json = JSON.parse(body)
+          json.frameworkUpdates ??= {}
+          json.frameworkUpdates.entityBatchUpdate ??= {}
+          const mutations = json.frameworkUpdates.entityBatchUpdate.mutations ??= []
+          let entity = mutations.find(mutation => mutation.payload?.macroMarkersListEntity?.markersList?.markerType === 'MARKER_TYPE_HEATMAP')
+          if (!entity) {
+            entity = {
+              entityKey: 'test-heatmap',
+              type: 'ENTITY_MUTATION_TYPE_REPLACE',
+              payload: {
+                macroMarkersListEntity: {
+                  key: 'test-heatmap',
+                  externalVideoId: 'jNQXAC9IVRw',
+                  markersList: { markerType: 'MARKER_TYPE_HEATMAP' }
+                }
+              }
+            }
+            mutations.push(entity)
+          }
+          const duration = popularity?.length ? DEMO_MEDIA_DURATION_SECONDS * 1000 / popularity.length : 0
+          entity.payload.macroMarkersListEntity.markersList.markers = (popularity ?? []).map((intensity, index) => ({
+            startMillis: String(index * duration), durationMillis: String(duration), intensityScoreNormalized: intensity
+          }))
+          body = Buffer.from(JSON.stringify(json))
         }
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }

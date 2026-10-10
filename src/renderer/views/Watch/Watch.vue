@@ -130,6 +130,7 @@
               :video-id="videoId"
               :playlist-id="playlistId"
               :chapters="videoChapters"
+              :popularity-markers="videoPopularity"
               :current-chapter-index="videoCurrentChapterIndex"
               :chapters-kind="videoChaptersKind"
               :chapters-src="chaptersSrc"

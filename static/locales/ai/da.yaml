@@ -1371,6 +1371,7 @@ Video:
   Sponsor Block category:
     hook: Introduktion/hilsen
   Player:
+    Most Replayed: "Mest genafspillet"
     Cast: "Cast"
     Music Mode: "Musiktilstand"
     Music Mode Description: "Afspil videoer ved 1×, og start nye videoer fra begyndelsen i denne fane. Dine gemte standardindstillinger for afspilning forbliver uændrede."

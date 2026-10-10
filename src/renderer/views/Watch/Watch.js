@@ -125,6 +125,7 @@ import { useTabToast } from '../../composables/useTabToast'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
 import { formatDateTime } from '../../helpers/dateFormat'
+import { getVideoPopularity } from '../../helpers/player/videoPopularity'
 
 /**
  * @typedef {{
@@ -358,6 +359,7 @@ export default defineComponent({
       videoDislikeCount: null,
       videoLengthSeconds: 0,
       videoChapters: [],
+      videoPopularity: [],
       videoCurrentChapterIndex: 0,
       /** @type {'chapters' | 'keyMoments'} */
       videoChaptersKind: 'chapters',
@@ -2422,6 +2424,7 @@ export default defineComponent({
       this.videoDislikeCount = null
       this.videoLengthSeconds = 0
       this.videoChapters = []
+      this.videoPopularity = []
       this.videoCurrentChapterIndex = 0
       this.videoChaptersKind = 'chapters'
       this.channelName = ''
@@ -3581,6 +3584,7 @@ export default defineComponent({
 
         let chapters = []
         let chaptersKind = 'chapters'
+        this.videoPopularity = this.isLive ? [] : getVideoPopularity(result)
         if (!this.hideChapters) {
           const rawChapters = result.player_overlays?.decorated_player_bar?.player_bar?.markers_map
             ?.find(marker => marker.marker_key === 'DESCRIPTION_CHAPTERS')?.value.chapters

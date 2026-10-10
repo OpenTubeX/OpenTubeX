@@ -1755,6 +1755,7 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
+    Most Replayed: "Més reproduït de nou"
     Cast: "Transmet"
     Music Mode: "Mode música"
     Music Mode Description: "Reprodueix vídeos a 1× i inicia els vídeos nous des del principi en aquesta pestanya. Els valors de reproducció predeterminats desats no canvien."

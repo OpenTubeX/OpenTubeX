@@ -2261,6 +2261,7 @@ Video:
       looping playlists: looping playlists
   Player:
     Cast: "Cast"
+    Most Replayed: Most replayed
     Music Mode: Music Mode
     Music Mode Description: Play videos at 1× and start new videos from the beginning in this tab. Your saved playback defaults stay unchanged.
     DLNA:

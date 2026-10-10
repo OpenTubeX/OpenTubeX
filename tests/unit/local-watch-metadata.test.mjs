@@ -9,6 +9,7 @@ const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import { getVideoPopularity } from '../../src/renderer/helpers/player/videoPopularity.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = source.indexOf('    getVideoInformationLocal:')
@@ -18,7 +19,7 @@ const chapterEnd = source.indexOf('\n    },', chapterStart)
 const extractChaptersFromDescription = compileFunction(`return ({${source.slice(chapterStart, chapterEnd)}\n} }).extractChaptersFromDescription`)()
 
 async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
-  info.streaming_data = { formats: [], adaptive_formats: [{ url: 'https://example.com/video' }] }
+  info.streaming_data = { formats: [], adaptive_formats: [{ url: 'https://example.com/video' }], hls_manifest_url: 'manifest' }
   const errors = []
   const dependencies = {
     initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
@@ -33,9 +34,11 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     parseLocalEndscreen: () => [],
     parseLocalVideoGames,
     parseLocalVideoSummary,
+    getVideoPopularity,
     YTNodes,
     parseLocalTextRuns,
     MANIFEST_TYPE_DASH: 'dash',
+    MANIFEST_TYPE_HLS: 'hls',
     parseLocalVideoCollaborators,
     parseLocalSubscriberCount,
     formatNumber: String,
@@ -94,6 +97,22 @@ test('removes the skeleton before community chapters finish loading', async () =
     await loading
   }
 })
+
+for (const live of [false, true]) {
+  test(`loads popularity independently of hidden chapters for ${live ? 'live streams' : 'videos'}`, async () => {
+    const heatmap = new YTNodes.MacroMarkersListEntity({
+      markersList: { markerType: 'MARKER_TYPE_HEATMAP', markers: [{
+        startMillis: '1000', durationMillis: '1000', intensityScoreNormalized: 1
+      }] }
+    }).toHeatmap()
+    const watch = await loadMetadata({
+      playability_status: { status: 'OK' },
+      basic_info: { title: 'Ready video', duration: 42, is_live: live, is_live_content: live },
+      page: [], heat_map: heatmap
+    }, 'disabled', { watch: { hideChapters: true } })
+    assert.deepEqual(watch.videoPopularity, live ? [] : [{ startSeconds: 1, endSeconds: 2, intensity: 1 }])
+  })
+}
 
 for (const change of ['none', 'navigation', 'reload', 'hide chapters']) {
   test(`handles late community chapters after ${change}`, async () => {

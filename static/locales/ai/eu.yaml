@@ -1322,6 +1322,7 @@ Video:
     music offtopic: Musikaz bestelakoa
     filler: Gaitik kanpokoak
   Player:
+    Most Replayed: "Gehien errepikatua"
     Cast: "Igorri"
     Music Mode: "Musika modua"
     Music Mode Description: "Erreproduzitu bideoak 1× abiaduran eta hasi bideo berriak hasieratik fitxa honetan. Gordetako erreprodukzio-ezarpen lehenetsiak ez dira aldatzen."
