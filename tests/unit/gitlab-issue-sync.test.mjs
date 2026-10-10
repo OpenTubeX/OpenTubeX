@@ -314,6 +314,55 @@ test('public merge-request lookups do not require additional sync token permissi
   assert.equal(requests[2].options.headers['PRIVATE-TOKEN'], 'test-token')
 })
 
+test('generated title links display named and numeric entity syntax literally', async () => {
+  const { state, client } = fixture()
+  state.sources[0].title = 'Show &copy; &#91; &#x5b; &amp; literally'
+  state.sources[0].description = '#1'
+  await sync(client)
+  const target = state.targets[0]
+  const check = body => assert.ok(marked.parse(body).includes('>Show &amp;copy; &amp;#91; &amp;#x5b; &amp;amp; literally</a>'))
+  check(target.body)
+  state.comments.push({ id: 20, body: `#${target.number}`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  check(state.notes[1].body)
+})
+
+test('reference-definition continuation titles stay literal in both directions', async () => {
+  for (const [opening, closing] of [['"', '"'], ["'", "'"], ['(', ')']]) {
+    for (const [prefix, multiline] of ['', '> ', '  '].flatMap(prefix => [false, true].map(multiline => [prefix, multiline]))) {
+      const { state, client } = fixture()
+      const body = reference => `${prefix === '  ' ? '- item\n\n' : ''}${prefix}[foo]: /url\n${prefix}  ${opening}title ${reference}${multiline ? `\n${prefix}continued ${reference}` : ''}${closing}\n\n[foo]\nOutside ${reference}`
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+      assert.ok(marked.parse(target.body).includes(`title="title #1${multiline ? '\ncontinued #1' : ''}"`))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+      assert.ok(marked.parse(state.notes[1].body).includes(`title="title #${target.number}${multiline ? `\ncontinued #${target.number}` : ''}"`))
+    }
+  }
+})
+
+test('invalid reference-title continuations remain prose and respect container boundaries', async () => {
+  for (const example of ['[foo]: /url\n"Outside REF" extra', '[foo]: /url\n\n"Outside REF"', '[foo]: /url "existing"\n"Outside REF"', '> [foo]: /url\n"Outside REF"', '- [foo]: /url\n"Outside REF"', 'Text\n[foo]: /url\n"Outside REF"']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
 test('nested tracking lists resolve references while indented list code remains intact', async () => {
   const { state, client } = fixture()
   const description = '* Parent\n    * [ ] #1\n    * Child\n      See #1\n\n          #1\n    * [ ] #1\n\nOutside\n\n    #1'
