@@ -504,37 +504,53 @@ test('reports subscription setting write failures from the settings manager', as
   await expect(shorts).toHaveAttribute('aria-checked', 'false')
 })
 
-test('saves Select All members-only changes together before leaving the manager', async ({ app, page }) => {
-  const settings = await goToSettingsSection(page, 'subscription')
-  await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
-  await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
-  await page.evaluate(() => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    window.subscriptionSettingsSaves = 0
-    store.subscribeAction(({ type }) => {
-      if (type === 'updateChannelSettings' || type === 'batchUpdateChannelSettings') {
-        window.subscriptionSettingsSaves += 1
-      }
+for (const future of [false, true]) {
+  test(`saves Select All members-only changes together before leaving the manager, future timestamps: ${future}`, async ({ app, page }) => {
+    const futureTimestamp = future ? Date.now() + 86400000 : 0
+    if (future) {
+      await page.evaluate(async updatedAt => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const channel of [...store.getters.getProfileList[0].subscriptions]) {
+          const saved = await store.dispatch('updateChannelSettings', {
+            channelId: channel.id, settings: { showMembersOnly: channel.showMembersOnly }, fromSync: true, updatedAt
+          })
+          if (!saved) throw new Error('Failed to seed a future subscription timestamp')
+        }
+      }, futureTimestamp)
+    }
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    await page.locator('.channelSelectionToolbar').getByRole('button', { name: 'Select All' }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.subscriptionSettingsSaves = 0
+      store.subscribeAction(({ type }) => {
+        if (type === 'updateChannelSettings' || type === 'batchUpdateChannelSettings') {
+          window.subscriptionSettingsSaves += 1
+        }
+      })
     })
+    const members = page.locator('.bulkMembersOnlySetting')
+    await expect(members.getByRole('checkbox')).toHaveAttribute('aria-checked', 'mixed')
+    await members.locator('.switch-label').click()
+    await expect(members.getByRole('checkbox')).toBeChecked()
+    await members.locator('.switch-label').click()
+    await expect(members.getByRole('checkbox')).not.toBeChecked()
+    await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect.poll(() => page.evaluate(timestamp => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .getters.getProfileList.every(profile => profile.subscriptions.every(channel => (
+          channel.showMembersOnly === false && channel.subscriptionSettingsUpdatedAt > timestamp
+        )))
+    ), futureTimestamp)).toBe(true)
+    expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
+    ;({ page } = await app.relaunch())
+    expect(await page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
+    ))).toBe(true)
   })
-  const members = page.locator('.bulkMembersOnlySetting')
-  await expect(members.getByRole('checkbox')).toHaveAttribute('aria-checked', 'mixed')
-  await members.locator('.switch-label').click()
-  await expect(members.getByRole('checkbox')).toBeChecked()
-  await members.locator('.switch-label').click()
-  await expect(members.getByRole('checkbox')).not.toBeChecked()
-  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
-  await expect.poll(() => page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
-  ))).toBe(true)
-  expect(await page.evaluate(() => window.subscriptionSettingsSaves)).toBe(2)
-  ;({ page } = await app.relaunch())
-  expect(await page.evaluate(() => (
-    document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      .getters.getProfileList.every(profile => profile.subscriptions.every(channel => channel.showMembersOnly === false))
-  ))).toBe(true)
-})
+}
 
 test('keeps queued bulk changes for remaining channels after another window unsubscribes', async ({ app, page }) => {
   const other = await openNewWindowFromTabBar(app, page)

@@ -5,7 +5,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../src/renderer/helpers/subscription-channels.js'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp } from '../../src/renderer/helpers/subscription-channels.js'
 import * as subscriptionSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import { areSyncSettingValuesEqual, mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/helpers/sync-settings-conflict.js'
 
@@ -250,6 +250,7 @@ test('a failed channel write cannot advance the saved edit timestamp', async () 
     DEFAULT_PROFILE_ICON,
     copySubscriptionChannelSettings,
     getChannelWithUpdatedSettings,
+    getNextSubscriptionSettingsTimestamp,
     deepCopy: structuredClone,
     console: { error() {} },
     DBProfileHandlers: { async updateChannelSettings(channel, ids) {

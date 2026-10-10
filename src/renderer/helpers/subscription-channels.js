@@ -62,6 +62,18 @@ export function copySubscriptionChannelSettings(channel, savedChannel) {
 }
 
 /**
+ * Orders an explicit local edit after observed settings even with clock skew.
+ * @param {object[]} subscriptions
+ * @returns {number}
+ */
+export function getNextSubscriptionSettingsTimestamp(subscriptions) {
+  return subscriptions.reduce((updatedAt, channel) => {
+    const timestamps = [channel.subscriptionSettingsUpdatedAt, ...Object.values(channel.subscriptionSettingsUpdatedAtByField ?? {})]
+    return Math.max(updatedAt, ...timestamps.filter(Number.isFinite).map(timestamp => timestamp + 1))
+  }, Date.now())
+}
+
+/**
  * Applies only requested preferences, preserving concurrent edits to other fields.
  * @param {object} subscription
  * @param {{ feedTypes?: string[], dailyVideoLimit?: number | null, showMembersOnly?: boolean }} settings
