@@ -531,6 +531,40 @@ test('unclosed list fences end when their list container exits', async () => {
   }
 })
 
+test('quoted fence-like content cannot close an open fence', async () => {
+  for (const example of ['```\n> ```\nREF\n```\nOutside REF', '> ```\n> > ```\n> REF\n> ```\nOutside REF', '- ```\n  > ```\n  REF\n  ```\nOutside REF', '> - ```\n>   > ```\n>   REF\n>   ```\nOutside REF']) {
+    const { state, client } = fixture()
+    const body = reference => example.replaceAll('REF', reference)
+    state.sources[0].description = body('#1')
+    await sync(client)
+    const target = state.targets[0]
+    const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+    assert.ok(target.body.endsWith(body('#1').replace('Outside #1', `Outside ${gitlabReference}`)))
+    state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+    await sync(client)
+    const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+    assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replace(`Outside #${target.number}`, `Outside ${githubReference}`)))
+  }
+})
+
+test('unclosed HTML regions end when their list container exits', async () => {
+  for (const tag of ['<pre>', '<code>', '<!--']) {
+    for (const example of [`- ${tag}\n  REF\n\nOutside REF`, `1. ${tag}\n   REF\n\nOutside REF`, `* Parent\n    - ${tag}\n      REF\n\n    Outside REF\nOutside REF`, `> - ${tag}\n>   REF\n>\n> Outside REF\nOutside REF`]) {
+      const { state, client } = fixture()
+      const body = reference => example.replaceAll('REF', reference)
+      state.sources[0].description = body('#1')
+      await sync(client)
+      const target = state.targets[0]
+      const gitlabReference = `[Report](${state.sources[0].web_url}) ([GitHub #${target.number}](${target.html_url}))`
+      assert.ok(target.body.endsWith(body('#1').replaceAll('Outside #1', `Outside ${gitlabReference}`)))
+      state.comments.push({ id: 20, body: body(`#${target.number}`), user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+      await sync(client)
+      const githubReference = `[Report](${target.html_url}) ([GitLab #1](${state.sources[0].web_url}))`
+      assert.ok(state.notes[1].body.endsWith(body(`#${target.number}`).replaceAll(`Outside #${target.number}`, `Outside ${githubReference}`)))
+    }
+  }
+})
+
 test('thematic breaks do not turn following indented code into list prose', async () => {
   for (const rule of ['* * *', '- - -', '_ _ _', '***', '---', '___']) {
     const { state, client } = fixture()
