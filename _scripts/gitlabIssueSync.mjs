@@ -10,6 +10,7 @@ import { raw } from 'hast-util-raw'
 import { fromHtml } from 'hast-util-from-html'
 import { visit, SKIP } from 'unist-util-visit'
 import { VFile } from 'vfile'
+import { escapeAttribute } from 'entities'
 
 const project = 'opentubex/OpenTubeX'
 // GitLab serves uploads through the stable project ID, not the repository path.
@@ -43,8 +44,13 @@ function markdown(body, transform) {
       if (element.position) htmlStarts.set(node.position.start.offset + element.position.start.offset, element.tagName)
     })
   })
+  const html = toHast(tree, { allowDangerousHtml: true })
+  const links = new Map()
+  visit(html, 'element', node => {
+    if (node.tagName === 'a' && node.position) links.set(node.position.start.offset, node.properties)
+  })
   const protectedHtml = []
-  visit(raw(toHast(tree, { allowDangerousHtml: true }), { file: new VFile(body) }), 'element', node => {
+  visit(raw(html, { file: new VFile(body) }), 'element', node => {
     if (htmlStarts.get(node.position?.start.offset) === node.tagName) protectedHtml.push(node.position)
   })
   const edits = []
@@ -52,7 +58,11 @@ function markdown(body, transform) {
     if (!node.position) return
     const { start, end } = node.position
     if (['code', 'inlineCode'].includes(node.type)) return SKIP
-    if (['text', 'link', 'image'].includes(node.type) && protectedHtml.some(region => start.offset >= region.start.offset && end.offset <= region.end.offset)) return SKIP
+    if (['text', 'link', 'linkReference', 'image'].includes(node.type) && protectedHtml.some(region => start.offset >= region.start.offset && end.offset <= region.end.offset)) return SKIP
+    if (node.type === 'linkReference' && links.has(start.offset)) {
+      const { href, title } = links.get(start.offset)
+      node = { ...node, type: 'link', url: href, title: title ?? null }
+    }
     const original = body.slice(start.offset, end.offset)
     const replacement = transform(node, original, index, parent)
     if (replacement != null && replacement !== original) edits.push({ start: start.offset, end: end.offset, replacement })
@@ -66,20 +76,24 @@ export function content(body = '', fromGitlab = false) {
   const upload = url => fromGitlab && url.startsWith('/uploads/') ? uploadsUrl + url.slice('/uploads/'.length) : url
   return markdown(body ?? '', (node, original, index, parent) => {
     if (node.type === 'html') {
-      const html = fromHtml(original, { fragment: true })
-      const markers = []
-      let hasUploads = false
+      const html = fromHtml(original, { fragment: true, verbose: true })
+      const edits = []
       visit(html, element => {
         if (element.type === 'comment' && element.value.trimStart().startsWith(`${prefix}:`)) {
-          markers.push(element.position)
+          edits.push({ ...element.position, replacement: '' })
         }
         for (const key of ['src', 'href', 'poster']) {
           const value = element.properties?.[key]
-          if (typeof value === 'string' && upload(value) !== value) hasUploads = true
+          const position = element.data?.position?.properties[key]
+          if (typeof value === 'string' && upload(value) !== value && position) {
+            edits.push({ ...position, replacement: `${key}="${escapeAttribute(upload(value))}"` })
+          }
         }
       })
-      for (const { start, end } of markers.reverse()) original = original.slice(0, start.offset) + original.slice(end.offset)
-      return hasUploads ? original.replaceAll('/uploads/', uploadsUrl) : original
+      for (const { start, end, replacement } of edits.sort((a, b) => b.start.offset - a.start.offset)) {
+        original = original.slice(0, start.offset) + replacement + original.slice(end.offset)
+      }
+      return original
     }
     if (node.url) {
       const url = upload(node.url)
@@ -167,9 +181,9 @@ function referenceResolver(sources, targets, mergeRequests) {
     const parsed = new URL(url)
     const base = side === 'gitlab' ? `https://gitlab.com/${project}/-/` : `https://github.com/${repository}/`
     if (!(parsed.origin + parsed.pathname).toLowerCase().startsWith(base.toLowerCase())) return
-    const [kind, id, extra] = parsed.pathname.slice(new URL(base).pathname.length).split('/')
+    const [kind, id, ...extra] = parsed.pathname.slice(new URL(base).pathname.length).split('/')
     const kinds = side === 'gitlab' ? ['issues', 'work_items', 'merge_requests'] : ['issues', 'pull']
-    if (extra !== undefined || !kinds.includes(kind.toLowerCase()) || !/^\d+$/.test(id)) return
+    if (extra.length > 1 || extra.some(Boolean) || !kinds.includes(kind.toLowerCase()) || !/^\d+$/.test(id)) return
     return render(`${kind.toLowerCase() === 'merge_requests' ? '!' : '#'}${id}`, side, parsed.search + parsed.hash, tooltip)
   }
   const rewrite = (body, side) => markdown(body, (node, original) => {

@@ -335,14 +335,17 @@ test('reference conversion preserves code, escapes, foreign references, and unre
 test('explicit local links retain comment fragments and escape title Markdown', async () => {
   const { state, client } = fixture()
   state.sources[0].title = 'A [title] *with* ~~removed~~ _format_ <tag> `code` \\ path'
-  state.sources[0].description = '[old title](https://gitlab.com/opentubex/OpenTubeX/-/issues/1#note_10)\n<https://gitlab.com/opentubex/OpenTubeX/-/work_items/1>\n(opentubex/OpenTubeX#1).'
+  state.sources[0].description = '[old title](https://gitlab.com/opentubex/OpenTubeX/-/issues/1#note_10)\n<https://gitlab.com/opentubex/OpenTubeX/-/work_items/1/>\n(opentubex/OpenTubeX#1).\n\n[old][report]\n\n[report]: https://gitlab.com/opentubex/OpenTubeX/-/issues/1 "Tooltip"'
   await sync(client)
   const body = state.targets[0].body
   const links = fromMarkdown(body.slice(body.indexOf('\n\n') + 2)).children.flatMap(node => node.children ?? []).filter(node => node.type === 'link' && node.url.startsWith(state.sources[0].web_url))
   for (const link of links) assert.deepEqual(link.children.map(({ type, value }) => ({ type, value })), [{ type: 'text', value: state.sources[0].title }])
   assert.ok(body.includes(`${state.sources[0].web_url}#note_10)`))
-  assert.equal((body.match(/GitHub #/g) ?? []).length, 3)
-  assert.equal(links.length, 3)
+  assert.equal((body.match(/GitHub #/g) ?? []).length, 4)
+  assert.equal(links.length, 4)
+  state.comments.push({ id: 20, body: `[old][report]\n\n[report]: ${state.targets[0].html_url}/`, user: { login: 'maintainer' }, html_url: 'https://github.com/comment' })
+  await sync(client)
+  assert.ok(state.notes[1].body.includes(`([GitLab #1](${state.sources[0].web_url}))`))
 })
 
 test('public merge-request lookups do not require additional sync token permissions', async t => {
@@ -421,6 +424,7 @@ test('converts upload links and image dimensions without changing unrelated link
   assert.equal(fromMarkdown(content('[image]: </uploads/hash/image.png>', true)).children[0].url, url)
   assert.equal(content('<img src="/uploads/hash/image.png" width="900">', true), `<img src="${url}" width="900">`)
   assert.equal(content('Text <a href="/uploads/hash/image.png">attachment</a>', true), `Text <a href="${url}">attachment</a>`)
+  assert.equal(content('<div><img src="/uploads/hash/image.png"><a href="https://example.org/uploads/other">/uploads/literal</a></div>', true), `<div><img src="${url}"><a href="https://example.org/uploads/other">/uploads/literal</a></div>`)
   assert.equal(fromMarkdown(content('![image](/uploads/hash/image(1).png){width=100}', true)).children[0].children[0].url, 'https://gitlab.com/-/project/85121418/uploads/hash/image(1).png')
   const unchanged = '[link](https://example.org){width=100}\n![image](https://example.org/image.png){custom=100}\nText {width=100}\n![image](https://example.org/image.png) [link](https://example.org){width=100}'
   assert.equal(content(unchanged, true), unchanged)
