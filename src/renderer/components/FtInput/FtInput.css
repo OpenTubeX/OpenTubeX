@@ -514,7 +514,7 @@
 }
 
 .inputAction.enabled:active {
-  background-color: var(--subtle-surface-color);
+  background-color: var(--side-nav-active-color);
   color: var(--side-nav-active-text-color);
   transition: background 0.2s ease-in;
 }
