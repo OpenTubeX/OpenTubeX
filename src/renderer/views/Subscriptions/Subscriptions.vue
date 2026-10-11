@@ -1029,10 +1029,28 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
       feedTab,
       getSubscriptionsForFeed(activeSubscriptions.value, feedTab).map(channel => channel.id)
     ]))
+    const cacheGettersByTab = {
+      videos: 'getVideoCache',
+      shorts: 'getShortsCache',
+      live: 'getLiveCache',
+      posts: 'getPostsCache'
+    }
+    // Refreshes may finish during the animation. Only dismiss entries that
+    // were eligible when the user requested the seen marks.
+    const entryIdsByTab = Object.fromEntries(cacheFeedTabs.map(feedTab => [
+      feedTab,
+      channelIdsByTab[feedTab].flatMap(channelId => {
+        const cache = store.getters[cacheGettersByTab[feedTab]]
+        const entries = cache[channelId]?.[feedTab === 'posts' ? 'posts' : 'videos'] ?? []
+        return entries.filter(entry => entry.isNewInSubscriptionFeed === true)
+          .map(entry => feedTab === 'posts' ? entry.postId : entry.videoId)
+      })
+    ]))
 
     const markSeen = () => store.dispatch('markSubscriptionEntriesAsSeen', {
       tabs: cacheFeedTabs,
-      channelIdsByTab
+      channelIdsByTab,
+      entryIdsByTab
     })
     const markedNewFeedView = newFeedView.value
     const isVisibleNewFeed = () => isMounted && tab === 'new' && currentTab.value === 'new' &&

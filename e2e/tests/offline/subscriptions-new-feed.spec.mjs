@@ -1639,6 +1639,75 @@ test.describe('large combined new feed', () => {
         await cdp.detach()
       })
 
+      if (reducedMotion === 'off') {
+        test('keeps entries arriving during the removal animation unseen', async ({ page, app }) => {
+          await goTo(page, 'subscriptions')
+          await page.locator('[data-subscription-feed-tab="all"]').click()
+          await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
+          await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
+          await page.evaluate(() => {
+            const animate = Element.prototype.animate
+            Element.prototype.animate = function (...args) {
+              const animation = animate.apply(this, args)
+              if (this.matches('.newFeed')) {
+                animation.pause()
+                window.__markSeenAnimation = animation
+                Element.prototype.animate = animate
+              }
+              return animation
+            }
+            document.querySelector('.markAllSeenButton').click()
+          })
+          await expect.poll(() => page.evaluate(() => !!window.__markSeenAnimation)).toBe(true)
+          // Apply the same cache writes as a refresh while removal is paused.
+          await page.evaluate(async ({ channelId, incoming }) => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            for (const [getter, action, field, entry] of [
+              ['getVideoCache', 'updateSubscriptionVideosCacheByChannel', 'videos', incoming.video],
+              ['getShortsCache', 'updateSubscriptionShortsCacheByChannel', 'videos', incoming.short],
+              ['getLiveCache', 'updateSubscriptionLiveCacheByChannel', 'videos', incoming.live],
+              ['getPostsCache', 'updateSubscriptionPostsCacheByChannel', 'posts', incoming.post]
+            ]) {
+              await store.dispatch(action, {
+                channelId,
+                [field]: [entry, ...store.getters[getter][channelId][field]],
+                timestamp: new Date()
+              })
+            }
+            window.__markSeenAnimation.finish()
+          }, {
+            channelId: CHANNEL_ID,
+            incoming: {
+              video: video('arrived-video', 'Video arriving during removal', now, { isNewInSubscriptionFeed: true }),
+              short: video('arrived-short', 'Short arriving during removal', now, { isNewInSubscriptionFeed: true }),
+              live: video('arrived-live', 'Live arriving during removal', now, { isNewInSubscriptionFeed: true, liveNow: true }),
+              post: post('arrived-post', 'Post arriving during removal', now)
+            }
+          })
+          await expect(page.getByText('Video arriving during removal', { exact: true })).toBeVisible()
+          await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+          await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
+          expect(await page.evaluate(() => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            return ['getVideoCache', 'getShortsCache', 'getLiveCache', 'getPostsCache'].map(getter => {
+              const cache = store.getters[getter]
+              const entry = Object.values(cache)[0]
+              return (entry.videos ?? entry.posts).map(item => item.isNewInSubscriptionFeed)
+            })
+          })).toEqual([
+            [true, ...Array(120).fill(false)],
+            [true, ...Array(24).fill(view === 'tabbed')],
+            [true, view === 'tabbed'],
+            [true, view === 'tabbed']
+          ])
+          const relaunched = await app.relaunch()
+          await goTo(relaunched.page, 'subscriptions')
+          await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
+          await expect(relaunched.page.getByText('Video arriving during removal', { exact: true })).toBeVisible()
+          await expect(relaunched.page.getByText('New video 0', { exact: true })).toHaveCount(0)
+        })
+      }
+
       if (view === 'tabbed' && reducedMotion === 'off') {
         test('switching categories during removal leaves the new category visible', async ({ page }) => {
           await goTo(page, 'subscriptions')

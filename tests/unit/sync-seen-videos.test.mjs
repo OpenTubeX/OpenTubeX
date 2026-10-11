@@ -105,6 +105,46 @@ test('mark all still dismisses displayed videos when a refresh wins the cache wr
   assert.equal(fixture.recorded.length, 1, 'The explicit seen action must survive a newer cache timestamp')
 })
 
+test('mark all limits cache and durable marks to IDs captured before an animation', async () => {
+  const fixture = cacheFixture()
+  fixture.context.rootGetters = { getSubscriptionSeenVideos: [], getSubscriptionSeenPosts: [] }
+  const entryIdsByTab = {}
+  for (const [tab, cacheKey, field, idKey] of [
+    ['videos', 'videoCache', 'videos', 'videoId'],
+    ['shorts', 'shortsCache', 'videos', 'videoId'],
+    ['live', 'liveCache', 'videos', 'videoId'],
+    ['posts', 'postsCache', 'posts', 'postId'],
+  ]) {
+    const entries = fixture.state[cacheKey].channel[field]
+    entryIdsByTab[tab] = entries.map(entry => entry[idKey])
+    entries.push({ [idKey]: `arrived-${tab}`, isNewInSubscriptionFeed: true })
+  }
+  const writes = []
+  fixture.handlers.markEntriesAsSeen = async (channelId, tab, entries) => {
+    writes.push([channelId, tab, structuredClone(entries)])
+  }
+  await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
+    tabs: Object.keys(entryIdsByTab), channelIds: ['channel'], entryIdsByTab,
+  })
+  assert.equal(writes.length, 4)
+  for (const [channelId, tab, entries] of writes) {
+    assert.equal(channelId, 'channel')
+    assert.deepEqual(entries.map(entry => entry.videoId ?? entry.postId), entryIdsByTab[tab])
+  }
+  for (const cacheKey of ['videoCache', 'shortsCache', 'liveCache', 'postsCache']) {
+    const cache = fixture.state[cacheKey].channel
+    assert.deepEqual((cache.videos ?? cache.posts).map(entry => entry.isNewInSubscriptionFeed), [false, true])
+  }
+  assert.deepEqual(fixture.recorded, [
+    ['mergeSubscriptionSeenVideos', { videos: [
+      { videoId: 'videoCache', isMembersOnly: false },
+      { videoId: 'shortsCache', isMembersOnly: false },
+      { videoId: 'liveCache', isMembersOnly: false },
+    ] }],
+    ['mergeSubscriptionSeenPosts', { posts: [{ postId: 'post' }] }],
+  ])
+})
+
 async function settingsFixture(history = []) {
   const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
   const db = {
