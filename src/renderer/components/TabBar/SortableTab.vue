@@ -529,6 +529,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 
 .tabLoadingLine {
   border-radius: inherit;
+  overflow: hidden;
 }
 
 .tabLoadingLine :deep(.embeddedProgressPath) {

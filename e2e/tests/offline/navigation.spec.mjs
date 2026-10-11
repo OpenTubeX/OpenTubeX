@@ -851,6 +851,25 @@ for (const uiScale of [95, 125]) {
       await expect(button).toHaveCSS('transition-duration', '0s')
     })
 
+    test('animates the header button radius while pressing with a mouse', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' })
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateReducedMotion', 'off')
+        await store.dispatch('updateAnimationSpeed', 25)
+      })
+      const button = page.locator('.topNav .menuButton')
+      await button.hover()
+      await page.mouse.down()
+      try {
+        await expect.poll(() => button.evaluate(element => element.getAnimations().some(animation =>
+          animation.transitionProperty?.startsWith('border-') && animation.playState === 'running'
+        ))).toBe(true)
+      } finally {
+        await page.mouse.up()
+      }
+    })
+
     test('shows complete desktop destination labels', async ({ page }) => {
       for (const locale of ['en-US', 'de-DE']) {
         await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)

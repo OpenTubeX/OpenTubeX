@@ -293,6 +293,7 @@
   --material-tab-padding-inline: 15px;
 
   align-items: stretch;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 4px 10px;
   margin-block: 8px 0;

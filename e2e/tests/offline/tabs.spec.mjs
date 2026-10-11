@@ -512,6 +512,35 @@ test.describe('tab bar', () => {
     expect(color[2] - color[1]).toBeGreaterThan(100)
   })
 
+  test('keeps the loading glow inside its tab', async ({ app, page }) => {
+    const loadingTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/clipped-loading-glow', makeActive: false, lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
+    await page.evaluate(id => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setReducedMotion', 'off')
+      window.ftElectron.tabs.setLoading(true, id)
+    }, loadingTab.id)
+    const line = tab.locator('.tabLoadingLine')
+    await expect(line).toBeVisible()
+    const points = await tab.evaluate(element => {
+      element.style.setProperty('--accent-color', '#ff00ff')
+      for (const animation of element.querySelector('.tabLoadingLine').getAnimations({ subtree: true })) {
+        animation.pause()
+        animation.currentTime = 600
+      }
+      const box = element.getBoundingClientRect()
+      return [0.25, 0.5, 0.75].map(fraction => [box.width * fraction, box.height - 0.5])
+    })
+    await line.evaluate(element => { element.style.visibility = 'hidden' })
+    const baseline = await sampleColors(app, tab, points)
+    await line.evaluate(element => { element.style.visibility = 'visible' })
+    const loading = await sampleColors(app, tab, points)
+    expect(Math.max(...loading.flatMap((color, index) => color.map((channel, component) =>
+      Math.abs(channel - baseline[index][component])
+    )))).toBeLessThanOrEqual(2)
+  })
+
   test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/loading-line',
