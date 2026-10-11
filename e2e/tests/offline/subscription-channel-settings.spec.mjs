@@ -91,7 +91,7 @@ for (const uiScale of [100, 95]) {
       for (const direction of ['ltr', 'rtl']) {
         await page.evaluate(value => { document.body.dir = value }, direction)
         const gap = await popover.evaluate(element => {
-          const members = element.querySelector('.membersOnlyPreference button').getBoundingClientRect()
+          const members = element.querySelector('.membersOnlyPreference .switch-label').getBoundingClientRect()
           const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
           return label.top - members.bottom
         })
@@ -255,9 +255,9 @@ test('keeps the popover and Subscription Settings manager in sync', async ({ app
   await expect(popoverShorts)
     .toHaveAttribute('aria-checked', 'true')
   const popoverMembersOnly = popover.getByRole('checkbox', { name: 'Members only' })
-  await expect(popoverMembersOnly).toHaveAttribute('aria-checked', 'true')
-  await popoverMembersOnly.click()
-  await expect(popoverMembersOnly).toHaveAttribute('aria-checked', 'false')
+  await expect(popoverMembersOnly).toBeChecked()
+  await popover.locator('label', { hasText: 'Members only' }).click()
+  await expect(popoverMembersOnly).not.toBeChecked()
   await popover.getByRole('checkbox', { name: 'Live' }).click()
   const popoverLimit = page.locator('.profileDropdown')
     .getByRole('combobox', { name: 'Videos per day' })
@@ -462,7 +462,7 @@ test('does not carry a failed popover edit into a later update', async ({ app, p
     window.channelSettingsUpdateCount = () => updateCount
   })
 
-  await popover.getByRole('checkbox', { name: 'Members only' }).click()
+  await popover.locator('label', { hasText: 'Members only' }).click()
   await expect.poll(() => page.evaluate(() => window.channelSettingsUpdateCount())).toBe(1)
 
   const limit = popover.getByRole('combobox', { name: 'Videos per day' })
