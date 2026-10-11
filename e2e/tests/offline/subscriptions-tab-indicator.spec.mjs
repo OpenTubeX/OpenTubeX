@@ -194,22 +194,23 @@ test.describe('subscriptions feed tab indicator', () => {
     await expect(page.locator('.tabsIndicator')).toBeVisible()
 
     await expect(page.locator('.tabsIndicator')).toHaveCSS('opacity', '1')
-    const animation = await page.evaluate(() => {
-      const indicator = document.querySelector('.tabsIndicator')
-      const targetTab = document.querySelector('[data-subscription-feed-tab="shorts"]')
-
-      return new Promise(resolve => {
-        indicator.addEventListener('transitionrun', event => {
-          if (event.propertyName !== 'opacity') {
-            return
-          }
-
-          resolve(Number.parseFloat(getComputedStyle(indicator).transitionDuration))
-        }, { once: true })
-
-        targetTab.click()
-      })
-    })
+    const animation = await page.getByRole('tablist', { name: 'Subscriptions tabs' }).evaluate(tablist => new Promise(resolve => {
+      // Crossfades replace the indicator. Observe the persistent tablist so
+      // either incoming or outgoing opacity transitions can report their run.
+      const timeout = setTimeout(() => {
+        tablist.removeEventListener('transitionrun', onTransition)
+        resolve(null)
+      }, 2000)
+      function onTransition(event) {
+        if (event.propertyName !== 'opacity' || !(event.target instanceof Element) ||
+            !event.target.matches('.tabsIndicator, .tabsIndicatorOutgoing')) return
+        clearTimeout(timeout)
+        tablist.removeEventListener('transitionrun', onTransition)
+        resolve(Number.parseFloat(getComputedStyle(event.target).transitionDuration))
+      }
+      tablist.addEventListener('transitionrun', onTransition)
+      tablist.querySelector('[data-subscription-feed-tab="shorts"]').click()
+    }))
 
     expect(animation).toBeCloseTo(0.14, 2)
   })
