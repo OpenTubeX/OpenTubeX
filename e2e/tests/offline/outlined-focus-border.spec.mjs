@@ -28,7 +28,7 @@ async function expectEvenFocusBorder(app, page, field, outlineSelector) {
       top: bounds.top,
       bottom: bounds.bottom,
       x: (legend.right + bounds.right) / 2,
-      y: bounds.top + bounds.height / 2,
+      radius: parseFloat(getComputedStyle(outline).borderTopLeftRadius),
       color,
       pixelRatio: devicePixelRatio
     }
@@ -45,12 +45,18 @@ async function expectEvenFocusBorder(app, page, field, outlineSelector) {
       return geometry.color.every((channel, index) => Math.abs(channel - pixels[offset + 2 - index]) < 40)
     }
     const vertical = edge => Array.from({ length: 13 }, (_, offset) => matches(geometry.x * scale, edge * scale + offset - 6)).filter(Boolean).length
-    const horizontal = edge => Array.from({ length: 13 }, (_, offset) => matches(edge * scale + offset - 6, geometry.y * scale)).filter(Boolean).length
-    return [vertical(geometry.top), vertical(geometry.bottom), horizontal(geometry.left), horizontal(geometry.right)]
+    const horizontal = (edge, y) => Array.from({ length: 13 }, (_, offset) => matches(edge * scale + offset - 6, y * scale)).filter(Boolean).length
+    // Native fieldsets reserve space above the painted border for the legend.
+    // Sample every row along both straight sides, excluding rounded corners.
+    const sides = []
+    for (let y = geometry.top + geometry.radius + 1; y < geometry.bottom - geometry.radius - 1; y += 1 / scale) {
+      sides.push(horizontal(geometry.left, y), horizontal(geometry.right, y))
+    }
+    return [vertical(geometry.top), vertical(geometry.bottom), ...sides]
   }, geometry)
-  expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThan(0)
+  expect(Math.min(...thicknesses), JSON.stringify({ thicknesses, geometry })).toBeGreaterThanOrEqual(Math.floor(2 * geometry.pixelRatio))
   expect(Math.max(...thicknesses), JSON.stringify(thicknesses)).toBeLessThanOrEqual(Math.ceil(2 * geometry.pixelRatio))
-  expect(Math.max(...thicknesses) - Math.min(...thicknesses), `top, bottom, left, right: ${thicknesses}`).toBeLessThanOrEqual(1)
+  expect(Math.max(...thicknesses) - Math.min(...thicknesses), `top, bottom, side rows: ${thicknesses}`).toBeLessThanOrEqual(1)
 }
 
 for (const uiScale of [100, 95]) {
@@ -107,7 +113,7 @@ for (const uiScale of [100, 95]) {
       await view.dispose()
     })
 
-    test('outlined dropdowns have equally thick keyboard focus borders', async ({ app, page }) => {
+    test('outlined dropdowns have equally thick keyboard and pointer focus borders', async ({ app, page }) => {
       const general = await goToSettingsSection(page, 'general')
       const select = general.getByRole('combobox', { name: 'Week Starts On' })
       for (const width of [1600, 640]) {
@@ -119,6 +125,12 @@ for (const uiScale of [100, 95]) {
           await select.focus()
           await select.evaluate(element => element.scrollIntoView({ block: 'center' }))
           await expect(select).toHaveJSProperty('disabled', false)
+          await expectEvenFocusBorder(app, page, select, '.selectOutline')
+          await select.blur()
+          await select.click()
+          await page.getByRole('option', { name: 'Monday', exact: true }).click()
+          await expect(page.getByRole('listbox')).toHaveCount(0)
+          expect(await select.evaluate(element => element.matches(':focus-visible'))).toBe(false)
           await expectEvenFocusBorder(app, page, select, '.selectOutline')
         }
       }

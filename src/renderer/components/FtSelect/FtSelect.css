@@ -449,15 +449,12 @@
 
 .select.outlined .select-text:focus ~ .selectOutline {
   border-color: var(--primary-color);
+  border-block-width: 2px;
 }
 
 /* Thicken all four edges without moving the label at fractional zoom. */
-.select.outlined .select-text:focus-visible {
+.select.outlined .select-text:focus {
   box-shadow: inset 1px 0 var(--primary-color), inset -1px 0 var(--primary-color);
-}
-
-.select.outlined .select-text:focus-visible ~ .selectOutline {
-  border-block-width: 2px;
 }
 
 @media (forced-colors: active) {
