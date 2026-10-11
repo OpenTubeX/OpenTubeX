@@ -7,6 +7,32 @@ import { createLocalFeedParsers } from '../../src/renderer/helpers/api/local-fee
 const fixture = JSON.parse(await readFile(new URL('../../e2e/fixtures/innertube/watch/review-channel-lockup.json', import.meta.url), 'utf8'))
 const { parseLockupView } = createLocalFeedParsers(() => false)
 
+for (const [label, age] of [
+  // YouTube uses abbreviated minute labels with a non-breaking space.
+  ['57\u00a0min ago', 57 * 60_000],
+  ['57 min ago', 57 * 60_000],
+  ['57\u00a0minutes ago', 57 * 60_000],
+  ['57 minutes ago', 57 * 60_000],
+  ['57\u202fmin ago', 57 * 60_000],
+  ['57m ago', 57 * 60_000],
+  ['2\u00a0hours ago', 2 * 3_600_000],
+  ['2h ago', 2 * 3_600_000],
+  ['2d ago', 2 * 86_400_000],
+  ['2mo ago', 2 * 2_592_000_000],
+  ['Streamed 57\u00a0min ago', 57 * 60_000]
+]) {
+  test(`preserves the recommendation upload time for ${JSON.stringify(label)}`, (t) => {
+    const now = Date.UTC(2026, 9, 11, 12)
+    t.mock.method(Date, 'now', () => now)
+    const raw = structuredClone(fixture)
+    raw.metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[1] = {
+      text: { content: label }
+    }
+    const video = parseLockupView(new YTNodes.LockupView(raw))
+    assert.equal(video.published, now - age)
+  })
+}
+
 for (const name of ['StudioPreview', 'Preview Channel', 'Overviews', 'WatchingToday', 'Awaiting News', 'éview', 'viewé', '觀看views', 'watching今日', 'waiting\u0301']) {
   test(`preserves the recommendation channel ${name} and its view count`, () => {
     const raw = structuredClone(fixture)
