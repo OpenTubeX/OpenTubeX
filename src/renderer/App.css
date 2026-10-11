@@ -311,6 +311,7 @@
 
 .app > .routerView {
   min-inline-size: 0;
+  padding-block-end: var(--connection-status-space, 0);
   container-name: route;
   container-type: inline-size;
 }
@@ -850,12 +851,12 @@
 
 /* The bottom strip includes a 2px compositor-safe inset. */
 .app.topTabs :deep(.sideNav) {
-  block-size: calc(100vh - var(--app-safe-area-inset-top) - var(--top-tab-bar-height) - var(--top-nav-height));
+  block-size: calc(100vh - var(--app-safe-area-inset-top) - var(--top-tab-bar-height) - var(--top-nav-height) - var(--connection-status-space, 0px));
   inset-block-start: calc(var(--app-safe-area-inset-top) + var(--top-tab-bar-height) + var(--top-nav-height));
 }
 
 .app.bottomTabs :deep(.sideNav) {
-  block-size: calc(100vh - 94px);
+  block-size: calc(100vh - 94px - var(--connection-status-space, 0px));
   inset-block-start: 60px;
 }
 
@@ -936,7 +937,7 @@
 
 @media only screen and (width > 680px) {
   .app.verticalTabs :deep(.sideNav) {
-    block-size: calc(100vh - 60px);
+    block-size: calc(100vh - 60px - var(--connection-status-space, 0px));
     inset-block-start: 60px;
   }
 

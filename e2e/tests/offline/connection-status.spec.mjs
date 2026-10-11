@@ -2,8 +2,200 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import { createInternetProbe, INTERNET_CHECK_URL } from '../../../src/renderer/helpers/internetConnectivity.js'
+import { openMockedVideo } from '../../helpers/player.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false } } })
+
+test.describe('full-window connection banner', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false,
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        animationSpeed: 0,
+      }
+    }
+  })
+
+  for (const scale of [1, 1.25]) {
+    test(`reconnecting banner spans full-window playback at UI scale ${scale}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.locator('video.player').evaluate(video => video.pause())
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.route(INTERNET_CHECK_URL, route => route.abort('internetdisconnected'))
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+        window.dispatchEvent(new Event('online'))
+      })
+      const banner = page.locator('.connectionStatus')
+      const player = page.locator('.ftVideoPlayer')
+      await expect(banner).toHaveText('Connection lost. Trying to reconnect…')
+      const toggleFullWindow = () => player.locator('.full-window-button').evaluate(button => button.click())
+      const expectBounds = async (left, right, bottom) => {
+        await expect.poll(() => banner.evaluate((element, { left, right, bottom }) => {
+          const bounds = element.getBoundingClientRect()
+          return Math.max(
+            Math.abs(bounds.left - left),
+            Math.abs(window.innerWidth - bounds.right - right),
+            Math.abs(window.innerHeight - bounds.bottom - bottom)
+          )
+        }, { left, right, bottom })).toBeLessThan(1)
+      }
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(direction => { document.documentElement.dir = direction }, direction)
+        for (const position of ['left', 'right', 'top', 'bottom']) {
+          await page.evaluate(position => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setTabBarPosition', position)
+            store.commit('setVerticalTabBarWidth', 280)
+          }, position)
+          const left = position === 'left' ? 280 : 0
+          const right = position === 'right' ? 280 : 0
+          const bottom = position === 'bottom' ? 34 : 0
+          await expectBounds(left, right, bottom)
+          await toggleFullWindow()
+          await expect(player).toHaveClass(/fullWindow/)
+          await expectBounds(0, 0, 0)
+          await expect.poll(async () => {
+            const videoBounds = await player.boundingBox()
+            const statusBounds = await banner.boundingBox()
+            return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
+          }).toBeLessThan(1)
+          await toggleFullWindow()
+          await expect(player).not.toHaveClass(/fullWindow/)
+          await expectBounds(left, right, bottom)
+        }
+      }
+      // Wrapped translations and resizing must resize the reserved area too.
+      await toggleFullWindow()
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setShowProgressBarToast', false)
+        store.commit('setShowProgressBar', true)
+      })
+      await expect(page.locator('.app > .progressBar')).toBeVisible()
+      for (const safeArea of ['0px', '24px']) {
+        await page.evaluate(safeArea => document.documentElement.style.setProperty('--safe-area-inset-bottom', safeArea), safeArea)
+        await expect.poll(async () => {
+          const videoBounds = await player.boundingBox()
+          const statusBounds = await banner.boundingBox()
+          return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
+        }).toBeLessThan(1)
+      }
+      await page.evaluate(() => {
+        document.documentElement.style.removeProperty('--safe-area-inset-bottom')
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowProgressBar', false)
+      })
+      await banner.evaluate(element => { element.style.fontSize = '28px' })
+      await page.setViewportSize({ width: 480, height: 800 })
+      await expect.poll(async () => {
+        const videoBounds = await player.boundingBox()
+        const statusBounds = await banner.boundingBox()
+        return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
+      }).toBeLessThan(1)
+      await page.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+      await page.evaluate(() => window.dispatchEvent(new Event('online')))
+      await expect(banner).toHaveText('Back online')
+      await expect(banner).toBeHidden()
+      await expect.poll(() => player.evaluate(element => Math.abs(innerHeight - element.getBoundingClientRect().bottom))).toBeLessThan(1)
+    })
+  }
+})
+
+for (const scale of [1, 1.25]) {
+  test(`connection banner reserves page and settings space at UI scale ${scale}`, async ({ page }) => {
+    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', 'left')
+      const content = document.createElement('div')
+      content.dataset.connectionLayoutContent = ''
+      content.style.height = '1600px'
+      document.querySelector('.tabContent[aria-hidden="false"] .routerView').append(content)
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    const banner = page.locator('.connectionStatus')
+    await expect(banner).toBeVisible()
+    await banner.evaluate(element => {
+      element.style.fontSize = '28px'
+      element.textContent = 'Connection lost. Trying to reconnect…'
+    })
+    const expectValidScrollEnd = async (maximumBeforeResize = Infinity) => {
+      await expect.poll(() => page.evaluate(maximumBeforeResize => {
+        const root = document.documentElement
+        const maximum = root.scrollHeight - root.clientHeight
+        const handle = document.querySelector('body > .os-scrollbar-vertical .os-scrollbar-handle')
+        const fraction = Number(getComputedStyle(handle).getPropertyValue('--os-viewport-percent'))
+        return Math.max(
+          maximum <= maximumBeforeResize
+            ? Math.abs(maximum - root.scrollTop)
+            : Math.max(0, -root.scrollTop, root.scrollTop - maximum),
+          Math.abs(root.clientHeight / fraction - root.scrollHeight)
+        ) * devicePixelRatio
+      }, maximumBeforeResize)).toBeLessThanOrEqual(2)
+    }
+    await page.setViewportSize({ width: 1600, height: 800 })
+    await expect.poll(() => banner.evaluate(element => Math.abs(
+      element.getBoundingClientRect().height -
+      parseFloat(getComputedStyle(document.body).getPropertyValue('--connection-status-height'))
+    ))).toBeLessThan(1)
+    for (const width of [1600, 480, 1600]) {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      await expect.poll(async () => {
+        const content = await page.locator('[data-connection-layout-content]').boundingBox()
+        const status = await banner.boundingBox()
+        return status.y - content.y - content.height
+      }).toBeGreaterThanOrEqual(0)
+      const maximumBeforeResize = await page.evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight)
+      await page.setViewportSize({ width, height: 800 })
+      await expect.poll(() => banner.evaluate(element => Math.abs(
+        element.getBoundingClientRect().height -
+        parseFloat(getComputedStyle(document.body).getPropertyValue('--connection-status-height'))
+      ))).toBeLessThan(1)
+      // Responsive content may grow even when the banner unwraps. Require
+      // the bottom only when the actual scroll range stays the same or shrinks.
+      await expectValidScrollEnd(maximumBeforeResize)
+      if (width === 1600) {
+        await expect.poll(async () => {
+          const sidebar = await page.locator('.sideNav').boundingBox()
+          const status = await banner.boundingBox()
+          return status.y - sidebar.y - sidebar.height
+        }).toBeGreaterThanOrEqual(-1)
+      }
+    }
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await banner.evaluate(element => { element.style.fontSize = '' })
+    await expectValidScrollEnd()
+    // Restore the narrow header's full width and reveal its quick settings.
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', 'top')
+      window.scrollTo(0, 0)
+    })
+    await page.setViewportSize({ width: 480, height: 800 })
+    await goTo(page, 'settings')
+    await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
+    await expect.poll(async () => {
+      const settings = await page.locator('.settingsWindow').boundingBox()
+      const status = await banner.boundingBox()
+      return Math.abs(settings.y + settings.height - status.y)
+    }).toBeLessThan(1)
+    await page.locator('.settingsWindowHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+      window.dispatchEvent(new Event('online'))
+    })
+    await expect(banner).toBeHidden()
+    await expectValidScrollEnd()
+  })
+}
 
 test('internet probe works with browser web security enabled', async ({ app }) => {
   let probeRequests = 0
