@@ -12107,7 +12107,7 @@ export default defineComponent({
       }
     }
 
-    async function performFirstLoad(isCurrentLoad = () => true) {
+    async function performFirstLoad(isCurrentLoad = () => true, startTime = props.startTime) {
       const generation = formatSwitchGeneration
       const isCurrentInitialLoad = () => generation === formatSwitchGeneration && isCurrentLoad()
       clearSabrBackoffTimer()
@@ -12143,7 +12143,7 @@ export default defineComponent({
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
-          await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
+          await loadPlaybackSource(props.manifestSrc, startTime, props.manifestMimeType)
           if (!ui || !player || !isCurrentInitialLoad()) return
 
           if (props.format === 'dash') {
@@ -12175,7 +12175,7 @@ export default defineComponent({
           }
         }
       } else {
-        await setLegacyQuality(props.startTime)
+        await setLegacyQuality(startTime)
       }
     }
 
@@ -12368,6 +12368,7 @@ export default defineComponent({
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value && pendingFormatSwitchState === null) {
+          const startTime = props.autoplayRequested ? 0 : props.startTime
           await unloadForFormatSwitch()
           if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
@@ -12385,7 +12386,7 @@ export default defineComponent({
 
           player.configure(getPlayerConfig(newFormat, preferAutoQuality.value))
 
-          await performFirstLoad(isCurrentFormatSwitch)
+          await performFirstLoad(isCurrentFormatSwitch, startTime)
           return
         }
 

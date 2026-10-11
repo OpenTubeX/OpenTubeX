@@ -150,3 +150,28 @@ test('queued autoplay ends after playback starts so later source loads obey the 
   })
   assert.equal(autoplay, false, 'a consumed queue request must not leave autoplay enabled for later source loads')
 })
+
+for (const format of ['audio', 'dash', 'legacy']) {
+  for (const queued of [true, false]) {
+    for (const switching of queued ? [true, false] : [true]) {
+      test(`${queued ? 'queued' : 'manual'} ${format} ${switching ? 'source switches during initial loading' : 'fresh loads'} ${queued && switching ? 'start at zero' : 'preserve the requested start'}`, async () => {
+        const firstLoad = playerSource.slice(playerSource.indexOf('    async function performFirstLoad('), playerSource.indexOf('\n    /**', playerSource.indexOf('    async function performFirstLoad(')))
+        const switchStart = playerSource.indexOf('      async ([newFormat], [oldFormat]) => {')
+        const initialSwitch = playerSource.slice(switchStart, playerSource.indexOf('        const video_ = video.value', switchStart)) + '\n}'
+        const starts = []
+        const context = {
+          props: { format, startTime: 2, autoplayRequested: queued, localFilePlayback: true, manifestSrc: 'queued-file', manifestMimeType: 'audio/mpeg' },
+          autoplayRequested: ref(queued), formatSwitchGeneration: 0, pendingFormatSwitchState: null,
+          hasLoaded: ref(false), preferAutoQuality: ref(true), hasMultipleAudioTracks: ref(false),
+          player: { configure() {}, getVariantTracks: () => [] }, ui: {}, ignoreErrors: false,
+          foregroundLoadAbortController: null, clearSabrBackoffTimer() {}, clearPreRollTimer() {},
+          unloadForFormatSwitch: async () => {}, ensureSabrStream() {}, getPlayerConfig: () => ({}),
+          loadPlaybackSource: async (url, start) => starts.push(start), setLegacyQuality: async start => starts.push(start),
+          process: { env: {} }, Date,
+        }
+        await runInNewContext(`${firstLoad}\nconst initialSwitch = ${initialSwitch}; ${switching ? 'initialSwitch([props.format], [props.format])' : 'performFirstLoad()'}`, context)
+        assert.deepEqual(starts, [queued && switching ? 0 : 2])
+      })
+    }
+  }
+}
