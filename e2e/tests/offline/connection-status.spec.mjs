@@ -5,7 +5,7 @@ import { createInternetProbe, INTERNET_CHECK_URL } from '../../../src/renderer/h
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
-test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false } } })
+test.use({ seed: { settings: { fetchSubscriptionsAutomatically: false, currentLocale: 'en-US' } } })
 
 test.describe('full-window connection banner', () => {
   test.use({
@@ -15,6 +15,7 @@ test.describe('full-window connection banner', () => {
         videoPlaybackEngine: 'built-in',
         ytDlpPlaybackEngineDefaultMigration: true,
         animationSpeed: 0,
+        currentLocale: 'en-US',
       }
     }
   })
@@ -36,7 +37,7 @@ test.describe('full-window connection banner', () => {
       const banner = page.locator('.connectionStatus')
       const player = page.locator('.ftVideoPlayer')
       await expect(banner).toHaveText('Connection lost. Trying to reconnect…')
-      const toggleFullWindow = () => player.locator('.full-window-button').evaluate(button => button.click())
+      const toggleFullWindow = () => player.locator('.full-window-button').click()
       const expectPlayerAboveBanner = async () => {
         await expect(player).toBeVisible()
         await expect(banner).toBeVisible()
@@ -149,6 +150,7 @@ for (const scale of [1, 1.25]) {
       await expect.poll(async () => {
         const content = await page.locator('[data-connection-layout-content]').boundingBox()
         const status = await banner.boundingBox()
+        if (!content || !status) return -Infinity
         return status.y - content.y - content.height
       }).toBeGreaterThanOrEqual(0)
       const maximumBeforeResize = await page.evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight)
@@ -164,6 +166,7 @@ for (const scale of [1, 1.25]) {
         await expect.poll(async () => {
           const sidebar = await page.locator('.sideNav').boundingBox()
           const status = await banner.boundingBox()
+          if (!sidebar || !status) return -Infinity
           return status.y - sidebar.y - sidebar.height
         }).toBeGreaterThanOrEqual(-1)
       }
@@ -182,6 +185,7 @@ for (const scale of [1, 1.25]) {
     await expect.poll(async () => {
       const settings = await page.locator('.settingsWindow').boundingBox()
       const status = await banner.boundingBox()
+      if (!settings || !status) return Infinity
       return Math.abs(settings.y + settings.height - status.y)
     }).toBeLessThan(1)
     await page.locator('.settingsWindowHeader').getByRole('button', { name: 'Close', exact: true }).click()
@@ -194,6 +198,119 @@ for (const scale of [1, 1.25]) {
     await expectValidScrollEnd()
   })
 }
+
+for (const scale of [1, 1.25]) {
+  for (const surface of ['sidebar', 'settings']) {
+    test(`${surface} nested scrollers clear the connection banner at UI scale ${scale}`, async ({ app, page }) => {
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const resize = async (width, height) => {
+        await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), ...bounds })
+        }, { width: Math.round(width * scale), height: Math.round(height * scale) })
+        await expect.poll(() => page.evaluate(() => [innerWidth, innerHeight])).toEqual([width, height])
+      }
+      await resize(1600, 700)
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+      })
+      const banner = page.locator('.connection-status-holder .connectionStatus')
+      await expect(banner).toBeVisible()
+      await banner.evaluate(element => {
+        element.style.fontSize = '40px'
+        element.textContent = 'Connection lost. Trying to reconnect…'
+      })
+      if (surface === 'settings') {
+        await goToSettingsSection(page, 'general')
+        await page.locator('.settingsWindow').getByRole('button', { name: 'Maximize', exact: true }).click()
+      }
+      const scrollers = surface === 'sidebar'
+        ? [page.locator('.sideNav .inner')]
+        : [page.locator('.settingsMenu'), page.locator('.settingsContent')]
+      for (const scroller of scrollers) {
+        await scroller.evaluate(element => {
+          const content = element.querySelector(':scope > .section') ?? element
+          const end = document.createElement(element.matches('menu') ? 'li' : 'div')
+          end.dataset.connectionScrollEnd = ''
+          end.style.height = '1200px'
+          end.style.flexShrink = '0'
+          content.append(end)
+        })
+      }
+      const expectNestedEnd = async (scroller, maximumBefore = Infinity) => {
+        const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+        await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+        await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => scroller.evaluate((element, maximumBefore) => {
+          const content = element.querySelector(':scope > .section, [data-connection-scroll-end]')
+          const trackElement = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track')
+          const thumbElement = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle')
+          if (!content || !trackElement || !thumbElement) return Infinity
+          const style = getComputedStyle(element)
+          const contentEnd = content.getBoundingClientRect().bottom +
+            Number.parseFloat(getComputedStyle(content).marginBottom) + Number.parseFloat(style.paddingBottom)
+          const viewportEnd = element.getBoundingClientRect().bottom - Number.parseFloat(style.borderBottomWidth)
+          const maximum = element.scrollHeight - element.clientHeight
+          const track = trackElement.getBoundingClientRect()
+          const thumb = thumbElement.getBoundingClientRect()
+          return Math.max(
+            Math.max(0, -element.scrollTop, element.scrollTop - maximum),
+            maximum <= maximumBefore ? Math.abs(contentEnd - viewportEnd) : Math.max(0, viewportEnd - contentEnd),
+            Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) * track.height,
+            maximum <= maximumBefore ? Math.abs(track.bottom - thumb.bottom) : 0
+          ) * devicePixelRatio
+        }, maximumBefore)).toBeLessThanOrEqual(2)
+      }
+      const triggers = [
+        () => resize(surface === 'sidebar' ? 720 : 1200, 700),
+        () => resize(1600, 900),
+        () => banner.evaluate(element => { element.style.fontSize = '' }),
+        async () => {
+          await page.evaluate(() => {
+            Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+            window.dispatchEvent(new Event('online'))
+          })
+          await expect(banner).toBeHidden()
+        }
+      ]
+      for (const trigger of triggers) {
+        const maximums = []
+        for (const scroller of scrollers) {
+          await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await expectNestedEnd(scroller)
+          maximums.push(await scroller.evaluate(element => element.scrollHeight - element.clientHeight))
+        }
+        await trigger()
+        for (const [index, scroller] of scrollers.entries()) {
+          await expectNestedEnd(scroller, maximums[index])
+        }
+      }
+    })
+  }
+}
+
+test('sync connection status does not reserve global banner space', async ({ page }) => {
+  await page.setViewportSize({ width: 480, height: 800 })
+  const section = await goToSettingsSection(page, 'general')
+  await section.evaluate(element => {
+    // SyncSettings uses this same class while connected and online.
+    const status = document.createElement('p')
+    status.className = 'connectionStatus'
+    status.textContent = 'Connected as test user'
+    element.append(status)
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setShowProgressBarToast', false)
+    store.commit('setShowProgressBar', true)
+  })
+  await expect(page.locator('.app > .progressBar')).toBeVisible()
+  await expect(page.locator('.connection-status-holder .connectionStatus')).toBeHidden()
+  await expect.poll(() => page.locator('.settingsWindow').evaluate(element =>
+    Math.abs(innerHeight - element.getBoundingClientRect().bottom)
+  )).toBeLessThan(1)
+})
 
 test('internet probe works with browser web security enabled', async ({ app }) => {
   let probeRequests = 0

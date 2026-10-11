@@ -751,7 +751,7 @@ body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
   inset-block-end: calc(34px + var(--connection-navigation-inset, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
-body:has(.connectionStatus) {
+body:has(.connection-status-holder .connectionStatus) {
   --connection-status-space: calc(var(--connection-status-height, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
