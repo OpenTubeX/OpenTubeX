@@ -143,6 +143,7 @@
               :use-theatre-mode="useTheatreMode"
               :autoplay-possible="autoplayPossible"
               :autoplay-enabled="autoplayEnabled"
+              :autoplay-requested="queuedPlaybackVideoId === videoId"
               :autoplay-countdown="autoplayCountdown"
               :auto-open-chapters="autoOpenChapters"
               :sidebar-chapters-open="showSidebarChapters"

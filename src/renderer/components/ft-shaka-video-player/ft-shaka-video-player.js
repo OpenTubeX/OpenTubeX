@@ -468,6 +468,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    autoplayRequested: {
+      type: Boolean,
+      default: false
+    },
     autoplayCountdown: {
       type: Object,
       default: null
@@ -1590,10 +1594,17 @@ export default defineComponent({
     // pending SABR state after this player loads, but that must not add autoplay
     // to the same media element afterward.
     const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
+    // Queue requests can arrive for a replacement player or an in-place source
+    // switch. Keep autoplay armed until playback starts, even if Watch has
+    // already consumed the loaded request.
+    const autoplayRequested = ref(props.autoplayRequested)
+    watch(() => props.autoplayRequested, requested => {
+      if (requested) autoplayRequested.value = true
+    })
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return !suppressInitialAutoplay && store.getters.getAutoplayVideos && isActiveTab.value
+      return (autoplayRequested.value || (!suppressInitialAutoplay && store.getters.getAutoplayVideos)) && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -7029,6 +7040,7 @@ export default defineComponent({
 
     function handlePlaying() {
       if (shortsNavigationSuspended.value) return
+      autoplayRequested.value = false
       hasPlaybackPosition.value = true
       // A decoded video frame replaces the retained startup/format-switch poster.
       showPoster.value = false
@@ -12095,7 +12107,7 @@ export default defineComponent({
       }
     }
 
-    async function performFirstLoad(isCurrentLoad = () => true) {
+    async function performFirstLoad(isCurrentLoad = () => true, startTime = props.startTime) {
       const generation = formatSwitchGeneration
       const isCurrentInitialLoad = () => generation === formatSwitchGeneration && isCurrentLoad()
       clearSabrBackoffTimer()
@@ -12131,7 +12143,7 @@ export default defineComponent({
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
-          await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
+          await loadPlaybackSource(props.manifestSrc, startTime, props.manifestMimeType)
           if (!ui || !player || !isCurrentInitialLoad()) return
 
           if (props.format === 'dash') {
@@ -12163,7 +12175,7 @@ export default defineComponent({
           }
         }
       } else {
-        await setLegacyQuality(props.startTime)
+        await setLegacyQuality(startTime)
       }
     }
 
@@ -12356,6 +12368,7 @@ export default defineComponent({
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value && pendingFormatSwitchState === null) {
+          const startTime = props.autoplayRequested ? 0 : props.startTime
           await unloadForFormatSwitch()
           if (!isCurrentFormatSwitch()) return
           ensureSabrStream()
@@ -12373,7 +12386,7 @@ export default defineComponent({
 
           player.configure(getPlayerConfig(newFormat, preferAutoQuality.value))
 
-          await performFirstLoad(isCurrentFormatSwitch)
+          await performFirstLoad(isCurrentFormatSwitch, startTime)
           return
         }
 
@@ -12424,6 +12437,13 @@ export default defineComponent({
           // from querying player state as soon as the format switch begins.
           hasLoaded.value = false
           hasPlaybackPosition.value = false
+        }
+
+        // A queued copy of the same video switches sources in this player.
+        // Start the queued item instead of restoring the previous source's end.
+        if (props.autoplayRequested) {
+          pendingFormatSwitchState.wasPaused = false
+          pendingFormatSwitchState.playbackPosition = 0
         }
 
         const {

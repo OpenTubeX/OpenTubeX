@@ -63,7 +63,7 @@ for (const mobile of [false, true]) {
     })
     test.use({
       seed: {
-        settings: { landingPage: 'history', enableDownloads: true, uiScale: mobile ? 95 : 100, iconPack: mobile ? 'remix' : 'material' },
+        settings: { landingPage: 'history', enableDownloads: true, autoplayVideos: false, uiScale: mobile ? 95 : 100, iconPack: mobile ? 'remix' : 'material' },
         downloads: [
           download(1, 'offline0001', 'Offline download', 'video', mediaPath,
             [{ videoId: 'offline0001', path: mediaPath, extension: 'webm' }]),
@@ -78,6 +78,8 @@ for (const mobile of [false, true]) {
             [{ videoId: 'missing0002', path: missingPath, extension: 'webm' }]),
           download(5, 'subtitle001', 'Subtitles only', 'subtitles', mediaPath,
             [{ videoId: 'subtitle001', path: mediaPath, extension: 'vtt' }]),
+          download(6, 'offline0002', 'Second audio download', 'audio', audioPath,
+            [{ videoId: 'offline0002', path: audioPath, extension: 'mp3' }]),
         ],
       }
     })
@@ -124,6 +126,8 @@ for (const mobile of [false, true]) {
       await expect(page).toHaveURL(/#\/watch\/offline0003\?downloadId=3/)
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
       await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0003')
+      await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1)).toBe(true)
+      await expect(video).not.toHaveAttribute('autoplay')
       await video.evaluate(element => element.pause())
       if (mobile) await page.getByRole('button', { name: 'Queue Playlist video two', exact: true }).click()
       await queue.getByRole('link').filter({ hasText: 'Playlist video two' }).click()
@@ -132,6 +136,40 @@ for (const mobile of [false, true]) {
       await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0004')
       await expect(queue).toBeHidden()
     })
+
+    for (const sameDownload of [false, true]) {
+      test(`starts a queued ${sameDownload ? 'duplicate' : 'copy'} of the current video from the beginning`, async ({ app, page }) => {
+        if (mobile) await setWindowSize(app, page, { width: 480, height: 850 })
+        await page.context().route(/^https?:/, route => route.abort('internetdisconnected'))
+        await page.evaluate(() => {
+          Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+          window.dispatchEvent(new Event('offline'))
+        })
+        if (mobile) {
+          await page.getByRole('button', { name: 'Quick settings', exact: true }).click()
+          await page.getByRole('button', { name: 'Downloads', exact: true }).click()
+        } else {
+          await goTo(page, 'downloads')
+        }
+        const row = title => page.locator('.downloadRow').filter({ has: page.getByRole('heading', { name: title, exact: true }) })
+        await row(sameDownload ? 'Downloaded audio' : 'Second audio download').getByRole('button', { name: 'Add to Queue', exact: true }).click()
+        await row('Downloaded audio').getByRole('button', { name: 'Play download', exact: true }).click()
+        const video = page.locator('video').first()
+        await expect(video).toHaveAttribute('src', 'downloadmedia://file/2/offline0002')
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+        const originalVideo = await video.elementHandle()
+        const ended = originalVideo.evaluate(element => new Promise(resolve => element.addEventListener('ended', resolve, { once: true })))
+        await video.evaluate(element => element.play())
+        await ended
+        const downloadId = sameDownload ? 2 : 6
+        await expect(page).toHaveURL(new RegExp(`#/watch/offline0002\\?downloadId=${downloadId}`))
+        await expect(video).toHaveAttribute('src', `downloadmedia://file/${downloadId}/offline0002`)
+        await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1 && !element.ended)).toBe(true)
+        await expect(video).not.toHaveAttribute('autoplay')
+        expect(await originalVideo.evaluate(element => element === document.querySelector('video'))).toBe(true)
+        await originalVideo.dispose()
+      })
+    }
 
     test('clearing a download removes all its queued copies', async ({ app, page }) => {
       if (mobile) {
