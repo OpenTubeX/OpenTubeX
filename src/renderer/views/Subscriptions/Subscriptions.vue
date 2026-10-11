@@ -376,6 +376,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
@@ -1029,10 +1030,39 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
       getSubscriptionsForFeed(activeSubscriptions.value, feedTab).map(channel => channel.id)
     ]))
 
-    await store.dispatch('markSubscriptionEntriesAsSeen', {
+    const markSeen = () => store.dispatch('markSubscriptionEntriesAsSeen', {
       tabs: cacheFeedTabs,
       channelIdsByTab
     })
+    const markedNewFeedView = newFeedView.value
+    const isVisibleNewFeed = () => isMounted && tab === 'new' && currentTab.value === 'new' &&
+      (!usesLogicalTabs || isTabPresented?.value === true) &&
+      newFeedView.value === markedNewFeedView &&
+      (newFeedView.value !== 'tabbed' || currentNewFeedTab.value === newFeedTab)
+
+    if (isVisibleNewFeed()) {
+      const startScroll = window.scrollY
+      if (startScroll > 0 && !isReducedMotionEnabled()) {
+        const startTime = performance.now()
+        const duration = 180 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+        while (isVisibleNewFeed()) {
+          await nextAnimationFrame()
+          if (!isVisibleNewFeed()) break
+          const progress = Math.min(1, (performance.now() - startTime) / duration)
+          window.scrollTo({ top: startScroll * (1 - progress) ** 3, behavior: 'instant' })
+          if (progress === 1) break
+        }
+      }
+      if (isVisibleNewFeed()) {
+        await resetNewFeedScroll()
+      }
+    }
+
+    if (isVisibleNewFeed()) {
+      await newPanel.value.markAllAsSeen(markSeen)
+    } else {
+      await markSeen()
+    }
   } finally {
     markingSeenTab.value = null
   }

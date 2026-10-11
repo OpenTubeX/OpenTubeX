@@ -1545,29 +1545,134 @@ test.describe('large new feed refresh', () => {
 })
 
 test.describe('large combined new feed', () => {
-  test.use({
-    seed: {
-      settings: { ...commonSettings, newSubscriptionFeedView: 'combined', uiScale: 95 },
-      profiles: [profile()],
-      subscriptionCache: [{
-        _id: CHANNEL_ID,
-        videos: Array.from({ length: 120 }, (_, index) => video(
+  const seed = {
+    settings: { ...commonSettings, newSubscriptionFeedView: 'combined', uiScale: 95 },
+    profiles: [profile()],
+    subscriptionCache: [{
+      _id: CHANNEL_ID,
+      videos: Array.from({ length: 120 }, (_, index) => video(
           `new-video-${index}`, `New video ${index}`, now - index * HOUR,
           { isNewInSubscriptionFeed: true }
-        )),
-        videosTimestamp: new Date(now).toISOString(),
-        shorts: Array.from({ length: 24 }, (_, index) => video(
+      )),
+      videosTimestamp: new Date(now).toISOString(),
+      shorts: Array.from({ length: 24 }, (_, index) => video(
           `new-short-${index}`, `New short ${index}`, now - index * HOUR,
           { isNewInSubscriptionFeed: true }
-        )),
-        shortsTimestamp: new Date(now).toISOString(),
-        liveStreams: [newLive],
-        liveStreamsTimestamp: new Date(now).toISOString(),
-        communityPosts: [post('new-post-below-feed', 'New post below feed', now)],
-        communityPostsTimestamp: new Date(now).toISOString()
-      }]
-    }
-  })
+      )),
+      shortsTimestamp: new Date(now).toISOString(),
+      liveStreams: [newLive],
+      liveStreamsTimestamp: new Date(now).toISOString(),
+      communityPosts: [post('new-post-below-feed', 'New post below feed', now)],
+      communityPostsTimestamp: new Date(now).toISOString()
+    }]
+  }
+  test.use({ seed })
+
+  for (const [view, scale, reducedMotion] of [
+    ['combined', 95, 'off'],
+    ['combined', 125, 'on'],
+    ['tabbed', 125, 'off'],
+    ['tabbed', 95, 'on']
+  ]) {
+    test.describe(`mark all seen: ${view}, ${scale}% scale, motion ${reducedMotion}`, () => {
+      test.use({ seed: { ...seed, settings: { ...seed.settings, newSubscriptionFeedView: view, uiScale: scale, reducedMotion } } })
+      test('returns to the top and clears the New feed without per-card layout work', async ({ page }) => {
+        await goTo(page, 'subscriptions')
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(view === 'combined' ? 126 : 100)
+        await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500)
+
+        const cdp = await page.context().newCDPSession(page)
+        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          window.__markAllSeenMetrics = { leaveReflows: 0, scrollAtCommit: null, animations: [] }
+          const animate = Element.prototype.animate
+          Element.prototype.animate = function (...args) {
+            if (this.matches('.newFeed')) {
+              window.__markAllSeenMetrics.animations.push({ scrollY: window.scrollY, frames: args[0] })
+            }
+            return animate.apply(this, args)
+          }
+          window.__restoreMarkSeenAnimate = () => { Element.prototype.animate = animate }
+          const offsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight').get
+          Object.defineProperty(document.body, 'offsetHeight', {
+            configurable: true,
+            get() {
+              window.__markAllSeenMetrics.leaveReflows++
+              return offsetHeight.call(this)
+            }
+          })
+          window.__unsubscribeMarkAllSeen = store.subscribe(mutation => {
+            if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
+              window.__markAllSeenMetrics.scrollAtCommit = window.scrollY
+            }
+          })
+        })
+        await page.getByRole('button', { name: 'Mark all as seen' }).click()
+        await expect(page.getByText('There is no new content.')).toBeVisible()
+        await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(0)
+        const metrics = await page.evaluate(() => {
+          delete document.body.offsetHeight
+          window.__unsubscribeMarkAllSeen()
+          window.__restoreMarkSeenAnimate()
+          return window.__markAllSeenMetrics
+        })
+        console.log('Mark all as seen:', metrics)
+        expect(metrics.leaveReflows).toBeLessThan(10)
+        expect(metrics.scrollAtCommit).toBeLessThanOrEqual(1)
+        expect(metrics.animations).toHaveLength(reducedMotion === 'on' ? 0 : 1)
+        for (const animation of metrics.animations) {
+          expect(animation.scrollY).toBeLessThanOrEqual(1)
+          expect(animation.frames.at(-1)).toEqual({ opacity: 0, transform: 'translateY(-10px)' })
+        }
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(1)
+        await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1)
+        await expect(page.locator('body > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+
+        await page.locator('[data-subscription-feed-tab="videos"]').click()
+        await page.locator('[data-subscription-feed-tab="all"]').click()
+        await expect(page.getByText('There is no new content.')).toBeVisible()
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(1)
+        await cdp.detach()
+      })
+
+      if (view === 'tabbed' && reducedMotion === 'off') {
+        test('switching categories during removal leaves the new category visible', async ({ page }) => {
+          await goTo(page, 'subscriptions')
+          await page.locator('[data-subscription-feed-tab="all"]').click()
+          await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(100)
+          await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500)
+          // Pause at the real leave animation so cancellation is deterministic.
+          await page.evaluate(() => {
+            const animate = Element.prototype.animate
+            Element.prototype.animate = function (...args) {
+              const animation = animate.apply(this, args)
+              if (this.matches('.newFeed')) {
+                animation.pause()
+                window.__markSeenAnimation = animation
+                Element.prototype.animate = animate
+              }
+              return animation
+            }
+            document.querySelector('.markAllSeenButton').click()
+          })
+          await expect.poll(() => page.evaluate(() => !!window.__markSeenAnimation)).toBe(true)
+          await page.locator('[data-new-feed-tab="shorts"]').click()
+          await expect(page.getByText('New short 0', { exact: true })).toBeVisible()
+          await expect(page.locator('.newFeed')).toHaveCSS('opacity', '1')
+          await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+          await expect.poll(() => page.evaluate(() => window.__markSeenAnimation.playState)).toBe('idle')
+          await page.locator('[data-new-feed-tab="videos"]').click()
+          await expect(page.getByText('There is no new content.')).toBeVisible()
+          await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(1)
+        })
+      }
+    })
+  }
 
   test('mounts cards in later sections when scrolled into view', async ({ page }) => {
     await goTo(page, 'subscriptions')
