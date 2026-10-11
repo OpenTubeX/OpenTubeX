@@ -3790,16 +3790,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .fullscreenTranscriptTarget :deep(.transcriptControls .ft-input) {
   color: var(--primary-text-color);
   background-color: rgb(255 255 255 / 8%);
-  border: 1px solid rgb(255 255 255 / 12%);
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptControls .ft-input::placeholder) {
   color: var(--tertiary-text-color);
-}
-
-.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input:focus) {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 18%, transparent);
 }
 
 .fullscreenTranscriptTarget :deep(.transcriptLanguageMenu) {

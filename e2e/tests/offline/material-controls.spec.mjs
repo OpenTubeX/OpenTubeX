@@ -770,9 +770,9 @@ for (const scale of [100, 95]) {
             })
             if (variant === 'filled') expect(focused.shadow).toContain('0px -2px')
             else {
-              expect(focused.shadow).toContain('2px 0px 0px 0px inset')
-              expect(focused.shadow).toContain('-2px 0px 0px 0px inset')
-              expect(focused.shadow).toContain('0px -2px 0px 0px inset')
+              expect(focused.shadow).toContain('1px 0px 0px 0px inset')
+              expect(focused.shadow).toContain('-1px 0px 0px 0px inset')
+              expect(focused.shadow).not.toContain('0px -2px 0px 0px inset')
             }
             await expect.poll(() => field.evaluate(element => {
               const outline = element.closest('.outlined') ? element.parentElement.querySelector('.inputOutline') : element
