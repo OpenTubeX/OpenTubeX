@@ -151,6 +151,23 @@ test('queued autoplay ends after playback starts so later source loads obey the 
   assert.equal(autoplay, false, 'a consumed queue request must not leave autoplay enabled for later source loads')
 })
 
+test('an explicit queue request starts a SABR replacement without re-enabling preference autoplay', () => {
+  const autoplayRequested = ref(false)
+  const isActiveTab = ref(true)
+  const autoplay = runInNewContext(autoplaySource + '\nautoplayVideos', {
+    autoplayRequested, isActiveTab, computed, suppressInitialAutoplay: true,
+    store: { getters: { getAutoplayVideos: true } },
+  })
+  assert.equal(autoplay.value, false, 'a paused SABR replacement must stay paused')
+  autoplayRequested.value = true
+  assert.equal(autoplay.value, true, 'a later explicit queue request must start')
+  isActiveTab.value = false
+  assert.equal(autoplay.value, false, 'queue requests must still respect the active tab')
+  isActiveTab.value = true
+  autoplayRequested.value = false
+  assert.equal(autoplay.value, false, 'consuming the queue request must retain the original suppression')
+})
+
 for (const format of ['audio', 'dash', 'legacy']) {
   for (const queued of [true, false]) {
     for (const switching of queued ? [true, false] : [true]) {

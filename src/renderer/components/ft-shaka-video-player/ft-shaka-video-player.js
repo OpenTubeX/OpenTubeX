@@ -1604,7 +1604,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return !suppressInitialAutoplay && (autoplayRequested.value || store.getters.getAutoplayVideos) && isActiveTab.value
+      return (autoplayRequested.value || (!suppressInitialAutoplay && store.getters.getAutoplayVideos)) && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
