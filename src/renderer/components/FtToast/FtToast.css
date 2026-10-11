@@ -434,7 +434,7 @@
 :is(.toast-holder, .progress-toast-holder) .toastActions.vertical {
   flex-direction: column;
   align-items: stretch;
-  gap: 4px;
+  margin-inline: auto;
 }
 
 :is(.toast-holder, .progress-toast-holder) .toastActions .btn {
