@@ -1,4 +1,4 @@
-import { chmod, readFile, writeFile } from 'node:fs/promises'
+import { chmod, readFile, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 import { test, expect, sel, setWindowSize } from '../../helpers/app.mjs'
@@ -60,6 +60,7 @@ async function configureCookieSearch(app, mode = 'file', responseDelay = 300) {
   const executable = path.join(app.userDataDir, 'search-fixture.cjs')
   const log = path.join(app.userDataDir, 'search-args.json')
   const response = path.join(app.userDataDir, 'search-response.json')
+  const pendingResponse = path.join(app.userDataDir, 'search-response.pending')
   const playlistResponse = path.join(app.userDataDir, 'playlist-response.json')
   await writeFile(response, JSON.stringify({ entries: [] }))
   await writeFile(playlistResponse, JSON.stringify({}))
@@ -67,7 +68,11 @@ async function configureCookieSearch(app, mode = 'file', responseDelay = 300) {
 const fs = require('node:fs')
 fs.writeFileSync(${JSON.stringify(log)}, JSON.stringify(process.argv.slice(2)))
 const response = process.argv.at(-1).includes('/playlist?') ? ${JSON.stringify(playlistResponse)} : ${JSON.stringify(response)}
-setTimeout(() => process.stdout.write(fs.readFileSync(response, 'utf8')), ${responseDelay})
+function sendResponse() {
+  if (fs.existsSync(${JSON.stringify(pendingResponse)})) return setTimeout(sendResponse, 50)
+  process.stdout.write(fs.readFileSync(response, 'utf8'))
+}
+setTimeout(sendResponse, ${responseDelay})
 `)
   await chmod(executable, 0o755)
   await app.page.evaluate(async ({ executable, mode }) => {
@@ -79,7 +84,7 @@ setTimeout(() => process.stdout.write(fs.readFileSync(response, 'utf8')), ${resp
     await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
     await store.dispatch('updateYtDlpPlaybackCookiesBrowserProfile', '/fixture/profile')
   }, { executable, mode })
-  return { log, response, playlistResponse }
+  return { log, response, playlistResponse, pendingResponse }
 }
 
 async function captureSearchNotice(page, filename, animations = 'allow') {
@@ -470,6 +475,60 @@ test('paginates authenticated results and stops at an empty final page', async (
   const args = JSON.parse(await readFile(log, 'utf8'))
   expect(args[args.indexOf('--playlist-start') + 1]).toBe('21')
 })
+
+for (const autoLoadMore of [true, false]) {
+  for (const uiScale of [100, 125]) {
+    test(`shows only the pagination spinner for cookie searches with ${autoLoadMore ? 'automatic' : 'manual'} loading at ${uiScale}% UI scale`, async ({ app, page }) => {
+      const { log, response, pendingResponse } = await configureCookieSearch(app)
+      await searchForAgeGate(page)
+      await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+      await writeFile(response, JSON.stringify({
+        entries: Array.from({ length: 20 }, (_, index) => ({
+          id: String(index).padStart(11, '0'), title: `Authenticated video ${index}`, channel: 'Creator', duration: 120
+        }))
+      }))
+      await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+      await expect(page.getByRole('heading', { name: 'Authenticated video 0', exact: true })).toBeVisible()
+      if (uiScale === 125) await setWindowSize(app, page, { width: 600, height: 844 })
+      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), uiScale)
+      const colorScheme = autoLoadMore ? 'dark' : 'light'
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await writeFile(response, JSON.stringify({ entries: [] }))
+      await writeFile(pendingResponse, '')
+      const pagination = page.locator('.ft-auto-load-next-page-wrapper')
+      try {
+        await page.evaluate(enabled => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateGeneralAutoLoadMorePaginatedItemsEnabled', enabled), autoLoadMore)
+        if (autoLoadMore) {
+          await pagination.evaluate(element => element.scrollIntoView({ block: 'end', behavior: 'instant' }))
+        } else {
+          await page.getByRole('button', { name: 'Fetch more results' }).click()
+        }
+        await expect.poll(async () => {
+          const args = JSON.parse(await readFile(log, 'utf8'))
+          return args[args.indexOf('--playlist-start') + 1]
+        }).toBe('21')
+        await expect(page.getByRole('status', { name: 'Loading more', exact: true })).toBeVisible()
+        await expect(page.locator('.double-bounce1')).toHaveCount(0, { timeout: 500 })
+        await expect(page.locator('.spinner')).toHaveCount(1)
+        await expectImagesLoaded(page.locator('.ft-list-item img'))
+        if (uiScale === 100) {
+          const box = await pagination.boundingBox()
+          const width = Math.min(600, box.width)
+          await page.screenshot({
+            path: test.info().outputPath(`cookie-search-pagination-${colorScheme}.png`),
+            clip: { x: box.x + (box.width - width) / 2, y: box.y - 150, width, height: box.height + 150 }
+          })
+        }
+      } finally {
+        await unlink(pendingResponse)
+      }
+      await expect(page.getByText('There are no more results for this search')).toBeVisible()
+      await expect(pagination).toHaveCount(0)
+      await expect(page.locator('.spinner')).toHaveCount(0)
+    })
+  }
+}
 
 test('keeps loaded results and retries the same page after a pagination error', async ({ app, page }) => {
   const { log, response } = await configureCookieSearch(app)
