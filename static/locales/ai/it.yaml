@@ -2063,3 +2063,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Rilevare i dispositivi sulla rete locale e trasmettere video a essi, e sincronizzare impostazioni e dati tra dispositivi."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Iscrizioni"
+  userplaylists: "Playlist"
+  history: "Cronologia"
+  subscribedchannels: "Canali"
+  trending: "Tendenze"
+  popular: "Popolari"
+  stats: "Statistiche"
+  more: "Altro"

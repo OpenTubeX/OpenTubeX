@@ -32,7 +32,10 @@
             :class="applyNavIconExpand"
           />
         </div>
-        <NavLabel :label="item.label" />
+        <NavLabel
+          :label="item.label"
+          :short-label="item.shortLabel"
+        />
       </router-link>
       <SideNavMoreOptions
         v-if="mobileOverflowItems.length > 0"
@@ -214,6 +217,8 @@ const navigationCatalog = computed(() => new Map(NAVIGATION_ITEM_DEFINITIONS.map
     ...item,
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     label: t(item.labelKey),
+    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+    shortLabel: t(`Mobile Navigation.${item.id}`),
   },
 ])))
 
@@ -288,19 +293,29 @@ function fitNavigationLabels() {
   }
   if (!mobileLayout.matches) {
     nav.style.removeProperty('--fitted-nav-label-size')
+    texts.forEach(text => text.parentElement.classList.remove('useShortLabel'))
     return
   }
-  const sizes = texts.flatMap(text => {
-    const label = text.parentElement
+  const labels = [...new Set(texts.map(text => text.parentElement))]
+  labels.forEach(label => label.classList.remove('useShortLabel'))
+  const sizes = labels.flatMap(label => {
+    let text = label.querySelector('span')
     const availableWidth = label.getBoundingClientRect().width
-    const textWidth = text.getBoundingClientRect().width
+    let textWidth = text.getBoundingClientRect().width
     if (availableWidth === 0 || textWidth === 0) return []
     const maximumSize = parseFloat(getComputedStyle(label).fontSize)
-    const currentSize = parseFloat(getComputedStyle(text).fontSize)
+    let currentSize = parseFloat(getComputedStyle(text).fontSize)
+    const shortText = label.querySelector('.shortLabel')
+    if (shortText && currentSize * (availableWidth - 0.25) / textWidth < 10) {
+      label.classList.add('useShortLabel')
+      text = shortText
+      textWidth = text.getBoundingClientRect().width
+      currentSize = parseFloat(getComputedStyle(text).fontSize)
+    }
     return [Math.min(maximumSize, currentSize * (availableWidth - 0.25) / textWidth)]
   })
   if (sizes.length === 0) return
-  const size = `${Math.floor(Math.min(...sizes) * 100) / 100}px`
+  const size = `${Math.max(10, Math.floor(Math.min(...sizes) * 100) / 100)}px`
   if (nav.style.getPropertyValue('--fitted-nav-label-size') !== size) {
     nav.style.setProperty('--fitted-nav-label-size', size)
   }

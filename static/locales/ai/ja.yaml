@@ -2063,3 +2063,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "ホーム"
+  subscriptions: "登録"
+  userplaylists: "リスト"
+  history: "履歴"
+  subscribedchannels: "チャンネル"
+  trending: "急上昇"
+  popular: "人気"
+  stats: "統計"
+  more: "その他"

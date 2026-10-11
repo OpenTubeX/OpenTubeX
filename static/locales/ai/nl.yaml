@@ -2123,3 +2123,15 @@ Storage Startup Error:
   Retry: "Opnieuw proberen"
 Native Permissions:
   Local Network: "Apparaten op je lokale netwerk vinden en er video's naartoe casten, en instellingen en gegevens tussen apparaten synchroniseren."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Abonn."
+  userplaylists: "Playlists"
+  history: "Historie"
+  subscribedchannels: "Kanalen"
+  trending: "Trending"
+  popular: "Populair"
+  stats: "Statistiek"
+  more: "Meer"

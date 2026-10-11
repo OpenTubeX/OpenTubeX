@@ -2068,3 +2068,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Vyhľadávať zariadenia v miestnej sieti a prenášať do nich videá a synchronizovať nastavenia a údaje medzi zariadeniami."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Domov"
+  subscriptions: "Odbery"
+  userplaylists: "Playlisty"
+  history: "História"
+  subscribedchannels: "Kanály"
+  trending: "Trendy"
+  popular: "Populárne"
+  stats: "Štatistiky"
+  more: "Viac"

@@ -2087,3 +2087,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Heim"
+  subscriptions: "Áskriftir"
+  userplaylists: "Listar"
+  history: "Saga"
+  subscribedchannels: "Rásir"
+  trending: "Í umræðu"
+  popular: "Vinsælt"
+  stats: "Tölfræði"
+  more: "Meira"

@@ -2067,3 +2067,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "尋找區域網路中的裝置並向其投放影片，同時在裝置之間同步設定和資料。"
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "首頁"
+  subscriptions: "訂閱"
+  userplaylists: "清單"
+  history: "紀錄"
+  subscribedchannels: "頻道"
+  trending: "發燒"
+  popular: "熱門"
+  stats: "統計"
+  more: "更多"

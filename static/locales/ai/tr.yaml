@@ -2064,3 +2064,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Yerel ağınızdaki cihazları keşfedin ve onlara video yayınlayın, cihazlar arasında ayarları ve verileri eşitleyin."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Ana Sayfa"
+  subscriptions: "Aboneler"
+  userplaylists: "Listeler"
+  history: "Geçmiş"
+  subscribedchannels: "Kanallar"
+  trending: "Trendler"
+  popular: "Popüler"
+  stats: "İstatistik"
+  more: "Daha"

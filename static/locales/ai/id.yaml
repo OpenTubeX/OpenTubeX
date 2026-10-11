@@ -2076,3 +2076,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Temukan perangkat di jaringan lokal Anda dan transmisikan video ke perangkat tersebut, serta sinkronkan pengaturan dan data antarperangkat."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Beranda"
+  subscriptions: "Langganan"
+  userplaylists: "Daftar"
+  history: "Riwayat"
+  subscribedchannels: "Kanal"
+  trending: "Tren"
+  popular: "Populer"
+  stats: "Statistik"
+  more: "Lainnya"

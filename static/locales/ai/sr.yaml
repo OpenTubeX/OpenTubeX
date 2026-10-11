@@ -2140,3 +2140,15 @@ Storage Startup Error:
   Retry: "Покушај поново"
 Native Permissions:
   Local Network: "Пронађите уређаје на локалној мрежи и емитујте видео-снимке на њих, и синхронизујте подешавања и податке између уређаја."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Почетна"
+  subscriptions: "Праћења"
+  userplaylists: "Листе"
+  history: "Историја"
+  subscribedchannels: "Канали"
+  trending: "Трендови"
+  popular: "Популарно"
+  stats: "Статистика"
+  more: "Више"

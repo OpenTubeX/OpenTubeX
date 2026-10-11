@@ -2073,3 +2073,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Yerli şəbəkənizdə cihazları tapın və videoları onlara yayımlayın, cihazlar arasında parametrləri və məlumatları sinxronlaşdırın."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Ana səhifə"
+  subscriptions: "Abunələr"
+  userplaylists: "Siyahılar"
+  history: "Tarixçə"
+  subscribedchannels: "Kanallar"
+  trending: "Trendlər"
+  popular: "Populyar"
+  stats: "Statistika"
+  more: "Daha çox"

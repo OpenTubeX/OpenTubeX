@@ -2454,3 +2454,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Heim"
+  subscriptions: "Abonn."
+  userplaylists: "Lister"
+  history: "Historikk"
+  subscribedchannels: "Kanalar"
+  trending: "Trendar"
+  popular: "Populært"
+  stats: "Statistikk"
+  more: "Meir"

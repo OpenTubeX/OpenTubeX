@@ -2088,3 +2088,15 @@ Storage Startup Error:
   Retry: "Ceisio eto"
 Native Permissions:
   Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Hafan"
+  subscriptions: "Tanysgr."
+  userplaylists: "Rhestrau"
+  history: "Hanes"
+  subscribedchannels: "Sianeli"
+  trending: "Trendio"
+  popular: "Poblogaidd"
+  stats: "Ystadegau"
+  more: "Rhagor"

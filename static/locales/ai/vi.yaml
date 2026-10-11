@@ -2102,3 +2102,15 @@ Storage Startup Error:
   Retry: "Thử lại"
 Native Permissions:
   Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Trang chủ"
+  subscriptions: "Đăng ký"
+  userplaylists: "Danh sách"
+  history: "Lịch sử"
+  subscribedchannels: "Kênh"
+  trending: "Xu hướng"
+  popular: "Phổ biến"
+  stats: "Thống kê"
+  more: "Thêm"

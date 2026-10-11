@@ -2707,3 +2707,15 @@ Storage Startup Error:
   Retry: "Torna-ho a provar"
 Native Permissions:
   Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Inici"
+  subscriptions: "Subs."
+  userplaylists: "Llistes"
+  history: "Historial"
+  subscribedchannels: "Canals"
+  trending: "Tendències"
+  popular: "Populars"
+  stats: "Estadíst."
+  more: "Més"

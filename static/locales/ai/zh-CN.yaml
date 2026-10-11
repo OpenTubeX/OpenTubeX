@@ -2063,3 +2063,15 @@ Search Bar:
 
 Native Permissions:
   Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "首页"
+  subscriptions: "订阅"
+  userplaylists: "列表"
+  history: "历史"
+  subscribedchannels: "频道"
+  trending: "热门"
+  popular: "人气"
+  stats: "统计"
+  more: "更多"

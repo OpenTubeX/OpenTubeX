@@ -3278,3 +3278,15 @@ Storage Startup Error:
   Retry: "Retry"
 Native Permissions:
   Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Subs"
+  userplaylists: "Playlists"
+  history: "History"
+  subscribedchannels: "Channels"
+  trending: "Trending"
+  popular: "Popular"
+  stats: "Stats"
+  more: "More"

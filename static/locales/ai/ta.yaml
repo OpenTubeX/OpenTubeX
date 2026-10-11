@@ -2115,3 +2115,15 @@ Storage Startup Error:
   Retry: "மீண்டும் முயற்சி"
 Native Permissions:
   Local Network: "உங்கள் உள்ளூர் வலையமைப்பில் சாதனங்களைக் கண்டறிந்து அவற்றுக்கு காணொளிகளை அனுப்பவும், சாதனங்களுக்கு இடையே அமைப்புகள் மற்றும் தரவை ஒத்திசைக்கவும்."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "முகப்பு"
+  subscriptions: "சந்தா"
+  userplaylists: "பட்டியல்"
+  history: "வரலாறு"
+  subscribedchannels: "சேனல்"
+  trending: "போக்கு"
+  popular: "பிரபலம்"
+  stats: "புள்ளி."
+  more: "மேலும்"

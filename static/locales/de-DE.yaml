@@ -3261,3 +3261,15 @@ Storage Startup Error:
   Retry: "Erneut versuchen"
 Native Permissions:
   Local Network: "Geräte im lokalen Netzwerk finden, Videos auf diese Geräte übertragen und Einstellungen und Daten geräteübergreifend synchronisieren."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Home"
+  subscriptions: "Abos"
+  userplaylists: "Playlists"
+  history: "Verlauf"
+  subscribedchannels: "Kanäle"
+  trending: "Trends"
+  popular: "Beliebt"
+  stats: "Statistik"
+  more: "Mehr"

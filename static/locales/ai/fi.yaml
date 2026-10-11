@@ -2112,3 +2112,15 @@ Storage Startup Error:
   Retry: "Yritä uudelleen"
 Native Permissions:
   Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Koti"
+  subscriptions: "Tilaukset"
+  userplaylists: "Listat"
+  history: "Historia"
+  subscribedchannels: "Kanavat"
+  trending: "Nousussa"
+  popular: "Suositut"
+  stats: "Tilastot"
+  more: "Lisää"

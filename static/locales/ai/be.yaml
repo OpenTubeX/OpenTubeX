@@ -2158,3 +2158,15 @@ Storage Startup Error:
   Retry: "Паспрабаваць яшчэ раз"
 Native Permissions:
   Local Network: "Знаходзіць прылады ў лакальнай сетцы і трансляваць на іх відэа, а таксама сінхранізаваць налады і даныя паміж прыладамі."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Галоўная"
+  subscriptions: "Падпіскі"
+  userplaylists: "Спісы"
+  history: "Гісторыя"
+  subscribedchannels: "Каналы"
+  trending: "Трэнды"
+  popular: "Папулярнае"
+  stats: "Статыстыка"
+  more: "Больш"

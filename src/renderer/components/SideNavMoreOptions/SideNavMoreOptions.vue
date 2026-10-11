@@ -23,6 +23,7 @@
         v-if="!hideLabelsSideBar"
         id="moreNavLabel"
         :label="$t('More')"
+        :short-label="$t('Mobile Navigation.more')"
       />
     </div>
     <div

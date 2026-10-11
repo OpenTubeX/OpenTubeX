@@ -2515,3 +2515,15 @@ Storage Startup Error:
   Retry: "다시 시도"
 Native Permissions:
   Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "홈"
+  subscriptions: "구독"
+  userplaylists: "목록"
+  history: "기록"
+  subscribedchannels: "채널"
+  trending: "급상승"
+  popular: "인기"
+  stats: "통계"
+  more: "더 보기"

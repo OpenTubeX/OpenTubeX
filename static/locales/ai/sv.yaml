@@ -2083,3 +2083,15 @@ Storage Startup Error:
   Retry: "Försök igen"
 Native Permissions:
   Local Network: "Hitta enheter i ditt lokala nätverk och casta videor till dem, och synkronisera inställningar och data mellan enheter."
+
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Hem"
+  subscriptions: "Prenum."
+  userplaylists: "Spellistor"
+  history: "Historik"
+  subscribedchannels: "Kanaler"
+  trending: "Trender"
+  popular: "Populärt"
+  stats: "Statistik"
+  more: "Mer"
