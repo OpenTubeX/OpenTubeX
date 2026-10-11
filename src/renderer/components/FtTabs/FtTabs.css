@@ -98,7 +98,7 @@
   will-change: opacity;
 }
 
-@media (pointer: coarse) {
+@media (any-pointer: coarse) {
   .materialTabs {
     --material-tab-min-height: var(--phone-touch-target, 48px);
   }
