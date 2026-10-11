@@ -4,7 +4,7 @@
     class="sideNavMoreOptions"
   >
     <div
-      class="navOption moreOptionNav"
+      class="navOption moreOptionNav mobileNavItem"
       :class="{ 'router-link-active': overflowRouteActive }"
       tabindex="0"
       role="button"
@@ -19,13 +19,11 @@
         class="navIcon"
         :class="applyNavIconExpand"
       />
-      <p
+      <NavLabel
         v-if="!hideLabelsSideBar"
         id="moreNavLabel"
-        class="navLabel"
-      >
-        {{ $t("More") }}
-      </p>
+        :label="$t('More')"
+      />
     </div>
     <div
       v-if="openMoreOptions"
@@ -62,6 +60,7 @@ import { computed, ref, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import store from '../../store/index'
+import NavLabel from '../SideNav/NavLabel.vue'
 
 const props = defineProps({
   items: {

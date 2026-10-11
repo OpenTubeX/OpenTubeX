@@ -353,41 +353,15 @@
 }
 
 .capacitorPhoneTabViewTabs {
+  --material-tab-font-size: 14px;
+  --material-tab-min-height: var(--phone-touch-target, 48px);
+
+
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   flex: 0 0 auto;
   background-color: var(--card-bg-color);
   border-block-end: 1px solid var(--border-color);
-}
-
-.capacitorPhoneTabViewTab {
-  min-block-size: 52px;
-  padding-block: 8px 5px;
-  padding-inline: 12px;
-  color: var(--secondary-text-color);
-  background-color: transparent;
-  border: 0;
-  border-block-end: 3px solid transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.25;
-  touch-action: manipulation;
-}
-
-.capacitorPhoneTabViewTab[aria-selected='true'] {
-  color: var(--primary-text-color);
-  border-block-end-color: var(--primary-color);
-}
-
-.capacitorPhoneTabViewTab:is(:hover, :active) {
-  background-color: var(--side-nav-hover-color);
-}
-
-.capacitorPhoneTabViewTab:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: -4px;
 }
 
 .capacitorPhoneTabFab {
@@ -434,50 +408,23 @@
 }
 
 .capacitorPhoneSyncedSessionTabsInner {
+  --material-tab-font-size: 13px;
+  --material-tab-min-height: var(--phone-touch-target, 48px);
+
   display: flex;
   flex-wrap: nowrap;
   gap: 4px;
 }
 
 .capacitorPhoneSyncedSessionTab {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   flex: 0 0 auto;
   min-inline-size: 0;
-  min-block-size: 48px;
-  padding-block: 8px 5px;
-  padding-inline: 10px;
-  color: var(--secondary-text-color);
-  background-color: transparent;
-  border: 0;
-  border-block-end: 3px solid transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  line-height: 1.25;
-  text-align: start;
-  touch-action: manipulation;
 }
 
 .capacitorPhoneSyncedSessionTab strong {
   min-inline-size: 0;
+  font: inherit;
   overflow-wrap: anywhere;
-}
-
-.capacitorPhoneSyncedSessionTab[aria-selected='true'] {
-  color: var(--primary-text-color);
-  border-block-end-color: var(--primary-color);
-}
-
-.capacitorPhoneSyncedSessionTab:is(:hover, :active) {
-  background-color: var(--side-nav-hover-color);
-}
-
-.capacitorPhoneSyncedSessionTab:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: -4px;
 }
 
 .capacitorPhoneSyncedTabs {

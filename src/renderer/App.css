@@ -38,13 +38,17 @@
   touch-action: manipulation;
 }
 
+:global(body) {
+  --mobile-nav-content-height: 60px;
+}
+
 .app {
+  --desktop-nav-rail-width: 104px;
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
   --top-nav-height: 60px;
   --progress-bar-height: 6px;
-  --mobile-nav-content-height: 60px;
   --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
   --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
@@ -787,7 +791,7 @@
 }
 
 @media only screen and (width <= 680px) {
-  .app.compactNavigation {
+  :global(body:has(.app.compactNavigation)) {
     --mobile-nav-content-height: 48px;
   }
 

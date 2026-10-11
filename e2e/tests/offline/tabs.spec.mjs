@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto'
+import { sampleColors } from '../../helpers/colors.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -71,6 +72,33 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
+  test('centers horizontal tabs with equal top and bottom gaps', async ({ page }) => {
+    for (const overflowing of [false, true]) {
+      if (overflowing) {
+        await page.evaluate(async () => {
+          for (let index = 0; index < 20; index++) {
+            await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+          }
+        })
+        await expect(page.locator('.tabsScrollbar')).toBeVisible()
+      }
+      for (const zoom of [1, 0.95, 1.25]) {
+        await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+        for (const position of ['top', 'bottom']) {
+          await page.evaluate(position => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position), position)
+          await expect.poll(() => page.locator('.tab').first().evaluate(tab => {
+            const bar = tab.closest('.tabBar').getBoundingClientRect()
+            const box = tab.getBoundingClientRect()
+            const top = box.top - bar.top
+            const bottom = bar.bottom - box.bottom
+            const style = getComputedStyle(tab)
+            return top >= 0.5 && bottom >= 0.5 && Math.abs(top - bottom) <= 0.6 && style.borderTopWidth === style.borderBottomWidth
+          }), { message: `balanced tab gaps at ${position}, ${zoom} scale, overflow ${overflowing}` }).toBe(true)
+        }
+      }
+    }
+  })
+
   test('the mobile tabs preference leaves desktop tabs available', async ({ page }) => {
     await page.evaluate(() => {
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableMobileTabs', false)
@@ -451,6 +479,39 @@ test.describe('tab bar', () => {
     }
   })
 
+  test('paints the loading streak along rounded tab corners', async ({ app, page }) => {
+    const loadingTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/rounded-loading-line', makeActive: false, lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${loadingTab.id}"]`)
+    await page.evaluate(id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUiRoundness', 100)
+      store.commit('setReducedMotion', 'off')
+      window.ftElectron.tabs.setLoading(true, id)
+    }, loadingTab.id)
+    await expect(tab.locator('.tabLoadingLine')).toBeVisible()
+    await tab.evaluate(element => {
+      element.style.setProperty('--accent-color', '#ff00ff')
+      element.style.setProperty('--primary-text-color', '#ff00ff')
+      for (const animation of element.querySelector('.tabLoadingLine').getAnimations({ subtree: true })) {
+        animation.pause()
+        animation.currentTime = 600
+      }
+    })
+    const point = await tab.evaluate(element => {
+      const style = getComputedStyle(element)
+      const border = Number.parseFloat(style.borderTopWidth)
+      const height = element.getBoundingClientRect().height - 2 * border
+      const radius = Math.min(Number.parseFloat(style.borderBottomLeftRadius), height / 2)
+      return [border + radius - (radius - 1) * Math.sin(Math.PI / 5),
+        border + height - radius + (radius - 1) * Math.cos(Math.PI / 5)]
+    })
+    const [color] = await sampleColors(app, tab, [point])
+    expect(color[0] - color[1], 'the loading streak rises around the left corner').toBeGreaterThan(100)
+    expect(color[2] - color[1]).toBeGreaterThan(100)
+  })
+
   test('keeps the loading line at the tab bottom with icons and reduced motion', async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/loading-line',
@@ -485,7 +546,7 @@ test.describe('tab bar', () => {
     await expect(tab.locator('.playingIcon')).toBeVisible()
     await expect(line).toBeVisible()
 
-    const animationName = () => line.evaluate(element => getComputedStyle(element, '::after').animationName)
+    const animationName = () => line.locator('path').evaluate(element => getComputedStyle(element).animationName)
     await expect.poll(animationName).not.toBe('none')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await expect.poll(animationName).toBe('none')
@@ -1787,22 +1848,14 @@ test.describe('tab bar', () => {
         await expect.poll(() => handle.evaluate((element) => {
           const handleRect = element.getBoundingClientRect()
           const headerRect = document.querySelector('.topNav').getBoundingClientRect()
-          const indicator = document.querySelector('.sideNav .activeIndicator')
-          const indicatorRect = indicator.getBoundingClientRect()
+          const activeOption = document.querySelector('.sideNav .navOption.router-link-active')
+          const optionRect = activeOption.getBoundingClientRect()
           const x = handleRect.left + handleRect.width / 2 +
             (element.closest('.position-left') ? 1 : -1)
-          // Include the painted indicator in hit testing despite its normal
-          // pointer-events:none, so a navigation highlight above the line fails.
-          const previousPointerEvents = indicator.style.pointerEvents
-          indicator.style.pointerEvents = 'auto'
-          try {
-            return [
-              headerRect.top + headerRect.height / 2,
-              indicatorRect.top + indicatorRect.height / 2
-            ].map(y => document.elementFromPoint(x, y) === element)
-          } finally {
-            indicator.style.pointerEvents = previousPointerEvents
-          }
+          return [
+            headerRect.top + headerRect.height / 2,
+            optionRect.top + optionRect.height / 2
+          ].map(y => document.elementFromPoint(x, y) === element)
         })).toEqual([true, true])
 
         const initialWidth = await page.locator('.tabBar.vertical').evaluate(element => element.getBoundingClientRect().width)

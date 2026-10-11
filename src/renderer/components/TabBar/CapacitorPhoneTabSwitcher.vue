@@ -113,7 +113,7 @@
               @close="closeSelectedTabs"
               @cancel="clearSelection"
             />
-            <div
+            <FtTabs
               v-if="showSyncedTabsView && activeView !== 'history'"
               class="capacitorPhoneTabViewTabs"
               role="tablist"
@@ -145,7 +145,7 @@
               >
                 {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
               </button>
-            </div>
+            </FtTabs>
             <div
               v-if="activeView === 'open'"
               id="capacitor-phone-open-tabs-panel"
@@ -243,7 +243,7 @@
                 v-overlay-scrollbars
                 class="capacitorPhoneSyncedSessionTabs"
               >
-                <div
+                <FtTabs
                   class="capacitorPhoneSyncedSessionTabsInner"
                   role="tablist"
                   :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
@@ -270,7 +270,7 @@
                     />
                     <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
                   </button>
-                </div>
+                </FtTabs>
               </div>
               <div
                 ref="syncedTabsScrollRef"
@@ -432,6 +432,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../FtTabs/FtTabs.vue'
 import { useChannelTabAvatars } from '../../composables/useChannelTabAvatars'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, useId, useTemplateRef, watch } from 'vue'

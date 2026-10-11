@@ -131,31 +131,14 @@
 }
 
 .tabsContent {
+  --material-tab-font-size: 15px;
+  --material-tab-padding-inline: 15px;
+
   position: relative;
   display: flex;
   flex: none;
   inline-size: max-content;
   min-inline-size: 100%;
-}
-
-.tabsIndicator {
-  position: absolute;
-
-  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
-  top: 0;
-
-  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
-  left: 0;
-  block-size: 3px;
-
-  /* A wider base avoids magnifying subpixel rounding at fractional UI scales. */
-  inline-size: 100px;
-  border-radius: calc(1.5px * var(--ui-roundness) / var(--tab-indicator-scale)) / calc(1.5px * var(--ui-roundness));
-  background-color: var(--primary-color);
-  pointer-events: none;
-  transform-origin: left top;
-  transition: transform 0.2s ease;
-  will-change: transform;
 }
 
 .tab {
@@ -184,26 +167,6 @@
 
 .hideTabIcons .channelTabIcon {
   display: none;
-}
-
-.tab::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: -3px;
-  block-size: 3px;
-  border-radius: calc(1.5px * var(--ui-roundness));
-  background-color: transparent;
-}
-
-.tab:focus-visible,
-.tab:hover:not(.selectedTab) {
-  font-weight: bold;
-}
-
-.tab:focus-visible:not(.selectedTab)::before,
-.tab:hover:not(.selectedTab)::before {
-  background-color: var(--border-color);
 }
 
 .tabLabel {
@@ -269,6 +232,12 @@
 
   .tabs {
     flex: 1 1 0;
+  }
+
+  .tabsContent {
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+    --material-tab-min-height: 48px;
   }
 
   .tab {

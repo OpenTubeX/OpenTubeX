@@ -24,7 +24,7 @@
             @click="getTrendingInfo(true)"
           />
         </div>
-        <FtFlexBox
+        <FtTabs
           class="trendingInfoTabs"
           role="tablist"
           :aria-label="$t('Trending.Trending Tabs')"
@@ -89,7 +89,7 @@
             />
             {{ t("Channel.Podcasts.Podcasts") }}
           </div>
-        </FtFlexBox>
+        </FtTabs>
       </div>
       <div
         id="trendingPanel"
@@ -117,6 +117,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -124,7 +125,6 @@ import { useI18n } from 'vue-i18n'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
-import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 
 import store from '../../store/index'

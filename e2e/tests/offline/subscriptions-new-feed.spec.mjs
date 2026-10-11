@@ -347,12 +347,12 @@ test.describe('new subscriptions feed', () => {
       await expect(postsTab).toHaveAttribute('aria-selected', 'true')
       await expect(page.getByText('New community post', { exact: true })).toBeVisible()
       await expect.poll(() => page.evaluate(() => {
-        const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+        const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
         const tab = document.querySelector('[data-new-feed-tab="posts"]').getBoundingClientRect()
         return Math.max(
           Math.abs(indicator.x - tab.x),
           Math.abs(indicator.width - tab.width),
-          Math.abs(indicator.top - tab.bottom)
+          Math.abs(indicator.bottom - tab.bottom)
         )
       })).toBeLessThan(2)
     })
@@ -368,7 +368,7 @@ test.describe('new subscriptions feed', () => {
     await showTabbedView.click()
 
     const newContentTabs = page.getByRole('tablist', { name: 'New content tabs' })
-    const newContentTabsIndicator = newContentTabs.locator('.newFeedTabsIndicator')
+    const newContentTabsIndicator = newContentTabs.locator('.tabsIndicator')
     await expect(newContentTabs).toBeVisible()
     await expect(newContentTabsIndicator).toBeVisible()
     await expect(page.getByRole('button', { name: 'Show combined view' })).toHaveAttribute('aria-pressed', 'true')
@@ -392,18 +392,18 @@ test.describe('new subscriptions feed', () => {
     const shortsTab = newContentTabs.locator('[data-new-feed-tab="shorts"]')
     await shortsTab.click()
     await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
-    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'transform')
+    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'opacity')
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
 
     await expect.poll(() => page.evaluate(() => {
-      const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+      const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
       const tab = document.querySelector('[data-new-feed-tab="shorts"]').getBoundingClientRect()
 
       return Math.max(
         Math.abs(indicator.x - tab.x),
         Math.abs(indicator.width - tab.width),
-        Math.abs(indicator.top - tab.bottom)
+        Math.abs(indicator.bottom - tab.bottom)
       )
     })).toBeLessThan(2)
 

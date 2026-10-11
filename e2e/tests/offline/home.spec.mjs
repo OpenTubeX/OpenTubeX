@@ -18,21 +18,11 @@ const HOME_THUMBNAIL_DATA_URL = `data:image/svg+xml;base64,${(
   await readFile(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url))
 ).toString('base64')}`
 
-async function expectSideNavIndicatorAligned(page) {
+async function expectSideNavSelection(page) {
   const activeNavOption = page.locator('.sideNav .navOption.router-link-active:visible')
-  const activeIndicator = page.locator('.sideNav .activeIndicator')
-  await expect.poll(async () => {
-    const [optionBounds, indicatorBounds] = await Promise.all([
-      activeNavOption.boundingBox(),
-      activeIndicator.boundingBox()
-    ])
-    if (optionBounds == null || indicatorBounds == null) return Number.POSITIVE_INFINITY
-
-    return Math.max(
-      Math.abs(optionBounds.y - indicatorBounds.y),
-      Math.abs(optionBounds.height - indicatorBounds.height)
-    )
-  }).toBeLessThanOrEqual(1)
+  await expect.poll(() => activeNavOption.evaluate(element =>
+    getComputedStyle(element, '::before').opacity
+  )).toBe('1')
 }
 
 function subscriptionVideo(videoId, title, extra = {}) {
@@ -446,16 +436,16 @@ test.describe('hidden Home page', () => {
 
     const activeNavOption = page.locator('.sideNav .navOption.router-link-active:visible')
     await expect(activeNavOption).toHaveAttribute('href', '#/subscriptions')
-    await expectSideNavIndicatorAligned(page)
+    await expectSideNavSelection(page)
 
     await navigationSubpage.getByRole('button', { name: 'Add item' }).click()
     await navigationSubpage.getByRole('menuitem', { name: 'Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toBeVisible()
-    await expectSideNavIndicatorAligned(page)
+    await expectSideNavSelection(page)
 
     await navigationSubpage.getByRole('button', { name: 'Remove Home' }).click()
     await expect(page.locator('.sideNav a[href="#/home"]')).toHaveCount(0)
-    await expectSideNavIndicatorAligned(page)
+    await expectSideNavSelection(page)
 
     await page.locator('.settingsBackButton').click()
     await goToSettingsSection(page, 'general')

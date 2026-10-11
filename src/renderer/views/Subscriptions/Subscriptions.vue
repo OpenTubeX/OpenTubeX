@@ -38,26 +38,19 @@
               ref="tabsRowRef"
               class="tabsRow"
             >
-              <FtFlexBox
+              <FtTabs
                 ref="tabsContainerRef"
                 class="tabs"
                 role="tablist"
                 :aria-label="$t('Subscriptions.Subscriptions Tabs')"
               >
-                <div
-                  v-if="tabsIndicatorStyle"
-                  class="tabsIndicator"
-                  data-animation-speed-managed
-                  :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
-                  aria-hidden="true"
-                />
                 <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
                 <div
                   v-if="!hideSubscriptionsVideos"
                   ref="videosTab"
                   class="tab"
                   role="tab"
-                  :aria-selected="currentTab === 'videos'"
+                  :aria-selected="selectedTab === 'videos'"
                   aria-controls="subscriptionsPanel"
                   data-subscription-feed-tab="videos"
                   :tabindex="currentTab === 'videos' ? 0 : -1"
@@ -85,7 +78,7 @@
                   ref="shortsTab"
                   class="tab"
                   role="tab"
-                  :aria-selected="currentTab === 'shorts'"
+                  :aria-selected="selectedTab === 'shorts'"
                   aria-controls="subscriptionsPanel"
                   data-subscription-feed-tab="shorts"
                   :tabindex="currentTab === 'shorts' ? 0 : -1"
@@ -113,7 +106,7 @@
                   ref="liveTab"
                   class="tab"
                   role="tab"
-                  :aria-selected="currentTab === 'live'"
+                  :aria-selected="selectedTab === 'live'"
                   aria-controls="subscriptionsPanel"
                   data-subscription-feed-tab="live"
                   :tabindex="currentTab === 'live' ? 0 : -1"
@@ -141,7 +134,7 @@
                   ref="communityTab"
                   class="tab"
                   role="tab"
-                  :aria-selected="currentTab === 'community'"
+                  :aria-selected="selectedTab === 'community'"
                   aria-controls="subscriptionsPanel"
                   data-subscription-feed-tab="posts"
                   :tabindex="currentTab === 'community' ? 0 : -1"
@@ -169,7 +162,7 @@
                   ref="newTab"
                   class="tab"
                   role="tab"
-                  :aria-selected="currentTab === 'new'"
+                  :aria-selected="selectedTab === 'new'"
                   aria-controls="subscriptionsPanel"
                   data-subscription-feed-tab="all"
                   :tabindex="currentTab === 'new' ? 0 : -1"
@@ -187,7 +180,7 @@
                     :data-label="$t('Global.New')"
                   ><span>{{ $t("Global.New") }}</span></span>
                 </div>
-              </FtFlexBox>
+              </FtTabs>
             </div>
             <div
               v-if="currentTabPanel !== null"
@@ -252,20 +245,12 @@
             </div>
           </div>
         </div>
-        <FtFlexBox
+        <FtTabs
           v-if="currentTab === 'new' && newFeedView === 'tabbed'"
-          ref="newFeedTabsContainerRef"
           class="newFeedTabs"
           role="tablist"
           :aria-label="$t('Subscriptions.New Content Tabs')"
         >
-          <div
-            v-if="newFeedTabsIndicatorStyle"
-            class="tabsIndicator newFeedTabsIndicator"
-            data-animation-speed-managed
-            :style="[newFeedTabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
-            aria-hidden="true"
-          />
           <button
             v-for="tab in visibleNewFeedTabs"
             :key="tab.id"
@@ -296,7 +281,7 @@
               class="newFeedTabDot"
             />
           </button>
-        </FtFlexBox>
+        </FtTabs>
       </div>
       <KeepAlive>
         <SubscriptionsVideos
@@ -356,6 +341,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -364,7 +350,6 @@ import { useRoute, useRouter } from 'vue-router'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtNewContentDot from '../../components/FtNewContentDot/FtNewContentDot.vue'
-import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
@@ -375,7 +360,6 @@ import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
-import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
@@ -1343,120 +1327,22 @@ watch([currentTabPanel, currentTabHasNewContent, headerFitsOneRow], () => {
   })
 })
 
-// ===== Sliding feed tab indicator =====
 const tabsContainerRef = useTemplateRef('tabsContainerRef')
-const newFeedTabsContainerRef = useTemplateRef('newFeedTabsContainerRef')
-/** @type {import('vue').Ref<Record<string, string> | null>} */
-const tabsIndicatorStyle = ref(null)
-/** @type {import('vue').Ref<Record<string, string> | null>} */
-const newFeedTabsIndicatorStyle = ref(null)
-const tabsIndicatorTransitionDuration = computed(() => {
-  return `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
-})
-let tabsResizeObserver = null
-// Place the indicator without animating when it was last measured while
-// hidden (e.g. in a background browser tab, where all offsets read 0),
-// otherwise it visibly flies in from the stale position.
-const tabsIndicatorState = { wasHidden: true }
-const newFeedTabsIndicatorState = { wasHidden: true }
-
-/**
- * @param {import('vue').ShallowRef<import('vue').ComponentPublicInstance | null>} containerRef
- * @param {string} selectedTabSelector
- * @param {import('vue').Ref<Record<string, string> | null>} indicatorStyle
- * @param {{ wasHidden: boolean }} state
- */
-function updateTabIndicator(containerRef, selectedTabSelector, indicatorStyle, state) {
-  const container = containerRef.value?.$el
-  const selected = container?.querySelector(selectedTabSelector)
-
-  if (!(selected instanceof HTMLElement)) {
-    indicatorStyle.value = null
-    state.wasHidden = true
-    return
-  }
-
-  if (selected.getClientRects().length === 0) {
-    indicatorStyle.value = null
-    state.wasHidden = true
-    return
-  }
-
-  // Physical values match the physical offset measurements and remain RTL-safe.
-  // The indicator sits just below the tab and only its transform is animated,
-  // keeping movement on the compositor while a large feed renders.
-  const style = {
-    '--tab-indicator-width': String(selected.offsetWidth),
-    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth / 100})`
-  }
-
-  if (state.wasHidden) {
-    style.transition = 'none'
-  }
-
-  indicatorStyle.value = style
-  state.wasHidden = false
-}
-
-const updateTabsIndicator = () => updateTabIndicator(
-  tabsContainerRef,
-  '.tab.selectedTab',
-  tabsIndicatorStyle,
-  tabsIndicatorState
-)
-const updateNewFeedTabsIndicator = () => updateTabIndicator(
-  newFeedTabsContainerRef,
-  '.newFeedTab.selectedTab',
-  newFeedTabsIndicatorStyle,
-  newFeedTabsIndicatorState
-)
-const updateTabIndicators = () => {
-  updateTabsIndicator()
-  updateNewFeedTabsIndicator()
-}
-
-function observeTabContainers() {
-  if (tabsResizeObserver === null) {
-    return
-  }
-
-  tabsResizeObserver.disconnect()
-
-  for (const container of [tabsContainerRef.value?.$el, newFeedTabsContainerRef.value?.$el]) {
-    if (container instanceof HTMLElement) {
-      tabsResizeObserver.observe(container)
-    }
-  }
-}
-
-watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
-watch([currentNewFeedTab, visibleNewFeedTabs], () => nextTick(updateNewFeedTabsIndicator))
-watch([currentTab, newFeedView], () => nextTick(() => {
-  observeTabContainers()
-  updateNewFeedTabsIndicator()
-}))
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
-    // Per-tab loaders resize the container while a refresh is running
-    tabsResizeObserver = new ResizeObserver(updateTabIndicators)
-    observeTabContainers()
-
     headerResizeObserver = new ResizeObserver(() => {
       updateHeaderFitsOneRow()
-      updateTabIndicators()
     })
     observeHeaderRow()
   }
 
   nextTick(() => {
     updateHeaderFitsOneRow()
-    updateTabIndicators()
   })
 })
 
 onBeforeUnmount(() => {
-  tabsResizeObserver?.disconnect()
   headerResizeObserver?.disconnect()
 })
 </script>

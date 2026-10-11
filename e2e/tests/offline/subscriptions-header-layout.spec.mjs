@@ -601,7 +601,7 @@ test.describe('subscriptions header layout', () => {
           container,
           tabs,
           titleGap: label.top - title.bottom,
-          indicatorGap: indicator.top - label.bottom
+          indicatorGap: indicator.bottom - 3 - label.bottom
         }
       })
 
@@ -612,7 +612,7 @@ test.describe('subscriptions header layout', () => {
       expect(layout.titleGap).toBeGreaterThanOrEqual(-1)
       expect(layout.titleGap).toBeLessThanOrEqual(24)
       expect(layout.indicatorGap).toBeGreaterThanOrEqual(-1)
-      expect(layout.indicatorGap).toBeLessThanOrEqual(10)
+      expect(layout.indicatorGap).toBeLessThanOrEqual(12.5)
       await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
       await attachScreenshot(`feed tabs at ${width}px`)
     }

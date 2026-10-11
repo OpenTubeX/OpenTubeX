@@ -216,11 +216,9 @@ test('keeps the focus indicator inside controls at layout edges', async ({ attac
   await pressGamepadButton(page, 'left')
   await expect(sideNavOption).toBeFocused()
   await expectContainedContrastFocusIndicator(sideNavOption, 'rgb(255, 255, 255)')
-  const sideNavLayers = await sideNavOption.evaluate((element) => ({
-    activeIndicator: Number.parseInt(getComputedStyle(element.parentElement.querySelector('.activeIndicator')).zIndex),
-    focusedOption: Number.parseInt(getComputedStyle(element).zIndex),
-  }))
-  expect(sideNavLayers.focusedOption).toBeGreaterThan(sideNavLayers.activeIndicator)
+  await expect.poll(() => sideNavOption.evaluate(element =>
+    getComputedStyle(element, '::before').opacity
+  )).toBe('1')
   await attachScreenshot('contained side navigation focus indicator')
 })
 

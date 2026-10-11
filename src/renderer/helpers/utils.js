@@ -215,7 +215,7 @@ export function getShortThumbnailUrl(video, backendPreference, currentInvidiousI
 export const ToastEventBus = new EventTarget()
 
 /** Icon shown on toasts that report a failure */
-const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
+export const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
 
 /**
  * @typedef {object} ToastOptions

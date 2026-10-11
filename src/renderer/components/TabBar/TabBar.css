@@ -4,16 +4,13 @@
   box-sizing: border-box;
   display: flex;
 
-  /* Top tabs sit on the bottom edge so their radii clear the window chrome and
-     the scrollport clip (overflow-y cannot stay visible while overflow-x scrolls). */
-  align-items: flex-end;
+  /* Keep the rounded tabs clear of both edges of the strip. */
+  align-items: center;
   background-color: var(--side-nav-color);
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
+  box-shadow: none;
   block-size: var(--top-tab-bar-height, 32px);
   min-block-size: var(--top-tab-bar-height, 32px);
-
-  /* Keep top radii off the title-bar edge. */
-  padding-block-start: 1px;
+  padding-block: 1px;
   padding-inline: var(--tab-bar-inline-padding);
   gap: 2px;
   position: sticky;
@@ -68,8 +65,7 @@
   padding-inline: 10px;
   padding-block: 0;
   border: 1px solid transparent;
-  border-block-end: 0;
-  border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
+  border-radius: calc(16px * var(--ui-roundness));
   background-color: color-mix(in srgb, var(--tab-group-color) 18%, var(--bg-color));
   color: var(--tab-group-color);
   cursor: pointer;
@@ -99,9 +95,8 @@
 }
 
 .collapsedTabGroup.bottom {
-  border-block-start: 0;
   border-block-end: 1px solid transparent;
-  border-radius: 0 0 calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness));
+  border-radius: calc(16px * var(--ui-roundness));
 }
 
 .collapsedTabGroup.vertical {
@@ -110,7 +105,7 @@
   min-inline-size: 0;
   max-inline-size: none;
   border-block-end: 1px solid transparent;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: calc(16px * var(--ui-roundness));
 }
 
 .collapsedTabGroup.bottom.active,
@@ -179,7 +174,7 @@
   border: 0;
   cursor: pointer;
   padding: 6px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: calc(16px * var(--ui-roundness));
   color: var(--secondary-text-color);
   transition: background-color 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
@@ -203,27 +198,18 @@
 /* ===== Bottom layout: fixed row on the bottom edge ===== */
 
 .tabBar.position-bottom {
-  align-items: flex-start;
-  box-shadow: 0 -2px 1px 0 var(--primary-shadow-color);
+  box-shadow: none;
   block-size: 34px;
   min-block-size: 34px;
   position: fixed;
   inset-block: auto 0;
 
-  /* Some decorated Linux windows paint the last two client pixels underneath
-     the compositor frame. Keep the mirrored tab and its 2px edge gap above
-     that area instead of letting the rounded border disappear behind it. */
-  padding-block: 0 4px;
+  /* Leave the same gap on both sides, including above the compositor frame. */
+  padding-block: 2px;
 }
 
 .tabBar.position-bottom .tabsScrollbar {
   inset-block: 0 auto;
-}
-
-/* overflow-y is hidden on this scrollport. Leave a pixel inside its clip edge
-   so the selected tab's rounded bottom border is painted in full. */
-.tabBar.position-bottom .tabsContainer {
-  padding-block-end: 1px;
 }
 
 /* ===== Vertical layout: fixed column on either side ===== */
@@ -252,13 +238,13 @@
 .tabBar.vertical.position-left {
   left: 0;
   right: auto;
-  box-shadow: 2px 0 1px 0 var(--primary-shadow-color);
+  box-shadow: none;
 }
 
 .tabBar.vertical.position-right {
   left: auto;
   right: 0;
-  box-shadow: -2px 0 1px 0 var(--primary-shadow-color);
+  box-shadow: none;
 }
 
 /* Keep the scrollbar against the window edge, leaving tab content and the

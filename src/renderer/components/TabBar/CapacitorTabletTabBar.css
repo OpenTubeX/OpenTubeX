@@ -50,7 +50,7 @@
   min-inline-size: var(--fixed-tab-width, 100px);
   max-inline-size: var(--fixed-tab-width, 200px);
   background-color: transparent;
-  border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
+  border-radius: calc(24px * var(--ui-roundness));
   overflow: clip;
   transition: background-color 150ms ease, transform 160ms ease;
 }
@@ -81,9 +81,10 @@
   position: absolute;
   z-index: 2;
   inset-block-end: 0;
-  inset-inline: 0;
+  inset-inline: 16px;
   block-size: 3px;
-  background-color: var(--primary-color);
+  border-radius: calc(3px * var(--ui-roundness));
+  background-color: var(--primary-text-color);
   pointer-events: none;
 }
 
@@ -115,7 +116,7 @@
   flex: 0 0 48px;
   inline-size: 48px;
   font-size: 16px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: calc(24px * var(--ui-roundness));
 }
 
 .capacitorTabletTabClose :deep(.ft-icon),

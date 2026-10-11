@@ -45,57 +45,23 @@
   margin: 0;
 }
 
+.pageTitle .trendingIcon {
+  color: var(--primary-color);
+}
+
 .headerRefreshWidget {
   min-inline-size: min(100%, 360px);
 }
 
 .trendingInfoTabs {
+  --material-tab-font-size: 1.1em;
+
   inline-size: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 4px 10px;
-  margin-block: 10px -3px;
+  margin-block: 10px 0;
   color: var(--tertiary-text-color);
-}
-
-.selectedTab {
-  border-block-end: 3px solid transparent;
-  color: var(--primary-text-color);
-  font-weight: bold;
-  box-sizing: border-box;
-  margin-block-end: -3px;
-}
-
-.tab {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  text-align: center;
-  padding-block: 12px;
-  padding-inline: 15px;
-  font-size: 1.1em;
-  cursor: pointer;
-  align-self: stretch;
-}
-
-.selectedTab::before {
-  content: '';
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: -3px;
-  block-size: 3px;
-  border-radius: calc(1.5px * var(--ui-roundness));
-  background-color: var(--primary-color);
-}
-
-.tab:hover {
-  font-weight: bold;
-}
-
-.trendingIcon {
-  color: var(--primary-color);
 }
 
 .statusMessage {

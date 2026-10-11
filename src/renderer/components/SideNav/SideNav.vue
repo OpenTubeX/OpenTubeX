@@ -12,16 +12,10 @@
       class="inner"
       :class="applyHiddenLabels"
     >
-      <div
-        v-show="indicatorStyle"
-        class="activeIndicator"
-        :style="indicatorStyle"
-        aria-hidden="true"
-      />
       <router-link
         v-for="(item, index) in visibleNavigationItems"
         :key="item.id"
-        class="navOption"
+        class="navOption mobileNavItem"
         :class="{
           topNavOption: index === 0,
           mobileHidden: !mobilePrimaryItemIds.has(item.id),
@@ -38,9 +32,7 @@
             :class="applyNavIconExpand"
           />
         </div>
-        <p class="navLabel">
-          {{ item.label }}
-        </p>
+        <NavLabel :label="item.label" />
       </router-link>
       <SideNavMoreOptions
         v-if="mobileOverflowItems.length > 0"
@@ -105,8 +97,9 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
+import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -120,6 +113,7 @@ import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 
 const { locale, t } = useI18n()
@@ -271,7 +265,50 @@ const historyTitle = computed(() => {
   )
 })
 
-// ===== Sliding active-route indicator =====
+// Fit visible mobile labels together so every destination has the same size.
+let labelObserver
+let observedLabelTexts = []
+let labelFitFrame
+const mobileLayout = window.matchMedia('(max-width: 680px)')
+
+function scheduleLabelFit() {
+  cancelAnimationFrame(labelFitFrame)
+  labelFitFrame = requestAnimationFrame(fitNavigationLabels)
+}
+
+function fitNavigationLabels() {
+  const nav = innerRef.value?.closest('.sideNav')
+  if (!nav || !labelObserver) return
+  const texts = [...nav.querySelectorAll('.mobileNavItem .navLabel > span')]
+  if (texts.length !== observedLabelTexts.length || texts.some((text, index) => text !== observedLabelTexts[index])) {
+    labelObserver.disconnect()
+    labelObserver.observe(nav)
+    texts.forEach(text => labelObserver.observe(text))
+    observedLabelTexts = texts
+  }
+  if (!mobileLayout.matches) {
+    nav.style.removeProperty('--fitted-nav-label-size')
+    return
+  }
+  const sizes = texts.flatMap(text => {
+    const label = text.parentElement
+    const availableWidth = label.getBoundingClientRect().width
+    const textWidth = text.getBoundingClientRect().width
+    if (availableWidth === 0 || textWidth === 0) return []
+    const maximumSize = parseFloat(getComputedStyle(label).fontSize)
+    const currentSize = parseFloat(getComputedStyle(text).fontSize)
+    return [Math.min(maximumSize, currentSize * (availableWidth - 0.25) / textWidth)]
+  })
+  if (sizes.length === 0) return
+  const size = `${Math.floor(Math.min(...sizes) * 100) / 100}px`
+  if (nav.style.getPropertyValue('--fitted-nav-label-size') !== size) {
+    nav.style.setProperty('--fitted-nav-label-size', size)
+  }
+}
+
+onUpdated(scheduleLabelFit)
+
+// ===== Bottom navigation scroll visibility =====
 const route = useRoute()
 const innerRef = useTemplateRef('innerRef')
 const scrollHidden = ref(false)
@@ -308,68 +345,8 @@ function updateScrollVisibility() {
   const page = document.scrollingElement
   scrollHidden.value = navigationScroll.update(window.scrollY, page.scrollHeight - page.clientHeight)
 }
-/** @type {import('vue').Ref<Record<string, string> | null>} */
-const indicatorStyle = ref(null)
-
-let remeasureTimeoutId = null
-let navMutationObserver = null
-
-function updateIndicator() {
-  const inner = innerRef.value
-  const mobile = window.matchMedia('(max-width: 680px)').matches
-  // Hidden overflow links use the visible More button as their mobile target.
-  const active = inner == null
-    ? null
-    : Array.from(inner.querySelectorAll(mobile
-        ? ':scope > .navOption.router-link-active, :scope > .sideNavMoreOptions > .moreOptionNav.router-link-active'
-        : '.navOption.router-link-active, .navChannel.router-link-active'))
-        .find((el) => el instanceof HTMLElement && el.offsetParent !== null)
-
-  if (!(active instanceof HTMLElement)) {
-    indicatorStyle.value = null
-    return
-  }
-
-  if (mobile) {
-    const nav = active.closest('.sideNav')
-    if (!(nav instanceof HTMLElement)) {
-      indicatorStyle.value = null
-      return
-    }
-
-    const navBounds = nav.getBoundingClientRect()
-    const activeBounds = active.getBoundingClientRect()
-    const inlineOffset = getComputedStyle(nav).direction === 'rtl'
-      ? navBounds.right - activeBounds.right
-      : activeBounds.left - navBounds.left
-
-    indicatorStyle.value = {
-      transform: `translateX(${getComputedStyle(nav).direction === 'rtl' ? -inlineOffset : inlineOffset}px)`,
-      inlineSize: `${activeBounds.width}px`,
-      blockSize: '3px'
-    }
-    return
-  }
-
-  indicatorStyle.value = {
-    transform: `translateY(${active.offsetTop}px)`,
-    inlineSize: '3px',
-    blockSize: `${active.offsetHeight}px`
-  }
-}
-
-/**
- * Re-measure once the side nav's 150ms width transition has finished,
- * as expanding/collapsing reflows the nav entries.
- */
-function updateIndicatorAfterResize() {
-  clearTimeout(remeasureTimeoutId)
-  remeasureTimeoutId = setTimeout(updateIndicator, 200)
-}
-
 watch(() => route.fullPath, () => {
   if (mobileNavigationMinimizePreview.value === null) resetScrollVisibility()
-  nextTick(updateIndicator)
 })
 watch(mobileNavigationMinimizePreview, tabId => {
   if (scrollResumeFrame !== null) cancelAnimationFrame(scrollResumeFrame)
@@ -391,31 +368,35 @@ watch([
   activeSubscriptionLimit.value = activeSubscriptionsPerPage
 })
 
-watch([isOpen, hideText, displayedActiveSubscriptions], () => {
-  nextTick(updateIndicator)
-  updateIndicatorAfterResize()
-})
+// Reconcile the real content end when rail labels or destinations disappear.
+watch([isOpen, () => props.forceExpanded, hideText, visibleNavigationItems, hideActiveSubscriptions, displayedActiveSubscriptions], () => {
+  const inner = innerRef.value
+  if (inner == null || window.matchMedia('(max-width: 680px)').matches) return
+  const contentEnd = inner.querySelector(':scope > div.mobileHidden') ?? inner.querySelector('hr')
+  clampOverlayScrollTop(inner, contentEnd)
+}, { flush: 'post' })
 
 onMounted(() => {
+  labelObserver = new ResizeObserver(scheduleLabelFit)
+  mobileLayout.addEventListener('change', scheduleLabelFit)
+  scheduleLabelFit()
   updateScrollLayout()
   window.addEventListener('scroll', updateScrollVisibility, { passive: true })
   window.addEventListener('resize', updateScrollLayout)
-  updateIndicator()
-  navMutationObserver = new MutationObserver(() => nextTick(updateIndicator))
-  navMutationObserver.observe(innerRef.value, { childList: true, subtree: true })
-  window.addEventListener('resize', updateIndicatorAfterResize)
 })
 
 onBeforeUnmount(() => {
+  cancelAnimationFrame(labelFitFrame)
+  labelObserver?.disconnect()
+  mobileLayout.removeEventListener('change', scheduleLabelFit)
   if (scrollResumeFrame !== null) cancelAnimationFrame(scrollResumeFrame)
   window.removeEventListener('scroll', updateScrollVisibility)
   window.removeEventListener('resize', updateScrollLayout)
-  clearTimeout(remeasureTimeoutId)
-  navMutationObserver?.disconnect()
-  window.removeEventListener('resize', updateIndicatorAfterResize)
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 </script>
 
 <style scoped src="./SideNav.css" />
+<style scoped src="./DesktopNavItem.css" />
+<style src="./MobileNavItem.css" />

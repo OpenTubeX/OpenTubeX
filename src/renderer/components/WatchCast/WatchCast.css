@@ -1,37 +1,16 @@
 .castTabs {
   display: flex;
-  border-block-end: 1px solid var(--border-color);
 }
 
 .castTab {
-  background: transparent;
-  border: 0;
-  border-block-end: 2px solid transparent;
-  color: var(--secondary-text-color);
-  cursor: pointer;
   flex: 1;
-  font: inherit;
-  min-block-size: 44px;
-  padding-block: 10px;
-  padding-inline: 16px;
   white-space: nowrap;
-}
-
-.castTab[aria-selected='true'] {
-  border-block-end-color: var(--primary-color);
-  color: var(--primary-text-color);
-  font-weight: 600;
 }
 
 .castTab:disabled,
 .castOption[aria-disabled='true'] {
   cursor: default;
   opacity: 0.5;
-}
-
-.castTab:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: -4px;
 }
 
 .castOptions {
@@ -71,6 +50,10 @@
 }
 
 @media (pointer: coarse), (width <= 680px) {
+  .castTabs {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+
   .castTab,
   .castOption {
     box-sizing: border-box;

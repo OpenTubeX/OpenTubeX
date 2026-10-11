@@ -581,6 +581,8 @@
 }
 
 .syncedSessionTabs {
+  --material-tab-font-size: 13px;
+
   border-block-end: 1px solid var(--divider-color);
   display: flex;
   flex-wrap: wrap;
@@ -588,43 +590,8 @@
   padding-inline: 4px;
 }
 
-.syncedSessionTab {
-  align-items: center;
-  background: transparent !important;
-  border-color: transparent !important;
-  border-radius: calc(7px * var(--ui-roundness)) calc(7px * var(--ui-roundness)) 0 0 !important;
-  display: flex;
-  gap: 8px;
-  min-block-size: 44px !important;
-  padding-block: 6px !important;
-  position: relative;
-}
-
-.syncedSessionTab::after {
-  background: transparent;
-  block-size: 2px;
-  border-radius: calc(2px * var(--ui-roundness));
-  content: '';
-  inset-block-end: -1px;
-  inset-inline: 8px;
-  position: absolute;
-}
-
-.syncedSessionTab:hover,
-.syncedSessionTab:focus-visible {
-  background: var(--side-nav-hover-color) !important;
-}
-
-.syncedSessionTab.selected {
-  color: var(--primary-text-color);
-}
-
-.syncedSessionTab.selected::after {
-  background: var(--accent-color);
-}
-
 .syncedSessionTab strong {
-  font-size: 13px;
+  font: inherit;
   overflow-wrap: anywhere;
 }
 

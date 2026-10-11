@@ -92,7 +92,7 @@ for (const uiScale of [100, 125]) {
       const group = page.locator('.fixedNavigationOptions')
       await expect(group.getByRole('checkbox')).toHaveCount(3)
       for (const narrow of [false, true]) {
-        if (narrow) await setWindowSize(app, page, { width: 500, height: 760 })
+        if (narrow) await setWindowSize(app, page, { width: 500, height: 600 })
         await expect.poll(() => group.evaluate(element => {
           const outline = element.getBoundingClientRect()
           return [...element.querySelectorAll('.switch-label')].every(label => {
@@ -197,7 +197,7 @@ for (const uiScale of [100, 125]) {
       await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
     })
 
-    test('updates safe-area, progress and overflow insets when compact mode changes', async ({ app, page }) => {
+    test('updates safe-area, progress and overflow insets when label modes change', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 500, height: 850 })
       await goTo(page, 'history')
       await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
@@ -214,21 +214,25 @@ for (const uiScale of [100, 125]) {
       })
       await expect(page.locator('.progressBar')).toBeVisible()
       await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeGreaterThan(3000)
-      for (const compact of [false, true, false, true]) {
+      for (const [compact, hideLabels] of [[false, false], [false, true], [true, true], [true, false], [false, false], [true, false]]) {
+        const height = compact ? 48 : hideLabels ? 60 : 60
+        const previousNavHeight = await page.locator('.sideNav').evaluate(element => element.getBoundingClientRect().height)
         await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
         const previousHeight = await page.evaluate(() => document.scrollingElement.scrollHeight)
-        await page.evaluate(async compact => {
-          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', compact)
+        await page.evaluate(async ({ compact, hideLabels }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setCompactNavigationLabels', compact)
+          store.commit('setHideLabelsSideBar', hideLabels)
           // Restore the phone fixture after Vue updates the root class, before layout.
           await Promise.resolve()
           document.querySelector('.app').classList.add('capacitorPhoneLayout')
-        }, compact)
-        await expect(page.locator('.sideNav')).toHaveCSS('height', `${(compact ? 48 : 60) + 24}px`)
-        if (compact) {
+        }, { compact, hideLabels })
+        await expect(page.locator('.sideNav')).toHaveCSS('height', `${height + 24}px`)
+        if (height + 24 < previousNavHeight - 1) {
           await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeLessThan(previousHeight)
           await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - (document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight)))).toBeLessThanOrEqual(1)
         }
-        await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${(compact ? 48 : 60) + 24 + 6}px`)
+        await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${height + 24 + 6}px`)
         await expect.poll(() => page.evaluate(() => {
           const nav = document.querySelector('.sideNav').getBoundingClientRect()
           const progress = document.querySelector('.progressBar').getBoundingClientRect()
@@ -337,47 +341,21 @@ test.describe('side nav navigation', () => {
     }
   })
 
-  test('moves the active indicator along the bottom mobile navigation', async ({ page }) => {
+  test('keeps the selection pill when navigating and switching to desktop', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 700 })
-    await goTo(page, 'subscriptions')
-
     const sideNav = page.locator('.sideNav')
-    const indicator = sideNav.locator('.activeIndicator')
-
-    async function indicatorAlignment() {
-      const activeOption = sideNav.locator('.inner > .navOption.router-link-active:visible')
-      const [navBounds, optionBounds, indicatorBounds] = await Promise.all([
-        sideNav.boundingBox(),
-        activeOption.boundingBox(),
-        indicator.boundingBox()
-      ])
-      if (!navBounds || !optionBounds || !indicatorBounds) return null
-
-      return {
-        bottomOffset: Math.abs(indicatorBounds.y + indicatorBounds.height - navBounds.y - navBounds.height),
-        height: indicatorBounds.height,
-        inlineOffset: Math.abs(indicatorBounds.x - optionBounds.x),
-        widthOffset: Math.abs(indicatorBounds.width - optionBounds.width),
-      }
+    for (const route of ['subscriptions', 'history']) {
+      await goTo(page, route)
+      await expect.poll(() => sideNav.locator('.mobileNavItem:visible').evaluateAll(items =>
+        items.filter(item => getComputedStyle(item, '::before').opacity === '1')
+          .map(item => item.getAttribute('href'))
+      )).toEqual([`#/${route}`])
+      await expect(sideNav.locator('.activeIndicator')).toBeHidden()
     }
-
-    await expect(indicator).toBeVisible()
-    await expect.poll(indicatorAlignment).toEqual({
-      bottomOffset: 0,
-      height: 3,
-      inlineOffset: 0,
-      widthOffset: 0,
-    })
-
-    const initialX = (await indicator.boundingBox()).x
-    await goTo(page, 'history')
-    await expect.poll(indicatorAlignment).toEqual({
-      bottomOffset: 0,
-      height: 3,
-      inlineOffset: 0,
-      widthOffset: 0,
-    })
-    await expect.poll(async () => (await indicator.boundingBox())?.x).not.toBe(initialX)
+    await page.setViewportSize({ width: 1000, height: 700 })
+    await expect.poll(() => sideNav.locator('.navOption.router-link-active').evaluate(element =>
+      getComputedStyle(element, '::before').opacity
+    )).toBe('1')
   })
 
   test('customizes navigation order on the side bar and mobile bar', async ({ page }) => {
@@ -435,17 +413,11 @@ test.describe('side nav navigation', () => {
 
     await page.locator('.sideNav .moreOptionContainer a[href="#/subscribedchannels"]').click()
     await expect(page).toHaveURL(/#\/subscribedchannels$/)
-    await expect.poll(async () => {
-      const [indicator, moreButton] = await Promise.all([
-        page.locator('.sideNav .activeIndicator').boundingBox(),
-        page.locator('.sideNav .moreOptionNav').boundingBox(),
-      ])
-      if (indicator == null || moreButton == null) return null
-      return {
-        inlineOffset: Math.abs(indicator.x - moreButton.x),
-        widthOffset: Math.abs(indicator.width - moreButton.width),
-      }
-    }).toEqual({ inlineOffset: 0, widthOffset: 0 })
+    const moreButton = page.locator('.sideNav .moreOptionNav')
+    await expect(moreButton).toHaveClass(/router-link-active/)
+    await expect.poll(() => moreButton.evaluate(element =>
+      getComputedStyle(element, '::before').opacity
+    )).toBe('1')
   })
 
   test('clamps the add-item picker after its options shrink', async ({ page }) => {
@@ -576,14 +548,11 @@ for (const uiScale of [90, 100, 125]) {
     test('uses square tiles with centered icons and avatars in the collapsed side bar', async ({ page }) => {
       await goTo(page, 'channel/UCaaaaaaaaaaaaaaaaaaaaaa')
       const sideNav = page.locator('.sideNav.hiddenLabels')
-      const activeIndicator = sideNav.locator('.activeIndicator')
-      const [avatarBounds, channelTileBounds, channelIndicatorBounds] = await Promise.all([
+      const [avatarBounds, channelTileBounds] = await Promise.all([
         sideNav.locator('.navChannel.router-link-active .channelThumbnail').boundingBox(),
-        sideNav.locator('.navChannel.router-link-active').boundingBox(),
-        activeIndicator.boundingBox()
+        sideNav.locator('.navChannel.router-link-active').boundingBox()
       ])
-      const avatarClearance = avatarBounds.x -
-        (channelIndicatorBounds.x + channelIndicatorBounds.width)
+      const avatarClearance = avatarBounds.x - channelTileBounds.x
       const avatarInlineCenter = avatarBounds.x + avatarBounds.width / 2
       const avatarCenter = avatarBounds.y + avatarBounds.height / 2
       const channelInlineCenter = channelTileBounds.x + channelTileBounds.width / 2
@@ -631,11 +600,9 @@ for (const uiScale of [90, 100, 125]) {
       }
 
       const activeTile = sideNav.locator('.inner > .navOption.router-link-active:visible')
-      const [activeTileBounds, indicatorBounds] = await Promise.all([
-        activeTile.boundingBox(),
-        activeIndicator.boundingBox()
-      ])
-      expect(Math.abs(activeTileBounds.x - indicatorBounds.x)).toBeLessThanOrEqual(1)
+      await expect.poll(() => activeTile.evaluate(element =>
+        getComputedStyle(element, '::before').opacity
+      )).toBe('1')
     })
   })
 }
@@ -761,3 +728,208 @@ test.describe('scaled mobile navigation', () => {
     await expect(page).toHaveURL(/#\/subscribedchannels$/)
   })
 })
+
+for (const uiScale of [100, 125]) {
+  test.describe(`expressive bottom navigation at ${uiScale}%`, () => {
+    test.use({ seed: { settings: { uiScale, alwaysShowNavigationBar: true } } })
+
+    test('shows complete bottom labels without changing icon-only heights', async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      const nav = page.locator('.sideNav')
+      for (const width of [320, 390, 667]) {
+        await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: 1000 - width })
+        for (const locale of ['en-US', 'de-DE']) {
+          await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+          await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel').evaluateAll(labels => labels.every(label =>
+            label.scrollWidth <= label.clientWidth && label.scrollHeight <= label.clientHeight
+          )), { message: 'every navigation label fits without clipping' }).toBe(true)
+          await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span').evaluateAll(labels =>
+            new Set(labels.map(label => getComputedStyle(label).fontSize)).size
+          ), { message: 'all mobile destinations use one shared font size' }).toBe(1)
+          await expect(nav).toHaveCSS('height', '60px')
+          for (const label of await nav.locator('.mobileNavItem:visible .navLabel').all()) {
+            await expect(label).toHaveCSS('white-space', 'nowrap')
+            await expect(label).toHaveCSS('height', '16px')
+            await expect(label).not.toHaveCSS('text-overflow', 'ellipsis')
+          }
+        }
+      }
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideLabelsSideBar', true))
+      await expect(nav).toHaveCSS('height', '60px')
+      await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', true))
+      await expect(nav).toHaveCSS('height', '48px')
+    })
+
+    test('keeps selection, touch targets and labels aligned across widths and directions', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      for (const width of [320, 390, 667]) {
+        await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: 1000 - width })
+        for (const direction of ['ltr', 'rtl']) {
+          await page.locator('body').evaluate((body, dir) => { body.dir = dir }, direction)
+          const home = page.locator('.sideNav a[href="#/home"]')
+          await home.click()
+          await expect(home).toHaveAttribute('aria-current', 'page')
+          const items = page.locator('.sideNav .mobileNavItem:visible')
+          await expect(items).toHaveCount(5)
+          const metrics = await items.evaluateAll(elements => elements.map(element => {
+            const box = element.getBoundingClientRect()
+            const icon = element.querySelector('.navIcon').getBoundingClientRect()
+            const label = element.querySelector('.navLabel').getBoundingClientRect()
+            const pill = getComputedStyle(element, '::before')
+            return {
+              width: box.width,
+              height: box.height,
+              iconCenter: Math.abs((icon.left + icon.right - box.left - box.right) / 2),
+              labelBottom: label.bottom - box.bottom,
+              pillOpacity: pill.opacity,
+              selected: element.classList.contains('router-link-active'),
+              transition: pill.transitionDuration,
+            }
+          }))
+          const widths = metrics.map(item => item.width)
+          expect(Math.max(...widths) - Math.min(...widths), 'destinations have equal-width slots').toBeLessThanOrEqual(1)
+          for (const item of metrics) {
+            expect(item.width).toBeGreaterThanOrEqual(48)
+            expect(item.height).toBeGreaterThanOrEqual(48)
+            expect(item.iconCenter).toBeLessThanOrEqual(1)
+            expect(item.labelBottom).toBeLessThanOrEqual(0)
+            // The clicked/focused destination is selected; other items have no state layer.
+            expect(item.pillOpacity).toBe(item.selected ? '1' : '0')
+            expect(item.transition).toBe('0s')
+          }
+          const subscriptions = page.locator('.sideNav a[href="#/subscriptions"]')
+          await subscriptions.click()
+          await expect(subscriptions).toHaveAttribute('aria-current', 'page')
+          await expect.poll(() => items.evaluateAll(elements => elements.every(element => {
+            const box = element.getBoundingClientRect()
+            const text = element.querySelector('.navLabel span').getBoundingClientRect()
+            return text.left >= box.left && text.right <= box.right && Math.abs(text.left + text.right - box.left - box.right) < 1
+          })), { message: 'bold active labels fit and remain centered' }).toBe(true)
+          const activeWidths = await items.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().width))
+          activeWidths.forEach((width, index) => expect(Math.abs(width - widths[index]), 'selection does not move neighboring destinations').toBeLessThanOrEqual(1))
+          await expect(page.locator('.sideNav .activeIndicator')).toBeHidden()
+          const more = page.locator('.sideNav .moreOptionNav')
+          await more.click()
+          const menu = await page.locator('.sideNav .moreOptionContainer').boundingBox()
+          expect(menu.x).toBeGreaterThanOrEqual(0)
+          expect(menu.x + menu.width).toBeLessThanOrEqual(await page.evaluate(() => innerWidth))
+          await more.click()
+          await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1)
+        }
+      }
+    })
+  })
+}
+
+for (const uiScale of [95, 125]) {
+  test.describe(`expressive desktop navigation at ${uiScale}%`, () => {
+    test.use({
+      seed: {
+        settings: { uiScale, alwaysShowScrollbars: true },
+        profiles: [{
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: Array.from({ length: 24 }, (_, index) => ({
+            id: `UC${index.toString().padStart(22, '0')}`,
+            name: `Channel ${index}`,
+            thumbnail: ''
+          }))
+        }]
+      }
+    })
+
+    test('shows complete desktop destination labels', async ({ page }) => {
+      for (const locale of ['en-US', 'de-DE']) {
+        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+        await goTo(page, 'subscriptions')
+        await expect.poll(() => page.locator('.sideNav .navOption .navLabel:visible').evaluateAll(labels => labels.every(label =>
+          label.scrollWidth <= label.clientWidth && label.scrollHeight <= label.clientHeight
+        )), { message: 'desktop labels fit at readable size without truncation' }).toBe(true)
+      }
+    })
+
+    test('keeps pills and labels contained in every sidebar mode and direction', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await goTo(page, 'history')
+      const nav = page.locator('.sideNav')
+      for (const direction of ['ltr', 'rtl']) {
+        await page.locator('body').evaluate((body, direction) => { body.dir = direction }, direction)
+        for (const mode of ['rail', 'icons', 'expanded', 'expanded-with-hidden-labels']) {
+          await page.evaluate(mode => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            const expanded = mode.startsWith('expanded')
+            if (store.getters.getIsSideNavOpen !== expanded) store.commit('toggleSideNav')
+            store.commit('setHideLabelsSideBar', mode === 'icons' || mode === 'expanded-with-hidden-labels')
+          }, mode)
+          const active = nav.locator('.navOption.router-link-active')
+          await expect.poll(() => active.evaluate(element => getComputedStyle(element, '::before').opacity)).toBe('1')
+          await expect(active.locator('.navLabel')).toBeVisible({ visible: mode !== 'icons' })
+          const metrics = await active.evaluate(element => {
+            const box = element.getBoundingClientRect()
+            const icon = element.querySelector('.navIcon').getBoundingClientRect()
+            const label = element.querySelector('.navLabel').getBoundingClientRect()
+            const pill = getComputedStyle(element, '::before')
+            return {
+              width: box.width,
+              height: box.height,
+              iconFits: icon.left >= box.left && icon.right <= box.right && icon.top >= box.top && icon.bottom <= box.bottom,
+              labelFits: label.width === 0 || (label.left >= box.left && label.right <= box.right && label.bottom <= box.bottom),
+              transition: pill.transitionDuration
+            }
+          })
+          expect(metrics.width).toBeGreaterThanOrEqual(47.9)
+          expect(metrics.height).toBeGreaterThanOrEqual(47.9)
+          expect(metrics.iconFits).toBe(true)
+          expect(metrics.labelFits).toBe(true)
+          expect(metrics.transition).toBe('0s')
+          await active.focus()
+          await expect(active).toBeFocused()
+          await expect(nav.locator('.inner > .os-scrollbar-vertical')).toBeAttached()
+        }
+      }
+    })
+
+    test('clamps the sidebar after layout and content shorten at the scroll end', async ({ app, page }) => {
+      const scroller = page.locator('.sideNav .inner')
+      await setWindowSize(app, page, { width: 1100, height: 500 })
+      const changes = [
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav')),
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')),
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')),
+        async () => page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('toggleSideNav')
+          store.commit('setHideLabelsSideBar', true)
+        }),
+        async () => setWindowSize(app, page, { width: 1150, height: 800 }),
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')),
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationItems', ['home', 'history'])),
+        async () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideActiveSubscriptions', true))
+      ]
+      for (const [index, change] of changes.entries()) {
+        const previousOffset = await scroller.evaluate(element => {
+          element.scrollTop = element.scrollHeight
+          return element.scrollTop
+        })
+        await change()
+        await expect.poll(() => scroller.evaluate((element, previousOffset) => {
+          const bounds = element.getBoundingClientRect()
+          const children = [...element.children].filter(child => !child.classList.contains('os-scrollbar') && child.getBoundingClientRect().height > 0)
+          const end = children.at(-1).getBoundingClientRect().bottom
+          const maximum = Math.max(0, end - bounds.top + element.scrollTop - element.clientHeight)
+          const scrollbar = element.querySelector('.os-scrollbar-vertical')
+          const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return {
+            validOffset: Math.abs(element.scrollTop - Math.min(previousOffset, maximum)) <= 1,
+            usable: !scrollbar.classList.contains('os-scrollbar-unusable') === (maximum > 1),
+            matchingThumb: maximum <= 1 || Math.abs(thumb.height / track.height - element.clientHeight / (maximum + element.clientHeight)) < 0.03
+          }
+        }, previousOffset), { message: `sidebar scroll range after change ${index + 1}` }).toEqual({ validOffset: true, usable: true, matchingThumb: true })
+      }
+    })
+  })
+}

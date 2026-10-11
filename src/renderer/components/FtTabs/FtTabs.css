@@ -1,0 +1,121 @@
+/* Layout-specific grids and scrolling remain with the owning view. */
+:where(.materialTabs) {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  user-select: none;
+  isolation: isolate;
+  gap: 6px;
+}
+
+/* Shared in-page tabs. Browser tabs and tab preview cards keep their own layout. */
+.materialTabs[role='tablist'] :deep([role='tab']) {
+  appearance: none;
+  border: 0;
+  padding-block: 8px;
+  padding-inline: var(--material-tab-padding-inline, 16px);
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: var(--material-tab-min-height, 40px);
+  border-radius: calc(24px * var(--ui-roundness));
+  background: transparent;
+  color: var(--secondary-text-color);
+  font-family: inherit;
+  font-size: var(--material-tab-font-size, inherit);
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']) {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:focus-visible) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -3px;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:disabled) {
+  cursor: default;
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:hover:not(:disabled)) {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab']:active:not(:disabled)) {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']:hover:not(:disabled)),
+.materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']:active:not(:disabled)) {
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+
+.materialTabs[role='tablist'] :deep([role='tab'] .ft-icon) {
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+/* Compact, mutually exclusive choices share one outline and internal dividers. */
+.materialTabs.segmented {
+  gap: 0;
+  border: 1px solid var(--divider-color);
+  border-radius: calc(24px * var(--ui-roundness));
+  overflow: clip;
+}
+
+.materialTabs.segmented[role='tablist'] :deep([role='tab']) {
+  border-radius: 0;
+}
+
+.materialTabs.segmented[role='tablist'] :deep([role='tab'] + [role='tab']) {
+  border-inline-start: 1px solid var(--divider-color);
+}
+
+/* Fade in place; geometry changes never move the pill between tabs. */
+.tabsIndicator,
+.tabsIndicatorOutgoing {
+  position: absolute;
+  /* stylelint-disable-next-line liberty/use-logical-spec -- physical coordinates from bounding boxes */
+  left: 0;
+  /* stylelint-disable-next-line liberty/use-logical-spec -- physical coordinates from bounding boxes */
+  top: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  transform-origin: left top;
+  transition: opacity 140ms ease;
+  will-change: opacity;
+}
+
+@media (pointer: coarse) {
+  .materialTabs {
+    --material-tab-min-height: var(--phone-touch-target, 48px);
+  }
+}
+
+.tabFade-enter-from,
+.tabFade-leave-to {
+  opacity: 0;
+}
+
+:global(:root[data-reduced-motion='reduce']) .tabsIndicator,
+:global(:root[data-reduced-motion='reduce']) .tabsIndicatorOutgoing {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .materialTabs[role='tablist'] :deep([role='tab']) {
+    transition: none;
+  }
+}
