@@ -468,6 +468,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    autoplayRequested: {
+      type: Boolean,
+      default: false
+    },
     autoplayCountdown: {
       type: Object,
       default: null
@@ -1590,10 +1594,13 @@ export default defineComponent({
     // pending SABR state after this player loads, but that must not add autoplay
     // to the same media element afterward.
     const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
+    // Queue advancement is an explicit playback request. Keep it for this
+    // player after Watch consumes the request when its source finishes loading.
+    const initialAutoplayRequested = props.autoplayRequested
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return !suppressInitialAutoplay && store.getters.getAutoplayVideos && isActiveTab.value
+      return !suppressInitialAutoplay && (initialAutoplayRequested || store.getters.getAutoplayVideos) && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */

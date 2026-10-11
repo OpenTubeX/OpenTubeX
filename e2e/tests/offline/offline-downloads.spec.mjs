@@ -63,7 +63,7 @@ for (const mobile of [false, true]) {
     })
     test.use({
       seed: {
-        settings: { landingPage: 'history', enableDownloads: true, uiScale: mobile ? 95 : 100, iconPack: mobile ? 'remix' : 'material' },
+        settings: { landingPage: 'history', enableDownloads: true, autoplayVideos: false, uiScale: mobile ? 95 : 100, iconPack: mobile ? 'remix' : 'material' },
         downloads: [
           download(1, 'offline0001', 'Offline download', 'video', mediaPath,
             [{ videoId: 'offline0001', path: mediaPath, extension: 'webm' }]),
@@ -124,6 +124,7 @@ for (const mobile of [false, true]) {
       await expect(page).toHaveURL(/#\/watch\/offline0003\?downloadId=3/)
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
       await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0003')
+      await expect.poll(() => video.evaluate(element => !element.paused && element.currentTime > 0.1)).toBe(true)
       await video.evaluate(element => element.pause())
       if (mobile) await page.getByRole('button', { name: 'Queue Playlist video two', exact: true }).click()
       await queue.getByRole('link').filter({ hasText: 'Playlist video two' }).click()

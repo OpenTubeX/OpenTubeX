@@ -495,6 +495,7 @@ export default defineComponent({
       /** @type {number|null} */
       oneTimeTimestamp: null,
       playNextTimeout: null,
+      queuedPlaybackVideoId: null,
       playNextCountDownIntervalId: null,
       autoplayCountdown: null,
       waitingForPlaylistContinuation: false,
@@ -2264,6 +2265,7 @@ export default defineComponent({
       const loadGeneration = ++this.videoLoadGeneration
       this.preparingVideoLoadGeneration = loadGeneration
       const requestedVideoId = this.tabRoute.params.id
+      if (this.queuedPlaybackVideoId !== requestedVideoId) this.queuedPlaybackVideoId = null
       this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
@@ -5074,6 +5076,7 @@ export default defineComponent({
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadState = null
+      this.queuedPlaybackVideoId = null
 
       if (
         !this.localFilePlayback &&
@@ -5561,6 +5564,7 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
+      this.queuedPlaybackVideoId = nextVideo.videoId
       this.tabRouter.push(nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` })
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
