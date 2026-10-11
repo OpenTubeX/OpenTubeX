@@ -72,6 +72,64 @@ async function openThreeTabsAndActivate(page, activeIndex) {
 }
 
 test.describe('tab bar', () => {
+  test('keeps auto-sized tab geometry stable when selection changes', async ({ app, page }, testInfo) => {
+    await page.evaluate(async () => {
+      for (let index = 0; index < 4; index++) {
+        await window.ftElectron.tabs.create({ route: '/history', makeActive: true })
+      }
+    })
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(5)
+    await expect(tabs.locator('.tabTitleText')).toHaveText(['Subscriptions', 'History', 'History', 'History', 'History'])
+
+    async function geometry() {
+      return await page.locator('.tabsContainer').evaluate(container => {
+        const origin = container.getBoundingClientRect().left - container.scrollLeft
+        return {
+          range: container.scrollWidth - container.clientWidth,
+          tabs: [...container.querySelectorAll('.tab')].map(tab => ({
+            width: tab.getBoundingClientRect().width,
+            start: tab.getBoundingClientRect().left - origin,
+            close: tab.querySelector('.closeButton').getBoundingClientRect().left - origin
+          }))
+        }
+      })
+    }
+
+    for (const zoom of [1, 0.95, 1.25]) {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(550 * zoom), 800), zoom)
+      await expect(page.locator('.tabsScrollbar')).toBeVisible()
+      const before = await geometry()
+      expect(before.tabs[0].width).toBeGreaterThan(100)
+      expect(before.tabs[0].width).toBeLessThan(200)
+      for (const tab of await tabs.all()) {
+        await page.evaluate(id => window.ftElectron.tabs.activate(id), await tab.getAttribute('data-tab-id'))
+        await expect(tab).toHaveClass(/active/)
+        await expect.poll(async () => {
+          const after = await geometry()
+          return Math.abs(after.range - before.range) <= 1 && after.tabs.every((box, index) =>
+            ['width', 'start', 'close'].every(key => Math.abs(box[key] - before.tabs[index][key]) <= 0.1)
+          )
+        }, { message: `selection keeps tab widths, close buttons and scroll range stable at ${zoom} zoom` }).toBe(true)
+      }
+    }
+
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1100, 800))
+    for (const colorScheme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const box = await page.locator('.tabBar').boundingBox()
+      const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
+        const contents = BrowserWindow.getAllWindows()[0].webContents
+        return (await contents.capturePage({ x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width), height: Math.round(box.height) })).toPNG().toString('base64')
+      }, box)
+      await testInfo.attach(`stable browser tabs ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+    }
+  })
+
   test('centers horizontal tabs with equal top and bottom gaps', async ({ page }) => {
     for (const overflowing of [false, true]) {
       if (overflowing) {

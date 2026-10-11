@@ -326,10 +326,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border-color: var(--tab-border-color, var(--border-color));
 }
 
-.tab.active .tabTitle {
-  font-weight: 600;
-}
-
 .tab.selected {
   --tab-background-color: color-mix(in srgb, var(--accent-color) 22%, var(--card-bg-color));
 

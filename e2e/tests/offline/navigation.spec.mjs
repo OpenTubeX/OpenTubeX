@@ -822,76 +822,78 @@ for (const uiScale of [100, 125]) {
   })
 }
 
-for (const uiScale of [100, 125]) {
-  test.describe(`localized bottom navigation at ${uiScale}%`, () => {
-    test.use({ seed: { settings: { uiScale, useAITranslationCompletions: true, backendFallback: true, rememberHistory: true, enableWatchStats: true, alwaysShowNavigationBar: true, baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', mainColor: 'Red', secColor: 'Blue' } } })
+for (const useAITranslationCompletions of [false, true]) {
+  for (const uiScale of [100, 125]) {
+    test.describe(`localized bottom navigation at ${uiScale}% with AI completions ${useAITranslationCompletions}`, () => {
+      test.use({ seed: { settings: { uiScale, useAITranslationCompletions, backendFallback: true, rememberHistory: true, enableWatchStats: true, alwaysShowNavigationBar: true, baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', mainColor: 'Red', secColor: 'Blue' } } })
 
-    test('keeps localized bottom navigation readable without clipping', async ({ app, page }, testInfo) => {
-      await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
-      await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
-      await expect.poll(() => page.evaluate(() => innerWidth)).toBe(320)
-      const locales = (await import('../../../static/locales/activeLocales.json', { with: { type: 'json' } })).default
-      const nav = page.locator('.sideNav')
-      async function captureNavigation(language) {
-        for (const colorScheme of ['dark', 'light']) {
-          await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-          const box = await nav.boundingBox()
-          const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
-            const contents = BrowserWindow.getAllWindows()[0].webContents
-            const zoom = contents.getZoomFactor()
-            return (await contents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })).toPNG().toString('base64')
-          }, box)
-          await testInfo.attach(`readable ${language} mobile navigation ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+      test('keeps localized bottom navigation readable without clipping', async ({ app, page }, testInfo) => {
+        await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setMinimumSize(0, 0))
+        await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
+        await expect.poll(() => page.evaluate(() => innerWidth)).toBe(320)
+        const locales = (await import('../../../static/locales/activeLocales.json', { with: { type: 'json' } })).default
+        const nav = page.locator('.sideNav')
+        async function captureNavigation(language) {
+          for (const colorScheme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+            const box = await nav.boundingBox()
+            const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
+              const contents = BrowserWindow.getAllWindows()[0].webContents
+              const zoom = contents.getZoomFactor()
+              return (await contents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })).toPNG().toString('base64')
+            }, box)
+            await testInfo.attach(`readable ${language} mobile navigation ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+          }
         }
-      }
-      for (const order of [DEFAULT_NAVIGATION_ITEMS, [...DEFAULT_NAVIGATION_ITEMS.slice(4), ...DEFAULT_NAVIGATION_ITEMS.slice(0, 4)]]) {
-        await page.evaluate(order => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateNavigationItems', order), order)
-        await expect(nav.locator('.mobileNavItem:visible')).toHaveCount(5)
-        for (const locale of locales) {
-          await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
-          await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span:visible').evaluateAll(labels => {
-            const sizes = labels.map(label => parseFloat(getComputedStyle(label).fontSize))
-            return labels.length === 5 && labels.every(label => label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width) &&
-              Math.min(...sizes) >= 10 && new Set(sizes).size === 1
-          }), { message: `${locale}: one readable size fits every bottom navigation label` }).toBe(true)
+        for (const order of [DEFAULT_NAVIGATION_ITEMS, [...DEFAULT_NAVIGATION_ITEMS.slice(4), ...DEFAULT_NAVIGATION_ITEMS.slice(0, 4)]]) {
+          await page.evaluate(order => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateNavigationItems', order), order)
+          await expect(nav.locator('.mobileNavItem:visible')).toHaveCount(5)
+          for (const locale of locales) {
+            await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+            await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span:visible').evaluateAll(labels => {
+              const sizes = labels.map(label => parseFloat(getComputedStyle(label).fontSize))
+              return labels.length === 5 && labels.every(label => label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width) &&
+                Math.min(...sizes) >= 10 && new Set(sizes).size === 1
+            }), { message: `${locale}: one readable size fits every bottom navigation label` }).toBe(true)
+          }
         }
-      }
-      await page.evaluate(async order => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        await store.dispatch('updateNavigationItems', order)
-        await store.dispatch('updateCurrentLocale', 'gl')
-      }, DEFAULT_NAVIGATION_ITEMS)
-      const playlists = nav.locator('a[href="#/userplaylists"]')
-      await expect(playlists).toHaveAttribute('aria-label', 'Listaxes de reprodución')
-      await expect(playlists.locator('.navLabel > span:visible')).toHaveText('Listaxes')
-      await playlists.click()
-      await expect(page).toHaveURL(/#\/userplaylists$/)
-      await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span:visible').evaluateAll(labels =>
-        labels.every(label => parseFloat(getComputedStyle(label).fontSize) >= 10 &&
-          label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width)
-      ), { message: 'the active Galician label also fits at a readable size' }).toBe(true)
-      await goTo(page, 'home')
-      await captureNavigation('Galician')
-      await setWindowSize(app, page, { width: Math.round(1000 * uiScale / 100), height: 850 })
-      await expect(playlists.locator('.navLabel > span:visible')).toHaveText('Listaxes de reprodución')
-      await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
-      await page.evaluate(async () => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        await store.dispatch('updateCurrentLocale', 'ta')
-        await store.dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels'])
+        await page.evaluate(async order => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateNavigationItems', order)
+          await store.dispatch('updateCurrentLocale', 'gl')
+        }, DEFAULT_NAVIGATION_ITEMS)
+        const playlists = nav.locator('a[href="#/userplaylists"]')
+        await expect(playlists).toHaveAttribute('aria-label', 'Listaxes de reprodución')
+        await expect(playlists.locator('.navLabel > span:visible')).toHaveText(useAITranslationCompletions ? 'Listaxes' : 'Playlists')
+        await playlists.click()
+        await expect(page).toHaveURL(/#\/userplaylists$/)
+        await expect.poll(() => nav.locator('.mobileNavItem:visible .navLabel > span:visible').evaluateAll(labels =>
+          labels.every(label => parseFloat(getComputedStyle(label).fontSize) >= 10 &&
+            label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width)
+        ), { message: 'the active Galician label also fits at a readable size' }).toBe(true)
+        await goTo(page, 'home')
+        await captureNavigation('Galician')
+        await setWindowSize(app, page, { width: Math.round(1000 * uiScale / 100), height: 850 })
+        await expect(playlists.locator('.navLabel > span:visible')).toHaveText('Listaxes de reprodución')
+        await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateCurrentLocale', 'ta')
+          await store.dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels'])
+        })
+        const stats = nav.locator('a[href="#/stats"]')
+        await stats.click()
+        await expect(stats).toHaveAttribute('aria-current', 'page')
+        if (useAITranslationCompletions) await expect(stats.locator('.navLabel > span:visible')).toHaveText('புள்ளிவி.')
+        await expect.poll(() => stats.locator('.navLabel > span:visible').evaluate(label =>
+          parseFloat(getComputedStyle(label).fontSize) >= 10 && label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width
+        )).toBe(true)
+        await captureNavigation('Tamil')
       })
-      const stats = nav.locator('a[href="#/stats"]')
-      await stats.click()
-      await expect(stats).toHaveAttribute('aria-current', 'page')
-      await expect(stats.locator('.navLabel > span:visible')).toHaveText('புள்ளிவி.')
-      await expect.poll(() => stats.locator('.navLabel > span:visible').evaluate(label =>
-        parseFloat(getComputedStyle(label).fontSize) >= 10 && label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width
-      )).toBe(true)
-      await captureNavigation('Tamil')
     })
-  })
+  }
 }
 
 test('keeps existing localized More labels with AI completions off', async ({ app, page }) => {
