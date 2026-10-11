@@ -458,7 +458,7 @@
 }
 
 @media (forced-colors: active) {
-  .select.outlined .select-text:focus-visible ~ .selectOutline {
+  .select.outlined .select-text:focus ~ .selectOutline {
     outline: 2px solid Highlight;
     outline-offset: 2px;
   }

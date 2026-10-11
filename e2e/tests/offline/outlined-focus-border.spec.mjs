@@ -135,5 +135,46 @@ for (const uiScale of [100, 95]) {
         }
       }
     })
+
+    test('outlined dropdowns retain their high contrast ring after mouse selection', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ forcedColors: 'active' })
+      const general = await goToSettingsSection(page, 'general')
+      const select = general.getByRole('combobox', { name: 'Week Starts On' })
+      const outline = select.locator('..').locator('.selectOutline')
+      const ring = () => outline.evaluate(element => {
+        const style = getComputedStyle(element)
+        return { style: style.outlineStyle, width: parseFloat(style.outlineWidth), offset: style.outlineOffset, color: style.outlineColor }
+      })
+      for (const width of [1600, 640]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+        await select.evaluate(element => element.scrollIntoView({ block: 'center' }))
+        await page.keyboard.press('Tab')
+        await select.focus()
+        expect(await select.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+        const keyboardRing = await ring()
+        expect(keyboardRing.style).toBe('solid')
+        const pixelRatio = await page.evaluate(() => devicePixelRatio)
+        expect(Math.round(keyboardRing.width * pixelRatio)).toBeGreaterThanOrEqual(Math.floor(2 * pixelRatio))
+        await select.blur()
+        await select.click()
+        await page.getByRole('option', { name: 'Monday', exact: true }).click()
+        await expect(select).toBeFocused()
+        expect(await select.evaluate(element => element.matches(':focus-visible'))).toBe(false)
+        await expect(select).toHaveCSS('box-shadow', 'none')
+        expect(await ring()).toEqual(keyboardRing)
+        const clip = await outline.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          return {
+            x: Math.floor((bounds.x - 6) * devicePixelRatio),
+            y: Math.floor((bounds.y - 6) * devicePixelRatio),
+            width: Math.ceil((bounds.width + 12) * devicePixelRatio),
+            height: Math.ceil((bounds.height + 12) * devicePixelRatio)
+          }
+        })
+        const capture = await app.electronApp.evaluate(async ({ BrowserWindow }, clip) =>
+          (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).crop(clip).toPNG().toString('base64'), clip)
+        await writeFile(testInfo.outputPath(`select-forced-colors-${width}.png`), Buffer.from(capture, 'base64'))
+      }
+    })
   })
 }
