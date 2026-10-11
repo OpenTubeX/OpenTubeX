@@ -96,7 +96,7 @@ test('update notification buttons are centered when they wrap below the text', a
       if (scale === 1 && size.width === 375) {
         for (const colorScheme of ['dark', 'light']) {
           await page.emulateMedia({ colorScheme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+          await expect(page.locator('body')).toContainClass(colorScheme)
           const path = testInfo.outputPath(`centered-update-buttons-${colorScheme}.png`)
           await notification.screenshot({ path, animations: 'disabled' })
           await testInfo.attach(`centered update buttons (${colorScheme})`, { path, contentType: 'image/png' })
