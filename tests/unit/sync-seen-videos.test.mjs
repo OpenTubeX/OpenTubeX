@@ -108,7 +108,7 @@ test('mark all still dismisses displayed videos when a refresh wins the cache wr
 test('mark all limits cache and durable marks to IDs captured before an animation', async () => {
   const fixture = cacheFixture()
   fixture.context.rootGetters = { getSubscriptionSeenVideos: [], getSubscriptionSeenPosts: [] }
-  const entryIdsByTab = {}
+  const entriesByTab = {}
   for (const [tab, cacheKey, field, idKey] of [
     ['videos', 'videoCache', 'videos', 'videoId'],
     ['shorts', 'shortsCache', 'videos', 'videoId'],
@@ -116,7 +116,9 @@ test('mark all limits cache and durable marks to IDs captured before an animatio
     ['posts', 'postsCache', 'posts', 'postId'],
   ]) {
     const entries = fixture.state[cacheKey].channel[field]
-    entryIdsByTab[tab] = entries.map(entry => entry[idKey])
+    entriesByTab[tab] = entries.map(entry => tab === 'posts'
+      ? { postId: entry.postId }
+      : { videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true })
     entries.push({ [idKey]: `arrived-${tab}`, isNewInSubscriptionFeed: true })
   }
   const writes = []
@@ -124,12 +126,13 @@ test('mark all limits cache and durable marks to IDs captured before an animatio
     writes.push([channelId, tab, structuredClone(entries)])
   }
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
-    tabs: Object.keys(entryIdsByTab), channelIds: ['channel'], entryIdsByTab,
+    tabs: Object.keys(entriesByTab), channelIds: ['channel'], entriesByTab,
   })
   assert.equal(writes.length, 4)
   for (const [channelId, tab, entries] of writes) {
     assert.equal(channelId, 'channel')
-    assert.deepEqual(entries.map(entry => entry.videoId ?? entry.postId), entryIdsByTab[tab])
+    assert.deepEqual(entries.map(entry => entry.videoId ?? entry.postId),
+      entriesByTab[tab].map(entry => entry.videoId ?? entry.postId))
   }
   for (const cacheKey of ['videoCache', 'shortsCache', 'liveCache', 'postsCache']) {
     const cache = fixture.state[cacheKey].channel
@@ -143,6 +146,26 @@ test('mark all limits cache and durable marks to IDs captured before an animatio
     ] }],
     ['mergeSubscriptionSeenPosts', { posts: [{ postId: 'post' }] }],
   ])
+})
+
+test('mark all leaves newly public uploads new when their captured membership changes', async () => {
+  const fixture = cacheFixture()
+  fixture.context.rootGetters = { getSubscriptionSeenVideos: [] }
+  const entriesByTab = {}
+  for (const [tab, cacheKey] of [['videos', 'videoCache'], ['shorts', 'shortsCache'], ['live', 'liveCache']]) {
+    entriesByTab[tab] = [{ videoId: cacheKey, isMembersOnly: true }]
+    fixture.state[cacheKey].channel.videos[0].isMembersOnly = false
+  }
+  let writes = 0
+  fixture.handlers.markEntriesAsSeen = async () => { writes++ }
+  await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
+    tabs: Object.keys(entriesByTab), channelIds: ['channel'], entriesByTab,
+  })
+  assert.equal(writes, 0)
+  assert.deepEqual(fixture.recorded, [])
+  for (const cacheKey of ['videoCache', 'shortsCache', 'liveCache']) {
+    assert.equal(fixture.state[cacheKey].channel.videos[0].isNewInSubscriptionFeed, true)
+  }
 })
 
 async function settingsFixture(history = []) {

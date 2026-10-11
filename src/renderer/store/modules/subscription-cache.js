@@ -255,7 +255,7 @@ const actions = {
     tabs = [tab],
     channelIds = [],
     channelIdsByTab = {},
-    entryIdsByTab
+    entriesByTab
   }) {
     const cacheConfigs = {
       videos: {
@@ -282,7 +282,10 @@ const actions = {
 
     for (const feedTab of tabs) {
       const channelIdSet = new Set(channelIdsByTab[feedTab] ?? channelIds)
-      const entryIdSet = entryIdsByTab == null ? null : new Set(entryIdsByTab[feedTab] ?? [])
+      const capturedMembership = entriesByTab == null
+        ? null
+        : new Map((entriesByTab[feedTab] ?? [])
+            .map(entry => [feedTab === 'posts' ? entry.postId : entry.videoId, entry.isMembersOnly === true]))
       const config = cacheConfigs[feedTab]
       if (config == null) {
         continue
@@ -299,7 +302,9 @@ const actions = {
         }
 
         const seenEntries = entries.filter(entry => entry.isNewInSubscriptionFeed === true &&
-          (entryIdSet === null || entryIdSet.has(feedTab === 'posts' ? entry.postId : entry.videoId))).map(entry => ({
+          (capturedMembership === null || (feedTab === 'posts'
+            ? capturedMembership.has(entry.postId)
+            : capturedMembership.get(entry.videoId) === (entry.isMembersOnly === true)))).map(entry => ({
           ...(feedTab === 'posts' ? { postId: entry.postId } : { videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true }),
           isNewInSubscriptionFeed: false
         }))

@@ -1642,6 +1642,16 @@ test.describe('large combined new feed', () => {
       if (reducedMotion === 'off') {
         test('keeps entries arriving during the removal animation unseen', async ({ page, app }) => {
           await goTo(page, 'subscriptions')
+          await page.evaluate(async channelId => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            await store.dispatch('updateSubscriptionVideosCacheByChannel', {
+              channelId,
+              videos: store.getters.getVideoCache[channelId].videos.map(entry => entry.videoId === 'new-video-1'
+                ? { ...entry, isMembersOnly: true }
+                : entry),
+              timestamp: new Date()
+            })
+          }, CHANNEL_ID)
           await page.locator('[data-subscription-feed-tab="all"]').click()
           await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
@@ -1670,7 +1680,9 @@ test.describe('large combined new feed', () => {
             ]) {
               await store.dispatch(action, {
                 channelId,
-                [field]: [entry, ...store.getters[getter][channelId][field]],
+                [field]: [entry, ...store.getters[getter][channelId][field].map(item => item.videoId === 'new-video-1'
+                  ? { ...item, isMembersOnly: false, title: 'Newly public upload' }
+                  : item)],
                 timestamp: new Date()
               })
             }
@@ -1685,6 +1697,7 @@ test.describe('large combined new feed', () => {
             }
           })
           await expect(page.getByText('Video arriving during removal', { exact: true })).toBeVisible()
+          await expect(page.getByText('Newly public upload', { exact: true })).toBeVisible()
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
           await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
           expect(await page.evaluate(() => {
@@ -1695,7 +1708,7 @@ test.describe('large combined new feed', () => {
               return (entry.videos ?? entry.posts).map(item => item.isNewInSubscriptionFeed)
             })
           })).toEqual([
-            [true, ...Array(120).fill(false)],
+            [true, false, true, ...Array(118).fill(false)],
             [true, ...Array(24).fill(view === 'tabbed')],
             [true, view === 'tabbed'],
             [true, view === 'tabbed']
@@ -1704,6 +1717,7 @@ test.describe('large combined new feed', () => {
           await goTo(relaunched.page, 'subscriptions')
           await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
           await expect(relaunched.page.getByText('Video arriving during removal', { exact: true })).toBeVisible()
+          await expect(relaunched.page.getByText('Newly public upload', { exact: true })).toBeVisible()
           await expect(relaunched.page.getByText('New video 0', { exact: true })).toHaveCount(0)
         })
       }
