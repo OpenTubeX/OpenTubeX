@@ -2140,3 +2140,6 @@ Storage Startup Error:
   Retry: "Покушај поново"
 Native Permissions:
   Local Network: "Пронађите уређаје на локалној мрежи и емитујте видео-снимке на њих, и синхронизујте подешавања и податке између уређаја."
+
+Installer:
+  Create Desktop Shortcut: Направи пречицу на радној површини

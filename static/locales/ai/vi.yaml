@@ -2102,3 +2102,6 @@ Storage Startup Error:
   Retry: "Thử lại"
 Native Permissions:
   Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."
+
+Installer:
+  Create Desktop Shortcut: Tạo lối tắt trên màn hình nền

@@ -2657,3 +2657,6 @@ Storage Startup Error:
   Retry: "Poskusi znova"
 Native Permissions:
   Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."
+
+Installer:
+  Create Desktop Shortcut: Ustvari bližnjico na namizju

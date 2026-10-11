@@ -2081,3 +2081,6 @@ Storage Startup Error:
   Retry: "Повторить"
 Native Permissions:
   Local Network: "Находить устройства в локальной сети и транслировать на них видео, а также синхронизировать настройки и данные между устройствами."
+
+Installer:
+  Create Desktop Shortcut: Создать ярлык на рабочем столе

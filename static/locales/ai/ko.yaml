@@ -2515,3 +2515,6 @@ Storage Startup Error:
   Retry: "다시 시도"
 Native Permissions:
   Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."
+
+Installer:
+  Create Desktop Shortcut: 바탕 화면 바로 가기 만들기

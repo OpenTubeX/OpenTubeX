@@ -2149,3 +2149,6 @@ Storage Startup Error:
   Retry: "Prøv igen"
 Native Permissions:
   Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."
+
+Installer:
+  Create Desktop Shortcut: Opret en genvej på skrivebordet

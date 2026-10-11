@@ -2707,3 +2707,6 @@ Storage Startup Error:
   Retry: "Torna-ho a provar"
 Native Permissions:
   Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."
+
+Installer:
+  Create Desktop Shortcut: Crea una drecera a l’escriptori

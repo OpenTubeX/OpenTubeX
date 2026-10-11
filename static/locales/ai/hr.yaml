@@ -2090,3 +2090,6 @@ Storage Startup Error:
   Retry: "Pokušaj ponovno"
 Native Permissions:
   Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."
+
+Installer:
+  Create Desktop Shortcut: Stvori prečac na radnoj površini

@@ -2114,3 +2114,6 @@ Storage Startup Error:
   Retry: "ניסיון חוזר"
 Native Permissions:
   Local Network: "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים."
+
+Installer:
+  Create Desktop Shortcut: יצירת קיצור דרך בשולחן העבודה

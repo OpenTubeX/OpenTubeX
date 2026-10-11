@@ -2090,3 +2090,6 @@ Storage Startup Error:
   Retry: "إعادة المحاولة"
 Native Permissions:
   Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."
+
+Installer:
+  Create Desktop Shortcut: إنشاء اختصار على سطح المكتب
