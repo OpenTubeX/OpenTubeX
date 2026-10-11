@@ -2114,3 +2114,6 @@ Storage Startup Error:
   Retry: "Tentar de novo"
 Native Permissions:
   Local Network: "Descubrir dispositivos na túa rede local e enviarlles vídeos, e sincronizar a configuración e os datos entre dispositivos."
+
+Installer:
+  Create Desktop Shortcut: Crear un atallo no escritorio

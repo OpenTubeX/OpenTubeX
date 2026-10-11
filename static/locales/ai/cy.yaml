@@ -2088,3 +2088,6 @@ Storage Startup Error:
   Retry: "Ceisio eto"
 Native Permissions:
   Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."
+
+Installer:
+  Create Desktop Shortcut: Creu llwybr byr ar y bwrdd gwaith

@@ -2149,3 +2149,6 @@ Storage Startup Error:
   Retry: "تلاش دوباره"
 Native Permissions:
   Local Network: "دستگاه‌های شبکهٔ محلی را پیدا کنید و ویدیوها را به آن‌ها بفرستید و تنظیمات و داده‌ها را بین دستگاه‌ها همگام‌سازی کنید."
+
+Installer:
+  Create Desktop Shortcut: ایجاد میان‌بر روی دسکتاپ

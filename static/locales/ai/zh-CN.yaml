@@ -2063,3 +2063,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"
+
+Installer:
+  Create Desktop Shortcut: 创建桌面快捷方式

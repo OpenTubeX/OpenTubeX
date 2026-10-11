@@ -1,5 +1,6 @@
 import packageDetails from '../package.json' with { type: 'json' }
 import { patchLinuxMprisName } from './patchLinuxMprisName.mjs'
+import { prepareWindowsInstallerTranslations } from './windowsInstallerTranslations.mjs'
 
 /** @type {import('electron-builder').Configuration} */
 export default {
@@ -31,7 +32,10 @@ export default {
   // electron-builder will however still spend time scanning the `node_modules` folder and building up a list of dependencies,
   // returning `false` from the `beforeBuild` hook skips that.
   beforeBuild: () => Promise.resolve(false),
-  afterPack: patchLinuxMprisName,
+  afterPack: async context => {
+    await patchLinuxMprisName(context)
+    await prepareWindowsInstallerTranslations(context)
+  },
   dmg: {
     contents: [
       {
@@ -150,5 +154,7 @@ export default {
   nsis: {
     allowToChangeInstallationDirectory: true,
     oneClick: false,
+    createDesktopShortcut: false,
+    include: '_scripts/windowsInstaller.nsh',
   },
 }

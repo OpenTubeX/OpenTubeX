@@ -2623,3 +2623,6 @@ Storage Startup Error:
   Retry: "Reintentar"
 Native Permissions:
   Local Network: "Detectar dispositivos en tu red local y transmitirles videos, y sincronizar la configuración y los datos entre dispositivos."
+
+Installer:
+  Create Desktop Shortcut: Crear un acceso directo en el escritorio

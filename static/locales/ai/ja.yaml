@@ -2063,3 +2063,6 @@ Search Bar:
 
 Native Permissions:
   Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"
+
+Installer:
+  Create Desktop Shortcut: デスクトップにショートカットを作成
