@@ -19,6 +19,61 @@ test.use({
 const popularity = Array.from({ length: 100 }, (_, index) =>
   index === 75 ? 1 : 0.12 + 0.5 * Math.exp(-(((index - 75) / 5) ** 2)) + Math.sin(index * 0.6) ** 2 * 0.08)
 
+test('popularity exits above the seek bar without clipping the graph', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { popularity })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  const graph = player.locator('.ft-popularity-graph')
+  const bar = player.locator('.shaka-seek-bar-container')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
+    for (const width of [1300, 500]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setContentSize(width, 900), width)
+      for (const frosted of [true, false]) {
+        await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+        await bar.hover()
+        await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+        const trackTop = await bar.evaluate(element => element.getBoundingClientRect().top +
+          Number.parseFloat(getComputedStyle(element).borderTopWidth))
+        // Pause the actual hover transition before it can finish, then sample it
+        // deterministically rather than relying on wall-clock screenshot timing.
+        await graph.evaluate(element => {
+          const pauseExit = event => {
+            if (event.propertyName !== 'transform') return
+            element.removeEventListener('transitionrun', pauseExit)
+            for (const animation of element.getAnimations()) {
+              animation.pause()
+              animation.currentTime = 90
+            }
+          }
+          element.addEventListener('transitionrun', pauseExit)
+        })
+        await player.locator('.shaka-play-button').hover()
+        await expect.poll(() => graph.evaluate(element => element.getAnimations()
+          .find(animation => animation.transitionProperty === 'transform')?.playState)).toBe('paused')
+        for (const time of [45, 90, 135]) {
+          const frame = await graph.evaluate((element, time) => {
+            for (const animation of element.getAnimations()) animation.currentTime = time
+            const bounds = element.getBoundingClientRect()
+            const style = getComputedStyle(element)
+            return { bottom: bounds.bottom, height: bounds.height, clip: style.clipPath, visibility: style.visibility }
+          }, time)
+          expect(frame.visibility).toBe('visible')
+          expect(frame.height).toBeGreaterThan(0)
+          expect(frame.height).toBeLessThanOrEqual(40)
+          expect(Math.abs(frame.bottom - trackTop) * scale, 'graph must stay above the seek bar throughout its exit').toBeLessThanOrEqual(1)
+          expect(['none', 'inset(0px)'], 'the full graph must remain unclipped during its exit').toContain(frame.clip)
+        }
+        await graph.evaluate(element => { for (const animation of element.getAnimations()) animation.finish() })
+        await expect(graph).toBeHidden()
+      }
+    }
+  }
+})
+
 test('popularity aligns with the seek bar across layouts, themes and UI scales', async ({ app, page }, testInfo) => {
   await mockPlayableWatchPage(app, page, { popularity })
   const video = await openMockedVideo(page)
@@ -36,7 +91,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await player.locator('.shaka-play-button').hover()
   await expect(graph).toBeHidden()
-  expect(await graph.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42)).toBe(40)
+  expect(await graph.evaluate(element => element.getBoundingClientRect().height)).toBe(0)
 
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
@@ -125,7 +180,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await expect(graph).toHaveCount(0)
 })
 
-test('reduced motion reveals the popularity graph without a slide transition', async ({ app, page }) => {
+test('reduced motion reveals the popularity graph without a transition', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await mockPlayableWatchPage(app, page, { popularity })
   await openMockedVideo(page)
@@ -138,7 +193,7 @@ test('reduced motion reveals the popularity graph without a slide transition', a
   await page.locator('.shaka-play-button').hover()
   await expect(graph).toBeHidden()
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await expect(graph).toHaveCSS('transition-duration', '0.18s, 0.18s, 0s')
+  await expect(graph).toHaveCSS('transition-duration', '0.18s, 0s')
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
   await expect(graph).toHaveCSS('transition-duration', '0s')
   await page.locator('.shaka-seek-bar-container').hover()
