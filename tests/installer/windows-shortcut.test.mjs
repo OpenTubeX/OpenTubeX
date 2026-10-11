@@ -91,20 +91,32 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
   const include = join(directory, 'fixture.nsh')
   // Wine tasklist reports false positives; only the fixture disables that check.
   await writeFile(include, '!macro customCheckAppRunning\n!macroend\n' + observed)
-  const artifacts = await build({
-    projectDir: process.cwd(),
-    prepackaged: join(directory, 'app'),
-    targets: Platform.WINDOWS.createTarget(['nsis'], Arch.x64),
-    config: {
-      ...config,
-      directories: { output: join(directory, 'output'), buildResources: resources },
-      win: { icon: resolve('_icons/icon.ico'), signAndEditExecutable: false },
-      nsis: { ...config.nsis, include, runAfterFinish: false },
-      publish: null
-    }
-  })
-  const installer = artifacts.find(path => path.endsWith('.exe'))
-  assert.ok(installer)
+  async function buildInstaller (nsis, output) {
+    const artifacts = await build({
+      projectDir: process.cwd(),
+      prepackaged: join(directory, 'app'),
+      targets: Platform.WINDOWS.createTarget(['nsis'], Arch.x64),
+      config: {
+        ...config,
+        // electron-builder normalizes this array in place on each build.
+        files: [...config.files],
+        directories: { output: join(directory, output), buildResources: resources },
+        win: { icon: resolve('_icons/icon.ico'), signAndEditExecutable: false },
+        nsis: { ...nsis, runAfterFinish: false },
+        publish: null
+      }
+    })
+    const installer = artifacts.find(path => path.endsWith('.exe'))
+    assert.ok(installer)
+    return installer
+  }
+  const installer = await buildInstaller({ ...config.nsis, include }, 'current')
+  const previousInclude = join(directory, 'previous.nsh')
+  await writeFile(previousInclude, '!macro customCheckAppRunning\n!macroend\n')
+  // Published v0.36.0-beta NSIS defaults, including its original uninstaller.
+  const previousInstaller = await buildInstaller({
+    oneClick: false, allowToChangeInstallationDirectory: true, include: previousInclude
+  }, 'previous')
   const toUnix = path => join(prefix, 'drive_c', ...path.slice(3).split('\\'))
   let desktopLink
   let installDirectory
@@ -122,7 +134,6 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
     await run('xdotool', ['key', '--window', window, 'alt+i'])
     await waitFor(() => exists(stateFile))
     const [state, link, location] = (await readFile(stateFile, 'utf8')).split('\r\n')
-    assert.equal(state, checked ? '1' : '0')
     desktopLink = toUnix(link)
     installDirectory = location
     await delay(200)
@@ -130,6 +141,7 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
     await run('xdotool', ['windowfocus', '--sync', window])
     await run('xdotool', ['key', ...(toggle ? ['space'] : []), 'Tab', 'Return'])
     await waitFor(async () => !(await run('xdotool', ['search', '--name', '^OpenTubeX Setup']).catch(() => null)))
+    assert.equal(state, checked ? '1' : '0')
   }
 
   const silentUpdate = (...args) => run('wine', [installer, '/S', '/currentuser', ...args])
@@ -137,6 +149,38 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
     toUnix(`${installDirectory}\\Uninstall OpenTubeX.exe`), '/S', scope, `_?=${installDirectory}`
   ])
 
+  await t.test('fresh installs leave an unrelated same-named desktop file untouched', async () => {
+    const unrelatedLink = join(prefix, 'drive_c/users', userInfo().username, 'Desktop/OpenTubeX.lnk')
+    const contents = Buffer.from('Unrelated user-created shortcut')
+    await writeFile(unrelatedLink, contents)
+    try {
+      await install(false)
+      assert.deepEqual(await readFile(unrelatedLink), contents)
+    } finally {
+      await rm(unrelatedLink, { force: true })
+    }
+  })
+  await t.test('the first automatic upgrade preserves shortcuts from the previous installer', async () => {
+    await uninstall('/currentuser')
+    await run('wine', [previousInstaller, '/S', '/currentuser'])
+    assert.equal(await exists(desktopLink), true)
+    await appendFile(desktopLink, 'previous installer shortcut preservation marker')
+    const before = await readFile(desktopLink)
+    await silentUpdate('--updated')
+    assert.ok((await readFile(desktopLink)).equals(before), 'The first automatic upgrade must preserve shortcut bytes')
+    await uninstall('/currentuser')
+  })
+  await t.test('the first manual and automatic upgrades preserve deleted shortcuts', async () => {
+    for (const automatic of [false, true]) {
+      await run('wine', [previousInstaller, '/S', '/currentuser'])
+      assert.equal(await exists(desktopLink), true)
+      await rm(desktopLink)
+      if (automatic) await silentUpdate('--updated')
+      else await install(false)
+      assert.equal(await exists(desktopLink), false)
+      await uninstall('/currentuser')
+    }
+  })
   await t.test('fresh install and silent update leave the desktop empty', async () => {
     await install(false)
     assert.equal(await exists(desktopLink), false)

@@ -1,10 +1,13 @@
+!ifndef BUILD_UNINSTALLER
+  Var preserveDesktopShortcut
+!endif
+
 !macro customHeader
   !ifdef BUILD_UNINSTALLER
     # Remove an opted-in shortcut on uninstall, despite disabling automatic creation.
     !undef DO_NOT_CREATE_DESKTOP_SHORTCUT
   !else
     !include "${BUILD_RESOURCES_DIR}/installer-translations.nsh"
-    Var preserveDesktopShortcut
 
     # Record the selected install scope before the old uninstaller removes links.
     Function RememberDesktopShortcut
@@ -79,7 +82,8 @@
     ${if} ${RebootFlag}
       Return
     ${endif}
-    ${if} ${FileExists} "$newDesktopLink"
+    ${if} $preserveDesktopShortcut == "true"
+    ${andIf} ${FileExists} "$newDesktopLink"
       SendMessage $mui.FinishPage.ShowReadme ${BM_SETCHECK} ${BST_CHECKED} 0
     ${endif}
   FunctionEnd
@@ -90,6 +94,7 @@
     ${endif}
     SendMessage $mui.FinishPage.ShowReadme ${BM_GETCHECK} 0 0 $0
     ${if} $0 == ${BST_UNCHECKED}
+    ${andIf} $preserveDesktopShortcut == "true"
     ${andIf} ${FileExists} "$newDesktopLink"
       WinShell::UninstShortcut "$newDesktopLink"
       Delete "$newDesktopLink"
