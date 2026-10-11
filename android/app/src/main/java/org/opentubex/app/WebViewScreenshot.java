@@ -17,6 +17,38 @@ import java.util.function.Consumer;
 final class WebViewScreenshot {
     private WebViewScreenshot() {}
 
+    private static final class CaptureWait implements Runnable {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final Runnable ready;
+        final Consumer<Exception> failure;
+        Runnable cleanup = () -> {};
+        boolean completed;
+        final Runnable timeout = () -> reject(new IllegalStateException("Timed out waiting for a rendered frame"));
+
+        CaptureWait(Runnable ready, Consumer<Exception> failure) {
+            this.ready = ready;
+            this.failure = failure;
+            // One deadline covers Chromium's visual-state barrier and submission.
+            handler.postDelayed(timeout, 2000);
+        }
+
+        boolean finish() {
+            if (completed) return false;
+            completed = true;
+            handler.removeCallbacks(timeout);
+            cleanup.run();
+            return true;
+        }
+
+        void reject(Exception error) {
+            if (finish()) failure.accept(error);
+        }
+
+        @Override public void run() {
+            if (finish()) ready.run();
+        }
+    }
+
     static void capture(Activity activity, WebView webView, Consumer<Bitmap> success, Consumer<Exception> failure) {
         capture(activity, webView, 0, 1, webView.getWidth(), webView.getHeight(), success, failure);
     }
@@ -34,46 +66,21 @@ final class WebViewScreenshot {
         }
         // Revealing a prewarmed tab updates the DOM before Chromium submits its
         // pixels. Wait for that visual state and a committed frame before copying.
+        CaptureWait wait = new CaptureWait(() -> copyRendered(
+            activity, webView, top, height, width, targetHeight, success, failure
+        ), failure);
         webView.postVisualStateCallback(0, new WebView.VisualStateCallback() {
             @Override public void onComplete(long requestId) {
-                awaitCommittedFrame(activity, webView, () -> copyRendered(
-                    activity, webView, top, height, width, targetHeight, success, failure
-                ), failure);
+                if (!wait.completed) awaitCommittedFrame(activity, webView, wait);
             }
         });
     }
 
-    private static void awaitCommittedFrame(Activity activity, WebView webView,
-                                            Runnable ready, Consumer<Exception> failure) {
+    private static void awaitCommittedFrame(Activity activity, WebView webView, CaptureWait wait) {
         if (!webView.isAttachedToWindow() || !webView.isHardwareAccelerated()) {
-            failure.accept(new IllegalStateException("WebView is not ready for hardware capture"));
+            wait.reject(new IllegalStateException("WebView is not ready for hardware capture"));
             return;
         }
-        Handler handler = new Handler(Looper.getMainLooper());
-        // Both completion signals run on the main thread. A timeout also removes
-        // listeners when a hidden or detached window stops submitting frames.
-        class FrameWait implements Runnable {
-            boolean completed;
-            Runnable cleanup;
-            final Runnable timeout = () -> {
-                if (finish()) {
-                    failure.accept(new IllegalStateException("Timed out waiting for a committed frame"));
-                }
-            };
-
-            boolean finish() {
-                if (completed) return false;
-                completed = true;
-                handler.removeCallbacks(timeout);
-                cleanup.run();
-                return true;
-            }
-
-            @Override public void run() {
-                if (finish()) ready.run();
-            }
-        }
-        FrameWait wait = new FrameWait();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ViewTreeObserver observer = webView.getViewTreeObserver();
             wait.cleanup = () -> {
@@ -100,9 +107,8 @@ final class WebViewScreenshot {
                 }
             };
             wait.cleanup = () -> window.removeOnFrameMetricsAvailableListener(listener);
-            window.addOnFrameMetricsAvailableListener(listener, handler);
+            window.addOnFrameMetricsAvailableListener(listener, wait.handler);
         }
-        handler.postDelayed(wait.timeout, 2000);
         webView.postInvalidateOnAnimation();
     }
 
