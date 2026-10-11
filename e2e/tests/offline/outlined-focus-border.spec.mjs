@@ -11,8 +11,12 @@ async function expectEvenFocusBorder(app, page, field, outlineSelector) {
   }, outlineSelector)
   await field.focus()
   await expect(field).toBeFocused()
-  // Wait for focus color transitions and the compositor before sampling pixels.
-  await page.waitForTimeout(200)
+  // Wait for the focus color transition, then allow the compositor to paint it.
+  await expect.poll(() => field.evaluate((element, outlineSelector) => {
+    const outline = element.parentElement.querySelector(outlineSelector)
+    return outline.getAnimations().length
+  }, outlineSelector)).toBe(0)
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const geometry = await field.evaluate((element, { outlineSelector, restingLabel }) => {
     const bounds = element.getBoundingClientRect()
     const outline = element.parentElement.querySelector(outlineSelector)
