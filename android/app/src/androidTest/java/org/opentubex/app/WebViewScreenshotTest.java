@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.webkit.WebView;
 
 import androidx.test.core.app.ActivityScenario;
@@ -21,6 +23,8 @@ import org.json.JSONTokener;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
@@ -145,6 +149,196 @@ public class WebViewScreenshotTest {
                 """);
             awaitCondition(webView, "document.querySelectorAll('.ft-list-video').length === 1 && document.body.textContent.includes('Shortened feed')");
             awaitCondition(webView, "window.scrollY <= Math.max(0, document.documentElement.scrollHeight - window.innerHeight) + 1");
+        }
+    }
+
+    @Test
+    public void thumbnailTimesOutBeforeVisualStateAndIgnoresLateCallback() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            AtomicReference<WebView.VisualStateCallback> delayedCallback = new AtomicReference<>();
+            AtomicBoolean delayVisualState = new AtomicBoolean(true);
+            scenario.onActivity(activity -> {
+                WebView webView = new WebView(activity) {
+                    @Override public void postVisualStateCallback(long requestId, VisualStateCallback callback) {
+                        if (delayVisualState.get()) delayedCallback.set(callback);
+                        else super.postVisualStateCallback(requestId, callback);
+                    }
+                };
+                webView.getSettings().setJavaScriptEnabled(true);
+                webView.loadDataWithBaseURL("https://localhost", "<body style='margin:0;background:lime'></body>",
+                    "text/html", "UTF-8", null);
+                activity.addContentView(webView, new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                view.set(webView);
+            });
+            WebView webView = view.get();
+            try {
+                awaitCondition(webView, "document.body?.style.background === 'lime'");
+                CountDownLatch timedOut = new CountDownLatch(1);
+                CountDownLatch duplicateCompletion = new CountDownLatch(1);
+                AtomicInteger completions = new AtomicInteger();
+                AtomicReference<Exception> error = new AtomicReference<>();
+                scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                    bitmap -> {
+                        bitmap.recycle();
+                        if (completions.incrementAndGet() > 1) duplicateCompletion.countDown();
+                    }, failure -> {
+                        error.set(failure);
+                        if (completions.incrementAndGet() > 1) duplicateCompletion.countDown();
+                        timedOut.countDown();
+                    }));
+                assertNotNull("The visual-state callback was requested", delayedCallback.get());
+                assertTrue("Capture must time out even if visual state never completes", timedOut.await(4, TimeUnit.SECONDS));
+                assertTrue(error.get().getMessage(), error.get().getMessage().contains("Timed out"));
+
+                CountDownLatch retried = new CountDownLatch(1);
+                AtomicReference<Exception> retryError = new AtomicReference<>();
+                AtomicReference<Integer> retryPixel = new AtomicReference<>();
+                scenario.onActivity(activity -> {
+                    delayVisualState.set(false);
+                    delayedCallback.get().onComplete(0);
+                    WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                        bitmap -> {
+                            retryPixel.set(bitmap.getPixel(160, 90));
+                            bitmap.recycle();
+                            retried.countDown();
+                        }, failure -> { retryError.set(failure); retried.countDown(); });
+                });
+                assertTrue("A subsequent capture succeeds", retried.await(10, TimeUnit.SECONDS));
+                assertEquals(null, retryError.get());
+                assertTrue("Retry captures the green page", Color.green(retryPixel.get()) > 220);
+                assertTrue("The late callback cannot complete capture again", !duplicateCompletion.await(250, TimeUnit.MILLISECONDS));
+                assertEquals(1, completions.get());
+            } finally {
+                scenario.onActivity(activity -> {
+                    ((ViewGroup) webView.getParent()).removeView(webView);
+                    webView.destroy();
+                });
+            }
+        }
+    }
+
+    @Test
+    public void thumbnailWaitsForCommittedFrameWhenDrawingIsDelayed() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app')");
+            evaluate(webView, """
+                window.__delayedPreview = document.createElement('div');
+                window.__delayedPreview.style.cssText = 'position:fixed;inset:0;background:black;z-index:2147483647';
+                document.body.append(window.__delayedPreview);
+                """);
+            CountDownLatch baseline = new CountDownLatch(1);
+            AtomicReference<Exception> error = new AtomicReference<>();
+            AtomicReference<Integer> pixel = new AtomicReference<>();
+            scenario.onActivity(activity -> WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                bitmap -> {
+                    pixel.set(bitmap.getPixel(160, 90));
+                    bitmap.recycle();
+                    baseline.countDown();
+                }, failure -> { error.set(failure); baseline.countDown(); }));
+            assertTrue(baseline.await(10, TimeUnit.SECONDS));
+            assertEquals(null, error.get());
+            assertEquals(Color.BLACK, (int) pixel.get());
+
+            AtomicBoolean drawingAllowed = new AtomicBoolean(false);
+            ViewTreeObserver.OnPreDrawListener delayDraw = drawingAllowed::get;
+            CountDownLatch captured = new CountDownLatch(1);
+            try {
+                scenario.onActivity(activity -> {
+                    webView.getViewTreeObserver().addOnPreDrawListener(delayDraw);
+                    webView.evaluateJavascript("window.__delayedPreview.style.background = 'lime'", ignored ->
+                        WebViewScreenshot.capture(activity, webView, 0.1, 0.3, 320, 180,
+                            bitmap -> {
+                                pixel.set(bitmap.getPixel(160, 90));
+                                bitmap.recycle();
+                                captured.countDown();
+                            }, failure -> { error.set(failure); captured.countDown(); }));
+                });
+                // Animation callbacks still run while pre-draw cancels submission.
+                boolean capturedBeforeDraw = captured.await(500, TimeUnit.MILLISECONDS);
+                webView.post(() -> {
+                    drawingAllowed.set(true);
+                    webView.invalidate();
+                });
+                assertTrue(captured.await(10, TimeUnit.SECONDS));
+                assertEquals(null, error.get());
+                assertTrue("Capture must wait until the new frame can be submitted", !capturedBeforeDraw);
+                assertTrue("Capture shows the newly committed green frame", Color.green(pixel.get()) > 220);
+            } finally {
+                webView.post(() -> drawingAllowed.set(true));
+                scenario.onActivity(activity -> {
+                    webView.getViewTreeObserver().removeOnPreDrawListener(delayDraw);
+                    webView.evaluateJavascript("window.__delayedPreview.remove()", null);
+                });
+            }
+        }
+    }
+
+    @Test
+    public void thumbnailWaitsForNewlyPresentedTabToPaint() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app')");
+            evaluate(webView, """
+                window.__tabPreviewPixels = null;
+                (async () => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const originalScale = store.state.settings.uiScale;
+                    const stage = document.createElement('div');
+                    stage.style.cssText = 'position:fixed;inset:0;background:black;z-index:2147483647';
+                    const tab = document.createElement('div');
+                    tab.style.cssText = 'position:absolute;inset:0;background:lime;opacity:0';
+                    stage.append(tab);
+                    document.body.append(stage);
+                    const pixels = [];
+                    try {
+                        for (const scale of [100, 125]) {
+                            store.state.settings.uiScale = scale;
+                            for (let attempt = 0; attempt < 10; attempt++) {
+                                // Prewarmed neighbors keep their layout with opacity zero.
+                                tab.style.opacity = '0';
+                                await new Promise(resolve => setTimeout(resolve, 100));
+                                tab.style.opacity = '1';
+                                // Opening the organizer can request a thumbnail immediately
+                                // after the swipe makes the target page visible.
+                                const {dataUrl} = await Capacitor.Plugins.Screenshot.take({
+                                    width:320, height:180, top:0.1, cropHeight:0.3
+                                });
+                                const image = new Image();
+                                image.src = dataUrl;
+                                await image.decode();
+                                const canvas = document.createElement('canvas');
+                                canvas.width = 320;
+                                canvas.height = 180;
+                                const context = canvas.getContext('2d');
+                                context.drawImage(image, 0, 0);
+                                pixels.push(context.getImageData(160, 90, 1, 1).data[1]);
+                            }
+                        }
+                        window.__tabPreviewPixels = {green:pixels};
+                    } catch (error) {
+                        window.__tabPreviewPixels = {error:String(error)};
+                    } finally {
+                        stage.remove();
+                        store.state.settings.uiScale = originalScale;
+                    }
+                })();
+                """);
+            awaitCondition(webView, "window.__tabPreviewPixels !== null", 45000);
+            JSONObject result = new JSONObject((String) new JSONTokener(evaluate(webView,
+                "JSON.stringify(window.__tabPreviewPixels)")).nextValue());
+            assertTrue("Thumbnail succeeds: " + result, !result.has("error"));
+            assertEquals(20, result.getJSONArray("green").length());
+            for (int index = 0; index < 20; index++) {
+                assertTrue("Capture " + index + " shows the presented green tab, not its previous black frame: " + result,
+                    result.getJSONArray("green").getInt(index) > 220);
+            }
         }
     }
 
@@ -322,7 +516,11 @@ public class WebViewScreenshotTest {
     }
 
     private static void awaitCondition(WebView view, String script) throws Exception {
-        long deadline = android.os.SystemClock.uptimeMillis() + 15000;
+        awaitCondition(view, script, 15000);
+    }
+
+    private static void awaitCondition(WebView view, String script, long timeoutMs) throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + timeoutMs;
         while (android.os.SystemClock.uptimeMillis() < deadline) {
             if ("true".equals(evaluate(view, script))) return;
             Thread.sleep(100);
