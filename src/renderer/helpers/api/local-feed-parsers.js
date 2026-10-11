@@ -629,7 +629,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
 
   const UPCOMING_TIME_REGEX = /^(premieres?|scheduled for) /i
 
-  const PUBLISH_TIME_REGEX = /^(streamed )?\d+ ?\w+? ago/i
+  const PUBLISH_TIME_REGEX = /^(streamed\s+)?\d+\s?\w+\s+ago/i
 
   /**
    * @param {string | undefined} text
