@@ -1594,13 +1594,16 @@ export default defineComponent({
     // pending SABR state after this player loads, but that must not add autoplay
     // to the same media element afterward.
     const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
-    // Queue advancement is an explicit playback request. Keep it for this
-    // player after Watch consumes the request when its source finishes loading.
-    const initialAutoplayRequested = props.autoplayRequested
+    // Queue requests can arrive for a replacement player or an in-place source
+    // switch. Keep autoplay armed after Watch consumes the loaded request.
+    const autoplayRequested = ref(props.autoplayRequested)
+    watch(() => props.autoplayRequested, requested => {
+      if (requested) autoplayRequested.value = true
+    })
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return !suppressInitialAutoplay && (initialAutoplayRequested || store.getters.getAutoplayVideos) && isActiveTab.value
+      return !suppressInitialAutoplay && (autoplayRequested.value || store.getters.getAutoplayVideos) && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -12431,6 +12434,13 @@ export default defineComponent({
           // from querying player state as soon as the format switch begins.
           hasLoaded.value = false
           hasPlaybackPosition.value = false
+        }
+
+        // A queued copy of the same video switches sources in this player.
+        // Start the queued item instead of restoring the previous source's end.
+        if (props.autoplayRequested) {
+          pendingFormatSwitchState.wasPaused = false
+          pendingFormatSwitchState.playbackPosition = 0
         }
 
         const {

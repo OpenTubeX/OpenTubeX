@@ -5564,8 +5564,14 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
-      this.queuedPlaybackVideoId = nextVideo.videoId
-      this.tabRouter.push(nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` })
+      const route = nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` }
+      if (this.tabRouter.resolve(route).fullPath === this.tabRoute.fullPath) {
+        this.$refs.player?.setCurrentTime(0)
+        this.$refs.player?.play()
+      } else {
+        this.queuedPlaybackVideoId = nextVideo.videoId
+        this.tabRouter.push(route)
+      }
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
     },

@@ -4,6 +4,7 @@ import { START_LOCATION } from 'vue-router'
 import packageDetails from '../../../package.json'
 import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import { translateWindowTitle } from '../helpers/strings'
+import { isAppHidden } from '../helpers/appVisibility'
 import {
   hasPendingViewTransition,
   runPendingViewTransition,
@@ -749,7 +750,21 @@ function urlFromRoute(route) {
 }
 
 function nextAnimationFrame() {
-  return new Promise(resolve => window.requestAnimationFrame(() => resolve()))
+  // Hidden WebViews stop rendering frames. Do not leave later queue items
+  // waiting behind the completed navigation while background audio plays.
+  if (isAppHidden()) return Promise.resolve()
+  return new Promise(resolve => {
+    const finish = () => {
+      window.cancelAnimationFrame(frame)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      resolve()
+    }
+    const onVisibilityChange = () => {
+      if (isAppHidden()) finish()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    const frame = window.requestAnimationFrame(finish)
+  })
 }
 
 function waitForTabElement(tabId, selector, timeout = 3000) {

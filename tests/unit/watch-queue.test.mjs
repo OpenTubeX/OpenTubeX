@@ -71,7 +71,8 @@ for (const route of [undefined, { path: '/watch/saved', query: { downloadId: '42
     const watch = {
       nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
       $store: { commit: (name, id) => removed.push([name, id]) },
-      tabRouter: { push: route => navigations.push(route) },
+      tabRoute: { fullPath: '/watch/previous' },
+      tabRouter: { resolve: route => ({ fullPath: route.path }), push: route => navigations.push(route) },
       t: key => key,
     }
     assert.equal(playNext.call(watch), true)
@@ -95,7 +96,7 @@ test('queued downloads explicitly start after loading even when general autoplay
     ...methods,
     nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route: { path: '/watch/saved', query: { downloadId: '42' } } },
     $store: { commit() {}, getters: { getAutoplayVideos: false } },
-    tabRouter: { push() {} },
+    tabRouter: { resolve: route => ({ fullPath: route.path }), push() {} },
     t: key => key,
     isLoading: false, preparingVideoLoadGeneration: null,
     localFilePlayback: true, videoPlayerLoaded: true,
@@ -109,11 +110,28 @@ test('queued downloads explicitly start after loading even when general autoplay
   const end = playerSource.indexOf('\n    })', start) + '\n    })'.length
   const autoplay = active => runInNewContext(playerSource.slice(start, end) + '\nautoplayVideos.value', {
     computed, suppressInitialAutoplay: false,
-    initialAutoplayRequested: watch.queuedPlaybackVideoId === watch.videoId,
+    autoplayRequested: { value: watch.queuedPlaybackVideoId === watch.videoId },
     store: watch.$store, isActiveTab: { value: active },
   })
   assert.equal(autoplay(true), true, 'the next queued file starts without enabling general autoplay')
   assert.equal(autoplay(false), false, 'a hidden tab must not start playing')
   await watch.handleVideoLoaded({ duration: 4 })
   assert.equal(watch.queuedPlaybackVideoId, null, 'the start request is consumed for later visits')
+})
+
+
+test('a queued duplicate of the current download replays without a route change', async () => {
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const methods = watchMethods(source, ['playNextQueuedVideo'])
+  const route = { path: '/watch/saved', query: { downloadId: '42' } }
+  const actions = []
+  const watch = {
+    ...methods, nextQueuedVideo: { videoId: 'saved', queueItemId: 1, route },
+    tabRoute: { fullPath: '/watch/saved?downloadId=42' },
+    tabRouter: { resolve: () => ({ fullPath: '/watch/saved?downloadId=42' }), push() { assert.fail('duplicate must not navigate') } },
+    $store: { commit: (name, id) => actions.push([name, id]) }, t: key => key,
+    $refs: { player: { setCurrentTime: time => actions.push(['seek', time]), play: () => actions.push(['play']) } },
+  }
+  assert.equal(watch.playNextQueuedVideo(), true)
+  assert.deepEqual(actions, [['removeVideoFromWatchQueue', 1], ['seek', 0], ['play']])
 })
