@@ -3,7 +3,10 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { Capacitor } from '@capacitor/core'
-import { nextTick, ref, shallowRef } from 'vue'
+import { computed, nextTick, ref, shallowRef } from 'vue'
+
+const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const initializePreviews = appSource.match(/initializeCapacitorTabPreviews\(store, [^\n]+/)[0]
 
 // Register the plugins against a native bridge so their real proxies call our mocks.
 globalThis.androidBridge = {}
@@ -91,19 +94,52 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
   })
   const warn = t.mock.method(console, 'warn', () => {})
   const pageSwipe = shallowRef(null)
-  const dispose = initializeCapacitorTabPreviews(store, pageSwipe)
+  const organizerSwipeActive = ref(false)
+  const dispose = vm.runInNewContext(initializePreviews, {
+    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed,
+  })
   t.after(() => {
     dispose()
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe,
+  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe, organizerSwipeActive,
     setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
 }
 
 async function captureScheduledPreview(t) {
   t.mock.timers.tick(600)
   await new Promise(setImmediate)
+}
+
+for (const previewState of ['missing', 'cached', 'capturing']) {
+  test(`a cancelled organizer pull refreshes a ${previewState} preview without another page event`, async t => {
+    const state = setup(t)
+    let finishCapture
+    if (previewState === 'cached') await captureScheduledPreview(t)
+    if (previewState === 'capturing') {
+      state.take.mock.mockImplementationOnce(() => new Promise(resolve => {
+        finishCapture = () => resolve({ dataUrl: 'partial gesture' })
+      }))
+      await captureScheduledPreview(t)
+    }
+    const latest = 'data:image/jpeg;base64,bGF0ZXN0'
+    state.setCaptureImage(latest)
+    state.document.dispatchEvent(new Event('scroll'))
+    const captures = state.take.mock.callCount()
+    prepareForTabOrganizer()
+    state.organizerSwipeActive.value = true
+    await captureScheduledPreview(t)
+    assert.equal(state.take.mock.callCount(), captures, 'a held pull must not capture the animated page')
+    state.organizerSwipeActive.value = false
+    t.mock.timers.tick(599)
+    assert.equal(state.take.mock.callCount(), captures, 'cancellation keeps capture off the input path')
+    t.mock.timers.tick(1)
+    finishCapture?.()
+    await new Promise(setImmediate)
+    assert.equal(state.take.mock.callCount(), captures + 1, 'the restored page gets a background capture')
+    assert.equal(getCapacitorTabPreview(state.tab), latest)
+  })
 }
 
 for (const event of ['loadeddata', 'playing', 'seeked']) {
