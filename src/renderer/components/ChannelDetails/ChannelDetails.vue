@@ -454,13 +454,15 @@ function updateTabsLayout() {
   if (!container || container.getBoundingClientRect().width === 0) return
   // Measure the full, bold-reserved labels independently of icon visibility.
   // This also lets icons return after resizing, changing locale or hiding tabs.
-  const fullWidth = [...container.querySelectorAll('.tab')].reduce((width, tab) => {
+  const tabs = [...container.querySelectorAll('.tab')]
+  const rowGap = Number.parseFloat(getComputedStyle(tabsContent.value.$el).columnGap)
+  const fullWidth = tabs.reduce((width, tab) => {
     const style = getComputedStyle(tab)
     const icon = getComputedStyle(tab.querySelector('.channelTabIcon'))
     return width + tab.querySelector('.tabLabel').getBoundingClientRect().width +
       Number.parseFloat(style.paddingInlineStart) + Number.parseFloat(style.paddingInlineEnd) +
       Number.parseFloat(icon.inlineSize) + Number.parseFloat(style.columnGap)
-  }, 0)
+  }, Math.max(0, tabs.length - 1) * rowGap)
   container.classList.toggle('hideTabIcons', fullWidth > container.getBoundingClientRect().width + 0.5)
   // Let the indicator's previous transform disappear before measuring overflow.
   nextTick(() => {

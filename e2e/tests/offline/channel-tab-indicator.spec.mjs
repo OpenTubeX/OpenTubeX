@@ -115,6 +115,38 @@ test('hides channel tab icons and preserves full labels when space is limited', 
   await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
 })
 
+test('hides channel icons when the gaps would otherwise make the row overflow', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1800, 900))
+  const tabs = page.locator('.channelDetails:visible .tabs')
+  for (const scale of [95, 125]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await tabs.evaluate(container => { container.style.cssText = 'flex: none; inline-size: 1200px' })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    const widthWithIcons = await tabs.evaluate(container => {
+      const content = container.querySelector('.tabsContent')
+      const buttons = [...content.querySelectorAll('.tab')]
+      const width = buttons.reduce((sum, tab) => sum + tab.getBoundingClientRect().width, 0)
+      const gaps = (buttons.length - 1) * parseFloat(getComputedStyle(content).columnGap)
+      container.style.flex = 'none'
+      container.style.inlineSize = `${width + gaps / 2}px`
+      return width + gaps
+    })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+    await expectAligned(page)
+    if (scale === 95) {
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        await captureAppFramebuffer(app, testInfo, `channel-tabs-fit-${colorScheme}`)
+      }
+    }
+    await tabs.evaluate((container, width) => { container.style.inlineSize = `${width + 2}px` }, widthWithIcons)
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+  }
+})
+
 test('keeps channel header rows evenly spaced below the banner', async ({ app, page }, testInfo) => {
   for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [750, 900, 100], [1600, 900, 95]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {

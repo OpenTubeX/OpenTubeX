@@ -841,6 +841,16 @@ for (const uiScale of [95, 125]) {
       }
     })
 
+    test('header button hover respects reduced motion', async ({ page }) => {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      // Exercise the component's OS preference fallback without the global override.
+      await page.evaluate(() => document.documentElement.removeAttribute('data-reduced-motion'))
+      const button = page.locator('.topNav .menuButton')
+      await button.hover()
+      await expect(button).toHaveCSS('transition-duration', '0s')
+    })
+
     test('shows complete desktop destination labels', async ({ page }) => {
       for (const locale of ['en-US', 'de-DE']) {
         await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)

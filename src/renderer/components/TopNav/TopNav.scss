@@ -650,7 +650,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .navButton {
+  .navButton,
+  .navButton:hover {
     transition: none;
   }
 
