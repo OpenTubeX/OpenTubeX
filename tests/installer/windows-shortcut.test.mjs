@@ -156,12 +156,17 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
     try {
       await install(false)
       assert.deepEqual(await readFile(unrelatedLink), contents)
+      await silentUpdate('--updated')
+      assert.deepEqual(await readFile(unrelatedLink), contents)
+      await install(false)
+      assert.deepEqual(await readFile(unrelatedLink), contents)
+      await uninstall('/currentuser')
+      assert.deepEqual(await readFile(unrelatedLink), contents)
     } finally {
       await rm(unrelatedLink, { force: true })
     }
   })
   await t.test('the first automatic upgrade preserves shortcuts from the previous installer', async () => {
-    await uninstall('/currentuser')
     await run('wine', [previousInstaller, '/S', '/currentuser'])
     assert.equal(await exists(desktopLink), true)
     await appendFile(desktopLink, 'previous installer shortcut preservation marker')

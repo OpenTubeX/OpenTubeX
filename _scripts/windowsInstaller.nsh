@@ -3,10 +3,7 @@
 !endif
 
 !macro customHeader
-  !ifdef BUILD_UNINSTALLER
-    # Remove an opted-in shortcut on uninstall, despite disabling automatic creation.
-    !undef DO_NOT_CREATE_DESKTOP_SHORTCUT
-  !else
+  !ifndef BUILD_UNINSTALLER
     !include "${BUILD_RESOURCES_DIR}/installer-translations.nsh"
 
     # Record the selected install scope before the old uninstaller removes links.
@@ -14,10 +11,17 @@
       StrCpy $preserveDesktopShortcut "false"
       ReadRegStr $0 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" InstallLocation
       ReadRegStr $1 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" ShortcutName
+      ClearErrors
+      ReadRegDWORD $2 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned
+      ${if} ${Errors}
+        # Released installers created desktop shortcuts automatically.
+        StrCpy $2 "1"
+      ${endif}
       ${if} $1 == ""
         StrCpy $1 "${PRODUCT_FILENAME}"
       ${endif}
       ${if} $0 != ""
+      ${andIf} $2 == "1"
       ${andIf} ${FileExists} "$0\${APP_EXECUTABLE_FILENAME}"
       ${andIf} ${FileExists} "$DESKTOP\$1.lnk"
         StrCpy $preserveDesktopShortcut "true"
@@ -27,9 +31,13 @@
     Function CreateDesktopShortcut
       ${ifNot} ${isNoDesktopShortcut}
       ${andIfNot} ${FileExists} "$newDesktopLink"
+        ClearErrors
         CreateShortCut "$newDesktopLink" "$appExe" "" "$appExe" 0 "" "" "${APP_DESCRIPTION}"
-        WinShell::SetLnkAUMI "$newDesktopLink" "${APP_ID}"
-        System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+        ${ifNot} ${Errors}
+          WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 1
+          WinShell::SetLnkAUMI "$newDesktopLink" "${APP_ID}"
+          System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+        ${endif}
       ${endif}
     FunctionEnd
   !endif
@@ -50,8 +58,19 @@
 !macroend
 
 !macro customInstall
+  WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 0
   ${if} $preserveDesktopShortcut == "true"
+    WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 1
     Call CreateDesktopShortcut
+  ${endif}
+!macroend
+
+!macro customUnInstall
+  ReadRegDWORD $0 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned
+  ${if} $0 == "1"
+  ${andIfNot} ${isKeepShortcuts}
+    WinShell::UninstShortcut "$oldDesktopLink"
+    Delete "$oldDesktopLink"
   ${endif}
 !macroend
 
@@ -98,6 +117,7 @@
     ${andIf} ${FileExists} "$newDesktopLink"
       WinShell::UninstShortcut "$newDesktopLink"
       Delete "$newDesktopLink"
+      WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 0
       System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
     ${endif}
   FunctionEnd

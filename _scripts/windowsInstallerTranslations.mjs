@@ -47,7 +47,7 @@ export async function getInstallerTranslations(localesDirectory) {
     if (!label) throw new Error(`Missing desktop shortcut installer translation for ${locale}`)
     return `LangString opentubexCreateDesktopShortcut \${LANG_${language}} "${escapeNsisString(label)}"`
   }))
-  return lines.join('\n') + '\n'
+  return '# -*- coding: utf-8 -*-\n' + lines.join('\n') + '\n'
 }
 
 /** @param {import('electron-builder').AfterPackContext} context */

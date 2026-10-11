@@ -11,10 +11,11 @@ test('installer labels cannot interpolate NSIS variables or inject instructions'
 
 test('installer languages use human translations and AI completions', async () => {
   const translations = await getInstallerTranslations('static/locales')
+  assert.ok(translations.startsWith('# -*- coding: utf-8 -*-\n'))
   assert.match(translations, /\$\{LANG_ENGLISH\} "Create a desktop shortcut"/)
   assert.match(translations, /\$\{LANG_GERMAN\} "Desktop-Verknüpfung erstellen"/)
   assert.match(translations, /\$\{LANG_FRENCH\} "Créer un raccourci sur le bureau"/)
-  assert.equal(translations.trim().split('\n').length, 26)
+  assert.equal(translations.match(/^LangString /gm).length, 26)
 })
 
 test('Windows packaging writes installer translations to its configured resources directory', async t => {
