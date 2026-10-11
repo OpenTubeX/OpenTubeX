@@ -2,6 +2,39 @@
   Var preserveDesktopShortcut
 !endif
 
+!include "Win\COM.nsh"
+
+# Check the current target, since a user can replace a previously created link.
+!macro CheckDesktopShortcut link target result
+  Push $R0
+  Push $R1
+  Push $R2
+  Push $R3
+  StrCpy ${result} "false"
+  StrCpy $R0 0
+  !insertmacro ComHlpr_CreateInProcInstance ${CLSID_ShellLink} ${IID_IShellLink} R0 ""
+  ${if} $R0 P<> 0
+    StrCpy $R1 0
+    ${IUnknown::QueryInterface} $R0 '("${IID_IPersistFile}",.R1)'
+    ${if} $R1 P<> 0
+      ${IPersistFile::Load} $R1 '("${link}",0).R2'
+      ${if} $R2 == 0
+        ${IShellLink::GetPath} $R0 '(.R3,${NSIS_MAX_STRLEN},0,0).R2'
+        ${if} $R2 == 0
+        ${andIf} $R3 == "${target}"
+          StrCpy ${result} "true"
+        ${endif}
+      ${endif}
+      ${IUnknown::Release} $R1 ""
+    ${endif}
+    ${IUnknown::Release} $R0 ""
+  ${endif}
+  Pop $R3
+  Pop $R2
+  Pop $R1
+  Pop $R0
+!macroend
+
 !macro customHeader
   !ifndef BUILD_UNINSTALLER
     !include "${BUILD_RESOURCES_DIR}/installer-translations.nsh"
@@ -11,20 +44,13 @@
       StrCpy $preserveDesktopShortcut "false"
       ReadRegStr $0 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" InstallLocation
       ReadRegStr $1 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" ShortcutName
-      ClearErrors
-      ReadRegDWORD $2 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned
-      ${if} ${Errors}
-        # Released installers created desktop shortcuts automatically.
-        StrCpy $2 "1"
-      ${endif}
       ${if} $1 == ""
         StrCpy $1 "${PRODUCT_FILENAME}"
       ${endif}
       ${if} $0 != ""
-      ${andIf} $2 == "1"
       ${andIf} ${FileExists} "$0\${APP_EXECUTABLE_FILENAME}"
       ${andIf} ${FileExists} "$DESKTOP\$1.lnk"
-        StrCpy $preserveDesktopShortcut "true"
+        !insertmacro CheckDesktopShortcut "$DESKTOP\$1.lnk" "$0\${APP_EXECUTABLE_FILENAME}" $preserveDesktopShortcut
       ${endif}
     FunctionEnd
 
@@ -34,7 +60,6 @@
         ClearErrors
         CreateShortCut "$newDesktopLink" "$appExe" "" "$appExe" 0 "" "" "${APP_DESCRIPTION}"
         ${ifNot} ${Errors}
-          WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 1
           WinShell::SetLnkAUMI "$newDesktopLink" "${APP_ID}"
           System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
         ${endif}
@@ -58,19 +83,18 @@
 !macroend
 
 !macro customInstall
-  WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 0
   ${if} $preserveDesktopShortcut == "true"
-    WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 1
     Call CreateDesktopShortcut
   ${endif}
 !macroend
 
 !macro customUnInstall
-  ReadRegDWORD $0 SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned
-  ${if} $0 == "1"
-  ${andIfNot} ${isKeepShortcuts}
-    WinShell::UninstShortcut "$oldDesktopLink"
-    Delete "$oldDesktopLink"
+  ${ifNot} ${isKeepShortcuts}
+    !insertmacro CheckDesktopShortcut "$oldDesktopLink" "$INSTDIR\${APP_EXECUTABLE_FILENAME}" $0
+    ${if} $0 == "true"
+      WinShell::UninstShortcut "$oldDesktopLink"
+      Delete "$oldDesktopLink"
+    ${endif}
   ${endif}
 !macroend
 
@@ -115,10 +139,12 @@
     ${if} $0 == ${BST_UNCHECKED}
     ${andIf} $preserveDesktopShortcut == "true"
     ${andIf} ${FileExists} "$newDesktopLink"
-      WinShell::UninstShortcut "$newDesktopLink"
-      Delete "$newDesktopLink"
-      WriteRegDWORD SHELL_CONTEXT "${INSTALL_REGISTRY_KEY}" DesktopShortcutOwned 0
-      System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+      !insertmacro CheckDesktopShortcut "$newDesktopLink" "$appExe" $0
+      ${if} $0 == "true"
+        WinShell::UninstShortcut "$newDesktopLink"
+        Delete "$newDesktopLink"
+        System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+      ${endif}
     ${endif}
   FunctionEnd
 !macroend

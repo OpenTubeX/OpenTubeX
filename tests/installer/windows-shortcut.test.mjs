@@ -90,7 +90,18 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
   assert.notEqual(observed, source, 'The finish-page observer must be installed')
   const include = join(directory, 'fixture.nsh')
   // Wine tasklist reports false positives; only the fixture disables that check.
-  await writeFile(include, '!macro customCheckAppRunning\n!macroend\n' + observed)
+  const shortcutFixture = `
+    ClearErrors
+    \${GetOptions} $CMDLINE "--fixture-foreign-shortcut" $0
+    \${ifNot} \${Errors}
+      SetShellVarContext current
+      CreateShortCut "$DESKTOP\\OpenTubeX.lnk" "$SYSDIR\\notepad.exe"
+      SetErrorLevel 0
+      Quit
+    \${endif}
+`
+  await writeFile(include, '!macro customCheckAppRunning\n!macroend\n' +
+    observed.replace('!macro customInit', '!macro customInit' + shortcutFixture))
   async function buildInstaller (nsis, output) {
     const artifacts = await build({
       projectDir: process.cwd(),
@@ -223,6 +234,28 @@ test('compiled Windows installer preserves the desktop shortcut choice', { timeo
     await install(false, true)
     await uninstall('/currentuser')
     assert.equal(await exists(desktopLink), false)
+  })
+  await t.test('uninstall preserves an owned shortcut replaced with an unrelated shortcut', async () => {
+    await install(false, true)
+    await run('wine', [installer, '/S', '--fixture-foreign-shortcut'])
+    const contents = await readFile(desktopLink)
+    await uninstall('/currentuser')
+    assert.deepEqual(await readFile(desktopLink), contents)
+    await rm(desktopLink)
+  })
+  await t.test('updates leave replaced shortcuts unchecked and preserve them even on opt-in', async () => {
+    await install(false, true)
+    await run('wine', [installer, '/S', '--fixture-foreign-shortcut'])
+    const contents = await readFile(desktopLink)
+    await silentUpdate('--updated')
+    assert.deepEqual(await readFile(desktopLink), contents)
+    await install(false)
+    assert.deepEqual(await readFile(desktopLink), contents)
+    await install(false, true)
+    assert.deepEqual(await readFile(desktopLink), contents)
+    await uninstall('/currentuser')
+    assert.deepEqual(await readFile(desktopLink), contents)
+    await rm(desktopLink)
   })
   await t.test('all-users installs also track the chosen scope and custom directory', async () => {
     const currentUserLink = desktopLink
