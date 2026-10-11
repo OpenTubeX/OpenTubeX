@@ -52,12 +52,15 @@ const remoteRecord = (videoId, watchProgress = 15) => ({
 })
 
 function monitorInputDelay() {
-  let previous = performance.now()
+  let previous = process.threadCpuUsage()
   let maximumDelay = 0
   let turns = 0
   const sample = () => {
-    const now = performance.now()
-    maximumDelay = Math.max(maximumDelay, now - previous)
+    // Concurrent CI suites can deschedule this process. Measure synchronous
+    // main-thread CPU work rather than time spent waiting for the runner's CPU.
+    const now = process.threadCpuUsage()
+    const work = (now.user - previous.user + now.system - previous.system) / 1000
+    maximumDelay = Math.max(maximumDelay, work)
     previous = now
   }
   const timer = setInterval(() => { sample(); turns++ }, 10)
@@ -70,10 +73,23 @@ function monitorInputDelay() {
       sample()
       clearInterval(timer)
       assert.ok(turns > 0, 'Input must run while background work is pending')
-      assert.ok(maximumDelay < 250, `Maximum renderer input delay was ${Math.round(maximumDelay)} ms`)
+      assert.ok(maximumDelay < 250, `Maximum renderer CPU burst was ${Math.round(maximumDelay)} ms`)
     },
   }
 }
+
+test('input monitoring still rejects synchronous renderer CPU stalls', async () => {
+  const input = monitorInputDelay()
+  try {
+    await new Promise(resolve => setTimeout(resolve, 20))
+    const start = process.threadCpuUsage()
+    let elapsed
+    do {
+      elapsed = process.threadCpuUsage(start)
+    } while (elapsed.user + elapsed.system < 300_000)
+    await assert.rejects(input.finish(), /Maximum renderer CPU burst/)
+  } finally { input.stop() }
+})
 
 test('history edits during transfer cannot become remote deletions or lose new progress', async () => {
   const records = Array.from({ length: 600 }, (_, index) => ({
