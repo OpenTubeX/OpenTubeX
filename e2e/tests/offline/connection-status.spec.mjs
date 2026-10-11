@@ -37,6 +37,16 @@ test.describe('full-window connection banner', () => {
       const player = page.locator('.ftVideoPlayer')
       await expect(banner).toHaveText('Connection lost. Trying to reconnect…')
       const toggleFullWindow = () => player.locator('.full-window-button').evaluate(button => button.click())
+      const expectPlayerAboveBanner = async () => {
+        await expect(player).toBeVisible()
+        await expect(banner).toBeVisible()
+        await expect.poll(async () => {
+          const videoBounds = await player.boundingBox()
+          const statusBounds = await banner.boundingBox()
+          if (!videoBounds || !statusBounds) return Infinity
+          return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
+        }, { message: 'Full-window player must clear the visible connection banner' }).toBeLessThan(1)
+      }
       const expectBounds = async (left, right, bottom) => {
         await expect.poll(() => banner.evaluate((element, { left, right, bottom }) => {
           const bounds = element.getBoundingClientRect()
@@ -62,11 +72,7 @@ test.describe('full-window connection banner', () => {
           await toggleFullWindow()
           await expect(player).toHaveClass(/fullWindow/)
           await expectBounds(0, 0, 0)
-          await expect.poll(async () => {
-            const videoBounds = await player.boundingBox()
-            const statusBounds = await banner.boundingBox()
-            return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
-          }).toBeLessThan(1)
+          await expectPlayerAboveBanner()
           await toggleFullWindow()
           await expect(player).not.toHaveClass(/fullWindow/)
           await expectBounds(left, right, bottom)
@@ -82,11 +88,7 @@ test.describe('full-window connection banner', () => {
       await expect(page.locator('.app > .progressBar')).toBeVisible()
       for (const safeArea of ['0px', '24px']) {
         await page.evaluate(safeArea => document.documentElement.style.setProperty('--safe-area-inset-bottom', safeArea), safeArea)
-        await expect.poll(async () => {
-          const videoBounds = await player.boundingBox()
-          const statusBounds = await banner.boundingBox()
-          return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
-        }).toBeLessThan(1)
+        await expectPlayerAboveBanner()
       }
       await page.evaluate(() => {
         document.documentElement.style.removeProperty('--safe-area-inset-bottom')
@@ -94,11 +96,7 @@ test.describe('full-window connection banner', () => {
       })
       await banner.evaluate(element => { element.style.fontSize = '28px' })
       await page.setViewportSize({ width: 480, height: 800 })
-      await expect.poll(async () => {
-        const videoBounds = await player.boundingBox()
-        const statusBounds = await banner.boundingBox()
-        return Math.abs(videoBounds.y + videoBounds.height - statusBounds.y)
-      }).toBeLessThan(1)
+      await expectPlayerAboveBanner()
       await page.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
       await page.evaluate(() => window.dispatchEvent(new Event('online')))
       await expect(banner).toHaveText('Back online')
