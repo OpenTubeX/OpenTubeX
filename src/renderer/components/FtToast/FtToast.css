@@ -751,6 +751,10 @@ body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
   inset-block-end: calc(34px + var(--connection-navigation-inset, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
+body:has(.connection-status-holder .connectionStatus) {
+  --connection-status-space: calc(var(--connection-status-height, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+}
+
 body:has(.app > .progressBar) {
   --connection-progress-inset: 6px;
 }
@@ -799,7 +803,8 @@ body:has(.app) :fullscreen .toast-holder[data-sonner-toaster]:is(.position-top-l
 
 body:has(.app) :fullscreen .connection-status-holder,
 body:has(.mobileSheet[open]) .connection-status-holder,
-body:has(.app .settingsWindow.maximized) .connection-status-holder {
+body:has(.app .settingsWindow.maximized) .connection-status-holder,
+body:has(.app .ftVideoPlayer.fullWindow) .connection-status-holder {
   inset-inline: 0;
   inset-block-end: calc(var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   transform: none;

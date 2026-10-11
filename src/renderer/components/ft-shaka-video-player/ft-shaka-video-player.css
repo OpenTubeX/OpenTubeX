@@ -4846,6 +4846,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   z-index: 1000;
 }
 
+.fullWindow:not(:fullscreen) {
+  inset-block-end: var(--connection-status-space, 0);
+}
+
 .fullWindow > .player {
   width: 100%;
   height: 100%;
@@ -5116,15 +5120,15 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :global(.app.capacitorTabs:has(.mobileMiniBar) > .routerView) {
-  padding-block-end: 108px;
+  padding-block-end: calc(108px + var(--connection-status-space, 0px));
 }
 
 :global(.app.capacitorTabs:has(.mobileMiniBar .mobileMiniBarCompact) > .routerView) {
-  padding-block-end: 112px;
+  padding-block-end: calc(112px + var(--connection-status-space, 0px));
 }
 
 :global(.app.capacitorTabs:has(.mobileMiniBar.mobileMiniBarCollapsed) > .routerView) {
-  padding-block-end: 64px;
+  padding-block-end: calc(64px + var(--connection-status-space, 0px));
 }
 
 .ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .musicAudioSurface, .mobileMiniBarOverlay) {

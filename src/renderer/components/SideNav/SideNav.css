@@ -1,6 +1,6 @@
 .sideNav {
   display: block;
-  block-size: calc(100dvh - var(--top-nav-sticky-offset, 60px));
+  block-size: calc(100dvh - var(--top-nav-sticky-offset, 60px) - var(--connection-status-space, 0px));
   inline-size: 80px;
   overflow-x: hidden;
   position: sticky;

@@ -33,7 +33,7 @@
      widths still follow the fixed-position containing viewport. */
   max-inline-size: 100%;
   min-block-size: 0;
-  max-block-size: calc(100dvh - var(--app-safe-area-inset-top, 0px));
+  max-block-size: calc(100dvh - var(--app-safe-area-inset-top, 0px) - var(--connection-status-space, 0px));
   border-width: 0;
   border-radius: 0;
 }
