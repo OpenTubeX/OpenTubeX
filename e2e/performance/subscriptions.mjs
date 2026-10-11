@@ -64,7 +64,9 @@ export async function measureVideosSwitch(page) {
         let previousFrame = startedAt
         let longestFrame = 0
 
-        function sampleFrame(timestamp) {
+        function sampleFrame() {
+          // Frame timestamps can precede startedAt when Chromium reuses a frame.
+          const timestamp = performance.now()
           longestFrame = Math.max(longestFrame, timestamp - previousFrame)
           previousFrame = timestamp
 
@@ -73,10 +75,13 @@ export async function measureVideosSwitch(page) {
             panel?.querySelector('.ft-list-video') !== null
 
           if (feedIsRendered) {
-            requestAnimationFrame(finishedAt => resolve({
-              elapsed: finishedAt - startedAt,
-              longestFrame: Math.max(longestFrame, finishedAt - previousFrame)
-            }))
+            requestAnimationFrame(() => {
+              const finishedAt = performance.now()
+              resolve({
+                elapsed: finishedAt - startedAt,
+                longestFrame: Math.max(longestFrame, finishedAt - previousFrame)
+              })
+            })
             return
           }
 

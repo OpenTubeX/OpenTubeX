@@ -29,22 +29,41 @@ test('performance arguments reject malformed and fractional counts', () => {
 
 test('subscription timing includes the frame that finishes rendering', async () => {
   let frame = 0
+  let timestamp = 0
   const metrics = await measureVideosSwitch({
     evaluate: action => vm.runInNewContext(`(${action.toString()})()`, {
-      performance: { now: () => 0 },
+      performance: { now: () => timestamp },
       document: {
         querySelector: selector => selector.includes('data-subscription-feed-tab')
           ? { click () {}, getAttribute: () => 'true' }
           : { querySelector: () => ({}) }
       },
       requestAnimationFrame: callback => {
-        const timestamp = ++frame === 1 ? 100 : 400
+        timestamp = ++frame === 1 ? 100 : 400
         callback(timestamp)
       }
     })
   })
   assert.equal(metrics.elapsed, 400)
   assert.equal(metrics.longestFrame, 300)
+})
+
+test('subscription timing stays valid when frame timestamps precede the measurement start', async () => {
+  const readings = [100, 110, 120]
+  const frameTimestamps = [90, 95]
+  const metrics = await measureVideosSwitch({
+    evaluate: action => vm.runInNewContext(`(${action.toString()})()`, {
+      performance: { now: () => readings.shift() },
+      document: {
+        querySelector: selector => selector.includes('data-subscription-feed-tab')
+          ? { click () {}, getAttribute: () => 'true' }
+          : { querySelector: () => ({}) }
+      },
+      requestAnimationFrame: callback => callback(frameTimestamps.shift())
+    })
+  })
+  assert.equal(metrics.elapsed, 20)
+  assert.equal(metrics.longestFrame, 10)
 })
 
 test('packed code size includes chunks in subdirectories and excludes maps and media', async () => {
