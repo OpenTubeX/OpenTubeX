@@ -85,10 +85,11 @@ for (const browseDownloads of [false, true]) for (const autoplayVideos of [true,
           videoId, title, route: { path: '/watch/' + videoId, query: { downloadId: String(id) } },
         } })
       }
-      app.$router.push({ path: '/watch/' + videoIds[0], query: { downloadId: String(ids[0]) } })
+      app.$router.push({ path: '/watch/' + videoIds[0], query: { downloadId: String(ids[0]), ...(sameDownload ? { timestamp: '0.25' } : {}) } })
       return { settings, queue, route }
     }, { ids, videoIds, autoplayVideos, sameDownload, mediaPath: process.env.ANDROID_OFFLINE_MEDIA_PATH, firstMediaPath: process.env.ANDROID_OFFLINE_FIRST_MEDIA_PATH })
     await expect.poll(() => page.locator('video').evaluate(video => video.readyState), { timeout: 20000 }).toBe(4)
+    if (sameDownload) assert.equal(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getActiveTab.route.query.timestamp), '0.25', 'Android retains the initial timestamp query')
     assert.ok(await page.locator('video').evaluate(video => video.duration >= 20), 'first track lasts beyond Android’s startup allowance')
     await page.locator('video').evaluate(video => { video.currentTime = 0; return video.play() })
     await expect.poll(() => adb('shell', 'dumpsys', 'media_session'), { timeout: 20000 }).toMatch(/Offline queue track 1/)
@@ -124,6 +125,7 @@ for (const browseDownloads of [false, true]) for (const autoplayVideos of [true,
         ended: document.querySelector('video').ended }
     }), { path: '/watch/' + videoIds[2], queue: 0, ended: true })
     assert.deepEqual(await page.evaluate(() => window.__offlineQueuePlayed), ids, 'every queued source actually played')
+    assert.equal(await page.locator('video').evaluate(video => video.autoplay), autoplayVideos, 'consumed queue requests preserve the autoplay preference')
   } catch (error) {
     // Reconnect only after the locked-screen verdict to retain diagnostics
     // without letting debugger activity make a failing queue advance.

@@ -5565,7 +5565,11 @@ export default defineComponent({
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
       const route = nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` }
-      if (this.tabRouter.resolve(route).fullPath === this.tabRoute.fullPath) {
+      const nextFullPath = this.tabRouter.resolve(route).fullPath
+      if (
+        this.watchRouteWithoutTimestamp(nextFullPath) ===
+        this.watchRouteWithoutTimestamp(this.tabRoute.fullPath)
+      ) {
         this.$refs.player?.setCurrentTime(0)
         this.$refs.player?.play()
       } else {

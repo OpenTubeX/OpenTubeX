@@ -1595,7 +1595,8 @@ export default defineComponent({
     // to the same media element afterward.
     const suppressInitialAutoplay = props.suppressAutoplayAfterSabrReload
     // Queue requests can arrive for a replacement player or an in-place source
-    // switch. Keep autoplay armed after Watch consumes the loaded request.
+    // switch. Keep autoplay armed until playback starts, even if Watch has
+    // already consumed the loaded request.
     const autoplayRequested = ref(props.autoplayRequested)
     watch(() => props.autoplayRequested, requested => {
       if (requested) autoplayRequested.value = true
@@ -7039,6 +7040,7 @@ export default defineComponent({
 
     function handlePlaying() {
       if (shortsNavigationSuspended.value) return
+      autoplayRequested.value = false
       hasPlaybackPosition.value = true
       // A decoded video frame replaces the retained startup/format-switch poster.
       showPoster.value = false
