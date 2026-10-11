@@ -60,6 +60,52 @@ async function showUpdatePrompt(page, releases) {
   await expect(page.locator('.changeLogTitle')).toBeVisible()
 }
 
+test('update notification buttons are centered when they wrap below the text', async ({ app, page }, testInfo) => {
+  const notification = await showUpdateNotification(page, [
+    release(`OpenTubeX ${newestUpdateVersion}`, `v${newestUpdateVersion}-beta`, NEWEST_NOTES)
+  ])
+
+  for (const scale of [1, 0.95, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    for (const size of [
+      { width: 1600, height: 900 },
+      { width: 800, height: 600 },
+      { width: 480, height: 800 },
+      { width: 375, height: 700 }
+    ]) {
+      // The initial window already has the desktop dimensions.
+      if (scale !== 1 || size.width !== 1600) await setWindowSize(app, page, size)
+      await expect.poll(() => notification.evaluate(element => {
+        const toast = element.getBoundingClientRect()
+        const message = element.querySelector('.toastMessage').getBoundingClientRect()
+        const actions = element.querySelector('.toastActions').getBoundingClientRect()
+        const wrapped = actions.top >= message.bottom
+        return {
+          wrapped,
+          aligned: wrapped
+            ? Math.abs(actions.left + actions.width / 2 - toast.left - toast.width / 2) <= 1
+            : actions.left >= message.right,
+          fits: element.scrollWidth <= element.clientWidth
+        }
+      }), { message: `${size.width}px at ${scale * 100}% UI scale` }).toEqual({
+        wrapped: size.width <= 480,
+        aligned: true,
+        fits: true
+      })
+
+      if (scale === 1 && size.width === 375) {
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toContainClass(colorScheme)
+          const path = testInfo.outputPath(`centered-update-buttons-${colorScheme}.png`)
+          await notification.screenshot({ path, animations: 'disabled' })
+          await testInfo.attach(`centered update buttons (${colorScheme})`, { path, contentType: 'image/png' })
+        }
+      }
+    }
+  }
+})
+
 for (const uiScale of [100, 95]) {
   test(`release-note scrollbar stays anchored during touch scrolling without scroll callbacks at ${uiScale}%`, async ({ app, page }) => {
     await showUpdatePrompt(page, [
@@ -152,7 +198,8 @@ test('the update notification stays dismissed for the current app session', asyn
   expect(updateBox).not.toBeNull()
   expect(Math.abs(dismissBox.x - updateBox.x)).toBeLessThanOrEqual(1)
   expect(dismissBox.y + dismissBox.height).toBeLessThanOrEqual(updateBox.y)
-  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeLessThanOrEqual(4.5)
+  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeGreaterThanOrEqual(7.5)
+  expect(updateBox.y - dismissBox.y - dismissBox.height).toBeLessThanOrEqual(8.5)
 
   const toastRow = notification.locator('xpath=../..')
   await expect(toastRow).toHaveAttribute('data-dismissible', 'false')
