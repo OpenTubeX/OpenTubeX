@@ -67,20 +67,6 @@
       />
     </div>
     <FtFlexBox>
-      <FtSlider
-        :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
-        :default-value="watchedPercentageThreshold"
-        setting-key="watchedPercentageThreshold"
-        :min-value="0"
-        :max-value="100"
-        :step="1"
-        value-extension="%"
-        :disabled="!rememberHistory"
-        :tooltip="$t('Settings.Privacy Settings.Watched Percentage Threshold Tooltip')"
-        @change="updateWatchedPercentageThreshold"
-      />
-    </FtFlexBox>
-    <FtFlexBox>
       <FtSelect
         class="privacyWatchedProgressSelect"
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
@@ -93,6 +79,20 @@
         :disabled="!rememberHistory"
         size-to-content
         @change="updateWatchedProgressSavingMode"
+      />
+    </FtFlexBox>
+    <FtFlexBox>
+      <FtSlider
+        :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
+        :default-value="watchedPercentageThreshold"
+        setting-key="watchedPercentageThreshold"
+        :min-value="0"
+        :max-value="100"
+        :step="1"
+        value-extension="%"
+        :disabled="!rememberHistory"
+        :tooltip="$t('Settings.Privacy Settings.Watched Percentage Threshold Tooltip')"
+        @change="updateWatchedPercentageThreshold"
       />
     </FtFlexBox>
   </FtSettingsSection>
