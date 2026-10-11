@@ -1,5 +1,7 @@
 <template>
   <SubscriptionsTabUi
+    v-if="!clearingVisibleContent"
+    ref="feed"
     class="newFeed"
     :is-loading="isLoading"
     :video-list="displayedEntries"
@@ -80,10 +82,14 @@
       @click="handleRefreshWarning"
     />
   </SubscriptionsTabUi>
+  <div
+    v-else
+    class="newFeed"
+  />
 </template>
 
 <script setup>
-import { computed, shallowRef, toRaw, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onDeactivated, ref, shallowRef, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
@@ -98,6 +104,8 @@ import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubs
 import { getNewSubscriptionFeedEntries } from '../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restricted-playback'
 import { MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
+import { applyAnimationSpeed } from '../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../helpers/reducedMotion'
 
 const props = defineProps({
   activeCategory: {
@@ -109,6 +117,48 @@ const props = defineProps({
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
+const feed = useTemplateRef('feed')
+const clearingVisibleContent = ref(false)
+let removalAnimation = null
+
+function cancelRemovalAnimation() {
+  removalAnimation?.cancel()
+  removalAnimation = null
+  clearingVisibleContent.value = false
+}
+
+watch(() => props.activeCategory, cancelRemovalAnimation)
+onDeactivated(cancelRemovalAnimation)
+onBeforeUnmount(cancelRemovalAnimation)
+
+/** @param {() => Promise<unknown>} markSeen */
+async function markAllAsSeen(markSeen) {
+  try {
+    const element = feed.value?.$el
+    if (element && !isReducedMotionEnabled()) {
+      const animation = applyAnimationSpeed(element.animate([
+        { opacity: 1, transform: 'translateY(0)' },
+        { opacity: 0, transform: 'translateY(-10px)' }
+      ], { duration: 200, easing: 'ease-in', fill: 'forwards' }))
+      removalAnimation = animation
+      await animation.finished.catch(() => {})
+      // Switching categories or leaving the page cancels the presentation,
+      // but the requested seen marks still need to be saved.
+      if (removalAnimation === animation) {
+        clearingVisibleContent.value = true
+      }
+    } else {
+      clearingVisibleContent.value = true
+    }
+    // Dispose the whole feed before updating its entries. Hundreds of
+    // individual Vue leave hooks otherwise each force their own reflow.
+    await nextTick()
+    await markSeen()
+  } finally {
+    cancelRemovalAnimation()
+  }
+}
+
 const newFeedDataOverrides = {
   hideNewSubscriptionFeedIndicator: true,
   isInNewSubscriptionFeed: true,
@@ -255,6 +305,7 @@ const hasNewContentByCategory = computed(() => ({
 }))
 
 defineExpose({
+  markAllAsSeen,
   refresh,
   isLoading,
   lastRefreshTimestamp: '',

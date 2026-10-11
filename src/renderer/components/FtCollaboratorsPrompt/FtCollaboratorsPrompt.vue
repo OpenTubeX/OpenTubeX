@@ -54,7 +54,6 @@
           :channel-name="collaborator.name"
           :channel-thumbnail="collaborator.thumbnail"
           :subscription-count-text="''"
-          :hide-profile-dropdown-toggle="true"
         />
       </div>
     </div>
