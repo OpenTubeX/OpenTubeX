@@ -36,7 +36,8 @@ test('popularity exits above the seek bar without clipping the graph', async ({ 
         await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
         await bar.hover()
         await expect(graph).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
-        const baseline = await graph.evaluate(element => element.getBoundingClientRect().bottom)
+        const trackTop = await bar.evaluate(element => element.getBoundingClientRect().top +
+          Number.parseFloat(getComputedStyle(element).borderTopWidth))
         // Pause the actual hover transition before it can finish, then sample it
         // deterministically rather than relying on wall-clock screenshot timing.
         await graph.evaluate(element => {
@@ -63,7 +64,7 @@ test('popularity exits above the seek bar without clipping the graph', async ({ 
           expect(frame.visibility).toBe('visible')
           expect(frame.height).toBeGreaterThan(0)
           expect(frame.height).toBeLessThanOrEqual(40)
-          expect(Math.abs(frame.bottom - baseline) * scale, 'graph must stay above the seek bar throughout its exit').toBeLessThanOrEqual(1)
+          expect(Math.abs(frame.bottom - trackTop) * scale, 'graph must stay above the seek bar throughout its exit').toBeLessThanOrEqual(1)
           expect(['none', 'inset(0px)'], 'the full graph must remain unclipped during its exit').toContain(frame.clip)
         }
         await graph.evaluate(element => { for (const animation of element.getAnimations()) animation.finish() })
@@ -90,7 +91,7 @@ test('popularity aligns with the seek bar across layouts, themes and UI scales',
   await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await player.locator('.shaka-play-button').hover()
   await expect(graph).toBeHidden()
-  expect(await graph.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).m22)).toBe(0)
+  expect(await graph.evaluate(element => element.getBoundingClientRect().height)).toBe(0)
 
   for (const scale of [1, 1.25]) {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
