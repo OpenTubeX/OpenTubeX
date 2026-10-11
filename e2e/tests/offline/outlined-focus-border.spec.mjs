@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { writeFile } from 'node:fs/promises'
@@ -69,49 +69,67 @@ for (const uiScale of [100, 95]) {
       }
     })
 
-    test('transcript search has equally thick borders around its label notch', async ({ app, page }, testInfo) => {
-      await mockPlayableWatchPage(app, page)
-      await page.route('https://example.test/transcript.vtt', route => route.fulfill({
-        contentType: 'text/vtt', body: 'WEBVTT\n\n00:00.000 --> 00:10.000\nCraft a consistent outline.\n'
-      }))
-      await openMockedVideo(page)
-      const video = await waitForPlayback(page)
-      await video.evaluate(element => element.pause())
-      const view = await watchViewHandle(page)
-      await view.evaluate(async view => {
-        view.captions = [{ url: 'https://example.test/transcript.vtt', label: 'English', language: 'en' }]
-        view.showTranscript = true
-        await view.$nextTick()
-      })
-      const card = page.locator('.transcriptCard')
-      await expect(card.locator('.transcriptSegment')).toHaveCount(1)
-      await card.getByRole('button', { name: 'Search transcript' }).click()
-      const search = card.getByRole('searchbox', { name: 'Search transcript', exact: true })
-      await search.fill('craft')
-      for (const width of [1600, 640]) {
-        await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
-        for (const theme of ['dark', 'light']) {
-          await page.emulateMedia({ colorScheme: theme })
-          await expect(page.locator('body')).toHaveClass(new RegExp(theme))
-          await search.focus()
-          await search.evaluate(element => element.scrollIntoView({ block: 'center' }))
-          await expectEvenFocusBorder(app, page, search, '.inputOutline')
-          const header = await card.locator('.transcriptHeader').boundingBox()
-          const field = await card.locator('.transcriptControls').boundingBox()
-          const pixelRatio = await page.evaluate(() => devicePixelRatio)
-          const clip = {
-            x: Math.round((Math.min(header.x, field.x) - 4) * pixelRatio),
-            y: Math.round((header.y - 4) * pixelRatio),
-            width: Math.round((Math.max(header.x + header.width, field.x + field.width) - Math.min(header.x, field.x) + 8) * pixelRatio),
-            height: Math.round((field.y + field.height - header.y + 8) * pixelRatio)
+    for (const presentation of ['regular', 'full-window', 'fullscreen']) {
+      test(`${presentation} transcript search has equally thick borders around its label notch`, async ({ app, page }, testInfo) => {
+        await mockPlayableWatchPage(app, page)
+        await page.route('https://example.test/transcript.vtt', route => route.fulfill({
+          contentType: 'text/vtt', body: 'WEBVTT\n\n00:00.000 --> 00:10.000\nCraft a consistent outline.\n'
+        }))
+        await openMockedVideo(page)
+        const video = await waitForPlayback(page)
+        await video.evaluate(element => element.pause())
+        const view = await watchViewHandle(page)
+        await view.evaluate(async (view, presentation) => {
+          view.captions = [{ url: 'https://example.test/transcript.vtt', label: 'English', language: 'en' }]
+          view.showTranscript = presentation === 'regular'
+          await view.$nextTick()
+        }, presentation)
+        if (presentation !== 'regular') {
+          const player = page.locator('.ftVideoPlayer')
+          if (presentation === 'fullscreen') {
+            await setPlayerFullscreen(page, true)
+          } else {
+            await player.hover({ position: { x: 20, y: 20 } })
+            await player.locator('.full-window-button').click()
+            await expect(player).toHaveClass(/fullWindow/)
           }
-          const capture = await app.electronApp.evaluate(async ({ BrowserWindow }, clip) =>
-            (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).crop(clip).toPNG().toString('base64'), clip)
-          await writeFile(testInfo.outputPath(`transcript-${width}-${theme}.png`), Buffer.from(capture, 'base64'))
+          await player.locator('.fullscreenTranscriptToggle').click()
+          await expect(player.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
         }
-      }
-      await view.dispose()
-    })
+        const card = page.locator('.transcriptCard')
+        await expect(card.locator('.transcriptSegment')).toHaveCount(1)
+        await card.getByRole('button', { name: 'Search transcript' }).click()
+        const search = card.getByRole('searchbox', { name: 'Search transcript', exact: true })
+        await search.fill('craft')
+        // Native fullscreen fills the private X server. Full-window mode covers
+        // the same overlay styles at desktop and narrow responsive widths.
+        for (const width of presentation === 'fullscreen' ? [1920] : [1600, 640]) {
+          if (presentation !== 'fullscreen') {
+            await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+          }
+          for (const theme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme: theme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+            await search.focus()
+            await search.evaluate(element => element.scrollIntoView({ block: 'center' }))
+            await expectEvenFocusBorder(app, page, search, '.inputOutline')
+            const header = await card.locator('.transcriptHeader').boundingBox()
+            const field = await card.locator('.transcriptControls').boundingBox()
+            const pixelRatio = await page.evaluate(() => devicePixelRatio)
+            const clip = {
+              x: Math.round((Math.min(header.x, field.x) - 4) * pixelRatio),
+              y: Math.round((header.y - 4) * pixelRatio),
+              width: Math.round((Math.max(header.x + header.width, field.x + field.width) - Math.min(header.x, field.x) + 8) * pixelRatio),
+              height: Math.round((field.y + field.height - header.y + 8) * pixelRatio)
+            }
+            const capture = await app.electronApp.evaluate(async ({ BrowserWindow }, clip) =>
+              (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).crop(clip).toPNG().toString('base64'), clip)
+            await writeFile(testInfo.outputPath(`${presentation}-transcript-${width}-${theme}.png`), Buffer.from(capture, 'base64'))
+          }
+        }
+        await view.dispose()
+      })
+    }
 
     test('outlined dropdowns have equally thick keyboard and pointer focus borders', async ({ app, page }) => {
       const general = await goToSettingsSection(page, 'general')
