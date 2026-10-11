@@ -15,11 +15,11 @@ for (const ending of ['short', 'reverse', 'pointercancel', 'resize', 'commit', '
     const saved = { open: 123.5 }
     let finishAnimation
     const context = vm.createContext({
-      props: { enabled: true }, open, openingSwitcher: false, disposed: false,
+      props: { enabled: true }, open, disposed: false,
       document: { querySelector: () => ({}) },
       window: { innerHeight: 800, addEventListener() {}, removeEventListener() {} },
       organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
-      captureBeforeTabOrganizer: async () => {}, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
+      prepareForTabOrganizer: () => {}, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
       dialogRef: { value: {
         querySelector: () => ({ querySelector: () => ({}), getBoundingClientRect: () => ({ top: 800, bottom: 900 }) }),
         closest: () => ({}),
