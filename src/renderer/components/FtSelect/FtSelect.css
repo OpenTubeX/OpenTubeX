@@ -451,9 +451,13 @@
   border-color: var(--primary-color);
 }
 
-/* Thicken keyboard focus without painting across the floating label's notch. */
+/* Thicken all four edges without moving the label at fractional zoom. */
 .select.outlined .select-text:focus-visible {
-  box-shadow: inset 2px 0 var(--primary-color), inset -2px 0 var(--primary-color), inset 0 -2px var(--primary-color);
+  box-shadow: inset 1px 0 var(--primary-color), inset -1px 0 var(--primary-color);
+}
+
+.select.outlined .select-text:focus-visible ~ .selectOutline {
+  border-block-width: 2px;
 }
 
 @media (forced-colors: active) {

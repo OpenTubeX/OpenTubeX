@@ -308,12 +308,14 @@
 
 .outlined.floatingLabel .ft-input:not(:disabled):focus ~ .inputOutline {
   border-color: var(--primary-color);
+  border-block-width: 2px;
 }
 
-/* Keep the thicker focus border out of the label's notch. */
+/* The fieldset draws the notched top and bottom. Thicken its sides inward
+   without changing the legend's position, including at fractional zoom. */
 .outlined.floatingLabel .ft-input:focus {
   border-color: transparent;
-  box-shadow: inset 2px 0 var(--primary-color), inset -2px 0 var(--primary-color), inset 0 -2px var(--primary-color);
+  box-shadow: inset 1px 0 var(--primary-color), inset -1px 0 var(--primary-color);
 }
 
 .outlined .selectLabelIcon :deep(.ft-icon__glyph) {
