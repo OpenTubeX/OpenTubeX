@@ -108,30 +108,13 @@
                 v-if="restrictedPlaybackConfigured"
                 class="membersOnlyPreference"
               >
-                <button
-                  type="button"
-                  class="feedTypePreference"
-                  role="checkbox"
-                  :aria-checked="activeChannelSettings.showMembersOnly"
-                  @click="updateShowMembersOnly(!activeChannelSettings.showMembersOnly)"
-                >
-                  <span
-                    class="feedTypePreferenceIcon"
-                    aria-hidden="true"
-                  >
-                    <FtIcon :icon="['fas', 'users']" />
-                  </span>
-                  <span>{{ $t('Search Listing.Label.Members Only') }}</span>
-                  <span
-                    class="feedTypePreferenceCheck"
-                    aria-hidden="true"
-                  >
-                    <FtIcon
-                      v-if="activeChannelSettings.showMembersOnly"
-                      :icon="['fas', 'check']"
-                    />
-                  </span>
-                </button>
+                <FtToggleSwitch
+                  :label="$t('Search Listing.Label.Members Only')"
+                  :default-value="activeChannelSettings.showMembersOnly"
+                  compact
+                  controlled
+                  @change="updateShowMembersOnly"
+                />
               </div>
               <div class="dailyVideoLimitPreference">
                 <FtSelect
@@ -208,6 +191,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
