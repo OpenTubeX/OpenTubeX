@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { compile, createSSRApp, h } from 'vue'
+import { compile, computed, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 
 const source = await readFile(new URL('../../src/renderer/components/GeneralSettings/GeneralSettings.vue', import.meta.url), 'utf8')
@@ -52,6 +52,8 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
     isElectron: false,
     isCapacitor: true,
     pageSwipe: { value: null },
+    organizerSwipeActive: { value: false },
+    computed,
     supportsYtDlp: true,
     route: {},
     ytDlp: { addYtDlpBinaryUpdatedListener: () => {} },

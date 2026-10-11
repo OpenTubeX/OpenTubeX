@@ -449,7 +449,7 @@ import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { getSyncedTabPreview } from '../../tabs/tabPreview'
 import { formatTabTitle } from '../../tabs/tabTitle'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
-import { captureBeforeTabOrganizer } from '../../tabs/capacitorTabPreviews'
+import { prepareForTabOrganizer } from '../../tabs/capacitorTabPreviews'
 import CapacitorTabPreview from './CapacitorTabPreview.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
@@ -643,14 +643,10 @@ const {
   },
 })
 
-let openingSwitcher = false
 let disposed = false
-async function openSwitcher() {
-  if (openingSwitcher || open.value || organizerTransition) return
-  openingSwitcher = true
-  await captureBeforeTabOrganizer()
-  openingSwitcher = false
-  if (disposed || !props.enabled) return
+function openSwitcher() {
+  if (open.value || organizerTransition || disposed || !props.enabled) return
+  prepareForTabOrganizer()
   activeView.value = 'open'
   skipDialogTransition.value = false
   open.value = true
@@ -661,9 +657,10 @@ async function openSwitcher() {
 let organizerTransition = null
 const organizerSwipe = {
   begin() {
-    if (!props.enabled || open.value || openingSwitcher || organizerTransition || disposed) return false
+    if (!props.enabled || open.value || organizerTransition || disposed) return false
     const page = document.querySelector('.app > .routerView')
     if (!page) return false
+    prepareForTabOrganizer()
     const state = { distance: 0, height: window.innerHeight, animation: null, ready: null, restoreScroll: null }
     organizerTransition = state
     window.addEventListener('resize', organizerSwipe.cancel)
@@ -671,8 +668,6 @@ const organizerSwipe = {
     skipDialogTransition.value = true
     activeView.value = 'open'
     state.ready = (async () => {
-      await captureBeforeTabOrganizer()
-      if (organizerTransition !== state || disposed || !props.enabled) return
       open.value = true
       // Let the open watcher restore the organizer viewport before measuring.
       await nextTick()

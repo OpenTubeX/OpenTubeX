@@ -5,28 +5,23 @@ import { canCaptureCapacitorTab, createCapacitorPreviewCache } from './capacitor
 
 const Screenshot = registerPlugin('Screenshot')
 const cache = createCapacitorPreviewCache(capturePage, shallowReactive(new Map()))
-let captureCurrent = async () => {}
+let timer
 
 export function getCapacitorTabPreview(tab) {
   return cache.get(tab)
 }
 
-export async function captureBeforeTabOrganizer() {
-  let timeout
-  // A slow/failed native call must not prevent opening the organizer.
-  await Promise.race([
-    captureCurrent(),
-    new Promise(resolve => { timeout = setTimeout(resolve, 250) })
-  ])
-  clearTimeout(timeout)
+export function prepareForTabOrganizer() {
+  // Open from the last-seen preview without a native capture on the input path.
+  // Discard pending captures before the overlay or live-page animation can paint.
+  clearTimeout(timer)
   cache.invalidate()
 }
 
 export function initializeCapacitorTabPreviews(store, pageSwipe) {
   if (!process.env.IS_CAPACITOR || !Capacitor.isPluginAvailable('Screenshot')) return () => {}
-  let timer
   const canCapture = () => !pageSwipe.value && canCaptureCapacitorTab(store.getters, document.visibilityState === 'visible') && !hasVisibleOverlay()
-  captureCurrent = async () => {
+  const captureCurrent = async () => {
     clearTimeout(timer)
     if (canCapture()) await cache.capture(store.getters.getPresentedTab)
   }
@@ -51,7 +46,7 @@ export function initializeCapacitorTabPreviews(store, pageSwipe) {
     schedule()
   }, { immediate: true, flush: 'sync' })
   // Video can become ready after the route's initial screenshot.
-  // Refresh that cached image before a slow organizer capture needs it.
+  // Keep the last-seen image current without capturing when the organizer opens.
   const contentEvents = ['scroll', 'loadeddata', 'playing', 'seeked']
   for (const event of contentEvents) document.addEventListener(event, schedule, true)
   document.addEventListener('visibilitychange', schedule)
@@ -61,7 +56,6 @@ export function initializeCapacitorTabPreviews(store, pageSwipe) {
     stopSwipe()
     clearTimeout(timer)
     cache.clear()
-    captureCurrent = async () => {}
     for (const event of contentEvents) document.removeEventListener(event, schedule, true)
     document.removeEventListener('visibilitychange', schedule)
     window.removeEventListener('resize', schedule)

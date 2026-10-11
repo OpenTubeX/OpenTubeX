@@ -3,7 +3,10 @@ import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { Capacitor } from '@capacitor/core'
-import { nextTick, ref, shallowRef } from 'vue'
+import { computed, nextTick, ref, shallowRef } from 'vue'
+
+const appSource = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+const initializePreviews = appSource.match(/initializeCapacitorTabPreviews\(store, [^\n]+/)[0]
 
 // Register the plugins against a native bridge so their real proxies call our mocks.
 globalThis.androidBridge = {}
@@ -13,7 +16,7 @@ Capacitor.PluginHeaders = [
 ]
 Capacitor.nativePromise = async () => {}
 const {
-  captureBeforeTabOrganizer,
+  prepareForTabOrganizer,
   getCapacitorTabPreview,
   initializeCapacitorTabPreviews,
 } = await import('../../src/renderer/tabs/capacitorTabPreviews.js')
@@ -91,14 +94,52 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
   })
   const warn = t.mock.method(console, 'warn', () => {})
   const pageSwipe = shallowRef(null)
-  const dispose = initializeCapacitorTabPreviews(store, pageSwipe)
+  const organizerSwipeActive = ref(false)
+  const dispose = vm.runInNewContext(initializePreviews, {
+    initializeCapacitorTabPreviews, store, pageSwipe, organizerSwipeActive, computed,
+  })
   t.after(() => {
     dispose()
     for (const restore of restoreGlobals) restore()
   })
   overlayReads = 0
-  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe,
+  return { document, store, tab, preview, uri, take, remove, warn, drawImage, pageSwipe, organizerSwipeActive,
     setCaptureImage: image => { captureImage = image }, overlayReads: () => overlayReads }
+}
+
+async function captureScheduledPreview(t) {
+  t.mock.timers.tick(600)
+  await new Promise(setImmediate)
+}
+
+for (const previewState of ['missing', 'cached', 'capturing']) {
+  test(`a cancelled organizer pull refreshes a ${previewState} preview without another page event`, async t => {
+    const state = setup(t)
+    let finishCapture
+    if (previewState === 'cached') await captureScheduledPreview(t)
+    if (previewState === 'capturing') {
+      state.take.mock.mockImplementationOnce(() => new Promise(resolve => {
+        finishCapture = () => resolve({ dataUrl: 'partial gesture' })
+      }))
+      await captureScheduledPreview(t)
+    }
+    const latest = 'data:image/jpeg;base64,bGF0ZXN0'
+    state.setCaptureImage(latest)
+    state.document.dispatchEvent(new Event('scroll'))
+    const captures = state.take.mock.callCount()
+    prepareForTabOrganizer()
+    state.organizerSwipeActive.value = true
+    await captureScheduledPreview(t)
+    assert.equal(state.take.mock.callCount(), captures, 'a held pull must not capture the animated page')
+    state.organizerSwipeActive.value = false
+    t.mock.timers.tick(599)
+    assert.equal(state.take.mock.callCount(), captures, 'cancellation keeps capture off the input path')
+    t.mock.timers.tick(1)
+    finishCapture?.()
+    await new Promise(setImmediate)
+    assert.equal(state.take.mock.callCount(), captures + 1, 'the restored page gets a background capture')
+    assert.equal(getCapacitorTabPreview(state.tab), latest)
+  })
 }
 
 for (const event of ['loadeddata', 'playing', 'seeked']) {
@@ -138,7 +179,7 @@ for (const playback of [
     const state = setup(t, { videos: [video] })
     state.tab.route.fullPath = '/watch/test-video'
 
-    await captureBeforeTabOrganizer()
+    await captureScheduledPreview(t)
 
     assert.equal(getCapacitorTabPreview(state.tab), state.preview)
     assert.equal(state.drawImage.mock.callCount(), 0)
@@ -149,7 +190,7 @@ for (const playback of [
 
 test('native thumbnails are bounded and require no renderer encoding or temporary file', async t => {
   const state = setup(t)
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.equal(getCapacitorTabPreview(state.tab), state.preview)
   assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 0, cropHeight: (375 * 9 / 16) / 700 }])
   assert.equal(state.drawImage.mock.callCount(), 0)
@@ -165,7 +206,7 @@ test('compact capture starts below fixed phone controls', async t => {
     }[selector]
     return bounds ? { getBoundingClientRect: () => bounds } : null
   }
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 60.25 / 700, cropHeight: (375 * 9 / 16) / 700 }])
 })
 
@@ -181,7 +222,7 @@ for (const height of [700, 220]) {
       }[selector]
       return bounds ? { getBoundingClientRect: () => bounds } : null
     }
-    await captureBeforeTabOrganizer()
+    await captureScheduledPreview(t)
     const cropHeight = Math.min(height - 60.25, 900 * 9 / 16)
     assert.equal(getCapacitorTabPreview(state.tab), state.preview)
     assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 640,
@@ -200,7 +241,7 @@ test('fractional full-width bottom controls remain outside a short capture', asy
     }[selector]
     return bounds ? { getBoundingClientRect: () => bounds } : null
   }
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 376, height: 65,
     top: 60.25 / 150, cropHeight: 65.25 / 150 }])
 })
@@ -217,7 +258,7 @@ for (const zoom of [1, 1.25]) {
       }[selector]
       return bounds ? { getBoundingClientRect: () => bounds } : null
     }
-    await captureBeforeTabOrganizer()
+    await captureScheduledPreview(t)
     assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 600 / zoom,
       height: Math.round(99.75 / zoom), top: (60.25 / zoom) / (220 / zoom), cropHeight: (99.75 / zoom) / (220 / zoom) }])
   })
@@ -234,7 +275,7 @@ test('navigation follows the CSS breakpoint when innerWidth rounds down', async 
     }[selector]
     return bounds ? { getBoundingClientRect: () => bounds } : null
   }
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 640, height: 360,
     top: 60.25 / 700, cropHeight: (680 * 9 / 16) / 700 }])
 })
@@ -242,7 +283,7 @@ test('navigation follows the CSS breakpoint when innerWidth rounds down', async 
 test('failed native capture leaves the cache empty', async t => {
   const error = new Error('Capture failed')
   const state = setup(t, { decodeError: error })
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.equal(getCapacitorTabPreview(state.tab), null)
   assert.equal(state.warn.mock.calls.at(-1).arguments[1], error)
 })
@@ -283,7 +324,7 @@ test('a held header swipe cannot cache a partial page preview', async t => {
   assert.equal(getCapacitorTabPreview(state.tab), null)
 
   state.pageSwipe.value = { ...state.pageSwipe.value, settling: true }
-  await captureBeforeTabOrganizer()
+  await captureScheduledPreview(t)
   assert.equal(state.take.mock.callCount(), 0, 'settling pages must not enter the organizer cache')
 
   state.pageSwipe.value = null
@@ -331,13 +372,16 @@ test('capture resumes when an invalidated screenshot outlasts the post-swipe tim
 
 for (const cancellation of ['none', 'direct', 'pointercancel']) {
   const cancelled = cancellation !== 'none'
-  test(`organizer pull captures before showing the overlay (cancellation: ${cancellation})`, async t => {
+  test(`organizer pull reuses its cached preview without waiting for an in-flight capture (cancellation: ${cancellation})`, async t => {
     const state = setup(t)
-    await captureBeforeTabOrganizer()
+    await captureScheduledPreview(t)
     assert.equal(getCapacitorTabPreview(state.tab), state.preview)
     let finishCapture
     const latest = 'data:image/jpeg;base64,bGF0ZXN0'
     state.take.mock.mockImplementation(() => new Promise(resolve => { finishCapture = () => resolve({ dataUrl: latest }) }))
+    state.document.dispatchEvent(new Event('scroll'))
+    await captureScheduledPreview(t)
+    assert.ok(finishCapture, 'a background capture is still pending')
     const open = ref(false)
     state.document.querySelector = selector => selector === '.app > .routerView' ? {} : null
     state.document.querySelectorAll = () => open.value ? [{ getBoundingClientRect: () => ({ width: 375 }) }] : []
@@ -345,19 +389,17 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     const methods = source.slice(source.indexOf('let organizerTransition ='), source.indexOf('defineExpose({ organizerSwipe })'))
     const updates = []
     const ctx = vm.createContext({
-      props: { enabled: true }, open, openingSwitcher: false, disposed: false,
+      props: { enabled: true }, open, disposed: false,
       document: state.document, window: globalThis.window,
       organizerGesture: ref(false), skipDialogTransition: ref(false), activeView: ref('open'),
-      captureBeforeTabOrganizer, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
+      prepareForTabOrganizer, nextTick, presentedTabId: ref('tab'), CSS: { escape: value => value },
       dialogRef: { value: { querySelector: () => ({ querySelector: () => ({}) }), closest: () => ({}) } },
       openTabsScrollRef: ref(null), organizerSwipeProgress: distance => distance / 320,
       createOrganizerSwipeAnimation: () => ({ update: value => updates.push(value), dispose() {}, finish: async () => {} }),
     })
     const gesture = vm.runInContext(`${methods}; organizerSwipe`, ctx)
     assert.equal(gesture.begin(), true)
-    assert.equal(open.value, false, 'the native capture must see the page, not the organizer')
-    await new Promise(setImmediate)
-    assert.ok(finishCapture, 'the gesture must refresh the cached screenshot')
+    assert.equal(open.value, true, 'the organizer opens synchronously using the cached preview')
     gesture.update(160)
     if (cancellation === 'direct') gesture.cancel()
     if (cancellation === 'pointercancel') {
@@ -373,7 +415,8 @@ for (const cancellation of ['none', 'direct', 'pointercancel']) {
     } else finishCapture()
     await new Promise(setImmediate)
     assert.equal(open.value, !cancelled, 'a late native result cannot reopen a cancelled organizer')
-    assert.equal(getCapacitorTabPreview(state.tab), latest)
-    assert.deepEqual(updates, cancelled ? [] : [0.5], 'pending capture must retain the latest finger position')
+    assert.equal(getCapacitorTabPreview(state.tab), state.preview, 'late capture must not overwrite the cached preview')
+    assert.equal(state.take.mock.callCount(), 2, 'opening does not request another screenshot')
+    assert.deepEqual(updates, cancelled ? [] : [0.5], 'layout preparation retains the latest finger position')
   })
 }
