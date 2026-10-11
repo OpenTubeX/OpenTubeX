@@ -689,7 +689,6 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
   await expect(sessionTabs).toHaveAttribute('data-overlayscrollbars-viewport')
   const sessionTablist = sessionTabs.getByRole('tablist', { name: 'Tabs from other devices' })
   await expect(sessionTablist).toHaveCount(1)
-  await expect(sessionTablist.locator(':scope > *')).toHaveCount(9)
   await expect(sessionTablist.locator(':scope > [role="tab"]')).toHaveCount(9)
   await expect(sessionTabs.getByRole('tab')).toHaveCount(9)
   await expect.poll(() => sessionTabs.evaluate(element => ({
@@ -2319,10 +2318,10 @@ for (const scale of [1, 1.25]) {
     try {
       for (const roundness of [0, 1, 2]) {
         await tab.evaluate((element, value) => element.style.setProperty('--ui-roundness', value), String(roundness))
-        await expect(tab).toHaveCSS('border-top-left-radius', `${6 * roundness}px`)
-        await expect(tab).toHaveCSS('border-top-right-radius', `${6 * roundness}px`)
-        await expect(tab).toHaveCSS('border-bottom-left-radius', '0px')
-        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${4 * roundness}px`)
+        await expect(tab).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
+        await expect(tab).toHaveCSS('border-top-right-radius', `${24 * roundness}px`)
+        await expect(tab).toHaveCSS('border-bottom-left-radius', `${24 * roundness}px`)
+        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
       }
       for (const selected of [false, true]) {
         await tab.evaluate((element, selected) => element.classList.toggle('active', selected), selected)

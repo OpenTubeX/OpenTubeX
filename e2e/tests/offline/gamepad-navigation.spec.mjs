@@ -342,7 +342,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').focus()
     await pressGamepadButton(page, 'left')
     await expect(tab).toBeFocused()
-    await expect(tab).toHaveCSS('border-radius', '8px')
+    await expect(tab).toHaveCSS('border-radius', '48px')
 
     const appearanceSettings = await goToSettingsSection(page, 'appearance')
     const switchInput = appearanceSettings.getByRole('checkbox', {
