@@ -36,7 +36,6 @@
 
 .materialTabs[role='tablist'] :deep([role='tab'][aria-selected='true']) {
   color: var(--primary-color);
-  font-weight: 700;
 }
 
 .materialTabs[role='tablist'] :deep([role='tab']:focus-visible) {
