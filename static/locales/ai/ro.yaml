@@ -2118,7 +2118,7 @@ Native Permissions:
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
   home: "Acasă"
-  subscriptions: "Abonam."
+  subscriptions: "Abon."
   userplaylists: "Liste"
   history: "Istoric"
   subscribedchannels: "Canale"

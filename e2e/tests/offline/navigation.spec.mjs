@@ -832,6 +832,20 @@ for (const uiScale of [100, 125]) {
       await expect.poll(() => page.evaluate(() => innerWidth)).toBe(320)
       const locales = (await import('../../../static/locales/activeLocales.json', { with: { type: 'json' } })).default
       const nav = page.locator('.sideNav')
+      async function captureNavigation(language) {
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          const box = await nav.boundingBox()
+          const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
+            const contents = BrowserWindow.getAllWindows()[0].webContents
+            const zoom = contents.getZoomFactor()
+            return (await contents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })).toPNG().toString('base64')
+          }, box)
+          await testInfo.attach(`readable ${language} mobile navigation ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
+        }
+      }
       for (const order of [DEFAULT_NAVIGATION_ITEMS, [...DEFAULT_NAVIGATION_ITEMS.slice(4), ...DEFAULT_NAVIGATION_ITEMS.slice(0, 4)]]) {
         await page.evaluate(order => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateNavigationItems', order), order)
         await expect(nav.locator('.mobileNavItem:visible')).toHaveCount(5)
@@ -859,23 +873,37 @@ for (const uiScale of [100, 125]) {
           label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width)
       ), { message: 'the active Galician label also fits at a readable size' }).toBe(true)
       await goTo(page, 'home')
-      for (const colorScheme of ['dark', 'light']) {
-        await page.emulateMedia({ colorScheme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
-        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-        const box = await nav.boundingBox()
-        const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }, box) => {
-          const contents = BrowserWindow.getAllWindows()[0].webContents
-          const zoom = contents.getZoomFactor()
-          return (await contents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })).toPNG().toString('base64')
-        }, box)
-        await testInfo.attach(`readable Galician mobile navigation ${colorScheme}`, { body: Buffer.from(screenshot, 'base64'), contentType: 'image/png' })
-      }
+      await captureNavigation('Galician')
       await setWindowSize(app, page, { width: Math.round(1000 * uiScale / 100), height: 850 })
       await expect(playlists.locator('.navLabel > span:visible')).toHaveText('Listaxes de reprodución')
+      await setWindowSize(app, page, { width: Math.round(320 * uiScale / 100), height: 800 })
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateCurrentLocale', 'ta')
+        await store.dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels'])
+      })
+      const stats = nav.locator('a[href="#/stats"]')
+      await stats.click()
+      await expect(stats).toHaveAttribute('aria-current', 'page')
+      await expect(stats.locator('.navLabel > span:visible')).toHaveText('புள்ளிவி.')
+      await expect.poll(() => stats.locator('.navLabel > span:visible').evaluate(label =>
+        parseFloat(getComputedStyle(label).fontSize) >= 10 && label.getBoundingClientRect().width <= label.parentElement.getBoundingClientRect().width
+      )).toBe(true)
+      await captureNavigation('Tamil')
     })
   })
 }
+
+test('keeps existing localized More labels with AI completions off', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 390, height: 750 })
+  for (const [locale, label] of [['fr-FR', 'Plus'], ['el', 'Περισσότερα'], ['de-DE', 'Mehr']]) {
+    await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+    const more = page.locator('.sideNav .moreOptionNav')
+    await expect(more).toHaveAttribute('aria-label', label)
+    await expect(more.locator('.navLabel > span:visible')).toHaveText(label)
+    await expect(more.locator('.navLabel')).not.toHaveClass(/useShortLabel/)
+  }
+})
 
 for (const uiScale of [95, 125]) {
   test.describe(`expressive desktop navigation at ${uiScale}%`, () => {

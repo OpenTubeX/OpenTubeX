@@ -2068,7 +2068,7 @@ Native Permissions:
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
   home: "Ana Sayfa"
-  subscriptions: "Aboneler"
+  subscriptions: "Abonelikler"
   userplaylists: "Listeler"
   history: "Geçmiş"
   subscribedchannels: "Kanallar"
