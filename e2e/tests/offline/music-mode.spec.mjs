@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 const musicModeSeed = {
@@ -204,25 +204,51 @@ test('excludes music mode from saved Quick Settings and the customizer', async (
   await expect(page.locator('.settingPicker .optionWrapper')).not.toHaveCount(0)
 })
 
-test('music mode headphones have a translucent circular background in both icon packs and themes', async ({ page }, testInfo) => {
+test('music mode headphones cut out the profile in both icon packs and header themes', async ({ app, page }, testInfo) => {
   await setMusicMode(page, true)
-  for (const iconPack of ['material', 'remix']) {
-    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
-    for (const colorScheme of ['dark', 'light']) {
-      await page.emulateMedia({ colorScheme })
-      await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
-      const indicator = page.locator('.musicModeIndicator')
-      await expect(indicator).toBeVisible()
-      await expect(indicator).toHaveCSS('background-color', /\/ 0\.4\)$/)
-      await expect(indicator).toHaveCSS('border-radius', '50%')
-      await expect(indicator).toHaveCSS('opacity', '1')
-      const bounds = await page.locator('.profileTrigger').boundingBox()
-      await testInfo.attach(`music-mode-${iconPack}-${colorScheme}`, {
-        body: await page.screenshot({ clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 } }),
-        contentType: 'image/png',
-      })
+  const indicator = page.locator('.musicModeIndicator')
+  for (const layout of ['desktop', 'phone']) {
+    if (layout === 'phone') await setWindowSize(app, page, { width: 375, height: 700 })
+    for (const iconPack of ['material', 'remix']) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), iconPack)
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
+        for (const scale of [100, 125]) {
+          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+          for (const mainColor of [null, 'Yellow', 'Red']) {
+            const coloredHeader = mainColor !== null
+            await page.evaluate(async mainColor => {
+              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+              await store.dispatch('updateMainColor', mainColor ?? 'Red')
+              await store.dispatch('updateBarColor', mainColor !== null)
+            }, mainColor)
+            await expect(indicator).toBeVisible()
+            await expect(indicator).toHaveCSS('border-radius', '50%')
+            await expect(indicator).toHaveCSS('opacity', '1')
+            const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
+            await expect(indicator).toHaveCSS('background-color', headerBackground)
+            const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
+            await expect(indicator).toHaveCSS('color', headerForeground)
+            if (layout === 'desktop' && scale === 100 && (!coloredHeader || mainColor === 'Yellow')) {
+              const bounds = await page.locator('.profileTrigger').boundingBox()
+              const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
+              const screenshot = await page.screenshot({
+                path: testInfo.outputPath(`${name}.png`),
+                clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
+              })
+              await testInfo.attach(name, {
+                body: screenshot,
+                contentType: 'image/png',
+              })
+            }
+          }
+        }
+      }
     }
   }
+  await setMusicMode(page, false)
+  await expect(indicator).toHaveCount(0)
 })
 
 test.describe('music mode visibility setting', () => {
