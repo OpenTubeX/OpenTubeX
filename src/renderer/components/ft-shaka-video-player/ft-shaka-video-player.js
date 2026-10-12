@@ -6674,14 +6674,13 @@ export default defineComponent({
         if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
           scheduleControlPanelLayout(controlPanel)
         }
-        // Chapter width transitions can move these buttons without resizing
-        // the panel. Follow their actual geometry throughout the animation.
+        // Button visibility and volume/preset sizes can move the right controls
+        // without resizing the panel. Keep their glass aligned with the buttons.
         updateRightControlGlass(controlPanel)
       })
       controlPanelResizeObserver.observe(controlPanel)
-      const chaptersButton = controlPanel.querySelector(':scope > .ft-chapters-button')
-      if (chaptersButton) {
-        controlPanelResizeObserver.observe(chaptersButton)
+      for (const control of controlPanel.querySelectorAll(':scope > button, :scope > .ft-volume-control-group, :scope > .ft-quick-playback-rate-bar')) {
+        controlPanelResizeObserver.observe(control)
       }
       if (timeDisplayGroup) {
         // Tabular timestamps usually change text without changing width.

@@ -12,22 +12,32 @@ test.use({
   }
 })
 
-test('autoplay keeps its original compact switch geometry', async ({ app, page }) => {
+test('autoplay keeps its original compact switch geometry at every UI roundness', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
   const player = page.locator('.ftVideoPlayer')
-  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   const toggle = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
   const track = toggle.locator('.ft-autoplay-switch')
   const thumb = track.locator('.ft-autoplay-switch-thumb')
   await expect.soft(track).toHaveCSS('width', '36px', { timeout: 1000 })
   await expect.soft(track).toHaveCSS('height', '18px', { timeout: 1000 })
-  for (const checked of [false, true]) {
-    if ((await toggle.getAttribute('aria-pressed') === 'true') !== checked) await toggle.click()
-    await expect(toggle).toHaveAttribute('aria-pressed', String(checked))
-    await expect.soft(thumb).toHaveCSS('width', '16px', { timeout: 1000 })
-    await expect.soft(thumb).toHaveCSS('height', '16px', { timeout: 1000 })
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+      await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
+      await expect.soft(track).toHaveCSS('border-radius', '999px', { timeout: 1000 })
+      for (const checked of [false, true]) {
+        if ((await toggle.getAttribute('aria-pressed') === 'true') !== checked) await toggle.click()
+        await expect(toggle).toHaveAttribute('aria-pressed', String(checked))
+        await expect(thumb).toHaveCSS('width', '16px')
+        await expect(thumb).toHaveCSS('height', '16px')
+        await expect(thumb).toHaveCSS('transform', checked ? 'matrix(1, 0, 0, 1, 18, 0)' : 'matrix(1, 0, 0, 1, 0, 0)')
+      }
+    }
   }
 })
 
