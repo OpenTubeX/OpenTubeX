@@ -12,7 +12,7 @@
     align-items: center;
     gap: 4px;
     padding-block: 6px;
-    padding-inline: 4px;
+    padding-inline: 4px calc(4px + var(--side-nav-tab-gap, 0px));
     border-radius: calc(24px * var(--ui-roundness));
     color: var(--primary-text-color);
     isolation: isolate;
@@ -99,8 +99,9 @@
   }
 
   .sideNav hr {
-    inline-size: calc(100% - 24px);
+    inline-size: calc(100% - 24px - var(--side-nav-tab-gap, 0px));
     margin-block: 12px;
+    margin-inline: 12px calc(12px + var(--side-nav-tab-gap, 0px));
     background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
   }
 
@@ -127,12 +128,12 @@
     flex-direction: row;
     justify-content: flex-start;
     gap: 12px;
-    inline-size: calc(100% - 8px - var(--expanded-nav-end-spacing, 8px));
+    inline-size: calc(100% - 16px - var(--side-nav-tab-gap, 0px));
     block-size: auto;
     min-block-size: 48px;
     padding-block: 8px;
     padding-inline: 12px;
-    margin-inline: 8px var(--expanded-nav-end-spacing, 8px);
+    margin-inline: 8px calc(8px + var(--side-nav-tab-gap, 0px));
     margin-block-end: 4px;
   }
 

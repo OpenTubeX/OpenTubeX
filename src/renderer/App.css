@@ -942,9 +942,9 @@
 
 .app.verticalTabsLeft:not(.isLocaleRightToLeft),
 .app.verticalTabsRight.isLocaleRightToLeft {
-  /* Match the navigation margin plus the adjacent tab padding and its
-     1px width allowance. */
-  --expanded-nav-end-spacing: calc(8px + var(--tab-bar-inline-padding) + 1px);
+  /* Include the adjacent tab padding and its 1px width allowance when
+     balancing the visible navigation gaps. */
+  --side-nav-tab-gap: calc(var(--tab-bar-inline-padding) + 1px);
 }
 
 @media only screen and (width > 680px) {
