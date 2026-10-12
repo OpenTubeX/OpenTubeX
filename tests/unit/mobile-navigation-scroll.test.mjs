@@ -47,8 +47,10 @@ test('a longer reveal threshold accumulates upward movement while retaining quic
 for (const hidden of [false, true]) {
   test(`minimize holds ${hidden ? 'hidden' : 'visible'} navigation through history scroll restoration`, async t => {
     const source = await readFile(new URL('../../src/renderer/components/SideNav/SideNav.vue', import.meta.url), 'utf8')
-    const layout = source.slice(source.indexOf('const route = useRoute()'), source.indexOf('watch(() => route.fullPath'))
-    const watchers = source.slice(source.indexOf('watch(() => route.fullPath'), source.indexOf('watch([\n  () => activeProfile'))
+    const scrollSection = source.slice(source.indexOf('// ===== Bottom navigation scroll visibility ====='), source.indexOf('watch([\n  () => activeProfile'))
+    const routeWatcherStart = scrollSection.indexOf('watch(() => route.fullPath')
+    const layout = scrollSection.slice(0, routeWatcherStart)
+    const watchers = scrollSection.slice(routeWatcherStart)
     const route = reactive({ fullPath: '/watch/video' })
     const preview = ref(null)
     const viewport = { scrollY: 0 }
@@ -59,7 +61,7 @@ for (const hidden of [false, true]) {
     const api = scope.run(() => vm.runInNewContext(`${layout}\n${watchers}\n;({ updateScrollLayout, updateScrollVisibility, scrollHidden })`, {
       requestAnimationFrame: callback => { frames.set(1, callback); return 1 },
       cancelAnimationFrame: id => frames.delete(id),
-      computed, ref, watch, nextTick, useRoute: () => route,
+      computed, ref, watch, nextTick, route,
       useTemplateRef: () => ref({ closest: () => nav }),
       store: { getters: { getAlwaysShowNavigationBar: false } },
       createMobileNavigationScroll, mobileNavigationMinimizePreview: preview,

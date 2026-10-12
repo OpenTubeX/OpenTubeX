@@ -124,6 +124,33 @@ test('sidebar navigation still animates the active highlight', async ({ page }) 
   await expect.poll(() => page.evaluate(() => window.__sidebarHighlightTransitions)).toContain('transform')
 })
 
+test('switching application tabs snaps the mobile More highlight for overflow routes', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 600, height: 800 })
+  await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), 95)
+  await page.evaluate(() => window.ftElectron.tabs.create({ route: '/subscribedchannels', makeActive: true }))
+  const more = page.locator('.sideNav .moreOptionNav')
+  await expect(more).toBeVisible()
+  await expect(more).toHaveClass(/router-link-active/)
+  await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/)
+  await expect.poll(() => more.evaluate(element => getComputedStyle(element, '::before').transitionProperty)).toContain('transform')
+  await more.evaluate(async element => {
+    await Promise.all(element.getAnimations({ subtree: true })
+      .filter(animation => animation instanceof CSSTransition)
+      .map(animation => animation.finished.catch(() => {})))
+    window.__moreHighlightTransitions = []
+    element.addEventListener('transitionrun', event => {
+      if (event.pseudoElement === '::before') window.__moreHighlightTransitions.push(event.propertyName)
+    })
+  })
+  for (const index of [0, 1, 0]) {
+    await page.locator(sel.tabs).nth(index).click()
+    await expect(page.locator(sel.tabs).nth(index)).toHaveClass(/active/)
+    await expect.poll(() => more.evaluate(element => element.classList.contains('router-link-active'))).toBe(index === 1)
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(await page.evaluate(() => window.__moreHighlightTransitions)).toEqual([])
+  }
+})
+
 test('restores sidebar highlight transitions when the selected tab fails to mount', async ({ page }) => {
   const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
   const failedTab = await page.evaluate(async () => {
