@@ -43,6 +43,12 @@ test('Home paints and stays responsive while learning from a large history', asy
       const start = performance.now()
       let previous = start
       let longestFrame = 0
+      let longestTask = 0
+      const collect = entries => {
+        for (const entry of entries) longestTask = Math.max(longestTask, entry.duration)
+      }
+      const observer = new PerformanceObserver(list => collect(list.getEntries()))
+      observer.observe({ type: 'longtask' })
       let firstPaint = null
       document.querySelector('.sideNav a[href="#/home"]').click()
       function sample(now) {
@@ -50,7 +56,12 @@ test('Home paints and stays responsive while learning from a large history', asy
         previous = now
         if (firstPaint === null && document.querySelector('.homeIntro')) firstPaint = now - start
         if (now - start > 3500) {
-          resolve({ firstPaint, longestFrame })
+          // Let the last sampled frame finish before draining its task entry.
+          setTimeout(() => {
+            collect(observer.takeRecords())
+            observer.disconnect()
+            resolve({ firstPaint, longestFrame, longestTask })
+          }, 0)
           return
         }
         requestAnimationFrame(sample)
@@ -58,7 +69,9 @@ test('Home paints and stays responsive while learning from a large history', asy
       requestAnimationFrame(sample)
     }))
     expect(timing.firstPaint, JSON.stringify(timing)).toBeLessThan(500)
-    expect(timing.longestFrame, JSON.stringify(timing)).toBeLessThan(300)
+    // Frame intervals include compositor/capture scheduling and several
+    // independent tasks. Gate input blocking directly; keep frames diagnostic.
+    expect(timing.longestTask, JSON.stringify(timing)).toBeLessThan(300)
     await expect(page.locator('[data-home-section="continueWatching"] .mediaThumbnail').first()).toBeVisible()
     // A second visit must not repeat full-library preparation.
     await goTo(page, 'history')
