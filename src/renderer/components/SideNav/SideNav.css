@@ -181,7 +181,7 @@
   pointer-events: none;
 }
 
-.sideNav.highlightTransitionsDisabled :is(.navOption, .navChannel)::before {
+.sideNav.highlightTransitionsDisabled :is(.navOption, .navChannel):not(:hover, :focus-visible, :active)::before {
   transition: none;
 }
 

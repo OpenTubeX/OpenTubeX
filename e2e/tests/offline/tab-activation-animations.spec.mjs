@@ -123,3 +123,52 @@ test('sidebar navigation still animates the active highlight', async ({ page }) 
   await goTo(page, 'history')
   await expect.poll(() => page.evaluate(() => window.__sidebarHighlightTransitions)).toContain('transform')
 })
+
+test('restores sidebar highlight transitions when the selected tab fails to mount', async ({ page }) => {
+  const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const failedTab = await page.evaluate(async () => {
+    const app = document.querySelector('#app').__vue_app__
+    // Hold route projection so the previous tab is still presented when the
+    // main process receives the real mount-failure notification.
+    app.config.globalProperties.$router.beforeEach(to => {
+      if (to.path === '/history') {
+        window.__tabPresentationBlocked = true
+        return new Promise(() => {})
+      }
+    })
+    return window.ftElectron.tabs.create({ route: '/history', makeActive: true })
+  })
+  await expect.poll(() => page.evaluate(() => window.__tabPresentationBlocked)).toBe(true)
+  await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/, { timeout: 2000 })
+  await page.mouse.move(800, 60)
+  const history = page.locator(sel.sideNavLink('history')).first()
+  await history.hover()
+  await expect.poll(() => history.evaluate(element => element.getAnimations({ subtree: true })
+    .some(animation => animation instanceof CSSTransition && animation.transitionProperty === 'transform'))).toBe(true)
+  await page.evaluate(id => {
+    const tab = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)
+    window.ftElectron.tabs.mountFailed(id, tab.mountRevision)
+  }, failedTab.id)
+  await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('unloaded')
+  expect(await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
+  })).toEqual({ active: failedTab.id, presented: presentedTabId })
+  await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/)
+})
+
+test('restores sidebar highlight transitions when route projection is rejected', async ({ page }) => {
+  const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const failedTab = await page.evaluate(async () => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$router.beforeEach(to => {
+      if (to.path === '/history') throw new Error('Expected route projection failure')
+    })
+    return window.ftElectron.tabs.create({ route: '/history', makeActive: true })
+  })
+  await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTabById(id)?.loadState, failedTab.id)).toBe('loaded')
+  expect(await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
+  })).toEqual({ active: failedTab.id, presented: presentedTabId })
+  await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/, { timeout: 2000 })
+})

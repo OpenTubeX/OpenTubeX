@@ -134,15 +134,13 @@ const props = defineProps({
   }
 })
 
+const route = useRoute()
 const highlightTransitionsDisabled = ref(false)
-watch([
-  () => store.getters.getActiveTabId,
-  () => store.getters.getPresentedTabId
-], ([activeTabId, presentedTabId], _, onCleanup) => {
-  // Route projection happens before presentation. Suppress the highlight from
-  // selection until the new tab's route has painted, including slow mounts.
-  highlightTransitionsDisabled.value = true
-  if (activeTabId !== presentedTabId) return
+watch(() => route.fullPath, (_route, _previousRoute, onCleanup) => {
+  // Tab switches project the route before updating the presented tab. Suppress
+  // only that highlight update, keeping interaction feedback during slow mounts.
+  highlightTransitionsDisabled.value = store.getters.getActiveTabId !== store.getters.getPresentedTabId
+  if (!highlightTransitionsDisabled.value) return
 
   let frame = requestAnimationFrame(() => {
     frame = requestAnimationFrame(() => {
@@ -342,7 +340,6 @@ function fitNavigationLabels() {
 onUpdated(scheduleLabelFit)
 
 // ===== Bottom navigation scroll visibility =====
-const route = useRoute()
 const innerRef = useTemplateRef('innerRef')
 const scrollHidden = ref(false)
 const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
