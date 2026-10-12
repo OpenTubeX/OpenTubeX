@@ -69,7 +69,12 @@ test('detects supported Takeout entries under the archive root', () => {
 
 const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
 
-for (const [filename, title] of [['My list.csv', 'My list'], ['Sets_Techno-videos.csv', 'Sets/Techno-videos']]) {
+for (const [filename, title] of [
+  ['My list.csv', 'My list'],
+  ['My list.CSV', 'My list'],
+  ['My list-VIDEOS.CSV', 'My list'],
+  ['Sets_Techno-videos.csv', 'Sets/Techno-videos'],
+]) {
   for (const metadataFirst of [true, false]) {
     test(`matches metadata to ${filename}, metadata first: ${metadataFirst}`, async () => {
       const root = 'Takeout/YouTube/playlists'
@@ -85,6 +90,23 @@ for (const [filename, title] of [['My list.csv', 'My list'], ['Sets_Techno-video
       })
     })
   }
+}
+
+for (const suffixed of [false, true]) {
+  test(`matches overlapping playlist titles one-to-one, suffixed files: ${suffixed}`, async () => {
+    const root = 'Takeout/YouTube/playlists'
+    const names = ['List', 'List-videos', 'List-videos-videos']
+    const archive = zipSync(Object.fromEntries([
+      [`${root}/playlists.csv`, strToU8(`${metadataHeader}\n${names.map((name, index) => `PL${index},${name},Description ${index},,`).join('\n')}`)],
+      ...names.map(name => [`${root}/${name}${suffixed ? '-videos' : ''}.csv`, strToU8('Video ID,Playlist video creation timestamp')]),
+    ]))
+    const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob([archive]))
+    assert.deepEqual(errors, [])
+    assert.equal(metadata.size, 3)
+    for (const [index, name] of names.entries()) {
+      assert.equal(metadata.get(`${root}/${name}${suffixed ? '-videos' : ''}.csv`).description, `Description ${index}`)
+    }
+  })
 }
 
 test('rejects metadata rows that match the same discovered video file', async () => {

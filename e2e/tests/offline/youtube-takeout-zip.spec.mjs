@@ -20,7 +20,7 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
     }])),
     [`${root}/playlists/My list-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n -abcdefghij,2025-01-02T00:00:00+00:00\n'),
     [`${root}/playlists/My list (2)-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nzzzzzzzzzzz,2025-01-03T00:00:00+00:00\n'),
-    'Another account/playlists/My list.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00+00:00\n'),
+    'Another account/playlists/My list.CSV': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00+00:00\n'),
     'Another account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp\nPLolder,My list,Older account,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\n'),
     [`${root}/videos/unrelated.mp4`]: new Uint8Array(1024),
   })
@@ -97,8 +97,10 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     [`${root}/Sets (Techno_Trance)-videos-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
     [`${root}/Favorites-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\n -abcdefghij,2025-01-02T00:00:00Z\n'),
     [`${root}/It_s music-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00Z\n'),
+    [`${root}/Case list.CSV`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
+    [`${root}/Case list-videos.CSV`]: strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00Z\n'),
     // Keep metadata after videos to catch dependence on ZIP entry order.
-    [`${root}/playlists.csv`]: strToU8(`${header}\nPLsets,Sets (Techno/Trance)-videos,"Sets, with ""quotes""\nand a second line",2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Public\nPLempty,Empty,No videos,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nFLfavorites,Favorites,Imported favorites,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nPLquote,It's music,Original title,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\n`),
+    [`${root}/playlists.csv`]: strToU8(`${header}\nPLsets,Sets (Techno/Trance)-videos,"Sets, with ""quotes""\nand a second line",2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Public\nPLempty,Empty,No videos,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nFLfavorites,Favorites,Imported favorites,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nPLquote,It's music,Original title,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nPLcase,Case list,First overlapping title,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\nPLsuffix,Case list-videos,Second overlapping title,2023-03-29T08:20:30Z,2025-10-01T19:20:15Z,Private\n`),
   })
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(bytes => {
@@ -115,7 +117,7 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     await selection.getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return ['Sets (Techno/Trance)-videos', 'Empty', 'Favorites', "It's music"].map(name => {
+      return ['Sets (Techno/Trance)-videos', 'Empty', 'Favorites', "It's music", 'Case list', 'Case list-videos'].map(name => {
         const playlist = store.getters.getAllPlaylists.find(item => item.playlistName === name)
         return playlist && {
           playlistName: playlist.playlistName,
@@ -130,8 +132,10 @@ test('imports original titles, descriptions, timestamps and empty playlists from
       { playlistName: 'Empty', description: 'No videos', createdAt, lastUpdatedAt, videoIds: [] },
       { playlistName: 'Favorites', description: 'Imported favorites', createdAt, lastUpdatedAt, videoIds: ['-abcdefghij'] },
       { playlistName: "It's music", description: 'Original title', createdAt, lastUpdatedAt, videoIds: ['lmnopqrstuv'] },
+      { playlistName: 'Case list', description: 'First overlapping title', createdAt, lastUpdatedAt, videoIds: ['abcdefghijk'] },
+      { playlistName: 'Case list-videos', description: 'Second overlapping title', createdAt, lastUpdatedAt, videoIds: ['lmnopqrstuv'] },
     ])
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(5)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(7)
   }
 })
 

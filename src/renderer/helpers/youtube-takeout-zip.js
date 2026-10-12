@@ -210,9 +210,16 @@ export async function readTakeoutPlaylistMetadata(file) {
   const metadata = new Map()
   const errors = []
   const playlistsByDirectory = new Map()
-  const videoPaths = new Set()
+  const videoPaths = new Map()
+  const suffixedVideoPaths = new Map()
   await streamTakeoutZip(file, new Set(['playlistMetadata']), entry => {
-    if (entry.type === 'playlists') { videoPaths.add(entry.path) }
+    if (entry.type !== 'playlists') { return }
+    const csvPath = `${entry.path.slice(0, -4)}.csv`
+    for (const [index, key] of [[videoPaths, csvPath], [suffixedVideoPaths, csvPath.replace(/-videos\.csv$/i, '-videos.csv')]]) {
+      const paths = index.get(key) ?? []
+      paths.push(entry.path)
+      index.set(key, paths)
+    }
   }, entry => {
     const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
     if (playlistsByDirectory.has(directory)) {
@@ -230,18 +237,37 @@ export async function readTakeoutPlaylistMetadata(file) {
   for (const [directory, playlists] of playlistsByDirectory) {
     if (playlists === null) { continue }
     const accountMetadata = new Map()
-    for (const playlist of playlists) {
+    const pending = playlists.map(playlist => {
       // Takeout replaces filename-unsafe characters, including slashes, with underscores.
       const filename = playlist.playlistName.replaceAll(/[<>:"'/\\|?*\p{Cc}]/gu, '_')
       const suffixedPath = `${directory}${filename}-videos.csv`
       const unsuffixedPath = `${directory}${filename}.csv`
-      const path = !videoPaths.has(suffixedPath) && videoPaths.has(unsuffixedPath) ? unsuffixedPath : suffixedPath
-      if (accountMetadata.has(path)) {
-        errors.push(new Error(`Ambiguous playlist metadata: ${path}`))
-        accountMetadata.clear()
-        break
+      const paths = [...(suffixedVideoPaths.get(suffixedPath) ?? []), ...(videoPaths.get(unsuffixedPath) ?? [])]
+      return { playlist, paths: new Set(paths.length ? paths : [suffixedPath]) }
+    })
+    const claimantsByPath = new Map()
+    for (const entry of pending) {
+      for (const path of entry.paths) {
+        const claimants = claimantsByPath.get(path) ?? []
+        claimants.push(entry)
+        claimantsByPath.set(path, claimants)
       }
-      accountMetadata.set(path, playlist)
+    }
+    // Assign forced matches first, removing each claimed path from other rows.
+    // A queue also resolves suffix-overlapping titles without rescanning every row.
+    const queue = pending.filter(entry => entry.paths.size === 1)
+    for (let i = 0; i < queue.length; i++) {
+      const entry = queue[i]
+      if (entry.paths.size !== 1) { continue }
+      const path = entry.paths.values().next().value
+      accountMetadata.set(path, entry.playlist)
+      for (const other of claimantsByPath.get(path)) {
+        if (other !== entry && other.paths.delete(path) && other.paths.size === 1) { queue.push(other) }
+      }
+    }
+    if (accountMetadata.size !== pending.length) {
+      errors.push(new Error(`Ambiguous playlist metadata: ${directory}playlists.csv`))
+      continue
     }
     // Commit each account only after all its records have unambiguous filenames.
     for (const [path, playlist] of accountMetadata) { metadata.set(path, playlist) }
