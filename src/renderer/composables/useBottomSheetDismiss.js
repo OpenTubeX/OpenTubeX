@@ -8,6 +8,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
   let drag = null
   let suppressClick = false
   let sheetAnimation = null
+  let isLeaving = false
 
   function clearDrag() {
     drag = null
@@ -19,7 +20,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
   }
 
   function startDrag(event) {
-    if (event.button !== 0 || event.isPrimary === false || drag) return
+    if (!sheet.value || isLeaving || event.button !== 0 || event.isPrimary === false || drag) return
     suppressClick = false
     const handle = event.target.closest('.bottomSheetHandle')
     // Check the touched content and ancestor scrollports, including an inner
@@ -125,6 +126,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
     }))
   }
   function transition(backdrop, done, leaving) {
+    isLeaving = leaving
     const element = backdrop.querySelector('[data-bottom-sheet]')
     const transform = getComputedStyle(element).transform
     clearDrag()

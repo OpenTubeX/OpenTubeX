@@ -492,7 +492,7 @@ export async function goTo(page, route) {
     await page.evaluate(() => window.scrollTo(0, 0))
     await expect(page.locator('.sideNav')).not.toHaveClass(/scrollHidden/)
   }
-  const visibleLink = () => page.locator(`${sel.sideNavLink(route)}:visible`).first()
+  const visibleLink = () => page.locator(sel.sideNavLink(route)).first()
   if (await visibleLink().count() === 0) {
     // Entry lives in the "More" flyout in the collapsed side nav.
     await page.locator('.sideNav .moreOptionNav').click()
@@ -570,7 +570,7 @@ export function expectAnimation(page, name) {
 /** Common locators, kept in one place so selector changes only hit here. */
 export const sel = {
   searchInput: '.topNav .searchInput input.ft-input',
-  sideNavLink: (route) => `:is(.sideNav, .moreOptionContainer) a[href="#/${route}"]`,
+  sideNavLink: (route) => `:is(.sideNav, .moreOptionContainer) a[href="#/${route}"]:visible`,
   tabs: '.tabBar .tab',
   activeTab: '.tabBar .tab.active',
   newTabButton: '.tabBar .newTabButton',

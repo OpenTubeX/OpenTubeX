@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
@@ -422,4 +422,66 @@ for (const kind of ['more', 'context']) {
       }
     })
   }
+}
+
+test('navigation helper selects one usable overflow link in mobile and desktop layouts', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.locator('.moreOptionNav').click()
+  const menu = page.locator('.moreOptionContainer')
+  await waitForAnimation(menu)
+  const link = page.locator(sel.sideNavLink('subscribedchannels'))
+  await expect(link).toHaveCount(1)
+  await link.click()
+  await expect(page).toHaveURL(/#\/subscribedchannels/)
+  await expect(menu).toHaveCount(0)
+  await page.setViewportSize({ width: 1024, height: 812 })
+  await expect(page.locator(sel.sideNavLink('history'))).toHaveCount(1)
+  await page.locator(sel.sideNavLink('history')).click()
+  await expect(page).toHaveURL(/#\/history/)
+})
+
+for (const kind of ['more', 'context']) {
+  test(`${kind} sheet ignores a drag during exit and permits dragging after reopening`, async ({ page }) => {
+    const errors = []
+    page.on('pageerror', error => errors.push(error.message))
+    await page.setViewportSize({ width: 375, height: 812 })
+    await goTo(page, 'history')
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    try {
+      const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
+      const open = async () => {
+        if (kind === 'more') await page.locator('.moreOptionNav').click()
+        else await openContext(page, session)
+        await waitForAnimation(menu)
+      }
+      await open()
+      // Capture the first exit frame and dispatch into its retained DOM before
+      // actionability can wait for the short animation to finish.
+      const retained = await menu.evaluate(element => {
+        const handle = element.querySelector('.bottomSheetHandle')
+        element.parentElement.click()
+        return new Promise(resolve => requestAnimationFrame(() => {
+          const bounds = handle.getBoundingClientRect()
+          const x = bounds.x + bounds.width / 2; const y = bounds.y + bounds.height / 2
+          handle.dispatchEvent(new PointerEvent('pointerdown', {
+            bubbles: true, pointerType: 'mouse', pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY: y
+          }))
+          window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 1, clientX: x, clientY: y + 100 }))
+          window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, clientX: x, clientY: y + 100 }))
+          resolve(element.isConnected && element.getAnimations().some(animation => animation.effect.getKeyframes().at(-1).transform === 'translateY(100%)'))
+        }))
+      })
+      expect(retained).toBe(true)
+      await expect(menu).toHaveCount(0)
+      expect(errors).toEqual([])
+      await open()
+      await touchDrag(session, menu.locator('.bottomSheetHandle'), 100)
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(menu).toHaveCount(0)
+      expect(errors).toEqual([])
+    } finally {
+      await session.detach()
+    }
+  })
 }
