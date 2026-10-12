@@ -16,7 +16,8 @@
       }"
       :style="{
         padding: padding + 'px',
-        fontSize: size + 'px'
+        fontSize: size + 'px',
+        anchorName: dropdownAnchor
       }"
       :aria-disabled="disabled"
       :aria-expanded="ariaExpanded ?? dropdownShown"
@@ -205,6 +206,7 @@ import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRe
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
@@ -299,6 +301,7 @@ const emit = defineEmits(['click', 'disabled-click', 'dropdown-open'])
 const LONG_CLICK_BOUNDARY_MS = 500
 
 const id = useId()
+const dropdownAnchor = `--icon-menu-${id}`
 
 const isKebabMenu = computed(() => (
   Array.isArray(props.icon) && ['ellipsis-v', 'ellipsis-vertical'].includes(props.icon[1])
@@ -309,6 +312,7 @@ const phoneLayout = usePhoneLayout()
 const ownsPhoneSheet = computed(() => props.mobileSheet && phoneLayout.value)
 const fullscreenDropdownTarget = ref(null)
 const portaledDropdown = computed(() => props.dropdownPortal || fullscreenDropdownTarget.value !== null)
+const usesDropdownAnchor = computed(() => supportsAnchorPositioning && portaledDropdown.value && !fullscreenDropdownTarget.value)
 const modalLayout = usePhoneLayout('(max-width: 900px), (max-height: 600px)')
 const useModal = computed(() => props.dropdownModalOnMobile && modalLayout.value && !fullscreenDropdownTarget.value)
 
@@ -332,7 +336,9 @@ watch(dropdownContentInner, (content, _, onCleanup) => {
 watch(dropdownShown, (shown) => {
   if (shown && !useModal.value && !ownsPhoneSheet.value) {
     window.addEventListener('resize', scheduleDropdownViewportUpdate)
-    window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+    if (!usesDropdownAnchor.value) {
+      window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+    }
   } else {
     removeDropdownViewportListeners()
     fullscreenDropdownTarget.value = null
@@ -535,8 +541,16 @@ function keepDropdownInViewport() {
     const maxTop = window.innerHeight - bottomMargin - dropdownRect.height
 
     dropdown.value.style.inset = 'auto'
-    dropdown.value.style.left = `${Math.max(viewportMargin, Math.min(left, maxLeft))}px`
-    dropdown.value.style.top = `${Math.max(minTop, Math.min(top, maxTop))}px`
+    const clampedLeft = Math.max(viewportMargin, Math.min(left, maxLeft))
+    const clampedTop = Math.max(minTop, Math.min(top, maxTop))
+    if (usesDropdownAnchor.value) {
+      Object.assign(dropdown.value.style, getAnchoredPosition(dropdownAnchor, buttonRect, clampedLeft, clampedTop, {
+        minLeft: viewportMargin, maxLeft, minTop, maxTop
+      }))
+    } else {
+      dropdown.value.style.left = `${clampedLeft}px`
+      dropdown.value.style.top = `${clampedTop}px`
+    }
     return
   }
 

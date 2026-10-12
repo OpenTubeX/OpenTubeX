@@ -4,6 +4,7 @@
       ref="triggerRef"
       type="button"
       class="colorFieldTrigger"
+      :style="{ anchorName: popoverAnchor }"
       :aria-label="label"
       :aria-expanded="open"
       @click="togglePicker"
@@ -211,10 +212,11 @@
 
 <script setup>
 import { vTouchRange } from '../../helpers/touchRange'
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 
 const props = defineProps({
   modelValue: {
@@ -241,6 +243,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:blurValue', 'change', 'apply', 'cancel', 'reset'])
 const { t } = useI18n()
 const triggerRef = useTemplateRef('triggerRef')
+const popoverAnchor = `--color-picker-${useId()}`
 const popoverRef = useTemplateRef('popoverRef')
 const saturationValueRef = useTemplateRef('saturationValueRef')
 const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
@@ -292,7 +295,7 @@ watch(open, async value => {
   }
   document.addEventListener('pointerdown', closeFromOutside)
   window.addEventListener('resize', positionPopover)
-  window.addEventListener('scroll', positionPopover, true)
+  if (!supportsAnchorPositioning) window.addEventListener('scroll', positionPopover, true)
   await nextTick()
   positionPopover()
   saturationValueRef.value?.focus()
@@ -540,7 +543,12 @@ function positionPopover() {
   const top = below + popover.offsetHeight <= window.innerHeight - margin
     ? below
     : Math.max(margin, triggerBounds.top - popover.offsetHeight - 8)
-  popoverStyle.value = { left: `${left}px`, top: `${top}px` }
+  popoverStyle.value = getAnchoredPosition(popoverAnchor, triggerBounds, left, top, {
+    minLeft: margin,
+    maxLeft: window.innerWidth - popover.offsetWidth - margin,
+    minTop: margin,
+    maxTop: window.innerHeight - popover.offsetHeight - margin
+  })
 }
 
 function closeFromOutside(event) {

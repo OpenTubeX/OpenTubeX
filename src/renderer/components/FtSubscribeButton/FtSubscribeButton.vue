@@ -7,6 +7,7 @@
     <div
       ref="buttonList"
       class="buttonList"
+      :style="{ anchorName: profileDropdownAnchor }"
     >
       <FtButton
         :label="subscribedText"
@@ -199,6 +200,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   formatSubscriptionDailyVideoLimit,
@@ -241,6 +243,7 @@ const props = defineProps({
 const emit = defineEmits(['subscribed'])
 
 const id = useId()
+const profileDropdownAnchor = `--subscription-${id}`
 
 /**
  * @typedef {object} Profile
@@ -346,22 +349,24 @@ watch(isProfileDropdownOpen, async (open) => {
   if (buttonList.value !== null) {
     profileDropdownPositionResizeObserver.observe(buttonList.value)
   }
-  profileDropdownPositionMutationObserver = new MutationObserver((records) => {
-    const dropdown = profileDropdown.value
-    if (dropdown !== null && records.every(({ target }) => (
-      target === dropdown || dropdown.contains(target)
-    ))) return
+  if (!supportsAnchorPositioning) {
+    profileDropdownPositionMutationObserver = new MutationObserver((records) => {
+      const dropdown = profileDropdown.value
+      if (dropdown !== null && records.every(({ target }) => (
+        target === dropdown || dropdown.contains(target)
+      ))) return
 
-    scheduleProfileDropdownPositionUpdate()
-  })
-  profileDropdownPositionMutationObserver.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['class', 'hidden', 'style'],
-    childList: true,
-    subtree: true
-  })
+      scheduleProfileDropdownPositionUpdate()
+    })
+    profileDropdownPositionMutationObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class', 'hidden', 'style'],
+      childList: true,
+      subtree: true
+    })
+    window.addEventListener('scroll', scheduleProfileDropdownPositionUpdate, { capture: true, passive: true })
+  }
   window.addEventListener('resize', scheduleProfileDropdownPositionUpdate)
-  window.addEventListener('scroll', scheduleProfileDropdownPositionUpdate, { capture: true, passive: true })
 
   const scroller = profileDropdownScroller.value
   const content = profileListContent.value
@@ -456,10 +461,14 @@ function positionProfileDropdown() {
   const preferredTop = opensAbove ? above : below
   const top = Math.max(viewportMargin, Math.min(preferredTop, maximumTop))
 
-  profileDropdownStyle.value = {
-    left: `${snapToDevicePixels(horizontalPosition.left)}px`,
-    top: `${snapToDevicePixels(top)}px`
-  }
+  profileDropdownStyle.value = getAnchoredPosition(
+    profileDropdownAnchor, triggerRect, snapToDevicePixels(horizontalPosition.left), snapToDevicePixels(top), {
+      minLeft: viewportMargin,
+      maxLeft: Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin),
+      minTop: viewportMargin,
+      maxTop: maximumTop
+    }
+  )
   profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
   profileDropdownOpensAbove.value = opensAbove
   isProfileDropdownPositioned.value = true

@@ -245,6 +245,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition } from '../../helpers/anchoredPosition'
 
 const props = defineProps({
   variant: {
@@ -334,7 +335,6 @@ const emit = defineEmits(['change', 'open', 'reset'])
 
 const id = useId()
 const dropdownAnchor = `--select-${id}`
-const supportsAnchorPositioning = CSS.supports('position-anchor', dropdownAnchor)
 const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
@@ -483,15 +483,7 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    // CSS anchors follow scrolling without JavaScript updates. Keep our
-    // measured offsets for viewport edges and rounding.
-    positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
-    left: supportsAnchorPositioning
-      ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
-      : `${snapToDevicePixels(left)}px`,
-    top: supportsAnchorPositioning
-      ? `calc(anchor(top) + ${snapToDevicePixels(top) - buttonRect.top}px)`
-      : `${snapToDevicePixels(top)}px`,
+    ...getAnchoredPosition(dropdownAnchor, buttonRect, snapToDevicePixels(left), snapToDevicePixels(top)),
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
     zIndex: props.dropdownZIndex
   }
