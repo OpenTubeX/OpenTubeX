@@ -1,5 +1,5 @@
 <template>
-  <div ref="root">
+  <div>
     <FtLoader
       v-if="displayIsLoading && activeVideoList.length === 0 && isCommunity"
     />
@@ -89,8 +89,7 @@ import {
   onDeactivated,
   onMounted,
   reactive,
-  ref,
-  useTemplateRef
+  ref
 } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
@@ -106,10 +105,8 @@ import store from '../../store/index'
 import { useKeepAliveEffectScope } from '../../composables/useKeepAliveEffectScope'
 import { useSubscriptionEntryVersion } from '../../composables/useSubscriptionEntryVersion'
 import { KeyboardShortcuts } from '../../../constants'
-import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
-import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import {
@@ -120,7 +117,6 @@ import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
 const isElectron = process.env.IS_ELECTRON
-const root = useTemplateRef('root')
 useKeepAliveEffectScope()
 
 const props = defineProps({
@@ -362,48 +358,10 @@ function removeKeyboardShortcutListener() {
   document.removeEventListener('keydown', keyboardShortcutHandler)
 }
 
-let hasActivated = false
-/** @type {Animation[]} */
-let activationAnimations = []
-
-function cancelActivationAnimations() {
-  activationAnimations.forEach(animation => animation.cancel())
-  activationAnimations = []
-}
-
 onMounted(addKeyboardShortcutListener)
-onActivated(() => {
-  addKeyboardShortcutListener()
-
-  if (!hasActivated) {
-    hasActivated = true
-    return
-  }
-
-  if (isReducedMotionEnabled()) {
-    return
-  }
-
-  cancelActivationAnimations()
-  activationAnimations = Array.from(root.value.querySelectorAll('.autoGrid'))
-    .filter(grid => grid.childElementCount > 0)
-    .map(grid => applyAnimationSpeed(grid.animate([
-      { opacity: 0, transform: 'translateY(10px)' },
-      { opacity: 1, transform: 'translateY(0)' }
-    ], {
-      duration: 300,
-      easing: 'ease'
-    })))
-})
-onDeactivated(() => {
-  removeKeyboardShortcutListener()
-  cancelActivationAnimations()
-})
-
-onBeforeUnmount(() => {
-  removeKeyboardShortcutListener()
-  cancelActivationAnimations()
-})
+onActivated(addKeyboardShortcutListener)
+onDeactivated(removeKeyboardShortcutListener)
+onBeforeUnmount(removeKeyboardShortcutListener)
 
 function refresh() {
   emit('refresh')

@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels, highlightTransitionsDisabled }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -133,6 +133,24 @@ const props = defineProps({
     default: false
   }
 })
+
+const highlightTransitionsDisabled = ref(false)
+watch([
+  () => store.getters.getActiveTabId,
+  () => store.getters.getPresentedTabId
+], ([activeTabId, presentedTabId], _, onCleanup) => {
+  // Route projection happens before presentation. Suppress the highlight from
+  // selection until the new tab's route has painted, including slow mounts.
+  highlightTransitionsDisabled.value = true
+  if (activeTabId !== presentedTabId) return
+
+  let frame = requestAnimationFrame(() => {
+    frame = requestAnimationFrame(() => {
+      highlightTransitionsDisabled.value = false
+    })
+  })
+  onCleanup(() => cancelAnimationFrame(frame))
+}, { flush: 'sync' })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isOpen = computed(() => {
