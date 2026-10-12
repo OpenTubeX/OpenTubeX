@@ -1549,7 +1549,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-overflow-menu.ft-menu-grid .shaka-current-quality-mark) {
   flex-shrink: 0;
+  align-self: flex-start;
   block-size: auto;
+  line-height: 6px;
 }
 
 /*
