@@ -99,7 +99,7 @@ test.describe('tab bar', () => {
     for (const zoom of [1, 0.95, 1.25]) {
       await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
       await app.electronApp.evaluate(({ BrowserWindow }, zoom) => BrowserWindow.getAllWindows()[0].setSize(Math.round(550 * zoom), 800), zoom)
-      await expect(page.locator('.tabsScrollbar')).toBeVisible()
+      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
       const before = await geometry()
       expect(before.tabs[0].width).toBeGreaterThan(100)
       expect(before.tabs[0].width).toBeLessThan(200)
@@ -138,7 +138,7 @@ test.describe('tab bar', () => {
             await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
           }
         })
-        await expect(page.locator('.tabsScrollbar')).toBeVisible()
+        await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
       }
       for (const zoom of [1, 0.95, 1.25]) {
         await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
@@ -1766,7 +1766,7 @@ test.describe('tab bar', () => {
     })).toEqual(groupReorderedIds)
   })
 
-  test('clamps its custom scrollbar after collapsing a group at the scroll end', async ({ page }) => {
+  test('clamps its horizontal scrollbar after collapsing a group at the scroll end', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 600 })
     const groupId = await page.evaluate(async () => {
       const tabIds = []
@@ -1785,8 +1785,8 @@ test.describe('tab bar', () => {
     })
 
     const container = page.locator('.tabsContainer')
-    const scrollbar = page.locator('.tabsScrollbar')
-    await expect(scrollbar).toBeVisible()
+    const scrollbar = page.locator('.tabsContainer > .os-scrollbar-horizontal')
+    await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
     await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
     await expect.poll(() => container.evaluate(element => (
       element.scrollLeft > 0 &&
@@ -1799,7 +1799,7 @@ test.describe('tab bar', () => {
       maxScroll: Math.max(0, element.scrollWidth - element.clientWidth),
       scrollLeft: element.scrollLeft
     }))).toEqual({ maxScroll: 0, scrollLeft: 0 })
-    await expect(scrollbar).toBeHidden()
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
   })
 
   test('clamps its vertical scrollbar after collapsing an expanded group at the scroll end', async ({ page, attachScreenshot }) => {

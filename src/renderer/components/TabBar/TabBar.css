@@ -33,21 +33,26 @@
   -webkit-app-region: no-drag;
 }
 
-.tabsViewport.hasScrollbar {
-  align-self: stretch;
-}
-
 .tabsContainer {
-  display: flex;
   min-inline-size: 0;
   overflow: auto hidden;
-
-  /* The horizontal layout draws its own scrollbar below (.tabsScrollbar). The
-     vertical one gets overlay scrollbars from v-overlay-scrollbars instead,
-     which hides the native ones itself. */
-  scrollbar-width: none;
-  gap: 2px;
   -webkit-app-region: no-drag;
+}
+
+.tabsContent {
+  display: flex;
+  inline-size: max-content;
+  min-inline-size: 100%;
+  gap: 2px;
+}
+
+/* Keep the track's full hit area while making the idle thumb less prominent. */
+.tabBar:not(.vertical) :deep(.os-scrollbar-horizontal:not(:hover) .os-scrollbar-handle) {
+  block-size: 50%;
+}
+
+.tabBar.vertical :deep(.os-scrollbar-vertical:not(:hover) .os-scrollbar-handle) {
+  inline-size: 50%;
 }
 
 .collapsedTabGroup {
@@ -126,42 +131,6 @@
   white-space: nowrap;
 }
 
-.tabsScrollbar {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
-  block-size: 3px;
-  border-radius: calc(999px * var(--ui-roundness));
-  background-color: var(--scrollbar-color);
-  cursor: pointer;
-  -webkit-app-region: no-drag;
-}
-
-.tabsScrollbarThumb {
-  block-size: 100%;
-  border-radius: inherit;
-  background-color: var(--primary-text-color);
-  transition: background-color 0.15s ease, opacity 0.15s ease;
-  cursor: grab;
-  opacity: 0.95;
-}
-
-.tabsScrollbarThumb:active {
-  background-color: var(--primary-text-color);
-  opacity: 1;
-  cursor: grabbing;
-}
-
-.tabsScrollbarThumb:hover {
-  background-color: var(--primary-text-color);
-  opacity: 1;
-}
-
-.tabsScrollbar:hover .tabsScrollbarThumb {
-  background-color: var(--primary-text-color);
-  opacity: 1;
-}
-
 .newTabButton,
 .tabOrganizerButton {
   display: flex;
@@ -206,7 +175,11 @@
   padding-block: 2px;
 }
 
-.tabBar.position-bottom .tabsScrollbar {
+.tabBar.position-bottom .tabsContainer :deep(.os-scrollbar-horizontal) {
+  inset-block: 0 auto;
+}
+
+.tabBar.position-bottom :deep(.os-scrollbar-horizontal .os-scrollbar-handle) {
   inset-block: 0 auto;
 }
 
@@ -256,6 +229,16 @@
   left: auto;
   right: 0;
 }
+
+.tabBar.vertical.position-left :deep(.os-scrollbar-vertical .os-scrollbar-handle) {
+  left: 0;
+  right: auto;
+}
+
+.tabBar.vertical.position-right :deep(.os-scrollbar-vertical .os-scrollbar-handle) {
+  left: auto;
+  right: 0;
+}
 /* stylelint-enable liberty/use-logical-spec */
 
 .tabBar.vertical .tabBarActions {
@@ -279,11 +262,16 @@
 
 .tabBar.vertical .tabsContainer {
   box-sizing: border-box;
-  flex-direction: column;
   block-size: 100%;
   padding-inline: var(--tab-bar-inline-padding);
   overflow: hidden auto;
   overscroll-behavior: contain;
+}
+
+.tabBar.vertical .tabsContent {
+  flex-direction: column;
+  inline-size: auto;
+  min-inline-size: 0;
 }
 
 /* Keep the divider outside the tab bar's stacking context so it can straddle
