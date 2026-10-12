@@ -2,7 +2,25 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { strToU8, zipSync } from 'fflate'
 
-import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+
+test('uses Takeout metadata instead of the sanitized video filename', () => {
+  const metadata = {
+    playlistName: 'Sets (Techno/Trance/Hard House/UKG)',
+    description: 'Sets',
+    createdAt: Date.parse('2023-03-29T08:20:30+00:00'),
+    lastUpdatedAt: Date.parse('2026-10-01T19:20:15+00:00'),
+  }
+  const playlist = parseTakeoutPlaylistCsv(
+    'Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00',
+    'Sets (Techno_Trance_Hard House_UKG)-videos.csv',
+    metadata
+  )
+  assert.deepEqual(playlist, {
+    ...metadata,
+    videos: [{ videoId: 'abcdefghijk', title: 'abcdefghijk', lengthSeconds: 0, timeAdded: Date.parse('2025-01-01T00:00:00+00:00') }],
+  })
+})
 
 test('detects supported Takeout entries under the archive root', () => {
   const root = 'takeout-001/Takeout/YouTube and YouTube Music'
@@ -11,7 +29,59 @@ test('detects supported Takeout entries under the archive root', () => {
   assert.equal(classifyTakeoutEntry(`${root}/history/search-history.json`), 'searchHistory')
   assert.equal(classifyTakeoutEntry(`${root}/playlists/My list.csv`), 'playlists')
   assert.equal(classifyTakeoutEntry(`${root}/videos/my-video.mp4`), null)
-  assert.equal(classifyTakeoutEntry(`${root}/playlists/playlists.csv`), null)
+  assert.equal(classifyTakeoutEntry(`${root}/playlists/playlists.csv`), 'playlistMetadata')
+})
+
+const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
+
+test('parses reordered metadata columns, BOM, CRLF and quoted multiline descriptions', () => {
+  const content = '\uFEFFPlaylist Description (Original),Playlist Title (Original),Playlist ID,Playlist Update Timestamp,Playlist Create Timestamp\r\n"First, second\r\nSay ""hello""","A/B-videos",PLexample,2025-02-01T00:00:00Z,2024-01-01T00:00:00Z\r\n'
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content), [{
+    playlistName: 'A/B-videos', description: 'First, second\r\nSay "hello"',
+    createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-02-01T00:00:00Z'),
+  }])
+  assert.deepEqual(parseTakeoutPlaylistMetadataCsv('Playlist ID,Playlist Title (Original)\nPLempty,Empty'), [{ playlistName: 'Empty' }])
+})
+
+test('rejects malformed playlist metadata rather than attaching it to the wrong playlist', () => {
+  for (const content of [
+    'wrong header',
+    `${metadataHeader}\nPLexample,Title,Description,not-a-date,`,
+    `${metadataHeader}\nPLexample,Title,Description`,
+    `${metadataHeader}\nPLexample, ,Description,,`,
+    `${metadataHeader}\nPLexample,"unclosed,Description,,`,
+    `${metadataHeader}\nPLexample,"Title"junk,Description,,`,
+  ]) {
+    assert.equal(parseTakeoutPlaylistMetadataCsv(content), null)
+  }
+})
+
+test('reads late metadata separately, scopes it to its account, and includes empty playlists', async () => {
+  const root = 'Takeout/YouTube and YouTube Music/playlists'
+  const archive = zipSync({
+    [`${root}/A_B-videos-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z'),
+    [`${root}/playlists.csv`]: strToU8(`${metadataHeader}\nPLone,A/B-videos,First account,2024-01-01T00:00:00Z,\nPLempty,Empty,,,\nPLquote,It's music,,,`),
+    'Another account/playlists/playlists.csv': strToU8(`${metadataHeader}\nPLtwo,A_B-videos,Second account,,`),
+  })
+  const file = new Blob([archive])
+  const listed = await listYouTubeTakeoutZipEntries(file)
+  assert.deepEqual(listed.map(entry => entry.type), ['playlists', 'playlists', 'playlists'])
+  const metadata = await readTakeoutPlaylistMetadata(file)
+  assert.equal(metadata.get(`${root}/A_B-videos-videos.csv`).playlistName, 'A/B-videos')
+  assert.equal(metadata.get(`${root}/Empty-videos.csv`).playlistName, 'Empty')
+  assert.equal(metadata.get(`${root}/It_s music-videos.csv`).playlistName, "It's music")
+  assert.equal(metadata.get('Another account/playlists/A_B-videos-videos.csv').description, 'Second account')
+  const entries = []
+  await forEachSelectedTakeoutZipEntry(file, new Set(['playlists']), entry => entries.push(entry))
+  assert.equal(entries.length, 1)
+  assert.equal(parseTakeoutPlaylistCsv(entries[0].content, 'A_B-videos-videos.csv', metadata.get(entries[0].path)).playlistName, 'A/B-videos')
+})
+
+test('rejects ambiguous sanitized filenames within an account', async () => {
+  const archive = zipSync({
+    'Takeout/YouTube/playlists/playlists.csv': strToU8(`${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`),
+  })
+  await assert.rejects(readTakeoutPlaylistMetadata(new Blob([archive])), /Ambiguous playlist metadata/)
 })
 
 test('lists supported entries and reads only selected archive content', async () => {

@@ -307,7 +307,7 @@ import {
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
-import { forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
+import { forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, readTakeoutPlaylistMetadata } from '../../helpers/youtube-takeout-zip'
 import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
@@ -498,12 +498,33 @@ async function importSelectedTakeoutData() {
   const selected = new Set(selectedTakeoutTypes.value)
   let importedPlaylists = false
   const playlistNameCounts = new Map()
-  const reservedPlaylistNames = new Set(takeoutEntries.value
-    .filter(entry => entry.type === 'playlists' && selected.has('playlists'))
-    .map(entry => getTakeoutPlaylistName(entry.path.split('/').at(-1))))
   const allocatedPlaylistNames = new Set()
   try {
+    const metadata = selected.has('playlists') ? await readTakeoutPlaylistMetadata(takeoutFile.value) : new Map()
+    const reservedPlaylistNames = new Set([
+      ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
+      ...takeoutEntries.value.filter(entry => entry.type === 'playlists')
+        .map(entry => (metadata.get(entry.path)?.playlistName ?? getTakeoutPlaylistName(entry.path.split('/').at(-1))).trim()),
+    ])
+    const importedPaths = new Set()
+    async function importPlaylist(playlist) {
+      const name = playlist.playlistName.trim()
+      const count = (playlistNameCounts.get(name) ?? 0) + 1
+      playlistNameCounts.set(name, count)
+      let playlistName = name
+      if (count > 1) {
+        let suffix = 2
+        while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
+          suffix++
+        }
+        playlistName = `${name} (${suffix})`
+      }
+      allocatedPlaylistNames.add(playlistName)
+      await importTakeoutPlaylist({ ...playlist, playlistName })
+      importedPlaylists = true
+    }
     await forEachSelectedTakeoutZipEntry(takeoutFile.value, selected, async entry => {
+      if (entry.type === 'playlists') { importedPaths.add(entry.path) }
       if (!isSupportedTakeoutEntry(entry)) {
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
         return
@@ -522,26 +543,19 @@ async function importSelectedTakeoutData() {
         } else if (entry.type === 'searchHistory') {
           await importYouTubeSearchHistory(JSON.parse(entry.content))
         } else if (entry.type === 'playlists') {
-          const name = getTakeoutPlaylistName(entry.path.split('/').at(-1))
-          const count = (playlistNameCounts.get(name) ?? 0) + 1
-          playlistNameCounts.set(name, count)
-          let playlistName = name
-          if (count > 1) {
-            let suffix = 2
-            while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
-              suffix++
-            }
-            playlistName = `${name} (${suffix})`
-          }
-          allocatedPlaylistNames.add(playlistName)
-          await importTakeoutPlaylist(entry, playlistName)
-          importedPlaylists = true
+          const playlist = parseTakeoutPlaylistCsv(entry.content, entry.path.split('/').at(-1), metadata.get(entry.path))
+          await importPlaylist(playlist)
         }
       } catch (error) {
         console.error('Unable to import Takeout entry', entry.path, error)
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
       }
     })
+    for (const [path, playlist] of metadata) {
+      if (!importedPaths.has(path)) {
+        await importPlaylist({ ...playlist, videos: [] })
+      }
+    }
     if (importedPlaylists) {
       showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
     }
@@ -1708,14 +1722,7 @@ async function exportYouTubeWatchHistory() {
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
-async function importTakeoutPlaylist(entry, playlistName) {
-  const name = entry.path.split('/').at(-1)
-  const playlist = parseTakeoutPlaylistCsv(entry.content, name)
-  if (playlist === null) {
-    throw new Error('Invalid playlist CSV')
-  }
-  playlist.playlistName = playlistName
-
+async function importTakeoutPlaylist(playlist) {
   const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
   if (existing === undefined) {
     await store.dispatch('addPlaylist', playlist)
@@ -1730,7 +1737,7 @@ async function importTakeoutPlaylist(entry, playlistName) {
         known.add(key)
       }
     }
-    await store.dispatch('updatePlaylist', { _id: existing._id, playlistName: existing.playlistName, videos })
+    await store.dispatch('importPlaylist', { createdAt: existing.createdAt, lastUpdatedAt: Date.now(), ...playlist, _id: existing._id, videos })
   }
 }
 
@@ -1759,9 +1766,10 @@ async function importPlaylists() {
   const data = response.content
 
   if (response.filename.toLowerCase().endsWith('.csv')) {
-    const playlistName = getTakeoutPlaylistName(response.filename)
     try {
-      await importTakeoutPlaylist({ path: response.filename, content: data }, playlistName)
+      const playlist = parseTakeoutPlaylistCsv(data, response.filename)
+      if (playlist === null) { throw new Error('Invalid playlist CSV') }
+      await importTakeoutPlaylist(playlist)
       showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
     } catch (error) {
       console.error('Unable to import Takeout playlist', response.filename, error)

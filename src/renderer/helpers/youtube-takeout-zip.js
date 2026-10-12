@@ -16,8 +16,8 @@ export function classifyTakeoutEntry(path) {
   if (parent === 'history' && name === 'search-history.json') {
     return 'searchHistory'
   }
-  if (parent === 'playlists' && name.endsWith('.csv') && name !== 'playlists.csv') {
-    return 'playlists'
+  if (parent === 'playlists' && name.endsWith('.csv')) {
+    return name === 'playlists.csv' ? 'playlistMetadata' : 'playlists'
   }
   return null
 }
@@ -111,7 +111,9 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
 /** Discover supported paths without inflating their contents or unrelated videos. */
 export async function listYouTubeTakeoutZipEntries(file) {
   const entries = []
-  await streamTakeoutZip(file, new Set(), entry => entries.push(entry), () => {})
+  await streamTakeoutZip(file, new Set(), entry => {
+    entries.push({ ...entry, type: entry.type === 'playlistMetadata' ? 'playlists' : entry.type })
+  }, () => {})
   return entries
 }
 
@@ -124,7 +126,102 @@ export function getTakeoutPlaylistName(filename) {
   return filename.replace(/(?:-videos)?\.csv$/i, '')
 }
 
-export function parseTakeoutPlaylistCsv(content, filename) {
+/** Parse CSV records, including quoted commas, escaped quotes and line breaks. */
+function parseCsvRecords(content) {
+  const records = []
+  let record = []
+  let field = ''
+  let quoted = false
+  let closedQuote = false
+  const text = content.replace(/^\uFEFF/, '')
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i]
+    if (quoted) {
+      if (char === '"') {
+        if (text[i + 1] === '"') {
+          field += '"'
+          i++
+        } else {
+          quoted = false
+          closedQuote = true
+        }
+      } else {
+        field += char
+      }
+    } else if (char === ',' || char === '\n' || char === '\r') {
+      record.push(field)
+      field = ''
+      closedQuote = false
+      if (char !== ',') {
+        records.push(record)
+        record = []
+        if (char === '\r' && text[i + 1] === '\n') { i++ }
+      }
+    } else if (char === '"' && field === '' && !closedQuote) {
+      quoted = true
+    } else if (char === '"' || closedQuote) {
+      return null
+    } else {
+      field += char
+    }
+  }
+  if (quoted) { return null }
+  if (field !== '' || record.length > 0 || closedQuote) {
+    records.push([...record, field])
+  }
+  return records
+}
+
+export function parseTakeoutPlaylistMetadataCsv(content) {
+  const records = parseCsvRecords(content)
+  if (!records?.length) { return null }
+  const headers = records[0]
+  const titleIndex = headers.indexOf('Playlist Title (Original)')
+  if (titleIndex === -1 || !headers.includes('Playlist ID')) { return null }
+  const playlists = []
+  for (const record of records.slice(1)) {
+    if (record.length === 1 && record[0] === '') { continue }
+    if (record.length !== headers.length || !record[titleIndex].trim()) { return null }
+    const playlist = { playlistName: record[titleIndex] }
+    const descriptionIndex = headers.indexOf('Playlist Description (Original)')
+    if (descriptionIndex !== -1) { playlist.description = record[descriptionIndex] }
+    for (const [column, property] of [
+      ['Playlist Create Timestamp', 'createdAt'],
+      ['Playlist Update Timestamp', 'lastUpdatedAt'],
+    ]) {
+      const value = record[headers.indexOf(column)]
+      if (value) {
+        const timestamp = Date.parse(value)
+        if (!Number.isFinite(timestamp)) { return null }
+        playlist[property] = timestamp
+      }
+    }
+    playlists.push(playlist)
+  }
+  return playlists
+}
+
+/** Read metadata first: Takeout can store playlists.csv after its video files. */
+export async function readTakeoutPlaylistMetadata(file) {
+  const metadata = new Map()
+  await streamTakeoutZip(file, new Set(['playlistMetadata']), () => {}, entry => {
+    const playlists = parseTakeoutPlaylistMetadataCsv(entry.content)
+    if (playlists === null) { throw new Error(`Invalid playlist metadata CSV: ${entry.path}`) }
+    const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
+    for (const playlist of playlists) {
+      // Takeout replaces filename-unsafe characters, including slashes, with underscores.
+      const filename = playlist.playlistName.replaceAll(/[<>:"'/\\|?*\p{Cc}]/gu, '_')
+      const path = `${directory}${filename}-videos.csv`
+      if (metadata.has(path)) {
+        throw new Error(`Ambiguous playlist metadata: ${path}`)
+      }
+      metadata.set(path, playlist)
+    }
+  })
+  return metadata
+}
+
+export function parseTakeoutPlaylistCsv(content, filename, metadata) {
   const rows = content.replace(/^\uFEFF/, '').trim().split(/\r?\n/)
   const header = rows[0].toLowerCase()
   if (header !== 'video id,playlist video creation timestamp' && header !== '影片 id,播放清單影片的建立時間戳記') {
@@ -144,7 +241,7 @@ export function parseTakeoutPlaylistCsv(content, filename) {
     videos.push({ videoId, title: videoId, lengthSeconds: 0, timeAdded })
   }
 
-  return { playlistName: getTakeoutPlaylistName(filename), videos }
+  return { playlistName: getTakeoutPlaylistName(filename), ...metadata, videos }
 }
 
 export function isSupportedTakeoutEntry(entry) {
