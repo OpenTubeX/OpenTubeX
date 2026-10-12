@@ -617,8 +617,17 @@
 }
 
 .syncedSessionHeader {
+  flex-wrap: wrap;
   gap: 10px;
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.syncedSessionName {
+  flex: 1 1 160px;
+  font-size: 14px;
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .syncedSessionIcon {
@@ -636,6 +645,7 @@
 .syncedSessionActions {
   flex: 0 0 auto;
   gap: 5px;
+  margin-inline-start: auto;
 }
 
 .syncedSessionActionButton {

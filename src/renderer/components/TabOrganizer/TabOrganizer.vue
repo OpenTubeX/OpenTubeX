@@ -491,6 +491,12 @@
                   :aria-labelledby="activeOtherDeviceSessionTabId"
                 >
                   <header class="syncedSessionHeader">
+                    <h4
+                      class="syncedSessionName"
+                      dir="auto"
+                    >
+                      {{ activeOtherDeviceName }}
+                    </h4>
                     <div class="syncedSessionActions">
                       <button
                         type="button"
@@ -826,6 +832,11 @@ const activeOtherDeviceSession = computed(() => (
   visibleOtherDeviceSessions.value.find(session => (
     otherDeviceSessionKey(session) === selectedOtherDeviceSessionKey.value
   )) ?? visibleOtherDeviceSessions.value[0] ?? null
+))
+const activeOtherDeviceName = computed(() => activeOtherDeviceSession.value?.syncDeviceName?.trim() || (
+  activeOtherDeviceSession.value?.syncPlatform === 'mobile'
+    ? t('Settings.Sync Settings.Mobile Device')
+    : t('Settings.Sync Settings.Desktop Device')
 ))
 useChannelTabAvatars(computed(() => showSyncedTabs.value
   ? activeOtherDeviceSession.value?.visibleTabs ?? []
