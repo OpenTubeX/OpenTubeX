@@ -360,6 +360,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   flex: 0 0 auto;
+  padding-block: 4px;
   background-color: var(--card-bg-color);
   border-block-end: 1px solid var(--border-color);
 }
@@ -414,6 +415,7 @@
   display: flex;
   flex-wrap: nowrap;
   gap: 4px;
+  padding-block: 4px;
 }
 
 .capacitorPhoneSyncedSessionTab {

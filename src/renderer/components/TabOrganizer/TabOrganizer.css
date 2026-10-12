@@ -587,6 +587,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  padding-block: 4px;
   padding-inline: 4px;
 }
 
