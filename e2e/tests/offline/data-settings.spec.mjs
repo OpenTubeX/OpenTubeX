@@ -146,11 +146,11 @@ test('keeps backup export choices usable at narrow widths and fractional UI scal
       const button = choices.getByRole('button', { name: 'Export selected data' })
       await expect(button).toBeVisible()
       await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
-      await button.scrollIntoViewIfNeeded()
       const bounds = await button.boundingBox()
       const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
       expect(bounds.x).toBeGreaterThanOrEqual(0)
       expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)
+      expect(bounds.y).toBeGreaterThanOrEqual(0)
       expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height)
     }
   }
