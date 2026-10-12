@@ -20,7 +20,7 @@ function deferred() {
   return { promise, resolve, reject }
 }
 
-function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), details = {}, embeddedNext = false, embeddedPlayer = true } = {}) {
+function loader({ android = Promise.resolve({ data: {} }), token = Promise.resolve('token'), next = Promise.resolve({ data: {} }), createPlayer = async () => ({ signature_timestamp: 1, decipher: async url => url }), details = {}, embeddedNext = false, embeddedPlayer = true } = {}) {
   const requests = []
   const playerResponse = {
     playabilityStatus: { status: 'OK' },
@@ -40,7 +40,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
   const dependencies = {
     getWatchHTMLWatchPage: async () => ({ session, playerResponse: embeddedPlayer ? playerResponse : undefined, nextResponse: embeddedNext ? {} : undefined }),
     localApiFetch: () => assert.fail('Unexpected network request'),
-    Player: { create: async () => ({ signature_timestamp: 1, decipher: async url => url }) },
+    Player: { create: createPlayer },
     PlayerCache: class {},
     UniversalCache: class {},
     generateContentPoToken: () => { requests.push('token'); return token },
@@ -61,7 +61,72 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     console,
   }
   const load = compileFunction(`${source.slice(start, end).replace('export ', '')}\nreturn getLocalVideoInfo`, Object.keys(dependencies))(...Object.values(dependencies))
-  return { load, requests }
+  return { load, requests, session }
+}
+
+test('prepares the playback token and watch metadata while the player script is pending', async () => {
+  const script = deferred()
+  const { load, requests } = loader({ createPlayer: () => script.promise, embeddedPlayer: false })
+  const loading = load('testVideo01')
+  await new Promise(resolve => setImmediate(resolve))
+  try {
+    assert.ok(requests.includes('token'), 'Player-script setup must not delay token generation')
+    assert.ok(requests.includes('/next'), 'Player-script setup must not delay watch metadata')
+    assert.ok(!requests.includes('/player'), 'The player request still needs the script signature timestamp')
+    assert.ok(!requests.includes('ANDROID'), 'Promotion lookup still needs the script signature timestamp')
+  } finally {
+    script.resolve({ signature_timestamp: 1, decipher: async url => url })
+    await loading
+  }
+})
+
+test('attaches the playback token only after the player script and token are ready', async () => {
+  const script = deferred()
+  const token = deferred()
+  const { load, requests, session } = loader({ createPlayer: () => script.promise, token: token.promise, embeddedPlayer: false })
+  const loading = load('testVideo01')
+  token.resolve('ready-token')
+  await new Promise(resolve => setImmediate(resolve))
+  assert.ok(!requests.includes('/player'))
+  script.resolve({ signature_timestamp: 123, decipher: async url => url })
+  const result = await loading
+  assert.equal(result.poToken, 'ready-token')
+  assert.equal(session.player.po_token, 'ready-token')
+})
+
+test('waits for the playback token before requesting streams after the script is ready', async () => {
+  const token = deferred()
+  const { load, requests } = loader({ token: token.promise, embeddedPlayer: false })
+  const loading = load('testVideo01')
+  await new Promise(resolve => setImmediate(resolve))
+  try {
+    assert.ok(requests.includes('ANDROID'), 'Promotion lookup only needs the player script')
+    assert.ok(!requests.includes('/player'), 'The streaming request still needs the playback token')
+  } finally {
+    token.resolve('token')
+    await loading
+  }
+})
+
+for (const failingStage of ['script', 'token', 'metadata']) {
+  test(`propagates a ${failingStage} failure while other startup stages are pending`, async () => {
+    const script = deferred()
+    const token = deferred()
+    const next = deferred()
+    const { load } = loader({ createPlayer: () => script.promise, token: token.promise, next: next.promise })
+    const loading = load('testVideo01')
+    const rejected = assert.rejects(loading, new RegExp(`${failingStage} unavailable`))
+    await new Promise(resolve => setImmediate(resolve))
+    const stage = { script, token, metadata: next }[failingStage]
+    stage.reject(new Error(`${failingStage} unavailable`))
+    try {
+      await rejected
+    } finally {
+      script.resolve({ signature_timestamp: 1, decipher: async url => url })
+      token.resolve('token')
+      next.resolve({ data: {} })
+    }
+  })
 }
 
 test('returns regular video data while promotion details are still pending', async () => {

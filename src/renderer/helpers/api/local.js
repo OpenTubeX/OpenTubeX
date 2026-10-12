@@ -730,19 +730,23 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     isPremiere ??= getLocalPremiereState(htmlExtracts.playerResponse.videoDetails)
   }
 
-  player ??= await Player.create(
-    process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
-    localApiFetch,
-    undefined,
-    // If we found the player ID in the HTML we can pass it in to save one request inside Player.create()
-    htmlExtracts.playerId
-  )
-  htmlExtracts.session.player = player
+  // Script setup, token generation, and /next only depend on the HTML session.
+  // Start them together, including when the player script is not cached yet.
+  const playerReady = (async () => {
+    player ??= await Player.create(
+      process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
+      localApiFetch,
+      undefined,
+      // If we found the player ID in the HTML we can pass it in to save one request inside Player.create()
+      htmlExtracts.playerId
+    )
+    htmlExtracts.session.player = player
+  })()
 
   // The current WEB player response does not include the paid-promotion
   // disclosure. ANDROID exposes it as a lightweight player overlay, so fetch
   // that metadata alongside token generation; a failure must not fail the load.
-  const paidPromotionRequest = htmlExtracts.session.actions.execute('/player', {
+  const paidPromotionRequest = playerReady.then(() => htmlExtracts.session.actions.execute('/player', {
     videoId: id,
     client: 'ANDROID',
     racyCheckOk: true,
@@ -753,30 +757,32 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       }
     },
     parse: false,
-  }).catch(() => null)
+  })).catch(() => null)
   const paidPromotionPromise = paidPromotionRequest.then(response => {
     if (response?.data) paidPromotionDurationMs ??= getPaidPromotionDurationMs(response.data)
     return paidPromotionDurationMs
   })
 
-  async function loadPlayerResponse() {
-    let contentPoToken
+  async function loadContentPoToken() {
     if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         !watchPageIpBlocked && shouldGeneratePoToken()) {
       try {
-        contentPoToken = await generateContentPoToken(
+        return await generateContentPoToken(
           id,
           htmlExtracts.session.context,
           htmlExtracts.initialAttestationData,
           htmlExtracts.ytConfig
         )
-        player.po_token = contentPoToken
       } catch (error) {
         console.error('Local API, poToken generation failed', error)
         throw error
       }
     }
+  }
 
+  async function loadPlayerResponse() {
+    const [, contentPoToken] = await Promise.all([playerReady, loadContentPoToken()])
+    if (contentPoToken) player.po_token = contentPoToken
     const playerResponse = htmlExtracts.playerResponse
       ? { data: htmlExtracts.playerResponse }
       : await htmlExtracts.session.actions.execute('/player', {
@@ -799,8 +805,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     return { playerResponse, contentPoToken, musicMediaType }
   }
 
-  // /next needs no playback token. Fetch it while preparing the player token
-  // instead of adding another round trip after the player response.
+  // /next needs neither the playback token nor the player script.
   const [{ playerResponse, contentPoToken, musicMediaType }, nextResponse] = await Promise.all([
     loadPlayerResponse(),
     htmlExtracts.nextResponse
