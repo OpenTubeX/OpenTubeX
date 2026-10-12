@@ -37,7 +37,7 @@
 
 !macro customHeader
   !ifndef BUILD_UNINSTALLER
-    !include "${BUILD_RESOURCES_DIR}/installer-translations.nsh"
+    !include "${BUILD_RESOURCES_DIR}\installer-translations.nsh"
 
     # Record the selected install scope before the old uninstaller removes links.
     Function RememberDesktopShortcut
