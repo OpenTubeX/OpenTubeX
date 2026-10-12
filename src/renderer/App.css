@@ -939,6 +939,13 @@
   inset-block-start: 60px;
 }
 
+.app.verticalTabsLeft:not(.isLocaleRightToLeft),
+.app.verticalTabsRight.isLocaleRightToLeft {
+  /* Match the visible start gap: 8px navigation margin + 4px tab padding
+     + the tab's 1px width allowance. */
+  --expanded-nav-end-spacing: 13px;
+}
+
 @media only screen and (width > 680px) {
   .app.verticalTabs :deep(.sideNav) {
     block-size: calc(100vh - 60px - var(--connection-status-space, 0px));

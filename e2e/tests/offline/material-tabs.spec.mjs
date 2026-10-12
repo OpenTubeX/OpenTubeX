@@ -68,15 +68,20 @@ test('connected segments stay joined in compact, RTL, and fractional-scale layou
         const buttons = [...element.querySelectorAll('[role="tab"]')]
         const [left, right] = buttons.map(button => button.getBoundingClientRect()).sort((a, b) => a.left - b.left)
         const group = element.getBoundingClientRect()
+        const parent = element.parentElement.getBoundingClientRect()
+        const parentStyle = getComputedStyle(element.parentElement)
+        const availableWidth = parent.width - parseFloat(parentStyle.paddingLeft) - parseFloat(parentStyle.paddingRight)
         const selected = element.querySelector('[aria-selected="true"]').getBoundingClientRect()
         const highlight = element.querySelector('.tabsIndicator').getBoundingClientRect()
         return {
           joined: Math.abs(left.right - right.left) < 0.2,
+          fullWidth: Math.abs(group.width - availableWidth) < 0.2,
+          equalSegments: Math.abs(left.width - right.width) < 0.2,
           contained: left.left >= group.left && right.right <= group.right,
           aligned: Math.max(Math.abs(highlight.left - selected.left), Math.abs(highlight.right - selected.right), Math.abs(highlight.top - selected.top), Math.abs(highlight.bottom - selected.bottom)) < 0.2,
           unclippedFocus: parseFloat(getComputedStyle(document.activeElement).outlineOffset) < 0,
         }
-      })).toEqual({ joined: true, contained: true, aligned: true, unclippedFocus: true })
+      })).toEqual({ joined: true, fullWidth: true, equalSegments: true, contained: true, aligned: true, unclippedFocus: true })
     }
   }
 })
