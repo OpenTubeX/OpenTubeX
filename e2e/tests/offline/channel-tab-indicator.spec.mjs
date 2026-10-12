@@ -56,6 +56,31 @@ async function expectAligned(page) {
   })).toBeLessThan(2)
 }
 
+test('vertically centers empty channel messages across tabs, widths, and UI scales', async ({ app, page }) => {
+  const card = page.locator('.channelContent:visible')
+  for (const [width, scale] of [[1600, 100], [375, 95], [812, 125]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+      BrowserWindow.getAllWindows()[0].setSize(width, 900)
+    }, width)
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    for (const tab of ['videos', 'shorts', 'live', 'podcasts', 'releases', 'courses', 'playlists', 'community']) {
+      await page.locator(`#${tab}Tab`).click()
+      await expect(card.locator('.message')).toBeVisible()
+      const layout = await card.evaluate(element => {
+        const box = element.getBoundingClientRect()
+        const text = element.querySelector('.message').getBoundingClientRect()
+        return {
+          offset: Math.abs((text.top + text.bottom - box.top - box.bottom) / 2),
+          fits: text.left >= box.left && text.right <= box.right &&
+            text.top >= box.top && text.bottom <= box.bottom
+        }
+      })
+      expect.soft(layout.offset, `${tab} at ${width}px and ${scale}% scale`).toBeLessThanOrEqual(1)
+      expect.soft(layout.fits, `${tab} text fits at ${width}px`).toBe(true)
+    }
+  }
+})
+
 async function expectTabScrollRange(tabs) {
   await expect.poll(() => tabs.evaluate(container => {
     const viewport = container.getBoundingClientRect()
