@@ -185,8 +185,10 @@ const actions = {
       }
 
       commit('addPlaylist', payload)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

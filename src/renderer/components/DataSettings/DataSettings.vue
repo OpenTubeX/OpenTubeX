@@ -497,6 +497,7 @@ async function importSelectedTakeoutData() {
   takeoutBusy.value = true
   const selected = new Set(selectedTakeoutTypes.value)
   let importedPlaylists = false
+  let failedPlaylists = false
   const playlistNameCounts = new Map()
   const allocatedPlaylistNames = new Set()
   try {
@@ -535,6 +536,7 @@ async function importSelectedTakeoutData() {
     await forEachSelectedTakeoutZipEntry(takeoutFile.value, selected, async entry => {
       if (entry.type === 'playlists') { importedPaths.add(entry.path) }
       if (!isSupportedTakeoutEntry(entry)) {
+        if (entry.type === 'playlists') { failedPlaylists = true }
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
         return
       }
@@ -556,6 +558,7 @@ async function importSelectedTakeoutData() {
           await importPlaylist(playlist)
         }
       } catch (error) {
+        if (entry.type === 'playlists') { failedPlaylists = true }
         console.error('Unable to import Takeout entry', entry.path, error)
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
       }
@@ -565,12 +568,13 @@ async function importSelectedTakeoutData() {
         try {
           await importPlaylist({ ...playlist, videos: [] })
         } catch (error) {
+          failedPlaylists = true
           console.error('Unable to import Takeout entry', path, error)
           showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path}`, icon: ['fas', 'circle-exclamation'] })
         }
       }
     }
-    if (importedPlaylists) {
+    if (importedPlaylists && !failedPlaylists) {
       showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
     }
     closeTakeoutImport()
@@ -1739,7 +1743,9 @@ const allPlaylists = computed(() => store.getters.getAllPlaylists)
 async function importTakeoutPlaylist(playlist) {
   const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
   if (existing === undefined) {
-    await store.dispatch('addPlaylist', playlist)
+    if (await store.dispatch('addPlaylist', playlist) !== true) {
+      throw new Error('Unable to save playlist')
+    }
   } else {
     const videos = deepCopy(existing.videos)
     const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))

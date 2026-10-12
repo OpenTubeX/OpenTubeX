@@ -1,8 +1,43 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
+import vm from 'node:vm'
 import { strToU8, zipSync } from 'fflate'
 
 import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata } from '../../src/renderer/helpers/youtube-takeout-zip.js'
+
+test('does not announce complete success after an empty playlist fails and a later playlist succeeds', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+  const messages = []
+  const imported = []
+  const busy = { value: false }
+  let closed = false
+  const context = vm.createContext({
+    takeoutBusy: busy,
+    selectedTakeoutTypes: { value: ['playlists'] },
+    takeoutEntries: { value: [] },
+    takeoutFile: { value: new Blob() },
+    readTakeoutPlaylistMetadata: async () => new Map([
+      ['playlists/Failed-videos.csv', { playlistName: 'Failed' }],
+      ['playlists/Success-videos.csv', { playlistName: 'Success' }],
+    ]),
+    forEachSelectedTakeoutZipEntry: async () => {},
+    importTakeoutPlaylist: async playlist => {
+      imported.push(playlist.playlistName)
+      if (playlist.playlistName === 'Failed') { throw new Error('Database write failed') }
+    },
+    console: { error() {} },
+    t: key => key,
+    showToast: options => messages.push(options.message),
+    closeTakeoutImport: () => { closed = true },
+  })
+  vm.runInContext(source.slice(source.indexOf('async function importSelectedTakeoutData()'), source.indexOf('function openProfileSettings()')), context)
+  await context.importSelectedTakeoutData()
+  assert.deepEqual(imported, ['Failed', 'Success'])
+  assert.deepEqual(messages, ['Settings.Data Settings.Unable to read file: playlists/Failed-videos.csv'])
+  assert.equal(closed, true)
+  assert.equal(busy.value, false)
+})
 
 test('uses Takeout metadata instead of the sanitized video filename', () => {
   const metadata = {

@@ -34,7 +34,7 @@ async function fixture(records) {
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, console: { error: error => errors.push(error) } }
+    { DBPlaylistHandlers, ...videoCounts, processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
   )
   const context = {
     state: module.state,
@@ -44,12 +44,34 @@ async function fixture(records) {
   }
   return {
     db, module, errors, handlers: DBPlaylistHandlers,
+    dispatch: context.dispatch,
     async load() {
       await module.actions.grabAllPlaylists(context)
       for (let i = 0; i < pending.length; i++) await pending[i]
     },
   }
 }
+
+test('adding a playlist reports a failed database write without updating the store', async () => {
+  const { db, module, errors, handlers, dispatch, load } = await fixture([playlist('favorites', 'Favorites')])
+  await load()
+  const failure = new Error('Playlist write failed')
+  handlers.create = async () => { throw failure }
+  const result = await dispatch('addPlaylist', { _id: 'new-empty', playlistName: 'New empty', videos: [] })
+  assert.equal(result, false)
+  assert.equal(module.state.playlists.some(item => item._id === 'new-empty'), false)
+  assert.equal(await db.playlists.findOneAsync({ _id: 'new-empty' }), null)
+  assert.deepEqual(errors, [failure])
+})
+
+test('adding a playlist reports a successful database write', async () => {
+  const { db, errors, dispatch, load } = await fixture([playlist('favorites', 'Favorites')])
+  await load()
+  const result = await dispatch('addPlaylist', { _id: 'new-empty', playlistName: 'New empty', videos: [] })
+  assert.equal(result, true)
+  assert.equal((await db.playlists.findOneAsync({ _id: 'new-empty' })).playlistName, 'New empty')
+  assert.deepEqual(errors, [])
+})
 
 for (const [id, name] of [['watchLater', 'Watch Later'], ['favorites', 'Favorites']]) {
   for (const existingDefault of [false, true]) {
