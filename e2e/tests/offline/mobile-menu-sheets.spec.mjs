@@ -25,10 +25,17 @@ test.beforeEach(async ({ page }) => {
   await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => fulfillVisualFixture(route, 'video-thumbnail'))
 })
 
+async function visibleBounds(target) {
+  await expect(target).toBeVisible()
+  const bounds = await target.boundingBox()
+  if (!bounds) throw new Error('Mobile sheet test target has no visible bounding box')
+  return bounds
+}
+
 async function openContext(page, session) {
   const title = page.locator('.ft-list-video .title').first()
   await title.scrollIntoViewIfNeeded()
-  const bounds = await title.boundingBox()
+  const bounds = await visibleBounds(title)
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
   })
@@ -39,9 +46,7 @@ async function openContext(page, session) {
   }
 }
 async function touchDrag(session, target, distance) {
-  await expect(target).toBeVisible()
-  const bounds = await target.boundingBox()
-  if (!bounds) throw new Error('Cannot drag a mobile sheet target without a visible bounding box')
+  const bounds = await visibleBounds(target)
   const point = { x: bounds.x + bounds.width / 2, y: bounds.y + Math.min(20, bounds.height / 2) }
   await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
   for (let step = 1; step <= 5; step++) {
@@ -76,7 +81,7 @@ for (const uiScale of [100, 125]) {
         await expect(menu.locator('.bottomSheetHandle')).toHaveCSS('touch-action', 'none')
         await expect(menu.locator(kind === 'more' ? '.moreOptionScroll' : '.mobileLinkActionsScroll')).toHaveCSS('touch-action', 'pan-down')
         if (kind === 'more') {
-          const bounds = await menu.boundingBox()
+          const bounds = await visibleBounds(menu)
           expect(bounds.width).toBeCloseTo(await page.evaluate(() => innerWidth), 0)
           expect(bounds.y + bounds.height).toBeCloseTo(await page.evaluate(() => innerHeight), 0)
           const rows = menu.locator('.navOption')
@@ -84,9 +89,9 @@ for (const uiScale of [100, 125]) {
           await expect(menu.locator('.navLabel').first()).toBeVisible()
         }
         const row = menu.locator(kind === 'more' ? '.navOption' : '[role="menuitem"]').first()
-        const before = await menu.boundingBox()
+        const before = await visibleBounds(menu)
         await touchDrag(session, row, 100)
-        expect((await menu.boundingBox()).y).toBeGreaterThan(before.y + 80)
+        expect((await visibleBounds(menu)).y).toBeGreaterThan(before.y + 80)
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect(menu).toHaveCount(0)
         await expect(page).toHaveURL(/#\/history/)
@@ -149,10 +154,10 @@ test('mobile context sheet preserves scrolling and dismisses from its handle in 
     await scroller.evaluate(element => { element.scrollTop = 100000 })
     const offset = await scroller.evaluate(element => element.scrollTop)
     expect(offset).toBeGreaterThan(0)
-    const before = await menu.boundingBox()
+    const before = await visibleBounds(menu)
     await touchDrag(session, scroller, 60)
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    expect((await menu.boundingBox()).y).toBeCloseTo(before.y, 0)
+    expect((await visibleBounds(menu)).y).toBeCloseTo(before.y, 0)
     await expect(menu).toBeVisible()
     await touchDrag(session, menu.locator('.bottomSheetHandle'), 100)
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
@@ -169,7 +174,7 @@ test('mobile context sheet preserves scrolling and dismisses from its handle in 
   }
 })
 
-test('mobile sheet dismissal respects reduced motion and remains tappable', async ({ page }) => {
+test('mobile sheet remains tappable with reduced motion enabled', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await goTo(page, 'history')
