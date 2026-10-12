@@ -18,8 +18,8 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
       titleUrl: 'https://www.youtube.com/results?search_query=example',
       time: '2025-01-01T00:00:00Z'
     }])),
-    [`${root}/playlists/My list.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n -abcdefghij,2025-01-02T00:00:00+00:00\n'),
-    [`${root}/playlists/My list (2).csv`]: strToU8('Video ID,Playlist video creation timestamp\nzzzzzzzzzzz,2025-01-03T00:00:00+00:00\n'),
+    [`${root}/playlists/My list-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n -abcdefghij,2025-01-02T00:00:00+00:00\n'),
+    [`${root}/playlists/My list (2)-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nzzzzzzzzzzz,2025-01-03T00:00:00+00:00\n'),
     'Another account/playlists/My list.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00+00:00\n'),
     [`${root}/videos/unrelated.mp4`]: new Uint8Array(1024),
   })
@@ -71,7 +71,7 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
         return [{
           getFile: async () => new File(
             ['Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n  -abcdefghij,2025-01-02T00:00:00+00:00\n'],
-            'Takeout favorites.csv',
+            'Takeout favorites-videos.csv',
             { type: 'text/csv' }
           )
         }]
