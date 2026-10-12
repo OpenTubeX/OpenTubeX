@@ -33,7 +33,7 @@ before(async () => {
   await page.waitForSelector('#app .app')
   originalSettings = await page.evaluate(() => {
     const app = document.querySelector('#app').__vue_app__.config.globalProperties
-    return { scale: app.$store.getters.getUiScale, auto: app.$store.getters.getAndroidAutoPictureInPicture,
+    return { scale: app.$store.getters.getUiScale, auto: app.$store.getters.getMobileAutoPictureInPicture,
       mini: app.$store.getters.getScrollMiniPlayerEnabled, route: app.$router.currentRoute.value.fullPath }
   })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/abcdefghijk'))
@@ -79,7 +79,7 @@ after(async () => {
         window.__stopPipLifecycleTrace?.()
         const app = document.querySelector('#app').__vue_app__.config.globalProperties
         app.$store.commit('setUiScale', settings.scale)
-        app.$store.commit('setAndroidAutoPictureInPicture', settings.auto)
+        app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
         app.$store.commit('setScrollMiniPlayerEnabled', settings.mini)
         await app.$router.push(settings.route)
       }, originalSettings)
@@ -99,10 +99,15 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
     // Native recordings expose intermediate surface buffers that DOM geometry
     // and occasional screenshots miss. The fixture has a solid dark background.
     const width = 270; const height = 480
+    const duration = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration',
+      '-of', 'default=noprint_wrappers=1:nokey=1', path], { encoding: 'utf8' }).trim())
+    assert.ok(Number.isFinite(duration) && duration > 0, 'the recording has a valid duration')
+    const frameBytes = width * height * 3
     const frames = execFileSync('ffmpeg', ['-v', 'error', '-threads', '1', '-filter_threads', '1', '-i', path, '-vf',
-      `fps=15,scale=${width}:${height}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 32 * 1024 * 1024 })
+      `fps=15,scale=${width}:${height}`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: Math.ceil(duration * 15 + 2) * frameBytes })
     let pipFrames = 0
     const clocks = []
+    let enteredAt
     for (let offset = 0; offset < frames.length; offset += width * height * 3) {
       const mask = new Uint8Array(width * height)
       for (let pixel = 0; pixel < mask.length; pixel++) {
@@ -133,6 +138,11 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
         assert.ok(largest.width / largest.height < 2.5,
           `native entry clipped the video at ${time.toFixed(3)}s: ${largest.width}x${largest.height}`)
         pipFrames++
+        enteredAt ??= time
+        // Geometry stays checked throughout the capture. Read the live clock
+        // over the first four seconds of entry, rather than OCRing idle PiP
+        // frames recorded while the native screenshot checks finish.
+        if (time - enteredAt > 4) continue
         // Read the clock burned into native video pixels. A progressing DOM
         // currentTime also passes when a static transition capture is frozen.
         const x = largest.left + Math.round(largest.width * 0.05)
@@ -173,7 +183,7 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 
     await page.evaluate(async trigger => {
       const video = document.querySelector('video')
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setAndroidAutoPictureInPicture', trigger === 'home')
+      store.commit('setMobileAutoPictureInPicture', trigger === 'home')
       video.currentTime = 2
       await video.play()
     }, trigger)
@@ -230,8 +240,15 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 
       return { y: rect.y, width: rect.width, outerWidth, rect: [rect.x, rect.y, rect.width, rect.height], inner: [innerWidth, innerHeight] }
     })
     const remote = `/sdcard/opentubex-pip-regression-${scale}-${label}.mp4`
-    const recorder = spawn('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'screenrecord', '--time-limit', '4', remote], { stdio: 'ignore' })
+    const recorder = spawn('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'screenrecord', '--time-limit', '180', remote], { stdio: 'ignore' })
     const recording = new Promise(resolve => recorder.once('exit', resolve))
+    const stopRecording = async () => {
+      if (recorder.exitCode === null) {
+        const pids = adb('shell', 'pidof screenrecord || true').trim().split(/\s+/).filter(Boolean)
+        if (pids.length) adb('shell', 'kill', '-2', ...pids)
+      }
+      await recording
+    }
     await page.waitForTimeout(300)
     try {
       if (trigger === 'home') adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
@@ -320,6 +337,9 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 
         clocks.push(clock)
       }
       assert.ok(new Set(clocks.slice(-3)).size > 1, 'PiP must keep showing live video')
+      // Keep recording until the native samples confirm entry, rather than
+      // letting a wall-clock deadline expire while a busy emulator starts up.
+      await stopRecording()
       await assertRecordedEntry(recording, remote, scale, label)
       const api = Number(adb('shell', 'getprop', 'ro.build.version.sdk').trim())
       if (api >= 31 && trigger === 'button') {
@@ -355,7 +375,7 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 
       assert.ok(returned.every(frame => Math.abs(frame.rect[1] - start.y) < 1 && Math.abs(frame.rect[2] - start.width) < 1),
         'returning must not animate from the mini-player back to the inline player')
     } finally {
-      await recording
+      await stopRecording()
       if (process.env.ANDROID_ARTIFACT_DIR) {
         await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}-trace.json`,
           JSON.stringify(await page.evaluate(() => window.__stopPipLifecycleTrace?.())))
