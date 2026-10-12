@@ -944,6 +944,8 @@ Settings:
     Add: إضافة
     Remove: إزالة
   Data Settings:
+    Select export data: "اختر البيانات المراد تصديرها"
+    Export selected data: "تصدير البيانات المحددة"
     Complete backup: "نسخة احتياطية كاملة"
     Import backup: "استيراد نسخة احتياطية"
     Export backup: "تصدير النسخ الاحتياطي"

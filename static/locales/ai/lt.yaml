@@ -1169,6 +1169,8 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
   Data Settings:
+    Select export data: "Pasirinkite eksportuojamus duomenis"
+    Export selected data: "Eksportuoti pasirinktus duomenis"
     Complete backup: "Pilna atsarginė kopija"
     Import backup: "Importuoti atsarginę kopiją"
     Export backup: "Eksportuoti atsarginę kopiją"

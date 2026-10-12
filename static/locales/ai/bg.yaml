@@ -938,6 +938,8 @@ Settings:
     Add: Добавяне
     Remove: Премахване
   Data Settings:
+    Select export data: "Изберете данните за експортиране"
+    Export selected data: "Експортиране на избраните данни"
     Complete backup: "Пълно архивиране"
     Import backup: "Импортиране на резервно копие"
     Export backup: "Експортиране на резервно копие"

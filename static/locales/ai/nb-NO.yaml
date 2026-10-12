@@ -936,6 +936,8 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Select export data: "Velg dataene som skal eksporteres"
+    Export selected data: "Eksporter valgte data"
     Complete backup: "Komplett sikkerhetskopi"
     Import backup: "Importer sikkerhetskopi"
     Export backup: "Eksporter sikkerhetskopi"

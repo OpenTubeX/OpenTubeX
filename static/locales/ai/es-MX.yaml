@@ -1087,6 +1087,8 @@ Settings:
     Add: Agregar
     Remove: Eliminar
   Data Settings:
+    Select export data: "Selecciona los datos que quieres exportar"
+    Export selected data: "Exportar los datos seleccionados"
     Complete backup: "Copia de seguridad completa"
     Import backup: "Importar copia de seguridad"
     Export backup: "Exportar copia de seguridad"

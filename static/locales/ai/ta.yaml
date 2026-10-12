@@ -950,6 +950,8 @@ Settings:
     Add: சேர்
     Remove: அகற்று
   Data Settings:
+    Select export data: "ஏற்றுமதி செய்ய வேண்டிய தரவைத் தேர்ந்தெடுக்கவும்"
+    Export selected data: "தேர்ந்தெடுத்த தரவை ஏற்றுமதி செய்"
     Complete backup: "முழுமையான காப்புப்பிரதி"
     Import backup: "காப்புப்பிரதியை இறக்குமதி செய்யவும்"
     Export backup: "காப்புப்பிரதியை ஏற்றுமதி செய்யவும்"

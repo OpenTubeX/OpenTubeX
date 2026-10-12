@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { strToU8, zipSync } from 'fflate'
+import { strToU8, unzipSync, zipSync } from 'fflate'
 
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup, validateBackupWatchStats } from '../../src/renderer/helpers/unifiedBackup.js'
 
@@ -23,6 +23,36 @@ test('round trips every backup section in a ZIP archive', async () => {
   assert.equal(result.manifest.version, 1)
   assert.deepEqual(result.data, data)
   assert.deepEqual(Object.keys(result.data), BACKUP_SECTIONS)
+})
+
+test('partial backups contain and restore only the selected sections', async () => {
+  for (const sections of BACKUP_SECTIONS.map(section => [section]).concat([['profiles', 'history']])) {
+    const selected = Object.fromEntries(sections.map(section => [section, data[section]]))
+    const backup = createUnifiedBackup(selected)
+    assert.deepEqual(Object.keys(unzipSync(new Uint8Array(await backup.arrayBuffer()))), ['manifest.json', ...sections.map(section => `${section}.json`)])
+    const restored = await readUnifiedBackup(backup)
+    assert.deepEqual(restored.manifest.sections, sections)
+    assert.deepEqual(restored.data, selected)
+  }
+  assert.throws(() => createUnifiedBackup({}), /No backup sections selected/)
+})
+
+test('complete backups without a sections manifest still restore all data', async () => {
+  const files = Object.fromEntries(BACKUP_SECTIONS.map(section => [`${section}.json`, strToU8(JSON.stringify(data[section]))]))
+  files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":1}')
+  assert.deepEqual((await readUnifiedBackup(new Blob([zipSync(files)]))).data, data)
+})
+
+test('rejects invalid section lists and missing, extra, or malformed selected data', async () => {
+  for (const sections of [[], ['unknown'], ['settings', 'settings'], 'settings', [null]]) {
+    const files = { 'manifest.json': strToU8(JSON.stringify({ format: 'opentubex-backup', version: 1, sections })) }
+    await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /Invalid backup sections/)
+  }
+  const manifest = strToU8('{"format":"opentubex-backup","version":1,"sections":["settings"]}')
+  for (const files of [{}, { 'settings.json': strToU8('{}'), 'history.json': strToU8('[]') }]) {
+    await assert.rejects(readUnifiedBackup(new Blob([zipSync({ 'manifest.json': manifest, ...files })])), /missing or unexpected files/)
+  }
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({ history: [null] })), /Invalid backup history/)
 })
 
 test('rejects an incomplete archive before restoring data', async () => {

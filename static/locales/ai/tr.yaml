@@ -934,6 +934,8 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
   Data Settings:
+    Select export data: "Dışa aktarılacak verileri seçin"
+    Export selected data: "Seçili verileri dışa aktar"
     Complete backup: "Tam yedek"
     Import backup: "Yedeklemeyi içe aktar"
     Export backup: "Yedeklemeyi dışa aktar"

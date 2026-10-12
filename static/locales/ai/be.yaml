@@ -967,6 +967,8 @@ Settings:
     Add: Дадаць
     Remove: Выдаліць
   Data Settings:
+    Select export data: "Выберыце даныя для экспарту"
+    Export selected data: "Экспартаваць выбраныя даныя"
     Complete backup: "Поўная рэзервовая копія"
     Import backup: "Імпартаваць рэзервовую копію"
     Export backup: "Экспартаваць рэзервовую копію"

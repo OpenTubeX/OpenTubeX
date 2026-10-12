@@ -949,6 +949,8 @@ Settings:
     Add: Lisää
     Remove: Poista
   Data Settings:
+    Select export data: "Valitse vietävät tiedot"
+    Export selected data: "Vie valitut tiedot"
     Complete backup: "Täydellinen varmuuskopiointi"
     Import backup: "Tuo varmuuskopio"
     Export backup: "Vie varmuuskopio"
