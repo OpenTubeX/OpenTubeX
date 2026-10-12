@@ -65,13 +65,16 @@ for (const uiScale of [100, 125]) {
 
         for (const pack of ['material', 'remix']) {
           await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
-          const avatar = page.locator('.playlistItemsCard .watched .channelAvatar').first()
+          const video = page.locator('.playlistItemsCard .ft-list-video').filter({
+            has: page.getByRole('link', { name: 'Playlist video 2', exact: true }),
+          })
+          const infoLine = video.locator('.infoLine')
+          const avatar = infoLine.locator('.channelAvatar')
           await expect(avatar).toBeVisible()
           await page.mouse.move(0, 0)
           const bounds = await avatar.boundingBox()
           const clip = { x: bounds.x - 3, y: bounds.y - 3, width: bounds.width + 6, height: bounds.height + 6 }
           const actual = await page.screenshot({ clip, animations: 'disabled' })
-          const infoLine = avatar.locator('xpath=ancestor::*[contains(@class, "infoLine")]')
           const previousOverflow = await infoLine.evaluate(element => {
             const previous = element.style.overflowX
             element.style.overflowX = 'visible'
