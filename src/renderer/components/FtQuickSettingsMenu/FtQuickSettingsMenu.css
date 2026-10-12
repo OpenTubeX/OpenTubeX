@@ -40,6 +40,7 @@
 
 :global(.topNavBarColor .musicModeIndicator) {
   background-color: var(--primary-color);
+  color: var(--text-with-main-color);
 }
 
 .profileTrigger:hover,

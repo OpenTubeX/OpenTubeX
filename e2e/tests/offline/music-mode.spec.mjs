@@ -216,20 +216,28 @@ test('music mode headphones cut out the profile in both icon packs and header th
         await expect(page.locator('body')).toHaveClass(new RegExp(colorScheme))
         for (const scale of [100, 125]) {
           await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
-          for (const coloredHeader of [false, true]) {
-            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBarColor', value), coloredHeader)
+          for (const mainColor of [null, 'Yellow', 'Red']) {
+            const coloredHeader = mainColor !== null
+            await page.evaluate(async mainColor => {
+              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+              await store.dispatch('updateMainColor', mainColor ?? 'Red')
+              await store.dispatch('updateBarColor', mainColor !== null)
+            }, mainColor)
             await expect(indicator).toBeVisible()
             await expect(indicator).toHaveCSS('border-radius', '50%')
             await expect(indicator).toHaveCSS('opacity', '1')
             const headerBackground = await page.locator('.topNav').evaluate(element => getComputedStyle(element).backgroundColor)
             await expect(indicator).toHaveCSS('background-color', headerBackground)
-            if (layout === 'desktop' && scale === 100 && !coloredHeader) {
+            const headerForeground = await page.locator('.topNav .menuButton').evaluate(element => getComputedStyle(element).color)
+            await expect(indicator).toHaveCSS('color', headerForeground)
+            if (layout === 'desktop' && scale === 100 && (!coloredHeader || mainColor === 'Yellow')) {
               const bounds = await page.locator('.profileTrigger').boundingBox()
+              const name = `music-mode-${iconPack}-${colorScheme}${coloredHeader ? '-yellow-header' : ''}`
               const screenshot = await page.screenshot({
-                path: testInfo.outputPath(`music-mode-${iconPack}-${colorScheme}.png`),
+                path: testInfo.outputPath(`${name}.png`),
                 clip: { x: bounds.x - 12, y: bounds.y - 8, width: bounds.width + 24, height: bounds.height + 20 },
               })
-              await testInfo.attach(`music-mode-${iconPack}-${colorScheme}`, {
+              await testInfo.attach(name, {
                 body: screenshot,
                 contentType: 'image/png',
               })
