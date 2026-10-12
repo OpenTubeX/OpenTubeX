@@ -92,6 +92,9 @@ export function useBottomSheetDismiss(sheet, dismiss) {
   }
   function endTouch(event) {
     if (!drag?.touch) return
+    // Multiple fingers cancel the single-finger drag; an unrelated release
+    // must never advance it using another finger's coordinates.
+    if (event.touches.length > 0 || event.changedTouches.length !== 1) return cancelDrag()
     // WebView can coalesce the final move; the release carries its true end.
     const touch = event.changedTouches[0]
     if (touch) move(touch.clientX, touch.clientY, event)

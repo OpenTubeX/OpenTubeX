@@ -376,3 +376,51 @@ for (const uiScale of [100, 125]) {
     }
   })
 }
+
+for (const kind of ['more', 'context']) {
+  for (const remainingFinger of [true, false]) {
+    test(`${kind} sheet cancels a two-finger release with ${remainingFinger ? 'one finger still held' : 'both fingers lifted'}`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      await goTo(page, 'history')
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      try {
+        if (kind === 'more') await page.locator('.moreOptionNav').click()
+        else await openContext(page, session)
+        const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
+        await waitForAnimation(menu)
+        await menu.evaluate((element, remainingFinger) => {
+          const handle = element.querySelector('.bottomSheetHandle')
+          const bounds = handle.getBoundingClientRect()
+          const x = bounds.x + bounds.width / 2; const y = bounds.y + bounds.height / 2
+          const first = new Touch({ identifier: 12, target: handle, clientX: x, clientY: y + (remainingFinger ? 0 : 20) })
+          const second = new Touch({ identifier: 13, target: handle, clientX: x, clientY: y + 120 })
+          handle.dispatchEvent(new PointerEvent('pointerdown', {
+            bubbles: true, pointerType: 'touch', pointerId: 12, isPrimary: true, button: 0, clientX: x, clientY: y
+          }))
+          if (!remainingFinger) {
+            handle.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [first] }))
+          }
+          // Give the unrelated release its own coordinates and control the
+          // remaining fingers explicitly; the next drag uses real touch input.
+          handle.dispatchEvent(new TouchEvent('touchend', {
+            bubbles: true,
+            cancelable: true,
+            touches: remainingFinger ? [first] : [],
+            changedTouches: remainingFinger ? [second] : [second, first]
+          }))
+          if (remainingFinger) {
+            handle.dispatchEvent(new TouchEvent('touchend', { bubbles: true, touches: [], changedTouches: [first] }))
+          }
+        }, remainingFinger)
+        await expect(menu).toBeVisible()
+        await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+        await touchDrag(session, menu.locator('.bottomSheetHandle'), 100)
+        await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+        await expect(menu).toHaveCount(0)
+      } finally {
+        await session.detach()
+      }
+    })
+  }
+}
