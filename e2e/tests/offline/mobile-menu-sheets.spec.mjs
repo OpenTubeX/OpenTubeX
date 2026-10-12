@@ -34,7 +34,6 @@ async function visibleBounds(target) {
 
 async function openContext(page, session) {
   const title = page.locator('.ft-list-video .title').first()
-  await title.scrollIntoViewIfNeeded()
   await title.click({ trial: true })
   const bounds = await visibleBounds(title)
   await session.send('Input.dispatchTouchEvent', {
