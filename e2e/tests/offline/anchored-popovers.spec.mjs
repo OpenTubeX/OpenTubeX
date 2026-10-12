@@ -293,6 +293,17 @@ for (const scale of [100, 95, 125]) {
       return bounds.top >= 7 && bounds.bottom <= innerHeight - 7
     })).toBe(true)
     expect(await page.evaluate(() => window.tooltipTriggerReads)).toBe(0)
+    const overflowBetweenFrames = await popup.evaluate(async element => {
+      const overflow = []
+      window.dispatchEvent(new Event('scroll'))
+      for (let i = 0; i < 3; i++) {
+        await new Promise(requestAnimationFrame)
+        const bounds = element.getBoundingClientRect()
+        overflow.push(Math.max(0, 7 - bounds.top, bounds.bottom - innerHeight + 7))
+      }
+      return Math.max(...overflow)
+    })
+    expect(overflowBetweenFrames, 'an active viewport correction persists between scroll frames').toBeLessThanOrEqual(1)
     await scroller.evaluate(element => { element.scrollTop = 0 })
     await expect.poll(() => popup.evaluate(element => {
       const trigger = document.querySelector('.settingsContent .selectTooltip .button')

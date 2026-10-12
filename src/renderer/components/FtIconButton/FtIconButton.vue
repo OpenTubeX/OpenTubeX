@@ -549,7 +549,7 @@ function keepDropdownInViewport() {
     if (usesDropdownAnchor.value) {
       const position = getAnchoredPosition(dropdownAnchor, buttonRect, left, top, {
         minLeft: viewportMargin, maxLeft, minTop, maxTop
-      })
+      }, props.dropdownPositionY === 'top' ? { above: top === aboveButton, gap: 4, bottomMargin } : undefined)
       for (const [property, value] of Object.entries(position)) {
         if (property.startsWith('--')) dropdown.value.style.setProperty(property, value ?? '')
         else dropdown.value.style[property] = value

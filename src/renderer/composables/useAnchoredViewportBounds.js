@@ -25,7 +25,6 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
     function schedule(event) {
       if (event?.type === 'scroll' && event.target instanceof Node && !event.target.contains(button)) return
       if (frame !== null) return
-      menu.style.removeProperty('translate')
       // The compositor's anchor scroll shift is visible after the next frame.
       frame = requestAnimationFrame(() => {
         frame = requestAnimationFrame(() => {
@@ -36,11 +35,15 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
           const maxTop = Number.parseFloat(menu.style.getPropertyValue('--anchor-max-top'))
           if (![minLeft, maxLeft, minTop, maxTop].every(Number.isFinite)) return
 
+          const [tx = 0, ty = 0] = menu.style.translate.split(' ').map(Number.parseFloat)
           const rect = menu.getBoundingClientRect()
-          const x = Math.max(minLeft, Math.min(rect.left, maxLeft)) - rect.left
-          const y = Math.max(minTop, Math.min(rect.top, maxTop)) - rect.top
+          const left = rect.left - (tx || 0)
+          const top = rect.top - (ty || 0)
+          const x = Math.max(minLeft, Math.min(left, maxLeft)) - left
+          const y = Math.max(minTop, Math.min(top, maxTop)) - top
           const needsCorrection = x !== 0 || y !== 0
           if (needsCorrection) menu.style.translate = `${x}px ${y}px`
+          else menu.style.removeProperty('translate')
 
           // A later layout change can invalidate the scroll correction. Observe
           // only the trigger's ancestors, and only while a correction is active.
@@ -48,6 +51,7 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
             correcting = needsCorrection
             mutations.disconnect()
             resize.disconnect()
+            resize.observe(menu)
             if (correcting) {
               for (const element of ancestors) {
                 mutations.observe(element, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] })
@@ -61,6 +65,9 @@ export function useAnchoredViewportBounds(trigger, popup, enabled) {
 
     window.addEventListener('scroll', schedule, { capture: true, passive: true })
     window.addEventListener('resize', schedule)
+    // Observe the popup on opening and resizing, including when neither CSS
+    // side fits and a viewport correction is needed before any scrolling.
+    resize.observe(menu)
     onCleanup(() => {
       window.removeEventListener('scroll', schedule, true)
       window.removeEventListener('resize', schedule)

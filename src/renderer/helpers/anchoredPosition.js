@@ -8,9 +8,10 @@ export const supportsAnchorPositioning = CSS.supports('position-anchor', '--popu
  * @param {number} left
  * @param {number} top
  * @param {{minLeft: number, maxLeft: number, minTop: number, maxTop: number}} [limits]
+ * @param {{above: boolean, gap: number, bottomMargin: number}} [placement]
  * @returns {Record<string, string|null>}
  */
-export function getAnchoredPosition(anchor, triggerRect, left, top, limits) {
+export function getAnchoredPosition(anchor, triggerRect, left, top, limits, placement) {
   if (!supportsAnchorPositioning) {
     if (limits) {
       left = Math.max(limits.minLeft, Math.min(left, limits.maxLeft))
@@ -24,6 +25,12 @@ export function getAnchoredPosition(anchor, triggerRect, left, top, limits) {
   return {
     positionAnchor: anchor,
     translate: null,
+    bottom: null,
+    marginTop: null,
+    marginBottom: null,
+    positionTryFallbacks: null,
+    '--anchor-gap': null,
+    '--anchor-bottom-margin': null,
     ...(limits
       ? {
           '--anchor-min-left': `${limits.minLeft}px`,
@@ -33,6 +40,17 @@ export function getAnchoredPosition(anchor, triggerRect, left, top, limits) {
         }
       : {}),
     left: limits ? `clamp(${limits.minLeft}px, ${anchoredLeft}, ${limits.maxLeft}px)` : anchoredLeft,
-    top: limits ? `clamp(${limits.minTop}px, ${anchoredTop}, ${limits.maxTop}px)` : anchoredTop
+    top: limits ? `clamp(${limits.minTop}px, ${anchoredTop}, ${limits.maxTop}px)` : anchoredTop,
+    ...(placement && limits
+      ? {
+          '--anchor-gap': `${placement.gap}px`,
+          '--anchor-bottom-margin': `${placement.bottomMargin}px`,
+          marginTop: 'var(--anchor-min-top)',
+          marginBottom: 'var(--anchor-bottom-margin)',
+          top: placement.above ? 'auto' : 'calc(anchor(bottom) + var(--anchor-gap) - var(--anchor-min-top))',
+          bottom: placement.above ? 'calc(anchor(top) + var(--anchor-gap) - var(--anchor-bottom-margin))' : 'auto',
+          positionTryFallbacks: placement.above ? '--anchored-popup-below' : '--anchored-popup-above'
+        }
+      : {})
   }
 }

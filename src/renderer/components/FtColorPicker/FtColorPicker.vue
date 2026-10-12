@@ -554,7 +554,7 @@ function positionPopover() {
     maxLeft: window.innerWidth - popover.offsetWidth - margin,
     minTop: margin,
     maxTop: window.innerHeight - popover.offsetHeight - margin
-  })
+  }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin })
 }
 
 function closeFromOutside(event) {

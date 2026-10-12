@@ -467,7 +467,7 @@ function positionProfileDropdown() {
       maxLeft: Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin),
       minTop: viewportMargin,
       maxTop: maximumTop
-    }
+    }, { above: opensAbove, gap, bottomMargin: viewportMargin }
   )
   profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
   profileDropdownOpensAbove.value = opensAbove
