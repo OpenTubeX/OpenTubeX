@@ -35,7 +35,7 @@ test.use({
   }
 })
 
-test('mobile playlist cards have compact padding and space between rows', async ({ app, page, attachScreenshot }) => {
+test('playlist cards have space between rows and compact mobile padding', async ({ app, page, attachScreenshot }) => {
   await goTo(page, 'userplaylists')
   await page.getByRole('link', { name: 'Playlist card spacing', exact: true }).click()
   const cards = page.locator('.playlistItems .ft-list-video')
@@ -46,10 +46,11 @@ test('mobile playlist cards have compact padding and space between rows', async 
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
       BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale)
     }, scale)
-    for (const viewport of [{ width: 375, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
+    for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }, { width: 461, height: 1026 }, { width: 812, height: 375 }]) {
       await page.setViewportSize(viewport)
+      const padding = viewport.width > 850 ? 6 : 4
       for (const card of await cards.all()) {
-        await expect(card).toHaveCSS('padding-block', '4px')
+        await expect(card).toHaveCSS('padding-block', `${padding}px`)
       }
       const layout = await cards.evaluateAll(elements => elements.map(element => {
         const bounds = element.getBoundingClientRect()
@@ -67,10 +68,10 @@ test('mobile playlist cards have compact padding and space between rows', async 
         }
       }))
       for (const [index, card] of layout.entries()) {
-        expect(card.paddingTop).toBeLessThanOrEqual(4)
-        expect(card.paddingBottom).toBeLessThanOrEqual(4)
+        expect(card.paddingTop).toBeLessThanOrEqual(padding)
+        expect(card.paddingBottom).toBeLessThanOrEqual(padding)
         expect(card.contentFits).toBe(true)
-        expect(card.bottomInset).toBeLessThanOrEqual(5)
+        expect(card.bottomInset).toBeLessThanOrEqual(padding + 1)
         if (index > 0) {
           expect(card.top - layout[index - 1].bottom).toBeGreaterThanOrEqual(7.5)
         }

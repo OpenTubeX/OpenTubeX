@@ -42,6 +42,7 @@
 
 .playlistInfoContainer {
   box-sizing: border-box;
+  border-radius: calc(12px * var(--ui-roundness));
 
   /* This is needed to make prompt always above video entries. Value being too high would block search suggestions */
   z-index: 1;
@@ -70,7 +71,6 @@
       max-inline-size: 92dvw;
       background-color: var(--card-bg-color);
       backdrop-filter: var(--card-bg-blur, none);
-      box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
 
       /* video progress bar has z-index 2 and this must be above it */
       z-index: 3;
@@ -112,6 +112,12 @@
       padding: 10px;
     }
   }
+}
+
+.playlistItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 
@@ -257,12 +263,6 @@
 }
 
 @media only screen and (width <= 850px) {
-  .playlistItems {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
   .playlistItem :deep(.ft-list-video) {
     padding-block: 4px;
   }
