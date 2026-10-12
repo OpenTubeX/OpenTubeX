@@ -45,6 +45,18 @@ test.beforeEach(async ({ page }) => {
   await page.route(/^https?:\/\//, abortUnmockedRequest)
 })
 
+async function settleSidebarHighlightTransitions(page) {
+  await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/)
+  await page.locator('.sideNav').evaluate(async nav => {
+    // getAnimations flushes styles; wait for any highlight transition to finish
+    // and give its queued transitionrun event a rendering opportunity.
+    await Promise.all(nav.getAnimations({ subtree: true })
+      .filter(animation => animation instanceof CSSTransition)
+      .map(animation => animation.finished.catch(() => {})))
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  })
+}
+
 test('returning to a cached subscription feed does not replay its entrance', async ({ page }) => {
   await goTo(page, 'subscriptions')
   await expect(page.locator('#subscriptionsPanel .ft-list-video')).toBeVisible()
@@ -94,7 +106,7 @@ test('switching application tabs snaps the active sidebar highlight', async ({ a
       await expect(page.locator(sel.tabs).nth(index)).toHaveClass(/active/)
       const route = index === 0 ? 'subscriptions' : 'history'
       await expect(page.locator(`.sideNav a[href="#/${route}"]`).first()).toHaveClass(/router-link-active/)
-      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await settleSidebarHighlightTransitions(page)
       expect(await page.evaluate(() => window.__sidebarHighlightTransitions)).toEqual([])
     }
   }
@@ -146,7 +158,7 @@ test('switching application tabs snaps the mobile More highlight for overflow ro
     await page.locator(sel.tabs).nth(index).click()
     await expect(page.locator(sel.tabs).nth(index)).toHaveClass(/active/)
     await expect.poll(() => more.evaluate(element => element.classList.contains('router-link-active'))).toBe(index === 1)
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await settleSidebarHighlightTransitions(page)
     expect(await page.evaluate(() => window.__moreHighlightTransitions)).toEqual([])
   }
 })
