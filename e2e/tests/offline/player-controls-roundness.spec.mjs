@@ -65,12 +65,12 @@ for (const uiScale of [100, 95]) {
           await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
           await expect(page.locator('body')).toHaveCSS('--ui-roundness', String(roundness / 100))
           const radii = await panel.locator('.ft-control-glass, .ft-right-control-glass').evaluateAll(elements => elements.map(element => Number.parseFloat(getComputedStyle(element).borderRadius)))
-          expect.soft(radii, `${width}px, roundness ${roundness}%`).toEqual(radii.map(() => 17 * roundness / 100))
+          expect(radii, `${width}px, roundness ${roundness}%`).toEqual(radii.map(() => 17 * roundness / 100))
 
           // The expanded volume surface uses the same radius for its reveal clip.
           await panel.locator('.shaka-mute-button').hover()
           await expect(panel.locator('.shaka-volume-bar-container')).toBeVisible()
-          await expect.soft(panel.locator('.ft-volume-control-group > .ft-control-glass')).toHaveCSS('border-radius', `${17 * roundness / 100}px`, { timeout: 1000 })
+          await expect(panel.locator('.ft-volume-control-group > .ft-control-glass')).toHaveCSS('border-radius', `${17 * roundness / 100}px`, { timeout: 1000 })
           await page.mouse.move(0, 0)
 
           if (width === 1600 && uiScale === 100 && [0, 100].includes(roundness)) {
