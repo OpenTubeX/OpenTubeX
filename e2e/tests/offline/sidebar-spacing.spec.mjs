@@ -7,7 +7,11 @@ async function expectMatchingGaps(sidebar) {
     const rtl = getComputedStyle(element).direction === 'rtl'
     const adjacent = rtl ? Math.abs(tab.left - sidebar.right) < 10 : Math.abs(sidebar.left - tab.right) < 10
     return Math.max(...[element.querySelector('.navOption'), element.querySelector('.navChannel')].map(item => {
-      const bounds = item.getBoundingClientRect()
+      const itemBounds = item.getBoundingClientRect()
+      const pillStyle = getComputedStyle(item, '::before')
+      const scale = itemBounds.width / parseFloat(getComputedStyle(item).width)
+      const left = itemBounds.left + parseFloat(pillStyle.left) * scale
+      const bounds = { left, right: left + parseFloat(pillStyle.width) * scale }
       const start = rtl ? (adjacent ? tab.left : sidebar.right) - bounds.right : bounds.left - (adjacent ? tab.right : sidebar.left)
       const end = rtl ? bounds.left - sidebar.left : sidebar.right - bounds.right
       return Math.abs(start - end)
@@ -16,7 +20,7 @@ async function expectMatchingGaps(sidebar) {
 }
 
 for (const uiScale of [95, 125]) {
-  test.describe(`expanded sidebar spacing at ${uiScale}% UI scale`, () => {
+  test.describe(`desktop sidebar spacing at ${uiScale}% UI scale`, () => {
     test.use({
       seed: {
         settings: { uiScale },
@@ -29,6 +33,26 @@ for (const uiScale of [95, 125]) {
             thumbnail: ''
           }))
         }]
+      }
+    })
+
+    test('matches the visible pill gaps in collapsed and icon-only modes', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await setWindowSize(app, page, { width: 1100, height: 700 })
+      await goTo(page, 'history')
+      const sidebar = page.locator('.sideNav')
+      for (const locale of ['en-US', 'ar']) {
+        for (const position of ['top', 'left', 'right']) {
+          for (const hideLabels of [false, true]) {
+            await page.evaluate(async ({ locale, position, hideLabels }) => {
+              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+              await store.dispatch('updateCurrentLocale', locale)
+              await store.dispatch('updateTabBarPosition', position)
+              store.commit('setHideLabelsSideBar', hideLabels)
+            }, { locale, position, hideLabels })
+            await expectMatchingGaps(sidebar)
+          }
+        }
       }
     })
 
