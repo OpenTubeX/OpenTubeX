@@ -209,36 +209,43 @@ export function parseTakeoutPlaylistMetadataCsv(content) {
 export async function readTakeoutPlaylistMetadata(file) {
   const metadata = new Map()
   const errors = []
-  const seenMetadataDirectories = new Set()
-  await streamTakeoutZip(file, new Set(['playlistMetadata']), () => {}, entry => {
+  const playlistsByDirectory = new Map()
+  const videoPaths = new Set()
+  await streamTakeoutZip(file, new Set(['playlistMetadata']), entry => {
+    if (entry.type === 'playlists') { videoPaths.add(entry.path) }
+  }, entry => {
     const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
-    if (seenMetadataDirectories.has(directory)) {
-      for (const path of metadata.keys()) {
-        if (path.slice(0, path.lastIndexOf('/') + 1) === directory) { metadata.delete(path) }
-      }
+    if (playlistsByDirectory.has(directory)) {
+      playlistsByDirectory.set(directory, null)
       errors.push(new Error(`Duplicate playlist metadata CSV: ${entry.path}`))
       return
     }
-    seenMetadataDirectories.add(directory)
     const playlists = parseTakeoutPlaylistMetadataCsv(entry.content)
+    playlistsByDirectory.set(directory, playlists)
     if (playlists === null) {
       errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
-      return
     }
+  })
+  // Resolve paths after the scan so either filename form can follow the metadata.
+  for (const [directory, playlists] of playlistsByDirectory) {
+    if (playlists === null) { continue }
     const accountMetadata = new Map()
     for (const playlist of playlists) {
       // Takeout replaces filename-unsafe characters, including slashes, with underscores.
       const filename = playlist.playlistName.replaceAll(/[<>:"'/\\|?*\p{Cc}]/gu, '_')
-      const path = `${directory}${filename}-videos.csv`
+      const suffixedPath = `${directory}${filename}-videos.csv`
+      const unsuffixedPath = `${directory}${filename}.csv`
+      const path = !videoPaths.has(suffixedPath) && videoPaths.has(unsuffixedPath) ? unsuffixedPath : suffixedPath
       if (accountMetadata.has(path)) {
         errors.push(new Error(`Ambiguous playlist metadata: ${path}`))
-        return
+        accountMetadata.clear()
+        break
       }
       accountMetadata.set(path, playlist)
     }
     // Commit each account only after all its records have unambiguous filenames.
     for (const [path, playlist] of accountMetadata) { metadata.set(path, playlist) }
-  })
+  }
   return { metadata, errors }
 }
 

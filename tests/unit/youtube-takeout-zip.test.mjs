@@ -69,6 +69,36 @@ test('detects supported Takeout entries under the archive root', () => {
 
 const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
 
+for (const [filename, title] of [['My list.csv', 'My list'], ['Sets_Techno-videos.csv', 'Sets/Techno-videos']]) {
+  for (const metadataFirst of [true, false]) {
+    test(`matches metadata to ${filename}, metadata first: ${metadataFirst}`, async () => {
+      const root = 'Takeout/YouTube/playlists'
+      const metadataEntry = [`${root}/playlists.csv`, strToU8(`${metadataHeader}\nPLold,${title},Description,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z`)]
+      const videoEntry = [`${root}/${filename}`, strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z')]
+      const file = new Blob([zipSync(Object.fromEntries(metadataFirst ? [metadataEntry, videoEntry] : [videoEntry, metadataEntry]))])
+      const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+      assert.deepEqual(errors, [])
+      assert.equal(metadata.size, 1)
+      assert.deepEqual(metadata.get(`${root}/${filename}`), {
+        playlistName: title, description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+      })
+    })
+  }
+}
+
+test('rejects metadata rows that match the same discovered video file', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`${metadataHeader}\nPLone,List,,,\nPLtwo,List-videos,,,`),
+    [`${root}/List-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp'),
+  })])
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.equal(metadata.size, 0)
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Ambiguous playlist metadata/)
+})
+
 test('invalidates repeated metadata entries for an account while retaining other accounts', async () => {
   const chunks = []
   const zip = new Zip((error, chunk) => {

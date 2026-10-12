@@ -21,6 +21,7 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
     [`${root}/playlists/My list-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n -abcdefghij,2025-01-02T00:00:00+00:00\n'),
     [`${root}/playlists/My list (2)-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nzzzzzzzzzzz,2025-01-03T00:00:00+00:00\n'),
     'Another account/playlists/My list.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00+00:00\n'),
+    'Another account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp\nPLolder,My list,Older account,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\n'),
     [`${root}/videos/unrelated.mp4`]: new Uint8Array(1024),
   })
 
@@ -56,9 +57,10 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
       watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
       playlists: store.getters.getAllPlaylists.filter(playlist => playlist.playlistName.startsWith('My list')).map(playlist => playlist.playlistName).sort(),
       playlistVideoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list')?.videos.map(video => video.videoId),
+      olderDescription: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list (3)')?.description,
       search: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'example'),
     }
-  })).toEqual({ subscribed: true, watched: true, playlists: ['My list', 'My list (2)', 'My list (3)'], playlistVideoIds: ['abcdefghijk', '-abcdefghij'], search: false })
+  })).toEqual({ subscribed: true, watched: true, playlists: ['My list', 'My list (2)', 'My list (3)'], playlistVideoIds: ['abcdefghijk', '-abcdefghij'], olderDescription: 'Older account', search: false })
 })
 
 test('imports a Takeout playlist CSV through Import Playlists', async ({ page }) => {
