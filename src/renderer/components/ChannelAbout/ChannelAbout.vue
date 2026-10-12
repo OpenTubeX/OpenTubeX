@@ -28,6 +28,8 @@
             target="_blank"
             rel="noopener noreferrer"
             dir="auto"
+            @click.prevent.stop="handleExternalLink(link.url)"
+            @auxclick.middle.prevent.stop="handleExternalLink(link.url)"
           >
             <span
               class="aboutLinkIcon"
@@ -163,7 +165,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, reactive } from 'vue'
+import { computed, inject, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelBubble from '../../components/FtChannelBubble/FtChannelBubble.vue'
@@ -178,6 +180,7 @@ import { formatNumber } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
 
 const { locale } = useI18n()
+const handleExternalLink = inject('handleExternalLink')
 const dateFormat = computed(() => store.getters.getDateFormat)
 const { tabId: injectedTabId } = useTabContext()
 const tabId = injectedTabId ?? 'web'
