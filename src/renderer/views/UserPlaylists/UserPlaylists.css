@@ -1,4 +1,7 @@
 .card {
+  --playlist-control-gap: 20px;
+  --playlist-field-label-outset: 7px;
+
   position: relative;
   box-sizing: border-box;
   inline-size: 100%;
@@ -12,15 +15,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-block-start: var(--playlist-control-gap);
 }
 
 .headingText {
+  margin-block: 0;
   min-inline-size: 0;
   overflow-wrap: anywhere;
 }
 
-.playlistList {
-  margin-block-start: 16px;
+.heading:not(:has(.optionsRow)) + .playlistList {
+  margin-block-start: var(--playlist-control-gap);
 }
 
 /* Playlist tiles need no reserved space for video metadata. */
@@ -44,6 +49,16 @@
   column-gap: 16px;
 }
 
+.playlistSearch {
+  --input-bottom-spacing: 0;
+
+  margin-block: var(--playlist-control-gap);
+}
+
+.playlistSearch.outlined {
+  margin-block-start: calc(var(--playlist-control-gap) + var(--playlist-field-label-outset));
+}
+
 @media only screen and (width <= 800px) {
   .searchInputsRow {
     /* Switch to 2 rows from 2 columns */
@@ -53,10 +68,41 @@
 }
 
 .optionsRow {
+  --settings-control-margin: 0;
+
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr;
   align-items: center;
+  row-gap: var(--playlist-control-gap);
+  margin-block-end: var(--playlist-control-gap);
+}
+
+.matchingVideosToggle {
+  --playlist-switch-hit-height: var(--switch-touch-height);
+  --playlist-switch-padding: calc((var(--playlist-switch-hit-height) - var(--switch-track-height)) / 2);
+}
+
+/* Space the visible track while retaining the switch's full touch target. */
+.matchingVideosToggle :deep(.switch-label) {
+  padding-block: var(--playlist-switch-padding);
+  margin-block: calc(-1 * var(--playlist-switch-padding));
+}
+
+.matchingVideosToggle :deep(.switch-label-text) {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--switch-track-height);
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .card {
+    --playlist-field-label-outset: 9px;
+  }
+
+  .matchingVideosToggle {
+    --playlist-switch-hit-height: max(48px, var(--switch-touch-height));
+  }
 }
 
 @media only screen and (width <= 800px) {
@@ -71,6 +117,10 @@
 .sortSelect {
   /* Put it on the right */
   margin-inline-start: auto;
+}
+
+.sortSelect.outlined {
+  margin-block-start: var(--playlist-field-label-outset);
 }
 
 .message {

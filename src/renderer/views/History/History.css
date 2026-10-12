@@ -9,6 +9,10 @@
   margin-inline: auto;
 }
 
+.card:not(:has(.optionsRow)) .historyResults {
+  margin-block-start: var(--history-control-gap);
+}
+
 .optionsRow {
   --settings-control-margin: 0;
 
@@ -77,6 +81,7 @@
   justify-content: space-between;
   gap: 12px;
   margin-block-start: 13px;
+  padding-block-start: var(--history-control-gap);
 }
 
 .headingRow h2 {
@@ -85,6 +90,7 @@
   flex: 0 0 auto;
   gap: 8px;
   white-space: nowrap;
+  margin-block: 0;
 }
 
 .headingActions {
@@ -96,10 +102,6 @@
 }
 
 @media only screen and (width <= 800px) {
-  .headingRow h2 {
-    margin-block-end: 0;
-  }
-
   .headingActions {
     flex-basis: 100%;
     margin-inline-start: 0;

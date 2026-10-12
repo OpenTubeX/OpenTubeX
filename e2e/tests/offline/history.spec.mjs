@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
@@ -123,6 +124,28 @@ test.use({
   }
 })
 
+test.describe('single history entry', () => {
+  test.use({ seed: { history: [historyEntry('aaaaaaaaaaa', 'Only history video', now - 1000)] } })
+
+  test('keeps a heading-to-results gap when search controls are hidden', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('Only history video')).toBeVisible()
+    await expect(page.locator('.historySearch')).toBeHidden()
+    await expect(page.locator('.optionsRow')).toHaveCount(0)
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [1440, 375]) {
+        await setWindowSize(app, page, { width, height: width === 1440 ? 950 : 850 })
+        await expect.poll(() => page.locator('.headingRow').evaluate(element => {
+          const headingBottom = Math.max(...[...element.children].map(child => child.getBoundingClientRect().bottom))
+          const results = element.closest('.card').querySelector('.autoGrid').getBoundingClientRect()
+          return results.top - headingBottom
+        }), { timeout: 2000 }).toBeCloseTo(20, 0)
+      }
+    }
+  })
+})
+
 test.describe('watch history', () => {
   for (const preference of ['on', 'system']) {
     test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {
@@ -212,6 +235,7 @@ test.describe('watch history', () => {
   })
 
   test('keeps consistent gaps between history controls and results at narrow widths and fractional zoom', async ({ app, page, attachScreenshot }) => {
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await goTo(page, 'history')
     for (const zoom of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
@@ -220,7 +244,7 @@ test.describe('watch history', () => {
         await expect.poll(() => page.locator('.headingActions').evaluate(element => {
           const actions = element.getBoundingClientRect()
           const card = element.closest('.card')
-          const heading = element.closest('.headingRow').getBoundingClientRect()
+          const headingBottom = Math.max(...[...element.closest('.headingRow').children].map(child => child.getBoundingClientRect().bottom))
           const search = card.querySelector('.historySearch .ft-input').getBoundingClientRect()
           const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
           const toggleText = card.querySelector('.toggleOptions .switch-label-text')
@@ -231,7 +255,7 @@ test.describe('watch history', () => {
           const sort = card.querySelector('.sortSelect .select-text').getBoundingClientRect()
           const sortLabel = card.querySelector('.sortSelect .select-label').getBoundingClientRect()
           const results = card.querySelector('.autoGrid').getBoundingClientRect()
-          const gaps = [Math.min(search.top, searchLabel.top) - heading.bottom, results.top - Math.max(sort.bottom, toggleBottom)]
+          const gaps = [Math.min(search.top, searchLabel.top) - headingBottom, results.top - Math.max(sort.bottom, toggleBottom)]
           if (getComputedStyle(card.querySelector('.optionsRow')).gridTemplateRows.split(' ').length === 2) {
             gaps.push(toggleTop - search.bottom, Math.min(sort.top, sortLabel.top) - toggleBottom)
             gaps.push(Math.min(search.top, searchLabel.top) - actions.bottom)
@@ -242,7 +266,8 @@ test.describe('watch history', () => {
         })).toEqual(Array(width / zoom <= 800 ? 5 : 3).fill(expect.closeTo(20, 0)))
         if (width / zoom <= 680) {
           const touchTarget = await page.locator('.toggleOptions .switch-label').boundingBox()
-          expect(touchTarget.height).toBeGreaterThanOrEqual(48)
+          // Electron zoom can introduce tiny fractions in CSS-pixel bounds.
+          expect(touchTarget.height).toBeGreaterThanOrEqual(48 - 0.01)
         }
         if (width === 320 && zoom === 1.25) {
           const text = await page.locator('.toggleOptions .switch-label-text').boundingBox()
@@ -250,6 +275,26 @@ test.describe('watch history', () => {
         }
         if (zoom === 1) await attachScreenshot(`history controls at ${width}px`)
       }
+    }
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1))
+    await setWindowSize(app, page, { width: 1440, height: 950 })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'system')
+      await store.dispatch('updateSystemDarkTheme', 'dark')
+      await store.dispatch('updateSystemLightTheme', 'light')
+      await store.dispatch('updateUiRoundness', 100)
+    })
+    await expectImagesLoaded(page.locator('.card img:visible'))
+    for (const theme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: theme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+      const clip = await page.locator('.card').evaluate(element => {
+        const card = element.getBoundingClientRect()
+        const results = element.querySelector('.autoGrid').getBoundingClientRect()
+        return { x: card.x, y: card.y, width: card.width, height: results.top - card.top + 80 }
+      })
+      await page.screenshot({ path: test.info().outputPath(`history-controls-${theme}.png`), clip })
     }
   })
 

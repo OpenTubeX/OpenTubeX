@@ -109,7 +109,7 @@
       v-model="newQuickBookmarkIcon"
     />
     <p
-      v-else
+      v-else-if="description"
       v-overlay-scrollbars
       class="playlistDescription"
       dir="auto"

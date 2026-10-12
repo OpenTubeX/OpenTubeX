@@ -93,7 +93,27 @@
 }
 
 .searchInputsRow {
+  --playlist-search-label-outset: 7px;
+
   margin-block-start: 8px;
+
+  @media (any-pointer: coarse), (width <= 680px) {
+    --playlist-search-label-outset: 9px;
+  }
+}
+
+.base {
+  .playlistInfoSeparator {
+    margin-block: 16px;
+  }
+
+  .playlistOptions {
+    justify-content: center;
+  }
+
+  .searchInputsRow {
+    margin-block-start: calc(16px + var(--playlist-search-label-outset));
+  }
 }
 
 .top-bar {
@@ -151,6 +171,7 @@
 
   .channelShareWrapper {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    margin-block-start: 16px;
   }
 
   .channelShareWrapper,
@@ -162,6 +183,12 @@
 
   .inputElement {
     inline-size: 100%;
+  }
+
+  .searchInputsRow {
+    --input-bottom-spacing: 6px;
+
+    margin-block-start: calc(16px + var(--playlist-search-label-outset));
   }
 }
 

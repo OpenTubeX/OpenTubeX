@@ -26,6 +26,7 @@
         >
           <FtInput
             ref="searchBar"
+            class="playlistSearch"
             input-type="search"
             :label="$t('User Playlists.Search bar placeholder')"
             :icon="['fas', 'search']"
@@ -41,6 +42,7 @@
           class="optionsRow"
         >
           <FtToggleSwitch
+            class="matchingVideosToggle"
             :label="$t('User Playlists.Playlists with Matching Videos')"
             :compact="true"
             :default-value="doSearchPlaylistsWithMatchingVideos"
