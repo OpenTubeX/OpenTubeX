@@ -1,4 +1,5 @@
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { readUnifiedBackup } from '../../../src/renderer/helpers/unifiedBackup.js'
 
 test('shows icons on data actions and vertically centers export choices', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
@@ -46,6 +47,7 @@ test('exports and imports search history through the unified ZIP', async ({ page
   })
 
   await dataSection.getByRole('button', { name: 'Export backup' }).click()
+  await page.getByRole('button', { name: 'Export selected data' }).click()
   await expect.poll(() => page.evaluate(() => window.backupArchive?.size ?? 0)).toBeGreaterThan(0)
 
   await page.evaluate(async () => {
@@ -77,6 +79,81 @@ test('exports and imports search history through the unified ZIP', async ({ page
     return store.getters.getWatchSecondsByDate['2026-09-26']
   })).toBe(42)
   await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
+})
+
+test('exports only selected backup categories and offers only those categories on import', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  const dataSection = await goToSettingsSection(page, 'data')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateSearchHistoryEntry', { _id: 'selected-query', query: 'selected backup query', lastUpdatedAt: Date.now() })
+    window.backupArchive = null
+    window.showSaveFilePicker = async () => {
+      if (!navigator.userActivation.isActive) throw new DOMException('Must be handling a user gesture to show a file picker.', 'SecurityError')
+      return {
+        createWritable: async () => ({
+          write: async blob => { window.backupArchive = blob }, close: async () => {},
+        })
+      }
+    }
+  })
+  await dataSection.getByRole('button', { name: 'Export backup' }).click()
+  const choices = page.locator('.settingsSubpageContent')
+  const checkboxes = choices.getByRole('checkbox')
+  await expect(checkboxes).toHaveCount(6)
+  for (const checkbox of await checkboxes.all()) {
+    await expect(checkbox).toBeChecked()
+    await checkbox.locator('+ label').click()
+    await expect(checkbox).not.toBeChecked()
+  }
+  await expect(choices.getByRole('button', { name: 'Export selected data' })).toBeDisabled()
+  await choices.getByText('Search history', { exact: true }).click()
+  await choices.getByRole('button', { name: 'Export selected data' }).click()
+  await expect.poll(() => page.evaluate(() => window.backupArchive?.size ?? 0)).toBeGreaterThan(0)
+  const bytes = await page.evaluate(async () => [...new Uint8Array(await window.backupArchive.arrayBuffer())])
+  const { data } = await readUnifiedBackup(new Blob([new Uint8Array(bytes)]))
+  expect(Object.keys(data)).toEqual(['searchHistory'])
+  expect(data.searchHistory.some(entry => entry.query === 'selected backup query')).toBe(true)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('removeSearchHistoryEntry', 'selected-query')
+    await store.dispatch('recordWatchTime', { date: '2026-09-26', seconds: 81 })
+    window.showOpenFilePicker = async () => [{
+      getFile: async () => new File([window.backupArchive], 'selected-backup.zip', { type: 'application/zip' }),
+    }]
+  })
+  await dataSection.getByRole('button', { name: 'Import backup' }).click()
+  await expect(choices.getByRole('checkbox')).toHaveCount(1)
+  await expect(choices.getByRole('checkbox', { name: 'Search history', exact: true })).toBeChecked()
+  await choices.getByRole('button', { name: 'Import selected data' }).click()
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getSearchHistoryEntries.some(entry => entry.query === 'selected backup query') &&
+      store.getters.getWatchSecondsByDate['2026-09-26'] === 81
+  })).toBe(true)
+})
+
+test('keeps backup export choices usable at narrow widths and fractional UI scales', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  await dataSection.getByRole('button', { name: 'Export backup' }).click()
+  const choices = page.locator('.settingsSubpageContent')
+  for (const zoom of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoom)
+    for (const width of [1600, 390]) {
+      await page.setViewportSize({ width, height: 800 })
+      await expect(choices.getByRole('checkbox')).toHaveCount(6)
+      const button = choices.getByRole('button', { name: 'Export selected data' })
+      await expect(button).toBeVisible()
+      await expect.poll(() => choices.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      const bounds = await button.boundingBox()
+      const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+      expect(bounds.x).toBeGreaterThanOrEqual(0)
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width)
+      expect(bounds.y).toBeGreaterThanOrEqual(0)
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height)
+    }
+  }
 })
 
 test('opens the profile directory in the file manager', async ({ app }) => {

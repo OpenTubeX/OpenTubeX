@@ -617,7 +617,7 @@ export async function readFileWithPicker(fileTypeDescription, acceptedTypes, rem
 
 /**
  * @param {string} fileName
- * @param {string | Blob} content
+ * @param {string | Blob | (() => Promise<Blob>)} content
  * @param {string} fileTypeDescription
  * @param {string} mimeType
  * @param {string} fileExtension
@@ -637,7 +637,7 @@ export async function writeFileWithPicker(
   defaultDirectory
 ) {
   if (process.env.IS_CAPACITOR) {
-    return saveAndroidFile(fileName, content, mimeType, defaultDirectory)
+    return saveAndroidFile(fileName, typeof content === 'function' ? await content() : content, mimeType, defaultDirectory)
   }
   // Only supported in Electron and desktop Chromium browsers
   // https://developer.mozilla.org/en-US/docs/Web/API/Window/showOpenFilePicker#browser_compatibility
@@ -662,6 +662,8 @@ export async function writeFileWithPicker(
         }],
       })
 
+      // Prepare expensive exports only after the picker has consumed the click gesture.
+      if (typeof content === 'function') content = await content()
       writableFileStream = await handle.createWritable()
       await writableFileStream.write(content)
     } catch (error) {
@@ -679,6 +681,7 @@ export async function writeFileWithPicker(
 
     return true
   } else {
+    if (typeof content === 'function') content = await content()
     if (typeof content === 'string') {
       content = new Blob([content], { type: mimeType })
     }

@@ -1080,6 +1080,8 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Select export data: "Vel dataa som skal eksporterast"
+    Export selected data: "Eksporter valde data"
     Complete backup: "Fullstendig tryggleikskopi"
     Import backup: "Importer tryggleikskopi"
     Export backup: "Eksporter tryggleikskopi"

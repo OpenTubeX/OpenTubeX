@@ -938,6 +938,8 @@ Settings:
     Add: Lägg till
     Remove: Ta bort
   Data Settings:
+    Select export data: "Välj data att exportera"
+    Export selected data: "Exportera valda data"
     Complete backup: "Fullständig säkerhetskopia"
     Import backup: "Importera säkerhetskopia"
     Export backup: "Exportera säkerhetskopia"

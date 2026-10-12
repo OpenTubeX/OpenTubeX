@@ -951,6 +951,8 @@ Settings:
     Add: Adicionar
     Remove: Remover
   Data Settings:
+    Select export data: "Selecione os dados a exportar"
+    Export selected data: "Exportar dados selecionados"
     Complete backup: "Cópia de segurança completa"
     Import backup: "Importar cópia de segurança"
     Export backup: "Exportar cópia de segurança"

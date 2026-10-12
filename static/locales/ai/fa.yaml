@@ -967,6 +967,8 @@ Settings:
     Add: افزودن
     Remove: حذف
   Data Settings:
+    Select export data: "داده‌های مورد نظر برای صادر کردن را انتخاب کنید"
+    Export selected data: "صادر کردن داده‌های انتخاب‌شده"
     Complete backup: "پشتیبان‌گیری کامل"
     Import backup: "وارد کردن نسخه پشتیبان"
     Export backup: "پشتیبان گیری را صادر کنید"

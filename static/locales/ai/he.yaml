@@ -949,6 +949,8 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
+    Select export data: "בחרו את הנתונים לייצוא"
+    Export selected data: "ייצוא הנתונים שנבחרו"
     Complete backup: "גיבוי מלא"
     Import backup: "ייבוא גיבוי"
     Export backup: "ייצוא גיבוי"

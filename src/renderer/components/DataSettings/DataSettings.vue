@@ -17,7 +17,7 @@
         :label="t('Settings.Data Settings.Export backup')"
         :icon="['fas', 'file-download']"
         :disabled="backupBusy"
-        @click="exportUnifiedBackup"
+        @click="openBackupExport"
       />
     </FtFlexBox>
     <p class="importFormatsHint">
@@ -142,6 +142,30 @@
       />
     </FtFlexBox>
     <FtSettingsSubpage
+      :open="showBackupExport"
+      :title="t('Settings.Data Settings.Export backup')"
+      :icon="['fas', 'file-download']"
+      @close="showBackupExport = false"
+    >
+      <div
+        class="takeoutSelection takeoutSelectionCentered"
+        :aria-busy="backupBusy"
+      >
+        <p>{{ t('Settings.Data Settings.Select export data') }}</p>
+        <FtCheckboxList
+          v-model="selectedExportSections"
+          :labels="backupLabels"
+          :values="BACKUP_SECTIONS"
+        />
+        <FtButton
+          :label="t('Settings.Data Settings.Export selected data')"
+          :icon="['fas', 'file-download']"
+          :disabled="backupBusy || selectedExportSections.length === 0"
+          @click="exportUnifiedBackup"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
       :open="showBackupImport"
       :title="t('Settings.Data Settings.Import backup')"
       :icon="['fas', 'folder-open']"
@@ -155,8 +179,8 @@
         <p>{{ t('Settings.Data Settings.Select backup data') }}</p>
         <FtCheckboxList
           v-model="selectedBackupSections"
-          :labels="backupLabels"
-          :values="BACKUP_SECTIONS"
+          :labels="backupImportLabels"
+          :values="backupImportSections"
         />
         <FtButton
           v-if="selectedBackupSections.length > 0"
@@ -296,6 +320,8 @@ const START_IN_DIRECTORY = 'downloads'
 const { t } = useI18n()
 const backupBusy = ref(false)
 const showBackupImport = ref(false)
+const showBackupExport = ref(false)
+const selectedExportSections = ref([...BACKUP_SECTIONS])
 const backupFilename = ref('')
 const backupData = shallowRef(null)
 const selectedBackupSections = ref([...BACKUP_SECTIONS])
@@ -308,6 +334,14 @@ const backupLabels = computed(() => [
   t('Home Page.Watch statistics'),
 ])
 
+const backupImportSections = computed(() => BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
+const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
+
+function openBackupExport() {
+  selectedExportSections.value = [...BACKUP_SECTIONS]
+  showBackupExport.value = true
+}
+
 function closeBackupImport() {
   showBackupImport.value = false
   backupData.value = null
@@ -316,23 +350,27 @@ function closeBackupImport() {
 async function exportUnifiedBackup() {
   backupBusy.value = true
   try {
-    const [profiles, playlists, history, searchHistory, watchStatsRecords, watchStatsAdjustment] = await Promise.all([
-      DBProfileHandlers.find(), DBPlaylistHandlers.find(), DBHistoryHandlers.find(),
-      DBSearchHistoryHandlers.find(), DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment(),
-    ])
-    const data = {
-      settings: deepCopy(transferableSettings.value),
-      profiles,
-      playlists,
-      history,
-      searchHistory,
-      watchStats: { records: watchStatsRecords, adjustment: watchStatsAdjustment },
-    }
-    await promptAndWriteToFile(
-      `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, createUnifiedBackup(data),
+    const selected = [...selectedExportSections.value]
+    const exported = await promptAndWriteToFile(
+      `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, async () => {
+        const readers = {
+          settings: () => deepCopy(transferableSettings.value),
+          profiles: () => DBProfileHandlers.find(),
+          playlists: () => DBPlaylistHandlers.find(),
+          history: () => DBHistoryHandlers.find(),
+          searchHistory: () => DBSearchHistoryHandlers.find(),
+          watchStats: async () => {
+            const [records, adjustment] = await Promise.all([DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment()])
+            return { records, adjustment }
+          },
+        }
+        const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
+        return createUnifiedBackup(Object.fromEntries(entries))
+      },
       t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
       t('Settings.Data Settings.Backup exported')
     )
+    if (exported) showBackupExport.value = false
   } catch (error) {
     showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
@@ -348,7 +386,7 @@ async function selectUnifiedBackup() {
     const { data } = await readUnifiedBackup(file)
     backupFilename.value = file.name
     backupData.value = data
-    selectedBackupSections.value = [...BACKUP_SECTIONS]
+    selectedBackupSections.value = [...backupImportSections.value]
     showBackupImport.value = true
   } catch (error) {
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
@@ -521,7 +559,7 @@ function openProfileSettings() {
 
 /**
  * @param {string} fileName
- * @param {string | Blob} content
+ * @param {string | Blob | (() => Promise<Blob>)} content
  * @param {string} fileTypeDescription
  * @param {string} mimeType
  * @param {string} fileExtension
@@ -549,6 +587,7 @@ async function promptAndWriteToFile(
     if (response) {
       showToast({ message: successMessage, icon: ['fas', 'check'] })
     }
+    return response
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
     showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })

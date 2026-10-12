@@ -33,6 +33,26 @@ test('canceling the native save picker does not report a saved screenshot', asyn
   assert.equal(await save('screenshot.png', new Blob(['PNG']), 'PNG', 'image/png', '.png'), false)
 })
 
+test('native exports resolve deferred backup content before calling the bridge', async () => {
+  const calls = []
+  const archive = new Blob(['ZIP bytes'], { type: 'application/zip' })
+  const save = loadPicker(async (...args) => { calls.push(args); return true })
+  assert.equal(await save('backup.zip', async () => archive, 'Backup', 'application/zip', '.zip'), true)
+  assert.deepEqual(calls, [['backup.zip', archive, 'application/zip', undefined]])
+})
+
+test('browsers without a save picker download deferred backup content', async () => {
+  const archive = new Blob(['ZIP bytes'], { type: 'application/zip' })
+  const downloads = []
+  const save = loadPicker(() => assert.fail('Browser export must not call the Android bridge'), {
+    process: { env: {} },
+    URL: { createObjectURL: blob => { assert.equal(blob, archive); return 'blob:backup' }, revokeObjectURL() {} },
+    document: { createElement: () => ({ click() { downloads.push(this.download) } }) },
+  })
+  assert.equal(await save('backup.zip', async () => archive, 'Backup', 'application/zip', '.zip'), true)
+  assert.deepEqual(downloads, ['backup.zip'])
+})
+
 test('native export errors reach the caller instead of reporting success', async () => {
   const error = new Error('Disk full')
   const save = loadPicker(async () => { throw error })

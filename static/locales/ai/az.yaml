@@ -936,6 +936,8 @@ Settings:
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
   Data Settings:
+    Select export data: "İxrac ediləcək məlumatları seçin"
+    Export selected data: "Seçilmiş məlumatları ixrac et"
     Complete backup: "Tam ehtiyat nüsxəsi"
     Import backup: "Ehtiyat nüsxəni idxal et"
     Export backup: "Ehtiyat nüsxəni ixrac et"

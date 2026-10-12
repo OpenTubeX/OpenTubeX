@@ -949,6 +949,8 @@ Settings:
     Add: Προσθήκη
     Remove: Αφαίρεση
   Data Settings:
+    Select export data: "Επιλέξτε τα δεδομένα για εξαγωγή"
+    Export selected data: "Εξαγωγή επιλεγμένων δεδομένων"
     Complete backup: "Ολοκλήρωση αντιγράφου ασφαλείας"
     Import backup: "Εισαγωγή αντιγράφου ασφαλείας"
     Export backup: "Εξαγωγή αντιγράφου ασφαλείας"

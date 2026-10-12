@@ -457,6 +457,8 @@ Settings:
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
   Data Settings:
+    Select export data: "Wybierz dane do wyeksportowania"
+    Export selected data: "Eksportuj wybrane dane"
     Complete backup: "Pełna kopia zapasowa"
     Import backup: "Importuj kopię zapasową"
     Export backup: "Eksportuj kopię zapasową"

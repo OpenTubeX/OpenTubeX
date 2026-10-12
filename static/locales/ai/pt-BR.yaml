@@ -934,6 +934,8 @@ Settings:
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
   Data Settings:
+    Select export data: "Selecione os dados para exportar"
+    Export selected data: "Exportar dados selecionados"
     Complete backup: "Backup completo"
     Import backup: "Importar backup"
     Export backup: "Exportar backup"

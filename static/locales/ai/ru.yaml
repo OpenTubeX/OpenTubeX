@@ -919,6 +919,8 @@ Settings:
     Add: Добавить
     Remove: Удалить
   Data Settings:
+    Select export data: "Выберите данные для экспорта"
+    Export selected data: "Экспортировать выбранные данные"
     Complete backup: "Полное резервное копирование"
     Import backup: "Импортировать резервную копию"
     Export backup: "Экспортировать резервную копию"

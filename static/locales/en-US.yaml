@@ -1510,6 +1510,8 @@ Settings:
     Add: Add
     Remove: Remove
   Data Settings:
+    Select export data: "Select the data to export"
+    Export selected data: "Export selected data"
     Complete backup: Complete backup
     Import backup: Import backup
     Export backup: Export backup

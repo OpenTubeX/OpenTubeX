@@ -1195,6 +1195,8 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
   Data Settings:
+    Select export data: "Izberite podatke za izvoz"
+    Export selected data: "Izvozi izbrane podatke"
     Complete backup: "Celotna varnostna kopija"
     Import backup: "Uvozi varnostno kopijo"
     Export backup: "Izvozi varnostno kopijo"

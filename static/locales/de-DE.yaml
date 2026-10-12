@@ -1114,6 +1114,8 @@ Settings:
     Cleanup Complete: Speicherbereinigung abgeschlossen
     Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
+    Select export data: "Wähle die zu exportierenden Daten aus"
+    Export selected data: "Ausgewählte Daten exportieren"
     Complete backup: Vollständige Sicherung
     Import backup: Sicherung importieren
     Export backup: Sicherung exportieren

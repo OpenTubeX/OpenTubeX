@@ -949,6 +949,8 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
   Data Settings:
+    Select export data: "Selecteer de gegevens om te exporteren"
+    Export selected data: "Geselecteerde gegevens exporteren"
     Complete backup: "Volledige back-up"
     Import backup: "Back-up importeren"
     Export backup: "Back-up exporteren"

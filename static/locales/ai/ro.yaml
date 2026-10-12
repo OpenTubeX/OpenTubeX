@@ -940,6 +940,8 @@ Settings:
     Add: Adaugă
     Remove: Elimină
   Data Settings:
+    Select export data: "Selectați datele de exportat"
+    Export selected data: "Exportă datele selectate"
     Complete backup: "Copie de rezervă completă"
     Import backup: "Importați copii de rezervă"
     Export backup: "Exportare copie de rezervă"

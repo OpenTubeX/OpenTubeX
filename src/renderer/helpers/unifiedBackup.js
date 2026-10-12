@@ -47,11 +47,13 @@ export function mergeBackupWatchStatsAdjustment(currentRecords, currentAdjustmen
 }
 
 export function createUnifiedBackup(data) {
+  const sections = BACKUP_SECTIONS.filter(section => Object.hasOwn(data, section))
+  if (sections.length === 0) throw new Error('No backup sections selected')
   const files = {
-    'manifest.json': strToU8(JSON.stringify({ format: 'opentubex-backup', version: 1, createdAt: new Date().toISOString() }))
+    'manifest.json': strToU8(JSON.stringify({ format: 'opentubex-backup', version: 1, createdAt: new Date().toISOString(), sections }))
   }
   let totalSize = files['manifest.json'].length
-  for (const section of BACKUP_SECTIONS) {
+  for (const section of sections) {
     files[`${section}.json`] = strToU8(JSON.stringify(data[section]))
     if (files[`${section}.json`].length > MAX_ENTRY_SIZE) throw new Error('Backup entry is too large')
     totalSize += files[`${section}.json`].length
@@ -106,16 +108,21 @@ export async function readUnifiedBackup(file) {
     reader.releaseLock()
   }
 
-  const expected = new Set(['manifest.json', ...BACKUP_SECTIONS.map(section => `${section}.json`)])
-  if (entries.size !== expected.size || [...entries.keys()].some(name => !expected.has(name))) {
-    throw new Error('Backup archive has missing or unexpected files')
-  }
   const parse = name => JSON.parse(strFromU8(entries.get(name)))
+  if (!entries.has('manifest.json')) throw new Error('Backup archive has missing or unexpected files')
   const manifest = parse('manifest.json')
   if (manifest?.format !== 'opentubex-backup' || manifest.version !== 1) {
     throw new Error('Unsupported backup version')
   }
-  const data = Object.fromEntries(BACKUP_SECTIONS.map(section => [section, parse(`${section}.json`)]))
+  const sections = manifest.sections ?? BACKUP_SECTIONS
+  if (!Array.isArray(sections) || sections.length === 0 || new Set(sections).size !== sections.length || sections.some(section => !BACKUP_SECTIONS.includes(section))) {
+    throw new Error('Invalid backup sections')
+  }
+  const expected = new Set(['manifest.json', ...sections.map(section => `${section}.json`)])
+  if (entries.size !== expected.size || [...entries.keys()].some(name => !expected.has(name))) {
+    throw new Error('Backup archive has missing or unexpected files')
+  }
+  const data = Object.fromEntries(sections.map(section => [section, parse(`${section}.json`)]))
   validateUnifiedBackup(data)
   return { manifest, data }
 }
@@ -131,7 +138,7 @@ export function validateBackupWatchStats(backup) {
 
 export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
-  if (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__')) throw new Error('Invalid backup settings')
+  if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
   const sections = {
     profiles: record => object(record) && typeof record._id === 'string' && (typeof record.name === 'string' || record.name === null) && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
@@ -139,7 +146,7 @@ export function validateUnifiedBackup(data) {
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',
   }
   for (const [section, valid] of Object.entries(sections)) {
-    if (!Array.isArray(data[section]) || !data[section].every(valid)) throw new Error(`Invalid backup ${section}`)
+    if (Object.hasOwn(data, section) && (!Array.isArray(data[section]) || !data[section].every(valid))) throw new Error(`Invalid backup ${section}`)
   }
-  validateBackupWatchStats(data.watchStats)
+  if (Object.hasOwn(data, 'watchStats')) validateBackupWatchStats(data.watchStats)
 }
