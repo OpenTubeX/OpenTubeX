@@ -105,6 +105,12 @@
     background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
   }
 
+  .hiddenLabels .navOption .navIcon {
+    font-size: inherit;
+    inline-size: 1em;
+    block-size: 1em;
+  }
+
   .hiddenLabels .navOption,
   .hiddenLabels .navChannel {
     inline-size: 50px;
