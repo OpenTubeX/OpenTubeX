@@ -36,6 +36,40 @@ for (const uiScale of [95, 125]) {
       }
     })
 
+    test('scales desktop icons with inherited text size only when labels are hidden', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await setWindowSize(app, page, { width: 1100, height: 700 })
+      await goTo(page, 'history')
+      const sidebar = page.locator('.sideNav')
+      const icon = sidebar.locator('.navOption .navIcon').first()
+      for (const pack of ['material', 'remix']) {
+        await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+        await expect(icon).toHaveAttribute('data-icon-pack', pack)
+        for (const mode of ['collapsed', 'icon-only', 'expanded', 'expanded-with-hidden-labels']) {
+          await page.evaluate(mode => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setHideLabelsSideBar', mode === 'icon-only' || mode === 'expanded-with-hidden-labels')
+            if (store.getters.getIsSideNavOpen !== mode.startsWith('expanded')) store.commit('toggleSideNav')
+          }, mode)
+          const item = sidebar.locator('.navOption').first()
+          const bounds = await item.boundingBox()
+          for (const fontSize of [16, 20]) {
+            await sidebar.evaluate((element, fontSize) => { element.style.fontSize = `${fontSize}px` }, fontSize)
+            const expectedSize = mode === 'icon-only' ? fontSize : 24
+            await expect.poll(() => icon.evaluate((element, expectedSize) => {
+              const style = getComputedStyle(element)
+              const glyph = getComputedStyle(element.querySelector('svg'))
+              // Chromium rounds inherited lengths at fractional Electron zoom.
+              return Math.max(...[style.fontSize, style.width, style.height, glyph.width]
+                .map(value => Math.abs(parseFloat(value) - expectedSize)))
+            }, expectedSize)).toBeLessThan(0.05)
+            expect(await item.boundingBox(), 'Icon scaling must preserve the clickable area').toEqual(bounds)
+          }
+          await sidebar.evaluate(element => element.style.removeProperty('font-size'))
+        }
+      }
+    })
+
     test('matches the visible pill gaps in collapsed and icon-only modes', async ({ app, page }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await setWindowSize(app, page, { width: 1100, height: 700 })
