@@ -74,7 +74,7 @@
       <FtButton
         :label="$t('Settings.Data Settings.Import History')"
         :icon="['fas', 'folder-open']"
-        @click="importWatchHistory"
+        @click="runDataImport(importWatchHistory)"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Export History')"
@@ -92,7 +92,7 @@
       <FtButton
         :label="$t('Settings.Data Settings.Import Playlists')"
         :icon="['fas', 'folder-open']"
-        @click="importPlaylists"
+        @click="runDataImport(importPlaylists)"
       />
       <FtButton
         :label="$t('Settings.Data Settings.Export Playlists')"
@@ -110,7 +110,7 @@
       <FtButton
         :label="t('Settings.Data Settings.Import search history')"
         :icon="['fas', 'folder-open']"
-        @click="importSearchHistory"
+        @click="runDataImport(importSearchHistory)"
       />
       <FtButton
         :label="t('Settings.Data Settings.Export search history')"
@@ -294,7 +294,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -336,8 +336,10 @@ import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, p
 import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistory, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
-import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
-import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
+import { importLibraryRecords, stageLibraryBackup, writeLibraryBackup } from '../../helpers/libraryBackup'
+import { compactAllDatastores, DBLibraryHandlers, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { forEachTakeoutImportEntry, forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, readTakeoutPlaylistMetadata } from '../../helpers/youtube-takeout-zip'
+import { importTakeoutPlaylist as importTakeoutPlaylistWithStorage } from '../../helpers/takeout-playlist-import'
 import {
   mergeSearchHistoryEntries,
   normalizeSearchHistoryEntry,
@@ -370,6 +372,19 @@ const selectedExportSections = ref([...BACKUP_SECTIONS])
 const backupFilename = ref('')
 const backupData = shallowRef(null)
 const backupPreview = shallowRef([])
+let backupDisposed = false
+let backupImportGeneration = 0
+let backupWriteGeneration = null
+function disposeBackupImport() {
+  backupDisposed = true
+  backupImportGeneration++
+  // Applying or exporting continues after Settings closes; keep its write lock.
+  backupBusy.value = backupWriteGeneration !== null
+  closeBackupImport()
+}
+onBeforeUnmount(disposeBackupImport)
+onDeactivated(disposeBackupImport)
+onActivated(() => { backupDisposed = false })
 const selectedBackupSections = ref([...BACKUP_SECTIONS])
 const backupLabels = computed(() => [
   t('Settings.Settings'),
@@ -380,7 +395,9 @@ const backupLabels = computed(() => [
   t('Home Page.Watch statistics'),
 ])
 
-const backupImportSections = computed(() => BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
+const backupImportSections = computed(() => process.env.IS_ELECTRON
+  ? backupData.value?.sections ?? []
+  : BACKUP_SECTIONS.filter(section => Object.hasOwn(backupData.value ?? {}, section)))
 const backupImportLabels = computed(() => backupImportSections.value.map(section => backupLabels.value[BACKUP_SECTIONS.indexOf(section)]))
 
 async function readImportState(sections) {
@@ -401,15 +418,28 @@ function openBackupExport() {
 }
 
 function closeBackupImport() {
+  if (process.env.IS_ELECTRON && backupData.value?.id) DBLibraryHandlers.query('importCancel', { id: backupData.value.id }).catch(console.error)
   showBackupImport.value = false
   backupData.value = null
   backupPreview.value = []
 }
 
 async function exportUnifiedBackup() {
+  if (backupDisposed || backupBusy.value) return
+  const generation = ++backupImportGeneration
+  const requestIsCurrent = () => !backupDisposed && generation === backupImportGeneration
+  backupWriteGeneration = generation
   backupBusy.value = true
   try {
     const selected = [...selectedExportSections.value]
+    if (process.env.IS_ELECTRON) {
+      const saved = await writeLibraryBackup(selected.includes('settings') ? deepCopy(transferableSettings.value) : undefined, `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, t('Settings.Data Settings.Complete backup'), 'data-settings-export', START_IN_DIRECTORY, { sections: selected })
+      if (saved && requestIsCurrent()) {
+        showBackupExport.value = false
+        showToast({ message: t('Settings.Data Settings.Backup exported'), icon: ['fas', 'check'] })
+      }
+      return
+    }
     const exported = await promptAndWriteToFile(
       `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, async () => {
         const readers = {
@@ -424,41 +454,54 @@ async function exportUnifiedBackup() {
           },
         }
         const entries = await Promise.all(selected.map(async section => [section, await readers[section]()]))
+        if (!requestIsCurrent()) return null
         return createUnifiedBackup(Object.fromEntries(entries))
       },
       t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
       t('Settings.Data Settings.Backup exported')
     )
-    if (exported) showBackupExport.value = false
+    if (exported && requestIsCurrent()) showBackupExport.value = false
   } catch (error) {
+    if (!requestIsCurrent()) { console.error(error); return }
     showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
-    backupBusy.value = false
+    if (backupWriteGeneration === generation) {
+      backupWriteGeneration = null
+      backupBusy.value = false
+    }
   }
 }
 
 async function selectUnifiedBackup() {
-  if (backupBusy.value) return
+  if (backupDisposed || backupBusy.value) return
+  const generation = ++backupImportGeneration
+  const requestIsCurrent = () => !backupDisposed && generation === backupImportGeneration
   backupBusy.value = true
   try {
     const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
-    if (file === null) return
-    const { data } = await readUnifiedBackup(file)
-    const current = await readImportState(Object.keys(data))
-    backupPreview.value = previewBackupImport(data, current)
+    if (file === null || !requestIsCurrent()) return
+    const data = process.env.IS_ELECTRON ? await stageLibraryBackup(file) : (await readUnifiedBackup(file)).data
+    if (!requestIsCurrent()) {
+      if (process.env.IS_ELECTRON) await DBLibraryHandlers.query('importCancel', { id: data.id })
+      return
+    }
     backupFilename.value = file.name
     backupData.value = data
     selectedBackupSections.value = [...backupImportSections.value]
     showBackupImport.value = true
   } catch (error) {
+    if (!requestIsCurrent()) { console.error(error); return }
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
-    backupBusy.value = false
+    if (requestIsCurrent()) backupBusy.value = false
   }
 }
 
 async function importUnifiedBackup() {
-  if (backupBusy.value || !backupData.value) return
+  if (backupDisposed || backupBusy.value || !backupData.value) return
+  const generation = ++backupImportGeneration
+  const requestIsCurrent = () => !backupDisposed && generation === backupImportGeneration
+  backupWriteGeneration = generation
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
@@ -470,6 +513,23 @@ async function importUnifiedBackup() {
   let profilesNeedRefresh = false
   let playlistsNeedRefresh = false
   try {
+    if (process.env.IS_ELECTRON) {
+      const result = await DBLibraryHandlers.query('importApply', { id: data.id, sections: [...selected] })
+      for (const [section, reason] of [['profiles', 'profilesOrSubscriptions'], ['playlists', 'playlists'], ['history', 'history'], ['watchStats', 'watchStats']]) {
+        if (selected.has(section)) store.dispatch('scheduleSyncServer', reason).catch(console.error)
+      }
+      if (requestIsCurrent()) closeBackupImport()
+      try {
+        await Promise.all([
+          ...(result.settings ? [applyImportedSettings(result.settings)] : []),
+          ...['grabAllProfiles', 'grabAllPlaylists', 'grabHistory', 'grabWatchStats', 'grabSearchHistoryEntries'].map(action => store.dispatch(action))
+        ])
+      } catch (error) {
+        console.error('Backup applied; refresh failed', error)
+      }
+      if (requestIsCurrent()) showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
+      return
+    }
     // Portable playlist readers require structured member arrays.
     // Reject unsupported selected playlists before any write; desktop restores them exactly.
     if (selected.has('playlists') && data.playlists.some(playlist => !Array.isArray(playlist.videos) || playlist.videos.some(video => video === null || typeof video !== 'object' || Array.isArray(video) || video instanceof Date))) {
@@ -536,13 +596,15 @@ async function importUnifiedBackup() {
     }
     if (selected.has('settings')) await applyImportedSettings(data.settings)
     const compaction = await compactAllDatastores().catch(() => false)
+    if (!requestIsCurrent()) return
     closeBackupImport()
     showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
     if (compaction !== true && (!Array.isArray(compaction) || compaction.some(result => result.status === 'rejected'))) {
       showToast({ message: t('Settings.Storage Settings.Cleanup Failed'), icon: ['fas', 'circle-exclamation'] })
     }
   } catch (error) {
-    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    if (!requestIsCurrent()) { console.error(error); return }
+    showToast({ message: `${t('Settings.Data Settings.Import Failed')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
     // Separate portable stores may have committed earlier records before a
     // later conditional write fails. Publish those records on the error path.
@@ -551,7 +613,10 @@ async function importUnifiedBackup() {
       ...(playlistsNeedRefresh ? ['grabAllPlaylists'] : []),
     ].map(refreshRestored))
     for (const result of refreshes) if (result.status === 'rejected') console.error(result.reason)
-    backupBusy.value = false
+    if (backupWriteGeneration === generation) {
+      backupWriteGeneration = null
+      backupBusy.value = false
+    }
   }
 }
 
@@ -810,7 +875,12 @@ async function importSubscriptions() {
   } else if (filename.endsWith('.db')) {
     const records = parseImportedLineDelimitedJson(content)
     if (records !== null) {
-      importFreeTubeSubscriptions(records)
+      try {
+        await importFreeTubeSubscriptions(records)
+      } catch (error) {
+        console.error(error)
+        showToast({ message: t('Settings.Data Settings.Import Failed'), icon: ['fas', 'circle-exclamation'] })
+      }
     }
   } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
     await importOpmlYouTubeSubscriptions(content)
@@ -920,7 +990,11 @@ function convertOldFreeTubeFormatToNew(oldData) {
 /**
  * @param {unknown[]} profileRecords
  */
-function importFreeTubeSubscriptions(profileRecords) {
+async function importFreeTubeSubscriptions(profileRecords) {
+  async function saveProfile(action, profile) {
+    if (!await store.dispatch(action, profile)) throw new Error('Could not persist imported profile')
+  }
+
   const firstEntry = profileRecords[0]
   if (
     isJsonObject(firstEntry) &&
@@ -945,18 +1019,19 @@ function importFreeTubeSubscriptions(profileRecords) {
     'icon'
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
-  const updatedPrimaryProfile = primaryProfile.value
+  const importedProfiles = []
+  const updatedPrimaryProfile = process.env.IS_ELECTRON ? null : { ...profileList.value[0], subscriptions: [...profileList.value[0].subscriptions] }
   let shouldUpdatePrimaryProfile = false
 
-  profileRecords.forEach((profileData) => {
-    // We would technically already be done by the time the data is parsed,
-    // however we want to limit the possibility of malicious data being sent
-    // to the app, so we'll only grab the data we need here.
+  for (const profileData of profileRecords) {
+    // Desktop keeps all valid legacy fields for lossless import. The staging
+    // serializer rejects invalid NeDB keys before touching the live library.
+    // Portable storage retains its existing allowlist behavior.
 
     if (!isJsonObject(profileData)) {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
-      return
+      continue
     }
 
     const profileObject = {}
@@ -974,6 +1049,10 @@ function importFreeTubeSubscriptions(profileRecords) {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
+      if (process.env.IS_ELECTRON) {
+        importedProfiles.push(profileObject)
+        continue
+      }
       if (profileObject._id === MAIN_PROFILE_ID) {
         if (Object.hasOwn(profileObject, 'icon')) {
           updatedPrimaryProfile.icon = profileObject.icon
@@ -984,7 +1063,7 @@ function importFreeTubeSubscriptions(profileRecords) {
         })
 
         if (existingProfileIndex !== -1) {
-          const existingProfile = deepCopy(profileList.value[existingProfileIndex])
+          const existingProfile = { ...profileList.value[existingProfileIndex] }
           if (Object.hasOwn(profileObject, 'icon')) {
             existingProfile.icon = profileObject.icon
           }
@@ -996,7 +1075,7 @@ function importFreeTubeSubscriptions(profileRecords) {
 
             return profileIndex === index
           })
-          store.dispatch('updateProfile', existingProfile)
+          await saveProfile('updateProfile', existingProfile)
         } else {
           const hasProfileIdCollision = profileList.value.some((profile) => {
             return profile._id === profileObject._id
@@ -1005,9 +1084,9 @@ function importFreeTubeSubscriptions(profileRecords) {
           if (hasProfileIdCollision) {
             const newProfile = { ...profileObject }
             delete newProfile._id
-            store.dispatch('createProfile', newProfile)
+            await saveProfile('createProfile', newProfile)
           } else {
-            store.dispatch('updateProfile', profileObject)
+            await saveProfile('updateProfile', profileObject)
           }
         }
       }
@@ -1022,13 +1101,17 @@ function importFreeTubeSubscriptions(profileRecords) {
       })
       shouldUpdatePrimaryProfile = true
     }
-  })
-
-  if (!shouldUpdatePrimaryProfile) {
-    return
   }
 
-  store.dispatch('updateProfile', updatedPrimaryProfile)
+  if (process.env.IS_ELECTRON) {
+    if (!importedProfiles.length) return
+    await DBLibraryHandlers.query('importSubscriptionProfiles', { profiles: importedProfiles })
+    store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
+    await store.dispatch('grabAllProfiles')
+  } else {
+    if (!shouldUpdatePrimaryProfile) return
+    await saveProfile('updateProfile', updatedPrimaryProfile)
+  }
 
   showToast({
     message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
@@ -1465,13 +1548,14 @@ const exportWatchSearchHistoryPromptNames = computed(() => [
 
 // #region watch history
 
-const historyCacheById = computed(() => {
-  return store.getters.getHistoryCacheById
-})
-
-const historyCacheSorted = computed(() => {
-  return store.getters.getHistoryCacheSorted
-})
+async function runDataImport(importData) {
+  try {
+    await importData()
+  } catch (error) {
+    console.error(error)
+    showToast({ message: `${t('Settings.Data Settings.Import Failed')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  }
+}
 
 async function importWatchHistory() {
   let response
@@ -1500,7 +1584,7 @@ async function importWatchHistory() {
   if (filename.endsWith('.db')) {
     const records = parseImportedLineDelimitedJson(content)
     if (records !== null) {
-      importFreeTubeWatchHistory(records)
+      await importFreeTubeWatchHistory(records)
     }
   } else if (filename.endsWith('.json')) {
     const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
@@ -1509,9 +1593,9 @@ async function importWatchHistory() {
     }
 
     if (isLibreTubeWatchHistoryBackup(jsonContent)) {
-      importLibreTubeWatchHistory(jsonContent)
+      await importLibreTubeWatchHistory(jsonContent)
     } else if (Array.isArray(jsonContent)) {
-      importYouTubeWatchHistory(jsonContent)
+      await importYouTubeWatchHistory(jsonContent)
     } else {
       showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
     }
@@ -1551,8 +1635,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
     'paid',
   ]
 
-  // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  const historyItems = []
   let importedCount = 0
 
   historyRecords.forEach((historyData) => {
@@ -1569,15 +1652,14 @@ async function importFreeTubeWatchHistory(historyRecords) {
       return
     }
 
-    const historyObject = {}
+    const historyObject = process.env.IS_ELECTRON ? { ...historyData } : {}
 
     Object.keys(historyData).forEach((key) => {
       if (requiredKeys.includes(key) || optionalKeys.includes(key)) {
         historyObject[key] = historyData[key]
-      } else if (!ignoredKeys.includes(key)) {
+      } else if (!process.env.IS_ELECTRON && !ignoredKeys.includes(key)) {
         showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
       }
-      // Else do not import the key
     })
 
     const historyObjectKeysSet = new Set(Object.keys(historyObject))
@@ -1592,7 +1674,7 @@ async function importFreeTubeWatchHistory(historyRecords) {
       // FreeTube history export does not have this data if the video was marked as watched manually, setting default value
       historyObject.description = historyObject.description ?? ''
 
-      historyItems.set(historyObject.videoId, historyObject)
+      historyItems.push(historyObject)
       importedCount++
     }
   })
@@ -1601,7 +1683,10 @@ async function importFreeTubeWatchHistory(historyRecords) {
     return
   }
 
-  await store.dispatch('overwriteHistory', historyItems)
+  if (process.env.IS_ELECTRON) await importLibraryRecords('history', historyItems)
+  else if (!await store.dispatch('overwriteHistory', mergeBackupHistory(await DBHistoryHandlers.find(), historyItems))) {
+    throw new Error('Unable to import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -1618,7 +1703,7 @@ async function importLibreTubeWatchHistory(backupData) {
     return
   }
 
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  const historyItems = new Map()
   const {
     historyItems: convertedHistoryItems,
     importedCount,
@@ -1640,7 +1725,10 @@ async function importLibreTubeWatchHistory(backupData) {
     })
   }
 
-  await store.dispatch('overwriteHistory', convertedHistoryItems)
+  if (process.env.IS_ELECTRON) await importLibraryRecords('history', [...convertedHistoryItems.values()])
+  else if (!await store.dispatch('overwriteHistory', mergeBackupHistory(await DBHistoryHandlers.find(), [...convertedHistoryItems.values()]))) {
+    throw new Error('Unable to import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -1659,10 +1747,12 @@ async function importYouTubeWatchHistory(historyData) {
   if (skipped > 0) {
     showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
   }
-  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
-  for (const entry of entries) historyItems.set(entry.videoId, entry)
+  const historyItems = new Map(entries.map(entry => [entry.videoId, entry]))
 
-  await store.dispatch('overwriteHistory', historyItems)
+  if (process.env.IS_ELECTRON) await importLibraryRecords('history', [...historyItems.values()])
+  else if (!await store.dispatch('overwriteHistory', mergeBackupHistory(await DBHistoryHandlers.find(), [...historyItems.values()]))) {
+    throw new Error('Unable to import history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All watched history has been successfully imported'),
@@ -1689,7 +1779,16 @@ async function exportWatchHistory(option) {
 }
 
 async function exportFreeTubeWatchHistory() {
-  const historyDb = historyCacheSorted.value.map((historyEntry) => {
+  if (process.env.IS_ELECTRON) {
+    try {
+      const saved = await writeLibraryBackup({}, `opentubex-watch-history-${getTodayDateStrLocalTimezone()}.db`, t('Settings.Data Settings.History File'), 'data-settings-export', START_IN_DIRECTORY, { format: 'ndjson', collection: 'history' })
+      if (saved) showToast({ message: t('Settings.Data Settings.All watched history has been successfully exported'), icon: ['fas', 'check'] })
+    } catch (error) {
+      showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    }
+    return
+  }
+  const historyDb = (await DBHistoryHandlers.find()).map((historyEntry) => {
     return JSON.stringify(historyEntry)
   }).join('\n') + '\n'
   const dateStr = getTodayDateStrLocalTimezone()
@@ -1706,7 +1805,16 @@ async function exportFreeTubeWatchHistory() {
 }
 
 async function exportYouTubeWatchHistory() {
-  const historyData = historyCacheSorted.value.map((entry) => {
+  if (process.env.IS_ELECTRON) {
+    try {
+      const saved = await writeLibraryBackup({}, `youtube-watch-history-${getTodayDateStrLocalTimezone()}.json`, t('Settings.Data Settings.History File'), 'data-settings-export', START_IN_DIRECTORY, { format: 'youtubeHistory' })
+      if (saved) showToast({ message: t('Settings.Data Settings.All watched history has been successfully exported'), icon: ['fas', 'check'] })
+    } catch (error) {
+      showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    }
+    return
+  }
+  const historyData = (await DBHistoryHandlers.find()).map((entry) => {
     return {
       header: 'YouTube',
       title: `Watched ${entry.title}`,
@@ -1742,27 +1850,16 @@ async function exportYouTubeWatchHistory() {
 
 // #region playlists
 
-const allPlaylists = computed(() => store.getters.getAllPlaylists)
-
 async function importTakeoutPlaylist(playlist) {
-  const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
-  if (existing === undefined) {
-    if (await store.dispatch('addPlaylist', playlist) !== true) {
-      throw new Error('Unable to save playlist')
-    }
-  } else {
-    const videos = deepCopy(existing.videos)
-    const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))
-    for (const video of playlist.videos) {
-      const key = `${video.videoId}:${video.timeAdded}`
-      if (!known.has(key)) {
-        processToBeAddedPlaylistVideo(video)
-        videos.push(video)
-        known.add(key)
-      }
-    }
-    await store.dispatch('importPlaylist', { createdAt: existing.createdAt, lastUpdatedAt: Date.now(), ...playlist, _id: existing._id, videos })
-  }
+  await importTakeoutPlaylistWithStorage(playlist, process.env.IS_ELECTRON
+    ? { importRecords: importLibraryRecords, find: DBPlaylistHandlers.find }
+    : {
+        find: () => DBPlaylistHandlers.find(),
+        create: async playlist => {
+          if (await store.dispatch('addPlaylist', playlist) !== true) throw new Error('Unable to save playlist')
+        },
+        update: playlist => store.dispatch('updatePlaylist', playlist),
+      })
 }
 
 async function normalizeImportedPlaylistThumbnail(playlist) {
@@ -1777,6 +1874,7 @@ async function normalizeImportedPlaylistThumbnail(playlist) {
 }
 
 async function importPlaylists() {
+  const existingPlaylists = process.env.IS_ELECTRON ? [] : await DBPlaylistHandlers.find()
   let response
   try {
     response = await readFileWithPicker(
@@ -1875,6 +1973,14 @@ async function importPlaylists() {
   ]
 
   const newPlaylists = []
+  const existingByName = new Map()
+  if (process.env.IS_ELECTRON && playlists.some(playlist => isJsonObject(playlist) && playlist._id == null)) {
+    for (const playlist of await DBLibraryHandlers.query('playlistSummaries')) {
+      if (!playlist.protected && !['favorites', 'watchLater'].includes(playlist._id) && !existingByName.has(playlist.playlistName)) {
+        existingByName.set(playlist.playlistName, playlist._id)
+      }
+    }
+  }
   let importedCount = 0
 
   for (const playlistData of playlists) {
@@ -1892,7 +1998,9 @@ async function importPlaylists() {
       return
     }
 
-    const playlistObject = {}
+    const playlistObject = process.env.IS_ELECTRON
+      ? Object.fromEntries(Object.entries(playlistData).filter(([key]) => !ignoredKeys.includes(key)))
+      : {}
     const videoIdToBeAddedSet = new Set()
     let countRequiredKeysPresent = 0
 
@@ -1939,7 +2047,16 @@ async function importPlaylists() {
 
     importedCount++
 
-    const existingPlaylist = allPlaylists.value.find((playlist) => {
+    if (process.env.IS_ELECTRON) {
+      if (playlistObject._id == null) {
+        playlistObject._id = existingByName.get(playlistObject.playlistName) ?? crypto.randomUUID()
+        existingByName.set(playlistObject.playlistName, playlistObject._id)
+      }
+      newPlaylists.push(playlistObject)
+      return
+    }
+
+    const existingPlaylist = existingPlaylists.find((playlist) => {
       if (playlistObject._id != null && playlist._id === playlistObject._id) {
         return true
       }
@@ -2018,7 +2135,8 @@ async function importPlaylists() {
   }
 
   if (newPlaylists.length > 0) {
-    store.dispatch('addPlaylists', newPlaylists)
+    if (process.env.IS_ELECTRON) await importLibraryRecords('playlists', newPlaylists)
+    else await store.dispatch('addPlaylists', newPlaylists)
   }
 
   showToast({
@@ -2028,10 +2146,19 @@ async function importPlaylists() {
 }
 
 async function exportPlaylists() {
+  if (process.env.IS_ELECTRON) {
+    try {
+      const saved = await writeLibraryBackup({}, `opentubex-playlists-${getTodayDateStrLocalTimezone()}.db`, t('Settings.Data Settings.Playlist File'), 'data-settings-export', START_IN_DIRECTORY, { format: 'ndjson', collection: 'playlists' })
+      if (saved) showToast({ message: t('Settings.Data Settings.All playlists has been successfully exported'), icon: ['fas', 'check'] })
+    } catch (error) {
+      showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+    }
+    return
+  }
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'opentubex-playlists-' + dateStr + '.db'
 
-  const playlistsDb = allPlaylists.value.map(playlist => {
+  const playlistsDb = (await DBPlaylistHandlers.find()).map(playlist => {
     return JSON.stringify(playlist)
   }).join('\n') + '\n'
 
@@ -2081,10 +2208,10 @@ async function importSearchHistory() {
   if (filename.endsWith('.db')) {
     const records = parseImportedLineDelimitedJson(content)
     if (records !== null) {
-      importFreeTubeSearchHistory(records)
+      await importFreeTubeSearchHistory(records)
     }
   } else if (filename.endsWith('.json')) {
-    importYouTubeSearchHistory(JSON.parse(content))
+    await importYouTubeSearchHistory(JSON.parse(content))
   }
 }
 
@@ -2093,7 +2220,7 @@ async function importSearchHistory() {
  */
 async function importFreeTubeSearchHistory(searchHistoryRecords) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const currentEntries = deepCopy(searchHistoryEntries.value)
+  const currentEntries = process.env.IS_ELECTRON ? [] : deepCopy(searchHistoryEntries.value)
   const importedEntries = []
 
   searchHistoryRecords.forEach((entry) => {
@@ -2105,6 +2232,7 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
       console.error('Missing keys:', entry)
     } else {
       importedEntries.push(normalizeSearchHistoryEntry({
+        ...(process.env.IS_ELECTRON ? entry : {}),
         _id: entry._id,
         query: typeof entry.query === 'string' ? entry.query : entry._id,
         lastUpdatedAt: entry.lastUpdatedAt,
@@ -2119,7 +2247,12 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
 
   const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
-  await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
+  if (process.env.IS_ELECTRON) {
+    await importLibraryRecords('searchHistory', importedEntries)
+    await store.dispatch('grabSearchHistoryEntries')
+  } else if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),
@@ -2132,7 +2265,7 @@ async function importFreeTubeSearchHistory(searchHistoryRecords) {
  */
 async function importYouTubeSearchHistory(historyData) {
   // deep copy so we don't get errors from Electron when we try to pass reactive objects through the IPC channels
-  const currentEntries = deepCopy(searchHistoryEntries.value)
+  const currentEntries = process.env.IS_ELECTRON ? [] : deepCopy(searchHistoryEntries.value)
   const { entries: importedEntries, skipped } = parseTakeoutSearchHistory(historyData)
   if (skipped > 0) {
     showToast({ message: t('Settings.Data Settings.History object has insufficient data, skipping item'), icon: ['fas', 'circle-exclamation'] })
@@ -2140,7 +2273,12 @@ async function importYouTubeSearchHistory(historyData) {
 
   const newSearchHistoryEntries = mergeSearchHistoryEntries(currentEntries, importedEntries)
 
-  await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
+  if (process.env.IS_ELECTRON) {
+    await importLibraryRecords('searchHistory', importedEntries)
+    await store.dispatch('grabSearchHistoryEntries')
+  } else if (await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries) !== true) {
+    throw new Error('Could not import search history')
+  }
 
   showToast({
     message: t('Settings.Data Settings.All search history has been successfully imported'),

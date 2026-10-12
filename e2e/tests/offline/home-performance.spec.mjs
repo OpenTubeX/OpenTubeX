@@ -14,13 +14,15 @@ test.use({
 })
 
 async function settleSeededHistory(page) {
+  await expect(page.locator('.ft-list-video').first()).toContainText('Linux desktop customization')
+  await expect(page.locator('.historySearchLoader')).toHaveCount(0)
   await page.evaluate(() => new Promise(resolve => {
     requestAnimationFrame(() => requestAnimationFrame(resolve))
   }))
 }
 
 async function seedLargeHistory(page) {
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     const now = Date.now()
     const history = Array.from({ length: 45000 }, (_, index) => ({
@@ -34,8 +36,7 @@ async function seedLargeHistory(page) {
       isWatched: false,
       type: 'video',
     }))
-    store.commit('setHistoryCacheSorted', history)
-    store.commit('setHistoryCacheById', Object.fromEntries(history.map(video => [video.videoId, video])))
+    await store.dispatch('overwriteHistory', history)
     store.commit('setEnableHomeRecommendations', true)
   })
 }

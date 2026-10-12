@@ -202,8 +202,10 @@ const actions = {
     try {
       const newProfile = await DBProfileHandlers.create(profile)
       commit('addProfileToList', newProfile)
+      return newProfile
     } catch (errMessage) {
       console.error(errMessage)
+      return null
     }
   },
 

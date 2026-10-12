@@ -1,6 +1,13 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
 import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
+import { join } from 'node:path'
+import model from '@seald-io/nedb/lib/model.js'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
+
+async function persistedSubscriptionCache(app) {
+  return (await readPersistedDatastore(join(app.userDataDir, 'subscription-cache.db'), 'utf8')).trim().split('\n').map(line => model.deserialize(line))
+}
 
 const now = Date.now()
 const HOUR = 3600000
@@ -145,11 +152,11 @@ test.describe('Reactive subscription title filtering', () => {
       await expect(page.getByText('New short', { exact: true })).toBeVisible()
       await expect(entries).toHaveCount(100)
       for (const title of ['Blocked updated short', 'Allowed updated short']) {
-        await page.evaluate(({ channelId, title }) => {
+        await page.evaluate(async ({ channelId, title }) => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          const entry = store.state.subscriptionCache.shortsCache[channelId].videos[0]
-          store.commit('updateShortsCacheWithChannelPageShorts', {
-            channelId, entries: [{ ...entry, title }]
+          const entry = await window.ftElectron.libraryQuery('subscriptionEntry', { videoId: 'new-short-1' })
+          await store.dispatch('updateSubscriptionShortsCacheWithChannelPageShorts', {
+            channelId, videos: [{ ...entry, title }]
           })
         }, { channelId: CHANNEL_ID, title })
         // Parent filtering must refill the page, not just hide the blocked card.
@@ -510,12 +517,9 @@ test.describe('new subscriptions feed', () => {
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
 
     await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      window.__markSeenMutations = []
-      window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
-        if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
-          window.__markSeenMutations.push(mutation.payload)
-        }
+      window.seenSyncReasons = []
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.subscribeAction(action => {
+        if (action.type === 'scheduleSyncServer') window.seenSyncReasons.push(action.payload)
       })
     })
 
@@ -526,16 +530,11 @@ test.describe('new subscriptions feed', () => {
     await page.locator('[data-new-feed-tab="shorts"]').click()
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
-    expect(await page.evaluate(() => {
-      window.__unsubscribeMarkSeen()
-      return window.__markSeenMutations
-    })).toEqual([[
-      {
-        tab: 'videos',
-        channelId: CHANNEL_ID,
-        entries: [{ videoId: newVideo.videoId, isMembersOnly: false, isNewInSubscriptionFeed: false }]
-      }
-    ]])
+    const [unmarked] = await page.evaluate(channelId => window.ftElectron.libraryQuery('subscriptionEntries', { channelId, field: 'shorts', ids: ['new-short-1'] }), CHANNEL_ID)
+    expect(unmarked.isNewInSubscriptionFeed).toBe(true)
+    const [marked] = await page.evaluate(channelId => window.ftElectron.libraryQuery('subscriptionEntries', { channelId, field: 'videos', ids: ['new-video-1'] }), CHANNEL_ID)
+    expect(marked.isNewInSubscriptionFeed).toBe(false)
+    expect(await page.evaluate(() => window.seenSyncReasons.filter(reason => reason === 'history'))).toStrictEqual(['history'])
   })
 
   test('shows category dots and marks an inactive category as seen from its context menu', async ({ page }) => {
@@ -655,20 +654,20 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('New video', { exact: true })).toBeVisible()
-    await page.evaluate(channelId => {
+    await page.evaluate(async ({ channelId, videos }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const video = store.state.subscriptionCache.videoCache[channelId].videos[0]
-      video.title = 'Updated new video'
-      video.viewCount = 42
-    }, CHANNEL_ID)
+      await store.dispatch('updateSubscriptionVideosCacheByChannel', { channelId, videos, timestamp: new Date() })
+      if (store.state.subscriptionCache.videoCache[channelId].videos.length) throw new Error('Full feed entered reactive state')
+    }, { channelId: CHANNEL_ID, videos: populatedCache[0].videos.map((entry, index) => index ? entry : { ...entry, title: 'Updated new video', viewCount: 42 }) })
     await expect(page.getByText('Updated new video', { exact: true })).toBeVisible()
     await expect(page.locator('.ft-list-video').filter({ hasText: 'Updated new video' }).locator('.viewCount')).toContainText('42')
 
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
-    await page.evaluate(channelId => {
+    await page.evaluate(async channelId => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.state.subscriptionCache.shortsCache[channelId].videos[0].title = 'Updated short'
+      const entry = await window.ftElectron.libraryQuery('subscriptionEntry', { videoId: 'new-short-1' })
+      await store.dispatch('updateSubscriptionShortsCacheWithChannelPageShorts', { channelId, videos: [{ ...entry, title: 'Updated short' }] })
     }, CHANNEL_ID)
     await expect(page.getByText('Updated short', { exact: true })).toBeVisible()
   })
@@ -1203,26 +1202,25 @@ test.describe('new feed settings and seen state', () => {
 
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
-    await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      window.__markSeenMutations = []
-      window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
-        if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
-          window.__markSeenMutations.push(mutation.payload)
-        }
-      })
-    })
     await markAllAsSeen.click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
-    expect(await page.evaluate(() => {
-      window.__unsubscribeMarkSeen()
-      return window.__markSeenMutations.map(batch => batch.map(({ tab, channelId }) => ({ tab, channelId })))
-    })).toEqual([[
-      { tab: 'videos', channelId: CHANNEL_ID },
-      { tab: 'shorts', channelId: CHANNEL_ID },
-      { tab: 'live', channelId: CHANNEL_ID },
-      { tab: 'posts', channelId: CHANNEL_ID }
-    ]])
+    const persisted = await page.evaluate(async ({ channelId, fields }) => {
+      return Promise.all(fields.map(async ({ field, ids }) => {
+        const entries = await window.ftElectron.libraryQuery('subscriptionEntries', { channelId, field, ids })
+        return { count: entries.length, allSeen: entries.every(entry => entry.isNewInSubscriptionFeed === false) }
+      }))
+    }, {
+      channelId: CHANNEL_ID,
+      fields: ['videos', 'shorts', 'liveStreams', 'communityPosts'].map(field => ({
+        field, ids: cacheWithVideoPost[0][field].map(entry => entry.videoId).filter(Boolean)
+      })).filter(({ field }) => field !== 'communityPosts')
+    })
+    expect(persisted).toEqual(['videos', 'shorts', 'liveStreams'].map(field => ({ count: cacheWithVideoPost[0][field].length, allSeen: true })))
+    const persistedPosts = await page.evaluate(async ids => {
+      const entries = await Promise.all(ids.map(postId => window.ftElectron.libraryQuery('subscriptionEntry', { postId })))
+      return entries.every(entry => entry.isNewInSubscriptionFeed === false)
+    }, cacheWithVideoPost[0].communityPosts.map(entry => entry.postId))
+    expect(persistedPosts).toBe(true)
     await expect(markAllAsSeen).toHaveCount(0)
 
     const relaunched = await app.relaunch()
@@ -1706,16 +1704,16 @@ test.describe('large combined new feed', () => {
       if (reducedMotion === 'off') {
         test('keeps entries arriving during the removal animation unseen', async ({ page, app }) => {
           await goTo(page, 'subscriptions')
-          await page.evaluate(async channelId => {
+          await page.evaluate(async ({ channelId, videos }) => {
             const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
             await store.dispatch('updateSubscriptionVideosCacheByChannel', {
               channelId,
-              videos: store.getters.getVideoCache[channelId].videos.map(entry => entry.videoId === 'new-video-1'
+              videos: videos.map(entry => entry.videoId === 'new-video-1'
                 ? { ...entry, isMembersOnly: true }
                 : entry),
               timestamp: new Date()
             })
-          }, CHANNEL_ID)
+          }, { channelId: CHANNEL_ID, videos: (await persistedSubscriptionCache(app)).find(record => record._id === CHANNEL_ID).videos })
           await page.locator('[data-subscription-feed-tab="all"]').click()
           await expect(page.getByText('New video 0', { exact: true })).toBeVisible()
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeVisible()
@@ -1734,17 +1732,17 @@ test.describe('large combined new feed', () => {
           })
           await expect.poll(() => page.evaluate(() => !!window.__markSeenAnimation)).toBe(true)
           // Apply the same cache writes as a refresh while removal is paused.
-          await page.evaluate(async ({ channelId, incoming }) => {
+          await page.evaluate(async ({ channelId, incoming, cache }) => {
             const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-            for (const [getter, action, field, entry] of [
-              ['getVideoCache', 'updateSubscriptionVideosCacheByChannel', 'videos', incoming.video],
-              ['getShortsCache', 'updateSubscriptionShortsCacheByChannel', 'videos', incoming.short],
-              ['getLiveCache', 'updateSubscriptionLiveCacheByChannel', 'videos', incoming.live],
-              ['getPostsCache', 'updateSubscriptionPostsCacheByChannel', 'posts', incoming.post]
+            for (const [cacheField, action, field, entry] of [
+              ['videos', 'updateSubscriptionVideosCacheByChannel', 'videos', incoming.video],
+              ['shorts', 'updateSubscriptionShortsCacheByChannel', 'videos', incoming.short],
+              ['liveStreams', 'updateSubscriptionLiveCacheByChannel', 'videos', incoming.live],
+              ['communityPosts', 'updateSubscriptionPostsCacheByChannel', 'posts', incoming.post]
             ]) {
               await store.dispatch(action, {
                 channelId,
-                [field]: [entry, ...store.getters[getter][channelId][field].map(item => item.videoId === 'new-video-1'
+                [field]: [entry, ...cache[cacheField].map(item => item.videoId === 'new-video-1'
                   ? { ...item, isMembersOnly: false, title: 'Newly public upload' }
                   : item)],
                 timestamp: new Date()
@@ -1753,6 +1751,7 @@ test.describe('large combined new feed', () => {
             window.__markSeenAnimation.finish()
           }, {
             channelId: CHANNEL_ID,
+            cache: (await persistedSubscriptionCache(app)).find(record => record._id === CHANNEL_ID),
             incoming: {
               video: video('arrived-video', 'Video arriving during removal', now, { isNewInSubscriptionFeed: true }),
               short: video('arrived-short', 'Short arriving during removal', now, { isNewInSubscriptionFeed: true }),
@@ -1764,14 +1763,8 @@ test.describe('large combined new feed', () => {
           await expect(page.getByText('Newly public upload', { exact: true })).toBeVisible()
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
           await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
-          expect(await page.evaluate(() => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-            return ['getVideoCache', 'getShortsCache', 'getLiveCache', 'getPostsCache'].map(getter => {
-              const cache = store.getters[getter]
-              const entry = Object.values(cache)[0]
-              return (entry.videos ?? entry.posts).map(item => item.isNewInSubscriptionFeed)
-            })
-          })).toEqual([
+          const cache = (await persistedSubscriptionCache(app)).find(record => record._id === CHANNEL_ID)
+          expect(['videos', 'shorts', 'liveStreams', 'communityPosts'].map(field => cache[field].map(item => item.isNewInSubscriptionFeed))).toEqual([
             [true, false, true, ...Array(118).fill(false)],
             [true, ...Array(24).fill(view === 'tabbed')],
             [true, view === 'tabbed'],

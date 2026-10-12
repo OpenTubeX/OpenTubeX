@@ -10,12 +10,13 @@ import { getOtherDeviceSessions, normalizeSyncSessionsDocument, removeSyncDevice
 const component = await readFile(new URL('../../src/renderer/components/SyncSettings/SyncAccountManagement.vue', import.meta.url), 'utf8')
 const revokeSource = component.slice(component.indexOf('function openRevokePrompt('), component.indexOf('\ndefineExpose'))
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const snapshotSource = storeSource.slice(storeSource.indexOf('async function saveSnapshotSection('), storeSource.indexOf('\nasync function clearUnsupportedWatchStats('))
 const deleteStart = storeSource.indexOf('  deleteSyncServerSession(')
 const deleteSource = storeSource.slice(deleteStart, storeSource.indexOf('  async completeSyncServerPairing', deleteStart))
 
 const tabSet = id => ({ sessionId: id, tabs: [{ id: `${id}-tab`, url: '/subscriptions' }] })
 
-async function fixture({ current = false, alreadyRevoked = false, releasedUploadDuringRevoke = false, postCleanupFailsOnce = false, otherLoginAfterRevoke = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false } = {}) {
+async function fixture({ current = false, alreadyRevoked = false, releasedUploadDuringRevoke = false, postCleanupFailsOnce = false, otherLoginAfterRevoke = false, conflict = false, cleanupFails = false, cleanupFailsOnce = false, otherLogin = false, otherLoginExpires = false, otherLoginDuringCleanup = false, otherLoginAfterConflict = false, cleanupAccountResponse, accountResponse, revokeFailsOnce = false, revokeResponseLost = false, snapshotRace } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   let remote = normalizeSyncSessionsDocument({ devices: {
@@ -43,7 +44,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     else if (actions[name]) return actions[name](context, value)
     else assert.fail(`Unexpected action: ${name}`)
   } }
-  const actions = vm.runInNewContext(`({${deleteSource}})`, {
+  const actions = vm.runInNewContext(`${snapshotSource}\n({${deleteSource}})`, {
     SyncServerClient: class {
       async getAccountSessions() {
         if (cleanupAccountResponse !== undefined) return cleanupAccountResponse
@@ -70,8 +71,8 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
     ENCRYPTED_SYNC_RETRIES: 3, decryptSyncDocument, encryptSyncDocument, removeSyncDeviceSessions, removeSyncSession,
     normalizeSyncSessionsDocument,
     i18n: { global: { t: key => key } },
-    parseSnapshot: JSON.parse,
-    savedSnapshot: async settings => settings.syncServerSnapshot,
+    process: { env: { IS_ELECTRON: false } }, parseSnapshot: JSON.parse,
+    savedSnapshot: async settings => { if (snapshotRace) await snapshotRace(settings); return settings.syncServerSnapshot },
     getSavedOtherDeviceSessions: snapshot => getOtherDeviceSessions(snapshot.sessionsV2, settings.syncServerDeviceId),
     SyncServerCancelledError: class extends Error {}, isSessionExpiredError: () => false,
   })
@@ -129,7 +130,7 @@ async function fixture({ current = false, alreadyRevoked = false, releasedUpload
   return {
     revoke: () => componentContext.revokeSession(),
     disappear: () => { revoked = true },
-    state: () => ({ remote, visible, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value, revokeAttempts, reloads }),
+    state: () => ({ remote, visible, settings, revoked, puts, prompt: prompt.value, error: promptError.value, emitted, tabsWarning: revokeDeletesTabs.value, revokeAttempts, reloads }),
   }
 }
 
@@ -352,3 +353,20 @@ test('preserves a reconnect while finishing released-client cleanup after revoca
   assert.equal(app.state().revoked, true)
   assert.equal(app.state().remote.devices['old-phone'].sessions[0].sessionId, 'new-window')
 })
+
+for (const change of ['token', 'disabled', 'privacy key']) {
+  test(`session deletion does not overwrite a new account while reading its snapshot: ${change}`, async () => {
+    const replacement = JSON.stringify({ subscriptions: ['retained'], sessionsV2: { devices: {} } })
+    const app = await fixture({ snapshotRace: async settings => {
+      await Promise.resolve()
+      if (change === 'token') settings.syncServerToken = 'new-token'
+      else if (change === 'disabled') settings.syncServerEnabled = false
+      else settings.syncServerPrivacyKey = 'new-key'
+      settings.syncServerSnapshot = replacement
+    } })
+    const before = structuredClone(app.state().visible)
+    await app.revoke()
+    assert.equal(app.state().settings.syncServerSnapshot, replacement)
+    assert.deepEqual(app.state().visible, before)
+  })
+}

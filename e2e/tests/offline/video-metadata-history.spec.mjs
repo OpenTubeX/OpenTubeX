@@ -1,6 +1,6 @@
-import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { once } from 'node:events'
 import { createServer } from 'node:http'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { DBActions, IpcChannels } from '../../../src/constants.js'
@@ -38,6 +38,89 @@ test('shows metadata history after loading a video with a previously recorded ti
     .toContainText('Previously recorded title')
 })
 
+test('failed metadata revision reads retain their section and offer a lossless Retry', async ({ app, page }, testInfo) => {
+  await page.evaluate(() => window.ftElectron.videoMetadataCache.update({ videoId: 'jNQXAC9IVRw', title: 'Previously recorded title', description: '', thumbnailUrl: '' }))
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await expect.poll(async () => (await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))).records.length).toBe(1)
+  const original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const handler = ipcMain._invokeHandlers.get('library-query')
+    let fail = true
+    ipcMain.removeHandler('library-query')
+    ipcMain.handle('library-query', (event, request) => {
+      if (request.method === 'metadataPage' && request.data.field === 'title' && fail) { fail = false; throw new Error('simulated metadata revision read failure') }
+      return handler(event, request)
+    })
+  })
+  await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Metadata history' })
+  await expect(dialog.getByRole('heading', { name: 'Title History' })).toBeVisible()
+  const retry = dialog.getByRole('button', { name: 'Retry', exact: true })
+  await expect(retry).toBeVisible()
+  await dialog.screenshot({ path: testInfo.outputPath('metadata-history-read-retry.png') })
+  await retry.click()
+  await expect(retry).toHaveCount(0)
+  await expect(dialog).toContainText('Previously recorded title')
+  expect(await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'title' }))).toStrictEqual(original)
+})
+
+test.describe('metadata thumbnail read recovery', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, uiScale: 95 } } })
+  for (const fallback of [true, false]) {
+    test(`failed metadata thumbnail reads ${fallback ? 'offer a lossless Retry with a fallback URL' : 'offer a lossless Retry without a fallback'}`, async ({ app, page }, testInfo) => {
+      let revision = 0
+      const server = createServer((request, response) => {
+        response.writeHead(200, { 'content-type': 'image/png' })
+        response.end(THUMBNAILS[revision])
+      })
+      server.listen(0, '127.0.0.1')
+      await once(server, 'listening')
+      try {
+        const url = `http://127.0.0.1:${server.address().port}`
+        await page.evaluate(({ action, url }) => window.ftElectron.dbSettings(action, { _id: 'defaultInvidiousInstance', value: url }), { action: DBActions.GENERAL.UPSERT, url })
+        const metadata = { videoId: 'jNQXAC9IVRw', title: 'Recorded title', description: '', thumbnailUrl: `${url}/thumbnail.png` }
+        await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata)
+        revision = 1
+        await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata)
+        await mockPlayableWatchPage(app, page)
+        await openMockedVideo(page)
+        const original = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'thumbnail' }))
+        expect(original.records.length).toBeGreaterThan(0)
+        const expectedThumbnail = await page.evaluate(id => window.ftElectron.libraryQuery('metadataThumbnail', { id }), original.records[0].thumbnailRevisionId)
+        await app.electronApp.evaluate(({ ipcMain }, fallback) => {
+          const handler = ipcMain._invokeHandlers.get('library-query')
+          let fail = true
+          globalThis.restoreThumbnailRead = () => { fail = false }
+          ipcMain.removeHandler('library-query')
+          ipcMain.handle('library-query', async (event, request) => {
+            if (request.method === 'metadataThumbnail' && fail) throw new Error('simulated metadata thumbnail read failure')
+            const result = await handler(event, request)
+            if (!fallback && request.method === 'metadataPage' && request.data.field === 'thumbnail') return { ...result, records: result.records.map(record => ({ ...record, thumbnailUrl: null })) }
+            return result
+          })
+        }, fallback)
+        await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
+        const frame = page.getByRole('dialog', { name: 'Metadata history' }).locator('.metadataThumbnail').first()
+        const retry = frame.getByRole('button', { name: 'Retry', exact: true })
+        await expect(retry).toBeVisible()
+        await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveCount(0)
+        await page.getByRole('dialog', { name: 'Metadata history' }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-retry-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
+        await app.electronApp.evaluate(() => globalThis.restoreThumbnailRead())
+        await retry.click()
+        await expect(retry).toHaveCount(0)
+        await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveAttribute('src', expectedThumbnail)
+        await frame.screenshot({ path: testInfo.outputPath(`metadata-thumbnail-${fallback ? 'fallback' : 'retry'}.png`) })
+        const restored = await page.evaluate(() => window.ftElectron.libraryQuery('metadataPage', { videoId: 'jNQXAC9IVRw', field: 'thumbnail' }))
+        expect(restored).toStrictEqual(fallback ? original : { ...original, records: original.records.map(record => ({ ...record, thumbnailUrl: null })) })
+      } finally {
+        server.close()
+        await once(server, 'close')
+      }
+    })
+  }
+})
+
 test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) => {
   let revision = 0
   let requests = 0
@@ -70,9 +153,12 @@ test('detects a replaced thumbnail at the same cacheable URL', async ({ page }) 
       .toBeNull()
     revision = 1
     const history = await page.evaluate(metadata => window.ftElectron.videoMetadataCache.update(metadata), metadata)
-    expect(history?.revisions).toHaveLength(2)
+    expect(history?.revisionCount).toBe(2)
     expect(requests).toBe(2)
-    expect(history.revisions[0].thumbnail).not.toBe(history.revisions[1].thumbnail)
+    const previous = await page.evaluate(videoId => window.ftElectron.libraryQuery('metadataPage', { videoId, field: 'thumbnail' }), metadata.videoId)
+    expect(previous.records).toHaveLength(1)
+    const thumbnail = await page.evaluate(id => window.ftElectron.libraryQuery('metadataThumbnail', { id }), previous.records[0].thumbnailRevisionId)
+    expect(thumbnail).toBe(`data:image/png;base64,${THUMBNAILS[0].toString('base64')}`)
   } finally {
     thumbnailServer.close()
     await once(thumbnailServer, 'close')
@@ -153,11 +239,14 @@ test('stores and presents every previous metadata version', async ({ app, page }
         thumbnailUrl: `${thumbnailBaseUrl}/redirect.png`
       }
       await window.ftElectron.videoMetadataCache.update(redirectedMetadata)
-      const redirectedHistory = await window.ftElectron.videoMetadataCache.update({
+      await window.ftElectron.videoMetadataCache.update({
         ...redirectedMetadata,
         title: 'Redirect test changed'
       })
-      const privateRedirectRejected = redirectedHistory.revisions.every(revision => revision.thumbnail === null)
+      const redirectedPage = await window.ftElectron.libraryQuery('metadataPage', { videoId: 'redirect001', field: 'thumbnail' })
+      const privateRedirectRejected = (await Promise.all(redirectedPage.records.map(record =>
+        window.ftElectron.libraryQuery('metadataThumbnail', { id: record.thumbnailRevisionId })
+      ))).every(thumbnail => thumbnail === null)
       await window.ftElectron.videoMetadataCache.clear()
 
       const observedAt = Date.now() - 10_000

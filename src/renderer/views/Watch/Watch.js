@@ -104,6 +104,7 @@ import {
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
 import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
@@ -314,12 +315,18 @@ export default defineComponent({
       shortsTransitionDirection: 0,
       shortsViewportHeight: window.innerHeight,
       shortsPlaybackCompleted: false,
+      libraryShortsFeed: [],
+      libraryShortsScopeKey: null,
+      libraryShortsGeneration: 0,
+      libraryShortsRetryAbort: null,
       shortsCompletionBlockedBySeek: false,
       shortsPlaybackAfterSeekSeconds: 0,
       shortsPlaybackCache: markRaw(new ShortsPlaybackCache()),
       shortsPreloadGeneration: 0,
       shortsPlayerCacheGeneration: 0,
       videoLoadGeneration: 0,
+      historyHydratedVideoId: null,
+      pendingHistoryHydration: null,
       playerLoadGeneration: 0,
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
@@ -812,6 +819,23 @@ export default defineComponent({
     subscriptionShortsFeedActive: function () {
       return this.customShortsPlayerActive
     },
+    libraryShortsRequest: function () {
+      if (!process.env.IS_ELECTRON || !this.subscriptionShortsFeedActive || this.tabRoute.query.shortSource === 'channel') return null
+      return {
+        subscriptions: this.$store.getters.getActiveProfile.subscriptions.slice(),
+        currentVideoId: this.videoId,
+        revision: [this.$store.state.subscriptionCache.subscriptionVideosFeedVersion, this.$store.state.history.historyRevision],
+        preferences: {
+          hideLiveStreams: this.$store.getters.getHideLiveStreams,
+          hideUpcomingPremieres: this.$store.getters.getHideUpcomingPremieres,
+          forbiddenTitles: this.forbiddenTitles,
+          hideWatched: this.$store.getters.getHideWatchedSubs,
+          restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(this.$store.getters),
+          onlyShowLatestFromChannel: this.$store.getters.getOnlyShowLatestFromChannel,
+          onlyShowLatestFromChannelNumber: this.$store.getters.getOnlyShowLatestFromChannelNumber
+        }
+      }
+    },
     subscriptionShortsFeed: function () {
       if (!this.subscriptionShortsFeedActive) {
         return []
@@ -825,6 +849,8 @@ export default defineComponent({
         feed = getChannelShortsNavigationContext(
           this.tabRoute.query.shortChannelId
         )
+      } else if (process.env.IS_ELECTRON) {
+        feed = this.libraryShortsFeed.slice()
       } else {
         const maxPerChannel = this.$store.getters.getOnlyShowLatestFromChannel
           ? this.$store.getters.getOnlyShowLatestFromChannelNumber
@@ -1300,6 +1326,10 @@ export default defineComponent({
     }
   },
   watch: {
+    libraryShortsRequest: {
+      immediate: true,
+      handler(request) { return this.refreshLibraryShortsFeed(request) }
+    },
     downloadAvailable(available) {
       if (!available) this.showDownloadPrompt = false
     },
@@ -1490,6 +1520,8 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
+    this.libraryShortsGeneration++
+    this.libraryShortsRetryAbort?.abort()
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
@@ -1517,6 +1549,42 @@ export default defineComponent({
     }
   },
   methods: {
+    async refreshLibraryShortsFeed(request = this.libraryShortsRequest) {
+      const generation = ++this.libraryShortsGeneration
+      const scopeKey = request && JSON.stringify([
+        this.$store.getters.getActiveProfile._id,
+        request.currentVideoId,
+        (request.subscriptions ?? []).map(channel => [channel?.id, channel?.showMembersOnly]),
+        request.preferences
+      ])
+      if (scopeKey !== this.libraryShortsScopeKey) this.libraryShortsFeed = []
+      this.libraryShortsScopeKey = scopeKey
+      this.libraryShortsRetryAbort?.abort()
+      this.libraryShortsRetryAbort = null
+      if (!request) return
+      try {
+        const records = await DBLibraryHandlers.query('subscriptionShortsWindow', request)
+        if (generation === this.libraryShortsGeneration) this.libraryShortsFeed = records
+      } catch (error) {
+        if (generation !== this.libraryShortsGeneration) return
+        console.error(error)
+        this.libraryShortsRetryAbort = markRaw(new AbortController())
+        showToast({
+          message: this.t('Storage Startup Error.Title'),
+          icon: ['fas', 'circle-exclamation'],
+          time: Infinity,
+          abortSignal: this.libraryShortsRetryAbort.signal,
+          buttons: [{
+            label: this.t('Storage Startup Error.Retry'),
+            icon: ['fas', 'sync'],
+            primary: true,
+            action: () => {
+              if (generation === this.libraryShortsGeneration) return this.refreshLibraryShortsFeed()
+            }
+          }]
+        })
+      }
+    },
     openPhonePanel(panel) {
       this.mobilePanel = panel
       if (panel === 'chapters') this.showSidebarChapters = true
@@ -1555,6 +1623,34 @@ export default defineComponent({
         })
       }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
+      if (this.$store?.state?.history?.libraryPaged) return this.finishDownloadedPlaybackAfterHistoryHydration()
+      if (this.finishDownloadedPlaybackWithoutMetadata()) this.videoLoadGeneration++
+    },
+    async finishDownloadedPlaybackAfterHistoryHydration() {
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.tabRoute.params.id
+      // Metadata cancellation must not invalidate the saved-state read that
+      // protects downloaded playback. Reuse this load's existing request.
+      const hydration = this.pendingHistoryHydration
+      let ready
+      try {
+        if (hydration?.loadGeneration === loadGeneration && hydration.videoId === videoId) {
+          ready = await hydration.ready
+        } else {
+          if (this.historyHydratedVideoId !== videoId) await this.$store.dispatch('hydrateVideoState', [videoId])
+          ready = true
+        }
+      } catch (error) {
+        console.error('Could not hydrate library video state', error)
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          this.historyHydratedVideoId = null
+          this.isLoading = false
+          this.errorMessage = error.message || error.toString()
+        }
+        return
+      }
+      if (!ready || !this.isCurrentVideoLoad(loadGeneration, videoId) || !this.isOffline || !this.isLoading || this.localFilePlayback) return
+      this.historyHydratedVideoId = videoId
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
         // Ignore metadata responses that arrive after switching to the local file.
         this.videoLoadGeneration++
@@ -3333,10 +3429,38 @@ export default defineComponent({
       }
 
       const videoId = this.tabRoute.params.id
+      // Fetch saved state alongside networking, but apply metadata/playback
+      // only after hydration so existing progress and playlist context survive.
+      const historyReady = this.$store?.state?.history?.libraryPaged
+        ? this.$store.dispatch('hydrateVideoState', [videoId]).then(() => {
+            if (this.isCurrentVideoLoad(loadGeneration, videoId)) this.historyHydratedVideoId = videoId
+            return true
+          }, error => {
+            console.error('Could not hydrate library video state', error)
+            if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+              this.historyHydratedVideoId = null
+              this.isLoading = false
+              this.errorMessage = error.message || error.toString()
+            }
+            return false
+          })
+        : Promise.resolve(true)
+      this.pendingHistoryHydration = { loadGeneration, videoId, ready: historyReady }
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
-        if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        if (!await historyReady) return
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+        try {
+          if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        } catch (error) {
+          console.error(error)
+          if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+            this.isLoading = false
+            this.errorMessage = error.message || error.toString()
+          }
+          return
+        }
         // Keep the metadata request queued for reconnect instead of abandoning
         // the watch page with its loading skeleton still visible.
       }
@@ -3354,6 +3478,7 @@ export default defineComponent({
               shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
                 (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
             }))
+        if (!await historyReady) return
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         const {
@@ -4043,6 +4168,7 @@ export default defineComponent({
         this.updateTitle()
       } catch (err) {
         backendFailed = true
+        if (!await historyReady) return
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         let handledError = err
@@ -4094,10 +4220,38 @@ export default defineComponent({
       }
 
       const videoId = this.tabRoute.params.id
+      // Fetch saved state alongside networking, but apply metadata/playback
+      // only after hydration so existing progress and playlist context survive.
+      const historyReady = this.$store?.state?.history?.libraryPaged
+        ? this.$store.dispatch('hydrateVideoState', [videoId]).then(() => {
+            if (this.isCurrentVideoLoad(loadGeneration, videoId)) this.historyHydratedVideoId = videoId
+            return true
+          }, error => {
+            console.error('Could not hydrate library video state', error)
+            if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+              this.historyHydratedVideoId = null
+              this.isLoading = false
+              this.errorMessage = error.message || error.toString()
+            }
+            return false
+          })
+        : Promise.resolve(true)
+      this.pendingHistoryHydration = { loadGeneration, videoId, ready: historyReady }
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
-        if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        if (!await historyReady) return
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
+        try {
+          if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        } catch (error) {
+          console.error(error)
+          if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+            this.isLoading = false
+            this.errorMessage = error.message || error.toString()
+          }
+          return
+        }
         // The shared network queue resumes this request when connectivity returns.
       }
 
@@ -4109,6 +4263,7 @@ export default defineComponent({
         ? this.getShortsVideoInformation(videoId, 'invidious')
         : invidiousGetVideoInformation(videoId))
         .then(async result => {
+          if (!await historyReady) return
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
           if (result.error) {
@@ -4351,6 +4506,7 @@ export default defineComponent({
         })
         .catch(async err => {
           backendFailed = true
+          if (!await historyReady) return
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
           if (metadataOnly) {
@@ -4703,6 +4859,7 @@ export default defineComponent({
     },
 
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
+      if (this.$store?.state?.history?.libraryPaged && this.historyHydratedVideoId !== this.videoId) return
       const now = Date.now()
       // Local playback can start before channel metadata is available.
       const metadata = this.localFilePlayback && !this.channelId && this.historyEntry
@@ -5024,6 +5181,7 @@ export default defineComponent({
 
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
+      if (this.$store?.state?.history?.libraryPaged && this.historyHydratedVideoId !== this.videoId) return
       // A background tab force-pauses its brief autoplay attempt, which would
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
@@ -5168,9 +5326,31 @@ export default defineComponent({
 
       // `playlistId` present
       if (this.selectedUserPlaylist != null) {
+        if (this.$store.state.playlists.libraryPaged && this.$store.getters.getPlaylistMemberships[this.videoId] === undefined) {
+          // Restored tabs and direct links may open an off-page member before
+          // any visible card has requested its membership state.
+          const videoId = this.videoId
+          const playlistId = this.playlistId
+          this.playlistType = 'user'
+          this.watchingPlaylist = true
+          this.$store.dispatch('hydrateVideoState', [videoId]).then(() => {
+            if (this.videoId === videoId && this.tabRoute.query.playlistId === playlistId) this.checkIfPlaylist()
+          }).catch(error => {
+            console.error(error)
+            if (this.videoId !== videoId || this.tabRoute.query.playlistId !== playlistId) return
+            this.playlistId = ''
+            this.playlistType = ''
+            this.playlistItemId = null
+            this.watchingPlaylist = false
+          })
+          return
+        }
         // If the page is accessed through navigation via router history, 'playlistId' is still specified
         // but the video could have been removed from the playlist in the meantime
-        if (!this.selectedUserPlaylist.videos.some((video) => video.videoId === this.videoId)) {
+        const containsVideo = this.$store.state.playlists.libraryPaged
+          ? this.$store.getters.getPlaylistMemberships[this.videoId]?.[this.selectedUserPlaylist._id] > 0
+          : this.selectedUserPlaylist.videos.some(video => video.videoId === this.videoId)
+        if (!containsVideo) {
           this.playlistId = ''
           this.playlistType = ''
           this.playlistItemId = null

@@ -164,7 +164,9 @@ const containedIds = computed(() => {
 
   return new Set(
     allPlaylists.value
-      .filter((playlist) => Array.isArray(playlist.videos) && playlist.videos.some((video) => video?.videoId === videoId))
+      .filter(playlist => store.state.playlists.libraryPaged
+        ? store.getters.getPlaylistMemberships[videoId]?.[playlist._id] > 0
+        : Array.isArray(playlist.videos) && playlist.videos.some(video => video?.videoId === videoId))
       .map((playlist) => playlist._id)
   )
 })

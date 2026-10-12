@@ -70,10 +70,10 @@ function cachedChannel(index) {
 }
 
 function cachedVideoTitle(page, index) {
-  return page.evaluate(id => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getVideoCache[id]?.videos?.[0]?.title
-  }, channelId(index))
+  return page.evaluate(async ({ id, videoId }) => {
+    const entries = await window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: [videoId] })
+    return entries[0]?.title
+  }, { id: channelId(index), videoId: `cached${index}` })
 }
 
 function cachedCollaboratorChannel(index) {
@@ -880,5 +880,28 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     expect(requestCountAfterCancel).toBeGreaterThan(0)
     expect(requestCount).toBe(requestCountAfterCancel)
     await expect(cancelRefresh).toHaveCount(0)
+  })
+})
+
+test.describe('durable RSS premiere verdicts', () => {
+  const cached = cachedChannel(0)
+  const unknown = { ...cached.videos[0], unknown: 'unresolved duplicate' }
+  delete unknown.isUpcoming
+  cached.videos = [unknown, { ...cached.videos[0], unknown: { keep: 'resolved duplicate' } }]
+  test.use({ seed: { settings: commonSettings, profiles: [profileWith(1)], subscriptionCache: [cached] } })
+
+  test('reuses a persisted negative verdict even when the first duplicate has no verdict', async ({ page }) => {
+    const watchRequests = []
+    page.on('request', request => { if (request.url().includes('/watch?')) watchRequests.push(request.url()) })
+    await routeFeeds(page, () => 0, index => rssFeed(index).replace(`fresh${index}`, `cached${index}`).replace('views="1000"', 'views="0"'))
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Cached video 0', { exact: true }).first()).toBeVisible()
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+    await expect(page.locator('.tab.active .tabLoadingLine')).toHaveCount(0)
+    expect(watchRequests).toStrictEqual([])
+    const saved = await page.evaluate(async id => window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: ['cached0'] }), channelId(0))
+    expect(saved).toHaveLength(1)
+    expect(saved[0].isUpcoming).toBe(false)
   })
 })

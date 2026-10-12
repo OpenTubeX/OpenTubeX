@@ -346,6 +346,7 @@
       <WatchVideoDownloadPrompt
         v-if="enableDownloads && showDownloadPrompt"
         :playlist-id="isUserPlaylist ? '' : id"
+        :user-playlist-id="isUserPlaylist ? id : ''"
         :playlist-key="id"
         :video-ids="isUserPlaylist ? playablePlaylistVideos(videos).map(video => video.videoId) : []"
         :is-playlist="true"
@@ -374,6 +375,8 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
+import { usePlaylistStatistics } from '../../composables/usePlaylistStatistics'
 
 import {
   ctrlFHandler,
@@ -383,14 +386,13 @@ import {
   showToast,
   getTodayDateStrLocalTimezone,
   writeFileWithPicker,
-  deepCopy,
 } from '../../helpers/utils'
 import { getPlaylistSnapshot } from '../../helpers/api/playlist-snapshot'
 import { createLocalPlaylistAvailabilityChecker } from '../../helpers/api/local'
 import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
 import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
-import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
+import { getSortedPlaylistItems } from '../../helpers/playlists'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -555,9 +557,6 @@ const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
-/** @type {import('vue').ComputedRef<Record<string, object>>} */
-const historyCacheById = computed(() => store.getters.getHistoryCacheById)
-
 /** @type {import('vue').ComputedRef<'' | 'start' | 'middle' | 'end' | 'hidden' | 'blur'>} */
 const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
@@ -620,31 +619,11 @@ const defaultThumbnail = computed(() => {
 
 const isUserPlaylist = computed(() => props.infoSource === 'user')
 const videoPlaylistType = computed(() => isUserPlaylist.value ? 'user' : '')
+const playlistStatistics = usePlaylistStatistics(store, () => props.id, () => isUserPlaylist.value)
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const userPlaylistAnyVideoWatched = computed(() => {
-  if (!isUserPlaylist.value || !Array.isArray(selectedUserPlaylist.value?.videos)) { return false }
-
-  const historyCacheById_ = historyCacheById.value
-  return selectedUserPlaylist.value.videos.some((video) => {
-    return video?.videoId != null && isHistoryEntryWatched(historyCacheById_[video.videoId])
-  })
-})
-
-/** @type {import('vue').ComputedRef<number>} */
-const userPlaylistUniqueVideosCount = computed(() => {
-  if (!Array.isArray(selectedUserPlaylist.value?.videos)) return 0
-  return selectedUserPlaylist.value.videos.reduce((set, video) => {
-    set.add(video?.videoId ?? Symbol('opaque member'))
-    return set
-  }, new Set()).size ?? 0
-})
-
-const userPlaylistDuplicateItemCount = computed(() => {
-  if (userPlaylistUniqueVideosCount.value === 0) { return 0 }
-
-  return selectedUserPlaylist.value.videos.length - userPlaylistUniqueVideosCount.value
-})
+const userPlaylistAnyVideoWatched = computed(() => isUserPlaylist.value && playlistStatistics.value.watchedCount > 0)
+const userPlaylistDuplicateItemCount = computed(() => playlistStatistics.value.total - playlistStatistics.value.uniqueCount)
 
 const exportPlaylistButtonVisible = computed(() => {
   return isUserPlaylist.value && !editMode.value && props.videoCount > 0
@@ -768,13 +747,18 @@ async function toggleCopyVideosPrompt() {
     description: props.description,
     sourcePlaylistId: isUserPlaylist.value ? selectedUserPlaylist.value?.sourcePlaylistId : id,
   }
-  const snapshot = isUserPlaylist.value ? { videos: props.videos } : await loadSnapshot(id)
-  if (!snapshot) return
+  try {
+    const snapshot = isUserPlaylist.value ? await DBLibraryHandlers.query('playlistSnapshot', { id }) : await loadSnapshot(id)
+    if (!snapshot) return
 
-  store.dispatch('showAddToPlaylistPromptForManyVideos', {
-    videos: snapshot.videos,
-    newPlaylistDefaultProperties: defaults,
-  })
+    store.dispatch('showAddToPlaylistPromptForManyVideos', {
+      videos: playablePlaylistVideos(snapshot.videos),
+      newPlaylistDefaultProperties: defaults,
+    })
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"), icon: ['fas', 'circle-exclamation'] })
+  }
 }
 
 async function addMissingVideos() {
@@ -787,8 +771,9 @@ async function addMissingVideos() {
 
   snapshotPending.value = true
   try {
-    const playlist = store.getters.getPlaylist(id)
+    const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id })
     if (!playlist) throw new Error('Playlist was deleted')
+    if (!Array.isArray(playlist.videos)) throw new Error('Cannot append to a retained non-array playlist')
     const present = new Set(playablePlaylistVideos(playlist.videos).map(video => video.videoId))
     for (const video of playablePlaylistVideos(snapshot.videos)) {
       snapshotController.signal.throwIfAborted()
@@ -918,11 +903,12 @@ function getExportFilename(title, extension) {
 async function exportAsFreeTubeDatabase() {
   const exportFileName = getExportFilename(selectedUserPlaylist.value.playlistName, 'db')
 
-  const data = JSON.stringify(selectedUserPlaylist.value) + '\n'
-
   // See DataSettings.vue `promptAndWriteToFile`
 
   try {
+    const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id: props.id })
+    if (!playlist) throw new Error('Playlist was deleted')
+    const data = JSON.stringify(playlist) + '\n'
     const response = await writeFileWithPicker(
       exportFileName,
       data,
@@ -945,22 +931,56 @@ async function exportAsFreeTubeDatabase() {
   }
 }
 
+async function orderedExportVideos() {
+  if (!isUserPlaylist.value) return playablePlaylistVideos(props.sortedVideos)
+  const options = { id: props.id, sort: store.getters.getUserPlaylistSortOrder, locale: locale.value, limit: 250 }
+  if (!process.env.IS_ELECTRON) {
+    const playlist = selectedUserPlaylist.value
+    if (!Array.isArray(playlist?.videos)) throw new Error('The playlist could not be loaded')
+    const videos = playablePlaylistVideos(playlist.videos).map(video => {
+      const entry = { ...video }
+      if (options.sort.startsWith('video_duration_') && !(Number.isFinite(entry.lengthSeconds) && entry.lengthSeconds > 0)) {
+        const history = store.getters.getHistoryCacheById?.[entry.videoId]
+        if (history) entry.lengthSeconds = history.lengthSeconds
+      }
+      return entry
+    })
+    return getSortedPlaylistItems(videos, options.sort, options.locale)
+  }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const videos = []
+    let cursor = null
+    let stale = false
+    do {
+      const page = await DBLibraryHandlers.query('playlistPage', { ...options, cursor })
+      if (page?.stale) { stale = true; break }
+      if (!page || !Array.isArray(page.records)) throw new Error('The playlist could not be loaded')
+      videos.push(...playablePlaylistVideos(page.records))
+      cursor = page.cursor
+    } while (cursor)
+    if (!stale) return videos
+  }
+  throw new Error('The playlist changed repeatedly; retry the export after the update finishes')
+}
+
 async function exportAsYouTubeCsv() {
   const exportFileName = getExportFilename(props.title, 'csv')
 
-  const videoData = playablePlaylistVideos(props.sortedVideos).map((video) => {
-    // Remove milliseconds and replace "Z" with +00:00 to match YouTube's exports
-    const timestamp = new Date(video.timeAdded).toISOString().slice(0, -5) + '+00:00'
-
-    return `${video.videoId},${timestamp}`
-  }).join('\n')
-
-  // YouTube includes 6 line feed characters at the end of the file, so we do the same here
-  const data = `Video ID,Playlist video creation timestamp\n${videoData}\n\n\n\n\n\n`
-
-  // See DataSettings.vue `promptAndWriteToFile`
-
   try {
+    const videoData = (await orderedExportVideos()).map((video) => {
+      // Legacy members can lack a timestamp. Use the epoch only for this
+      // export; the losslessly stored record remains unchanged.
+      const added = new Date(video.timeAdded ?? 0)
+      const timestamp = (Number.isNaN(added.getTime()) ? new Date(0) : added).toISOString().slice(0, -5) + '+00:00'
+
+      return `${video.videoId},${timestamp}`
+    }).join('\n')
+
+    // YouTube includes 6 line feed characters at the end of the file, so we do the same here
+    const data = `Video ID,Playlist video creation timestamp\n${videoData}\n\n\n\n\n\n`
+
+    // See DataSettings.vue `promptAndWriteToFile`
+
     const response = await writeFileWithPicker(
       exportFileName,
       data,
@@ -986,13 +1006,12 @@ async function exportAsYouTubeCsv() {
 async function exportAsListOfUrls() {
   const exportFileName = getExportFilename(props.title, 'txt')
 
-  const data = playablePlaylistVideos(props.sortedVideos).map((video) => {
-    return `https://www.youtube.com/watch?v=${video.videoId}`
-  }).join('\n') + '\n'
-
   // See DataSettings.vue `promptAndWriteToFile`
 
   try {
+    const data = (await orderedExportVideos()).map((video) => {
+      return `https://www.youtube.com/watch?v=${video.videoId}`
+    }).join('\n') + '\n'
     const response = await writeFileWithPicker(
       exportFileName,
       data,
@@ -1030,14 +1049,7 @@ const deletePlaylistPromptNames = computed(() => [
 ])
 
 /** @type {import('vue').ComputedRef<number>} */
-const userPlaylistWatchedVideoCount = computed(() => {
-  if (!isUserPlaylist.value || !userPlaylistAnyVideoWatched.value) { return false }
-
-  const historyCacheById_ = historyCacheById.value
-  return selectedUserPlaylist.value.videos.reduce((count, video) => {
-    return video?.videoId != null && isHistoryEntryWatched(historyCacheById_[video.videoId]) ? count + 1 : count
-  }, 0)
-})
+const userPlaylistWatchedVideoCount = computed(() => playlistStatistics.value.watchedCount)
 
 const removeVideosOnWatchPromptLabelText = computed(() => {
   return t(
@@ -1058,12 +1070,28 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
 async function scanDeadVideos() {
   if (deadVideoScanRunning.value) return
   const playlistId = props.id
-  const videos = playablePlaylistVideos(selectedUserPlaylist.value.videos)
   deadVideoScanController = new AbortController()
   const signal = deadVideoScanController.signal
   deadVideoScanRunning.value = true
-  deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
+  deadVideoProgress.value = { checked: 0, total: 0, uncertain: 0 }
   try {
+    const videos = []
+    if (process.env.IS_ELECTRON) {
+      let cursor = null
+      do {
+        const page = await DBLibraryHandlers.query('playlistPage', { id: playlistId, cursor })
+        if (signal.aborted || props.id !== playlistId) return
+        if (page.stale) throw new Error('The playlist changed before the scan started')
+        videos.push(...page.records.map(video => ({ ...video, playlistItemId: video._libraryMemberId })))
+        cursor = page.cursor
+      } while (cursor)
+    } else {
+      const snapshot = await DBLibraryHandlers.query('playlistSnapshot', { id: playlistId })
+      if (signal.aborted || props.id !== playlistId) return
+      if (!snapshot) throw new Error('The playlist no longer exists')
+      videos.push(...snapshot.videos)
+    }
+    deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
     const useLocal = process.env.SUPPORTS_LOCAL_API && store.getters.getBackendPreference !== 'invidious'
     const checkLocal = useLocal ? await createLocalPlaylistAvailabilityChecker(signal) : null
     const result = await findDeadPlaylistItems(videos, async (videoId, scanSignal) => {
@@ -1100,18 +1128,37 @@ async function scanDeadVideos() {
 async function handleRemoveDeadVideosPromptAnswer(option) {
   showRemoveDeadVideosPrompt.value = false
   if (option !== 'delete') return
-  const playlist = selectedUserPlaylist.value
-  const videos = playlist.videos.filter(video => video?.playlistItemId == null || !deadVideoItemIds.value.has(video.playlistItemId))
-  const removed = playlist.videos.length - videos.length
-  if (removed === 0) return
-  const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
-  showToast({
-    message: saved
-      ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
-      : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-    icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
-  })
-  deadVideoItemIds.value = new Set()
+  if (process.env.IS_ELECTRON) {
+    try {
+      const removed = await DBLibraryHandlers.query('removePlaylistMembers', { id: props.id, memberIds: [...deadVideoItemIds.value] })
+      if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      showToast({ message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed), icon: ['fas', 'trash'] })
+      await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
+    } catch (error) {
+      console.error(error)
+      showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
+    } finally {
+      deadVideoItemIds.value = new Set()
+    }
+    return
+  }
+  try {
+    const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id: props.id })
+    if (!playlist) throw new Error('The playlist no longer exists')
+    const videos = playlist.videos.filter(video => video?.playlistItemId == null || !deadVideoItemIds.value.has(video.playlistItemId))
+    const removed = playlist.videos.length - videos.length
+    if (removed === 0) return
+    const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
+    showToast({
+      message: saved
+        ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
+        : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+    })
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
+  } finally { deadVideoItemIds.value = new Set() }
 }
 
 /**
@@ -1119,46 +1166,8 @@ async function handleRemoveDeadVideosPromptAnswer(option) {
  */
 async function handleRemoveDuplicateVideosPromptAnswer(option) {
   showRemoveDuplicateVideosPrompt.value = false
-  if (option !== 'delete') { return }
-
-  const videoIdsAdded = new Set()
-  const newVideoItems = selectedUserPlaylist.value.videos.reduce((ary, video) => {
-    if (video?.videoId == null || !videoIdsAdded.has(video.videoId)) {
-      ary.push(video)
-      if (video?.videoId != null) videoIdsAdded.add(video.videoId)
-    }
-
-    return ary
-  }, [])
-
-  const removedVideosCount = userPlaylistDuplicateItemCount.value
-  if (removedVideosCount === 0) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    return
-  }
-
-  const playlist = {
-    ...selectedUserPlaylist.value,
-    videos: deepCopy(newVideoItems),
-  }
-  try {
-    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-        videoCount: removedVideosCount
-      }, removedVideosCount),
-      icon: ['fas', 'trash'],
-    })
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  if (option !== 'delete') return
+  await cleanupUserPlaylist('duplicates')
 }
 
 /**
@@ -1166,49 +1175,30 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
  */
 async function handleRemoveVideosOnWatchPromptAnswer(option) {
   showRemoveVideosOnWatchPrompt.value = false
-  if (option !== 'delete') { return }
-
-  const historyCacheById_ = historyCacheById.value
-  const videosToWatch = selectedUserPlaylist.value.videos.filter((video) => {
-    return video?.videoId == null || !isHistoryEntryWatched(historyCacheById_[video.videoId])
-  })
-
-  const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length
-
-  if (removedVideosCount === 0) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    return
-  }
-
-  const playlist = {
-    ...selectedUserPlaylist.value,
-    videos: deepCopy(videosToWatch),
-  }
-  try {
-    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-        videoCount: removedVideosCount
-      }, removedVideosCount),
-      icon: ['fas', 'trash'],
-    })
-  } catch (e) {
-    showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: ['fas', 'circle-exclamation'],
-    })
-    console.error(e)
-  }
+  if (option !== 'delete') return
+  await cleanupUserPlaylist('watched')
 }
 
-const router = useRouter()
+async function cleanupUserPlaylist(mode) {
+  try {
+    const removed = await DBLibraryHandlers.query('cleanupPlaylist', { id: props.id, mode })
+    if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed),
+      icon: ['fas', 'trash'],
+    })
+    await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
+  }
+}
 
 /**
  * @param {'delete' | 'cancel' | null} option
  */
+const router = useRouter()
+
 function handleDeletePlaylistPromptAnswer(option) {
   showDeletePlaylistPrompt.value = false
   if (option !== 'delete') { return }

@@ -734,6 +734,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  channelRouteGeneration += 1
   document.removeEventListener('keydown', handlePanelTabNavigation)
 })
 
@@ -1236,6 +1237,23 @@ watch(videoSortBy, () => {
   }
 })
 
+async function setChannelVideoResults(target, videos, isCurrentRequest, append = false) {
+  if (!isCurrentRequest()) return false
+  const ids = store.state.history.libraryPaged
+    ? [...new Set(videos.map(video => video.videoId).filter(id => typeof id === 'string' && id))]
+    : []
+  // Keep lookup results alive until the published list owns these references.
+  if (ids.length) store.commit('retainVideoState', ids)
+  try {
+    if (ids.length) await store.dispatch('hydrateVideoState', ids)
+    if (!isCurrentRequest()) return false
+    target.value = append ? target.value.concat(videos) : videos
+    return true
+  } finally {
+    if (ids.length) store.commit('releaseVideoState', ids)
+  }
+}
+
 async function getChannelVideosLocal() {
   const isCurrentRequest = startElementListRequest('videos')
   setElementListLoading('videos', true)
@@ -1253,7 +1271,7 @@ async function getChannelVideosLocal() {
         return
       }
 
-      latestVideos.value = parseLocalPlaylistVideos(playlist.items)
+      if (!await setChannelVideoResults(latestVideos, parseLocalPlaylistVideos(playlist.items), isCurrentRequest)) return
       videoContinuationData.value = playlist.has_continuation ? playlist : null
       setElementListLoading('videos', false)
     } else {
@@ -1278,7 +1296,7 @@ async function getChannelVideosLocal() {
         return
       }
 
-      latestVideos.value = parseLocalChannelVideos(videosTab.videos, id.value, channelName.value)
+      if (!await setChannelVideoResults(latestVideos, parseLocalChannelVideos(videosTab.videos, id.value, channelName.value), isCurrentRequest)) return
       videoContinuationData.value = videosTab.has_continuation ? videosTab : null
       setElementListLoading('videos', false)
     }
@@ -1320,7 +1338,7 @@ async function getChannelVideosLocalMore() {
       if (!isCurrentRequest()) return
 
       if (continuation) {
-        latestVideos.value = latestVideos.value.concat(parseLocalPlaylistVideos(continuation.items))
+        if (!await setChannelVideoResults(latestVideos, parseLocalPlaylistVideos(continuation.items), isCurrentRequest, true)) return
         videoContinuationData.value = continuation.has_continuation ? continuation : null
       } else {
         videoContinuationData.value = null
@@ -1332,7 +1350,7 @@ async function getChannelVideosLocalMore() {
       const continuation = await videoContinuationData.value.getContinuation()
       if (!isCurrentRequest()) return
 
-      latestVideos.value = latestVideos.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
+      if (!await setChannelVideoResults(latestVideos, parseLocalChannelVideos(continuation.videos, id.value, channelName.value), isCurrentRequest, true)) return
       videoContinuationData.value = continuation.has_continuation ? continuation : null
     }
   } catch (err) {
@@ -1364,11 +1382,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
     if (!isCurrentRequest()) {
       return
     }
-    if (more) {
-      latestVideos.value = latestVideos.value.concat(response.videos)
-    } else {
-      latestVideos.value = response.videos
-    }
+    if (!await setChannelVideoResults(latestVideos, response.videos, isCurrentRequest, more)) return
     videoContinuationData.value = response.continuation || null
     setElementListLoading('videos', false)
 
@@ -1442,7 +1456,7 @@ async function getChannelShortsLocal() {
       parsedShorts = parseLocalChannelShorts(shortsTab.videos, id.value, channelName.value)
     }
 
-    latestShorts.value = parsedShorts
+    if (!await setChannelVideoResults(latestShorts, parsedShorts, isCurrentRequest)) return
     shortContinuationData.value = shortsTab.has_continuation ? shortsTab : null
     setElementListLoading('shorts', false)
 
@@ -1487,7 +1501,7 @@ async function getChannelShortsLocalMore() {
       parsedShorts = parseLocalChannelShorts(continuation.videos, id.value, channelName.value)
     }
 
-    latestShorts.value = latestShorts.value.concat(parsedShorts)
+    if (!await setChannelVideoResults(latestShorts, parsedShorts, isCurrentRequest, true)) return
     shortContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -1516,11 +1530,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
   try {
     const response = await getInvidiousChannelShorts(id.value, shortSortBy.value, shortContinuationData.value)
     if (!isCurrentRequest()) return
-    if (more) {
-      latestShorts.value = latestShorts.value.concat(response.videos)
-    } else {
-      latestShorts.value = response.videos
-    }
+    if (!await setChannelVideoResults(latestShorts, response.videos, isCurrentRequest, more)) return
     shortContinuationData.value = response.continuation || null
     setElementListLoading('shorts', false)
 
@@ -1547,6 +1557,15 @@ const latestLive = shallowRef([])
 const liveContinuationData = shallowRef(null)
 const showLiveSortBy = ref(true)
 const liveSortBy = ref('newest')
+
+let retainedChannelVideoIds = []
+watch(() => [...new Set([...latestVideos.value, ...latestShorts.value, ...latestLive.value].map(video => video.videoId).filter(id => typeof id === 'string' && id))], ids => {
+  if (!store.state.history.libraryPaged) return
+  store.commit('retainVideoState', ids)
+  store.commit('releaseVideoState', retainedChannelVideoIds)
+  retainedChannelVideoIds = ids
+}, { flush: 'sync' })
+onBeforeUnmount(() => store.commit('releaseVideoState', retainedChannelVideoIds))
 
 watch(liveSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
@@ -1594,7 +1613,7 @@ async function getChannelLiveLocal() {
       videos = liveTab.videos
     }
 
-    latestLive.value = parseLocalChannelVideos(videos, id.value, channelName.value)
+    if (!await setChannelVideoResults(latestLive, parseLocalChannelVideos(videos, id.value, channelName.value), isCurrentRequest)) return
     liveContinuationData.value = liveTab.has_continuation ? liveTab : null
     setElementListLoading('live', false)
 
@@ -1628,7 +1647,7 @@ async function getChannelLiveLocalMore() {
     const continuation = await liveContinuationData.value.getContinuation()
     if (!isCurrentRequest()) return
 
-    latestLive.value = latestLive.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
+    if (!await setChannelVideoResults(latestLive, parseLocalChannelVideos(continuation.videos, id.value, channelName.value), isCurrentRequest, true)) return
     liveContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     if (!isCurrentRequest()) return
@@ -1657,11 +1676,7 @@ async function channelInvidiousLive(sortByChanged) {
   try {
     const response = await getInvidiousChannelLive(id.value, liveSortBy.value, liveContinuationData.value)
     if (!isCurrentRequest()) return
-    if (more) {
-      latestLive.value = latestLive.value.concat(response.videos)
-    } else {
-      latestLive.value = response.videos
-    }
+    if (!await setChannelVideoResults(latestLive, response.videos, isCurrentRequest, more)) return
     liveContinuationData.value = response.continuation || null
     setElementListLoading('live', false)
 

@@ -364,7 +364,7 @@ import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
-import { getIconForSortPreference } from '../../helpers/utils'
+import { getIconForSortPreference, showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -378,6 +378,7 @@ import {
   refreshSubscriptionVideosFromRemote
 } from '../../helpers/subscriptions'
 import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 
 const isElectron = process.env.IS_ELECTRON
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
@@ -981,6 +982,24 @@ const currentTabPanel = computed(() => {
   }
 })
 
+const restoredFeedTab = currentTab.value
+const restoredLogicalTab = isElectron && tabId ? store.getters.getTabById(tabId) : null
+let pendingInitialScroll = restoredLogicalTab?.history[restoredLogicalTab.historyIndex]?.scroll
+pendingInitialScroll = pendingInitialScroll?.top > 0 ? { ...pendingInitialScroll } : null
+watch([() => currentTabPanel.value?.isLoading, () => isTabPresented?.value, currentTab], async ([loading, presented, feedTab]) => {
+  if (feedTab !== restoredFeedTab) pendingInitialScroll = null
+  if (!pendingInitialScroll || loading !== false || presented !== true) return
+  const scroll = pendingInitialScroll
+  // The first SQLite page arrives after navigation's initial scroll restore.
+  // Wait for its eager first screen to give the viewport its actual range.
+  await nextTick()
+  await nextAnimationFrame()
+  if (pendingInitialScroll !== scroll || !isMounted || isTabPresented.value !== true || currentTab.value !== restoredFeedTab) return
+  pendingInitialScroll = null
+  window.scrollTo({ ...scroll, behavior: 'instant' })
+  resetHeaderScrollVisibility()
+}, { flush: 'post' })
+
 const currentTabHasNewContent = computed(() => {
   if (currentTab.value === 'new') {
     return showNewSubscriptionFeed.value && currentTabPanel.value?.hasNewContent === true
@@ -1022,17 +1041,19 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
     }
     // Refreshes may finish during the animation. Only dismiss entries that
     // were eligible when the user requested the seen marks.
-    const entriesByTab = Object.fromEntries(cacheFeedTabs.map(feedTab => [
-      feedTab,
-      channelIdsByTab[feedTab].flatMap(channelId => {
-        const cache = store.getters[cacheGettersByTab[feedTab]]
-        const entries = cache[channelId]?.[feedTab === 'posts' ? 'posts' : 'videos'] ?? []
-        return entries.filter(entry => entry.isNewInSubscriptionFeed === true)
-          .map(entry => feedTab === 'posts'
-            ? { postId: entry.postId }
-            : { videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true })
-      })
-    ]))
+    const entriesByTab = isElectron
+      ? (await DBLibraryHandlers.query('markSubscriptionEntries', { tabs: cacheFeedTabs, channelIdsByTab, capture: true })).entriesByTab
+      : Object.fromEntries(cacheFeedTabs.map(feedTab => [
+          feedTab,
+          channelIdsByTab[feedTab].flatMap(channelId => {
+            const cache = store.getters[cacheGettersByTab[feedTab]]
+            const entries = cache[channelId]?.[feedTab === 'posts' ? 'posts' : 'videos'] ?? []
+            return entries.filter(entry => entry.isNewInSubscriptionFeed === true)
+              .map(entry => feedTab === 'posts'
+                ? { postId: entry.postId }
+                : { videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true })
+          })
+        ]))
 
     const markSeen = () => store.dispatch('markSubscriptionEntriesAsSeen', {
       tabs: cacheFeedTabs,
@@ -1068,6 +1089,9 @@ async function markAllAsSeen(tab, newFeedTab = currentNewFeedTab.value) {
     } else {
       await markSeen()
     }
+  } catch (error) {
+    console.error(error)
+    showToast(t('Storage Startup Error.Title'))
   } finally {
     markingSeenTab.value = null
   }

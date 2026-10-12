@@ -391,6 +391,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
@@ -400,6 +401,7 @@ const props = defineProps({
   externalUrl: { type: String, default: '' },
   videoIds: { type: Array, default: () => [] },
   playlistId: { type: String, default: '' },
+  userPlaylistId: { type: String, default: '' },
   playlistKey: { type: String, default: '' },
   isPlaylist: { type: Boolean, default: false },
   title: { type: String, required: true },
@@ -636,21 +638,34 @@ async function chooseDownloadFolder() {
   if (typeof path === 'string' && path.length > 0) store.dispatch('updateYtDlpDownloadFolderPath', path)
 }
 async function startDownload() {
-  const result = await ytDlp.ytDlpDownload({
-    ...normalizeOptions(options),
-    videoId: props.videoId,
-    ...(props.externalUrl ? { externalUrl: props.externalUrl } : {}),
-    videoIds: [...props.videoIds],
-    playlistId: props.playlistId,
-    playlistKey: props.playlistKey,
-    isPlaylist: props.isPlaylist,
-    title: props.title,
-    thumbnail: props.thumbnail,
-    // edited options no longer describe the template they started from
-    template: isDirty.value ? '' : selectedTemplate.value
-  })
-  if (result != null && 'id' in result) downloadId.value = result.id
-  else if (result != null && 'error' in result) showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })
+  try {
+    let videoIds = [...props.videoIds]
+    if (props.userPlaylistId) {
+      const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id: props.userPlaylistId })
+      if (!playlist) throw new Error('The playlist no longer exists')
+      videoIds = (Array.isArray(playlist.videos) ? playlist.videos : [])
+        .filter(video => video !== null && typeof video === 'object' && !Array.isArray(video) && typeof video.videoId === 'string' && video.videoId.length > 0)
+        .map(video => video.videoId)
+    }
+    const result = await ytDlp.ytDlpDownload({
+      ...normalizeOptions(options),
+      videoId: props.videoId,
+      ...(props.externalUrl ? { externalUrl: props.externalUrl } : {}),
+      videoIds,
+      playlistId: props.playlistId,
+      playlistKey: props.playlistKey,
+      isPlaylist: props.isPlaylist,
+      title: props.title,
+      thumbnail: props.thumbnail,
+      // edited options no longer describe the template they started from
+      template: isDirty.value ? '' : selectedTemplate.value
+    })
+    if (result != null && 'id' in result) downloadId.value = result.id
+    else if (result != null && 'error' in result) showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })
+  }
 }
 const activeDownload = computed(() => downloadId.value === null
   ? null

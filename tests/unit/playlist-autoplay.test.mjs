@@ -2,10 +2,64 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, nextTick, reactive, ref, shallowRef, watch as observe } from 'vue'
+import { computed, nextTick, reactive, ref, shallowRef, toRaw, watch as observe } from 'vue'
 
 const playlistSource = readFileSync(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
 const watchSource = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+
+for (const nextOnPage of [true, false]) {
+  test(`paged shuffled playlists preload the next ${nextOnPage ? 'on-page' : 'off-page'} member`, () => {
+    const next = { videoId: 'next', _libraryMemberId: 'next-member' }
+    const later = { videoId: 'later', _libraryMemberId: 'later-member' }
+    const context = {
+      computed, isPagedPlaylist: ref(true), userWindowReady: ref(true), userWindowOwner: ref('current'), userWindowKey: () => 'current',
+      userWindow: ref({ index: 99, total: 350, next }),
+      playlistItems: ref(nextOnPage ? [{ videoId: 'current' }, next, later] : [{ videoId: 'current' }]),
+      randomizedPlaylistItems: ref([]), shuffleEnabled: ref(true), loopEnabled: ref(false), isFetchingPlaylistContinuation: ref(false),
+      findIndexOfCurrentVideoInPlaylist: () => 0,
+    }
+    const upcoming = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'const upcomingVideos =', '\nwatch(')}\nupcomingVideos`, context)
+    const plain = () => Array.from(upcoming.value, video => structuredClone(toRaw(video)))
+    assert.deepEqual(plain(), nextOnPage ? [next, later] : [next])
+    context.userWindowReady.value = false
+    assert.deepEqual(plain(), [])
+    context.userWindowReady.value = true
+    context.userWindowOwner.value = 'old'
+    assert.deepEqual(plain(), [])
+    context.userWindowOwner.value = 'current'
+    context.userWindow.value = { index: 349, total: 350, next }
+    assert.deepEqual(plain(), [])
+    context.loopEnabled.value = true
+    assert.deepEqual(plain(), nextOnPage ? [next, later] : [next])
+  })
+}
+
+test('paged shuffle wraps with a fresh order only outside an unavailable-video skip chain', () => {
+  for (const [canPlay, expectedAutoSkipItem, reshuffles] of [[false, null, false], [true, null, true], [true, 'first-member', false]]) {
+    const navigations = []
+    const currentRoute = ref({ fullPath: '/current' })
+    let seeds = 0
+    const context = {
+      isPagedPlaylist: ref(true), canPlayNextVideo: ref(canPlay), shuffleEnabled: ref(true), expectedAutoSkipItem,
+      userWindow: ref({ index: 3, total: 4, next: { videoId: 'first', playlistItemId: 'legacy-duplicate', _libraryMemberId: 'first-member' } }),
+      userWindowReady: ref(true),
+      userWindowOwner: ref('current'), userWindowKey: () => 'current', userWindowGeneration: 1,
+      userShuffleSeed: ref('previous-seed'), userShuffleAnchor: { memberId: 'original-anchor' },
+      props: { playlistId: 'playlist', playlistType: 'user', downloadId: 'download' },
+      router: { currentRoute, push: payload => { navigations.push(structuredClone(payload)); currentRoute.value = { fullPath: '/next' }; return Promise.resolve() } },
+      crypto: { randomUUID: () => { seeds++; return 'new-seed' } }, showToast() {}, t: key => key,
+    }
+    const playNext = vm.runInNewContext(`${extractSourceBetweenMarkers(playlistSource, 'function playNextVideo() {', '\nfunction playPreviousVideo() {')}\n${extractSourceBetweenMarkers(playlistSource, 'async function playUserPlaylistItem(', '\nwatch(')}\nplayNextVideo`, context)
+    playNext()
+    assert.equal(seeds, reshuffles ? 1 : 0)
+    assert.equal(context.userShuffleSeed.value, reshuffles ? 'new-seed' : 'previous-seed')
+    assert.deepEqual(structuredClone(context.userShuffleAnchor), reshuffles ? { memberId: 'first-member' } : { memberId: 'original-anchor' })
+    assert.deepEqual(navigations, canPlay ? [{ path: '/watch/first', query: {
+      playlistId: 'playlist', playlistType: 'user', playlistItemId: 'legacy-duplicate', libraryMemberId: 'first-member', downloadId: 'download',
+    } }] : [])
+  }
+})
+
 function extractSourceBetweenMarkers(source, start, end) {
   const from = source.indexOf(start)
   const to = source.indexOf(end, from)

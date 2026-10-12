@@ -1,5 +1,14 @@
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
 
+test.beforeEach(async ({ page }) => {
+  await page.evaluate(() => {
+    window.importSyncReasons = []
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.subscribeAction(action => {
+      if (action.type === 'scheduleSyncServer') window.importSyncReasons.push(action.payload)
+    })
+  })
+})
+
 function lineDelimitedFixture(firstRecord, lastRecord) {
   return [
     JSON.stringify(firstRecord),
@@ -139,6 +148,7 @@ test('line-delimited subscriptions keep valid rows around a malformed row', asyn
       .filter(id => id.startsWith('UCissue866-'))
       .sort()
   })).toEqual(['UCissue866-a', 'UCissue866-b'])
+  expect(await page.evaluate(() => window.importSyncReasons.filter(reason => reason === 'profilesOrSubscriptions'))).toStrictEqual(['profilesOrSubscriptions'])
   expect(pageErrors).toEqual([])
 })
 
@@ -163,6 +173,7 @@ test('line-delimited watch history keeps valid rows around a malformed row', asy
       .filter(videoId => videoId.startsWith('issue866'))
       .sort()
   })).toEqual(['issue866a01', 'issue866b02'])
+  expect(await page.evaluate(() => window.importSyncReasons.filter(reason => reason === 'history'))).toStrictEqual(['history'])
   expect(pageErrors).toEqual([])
 })
 
@@ -194,14 +205,14 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
   await expect(page.locator('.toast', {
     hasText: 'All playlists has been successfully imported'
   })).toBeVisible()
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     const playlists = store.getters.getAllPlaylists
       .filter(({ _id }) => _id.startsWith('issue866-playlist-'))
     const mixedPlaylist = playlists.find(({ _id }) => _id === 'issue866-playlist-mixed-videos')
     return {
       ids: playlists.map(({ _id }) => _id).sort(),
-      mixedVideoIds: mixedPlaylist?.videos.map(({ videoId }) => videoId)
+      mixedVideoIds: mixedPlaylist ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: mixedPlaylist._id })).videos.map(({ videoId }) => videoId) : []
     }
   })).toEqual({
     ids: [
@@ -211,6 +222,7 @@ test('line-delimited playlists keep valid rows around a malformed row', async ({
     ],
     mixedVideoIds: ['issue866-playlist-video']
   })
+  expect(await page.evaluate(() => window.importSyncReasons.filter(reason => reason === 'playlists'))).toStrictEqual(['playlists'])
   expect(pageErrors).toEqual([])
 })
 

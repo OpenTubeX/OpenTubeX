@@ -8,13 +8,18 @@ import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
 import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
+import { recommendationInputs, recommendationSubscriptionCandidates } from '../../src/datastores/sqlite/operations.js'
+
 import { isVideoHiddenByPreferences } from '../../src/renderer/helpers/subscription-visibility.js'
 
 const source = (await readFile(new URL('../../src/renderer/composables/useHomeRecommendations.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export function ', 'function ')
 
-function createFeed({ records = [], candidates = [], playlists = [], settings = {}, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
+function createFeed({ records = [], candidates = [], playlists = [], settings = {}, desktop = false, query, autoRefresh = true, buildProfile = async () => ({ channels: [], channelWeights: new Map(), evidence: new Map() }) } = {}) {
   const state = reactive({ recommendations: { recommendationRecords: Object.fromEntries(records.map(record => [record.videoId, record])) } })
   const getters = reactive({
     getEnableHomeRecommendations: true,
@@ -40,7 +45,8 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
   let cleanups = []
   const work = { profiles: 0, rankings: 0, requests: 0 }
   const dependencies = {
-    computed, ref, shallowRef, toRaw, watch, store, runCooperatively,
+    computed, ref, shallowRef, toRaw, store, runCooperatively,
+    watch: autoRefresh ? watch : (input, callback, options) => watch(input, callback, { ...options, immediate: false }),
     onBeforeUnmount: callback => cleanups.push(callback),
     useTabContext: () => ({}),
     getRecommendationLearningEntries, recommendationSubscriptionIds, mergeRecommendationCandidates, getUpcomingPremiereTimestamp,
@@ -53,6 +59,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     },
     collectRecommendationCandidates: async () => { work.requests++; return { videos: candidates, failedSources: 0 } },
     requestAnimationFrame: callback => setTimeout(callback, 0),
+    process: { env: { IS_ELECTRON: desktop } }, DBLibraryHandlers: { query },
   }
   const useHomeRecommendations = compileFunction(`${source}\nreturn useHomeRecommendations`, Object.keys(dependencies))(...Object.values(dependencies))
   function mount() {
@@ -74,6 +81,98 @@ async function waitForFeed(feed) {
   }
   assert.equal(feed.isLoading.value, false)
 }
+
+for (const failedQuery of ['revisions', 'recommendationInputs', 'recommendationSubscriptionCandidates', 'videoState']) {
+  test(`desktop Home releases loading, reports and recovers from a failed ${failedQuery} query`, async t => {
+    let fail = true
+    const instance = createFeed({ desktop: true, autoRefresh: false, candidates: [{ videoId: 'candidate', title: 'Retained' }],
+      query: async (method, options) => {
+        const step = method === 'recommendationInputs' && options.revisionsOnly ? 'revisions' : method
+        if (step === failedQuery && fail) throw new Error(`Failed ${step}`)
+        if (method === 'recommendationInputs') return options.revisionsOnly ? {} : { history: [], favorites: [], saved: [] }
+        if (method === 'recommendationSubscriptionCandidates') return []
+        if (method === 'videoState') return { history: [] }
+        assert.fail(`Unexpected query: ${method}`)
+      },
+    })
+    t.after(instance.stop)
+    await instance.feed.refresh()
+    assert.equal(instance.feed.isLoading.value, false)
+    assert.equal(instance.feed.hasError.value, true)
+    fail = false
+    await instance.feed.refresh()
+    assert.equal(instance.feed.isLoading.value, false)
+    assert.equal(instance.feed.hasError.value, false)
+    assert.deepEqual(instance.feed.recommendations.value.map(video => video.videoId), ['candidate'])
+  })
+}
+
+test('a failed superseded desktop Home request cannot stop or mark the newer feed as failed', async t => {
+  const requests = []
+  const instance = createFeed({ desktop: true, autoRefresh: false,
+    query: async (method, options) => {
+      if (method === 'recommendationInputs') return options.revisionsOnly ? {} : { history: [], favorites: [], saved: [] }
+      if (method === 'videoState') return { history: [] }
+      if (method === 'recommendationSubscriptionCandidates') {
+        const request = Promise.withResolvers()
+        requests.push(request)
+        return request.promise
+      }
+      assert.fail(`Unexpected query: ${method}`)
+    },
+  })
+  t.after(instance.stop)
+  const old = instance.feed.refresh()
+  for (let index = 0; index < 100 && requests.length < 1; index++) await new Promise(resolve => setTimeout(resolve, 1))
+  assert.equal(requests.length, 1)
+  const current = instance.feed.refresh()
+  for (let index = 0; index < 100 && requests.length < 2; index++) await new Promise(resolve => setTimeout(resolve, 1))
+  assert.equal(requests.length, 2)
+  requests[0].reject(new Error('superseded request failed'))
+  await old
+  assert.equal(instance.feed.hasError.value, false)
+  assert.equal(instance.feed.isLoading.value, true)
+  requests[1].resolve([{ videoId: 'current', title: 'Retained' }])
+  await current
+  assert.equal(instance.feed.hasError.value, false)
+  assert.equal(instance.feed.isLoading.value, false)
+  assert.deepEqual(instance.feed.recommendations.value.map(video => video.videoId), ['current'])
+})
+
+test('Home applies the same membership authentication policy to desktop and portable cached candidates', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const videos = [{ videoId: 'public', title: 'Public' }, { videoId: 'member', title: 'Member', isMembersOnly: true }]
+  await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', videos })
+  for (const desktop of [false, true]) {
+    for (const configured of [false, true]) {
+      const subscriptionQueries = []
+      const instance = createFeed({
+        desktop,
+        settings: {
+          getActiveProfile: { subscriptions: [{ id: 'channel', showMembersOnly: false, feedTypes: [] }] },
+          getVideoCache: { channel: { videos } },
+          getYtDlpPlaybackAuthMode: configured ? 'file' : 'none', getYtDlpPlaybackCookiesPath: '/fixture/cookies.txt',
+        },
+        query: async (method, options) => {
+          if (method === 'recommendationInputs') return { history: [], favorites: [], saved: [] }
+          if (method === 'videoState') return { history: [] }
+          assert.equal(method, 'recommendationSubscriptionCandidates')
+          subscriptionQueries.push(structuredClone(options))
+          return recommendationSubscriptionCandidates(engine, structuredClone(options))
+        },
+      })
+      try {
+        await waitForFeed(instance.feed)
+        assert.equal(subscriptionQueries.length, desktop ? 1 : 0)
+        if (desktop) assert.deepEqual(subscriptionQueries[0].channelIds, ['channel'])
+        assert.deepEqual(instance.feed.recommendations.value.map(video => video.videoId), configured ? ['public', 'member'] : ['public'])
+      } finally { instance.stop() }
+    }
+  }
+})
 
 test('revisiting Home restores the completed feed immediately without fetching or ranking again', async () => {
   const first = createFeed({ candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })) })
@@ -369,5 +468,41 @@ for (const videos of [undefined, null, 42, 'retained scalar', { retained: true }
       assert.equal(instance.feed.recommendations.value.length, 0)
       assert.deepEqual(playlists, before)
     } finally { instance.stop() }
+  })
+}
+
+for (const collection of ['history', 'playlists']) {
+  test(`a new desktop Home invalidates cached recommendations after durable ${collection} changes`, async t => {
+    const database = new DatabaseSync(':memory:')
+    database.exec(SCHEMA_SQL)
+    t.after(() => database.close())
+    const engine = new LibraryEngine(database)
+    await engine.collections.history.insertAsync({ _id: 'seed', videoId: 'seed', title: 'Linux', timeWatched: 1 })
+    const first = createFeed({
+      desktop: true, candidates: [{ videoId: 'candidate', title: 'Candidate' }],
+      query: async (method, options) => {
+        if (method === 'recommendationInputs') return recommendationInputs(engine, options)
+        if (method === 'videoState') return engine.videoState(options)
+        if (method === 'recommendationSubscriptionCandidates') return []
+        assert.fail(`Unexpected query: ${method}`)
+      },
+    })
+    await waitForFeed(first.feed)
+    assert.deepEqual(first.feed.recommendations.value.map(video => video.videoId), ['candidate'])
+    const work = { ...first.work }
+    first.stop()
+    const unchanged = first.mount()
+    await waitForFeed(unchanged.feed)
+    assert.deepEqual(unchanged.work, work, 'unchanged revisions must reuse the completed feed')
+    unchanged.stop()
+    if (collection === 'history') await engine.collections.history.insertAsync({ _id: 'candidate', videoId: 'candidate', title: 'Candidate', timeWatched: 2 })
+    else await engine.collections.playlists.insertAsync({ _id: 'p', playlistName: 'Saved', videos: [{ videoId: 'saved', title: 'Saved' }] })
+    const changed = first.mount()
+    try {
+      await waitForFeed(changed.feed)
+      assert.equal(changed.work.requests, work.requests + 1)
+      assert.equal(changed.work.profiles, work.profiles + 1)
+      assert.deepEqual(changed.feed.recommendations.value.map(video => video.videoId), collection === 'history' ? [] : ['candidate'])
+    } finally { changed.stop() }
   })
 }

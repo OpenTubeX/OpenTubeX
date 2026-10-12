@@ -84,6 +84,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  presenceCount: {
+    type: Number,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['selected'])
@@ -118,6 +122,7 @@ const titleForDisplay = computed(() => {
 /** @type {import('vue').ComputedRef<number>} */
 const loneVideoPresenceCountInPlaylist = computed(() => {
   if (toBeAddedToPlaylistVideoList.value.length !== 1) { return 0 }
+  if (props.presenceCount != null) return props.presenceCount
 
   const loneToBeAddedToPlaylistVideoVideoId = toBeAddedToPlaylistVideoList.value[0].videoId
 
@@ -141,6 +146,7 @@ const loneVideoPresenceCountInPlaylistText = computed(() => {
 /** @type {import('vue').ComputedRef<number>} */
 const multiVideoPresenceCountInPlaylist = computed(() => {
   if (toBeAddedToPlaylistVideoList.value.length < 2) { return 0 }
+  if (props.presenceCount != null) return props.presenceCount
 
   // Count of to be added videos already present in this playlist
   return toBeAddedToPlaylistVideoList.value.reduce((accumulator, toBeAddedToVideo) => {
@@ -181,10 +187,9 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
 const thumbnail = computed(() => {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (props.playlist.customThumbnail) return props.playlist.customThumbnail
-  const first = Array.isArray(props.playlist.videos) ? props.playlist.videos[0] : null
+  const first = props.playlist.firstVideo ?? (Array.isArray(props.playlist.videos) ? props.playlist.videos[0] : null)
   return first && typeof first.videoId === 'string' && first.videoId !== ''
     ? getVideoThumbnailUrl(first.videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
-
     : thumbnailPlaceholder
 })
 

@@ -71,6 +71,32 @@ test('failed history metadata requests leave imported entries intact', async ({ 
   await expect(page.getByText('Imported video', { exact: true })).toBeVisible()
 })
 
+test.describe('restored duplicate history occurrences', () => {
+  const older = [
+    { ...original, _id: 'old-first', timeWatched: 1000, watchProgress: 12, unknown: { keep: 'first' } },
+    { ...original, _id: 'old-second', timeWatched: 2000, watchProgress: 34, unknown: { keep: 'second' } },
+  ]
+  const newest = { ...original, _id: 'newest', title: 'Complete newer occurrence', author: 'Current channel', authorId: 'UCabcdefghijklmnopqrstuv', published: 1000, lengthSeconds: 600, isLive: false, liveNow: false, isUpcoming: false, unknown: { keep: 'newest' } }
+  test.use({ seed: { settings: { historyWatchedStatusMigrated: true }, history: [...older, newest] } })
+  test('repairs each older occurrence while preserving the complete newest record and its cache', async ({ app, page }) => {
+    await page.route('**/youtubei/v1/player*', route => route.fulfill({
+      json: {
+        videoDetails: { videoId: original.videoId, author: 'Recovered channel', channelId: 'UCabcdefghijklmnopqrstuv', lengthSeconds: '120' },
+        microformat: { playerMicroformatRenderer: { publishDate: '2025-01-01' } },
+      },
+    }))
+    await goTo(page, 'history')
+    await startRepair(page)
+    await expect(page.getByRole('status')).toContainText('Checked 2/2 · Repaired 2 · Failed 0')
+    const expected = [...older.map(record => ({ ...record, author: 'Recovered channel', authorId: 'UCabcdefghijklmnopqrstuv', published: Date.parse('2025-01-01'), lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false })), newest]
+    const stored = () => app.page.evaluate(async () => (await window.ftElectron.libraryQuery('historyPage')).records)
+    expect((await stored()).sort((a, b) => a._id.localeCompare(b._id))).toEqual(expected.sort((a, b) => a._id.localeCompare(b._id)))
+    await expect.poll(() => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id]._id, original.videoId)).toBe('newest')
+    await app.relaunch()
+    expect((await stored()).sort((a, b) => a._id.localeCompare(b._id))).toEqual(expected)
+  })
+})
+
 test('keeps Cancel available if history is cleared during a repair', async ({ page }) => {
   let release
   const pending = new Promise(resolve => { release = resolve })

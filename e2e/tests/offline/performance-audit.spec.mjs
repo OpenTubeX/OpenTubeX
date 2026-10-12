@@ -192,26 +192,20 @@ test.describe('large bookmark playlist', () => {
   })
 
   test('visible history cards share the bookmark index', async ({ page }) => {
-    await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      window.__bookmarkIdReads = 0
-      for (const video of store.getters.getQuickBookmarkPlaylist.videos) {
-        const id = video.videoId
-        Object.defineProperty(video, 'videoId', {
-          enumerable: true,
-          configurable: true,
-          get() { window.__bookmarkIdReads++; return id },
-        })
-      }
-    })
     await goTo(page, 'history')
     await expect.poll(() => page.locator('.quickBookmarkVideoIcon').count()).toBeGreaterThan(5)
-    const metrics = await page.evaluate(() => ({
-      controls: document.querySelectorAll('.quickBookmarkVideoIcon').length,
-      reads: window.__bookmarkIdReads,
-    }))
+    const metrics = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        controls: document.querySelectorAll('.quickBookmarkVideoIcon').length,
+        count: store.getters.getQuickBookmarkPlaylist.videoCount,
+        residentMembers: store.getters.getQuickBookmarkPlaylist.videos.length,
+      }
+    })
     console.log('Rendered history bookmark work:', metrics)
-    expect(metrics.reads).toBe(10_000)
+    expect(metrics.count).toBe(10_000)
+    expect(metrics.residentMembers).toBe(0)
+    expect(metrics.controls).toBeLessThanOrEqual(100)
     const card = page.locator('.ft-list-video').first()
     await card.locator('.quickBookmarkVideoIcon').click()
     await expect(card.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
@@ -219,28 +213,22 @@ test.describe('large bookmark playlist', () => {
     await expect(card.locator('.quickBookmarkVideoIcon.bookmarked')).toHaveCount(0)
   })
 
-  test('playlist overview does not deep-watch saved video titles', async ({ page }) => {
-    await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      window.__playlistTitleReads = 0
-      for (const video of store.getters.getQuickBookmarkPlaylist.videos) {
-        const title = video.title
-        Object.defineProperty(video, 'title', {
-          enumerable: true,
-          configurable: true,
-          get() { window.__playlistTitleReads++; return title },
-        })
-      }
-    })
+  test('playlist overview retains bounded summaries after metadata changes', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await expect(page.getByRole('link', { name: 'Favorites', exact: true })).toBeVisible()
-    expect(await page.evaluate(() => window.__playlistTitleReads)).toBe(0)
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.getters.getQuickBookmarkPlaylist.videos[0].timeAdded = 2
+      await store.dispatch('updatePlaylist', { ...store.getters.getQuickBookmarkPlaylist, playlistName: 'Favorite saved videos' })
     })
-    await page.waitForTimeout(100)
-    expect(await page.evaluate(() => window.__playlistTitleReads)).toBe(0)
+    expect(await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = store.getters.getQuickBookmarkPlaylist
+      return { count: playlist.videoCount, residentMembers: playlist.videos.length, name: playlist.playlistName }
+    })).toEqual({ count: 10_000, residentMembers: 0, name: 'Favorite saved videos' })
+    const persisted = await page.evaluate(() => window.ftElectron.libraryQuery('playlistPage', { id: 'favorites', limit: 100 }))
+    expect(persisted.records).toHaveLength(100)
+    expect(persisted.cursor).not.toBeNull()
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistStatistics', { id: 'favorites' }))).toMatchObject({ total: 10_000 })
   })
 })
 

@@ -471,6 +471,20 @@ test('foreground RSS parsing lets renderer input run before returning entries', 
   }
 })
 
+test('foreground RSS enrichment failures reject instead of returning a successful empty feed', async () => {
+  const start = subscriptions.indexOf('export async function parseYouTubeRSSFeed(')
+  const end = subscriptions.indexOf('\n/**', start)
+  const failure = new Error('subscription verdict query unavailable')
+  const context = vm.createContext({
+    process: { env: { IS_ELECTRON: true } },
+    window: { ftElectron: { subscriptionAutoRefresh: { processFeed: async () => ({ name: 'Channel', videos: [{ videoId: 'retained' }] }) } } },
+    parseSubscriptionRss,
+    enrichSubscriptionRssEntries: async () => { throw failure },
+  })
+  vm.runInContext(subscriptions.slice(start, end).replace('export ', ''), context)
+  await assert.rejects(context.parseYouTubeRSSFeed('<feed/>', 'UCtest'), error => error === failure)
+})
+
 test('background merge preserves data-loss errors and permits an explicit retry', async () => {
   const jobs = createJobs()
   try {

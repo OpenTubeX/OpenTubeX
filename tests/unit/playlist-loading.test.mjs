@@ -3,12 +3,15 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { effectScope, nextTick, reactive, ref, watch } from 'vue'
+import { createPortableLibrary } from '../../src/datastores/handlers/library-web.js'
+import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
 import { babelParse, parse } from 'vue/compiler-sfc'
-import { ref } from 'vue'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
 const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+const view = await readFile(new URL('../../src/renderer/views/Playlist/Playlist.vue', import.meta.url), 'utf8')
 
 function playlist(_id, playlistName, protectedValue = false) {
   return {
@@ -16,6 +19,17 @@ function playlist(_id, playlistName, protectedValue = false) {
     videos: [{ videoId: `${_id}-video`, playlistItemId: `${_id}-item`, timeAdded: 1, type: 'video' }],
   }
 }
+
+test('playlist view counts retained browser/mobile members and bounded desktop summaries', () => {
+  const expression = view.match(/^const selectedUserPlaylistVideoCount = (.+)$/m)[1]
+  const count = value => vm.runInNewContext(expression, {
+    computed: getter => ({ value: getter() }),
+    selectedUserPlaylist: { value },
+  }).value
+  assert.equal(count(playlist('portable', 'Mobile and browser')), 1)
+  assert.equal(count({ _id: 'desktop', videoCount: 20000, videos: [] }), 20000)
+  assert.equal(count(undefined), 0)
+})
 
 async function fixture(records, quickBookmarkTargetPlaylistId = records[0]?._id) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
@@ -175,6 +189,64 @@ for (const name of [undefined, null, false, 42, { retained: true }]) {
     assert.deepEqual(await db.playlists.findOneAsync({ _id: original._id }), original)
   })
 }
+for (const platform of ['browser', 'android', 'ios']) {
+  for (const direction of ['ascending', 'descending']) {
+    test(`${platform} open duration pages refresh after history repair (${direction})`, async t => {
+      const saved = { _id: 'p', playlistName: 'Saved', lastUpdatedAt: 1, videos: [
+        { videoId: 'repaired', playlistItemId: 'first', unknown: new Date(1) },
+        { videoId: 'explicit', playlistItemId: 'second', lengthSeconds: 30 },
+      ] }
+      const db = { playlists: new Datastore({ inMemoryOnly: true }), history: new Datastore({ inMemoryOnly: true }) }
+      await db.playlists.insertAsync(saved)
+      const history = { find: () => db.history.findAsync({}) }
+      const library = createPortableLibrary({ history, playlists: { find: () => db.playlists.findAsync({}) } })
+      const values = Object.fromEntries([
+        'playlistItems', 'firstVideoId', 'firstVideoPlaylistItemId', 'playlistTitle', 'playlistDescription',
+        'lastUpdatedDate', 'viewCount', 'channelName', 'channelThumbnail', 'channelId', 'infoSource',
+        'userPlaylistPreloadIds', 'userPlaylistVisibleLimit', 'playlistError', 'nextPageError',
+        'playlistErrorRetryable', 'isLoading', 'isLoadingMore', 'playlistPage',
+      ].map(name => [name, ref(name === 'playlistItems' ? [] : null)]))
+      const state = reactive({ history: { historyRevision: 0 } })
+      const pending = []
+      const dependencies = {
+        ...values, ref, watch, nextTick, console, pending, SORT_BY_VALUES,
+        process: { env: { IS_ELECTRON: false, IS_ANDROID: platform === 'android', IS_IOS: platform === 'ios' } },
+        store: { state }, DBLibraryHandlers: library,
+        playlistId: ref('p'), selectedUserPlaylist: ref(saved), isUserPlaylistRequested: ref(true),
+        sortOrder: ref(`video_duration_${direction}`), locale: ref('en-US'),
+        processedVideoSearchQuery: ref(''), videoSearchQuery: ref(''),
+        updateLastUpdatedDate() {}, updatePageTitle() {}, t: key => key,
+      }
+      // Execute the view's page loader and watcher with Vue and the real NeDB
+      // adapter, including the asynchronous refresh and its loaded extent.
+      const pageSource = view.slice(view.indexOf('const userPageCursor ='), view.indexOf('// react to route changes...'))
+      const scope = effectScope()
+      t.after(() => scope.stop())
+      const load = scope.run(() => vm.compileFunction(pageSource + `
+        const original = parseUserPlaylist
+        parseUserPlaylist = (...args) => {
+          const result = original(...args)
+          pending.push(result)
+          return result
+        }
+        return parseUserPlaylist
+      `, Object.keys(dependencies))(...Object.values(dependencies)))
+      await load(saved)
+      assert.deepEqual(values.playlistItems.value.map(video => video.videoId), direction === 'ascending' ? ['repaired', 'explicit'] : ['explicit', 'repaired'])
+      const repaired = { _id: 'visit', videoId: 'repaired', timeWatched: 2, lengthSeconds: 90, watchProgress: 12, unknown: new Date(2) }
+      await db.history.insertAsync(repaired)
+      state.history.historyRevision++
+      await nextTick()
+      assert.equal(pending.length, 2, 'history repair must refresh the open page')
+      await Promise.all(pending)
+      assert.deepEqual(values.playlistItems.value.map(video => [video.videoId, video.lengthSeconds]), direction === 'ascending' ? [['explicit', 30], ['repaired', 90]] : [['repaired', 90], ['explicit', 30]])
+      assert.equal(values.userPlaylistVisibleLimit.value, 2)
+      assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), saved)
+      assert.deepEqual(await db.history.findOneAsync({ _id: 'visit' }), repaired)
+    })
+  }
+}
+
 for (const videos of [undefined, null, false, 'retained', { unknown: true }, [null, false, 'retained'], [{}, { videoId: null }, { videoId: 42 }, { videoId: '' }, new Date(1)]]) {
   test(`portable startup retains opaque playlist members ${JSON.stringify(videos)}`, async () => {
     const record = { ...playlist('legacy', 'Retained'), ...(videos === undefined ? {} : { videos }) }

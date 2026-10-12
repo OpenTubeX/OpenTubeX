@@ -50,7 +50,7 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
-import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBSettingHandlers, DBWatchStatsHandlers, DBLibraryHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
@@ -198,7 +198,47 @@ function parseSnapshot(value) {
   }
 }
 
+async function savedSnapshot(settings) {
+  return process.env.IS_ELECTRON ? DBLibraryHandlers.query('syncSnapshotRead') : settings.syncServerSnapshot
+}
+
+async function saveSnapshotSection({ commit, dispatch, rootState }, settings, collection, value, assertActive = () => {}) {
+  const keys = ['syncServerUrl', 'syncServerToken', 'syncServerPrivacyMode', 'syncServerPrivacyKey', 'syncServerPrivacySalt']
+  const identity = source => keys.map(key => source[key] ?? (key === 'syncServerPrivacyMode' ? 'legacy' : ''))
+  const account = identity(settings)
+  const assertCurrent = () => {
+    assertActive()
+    if (!rootState.settings.syncServerEnabled || identity(rootState.settings).some((value, index) => value !== account[index])) throw new SyncServerCancelledError()
+  }
+  assertCurrent()
+  if (process.env.IS_ELECTRON) {
+    const result = await DBLibraryHandlers.query('syncSnapshotSection', { account, collection, value, remove: value === undefined })
+    assertCurrent()
+    if (!result.updated) throw new SyncServerCancelledError()
+    commit('setSyncServerSnapshot', result.value)
+    return
+  }
+  // The portable snapshot can change while its asynchronous reader yields.
+  // Preserve concurrent sections and recheck ownership before saving it.
+  while (true) {
+    const previous = rootState.settings.syncServerSnapshot
+    const snapshot = parseSnapshot(await savedSnapshot(rootState.settings))
+    assertCurrent()
+    if (previous !== rootState.settings.syncServerSnapshot) continue
+    if (value === undefined) delete snapshot[collection]
+    else snapshot[collection] = value
+    await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+    assertCurrent()
+    return
+  }
+}
+
 async function clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshotValue = rootState.settings.syncServerSnapshot) {
+  if (process.env.IS_ELECTRON) {
+    await saveSnapshotSection({ commit, dispatch, rootState }, { ...rootState.settings }, 'watchStats', undefined)
+    commit('setSyncedWatchStats', [])
+    return
+  }
   commit('setSyncedWatchStats', [])
   const snapshot = parseSnapshot(snapshotValue)
   if (!('watchStats' in snapshot)) return
@@ -276,8 +316,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   let client = networkClient
   let encryptedCollections = null
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
-  const previous = parseSnapshot(settings.syncServerSnapshot)
-  const next = { ...previous }
+  let previous
+  let next
   const historyAccount = [settings.syncServerUrl, settings.syncServerToken,
     settings.syncServerPrivacyMode, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt]
   const result = {}
@@ -289,12 +329,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit,
     dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
     assertActive: assertSyncStillActive,
-    async persistPlaylistSyncBaseline(id, { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] }) {
+    async persistPlaylistSyncBaseline(id, changes) {
+      const { remoteId, metadata, applied = false, videos: syncedVideos, added = [], removed = [] } = changes
       // Encrypted adapter mutations are only published in the final upload.
       if (encrypted) return
       const current = rootState.settings
       if (![current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
         current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])) return
+      if (process.env.IS_ELECTRON) {
+        const result = await DBLibraryHandlers.query('syncSnapshotSection', { account: historyAccount, collection: 'playlists', value: { ...changes, id } })
+        if (result.updated) commit('setSyncServerSnapshot', result.value)
+        return
+      }
       const saved = parseSnapshot(current.syncServerSnapshot)
       // Until the local save succeeds, retain the shared header baseline so a
       // retry can still distinguish a remote rename from a new local edit.
@@ -315,11 +361,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
       // A disable can cancel requests after they succeeded. Record those
       // effects, but never carry them into a different account/privacy context.
+      if (process.env.IS_ELECTRON) {
+        if (!sameAccount()) return
+        const result = await DBLibraryHandlers.query('syncSnapshotHistory', { account: historyAccount, changes })
+        if (result.updated && sameAccount()) commit('setSyncServerSnapshot', result.value)
+        return
+      }
       while (sameAccount()) {
-        const snapshot = rootState.settings.syncServerSnapshot
+        const preview = rootState.settings.syncServerSnapshot
+        const snapshot = await savedSnapshot(rootState.settings)
         const updated = await runBackgroundJob('updateHistorySnapshot', { snapshot, ...changes })
         if (!sameAccount()) return
-        if (snapshot !== rootState.settings.syncServerSnapshot) continue
+        if (preview !== rootState.settings.syncServerSnapshot) continue
         await dispatch('updateSyncServerSnapshot', updated, { root: true })
         return
       }
@@ -518,6 +571,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   try {
+    previous = parseSnapshot(await savedSnapshot(settings))
+    next = { ...previous }
     // Remote checks share recent discovery. Full syncs refresh it for subsequent
     // live checks too, so new support cannot be reverted by an old live client.
     // Recheck missing support before consuming a live notification, otherwise an
@@ -1079,7 +1134,7 @@ const actions = {
   },
 
   async deleteSyncServerSessions({ commit, dispatch, rootState }, { syncDeviceId, sessionId, accountSessionId } = {}) {
-    const settings = rootState.settings
+    const settings = { ...rootState.settings }
     if (typeof syncDeviceId !== 'string' || (sessionId !== undefined && typeof sessionId !== 'string') ||
         (sessionId === undefined && typeof accountSessionId !== 'string')) {
       throw new Error('Invalid synced tab set')
@@ -1145,10 +1200,8 @@ const actions = {
           }
 
           assertSyncEnabled(rootState, client)
-          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
-          snapshot.sessionsV2 = nextSessions
-          await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
-          commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions(snapshot, settings))
+          await saveSnapshotSection({ commit, dispatch, rootState }, settings, 'sessionsV2', nextSessions, () => assertSyncEnabled(rootState, client))
+          commit('setSyncServerOtherDeviceSessions', getSavedOtherDeviceSessions({ sessionsV2: nextSessions }, settings))
           commit('setSyncServerStatus', 'success')
           return true
         }
@@ -1221,9 +1274,7 @@ const actions = {
           assertCurrentAccount(client)
           await collectionCache.put('watchStats', saved.revision, next)
           assertCurrentAccount(client)
-          const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
-          snapshot.watchStats = next
-          await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
+          await saveSnapshotSection({ commit, dispatch, rootState }, settings, 'watchStats', next, () => assertCurrentAccount(client))
           commit('setSyncedWatchStats', next)
           return true
         }

@@ -86,6 +86,7 @@
             :selected="selectedPlaylistIdList.includes(playlist._id)"
             :disabled="playlistDisabled(playlist._id)"
             :adding-duplicate-videos-enabled="addingDuplicateVideosEnabled"
+            :presence-count="presenceCounts ? presenceCounts.get(playlist._id) ?? 0 : null"
             @selected="countSelected"
           />
         </div>
@@ -118,7 +119,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -129,6 +130,7 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
+import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 import store from '../../store/index'
 
 import {
@@ -261,6 +263,21 @@ const allPlaylistsLength = computed(() => allPlaylists.value.length)
 
 const processedQuery = computed(() => query.value.trim().toLowerCase())
 
+const selection = shallowRef({ counts: [], matches: [] })
+const presenceCounts = computed(() => process.env.IS_ELECTRON
+  ? new Map(selection.value.counts.map(row => [row.id, toBeAddedToPlaylistVideoCount.value === 1 ? row.occurrences : row.matchingCount]))
+  : null)
+let selectionGeneration = 0
+if (process.env.IS_ELECTRON) {
+  watch([toBeAddedToPlaylistVideoIdList, processedQuery, allPlaylists], async () => {
+    const current = ++selectionGeneration
+    try {
+      const result = await DBLibraryHandlers.query('playlistSelection', { ids: toBeAddedToPlaylistVideoIdList.value, query: processedQuery.value })
+      if (current === selectionGeneration) selection.value = result
+    } catch (error) { console.error(error) }
+  }, { immediate: true })
+}
+
 const activePlaylists = computed(() => {
   const processedQuery_ = processedQuery.value
 
@@ -274,10 +291,12 @@ const activePlaylists = computed(() => {
 
     if (
       doSearchPlaylistsWithMatchingVideos.value &&
-      (Array.isArray(playlist.videos) ? playlist.videos : []).some(v =>
-        (typeof v?.author === 'string' && v.author.toLowerCase().includes(processedQuery_)) ||
-        (typeof v?.title === 'string' && v.title.toLowerCase().includes(processedQuery_))
-      )
+      (process.env.IS_ELECTRON
+        ? selection.value.matches.includes(playlist._id)
+        : (Array.isArray(playlist.videos) ? playlist.videos : []).some(v =>
+            (typeof v?.author === 'string' && v.author.toLowerCase().includes(processedQuery_)) ||
+            (typeof v?.title === 'string' && v.title.toLowerCase().includes(processedQuery_))
+          ))
     ) {
       return true
     }
@@ -304,12 +323,14 @@ const getPlaylistIdsFiltered = (filter) => {
 }
 
 const playlistIdsContainingVideosToBeAdded = computed(() => {
+  if (process.env.IS_ELECTRON) return new Set(selection.value.counts.filter(row => row.count > 0).map(row => row.id))
   return getPlaylistIdsFiltered((videoIdsToAdd, playlistVideoIds) =>
     videoIdsToAdd.some((videoId) => playlistVideoIds.has(videoId))
   )
 })
 
 const playlistIdsContainingAllVideosToBeAdded = computed(() => {
+  if (process.env.IS_ELECTRON) return new Set(selection.value.counts.filter(row => row.count === new Set(toBeAddedToPlaylistVideoIdList.value).size).map(row => row.id))
   return getPlaylistIdsFiltered((videoIdsToAdd, playlistVideoIds) =>
     videoIdsToAdd.every((videoId) => playlistVideoIds.has(videoId))
   )
@@ -399,7 +420,9 @@ function countSelected(playlistId) {
   }
 }
 
-function addSelectedToPlaylists() {
+let addInProgress = false
+async function addSelectedToPlaylists() {
+  if (addInProgress) return
   const addedPlaylistIds = new Set()
 
   if (selectedPlaylistIdList.value.length === 0) {
@@ -413,27 +436,43 @@ function addSelectedToPlaylists() {
   const allPlaylists_ = allPlaylists.value
   const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
 
-  selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
-    const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null || !Array.isArray(playlist.videos)) { return }
-
-    let videosToBeAdded
-
-    if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = new Set(playlist.videos.flatMap((v) => typeof v?.videoId === 'string' ? [v.videoId] : []))
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.has(v.videoId))
-    } else {
-      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+  if (process.env.IS_ELECTRON) {
+    addInProgress = true
+    try {
+      const changed = await DBLibraryHandlers.query('addSelectedPlaylistVideos', { ids: selectedPlaylistIdList.value, videos: toBeAddedToPlaylistVideoList_, allowDuplicates: addingDuplicateVideosEnabled.value })
+      if (changed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      for (const id of selectedPlaylistIdList.value) addedPlaylistIds.add(id)
+    } catch (error) {
+      console.error(error)
+      showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
+      return
+    } finally {
+      await store.dispatch('grabAllPlaylists').catch(console.error)
+      addInProgress = false
     }
+  } else {
+    selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
+      const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
+      if (playlist == null || !Array.isArray(playlist.videos)) { return }
 
-    store.dispatch('addVideos', {
-      _id: playlist._id,
-      videos: videosToBeAdded,
+      let videosToBeAdded
+
+      if (!addingDuplicateVideosEnabled.value) {
+        const playlistVideoIds = new Set(playlist.videos.flatMap((v) => typeof v?.videoId === 'string' ? [v.videoId] : []))
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.has(v.videoId))
+      } else {
+      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
+        videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
+      }
+
+      store.dispatch('addVideos', {
+        _id: playlist._id,
+        videos: videosToBeAdded,
+      })
+
+      addedPlaylistIds.add(playlist._id)
     })
-
-    addedPlaylistIds.add(playlist._id)
-  })
+  }
 
   showToast({
     message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {

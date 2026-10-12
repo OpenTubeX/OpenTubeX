@@ -1,6 +1,7 @@
 import { ytDlp } from './ytDlp'
 import { supportsYtDlp } from './ytDlpCapabilities'
 import store from '../store/index'
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { getDownloadTemplateOptions } from './downloadTemplates'
 import {
   matchesAutomaticDownloadRule,
@@ -88,6 +89,11 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
   }
 
   const rule = normalizeAutomaticDownloadRule(rawRule)
+  if (process.env.IS_ELECTRON) {
+    const current = []
+    for (let offset = 0; offset < videos.length; offset += 250) current.push(...await DBLibraryHandlers.query('subscriptionEntries', { channelId: channel.id, field: source === 'live' ? 'liveStreams' : source, ids: videos.slice(offset, offset + 250).map(video => video.videoId) }))
+    videos = current
+  }
   const customTemplates = parseCustomTemplates()
   const templateOptions = getDownloadTemplateOptions(rule.template, customTemplates)
   if (templateOptions === null) {

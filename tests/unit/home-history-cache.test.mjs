@@ -5,6 +5,7 @@ import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import { toRaw } from 'vue'
 import { createStore } from 'vuex'
+import model from '@seald-io/nedb/lib/model.js'
 import { getContinueWatchingCandidates } from '../../src/renderer/helpers/homeSections.js'
 import { canMarkHistoryEntryAsWatched } from '../../src/history.js'
 
@@ -12,12 +13,29 @@ const source = (await readFile(new URL('../../src/renderer/store/modules/history
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace('export default ', 'return ')
 
-function fixture() {
-  const history = compileFunction(source, ['getContinueWatchingCandidates', 'canMarkHistoryEntryAsWatched', 'toRaw'])(getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, toRaw)
+function fixture(electron = false) {
+  const history = compileFunction(source, ['getContinueWatchingCandidates', 'canMarkHistoryEntryAsWatched', 'toRaw', 'model', 'process'])(getContinueWatchingCandidates, canMarkHistoryEntryAsWatched, toRaw, model, { env: { IS_ELECTRON: electron } })
   return createStore({ modules: { history } })
 }
 
 const video = (videoId, watchProgress = 10) => ({ videoId, watchProgress, lengthSeconds: 100, timeWatched: 1000 })
+
+test('desktop history pages retain newest per-video state across page order and tied IDs', () => {
+  const store = fixture(true)
+  const newest = { ...video('same', 75), _id: '\uE000', timeWatched: 2, isWatched: true, unknown: new Date(1) }
+  const older = { ...newest, _id: 'old', timeWatched: 1, watchProgress: 10, isWatched: false }
+  const tied = { ...older, _id: '😀', timeWatched: 2 }
+  for (const pages of [[newest, older, tied], [older, tied, newest]]) {
+    store.commit('cacheHistoryRecords', { ids: ['same'], records: [] })
+    for (const record of pages) store.commit('cacheHistoryRecords', [record])
+    assert.deepEqual(store.getters.getHistoryCacheById.same, newest)
+  }
+  const refreshed = { ...newest, watchProgress: 99 }
+  store.commit('cacheHistoryRecords', [refreshed])
+  assert.deepEqual(store.getters.getHistoryCacheById.same, refreshed)
+  store.commit('cacheHistoryRecords', { ids: ['same'], records: [older] })
+  assert.deepEqual(store.getters.getHistoryCacheById.same, older)
+})
 
 test('the shared Home shelf stays cached and updates after progress, status and structural mutations', () => {
   const store = fixture()
@@ -173,3 +191,15 @@ for (const ids of [[1, '1'], ['1', 1], [true, 'true'], ['true', true]]) {
     })
   }
 }
+
+test('deleting a video removes every restored duplicate from the bounded cache and Home shelf', () => {
+  const store = fixture()
+  const records = [{ ...video('deleted'), _id: 'first' }, { ...video('keep'), _id: 'retained' }, { ...video('deleted'), _id: 'second' }]
+  store.commit('setHistoryCacheSorted', records)
+  store.commit('setHistoryCacheById', { deleted: records[2], keep: records[1] })
+  store.commit('removeFromHistoryCacheById', 'deleted')
+  assert.deepEqual(store.getters.getHistoryCacheSorted, [records[1]])
+  assert.deepEqual(store.getters.getHistoryCacheById, { keep: records[1] })
+  assert.deepEqual(Object.entries(store.getters.getHistoryCacheByRecordId), [['retained', records[1]]])
+  assert.deepEqual(store.getters.getContinueWatchingHistory(), [records[1]])
+})

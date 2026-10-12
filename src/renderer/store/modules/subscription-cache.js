@@ -1,5 +1,5 @@
 import {
-  DBSubscriptionCacheHandlers,
+  DBSubscriptionCacheHandlers, DBLibraryHandlers,
 } from '../../../datastores/handlers/index'
 import { toRaw } from 'vue'
 import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries'
@@ -54,6 +54,7 @@ const state = {
   shortsCache: {},
   postsCache: {},
   subscriptionVideosFeedVersion: 0,
+  libraryPaged: !!process.env.IS_ELECTRON,
 
   subscriptionCacheReady: false,
   subscriptionFeedRefreshInProgress: false,
@@ -149,19 +150,19 @@ const actions = {
         let hasData = false
 
         if (Array.isArray(dataEntry.videos)) {
-          videos[channelId] = { videos: withFeedState(dataEntry.videos), timestamp: toDate(dataEntry.videosTimestamp) }
+          videos[channelId] = { videos: withFeedState(dataEntry.videos), timestamp: toDate(dataEntry.videosTimestamp), ...(dataEntry._libraryFeedCounts ? { count: dataEntry._libraryFeedCounts.videos ?? 0 } : {}) }
           hasData = true
         }
         if (Array.isArray(dataEntry.liveStreams)) {
-          liveStreams[channelId] = { videos: withFeedState(dataEntry.liveStreams), timestamp: toDate(dataEntry.liveStreamsTimestamp) }
+          liveStreams[channelId] = { videos: withFeedState(dataEntry.liveStreams), timestamp: toDate(dataEntry.liveStreamsTimestamp), ...(dataEntry._libraryFeedCounts ? { count: dataEntry._libraryFeedCounts.liveStreams ?? 0 } : {}) }
           hasData = true
         }
         if (Array.isArray(dataEntry.shorts)) {
-          shorts[channelId] = { videos: withFeedState(dataEntry.shorts), timestamp: toDate(dataEntry.shortsTimestamp) }
+          shorts[channelId] = { videos: withFeedState(dataEntry.shorts), timestamp: toDate(dataEntry.shortsTimestamp), ...(dataEntry._libraryFeedCounts ? { count: dataEntry._libraryFeedCounts.shorts ?? 0 } : {}) }
           hasData = true
         }
         if (Array.isArray(dataEntry.communityPosts)) {
-          communityPosts[channelId] = { posts: dataEntry.communityPosts, timestamp: toDate(dataEntry.communityPostsTimestamp) }
+          communityPosts[channelId] = { posts: dataEntry.communityPosts, timestamp: toDate(dataEntry.communityPostsTimestamp), ...(dataEntry._libraryFeedCounts ? { count: dataEntry._libraryFeedCounts.communityPosts ?? 0 } : {}) }
           hasData = true
         }
 
@@ -181,13 +182,15 @@ const actions = {
 
   async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
     const previousCache = state.videoCache[channelId]
-    videos = ensureSubscriptionFeedEntryState(
-      videos,
-      previousCache?.videos,
-      'videoId',
-      previousCache?.timestamp,
-      rootGetters.getHistoryCacheById
-    )
+    if (!state.libraryPaged) {
+      videos = ensureSubscriptionFeedEntryState(
+        videos,
+        previousCache?.videos,
+        'videoId',
+        previousCache?.timestamp,
+        rootGetters.getHistoryCacheById
+      )
+    }
 
     try {
       if (await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp) === false) return false
@@ -217,13 +220,15 @@ const actions = {
 
   async updateSubscriptionLiveCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
     const previousCache = state.liveCache[channelId]
-    videos = ensureSubscriptionFeedEntryState(
-      videos,
-      previousCache?.videos,
-      'videoId',
-      previousCache?.timestamp,
-      rootGetters.getHistoryCacheById
-    )
+    if (!state.libraryPaged) {
+      videos = ensureSubscriptionFeedEntryState(
+        videos,
+        previousCache?.videos,
+        'videoId',
+        previousCache?.timestamp,
+        rootGetters.getHistoryCacheById
+      )
+    }
 
     try {
       if (await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp) === false) return false
@@ -235,12 +240,14 @@ const actions = {
 
   async updateSubscriptionPostsCacheByChannel({ commit, state }, { channelId, posts, timestamp = new Date() }) {
     const previousCache = state.postsCache[channelId]
-    posts = ensureSubscriptionFeedEntryState(
-      posts,
-      previousCache?.posts,
-      'postId',
-      previousCache?.timestamp
-    )
+    if (!state.libraryPaged) {
+      posts = ensureSubscriptionFeedEntryState(
+        posts,
+        previousCache?.posts,
+        'postId',
+        previousCache?.timestamp
+      )
+    }
 
     try {
       if (await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp) === false) return false
@@ -257,6 +264,20 @@ const actions = {
     channelIdsByTab = {},
     entriesByTab
   }) {
+    if (state.libraryPaged) {
+      const caches = { videos: state.videoCache, shorts: state.shortsCache, live: state.liveCache, posts: state.postsCache }
+      const timestampsByTab = Object.fromEntries(tabs.map(tab => [tab, Object.fromEntries((channelIdsByTab[tab] ?? channelIds).map(id => {
+        const time = toDate(caches[tab]?.[id]?.timestamp).getTime()
+        return [id, Number.isFinite(time) ? time : 0]
+      }))]))
+      try {
+        const result = await DBLibraryHandlers.query('markSubscriptionEntries', { tabs, channelIds, channelIdsByTab, timestampsByTab, entriesByTab })
+        if (Object.keys(result.settings).length) dispatch('scheduleSyncServer', 'history').catch(console.error)
+        for (const [key, value] of Object.entries(result.settings)) commit(key === 'subscriptionSeenVideos' ? 'setSubscriptionSeenVideos' : 'setSubscriptionSeenPosts', value)
+      } catch (error) { console.error(error) }
+      commit('markSubscriptionEntriesAsSeenInCache', [])
+      return
+    }
     const cacheConfigs = {
       videos: {
         cache: applySubscriptionSeenVideosToCache(state.videoCache, rootGetters?.getSubscriptionSeenVideos),
@@ -340,6 +361,15 @@ const actions = {
   },
 
   async markSubscriptionVideoAsSeen({ commit, dispatch, state, rootGetters }, videoId) {
+    if (state.libraryPaged) {
+      try {
+        const result = await DBLibraryHandlers.query('markSubscriptionEntries', { videoId })
+        if (Object.keys(result.settings).length) dispatch('scheduleSyncServer', 'history').catch(console.error)
+        for (const [key, value] of Object.entries(result.settings)) commit(key === 'subscriptionSeenVideos' ? 'setSubscriptionSeenVideos' : 'setSubscriptionSeenPosts', value)
+      } catch (error) { console.error(error) }
+      commit('markSubscriptionEntriesAsSeenInCache', [])
+      return
+    }
     const cacheConfigs = [
       {
         cache: applySubscriptionSeenVideosToCache(state.videoCache, rootGetters?.getSubscriptionSeenVideos),
@@ -384,10 +414,12 @@ const actions = {
   },
 
   async markSubscriptionVideoAsUnseen({ dispatch, state }, videoId) {
-    const video = [state.videoCache, state.shortsCache, state.liveCache]
-      .flatMap(cache => Object.values(cache))
-      .flatMap(entry => entry?.videos ?? [])
-      .find(video => video.videoId === videoId)
+    const video = state.libraryPaged
+      ? await DBLibraryHandlers.query('subscriptionEntry', { videoId })
+      : [state.videoCache, state.shortsCache, state.liveCache]
+          .flatMap(cache => Object.values(cache))
+          .flatMap(entry => entry?.videos ?? [])
+          .find(video => video.videoId === videoId)
     if (!video) return
 
     await dispatch('updateSubscriptionHistory', {
@@ -396,6 +428,15 @@ const actions = {
   },
 
   async markSubscriptionPostAsSeen({ commit, dispatch, state, rootGetters }, postId) {
+    if (state.libraryPaged) {
+      try {
+        const result = await DBLibraryHandlers.query('markSubscriptionEntries', { postId })
+        if (Object.keys(result.settings).length) dispatch('scheduleSyncServer', 'history').catch(console.error)
+        for (const [key, value] of Object.entries(result.settings)) commit(key === 'subscriptionSeenVideos' ? 'setSubscriptionSeenVideos' : 'setSubscriptionSeenPosts', value)
+      } catch (error) { console.error(error) }
+      commit('markSubscriptionEntriesAsSeenInCache', [])
+      return
+    }
     const writes = []
     let marked = false
     const cache = applySubscriptionSeenPostsToCache(state.postsCache, rootGetters?.getSubscriptionSeenPosts)
@@ -449,6 +490,7 @@ const mutations = {
     state.subscriptionVideosFeedVersion++
   },
   markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
+    state.subscriptionVideosFeedVersion++
     for (const { tab, channelId, entries: marked } of cacheEntries) {
       const cache = tab === 'videos'
         ? state.videoCache
@@ -471,22 +513,27 @@ const mutations = {
   },
 
   updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
+    state.subscriptionVideosFeedVersion++
     const existingObject = state.videoCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
+    if (state.libraryPaged && entries != null) newObject.count = entries.length
+    if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.videoCache[channelId] = newObject
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
+    state.subscriptionVideosFeedVersion++
     const existingObject = state.shortsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
+    if (state.libraryPaged && entries != null) newObject.count = entries.length
+    if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.shortsCache[channelId] = newObject
   },
   updateShortsCacheWithChannelPageShorts(state, { channelId, entries }) {
+    state.subscriptionVideosFeedVersion++
     const cachedObject = state.shortsCache[channelId]
 
     if (cachedObject && cachedObject.videos.length > 0) {
@@ -513,23 +560,28 @@ const mutations = {
     }
   },
   updateLiveCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
+    state.subscriptionVideosFeedVersion++
     const existingObject = state.liveCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
+    if (state.libraryPaged && entries != null) newObject.count = entries.length
+    if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.liveCache[channelId] = newObject
   },
   updatePostsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
+    state.subscriptionVideosFeedVersion++
     const existingObject = state.postsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { posts: null }
-    if (entries != null) { newObject.posts = preserveSubscriptionSeenEntries(entries, existingObject?.posts, 'postId') }
+    if (state.libraryPaged && entries != null) newObject.count = entries.length
+    if (entries != null) { newObject.posts = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.posts, 'postId') }
     newObject.timestamp = toDate(timestamp)
     state.postsCache[channelId] = newObject
   },
 
   clearCaches(state) {
+    state.subscriptionVideosFeedVersion++
     state.videoCache = {}
     state.shortsCache = {}
     state.liveCache = {}
@@ -537,6 +589,7 @@ const mutations = {
   },
 
   clearCachesForManyChannels(state, channelIds) {
+    state.subscriptionVideosFeedVersion++
     channelIds.forEach((channelId) => {
       state.videoCache[channelId] = null
       state.liveCache[channelId] = null
@@ -546,6 +599,7 @@ const mutations = {
   },
 
   setCaches(state, { videos, liveStreams, shorts, communityPosts }) {
+    state.subscriptionVideosFeedVersion++
     state.videoCache = videos
     state.liveCache = liveStreams
     state.shortsCache = shorts

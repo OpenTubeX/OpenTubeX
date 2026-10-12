@@ -337,6 +337,7 @@ import WatchVideoMetadataHistory from '../WatchVideoMetadataHistory/WatchVideoMe
 import WatchVideoLikes from '../WatchVideoLikes/WatchVideoLikes.vue'
 
 import store from '../../store'
+import { useVideoState } from '../../helpers/libraryState'
 
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
@@ -975,6 +976,8 @@ onBeforeUnmount(() => {
 })
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+useVideoState(store, () => [props.id])
+
 const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.id))
 
 // `description` and `viewCount` are intentionally left out,

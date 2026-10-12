@@ -1,6 +1,7 @@
 import { strToU8, zipSync } from 'fflate'
 
 import { expect, goToSettingsSection, test } from '../../helpers/app.mjs'
+import { DBActions } from '../../../src/constants.js'
 
 test('previews and imports selected data from a YouTube Takeout ZIP', async ({ page }) => {
   const root = 'Takeout/YouTube and YouTube Music'
@@ -51,13 +52,14 @@ test('previews and imports selected data from a YouTube Takeout ZIP', async ({ p
   await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
   await selection.getByRole('button', { name: 'Import selected data' }).click()
 
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list')
     return {
       subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCtakeouttest'),
       watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
       playlists: store.getters.getAllPlaylists.filter(playlist => playlist.playlistName.startsWith('My list')).map(playlist => playlist.playlistName).sort(),
-      playlistVideoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list')?.videos.map(video => video.videoId),
+      playlistVideoIds: playlist ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })).videos.map(video => video.videoId) : [],
       olderDescription: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'My list (3)')?.description,
       search: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'example'),
     }
@@ -66,7 +68,7 @@ test('previews and imports selected data from a YouTube Takeout ZIP', async ({ p
 
 test('imports a Takeout playlist CSV through Import Playlists', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     Object.defineProperty(window, 'showOpenFilePicker', {
       configurable: true,
       value: async options => {
@@ -83,9 +85,10 @@ test('imports a Takeout playlist CSV through Import Playlists', async ({ page })
   })
 
   await dataSection.getByRole('button', { name: 'Import Playlists' }).click()
-  await expect.poll(() => page.evaluate(() => {
+  await expect.poll(() => page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    return store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')?.videos.map(video => video.videoId)
+    const playlist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Takeout favorites')
+    return playlist ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })).videos.map(video => video.videoId) : []
   })).toEqual(['abcdefghijk', '-abcdefghij'])
 })
 
@@ -111,24 +114,25 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     })
   }, [...archive])
 
+  const builtInFavorites = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'favorites' }))
   for (let attempt = 0; attempt < 2; attempt++) {
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
     const selection = page.locator('.takeoutSelectionCentered')
     await expect(selection.getByRole('checkbox')).toHaveCount(1)
     await selection.getByRole('button', { name: 'Preview changes', exact: true }).click()
     await selection.getByRole('button', { name: 'Import selected data' }).click()
-    await expect.poll(() => page.evaluate(() => {
+    await expect.poll(() => page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return ['Sets (Techno/Trance)-videos', 'Empty', 'Favorites', "It's music", 'Case list', 'Case list-videos'].map(name => {
+      return await Promise.all(['Sets (Techno/Trance)-videos', 'Empty', 'Favorites', "It's music", 'Case list', 'Case list-videos'].map(async name => {
         const playlist = store.getters.getAllPlaylists.find(item => item.playlistName === name)
         return playlist && {
           playlistName: playlist.playlistName,
           description: playlist.description,
           createdAt: playlist.createdAt,
           lastUpdatedAt: playlist.lastUpdatedAt,
-          videoIds: playlist.videos.map(video => video.videoId),
+          videoIds: (await window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })).videos.map(video => video.videoId),
         }
-      })
+      }))
     })).toEqual([
       { playlistName: 'Sets (Techno/Trance)-videos', description: 'Sets, with "quotes"\nand a second line', createdAt, lastUpdatedAt, videoIds: ['abcdefghijk'] },
       { playlistName: 'Empty', description: 'No videos', createdAt, lastUpdatedAt, videoIds: [] },
@@ -137,7 +141,8 @@ test('imports original titles, descriptions, timestamps and empty playlists from
       { playlistName: 'Case list', description: 'First overlapping title', createdAt, lastUpdatedAt, videoIds: ['abcdefghijk'] },
       { playlistName: 'Case list-videos', description: 'Second overlapping title', createdAt, lastUpdatedAt, videoIds: ['lmnopqrstuv'] },
     ])
-    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(7)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(8)
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'favorites' }))).toStrictEqual(builtInFavorites)
   }
 })
 
@@ -171,22 +176,24 @@ for (const [name, metadata] of [
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
-    await expect.poll(() => page.evaluate(() => {
+    await expect.poll(() => page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const goodPlaylist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good/List')
+      const localized = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === '本地清單')
+      const empty = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good empty')
       return {
         subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailure'),
         watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
         searched: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'metadata failure'),
         playlistCount: store.getters.getAllPlaylists.length,
-        videoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === '本地清單')?.videos.map(video => video.videoId),
+        videoIds: localized ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: localized._id })).videos.map(video => video.videoId) : undefined,
         goodPlaylist: goodPlaylist && {
           description: goodPlaylist.description,
           createdAt: goodPlaylist.createdAt,
           lastUpdatedAt: goodPlaylist.lastUpdatedAt,
-          videoIds: goodPlaylist.videos.map(video => video.videoId),
+          videoIds: (await window.ftElectron.libraryQuery('playlistSnapshot', { id: goodPlaylist._id })).videos.map(video => video.videoId),
         },
-        empty: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good empty')?.videos,
+        empty: empty ? (await window.ftElectron.libraryQuery('playlistSnapshot', { id: empty._id })).videos : undefined,
       }
     })).toEqual({
       subscribed: true,
@@ -203,29 +210,31 @@ for (const [name, metadata] of [
   })
 }
 
-for (const [kind, action, failedName] of [
-  ['existing', 'importPlaylist', 'Favorites'],
-  ['new', 'addPlaylist', 'Failed empty list'],
+for (const [kind, failedName] of [
+  ['existing', 'Existing failed list'],
+  ['new', 'Failed empty list'],
 ]) {
-  test(`reports a failed ${kind} playlist save and continues without claiming complete success`, async ({ page }) => {
+  test(`reports a failed ${kind} playlist save and continues without claiming complete success`, async ({ app, page }) => {
     const archive = zipSync({
       'Takeout/YouTube/playlists/playlists.csv': strToU8(`Playlist ID,Playlist Title (Original)\nPLfailed,${failedName}\nPLempty,Another empty list\n`),
     })
     const dataSection = await goToSettingsSection(page, 'data')
-    await page.evaluate(({ bytes, action, failedName }) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const dispatch = store.dispatch.bind(store)
-      store.dispatch = (type, payload, options) => {
-        if (type === action && payload.playlistName === failedName) {
-          return action === 'addPlaylist' ? Promise.resolve(false) : Promise.reject(new Error('Simulated playlist write failure'))
-        }
-        return dispatch(type, payload, options)
-      }
+    const retained = { _id: 'existing-takeout', playlistName: failedName, videos: [{ videoId: 'retained', playlistItemId: 'member', unknown: true }], future: { keep: true } }
+    if (kind === 'existing') await page.evaluate(({ record, action }) => window.ftElectron.dbPlaylists(action, [record]), { record: retained, action: DBActions.GENERAL.CREATE })
+    await app.electronApp.evaluate(({ ipcMain }, failedName) => {
+      const handler = ipcMain._invokeHandlers.get('library-query')
+      ipcMain.removeHandler('library-query')
+      ipcMain.handle('library-query', (event, request) => {
+        if (request.method === 'importChunk' && request.data.records?.some(record => record.playlistName === failedName)) throw new Error('Simulated playlist write failure')
+        return handler(event, request)
+      })
+    }, failedName)
+    await page.evaluate(bytes => {
       Object.defineProperty(window, 'showOpenFilePicker', {
         configurable: true,
         value: async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'empty-playlists.zip', { type: 'application/zip' }) }]
       })
-    }, { bytes: [...archive], action, failedName })
+    }, [...archive])
     await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Preview changes', exact: true }).click()
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
@@ -233,5 +242,6 @@ for (const [kind, action, failedName] of [
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
     await expect(page.locator('.toast', { hasText: `Unable to read file: Takeout/YouTube/playlists/${failedName}-videos.csv` })).toBeVisible()
     await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)
+    if (kind === 'existing') expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), retained._id)).toStrictEqual(retained)
   })
 }

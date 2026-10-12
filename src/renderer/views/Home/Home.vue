@@ -104,12 +104,14 @@
         <HomeShelf
           :items="continueWatching"
           :label="sectionLabel(section.id)"
+          :total-items="IS_ELECTRON ? store.getters.getContinueWatchingTotal : null"
+          :load-more="IS_ELECTRON ? loadMoreContinuedHistory : null"
         >
           <template #default="{ items }">
             <ul class="mediaGrid">
               <li
                 v-for="video in items"
-                :key="video.videoId"
+                :key="video._id ?? video.videoId"
               >
                 <RouterLink
                   :to="`/watch/${video.videoId}`"
@@ -283,9 +285,33 @@
           :icon="['fas', 'fire']"
           :to="newSubscriptionFeedRoute"
         />
+        <div
+          v-if="failedNewSubscriptionCategories.length"
+          role="alert"
+        >
+          <p>{{ t('Storage Startup Error.Title') }}</p>
+          <div
+            v-for="category in failedNewSubscriptionCategories"
+            :key="category"
+            class="sectionHeading"
+            :data-home-subscription-retry="category"
+          >
+            <span>{{ newSubscriptionCategoryLabel(category) }}</span>
+            <FtButton
+              :label="t('Storage Startup Error.Retry')"
+              :icon="['fas', 'sync']"
+              :disabled="pagedNewContent[category].busy.value"
+              @click="retryNewSubscriptionCategory(category)"
+            />
+          </div>
+        </div>
+        <FtLoader v-else-if="newSubscriptionReadPending && newSubscriptionEntries.length === 0" />
         <HomeShelf
+          v-if="newSubscriptionEntries.length > 0"
           :items="newSubscriptionEntries"
           :label="sectionLabel(section.id)"
+          :total-items="IS_ELECTRON ? newSubscriptionTotal : null"
+          :load-more="IS_ELECTRON ? loadMoreNewSubscriptionEntries : null"
         >
           <template #default="{ items }">
             <ul class="mediaGrid newSubscriptionGrid">
@@ -535,7 +561,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAutoGrid from '../../components/FtAutoGrid/FtAutoGrid.vue'
@@ -566,6 +592,8 @@ import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/res
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { formatDateTime } from '../../helpers/dateFormat'
 import { useHomeRecommendations } from '../../composables/useHomeRecommendations'
+import { useSubscriptionPage } from '../../composables/useSubscriptionPage'
+import { useTabContext } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
@@ -593,6 +621,20 @@ const configurableSections = computed(() => (
   sectionLayout.value.filter(section => supportedSectionIds.value.has(section.id))
 ))
 const visibleSections = computed(() => configurableSections.value.filter(section => section.visible))
+
+const { isTabPresented } = useTabContext()
+let historySummaryRefreshPending = false
+function refreshHomeHistorySummary() {
+  if (IS_ELECTRON && !historySummaryRefreshPending && isTabPresented?.value !== false && visibleSections.value.some(section => section.id === 'continueWatching')) {
+    historySummaryRefreshPending = true
+    store.dispatch('refreshHistorySummary').catch(console.error).finally(() => { historySummaryRefreshPending = false })
+  }
+}
+// Eligibility can change with the clock even when no history write occurred.
+onMounted(refreshHomeHistorySummary)
+onActivated(refreshHomeHistorySummary)
+watch(() => isTabPresented?.value, presented => { if (presented) refreshHomeHistorySummary() })
+watch(() => visibleSections.value.some(section => section.id === 'continueWatching'), visible => { if (visible) refreshHomeHistorySummary() })
 const allSectionsHidden = computed(() => visibleSections.value.length === 0)
 const {
   enabled: recommendationsEnabled,
@@ -640,6 +682,7 @@ function recommendationReason(video) {
 }
 
 const continueWatching = computed(() => store.getters.getContinueWatchingHistory())
+const loadMoreContinuedHistory = () => store.dispatch('loadMoreContinuedHistory')
 const watchQueue = computed(() => store.getters.getWatchQueue)
 const playlistVideoCount = playlist => store.state.playlists.libraryPaged ? playlist.videoCount ?? 0 : Array.isArray(playlist.videos) ? playlist.videos.length : 0
 const recentPlaylists = computed(() => store.getters.getAllPlaylists
@@ -652,27 +695,71 @@ const recentPlaylists = computed(() => store.getters.getAllPlaylists
 const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlpDownloads))
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
-const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
-  feeds: enabledSubscriptionFeeds.value,
-  activeSubscriptions: activeSubscriptions.value,
-  historyCacheById: store.getters.getHistoryCacheById,
-  hideLiveStreams: store.getters.getHideLiveStreams,
-  hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getActiveForbiddenTitles,
-  onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
-  onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
-  restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
-  sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
-}))
-const newSubscriptionEntries = computed(() => (
-  Object.entries(newSubscriptionContent.value)
+const pagedNewContent = IS_ELECTRON
+  ? Object.fromEntries(['videos', 'shorts', 'live', 'posts'].map(category => [category, useSubscriptionPage(
+      () => category,
+      () => true,
+      () => store.getters.getShowNewSubscriptionFeed,
+      () => 100,
+      () => 100,
+      () => 'newest'
+    )]))
+  : {}
+const newSubscriptionContent = computed(() => IS_ELECTRON
+  ? Object.fromEntries(Object.entries(pagedNewContent).map(([category, page]) => [category, page.records.value]))
+  : getNewSubscriptionFeedEntries({
+      feeds: enabledSubscriptionFeeds.value,
+      activeSubscriptions: activeSubscriptions.value,
+      historyCacheById: store.getters.getHistoryCacheById,
+      hideLiveStreams: store.getters.getHideLiveStreams,
+      hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+      forbiddenTitles: store.getters.getActiveForbiddenTitles,
+      onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
+      onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
+      restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),
+      sortBy: store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest',
+    }))
+function newSubscriptionPrefix(content, pages) {
+  const entries = Object.entries(content)
     .flatMap(([category, entries]) => entries.map(entry => ({
       category,
       entry,
       timestamp: newSubscriptionEntryTimestamp(entry)
     })))
     .toSorted((a, b) => b.timestamp - a.timestamp)
-))
+  let complete = entries.length
+  for (const [category, page] of Object.entries(pages)) {
+    if (!page.records.value.length && (page.busy.value || page.failed.value)) return []
+    if (!page.cursor.value) continue
+    // Unknown rows follow this category's last loaded row. Publish only the
+    // merged prefix before any category can insert another row into it.
+    const end = entries.findIndex(item => item.category === category && item.entry === page.records.value.at(-1))
+    complete = Math.min(complete, end + 1)
+  }
+  return entries.slice(0, complete)
+}
+const newSubscriptionEntries = computed(() => newSubscriptionPrefix(newSubscriptionContent.value, pagedNewContent))
+const newSubscriptionTotal = computed(() => Object.values(pagedNewContent).reduce((total, page) => total + page.total.value, 0))
+const failedNewSubscriptionCategories = computed(() => Object.entries(pagedNewContent).filter(([, page]) => page.failed.value).map(([category]) => category))
+const newSubscriptionReadPending = computed(() => Object.values(pagedNewContent).some(page => page.busy.value))
+
+function retryNewSubscriptionCategory(category) {
+  const page = pagedNewContent[category]
+  if (page.busy.value) return
+  return (page.cursor.value && page.records.value.length ? page.more() : page.load()).catch(console.error)
+}
+
+async function loadMoreNewSubscriptionEntries() {
+  const pages = Object.values(pagedNewContent).filter(page => page.cursor.value)
+  if (pages.some(page => page.busy.value)) return false
+  try {
+    await Promise.all(pages.map(page => page.more()))
+    return pages.every(page => !page.failed.value)
+  } catch (error) {
+    console.error(error)
+    return false
+  }
+}
 const newSubscriptionFeedRoute = Object.freeze({
   path: '/subscriptions',
   query: { tab: 'new' },
@@ -708,7 +795,7 @@ const sectionDefinitions = computed(() => ({
   },
   newSinceLastVisit: {
     label: t('Home Page.New since last visit'),
-    get hasContent() { return store.getters.getShowNewSubscriptionFeed && newSubscriptionEntries.value.length > 0 },
+    get hasContent() { return store.getters.getShowNewSubscriptionFeed && (newSubscriptionEntries.value.length > 0 || failedNewSubscriptionCategories.value.length > 0 || newSubscriptionReadPending.value) },
   },
   watchQueue: {
     label: t('Home Page.Watch queue'),

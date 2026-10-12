@@ -1,5 +1,5 @@
 import { IpcChannels } from '../../../src/constants.js'
-import { access, mkdir, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, goToSettingsSection, setWindowSize, test } from '../../helpers/app.mjs'
 
@@ -22,6 +22,54 @@ test.use({
       videosTimestamp: 1
     }]
   }
+})
+
+test.describe('desktop library compaction', () => {
+  const history = Array.from({ length: 16 }, (_, index) => ({
+    _id: `large-${index}`,
+    videoId: `v${String(index).padStart(10, '0')}`,
+    title: `History ${index}`,
+    timeWatched: 1700000000000 + index,
+    isWatched: true,
+    unknown: '雪'.repeat(90000),
+  }))
+  const playlist = {
+    _id: 'retained',
+    playlistName: 'Retained',
+    protected: true,
+    unknown: { keep: true },
+    videos: [
+      { videoId: 'same', playlistItemId: 'duplicate', unknown: 'first' },
+      { videoId: 'same', playlistItemId: 'duplicate', unknown: 'second' },
+    ]
+  }
+  test.use({ seed: { settings: { historyRetentionDays: '', historyWatchedStatusMigrated: true }, history, playlists: [playlist] } })
+  test('releases deleted library pages while preserving ordered duplicates and migration originals after relaunch', async ({ app, page }) => {
+    const libraryPath = path.join(app.userDataDir, 'library.sqlite')
+    const originals = await Promise.all(['history.db', 'playlists.db', 'settings.db'].map(filename => readFile(path.join(app.userDataDir, filename))))
+    const before = (await stat(libraryPath)).size
+    expect(before).toBeGreaterThan(4000000)
+    const backup = await page.evaluate(() => window.ftElectron.libraryQuery('exportStart', { format: 'ndjson', collection: 'history' }))
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+    expect(await page.evaluate(() => window.ftElectron.storage.compactDatabases())).toBe(false)
+    const exported = await page.evaluate(async backup => {
+      const chunk = await window.ftElectron.libraryQuery('exportNext', backup)
+      return new TextDecoder().decode(chunk.data)
+    }, backup)
+    expect(exported).toContain('History 0')
+    expect(await page.evaluate(backup => window.ftElectron.libraryQuery('exportCancel', backup), backup)).toBe(true)
+    expect(await page.evaluate(() => window.ftElectron.storage.compactDatabases())).toBe(true)
+    const after = (await stat(libraryPath)).size
+    expect(after).toBeLessThan(before / 2)
+    const stored = () => app.page.evaluate(async () => ({
+      history: (await window.ftElectron.libraryQuery('historyPage')).records,
+      playlist: await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'retained' }),
+    }))
+    expect(await stored()).toEqual({ history: [], playlist })
+    await app.relaunch()
+    expect(await stored()).toEqual({ history: [], playlist })
+    expect(await Promise.all(['history.db', 'playlists.db', 'settings.db'].map(filename => readFile(path.join(app.userDataDir, filename))))).toEqual(originals)
+  })
 })
 
 test('keeps retention label transparent and its indicators inside the card', async ({ app, page }, testInfo) => {
@@ -334,8 +382,10 @@ test('moves storage controls into one searchable category', async ({ app, attach
   await expect(storage.locator('.storageKind')).toHaveCount(0)
   await expect(storage.locator('.storageLocation').filter({ hasText: 'downloads.json' })
     .locator('[data-icon="file-lines"]')).toBeVisible()
-  await expect(storage.locator('.storageLocation').filter({ hasText: 'subscription-cache.db' })
-    .locator('[data-icon="file-lines"]')).toBeVisible()
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'library.sqlite' })).toHaveCount(7)
+  await expect(storage.locator('.storageLocation').filter({ hasText: '.db' })).toHaveCount(0)
+  await expect(storage.locator('.storageLocation').filter({ hasText: 'library.sqlite' })
+    .locator('[data-icon="file-lines"]')).toHaveCount(7)
   await expect(storage.locator('.storageLocation').filter({ hasText: 'tab-previews/' })
     .locator('[data-icon="folder-open"]')).toBeVisible()
   await expect(storage.getByText('Measured profile data')).toHaveCount(0)

@@ -1,22 +1,24 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
-import { test, expect, waitForAppReady, openNewWindowFromTabBar } from '../../helpers/app.mjs'
+import { test, expect, goTo, waitForAppReady, openNewWindowFromTabBar } from '../../helpers/app.mjs'
 import { createBackgroundSubscriptionRequests } from '../../../src/subscriptionBackgroundRequests.js'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
-const xml = '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/"><author><name>Background channel</name></author><entry><yt:videoId>background1</yt:videoId><title>Fetched with the window closed</title><published>2026-09-14T08:00:00Z</published><media:statistics views="1"/></entry></feed>'
+const previousFetch = Date.now() - 86400000
+const xml = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/"><author><name>Background channel</name></author><entry><yt:videoId>background1</yt:videoId><title>Fetched with the window closed</title><published>${new Date(Date.now() - 60000).toISOString()}</published><media:statistics views="1"/></entry><entry><yt:videoId>previous111</yt:videoId><title>Previously fetched video</title><published>${new Date(previousFetch - 86400000).toISOString()}</published><media:statistics views="1000"/></entry></feed>`
 
 test.use({
   seed: {
-    settings: { fetchSubscriptionsAutomatically: false, enableClosedAppSubscriptionRefresh: true, subscriptionFeedAutoRefreshInterval: '0' },
-    profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: [{ id: channelId, name: 'Background channel', thumbnail: '' }] }]
+    settings: { fetchSubscriptionsAutomatically: false, enableClosedAppSubscriptionRefresh: true, subscriptionFeedAutoRefreshInterval: '0', showNewSubscriptionFeed: true, showNewSubscriptionFeedIndicators: true },
+    profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: [{ id: channelId, name: 'Background channel', thumbnail: '' }] }],
+    subscriptionCache: [{ _id: channelId, videosTimestamp: previousFetch, videos: [{ videoId: 'previous111', title: 'Previously fetched video', author: 'Background channel', authorId: channelId, published: previousFetch - 86400000, isNewInSubscriptionFeed: false }] }],
   }
 })
 
 for (const windowAction of ['destroy', 'hide']) {
   const windowState = windowAction === 'destroy' ? 'have no renderers' : 'hide'
-  test(`refreshes while windows ${windowState}, imports on return, and quits fully`, async ({ app, page }) => {
+  test(`refreshes while windows ${windowState}, imports on return, and quits fully`, async ({ app, page }, testInfo) => {
     await app.electronApp.evaluate(({ net }, body) => {
       const originalFetch = net.fetch
       net.fetch = (url, options) => {
@@ -62,8 +64,15 @@ for (const windowAction of ['destroy', 'hide']) {
     } else {
       await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show())
     }
-    await expect.poll(() => nextPage.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getVideoCache[id]?.videos[0]?.title, channelId)).toBe('Fetched with the window closed')
+    await expect.poll(() => nextPage.evaluate(async id => (await window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: ['background1'] }))[0]?.title, channelId)).toBe('Fetched with the window closed')
+    const entries = await nextPage.evaluate(id => window.ftElectron.libraryQuery('subscriptionEntries', { channelId: id, ids: ['background1', 'previous111'] }), channelId)
+    expect(entries.map(entry => [entry.videoId, entry.isNewInSubscriptionFeed])).toStrictEqual([['background1', true], ['previous111', false]])
     await expect.poll(() => nextPage.evaluate(() => window.ftElectron.subscriptionAutoRefresh.nextBackgroundResult())).toBeNull()
+    await goTo(nextPage, 'subscriptions')
+    await nextPage.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(nextPage.getByText('Fetched with the window closed', { exact: true })).toBeVisible()
+    await expect(nextPage.getByText('Previously fetched video', { exact: true })).toHaveCount(0)
+    await nextPage.locator('.tabContent[aria-hidden="false"]').screenshot({ path: testInfo.outputPath(`background-new-${windowAction}.png`) })
     const quit = app.electronApp.waitForEvent('close')
     await app.electronApp.evaluate(({ app }) => { app.quit() })
     await quit

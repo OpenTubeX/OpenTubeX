@@ -194,9 +194,11 @@ test('portable backup restoration retains every identified history occurrence ac
     { _id: 'local-missing', title: 'No video ID', timeWatched: 20, isWatched: true, unknown: { local: true } },
     { _id: 'string-older', videoId: 'same', timeWatched: 'aaa', isWatched: true },
     { _id: 'string-newest', videoId: 'same', timeWatched: 'zzz', isWatched: true, unknown: { retained: true } },
+    { _id: 'z-equal', videoId: 'equal', timeWatched: 400, isWatched: false },
   ]
   await db.history.insertAsync(original)
   const incoming = [
+    { _id: 'a-equal', videoId: 'equal', timeWatched: 400, isWatched: true },
     ...[undefined, undefined, null, null, 42, '42', 'same', 'same'].map((videoId, index) => ({
       _id: `imported-${index}`, ...(videoId === undefined ? {} : { videoId }), timeWatched: index + 1,
       watchProgress: 12, isWatched: true, title: `Imported ${index}`, unknown: { index },
@@ -241,12 +243,15 @@ test('portable backup restoration retains every identified history occurrence ac
     assert.deepEqual(await db.history.findAsync({}).sort({ _id: 1 }), expected)
     assert.equal(toRaw(store.state.history.historyCacheSorted).length, expected.length)
     assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
     await store.dispatch('grabHistory')
     assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
+    assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
     assert.equal(messages.at(-1).message, 'Settings.Data Settings.Backup imported')
   }
   assert.equal(await store.dispatch('overwriteHistory', new Map([...original, ...incoming].map(record => [record._id, record]))), true)
   assert.deepEqual(toRaw(store.state.history.historyCacheById.same), (await History.find()).find(record => record.videoId === 'same'))
+  assert.deepEqual(toRaw(store.state.history.historyCacheById.equal), (await History.find()).find(record => record.videoId === 'equal'))
   assert.deepEqual(decoded.history, incoming)
 })
 

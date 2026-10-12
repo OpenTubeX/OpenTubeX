@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import model from '@seald-io/nedb/lib/model.js'
 import { createStore } from 'vuex'
+import { toRaw } from 'vue'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 import * as externalMediaPositions from '../../src/renderer/helpers/externalMediaPosition.js'
@@ -32,7 +37,7 @@ function evaluate (source, dependencies, exports = '') {
 function fixture () {
   const db = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
   const handlers = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
-  const history = evaluate(sources[1], { DBHistoryHandlers: handlers.history, ...historyHelpers, ...externalMediaPositions })
+  const history = evaluate(sources[1], { model, DBHistoryHandlers: handlers.history, ...historyHelpers, ...externalMediaPositions })
   const recommendations = evaluate(sources[2], { DBRecommendationHandlers: handlers.recommendations })
   const otherModules = Object.fromEntries([...sources[3].matchAll(/^import (\w+) from '\.\/modules\//gm)].map(([, name]) => [name, {}]))
   const store = evaluate(sources[3], {
@@ -85,6 +90,56 @@ const video = (videoId, timeWatched = Date.now()) => ({
   watchProgress: 500,
   timeWatched,
   isWatched: true,
+})
+
+test('removing one history video deletes all restored occurrences on both storage adapters', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec('PRAGMA foreign_keys = ON')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const portable = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
+  for (const db of [engine.collections, portable]) {
+    const { history, recommendations } = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
+    const removed = [{ ...video('removed'), _id: 'first' }, { ...video('removed'), _id: 'second', unknown: 'preserved duplicate' }]
+    const retained = { ...video('retained'), _id: 'retained', unknown: { keep: true } }
+    await db.history.insertAsync([...removed, retained])
+    await recommendations.record({ type: 'positive', video: removed[0] })
+    assert.equal(await history.delete('removed'), 2)
+    assert.deepEqual(await db.history.findAsync({}), [retained])
+    assert.deepEqual((await recommendations.find()).records, [])
+    assert.equal(await history.delete('removed'), 0)
+  }
+})
+
+test('age-based cleanup retains newer duplicate history and its recommendation evidence on both adapters', async t => {
+  const database = new DatabaseSync(':memory:')
+  database.exec('PRAGMA foreign_keys = ON')
+  database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  const portable = Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
+  for (const db of [engine.collections, portable]) {
+    const { history, recommendations } = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History, recommendations }')
+    const retained = [
+      { ...video('duplicate', 100), _id: 'boundary', unknown: { keep: true } },
+      { ...video('duplicate', 200), _id: 'recent', watchProgress: 550 },
+      { ...video('playing', 1), _id: 'playing' },
+      { ...video('unrelated', 300), _id: 'unrelated' },
+    ]
+    await db.history.insertAsync([
+      { ...video('duplicate', 1), _id: 'old-first' },
+      { ...video('duplicate', 2), _id: 'old-second' },
+      { ...video('expired', 3), _id: 'expired' },
+      ...retained,
+    ])
+    const evidence = ['duplicate', 'expired', 'playing'].map(_id => ({ _id, updatedAt: Date.now(), feedback: 'positive', unknown: 'keep' }))
+    await db.recommendations.insertAsync(evidence)
+    assert.deepEqual((await history.deleteOlderThan(100, ['playing'])).sort(), ['duplicate', 'duplicate', 'expired'])
+    assert.deepEqual((await db.history.findAsync({})).sort((a, b) => a._id.localeCompare(b._id)), retained.sort((a, b) => a._id.localeCompare(b._id)))
+    assert.deepEqual((await recommendations.find()).records.sort((a, b) => a._id.localeCompare(b._id)), evidence.filter(record => record._id !== 'expired'))
+    assert.deepEqual(await history.deleteOlderThan(100, ['playing']), [])
+  }
 })
 const evidenceIds = records => records.map(record => record.videoId).sort()
 const seeds = store => buildRecommendationProfile(store.getters.getHistoryCacheSorted, {
@@ -201,4 +256,39 @@ test('history removal does not eagerly initialize unused recommendation state', 
 
   assert.equal(f.reloads.length, 0)
   assert.equal(f.store.getters.getRecommendationEpoch, null)
+})
+
+test('failed cleanup refresh retains newer duplicate history in the complete cached view', async t => {
+  const database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL)
+  t.after(() => database.close())
+  const engine = new LibraryEngine(database)
+  for (const db of [engine.collections, Object.fromEntries(['history', 'settings', 'recommendations'].map(name => [name, new Datastore({ inMemoryOnly: true })]))]) {
+    const cutoff = Date.now() - 86_400_000
+    const old = { ...video('same', cutoff - 1), _id: 'old', unknown: 'old' }
+    const newer = { ...video('same', cutoff + 10_000), _id: 'newer', unknown: { keep: new Date(1) }, watchProgress: 321 }
+    await db.history.insertAsync([old, newer])
+    const handlers = evaluate(sources[0], { db, createRecommendationStore, createIdQuery, ...historyHelpers, ...seenHelpers }, 'return { history: History }')
+    let failRead = false
+    const history = evaluate(sources[1], { model, DBHistoryHandlers: handlers.history, ...historyHelpers, ...externalMediaPositions,
+      process: { env: { IS_ELECTRON: db === engine.collections } },
+      DBLibraryHandlers: { query: async (method, options) => { if (failRead) throw new Error('read unavailable'); return engine[method](options) } },
+    })
+    const store = createStore({ modules: { history }, getters: { getHistoryRetentionDays: () => 0 } })
+    await store.dispatch('grabHistory')
+    const before = structuredClone(toRaw(store.state.history.historyCacheSorted))
+    const byIdBefore = structuredClone(toRaw(store.state.history.historyCacheById.same))
+    if (db === engine.collections) assert.deepEqual(byIdBefore, newer)
+    const original = handlers.history.find
+    handlers.history.find = async () => { throw new Error('read unavailable after successful cleanup') }
+    failRead = true
+    t.after(() => { handlers.history.find = original })
+    assert.equal(await store.dispatch('removeHistoryOlderThan', 1), 1)
+    assert.deepEqual([...store.getters.getHistoryCacheSorted], before)
+    assert.deepEqual(store.state.history.historyCacheById.same, byIdBefore)
+    assert.deepEqual(await db.history.findAsync({}), [newer])
+    handlers.history.find = original
+    failRead = false
+    await store.dispatch('grabHistory')
+    assert.deepEqual([...store.getters.getHistoryCacheSorted], [newer])
+  }
 })

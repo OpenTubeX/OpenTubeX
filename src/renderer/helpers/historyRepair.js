@@ -1,3 +1,4 @@
+import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { computed, reactive, ref } from 'vue'
 import store from '../store'
 import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, parseHistoryRepairYtDlp, repairHistory } from '../../historyRepair'
@@ -67,6 +68,41 @@ export async function runMetadataRepair(state, { useCookies = false, ...options 
   Object.assign(state, { ...initialRepairState, running: true, started: true })
   try {
     if (typeof options.records === 'function') options.records = await options.records(controller.signal)
+    if (state === historyRepairState && store.state.history.libraryPaged) {
+      let cursor = null
+      const totals = { checked: 0, repaired: 0, failed: 0 }
+      do {
+        const page = await DBLibraryHandlers.query('historyRepairPage', { cursor })
+        if (controller.signal.aborted) break
+        // The cursor retains the initial count because successful repairs remove candidates.
+        historyRepairState.total = page.total
+        const repairedIds = new Set()
+        try {
+          const result = await repairHistory({
+            records: page.records,
+            getRecord: (videoId, id) => DBLibraryHandlers.query('historyRepairRecord', { id, videoId }),
+            fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),
+            saveMetadata: async metadata => {
+              const result = await store.dispatch('updateSubscriptionHistory', { metadata, deferRefresh: true })
+              if (result.repaired) for (const record of metadata) repairedIds.add(record.videoId)
+              return result
+            },
+            signal: controller.signal,
+            onProgress: progress => { for (const key of Object.keys(totals)) historyRepairState[key] = totals[key] + progress[key] },
+            onPhase: phase => { historyRepairState.phase = phase }
+          })
+          for (const key of Object.keys(totals)) totals[key] += result[key]
+        } finally {
+          // Keep successful partial repairs visible even after cancellation or
+          // a failed later batch. Reload once per page, rather than per save.
+          if (repairedIds.size) {
+            await store.dispatch('grabHistory').catch(console.error)
+            await store.dispatch('hydrateVideoState', [...repairedIds]).catch(console.error)
+          }
+        }
+        cursor = page.cursor
+      } while (cursor && !controller.signal.aborted)
+    } else {
     await repairHistory({
       ...options,
       fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),
@@ -74,6 +110,7 @@ export async function runMetadataRepair(state, { useCookies = false, ...options 
       onProgress: progress => Object.assign(state, progress),
       onPhase: phase => { state.phase = phase },
     })
+    }
     state.phase = controller.signal.aborted ? 'stopped' : 'finished'
   } catch (error) {
     state.phase = 'stopped'

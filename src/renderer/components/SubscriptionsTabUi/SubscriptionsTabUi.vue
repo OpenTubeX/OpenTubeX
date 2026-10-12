@@ -22,7 +22,7 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="!displayIsLoading && activeVideoList.length === 0 && !hasAdditionalContent"
+      v-if="!displayIsLoading && (!isPaged || !pagedFeed.failed.value) && activeVideoList.length === 0 && !hasAdditionalContent"
     >
       <p
         v-if="!activeProfileHasSubscriptions"
@@ -60,12 +60,25 @@
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
       :stable-item-keys="stableItemKeys"
-      :render-all-items-lazily="isElectron"
+      :render-all-items-lazily="isPaged"
       :youtube-style-shorts="youtubeStyleShorts"
     />
     <slot />
+    <FtFlexBox
+      v-if="isPaged && pagedFeed.failed.value"
+      class="subscriptionPageRetry"
+      role="alert"
+    >
+      <FtButton
+        :label="$t('User Playlists.SinglePlaylistView.Retry')"
+        :icon="['fas', 'sync']"
+        @click="increaseLimit"
+      />
+    </FtFlexBox>
     <FtAutoLoadNextPageWrapper
-      v-if="activeVideoList.length > 0 && filteredVideoList.length > dataLimit"
+      v-if="activeVideoList.length > 0 && (isPaged ? pagedFeed.cursor.value !== null && !pagedFeed.failed.value : filteredVideoList.length > dataLimit)"
+      :key="isPaged ? pagedFeed.busy.value : null"
+      :loading="isPaged && pagedFeed.busy.value"
       @load-next-page="increaseLimit"
     >
       <FtFlexBox>
@@ -113,13 +126,14 @@ import {
   applySubscriptionVideoLimit,
   filterMembersOnlySubscriptionVideos
 } from '../../helpers/subscription-channels'
+import { useSubscriptionPage } from '../../composables/useSubscriptionPage'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
-const isElectron = process.env.IS_ELECTRON
 useKeepAliveEffectScope()
 
 const props = defineProps({
+  pagedFeed: { type: Object, default: null },
   dataOverrides: {
     type: Object,
     default: null
@@ -179,6 +193,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['refresh'])
+const isPaged = process.env.IS_ELECTRON
 
 const paginationKey = props.refreshTab ?? (props.onlyShowNew ? 'new' : 'subscriptions')
 const subscriptionLimitStorageKey = tabId
@@ -187,9 +202,12 @@ const subscriptionLimitStorageKey = tabId
 const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
+const ownFeed = useSubscriptionPage(() => props.subscriptionFeedType ?? props.refreshTab ?? 'videos', () => props.onlyShowNew, () => props.pagedFeed === null, () => props.initialDataLimit, () => dataLimit.value)
+const pagedFeed = computed(() => props.pagedFeed ?? ownFeed)
 const subscriptionEntryVersion = useSubscriptionEntryVersion()
 
 const activeVideoList = computed(() => {
+  if (isPaged) return pagedFeed.value.records.value.map(entry => reactive(entry))
   let activeEntries
   if (filteredVideoList.value.length < dataLimit.value) {
     activeEntries = filteredVideoList.value
@@ -220,7 +238,7 @@ const displayIsLoading = computed(() => {
     subscriptionFeedRefreshInProgress.value &&
     (props.refreshTab === null || subscriptionFeedRefreshTab.value === props.refreshTab)
 
-  return props.isLoading || isRelevantGlobalRefresh
+  return props.isLoading || (isPaged && pagedFeed.value.busy.value) || isRelevantGlobalRefresh
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -299,13 +317,23 @@ const filteredVideoList = computed(() => {
 })
 
 const hasNewContent = computed(() => {
+  if (isPaged) return pagedFeed.value.hasNew.value
   return filteredVideoList.value.some(entry => {
     return entry.isNewInSubscriptionFeed === true &&
       (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
   })
 })
 
-function increaseLimit() {
+async function increaseLimit() {
+  if (isPaged) {
+    if (pagedFeed.value.busy.value) return
+    try {
+      await pagedFeed.value.more()
+      dataLimit.value = pagedFeed.value.records.value.length
+      sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
+    } catch (error) { console.error(error) }
+    return
+  }
   dataLimit.value += props.initialDataLimit
   sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
 }
@@ -367,7 +395,7 @@ function refresh() {
   emit('refresh')
 }
 
-defineExpose({ hasNewContent })
+defineExpose({ hasNewContent, isLoading: displayIsLoading })
 </script>
 
 <style scoped src="./SubscriptionsTabUi.css" />

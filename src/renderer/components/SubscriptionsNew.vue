@@ -5,6 +5,7 @@
     class="newFeed"
     :is-loading="isLoading"
     :video-list="displayedEntries"
+    :paged-feed="isElectron ? pagedFeeds[activeCategory ?? 'videos'] : null"
     :data-overrides="newFeedDataOverrides"
     :subscription-feed-type="activeCategory ?? 'videos'"
     :error-channels="errorChannels"
@@ -24,8 +25,9 @@
     </template>
     <Transition name="new-feed-section">
       <section
-        v-if="showCombinedView && newShorts.length > 0"
+        v-if="showCombinedView && (newShorts.length > 0 || (isElectron && pagedFeeds.shorts.failed.value))"
         class="mediaSection"
+        data-new-feed-category="shorts"
       >
         <h3>{{ $t('Global.Shorts') }}</h3>
         <FtElementList
@@ -37,12 +39,32 @@
           :youtube-style-shorts="useCustomShortsPlayer"
           :use-channels-hidden-preference="false"
         />
+        <div
+          v-if="isElectron && pagedFeeds.shorts.failed.value"
+          role="alert"
+        >
+          <p>{{ $t('Storage Startup Error.Title') }}</p>
+          <FtButton
+            :label="$t('Storage Startup Error.Retry')"
+            :icon="['fas', 'sync']"
+            :disabled="pagedFeeds.shorts.busy.value"
+            @click="retryCategory('shorts')"
+          />
+        </div>
+        <FtButton
+          v-else-if="isElectron && pagedFeeds.shorts.cursor.value"
+          :label="$t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
+          :disabled="pagedFeeds.shorts.busy.value"
+          @click="loadMoreCategory('shorts')"
+        />
       </section>
     </Transition>
     <Transition name="new-feed-section">
       <section
-        v-if="showCombinedView && newLive.length > 0"
+        v-if="showCombinedView && (newLive.length > 0 || (isElectron && pagedFeeds.live.failed.value))"
         class="mediaSection"
+        data-new-feed-category="live"
       >
         <h3>{{ $t('Global.Live') }}</h3>
         <FtElementList
@@ -53,12 +75,32 @@
           stable-item-keys
           :use-channels-hidden-preference="false"
         />
+        <div
+          v-if="isElectron && pagedFeeds.live.failed.value"
+          role="alert"
+        >
+          <p>{{ $t('Storage Startup Error.Title') }}</p>
+          <FtButton
+            :label="$t('Storage Startup Error.Retry')"
+            :icon="['fas', 'sync']"
+            :disabled="pagedFeeds.live.busy.value"
+            @click="retryCategory('live')"
+          />
+        </div>
+        <FtButton
+          v-else-if="isElectron && pagedFeeds.live.cursor.value"
+          :label="$t('Subscriptions.Load More Videos')"
+          :icon="['fas', 'arrow-down']"
+          :disabled="pagedFeeds.live.busy.value"
+          @click="loadMoreCategory('live')"
+        />
       </section>
     </Transition>
     <Transition name="new-feed-section">
       <section
-        v-if="showCombinedView && newPosts.length > 0"
+        v-if="showCombinedView && (newPosts.length > 0 || (isElectron && pagedFeeds.posts.failed.value))"
         class="postsSection"
+        data-new-feed-category="posts"
       >
         <h3>{{ $t('Global.Posts') }}</h3>
         <FtElementList
@@ -69,6 +111,25 @@
           display="list"
           stable-item-keys
           :use-channels-hidden-preference="false"
+        />
+        <div
+          v-if="isElectron && pagedFeeds.posts.failed.value"
+          role="alert"
+        >
+          <p>{{ $t('Storage Startup Error.Title') }}</p>
+          <FtButton
+            :label="$t('Storage Startup Error.Retry')"
+            :icon="['fas', 'sync']"
+            :disabled="pagedFeeds.posts.busy.value"
+            @click="retryCategory('posts')"
+          />
+        </div>
+        <FtButton
+          v-else-if="isElectron && pagedFeeds.posts.cursor.value"
+          :label="$t('Subscriptions.Load More Posts')"
+          :icon="['fas', 'arrow-down']"
+          :disabled="pagedFeeds.posts.busy.value"
+          @click="loadMoreCategory('posts')"
         />
       </section>
     </Transition>
@@ -98,6 +159,9 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useSubscriptionPage } from '../composables/useSubscriptionPage'
+import { useTabContext } from '../tabs/TabContext'
+import FtButton from './FtButton/FtButton.vue'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
@@ -133,6 +197,8 @@ onBeforeUnmount(cancelRemovalAnimation)
 
 /** @param {() => Promise<unknown>} markSeen */
 async function markAllAsSeen(markSeen) {
+  const profileId = store.getters.getActiveProfile._id
+  const categories = props.activeCategory === null ? ['videos', 'shorts', 'live', 'posts'] : [props.activeCategory]
   try {
     const element = feed.value?.$el
     if (element && !isReducedMotionEnabled()) {
@@ -154,11 +220,41 @@ async function markAllAsSeen(markSeen) {
     // individual Vue leave hooks otherwise each force their own reflow.
     await nextTick()
     await markSeen()
+    if (isElectron && profileId === store.getters.getActiveProfile._id) {
+      // Seen writes invalidate SQLite views asynchronously. Keep the disposed
+      // feed hidden until its replacement pages are ready, so stale cards do
+      // not remount and then leave one by one when the queued refresh lands.
+      await nextTick()
+      await Promise.all(categories.map(async category => {
+        const page = pagedFeeds[category]
+        try { await page.load() } catch (error) {
+          if (profileId === store.getters.getActiveProfile._id && page.failed.value) page.records.value = []
+          console.error(error)
+        }
+      }))
+    }
   } finally {
     cancelRemovalAnimation()
   }
 }
 
+const { tabId } = useTabContext()
+const extentStorageKey = tabId ? `Subscriptions/${tabId}/new/dataLimit` : 'subscriptionLimit/new'
+const restoredExtent = Number(sessionStorage.getItem(extentStorageKey)) || 0
+const pagedFeeds = Object.fromEntries(['videos', 'shorts', 'live', 'posts'].map(category => [category, useSubscriptionPage(() => category, () => true, () => props.activeCategory === null || props.activeCategory === category, () => category === 'posts' ? 20 : 100, () => Math.max(category === 'posts' ? 20 : 100, restoredExtent))]))
+async function loadMoreCategory(category) {
+  const feed = pagedFeeds[category]
+  if (feed.busy.value) return
+  try {
+    await feed.more()
+    if (!feed.failed.value) sessionStorage.setItem(extentStorageKey, String(Math.max(...Object.values(pagedFeeds).map(page => page.records.value.length))))
+  } catch (error) { console.error(error) }
+}
+function retryCategory(category) {
+  const feed = pagedFeeds[category]
+  if (feed.busy.value) return
+  return (feed.cursor.value && feed.records.value.length ? feed.more() : feed.load()).catch(console.error)
+}
 const newFeedDataOverrides = {
   hideNewSubscriptionFeedIndicator: true,
   isInNewSubscriptionFeed: true,
@@ -262,10 +358,10 @@ watch(watchedHistoryState, (current, previous) => {
 
 // The feed builder tracks fields used for selection and ordering. Downstream
 // pagination should scan raw entries and make only rendered cards reactive.
-const newVideos = computed(() => newContentByCategory.value.videos.map(toRaw))
-const newShorts = computed(() => newContentByCategory.value.shorts.map(toRaw))
-const newLive = computed(() => newContentByCategory.value.live.map(toRaw))
-const newPosts = computed(() => newContentByCategory.value.posts.map(toRaw))
+const newVideos = computed(() => isElectron ? pagedFeeds.videos.records.value : newContentByCategory.value.videos.map(toRaw))
+const newShorts = computed(() => isElectron ? pagedFeeds.shorts.records.value : newContentByCategory.value.shorts.map(toRaw))
+const newLive = computed(() => isElectron ? pagedFeeds.live.records.value : newContentByCategory.value.live.map(toRaw))
+const newPosts = computed(() => isElectron ? pagedFeeds.posts.records.value : newContentByCategory.value.posts.map(toRaw))
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 const showCombinedView = computed(() => props.activeCategory === null)
 const displayedEntries = computed(() => {
@@ -282,11 +378,13 @@ const displayedEntries = computed(() => {
 })
 
 const hasAdditionalContent = computed(() => {
-  return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
+  return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0 ||
+    (isElectron && ['shorts', 'live', 'posts'].some(category => pagedFeeds[category].failed.value))
 })
 
 const isLoading = computed(() => {
-  return !store.getters.getSubscriptionCacheReady || isRefreshing.value
+  return !store.getters.getSubscriptionCacheReady || isRefreshing.value ||
+    (isElectron && Object.values(pagedFeeds).some(feed => feed.busy.value))
 })
 
 const hasNewContent = computed(() => {
@@ -297,12 +395,23 @@ const hasNewContent = computed(() => {
   return newVideos.value.length > 0 || hasAdditionalContent.value
 })
 
-const hasNewContentByCategory = computed(() => ({
-  videos: newVideos.value.length > 0,
-  shorts: newShorts.value.length > 0,
-  live: newLive.value.length > 0,
-  posts: newPosts.value.length > 0
-}))
+const hasNewContentByCategory = computed(() => {
+  if (isElectron) {
+    const counts = pagedFeeds[props.activeCategory ?? 'videos'].categoryCounts.value
+    return Object.fromEntries(
+      Object.entries(pagedFeeds).map(([category, feed]) => {
+        const count = props.activeCategory === null ? feed.categoryCounts.value[category] ?? counts[category] ?? feed.total.value : counts[category] ?? 0
+        return [category, count > 0 || (props.activeCategory === null && feed.records.value.length > 0)]
+      })
+    )
+  }
+  return {
+    videos: newVideos.value.length > 0,
+    shorts: newShorts.value.length > 0,
+    live: newLive.value.length > 0,
+    posts: newPosts.value.length > 0
+  }
+})
 
 defineExpose({
   markAllAsSeen,

@@ -8,9 +8,10 @@ import { areJsonValuesEqual } from '../../src/renderer/helpers/jsonValues.js'
 
 const helpers = createWatchStatsHelpers()
 const storeSource = readFileSync(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const snapshotSource = storeSource.slice(storeSource.indexOf('async function saveSnapshotSection('), storeSource.indexOf('\nasync function clearUnsupportedWatchStats('))
 const actionSource = storeSource.slice(storeSource.indexOf('  replaceSyncWatchStatsDevice('), storeSource.indexOf('  async completeSyncServerPairing('))
 
-async function fixture({ sourceChanged = false, localChanged = false, conflict = false, uploadFails = false, nested = false, rootChanged = false, resetChanged = false } = {}) {
+async function fixture({ sourceChanged = false, localChanged = false, conflict = false, uploadFails = false, nested = false, rootChanged = false, resetChanged = false, snapshotRace } = {}) {
   const key = Buffer.alloc(32, 1).toString('base64')
   const salt = Buffer.alloc(16, 2).toString('base64')
   const settings = { syncServerEnabled: true, syncServerToken: 'token', syncServerUrl: 'https://sync.example',
@@ -55,10 +56,10 @@ async function fixture({ sourceChanged = false, localChanged = false, conflict =
   const bindings = { ...helpers, SyncServerClient: Client, areJsonValuesEqual, decryptSyncDocument, encryptSyncDocument,
     i18n: { global: { t: key => key } }, ENCRYPTED_SYNC_RETRIES: 3,
     activityAccountKey: value => JSON.stringify([value.syncServerUrl, value.syncServerUsername, value.syncServerDeviceId]),
-    assertSyncEnabled: () => {}, SyncServerCancelledError: Error, withSyncLock: callback => callback(),
+    assertSyncEnabled: rootState => { if (!rootState.settings.syncServerEnabled) throw new Error('Sync disabled') }, SyncServerCancelledError: Error, withSyncLock: callback => callback(),
     trackSyncClient: value => value, releaseSyncClient: () => {},
-    collectionCache: { put: () => {} }, parseSnapshot: JSON.parse, savedSnapshot: async settings => settings.syncServerSnapshot, DBWatchStatsHandlers: { find: async () => records } }
-  const actions = compileFunction(`return ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
+    collectionCache: { put: () => {} }, process: { env: { IS_ELECTRON: false } }, parseSnapshot: JSON.parse, savedSnapshot: async settings => { if (snapshotRace) await snapshotRace(settings); return settings.syncServerSnapshot }, DBWatchStatsHandlers: { find: async () => records } }
+  const actions = compileFunction(`${snapshotSource}\nreturn ({${actionSource}})`, Object.keys(bindings))(...Object.values(bindings))
   const context = { rootState: { settings }, commit(name, value) {
     if (name === 'setSyncedWatchStats') visible = value
   }, dispatch: async (name, value) => {
@@ -115,5 +116,22 @@ for (const change of ['rootChanged', 'resetChanged']) {
     await assert.rejects(f.run('max'), /Replacement changed/)
     assert.equal(f.puts(), 0)
     assert.equal(f.remote().length, 2)
+  })
+}
+
+for (const change of ['token', 'disabled', 'privacy key']) {
+  test(`device replacement does not overwrite a new account while reading its snapshot: ${change}`, async () => {
+    const replacement = JSON.stringify({ history: { retained: true }, watchStats: [{ deviceId: 'new-account', days: {} }] })
+    const f = await fixture({ snapshotRace: async settings => {
+      await Promise.resolve()
+      if (change === 'token') settings.syncServerToken = 'new-token'
+      else if (change === 'disabled') settings.syncServerEnabled = false
+      else settings.syncServerPrivacyKey = 'new-key'
+      settings.syncServerSnapshot = replacement
+    } })
+    const before = structuredClone(f.visible())
+    await assert.rejects(f.run('max'))
+    assert.equal(f.settings.syncServerSnapshot, replacement)
+    assert.deepEqual(f.visible(), before)
   })
 }
