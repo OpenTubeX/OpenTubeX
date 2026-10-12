@@ -62,6 +62,9 @@ for (const uiScale of [100, 125]) {
         }
         await open()
         await expect(menu.locator('.bottomSheetHandle')).toBeVisible()
+        await expect(menu).toHaveCSS('touch-action', 'none')
+        await expect(menu.locator('.bottomSheetHandle')).toHaveCSS('touch-action', 'none')
+        await expect(menu.locator(kind === 'more' ? '.moreOptionScroll' : '.mobileLinkActionsScroll')).toHaveCSS('touch-action', 'pan-down')
         if (kind === 'more') {
           const bounds = await menu.boundingBox()
           expect(bounds.width).toBeCloseTo(await page.evaluate(() => innerWidth), 0)
@@ -79,9 +82,8 @@ for (const uiScale of [100, 125]) {
         await expect(page).toHaveURL(/#\/history/)
 
         await open()
-        // A slow short pull settles back and must not activate the row.
+        // A short pull settles back and must not activate the row.
         await touchDrag(session, row, 16)
-        await page.waitForTimeout(100)
         await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await expect(menu).toBeVisible()
         await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
