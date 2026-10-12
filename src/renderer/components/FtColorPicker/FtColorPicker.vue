@@ -272,6 +272,7 @@ let statusTimeout = null
 let copiedTimeout = null
 let lastEmittedColor = null
 let colorSourcesResizeObserver = null
+let popoverResizeObserver = null
 
 const opaqueHex = computed(() => formatHex(hsvToRgb(hue.value, saturation.value, value.value), 255))
 const supportsBlur = computed(() => props.blurValue !== null)
@@ -299,6 +300,9 @@ watch(open, async value => {
   window.addEventListener('resize', positionPopover)
   if (!supportsAnchorPositioning) window.addEventListener('scroll', positionPopover, true)
   await nextTick()
+  if (!open.value || popoverRef.value === null) return
+  popoverResizeObserver = new ResizeObserver(positionPopover)
+  popoverResizeObserver.observe(popoverRef.value)
   positionPopover()
   saturationValueRef.value?.focus()
 })
@@ -559,6 +563,8 @@ function closeFromOutside(event) {
 }
 
 function removeOpenListeners() {
+  popoverResizeObserver?.disconnect()
+  popoverResizeObserver = null
   document.removeEventListener('pointerdown', closeFromOutside)
   window.removeEventListener('resize', positionPopover)
   window.removeEventListener('scroll', positionPopover, true)

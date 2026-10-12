@@ -212,6 +212,40 @@ for (const { uiScale, anchors } of [
 }
 
 for (const scale of [100, 95, 125]) {
+  test(`color picker updates viewport bounds when its status row grows at ${scale}%`, async ({ page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
+    const surface = surfaces.find(surface => surface.name === 'color picker')
+    await surface.open(page)
+    const popup = page.locator(surface.popup)
+    await waitForPopupLayout(popup)
+    const initialHeight = await popup.evaluate(element => element.getBoundingClientRect().height)
+    await popup.locator('.hexInputControl input').press('Escape')
+    const trigger = page.locator(surface.trigger).first()
+    await trigger.evaluate((element, height) => {
+      const rect = element.getBoundingClientRect()
+      element.style.translate = `0px ${innerHeight - height - rect.height - 20 - rect.top}px`
+      element.click()
+    }, initialHeight)
+    await waitForPopupLayout(popup)
+    await expect.poll(() => popup.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight + 12))).toBeLessThanOrEqual(1)
+    const input = popup.locator('.hexInputControl input')
+    await input.fill('invalid')
+    await input.press('Enter')
+    await expect(popup.locator('[role="status"]')).toBeVisible()
+    await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(initialHeight)
+    await expect.poll(() => popup.evaluate(element => element.getBoundingClientRect().bottom <= innerHeight - 11), { timeout: 1000 }).toBe(true)
+    await expect(popup.locator('[role="status"]')).toBeVisible()
+    if (scale === 100) {
+      await page.screenshot({
+        path: testInfo.outputPath('color-picker-status.png'),
+        clip: await popup.evaluate(element => {
+          const { x, y, width, height } = element.getBoundingClientRect()
+          return { x, y, width, height }
+        })
+      })
+    }
+  })
   test(`portaled icon menu stays within viewport bounds during real page scrolling at ${scale}%`, async ({ app, page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), scale)
