@@ -93,7 +93,7 @@ test('yt-dlp retries panoramic extraction when backend projection metadata is ab
   await expect.poll(() => watch.evaluate(view => view.vrProjection)).toBe('EQUIRECTANGULAR')
   await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
   expect(await app.electronApp.evaluate(() => globalThis.__vrAttempts)).toEqual([false, true])
-  expect(await page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
+  await expect.poll(() => page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
   releaseManifest?.()
 })
 
@@ -187,7 +187,7 @@ for (const suppliedHls of ['valid', 'missing', 'rejected', 'failed-child']) {
       manifest: view.manifestSrc?.split('?')[0],
     }))).toEqual({ loading: false, engine: 'built-in', projection: 'EQUIRECTANGULAR', manifest: 'https://vr.example.test/master.m3u8' })
     await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
-    expect(await page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
+    await expect.poll(() => page.locator('.ftVideoPlayer video').first().evaluate(element => element.ui.getControls().isPlayingVR())).toBe(true)
     expect(await app.electronApp.evaluate(() => globalThis.__builtinVrExtractions)).toBe(0)
     expect(vrRequests).toBe(suppliedHls === 'valid' ? 0 : 1)
     releaseManifest?.()

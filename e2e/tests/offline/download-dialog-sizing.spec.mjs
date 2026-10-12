@@ -16,8 +16,10 @@ async function expectCompactOptions(prompt) {
 }
 
 async function scrollToBottom(scroller) {
-  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expect.poll(() => scroller.evaluate(element => {
+    element.scrollTop = element.scrollHeight
+    return element.scrollTop
+  })).toBeGreaterThan(0)
   await expectScrollAtRenderedEnd(scroller)
   await expectScrollbarMatchesOverflow(scroller)
 }
