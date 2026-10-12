@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
@@ -68,7 +68,7 @@ test.use({
 })
 
 async function readSavedSession(userDataDir) {
-  const contents = await readFile(path.join(userDataDir, 'tab-session.db'), 'utf8')
+  const contents = await readPersistedDatastore(path.join(userDataDir, 'tab-session.db'), 'utf8')
   const records = contents
     .trim()
     .split('\n')

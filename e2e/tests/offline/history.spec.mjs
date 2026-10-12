@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -607,7 +608,7 @@ test.describe('watch history', () => {
     await expect(markAllButton).toBeDisabled()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       const latestRecords = Object.values(Object.fromEntries(
         records.filter(record => record.videoId).map(record => [record.videoId, record])
@@ -862,7 +863,7 @@ test.describe('watch history with an immediate watched threshold', () => {
     await expect(video).toHaveCount(0)
     await expect(page.getByText('Your history list is currently empty.')).toBeVisible()
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.filter(record => record._id === 'ddddddddddd').at(-1)?.$$deleted
     }).toBe(true)
@@ -890,7 +891,7 @@ test.describe('watch history with an immediate watched threshold', () => {
     await page.getByRole('menuitem', { name: 'Mark As Watched' }).click()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
       return records.filter(record => record.videoId === 'ddddddddddd').at(-1)?.watchProgress
     }).toBe(0)
@@ -921,7 +922,7 @@ test.describe('history cleanup', () => {
     await expect(page.getByText('Recent video')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'ooooooooooo').at(-1)?.$$deleted
     }).toBe(true)
@@ -975,7 +976,7 @@ test.describe('legacy watch history', () => {
     await expect(page.getByText('Legacy imported video')).toBeVisible()
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.find((record) => record._id === 'legacyvideo')
     }).toMatchObject({ watchProgress: 95, isWatched: true, isLive: false })

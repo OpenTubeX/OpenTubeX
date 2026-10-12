@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
@@ -53,7 +53,7 @@ test.describe('yt-dlp playback preloading', () => {
 
     await expect.poll(async () => {
       const settings = latestSettings(
-        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+        await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
       )
       return {
         enabled: settings.ytDlpPreloadEnabled,

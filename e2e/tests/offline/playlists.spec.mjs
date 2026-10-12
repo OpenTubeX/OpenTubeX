@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -462,7 +463,7 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Renamed seeded playlist')).toHaveCount(0)
 
     await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'e2eseeded').at(-1)?.$$deleted
     }).toBe(true)

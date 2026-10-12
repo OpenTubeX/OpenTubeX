@@ -1,3 +1,4 @@
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { readFile, readdir } from 'node:fs/promises'
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import path from 'node:path'
@@ -230,7 +231,7 @@ test('distraction-free switch disables the early splash in new windows and can r
     await settings.locator('label.switch-label').filter({ hasText: 'Hide Startup Splash' }).click()
     await expect(toggle).toBeChecked({ checked: hidden })
     await expect.poll(async () => latestSettings(
-      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
     ).hideStartupSplash).toBe(hidden)
     if (hidden) {
       for (const colorScheme of ['dark', 'light']) {

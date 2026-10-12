@@ -2279,7 +2279,7 @@ test('mobile skip buttons flank the centered play button', async ({ app, page })
 
   const view = await watchViewHandle(page)
   await view.evaluate(async component => {
-    component.$store.commit('addPlaylist', {
+    await component.$store.dispatch('addPlaylist', {
       _id: 'ft-playlist--mobile-skip-test',
       playlistName: 'Mobile skip test',
       videos: [
@@ -3541,7 +3541,7 @@ test.describe('watch page', () => {
 
     const watchView = await watchViewHandle(page)
     await watchView.evaluate(async view => {
-      view.$store.commit('addPlaylist', {
+      await view.$store.dispatch('addPlaylist', {
         _id: 'ft-playlist--skip-test',
         playlistName: 'Skip test',
         videos: [
@@ -3589,7 +3589,7 @@ test.describe('watch page', () => {
 
     const watchView = await watchViewHandle(page)
     await watchView.evaluate(async view => {
-      view.$store.commit('addPlaylist', {
+      await view.$store.dispatch('addPlaylist', {
         _id: 'ft-playlist--loop-test',
         playlistName: 'Loop test',
         videos: [

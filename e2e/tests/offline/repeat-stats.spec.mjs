@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import { expect, goToSettingsSection, latestSettings, sel, setPlayerFullscreen, setWindowSize, test } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
@@ -155,7 +155,7 @@ test('Distraction Free hides repeat stats immediately without disabling looping 
   await expect(stats).toHaveCount(0)
   await expect.poll(() => video.evaluate(element => element.loop)).toBe(true)
   await expect.poll(async () => {
-    const contents = await readFile(`${app.userDataDir}/settings.db`, 'utf8')
+    const contents = await readPersistedDatastore(`${app.userDataDir}/settings.db`, 'utf8')
     return latestSettings(contents).hideRepeatStats
   }).toBe(true)
 
@@ -164,7 +164,7 @@ test('Distraction Free hides repeat stats immediately without disabling looping 
   await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
   await expect(stats.locator('.repeatStatsTime')).toHaveText(spent)
   await expect.poll(async () => {
-    const contents = await readFile(`${app.userDataDir}/settings.db`, 'utf8')
+    const contents = await readPersistedDatastore(`${app.userDataDir}/settings.db`, 'utf8')
     return latestSettings(contents).hideRepeatStats
   }).toBe(false)
 })

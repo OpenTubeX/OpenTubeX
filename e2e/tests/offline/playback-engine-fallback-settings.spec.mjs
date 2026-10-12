@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
@@ -22,7 +22,7 @@ test('playback-engine fallback defaults on and persists independently of API fal
   await expect(toggle).not.toBeChecked()
   await expect(apiFallback).toBeChecked()
   await expect.poll(async () => latestSettings(
-    await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
   ).playbackEngineFallback).toBe(false)
 
   const relaunched = await app.relaunch()
@@ -33,6 +33,6 @@ test('playback-engine fallback defaults on and persists independently of API fal
   await toggle.press('Space')
   await expect(toggle).toBeChecked()
   await expect.poll(async () => latestSettings(
-    await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8')
   ).playbackEngineFallback).toBe(true)
 })

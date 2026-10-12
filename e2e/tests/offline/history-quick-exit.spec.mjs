@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 import { test, expect, sel } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
@@ -21,7 +21,7 @@ test.use({
 })
 
 async function savedProgress(app) {
-  const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+  const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
   return contents.trim().split('\n').map(line => JSON.parse(line))
     .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
 }

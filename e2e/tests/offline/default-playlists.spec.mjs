@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 
 import { test, expect, goTo } from '../../helpers/app.mjs'
@@ -9,7 +9,7 @@ test('default playlists are created on a fresh profile', async ({ app, page }) =
   await expect(page.getByRole('link', { name: 'Favorites' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Watch Later' })).toBeVisible()
 
-  const db = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+  const db = await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')
   expect(db).toContain('"_id":"favorites"')
   expect(db).toContain('"_id":"watchLater"')
   const playlists = db.trim().split('\n').map(line => JSON.parse(line))
