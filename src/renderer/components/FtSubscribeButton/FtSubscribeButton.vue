@@ -201,6 +201,7 @@ import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import {
   formatSubscriptionDailyVideoLimit,
@@ -313,6 +314,7 @@ const isSubscriptionOptionsEnabled = computed(() => {
 const isProfileDropdownOpen = ref(false)
 const buttonList = useTemplateRef('buttonList')
 const profileDropdown = useTemplateRef('profileDropdown')
+useAnchoredViewportBounds(buttonList, profileDropdown, isProfileDropdownOpen)
 const profileDropdownScroller = useTemplateRef('profileDropdownScroller')
 const profileListContent = useTemplateRef('profileListContent')
 const profileDropdownStyle = ref({ left: '8px', top: '8px' })
@@ -450,8 +452,7 @@ function positionProfileDropdown() {
   const horizontalPosition = getProfileDropdownHorizontalPosition(
     trigger,
     triggerRect,
-    dropdownWidth,
-    viewportMargin
+    dropdownWidth
   )
   const below = triggerRect.bottom + gap
   const above = triggerRect.top - dropdownHeight - gap
@@ -459,10 +460,9 @@ function positionProfileDropdown() {
   const opensAbove = below + dropdownHeight > window.innerHeight - viewportMargin &&
     above >= viewportMargin
   const preferredTop = opensAbove ? above : below
-  const top = Math.max(viewportMargin, Math.min(preferredTop, maximumTop))
 
   profileDropdownStyle.value = getAnchoredPosition(
-    profileDropdownAnchor, triggerRect, snapToDevicePixels(horizontalPosition.left), snapToDevicePixels(top), {
+    profileDropdownAnchor, triggerRect, snapToDevicePixels(horizontalPosition.left), snapToDevicePixels(preferredTop), {
       minLeft: viewportMargin,
       maxLeft: Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin),
       minTop: viewportMargin,
@@ -484,12 +484,11 @@ function prepareProfileDropdownPosition() {
   const horizontalPosition = getProfileDropdownHorizontalPosition(
     trigger,
     triggerRect,
-    dropdownWidth,
-    viewportMargin
+    dropdownWidth
   )
 
   profileDropdownStyle.value = {
-    left: `${snapToDevicePixels(horizontalPosition.left)}px`,
+    left: `${snapToDevicePixels(Math.max(viewportMargin, Math.min(horizontalPosition.left, window.innerWidth - dropdownWidth - viewportMargin)))}px`,
     top: `${snapToDevicePixels(Math.max(viewportMargin, triggerRect.bottom + 4))}px`
   }
   profileDropdownAnchoredLeftEdge.value = horizontalPosition.anchoredLeftEdge
@@ -501,18 +500,16 @@ function prepareProfileDropdownPosition() {
  * @param {HTMLElement} trigger
  * @param {DOMRect} triggerRect
  * @param {number} dropdownWidth
- * @param {number} viewportMargin
  */
-function getProfileDropdownHorizontalPosition(trigger, triggerRect, dropdownWidth, viewportMargin) {
+function getProfileDropdownHorizontalPosition(trigger, triggerRect, dropdownWidth) {
   const anchoredLeftEdge = getComputedStyle(trigger).direction === 'rtl'
   const preferredLeft = anchoredLeftEdge
     ? triggerRect.left
     : triggerRect.right - dropdownWidth
-  const maximumLeft = Math.max(viewportMargin, window.innerWidth - dropdownWidth - viewportMargin)
 
   return {
     anchoredLeftEdge,
-    left: Math.max(viewportMargin, Math.min(preferredLeft, maximumLeft))
+    left: preferredLeft
   }
 }
 

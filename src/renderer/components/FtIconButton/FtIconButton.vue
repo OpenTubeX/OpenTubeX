@@ -5,6 +5,7 @@
     @focusout="handleDropdownFocusOut"
   >
     <button
+      ref="iconButton"
       class="iconButton"
       :aria-label="title"
       :title="title"
@@ -207,6 +208,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
@@ -325,6 +327,7 @@ let fullscreenTargetObserver = null
 const dropdown = useTemplateRef('dropdown')
 const dropdownContent = useTemplateRef('dropdownContent')
 const dropdownContentInner = useTemplateRef('dropdownContentInner')
+useAnchoredViewportBounds(useTemplateRef('iconButton'), dropdown, computed(() => dropdownShown.value && usesDropdownAnchor.value))
 
 watch(dropdownContentInner, (content, _, onCleanup) => {
   if (!content) return
@@ -544,9 +547,13 @@ function keepDropdownInViewport() {
     const clampedLeft = Math.max(viewportMargin, Math.min(left, maxLeft))
     const clampedTop = Math.max(minTop, Math.min(top, maxTop))
     if (usesDropdownAnchor.value) {
-      Object.assign(dropdown.value.style, getAnchoredPosition(dropdownAnchor, buttonRect, clampedLeft, clampedTop, {
+      const position = getAnchoredPosition(dropdownAnchor, buttonRect, left, top, {
         minLeft: viewportMargin, maxLeft, minTop, maxTop
-      }))
+      })
+      for (const [property, value] of Object.entries(position)) {
+        if (property.startsWith('--')) dropdown.value.style.setProperty(property, value ?? '')
+        else dropdown.value.style[property] = value
+      }
     } else {
       dropdown.value.style.left = `${clampedLeft}px`
       dropdown.value.style.top = `${clampedTop}px`

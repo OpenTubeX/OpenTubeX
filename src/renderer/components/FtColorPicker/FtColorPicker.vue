@@ -217,6 +217,7 @@ import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
   modelValue: {
@@ -250,6 +251,7 @@ const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
 const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
 const open = ref(false)
+useAnchoredViewportBounds(triggerRef, popoverRef, open)
 const hue = ref(0)
 const saturation = ref(0)
 const value = ref(0)
@@ -538,11 +540,11 @@ function positionPopover() {
   if (trigger === null || popover === null) return
   const triggerBounds = trigger.getBoundingClientRect()
   const margin = 12
-  const left = clamp(triggerBounds.left, margin, window.innerWidth - popover.offsetWidth - margin)
+  const left = triggerBounds.left
   const below = triggerBounds.bottom + 8
   const top = below + popover.offsetHeight <= window.innerHeight - margin
     ? below
-    : Math.max(margin, triggerBounds.top - popover.offsetHeight - 8)
+    : triggerBounds.top - popover.offsetHeight - 8
   popoverStyle.value = getAnchoredPosition(popoverAnchor, triggerBounds, left, top, {
     minLeft: margin,
     maxLeft: window.innerWidth - popover.offsetWidth - margin,

@@ -36,12 +36,14 @@
 import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
 const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
 const tooltipStyle = ref({})
 const visible = ref(false)
+useAnchoredViewportBounds(buttonRef, textRef, visible)
 const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
 let hovered = false
@@ -169,8 +171,6 @@ function positionTooltip() {
       top = buttonRect.bottom + TOOLTIP_GAP
   }
 
-  left = Math.max(EDGE_MARGIN, Math.min(left, window.innerWidth - width - EDGE_MARGIN))
-  top = Math.max(EDGE_MARGIN, Math.min(top, window.innerHeight - height - EDGE_MARGIN))
   tooltipStyle.value = getAnchoredPosition(tooltipAnchor, buttonRect, Math.round(left), Math.round(top), {
     minLeft: EDGE_MARGIN,
     maxLeft: window.innerWidth - width - EDGE_MARGIN,
