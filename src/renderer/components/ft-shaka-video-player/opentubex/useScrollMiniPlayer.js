@@ -237,7 +237,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   /** @type {IntersectionObserver | null} */
   let scrollMiniIntersectionObserver = null
-  let mobileMiniBarLayoutObserver = null
+  let miniPlayerLayoutObserver = null
   /** @type {number | null} */
   let scrollMiniPlayPauseHideTimeout = null
   /** @type {number | null} */
@@ -1782,8 +1782,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function teardownScrollMiniPlayer() {
     unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
-    mobileMiniBarLayoutObserver?.disconnect()
-    mobileMiniBarLayoutObserver = null
+    miniPlayerLayoutObserver?.disconnect()
+    miniPlayerLayoutObserver = null
 
     if (scrollMiniIntersectionObserver) {
       scrollMiniIntersectionObserver.disconnect()
@@ -1812,11 +1812,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   let unregisterAndroidBackPlayer = null
   onMounted(() => {
     const sideNav = document.querySelector('.sideNav')
-    if (sideNav) {
-      mobileMiniBarLayoutObserver = new ResizeObserver(() => {
-        if (scrollMiniPlayerActive.value && usesMobileMiniBar()) handleScrollMiniWindowResize()
+    const tabBar = document.querySelector('.tabBar')
+    if (sideNav || tabBar) {
+      miniPlayerLayoutObserver = new ResizeObserver(entries => {
+        const target = usesMobileMiniBar() ? sideNav : tabBar
+        if (scrollMiniPlayerActive.value && entries.some(entry => entry.target === target)) {
+          handleScrollMiniWindowResize()
+        }
       })
-      mobileMiniBarLayoutObserver.observe(sideNav)
+      if (sideNav) miniPlayerLayoutObserver.observe(sideNav)
+      if (tabBar) miniPlayerLayoutObserver.observe(tabBar)
     }
     if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
     window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)

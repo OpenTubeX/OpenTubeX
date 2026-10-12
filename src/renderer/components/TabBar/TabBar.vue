@@ -8,14 +8,10 @@
     :class="[`position-${tabBarPosition}`, { vertical }]"
     :style="fixedTabWidthStyle"
   >
-    <div
-      ref="tabsViewportRef"
-      class="tabsViewport"
-      :class="{ hasScrollbar: showScrollbar }"
-    >
+    <div class="tabsViewport">
       <div
         ref="dropZoneRef"
-        v-overlay-scrollbars="vertical"
+        v-overlay-scrollbars
         class="tabsContainer"
         @scroll="handleScroll"
         @wheel="handleWheel"
@@ -23,82 +19,75 @@
         @mousedown.middle="handleTabListMiddleMouseDown"
         @auxclick="handleTabListAuxClick"
       >
-        <template
-          v-for="(item, index) in stripItems"
-          :key="item.id"
-        >
-          <SortableTab
-            v-if="item.type === 'tab'"
-            :tab="item.tab"
-            :group="tabGroupById.get(item.tab.groupId) ?? null"
-            :index="index"
-            :vertical="vertical"
-            :tab-bar-position="tabBarPosition"
-            :offset="tabOffsets[item.id] || 0"
-            :is-dragging="draggingTabIds.has(item.id)"
-            :is-settling="isSettling && settlingTabIds.has(item.id)"
-            :suppress-transition="suppressTransitions"
-            :disable-tooltips="draggingTabIds.size > 0"
-            :close-tooltips-signal="closeTooltipsSignal"
-            :show-icon="showTabIcons"
-            :show-preview="showTabPreviews"
-            :is-selected="selectedTabIds.has(item.id)"
-            :close-label="t('Close Tab')"
-            @activate="handleActivate"
-            @close="closeTab"
-            @middle-click="handleMiddleClick"
-          />
-          <TabTooltip
-            v-else
-            :title="item.group.name"
-            :tabs="item.tabs"
-            :show-icon="showTabIcons"
-            is-group
-            :tab-bar-position="tabBarPosition"
-            :disable-tooltips="draggingTabIds.size > 0"
-            :close-tooltips-signal="closeTooltipsSignal"
-            :show-preview="showTabPreviews"
-          >
-            <template #anchor="{ bindings }">
-              <button
-                v-bind="bindings"
-                class="tabBarReorderItem collapsedTabGroup"
-                :class="{
-                  active: item.isActive,
-                  bottom: tabBarPosition === 'bottom',
-                  noTransition: suppressTransitions,
-                  vertical
-                }"
-                :data-reorder-id="item.id"
-                :data-group-id="item.group.id"
-                :style="collapsedGroupStyle(item)"
-                :aria-label="collapsedGroupLabel(item)"
-                :aria-expanded="false"
-                @click="expandTabGroup(item.group.id)"
-              >
-                <FtIcon
-                  :icon="['fas', item.group.icon || 'layer-group']"
-                  aria-hidden="true"
-                />
-                <span class="collapsedTabGroupName">
-                  {{ item.group.name }}
-                </span>
-              </button>
-            </template>
-          </TabTooltip>
-        </template>
-      </div>
-      <div
-        v-show="showScrollbar && !vertical"
-        ref="scrollbarRef"
-        class="tabsScrollbar"
-        @pointerdown="handleScrollbarTrackPointerDown"
-      >
         <div
-          class="tabsScrollbarThumb"
-          :style="scrollbarThumbStyle"
-          @pointerdown.stop="handleScrollbarThumbPointerDown"
-        />
+          ref="tabsContentRef"
+          class="tabsContent"
+        >
+          <template
+            v-for="(item, index) in stripItems"
+            :key="item.id"
+          >
+            <SortableTab
+              v-if="item.type === 'tab'"
+              :tab="item.tab"
+              :group="tabGroupById.get(item.tab.groupId) ?? null"
+              :index="index"
+              :vertical="vertical"
+              :tab-bar-position="tabBarPosition"
+              :offset="tabOffsets[item.id] || 0"
+              :is-dragging="draggingTabIds.has(item.id)"
+              :is-settling="isSettling && settlingTabIds.has(item.id)"
+              :suppress-transition="suppressTransitions"
+              :disable-tooltips="draggingTabIds.size > 0"
+              :close-tooltips-signal="closeTooltipsSignal"
+              :show-icon="showTabIcons"
+              :show-preview="showTabPreviews"
+              :is-selected="selectedTabIds.has(item.id)"
+              :close-label="t('Close Tab')"
+              @activate="handleActivate"
+              @close="closeTab"
+              @middle-click="handleMiddleClick"
+            />
+            <TabTooltip
+              v-else
+              :title="item.group.name"
+              :tabs="item.tabs"
+              :show-icon="showTabIcons"
+              is-group
+              :tab-bar-position="tabBarPosition"
+              :disable-tooltips="draggingTabIds.size > 0"
+              :close-tooltips-signal="closeTooltipsSignal"
+              :show-preview="showTabPreviews"
+            >
+              <template #anchor="{ bindings }">
+                <button
+                  v-bind="bindings"
+                  class="tabBarReorderItem collapsedTabGroup"
+                  :class="{
+                    active: item.isActive,
+                    bottom: tabBarPosition === 'bottom',
+                    noTransition: suppressTransitions,
+                    vertical
+                  }"
+                  :data-reorder-id="item.id"
+                  :data-group-id="item.group.id"
+                  :style="collapsedGroupStyle(item)"
+                  :aria-label="collapsedGroupLabel(item)"
+                  :aria-expanded="false"
+                  @click="expandTabGroup(item.group.id)"
+                >
+                  <FtIcon
+                    :icon="['fas', item.group.icon || 'layer-group']"
+                    aria-hidden="true"
+                  />
+                  <span class="collapsedTabGroupName">
+                    {{ item.group.name }}
+                  </span>
+                </button>
+              </template>
+            </TabTooltip>
+          </template>
+        </div>
       </div>
     </div>
     <div class="tabBarActions">
@@ -159,7 +148,7 @@ import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import { computeReorderOffsets } from '../../helpers/reorderOffsets'
-import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollLeft, clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import SortableTab from './SortableTab.vue'
 import TabTooltip from './TabTooltip.vue'
 import TabTooltipOverlay from './TabTooltipOverlay.vue'
@@ -350,9 +339,8 @@ const tabOrganizerTooltip = computed(() => {
 })
 
 const tabBarRef = useTemplateRef('tabBarRef')
-const tabsViewportRef = useTemplateRef('tabsViewportRef')
+const tabsContentRef = useTemplateRef('tabsContentRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
-const scrollbarRef = useTemplateRef('scrollbarRef')
 const closeTooltipsSignal = ref(0)
 const selectedTabIds = computed(() => new Set(store.getters.getSelectedTabIds))
 /** @type {string | null} */
@@ -432,6 +420,11 @@ function handleTabContainerPointerDown(event) {
   const target = event.target
   if (!(target instanceof Element)) return
 
+  if (target.closest('.os-scrollbar')) {
+    cancelScrollAnimation()
+    return
+  }
+
   // Ignore clicks on the close button
   if (target.closest('.closeButton')) return
 
@@ -478,7 +471,7 @@ function handleTabContainerPointerDown(event) {
   const rects = tabsList.map(tab => measuredRectById.get(tab.id)).filter(Boolean)
   if (rects.length !== tabsList.length) return
 
-  // Compute the gap between adjacent tabs (matches the .tabsContainer gap)
+  // Compute the gap between adjacent tabs (matches the .tabsContent gap)
   let gap = 0
   if (rects.length > 1) {
     gap = rects[1].start - (rects[0].start + rects[0].size)
@@ -1036,7 +1029,7 @@ function handleMiddleClick(event, tabId) {
  * @param {MouseEvent} event
  */
 function handleTabListMiddleMouseDown(event) {
-  if (event.target === event.currentTarget) {
+  if (event.target === event.currentTarget || event.target === tabsContentRef.value) {
     event.preventDefault()
   }
 }
@@ -1046,7 +1039,7 @@ function handleTabListMiddleMouseDown(event) {
  * @param {MouseEvent} event
  */
 function handleTabListAuxClick(event) {
-  if (event.button === 1 && event.target === event.currentTarget) {
+  if (event.button === 1 && (event.target === event.currentTarget || event.target === tabsContentRef.value)) {
     event.preventDefault()
     createNewTab()
   }
@@ -1133,16 +1126,14 @@ onMounted(() => {
     })
   }
 
-  window.addEventListener('resize', handleWindowResize)
-
   nextTick(() => {
     if (typeof ResizeObserver === 'function') {
       resizeObserver = new ResizeObserver(() => {
-        updateScrollbar()
+        clampTabsScroll()
       })
 
-      if (tabsViewportRef.value) {
-        resizeObserver.observe(tabsViewportRef.value)
+      if (tabsContentRef.value) {
+        resizeObserver.observe(tabsContentRef.value)
       }
 
       if (dropZoneRef.value) {
@@ -1150,7 +1141,7 @@ onMounted(() => {
       }
     }
 
-    updateScrollbar()
+    clampTabsScroll()
   })
 })
 
@@ -1171,33 +1162,18 @@ onUnmounted(() => {
   pendingSettleReorder = null
 
   stopTabBarResize()
-  stopScrollbarThumbDrag()
   cancelScrollAnimation()
   resizeObserver?.disconnect()
-  window.removeEventListener('resize', handleWindowResize)
   document.body.classList.remove('tab-bar-grabbing')
 })
 
 // ===== Scrollbar =====
 const tabBarScrollPosition = computed(() => store.getters.getTabBarScrollPosition)
-const showScrollbar = ref(false)
-const scrollbarThumbWidth = ref(0)
-const scrollbarThumbOffset = ref(0)
 
 let scrollTarget = null
 let scrollAnimationId = null
 let resizeObserver = null
-let scrollbarDragState = null
 let removeActiveChangedListener = null
-
-const MIN_SCROLLBAR_THUMB_WIDTH = 24
-
-const scrollbarThumbStyle = computed(() => {
-  return {
-    inlineSize: `${scrollbarThumbWidth.value}px`,
-    transform: `translateX(${scrollbarThumbOffset.value}px)`
-  }
-})
 
 function animateScroll() {
   const container = dropZoneRef.value
@@ -1211,12 +1187,18 @@ function animateScroll() {
     container.scrollLeft = scrollTarget
     scrollTarget = null
     scrollAnimationId = null
-    updateScrollbar()
     return
   }
 
+  const previousScrollLeft = container.scrollLeft
   container.scrollLeft += diff * 0.25
-  updateScrollbar()
+  // Fractional UI scales can round an animation step to the current offset.
+  if (container.scrollLeft === previousScrollLeft) {
+    container.scrollLeft = scrollTarget
+    scrollTarget = null
+    scrollAnimationId = null
+    return
+  }
   scrollAnimationId = requestAnimationFrame(animateScroll)
 }
 
@@ -1231,46 +1213,15 @@ function cancelScrollAnimation() {
   }
 }
 
-function updateScrollbar() {
-  const container = dropZoneRef.value
-  const viewport = tabsViewportRef.value
-
-  if (!container || !viewport) {
-    return
+/** @param {HTMLElement} container */
+function getHorizontalScrollRange(container) {
+  const maximumScroll = Math.max(0, tabsContentRef.value.scrollWidth - container.clientWidth)
+  const direction = getComputedStyle(container).direction === 'rtl' ? -1 : 1
+  return {
+    min: Math.min(0, direction * maximumScroll),
+    max: Math.max(0, direction * maximumScroll),
+    direction
   }
-
-  // The vertical layout scrolls natively, so the custom scrollbar stays hidden.
-  if (vertical.value) {
-    showScrollbar.value = false
-    scrollbarThumbWidth.value = 0
-    scrollbarThumbOffset.value = 0
-    return
-  }
-
-  const maxScroll = container.scrollWidth - container.clientWidth
-
-  if (maxScroll <= 1) {
-    showScrollbar.value = false
-    scrollbarThumbWidth.value = 0
-    scrollbarThumbOffset.value = 0
-    return
-  }
-
-  showScrollbar.value = true
-
-  const trackWidth = viewport.clientWidth
-  const visibleRatio = container.clientWidth / container.scrollWidth
-  const thumbWidth = Math.min(
-    trackWidth,
-    Math.max(Math.round(trackWidth * visibleRatio), MIN_SCROLLBAR_THUMB_WIDTH)
-  )
-  const maxThumbOffset = Math.max(0, trackWidth - thumbWidth)
-  const thumbOffset = maxScroll > 0
-    ? (container.scrollLeft / maxScroll) * maxThumbOffset
-    : 0
-
-  scrollbarThumbWidth.value = thumbWidth
-  scrollbarThumbOffset.value = Math.max(0, Math.min(maxThumbOffset, thumbOffset))
 }
 
 /**
@@ -1285,13 +1236,13 @@ function handleWheel(event) {
 
   event.preventDefault()
 
-  const delta = event.deltaY || event.deltaX
-  const maxScroll = container.scrollWidth - container.clientWidth
+  const { min, max, direction } = getHorizontalScrollRange(container)
+  const delta = event.deltaY ? event.deltaY * direction : event.deltaX
 
   if (scrollTarget == null) {
     scrollTarget = container.scrollLeft
   }
-  scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget + delta))
+  scrollTarget = Math.max(min, Math.min(max, scrollTarget + delta))
 
   if (isElectron) {
     window.ftElectron.tabs.setTabBarScroll(scrollTarget)
@@ -1303,107 +1254,11 @@ function handleWheel(event) {
 }
 
 function handleScroll() {
-  updateScrollbar()
+  if (isElectron && !vertical.value && !scrollAnimationId) {
+    scrollTarget = dropZoneRef.value.scrollLeft
+    window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+  }
   scheduleDragPositionUpdate()
-}
-
-/**
- * @param {PointerEvent} event
- */
-function handleScrollbarTrackPointerDown(event) {
-  if (event.button !== 0 || event.target.closest('.tabsScrollbarThumb')) {
-    return
-  }
-
-  const container = dropZoneRef.value
-  const scrollbar = scrollbarRef.value
-  if (!container || !scrollbar) return
-
-  event.preventDefault()
-  cancelScrollAnimation()
-
-  const maxScroll = container.scrollWidth - container.clientWidth
-  const maxThumbOffset = scrollbar.clientWidth - scrollbarThumbWidth.value
-  const trackRect = scrollbar.getBoundingClientRect()
-  const desiredThumbOffset = event.clientX - trackRect.left - scrollbarThumbWidth.value / 2
-  const clampedThumbOffset = Math.max(0, Math.min(maxThumbOffset, desiredThumbOffset))
-  const nextScrollLeft = maxThumbOffset > 0
-    ? (clampedThumbOffset / maxThumbOffset) * maxScroll
-    : 0
-
-  container.scrollLeft = nextScrollLeft
-  scrollTarget = nextScrollLeft
-  if (isElectron) {
-    window.ftElectron.tabs.setTabBarScroll(nextScrollLeft)
-  }
-  updateScrollbar()
-}
-
-/**
- * @param {PointerEvent} event
- */
-function handleScrollbarThumbPointerDown(event) {
-  if (event.button !== 0) {
-    return
-  }
-
-  const container = dropZoneRef.value
-  const scrollbar = scrollbarRef.value
-  if (!container || !scrollbar) return
-
-  const maxScroll = container.scrollWidth - container.clientWidth
-  const maxThumbOffset = scrollbar.clientWidth - scrollbarThumbWidth.value
-  if (maxScroll <= 0 || maxThumbOffset <= 0) {
-    return
-  }
-
-  event.preventDefault()
-  cancelScrollAnimation()
-
-  scrollbarDragState = {
-    startX: event.clientX,
-    startScrollLeft: container.scrollLeft,
-    maxScroll,
-    maxThumbOffset
-  }
-
-  document.body.classList.add('tab-bar-grabbing')
-  window.addEventListener('pointermove', handleScrollbarThumbPointerMove)
-  window.addEventListener('pointerup', stopScrollbarThumbDrag)
-  window.addEventListener('pointercancel', stopScrollbarThumbDrag)
-}
-
-/**
- * @param {PointerEvent} event
- */
-function handleScrollbarThumbPointerMove(event) {
-  if (!scrollbarDragState || !dropZoneRef.value) {
-    return
-  }
-
-  const deltaX = event.clientX - scrollbarDragState.startX
-  const nextScrollLeft = scrollbarDragState.startScrollLeft +
-    (deltaX / scrollbarDragState.maxThumbOffset) * scrollbarDragState.maxScroll
-  const clampedScrollLeft = Math.max(0, Math.min(scrollbarDragState.maxScroll, nextScrollLeft))
-
-  dropZoneRef.value.scrollLeft = clampedScrollLeft
-  scrollTarget = clampedScrollLeft
-  if (isElectron) {
-    window.ftElectron.tabs.setTabBarScroll(clampedScrollLeft)
-  }
-  updateScrollbar()
-}
-
-function stopScrollbarThumbDrag() {
-  scrollbarDragState = null
-  document.body.classList.remove('tab-bar-grabbing')
-  window.removeEventListener('pointermove', handleScrollbarThumbPointerMove)
-  window.removeEventListener('pointerup', stopScrollbarThumbDrag)
-  window.removeEventListener('pointercancel', stopScrollbarThumbDrag)
-}
-
-function handleWindowResize() {
-  updateScrollbar()
 }
 
 // Apply scroll position received from main process state broadcasts.
@@ -1421,34 +1276,35 @@ watch(tabBarScrollPosition, (newPosition) => {
       container.scrollLeft = newPosition
       scrollTarget = newPosition
     }
-
-    updateScrollbar()
   })
 })
 
-watch(stripItems, () => {
+function clampTabsScroll() {
   const container = dropZoneRef.value
-  if (container) {
-    if (vertical.value) {
-      const renderedItems = container.querySelectorAll(':scope > .tabBarReorderItem')
-      clampOverlayScrollTop(container, renderedItems[renderedItems.length - 1] ?? null)
-    } else {
-      const maxScroll = Math.max(0, container.scrollWidth - container.clientWidth)
-      container.scrollLeft = Math.min(container.scrollLeft, maxScroll)
-      if (scrollTarget != null) {
-        scrollTarget = Math.min(scrollTarget, maxScroll)
+  const content = tabsContentRef.value
+  if (!container || !content) return
+
+  if (vertical.value) {
+    clampOverlayScrollTop(container, content.lastElementChild)
+  } else {
+    clampOverlayScrollLeft(container, content)
+    if (scrollTarget != null) {
+      const { min, max } = getHorizontalScrollRange(container)
+      const clampedTarget = Math.max(min, Math.min(max, scrollTarget))
+      if (scrollTarget !== clampedTarget) {
+        scrollTarget = clampedTarget
+        if (isElectron) window.ftElectron.tabs.setTabBarScroll(scrollTarget)
       }
     }
   }
-  updateScrollbar()
-}, { flush: 'post' })
+}
+
+watch(stripItems, clampTabsScroll, { flush: 'post' })
 
 watch(vertical, () => {
   cancelScrollAnimation()
   scrollTarget = null
-  nextTick(() => {
-    updateScrollbar()
-  })
+  nextTick(clampTabsScroll)
 })
 
 watch(tabs, (nextTabs) => {

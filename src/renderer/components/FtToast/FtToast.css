@@ -247,14 +247,14 @@
 .progress-toast-holder.top-tabs.position-top-left,
 .progress-toast-holder.top-tabs.position-top-center,
 .progress-toast-holder.top-tabs.position-top-right {
-  inset-block-start: 56px;
+  inset-block-start: calc(24px + var(--top-tab-bar-height));
 }
 
 /* Keep bottom-positioned toasts above the bottom horizontal tab bar. */
 .progress-toast-holder.bottom-tabs.position-bottom-left,
 .progress-toast-holder.bottom-tabs.position-bottom-center,
 .progress-toast-holder.bottom-tabs.position-bottom-right {
-  inset-block-end: calc(58px + var(--mobile-toast-inset, 0px) + var(--connection-height, 0px));
+  inset-block-end: calc(24px + var(--bottom-tab-bar-height) + var(--mobile-toast-inset, 0px) + var(--connection-height, 0px));
 }
 
 :is(.toast-holder, .progress-toast-holder) .toast-slot {
@@ -748,7 +748,7 @@ body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
 }
 
 .connection-status-holder.bottom-tabs {
-  inset-block-end: calc(34px + var(--connection-navigation-inset, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  inset-block-end: calc(var(--bottom-tab-bar-height) + var(--connection-navigation-inset, 0px) + var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
 body:has(.connection-status-holder .connectionStatus) {

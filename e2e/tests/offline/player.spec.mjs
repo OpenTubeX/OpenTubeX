@@ -1899,12 +1899,22 @@ test.describe('scroll mini player', () => {
       await scrollBelowPlayer(player)
       await expect(player).toHaveClass(/scrollMiniPlayer/)
       await setWindowSize(app, page, { width: 480, height: 800 })
-      await page.locator('.sideNav a').first().evaluate(link => link.focus({ preventScroll: true }))
-      await expect.poll(() => player.evaluate(element => {
-        const playerBounds = element.getBoundingClientRect()
-        const navigationBounds = document.querySelector('.sideNav').getBoundingClientRect()
-        return navigationBounds.top - playerBounds.bottom
-      })).toBeGreaterThanOrEqual(15)
+      for (const overflowing of [false, true]) {
+        if (overflowing) {
+          await page.evaluate(async () => {
+            for (let index = 0; index < 8; index++) {
+              await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+            }
+          })
+          await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+        }
+        await page.locator('.sideNav a').first().evaluate(link => link.focus({ preventScroll: true }))
+        await expect.poll(() => player.evaluate(element => {
+          const playerBounds = element.getBoundingClientRect()
+          const navigationBounds = document.querySelector('.sideNav').getBoundingClientRect()
+          return navigationBounds.top - playerBounds.bottom
+        })).toBeGreaterThanOrEqual(15)
+      }
     })
   })
 

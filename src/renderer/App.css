@@ -39,6 +39,10 @@
 }
 
 :global(body) {
+  /* stylelint-disable-next-line length-zero-no-unit */
+  --horizontal-tab-scrollbar-space: 0px;
+  --top-tab-bar-height: calc(32px + var(--horizontal-tab-scrollbar-space));
+  --bottom-tab-bar-height: calc(34px + var(--horizontal-tab-scrollbar-space));
   --mobile-nav-content-height: 60px;
 }
 
@@ -57,7 +61,6 @@
   /* Keep a length so the empty space can be added inside calc(). */
   /* stylelint-disable-next-line length-zero-no-unit */
   --mobile-progress-bar-space: 0px;
-  --top-tab-bar-height: 32px;
   --top-nav-sticky-offset: calc(var(--app-safe-area-inset-top) + var(--top-nav-height));
 
   box-sizing: border-box;
@@ -66,6 +69,10 @@
   font-family: var(--app-font-family);
   block-size: 100%;
   padding-block-start: var(--app-safe-area-inset-top);
+}
+
+:global(body:has(.tabBar .os-scrollbar-horizontal.os-scrollbar-visible)) {
+  --horizontal-tab-scrollbar-space: var(--scrollbar-track-width);
 }
 
 .app.capacitorTabs {
@@ -551,7 +558,7 @@
 
 .findbar {
   position: fixed;
-  inset-block-start: 102px;
+  inset-block-start: calc(var(--top-nav-sticky-offset) + 10px);
   inset-inline-end: 18px;
   z-index: 10001;
   display: flex;
@@ -861,7 +868,7 @@
 }
 
 .app.bottomTabs :deep(.sideNav) {
-  block-size: calc(100vh - 94px - var(--connection-status-space, 0px));
+  block-size: calc(100vh - 60px - var(--bottom-tab-bar-height) - var(--connection-status-space, 0px));
   inset-block-start: 60px;
 }
 
@@ -871,15 +878,15 @@
 
 .app.bottomTabs {
   box-sizing: border-box;
-  padding-block-end: 34px;
+  padding-block-end: var(--bottom-tab-bar-height);
 }
 
 .app.bottomTabs .sideNavBackdrop {
-  inset-block: 60px 34px;
+  inset-block: 60px var(--bottom-tab-bar-height);
 }
 
 .app.bottomTabs :deep(.progressBar) {
-  inset-block-end: 34px;
+  inset-block-end: var(--bottom-tab-bar-height);
 }
 
 .app.topTabs {
@@ -893,15 +900,15 @@
   }
 
   .app.bottomTabs :deep(.sideNav) {
-    inset-block-end: 34px;
+    inset-block-end: var(--bottom-tab-bar-height);
   }
 
   .app.bottomTabs :deep(.progressBar) {
-    inset-block-end: calc(34px + var(--mobile-nav-height));
+    inset-block-end: calc(var(--bottom-tab-bar-height) + var(--mobile-nav-height));
   }
 
   .app.bottomTabs :deep(.moreOptionContainer) {
-    inset-block-end: calc(34px + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
+    inset-block-end: calc(var(--bottom-tab-bar-height) + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
   }
 
   .sideNavBackdrop {

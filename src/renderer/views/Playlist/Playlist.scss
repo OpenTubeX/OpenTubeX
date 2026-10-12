@@ -96,9 +96,9 @@
     .playlistInfoContainer {
       background-color: var(--card-bg-color);
       backdrop-filter: var(--card-bg-blur, none);
-      block-size: calc(100vh - 132px);
+      block-size: calc(100vh - var(--top-nav-sticky-offset) - var(--playlist-bottom-inset, 0px) - 40px);
       inline-size: 30%;
-      inset-block-start: 96px;
+      inset-block-start: calc(var(--top-nav-sticky-offset) + 4px);
       position: sticky;
 
       .playlistInfo {
@@ -112,6 +112,10 @@
       padding: 10px;
     }
   }
+}
+
+:global(.app.bottomTabs) .routerView {
+  --playlist-bottom-inset: var(--bottom-tab-bar-height);
 }
 
 .playlistItems {

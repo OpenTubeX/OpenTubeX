@@ -2,7 +2,7 @@ import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
-import { test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
 const seededPremiereStart = Date.now() + 86_400_000
@@ -877,6 +877,38 @@ test.describe('custom playlist order', () => {
     await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
     await expectHeaderBelowNavigation()
   })
+
+  for (const position of ['top', 'bottom']) {
+    for (const scale of [0.95, 1.25]) {
+      test(`list playlist header clears overflowing ${position} tabs at ${scale} scale`, async ({ app, page }) => {
+        await setWindowSize(app, page, { width: 1350, height: 750 })
+        await goTo(page, 'userplaylists')
+        await page.getByText('Large custom playlist').click()
+        await page.evaluate(async ({ position, scale }) => {
+          window.ftElectron.setZoomFactor(scale)
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setPlaylistViewType', 'list')
+          store.commit('setTabBarPosition', position)
+          store.commit('setScrollbarThumbWidth', 20)
+          for (let index = 0; index < 18; index++) {
+            await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+          }
+        }, { position, scale })
+        await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+        await page.evaluate(() => window.scrollTo(0, Number.MAX_SAFE_INTEGER))
+        const header = page.locator('.playlistInfoContainer')
+        await expect.poll(() => header.evaluate((element, position) => {
+          const box = element.getBoundingClientRect()
+          const navigation = document.querySelector('.topNav').getBoundingClientRect()
+          const boundary = position === 'bottom' ? document.querySelector('.tabBar').getBoundingClientRect().top : innerHeight
+          return {
+            belowNavigation: box.top >= navigation.bottom - 1,
+            clearOfBottom: box.bottom <= boundary - 35
+          }
+        }, position)).toEqual({ belowNavigation: true, clearOfBottom: true })
+      })
+    }
+  }
 
   test('moves a video to the top from its options menu', async ({ page }) => {
     await goTo(page, 'userplaylists')

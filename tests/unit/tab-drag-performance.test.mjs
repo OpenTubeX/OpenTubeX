@@ -48,7 +48,8 @@ function createDragHarness({ vertical = false, count = 100 } = {}) {
     selectedTabIds: ref(new Set()), closeTooltipsSignal: ref(0),
     dropZoneRef: { value: container },
     buildStripItems: items => items,
-    clearTabSelection() {}, setTabSelection() {}, updateScrollbar() {},
+    clearTabSelection() {}, setTabSelection() {},
+    isElectron: false,
     document: { body: { classList: { add() {}, remove() {} } } },
     window: {
       addEventListener() {}, removeEventListener() {},
