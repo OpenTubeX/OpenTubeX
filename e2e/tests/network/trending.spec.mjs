@@ -99,7 +99,7 @@ test.describe('trending page', () => {
         document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
       }, roundness)
       await expect.poll(() => page.locator('.trendingInfoTabs .selectedTab').evaluate(element =>
-        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+        getComputedStyle(element).borderBottomLeftRadius)).toBe(`${24 * roundness / 100}px`)
     }
 
     const sportsTab = page.getByRole('tab', { name: 'Sports' })

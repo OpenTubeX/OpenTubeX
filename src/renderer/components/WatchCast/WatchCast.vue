@@ -42,9 +42,10 @@
     @dropdown-open="openDropdown"
   >
     <template #dropdown-header>
-      <div
+      <FtTabs
         v-if="protocols.length > 1"
         class="castTabs"
+        variant="segmented"
         role="tablist"
         :aria-label="t('Video.Player.Cast')"
       >
@@ -68,7 +69,7 @@
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           {{ protocol === 'google' ? 'Google Cast' : 'DLNA' }}
         </button>
-      </div>
+      </FtTabs>
     </template>
     <div
       :id="`${id}-panel`"
@@ -107,6 +108,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

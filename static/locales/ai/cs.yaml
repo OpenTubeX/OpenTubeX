@@ -2066,5 +2066,17 @@ Search Bar:
 Native Permissions:
   Local Network: "Vyhledávat zařízení v místní síti a přenášet do nich videa a synchronizovat nastavení a data mezi zařízeními."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Domů"
+  subscriptions: "Odběry"
+  userplaylists: "Playlisty"
+  history: "Historie"
+  subscribedchannels: "Kanály"
+  trending: "Trendy"
+  popular: "Populární"
+  stats: "Statistiky"
+  more: "Více"
+
 Installer:
   Create Desktop Shortcut: Vytvořit zástupce na ploše

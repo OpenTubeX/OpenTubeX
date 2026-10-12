@@ -765,12 +765,8 @@ body:has(.app.capacitorPhoneLayout) {
 
 @media (width <= 680px) {
   body:has(.app) {
-    --connection-navigation-inset: 60px;
+    --connection-navigation-inset: var(--mobile-nav-content-height, 60px);
     --mobile-toast-inset: calc(var(--connection-navigation-inset) - 17px);
-  }
-
-  body:has(.app.compactNavigation) {
-    --connection-navigation-inset: 48px;
   }
 
   .connection-status-holder {

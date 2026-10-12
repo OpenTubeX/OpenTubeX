@@ -2150,5 +2150,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Hjem"
+  subscriptions: "Abonn."
+  userplaylists: "Playlister"
+  history: "Historik"
+  subscribedchannels: "Kanaler"
+  trending: "Trends"
+  popular: "Populære"
+  stats: "Statistik"
+  more: "Mere"
+
 Installer:
   Create Desktop Shortcut: Opret en genvej på skrivebordet

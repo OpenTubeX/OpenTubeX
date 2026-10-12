@@ -2113,5 +2113,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Εντοπισμός συσκευών στο τοπικό σας δίκτυο και μετάδοση βίντεο σε αυτές, καθώς και συγχρονισμός ρυθμίσεων και δεδομένων μεταξύ συσκευών."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Αρχική"
+  subscriptions: "Συνδρομές"
+  userplaylists: "Λίστες"
+  history: "Ιστορικό"
+  subscribedchannels: "Κανάλια"
+  trending: "Τάσεις"
+  popular: "Δημοφιλή"
+  stats: "Στατιστικά"
+  more: "Περισσ."
+
 Installer:
   Create Desktop Shortcut: Δημιουργία συντόμευσης στην επιφάνεια εργασίας

@@ -2115,5 +2115,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Descubrir dispositivos na túa rede local e enviarlles vídeos, e sincronizar a configuración e os datos entre dispositivos."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Inicio"
+  subscriptions: "Subscr."
+  userplaylists: "Listaxes"
+  history: "Histórico"
+  subscribedchannels: "Canles"
+  trending: "Tendencias"
+  popular: "Populares"
+  stats: "Estatíst."
+  more: "Máis"
+
 Installer:
   Create Desktop Shortcut: Crear un atallo no escritorio

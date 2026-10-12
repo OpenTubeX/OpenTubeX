@@ -31,7 +31,7 @@
   position: fixed;
   inset-block-start: 60px;
   inset-inline-end: 0;
-  inline-size: calc(100% - 80px);
+  inline-size: calc(100% - var(--desktop-nav-rail-width));
   margin-inline: 0;
   z-index: 3;
 

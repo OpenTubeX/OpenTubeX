@@ -31,11 +31,17 @@
   transition: background 0.2s ease-in;
 }
 
+.moreOptionContainer .navOption.router-link-active {
+  color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
 .moreOptionContainer {
   position: fixed;
   background-color: var(--side-nav-color);
   inset-block-end: calc(var(--mobile-nav-height) + var(--mobile-progress-bar-space, 0px));
   inline-size: 70px;
+  inset-inline-end: 4px;
   z-index: 0;
   box-shadow: 3px -3px 5px 0 rgb(0 0 0 / 20%);
 }
@@ -96,10 +102,6 @@
     display: flex;
     justify-content: center;
     padding-block: 0;
-  }
-
-  .compactLabels .moreOptionNav .navIcon {
-    margin-block-start: 0;
   }
 
   .compactLabels .moreOptionNav .navLabel {

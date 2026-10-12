@@ -1,0 +1,179 @@
+@media only screen and (width > 680px) {
+  .sideNav {
+    background-color: var(--side-nav-color);
+    box-shadow: none;
+  }
+
+  .navOption,
+  .navChannel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding-block: 6px;
+    padding-inline: 4px;
+    border-radius: calc(24px * var(--ui-roundness));
+    color: var(--primary-text-color);
+    isolation: isolate;
+  }
+
+  .navOption:hover,
+  .navOption:active,
+  .navChannel:hover,
+  .navChannel:active {
+    background: transparent;
+    color: var(--primary-text-color);
+  }
+
+  .navOption::before,
+  .navChannel::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset-block-start: 6px;
+    inline-size: 64px;
+    block-size: 32px;
+    border-radius: calc(24px * var(--ui-roundness));
+    background-color: var(--side-nav-hover-color);
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition: transform 350ms cubic-bezier(0.2, 1.4, 0.4, 1), opacity 150ms ease;
+  }
+
+  .navChannel::before {
+    inset-block-start: 2px;
+    block-size: 43px;
+  }
+
+  :is(.navOption, .navChannel):is(.router-link-active, :hover, :focus-visible)::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  :is(.navOption, .navChannel):active::before {
+    opacity: 1;
+    transform: scaleX(0.88);
+    transition-duration: 100ms;
+  }
+
+  :is(.navOption, .navChannel).router-link-active {
+    color: var(--primary-color);
+  }
+
+  :is(.navOption, .navChannel).router-link-active::before {
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  }
+
+  .navOption .thumbnailContainer {
+    display: grid;
+    place-items: center;
+    inline-size: 32px;
+    block-size: 32px;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .navOption .navIcon {
+    font-size: 24px;
+    inline-size: 24px;
+    block-size: 24px;
+    margin: 0;
+  }
+
+  .navOption .navLabel {
+    inline-size: 100%;
+    margin: 0;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .navChannel .thumbnailContainer {
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .sideNav hr {
+    inline-size: calc(100% - 24px);
+    margin-block: 12px;
+    background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  }
+
+  .hiddenLabels .navOption,
+  .hiddenLabels .navChannel {
+    inline-size: 50px;
+    block-size: 50px;
+    justify-content: center;
+  }
+
+  .hiddenLabels :is(.navOption, .navChannel)::before {
+    inline-size: 42px;
+    block-size: 42px;
+    inset-block-start: 4px;
+  }
+
+  .expanded,
+  .expanded .inner {
+    inline-size: 200px;
+  }
+
+  .expanded .navOption,
+  .expanded .navChannel {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    inline-size: calc(100% - 16px);
+    block-size: auto;
+    min-block-size: 48px;
+    padding-block: 8px;
+    padding-inline: 12px;
+    margin-inline: 8px;
+    margin-block-end: 4px;
+  }
+
+  .expanded :is(.navOption, .navChannel)::before {
+    inset: 0;
+    inline-size: auto;
+    block-size: auto;
+  }
+
+  .expanded .navLabel {
+    display: block;
+    text-align: start;
+    min-inline-size: 0;
+  }
+
+  .expanded .navOption .navLabel {
+    font-size: 14px;
+    line-height: 20px;
+    white-space: normal;
+  }
+
+  .expanded .navChannel {
+    gap: 8px;
+    padding-block: 6px;
+    padding-inline: 8px;
+  }
+
+  .expanded .navChannel .navLabel {
+    margin: 0;
+    flex: 1;
+    line-height: 18px;
+  }
+
+  :is(.navOption, .navChannel).router-link-active .navLabel {
+    font-weight: 700;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navOption::before,
+  .navChannel::before {
+    transition: none;
+  }
+}

@@ -2064,5 +2064,17 @@ Search Bar:
 Native Permissions:
   Local Network: "Encontrar dispositivos na sua rede local e transmitir vídeos para eles, e sincronizar configurações e dados entre dispositivos."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Início"
+  subscriptions: "Inscrições"
+  userplaylists: "Playlists"
+  history: "Histórico"
+  subscribedchannels: "Canais"
+  trending: "Em alta"
+  popular: "Populares"
+  stats: "Estatíst."
+  more: "Mais"
+
 Installer:
   Create Desktop Shortcut: Criar um atalho na área de trabalho

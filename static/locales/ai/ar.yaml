@@ -2091,5 +2091,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "اكتشاف الأجهزة على شبكتك المحلية وبث الفيديوهات إليها، ومزامنة الإعدادات والبيانات بين الأجهزة."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "الرئيسية"
+  subscriptions: "اشتراكات"
+  userplaylists: "قوائم"
+  history: "السجل"
+  subscribedchannels: "القنوات"
+  trending: "الرائج"
+  popular: "الشائع"
+  stats: "إحصاءات"
+  more: "المزيد"
+
 Installer:
   Create Desktop Shortcut: إنشاء اختصار على سطح المكتب

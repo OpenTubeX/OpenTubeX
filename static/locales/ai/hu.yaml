@@ -2065,5 +2065,17 @@ Search Bar:
 Native Permissions:
   Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Kezdőlap"
+  subscriptions: "Feliratk."
+  userplaylists: "Listák"
+  history: "Előzmények"
+  subscribedchannels: "Csatornák"
+  trending: "Felkapott"
+  popular: "Népszerű"
+  stats: "Statiszt."
+  more: "Több"
+
 Installer:
   Create Desktop Shortcut: Asztali parancsikon létrehozása

@@ -2075,5 +2075,17 @@ Search Bar:
 Native Permissions:
   Local Network: "Kavout trevnadoù war ho rouedad lec'hel ha skignañ videoioù warno, ha goubredañ an arventennoù hag ar roadennoù etre trevnadoù."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Degemer"
+  subscriptions: "Kouman."
+  userplaylists: "Rolloù"
+  history: "Istor"
+  subscribedchannels: "Chadennoù"
+  trending: "Er cʼhiz"
+  popular: "Poblek"
+  stats: "Stadegoù"
+  more: "Muioc'h"
+
 Installer:
   Create Desktop Shortcut: Krouiñ ur verradenn war ar burev

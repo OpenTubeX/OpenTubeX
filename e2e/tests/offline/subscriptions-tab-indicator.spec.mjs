@@ -63,7 +63,7 @@ test.describe('subscriptions feed tab indicator', () => {
   test.describe('fractional device pixel ratio', () => {
     test.use({ launchArgs: ['--force-device-scale-factor=2.625'] })
 
-    test('paints both underlines within the selected tab edges', async ({ app, page }) => {
+    test('paints both tonal pills within the selected tab edges', async ({ app, page }) => {
       await goTo(page, 'subscriptions')
       await page.locator('[data-subscription-feed-tab="all"]').click()
       await page.getByRole('button', { name: 'Show tabbed view' }).click()
@@ -77,28 +77,21 @@ test.describe('subscriptions feed tab indicator', () => {
       for (const selector of ['.newFeedTab.selectedTab', '[data-subscription-feed-tab="videos"]']) {
         const tab = page.locator(selector)
         await tab.click()
-        const { width } = await tab.boundingBox()
-        const underlineY = await tab.evaluate(element => {
-          const indicator = element.parentElement.querySelector('.tabsIndicator').getBoundingClientRect()
-          return (indicator.top + indicator.bottom) / 2 - element.getBoundingClientRect().top
-        })
+        const { width, height } = await tab.boundingBox()
         const colors = await sampleColors(app, tab, [
-          [2, underlineY],
-          [width - 2, underlineY],
-          [width + 2, underlineY]
+          [4, height / 2], [width - 4, height / 2], [1, 1]
         ])
-        // DOM bounds can be correct while a scaled strip paints too short.
-        // Allow slight antialiasing at the rounded ends of the actual pixels.
+        // The translucent accent must paint both ends, while the rounded
+        // corner stays clear rather than becoming a rectangular highlight.
         for (const color of colors.slice(0, 2)) {
-          expect(color[0]).toBeGreaterThan(247)
-          expect(Math.max(...color.slice(1))).toBeLessThan(8)
+          expect(color[0] - color[1]).toBeGreaterThan(35)
         }
-        expect(Math.max(...colors[2].slice(1))).toBeGreaterThan(8)
+        expect(Math.abs(colors[2][0] - colors[2][1])).toBeLessThan(10)
       }
     })
   })
 
-  test('rounds both feed indicators without stretching their end caps', async ({ app, page }) => {
+  test('rounds both feed pills with the configured UI roundness', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await page.getByRole('button', { name: 'Show tabbed view' }).click()
@@ -111,16 +104,14 @@ test.describe('subscriptions feed tab indicator', () => {
         await page.evaluate(value => {
           document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
         }, roundness)
-        for (const selector of ['.tabsIndicator:not(.newFeedTabsIndicator)', '.newFeedTabsIndicator']) {
+        for (const selector of ['.tabs > .tabsIndicator', '.newFeedTabs > .tabsIndicator']) {
           await expect.poll(() => page.locator(selector).evaluate(element => {
-            const style = getComputedStyle(element)
-            const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
-            const scale = new DOMMatrixReadOnly(style.transform).a
-            return {
-              horizontal: Math.round(horizontal * scale * 100) / 100,
-              vertical
-            }
-          })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+            const tab = element.parentElement.querySelector('[aria-selected="true"]').getBoundingClientRect()
+            const radius = Math.min(24 * Number.parseFloat(getComputedStyle(element).getPropertyValue('--ui-roundness')), tab.height / 2, tab.width / 2)
+            const bounds = element.getBoundingClientRect()
+            return Math.abs(Number.parseFloat(element.style.borderRadius) - radius) < 0.1 &&
+              Math.abs(bounds.height - tab.height) < 0.1 && Math.abs(bounds.width - tab.width) < 0.1
+          })).toBe(true)
         }
       }
     }
@@ -157,7 +148,7 @@ test.describe('subscriptions feed tab indicator', () => {
     expect((await tab.boundingBox()).width).toBe(widthBeforeHover)
   })
 
-  test('only animates the transform, so it runs on the compositor', async ({ page }) => {
+  test('only animates opacity, so it runs on the compositor', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.locator('.tabsIndicator')).toBeVisible()
@@ -165,7 +156,7 @@ test.describe('subscriptions feed tab indicator', () => {
     // The initial placement is intentionally not animated
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
-    await expect(page.locator('.tabsIndicator')).toHaveCSS('transition-property', 'transform')
+    await expect(page.locator('.tabsIndicator')).toHaveCSS('transition-property', 'opacity')
   })
 
   test('paints selection feedback before mounting the selected feed', async ({ page }) => {
@@ -202,24 +193,26 @@ test.describe('subscriptions feed tab indicator', () => {
     await expect(page.getByText('video video 000')).toBeVisible()
     await expect(page.locator('.tabsIndicator')).toBeVisible()
 
-    const animation = await page.evaluate(() => {
-      const indicator = document.querySelector('.tabsIndicator')
-      const targetTab = document.querySelector('[data-subscription-feed-tab="shorts"]')
+    await expect(page.locator('.tabsIndicator')).toHaveCSS('opacity', '1')
+    const animation = await page.getByRole('tablist', { name: 'Subscriptions tabs' }).evaluate(tablist => new Promise(resolve => {
+      // Crossfades replace the indicator. Observe the persistent tablist so
+      // either incoming or outgoing opacity transitions can report their run.
+      const timeout = setTimeout(() => {
+        tablist.removeEventListener('transitionrun', onTransition)
+        resolve(null)
+      }, 2000)
+      function onTransition(event) {
+        if (event.propertyName !== 'opacity' || !(event.target instanceof Element) ||
+            !event.target.matches('.tabsIndicator, .tabsIndicatorOutgoing')) return
+        clearTimeout(timeout)
+        tablist.removeEventListener('transitionrun', onTransition)
+        resolve(Number.parseFloat(getComputedStyle(event.target).transitionDuration))
+      }
+      tablist.addEventListener('transitionrun', onTransition)
+      tablist.querySelector('[data-subscription-feed-tab="shorts"]').click()
+    }))
 
-      return new Promise(resolve => {
-        indicator.addEventListener('transitionend', event => {
-          if (event.propertyName !== 'transform') {
-            return
-          }
-
-          resolve(event.elapsedTime)
-        }, { once: true })
-
-        targetTab.click()
-      })
-    })
-
-    expect(animation).toBeCloseTo(0.2, 2)
+    expect(animation).toBeCloseTo(0.14, 2)
   })
 
   test('animates cached feed content when switching back to it', async ({ page }) => {
@@ -232,6 +225,7 @@ test.describe('subscriptions feed tab indicator', () => {
     const animationTargetClass = await page.evaluate(() => new Promise(resolve => {
       const target = document.querySelector('[data-subscription-feed-tab="videos"]')
 
+      const timeout = setTimeout(() => resolve(null), 2000)
       function inspectFrame() {
         if (target.getAttribute('aria-selected') !== 'true') {
           requestAnimationFrame(inspectFrame)
@@ -244,7 +238,12 @@ test.describe('subscriptions feed tab indicator', () => {
             return animation.playState === 'running' &&
               animation.effect.getComputedTiming().duration > 0
           })
-          resolve(animation?.effect.target.className ?? null)
+          if (animation) {
+            clearTimeout(timeout)
+            resolve(animation.effect.target.className)
+          } else {
+            requestAnimationFrame(inspectFrame)
+          }
         })
       }
 
@@ -327,7 +326,7 @@ test.describe('subscriptions feed tab indicator', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
     await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
 
-    // Wait out the 200ms transition
+    // Wait out the 140ms crossfade
     await page.waitForTimeout(400)
 
     const { indicator, tab } = await page.evaluate(() => {
@@ -346,7 +345,7 @@ test.describe('subscriptions feed tab indicator', () => {
     // offset measurements used by the indicator are integer layout values.
     expect(Math.abs(indicator.x - tab.x)).toBeLessThan(2)
     expect(Math.abs(indicator.width - tab.width)).toBeLessThan(2)
-    expect(Math.abs(indicator.top - tab.bottom)).toBeLessThan(2)
+    expect(Math.abs(indicator.bottom - tab.bottom)).toBeLessThan(2)
     await attachScreenshot('indicator under the Shorts tab')
   })
 

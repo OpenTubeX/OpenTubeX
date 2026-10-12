@@ -82,20 +82,12 @@
           ref="tabsContainer"
           v-overlay-scrollbars
           class="tabs"
-          role="tablist"
-          :aria-label="$t('Channel.Channel Tabs')"
         >
-          <div
+          <FtTabs
             ref="tabsContent"
             class="tabsContent"
+            :aria-label="$t('Channel.Channel Tabs')"
           >
-            <div
-              v-if="tabsIndicatorStyle"
-              class="tabsIndicator"
-              data-animation-speed-managed
-              :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
-              aria-hidden="true"
-            />
             <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
             <div
               v-if="visibleTabs.includes('home')"
@@ -335,7 +327,7 @@
                 :data-label="$t('Channel.About.About')"
               ><span>{{ $t("Channel.About.About") }}</span></span>
             </div>
-          </div>
+          </FtTabs>
         </div>
 
         <FtInput
@@ -368,6 +360,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../FtTabs/FtTabs.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -383,7 +376,6 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, formatNumber } from '../../helpers/utils'
-import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -444,43 +436,7 @@ const { locale } = useI18n()
 const { isTabPresented } = useTabContext()
 const tabsContainer = useTemplateRef('tabsContainer')
 const tabsContent = useTemplateRef('tabsContent')
-/** @type {import('vue').Ref<Record<string, string> | null>} */
-const tabsIndicatorStyle = ref(null)
-const tabsIndicatorTransitionDuration = computed(() => (
-  `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
-))
 let tabsResizeObserver = null
-let indicatorWasHidden = true
-
-/** @param {boolean} [animate] slide only when the selected tab changes */
-function updateTabIndicator(animate = false) {
-  const selected = tabsContainer.value?.querySelector('.selectedTab')
-  if ((isTabPresented && !isTabPresented.value) ||
-    !(selected instanceof HTMLElement) || selected.getClientRects().length === 0) {
-    tabsIndicatorStyle.value = null
-    indicatorWasHidden = true
-    return
-  }
-
-  // Match the subscriptions indicator: animate only the transform and
-  // compensate for scaled end caps.
-  // Keep fractional geometry at non-100% UI scales.
-  const containerRect = tabsContent.value.getBoundingClientRect()
-  const selectedRect = selected.getBoundingClientRect()
-  const style = {
-    '--tab-indicator-scale': String(selectedRect.width / 100),
-    transform: `translate(${selectedRect.left - containerRect.left}px, ${selectedRect.bottom - containerRect.top - 3}px) scaleX(${selectedRect.width / 100})`
-  }
-  // Repeated resize notifications must not cancel an ongoing tab switch.
-  if (!indicatorWasHidden && tabsIndicatorStyle.value?.transform === style.transform) {
-    return
-  }
-  if (!animate || indicatorWasHidden) {
-    style.transition = 'none'
-  }
-  tabsIndicatorStyle.value = style
-  indicatorWasHidden = false
-}
 
 function revealSelectedTab() {
   const container = tabsContainer.value
@@ -498,19 +454,20 @@ function updateTabsLayout() {
   if (!container || container.getBoundingClientRect().width === 0) return
   // Measure the full, bold-reserved labels independently of icon visibility.
   // This also lets icons return after resizing, changing locale or hiding tabs.
-  const fullWidth = [...container.querySelectorAll('.tab')].reduce((width, tab) => {
+  const tabs = [...container.querySelectorAll('.tab')]
+  const rowGap = Number.parseFloat(getComputedStyle(tabsContent.value.$el).columnGap)
+  const fullWidth = tabs.reduce((width, tab) => {
     const style = getComputedStyle(tab)
     const icon = getComputedStyle(tab.querySelector('.channelTabIcon'))
     return width + tab.querySelector('.tabLabel').getBoundingClientRect().width +
       Number.parseFloat(style.paddingInlineStart) + Number.parseFloat(style.paddingInlineEnd) +
       Number.parseFloat(icon.inlineSize) + Number.parseFloat(style.columnGap)
-  }, 0)
+  }, Math.max(0, tabs.length - 1) * rowGap)
   container.classList.toggle('hideTabIcons', fullWidth > container.getBoundingClientRect().width + 0.5)
-  updateTabIndicator()
   // Let the indicator's previous transform disappear before measuring overflow.
   nextTick(() => {
     if (tabsContainer.value !== container || !tabsContent.value) return
-    clampOverlayScrollLeft(container, tabsContent.value)
+    clampOverlayScrollLeft(container, tabsContent.value.$el)
     revealSelectedTab()
   })
 }
@@ -519,24 +476,20 @@ function observeTabs() {
   tabsResizeObserver?.disconnect()
   if (tabsContainer.value) {
     tabsResizeObserver?.observe(tabsContainer.value)
-    tabsResizeObserver?.observe(tabsContent.value)
+    tabsResizeObserver?.observe(tabsContent.value.$el)
     // Labels can change width without resizing the wrapping container.
     tabsContainer.value.querySelectorAll('.tab, .tabLabel').forEach(tab => tabsResizeObserver?.observe(tab))
   }
   updateTabsLayout()
 }
 
-watch(() => props.currentTab, () => {
-  revealSelectedTab()
-  updateTabIndicator(true)
-}, { flush: 'post' })
+watch(() => props.currentTab, revealSelectedTab, { flush: 'post' })
 watch([() => props.visibleTabs, tabsContainer, locale,
   () => isTabPresented?.value], observeTabs, { flush: 'post' })
 
 onActivated(() => nextTick(observeTabs))
 onDeactivated(() => {
   tabsResizeObserver?.disconnect()
-  indicatorWasHidden = true
 })
 
 const thumbnailLoadFailed = ref(false)

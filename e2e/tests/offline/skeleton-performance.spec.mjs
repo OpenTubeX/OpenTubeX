@@ -41,6 +41,13 @@ for (const { zoom, throttle, width, direction } of [
           .map(animation => animation.finished.catch(() => {})))
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
       })
+      // The rounded browser-tab SVG sweep intentionally repaints its stroke.
+      // Isolate the skeleton measurement from that independently tested loader.
+      await page.locator('.tabLoadingLine').evaluateAll(indicators => {
+        for (const indicator of indicators) {
+          for (const animation of indicator.getAnimations({ subtree: true })) animation.pause()
+        }
+      })
       const events = []
       session.on('Tracing.dataCollected', ({ value }) => events.push(...value))
       await session.send('Tracing.start', { categories: 'devtools.timeline', transferMode: 'ReportEvents' })

@@ -2115,5 +2115,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "בית"
+  subscriptions: "מינויים"
+  userplaylists: "רשימות"
+  history: "היסטוריה"
+  subscribedchannels: "ערוצים"
+  trending: "חמים"
+  popular: "פופולרי"
+  stats: "נתונים"
+  more: "עוד"
+
 Installer:
   Create Desktop Shortcut: יצירת קיצור דרך בשולחן העבודה

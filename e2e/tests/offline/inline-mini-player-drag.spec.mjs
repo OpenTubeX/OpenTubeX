@@ -184,7 +184,7 @@ for (const uiScale of [100, 125, 150]) {
     await setWindowSize(app, page, { width: 1250, height: 380 })
     for (const expanded of [true, false]) {
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav'))
-      await expect.poll(() => page.locator('.app > .sideNav').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(expanded ? 200 : 80, 0)
+      await expect.poll(() => page.locator('.app > .sideNav').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(expanded ? 200 : 104, 0)
       await expectClearOfSidebar()
     }
     const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>

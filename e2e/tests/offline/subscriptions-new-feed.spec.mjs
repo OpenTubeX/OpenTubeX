@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 
 const now = Date.now()
@@ -347,16 +348,74 @@ test.describe('new subscriptions feed', () => {
       await expect(postsTab).toHaveAttribute('aria-selected', 'true')
       await expect(page.getByText('New community post', { exact: true })).toBeVisible()
       await expect.poll(() => page.evaluate(() => {
-        const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+        const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
         const tab = document.querySelector('[data-new-feed-tab="posts"]').getBoundingClientRect()
         return Math.max(
           Math.abs(indicator.x - tab.x),
           Math.abs(indicator.width - tab.width),
-          Math.abs(indicator.top - tab.bottom)
+          Math.abs(indicator.bottom - tab.bottom)
         )
       })).toBeLessThan(2)
     })
   }
+
+  test('wraps long New feed category labels without clipping desktop tabs', async ({ app, page }, testInfo) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+    const tabs = page.getByRole('tablist', { name: 'New content tabs' })
+    for (const scale of [95, 125]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].setSize(Math.round(700 * scale / 100), 900), scale)
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await tabs.locator('.tabLabel').evaluateAll(labels => {
+        const translations = ['Neue Videos', 'YouTube Shorts', 'Neue Livestreams', 'Neue Community-Beiträge der abonnierten Kanäle']
+        labels.forEach((label, index) => {
+          label.dataset.label = translations[index]
+          label.querySelector('span').textContent = translations[index]
+        })
+      })
+      // Reproduce the old single-row clipping before checking the responsive layout.
+      await tabs.evaluate(element => { element.style.flexWrap = 'nowrap' })
+      await expect.poll(() => tabs.evaluate(element => {
+        const box = element.getBoundingClientRect()
+        return [...element.querySelectorAll('[role="tab"]')].some(button => {
+          const tab = button.getBoundingClientRect()
+          return tab.left < box.left - 1 || tab.right > box.right + 1
+        })
+      })).toBe(true)
+      await tabs.evaluate(element => { element.style.removeProperty('flex-wrap') })
+      await expect.poll(() => tabs.evaluate(element => {
+        const box = element.getBoundingClientRect()
+        const buttons = [...element.querySelectorAll('[role="tab"]')]
+        return buttons.every(button => {
+          const tab = button.getBoundingClientRect()
+          const label = button.querySelector('.tabLabel > span')
+          return tab.left >= box.left - 1 && tab.right <= box.right + 1 &&
+            tab.bottom <= box.bottom + 1 && label.scrollWidth <= label.clientWidth + 1
+        })
+      })).toBe(true)
+      await expect.poll(() => tabs.locator('[role="tab"]').evaluateAll(buttons =>
+        new Set(buttons.map(button => Math.round(button.getBoundingClientRect().top))).size
+      )).toBeGreaterThan(1)
+      await tabs.locator('[data-new-feed-tab="videos"]').focus()
+      await page.keyboard.press('End')
+      const posts = tabs.locator('[data-new-feed-tab="posts"]')
+      await expect(posts).toBeFocused()
+      await expect(posts).toHaveAttribute('aria-selected', 'true')
+      await expect.poll(() => tabs.evaluate(element => {
+        const pill = element.querySelector('.tabsIndicator').getBoundingClientRect()
+        const selected = element.querySelector('[aria-selected="true"]').getBoundingClientRect()
+        return Math.max(Math.abs(pill.left - selected.left), Math.abs(pill.top - selected.top), Math.abs(pill.width - selected.width))
+      })).toBeLessThan(1)
+      if (scale === 95) {
+        for (const colorScheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+          await captureAppFramebuffer(app, testInfo, `desktop-new-feed-tabs-${colorScheme}`)
+        }
+      }
+    }
+  })
 
   test('switches between the combined and tabbed views and remembers the choice', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
@@ -368,7 +427,7 @@ test.describe('new subscriptions feed', () => {
     await showTabbedView.click()
 
     const newContentTabs = page.getByRole('tablist', { name: 'New content tabs' })
-    const newContentTabsIndicator = newContentTabs.locator('.newFeedTabsIndicator')
+    const newContentTabsIndicator = newContentTabs.locator('.tabsIndicator')
     await expect(newContentTabs).toBeVisible()
     await expect(newContentTabsIndicator).toBeVisible()
     await expect(page.getByRole('button', { name: 'Show combined view' })).toHaveAttribute('aria-pressed', 'true')
@@ -392,18 +451,18 @@ test.describe('new subscriptions feed', () => {
     const shortsTab = newContentTabs.locator('[data-new-feed-tab="shorts"]')
     await shortsTab.click()
     await expect(shortsTab).toHaveAttribute('aria-selected', 'true')
-    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'transform')
+    await expect(newContentTabsIndicator).toHaveCSS('transition-property', 'opacity')
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
 
     await expect.poll(() => page.evaluate(() => {
-      const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+      const indicator = document.querySelector('.newFeedTabs .tabsIndicator').getBoundingClientRect()
       const tab = document.querySelector('[data-new-feed-tab="shorts"]').getBoundingClientRect()
 
       return Math.max(
         Math.abs(indicator.x - tab.x),
         Math.abs(indicator.width - tab.width),
-        Math.abs(indicator.top - tab.bottom)
+        Math.abs(indicator.bottom - tab.bottom)
       )
     })).toBeLessThan(2)
 

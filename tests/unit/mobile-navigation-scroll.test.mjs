@@ -47,7 +47,7 @@ test('a longer reveal threshold accumulates upward movement while retaining quic
 for (const hidden of [false, true]) {
   test(`minimize holds ${hidden ? 'hidden' : 'visible'} navigation through history scroll restoration`, async t => {
     const source = await readFile(new URL('../../src/renderer/components/SideNav/SideNav.vue', import.meta.url), 'utf8')
-    const layout = source.slice(source.indexOf('const route = useRoute()'), source.indexOf('/** @type {import(\'vue\').Ref<Record'))
+    const layout = source.slice(source.indexOf('const route = useRoute()'), source.indexOf('watch(() => route.fullPath'))
     const watchers = source.slice(source.indexOf('watch(() => route.fullPath'), source.indexOf('watch([\n  () => activeProfile'))
     const route = reactive({ fullPath: '/watch/video' })
     const preview = ref(null)
@@ -64,7 +64,7 @@ for (const hidden of [false, true]) {
       store: { getters: { getAlwaysShowNavigationBar: false } },
       createMobileNavigationScroll, mobileNavigationMinimizePreview: preview,
       window: viewport, document: { scrollingElement: { scrollHeight: 3000, clientHeight: 800 } },
-      getComputedStyle: () => ({ getPropertyValue: () => '1' }), updateIndicator() {}
+      getComputedStyle: () => ({ getPropertyValue: () => '1' })
     }))
     api.updateScrollLayout()
     if (hidden) { viewport.scrollY = 40; api.updateScrollVisibility() }

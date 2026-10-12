@@ -450,7 +450,7 @@
                   {{ t('Settings.Sync Settings.Tabs From Other Devices') }}
                 </h3>
               </header>
-              <div
+              <FtTabs
                 class="syncedSessionTabs"
                 role="tablist"
                 :aria-label="t('Settings.Sync Settings.Tabs From Other Devices')"
@@ -480,7 +480,7 @@
                   </span>
                   <strong>{{ formatDeviceSessionLabel(session, t) }}</strong>
                 </button>
-              </div>
+              </FtTabs>
               <div class="syncedSessionPanels">
                 <article
                   v-if="activeOtherDeviceSession"
@@ -674,6 +674,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../FtTabs/FtTabs.vue'
 import { useChannelTabAvatars } from '../../composables/useChannelTabAvatars'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'

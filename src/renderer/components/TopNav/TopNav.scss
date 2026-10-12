@@ -9,7 +9,7 @@
 
 .topNav {
   background-color: var(--card-bg-color);
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
+  box-shadow: none;
   block-size: var(--top-nav-height, 60px);
   inset-inline: 0;
   line-height: var(--top-nav-height, 60px);
@@ -86,15 +86,6 @@
   }
 }
 
-// The header sits above the tab bar, so continue its edge shadow here.
-.app.verticalTabsLeft .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset 2px 0 1px 0 var(--primary-shadow-color);
-}
-
-.app.verticalTabsRight .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset -2px 0 1px 0 var(--primary-shadow-color);
-}
-
 /* These settings name physical window edges, independent of text direction. */
 /* stylelint-disable liberty/use-logical-spec */
 @media only screen and (width <= 680px) {
@@ -136,7 +127,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: calc(20px * var(--ui-roundness));
   border-style: none;
   background-color: transparent;
   color: var(--primary-text-color);
@@ -144,7 +135,7 @@
   font-size: 20px;
   line-height: 0;
   padding: 10px;
-  transition: background 0.2s ease-out;
+  transition: background-color 150ms ease, border-radius 200ms ease;
 }
 
 .navButton :deep(.ft-icon) {
@@ -157,13 +148,12 @@
   &:hover {
     background-color: var(--header-button-hover-color);
     color: var(--header-button-hover-text-color);
-    transition: background 0.2s ease-in;
   }
 
   &:active {
     background-color: var(--header-button-pressed-color);
     color: var(--header-button-pressed-text-color);
-    transition: background 0.2s ease-in;
+    border-radius: calc(12px * var(--ui-roundness));
   }
 }
 
@@ -247,7 +237,7 @@
 
   .logo {
     align-items: center;
-    border-radius: calc(4px * var(--ui-roundness));
+    border-radius: calc(20px * var(--ui-roundness));
     cursor: pointer;
     display: flex;
     padding-block: 0;
@@ -371,7 +361,7 @@
     min-block-size: 48px;
     padding-inline: 12px;
     border: 0;
-    border-radius: calc(12px * var(--ui-roundness));
+    border-radius: calc(24px * var(--ui-roundness));
     background-color: var(--search-bar-color);
     box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
     color: var(--primary-text-color);
@@ -432,7 +422,7 @@
     .searchContainer {
       align-items: center;
       background-color: var(--search-bar-color);
-      border-radius: calc(12px * var(--ui-roundness));
+      border-radius: calc(24px * var(--ui-roundness));
       box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
 
       @include top-nav-is-colored {
@@ -659,6 +649,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .navButton,
+  .navButton:hover {
+    transition: none;
+  }
+
   .syncIndicator :deep(.ft-icon__glyph) {
     animation: none;
   }

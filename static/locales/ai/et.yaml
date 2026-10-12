@@ -2067,5 +2067,17 @@ Search Bar:
 Native Permissions:
   Local Network: "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Avaleht"
+  subscriptions: "Tellimused"
+  userplaylists: "Loendid"
+  history: "Ajalugu"
+  subscribedchannels: "Kanalid"
+  trending: "Trendid"
+  popular: "Populaarne"
+  stats: "Statistika"
+  more: "Veel"
+
 Installer:
   Create Desktop Shortcut: Loo töölauale otsetee

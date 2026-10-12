@@ -87,7 +87,7 @@ async function expectTabScrollRange(tabs) {
   })
 }
 
-test('hides channel tab icons before shortening labels when space is limited', async ({ app, page }, testInfo) => {
+test('hides channel tab icons and preserves full labels when space is limited', async ({ app, page }, testInfo) => {
   for (const [width, scale] of [[375, 95], [812, 125], [1250, 100], [1600, 95]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => {
       BrowserWindow.getAllWindows()[0].setSize(width, 900)
@@ -107,11 +107,44 @@ test('hides channel tab icons before shortening labels when space is limited', a
   })
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(450, 900))
   await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
-  await expect.poll(() => page.locator('.channelDetails:visible .tabs').evaluate(container =>
-    container.scrollWidth - container.clientWidth
-  )).toBeLessThanOrEqual(1)
+  // Pill spacing can require scrolling even with fewer tabs; labels stay complete.
+  await expect.poll(() => page.locator('.channelDetails:visible .tabLabel > span').evaluateAll(labels =>
+    labels.every(label => label.scrollWidth <= label.clientWidth + 1)
+  )).toBe(true)
   await expectTabScrollRange(page.locator('.channelDetails:visible .tabs'))
   await captureAppFramebuffer(app, testInfo, 'channel-tabs-full-labels-without-icons')
+})
+
+test('hides channel icons when the gaps would otherwise make the row overflow', async ({ app, page }, testInfo) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1800, 900))
+  const tabs = page.locator('.channelDetails:visible .tabs')
+  for (const scale of [95, 125]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await tabs.evaluate(container => { container.style.cssText = 'flex: none; inline-size: 1200px' })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    const widthWithIcons = await tabs.evaluate(container => {
+      const content = container.querySelector('.tabsContent')
+      const buttons = [...content.querySelectorAll('.tab')]
+      const width = buttons.reduce((sum, tab) => sum + tab.getBoundingClientRect().width, 0)
+      const gaps = (buttons.length - 1) * parseFloat(getComputedStyle(content).columnGap)
+      container.style.flex = 'none'
+      container.style.inlineSize = `${width + gaps / 2}px`
+      return width + gaps
+    })
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeHidden()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+    await expectAligned(page)
+    if (scale === 95) {
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        await captureAppFramebuffer(app, testInfo, `channel-tabs-fit-${colorScheme}`)
+      }
+    }
+    await tabs.evaluate((container, width) => { container.style.inlineSize = `${width + 2}px` }, widthWithIcons)
+    await expect(page.locator('#videosTab .channelTabIcon')).toBeVisible()
+    await expect.poll(() => tabs.evaluate(container => container.scrollWidth - container.clientWidth)).toBeLessThanOrEqual(1)
+  }
 })
 
 test('keeps channel header rows evenly spaced below the banner', async ({ app, page }, testInfo) => {
@@ -314,20 +347,22 @@ test('separates the content card on every channel tab', async ({ app, page }, te
   })).toBe(56)
 })
 
-test('slides the active channel line with the feed timing and configured animation speed', async ({ page }) => {
-  for (const [speed, tabId, duration] of [[100, 'aboutTab', 200], [200, 'videosTab', 100], [50, 'shortsTab', 400]]) {
+test('crossfades the active channel line at the configured animation speed', async ({ page }) => {
+  for (const [speed, tabId, duration] of [[100, 'aboutTab', 140], [200, 'videosTab', 70], [50, 'shortsTab', 280]]) {
     await page.evaluate(value => {
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', value)
     }, speed)
+    await expect(page.locator(indicatorSelector)).toHaveCSS('opacity', '1')
     const elapsed = await page.locator(indicatorSelector).evaluate((indicator, tabId) => new Promise(resolve => {
-      indicator.addEventListener('transitionend', event => {
-        resolve(event.elapsedTime * 1000)
+      indicator.addEventListener('transitionrun', () => {
+        resolve(Number.parseFloat(getComputedStyle(indicator).transitionDuration) * 1000)
       }, { once: true })
       document.getElementById(tabId).click()
     }), tabId)
     expect(elapsed).toBeCloseTo(duration, 0)
-    await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'transform')
+    await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'opacity')
     await expectAligned(page)
+    await expect.poll(() => page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
   }
 })
 
@@ -430,13 +465,10 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
       document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
     }, roundness)
     await expect.poll(() => page.locator(indicatorSelector).evaluate(element => {
-      const style = getComputedStyle(element)
-      const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
-      return {
-        horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
-        vertical
-      }
-    })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+      const tab = element.parentElement.querySelector('[aria-selected="true"]')
+      const expectedRadius = Math.min(parseFloat(getComputedStyle(tab).borderBottomLeftRadius), tab.offsetHeight / 2, tab.offsetWidth / 2)
+      return Math.abs(parseFloat(element.style.borderRadius) - expectedRadius)
+    })).toBeLessThan(0.2)
   }
 })
 
@@ -560,7 +592,7 @@ test('desktop channel tabs size to their content and show icons in both packs', 
         const icon = element.querySelector('.ft-icon').getBoundingClientRect()
         return element.getBoundingClientRect().width - label.width - icon.width
       })
-      expect(spacing).toBeCloseTo(36, 0)
+      expect(spacing).toBeCloseTo(38, 0)
     }
     await expectAligned(page)
     await captureAppFramebuffer(app, testInfo, `channel-tab-icons-${pack}`)

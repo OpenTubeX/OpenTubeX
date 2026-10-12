@@ -2118,5 +2118,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Descobrir dispositivos na rede local e transmitir vídeos para eles, e sincronizar definições e dados entre dispositivos."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Início"
+  subscriptions: "Subscr."
+  userplaylists: "Listas"
+  history: "Histórico"
+  subscribedchannels: "Canais"
+  trending: "Tendências"
+  popular: "Populares"
+  stats: "Estatíst."
+  more: "Mais"
+
 Installer:
   Create Desktop Shortcut: Criar um atalho no ambiente de trabalho

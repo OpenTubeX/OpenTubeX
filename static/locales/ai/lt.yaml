@@ -2562,5 +2562,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Aptikti įrenginius vietiniame tinkle ir perduoti į juos vaizdo įrašus bei sinchronizuoti nustatymus ir duomenis tarp įrenginių."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Pradžia"
+  subscriptions: "Prenum."
+  userplaylists: "Sąrašai"
+  history: "Istorija"
+  subscribedchannels: "Kanalai"
+  trending: "Tendenc."
+  popular: "Populiaru"
+  stats: "Statistika"
+  more: "Daugiau"
+
 Installer:
   Create Desktop Shortcut: Sukurti darbalaukio nuorodą

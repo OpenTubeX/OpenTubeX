@@ -2087,5 +2087,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Откриване на устройства в локалната мрежа и предаване на видеоклипове към тях, както и синхронизиране на настройки и данни между устройства."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Начало"
+  subscriptions: "Абонаменти"
+  userplaylists: "Плейлисти"
+  history: "История"
+  subscribedchannels: "Канали"
+  trending: "Трендове"
+  popular: "Популярни"
+  stats: "Статистика"
+  more: "Още"
+
 Installer:
   Create Desktop Shortcut: Създаване на пряк път на работния плот

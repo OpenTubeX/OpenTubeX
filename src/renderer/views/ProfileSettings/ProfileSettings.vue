@@ -50,9 +50,10 @@
       v-if="openSettingsProfile"
       :key="openSettingsProfileId"
     >
-      <div
+      <FtTabs
         v-if="!isNewProfileOpen"
         class="profileTabs"
+        variant="segmented"
         role="tablist"
         :aria-label="$t('Profile.Profile Settings')"
       >
@@ -98,7 +99,7 @@
           />
           {{ $t('Profile.Manage Profile Subscriptions') }}
         </button>
-      </div>
+      </FtTabs>
       <div
         v-show="isNewProfileOpen || activeTab === 'customization'"
         :id="customizationPanelId"
@@ -136,6 +137,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../../components/FtTabs/FtTabs.vue'
 import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 

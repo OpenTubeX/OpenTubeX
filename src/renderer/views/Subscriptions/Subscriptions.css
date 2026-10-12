@@ -184,6 +184,10 @@
 }
 
 .tabs {
+  --material-tab-font-size: 1.1em;
+  --material-tab-padding-inline: 15px;
+
+  flex-wrap: wrap;
   inline-size: auto;
   justify-content: flex-start;
   gap: 4px 10px;
@@ -249,32 +253,6 @@
   font-weight: bold;
 }
 
-.tabsIndicator {
-  position: absolute;
-
-  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
-  top: 0;
-
-  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
-  left: 0;
-  block-size: 3px;
-
-  /* A 1px base amplifies device-pixel rounding when stretched to a tab's
-     width in WebView. Keep the base wide and scale it to the selected tab. */
-  inline-size: 100px;
-
-  /* Compensate for scaleX so the end caps stay round at every tab width. */
-  border-radius: calc(150px * var(--ui-roundness) / var(--tab-indicator-width)) / calc(1.5px * var(--ui-roundness));
-  background-color: var(--primary-color);
-  pointer-events: none;
-  transform-origin: left top;
-
-  /* animating only the transform keeps this on the compositor, so it stays
-     smooth while the main thread renders a large feed */
-  transition: transform 0.2s ease;
-  will-change: transform;
-}
-
 .tab {
   display: flex;
   align-items: center;
@@ -312,10 +290,13 @@
 }
 
 .newFeedTabs {
+  --material-tab-padding-inline: 15px;
+
   align-items: stretch;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 4px 10px;
-  margin-block: 8px -3px;
+  margin-block: 8px 0;
   position: relative;
   overflow-inline: clip;
   color: var(--tertiary-text-color);
@@ -376,6 +357,14 @@
   }
 }
 
+@media only screen and (680px < width <= 1280px) {
+  .tabs {
+    --material-tab-padding-inline: 12px;
+
+    column-gap: 8px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .card {
     --subscriptions-header-padding-block-end: 10px;
@@ -397,6 +386,10 @@
   }
 
   .subscriptionsHeader:not(.singleRow) .tabs {
+    --material-tab-min-height: 48px;
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+
     flex: 1 1 auto;
     inline-size: 100%;
     flex-wrap: nowrap;
@@ -411,10 +404,6 @@
     padding-block: 4px;
     padding-inline: 4px;
     font-size: 0.9em;
-  }
-
-  .tabsIndicator:not(.newFeedTabsIndicator) {
-    margin-block-start: -8px;
   }
 
   .tabLabel {
@@ -486,6 +475,10 @@
   }
 
   .newFeedTabs {
+    --material-tab-min-height: 48px;
+    --material-tab-font-size: 0.9em;
+    --material-tab-padding-inline: 4px;
+
     flex-wrap: nowrap;
     gap: 0;
   }

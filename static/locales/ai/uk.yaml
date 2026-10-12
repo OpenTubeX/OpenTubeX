@@ -2106,5 +2106,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Знаходити пристрої в локальній мережі та транслювати на них відео, а також синхронізувати налаштування й дані між пристроями."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Головна"
+  subscriptions: "Підписки"
+  userplaylists: "Добірки"
+  history: "Історія"
+  subscribedchannels: "Канали"
+  trending: "Тренди"
+  popular: "Популярне"
+  stats: "Статистика"
+  more: "Ще"
+
 Installer:
   Create Desktop Shortcut: Створити ярлик на робочому столі

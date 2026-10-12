@@ -1,0 +1,116 @@
+/* Shared by primary destinations and the More button, across Vue scopes. */
+@media only screen and (width <= 680px) {
+  .sideNav .sideNavMoreOptions,
+  .sideNav .mobileNavItem {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  .sideNav .mobileNavItem {
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: var(--mobile-nav-content-height);
+    padding-block: 4px;
+    padding-inline: 0;
+    border-radius: calc(20px * var(--ui-roundness));
+    color: var(--primary-text-color);
+    background: transparent;
+    isolation: isolate;
+  }
+
+  .sideNav .mobileNavItem:is(:hover, :active, :focus-visible) {
+    background: transparent;
+    color: var(--primary-text-color);
+  }
+
+  .sideNav .mobileNavItem:not(.mobileHidden) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .sideNav .mobileNavItem::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset-block-start: 4px;
+    inline-size: min(64px, 100%);
+    block-size: 32px;
+    border-radius: calc(20px * var(--ui-roundness));
+    background-color: var(--side-nav-hover-color);
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition: transform 350ms cubic-bezier(0.2, 1.4, 0.4, 1), opacity 150ms ease;
+  }
+
+  .sideNav .mobileNavItem.router-link-active {
+    color: var(--primary-color);
+  }
+
+  .sideNav .mobileNavItem.router-link-active::before {
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .sideNav .mobileNavItem:hover::before,
+  .sideNav .mobileNavItem:focus-visible::before,
+  .sideNav .mobileNavItem[aria-expanded='true']::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .sideNav .mobileNavItem:active::before {
+    opacity: 1;
+    transform: scaleX(0.88);
+    transition-duration: 100ms;
+  }
+
+  .sideNav .mobileNavItem .thumbnailContainer {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 32px;
+    margin: 0;
+  }
+
+  .sideNav .mobileNavItem .navIcon {
+    flex-shrink: 0;
+    font-size: 24px;
+    inline-size: 24px;
+    block-size: 24px;
+    margin: 0;
+  }
+
+  .sideNav .moreOptionNav > .navIcon {
+    margin-block: 4px;
+  }
+
+  .sideNav .mobileNavItem .navLabel {
+    inline-size: 100%;
+    block-size: 16px;
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  .sideNav .mobileNavItem.router-link-active .navLabel {
+    font-weight: 700;
+  }
+
+  .sideNav:is(.compactLabels, .hiddenLabels) .mobileNavItem::before {
+    inset-block-start: calc((var(--mobile-nav-content-height) - 32px) / 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sideNav .mobileNavItem::before {
+    transition: none;
+  }
+}

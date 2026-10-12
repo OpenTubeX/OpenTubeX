@@ -154,11 +154,11 @@ for (const zoom of [1, 0.95]) {
       store.commit('setShowProgressBar', false)
     }, zoom)
     const nav = page.locator('.sideNav')
-    await expect.poll(() => nav.locator('.activeIndicator').evaluate(element => element.getBoundingClientRect().height))
-      .toBeCloseTo(3, 1)
-    await expect.poll(() => nav.locator('.activeIndicator').evaluate(element => (
-      new DOMMatrix(getComputedStyle(element).transform).m42
-    ))).toBeCloseTo(0, 2)
+    const activeOption = nav.locator('.navOption.router-link-active:visible')
+    const originalPill = await activeOption.evaluate(element => {
+      const pill = getComputedStyle(element, '::before')
+      return { top: pill.top, height: pill.height }
+    })
     const originalHeight = await nav.evaluate(element => element.getBoundingClientRect().height)
     await page.evaluate(() => {
       const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
@@ -167,18 +167,18 @@ for (const zoom of [1, 0.95]) {
     })
     await expect(page.locator('.progressBar')).toBeVisible()
     const metrics = await nav.evaluate(element => {
-      const indicator = element.querySelector('.activeIndicator').getBoundingClientRect()
+      const pill = getComputedStyle(element.querySelector('.navOption.router-link-active'), '::before')
       const progress = document.querySelector('.progressBar').getBoundingClientRect()
       return {
         height: element.getBoundingClientRect().height,
         progressBottom: progress.bottom,
         navTop: element.getBoundingClientRect().top,
-        indicatorBottomInset: innerHeight - indicator.bottom,
+        pill: { top: pill.top, height: pill.height },
       }
     })
     expect(metrics.height).toBeCloseTo(originalHeight, 0)
     expect(metrics.progressBottom).toBeCloseTo(metrics.navTop, 0)
-    expect(metrics.indicatorBottomInset).toBeCloseTo(24, 0)
+    expect(metrics.pill).toEqual(originalPill)
     await page.evaluate(() => {
       document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store.commit('setShowProgressBar', false)
     })
@@ -379,45 +379,36 @@ test('phone card dragging keeps its finger offset while scrolling and stops at t
 
 test('fits synced-device tabs in the phone tab organizer', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 375, height: 760 })
-  await page.addStyleTag({
-    path: path.join(
-      repoRoot,
-      'src/renderer/components/TabBar/CapacitorPhoneTabSwitcher.css'
-    )
-  })
+  await enablePhoneTabSwitcher(page)
   await page.evaluate(() => {
-    const dialog = document.createElement('section')
-    dialog.className = 'capacitorPhoneTabDialog'
-    dialog.style.height = 'min(620px, 100%)'
-    dialog.style.width = 'min(560px, 100%)'
-    dialog.innerHTML = `
-      <div class="capacitorPhoneTabViewTabs" role="tablist">
-        <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="false">2 open tabs</button>
-        <button class="capacitorPhoneTabViewTab" role="tab" aria-selected="true">Tabs from other devices</button>
-      </div>
-      <div class="capacitorPhoneSyncedView" role="tabpanel">
-        <div class="capacitorPhoneSyncedSessionTabs">
-          <div class="capacitorPhoneSyncedSessionTabsInner" role="tablist" aria-label="Tabs from other devices">
-            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="true"><span aria-hidden="true">▣</span><strong>A very long encrypted device name that must wrap · 2 tabs</strong></button>
-            <button class="capacitorPhoneSyncedSessionTab" role="tab" aria-selected="false"><span aria-hidden="true">▣</span><strong>Mobile · 1 tab</strong></button>
-          </div>
-        </div>
-        <div class="capacitorPhoneSyncedTabs">
-          <article class="capacitorPhoneSyncedSession" role="tabpanel">
-            <header class="capacitorPhoneSyncedSessionHeader">
-              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedOpenAll"><span aria-hidden="true">↗</span><span>Open all tabs</span></button>
-              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedDelete dangerButton" aria-label="Delete: Desktop · 2 tabs"><span aria-hidden="true">×</span></button>
-            </header>
-            <div class="capacitorPhoneSyncedTabList">
-              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>A very long channel tab title that must not overflow</span></button>
-              <button class="capacitorPhoneSyncedTabButton capacitorPhoneSyncedTabTarget"><span aria-hidden="true">↗</span><span>Watch later</span></button>
-            </div>
-          </article>
-        </div>
-      </div>
-    `
-    document.body.append(dialog)
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setSyncServerEnabled', true)
+    store.commit('setSyncServerToken', 'e2e-token')
+    store.commit('setSyncServerPrivacyMode', 'enhanced')
+    store.commit('setSyncServerSyncSessions', true)
+    store.commit('setSyncServerSharedTabs', false)
+    store.commit('setSyncServerOtherDeviceSessions', [
+      {
+        syncDeviceId: 'desktop-e2e',
+        syncPlatform: 'desktop',
+        sessionId: 'desktop-session',
+        tabs: [
+          { id: 'history', title: 'History', url: '/history' },
+          { id: 'subscriptions', title: 'Subscriptions', url: '/subscriptions' },
+        ]
+      },
+      {
+        syncDeviceId: 'mobile-e2e',
+        syncPlatform: 'mobile',
+        sessionId: 'mobile-session',
+        tabs: [
+          { id: 'home', title: 'Home', url: '/home' },
+        ]
+      },
+    ])
   })
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  await page.getByRole('tab', { name: 'Tabs from other devices' }).click()
 
   const dialog = page.locator('.capacitorPhoneTabDialog')
   await expect.poll(() => dialog.evaluate(element => (
@@ -440,16 +431,13 @@ test('fits synced-device tabs in the phone tab organizer', async ({ app, page })
     })
   expect(actionAlignment.openAllStartOffset).toBeLessThanOrEqual(1)
   expect(actionAlignment.deleteEndOffset).toBeLessThanOrEqual(1)
-  const activeIndicator = await dialog.getByRole('tab', { name: 'Tabs from other devices' })
-    .evaluate(element => {
-      const style = getComputedStyle(element)
-      return {
-        color: style.borderBottomColor,
-        width: Number.parseFloat(style.borderBottomWidth),
-      }
-    })
-  expect(activeIndicator.width).toBe(3)
-  expect(activeIndicator.color).not.toBe('rgba(0, 0, 0, 0)')
+  const activeIndicator = dialog.locator('.capacitorPhoneTabViewTabs .tabsIndicator')
+  await expect(activeIndicator).toBeVisible()
+  await expect.poll(() => activeIndicator.evaluate(element => {
+    const pill = element.getBoundingClientRect()
+    const tab = element.parentElement.querySelector('[aria-selected="true"]').getBoundingClientRect()
+    return Math.max(Math.abs(pill.top - tab.top), Math.abs(pill.bottom - tab.bottom))
+  })).toBeLessThan(0.2)
 
   await setWindowSize(app, page, { width: 760, height: 375 })
   await expect.poll(() => dialog.evaluate(element => (
@@ -701,7 +689,6 @@ test('shows remote tab sets as tabs and confirms deletion in the phone organizer
   await expect(sessionTabs).toHaveAttribute('data-overlayscrollbars-viewport')
   const sessionTablist = sessionTabs.getByRole('tablist', { name: 'Tabs from other devices' })
   await expect(sessionTablist).toHaveCount(1)
-  await expect(sessionTablist.locator(':scope > *')).toHaveCount(9)
   await expect(sessionTablist.locator(':scope > [role="tab"]')).toHaveCount(9)
   await expect(sessionTabs.getByRole('tab')).toHaveCount(9)
   await expect.poll(() => sessionTabs.evaluate(element => ({
@@ -2331,10 +2318,10 @@ for (const scale of [1, 1.25]) {
     try {
       for (const roundness of [0, 1, 2]) {
         await tab.evaluate((element, value) => element.style.setProperty('--ui-roundness', value), String(roundness))
-        await expect(tab).toHaveCSS('border-top-left-radius', `${6 * roundness}px`)
-        await expect(tab).toHaveCSS('border-top-right-radius', `${6 * roundness}px`)
-        await expect(tab).toHaveCSS('border-bottom-left-radius', '0px')
-        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${4 * roundness}px`)
+        await expect(tab).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
+        await expect(tab).toHaveCSS('border-top-right-radius', `${24 * roundness}px`)
+        await expect(tab).toHaveCSS('border-bottom-left-radius', `${24 * roundness}px`)
+        await expect(tab.locator('.capacitorTabletTabClose')).toHaveCSS('border-top-left-radius', `${24 * roundness}px`)
       }
       for (const selected of [false, true]) {
         await tab.evaluate((element, selected) => element.classList.toggle('active', selected), selected)

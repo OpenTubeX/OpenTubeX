@@ -78,10 +78,13 @@
           />
           <span class="tabTitleText">{{ displayTitle }}</span>
         </span>
-        <span
+        <FtEmbeddedProgress
           v-if="showLoadingIndicator && !showLoadingDot"
           class="tabLoadingLine"
-          aria-hidden="true"
+          :corner-radius="16 * store.getters.getUiRoundness / 100"
+          :progress="70"
+          :start-arc-fraction="0.5"
+          :end-arc-fraction="0.5"
         />
         <button
           class="closeButton"
@@ -102,6 +105,7 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
+import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 import store from '../../store/index'
@@ -262,7 +266,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   --tab-background-color: var(--tab-surface-color, var(--bg-color));
 
   background-color: var(--tab-background-color);
-  border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
+  border-radius: calc(16px * var(--ui-roundness));
   cursor: pointer;
   block-size: 30px;
 
@@ -272,7 +276,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   max-inline-size: var(--fixed-tab-width, 200px);
   flex-shrink: 0;
   border: 1px solid transparent;
-  border-block-end: 0;
   transition: transform 0.2s ease;
   position: relative;
   user-select: none;
@@ -290,13 +293,12 @@ watch(tabAvatarUrl, (avatarUrl) => {
   inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;
-  border-radius: calc(6px * var(--ui-roundness));
+  border-radius: calc(16px * var(--ui-roundness));
   border-block-end: 1px solid transparent;
 }
 
 .tab.bottom {
-  border-radius: 0 0 calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness));
-  border-block-start: 0;
+  border-radius: calc(16px * var(--ui-roundness));
   border-block-end: 1px solid transparent;
 }
 
@@ -474,7 +476,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   border: 0;
   cursor: pointer;
   padding: 2px;
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: calc(12px * var(--ui-roundness));
   color: var(--tertiary-text-color);
   opacity: 0;
   transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
@@ -521,44 +523,29 @@ watch(tabAvatarUrl, (avatarUrl) => {
   font-size: 10px;
 }
 
-/* Clip only the loading streak so it cannot spill into adjacent tabs. */
 .tabLoadingLine {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-end: 0;
-  block-size: 6px;
-  overflow: clip;
-  pointer-events: none;
-  border-end-start-radius: inherit;
-  border-end-end-radius: inherit;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
-.tabLoadingLine::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  inset-block-end: 0;
-  inline-size: 70%;
-  block-size: 2px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-color) 75%, var(--primary-text-color));
-  filter: drop-shadow(0 -1px 2px var(--accent-color));
+.tabLoadingLine :deep(.embeddedProgressPath) {
+  stroke: var(--accent-color);
+  filter: drop-shadow(0 0 2px var(--accent-color));
   animation: tab-loading-sweep 1.5s ease-in-out infinite;
 }
 
 @keyframes tab-loading-sweep {
   from {
-    transform: translateX(-100%);
+    stroke-dashoffset: calc(var(--embedded-progress-path-length) * 0.7);
   }
 
   to {
-    transform: translateX(143%);
+    stroke-dashoffset: calc(var(--embedded-progress-path-length) * -1);
   }
 }
 
-:global(:root[data-reduced-motion='reduce']) .tabLoadingLine::after {
+:global(:root[data-reduced-motion='reduce']) .tabLoadingLine :deep(.embeddedProgressPath) {
   animation: none;
-  inline-size: 100%;
-  background: var(--accent-color);
+  stroke-dasharray: var(--embedded-progress-path-length) var(--embedded-progress-gap-length) !important;
 }
 </style>

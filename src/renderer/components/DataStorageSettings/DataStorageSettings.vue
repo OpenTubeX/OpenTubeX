@@ -4,8 +4,9 @@
     class="settingsCategory dataStorageSettings"
   >
     <Teleport :to="`#${settingsWindow.contentHeaderTargetId}`">
-      <div
+      <FtTabs
         class="dataStorageTabs"
+        variant="segmented"
         role="tablist"
         :aria-label="t('Settings.Data Settings.Data And Storage')"
       >
@@ -53,7 +54,7 @@
           />
           {{ t('Settings.Storage Settings.Storage') }}
         </button>
-      </div>
+      </FtTabs>
     </Teleport>
 
     <div
@@ -78,6 +79,7 @@
 </template>
 
 <script setup>
+import FtTabs from '../FtTabs/FtTabs.vue'
 import { FtIcon } from '@opentubex/icons'
 import { inject, nextTick, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'

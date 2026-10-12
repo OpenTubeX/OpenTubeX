@@ -216,11 +216,9 @@ test('keeps the focus indicator inside controls at layout edges', async ({ attac
   await pressGamepadButton(page, 'left')
   await expect(sideNavOption).toBeFocused()
   await expectContainedContrastFocusIndicator(sideNavOption, 'rgb(255, 255, 255)')
-  const sideNavLayers = await sideNavOption.evaluate((element) => ({
-    activeIndicator: Number.parseInt(getComputedStyle(element.parentElement.querySelector('.activeIndicator')).zIndex),
-    focusedOption: Number.parseInt(getComputedStyle(element).zIndex),
-  }))
-  expect(sideNavLayers.focusedOption).toBeGreaterThan(sideNavLayers.activeIndicator)
+  await expect.poll(() => sideNavOption.evaluate(element =>
+    getComputedStyle(element, '::before').opacity
+  )).toBe('1')
   await attachScreenshot('contained side navigation focus indicator')
 })
 
@@ -344,7 +342,7 @@ test.describe('configured gamepad highlight roundness', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').focus()
     await pressGamepadButton(page, 'left')
     await expect(tab).toBeFocused()
-    await expect(tab).toHaveCSS('border-radius', '8px')
+    await expect(tab).toHaveCSS('border-radius', '48px')
 
     const appearanceSettings = await goToSettingsSection(page, 'appearance')
     const switchInput = appearanceSettings.getByRole('checkbox', {

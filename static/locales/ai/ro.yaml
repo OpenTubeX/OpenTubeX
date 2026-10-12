@@ -2115,5 +2115,17 @@ Storage Startup Error:
 Native Permissions:
   Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."
 
+# Short, single-line bottom-navigation labels; keep them readable in 64px slots.
+Mobile Navigation:
+  home: "Acasă"
+  subscriptions: "Abon."
+  userplaylists: "Liste"
+  history: "Istoric"
+  subscribedchannels: "Canale"
+  trending: "Tendințe"
+  popular: "Populare"
+  stats: "Statistici"
+  more: "Mai mult"
+
 Installer:
   Create Desktop Shortcut: Creează o scurtătură pe desktop
