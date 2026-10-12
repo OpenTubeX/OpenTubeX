@@ -53,7 +53,7 @@ for (const uiScale of [100, 125]) {
       await expectScrollTether(select, 'quickSettings')
     })
 
-    test('fits the comments dropdown on opening and lets it scroll out of view', async ({ app, page }) => {
+    test('fits the comments dropdown on opening and keeps it inside the viewport when scrolling', async ({ app, page }) => {
       const select = await commentsSort({ app, page })
       const dropdown = page.locator('.selectDropdown')
       for (const edge of ['bottom', 'top']) {
@@ -88,10 +88,22 @@ for (const uiScale of [100, 125]) {
           const target = edge === 'bottom' ? 8 : innerHeight - bounds.height - 8
           window.scrollBy({ top: bounds.top - target, behavior: 'instant' })
         }, edge)
-        await expect.poll(() => dropdown.evaluate((menu, edge) => {
+        await expect.poll(() => dropdown.evaluate(menu => {
           const bounds = menu.getBoundingClientRect()
-          return edge === 'bottom' ? bounds.top < 0 : bounds.bottom > innerHeight
-        }, edge)).toBe(true)
+          const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
+          return bounds.top >= chromeBottom + 3 && bounds.bottom <= innerHeight - 7 &&
+            bounds.left >= 7 && bounds.right <= innerWidth - 7
+        })).toBe(true)
+
+        // Moving back releases the viewport correction and restores the anchor gap.
+        await select.evaluate((button, target) => {
+          window.scrollBy({ top: button.getBoundingClientRect().top - target, behavior: 'instant' })
+        }, targetTop)
+        await expect.poll(() => select.evaluate((button, edge) => {
+          const menu = document.getElementById(button.getAttribute('aria-controls')).getBoundingClientRect()
+          const bounds = button.getBoundingClientRect()
+          return Math.abs((edge === 'bottom' ? bounds.top - menu.bottom : menu.top - bounds.bottom) - 4)
+        }, edge)).toBeLessThanOrEqual(1)
         await expect(dropdown).toHaveAttribute('style', openingStyle)
         await select.press('Escape')
         await expect(dropdown).toBeHidden()

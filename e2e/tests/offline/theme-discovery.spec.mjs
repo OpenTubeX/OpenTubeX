@@ -481,7 +481,7 @@ test('pinches theme screenshots to zoom and resets zoom when switching screensho
   await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
   const gallery = await openDiscovery(page)
   await gallery.locator('.themePreview button').click()
-  const image = page.locator('.fullThemeScreenshot')
+  const image = page.locator('img.fullThemeScreenshot')
   await expect(image).toBeVisible()
   const bounds = await image.boundingBox()
   const x = bounds.x + bounds.width / 2
@@ -507,6 +507,7 @@ test('pinches theme screenshots to zoom and resets zoom when switching screensho
     await expect.poll(() => wrapper.evaluate((el, initial) => Math.abs(new DOMMatrix(getComputedStyle(el).transform).e - initial), initialX)).toBeGreaterThan(20)
     await page.locator('.screenshotNavigation button').last().click()
     await expect(image).toHaveAttribute('src', secondScreenshot)
+    await expect(image).toBeVisible()
     await expect.poll(() => image.evaluate(el => new DOMMatrix(getComputedStyle(el).transform).a)).toBe(1)
   } finally {
     await session.detach()

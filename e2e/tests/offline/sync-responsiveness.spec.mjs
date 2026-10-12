@@ -31,6 +31,7 @@ const payload = await encryptSyncDocument(remoteHistory, key, salt)
 test.use({
   seed: {
     settings: {
+      landingPage: 'settings',
       syncServerEnabled: false,
       syncServerAutoSync: false,
       syncServerUrl: 'https://sync-responsiveness.example',

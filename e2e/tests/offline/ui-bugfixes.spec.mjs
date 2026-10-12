@@ -811,7 +811,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
       },
     ])
     for (let index = 0; index < 30; index++) {
-      await store.dispatch('createTab', { route: `/watch/local-${index}`, makeActive: false })
+      await store.dispatch('createTab', { route: `/watch/local-${index}`, makeActive: false, isUnloaded: true })
     }
   }, { desktopDeviceId, privacyKey })
   await expect.poll(() => page.locator('.capacitorPhoneTabCount').textContent()).toBe('31')

@@ -123,23 +123,25 @@ for (const uiScale of [100, 125]) {
       await page.locator('.profileTrigger').click()
       const menu = page.locator('.quickSettingsMenu')
       await expect(menu).toHaveCSS('transform', 'none')
-      const wasClosing = await page.evaluate(() => new Promise(resolve => {
+      await page.evaluate(() => {
+        window.quickSettingsWasClosing = null
         const trigger = document.querySelector('.profileTrigger')
         const onTransitionRun = event => {
           if (!event.target.matches('.quickSettingsMenu')) return
           clearTimeout(timeout)
           document.removeEventListener('transitionrun', onTransitionRun)
           trigger.click()
-          resolve(true)
+          window.quickSettingsWasClosing = true
         }
         const timeout = setTimeout(() => {
           document.removeEventListener('transitionrun', onTransitionRun)
-          resolve(false)
+          window.quickSettingsWasClosing = false
         }, 1000)
         document.addEventListener('transitionrun', onTransitionRun)
         trigger.click()
-      }))
-      expect(wasClosing).toBe(true)
+      })
+      await expect.poll(() => page.evaluate(() => window.quickSettingsWasClosing)).not.toBeNull()
+      expect(await page.evaluate(() => window.quickSettingsWasClosing)).toBe(true)
       await expect(menu).toHaveCount(1)
       await expect(menu).toBeVisible()
       await expect(menu).toHaveCSS('opacity', '1')

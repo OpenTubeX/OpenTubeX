@@ -509,7 +509,10 @@ for (const change of ['backend setting', 'learning reset']) {
       release = backend.holdResponses()
       const completedRequestCount = backend.requests.length
       await section.getByRole('button', { name: 'Load more videos', exact: true }).click()
-      await expectBothSources(backend, completedRequestCount)
+      // The held batch starts related and channel requests concurrently. Wait
+      // for all of them before counting; later arrivals are still this batch.
+      await expect.poll(() => backend.requests.slice(completedRequestCount).map(request => request.source).sort())
+        .toEqual(['channel', 'related', 'related'])
       const pendingRequestCount = backend.requests.length
       const abortedCount = backend.aborted.length
       await changeContext()

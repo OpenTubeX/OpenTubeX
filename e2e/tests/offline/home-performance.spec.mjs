@@ -2,7 +2,16 @@ import { test, expect, goTo } from '../../helpers/app.mjs'
 
 // Trace screenshots/snapshots compete with the throttled renderer and distort
 // frame timings. Keep the functional suites traced, but measure without them.
-test.use({ trace: 'off', seed: { settings: { landingPage: 'history' } } })
+test.use({
+  trace: 'off',
+  seed: {
+    settings: {
+      landingPage: 'history',
+      backendPreference: 'invidious',
+      defaultInvidiousInstance: 'https://home-performance.example',
+    }
+  }
+})
 
 async function settleSeededHistory(page) {
   await page.evaluate(() => new Promise(resolve => {
@@ -34,6 +43,15 @@ async function seedLargeHistory(page) {
 // Match a large imported library without putting personal profile data in fixtures.
 test('Home paints and stays responsive while learning from a large history', async ({ page }) => {
   await page.context().route(/https?:\/\//, route => route.abort())
+  // Local API recordings can still provide candidates through IPC. Use an
+  // empty HTTP backend so feed animations do not compete with history learning.
+  await page.route('https://home-performance.example/**', route => {
+    const path = new URL(route.request().url()).pathname
+    const body = path.startsWith('/api/v1/videos/')
+      ? { recommendedVideos: [] }
+      : path.startsWith('/api/v1/channels/') ? { videos: [], continuation: null } : []
+    return route.fulfill({ json: body })
+  })
   await seedLargeHistory(page)
   await settleSeededHistory(page)
   const cdp = await page.context().newCDPSession(page)
@@ -73,6 +91,7 @@ test('Home paints and stays responsive while learning from a large history', asy
     // independent tasks. Gate input blocking directly; keep frames diagnostic.
     expect(timing.longestTask, JSON.stringify(timing)).toBeLessThan(300)
     await expect(page.locator('[data-home-section="continueWatching"] .mediaThumbnail').first()).toBeVisible()
+    await expect(page.locator('.recommendationEntry')).toHaveCount(0)
     // A second visit must not repeat full-library preparation.
     await goTo(page, 'history')
     await goTo(page, 'home')

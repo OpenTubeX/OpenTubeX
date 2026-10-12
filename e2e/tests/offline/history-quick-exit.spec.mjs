@@ -318,7 +318,10 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline',
 
 test('native audio loading preserves a seek made during buffering', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  // A restored position can be positive before the initial source plays.
+  // Switch from playing playback so the audio source is expected to resume.
+  await expect.poll(() => video.evaluate(element => !element.paused && !element.seeking && element.readyState >= 3)).toBe(true)
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate((component, url) => {
     const video = component.proxy.$el.querySelector('video')
