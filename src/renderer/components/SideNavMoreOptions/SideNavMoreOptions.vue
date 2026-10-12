@@ -163,6 +163,7 @@ const applyNavIconExpand = computed(() => {
 })
 
 function moveFocus(event) {
+  if (!openMoreOptions.value || !sheetRef.value) return
   const links = [...sheetRef.value.querySelectorAll('a[href]')]
   const index = links.indexOf(document.activeElement)
   const next = event.shiftKey ? (index <= 0 ? links.length - 1 : index - 1) : (index + 1) % links.length

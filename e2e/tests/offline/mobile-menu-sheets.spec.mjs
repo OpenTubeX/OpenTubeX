@@ -243,7 +243,7 @@ test('sheet dismissal uses the release position when the last touchmove is coale
 
 test('dragging during entry takes over from the current visual position', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', 25))
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
   await page.locator('.moreOptionNav').click()
   const menu = page.locator('.moreOptionContainer')
   const movement = await menu.evaluate(element => {
@@ -485,3 +485,36 @@ for (const kind of ['more', 'context']) {
     }
   })
 }
+
+test('More sheet ignores Tab during exit and restores focus trapping after reopening', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
+  await page.setViewportSize({ width: 375, height: 812 })
+  // Slow the existing animation setting so real key input can reliably land
+  // inside the retained exit interval even on a busy runner.
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 25))
+  const trigger = page.locator('.moreOptionNav')
+  const menu = page.locator('.moreOptionContainer')
+  await trigger.click()
+  await waitForAnimation(menu)
+  await expect(menu).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(1)
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Shift+Tab')
+  await expect(menu).toHaveCount(0)
+  expect(errors).toEqual([])
+  await expect(trigger).toBeFocused()
+  await trigger.click()
+  await waitForAnimation(menu)
+  await page.keyboard.press('Tab')
+  await expect(menu.locator('a[href]').first()).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(menu.locator('a[href]').last()).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(menu).toHaveCount(0)
+  expect(errors).toEqual([])
+})
