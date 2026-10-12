@@ -39,7 +39,9 @@ async function openContext(page, session) {
   }
 }
 async function touchDrag(session, target, distance) {
+  await expect(target).toBeVisible()
   const bounds = await target.boundingBox()
+  if (!bounds) throw new Error('Cannot drag a mobile sheet target without a visible bounding box')
   const point = { x: bounds.x + bounds.width / 2, y: bounds.y + Math.min(20, bounds.height / 2) }
   await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
   for (let step = 1; step <= 5; step++) {
@@ -217,6 +219,9 @@ test('sheet dismissal uses the release position when the last touchmove is coale
   await page.locator('.moreOptionNav').click()
   const menu = page.locator('.moreOptionContainer')
   await waitForAnimation(menu)
+  // CDP cannot force WebView to omit its final touchmove. Synthetic events
+  // deterministically provide a release beyond the last delivered move; the
+  // preceding tests cover actionability with real touch holds and drags.
   await menu.evaluate(element => {
     const row = element.querySelector('a')
     const bounds = row.getBoundingClientRect()
@@ -266,7 +271,7 @@ test('More sheet closes and releases modal state when leaving mobile layout', as
   await expect(menu).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(false)
-  await expect.poll(() => page.locator('.sideNav').evaluate(element => element.inert)).toBe(false)
+  await expect(page.locator('.sideNav')).toHaveJSProperty('inert', false)
 })
 
 test('a short downward flick dismisses after dwelling on the handle', async ({ page }) => {
