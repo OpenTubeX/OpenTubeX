@@ -182,6 +182,13 @@ public class PictureInPictureTest {
                     "window.__pipAcceptedLayout = event.layout; } });",
                 result -> listening.countDown()));
             assertTrue(listening.await(5, TimeUnit.SECONDS));
+            boolean[] focused = { false };
+            deadline = android.os.SystemClock.uptimeMillis() + 5000;
+            while (!focused[0] && android.os.SystemClock.uptimeMillis() < deadline) {
+                scenario.onActivity(activity -> focused[0] = activity.hasWindowFocus());
+                Thread.sleep(20);
+            }
+            assertTrue("Activity has focus before configuring PiP layout", focused[0]);
             CountDownLatch configured = new CountDownLatch(1);
             scenario.onActivity(activity -> {
                 WebView view = activity.getBridge().getWebView();
