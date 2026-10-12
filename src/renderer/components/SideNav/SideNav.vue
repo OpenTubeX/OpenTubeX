@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels, highlightTransitionsDisabled }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -118,6 +118,7 @@ import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -133,6 +134,22 @@ const props = defineProps({
     default: false
   }
 })
+
+const route = useRoute()
+const highlightTransitionsDisabled = ref(false)
+watch(() => route.fullPath, (_route, _previousRoute, onCleanup) => {
+  // Tab switches project the route before updating the presented tab. Suppress
+  // only that highlight update, keeping interaction feedback during slow mounts.
+  highlightTransitionsDisabled.value = getTabNavigationService().isPresentingRoute(route.fullPath)
+  if (!highlightTransitionsDisabled.value) return
+
+  let frame = requestAnimationFrame(() => {
+    frame = requestAnimationFrame(() => {
+      highlightTransitionsDisabled.value = false
+    })
+  })
+  onCleanup(() => cancelAnimationFrame(frame))
+}, { flush: 'sync' })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isOpen = computed(() => {
@@ -324,7 +341,6 @@ function fitNavigationLabels() {
 onUpdated(scheduleLabelFit)
 
 // ===== Bottom navigation scroll visibility =====
-const route = useRoute()
 const innerRef = useTemplateRef('innerRef')
 const scrollHidden = ref(false)
 const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
