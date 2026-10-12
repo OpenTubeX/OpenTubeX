@@ -97,16 +97,18 @@ function pictureInPictureGeometry(video) {
   return { rect, content: { x, y, width, height } }
 }
 
-function pictureInPictureSourceRect(video) {
-  if (!video || document.body.classList.contains('androidPictureInPicture')) return null
-  let { x, y, width, height } = pictureInPictureGeometry(video).content
+function pictureInPictureBounds(video) {
+  if (!video || document.body.classList.contains('androidPictureInPicture')) return { sourceRect: null, layout: null }
+  const { rect, content } = pictureInPictureGeometry(video)
+  let { x, y, width, height } = content
   const right = Math.min(window.innerWidth, x + width)
   const bottom = Math.min(window.innerHeight, y + height)
   x = Math.max(0, x)
   y = Math.max(0, y)
-  return right > x && bottom > y
+  const sourceRect = right > x && bottom > y
     ? { x, y, width: right - x, height: bottom - y, viewportWidth: window.innerWidth }
     : null
+  return { sourceRect, layout: sourceRect ? { rect, fit: getComputedStyle(video).objectFit } : null }
 }
 
 function observePictureInPictureBounds(video) {
@@ -123,11 +125,11 @@ function observePictureInPictureBounds(video) {
     frame = requestAnimationFrame(() => {
       frame = null
       if (document.body.classList.contains('androidPictureInPicture')) return
-      const sourceRect = pictureInPictureSourceRect(video)
-      const key = JSON.stringify(sourceRect)
+      const bounds = pictureInPictureBounds(video)
+      const key = JSON.stringify(bounds)
       if (key === lastSent) return
       lastSent = key
-      AndroidUi.updatePictureInPictureSourceRect({ sourceRect })
+      AndroidUi.updatePictureInPictureSourceRect(bounds)
         .catch(error => {
           if (lastSent === key) lastSent = undefined
           console.warn('Could not update Android PiP bounds', error)
@@ -198,9 +200,9 @@ function waitForPictureInPicturePaint() {
 }
 
 export async function enterAndroidPictureInPicture(video) {
-  const options = { ...videoDimensions(video), sourceRect: pictureInPictureSourceRect(video) }
+  const options = { ...videoDimensions(video), ...pictureInPictureBounds(video) }
   setAndroidPictureInPictureTarget(true, video)
-  window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning: true }))
+  window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning: true, layout: options.layout }))
   // Paint the video-only page before Android starts its entry animation.
   // The viewport and source rectangle keep their original video geometry.
   const { painted, nativeChange } = await waitForPictureInPicturePaint()
@@ -234,7 +236,7 @@ export function setAndroidAutoPictureInPicture(enabled, video) {
   return AndroidUi?.setAutoPictureInPicture({
     enabled,
     ...videoDimensions(video),
-    sourceRect: enabled || retainTarget ? pictureInPictureSourceRect(video) : null,
+    ...pictureInPictureBounds(enabled || retainTarget ? video : null),
   }) ?? Promise.resolve()
 }
 
@@ -291,20 +293,23 @@ export function getAndroidDeviceArchitecture() {
   return AndroidUi?.getDeviceArchitecture() ?? Promise.resolve({ architecture: '' })
 }
 
-export function setAndroidPictureInPictureDocumentState(active, { transitioning = false } = {}) {
+export function setAndroidPictureInPictureDocumentState(active, { transitioning = false, layout = null } = {}) {
   const classes = document.body.classList
   stopPictureInPictureTransition?.()
   stopPictureInPictureTransition = null
-  if (active && transitioning && classes.contains('androidPictureInPicture')) return
-  if (active && !classes.contains('androidPictureInPicture')) {
-    const rect = pictureInPictureVideo ? pictureInPictureGeometry(pictureInPictureVideo).rect : null
+  if (active && transitioning && classes.contains('androidPictureInPicture') &&
+    !(layout && classes.contains('androidPictureInPictureEntering'))) return
+  if (active && (!classes.contains('androidPictureInPicture') || (transitioning && layout))) {
+    // Android may have accepted bounds before a scroll/mini-player animation
+    // advanced. Freeze the layout paired with its crop, not a newer position.
+    const rect = layout?.rect ?? (pictureInPictureVideo ? pictureInPictureGeometry(pictureInPictureVideo).rect : null)
     if (rect) {
       // Keep the video element unchanged while native Android crops and scales
       // the live viewport, including when its safe-area insets change.
       for (const [name, value] of Object.entries({ left: rect.x, top: rect.y, width: rect.width, height: rect.height })) {
         document.documentElement.style.setProperty(`--android-pip-source-${name}`, `${value}px`)
       }
-      document.documentElement.style.setProperty('--android-pip-video-fit', getComputedStyle(pictureInPictureVideo).objectFit)
+      document.documentElement.style.setProperty('--android-pip-video-fit', layout?.fit ?? getComputedStyle(pictureInPictureVideo).objectFit)
     }
   }
   if (!active && classes.contains('androidPictureInPicture')) {

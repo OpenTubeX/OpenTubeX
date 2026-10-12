@@ -233,6 +233,37 @@ test('native entry and resize callbacks never change the live video geometry or 
   assert.equal(r.properties.get('--android-pip-source-top'), '60px')
 })
 
+for (const [width, height] of [[400, 225], [400, 300], [320.8, 240.6]]) {
+  test(`automatic entry freezes the accepted ${width} × ${height} layout while the mini-player is moving`, async () => {
+    const r = renderer({ rect: { x: 0, y: -200, width, height } })
+    await r.setAndroidAutoPictureInPicture(true, r.video)
+    const { sourceRect, layout } = r.calls.at(-1)[1]
+    Object.assign(r.rect, { x: 10, y: 700, width: 80, height: 45 })
+    r.setAndroidPictureInPictureDocumentState(true, { transitioning: true, layout })
+    const letterbox = (height - sourceRect.height) / 2
+    assert.ok(Math.abs(parseFloat(r.properties.get('--android-pip-source-top')) - (sourceRect.y - letterbox)) < 0.001,
+      'the moving video content must be frozen inside the crop Android actually accepted')
+    assert.equal(parseFloat(r.properties.get('--android-pip-source-left')), sourceRect.x)
+    assert.equal(parseFloat(r.properties.get('--android-pip-source-width')), width)
+    assert.equal(parseFloat(r.properties.get('--android-pip-source-height')), height)
+    assert.equal(r.properties.get('--android-pip-video-fit'), layout.fit)
+  })
+}
+
+test('native automatic entry replaces a newer manual paint snapshot with its accepted crop', async () => {
+  const r = renderer({ rect: { x: 0, y: -200, width: 400, height: 225 } })
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  const { layout } = r.calls.at(-1)[1]
+  r.rect.y = 700
+  const entered = r.enterAndroidPictureInPicture(r.video)
+  assert.equal(r.properties.get('--android-pip-source-top'), '575px')
+  r.window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning: true, layout }))
+  r.flush()
+  await entered
+  assert.equal(r.properties.get('--android-pip-source-top'), '0px')
+  assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
+})
+
 test('disabling automatic entry while already in PiP retains the manual video target', async () => {
   const r = renderer()
   await r.setAndroidAutoPictureInPicture(true, r.video)
