@@ -55,7 +55,7 @@ for (const scale of [1, 0.95]) {
             text.top >= card.top && text.bottom <= card.bottom
         }
       })
-      expect.soft(layout.gap, `header gap at ${width}px`).toBeGreaterThanOrEqual(19)
+      expect.soft(layout.gap, `header gap at ${width}px`).toBeCloseTo(10, 1)
       expect.soft(layout.centeringOffset, `vertical centering at ${width}px`).toBeLessThanOrEqual(1)
       expect.soft(layout.textFits, `text fits at ${width}px`).toBe(true)
     }

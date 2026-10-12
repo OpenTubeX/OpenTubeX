@@ -113,6 +113,8 @@ for (const scale of [1, 1.25]) {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setTabBarPosition', 'left')
+      // Exercise range clamping independently of responsive scroll anchoring.
+      document.documentElement.style.overflowAnchor = 'none'
       const content = document.createElement('div')
       content.dataset.connectionLayoutContent = ''
       content.style.height = '1600px'

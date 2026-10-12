@@ -176,6 +176,8 @@ test('every feed refresh preserves the visible New feed position', async ({ app,
   await expect(page.getByText('Feed video 00')).toBeVisible()
   await page.locator('[data-subscription-feed-tab="all"]').click()
   await expect(page.locator('[data-subscription-feed-tab="all"]')).toHaveAttribute('aria-selected', 'true')
+  // Selection paints before the feed mounts and restores its saved offset.
+  await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
   await scrollFeedTo(page, 800)
   for (const tab of ['videos', 'shorts', 'live', 'posts']) {

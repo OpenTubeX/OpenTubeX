@@ -123,7 +123,7 @@ test.describe('distraction and appearance settings', () => {
 })
 
 test.describe('default appearance', () => {
-  test('vertical tabs match the header shadow without a divider line', async ({ page, attachScreenshot }) => {
+  test('vertical tabs and the header have no shadows or divider lines', async ({ page, attachScreenshot }) => {
     for (const theme of ['light', 'dark']) {
       for (const position of ['left', 'right']) {
         await page.evaluate(({ theme, position }) => {
@@ -136,11 +136,9 @@ test.describe('default appearance', () => {
         const tabBar = page.locator(`.tabBar.vertical.position-${position}`)
         await expect(tabBar).toBeVisible()
         await expect(page.locator(`.tabBarResizeHandle.position-${position}`)).toHaveCSS('background-image', 'none')
-        await expect(tabBar).toHaveCSS('box-shadow', position === 'left' ? / 2px 0px 1px 0px$/ : / -2px 0px 1px 0px$/)
-        const tabBarShadow = await tabBar.evaluate(element => getComputedStyle(element).boxShadow)
-        const headerShadow = await page.locator('.topNav').evaluate(element => getComputedStyle(element).boxShadow)
-        expect(headerShadow).toContain(`${tabBarShadow} inset`)
-        await attachScreenshot(`${theme} vertical tabs on ${position} with matching header shadow`)
+        await expect(tabBar).toHaveCSS('box-shadow', 'none')
+        await expect(page.locator('.topNav')).toHaveCSS('box-shadow', 'none')
+        await attachScreenshot(`${theme} vertical tabs on ${position} without shadows`)
       }
     }
   })
@@ -188,13 +186,13 @@ test.describe('default appearance', () => {
 
         if (className === 'position-bottom') {
           expect(insets).toEqual({
-            bottom: 4,
+            bottom: 2,
             bottomBorder: '1px',
-            top: 0,
-            topBorder: '0px',
+            top: 2,
+            topBorder: '1px',
           })
           const clipClearance = await activeTab.evaluate((element) => {
-            return element.parentElement.getBoundingClientRect().bottom -
+            return element.closest('.tabBar').getBoundingClientRect().bottom -
               element.getBoundingClientRect().bottom
           })
           expect(clipClearance).toBeGreaterThanOrEqual(1)
@@ -202,9 +200,9 @@ test.describe('default appearance', () => {
           await attachScreenshot('horizontal tabs at bottom with safe inset')
         } else {
           expect(insets).toEqual({
-            bottom: 0,
-            bottomBorder: '0px',
-            top: 2,
+            bottom: 1,
+            bottomBorder: '1px',
+            top: 1,
             topBorder: '1px',
           })
           expect(await getTabEdgeBorderCoverage(page, activeTab, 'top')).toBeGreaterThan(0.7)

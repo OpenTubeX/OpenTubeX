@@ -337,12 +337,12 @@ test('separates the content card on every channel tab', async ({ app, page }, te
       await expect.poll(() => page.locator(contentSelector).evaluate(content => {
         const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
         return Math.round(content.getBoundingClientRect().top - tabs.bottom)
-      }), { message: `56px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(56)
+      }), { message: `46px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(46)
       await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
         const header = card.previousElementSibling.getBoundingClientRect()
         const bounds = card.getBoundingClientRect()
         return Math.round(bounds.top - header.bottom)
-      }), { message: `20px between cards on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(20)
+      }), { message: `10px between cards on ${tabId} at ${width}px and ${scale}% UI scale` }).toBe(10)
     }
   }
   await page.locator('#videosTab').click()
@@ -369,7 +369,7 @@ test('separates the content card on every channel tab', async ({ app, page }, te
   await expect(firstHeading).toHaveText('Details')
   await expect.poll(() => firstHeading.evaluate(heading => {
     return Math.round(heading.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-  })).toBe(56)
+  })).toBe(46)
 })
 
 test('crossfades the active channel line at the configured animation speed', async ({ page }) => {

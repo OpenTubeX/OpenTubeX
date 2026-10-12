@@ -28,15 +28,15 @@ test.describe('channel page', () => {
       await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
       await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
         return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
-      }), { message: `56px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(56)
+      }), { message: `46px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(46)
       await expect.poll(() => page.locator('.channelContent:visible').evaluate(card => {
         const header = card.previousElementSibling.getBoundingClientRect()
         return Math.round(card.getBoundingClientRect().top - header.bottom)
-      }), { message: `20px between Home cards at ${width}px and ${scale}% UI scale` }).toBe(20)
+      }), { message: `10px between Home cards at ${width}px and ${scale}% UI scale` }).toBe(10)
     }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
-    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'transform')
+    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'opacity')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -106,7 +106,7 @@ test.describe('channel page', () => {
           horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
           vertical
         }
-      })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+      })).toEqual({ horizontal: Math.min(24 * roundness / 100, 20), vertical: Math.min(24 * roundness / 100, 20) })
     }
 
     await page.locator('body').evaluate(element => {

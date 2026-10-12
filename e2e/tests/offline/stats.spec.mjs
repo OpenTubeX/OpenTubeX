@@ -95,7 +95,7 @@ test.describe('watch stats', () => {
     }
   })
 
-  test('active navigation stays readable while the system theme changes', async ({ page }) => {
+  test('active navigation stays readable while the system theme changes', async ({ app, page }, testInfo) => {
     await goTo(page, 'stats')
     const contrast = () => page.evaluate(() => {
       function channels(color) {
@@ -122,7 +122,7 @@ test.describe('watch stats', () => {
         navColor[index] * navOpacity + channel * (1 - navOpacity))
       return {
         tab: ratio(channels(getComputedStyle(tab).color), channels(getComputedStyle(tab).backgroundColor)),
-        sidebar: ratio(channels(getComputedStyle(nav).color), navBackground),
+        sidebar: ratio(channels(getComputedStyle(nav.querySelector('.navLabel')).color), navBackground),
       }
     })
     await page.emulateMedia({ colorScheme: 'light' })
@@ -130,6 +130,7 @@ test.describe('watch stats', () => {
     await page.locator('.sideNav .navOption.router-link-exact-active').hover()
     await expect.poll(async () => (await contrast()).tab).toBeGreaterThan(4.5)
     await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
+    await page.screenshot({ path: testInfo.outputPath('active-navigation-light.png') })
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/\bdark\b/)
     const changed = await contrast()
@@ -141,6 +142,15 @@ test.describe('watch stats', () => {
     const reversed = await contrast()
     expect.soft(reversed.tab).toBeGreaterThan(4.5)
     expect.soft(reversed.sidebar).toBeGreaterThan(4.5)
+    await setWindowSize(app, page, { width: 320, height: 800 })
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .dispatch('updateNavigationItems', ['stats', 'home', 'subscriptions', 'history', 'userplaylists', 'subscribedchannels']))
+    await expect(page.locator('.sideNav .navOption.router-link-exact-active')).toBeVisible()
+    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
+    await page.screenshot({ path: testInfo.outputPath('active-mobile-navigation-light.png') })
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
   })
 })
 
@@ -662,6 +672,10 @@ test.describe('synced watch stats', () => {
     await selector.getByRole('button', { name: 'Extra device with a much longer name' }).click()
     await selectedSegmentIsAligned('Extra device with a much longer name')
     await selector.getByRole('button', { name: 'All devices' }).click()
+    // Sidebar reflow animations briefly change the range again after resizing.
+    // Check clamping against the final layout without that intermediate range.
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
     const scrollbar = selector.locator(':scope > .os-scrollbar-horizontal')
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await app.electronApp.evaluate(({ BrowserWindow }) => {

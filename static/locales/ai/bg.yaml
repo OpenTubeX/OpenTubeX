@@ -2090,7 +2090,7 @@ Native Permissions:
 # Short, single-line bottom-navigation labels; keep them readable in 64px slots.
 Mobile Navigation:
   home: "Начало"
-  subscriptions: "Абонаменти"
+  subscriptions: "Абонам."
   userplaylists: "Плейлисти"
   history: "История"
   subscribedchannels: "Канали"

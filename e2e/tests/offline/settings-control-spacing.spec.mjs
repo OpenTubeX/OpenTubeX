@@ -295,8 +295,8 @@ for (const uiScale of [100, 95]) {
         const mixedGaps = await privacy.locator('.settingsSection').first().evaluate(element => {
           const select = element.querySelector('.privacyExternalLinkSelect .select-text').getBoundingClientRect()
           const slider = element.querySelector('.pure-material-slider').getBoundingClientRect()
-          const progress = element.querySelector('.ft-flex-box .select-text').getBoundingClientRect()
-          return [slider.top - select.bottom, progress.top - slider.bottom]
+          const progress = element.querySelector('.privacyWatchedProgressSelect .select-text').getBoundingClientRect()
+          return [progress.top - select.bottom, slider.top - progress.bottom]
         })
         for (const gap of mixedGaps) expect.soft(gap, `${width}px privacy select/slider`).toBeCloseTo(20, 1)
         const addons = await openCategory(page, 'add-ons')

@@ -101,6 +101,7 @@
   }
 
   .sideNav .mobileNavItem.router-link-active .navLabel {
+    color: var(--primary-text-color);
     font-weight: 700;
   }
 

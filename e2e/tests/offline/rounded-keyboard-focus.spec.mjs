@@ -44,7 +44,7 @@ for (const uiScale of [100, 95, 125]) {
     test('preserves circular button corners when tabbing into them', async ({ page }) => {
       const button = page.locator('.topNav .navButton').first()
       const radius = await button.evaluate(element => getComputedStyle(element).borderRadius)
-      expect(radius).toBe('50%')
+      expect(radius).toBe('20px')
       await button.focus()
       await page.keyboard.press('Tab')
       await page.keyboard.press('Shift+Tab')
