@@ -136,11 +136,13 @@ test('imports original titles, descriptions, timestamps and empty playlists from
 for (const [name, metadata] of [
   ['malformed', 'wrong header\n'],
   ['ambiguous', 'Playlist ID,Playlist Title (Original)\nPLone,A/B\nPLtwo,A_B\n'],
+  ['localized', '播放清單 ID,標題\nPLlocalized,本地清單\n'],
 ]) {
-  test(`keeps importing other selected types when playlist metadata is ${name}`, async ({ page }) => {
+  test(`imports video CSVs and other selected types when playlist metadata is ${name}`, async ({ page }) => {
     const root = 'Takeout/YouTube and YouTube Music'
     const archive = zipSync({
       [`${root}/playlists/playlists.csv`]: strToU8(metadata),
+      [`${root}/playlists/本地清單-videos.csv`]: strToU8('影片 ID,播放清單影片的建立時間戳記\nabcdefghijk,2025-01-01T00:00:00Z\n'),
       [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCmetadatafailure,https://www.youtube.com/channel/UCmetadatafailure,Metadata failure channel\n'),
       [`${root}/history/watch-history.json`]: strToU8(JSON.stringify([{
         products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z'
@@ -165,8 +167,12 @@ for (const [name, metadata] of [
         watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
         searched: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'metadata failure'),
         playlistCount: store.getters.getAllPlaylists.length,
+        videoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === '本地清單')?.videos.map(video => video.videoId),
       }
-    })).toEqual({ subscribed: true, watched: true, searched: true, playlistCount: 2 })
+    })).toEqual({ subscribed: true, watched: true, searched: true, playlistCount: 3, videoIds: ['abcdefghijk'] })
+    await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
+    await expect(page.locator('.toast', { hasText: 'Unable to read file' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)
   })
 }
 

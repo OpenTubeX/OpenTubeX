@@ -506,7 +506,7 @@ async function importSelectedTakeoutData() {
       try {
         metadata = await readTakeoutPlaylistMetadata(takeoutFile.value)
       } catch (error) {
-        selected.delete('playlists')
+        failedPlaylists = true
         console.error('Unable to import Takeout playlist metadata', error)
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
       }
