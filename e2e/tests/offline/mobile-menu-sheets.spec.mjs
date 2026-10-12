@@ -25,10 +25,18 @@ test.beforeEach(async ({ page }) => {
   await page.route(/^https:\/\/i\.ytimg\.com\/vi\//, route => fulfillVisualFixture(route, 'video-thumbnail'))
 })
 
-async function openContext(page) {
-  await page.locator('.ft-list-video .title').first().evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
-    bubbles: true, cancelable: true, pointerType: 'touch'
-  })))
+async function openContext(page, session) {
+  const title = page.locator('.ft-list-video .title').first()
+  await title.scrollIntoViewIfNeeded()
+  const bounds = await title.boundingBox()
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
+  })
+  try {
+    await expect(page.locator('.mobileLinkActions')).toBeVisible()
+  } finally {
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  }
 }
 async function touchDrag(session, target, distance) {
   const bounds = await target.boundingBox()
@@ -56,7 +64,7 @@ for (const uiScale of [100, 125]) {
         const menu = page.locator(kind === 'more' ? '.moreOptionContainer' : '.mobileLinkActions')
         const open = async () => {
           if (kind === 'more') await page.locator('.moreOptionNav').click()
-          else await openContext(page)
+          else await openContext(page, session)
           await expect(menu).toBeVisible()
           await waitForAnimation(menu)
         }
@@ -127,7 +135,7 @@ test('mobile context sheet preserves scrolling and dismisses from its handle in 
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
   try {
-    await openContext(page)
+    await openContext(page, session)
     const menu = page.locator('.mobileLinkActions')
     await waitForAnimation(menu)
     const scroller = menu.locator('.mobileLinkActionsScroll')
@@ -148,7 +156,7 @@ test('mobile context sheet preserves scrolling and dismisses from its handle in 
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(menu).toHaveCount(0)
 
-    await openContext(page)
+    await openContext(page, session)
     await menu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
     await expect(menu.getByRole('button', { name: 'Back', exact: true })).toBeVisible()
     await touchDrag(session, menu.locator('.bottomSheetHandle'), 100)
