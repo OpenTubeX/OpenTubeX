@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { strToU8, zipSync } from 'fflate'
+import { strToU8, Zip, ZipDeflate, zipSync } from 'fflate'
 
 import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
@@ -68,6 +68,29 @@ test('detects supported Takeout entries under the archive root', () => {
 })
 
 const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
+
+test('invalidates repeated metadata entries for an account while retaining other accounts', async () => {
+  const chunks = []
+  const zip = new Zip((error, chunk) => {
+    if (error) { throw error }
+    chunks.push(chunk)
+  })
+  for (const [path, content] of [
+    ['Repeated account/playlists/playlists.csv', `${metadataHeader}\nPLfirst,First,Original,,`],
+    ['Good account/playlists/playlists.csv', `${metadataHeader}\nPLgood,Good,List,,`],
+    ['Repeated account/playlists/playlists.csv', `${metadataHeader}\nPLfirst,First,Replacement,,\nPLsecond,Second,,,`],
+  ]) {
+    const entry = new ZipDeflate(path)
+    zip.add(entry)
+    entry.push(strToU8(content), true)
+  }
+  zip.end()
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob(chunks))
+  assert.equal(metadata.size, 1)
+  assert.equal(metadata.get('Good account/playlists/Good-videos.csv').description, 'List')
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Duplicate playlist metadata.*Repeated account/)
+})
 
 for (const [schema, badMetadata] of [
   ['malformed', 'wrong header\n'],

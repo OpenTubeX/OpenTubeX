@@ -209,13 +209,22 @@ export function parseTakeoutPlaylistMetadataCsv(content) {
 export async function readTakeoutPlaylistMetadata(file) {
   const metadata = new Map()
   const errors = []
+  const seenMetadataDirectories = new Set()
   await streamTakeoutZip(file, new Set(['playlistMetadata']), () => {}, entry => {
+    const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
+    if (seenMetadataDirectories.has(directory)) {
+      for (const path of metadata.keys()) {
+        if (path.slice(0, path.lastIndexOf('/') + 1) === directory) { metadata.delete(path) }
+      }
+      errors.push(new Error(`Duplicate playlist metadata CSV: ${entry.path}`))
+      return
+    }
+    seenMetadataDirectories.add(directory)
     const playlists = parseTakeoutPlaylistMetadataCsv(entry.content)
     if (playlists === null) {
       errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
       return
     }
-    const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
     const accountMetadata = new Map()
     for (const playlist of playlists) {
       // Takeout replaces filename-unsafe characters, including slashes, with underscores.
