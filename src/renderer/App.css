@@ -558,7 +558,7 @@
 
 .findbar {
   position: fixed;
-  inset-block-start: 102px;
+  inset-block-start: calc(var(--top-nav-sticky-offset) + 10px);
   inset-inline-end: 18px;
   z-index: 10001;
   display: flex;

@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 
 test('Enter and Shift+Enter navigate one find bar match at a time', async ({ page }) => {
   await page.locator('.tabContent[aria-hidden="false"]').evaluate((tabContent) => {
@@ -25,3 +25,28 @@ test('Enter and Shift+Enter navigate one find bar match at a time', async ({ pag
   await findbarInput.press('Shift+Enter')
   await expect(findbarStatus).toHaveText('1/2')
 })
+
+for (const position of ['top', 'bottom']) {
+  for (const scale of [0.95, 1.25]) {
+    test(`find bar clears an overflowing ${position} tab bar at ${scale} scale`, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 1400, height: 700 })
+      await page.evaluate(async ({ position, scale }) => {
+        window.ftElectron.setZoomFactor(scale)
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', position)
+        store.commit('setScrollbarThumbWidth', 20)
+        for (let index = 0; index < 18; index++) {
+          await window.ftElectron.tabs.create({ route: '/history', makeActive: false, lazyLoad: true })
+        }
+      }, { position, scale })
+      await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+      await page.keyboard.press('Control+f')
+      const findbar = page.locator('.findbar')
+      await expect(findbar).toBeVisible()
+      await expect.poll(() => findbar.evaluate(element => {
+        const gap = element.getBoundingClientRect().top - document.querySelector('.topNav').getBoundingClientRect().bottom
+        return Math.abs(gap - 10) * devicePixelRatio
+      })).toBeLessThanOrEqual(1)
+    })
+  }
+}

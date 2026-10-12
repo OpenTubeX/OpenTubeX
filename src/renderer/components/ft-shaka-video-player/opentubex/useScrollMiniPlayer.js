@@ -1815,7 +1815,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const tabBar = document.querySelector('.tabBar')
     if (sideNav || tabBar) {
       miniPlayerLayoutObserver = new ResizeObserver(entries => {
-        if (scrollMiniPlayerActive.value && (usesMobileMiniBar() || entries.some(entry => entry.target === tabBar))) {
+        const target = usesMobileMiniBar() ? sideNav : tabBar
+        if (scrollMiniPlayerActive.value && entries.some(entry => entry.target === target)) {
           handleScrollMiniWindowResize()
         }
       })

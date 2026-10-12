@@ -270,7 +270,20 @@ for (const position of ['top', 'bottom']) {
       const scrollToEnd = async () => {
         await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
         await container.evaluate(element => { element.scrollLeft = element.scrollWidth })
-        await expect.poll(() => container.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+        // Native scroll events reach Electron asynchronously. Ensure the
+        // position is shared before title updates publish another tab snapshot.
+        await expect.poll(async () => {
+          const native = await container.evaluate(element => ({
+            offset: element.scrollLeft,
+            maximum: element.scrollWidth - element.clientWidth,
+            scale: devicePixelRatio
+          }))
+          const shared = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)
+          return {
+            atEnd: Math.abs(native.maximum - native.offset) * native.scale <= 2,
+            sharedMatches: Math.abs(shared - native.offset) * native.scale <= 2
+          }
+        }).toEqual({ atEnd: true, sharedMatches: true })
       }
       const expectValidEnd = async () => {
         await expect.poll(() => container.evaluate(element => {
@@ -296,11 +309,15 @@ for (const position of ['top', 'bottom']) {
         const { tabs } = await window.ftElectron.tabs.getState()
         for (const tab of tabs) window.ftElectron.tabs.updateTitle('A long history tab title that fills its maximum width', tab.id)
       })
+      // Title updates use asynchronous IPC; confirm the wider content has
+      // rendered before scrolling, then verify the shortened titles separately.
+      await expect(container.locator('.tabTitleText')).toHaveText(Array(13).fill('A long history tab title that fills its maximum width'))
       await scrollToEnd()
       await page.evaluate(async () => {
         const { tabs } = await window.ftElectron.tabs.getState()
         for (const tab of tabs) window.ftElectron.tabs.updateTitle('History', tab.id)
       })
+      await expect(container.locator('.tabTitleText')).toHaveText(Array(13).fill('History'))
       await expectValidEnd()
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUseFixedTabWidth', true))
       await scrollToEnd()
