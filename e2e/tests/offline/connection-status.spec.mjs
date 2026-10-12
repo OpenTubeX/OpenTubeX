@@ -233,6 +233,8 @@ for (const scale of [1, 1.25]) {
         : [page.locator('.settingsMenu'), page.locator('.settingsContent')]
       for (const scroller of scrollers) {
         await scroller.evaluate(element => {
+          // Keep this range-clamping check independent of native scroll anchoring.
+          element.style.overflowAnchor = 'none'
           const content = element.querySelector(':scope > .section') ?? element
           const end = document.createElement(element.matches('menu') ? 'li' : 'div')
           end.dataset.connectionScrollEnd = ''
@@ -240,6 +242,14 @@ for (const scale of [1, 1.25]) {
           end.style.flexShrink = '0'
           content.append(end)
         })
+      }
+      const expectBannerMeasured = async () => {
+        await expect.poll(() => page.evaluate(() => {
+          const holder = document.querySelector('.connection-status-holder')
+          const actualHeight = holder?.getBoundingClientRect().height ?? 0
+          const measuredHeight = Number.parseFloat(getComputedStyle(document.body).getPropertyValue('--connection-status-height')) || 0
+          return Math.abs(actualHeight - measuredHeight)
+        })).toBeLessThan(1)
       }
       const expectNestedEnd = async (scroller, maximumBefore = Infinity) => {
         const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
@@ -278,6 +288,7 @@ for (const scale of [1, 1.25]) {
         }
       ]
       for (const trigger of triggers) {
+        await expectBannerMeasured()
         const maximums = []
         for (const scroller of scrollers) {
           await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
@@ -285,6 +296,7 @@ for (const scale of [1, 1.25]) {
           maximums.push(await scroller.evaluate(element => element.scrollHeight - element.clientHeight))
         }
         await trigger()
+        await expectBannerMeasured()
         for (const [index, scroller] of scrollers.entries()) {
           await expectNestedEnd(scroller, maximums[index])
         }
