@@ -98,6 +98,7 @@ import { useRoute, useRouter } from 'vue-router'
 import store from '../../store/index'
 import NavLabel from '../SideNav/NavLabel.vue'
 import { useBottomSheetDismiss } from '../../composables/useBottomSheetDismiss'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
@@ -109,6 +110,10 @@ const props = defineProps({
 })
 
 const openMoreOptions = ref(false)
+const mobileLayout = usePhoneLayout('(max-width: 680px)')
+watch(mobileLayout, (isMobile) => {
+  if (!isMobile) closeMenu()
+})
 const route = useRoute()
 
 const promptId = useId()

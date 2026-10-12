@@ -49,6 +49,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
       drag.originOffset = transform === 'none' ? 0 : new DOMMatrixReadOnly(transform).m42
       sheetAnimation?.cancel()
       drag.active = true
+      drag.start = performance.now()
       suppressClick = true
     }
     if (event.cancelable) event.preventDefault()

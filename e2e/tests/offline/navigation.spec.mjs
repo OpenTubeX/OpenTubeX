@@ -812,7 +812,8 @@ for (const uiScale of [100, 125]) {
           await more.click()
           const menu = await page.locator('.moreOptionContainer').boundingBox()
           expect(menu.x).toBeGreaterThanOrEqual(0)
-          expect(menu.x + menu.width).toBeLessThanOrEqual(await page.evaluate(() => innerWidth))
+          // Electron zoom can round innerWidth below the fractional layout edge.
+          expect(menu.x + menu.width - await page.evaluate(() => innerWidth)).toBeLessThanOrEqual(1)
           await page.keyboard.press('Escape')
           await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1)
         }

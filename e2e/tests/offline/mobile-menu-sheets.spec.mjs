@@ -244,3 +244,45 @@ test('dragging during entry takes over from the current visual position', async 
   await page.keyboard.press('Escape')
   await expect(menu).toHaveCount(0)
 })
+
+test('More sheet closes and releases modal state when leaving mobile layout', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  const originalOverflow = await page.evaluate(() => document.documentElement.style.overflow)
+  await page.locator('.moreOptionNav').click()
+  const menu = page.locator('.moreOptionContainer')
+  await waitForAnimation(menu)
+  await page.setViewportSize({ width: 680, height: 812 })
+  await expect(menu).toBeVisible()
+  await page.setViewportSize({ width: 681, height: 812 })
+  await expect(page.locator('.moreOptionNav')).toBeHidden()
+  await expect(menu).toHaveCount(0)
+  await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe(originalOverflow)
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.isAnyPromptOpen)).toBe(false)
+  await expect.poll(() => page.locator('.sideNav').evaluate(element => element.inert)).toBe(false)
+})
+
+test('a short downward flick dismisses after dwelling on the handle', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.locator('.moreOptionNav').click()
+  const menu = page.locator('.moreOptionContainer')
+  await waitForAnimation(menu)
+  await menu.evaluate(element => {
+    const handle = element.querySelector('.bottomSheetHandle')
+    const originalNow = performance.now
+    // Simulate a hold before the flick without a timing sleep.
+    let elapsed = 0
+    performance.now = () => elapsed
+    try {
+      handle.dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true, pointerType: 'mouse', pointerId: 10, isPrimary: true, button: 0, clientX: 180, clientY: 500
+      }))
+      elapsed = 1000
+      window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 10, clientX: 180, clientY: 550, cancelable: true }))
+      elapsed = 1020
+      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 10, clientX: 180, clientY: 560, cancelable: true }))
+    } finally {
+      performance.now = originalNow
+    }
+  })
+  await expect(menu).toHaveCount(0)
+})
