@@ -958,6 +958,7 @@ Settings:
       History replace effect: Bat datozen bideoen ikustaldi-historia ordezten da. Gainerako historia mantentzen da.
     Select export data: "Hautatu esportatu nahi dituzun datuak"
     Export selected data: "Esportatu hautatutako datuak"
+    Import Failed: "Inportazioak huts egin du"
     Complete backup: "Babeskopia osoa"
     Import backup: "Inportatu babeskopia"
     Export backup: "Esportatu babeskopia"
@@ -1546,6 +1547,7 @@ Video:
       Untrusted Receiver: "Hartzailearen ziurtagiria ez da fidagarria. Erabili autentifikatutako Google Cast hartzaile bat."
   Station: Estazioa
   Playlist:
+    Load Previous Videos: "Kargatu aurreko bideoak"
     Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude
   External Media:
     Dislikes: "Desatsegitea | Desatsegiteak"
@@ -2132,3 +2134,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Sortu lasterbide bat mahaigainean
+
+Library:
+  CouldNotOpen: "OpenTubeX-ek ezin izan du zure liburutegia ireki. Ez aldatu datu-fitxategiak."
+  RestoreProfile: "Itxi OpenTubeX erabat eta leheneratu profilaren babeskopia osoa, library.sqlite eta hari lotutako fitxategiak barne."

@@ -973,6 +973,7 @@ Settings:
       History replace effect: Vastaavien videoiden katseluhistoria korvataan. Muu historia säilytetään.
     Select export data: "Valitse vietävät tiedot"
     Export selected data: "Vie valitut tiedot"
+    Import Failed: "Tuonti epäonnistui"
     Complete backup: "Täydellinen varmuuskopiointi"
     Import backup: "Tuo varmuuskopio"
     Export backup: "Vie varmuuskopio"
@@ -1568,6 +1569,7 @@ Video:
       Untrusted Receiver: "Vastaanottimen varmenteeseen ei luoteta. Käytä todennettua Google Cast -vastaanotinta."
   Station: Asema
   Playlist:
+    Load Previous Videos: "Lataa aiemmat videot"
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
   External Media:
     Dislikes: "Ei-tykkäys | Ei-tykkäystä"
@@ -2161,3 +2163,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Luo työpöydälle pikakuvake
+
+Library:
+  CouldNotOpen: "OpenTubeX ei voinut avata kirjastoasi. Jätä datatiedostot ennalleen."
+  RestoreProfile: "Sulje OpenTubeX kokonaan ja palauta profiilin täydellinen varmuuskopio, mukaan lukien library.sqlite ja siihen liittyvät tiedostot."

@@ -1138,6 +1138,7 @@ Settings:
       History replace effect: Der Wiedergabeverlauf für übereinstimmende Videos wird ersetzt. Der übrige Verlauf bleibt erhalten.
     Select export data: "Wähle die zu exportierenden Daten aus"
     Export selected data: "Ausgewählte Daten exportieren"
+    Import Failed: "Import fehlgeschlagen"
     Complete backup: Vollständige Sicherung
     Import backup: Sicherung importieren
     Export backup: Sicherung exportieren
@@ -2275,6 +2276,7 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Die Livechat-Wiederholung ist aktiviert. Chatnachrichten erscheinen hier während der Videowiedergabe.
   Station: Station
   Playlist:
+    Load Previous Videos: "Vorherige Videos laden"
     Unavailable videos are hidden: 1 nicht verfügbares Video ist ausgeblendet | {count} nicht verfügbare Videos sind ausgeblendet
   Enable SponsorBlock on Channel: SponsorBlock auf Kanal aktivieren
   Disable SponsorBlock on Channel: SponsorBlock auf Kanal deaktivieren
@@ -3310,3 +3312,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Desktop-Verknüpfung erstellen
+
+Library:
+  CouldNotOpen: "OpenTubeX konnte deine Bibliothek nicht öffnen. Lass deine Datendateien unverändert."
+  RestoreProfile: "Beende OpenTubeX vollständig und stelle eine vollständige Sicherung deines Profils wieder her, einschließlich library.sqlite und der zugehörigen Dateien."

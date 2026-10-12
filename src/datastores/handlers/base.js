@@ -1,5 +1,6 @@
 import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
+import model from '@seald-io/nedb/lib/model.js'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
@@ -9,7 +10,7 @@ import { createIdQuery } from '../idQuery'
 import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
-import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { isBackupWatchStatsDay, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
@@ -448,15 +449,38 @@ class WatchStats {
   static mergeBackup(backup) {
     validateBackupWatchStats(backup)
     return this.runWrite(async () => {
-      const currentRecords = await this.find()
-      const currentAdjustment = await this.getHistoricalAdjustment()
+      const savedRecords = await db.watchStats.findAsync({})
+      const savedById = new Map(savedRecords.map(record => [record._id, record]))
+      const currentMarker = savedById.get(this.migrationId)
+      const markers = backup.records.filter(record => record._id === this.migrationId)
+      if (markers.length > 1) throw new Error('Duplicate reserved watch-stat marker')
+      const importedMarker = markers[0]
+      const protocolFields = new Set(['_id', 'completedAt', 'hadEstimates', 'adjustment'])
+      for (const [key, value] of Object.entries(importedMarker ?? {})) {
+        if (!protocolFields.has(key) && currentMarker && Object.hasOwn(currentMarker, key) && model.serialize(currentMarker[key]) !== model.serialize(value)) throw new Error('Conflicting retained watch-stat marker')
+      }
+      if (importedMarker && Object.hasOwn(importedMarker, 'adjustment') && model.serialize(importedMarker.adjustment) !== model.serialize(backup.adjustment)) throw new Error('Conflicting retained watch-stat marker adjustment')
+      const marker = { ...currentMarker, ...importedMarker }
+      const currentRecords = savedRecords.filter(record => record._id !== this.migrationId && isBackupWatchStatsDay(record))
+      const importedRecords = backup.records.filter(record => record._id !== this.migrationId && isBackupWatchStatsDay(record))
+      const retained = backup.records.filter(record => record._id !== this.migrationId && !isBackupWatchStatsDay(record))
+      // Retained malformed days cannot be merged by arithmetic or by date.
+      // Preserve their record identity and fail before writes on conflicting data.
+      const retainedIds = new Set()
+      for (const record of retained) {
+        if (retainedIds.has(record._id)) throw new Error('Duplicate retained watch statistics')
+        retainedIds.add(record._id)
+        const current = savedById.get(record._id)
+        if (current && model.serialize(current) !== model.serialize(record)) throw new Error('Conflicting retained watch statistics')
+      }
+      const currentAdjustment = currentMarker?.adjustment ?? null
       const byDate = new Map(currentRecords.map(record => [record.date, record]))
-      for (const imported of backup.records) {
+      for (const imported of importedRecords) {
         byDate.set(imported.date, mergeBackupWatchStatsRecord(byDate.get(imported.date), imported))
       }
       const records = [...byDate.values()]
       const retainedCurrent = currentRecords.filter(record => byDate.get(record.date) === record)
-      const retainedImported = backup.records.filter(record => byDate.get(record.date) === record)
+      const retainedImported = importedRecords.filter(record => byDate.get(record.date) === record)
       const adjustment = mergeBackupWatchStatsAdjustment(
         retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
       )
@@ -466,15 +490,15 @@ class WatchStats {
         if (record === current) continue
         const withoutImportedId = { ...record }
         delete withoutImportedId._id
-        await db.watchStats.updateAsync(
-          { date: record.date },
-          current ? { ...withoutImportedId, _id: current._id } : withoutImportedId,
-          { upsert: true }
-        )
+        if (current) await db.watchStats.updateAsync({ _id: current._id }, { ...withoutImportedId, _id: current._id })
+        else await db.watchStats.insertAsync(withoutImportedId)
+      }
+      for (const record of retained) {
+        if (!savedById.has(record._id)) await db.watchStats.insertAsync(record)
       }
       await db.watchStats.updateAsync(
         { _id: this.migrationId },
-        { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
+        { ...marker, _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
         { upsert: true }
       )
       this.migrationPromise = null

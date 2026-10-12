@@ -51,7 +51,7 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
             for (const record of changed.values()) {
               if (existing.has(record._id)) await db.updateAsync({ _id: record._id }, record)
             }
-            const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
+            const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1, updatedAt: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
             removed = excess.map(entry => entry._id)
             if (removed.length) await db.removeAsync(createIdQuery('_id', removed), { multi: true })
             await db.updateAsync({ _id: 'meta' }, { $set: { revision: revision + 1 } })

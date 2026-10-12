@@ -962,6 +962,7 @@ Settings:
       History replace effect: Povijest gledanja podudarnih videozapisa zamjenjuje se. Ostala povijest zadržava se.
     Select export data: "Odaberite podatke za izvoz"
     Export selected data: "Izvezi odabrane podatke"
+    Import Failed: "Uvoz nije uspio"
     Complete backup: "Potpuna sigurnosna kopija"
     Import backup: "Uvezi sigurnosnu kopiju"
     Export backup: "Izvezite sigurnosnu kopiju"
@@ -1548,6 +1549,7 @@ Video:
       Untrusted Receiver: "Certifikat prijamnika nije pouzdan. Upotrijebite autentificirani Google Cast prijamnik."
   Station: Postaja
   Playlist:
+    Load Previous Videos: "Učitaj prethodne videozapise"
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno
   External Media:
     Dislikes: "Nesviđanje | Nesviđanja | Nesviđanja"
@@ -2139,3 +2141,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Stvori prečac na radnoj površini
+
+Library:
+  CouldNotOpen: "OpenTubeX nije mogao otvoriti vašu knjižnicu. Nemojte mijenjati podatkovne datoteke."
+  RestoreProfile: "Potpuno zatvorite OpenTubeX i vratite potpunu sigurnosnu kopiju profila, uključujući library.sqlite i pripadajuće datoteke."

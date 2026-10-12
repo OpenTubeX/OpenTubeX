@@ -968,6 +968,7 @@ Settings:
       History replace effect: يُستبدل سجل المشاهدة للفيديوهات المطابقة. يُحفظ السجل الآخر.
     Select export data: "اختر البيانات المراد تصديرها"
     Export selected data: "تصدير البيانات المحددة"
+    Import Failed: "فشل الاستيراد"
     Complete backup: "نسخة احتياطية كاملة"
     Import backup: "استيراد نسخة احتياطية"
     Export backup: "تصدير النسخ الاحتياطي"
@@ -1563,6 +1564,7 @@ Video:
       Untrusted Receiver: "شهادة جهاز الاستقبال غير موثوقة. استخدم جهاز استقبال Google Cast مصادقًا عليه."
   Station: محطة
   Playlist:
+    Load Previous Videos: "تحميل الفيديوهات السابقة"
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة
   External Media:
     Dislikes: "عدم الإعجاب | عدم إعجاب | عدم الإعجاب | عدم الإعجاب | عدم الإعجاب | عدم الإعجاب"
@@ -2139,3 +2141,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: إنشاء اختصار على سطح المكتب
+
+Library:
+  CouldNotOpen: "تعذّر على OpenTubeX فتح مكتبتك. اترك ملفات بياناتك دون تغيير."
+  RestoreProfile: "أغلق OpenTubeX تمامًا واستعد نسخة احتياطية كاملة من ملفك الشخصي، بما في ذلك library.sqlite والملفات المصاحبة له."

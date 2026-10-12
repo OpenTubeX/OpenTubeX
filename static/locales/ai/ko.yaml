@@ -1180,6 +1180,7 @@ Settings:
       History replace effect: 일치하는 동영상의 시청 기록은 대체됩니다. 다른 기록은 유지됩니다.
     Select export data: "내보낼 데이터를 선택하세요"
     Export selected data: "선택한 데이터 내보내기"
+    Import Failed: "가져오기 실패"
     Complete backup: "전체 백업"
     Import backup: "백업 가져오기"
     Export backup: "백업 내보내기"
@@ -1878,6 +1879,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'
   Station: 스테이션
   Playlist:
+    Load Previous Videos: "이전 동영상 불러오기"
     Unavailable videos are hidden: 사용할 수 없는 동영상 {count}개가 숨겨졌습니다
   External Media:
     Dislikes: "싫어요"
@@ -2564,3 +2566,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: 바탕 화면 바로 가기 만들기
+
+Library:
+  CouldNotOpen: "OpenTubeX가 라이브러리를 열지 못했습니다. 데이터 파일을 변경하지 마세요."
+  RestoreProfile: "OpenTubeX를 완전히 종료하고 library.sqlite 및 관련 파일을 포함한 전체 프로필 백업을 복원하세요."

@@ -968,6 +968,7 @@ Settings:
       History replace effect: Lịch sử xem của các video trùng khớp được thay thế. Lịch sử khác được giữ lại.
     Select export data: "Chọn dữ liệu để xuất"
     Export selected data: "Xuất dữ liệu đã chọn"
+    Import Failed: "Nhập thất bại"
     Complete backup: "Bản sao lưu đầy đủ"
     Import backup: "Nhập bản sao lưu"
     Export backup: "Xuất bản sao lưu"
@@ -1560,6 +1561,7 @@ Video:
       Untrusted Receiver: "Chứng chỉ của thiết bị nhận không đáng tin cậy. Hãy sử dụng thiết bị nhận Google Cast đã được xác thực."
   Station: Trạm
   Playlist:
+    Load Previous Videos: "Tải các video trước"
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
   External Media:
     Dislikes: "Lượt không thích"
@@ -2151,3 +2153,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Tạo lối tắt trên màn hình nền
+
+Library:
+  CouldNotOpen: "OpenTubeX không thể mở thư viện của bạn. Giữ nguyên các tệp dữ liệu."
+  RestoreProfile: "Thoát hoàn toàn OpenTubeX và khôi phục bản sao lưu toàn bộ hồ sơ, bao gồm library.sqlite và các tệp đi kèm."

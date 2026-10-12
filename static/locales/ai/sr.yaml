@@ -982,6 +982,7 @@ Settings:
       History replace effect: Историја гледања одговарајућих видео-снимака се замењује. Остала историја се чува.
     Select export data: "Изаберите податке за извоз"
     Export selected data: "Извези изабране податке"
+    Import Failed: "Увоз није успео"
     Complete backup: "Потпуна резервна копија"
     Import backup: "Увези резервну копију"
     Export backup: "Извези резервну копију"
@@ -1592,6 +1593,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Преостало време до поновног покушаја SABR-а: {remindingTimeSeconds}s'
   Station: Станица
   Playlist:
+    Load Previous Videos: "Учитај претходне видео-снимке"
     Unavailable videos are hidden: 1 недоступан видео-снимак је скривен | {count} недоступна видео-снимка су скривена | {count} недоступних видео-снимака је скривено
   External Media:
     Dislikes: "Негативна оцена | Негативне оцене | Негативних оцена"
@@ -2189,3 +2191,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Направи пречицу на радној површини
+
+Library:
+  CouldNotOpen: "OpenTubeX није могао да отвори вашу библиотеку. Не мењајте датотеке са подацима."
+  RestoreProfile: "Потпуно затворите OpenTubeX и вратите потпуну резервну копију профила, укључујући library.sqlite и пратеће датотеке."

@@ -214,6 +214,16 @@ export function updateHistorySnapshot({ snapshot, previous, acknowledged, next }
   return JSON.stringify({ ...saved, history: next ?? Object.fromEntries(historyBaseline(previous, acknowledged)) })
 }
 
+export function updatePlaylistSnapshot({ snapshot, id, remoteId, metadata, previousVideos, acknowledged, next }) {
+  let saved
+  try { saved = JSON.parse(snapshot) } catch { saved = {} }
+  const previous = saved?.playlists?.[id] ?? {}
+  const videos = new Set(Array.isArray(previous.videos) ? previous.videos : Array.isArray(previousVideos) ? previousVideos : [])
+  for (const videoId of acknowledged.deletions) videos.delete(videoId)
+  for (const videoId of acknowledged.upserts) videos.add(videoId)
+  return JSON.stringify({ ...saved, playlists: { ...saved?.playlists, [id]: { ...previous, remoteId, metadata, videos: next?.videos ?? [...videos] } } })
+}
+
 export function mergeHistory({ localHistory, remoteHistory, previous = {}, acknowledged = {}, options = {} }) {
   const previousStates = historyBaseline(previous, acknowledged)
   const previousIds = previousStates.keys()

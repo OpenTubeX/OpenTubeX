@@ -991,6 +991,7 @@ Settings:
       History replace effect: سابقه تماشای ویدیوهای منطبق جایگزین می‌شود. سایر سوابق حفظ می‌شوند.
     Select export data: "داده‌های مورد نظر برای صادر کردن را انتخاب کنید"
     Export selected data: "صادر کردن داده‌های انتخاب‌شده"
+    Import Failed: "وارد کردن ناموفق بود"
     Complete backup: "پشتیبان‌گیری کامل"
     Import backup: "وارد کردن نسخه پشتیبان"
     Export backup: "پشتیبان گیری را صادر کنید"
@@ -1605,6 +1606,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'
   Station: ایستگاه
   Playlist:
+    Load Previous Videos: "بارگیری ویدیوهای قبلی"
     Unavailable videos are hidden: ۱ ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند
   External Media:
     Dislikes: "دیسلایک | دیسلایک‌ها"
@@ -2198,3 +2200,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: ایجاد میان‌بر روی دسکتاپ
+
+Library:
+  CouldNotOpen: "OpenTubeX نتوانست کتابخانهٔ شما را باز کند. فایل‌های دادهٔ خود را بدون تغییر نگه دارید."
+  RestoreProfile: "OpenTubeX را کاملاً ببندید و یک نسخهٔ پشتیبان کامل از نمایه را، شامل library.sqlite و فایل‌های همراه آن، بازیابی کنید."

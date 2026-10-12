@@ -958,6 +958,7 @@ Settings:
       History replace effect: História sledovania zodpovedajúcich videí sa nahradí. Ostatná história sa zachová.
     Select export data: "Vyberte údaje na export"
     Export selected data: "Exportovať vybrané údaje"
+    Import Failed: "Import zlyhal"
     Complete backup: "Kompletná záloha"
     Import backup: "Importovať zálohu"
     Export backup: "Exportovať zálohu"
@@ -1241,6 +1242,8 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "Tento kanál má videá, ale žiadne sa nepodarilo zobraziť. Skúste načítať ďalšie"
 Video:
+  Playlist:
+    Load Previous Videos: "Načítať predchádzajúce videá"
   External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané v OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Invalid Media URL: "Neplatná adresa URL média"
   Mark As Fully Watched: Označiť ako úplne pozreté
@@ -2117,3 +2120,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Vytvoriť odkaz na pracovnej ploche
+
+Library:
+  CouldNotOpen: "OpenTubeX nemohol otvoriť vašu knižnicu. Ponechajte dátové súbory nezmenené."
+  RestoreProfile: "Úplne ukončite OpenTubeX a obnovte úplnú zálohu profilu vrátane library.sqlite a súvisiacich súborov."

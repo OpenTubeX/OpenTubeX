@@ -1,4 +1,5 @@
 import { toRaw } from 'vue'
+import model from '@seald-io/nedb/lib/model.js'
 import { getContinueWatchingCandidates } from '../../helpers/homeSections'
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
 import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
@@ -79,7 +80,7 @@ const actions = {
 
       const resultsById = {}
       results.forEach(video => {
-        resultsById[video.videoId] = video
+        if (typeof video.videoId === 'string' && !Object.hasOwn(resultsById, video.videoId)) resultsById[video.videoId] = video
       })
 
       commit('setHistoryCacheSorted', results)
@@ -123,12 +124,12 @@ const actions = {
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      sortedRecords.sort((a, b) => b.timeWatched - a.timeWatched)
+      sortedRecords.sort((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(a._id, b._id))
 
       await DBHistoryHandlers.overwrite(sortedRecords)
 
       commit('setHistoryCacheSorted', sortedRecords)
-      commit('setHistoryCacheById', Object.fromEntries(migratedHistoryItems))
+      commit('setHistoryCacheById', Object.fromEntries(sortedRecords.toReversed().filter(record => typeof record.videoId === 'string').map(record => [record.videoId, record])))
       return true
     } catch (errMessage) {
       console.error(errMessage)

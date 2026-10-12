@@ -968,6 +968,7 @@ Settings:
       History replace effect: Історія перегляду відповідних відео замінюється. Решта історії зберігається.
     Select export data: "Виберіть дані для експорту"
     Export selected data: "Експортувати вибрані дані"
+    Import Failed: "Не вдалося імпортувати"
     Complete backup: "Повне резервне копіювання"
     Import backup: "Імпортувати резервну копію"
     Export backup: "Експортувати резервну копію"
@@ -1563,6 +1564,7 @@ Video:
       Untrusted Receiver: "Сертифікат приймача не є довіреним. Використовуйте автентифікований приймач Google Cast."
   Station: Станція
   Playlist:
+    Load Previous Videos: "Завантажити попередні відео"
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано
   External Media:
     Dislikes: "дизлайк | дизлайки | дизлайків"
@@ -2154,3 +2156,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Створити ярлик на робочому столі
+
+Library:
+  CouldNotOpen: "OpenTubeX не вдалося відкрити вашу бібліотеку. Не змінюйте файли даних."
+  RestoreProfile: "Повністю закрийте OpenTubeX і відновіть повну резервну копію профілю, включно з library.sqlite та супровідними файлами."

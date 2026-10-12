@@ -960,6 +960,7 @@ Settings:
       History replace effect: Uyğun videoların baxış tarixçəsi əvəz edilir. Digər tarixçə saxlanılır.
     Select export data: "İxrac ediləcək məlumatları seçin"
     Export selected data: "Seçilmiş məlumatları ixrac et"
+    Import Failed: "İdxal alınmadı"
     Complete backup: "Tam ehtiyat nüsxəsi"
     Import backup: "Ehtiyat nüsxəni idxal et"
     Export backup: "Ehtiyat nüsxəni ixrac et"
@@ -1239,6 +1240,8 @@ Channel:
   Search Result Types: Axtarış nəticələrinin növləri
   All Results: Hamısı
 Video:
+  Playlist:
+    Load Previous Videos: "Əvvəlki videoları yüklə"
   External DRM Protected: "DRM ilə qorunan videolar xüsusi, qapalı mənbəli komponentlər tələb etdiyindən OpenTubeX vasitəsilə oynadıla bilmir."
   Invalid Media URL: "Yanlış media URL-si"
   Mark As Fully Watched: Tam baxılmış kimi işarələ
@@ -2119,3 +2122,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: İş masasında qısayol yarat
+
+Library:
+  CouldNotOpen: "OpenTubeX kitabxananızı aça bilmədi. Məlumat fayllarınızı dəyişməyin."
+  RestoreProfile: "OpenTubeX tətbiqindən tamamilə çıxın və library.sqlite və ona aid fayllar daxil olmaqla profilin tam ehtiyat nüsxəsini bərpa edin."

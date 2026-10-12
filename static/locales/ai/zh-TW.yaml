@@ -958,6 +958,7 @@ Settings:
       History replace effect: 相符影片的觀看記錄將被取代。其他記錄將被保留。
     Select export data: "選擇要匯出的資料"
     Export selected data: "匯出所選資料"
+    Import Failed: "匯入失敗"
     Complete backup: "完整備份"
     Import backup: "匯入備份"
     Export backup: "匯出備份"
@@ -1238,6 +1239,8 @@ Channel:
   Videos:
     This channel has videos but none could be displayed, try fetching more: "此頻道有影片，但無法顯示任何影片，請嘗試載入更多"
 Video:
+  Playlist:
+    Load Previous Videos: "載入之前的影片"
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
   Invalid Media URL: "無效的媒體網址"
   Mark As Fully Watched: 標示為已完整觀看
@@ -2116,3 +2119,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: 建立桌面捷徑
+
+Library:
+  CouldNotOpen: "OpenTubeX 無法開啟您的資料庫。請勿變更資料檔案。"
+  RestoreProfile: "請完全結束 OpenTubeX，然後還原完整的設定檔備份，包括 library.sqlite 及其相關檔案。"

@@ -335,7 +335,7 @@ import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../helpers/import-preview'
 import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistory, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
@@ -463,13 +463,32 @@ async function importUnifiedBackup() {
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
   try {
+    // Portable playlist readers require structured member arrays.
+    // Reject unsupported selected playlists before any write; desktop restores them exactly.
+    if (selected.has('playlists') && data.playlists.some(playlist => !Array.isArray(playlist.videos) || playlist.videos.some(video => video === null || typeof video !== 'object' || Array.isArray(video) || video instanceof Date))) {
+      throw new Error('Invalid backup playlists')
+    }
+    if (selected.has('profiles') && data.profiles.some(profile => !Array.isArray(profile.subscriptions) || profile.subscriptions.some(channel => channel === null || typeof channel !== 'object' || Array.isArray(channel) || typeof channel.id !== 'string'))) {
+      throw new Error('Invalid backup profiles')
+    }
+    const preparedProfiles = []
     if (selected.has('profiles')) {
       const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
       for (const profile of data.profiles) {
         const merged = mergeBackupProfile(currentProfiles.get(profile._id), profile)
-        await DBProfileHandlers.upsert(merged)
         currentProfiles.set(profile._id, merged)
+        preparedProfiles.push(merged)
       }
+    }
+    if (selected.has('playlists')) {
+      const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
+      for (const playlist of data.playlists) {
+        const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
+        currentPlaylists.set(playlist._id, merged)
+      }
+    }
+    if (selected.has('profiles')) {
+      for (const profile of preparedProfiles) await DBProfileHandlers.upsert(profile)
       await store.dispatch('grabAllProfiles')
     }
     if (selected.has('playlists')) {
@@ -482,10 +501,7 @@ async function importUnifiedBackup() {
       }
     }
     if (selected.has('history')) {
-      const records = new Map((await DBHistoryHandlers.find()).map(record => [record.videoId, record]))
-      for (const imported of data.history) {
-        records.set(imported.videoId, mergeBackupHistoryRecord(records.get(imported.videoId), imported))
-      }
+      const records = mergeBackupHistory(await DBHistoryHandlers.find(), data.history)
       if (await store.dispatch('overwriteHistory', records) !== true) throw new Error('Could not restore history')
     }
     if (selected.has('searchHistory')) {

@@ -960,6 +960,7 @@ Settings:
       History replace effect: Το ιστορικό παρακολούθησης των αντίστοιχων βίντεο αντικαθίσταται. Το υπόλοιπο ιστορικό διατηρείται.
     Select export data: "Επιλέξτε τα δεδομένα για εξαγωγή"
     Export selected data: "Εξαγωγή επιλεγμένων δεδομένων"
+    Import Failed: "Η εισαγωγή απέτυχε"
     Complete backup: "Ολοκλήρωση αντιγράφου ασφαλείας"
     Import backup: "Εισαγωγή αντιγράφου ασφαλείας"
     Export backup: "Εξαγωγή αντιγράφου ασφαλείας"
@@ -1546,6 +1547,7 @@ Video:
       Untrusted Receiver: "Το πιστοποιητικό του δέκτη δεν είναι έμπιστο. Χρησιμοποιήστε έναν πιστοποιημένο δέκτη Google Cast."
   Station: Σταθμός
   Playlist:
+    Load Previous Videos: "Φόρτωση προηγούμενων βίντεο"
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
   External Media:
     Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
@@ -2137,3 +2139,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Δημιουργία συντόμευσης στην επιφάνεια εργασίας
+
+Library:
+  CouldNotOpen: "Το OpenTubeX δεν μπόρεσε να ανοίξει τη βιβλιοθήκη σας. Αφήστε τα αρχεία δεδομένων σας αμετάβλητα."
+  RestoreProfile: "Κλείστε εντελώς το OpenTubeX και επαναφέρετε ένα πλήρες αντίγραφο ασφαλείας του προφίλ, συμπεριλαμβανομένου του library.sqlite και των συνοδευτικών αρχείων του."

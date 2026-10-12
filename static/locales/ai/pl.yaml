@@ -474,6 +474,7 @@ Settings:
       History replace effect: Historia oglądania pasujących filmów zostanie zastąpiona. Pozostała historia zostanie zachowana.
     Select export data: "Wybierz dane do wyeksportowania"
     Export selected data: "Eksportuj wybrane dane"
+    Import Failed: "Import nie powiódł się"
     Complete backup: "Pełna kopia zapasowa"
     Import backup: "Importuj kopię zapasową"
     Export backup: "Eksportuj kopię zapasową"
@@ -684,6 +685,8 @@ Channel:
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
 Video:
+  Playlist:
+    Load Previous Videos: "Wczytaj poprzednie filmy"
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"
   Mark As Fully Watched: Oznacz jako obejrzany w całości
@@ -1334,3 +1337,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Utwórz skrót na pulpicie
+
+Library:
+  CouldNotOpen: "OpenTubeX nie mógł otworzyć twojej biblioteki. Nie zmieniaj plików danych."
+  RestoreProfile: "Całkowicie zamknij OpenTubeX i przywróć pełną kopię zapasową profilu, w tym library.sqlite i pliki towarzyszące."

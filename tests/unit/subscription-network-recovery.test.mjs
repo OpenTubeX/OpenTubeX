@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { shallowReactive } from 'vue'
+import { isRssUpcomingPremiere, isUpcomingPremiere } from '../../src/renderer/helpers/subscription-visibility.js'
 import { createI18n } from 'vue-i18n'
 import { load } from 'js-yaml'
 import { YTNodes } from 'youtubei.js'
@@ -25,6 +26,7 @@ const networkSource = (await readFile(new URL('../../src/renderer/helpers/networ
 
 const source = (await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+  .replace(/^export \{[^\n]* from [^\n]*\n/gm, '')
   .replace(/^export /gm, '')
 
 // Exercise the real refresh, fallback, cache, and notification paths with fake
@@ -111,7 +113,7 @@ function createRefresh({ online = true, feed = 'Shorts', error = new TypeError('
     invidiousGetCommunityPosts: fetchInvidious,
     getLocalChannel: async () => channelInfo,
     getLocalPlaylist: async () => { if (playlistError) throw playlistError; return { items: playlistItems } },
-    parseLocalPlaylistVideos, parseLocalChannelShorts, parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate,
+    isRssUpcomingPremiere, isUpcomingPremiere, parseLocalPlaylistVideos, parseLocalChannelShorts, parseSubscriptionRss, parseRssUpcomingInfo, isRssUpcomingPremiereCandidate,
     mergeSubscriptionShortThumbnails: videos => videos,
     DOMParser: class {
       parseFromString() {

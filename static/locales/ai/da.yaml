@@ -985,6 +985,7 @@ Settings:
       History replace effect: Visningshistorik for matchende videoer erstattes. Øvrig historik bevares.
     Select export data: "Vælg de data, der skal eksporteres"
     Export selected data: "Eksportér valgte data"
+    Import Failed: "Import mislykkedes"
     Complete backup: "Fuldfør backup"
     Import backup: "Importér sikkerhedskopi"
     Export backup: "Eksportér backup"
@@ -1598,6 +1599,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-ventetid: {remindingTimeSeconds}s'
   Station: Station
   Playlist:
+    Load Previous Videos: "Indlæs tidligere videoer"
     Unavailable videos are hidden: 1 utilgængelig video er skjult | {count} utilgængelige videoer er skjult
   External Media:
     Dislikes: "Negativ bedømmelse | Negative bedømmelser"
@@ -2198,3 +2200,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Opret en genvej på skrivebordet
+
+Library:
+  CouldNotOpen: "OpenTubeX kunne ikke åbne dit bibliotek. Lad dine datafiler være uændrede."
+  RestoreProfile: "Afslut OpenTubeX helt, og gendan en komplet sikkerhedskopi af profilen, inklusive library.sqlite og de tilhørende filer."

@@ -960,6 +960,7 @@ Settings:
       History replace effect: Seerhistorikken for samsvarende videoer erstattes. Annen historikk beholdes.
     Select export data: "Velg dataene som skal eksporteres"
     Export selected data: "Eksporter valgte data"
+    Import Failed: "Import mislyktes"
     Complete backup: "Komplett sikkerhetskopi"
     Import backup: "Importer sikkerhetskopi"
     Export backup: "Eksporter sikkerhetskopi"
@@ -1544,6 +1545,7 @@ Video:
       Untrusted Receiver: "Mottakerens sertifikat er ikke klarert. Bruk en autentisert Google Cast-mottaker."
   Station: Stasjon
   Playlist:
+    Load Previous Videos: "Last inn tidligere videoer"
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult
   External Media:
     Dislikes: "Misliking | Mislikinger"
@@ -2135,3 +2137,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Opprett en snarvei på skrivebordet
+
+Library:
+  CouldNotOpen: "OpenTubeX kunne ikke åpne biblioteket ditt. La datafilene være uendret."
+  RestoreProfile: "Avslutt OpenTubeX helt og gjenopprett en fullstendig sikkerhetskopi av profilen, inkludert library.sqlite og tilhørende filer."

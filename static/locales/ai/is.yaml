@@ -962,6 +962,7 @@ Settings:
       History replace effect: Áhorfssögu samsvarandi myndskeiða er skipt út. Önnur saga er varðveitt.
     Select export data: "Veldu gögnin sem á að flytja út"
     Export selected data: "Flytja út valin gögn"
+    Import Failed: "Innflutningur mistókst"
     Complete backup: "Fullt öryggisafrit"
     Import backup: "Flytja inn öryggisafrit"
     Export backup: "Flytja út öryggisafrit"
@@ -1548,6 +1549,7 @@ Video:
       Error With Details: "Ekki tókst að senda myndskeiðið: {error}"
       Untrusted Receiver: "Vottorði móttakarans er ekki treyst. Notaðu auðkenndan Google Cast-móttakara."
   Playlist:
+    Load Previous Videos: "Hlaða fyrri myndskeiðum"
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
   External Media:
     Dislikes: "Neikvætt atkvæði | Neikvæð atkvæði"
@@ -2136,3 +2138,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Búa til flýtileið á skjáborði
+
+Library:
+  CouldNotOpen: "OpenTubeX gat ekki opnað safnið þitt. Haltu gagnaskránum óbreyttum."
+  RestoreProfile: "Lokaðu OpenTubeX alveg og endurheimtu fullkomið öryggisafrit af notandasniðinu, þar á meðal library.sqlite og meðfylgjandi skrár."

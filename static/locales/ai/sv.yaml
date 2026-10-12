@@ -962,6 +962,7 @@ Settings:
       History replace effect: Visningshistorik för matchande videor ersätts. Övrig historik behålls.
     Select export data: "Välj data att exportera"
     Export selected data: "Exportera valda data"
+    Import Failed: "Importen misslyckades"
     Complete backup: "Fullständig säkerhetskopia"
     Import backup: "Importera säkerhetskopia"
     Export backup: "Exportera säkerhetskopia"
@@ -1541,6 +1542,7 @@ Video:
       Untrusted Receiver: "Mottagarens certifikat är inte betrott. Använd en autentiserad Google Cast-mottagare."
   Station: Station
   Playlist:
+    Load Previous Videos: "Läs in tidigare videor"
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda
   External Media:
     Dislikes: "Ogillamarkering | Ogillamarkeringar"
@@ -2132,3 +2134,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Skapa en genväg på skrivbordet
+
+Library:
+  CouldNotOpen: "OpenTubeX kunde inte öppna ditt bibliotek. Lämna dina datafiler oförändrade."
+  RestoreProfile: "Avsluta OpenTubeX helt och återställ en fullständig säkerhetskopia av profilen, inklusive library.sqlite och tillhörande filer."

@@ -1260,6 +1260,7 @@ Settings:
       History replace effect: Se substitueix l’historial dels vídeos coincidents. Es conserva la resta de l’historial.
     Select export data: "Selecciona les dades que vols exportar"
     Export selected data: "Exporta les dades seleccionades"
+    Import Failed: "La importació ha fallat"
     Complete backup: "Còpia de seguretat completa"
     Import backup: "Importar còpia de seguretat"
     Export backup: "Exportar còpia de seguretat"
@@ -2010,6 +2011,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'
   Station: Estació
   Playlist:
+    Load Previous Videos: "Carrega els vídeos anteriors"
     Unavailable videos are hidden: 1 vídeo no disponible està ocult | {count} vídeos no disponibles estan ocults | {count} vídeos no disponibles estan ocults
   External Media:
     Dislikes: "No m'agrada | No m'agrada | No m'agrada"
@@ -2756,3 +2758,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crea una drecera a l’escriptori
+
+Library:
+  CouldNotOpen: "OpenTubeX no ha pogut obrir la vostra biblioteca. No modifiqueu els fitxers de dades."
+  RestoreProfile: "Tanqueu OpenTubeX completament i restaureu una còpia de seguretat completa del perfil, incloent-hi library.sqlite i els fitxers que l’acompanyen."

@@ -4,6 +4,9 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import Datastore from '@seald-io/nedb'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
 import { recommendationVideo, updateRecommendationRecord, sampleRecommendationPlayback, RECOMMENDATION_RECORD_LIMIT } from '../../src/recommendation-learning.js'
 const video = { videoId: 'linux-video', title: 'Linux desktop', authorId: 'channel', lengthSeconds: 600 }
@@ -82,18 +85,36 @@ test('feedback and exposure survive a datastore reopen', async () => {
     assert.equal(state.epoch, epoch)
   } finally { await rm(directory, { recursive: true, force: true }) }
 })
-test('prunes old and excess learning records without deleting the schema record', async () => {
-  const db = new Datastore({ inMemoryOnly: true })
-  const store = createRecommendationStore(db)
-  const { epoch } = await store.find()
-  const now = Date.now()
-  await db.insertAsync(Array.from({ length: RECOMMENDATION_RECORD_LIMIT + 2 }, (_, i) => ({ ...video, _id: `video${i}`, videoId: `video${i}`, updatedAt: now - i })))
-  await store.record({ type: 'positive', video, epoch })
-  assert.equal((await store.find()).records.length, RECOMMENDATION_RECORD_LIMIT)
-  await db.insertAsync({ ...video, _id: 'expired', videoId: 'expired', updatedAt: 1 })
-  assert.ok(!(await store.find()).records.some(record => record.videoId === 'expired'))
-  assert.equal((await store.find()).epoch, epoch)
-})
+for (const adapter of ['portable', 'sqlite']) {
+  test(`${adapter} prunes old and excess learning records without copying their complete contents`, async t => {
+    const database = adapter === 'sqlite' ? new DatabaseSync(':memory:') : null
+    if (database) { database.exec('PRAGMA foreign_keys = ON;' + SCHEMA_SQL); t.after(() => database.close()) }
+    const db = database ? new LibraryEngine(database).collections.recommendations : new Datastore({ inMemoryOnly: true })
+    const store = createRecommendationStore(db)
+    const { epoch } = await store.find()
+    const now = Date.now()
+    await db.insertAsync(Array.from({ length: RECOMMENDATION_RECORD_LIMIT + 2 }, (_, i) => ({ ...video, _id: `video${i}`, videoId: `video${i}`, updatedAt: now - i })))
+    const projected = []
+    const find = db.findAsync.bind(db)
+    t.mock.method(db, 'findAsync', (query, projection) => {
+      const cursor = find(query, projection)
+      if (projection) {
+        const then = cursor.then.bind(cursor)
+        cursor.then = (resolve, reject) => then(records => { projected.push(...records); return resolve(records) }, reject)
+      }
+      return cursor
+    })
+    await store.record({ type: 'positive', video, epoch })
+    assert.equal((await store.find()).records.length, RECOMMENDATION_RECORD_LIMIT)
+    assert.equal(projected.length, 3)
+    for (const entry of projected) {
+      assert.deepEqual(Object.keys(entry).sort(), ['_id', 'updatedAt'])
+    }
+    await db.insertAsync({ ...video, _id: 'expired', videoId: 'expired', updatedAt: 1 })
+    assert.ok(!(await store.find()).records.some(record => record.videoId === 'expired'))
+    assert.equal((await store.find()).epoch, epoch)
+  })
+}
 
 test('a sparse impression does not erase metadata learned during playback', () => {
   const learned = updateRecommendationRecord(undefined, { type: 'watch', video: { ...video, description: 'KDE Plasma widgets', keywords: ['Plasma'] }, sessionId: 'session', seconds: 120 })

@@ -1111,6 +1111,7 @@ Settings:
       History replace effect: Se reemplaza el historial de los videos coincidentes. Se conserva el resto del historial.
     Select export data: "Selecciona los datos que quieres exportar"
     Export selected data: "Exportar los datos seleccionados"
+    Import Failed: "Error al importar"
     Complete backup: "Copia de seguridad completa"
     Import backup: "Importar copia de seguridad"
     Export backup: "Exportar copia de seguridad"
@@ -1841,6 +1842,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Tiempo restante de retroceso de SABR: {remindingTimeSeconds} s'
   Station: Estación
   Playlist:
+    Load Previous Videos: "Cargar videos anteriores"
     Unavailable videos are hidden: 1 video no disponible está oculto | {count} videos no disponibles están ocultos | {count} videos no disponibles están ocultos
   External Media:
     Dislikes: "No me gusta | No me gusta | No me gusta"
@@ -2546,3 +2548,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crear un acceso directo en el escritorio
+
+Library:
+  CouldNotOpen: "OpenTubeX no pudo abrir tu biblioteca. No modifiques los archivos de datos."
+  RestoreProfile: "Cierra OpenTubeX por completo y restaura una copia de seguridad completa del perfil, incluidos library.sqlite y los archivos que lo acompañan."

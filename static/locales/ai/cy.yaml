@@ -958,6 +958,7 @@ Settings:
       History replace effect: Caiff hanes gwylio fideos cyfatebol ei ddisodli. Cedwir hanes arall.
     Select export data: "Dewiswch y data i'w allforio"
     Export selected data: "Allforio’r data a ddewiswyd"
+    Import Failed: "Methodd y mewnforio"
     Complete backup: "Copi wrth gefn cyflawn"
     Import backup: "Mewnforio copi wrth gefn"
     Export backup: "Allforio copi wrth gefn"
@@ -1548,6 +1549,7 @@ Video:
       Untrusted Receiver: "Nid yw tystysgrif y derbynnydd yn ddibynadwy. Defnyddiwch dderbynnydd Google Cast sydd wedi ei ddilysu."
   Station: Gorsaf
   Playlist:
+    Load Previous Videos: "Llwytho fideos blaenorol"
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
   External Media:
     Dislikes: "Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi"
@@ -2137,3 +2139,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Creu llwybr byr ar y bwrdd gwaith
+
+Library:
+  CouldNotOpen: "Ni allai OpenTubeX agor eich llyfrgell. Peidiwch â newid eich ffeiliau data."
+  RestoreProfile: "Caewch OpenTubeX yn llwyr ac adferwch gopi wrth gefn cyflawn o’r proffil, gan gynnwys library.sqlite a’r ffeiliau cysylltiedig."

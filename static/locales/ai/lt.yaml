@@ -1193,6 +1193,7 @@ Settings:
       History replace effect: Atitinkamų vaizdo įrašų žiūrėjimo istorija pakeičiama. Kita istorija išsaugoma.
     Select export data: "Pasirinkite eksportuojamus duomenis"
     Export selected data: "Eksportuoti pasirinktus duomenis"
+    Import Failed: "Importuoti nepavyko"
     Complete backup: "Pilna atsarginė kopija"
     Import backup: "Importuoti atsarginę kopiją"
     Export backup: "Eksportuoti atsarginę kopiją"
@@ -1912,6 +1913,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'
   Station: Stotis
   Playlist:
+    Load Previous Videos: "Įkelti ankstesnius vaizdo įrašus"
     Unavailable videos are hidden: 1 nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta
   External Media:
     Dislikes: "Nepatinka | Nepatinka | Nepatinka"
@@ -2610,3 +2612,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Sukurti darbalaukio nuorodą
+
+Library:
+  CouldNotOpen: "OpenTubeX nepavyko atverti jūsų bibliotekos. Nekeiskite duomenų failų."
+  RestoreProfile: "Visiškai užverkite OpenTubeX ir atkurkite visą profilio atsarginę kopiją, įskaitant library.sqlite ir su juo susijusius failus."

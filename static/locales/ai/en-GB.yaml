@@ -940,6 +940,7 @@ Settings:
       History replace effect: Watch history for matching videos is replaced. Other history is kept.
     Select export data: "Select the data to export"
     Export selected data: "Export selected data"
+    Import Failed: "Import failed"
     Complete backup: "Complete backup"
     Import backup: "Import backup"
     Export backup: "Export backup"
@@ -1511,6 +1512,7 @@ Video:
       Untrusted Receiver: "The receiver's certificate is not trusted. Use an authenticated Google Cast receiver."
   Station: Station
   Playlist:
+    Load Previous Videos: "Load Previous Videos"
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
   External Media:
     Dislikes: "dislike | dislikes"
@@ -2099,3 +2101,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Create a desktop shortcut
+
+Library:
+  CouldNotOpen: "OpenTubeX could not open your library. Keep your data files unchanged."
+  RestoreProfile: "Quit OpenTubeX completely and restore a complete profile backup, including library.sqlite and its accompanying files."

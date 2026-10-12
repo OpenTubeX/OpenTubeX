@@ -973,6 +973,7 @@ Settings:
       History replace effect: היסטוריית הצפייה של סרטונים תואמים מוחלפת. שאר ההיסטוריה נשמרת.
     Select export data: "בחרו את הנתונים לייצוא"
     Export selected data: "ייצוא הנתונים שנבחרו"
+    Import Failed: "הייבוא נכשל"
     Complete backup: "גיבוי מלא"
     Import backup: "ייבוא גיבוי"
     Export backup: "ייצוא גיבוי"
@@ -1570,6 +1571,7 @@ Video:
       Untrusted Receiver: "האישור של המקלט אינו מהימן. יש להשתמש במקלט Google Cast מאומת."
   Station: תחנה
   Playlist:
+    Load Previous Videos: "טעינת הסרטונים הקודמים"
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים
   External Media:
     Dislikes: "דיסלייק | דיסלייקים | דיסלייקים"
@@ -2163,3 +2165,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: יצירת קיצור דרך בשולחן העבודה
+
+Library:
+  CouldNotOpen: "OpenTubeX לא הצליח לפתוח את הספרייה שלך. אין לשנות את קובצי הנתונים."
+  RestoreProfile: "יש לסגור את OpenTubeX לחלוטין ולשחזר גיבוי מלא של הפרופיל, כולל library.sqlite והקבצים הנלווים אליו."

@@ -958,6 +958,7 @@ Settings:
       History replace effect: 一致する動画の再生履歴は置き換えられます。その他の履歴は保持されます。
     Select export data: "エクスポートするデータを選択"
     Export selected data: "選択したデータをエクスポート"
+    Import Failed: "インポートに失敗しました"
     Complete backup: "完全なバックアップ"
     Import backup: "バックアップをインポート"
     Export backup: "バックアップをエクスポート"
@@ -1236,6 +1237,8 @@ Channel:
   Search Result Types: 検索結果の種類
   All Results: すべて
 Video:
+  Playlist:
+    Load Previous Videos: "前の動画を読み込む"
   External DRM Protected: "DRMで保護された動画は、独自のクローズドソースコンポーネントが必要なため、OpenTubeXでは再生できません。"
   Invalid Media URL: "無効なメディアURL"
   Mark As Fully Watched: 最後まで視聴済みにする
@@ -2109,3 +2112,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: デスクトップにショートカットを作成
+
+Library:
+  CouldNotOpen: "OpenTubeX はライブラリを開けませんでした。データファイルを変更しないでください。"
+  RestoreProfile: "OpenTubeX を完全に終了し、library.sqlite とその関連ファイルを含む、プロファイル全体のバックアップを復元してください。"

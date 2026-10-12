@@ -958,6 +958,7 @@ Settings:
       History replace effect: Riwayat tontonan video yang cocok diganti. Riwayat lainnya dipertahankan.
     Select export data: "Pilih data yang akan diekspor"
     Export selected data: "Ekspor data yang dipilih"
+    Import Failed: "Impor gagal"
     Complete backup: "Cadangan lengkap"
     Import backup: "Impor cadangan"
     Export backup: "Ekspor cadangan"
@@ -1539,6 +1540,7 @@ Video:
       Untrusted Receiver: "Sertifikat penerima tidak tepercaya. Gunakan penerima Google Cast yang terautentikasi."
   Station: Stasiun
   Playlist:
+    Load Previous Videos: "Muat video sebelumnya"
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'
   External Media:
     Dislikes: "Tidak suka"
@@ -2125,3 +2127,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Buat pintasan desktop
+
+Library:
+  CouldNotOpen: "OpenTubeX tidak dapat membuka pustaka Anda. Jangan ubah berkas data Anda."
+  RestoreProfile: "Tutup OpenTubeX sepenuhnya dan pulihkan cadangan profil lengkap, termasuk library.sqlite beserta berkas pendampingnya."

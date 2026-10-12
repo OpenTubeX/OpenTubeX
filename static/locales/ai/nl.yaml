@@ -973,6 +973,7 @@ Settings:
       History replace effect: De kijkgeschiedenis van overeenkomende video’s wordt vervangen. Andere geschiedenis blijft behouden.
     Select export data: "Selecteer de gegevens om te exporteren"
     Export selected data: "Geselecteerde gegevens exporteren"
+    Import Failed: "Importeren mislukt"
     Complete backup: "Volledige back-up"
     Import backup: "Back-up importeren"
     Export backup: "Back-up exporteren"
@@ -1579,6 +1580,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'
   Station: Station
   Playlist:
+    Load Previous Videos: "Vorige video’s laden"
     Unavailable videos are hidden: 1 niet-beschikbare video is verborgen | {count} niet-beschikbare video's zijn verborgen
   External Media:
     Dislikes: "Dislike | Dislikes"
@@ -2172,3 +2174,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Een snelkoppeling op het bureaublad maken
+
+Library:
+  CouldNotOpen: "OpenTubeX kon je bibliotheek niet openen. Laat je gegevensbestanden ongewijzigd."
+  RestoreProfile: "Sluit OpenTubeX volledig af en herstel een volledige profielback-up, inclusief library.sqlite en de bijbehorende bestanden."

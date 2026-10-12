@@ -968,6 +968,7 @@ Settings:
       History replace effect: Substitúese o historial dos vídeos coincidentes. Consérvase o resto do historial.
     Select export data: "Selecciona os datos que queres exportar"
     Export selected data: "Exportar os datos seleccionados"
+    Import Failed: "Fallou a importación"
     Complete backup: "Copia de seguranza completa"
     Import backup: "Importar copia de seguranza"
     Export backup: "Exportar copia de seguranza"
@@ -1572,6 +1573,7 @@ Video:
       Untrusted Receiver: "O certificado do receptor non é de confianza. Usa un receptor Google Cast autenticado."
   Station: Estación
   Playlist:
+    Load Previous Videos: "Cargar os vídeos anteriores"
     Unavailable videos are hidden: 1 vídeo non dispoñible está oculto | {count} vídeos non dispoñibles están ocultos
   External Media:
     Dislikes: "Desgusto | Desgustos"
@@ -2163,3 +2165,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Crear un atallo no escritorio
+
+Library:
+  CouldNotOpen: "OpenTubeX non puido abrir a túa biblioteca. Non modifiques os ficheiros de datos."
+  RestoreProfile: "Pecha OpenTubeX completamente e restaura unha copia de seguridade completa do perfil, incluídos library.sqlite e os ficheiros que o acompañan."

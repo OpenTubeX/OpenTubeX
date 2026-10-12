@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import model from '@seald-io/nedb/lib/model.js'
+import { toRaw } from 'vue'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 
@@ -23,7 +25,7 @@ async function fixture(fail = false) {
   const History = compileFunction(baseSource.slice(baseSource.indexOf('class Settings {'), baseSource.indexOf('\nclass WatchStats {'))
     + '\nreturn History', Object.keys(baseDependencies))(...Object.values(baseDependencies))
   if (fail) History.updateSubscriptionState = async () => { throw new Error('history persistence failed') }
-  const dependencies = { ...historyHelpers, DBHistoryHandlers: History, console: { error() {} } }
+  const dependencies = { ...historyHelpers, model, DBHistoryHandlers: History, console: { error() {} } }
   const module = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
     .replace('export default', 'return'), Object.keys(dependencies))(...Object.values(dependencies))
   const appliedMarks = []
@@ -37,8 +39,15 @@ async function fixture(fail = false) {
   }
   context.commit('setHistoryCacheSorted', structuredClone(records))
   context.commit('setHistoryCacheById', Object.fromEntries(context.state.historyCacheSorted.map(entry => [entry.videoId, entry])))
-  return { context, db, appliedMarks, savedMarks, handlers: History }
+  return { context, db, appliedMarks, savedMarks, handlers: History, module }
 }
+
+test('portable overwrite cache agrees with NeDB when duplicate timestamps are equal', async () => {
+  const f = await fixture()
+  const records = [...await f.db.history.findAsync({}), { _id: 'z', videoId: 'equal', timeWatched: 400, isWatched: false }, { _id: 'a', videoId: 'equal', timeWatched: 400, isWatched: true }]
+  assert.equal(await f.module.actions.overwriteHistory(f.context, new Map(records.map(record => [record._id, record]))), true)
+  assert.deepEqual(toRaw(f.context.state.historyCacheById.equal), (await f.db.history.findAsync({}).sort({ timeWatched: -1 })).find(record => record.videoId === 'equal'))
+})
 
 for (const bulk of [false, true]) {
   test(`${bulk ? 'bulk' : 'individual'} mark as watched persists and applies seen marks without changing playback metadata`, async () => {

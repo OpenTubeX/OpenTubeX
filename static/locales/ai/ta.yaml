@@ -974,6 +974,7 @@ Settings:
       History replace effect: பொருந்தும் காணொளிகளின் பார்வை வரலாறு மாற்றப்படும். பிற வரலாறு தக்கவைக்கப்படும்.
     Select export data: "ஏற்றுமதி செய்ய வேண்டிய தரவைத் தேர்ந்தெடுக்கவும்"
     Export selected data: "தேர்ந்தெடுத்த தரவை ஏற்றுமதி செய்"
+    Import Failed: "இறக்குமதி தோல்வியடைந்தது"
     Complete backup: "முழுமையான காப்புப்பிரதி"
     Import backup: "காப்புப்பிரதியை இறக்குமதி செய்யவும்"
     Export backup: "காப்புப்பிரதியை ஏற்றுமதி செய்யவும்"
@@ -1575,6 +1576,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்
   Playlist:
+    Load Previous Videos: "முந்தைய காணொளிகளை ஏற்று"
     Unavailable videos are hidden: கிடைக்காத 1 காணொளி மறைக்கப்பட்டுள்ளது | கிடைக்காத {count} காணொளிகள் மறைக்கப்பட்டுள்ளன
   External Media:
     Dislikes: "விருப்பமின்மை | விருப்பமின்மைகள்"
@@ -2164,3 +2166,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: பணிமேடையில் குறுக்குவழியை உருவாக்கு
+
+Library:
+  CouldNotOpen: "OpenTubeX உங்கள் நூலகத்தைத் திறக்க முடியவில்லை. உங்கள் தரவுக் கோப்புகளை மாற்றாமல் வைத்திருங்கள்."
+  RestoreProfile: "OpenTubeX-ஐ முழுமையாக மூடி, library.sqlite மற்றும் அதனுடன் தொடர்புடைய கோப்புகள் உட்பட முழுச் சுயவிவரத்தின் காப்புப் பிரதியை மீட்டெடுக்கவும்."

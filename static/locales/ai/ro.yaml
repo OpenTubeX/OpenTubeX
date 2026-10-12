@@ -962,6 +962,7 @@ Settings:
       History replace effect: Istoricul de vizionare al videoclipurilor corespunzătoare este înlocuit. Restul istoricului este păstrat.
     Select export data: "Selectați datele de exportat"
     Export selected data: "Exportă datele selectate"
+    Import Failed: "Importul a eșuat"
     Complete backup: "Copie de rezervă completă"
     Import backup: "Importați copii de rezervă"
     Export backup: "Exportare copie de rezervă"
@@ -1564,6 +1565,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'
   Station: Stație
   Playlist:
+    Load Previous Videos: "Încarcă videoclipurile anterioare"
     Unavailable videos are hidden: 1 videoclip indisponibil este ascuns | {count} videoclipuri indisponibile sunt ascunse | {count} de videoclipuri indisponibile sunt ascunse
   External Media:
     Dislikes: "Apreciere negativă | Aprecieri negative | Aprecieri negative"
@@ -2159,3 +2161,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Creează o scurtătură pe desktop
+
+Library:
+  CouldNotOpen: "OpenTubeX nu a putut deschide biblioteca. Nu modificați fișierele de date."
+  RestoreProfile: "Închideți complet OpenTubeX și restaurați o copie de siguranță completă a profilului, inclusiv library.sqlite și fișierele asociate."

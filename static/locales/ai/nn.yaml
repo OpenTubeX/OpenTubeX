@@ -1104,6 +1104,7 @@ Settings:
       History replace effect: Sjåarhistoria for samsvarande videoar vert erstatta. Anna historie vert teken vare på.
     Select export data: "Vel dataa som skal eksporterast"
     Export selected data: "Eksporter valde data"
+    Import Failed: "Import mislukkast"
     Complete backup: "Fullstendig tryggleikskopi"
     Import backup: "Importer tryggleikskopi"
     Export backup: "Eksporter tryggleikskopi"
@@ -1807,6 +1808,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'
   Station: Stasjon
   Playlist:
+    Load Previous Videos: "Last inn tidlegare videoar"
     Unavailable videos are hidden: 1 utilgjengeleg video er gøymd | {count} utilgjengelege videoar er gøymde
   External Media:
     Dislikes: "Misliking | Mislikingar"
@@ -2503,3 +2505,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Opprett ein snarveg på skrivebordet
+
+Library:
+  CouldNotOpen: "OpenTubeX kunne ikkje opne biblioteket ditt. La datafilene vere uendra."
+  RestoreProfile: "Avslutt OpenTubeX heilt og gjenopprett ein fullstendig tryggingskopi av profilen, inkludert library.sqlite og tilhøyrande filer."

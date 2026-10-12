@@ -991,6 +991,7 @@ Settings:
       History replace effect: Гісторыя прагляду адпаведных відэа замяняецца. Іншая гісторыя захоўваецца.
     Select export data: "Выберыце даныя для экспарту"
     Export selected data: "Экспартаваць выбраныя даныя"
+    Import Failed: "Імпарт не атрымаўся"
     Complete backup: "Поўная рэзервовая копія"
     Import backup: "Імпартаваць рэзервовую копію"
     Export backup: "Экспартаваць рэзервовую копію"
@@ -1611,6 +1612,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'
   Station: Станцыя
   Playlist:
+    Load Previous Videos: "Загрузіць папярэднія відэа"
     Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
   External Media:
     Dislikes: "Дызлайк | Дызлайкі | Дызлайкаў"
@@ -2207,3 +2209,7 @@ Mobile Navigation:
 
 Installer:
   Create Desktop Shortcut: Стварыць ярлык на працоўным стале
+
+Library:
+  CouldNotOpen: "OpenTubeX не ўдалося адкрыць вашу бібліятэку. Не змяняйце файлы даных."
+  RestoreProfile: "Цалкам закрыйце OpenTubeX і аднавіце поўную рэзервовую копію профілю, уключаючы library.sqlite і спадарожныя файлы."
