@@ -744,8 +744,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   })()
 
   // The current WEB player response does not include the paid-promotion
-  // disclosure. ANDROID exposes it as a lightweight player overlay, so fetch
-  // that metadata alongside token generation; a failure must not fail the load.
+  // disclosure. ANDROID exposes it as a lightweight player overlay. Request it
+  // once the script signature timestamp is ready, without waiting for the token.
+  // A failure must not fail the load.
   const paidPromotionRequest = playerReady.then(() => htmlExtracts.session.actions.execute('/player', {
     videoId: id,
     client: 'ANDROID',
