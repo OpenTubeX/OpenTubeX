@@ -35,6 +35,7 @@ async function visibleBounds(target) {
 async function openContext(page, session) {
   const title = page.locator('.ft-list-video .title').first()
   await title.scrollIntoViewIfNeeded()
+  await title.click({ trial: true })
   const bounds = await visibleBounds(title)
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
@@ -345,4 +346,33 @@ for (const pointerType of ['mouse', 'touch']) {
       await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
     })
   }
+}
+
+for (const uiScale of [100, 125]) {
+  test(`tall mobile context sheet keeps its handle below the top safe area at ${uiScale}%`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100), uiScale)
+    await page.setViewportSize({ width: 375, height: 420 })
+    await goTo(page, 'history')
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-top', '32px'))
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+    try {
+      await openContext(page, session)
+      const menu = page.locator('.mobileLinkActions')
+      await waitForAnimation(menu)
+      const bounds = await visibleBounds(menu)
+      expect(bounds.y).toBeGreaterThanOrEqual(32)
+      expect(bounds.y + bounds.height).toBeCloseTo(await page.evaluate(() => innerHeight), 0)
+      const scroller = menu.locator('.mobileLinkActionsScroll')
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      const handle = menu.locator('.bottomSheetHandle')
+      expect((await visibleBounds(handle)).y).toBeGreaterThanOrEqual(32)
+      await touchDrag(session, handle, 100)
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(menu).toHaveCount(0)
+    } finally {
+      await session.detach()
+    }
+  })
 }
