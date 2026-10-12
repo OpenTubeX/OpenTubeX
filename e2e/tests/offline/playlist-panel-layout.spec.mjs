@@ -73,6 +73,7 @@ for (const uiScale of [100, 125]) {
           await expect(avatar).toBeVisible()
           await page.mouse.move(0, 0)
           const bounds = await avatar.boundingBox()
+          expect(bounds, 'visible avatar should have screenshot bounds').not.toBeNull()
           const clip = { x: bounds.x - 3, y: bounds.y - 3, width: bounds.width + 6, height: bounds.height + 6 }
           const actual = await page.screenshot({ clip, animations: 'disabled' })
           const previousOverflow = await infoLine.evaluate(element => {
@@ -125,7 +126,7 @@ for (const uiScale of [100, 125]) {
           }
         }
 
-        await page.setViewportSize({ width: 1440, height: 900 })
+        await page.setViewportSize({ width: Math.round(1440 * uiScale / 100), height: Math.round(900 * uiScale / 100) })
         await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 100))
         await expectImagesLoaded(page.locator('.playlistPage img:visible'))
         for (const theme of ['dark', 'light']) {
@@ -134,6 +135,7 @@ for (const uiScale of [100, 125]) {
           await attachScreenshot(`playlist ${playlistViewType} ${theme}`)
           if (uiScale === 100) {
             const bounds = await page.locator('.playlistPage').boundingBox()
+            expect(bounds, 'visible playlist should have screenshot bounds').not.toBeNull()
             await page.screenshot({
               path: test.info().outputPath(`playlist-${playlistViewType}-${theme}.png`),
               clip: { x: bounds.x, y: bounds.y, width: bounds.width, height: Math.min(bounds.height, 600) },
