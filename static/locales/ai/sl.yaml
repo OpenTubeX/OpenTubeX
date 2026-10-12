@@ -1984,6 +1984,7 @@ Video:
       subscriber_only: "Samo za naročnike"
       needs_auth: "Zahtevana je prijava"
       unlisted: "Ni na seznamu"
+  How this was made: Kako je bilo to ustvarjeno
 Playlist:
   Playlist Already Preloaded: "Vsi videoposnetki na seznamu so že prednaloženi"
   Playlist Preload Progress: "Prednalaganje videoposnetkov: {completed} od {requested}"

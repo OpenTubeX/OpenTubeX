@@ -178,8 +178,6 @@ Subscriptions:
   Show Combined View: Afișează vizualizarea combinată
   Newest First: Cele mai noi primele
   Oldest First: Cele mai vechi primele
-  Posts:
-    RSS Message: YouTube nu oferă fluxuri RSS pentru postări. Dezactivează setarea „{rssSetting}” pentru a vedea postările sau activează setarea „{hideSetting}” pentru a ascunde această filă.
 Trending:
   Load Error: Tendințele nu au putut fi încărcate.
   Unsupported Backend: Tendințele necesită API-ul local. Selectați API-ul local sau activați furnizorul de rezervă.
@@ -1562,6 +1560,7 @@ Video:
       subscriber_only: "Numai abonații"
       needs_auth: "Este necesară conectarea"
       unlisted: "Nelistat"
+  How this was made: Cum a fost creat
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"
@@ -2042,8 +2041,6 @@ Channels:
   Load More Channels: "Încarcă mai multe canale"
 Search Bar:
   Use Suggestion: Folosește sugestia
-  Open Search Container: Deschide câmpul de căutare
-  Search: Caută
 Theme Discovery:
   Discover Themes: "Descoperă teme"
   Refresh: "Reîncarcă"

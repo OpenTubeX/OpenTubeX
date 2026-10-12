@@ -1556,6 +1556,7 @@ Video:
       subscriber_only: "Chỉ dành cho người đăng ký"
       needs_auth: "Yêu cầu đăng nhập"
       unlisted: "Không liệt kê"
+  How this was made: Nội dung này được tạo ra như thế nào
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"

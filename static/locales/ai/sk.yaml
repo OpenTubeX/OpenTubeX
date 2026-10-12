@@ -1527,6 +1527,7 @@ Video:
       subscriber_only: "Iba predplatitelia"
       needs_auth: "Vyžaduje sa prihlásenie"
       unlisted: "Neuvedené"
+  How this was made: Ako to bolo vytvorené
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"

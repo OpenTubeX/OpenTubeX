@@ -1507,6 +1507,7 @@ Video:
       subscriber_only: Subscribers only
       needs_auth: Sign-in required
       unlisted: Unlisted
+  How this was made: How this was made
 Playlist:
   Playlist Already Preloaded: "All playlist videos are already preloaded"
   Playlist Preload Progress: "Preloading videos: {completed} of {requested}"

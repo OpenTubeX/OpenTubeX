@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || license"
+    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || license || (contentDisclosures?.length ?? 0) > 0"
     ref="descriptionCard"
     :class="{
       videoDescription: true,
@@ -47,6 +47,35 @@
         @timestamp-event="onTimestamp"
         @click="expandDescriptionWithClick"
       />
+      <div
+        v-if="(contentDisclosures?.length ?? 0) > 0 && isExpanded"
+        class="contentDisclosureSection"
+      >
+        <h3 class="contentDisclosureTitle">
+          {{ t('Video.How this was made') }}
+        </h3>
+        <div
+          v-for="(item, index) in contentDisclosures"
+          :key="index"
+          class="contentDisclosureItem"
+        >
+          <div class="contentDisclosureHeader">
+            {{ item.label }}
+          </div>
+          <div
+            v-if="item.description"
+            class="contentDisclosureBody"
+          >
+            {{ item.description }}
+          </div>
+          <div
+            v-if="item.attribution"
+            class="contentDisclosureAttribution"
+          >
+            {{ item.attribution }}
+          </div>
+        </div>
+      </div>
       <bdi
         v-if="license"
         class="license"
@@ -176,6 +205,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  contentDisclosures: {
+    type: Array,
+    default: () => [],
+  },
   previewOnly: { type: Boolean, default: false },
   alwaysExpanded: {
     type: Boolean,
@@ -293,7 +326,7 @@ let hasMeasured = false
  */
 function isShortDescription() {
   // These sections are hidden while collapsed, so text dimensions cannot account for them.
-  if (props.tags.length > 0 || props.games.length > 0 || props.license) {
+  if (props.tags.length > 0 || props.games.length > 0 || props.license || (props.contentDisclosures?.length ?? 0) > 0) {
     return false
   }
 
@@ -318,7 +351,7 @@ function measureDescription() {
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || Boolean(props.license)
+  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || Boolean(props.license) || (props.contentDisclosures?.length ?? 0) > 0
   if (!descriptionElem || (
     descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
     (!hasMetadata || !descriptionCard.value?.$el?.clientHeight)
@@ -396,7 +429,7 @@ watch(shownDescription, async () => {
   measureDescription()
   updateDescriptionLayout()
 })
-watch([() => props.tags, () => props.games, () => props.license], async () => {
+watch([() => props.tags, () => props.games, () => props.license, () => props.contentDisclosures], async () => {
   await nextTick()
   observeDescriptionElements()
   measureDescription()

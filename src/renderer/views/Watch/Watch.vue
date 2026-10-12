@@ -765,6 +765,7 @@
               :description-html="videoDescriptionHtml"
               :tags="videoTags"
               :license="license"
+              :content-disclosures="contentDisclosures"
               :games="videoGames"
               always-expanded
               class="watchVideo"
@@ -1004,6 +1005,7 @@
           :description-html="videoDescriptionHtml"
           :tags="videoTags"
           :license="license"
+          :content-disclosures="contentDisclosures"
           :games="videoGames"
           preview-only
           class="watchVideo phoneDescriptionPreview"
@@ -1022,6 +1024,7 @@
             :description-html="videoDescriptionHtml"
             :tags="videoTags"
             :license="license"
+            :content-disclosures="contentDisclosures"
             :games="videoGames"
             :always-expanded="fullscreenMetadataOpen || phonePanelsEnabled"
             class="watchVideo"

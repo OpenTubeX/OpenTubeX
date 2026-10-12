@@ -1575,6 +1575,7 @@ Video:
       subscriber_only: "Alleen abonnees"
       needs_auth: "Inloggen vereist"
       unlisted: "Verborgen"
+  How this was made: Hoe dit is gemaakt
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"

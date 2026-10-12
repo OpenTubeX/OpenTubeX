@@ -898,6 +898,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 mittesaadav video on peidetud | {count} mittesaadavat videot on peidetud
   Premiere: Esilinastus
+  AI: Tehisaru
+  AI-generated content: "Tehisaru: sisu on loodud tehisaru abil"
+  How this was made: Kuidas see video on tehtud
 Playlist:
   #& About
   View Full Playlist: 'Näita kogu esitusloendit'

@@ -903,6 +903,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 kullanılamayan video gizlendi | {count} kullanılamayan video gizlendi
   Premiere: İlk gösterim
+  AI: YZ
+  AI-generated content: "YZ: İçerik YZ ile yapıldı"
+  How this was made: Nasıl yapıldı
 Playlist:
   #& About
   View Full Playlist: 'Tüm oynatma listesini görüntüle'

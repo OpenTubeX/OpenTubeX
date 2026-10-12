@@ -1837,6 +1837,7 @@ Video:
       subscriber_only: "Solo suscriptores"
       needs_auth: "Es necesario iniciar sesión"
       unlisted: "No listado"
+  How this was made: Cómo se hizo
 Playlist:
   Playlist Already Preloaded: "Todos los videos de la lista ya están precargados"
   Playlist Preload Progress: "Precargando videos: {completed} de {requested}"

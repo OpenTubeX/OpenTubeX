@@ -237,3 +237,34 @@
   font-size: 14px;
   color: var(--secondary-text-color);
 }
+
+.contentDisclosureSection {
+  margin-block-start: 1.5em;
+}
+
+.contentDisclosureTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-block: 0 12px;
+}
+
+.contentDisclosureHeader {
+  font-weight: 600;
+  font-size: 15px;
+  margin-block-end: 4px;
+}
+
+.contentDisclosureBody,
+.contentDisclosureAttribution {
+  font-size: 15px;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+.contentDisclosureAttribution {
+  margin-block-start: 6px;
+}
+
+.contentDisclosureItem + .contentDisclosureItem {
+  margin-block-start: 12px;
+}

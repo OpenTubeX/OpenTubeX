@@ -793,6 +793,7 @@ Channel:
       Oldest: 'Koshañ'
       Most Popular: 'Ar muiañ a verzh ganto'
     This channel does not currently have any videos: 'N''eus ket a video evit poent gant ar chadenn-mañ'
+    This channel has videos but none could be displayed, try fetching more: Videoioù a zo e-barzh ar chadenn-mañ, met hini ne c'hall bezañ diskouezet, klaskit diskouez muioc'h
   Shorts:
     This channel does not currently have any shorts: 'N''eus ket a video short evit poent gant ar chadenn-mañ'
   Live:
@@ -959,6 +960,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 video dihergez a zo kuzhet | {count} video dihergez a zo kuzhet
   Premiere: Rakskignañ
+  AI: IA
+  AI-generated content: "IA : Krouet eo bet gant Intent Artifisiel"
+  How this was made: Penaos eo bet krouet
 Playlist:
   #& About
   Playlist: 'Roll-videoioù'

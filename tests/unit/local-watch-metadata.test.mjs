@@ -28,6 +28,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
       info,
       paidPromotionDurationMs: options.paidPromotionDurationMs ?? null,
       paidPromotionPromise: options.paidPromotionPromise,
+      contentDisclosures: options.contentDisclosures,
     }),
     getOembedTitle: options.getOembedTitle ?? (async () => null),
     areLocalCommentsDisabled: () => true,
@@ -96,6 +97,16 @@ test('removes the skeleton before community chapters finish loading', async () =
     finishChapters([])
     await loading
   }
+})
+
+test('uses disclosures for the AI badge when primary metadata has no badge', async () => {
+  const contentDisclosures = [{ label: 'Altered or synthetic content', description: 'Edited visuals', attribution: '' }]
+  const watch = await loadMetadata({
+    playability_status: { status: 'OK' },
+    basic_info: { title: 'Ready video', duration: 42 }, page: [],
+  }, 'disabled', { contentDisclosures })
+  assert.deepEqual(watch.contentDisclosures, contentDisclosures)
+  assert.equal(watch.hasAiGeneratedContent, true)
 })
 
 for (const live of [false, true]) {

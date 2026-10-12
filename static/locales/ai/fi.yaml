@@ -1564,6 +1564,7 @@ Video:
       subscriber_only: "Vain tilaajat"
       needs_auth: "Kirjautuminen vaaditaan"
       unlisted: "Listaamaton"
+  How this was made: Miten tämä tehtiin
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"

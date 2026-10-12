@@ -1544,6 +1544,7 @@ Video:
       subscriber_only: "Aðeins áskrifendur"
       needs_auth: "Innskráning er nauðsynleg"
       unlisted: "Óskráð"
+  How this was made: Hvernig þetta var gert
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"

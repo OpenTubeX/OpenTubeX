@@ -1213,8 +1213,6 @@ Channel:
   Channel Name Unavailable: "N'eo ket hegerz anv ar chadenn"
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Videoioù zo er chadenn-mañ met hini ebet n'eus gallet bezañ diskouezet. Klaskit kargañ muioc'h"
 Video:
   External DRM Protected: "Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor."
   Invalid Media URL: "URL media didalvoudek"
@@ -1294,8 +1292,6 @@ Video:
   Notification unavailable: "N'eo ket hegerz rebuadoù ar reizhiad"
   Scheduled video starting: "Ar video rakluniet a grog"
   Live notification body: "{videoTitle} a grog bremañ"
-  AI: "IA"
-  AI-generated content: "Endalc'had savet gant an IA"
   Collaborators: "Kenlabourerien"
   Live Chat Replay: "Adlenn ar flapañ war-eeun"
   Show Live Chat: "Diskouez ar flapañ war-eeun"

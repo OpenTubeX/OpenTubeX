@@ -1535,6 +1535,7 @@ Video:
       subscriber_only: "Khusus pelanggan"
       needs_auth: "Perlu login"
       unlisted: "Tidak terdaftar"
+  How this was made: Bagaimana ini dibuat
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"

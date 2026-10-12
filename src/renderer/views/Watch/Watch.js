@@ -323,6 +323,7 @@ export default defineComponent({
       playerLoadGeneration: 0,
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
+      contentDisclosures: null,
       hasPaidPromotion: false,
       paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
@@ -2403,6 +2404,7 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = false
       this.shortsPlaybackAfterSeekSeconds = 0
       this.hasAiGeneratedContent = false
+      this.contentDisclosures = null
       this.hasPaidPromotion = false
       this.paidPromotionDurationMs = 10000
       this.upcomingTimestamp = null
@@ -3346,11 +3348,13 @@ export default defineComponent({
           isLiveDvrEnabled,
           watchPageIpBlocked,
           musicMediaType,
+          contentDisclosures,
           androidLiveHlsManifestUrl,
           androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
+        this.contentDisclosures = contentDisclosures ?? null
 
         if (watchPageIpBlocked) {
           this.ipBlockDetectedInCurrentChain = true
@@ -3569,7 +3573,8 @@ export default defineComponent({
         this.isPremiere = isPremiere === true
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
         this.isUnlisted = !!result.basic_info.is_unlisted
-        this.hasAiGeneratedContent = result.primary_info?.badges?.some(badge => badge.label === 'AI') ?? false
+        this.hasAiGeneratedContent = (result.primary_info?.badges?.some(badge => badge.label === 'AI') ?? false) ||
+          (this.contentDisclosures?.some(item => /\b(ai|artificial intelligence|altered|synthetic)\b/i.test(item.label)) ?? false)
 
         if (this.isLive && !this.isLiveContent) {
           this.videoPublished = result.basic_info.start_timestamp.getTime()
@@ -4160,6 +4165,8 @@ export default defineComponent({
           this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
+          this.contentDisclosures = null
+          this.hasAiGeneratedContent = false
           this.isUnlisted = !result.isListed
 
           this.captions = sortCaptions(result.captions.map(caption => {

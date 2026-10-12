@@ -1559,6 +1559,7 @@ Video:
       subscriber_only: "Лише для підписників"
       needs_auth: "Потрібен вхід"
       unlisted: "Не в списку"
+  How this was made: Як це було створено
 Playlist:
   Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
   Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"

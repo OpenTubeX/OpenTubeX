@@ -1874,6 +1874,7 @@ Video:
       subscriber_only: "구독자만"
       needs_auth: "로그인 필요"
       unlisted: "일부 공개"
+  How this was made: 제작 방식
 Playlist:
   Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
   Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"

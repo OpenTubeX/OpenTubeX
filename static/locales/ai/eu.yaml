@@ -1542,6 +1542,7 @@ Video:
       subscriber_only: "Harpidedunentzat bakarrik"
       needs_auth: "Saioa hasi behar da"
       unlisted: "Zerrendatu gabeak"
+  How this was made: Nola egin den
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"

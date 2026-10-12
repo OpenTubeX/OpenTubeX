@@ -1908,6 +1908,7 @@ Video:
       subscriber_only: "Tik prenumeratoriams"
       needs_auth: "Būtina prisijungti"
       unlisted: "Neįtrauktas į sąrašą"
+  How this was made: Kaip tai buvo sukurta
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"

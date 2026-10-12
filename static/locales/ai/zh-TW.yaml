@@ -1526,6 +1526,7 @@ Video:
       subscriber_only: "僅限訂閱者"
       needs_auth: "需要登入"
       unlisted: "未公開"
+  How this was made: 這是如何製作的
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"

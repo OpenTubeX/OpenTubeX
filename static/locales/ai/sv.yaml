@@ -1537,6 +1537,7 @@ Video:
       subscriber_only: "Endast prenumeranter"
       needs_auth: "Inloggning krävs"
       unlisted: "Olistad"
+  How this was made: Så skapades detta
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"

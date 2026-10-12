@@ -1571,6 +1571,7 @@ Video:
       subscriber_only: "சந்தாதாரர்கள் மட்டும்"
       needs_auth: "உள்நுழைவு தேவை"
       unlisted: "பட்டியலிடப்படாதது"
+  How this was made: இது எப்படி உருவாக்கப்பட்டது
 Playlist:
   Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
   Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"

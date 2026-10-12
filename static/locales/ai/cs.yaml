@@ -1213,8 +1213,6 @@ Channel:
   Channel Name Unavailable: Název kanálu není dostupný
   Search Result Types: Typy výsledků hledání
   All Results: Vše
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Tento kanál má videa, ale žádné se nepodařilo zobrazit. Zkuste načíst další"
 Video:
   External DRM Protected: "Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem."
   Invalid Media URL: "Neplatná adresa URL média"
@@ -1294,8 +1292,6 @@ Video:
   Notification unavailable: Systémová oznámení nejsou dostupná
   Scheduled video starting: Naplánované video začíná
   Live notification body: 'Video {videoTitle} právě začíná'
-  AI: AI
-  AI-generated content: Obsah vytvořený umělou inteligencí
   Collaborators: Spolupracovníci
   Live Chat Replay: Záznam živého chatu
   Show Live Chat: Zobrazit živý chat

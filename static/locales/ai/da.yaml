@@ -1594,6 +1594,7 @@ Video:
       subscriber_only: "Kun abonnenter"
       needs_auth: "Log ind er påkrævet"
       unlisted: "Ikke opført"
+  How this was made: Sådan blev dette lavet
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"

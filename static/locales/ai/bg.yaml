@@ -1540,6 +1540,7 @@ Video:
       subscriber_only: "Само абонати"
       needs_auth: "Изисква се вписване"
       unlisted: "Непосочен в списъка"
+  How this was made: Как е създадено това
 Playlist:
   Playlist Already Preloaded: "Всички видеоклипове в плейлиста вече са предварително заредени"
   Playlist Preload Progress: "Предварително зареждане на видеоклипове: {completed} от {requested}"

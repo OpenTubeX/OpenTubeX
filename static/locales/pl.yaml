@@ -875,6 +875,10 @@ Settings:
     Generated SponsorBlock User ID Copy Button: Skopiuj wygenerowany ID użytkownika SponsorBlock
     Generated SponsorBlock User ID Copied: Wygenerowany ID użytkownika SponsorBlock został skopiowany do schowka
     Skip notification timeout: Czas trwania powiadomienia o cofnięciu pominięcia
+    Excluded Channels:
+      Disabled Message: Niektóre kanały zostały wykluczone na podstawie identyfikatorów i nie zostały przetworzone. Funkcja jest zablokowana na czas aktualizacji tych identyfikatorów
+      Excluded Channels: Wykluczone Kanały
+      Tooltip: Wprowadź identyfikator kanału, aby wyłączyć funkcję SponsorBlock. Segmenty reklamowe w filmach z tego kanału nie będą pomijane. Wprowadzony identyfikator kanału musi być dokładnie taki sam, przy czym należy uwzględnić wielkość liter.
   External Player Settings:
     Custom External Player Arguments: Niestandardowe argumenty zewnętrznego odtwarzacza
     Custom External Player Executable: Niestandardowy plik wykonywalny zewnętrznego odtwarzacza
@@ -1137,6 +1141,7 @@ Channel:
       Oldest: 'Najstarsze'
       Most Popular: 'Najpopularniejsze'
     This channel does not currently have any videos: 'Ten kanał nie ma obecnie żadnych filmów'
+    This channel has videos but none could be displayed, try fetching more: Ten kanał zawiera filmy, ale nie udało się wyświetlić żadnego z nich. Spróbuj pobrać więcej
   Playlists:
     Playlists: 'Playlisty'
     This channel does not currently have any playlists: 'Ten kanał nie ma żadnych playlist'
@@ -1453,6 +1458,9 @@ Video:
   Station: Stacja
   Playlist:
     Unavailable videos are hidden: 1 niedostępny film został ukryty | Ukryto {count} film(y/ów), które są niedostępne
+  Enable SponsorBlock on Channel: Włącz funkcję SponsorBlock na kanale
+  Disable SponsorBlock on Channel: Wyłącz funkcję SponsorBlock na kanale
+  How this was made: Jak to powstało
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -2004,3 +2012,5 @@ Unload Multiple Tabs Confirmation:
   Title: Uśpić wiele kart?
   Message: Spowoduje to uśpienie {count} kart.
   Unload Tabs: Uśpij {count} karty | Uśpij {count} kart
+SponsorBlock Disabled on Channel: Funkcja SponsorBlock została wyłączona na kanale {channel}
+SponsorBlock Enabled on Channel: Funkcja SponsorBlock została włączona na kanale {channel}

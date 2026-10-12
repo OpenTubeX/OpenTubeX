@@ -1534,6 +1534,7 @@ Video:
       subscriber_only: "Только подписчики"
       needs_auth: "Требуется вход"
       unlisted: "Отсутствует в списках"
+  How this was made: Как это было создано
 Playlist:
   Playlist Already Preloaded: "Все видео из плейлиста уже предварительно загружены"
   Playlist Preload Progress: "Предварительная загрузка видео: {completed} из {requested}"

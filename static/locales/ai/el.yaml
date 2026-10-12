@@ -178,8 +178,6 @@ Subscriptions:
   Show Combined View: Ενιαία προβολή
   Newest First: Νεότερα πρώτα
   Oldest First: Παλαιότερα πρώτα
-  Posts:
-    RSS Message: Το YouTube δεν παρέχει ροές RSS για αναρτήσεις. Απενεργοποιήστε τη ρύθμιση "{rssSetting}" για να βλέπετε αναρτήσεις ή ενεργοποιήστε τη ρύθμιση "{hideSetting}" για να αποκρύψετε αυτήν την καρτέλα.
 Trending:
   Load Error: Δεν ήταν δυνατή η φόρτωση των τάσεων.
   Unsupported Backend: Οι τάσεις απαιτούν το Τοπικό API. Επιλέξτε το Τοπικό API ή ενεργοποιήστε την εφεδρική χρήση συστήματος υποστήριξης.
@@ -196,8 +194,6 @@ User Playlists:
   Remove Saved Playlist: "Αφαίρεση αποθηκευμένης λίστας αναπαραγωγής"
   Load More Playlists: Φόρτωση περισσότερων λιστών αναπαραγωγής
   Save to: Αποθήκευση σε…
-  Move Video to the Top: Μετακίνηση βίντεο στην κορυφή
-  Move Video to the Bottom: Μετακίνηση βίντεο στο τέλος
   Quick Bookmark Icon: Εικονίδιο γρήγορου σελιδοδείκτη
   Custom Emoji: Προσαρμοσμένο emoji
   Choose Image: Επιλογή εικόνας
@@ -620,8 +616,6 @@ Settings:
         Drop Shadow: Σκιά
       Reset: Επαναφορά εμφάνισης υποτίτλων
     Default Viewing Mode:
-      Full Window (Always On): Πλήρες παράθυρο (πάντα ενεργό)
-      Full Screen (Always On): Πλήρης οθόνη (πάντα ενεργή)
       Tooltip: Οι περισσότερες προεπιλεγμένες λειτουργίες προβολής εφαρμόζονται μόνο στην αρχή κάθε συνεδρίας παρακολούθησης. Οι αλλαγές που κάνετε κατά τη συνεδρία διατηρούνται μέχρι να τελειώσει. Οι μόνιμα ενεργές λειτουργίες προβολής εφαρμόζονται κάθε φορά που αλλάζετε βίντεο, ανεξάρτητα από τις αλλαγές που κάνατε κατά την προβολή του προηγούμενου βίντεο.
     Auto Picture in Picture:
       Auto Picture in Picture: Αυτόματη μετάβαση σε λειτουργία εικόνας εντός εικόνας
@@ -668,11 +662,6 @@ Settings:
     Reorder Playback Speed: Σύρετε για αλλαγή σειράς της ταχύτητας αναπαραγωγής
     Playback Speed: Ταχύτητα αναπαραγωγής
     Parallel Segment Loading: Παράλληλη φόρτωση τμημάτων
-    Screenshot:
-      Mode: Λειτουργία στιγμιότυπου οθόνης
-      Modes:
-        Save To Folder: Αποθήκευση σε φάκελο
-        Clipboard: Αντιγραφή στο πρόχειρο
     Rotate Wide Videos to Landscape in Fullscreen: 'Περιστροφή ευρέων βίντεο σε οριζόντιο προσανατολισμό σε πλήρη οθόνη'
     Swipe Up or Down to Enter or Exit Fullscreen: 'Σύρετε πάνω ή κάτω για είσοδο ή έξοδο από την πλήρη οθόνη'
     Preload Upcoming Videos: "Προφόρτωση επόμενων βίντεο"
@@ -946,8 +935,6 @@ Settings:
     Show Video Title: Εμφάνιση τίτλου βίντεο
     Show Bottom Right Actions Dock: Εμφάνιση βάσης ενεργειών κάτω δεξιά
     Paused Interface Hide Delay: Καθυστέρηση απόκρυψης περιβάλλοντος κατά την παύση
-    Add: Προσθήκη
-    Remove: Αφαίρεση
   Data Settings:
     Select export data: "Επιλέξτε τα δεδομένα για εξαγωγή"
     Export selected data: "Εξαγωγή επιλεγμένων δεδομένων"
@@ -966,16 +953,7 @@ Settings:
     Data And Storage: Δεδομένα και αποθηκευτικός χώρος
     Profile Directory: Κατάλογος προφίλ
     Open Profile Directory: Άνοιγμα καταλόγου προφίλ
-    Settings File: Αρχείο ρυθμίσεων
-    Import Settings: Εισαγωγή ρυθμίσεων
-    Export Settings: Εξαγωγή ρυθμίσεων
-    Settings Tooltip: Δεν είναι δυνατή η εξαγωγή ή η εισαγωγή ρυθμίσεων που αφορούν συγκεκριμένο λειτουργικό σύστημα ή χρήστη, καθώς και πειραματικών ρυθμίσεων (π.χ. διαμεσολαβητής, εξωτερικό πρόγραμμα αναπαραγωγής, φάκελος στιγμιότυπων οθόνης...)
     Invalid JSON row, skipping item: Μη έγκυρο JSON στη γραμμή {row}, το στοιχείο παραλείπεται
-    All settings have been successfully imported: Όλες οι ρυθμίσεις εισήχθησαν με επιτυχία
-    All settings have been successfully exported: Όλες οι ρυθμίσεις εξήχθησαν με επιτυχία
-    Setting object has insufficient data, skipping item: Το αντικείμενο ρύθμισης δεν περιέχει αρκετά δεδομένα, το στοιχείο παραλείπεται
-    Unknown setting key: 'Άγνωστο κλειδί ρύθμισης: {key}'
-    Non-transferable setting key: 'Μη μεταβιβάσιμο κλειδί ρύθμισης: {key}'
     Import subscriptions formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), αντίγραφο ασφαλείας LibreTube ή εξαγωγή FreeTube (.json)'
     Import history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), αντίγραφο ασφαλείας LibreTube (.json)'
     Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db)'
@@ -1564,6 +1542,7 @@ Video:
       subscriber_only: "Μόνο συνδρομητές"
       needs_auth: "Απαιτείται σύνδεση"
       unlisted: "Μη καταχωρημένο"
+  How this was made: Πώς δημιουργήθηκε αυτό
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"
@@ -2040,8 +2019,6 @@ Channels:
   Load More Channels: "Φόρτωση περισσότερων καναλιών"
 Search Bar:
   Use Suggestion: Χρήση πρότασης
-  Open Search Container: Άνοιγμα πεδίου αναζήτησης
-  Search: Αναζήτηση
 Theme Discovery:
   Discover Themes: "Ανακάλυψη θεμάτων"
   Refresh: "Ανανέωση"

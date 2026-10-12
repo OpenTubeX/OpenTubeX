@@ -55,6 +55,7 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
     decipherManifestUrl: async url => url,
     decipherFormats: async () => {},
     extractTotalAdTimeMilliseconds: () => 0,
+    extractLocalContentDisclosures: () => null,
     Constants, Utils, YT, ClientType,
     createInnertube: () => assert.fail('Unexpected fallback'),
     Response,

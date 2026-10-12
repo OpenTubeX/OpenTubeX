@@ -1544,6 +1544,7 @@ Video:
       subscriber_only: "Tanysgrifwyr yn unig"
       needs_auth: "Angen mewngofnodi"
       unlisted: "Heb ei restru"
+  How this was made: Sut cafodd hwn ei wneud
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"

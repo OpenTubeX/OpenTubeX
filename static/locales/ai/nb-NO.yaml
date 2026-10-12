@@ -1540,6 +1540,7 @@ Video:
       subscriber_only: "Kun abonnenter"
       needs_auth: "Pålogging kreves"
       unlisted: "Ikke oppført"
+  How this was made: Slik ble dette laget
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"

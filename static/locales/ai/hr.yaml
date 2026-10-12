@@ -1544,6 +1544,7 @@ Video:
       subscriber_only: "Samo pretplatnici"
       needs_auth: "Potrebna je prijava"
       unlisted: "Nije javno navedeno"
+  How this was made: Kako je ovo izrađeno
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"

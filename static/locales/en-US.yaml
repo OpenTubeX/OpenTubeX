@@ -2485,6 +2485,7 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
+  How this was made: How this was made
 #& Playlists
 Playlist:
   #& About

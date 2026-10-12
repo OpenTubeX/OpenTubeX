@@ -1559,6 +1559,7 @@ Video:
       subscriber_only: "المشتركون فقط"
       needs_auth: "يلزم تسجيل الدخول"
       unlisted: "غير مدرج"
+  How this was made: كيف تم صنع هذا
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"

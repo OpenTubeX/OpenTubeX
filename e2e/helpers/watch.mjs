@@ -136,6 +136,7 @@ function blankCommentLikeCount(body) {
  * @param {boolean} [options.commentTimestamp] add a timestamp to one top-level comment
  * @param {boolean} [options.blankCommentLikes] replace one comment's zero-like count with YouTube's whitespace representation
  * @param {number[]|null} [options.popularity] replace replay intensities, or remove popularity metadata
+ * @param {{label: string, description: string, attribution: string}[]} [options.contentDisclosures] include structured content disclosures
  */
 export async function mockWatchPage(app, page, {
   playable = false,
@@ -146,7 +147,8 @@ export async function mockWatchPage(app, page, {
   creatorReply = false,
   commentTimestamp = false,
   blankCommentLikes = false,
-  popularity
+  popularity,
+  contentDisclosures
 } = {}) {
   const counters = new Map()
   const includeCaptions = captionTranslations || captionCueSettings !== '' || captionVideoIds !== null
@@ -270,6 +272,29 @@ export async function mockWatchPage(app, page, {
       }
 
       if (body) {
+        if (contentDisclosures && url.includes('/next')) {
+          const json = JSON.parse(body)
+          json.engagementPanels ??= []
+          json.engagementPanels = json.engagementPanels.filter(panel =>
+            panel.engagementPanelSectionListRenderer?.targetId !== 'engagement-panel-structured-description')
+          json.engagementPanels.push({
+            engagementPanelSectionListRenderer: {
+              targetId: 'engagement-panel-structured-description',
+              content: {
+                structuredDescriptionContentRenderer: {
+                  items: contentDisclosures.map(item => ({
+                    howThisWasMadeSectionView: {
+                      bodyHeader: { content: item.label },
+                      bodyText: { content: item.description },
+                      attributionText: { content: item.attribution }
+                    }
+                  }))
+                }
+              }
+            }
+          })
+          body = Buffer.from(JSON.stringify(json))
+        }
         if (ownerReply && body.includes('"replyLevel":0')) {
           body = addOwnerReplyMarker(body)
         }

@@ -586,9 +586,6 @@ Settings:
     Open All Tabs Confirmation: "Otworzyć wszystkie karty?"
     Server Update Required: "Zaktualizuj ten serwer, aby obsługiwał szyfrowaną synchronizację w czasie rzeczywistym."
   SponsorBlock Settings:
-    Excluded Channels:
-      Excluded Channels: "Wykluczone kanały"
-      Tooltip: "Wpisz identyfikator kanału, aby segmenty SponsorBlock w jego filmach nie były pomijane. Identyfikator musi dokładnie pasować, z uwzględnieniem wielkości liter."
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor
   Password Dialog:
@@ -671,8 +668,6 @@ Channel:
   Channel Name Unavailable: Nazwa kanału jest niedostępna
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
-  Videos:
-    This channel has videos but none could be displayed, try fetching more: "Ten kanał ma filmy, ale nie udało się wyświetlić żadnego z nich. Spróbuj wczytać więcej"
 Video:
   External DRM Protected: "OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie."
   Invalid Media URL: "Nieprawidłowy adres URL multimediów"

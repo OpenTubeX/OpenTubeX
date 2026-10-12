@@ -1607,6 +1607,7 @@ Video:
       subscriber_only: "Толькі абаненты"
       needs_auth: "Неабходна ўвайсці"
       unlisted: "Не ў спісе"
+  How this was made: Як гэта было зроблена
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"

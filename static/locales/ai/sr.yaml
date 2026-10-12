@@ -1588,6 +1588,7 @@ Video:
       subscriber_only: "Само претплатници"
       needs_auth: "Обавезна је пријава"
       unlisted: "Није на листи"
+  How this was made: Како је ово направљено
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"

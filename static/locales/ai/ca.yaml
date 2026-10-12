@@ -2006,6 +2006,7 @@ Video:
       subscriber_only: "Només subscriptors"
       needs_auth: "L'inici de sessió és obligatori"
       unlisted: "Ocult"
+  How this was made: Com s’ha fet
 Playlist:
   Playlist Already Preloaded: "Tots els vídeos de la llista ja estan precarregats"
   Playlist Preload Progress: "S'estan precarregant vídeos: {completed} de {requested}"
