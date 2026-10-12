@@ -41,6 +41,7 @@ export class TabNavigationService {
     this.latestTransitionRequestId = 0
     this.transitionQueue = Promise.resolve()
     this.pendingPresentation = null
+    this.routeProjection = null
     this.staleTransitionResolvers = new Map()
     this.loadingSourcesByTabId = new Map()
     this.navigationQueuesByTabId = new Map()
@@ -164,7 +165,7 @@ export class TabNavigationService {
     // it instead of the stale one cancelling it.
     const runTransition = takePendingViewTransition(TAB_VIEW_TRANSITION_MAX_AGE_MS)
     try {
-      await this.projectRoute(targetTab.route)
+      await this.projectRoute(targetTab.route, { tabPresentation: outgoingTabId !== tabId })
       if (this.isTransitionStale(tabId, revision, requestId)) {
         return false
       }
@@ -616,7 +617,11 @@ export class TabNavigationService {
     }
   }
 
-  async projectRoute(route) {
+  isPresentingRoute(fullPath) {
+    return this.routeProjection?.tabPresentation === true && this.routeProjection.fullPath === fullPath
+  }
+
+  async projectRoute(route, { tabPresentation = false } = {}) {
     // A restored tab can mount before Vue Router finishes reading the initial
     // hash. Projecting during that startup navigation leaves the logical route
     // updated while the browser URL is later reset to the initial `#/`.
@@ -624,11 +629,17 @@ export class TabNavigationService {
 
     const resolved = this.resolve(route)
     if (this.router.currentRoute.value.fullPath !== resolved.fullPath) {
-      await this.router.replace({
-        path: resolved.path,
-        query: resolved.query,
-        hash: resolved.hash
-      })
+      const projection = { fullPath: resolved.fullPath, tabPresentation }
+      this.routeProjection = projection
+      try {
+        await this.router.replace({
+          path: resolved.path,
+          query: resolved.query,
+          hash: resolved.hash
+        })
+      } finally {
+        if (this.routeProjection === projection) this.routeProjection = null
+      }
     }
   }
 

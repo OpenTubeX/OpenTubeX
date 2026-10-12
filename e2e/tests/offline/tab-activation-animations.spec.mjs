@@ -57,6 +57,19 @@ async function settleSidebarHighlightTransitions(page) {
   })
 }
 
+async function expectNavigationAfterFailedPresentation(page) {
+  await page.mouse.move(800, 60)
+  await settleSidebarHighlightTransitions(page)
+  await page.locator(sel.sideNavLink('subscriptions')).first().evaluate(element => {
+    window.__outgoingHighlightTransitions = []
+    element.addEventListener('transitionrun', event => {
+      if (event.pseudoElement === '::before') window.__outgoingHighlightTransitions.push(event.propertyName)
+    })
+  })
+  await goTo(page, 'userplaylists')
+  await expect.poll(() => page.evaluate(() => window.__outgoingHighlightTransitions)).toContain('transform')
+}
+
 test('returning to a cached subscription feed does not replay its entrance', async ({ page }) => {
   await goTo(page, 'subscriptions')
   await expect(page.locator('#subscriptionsPanel .ft-list-video')).toBeVisible()
@@ -164,6 +177,7 @@ test('switching application tabs snaps the mobile More highlight for overflow ro
 })
 
 test('restores sidebar highlight transitions when the selected tab fails to mount', async ({ page }) => {
+  await goTo(page, 'subscriptions')
   const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
   const failedTab = await page.evaluate(async () => {
     const app = document.querySelector('#app').__vue_app__
@@ -194,9 +208,11 @@ test('restores sidebar highlight transitions when the selected tab fails to moun
     return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
   })).toEqual({ active: failedTab.id, presented: presentedTabId })
   await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/)
+  await expectNavigationAfterFailedPresentation(page)
 })
 
 test('restores sidebar highlight transitions when route projection is rejected', async ({ page }) => {
+  await goTo(page, 'subscriptions')
   const presentedTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
   const failedTab = await page.evaluate(async () => {
     document.querySelector('#app').__vue_app__.config.globalProperties.$router.beforeEach(to => {
@@ -210,4 +226,5 @@ test('restores sidebar highlight transitions when route projection is rejected',
     return { active: store.getters.getActiveTabId, presented: store.getters.getPresentedTabId }
   })).toEqual({ active: failedTab.id, presented: presentedTabId })
   await expect(page.locator('.sideNav')).not.toHaveClass(/highlightTransitionsDisabled/, { timeout: 2000 })
+  await expectNavigationAfterFailedPresentation(page)
 })

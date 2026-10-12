@@ -118,6 +118,7 @@ import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -139,7 +140,7 @@ const highlightTransitionsDisabled = ref(false)
 watch(() => route.fullPath, (_route, _previousRoute, onCleanup) => {
   // Tab switches project the route before updating the presented tab. Suppress
   // only that highlight update, keeping interaction feedback during slow mounts.
-  highlightTransitionsDisabled.value = store.getters.getActiveTabId !== store.getters.getPresentedTabId
+  highlightTransitionsDisabled.value = getTabNavigationService().isPresentingRoute(route.fullPath)
   if (!highlightTransitionsDisabled.value) return
 
   let frame = requestAnimationFrame(() => {
