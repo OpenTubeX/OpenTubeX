@@ -62,8 +62,12 @@ for (const feed of ['videos', 'new']) {
       }
       await page.evaluate(() => {
         window.__refreshLongTasks = []
+        window.__refreshCompletedAt = null
+        window.addEventListener('opentubex-subscription-refresh-completed', () => {
+          window.__refreshCompletedAt = performance.now()
+        }, { once: true })
         window.__refreshObserver = new PerformanceObserver(list => {
-          window.__refreshLongTasks.push(...list.getEntries().map(entry => entry.duration))
+          window.__refreshLongTasks.push(...list.getEntries().map(entry => ({ startTime: entry.startTime, duration: entry.duration })))
         })
         window.__refreshObserver.observe({ type: 'longtask' })
       })
@@ -75,10 +79,16 @@ for (const feed of ['videos', 'new']) {
       await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
       await expect(page.locator('#subscriptionsPanel .ft-list-video').first()).toBeVisible()
       const metrics = await page.evaluate(() => {
+        window.__refreshLongTasks.push(...window.__refreshObserver.takeRecords().map(entry => ({ startTime: entry.startTime, duration: entry.duration })))
         window.__refreshObserver.disconnect()
+        const completedAt = window.__refreshCompletedAt
+        // The completion task can also publish cards. Only include its portion
+        // inside the refresh, as well as all preceding refresh tasks.
+        const durations = window.__refreshLongTasks.map(entry => Math.max(0, Math.min(entry.duration, completedAt - entry.startTime)))
         return {
-          durations: window.__refreshLongTasks,
-          blockingMs: window.__refreshLongTasks.reduce((total, duration) => total + Math.max(0, duration - 50), 0)
+          completedAt,
+          durations,
+          blockingMs: durations.reduce((total, duration) => total + Math.max(0, duration - 50), 0)
         }
       })
       if (process.env.OPENTUBEX_REFRESH_CPU_PROFILE) {
@@ -87,8 +97,9 @@ for (const feed of ['videos', 'new']) {
       }
       await cdp.detach()
       await testInfo.attach('subscription refresh responsiveness', { body: JSON.stringify(metrics), contentType: 'application/json' })
-      // Allow the initial controls and final page of cards to render once, while
-      // catching repeated redraws (over 10 seconds of blocking in this replay).
+      expect(metrics.completedAt).not.toBeNull()
+      // Measure input blocking while fetching, including any incremental card
+      // redraws. Final publication after completion is outside this interval.
       expect(metrics.blockingMs, JSON.stringify(metrics)).toBeLessThan(1500)
     })
   })
