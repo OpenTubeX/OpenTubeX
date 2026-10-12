@@ -570,7 +570,7 @@ export function expectAnimation(page, name) {
 /** Common locators, kept in one place so selector changes only hit here. */
 export const sel = {
   searchInput: '.topNav .searchInput input.ft-input',
-  sideNavLink: (route) => `.sideNav a[href="#/${route}"]`,
+  sideNavLink: (route) => `:is(.sideNav, .moreOptionContainer) a[href="#/${route}"]`,
   tabs: '.tabBar .tab',
   activeTab: '.tabBar .tab.active',
   newTabButton: '.tabBar .newTabButton',

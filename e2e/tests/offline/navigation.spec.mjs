@@ -178,10 +178,10 @@ for (const uiScale of [100, 125]) {
           await expect(more.locator('.navLabel')).toBeHidden()
         }
         await more.click()
-        for (const label of await nav.locator('.moreOptionContainer .navLabel').all()) {
+        for (const label of await page.locator('.moreOptionContainer .navLabel').all()) {
           await expect(label).toBeVisible()
         }
-        await nav.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
+        await page.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
         await expect(more).toHaveClass(/router-link-active/)
         await expect(more.locator('.navLabel')).toBeHidden()
         await expect(primary.locator('.navLabel:visible')).toHaveCount(0)
@@ -241,10 +241,9 @@ for (const uiScale of [100, 125]) {
         await page.locator('.moreOptionNav').click()
         await expect.poll(() => page.evaluate(() => {
           const menu = document.querySelector('.moreOptionContainer').getBoundingClientRect()
-          const progress = document.querySelector('.progressBar').getBoundingClientRect()
-          return Math.abs(menu.bottom - progress.top)
+          return Math.abs(menu.bottom - innerHeight)
         })).toBeLessThanOrEqual(1)
-        await page.locator('.moreOptionNav').click()
+        await page.keyboard.press('Escape')
       }
     })
 
@@ -304,9 +303,9 @@ test.describe('side nav navigation', () => {
     ]) {
       await page.setViewportSize(viewport)
       await moreButton.click()
-      await expect(sideNav.locator('.moreOptionContainer')).toBeVisible()
+      await expect(page.locator('.moreOptionContainer')).toBeVisible()
       await expect(sideNav.getByRole('link', { name: 'About', exact: true })).toHaveCount(0)
-      await moreButton.click()
+      await page.keyboard.press('Escape')
     }
   })
 
@@ -407,11 +406,11 @@ test.describe('side nav navigation', () => {
     ))).toEqual(reordered.slice(0, 4).map(id => `#/${id}`))
 
     await page.locator('.sideNav .moreOptionNav').click()
-    await expect.poll(() => page.locator('.sideNav .moreOptionContainer .navOption').evaluateAll(links => (
+    await expect.poll(() => page.locator('.moreOptionContainer .navOption').evaluateAll(links => (
       links.map(link => link.getAttribute('href'))
     ))).toEqual(reordered.filter(id => id !== 'popular').slice(4).map(id => `#/${id}`))
 
-    await page.locator('.sideNav .moreOptionContainer a[href="#/subscribedchannels"]').click()
+    await page.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
     await expect(page).toHaveURL(/#\/subscribedchannels$/)
     const moreButton = page.locator('.sideNav .moreOptionNav')
     await expect(moreButton).toHaveClass(/router-link-active/)
@@ -724,7 +723,7 @@ test.describe('scaled mobile navigation', () => {
   test('keeps More menu links clickable above the mobile bar', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 500, height: 700 })
     await page.locator('.sideNav .moreOptionNav').click()
-    await page.locator('.sideNav .moreOptionContainer a[href="#/subscribedchannels"]').click()
+    await page.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
     await expect(page).toHaveURL(/#\/subscribedchannels$/)
   })
 })
@@ -811,10 +810,10 @@ for (const uiScale of [100, 125]) {
           await expect(page.locator('.sideNav .activeIndicator')).toBeHidden()
           const more = page.locator('.sideNav .moreOptionNav')
           await more.click()
-          const menu = await page.locator('.sideNav .moreOptionContainer').boundingBox()
+          const menu = await page.locator('.moreOptionContainer').boundingBox()
           expect(menu.x).toBeGreaterThanOrEqual(0)
           expect(menu.x + menu.width).toBeLessThanOrEqual(await page.evaluate(() => innerWidth))
-          await more.click()
+          await page.keyboard.press('Escape')
           await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1)
         }
       }

@@ -206,165 +206,181 @@
     />
     <FtContextMenu />
     <Teleport :to="mobileContextMenuTarget">
-      <div
-        v-if="mobileContextLink || mobileContextActions"
-        class="mobileLinkActionsBackdrop"
-        @pointerdown.stop
-        @touchstart.stop
-        @touchend.stop
-        @dblclick.stop
-        @click.stop.self="closeMobileLinkActions"
-        @keydown.esc.stop="backMobileContextMenu"
+      <Transition
+        :css="false"
+        @enter="enterMobileContextSheet"
+        @leave="leaveMobileContextSheet"
+        @after-leave="releaseMobileContextSheet"
       >
-        <section
-          ref="mobileLinkActionsRef"
-          class="mobileLinkActions"
-          role="menu"
-          :aria-label="mobileContextMenuTitle"
-          tabindex="-1"
+        <div
+          v-if="mobileContextLink || mobileContextActions"
+          class="mobileLinkActionsBackdrop"
+          @pointerdown.stop
+          @touchstart.stop
+          @touchend.stop
+          @dblclick.stop
+          @click.stop.self="closeMobileLinkActions"
           @keydown.esc.stop="backMobileContextMenu"
         >
-          <div class="mobileLinkActionsHeader">
-            <button
-              v-if="mobileContextMenuStack.length > 1"
-              type="button"
-              class="mobileLinkActionsBack"
-              @click="backMobileContextMenu"
-            >
-              <FtIcon
-                :icon="['fas', 'arrow-left']"
-                aria-hidden="true"
-              />
-              {{ t('Back') }}
-            </button>
-            <strong
-              v-if="mobileContextMenuStack.length === 1"
-              dir="auto"
-            >{{ mobileContextMenuTitle }}</strong>
-          </div>
-          <div
-            v-if="mobileContextQuickActions.length"
-            class="mobileLinkQuickActions"
-          >
-            <button
-              v-for="action in mobileContextQuickActions"
-              :key="action.label"
-              type="button"
-              role="menuitem"
-              :title="action.label"
-              :aria-label="action.label"
-              :disabled="action.enabled === false"
-              @click="runMobileContextAction(action)"
-            >
-              <FtIcon
-                :icon="action.icon"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-          <div
-            v-if="mobileContextThumbnailActions.length"
-            class="mobileLinkQuickActions mobileThumbnailActionRow"
-          >
-            <button
-              v-for="action in mobileContextThumbnailActions"
-              :key="action.label"
-              type="button"
-              :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
-              :title="action.label"
-              :aria-label="action.label"
-              :aria-checked="action.pressed"
-              :disabled="action.enabled === false"
-              @click="runMobileContextAction(action)"
-            >
-              <FtIcon
-                :icon="action.icon"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-          <div
-            ref="mobileLinkActionsScrollRef"
-            v-overlay-scrollbars
-            class="mobileLinkActionsScroll"
+          <section
+            ref="mobileLinkActionsRef"
+            class="mobileLinkActions"
+            data-bottom-sheet
+            role="menu"
+            :aria-label="mobileContextMenuTitle"
+            tabindex="-1"
+            @pointerdown="startMobileContextDrag"
+            @touchmove="moveMobileContextTouch"
+            @scroll.capture="updateMobileContextScrollAction"
+            @click.capture="filterMobileContextClick"
+            @keydown.esc.stop="backMobileContextMenu"
           >
             <div
-              ref="mobileLinkActionsContentRef"
-              class="mobileLinkActionsContent"
-            >
-              <template
-                v-for="(action, index) in mobileContextMenuRows"
-                :key="action.label ?? index"
-              >
-                <div
-                  v-if="action.type === 'separator'"
-                  class="mobileLinkActionsSeparator"
-                  role="separator"
-                />
-                <button
-                  v-else
-                  type="button"
-                  role="menuitem"
-                  :aria-label="action.label"
-                  :disabled="action.enabled === false"
-                  :aria-haspopup="action.submenu ? 'menu' : undefined"
-                  @click="runMobileContextAction(action)"
-                >
-                  <FtIcon
-                    :icon="action.icon"
-                    aria-hidden="true"
-                  />
-                  <span>{{ action.label }}</span>
-                  <span
-                    v-if="action.submenu"
-                    class="mobileLinkSubmenuArrow"
-                    aria-hidden="true"
-                  />
-                </button>
-              </template>
+              class="bottomSheetHandle"
+              aria-hidden="true"
+            />
+            <div class="mobileLinkActionsHeader">
               <button
-                v-if="mobileContextLink"
+                v-if="mobileContextMenuStack.length > 1"
                 type="button"
-                role="menuitem"
-                @click="openMobileContextLink(false)"
-              >
-                <FtIcon :icon="['fas', 'link']" />
-                {{ t('Share.Open Link') }}
-              </button>
-              <button
-                v-if="mobileContextLinkCanOpenInTab"
-                type="button"
-                role="menuitem"
-                @click="openMobileContextLink(true)"
-              >
-                <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
-                {{ t('Context Menu.Open in a New Tab') }}
-              </button>
-              <button
-                v-if="mobileContextLinkCopyUrl"
-                type="button"
-                role="menuitem"
-                @click="copyMobileContextLink"
-              >
-                <FtIcon :icon="['fas', 'copy']" />
-                {{ t('Share.Copy Link') }}
-              </button>
-              <button
-                v-if="mobileContextLinkCopyUrl"
-                type="button"
-                role="menuitem"
-                @click="shareMobileContextLink"
+                class="mobileLinkActionsBack"
+                @click="backMobileContextMenu"
               >
                 <FtIcon
-                  :icon="['fas', 'share-alt']"
+                  :icon="['fas', 'arrow-left']"
                   aria-hidden="true"
                 />
-                {{ t('Share.Share Link') }}
+                {{ t('Back') }}
+              </button>
+              <strong
+                v-if="mobileContextMenuStack.length === 1"
+                dir="auto"
+              >{{ mobileContextMenuTitle }}</strong>
+            </div>
+            <div
+              v-if="mobileContextQuickActions.length"
+              class="mobileLinkQuickActions"
+            >
+              <button
+                v-for="action in mobileContextQuickActions"
+                :key="action.label"
+                type="button"
+                role="menuitem"
+                :title="action.label"
+                :aria-label="action.label"
+                :disabled="action.enabled === false"
+                @click="runMobileContextAction(action)"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
               </button>
             </div>
-          </div>
-        </section>
-      </div>
+            <div
+              v-if="mobileContextThumbnailActions.length"
+              class="mobileLinkQuickActions mobileThumbnailActionRow"
+            >
+              <button
+                v-for="action in mobileContextThumbnailActions"
+                :key="action.label"
+                type="button"
+                :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
+                :title="action.label"
+                :aria-label="action.label"
+                :aria-checked="action.pressed"
+                :disabled="action.enabled === false"
+                @click="runMobileContextAction(action)"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+            <div
+              ref="mobileLinkActionsScrollRef"
+              v-overlay-scrollbars
+              class="mobileLinkActionsScroll"
+            >
+              <div
+                ref="mobileLinkActionsContentRef"
+                class="mobileLinkActionsContent"
+              >
+                <template
+                  v-for="(action, index) in mobileContextMenuRows"
+                  :key="action.label ?? index"
+                >
+                  <div
+                    v-if="action.type === 'separator'"
+                    class="mobileLinkActionsSeparator"
+                    role="separator"
+                  />
+                  <button
+                    v-else
+                    type="button"
+                    role="menuitem"
+                    :aria-label="action.label"
+                    :disabled="action.enabled === false"
+                    :aria-haspopup="action.submenu ? 'menu' : undefined"
+                    @click="runMobileContextAction(action)"
+                  >
+                    <FtIcon
+                      :icon="action.icon"
+                      aria-hidden="true"
+                    />
+                    <span>{{ action.label }}</span>
+                    <span
+                      v-if="action.submenu"
+                      class="mobileLinkSubmenuArrow"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </template>
+                <button
+                  v-if="mobileContextLink"
+                  type="button"
+                  role="menuitem"
+                  @click="openMobileContextLink(false)"
+                >
+                  <FtIcon :icon="['fas', 'link']" />
+                  {{ t('Share.Open Link') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCanOpenInTab"
+                  type="button"
+                  role="menuitem"
+                  @click="openMobileContextLink(true)"
+                >
+                  <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
+                  {{ t('Context Menu.Open in a New Tab') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCopyUrl"
+                  type="button"
+                  role="menuitem"
+                  @click="copyMobileContextLink"
+                >
+                  <FtIcon :icon="['fas', 'copy']" />
+                  {{ t('Share.Copy Link') }}
+                </button>
+                <button
+                  v-if="mobileContextLinkCopyUrl"
+                  type="button"
+                  role="menuitem"
+                  @click="shareMobileContextLink"
+                >
+                  <FtIcon
+                    :icon="['fas', 'share-alt']"
+                    aria-hidden="true"
+                  />
+                  {{ t('Share.Share Link') }}
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </Transition>
     </Teleport>
     <FtToast />
     <FtProgressBar
@@ -530,6 +546,7 @@
 </template>
 
 <script setup>
+import { useBottomSheetDismiss } from './composables/useBottomSheetDismiss'
 import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/figtree'
@@ -1142,6 +1159,11 @@ provide('openMobileContextActions', async (menu) => {
 })
 const mobileLinkActionsPromptId = useId()
 const mobileLinkActionsRef = useTemplateRef('mobileLinkActionsRef')
+const {
+  startDrag: startMobileContextDrag, moveTouch: moveMobileContextTouch, filterClick: filterMobileContextClick,
+  updateScrollAction: updateMobileContextScrollAction,
+  enter: enterMobileContextSheet, leave: leaveMobileContextSheet
+} = useBottomSheetDismiss(mobileLinkActionsRef, closeMobileLinkActions)
 const mobileLinkActionsScrollRef = useTemplateRef('mobileLinkActionsScrollRef')
 const mobileLinkActionsContentRef = useTemplateRef('mobileLinkActionsContentRef')
 watch(mobileLinkActionsContentRef, (content, _, onCleanup) => {
@@ -1191,12 +1213,14 @@ watch(() => mobileContextLink.value !== null || mobileContextActions.value !== n
     lockBodyScroll()
     store.commit('addOpenPrompt', mobileLinkActionsPromptId)
     mobileLinkActionsLocked = true
-  } else if (!isOpen && mobileLinkActionsLocked) {
-    store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
-    unlockBodyScroll()
-    mobileLinkActionsLocked = false
   }
 })
+function releaseMobileContextSheet() {
+  if (mobileContextLink.value || mobileContextActions.value || !mobileLinkActionsLocked) return
+  store.commit('removeOpenPrompt', mobileLinkActionsPromptId)
+  unlockBodyScroll()
+  mobileLinkActionsLocked = false
+}
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
