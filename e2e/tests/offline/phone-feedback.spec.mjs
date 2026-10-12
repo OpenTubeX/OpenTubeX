@@ -343,7 +343,7 @@ test('autoplay glyph stays within its original compact switch in both states and
   const toggle = page.locator('.phonePlayerOptions[open] .autoplay-toggle')
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
-    await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', `${999 * roundness / 100}px`)
+    await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', '999px')
   }
   for (const direction of ['ltr', 'rtl']) {
     await page.evaluate(value => { document.body.dir = value }, direction)

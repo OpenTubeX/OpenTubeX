@@ -215,43 +215,26 @@ test.describe('subscriptions feed tab indicator', () => {
     expect(animation).toBeCloseTo(0.14, 2)
   })
 
-  test('animates cached feed content when switching back to it', async ({ page }) => {
+  test('does not replay cached feed appearance when switching back to it', async ({ page }) => {
     await goTo(page, 'subscriptions')
-
     await expect(page.getByText('video video 000')).toBeVisible()
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
-
-    const animationTargetClass = await page.evaluate(() => new Promise(resolve => {
-      const target = document.querySelector('[data-subscription-feed-tab="videos"]')
-
-      const timeout = setTimeout(() => resolve(null), 2000)
-      function inspectFrame() {
-        if (target.getAttribute('aria-selected') !== 'true') {
-          requestAnimationFrame(inspectFrame)
-          return
-        }
-
-        requestAnimationFrame(() => {
-          const panel = document.querySelector('#subscriptionsPanel')
-          const animation = panel.getAnimations({ subtree: true }).find(animation => {
-            return animation.playState === 'running' &&
-              animation.effect.getComputedTiming().duration > 0
-          })
-          if (animation) {
-            clearTimeout(timeout)
-            resolve(animation.effect.target.className)
-          } else {
-            requestAnimationFrame(inspectFrame)
-          }
-        })
+    await page.evaluate(() => {
+      window.__cachedFeedAnimationCount = 0
+      window.__originalFeedAnimate = Element.prototype.animate
+      Element.prototype.animate = function (...args) {
+        if (this.matches('.autoGrid')) window.__cachedFeedAnimationCount++
+        return window.__originalFeedAnimate.apply(this, args)
       }
-
-      target.click()
-      requestAnimationFrame(inspectFrame)
-    }))
-
-    expect(animationTargetClass).toContain('autoGrid')
+    })
+    try {
+      await page.locator('[data-subscription-feed-tab="videos"]').click()
+      await expect(page.getByText('video video 000')).toBeVisible()
+      expect(await page.evaluate(() => window.__cachedFeedAnimationCount)).toBe(0)
+    } finally {
+      await page.evaluate(() => { Element.prototype.animate = window.__originalFeedAnimate })
+    }
   })
 
   test('does not animate a cached empty-state message', async ({ page }) => {

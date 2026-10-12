@@ -266,7 +266,10 @@ test.describe('watch history', () => {
       ta: ['பழையது அழி', 'சரி', 'யாவும் கண்டது']
     }
     for (const [locale, labels] of Object.entries(compactLabels)) {
-      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      await page.evaluate(locale => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale)
+      }, locale)
+      await expect(page.locator('html')).toHaveAttribute('lang', locale)
       for (const zoom of [1, 1.25]) {
         await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
         for (const width of [320, 375, 520, 732]) {
@@ -304,8 +307,10 @@ test.describe('watch history', () => {
     const activeLocales = JSON.parse(await readFile(new URL('../../../static/locales/activeLocales.json', import.meta.url), 'utf8'))
     const actions = page.locator('.headingActions')
     for (const locale of ['br', ...activeLocales.filter(locale => locale !== 'br')]) {
-      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
-      await page.waitForFunction(locale => document.documentElement.lang === locale, locale)
+      await page.evaluate(locale => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale)
+      }, locale)
+      await expect(page.locator('html')).toHaveAttribute('lang', locale)
       for (const zoom of [1, 1.25]) {
         await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
         for (const width of [320, 375]) {
