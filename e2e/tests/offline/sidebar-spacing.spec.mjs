@@ -54,6 +54,7 @@ for (const uiScale of [95, 125]) {
         await page.emulateMedia({ colorScheme })
         await expect(page.locator('body')).toContainClass(colorScheme)
         const bounds = await sidebar.boundingBox()
+        expect(bounds, 'The expanded sidebar must have visible bounds for the screenshot').not.toBeNull()
         await page.screenshot({
           path: testInfo.outputPath(`sidebar-spacing-${colorScheme}.png`),
           clip: {
