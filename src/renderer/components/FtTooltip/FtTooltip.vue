@@ -5,6 +5,7 @@
       :aria-labelledby="id"
       class="button"
       type="button"
+      :style="{ anchorName: tooltipAnchor }"
       @mouseenter="setHovered(true)"
       @mouseleave="setHovered(false)"
       @focus="setFocused(true)"
@@ -34,12 +35,15 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
 const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
 const tooltipStyle = ref({})
 const visible = ref(false)
+useAnchoredViewportBounds(buttonRef, textRef, visible)
 const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
 let hovered = false
@@ -83,22 +87,24 @@ function startTrackingPosition() {
   if (!visible.value || trackingPosition) return
   trackingPosition = true
   window.addEventListener('resize', schedulePositionUpdate)
-  window.addEventListener('scroll', schedulePositionUpdate, true)
   document.addEventListener('fullscreenchange', handleFullscreenChange)
 
-  positionMutationObserver ??= new MutationObserver((records) => {
-    const tooltip = textRef.value
-    if (tooltip && records.every(({ target }) => target === tooltip || tooltip.contains(target))) {
-      return
-    }
-    schedulePositionUpdate()
-  })
-  positionMutationObserver.observe(document.body, {
-    attributes: true,
-    attributeFilter: ['class', 'hidden', 'style'],
-    childList: true,
-    subtree: true,
-  })
+  if (!supportsAnchorPositioning) {
+    window.addEventListener('scroll', schedulePositionUpdate, true)
+    positionMutationObserver ??= new MutationObserver((records) => {
+      const tooltip = textRef.value
+      if (tooltip && records.every(({ target }) => target === tooltip || tooltip.contains(target))) {
+        return
+      }
+      schedulePositionUpdate()
+    })
+    positionMutationObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class', 'hidden', 'style'],
+      childList: true,
+      subtree: true,
+    })
+  }
 
   positionResizeObserver ??= new ResizeObserver(schedulePositionUpdate)
   if (buttonRef.value) {
@@ -165,12 +171,12 @@ function positionTooltip() {
       top = buttonRect.bottom + TOOLTIP_GAP
   }
 
-  left = Math.max(EDGE_MARGIN, Math.min(left, window.innerWidth - width - EDGE_MARGIN))
-  top = Math.max(EDGE_MARGIN, Math.min(top, window.innerHeight - height - EDGE_MARGIN))
-  tooltipStyle.value = {
-    left: `${Math.round(left)}px`,
-    top: `${Math.round(top)}px`,
-  }
+  tooltipStyle.value = getAnchoredPosition(tooltipAnchor, buttonRect, Math.round(left), Math.round(top), {
+    minLeft: EDGE_MARGIN,
+    maxLeft: window.innerWidth - width - EDGE_MARGIN,
+    minTop: EDGE_MARGIN,
+    maxTop: window.innerHeight - height - EDGE_MARGIN
+  })
 }
 
 async function handleFullscreenChange() {
@@ -205,6 +211,7 @@ const props = defineProps({
 })
 
 const id = useId()
+const tooltipAnchor = `--tooltip-${id}`
 
 defineExpose({ id })
 </script>

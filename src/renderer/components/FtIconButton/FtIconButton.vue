@@ -5,6 +5,7 @@
     @focusout="handleDropdownFocusOut"
   >
     <button
+      ref="iconButton"
       class="iconButton"
       :aria-label="title"
       :title="title"
@@ -16,7 +17,8 @@
       }"
       :style="{
         padding: padding + 'px',
-        fontSize: size + 'px'
+        fontSize: size + 'px',
+        anchorName: dropdownAnchor
       }"
       :aria-disabled="disabled"
       :aria-expanded="ariaExpanded ?? dropdownShown"
@@ -205,6 +207,8 @@ import { provide, computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRe
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
@@ -299,6 +303,7 @@ const emit = defineEmits(['click', 'disabled-click', 'dropdown-open'])
 const LONG_CLICK_BOUNDARY_MS = 500
 
 const id = useId()
+const dropdownAnchor = `--icon-menu-${id}`
 
 const isKebabMenu = computed(() => (
   Array.isArray(props.icon) && ['ellipsis-v', 'ellipsis-vertical'].includes(props.icon[1])
@@ -309,6 +314,7 @@ const phoneLayout = usePhoneLayout()
 const ownsPhoneSheet = computed(() => props.mobileSheet && phoneLayout.value)
 const fullscreenDropdownTarget = ref(null)
 const portaledDropdown = computed(() => props.dropdownPortal || fullscreenDropdownTarget.value !== null)
+const usesDropdownAnchor = computed(() => supportsAnchorPositioning && portaledDropdown.value && !fullscreenDropdownTarget.value)
 const modalLayout = usePhoneLayout('(max-width: 900px), (max-height: 600px)')
 const useModal = computed(() => props.dropdownModalOnMobile && modalLayout.value && !fullscreenDropdownTarget.value)
 
@@ -321,6 +327,7 @@ let fullscreenTargetObserver = null
 const dropdown = useTemplateRef('dropdown')
 const dropdownContent = useTemplateRef('dropdownContent')
 const dropdownContentInner = useTemplateRef('dropdownContentInner')
+useAnchoredViewportBounds(useTemplateRef('iconButton'), dropdown, computed(() => dropdownShown.value && usesDropdownAnchor.value))
 
 watch(dropdownContentInner, (content, _, onCleanup) => {
   if (!content) return
@@ -332,7 +339,9 @@ watch(dropdownContentInner, (content, _, onCleanup) => {
 watch(dropdownShown, (shown) => {
   if (shown && !useModal.value && !ownsPhoneSheet.value) {
     window.addEventListener('resize', scheduleDropdownViewportUpdate)
-    window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+    if (!usesDropdownAnchor.value) {
+      window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+    }
   } else {
     removeDropdownViewportListeners()
     fullscreenDropdownTarget.value = null
@@ -535,8 +544,20 @@ function keepDropdownInViewport() {
     const maxTop = window.innerHeight - bottomMargin - dropdownRect.height
 
     dropdown.value.style.inset = 'auto'
-    dropdown.value.style.left = `${Math.max(viewportMargin, Math.min(left, maxLeft))}px`
-    dropdown.value.style.top = `${Math.max(minTop, Math.min(top, maxTop))}px`
+    const clampedLeft = Math.max(viewportMargin, Math.min(left, maxLeft))
+    const clampedTop = Math.max(minTop, Math.min(top, maxTop))
+    if (usesDropdownAnchor.value) {
+      const position = getAnchoredPosition(dropdownAnchor, buttonRect, left, top, {
+        minLeft: viewportMargin, maxLeft, minTop, maxTop
+      }, props.dropdownPositionY === 'top' ? { above: top === aboveButton, gap: 4, bottomMargin } : undefined)
+      for (const [property, value] of Object.entries(position)) {
+        if (property.startsWith('--')) dropdown.value.style.setProperty(property, value ?? '')
+        else dropdown.value.style[property] = value
+      }
+    } else {
+      dropdown.value.style.left = `${clampedLeft}px`
+      dropdown.value.style.top = `${clampedTop}px`
+    }
     return
   }
 

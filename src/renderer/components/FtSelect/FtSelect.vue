@@ -245,6 +245,8 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
   variant: {
@@ -334,7 +336,6 @@ const emit = defineEmits(['change', 'open', 'reset'])
 
 const id = useId()
 const dropdownAnchor = `--select-${id}`
-const supportsAnchorPositioning = CSS.supports('position-anchor', dropdownAnchor)
 const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
@@ -348,6 +349,7 @@ const filteredOptions = computed(() => props.selectNames
   .map((name, index) => ({ name, index }))
   .filter(({ name }) => !phoneLayout.value || name.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
 const dropdownShown = ref(false)
+useAnchoredViewportBounds(selectButton, dropdown, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
 const activeIndex = ref(0)
 const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
@@ -469,29 +471,19 @@ function updateDropdownPosition() {
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
   const menuHeight = Math.min(desiredHeight, availableHeight)
   const centeredLeft = buttonRect.left + (buttonRect.width - menuWidth) / 2
-  const left = Math.max(
-    viewportMargin,
-    Math.min(centeredLeft, window.innerWidth - viewportMargin - menuWidth)
-  )
   const top = openAbove
-    ? Math.max(minimumTop, buttonRect.top - menuGap - menuHeight)
-    : Math.max(
-        minimumTop,
-        Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
-      )
+    ? buttonRect.top - menuGap - menuHeight
+    : buttonRect.bottom + menuGap
 
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    // CSS anchors follow scrolling without JavaScript updates. Keep our
-    // measured offsets for viewport edges and rounding.
-    positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
-    left: supportsAnchorPositioning
-      ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
-      : `${snapToDevicePixels(left)}px`,
-    top: supportsAnchorPositioning
-      ? `calc(anchor(top) + ${snapToDevicePixels(top) - buttonRect.top}px)`
-      : `${snapToDevicePixels(top)}px`,
+    ...getAnchoredPosition(dropdownAnchor, buttonRect, snapToDevicePixels(centeredLeft), snapToDevicePixels(top), {
+      minLeft: viewportMargin,
+      maxLeft: window.innerWidth - viewportMargin - menuWidth,
+      minTop: minimumTop,
+      maxTop: maximumBottom - menuHeight
+    }),
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
     zIndex: props.dropdownZIndex
   }

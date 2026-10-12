@@ -4,6 +4,7 @@
       ref="triggerRef"
       type="button"
       class="colorFieldTrigger"
+      :style="{ anchorName: popoverAnchor }"
       :aria-label="label"
       :aria-expanded="open"
       @click="togglePicker"
@@ -211,10 +212,12 @@
 
 <script setup>
 import { vTouchRange } from '../../helpers/touchRange'
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
+import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
 
 const props = defineProps({
   modelValue: {
@@ -241,12 +244,14 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:blurValue', 'change', 'apply', 'cancel', 'reset'])
 const { t } = useI18n()
 const triggerRef = useTemplateRef('triggerRef')
+const popoverAnchor = `--color-picker-${useId()}`
 const popoverRef = useTemplateRef('popoverRef')
 const saturationValueRef = useTemplateRef('saturationValueRef')
 const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
 const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
 const open = ref(false)
+useAnchoredViewportBounds(triggerRef, popoverRef, open)
 const hue = ref(0)
 const saturation = ref(0)
 const value = ref(0)
@@ -267,6 +272,7 @@ let statusTimeout = null
 let copiedTimeout = null
 let lastEmittedColor = null
 let colorSourcesResizeObserver = null
+let popoverResizeObserver = null
 
 const opaqueHex = computed(() => formatHex(hsvToRgb(hue.value, saturation.value, value.value), 255))
 const supportsBlur = computed(() => props.blurValue !== null)
@@ -292,8 +298,11 @@ watch(open, async value => {
   }
   document.addEventListener('pointerdown', closeFromOutside)
   window.addEventListener('resize', positionPopover)
-  window.addEventListener('scroll', positionPopover, true)
+  if (!supportsAnchorPositioning) window.addEventListener('scroll', positionPopover, true)
   await nextTick()
+  if (!open.value || popoverRef.value === null) return
+  popoverResizeObserver = new ResizeObserver(positionPopover)
+  popoverResizeObserver.observe(popoverRef.value)
   positionPopover()
   saturationValueRef.value?.focus()
 })
@@ -535,12 +544,17 @@ function positionPopover() {
   if (trigger === null || popover === null) return
   const triggerBounds = trigger.getBoundingClientRect()
   const margin = 12
-  const left = clamp(triggerBounds.left, margin, window.innerWidth - popover.offsetWidth - margin)
+  const left = triggerBounds.left
   const below = triggerBounds.bottom + 8
   const top = below + popover.offsetHeight <= window.innerHeight - margin
     ? below
-    : Math.max(margin, triggerBounds.top - popover.offsetHeight - 8)
-  popoverStyle.value = { left: `${left}px`, top: `${top}px` }
+    : triggerBounds.top - popover.offsetHeight - 8
+  popoverStyle.value = getAnchoredPosition(popoverAnchor, triggerBounds, left, top, {
+    minLeft: margin,
+    maxLeft: window.innerWidth - popover.offsetWidth - margin,
+    minTop: margin,
+    maxTop: window.innerHeight - popover.offsetHeight - margin
+  }, { above: top < triggerBounds.top, gap: 8, bottomMargin: margin })
 }
 
 function closeFromOutside(event) {
@@ -549,6 +563,8 @@ function closeFromOutside(event) {
 }
 
 function removeOpenListeners() {
+  popoverResizeObserver?.disconnect()
+  popoverResizeObserver = null
   document.removeEventListener('pointerdown', closeFromOutside)
   window.removeEventListener('resize', positionPopover)
   window.removeEventListener('scroll', positionPopover, true)

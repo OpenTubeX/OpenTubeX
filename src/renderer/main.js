@@ -16,6 +16,7 @@ import { initializeAndroidDynamicColors } from './helpers/dynamicColors'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
 import 'vue-sonner/style.css'
+import './helpers/anchoredPosition.css'
 
 import { ObserveVisibility } from 'vue-observe-visibility'
 
