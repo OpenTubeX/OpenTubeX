@@ -29,7 +29,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
         if (element.scrollTop > 1) return
       }
     }
-    drag = { id: event.pointerId, touch: event.pointerType === 'touch', x: event.clientX, y: event.clientY, start: performance.now(), offset: 0, active: false }
+    drag = { id: event.pointerId, touch: event.pointerType === 'touch', x: event.clientX, y: event.clientY, offset: 0, active: false }
     window.addEventListener('pointermove', movePointer, true)
     window.addEventListener('pointerup', endPointer, true)
     window.addEventListener('pointercancel', cancelPointer, true)
@@ -50,6 +50,7 @@ export function useBottomSheetDismiss(sheet, dismiss) {
       sheetAnimation?.cancel()
       drag.active = true
       drag.start = performance.now()
+      drag.startOffset = distance
       suppressClick = true
     }
     if (event.cancelable) event.preventDefault()
@@ -67,10 +68,13 @@ export function useBottomSheetDismiss(sheet, dismiss) {
     move(touch.clientX, touch.clientY, event)
   }
   function finish() {
-    const { active, offset, start } = drag
+    const { active, offset, start, startOffset } = drag
     clearDrag()
     if (!active) return
-    if (offset > 80 || (offset > 20 && offset / (performance.now() - start) > 0.6)) {
+    // Match the timed distance to its first movement sample. A release-only
+    // sample has no measured movement and cannot establish flick velocity.
+    const elapsed = performance.now() - start
+    if (offset > 80 || (offset > 20 && elapsed > 0 && (offset - startOffset) / elapsed > 0.6)) {
       dismiss()
     } else {
       const element = sheet.value

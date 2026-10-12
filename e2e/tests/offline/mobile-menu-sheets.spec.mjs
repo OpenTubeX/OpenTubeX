@@ -292,10 +292,52 @@ test('a short downward flick dismisses after dwelling on the handle', async ({ p
       elapsed = 1000
       window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 10, clientX: 180, clientY: 550, cancelable: true }))
       elapsed = 1020
-      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 10, clientX: 180, clientY: 560, cancelable: true }))
+      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 10, clientX: 180, clientY: 570, cancelable: true }))
     } finally {
       performance.now = originalNow
     }
   })
   await expect(menu).toHaveCount(0)
 })
+
+for (const pointerType of ['mouse', 'touch']) {
+  for (const releaseOnly of [true, false]) {
+    test(`short ${pointerType} pulls settle back with ${releaseOnly ? 'only a release sample' : 'slow movement after activation'}`, async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      await page.locator('.moreOptionNav').click()
+      const menu = page.locator('.moreOptionContainer')
+      await waitForAnimation(menu)
+      await menu.evaluate((element, { pointerType, releaseOnly }) => {
+        const handle = element.querySelector('.bottomSheetHandle')
+        const originalNow = performance.now
+        let elapsed = 0
+        performance.now = () => elapsed
+        const touch = y => new Touch({ identifier: 11, target: handle, clientX: 180, clientY: y })
+        try {
+          handle.dispatchEvent(new PointerEvent('pointerdown', {
+            bubbles: true, pointerType, pointerId: 11, isPrimary: true, button: 0, clientX: 180, clientY: 500
+          }))
+          elapsed = 1000
+          if (!releaseOnly) {
+            if (pointerType === 'touch') {
+              handle.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [touch(550)] }))
+            } else {
+              window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 11, clientX: 180, clientY: 550, cancelable: true }))
+            }
+            elapsed = 1020
+          }
+          const end = releaseOnly ? 540 : 560
+          if (pointerType === 'touch') {
+            handle.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [touch(end)] }))
+          } else {
+            window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 11, clientX: 180, clientY: end, cancelable: true }))
+          }
+        } finally {
+          performance.now = originalNow
+        }
+      }, { pointerType, releaseOnly })
+      await expect(menu).toBeVisible()
+      await expect.poll(() => menu.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+    })
+  }
+}
