@@ -1,6 +1,159 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
 
 test.use({ seed: { settings: { alwaysShowScrollbars: true } } })
+
+for (const position of ['top', 'bottom']) {
+  test(`quick settings stay inside the viewport above the reserved scrollbar row at ${position}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 700 })
+    await page.evaluate(async ({ position, quickSettings }) => {
+      window.ftElectron.setZoomFactor(0.95)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', position)
+      store.commit('setScrollbarThumbWidth', 20)
+      store.commit('setQuickSettings', quickSettings)
+      for (let index = 0; index < 18; index++) {
+        await window.ftElectron.tabs.create({ route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true })
+      }
+    }, { position, quickSettings: [...DEFAULT_QUICK_SETTINGS, 'useProxy'] })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect(page.locator('.tabsContainer > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-visible/)
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    await expect(menu).toHaveCSS('transform', 'none')
+    await expect.poll(() => menu.evaluate((element, position) => {
+      const boundary = position === 'bottom' ? document.querySelector('.tabBar').getBoundingClientRect().top : innerHeight
+      return boundary - element.getBoundingClientRect().bottom
+    }, position)).toBeGreaterThanOrEqual(4)
+  })
+
+  test(`notifications clear the reserved scrollbar row at ${position}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1400, height: 700 })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(async position => {
+      window.ftElectron.setZoomFactor(0.95)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', position)
+      store.commit('setToastPosition', `${position}-right`)
+      store.commit('setScrollbarThumbWidth', 20)
+      for (let index = 0; index < 18; index++) {
+        await window.ftElectron.tabs.create({ route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true })
+      }
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+      window.dispatchEvent(new Event('offline'))
+      window.ftElectron.showToastOnAllTabs('Reserved row notification', 30000, ['fas', 'check'])
+    }, position)
+    const banner = page.locator('.connectionStatus')
+    const notification = page.locator('.toast', { hasText: 'Reserved row notification' })
+    await expect(banner).toBeVisible()
+    await expect(notification).toBeVisible()
+    if (position === 'bottom') {
+      await expect.poll(() => banner.evaluate(element => (document.querySelector('.tabBar').getBoundingClientRect().top - element.getBoundingClientRect().bottom) * devicePixelRatio)).toBeGreaterThanOrEqual(-0.5)
+    }
+    const gapFromTabs = locator => locator.evaluate((element, position) => {
+      const bar = document.querySelector('.tabBar').getBoundingClientRect()
+      const toast = element.getBoundingClientRect()
+      return position === 'top' ? toast.top - bar.bottom : bar.top - toast.bottom
+    }, position)
+    await expect.poll(() => gapFromTabs(notification)).toBeGreaterThanOrEqual(28)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowProgressBarToast', true)
+      store.commit('setProgressBarMessage', 'Reserved row progress')
+      store.commit('setShowProgressBar', true)
+    })
+    const progress = page.getByTestId('progress-toast')
+    await expect(progress).toBeVisible()
+    await expect.poll(() => gapFromTabs(progress)).toBeGreaterThanOrEqual(23)
+  })
+}
+
+test.describe('RTL horizontal scrolling', () => {
+  test.use({ seed: { settings: { alwaysShowScrollbars: true, currentLocale: 'ar' } } })
+
+  for (const position of ['top', 'bottom']) {
+    test(`RTL horizontal scrolling keeps wheel, drag, and shrinking ranges consistent at ${position}`, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 800, height: 600 })
+      const groupId = await page.evaluate(async position => {
+        window.ftElectron.setZoomFactor(0.95)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setTabBarPosition', position)
+        const ids = []
+        for (let index = 0; index < 18; index++) {
+          const tab = await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true
+          })
+          ids.push(tab.id)
+        }
+        const group = await window.ftElectron.tabs.createGroup({ name: 'History', color: 'green' })
+        await window.ftElectron.tabs.setGroup(ids, group.id)
+        return group.id
+      }, position)
+      const container = page.locator('.tabsContainer')
+      await expect.poll(() => container.evaluate(element => getComputedStyle(element).direction)).toBe('rtl')
+      const scrollbar = container.locator(':scope > .os-scrollbar-horizontal')
+      await expect(scrollbar).toHaveClass(/os-scrollbar-rtl/)
+      await container.hover()
+      await container.evaluate(element => element.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 300 })))
+      await expect.poll(() => container.evaluate(element => Math.abs(element.scrollLeft + 300))).toBeLessThanOrEqual(2)
+      await container.evaluate(element => element.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaX: -100 })))
+      await expect.poll(() => container.evaluate(element => Math.abs(element.scrollLeft + 400))).toBeLessThanOrEqual(2)
+      const handle = scrollbar.locator('.os-scrollbar-handle')
+      await handle.hover()
+      const box = await handle.boundingBox()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2 - 100, box.y + box.height / 2, { steps: 8 })
+      await page.mouse.up()
+      await expect.poll(() => container.evaluate(element => element.scrollLeft)).toBeLessThan(-500)
+      await expect.poll(() => page.evaluate(async () => (await window.ftElectron.tabs.getState()).tabBarScrollPosition)).toBeLessThan(-500)
+      await container.evaluate(element => element.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 10000 })))
+      await page.evaluate(groupId => window.ftElectron.tabs.updateGroup(groupId, { isCollapsed: true }), groupId)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+      await expect.poll(() => container.evaluate(element => ({
+        offset: element.scrollLeft,
+        range: element.scrollWidth - element.clientWidth
+      }))).toEqual({ offset: 0, range: 0 })
+      await expect.poll(() => page.evaluate(async () => Math.abs((await window.ftElectron.tabs.getState()).tabBarScrollPosition))).toBe(0)
+    })
+  }
+})
+
+for (const position of ['top', 'bottom']) {
+  for (const scale of [1, 0.95, 1.25]) {
+    test(`wide horizontal scrollbars keep tab actions reachable at ${position}, ${scale} scale`, async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 800, height: 600 })
+      await page.evaluate(async ({ position, scale }) => {
+        window.ftElectron.setZoomFactor(scale)
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', position)
+        store.commit('setScrollbarThumbWidth', 20)
+        for (let index = 0; index < 18; index++) {
+          await window.ftElectron.tabs.create({
+            route: '/history', title: `History ${index + 1}`, makeActive: false, lazyLoad: true
+          })
+        }
+      }, { position, scale })
+      await expect.poll(() => page.locator('.tabBar').evaluate((element, position) => {
+        const bar = element.getBoundingClientRect()
+        const navigation = document.querySelector(position === 'top' ? '.topNav' : '.sideNav').getBoundingClientRect()
+        return Math.abs(position === 'top' ? navigation.top - bar.bottom : bar.top - navigation.bottom)
+      }, position)).toBeLessThan(1)
+      const tab = page.locator('.tab').nth(1)
+      const id = await tab.getAttribute('data-tab-id')
+      const title = tab.locator('.tabTitleText')
+      const box = await title.boundingBox()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await expect.poll(() => title.evaluate(element => {
+        const box = element.getBoundingClientRect()
+        return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('.tab')?.dataset.tabId
+      })).toBe(id)
+      await title.click()
+      await expect(tab).toHaveClass(/active/)
+      await tab.locator('.closeButton').click()
+      await expect(page.locator(`.tab[data-tab-id="${id}"]`)).toHaveCount(0)
+    })
+  }
+}
 
 test('horizontal tabs use the shared scrollbar and its appearance settings', async ({ page }, testInfo) => {
   await page.evaluate(async () => {

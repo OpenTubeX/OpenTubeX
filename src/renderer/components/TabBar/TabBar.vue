@@ -1190,7 +1190,15 @@ function animateScroll() {
     return
   }
 
+  const previousScrollLeft = container.scrollLeft
   container.scrollLeft += diff * 0.25
+  // Fractional UI scales can round an animation step to the current offset.
+  if (container.scrollLeft === previousScrollLeft) {
+    container.scrollLeft = scrollTarget
+    scrollTarget = null
+    scrollAnimationId = null
+    return
+  }
   scrollAnimationId = requestAnimationFrame(animateScroll)
 }
 
@@ -1202,6 +1210,17 @@ function cancelScrollAnimation() {
 
   if (dropZoneRef.value) {
     scrollTarget = dropZoneRef.value.scrollLeft
+  }
+}
+
+/** @param {HTMLElement} container */
+function getHorizontalScrollRange(container) {
+  const maximumScroll = Math.max(0, tabsContentRef.value.scrollWidth - container.clientWidth)
+  const direction = getComputedStyle(container).direction === 'rtl' ? -1 : 1
+  return {
+    min: Math.min(0, direction * maximumScroll),
+    max: Math.max(0, direction * maximumScroll),
+    direction
   }
 }
 
@@ -1217,13 +1236,13 @@ function handleWheel(event) {
 
   event.preventDefault()
 
-  const delta = event.deltaY || event.deltaX
-  const maxScroll = container.scrollWidth - container.clientWidth
+  const { min, max, direction } = getHorizontalScrollRange(container)
+  const delta = event.deltaY ? event.deltaY * direction : event.deltaX
 
   if (scrollTarget == null) {
     scrollTarget = container.scrollLeft
   }
-  scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget + delta))
+  scrollTarget = Math.max(min, Math.min(max, scrollTarget + delta))
 
   if (isElectron) {
     window.ftElectron.tabs.setTabBarScroll(scrollTarget)
@@ -1270,8 +1289,12 @@ function clampTabsScroll() {
   } else {
     clampOverlayScrollLeft(container, content)
     if (scrollTarget != null) {
-      const maxScroll = Math.max(0, content.scrollWidth - container.clientWidth)
-      scrollTarget = Math.min(scrollTarget, maxScroll)
+      const { min, max } = getHorizontalScrollRange(container)
+      const clampedTarget = Math.max(min, Math.min(max, scrollTarget))
+      if (scrollTarget !== clampedTarget) {
+        scrollTarget = clampedTarget
+        if (isElectron) window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+      }
     }
   }
 }

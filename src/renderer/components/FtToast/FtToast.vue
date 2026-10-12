@@ -137,10 +137,6 @@ const TOAST_WIDTH = 'calc(100vw - 60px)'
 const TOAST_GAP = 10
 /** Distance in px from the screen edges the toasts are anchored to */
 const VIEWPORT_INSET = 29
-/** Larger top inset that keeps top-positioned toasts below the horizontal tab bar */
-const TAB_BAR_INSET = 61
-/** Bottom tabs reserve two extra pixels that stay clear of decorated window frames */
-const BOTTOM_TAB_BAR_INSET = TAB_BAR_INSET + 2
 /** Distance in px at which the persistent refresh toast gets out of the pointer's way */
 const PROGRESS_TOAST_PROXIMITY = 32
 /** Extra distance required before restoring the toast, to avoid flicker around the boundary */
@@ -257,8 +253,12 @@ const toasterOffset = computed(() => {
   return {
     left: VIEWPORT_INSET + (tabBarPosition.value === 'left' ? store.getters.getVerticalTabBarWidth : 0),
     right: VIEWPORT_INSET + (tabBarPosition.value === 'right' ? store.getters.getVerticalTabBarWidth : 0),
-    bottom: (tabBarPosition.value === 'bottom' ? BOTTOM_TAB_BAR_INSET : VIEWPORT_INSET) + progressInset + connectionHeight.value,
-    top: (tabBarPosition.value === 'top' ? TAB_BAR_INSET : VIEWPORT_INSET) + progressInset
+    bottom: tabBarPosition.value === 'bottom'
+      ? `calc(var(--bottom-tab-bar-height) + ${VIEWPORT_INSET + progressInset + connectionHeight.value}px)`
+      : VIEWPORT_INSET + progressInset + connectionHeight.value,
+    top: tabBarPosition.value === 'top'
+      ? `calc(var(--top-tab-bar-height) + ${VIEWPORT_INSET + progressInset}px)`
+      : VIEWPORT_INSET + progressInset
   }
 })
 

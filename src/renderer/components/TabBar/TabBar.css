@@ -39,6 +39,10 @@
   -webkit-app-region: no-drag;
 }
 
+.tabBar:not(.vertical) .tabsContainer {
+  padding-block-end: var(--horizontal-tab-scrollbar-space, 0);
+}
+
 .tabsContent {
   display: flex;
   inline-size: max-content;
@@ -162,17 +166,29 @@
   display: contents;
 }
 
+.tabBar:not(.vertical) .tabBarActions {
+  display: flex;
+  align-self: stretch;
+  gap: 2px;
+  padding-block-end: var(--horizontal-tab-scrollbar-space, 0);
+}
+
 /* ===== Bottom layout: fixed row on the bottom edge ===== */
 
 .tabBar.position-bottom {
   box-shadow: none;
-  block-size: 34px;
-  min-block-size: 34px;
+  block-size: var(--bottom-tab-bar-height, 34px);
+  min-block-size: var(--bottom-tab-bar-height, 34px);
   position: fixed;
   inset-block: auto 0;
 
   /* Leave the same gap on both sides, including above the compositor frame. */
   padding-block: 2px;
+}
+
+.tabBar.position-bottom .tabsContainer,
+.tabBar.position-bottom .tabBarActions {
+  padding-block: var(--horizontal-tab-scrollbar-space, 0) 0;
 }
 
 .tabBar.position-bottom .tabsContainer :deep(.os-scrollbar-horizontal) {

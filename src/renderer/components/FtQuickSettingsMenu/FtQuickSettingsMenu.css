@@ -4,11 +4,11 @@
 }
 
 :global(.app.topTabs) .quickSettings {
-  --quick-settings-viewport-offset: 32px;
+  --quick-settings-viewport-offset: var(--top-tab-bar-height);
 }
 
 :global(.app.bottomTabs) .quickSettings {
-  --quick-settings-viewport-offset: 34px;
+  --quick-settings-viewport-offset: var(--bottom-tab-bar-height);
 }
 
 .profileTrigger {
