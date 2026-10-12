@@ -132,3 +132,62 @@ test('imports original titles, descriptions, timestamps and empty playlists from
     await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(5)
   }
 })
+
+for (const [name, metadata] of [
+  ['malformed', 'wrong header\n'],
+  ['ambiguous', 'Playlist ID,Playlist Title (Original)\nPLone,A/B\nPLtwo,A_B\n'],
+]) {
+  test(`keeps importing other selected types when playlist metadata is ${name}`, async ({ page }) => {
+    const root = 'Takeout/YouTube and YouTube Music'
+    const archive = zipSync({
+      [`${root}/playlists/playlists.csv`]: strToU8(metadata),
+      [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCmetadatafailure,https://www.youtube.com/channel/UCmetadatafailure,Metadata failure channel\n'),
+      [`${root}/history/watch-history.json`]: strToU8(JSON.stringify([{
+        products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z'
+      }])),
+      [`${root}/history/search-history.json`]: strToU8(JSON.stringify([{
+        products: ['YouTube'], titleUrl: 'https://www.youtube.com/results?search_query=metadata+failure', time: '2025-01-01T00:00:00Z'
+      }])),
+    })
+    const dataSection = await goToSettingsSection(page, 'data')
+    await page.evaluate(bytes => {
+      Object.defineProperty(window, 'showOpenFilePicker', {
+        configurable: true,
+        value: async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'bad-metadata.zip', { type: 'application/zip' }) }]
+      })
+    }, [...archive])
+    await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
+    await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailure'),
+        watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
+        searched: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'metadata failure'),
+        playlistCount: store.getters.getAllPlaylists.length,
+      }
+    })).toEqual({ subscribed: true, watched: true, searched: true, playlistCount: 2 })
+  })
+}
+
+test('continues importing empty playlists after a playlist write fails', async ({ page }) => {
+  const archive = zipSync({
+    'Takeout/YouTube/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nFLfavorites,Favorites\nPLempty,Another empty list\n'),
+  })
+  const dataSection = await goToSettingsSection(page, 'data')
+  await page.evaluate(bytes => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const dispatch = store.dispatch.bind(store)
+    store.dispatch = (type, payload, options) => {
+      if (type === 'importPlaylist' && payload.playlistName === 'Favorites') { return Promise.reject(new Error('Simulated playlist write failure')) }
+      return dispatch(type, payload, options)
+    }
+    Object.defineProperty(window, 'showOpenFilePicker', {
+      configurable: true,
+      value: async () => [{ getFile: async () => new File([new Uint8Array(bytes)], 'empty-playlists.zip', { type: 'application/zip' }) }]
+    })
+  }, [...archive])
+  await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
+  await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.some(playlist => playlist.playlistName === 'Another empty list'))).toBe(true)
+})

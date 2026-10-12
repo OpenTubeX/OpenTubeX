@@ -201,7 +201,11 @@ export function parseTakeoutPlaylistMetadataCsv(content) {
   return playlists
 }
 
-/** Read metadata first: Takeout can store playlists.csv after its video files. */
+/**
+ * Read metadata first: Takeout can store playlists.csv after its video files.
+ * The extra archive scan between discovery and import avoids buffering video
+ * CSVs or inflating unselected metadata during discovery.
+ */
 export async function readTakeoutPlaylistMetadata(file) {
   const metadata = new Map()
   await streamTakeoutZip(file, new Set(['playlistMetadata']), () => {}, entry => {

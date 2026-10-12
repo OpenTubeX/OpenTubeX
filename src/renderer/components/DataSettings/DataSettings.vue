@@ -500,7 +500,16 @@ async function importSelectedTakeoutData() {
   const playlistNameCounts = new Map()
   const allocatedPlaylistNames = new Set()
   try {
-    const metadata = selected.has('playlists') ? await readTakeoutPlaylistMetadata(takeoutFile.value) : new Map()
+    let metadata = new Map()
+    if (selected.has('playlists')) {
+      try {
+        metadata = await readTakeoutPlaylistMetadata(takeoutFile.value)
+      } catch (error) {
+        selected.delete('playlists')
+        console.error('Unable to import Takeout playlist metadata', error)
+        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+      }
+    }
     const reservedPlaylistNames = new Set([
       ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
       ...takeoutEntries.value.filter(entry => entry.type === 'playlists')
@@ -553,7 +562,12 @@ async function importSelectedTakeoutData() {
     })
     for (const [path, playlist] of metadata) {
       if (!importedPaths.has(path)) {
-        await importPlaylist({ ...playlist, videos: [] })
+        try {
+          await importPlaylist({ ...playlist, videos: [] })
+        } catch (error) {
+          console.error('Unable to import Takeout entry', path, error)
+          showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${path}`, icon: ['fas', 'circle-exclamation'] })
+        }
       }
     }
     if (importedPlaylists) {
