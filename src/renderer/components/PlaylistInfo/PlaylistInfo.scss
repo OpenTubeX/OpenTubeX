@@ -104,7 +104,7 @@
 
 .base {
   .playlistInfoSeparator {
-    margin-block-end: 32px;
+    margin-block: 16px;
   }
 
   .playlistOptions {
@@ -112,7 +112,7 @@
   }
 
   .searchInputsRow {
-    margin-block-start: calc(32px + var(--playlist-search-label-outset));
+    margin-block-start: calc(16px + var(--playlist-search-label-outset));
   }
 }
 
@@ -171,6 +171,7 @@
 
   .channelShareWrapper {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    margin-block-start: 16px;
   }
 
   .channelShareWrapper,
@@ -185,7 +186,9 @@
   }
 
   .searchInputsRow {
-    margin-block-start: calc(30px + var(--playlist-search-label-outset));
+    --input-bottom-spacing: 6px;
+
+    margin-block-start: calc(16px + var(--playlist-search-label-outset));
   }
 }
 

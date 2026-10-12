@@ -124,6 +124,28 @@ test.use({
   }
 })
 
+test.describe('single history entry', () => {
+  test.use({ seed: { history: [historyEntry('aaaaaaaaaaa', 'Only history video', now - 1000)] } })
+
+  test('keeps a heading-to-results gap when search controls are hidden', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('Only history video')).toBeVisible()
+    await expect(page.locator('.historySearch')).toBeHidden()
+    await expect(page.locator('.optionsRow')).toHaveCount(0)
+    for (const zoom of [1, 1.25]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+      for (const width of [1440, 375]) {
+        await setWindowSize(app, page, { width, height: width === 1440 ? 950 : 850 })
+        await expect.poll(() => page.locator('.headingRow').evaluate(element => {
+          const headingBottom = Math.max(...[...element.children].map(child => child.getBoundingClientRect().bottom))
+          const results = element.closest('.card').querySelector('.autoGrid').getBoundingClientRect()
+          return results.top - headingBottom
+        }), { timeout: 2000 }).toBeCloseTo(20, 0)
+      }
+    }
+  })
+})
+
 test.describe('watch history', () => {
   for (const preference of ['on', 'system']) {
     test(`watched thumbnail hover and focus stay instant with reduced motion ${preference}`, async ({ page }) => {

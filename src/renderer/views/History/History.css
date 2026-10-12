@@ -9,6 +9,10 @@
   margin-inline: auto;
 }
 
+.card:not(:has(.optionsRow)) .historyResults {
+  margin-block-start: var(--history-control-gap);
+}
+
 .optionsRow {
   --settings-control-margin: 0;
 

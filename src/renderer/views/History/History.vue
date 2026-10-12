@@ -156,7 +156,10 @@
           @change="updateUserHistorySortBy"
         />
       </div>
-      <div :aria-busy="isSearching">
+      <div
+        class="historyResults"
+        :aria-busy="isSearching"
+      >
         <FtLoader
           v-if="isSearching"
           class="historySearchLoader"
