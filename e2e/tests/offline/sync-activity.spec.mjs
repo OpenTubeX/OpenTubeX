@@ -253,8 +253,14 @@ for (const uiScale of [100, 125]) {
         ['it', 'Cancella su questo dispositivo'],
         ['el', 'Εκκαθάριση σε αυτή τη συσκευή'],
       ]) {
-        await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          .dispatch('updateCurrentLocale', locale), locale)
+        // Wait for the setting and rendered label instead of returning a Vuex
+        // promise that Chromium can collect while Playwright awaits it.
+        await page.evaluate(locale => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            .dispatch('updateCurrentLocale', locale)
+        }, locale)
+        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__
+          .config.globalProperties.$store.getters.getCurrentLocale)).toBe(locale)
         await expect(card.locator('.activityClear')).toHaveAccessibleName(label)
         for (const width of [800, 700, 600, 480, 375, 320]) {
           await setWindowSize(app, page, { width, height: 700 + width })

@@ -160,7 +160,9 @@ test.describe('thumbnail size slider', () => {
           return {
             height: root.scrollHeight,
             offset: window.scrollY,
-            bottomDistance: root.scrollHeight - root.clientHeight - window.scrollY,
+            // Integer layout heights and a fractional scroll offset can differ
+            // by up to two physical pixels after rounding at non-100% zoom.
+            bottomDistance: (root.scrollHeight - root.clientHeight - window.scrollY) * devicePixelRatio,
             contentBottomError: Math.abs(root.clientHeight - contentBottom - bottomMargin),
             thumbBottomDistance: track.bottom - handle.bottom,
             thumbHeightError: Math.abs(handle.height - Math.max(minHandleHeight, track.height * root.clientHeight / root.scrollHeight)),
@@ -177,7 +179,7 @@ test.describe('thumbnail size slider', () => {
         await expect.poll(async () => {
           await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
           return Math.abs((await scrollState()).bottomDistance)
-        }).toBeLessThanOrEqual(1)
+        }).toBeLessThanOrEqual(2)
         const before = await scrollState()
         expect(before.offset).toBeGreaterThan(0)
 
@@ -188,7 +190,7 @@ test.describe('thumbnail size slider', () => {
         }
 
         await expect.poll(async () => (await scrollState()).height).toBeLessThan(before.height)
-        await expect.poll(async () => Math.abs((await scrollState()).bottomDistance)).toBeLessThanOrEqual(1)
+        await expect.poll(async () => Math.abs((await scrollState()).bottomDistance)).toBeLessThanOrEqual(2)
         // Include the desktop route's bottom margin as well as the card's;
         // the phone route has a negative margin and adds no bottom space.
         await expect.poll(async () => (await scrollState()).contentBottomError).toBeLessThanOrEqual(1)

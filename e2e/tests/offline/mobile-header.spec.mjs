@@ -197,14 +197,21 @@ for (const zoom of [1, 1.25]) {
     })
     await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
     for (const width of [375, 680, 850]) {
-      await setWindowSize(app, page, { width, height: width === 375 ? 850 : width === 680 ? 800 : 700 })
-      if (width === 850) await page.locator('.topNav').evaluate(header => header.classList.add('phoneLayout'))
-      await expect.poll(() => page.locator('.profiles').evaluate(element => {
+      await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), ...size })
+      }, { width: Math.round(width * zoom), height: (width === 375 ? 850 : width === 680 ? 800 : 700) * zoom })
+      await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+      await expect.poll(() => page.locator('.topNav').evaluate((header, width) => {
+        // Simulate native phone landscape immediately before measuring: a
+        // desktop resize render can remove a manually applied layout class.
+        if (width === 850) header.classList.add('phoneLayout')
+        const element = header.querySelector('.profiles')
         const buttons = [...element.querySelectorAll(':scope > button, .capacitorPhoneTabSwitcherButton, .profileTrigger')]
           .map(button => button.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0)
         const distances = buttons.slice(1).map((rect, index) => rect.left + rect.width / 2 - buttons[index].left - buttons[index].width / 2)
         return Math.max(...distances) - Math.min(...distances)
-      })).toBeLessThan(0.2)
+      }, width)).toBeLessThan(0.2)
     }
   })
 }
