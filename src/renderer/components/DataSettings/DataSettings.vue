@@ -307,7 +307,7 @@ import {
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
-import { forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
+import { forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
@@ -500,7 +500,7 @@ async function importSelectedTakeoutData() {
   const playlistNameCounts = new Map()
   const reservedPlaylistNames = new Set(takeoutEntries.value
     .filter(entry => entry.type === 'playlists' && selected.has('playlists'))
-    .map(entry => entry.path.split('/').at(-1).replace(/\.csv$/i, '')))
+    .map(entry => getTakeoutPlaylistName(entry.path.split('/').at(-1))))
   const allocatedPlaylistNames = new Set()
   try {
     await forEachSelectedTakeoutZipEntry(takeoutFile.value, selected, async entry => {
@@ -522,7 +522,7 @@ async function importSelectedTakeoutData() {
         } else if (entry.type === 'searchHistory') {
           await importYouTubeSearchHistory(JSON.parse(entry.content))
         } else if (entry.type === 'playlists') {
-          const name = entry.path.split('/').at(-1).replace(/\.csv$/i, '')
+          const name = getTakeoutPlaylistName(entry.path.split('/').at(-1))
           const count = (playlistNameCounts.get(name) ?? 0) + 1
           playlistNameCounts.set(name, count)
           let playlistName = name
@@ -1759,7 +1759,7 @@ async function importPlaylists() {
   const data = response.content
 
   if (response.filename.toLowerCase().endsWith('.csv')) {
-    const playlistName = response.filename.replace(/\.csv$/i, '')
+    const playlistName = getTakeoutPlaylistName(response.filename)
     try {
       await importTakeoutPlaylist({ path: response.filename, content: data }, playlistName)
       showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })

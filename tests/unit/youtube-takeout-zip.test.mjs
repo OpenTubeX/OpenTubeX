@@ -59,6 +59,20 @@ test('parses Takeout playlist CSV and rejects other CSV files', () => {
   assert.equal(parseTakeoutPlaylistCsv('Video,Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00', 'My list.csv'), null)
 })
 
+test('strips only the final Takeout video-file suffix from playlist names', () => {
+  const content = 'Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n'
+  for (const [filename, playlistName] of [
+    ['Favorites-videos.csv', 'Favorites'],
+    ['Favorites-videos.CSV', 'Favorites'],
+    ['Favorites.csv', 'Favorites'],
+    ['My-videos collection-videos.csv', 'My-videos collection'],
+    ['My-videos-videos.csv', 'My-videos'],
+    ['旅行-videos.csv', '旅行'],
+  ]) {
+    assert.equal(parseTakeoutPlaylistCsv(content, filename).playlistName, playlistName)
+  }
+})
+
 test('parses Takeout playlist CSV with spaces before dash-prefixed video IDs', () => {
   for (const idField of [' -abcdefghij', '   -abcdefghij', '  "-abcdefghij"']) {
     for (const newline of ['\n', '\r\n']) {

@@ -120,6 +120,10 @@ export async function forEachSelectedTakeoutZipEntry(file, types, onEntry) {
   await streamTakeoutZip(file, types, () => {}, onEntry)
 }
 
+export function getTakeoutPlaylistName(filename) {
+  return filename.replace(/(?:-videos)?\.csv$/i, '')
+}
+
 export function parseTakeoutPlaylistCsv(content, filename) {
   const rows = content.replace(/^\uFEFF/, '').trim().split(/\r?\n/)
   const header = rows[0].toLowerCase()
@@ -140,7 +144,7 @@ export function parseTakeoutPlaylistCsv(content, filename) {
     videos.push({ videoId, title: videoId, lengthSeconds: 0, timeAdded })
   }
 
-  return { playlistName: filename.replace(/\.csv$/i, ''), videos }
+  return { playlistName: getTakeoutPlaylistName(filename), videos }
 }
 
 export function isSupportedTakeoutEntry(entry) {
