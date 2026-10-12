@@ -133,9 +133,9 @@ public class MainActivity extends BridgeActivity {
     public void onPictureInPictureUiStateChanged(PictureInPictureUiState state) {
         super.onPictureInPictureUiStateChanged(state);
         if (Build.VERSION.SDK_INT >= 35 && state.isTransitioningToPip()) {
-            getBridge().triggerWindowJSEvent("opentubex:android-pip",
-                "{\"active\":true,\"transitioning\":true}");
-            ((AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance()).preparePictureInPictureSurface();
+            AndroidUiPlugin plugin = (AndroidUiPlugin) getBridge().getPlugin("AndroidUi").getInstance();
+            plugin.notifyPictureInPictureEntering();
+            plugin.preparePictureInPictureSurface();
         }
     }
 

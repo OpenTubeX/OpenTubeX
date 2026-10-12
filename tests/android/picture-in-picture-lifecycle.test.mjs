@@ -34,7 +34,8 @@ before(async () => {
   originalSettings = await page.evaluate(() => {
     const app = document.querySelector('#app').__vue_app__.config.globalProperties
     return { scale: app.$store.getters.getUiScale, auto: app.$store.getters.getMobileAutoPictureInPicture,
-      mini: app.$store.getters.getScrollMiniPlayerEnabled, route: app.$router.currentRoute.value.fullPath }
+      mini: app.$store.getters.getScrollMiniPlayerEnabled, animation: app.$store.getters.getAnimationSpeed,
+      motion: app.$store.getters.getReducedMotion, route: app.$router.currentRoute.value.fullPath }
   })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/watch/abcdefghijk'))
   await page.waitForSelector('.videoLayout')
@@ -81,6 +82,8 @@ after(async () => {
         app.$store.commit('setUiScale', settings.scale)
         app.$store.commit('setMobileAutoPictureInPicture', settings.auto)
         app.$store.commit('setScrollMiniPlayerEnabled', settings.mini)
+        app.$store.commit('setAnimationSpeed', settings.animation)
+        app.$store.commit('setReducedMotion', settings.motion)
         await app.$router.push(settings.route)
       }, originalSettings)
     } finally { await browser.close() }
@@ -385,6 +388,90 @@ for (const [scale, trigger, scroll] of [[100, 'button'], [125, 'button'], [100, 
       await page.evaluate(() => {
         document.querySelector('video')?.pause()
         document.querySelector('#pip-offscreen-content')?.remove()
+        window.scrollTo(0, 0)
+      })
+    }
+  })
+}
+
+for (const scale of [100, 125]) {
+  test(`native PiP uses its accepted crop when leaving during the scroll mini-player morph at ${scale}%`, { skip: !enabled }, async () => {
+    await page.evaluate(async scale => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollMiniPlayerEnabled', false)
+      store.commit('setUiScale', scale)
+      store.commit('setMobileAutoPictureInPicture', true)
+      // Widen the race so native entry consistently overlaps the morph.
+      store.commit('setAnimationSpeed', 25)
+      store.commit('setReducedMotion', 'off')
+      window.scrollTo(0, 0)
+      const video = document.querySelector('video')
+      video.currentTime = 2
+      await video.play()
+    }, scale)
+    await page.waitForFunction(() => !document.querySelector('.ftVideoPlayer').classList.contains('scrollMiniPlayer') &&
+      !document.querySelector('[data-mobile-mini-morph]'))
+    try {
+      await page.evaluate(() => {
+        const content = document.createElement('div')
+        content.id = 'pip-offscreen-content'
+        content.style.height = '2000px'
+        document.querySelector('.videoLayout').append(content)
+        window.__pipAcceptedLayout = null
+        window.__pipCaptureLayout = event => {
+          if (event.active && event.transitioning) window.__pipAcceptedLayout = event.layout
+        }
+        window.addEventListener('opentubex:android-pip', window.__pipCaptureLayout)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollMiniPlayerEnabled', true)
+        window.scrollTo(0, 1000)
+      })
+      await page.waitForSelector('[data-mobile-mini-morph]')
+      adb('shell', 'input', 'keyevent', 'KEYCODE_HOME')
+      await page.waitForFunction(() => document.body.classList.contains('androidPictureInPicture') &&
+        !document.body.classList.contains('androidPictureInPictureEntering'), null, { polling: 100, timeout: 15000 })
+      const geometry = await page.evaluate(() => ({
+        accepted: window.__pipAcceptedLayout,
+        actual: document.querySelector('video').getBoundingClientRect().toJSON(),
+      }))
+      assert.ok(geometry.accepted, 'native entry returns the layout paired with its crop')
+      for (const axis of ['x', 'y', 'width', 'height']) {
+        assert.ok(Math.abs(geometry.actual[axis] - geometry.accepted.rect[axis]) < 1,
+          `the video must match the accepted crop at ${axis}: ${JSON.stringify(geometry)}`)
+      }
+      await page.waitForTimeout(600)
+      const activity = adb('shell', 'dumpsys', 'activity', 'activities') + adb('shell', 'dumpsys', 'activity', 'top')
+      const bounds = activity.match(/mBounds=Rect\((\d+), (\d+) - (\d+), (\d+)\)[^\n]*mWindowingMode=pinned/) ??
+        activity.match(/Stack #4:\s+mFullscreen=false\s+mBounds=Rect\((\d+), (\d+) - (\d+), (\d+)\)/)
+      assert.ok(bounds, 'the native window entered PiP')
+      const png = execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'exec-out', 'screencap', '-p'], { maxBuffer: 16 * 1024 * 1024 })
+      if (process.env.ANDROID_ARTIFACT_DIR) await writeFile(
+        `${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-mini-morph.png`, png)
+      const pixels = await page.evaluate(async ({ png, bounds }) => {
+        const bitmap = await createImageBitmap(new Blob([Uint8Array.from(atob(png), character => character.charCodeAt(0))], { type: 'image/png' }))
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
+        const context = canvas.getContext('2d')
+        context.drawImage(bitmap, 0, 0)
+        bitmap.close()
+        const [left, top, right, bottom] = bounds
+        // Sample the fixture near every edge, excluding rounded corners and its
+        // central clock. DOM assertions alone cannot catch a stale native crop.
+        return [0.03, 0.15, 0.85, 0.97].flatMap(y => [0.1, 0.5, 0.9].map(x =>
+          [...context.getImageData(Math.round(left + (right - left) * x),
+            Math.round(top + (bottom - top) * y), 1, 1).data].slice(0, 3)))
+      }, { png: png.toString('base64'), bounds: bounds.slice(1).map(Number) })
+      assert.ok(pixels.every(rgb => rgb.every((value, index) => Math.abs(value - [32, 38, 48][index]) < 8)),
+        `PiP must show video at every edge without clipping or black bands: ${JSON.stringify(pixels)}`)
+    } finally {
+      adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
+      await page.waitForFunction(() => !document.body.classList.contains('androidPictureInPicture') &&
+        !document.body.classList.contains('androidPictureInPictureRestoring'))
+      await page.evaluate(() => {
+        window.removeEventListener('opentubex:android-pip', window.__pipCaptureLayout)
+        delete window.__pipCaptureLayout
+        delete window.__pipAcceptedLayout
+        document.querySelector('video')?.pause()
+        document.querySelector('#pip-offscreen-content')?.remove()
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollMiniPlayerEnabled', false)
         window.scrollTo(0, 0)
       })
     }

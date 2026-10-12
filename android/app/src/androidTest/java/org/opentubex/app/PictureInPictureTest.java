@@ -178,9 +178,25 @@ public class PictureInPictureTest {
             CountDownLatch listening = new CountDownLatch(1);
             scenario.onActivity(activity -> activity.getBridge().getWebView().evaluateJavascript(
                 "window.__pipEarlyEntry = false; window.addEventListener('opentubex:android-pip', " +
-                "event => { if (event.active && event.transitioning) window.__pipEarlyEntry = true; });",
+                "event => { if (event.active && event.transitioning) { window.__pipEarlyEntry = true; " +
+                    "window.__pipAcceptedLayout = event.layout; } });",
                 result -> listening.countDown()));
             assertTrue(listening.await(5, TimeUnit.SECONDS));
+            CountDownLatch configured = new CountDownLatch(1);
+            scenario.onActivity(activity -> {
+                WebView view = activity.getBridge().getWebView();
+                AndroidUiPlugin plugin = (AndroidUiPlugin) activity.getBridge().getPlugin("AndroidUi").getInstance();
+                JSObject rect = new JSObject().put("x", 0).put("y", 0).put("width", 400).put("height", 225);
+                JSObject source = new JSObject().put("x", 0).put("y", 0).put("width", 400)
+                    .put("height", 225).put("viewportWidth", view.getWidth());
+                JSObject layout = new JSObject().put("rect", rect).put("fit", "contain");
+                plugin.setAutoPictureInPicture(new PluginCall(null, "AndroidUi", "pip-layout-test",
+                    "setAutoPictureInPicture", new JSObject().put("enabled", false)
+                        .put("sourceRect", source).put("layout", layout)) {
+                    @Override public void resolve() { configured.countDown(); }
+                });
+            });
+            assertTrue(configured.await(5, TimeUnit.SECONDS));
             scenario.onActivity(activity -> {
                 assertFalse("Entry preparation precedes the mode change", activity.isInPictureInPictureMode());
                 // UI-state's builder is hidden; recreate the two Parcelable flags.
@@ -197,14 +213,15 @@ public class PictureInPictureTest {
             while (!transitioning[0] && android.os.SystemClock.uptimeMillis() < deadline) {
                 CountDownLatch received = new CountDownLatch(1);
                 scenario.onActivity(activity -> activity.getBridge().getWebView().evaluateJavascript(
-                    "window.__pipEarlyEntry === true", result -> {
+                    "window.__pipEarlyEntry === true && window.__pipAcceptedLayout?.rect?.width === 400 " +
+                        "&& window.__pipAcceptedLayout.rect.y === 0 && window.__pipAcceptedLayout.fit === 'contain'", result -> {
                         transitioning[0] = "true".equals(result);
                         received.countDown();
                     }));
                 assertTrue(received.await(5, TimeUnit.SECONDS));
                 if (!transitioning[0]) Thread.sleep(20);
             }
-            assertTrue("Hide the page when Android starts its crop, before the mode callback", transitioning[0]);
+            assertTrue("Entry sends the layout accepted with the crop before the mode callback", transitioning[0]);
         }
     }
 

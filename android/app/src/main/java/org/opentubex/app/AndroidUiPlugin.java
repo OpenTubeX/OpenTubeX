@@ -30,6 +30,7 @@ public class AndroidUiPlugin extends Plugin {
     private Rational pictureInPictureAspectRatio = new Rational(16, 9);
     private PictureInPictureSurface pictureInPictureSurface;
     private Rect pictureInPictureSourceRect;
+    private JSObject pictureInPictureLayout;
     private boolean pictureInPictureScrollbarsHidden;
     private boolean fullscreenScrollbarsHidden;
     private boolean pageScrollbarsHidden;
@@ -174,8 +175,7 @@ public class AndroidUiPlugin extends Plugin {
             }
 
             updateSourceRect(call);
-            getBridge().triggerWindowJSEvent("opentubex:android-pip",
-                "{\"active\":true,\"transitioning\":true}");
+            notifyPictureInPictureEntering();
             setPictureInPictureScrollbars(true);
             surface().prepare(pictureInPictureSourceRect);
             if (getActivity().isFinishing() || getActivity().isDestroyed()) {
@@ -246,6 +246,7 @@ public class AndroidUiPlugin extends Plugin {
         JSObject source = call.getObject("sourceRect");
         if (source == null) {
             pictureInPictureSourceRect = null;
+            pictureInPictureLayout = null;
             return;
         }
         if (!getActivity().hasWindowFocus()) return;
@@ -268,7 +269,10 @@ public class AndroidUiPlugin extends Plugin {
             location[0] + (int) Math.round((x + width) * scale),
             location[1] + (int) Math.round((y + height) * scale)
         );
-        if (!rect.isEmpty()) pictureInPictureSourceRect = rect;
+        if (!rect.isEmpty()) {
+            pictureInPictureSourceRect = rect;
+            pictureInPictureLayout = call.getObject("layout");
+        }
     }
 
     @PluginMethod
@@ -348,8 +352,7 @@ public class AndroidUiPlugin extends Plugin {
             preparePictureInPictureSurface();
             return;
         }
-        getBridge().triggerWindowJSEvent("opentubex:android-pip",
-            "{\"active\":true,\"transitioning\":true}");
+        notifyPictureInPictureEntering();
         preparePictureInPictureSurface();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return;
         boolean entered = false;
@@ -374,6 +377,14 @@ public class AndroidUiPlugin extends Plugin {
         // Pin the live viewport before automatic entry starts resizing it.
         setPictureInPictureScrollbars(true);
         surface().prepare(pictureInPictureSourceRect);
+    }
+
+    void notifyPictureInPictureEntering() {
+        // Return the renderer layout accepted with the crop. Animations can
+        // move the video between that update and Android's entry callback.
+        JSObject event = new JSObject().put("active", true).put("transitioning", true)
+            .put("layout", pictureInPictureLayout);
+        getBridge().triggerWindowJSEvent("opentubex:android-pip", event.toString());
     }
 
     private void cancelPictureInPictureEntry() {
