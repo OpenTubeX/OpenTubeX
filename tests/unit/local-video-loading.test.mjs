@@ -64,13 +64,13 @@ function loader({ android = Promise.resolve({ data: {} }), token = Promise.resol
   return { load, requests, session }
 }
 
-test('prepares the playback token and watch metadata while the player script is pending', async () => {
+test('requests watch metadata while the player script is pending', async () => {
   const script = deferred()
   const { load, requests } = loader({ createPlayer: () => script.promise, embeddedPlayer: false })
   const loading = load('testVideo01')
   await new Promise(resolve => setImmediate(resolve))
   try {
-    assert.ok(requests.includes('token'), 'Player-script setup must not delay token generation')
+    assert.ok(!requests.includes('token'), 'Token generation must recheck load validity after player-script setup')
     assert.ok(requests.includes('/next'), 'Player-script setup must not delay watch metadata')
     assert.ok(!requests.includes('/player'), 'The player request still needs the script signature timestamp')
     assert.ok(!requests.includes('ANDROID'), 'Promotion lookup still needs the script signature timestamp')
@@ -92,6 +92,19 @@ test('attaches the playback token only after the player script and token are rea
   const result = await loading
   assert.equal(result.poToken, 'ready-token')
   assert.equal(session.player.po_token, 'ready-token')
+})
+
+test('does not enqueue a token for a load superseded during player-script setup', async () => {
+  const script = deferred()
+  const { load, requests } = loader({ createPlayer: () => script.promise })
+  let currentLoad = true
+  const loading = load('testVideo01', { shouldGeneratePoToken: () => currentLoad })
+  await new Promise(resolve => setImmediate(resolve))
+  currentLoad = false
+  script.resolve({ signature_timestamp: 1, decipher: async url => url })
+  const result = await loading
+  assert.ok(!requests.includes('token'), 'A superseded load must not occupy the shared token queue')
+  assert.equal(result.poToken, undefined)
 })
 
 test('waits for the playback token before requesting streams after the script is ready', async () => {
@@ -117,6 +130,10 @@ for (const failingStage of ['script', 'token', 'metadata']) {
     const loading = load('testVideo01')
     const rejected = assert.rejects(loading, new RegExp(`${failingStage} unavailable`))
     await new Promise(resolve => setImmediate(resolve))
+    if (failingStage === 'token') {
+      script.resolve({ signature_timestamp: 1, decipher: async url => url })
+      await new Promise(resolve => setImmediate(resolve))
+    }
     const stage = { script, token, metadata: next }[failingStage]
     stage.reject(new Error(`${failingStage} unavailable`))
     try {

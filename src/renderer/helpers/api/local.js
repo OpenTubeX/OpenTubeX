@@ -730,8 +730,8 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     isPremiere ??= getLocalPremiereState(htmlExtracts.playerResponse.videoDetails)
   }
 
-  // Script setup, token generation, and /next only depend on the HTML session.
-  // Start them together, including when the player script is not cached yet.
+  // Script setup and /next only depend on the HTML session. Start them together,
+  // including when the player script is not cached yet.
   const playerReady = (async () => {
     player ??= await Player.create(
       process.env.IS_ELECTRON ? new PlayerCache() : new UniversalCache(false),
@@ -764,26 +764,25 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     return paidPromotionDurationMs
   })
 
-  async function loadContentPoToken() {
+  async function loadPlayerResponse() {
+    // Recheck load validity after script setup before occupying the token queue.
+    await playerReady
+    let contentPoToken
     if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         !watchPageIpBlocked && shouldGeneratePoToken()) {
       try {
-        return await generateContentPoToken(
+        contentPoToken = await generateContentPoToken(
           id,
           htmlExtracts.session.context,
           htmlExtracts.initialAttestationData,
           htmlExtracts.ytConfig
         )
+        player.po_token = contentPoToken
       } catch (error) {
         console.error('Local API, poToken generation failed', error)
         throw error
       }
     }
-  }
-
-  async function loadPlayerResponse() {
-    const [, contentPoToken] = await Promise.all([playerReady, loadContentPoToken()])
-    if (contentPoToken) player.po_token = contentPoToken
     const playerResponse = htmlExtracts.playerResponse
       ? { data: htmlExtracts.playerResponse }
       : await htmlExtracts.session.actions.execute('/player', {

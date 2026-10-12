@@ -233,47 +233,67 @@ test.describe('local player request concurrency', () => {
     }
   })
 
-  test('prepares the token and watch metadata while the player script is pending', async ({ app, page }, testInfo) => {
-    await mockPlayableWatchPage(app, page)
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      ipcMain.removeHandler('generate-po-token')
-      ipcMain.handle('generate-po-token', () => {
-        globalThis.loadingTestTokenRequested = true
-        return 'test-po-token'
+  for (const changeVideo of [false, true]) {
+    test(changeVideo ? 'only requests a token for the current video after navigation during player-script setup' : 'fetches watch metadata while the player script is pending', async ({ app, page }, testInfo) => {
+      const currentVideoId = 'dQw4w9WgXc'
+      await mockPlayableWatchPage(app, page)
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler('generate-po-token')
+        globalThis.loadingTestTokenVideoIds = []
+        ipcMain.handle('generate-po-token', (_event, videoId) => {
+          globalThis.loadingTestTokenVideoIds.push(videoId)
+          return 'test-po-token'
+        })
       })
-    })
-    let finishScript
-    const scriptResponse = new Promise(resolve => { finishScript = resolve })
-    let scriptPending = false
-    let metadataRequested = false
-    await page.route('**/s/player/**', async route => {
-      scriptPending = true
-      await scriptResponse
-      await route.fallback()
-    })
-    await page.route('**/youtubei/v1/next**', route => {
-      metadataRequested = true
-      return route.fallback()
-    })
-    try {
-      const startedAt = performance.now()
-      await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
-      await page.locator(sel.searchInput).press('Enter')
-      await expect.poll(() => scriptPending).toBe(true)
-      await expect.poll(() => app.electronApp.evaluate(() => globalThis.loadingTestTokenRequested ?? false))
-        .toBe(true)
-      await expect.poll(() => metadataRequested).toBe(true)
-      await expect(page.locator('.infoSkeleton')).toBeVisible()
-      finishScript()
-      await waitForPlayback(page)
-      await expect(page.locator('.infoSkeleton, .videoPlayerPlaceholder')).toHaveCount(0)
-      await testInfo.attach('playback-with-concurrent-startup', {
-        body: JSON.stringify({ playbackMs: performance.now() - startedAt }),
-        contentType: 'application/json'
+      let finishScript
+      const scriptResponse = new Promise(resolve => { finishScript = resolve })
+      let scriptPending = false
+      let metadataRequested = false
+      await page.route('**/s/player/**', async route => {
+        scriptPending = true
+        await scriptResponse
+        await route.fallback()
       })
-      await page.screenshot({ path: testInfo.outputPath('playback-with-concurrent-startup.png') })
-    } finally {
-      finishScript()
-    }
-  })
+      await page.route('**/youtubei/v1/next**', route => {
+        metadataRequested = true
+        if (route.request().postDataJSON().videoId === currentVideoId) return route.fulfill({ json: {} })
+        return route.fallback()
+      })
+      try {
+        const startedAt = performance.now()
+        await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${videoId}`)
+        await page.locator(sel.searchInput).press('Enter')
+        await expect.poll(() => scriptPending).toBe(true)
+        await expect.poll(() => metadataRequested).toBe(true)
+        expect(await app.electronApp.evaluate(() => globalThis.loadingTestTokenVideoIds)).toEqual([])
+        await expect(page.locator('.infoSkeleton')).toBeVisible()
+        if (changeVideo) {
+          const currentMetadataRequest = page.waitForRequest(request => request.url().includes('/youtubei/v1/next') &&
+            request.postDataJSON().videoId === currentVideoId)
+          await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${currentVideoId}`)
+          await page.locator(sel.searchInput).press('Enter')
+          await expect(page).toHaveURL(new RegExp(`#/watch/${currentVideoId}`))
+          await currentMetadataRequest
+          const promotionRequest = page.waitForRequest(request => request.url().includes('/youtubei/v1/player') &&
+            request.postDataJSON().context.client.clientName === 'ANDROID')
+          finishScript()
+          await promotionRequest
+          await waitForPlayback(page)
+          expect(await app.electronApp.evaluate(() => globalThis.loadingTestTokenVideoIds)).toEqual([currentVideoId])
+          return
+        }
+        finishScript()
+        await waitForPlayback(page)
+        expect(await app.electronApp.evaluate(() => globalThis.loadingTestTokenVideoIds)).toEqual([videoId])
+        await expect(page.locator('.infoSkeleton, .videoPlayerPlaceholder')).toHaveCount(0)
+        await testInfo.attach('playback-with-concurrent-startup', {
+          body: JSON.stringify({ playbackMs: performance.now() - startedAt }),
+          contentType: 'application/json'
+        })
+        await page.screenshot({ path: testInfo.outputPath('playback-with-concurrent-startup.png') })
+      } finally {
+        finishScript()
+      }
+    })
+  }
 })
