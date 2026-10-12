@@ -113,6 +113,12 @@
     margin-block-start: 0.2em;
   }
 
+  .channelName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .playlistTitle,
   .playlistDescription {
     overflow-x: hidden;
@@ -136,6 +142,15 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+    grid-column: 2;
+
+    &:only-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .channelShareWrapper {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
 
   .channelShareWrapper,
