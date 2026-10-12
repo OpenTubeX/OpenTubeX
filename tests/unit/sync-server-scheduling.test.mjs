@@ -90,6 +90,27 @@ async function loadLocalChangePlugin() {
   )
 }
 
+test('schedules imported playlist changes while skipping failed and remote writes', async () => {
+  const scheduled = []
+  const store = createStore({
+    state: { settings: settings({ syncServerSyncPlaylists: true }) },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: { upsertPlaylistToList() {} },
+    actions: {
+      async importPlaylist({ commit }, { fail = false } = {}) {
+        if (fail) { throw new Error('Playlist write failed') }
+        commit('upsertPlaylistToList')
+      },
+      scheduleSyncServer: (_, reason) => scheduled.push(reason),
+    },
+  })
+  await store.dispatch('importPlaylist')
+  assert.deepEqual(scheduled, ['playlists'])
+  await dispatchRemoteSyncAction(store.dispatch, 'importPlaylist')
+  await assert.rejects(store.dispatch('importPlaylist', { fail: true }), /Playlist write failed/)
+  assert.deepEqual(scheduled, ['playlists'])
+})
+
 async function profileChangeFixture() {
   const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
   const profiles = vm.runInNewContext(source

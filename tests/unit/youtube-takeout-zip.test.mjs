@@ -121,6 +121,19 @@ test('rejects metadata rows that match the same discovered video file', async ()
   assert.match(errors[0].message, /Ambiguous playlist metadata/)
 })
 
+test('rejects uncertain metadata when one playlist could match either filename form', async () => {
+  const root = 'Takeout/YouTube/playlists'
+  const file = new Blob([zipSync({
+    [`${root}/playlists.csv`]: strToU8(`${metadataHeader}\nPLone,List,Description,,`),
+    [`${root}/List.csv`]: strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z'),
+    [`${root}/List-videos.csv`]: strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-02T00:00:00Z'),
+  })])
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.equal(metadata.size, 0)
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Ambiguous playlist metadata/)
+})
+
 test('invalidates repeated metadata entries for an account while retaining other accounts', async () => {
   const chunks = []
   const zip = new Zip((error, chunk) => {
