@@ -59,6 +59,8 @@ const surfaces = [
     alignment: 'end',
     async open(page, positionTrigger) {
       await goTo(page, 'home')
+      // Home reveals its activity cards over several frames; they move this trigger.
+      await expect(page.locator('.homePage')).toHaveAttribute('aria-busy', 'false')
       await positionTrigger?.(page.locator(this.trigger))
       const button = page.locator(this.trigger)
       if (positionTrigger) await button.evaluate(element => element.click())
