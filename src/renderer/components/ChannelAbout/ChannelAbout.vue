@@ -28,7 +28,6 @@
             target="_blank"
             rel="noopener noreferrer"
             dir="auto"
-            @click.prevent="openExternalLink(link.url)"
           >
             <span
               class="aboutLinkIcon"
@@ -175,7 +174,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml.js'
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
-import { formatNumber, openExternalLink } from '../../helpers/utils'
+import { formatNumber } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
 
 const { locale } = useI18n()
