@@ -1,7 +1,5 @@
 .dataStorageTabs {
   display: grid;
-  inline-size: fit-content;
-  max-inline-size: 100%;
   gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

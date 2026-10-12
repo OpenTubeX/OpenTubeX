@@ -1,6 +1,4 @@
 .tabBar {
-  --tab-bar-inline-padding: 4px;
-
   box-sizing: border-box;
   display: flex;
 

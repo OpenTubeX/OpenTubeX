@@ -127,12 +127,12 @@
     flex-direction: row;
     justify-content: flex-start;
     gap: 12px;
-    inline-size: calc(100% - 16px);
+    inline-size: calc(100% - 8px - var(--expanded-nav-end-spacing, 8px));
     block-size: auto;
     min-block-size: 48px;
     padding-block: 8px;
     padding-inline: 12px;
-    margin-inline: 8px;
+    margin-inline: 8px var(--expanded-nav-end-spacing, 8px);
     margin-block-end: 4px;
   }
 
