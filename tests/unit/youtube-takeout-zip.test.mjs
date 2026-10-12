@@ -17,10 +17,10 @@ test('does not announce complete success after an empty playlist fails and a lat
     selectedTakeoutTypes: { value: ['playlists'] },
     takeoutEntries: { value: [] },
     takeoutFile: { value: new Blob() },
-    readTakeoutPlaylistMetadata: async () => new Map([
+    readTakeoutPlaylistMetadata: async () => ({ errors: [], metadata: new Map([
       ['playlists/Failed-videos.csv', { playlistName: 'Failed' }],
       ['playlists/Success-videos.csv', { playlistName: 'Success' }],
-    ]),
+    ]) }),
     forEachSelectedTakeoutZipEntry: async () => {},
     importTakeoutPlaylist: async playlist => {
       imported.push(playlist.playlistName)
@@ -69,6 +69,29 @@ test('detects supported Takeout entries under the archive root', () => {
 
 const metadataHeader = 'Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp'
 
+for (const [schema, badMetadata] of [
+  ['malformed', 'wrong header\n'],
+  ['localized', '播放清單 ID,標題\nPLbad,清單\n'],
+  ['ambiguous', `${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`],
+]) {
+  for (const badFirst of [true, false]) {
+    test(`retains valid account metadata with ${schema} metadata in another account, invalid first: ${badFirst}`, async () => {
+      const valid = ['Good account/playlists/playlists.csv', strToU8(`${metadataHeader}\nPLgood,Good/List,Description,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\nPLempty,Empty,,,`)]
+      const invalid = ['Bad account/playlists/playlists.csv', strToU8(badMetadata)]
+      const archive = zipSync(Object.fromEntries(badFirst ? [invalid, valid] : [valid, invalid]))
+      const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob([archive]))
+      assert.equal(metadata.size, 2)
+      assert.deepEqual(metadata.get('Good account/playlists/Good_List-videos.csv'), {
+        playlistName: 'Good/List', description: 'Description',
+        createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'),
+      })
+      assert.equal(metadata.get('Good account/playlists/Empty-videos.csv').playlistName, 'Empty')
+      assert.equal(errors.length, 1)
+      assert.match(errors[0].message, /Bad account\/playlists\//)
+    })
+  }
+}
+
 test('parses reordered metadata columns, BOM, CRLF and quoted multiline descriptions', () => {
   const content = '\uFEFFPlaylist Description (Original),Playlist Title (Original),Playlist ID,Playlist Update Timestamp,Playlist Create Timestamp\r\n"First, second\r\nSay ""hello""","A/B-videos",PLexample,2025-02-01T00:00:00Z,2024-01-01T00:00:00Z\r\n'
   assert.deepEqual(parseTakeoutPlaylistMetadataCsv(content), [{
@@ -101,7 +124,8 @@ test('reads late metadata separately, scopes it to its account, and includes emp
   const file = new Blob([archive])
   const listed = await listYouTubeTakeoutZipEntries(file)
   assert.deepEqual(listed.map(entry => entry.type), ['playlists', 'playlists', 'playlists'])
-  const metadata = await readTakeoutPlaylistMetadata(file)
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(file)
+  assert.deepEqual(errors, [])
   assert.equal(metadata.get(`${root}/A_B-videos-videos.csv`).playlistName, 'A/B-videos')
   assert.equal(metadata.get(`${root}/Empty-videos.csv`).playlistName, 'Empty')
   assert.equal(metadata.get(`${root}/It_s music-videos.csv`).playlistName, "It's music")
@@ -116,7 +140,10 @@ test('rejects ambiguous sanitized filenames within an account', async () => {
   const archive = zipSync({
     'Takeout/YouTube/playlists/playlists.csv': strToU8(`${metadataHeader}\nPLone,A/B,,,\nPLtwo,A_B,,,`),
   })
-  await assert.rejects(readTakeoutPlaylistMetadata(new Blob([archive])), /Ambiguous playlist metadata/)
+  const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob([archive]))
+  assert.equal(metadata.size, 0)
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Ambiguous playlist metadata/)
 })
 
 test('lists supported entries and reads only selected archive content', async () => {

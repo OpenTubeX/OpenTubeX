@@ -503,12 +503,17 @@ async function importSelectedTakeoutData() {
   try {
     let metadata = new Map()
     if (selected.has('playlists')) {
-      try {
-        metadata = await readTakeoutPlaylistMetadata(takeoutFile.value)
-      } catch (error) {
+      function reportMetadataError(error) {
         failedPlaylists = true
         console.error('Unable to import Takeout playlist metadata', error)
         showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+      }
+      try {
+        const result = await readTakeoutPlaylistMetadata(takeoutFile.value)
+        metadata = result.metadata
+        result.errors.forEach(reportMetadataError)
+      } catch (error) {
+        reportMetadataError(error)
       }
     }
     const reservedPlaylistNames = new Set([

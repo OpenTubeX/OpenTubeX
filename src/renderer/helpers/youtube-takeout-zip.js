@@ -208,21 +208,29 @@ export function parseTakeoutPlaylistMetadataCsv(content) {
  */
 export async function readTakeoutPlaylistMetadata(file) {
   const metadata = new Map()
+  const errors = []
   await streamTakeoutZip(file, new Set(['playlistMetadata']), () => {}, entry => {
     const playlists = parseTakeoutPlaylistMetadataCsv(entry.content)
-    if (playlists === null) { throw new Error(`Invalid playlist metadata CSV: ${entry.path}`) }
+    if (playlists === null) {
+      errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
+      return
+    }
     const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
+    const accountMetadata = new Map()
     for (const playlist of playlists) {
       // Takeout replaces filename-unsafe characters, including slashes, with underscores.
       const filename = playlist.playlistName.replaceAll(/[<>:"'/\\|?*\p{Cc}]/gu, '_')
       const path = `${directory}${filename}-videos.csv`
-      if (metadata.has(path)) {
-        throw new Error(`Ambiguous playlist metadata: ${path}`)
+      if (accountMetadata.has(path)) {
+        errors.push(new Error(`Ambiguous playlist metadata: ${path}`))
+        return
       }
-      metadata.set(path, playlist)
+      accountMetadata.set(path, playlist)
     }
+    // Commit each account only after all its records have unambiguous filenames.
+    for (const [path, playlist] of accountMetadata) { metadata.set(path, playlist) }
   })
-  return metadata
+  return { metadata, errors }
 }
 
 export function parseTakeoutPlaylistCsv(content, filename, metadata) {

@@ -143,6 +143,8 @@ for (const [name, metadata] of [
     const archive = zipSync({
       [`${root}/playlists/playlists.csv`]: strToU8(metadata),
       [`${root}/playlists/本地清單-videos.csv`]: strToU8('影片 ID,播放清單影片的建立時間戳記\nabcdefghijk,2025-01-01T00:00:00Z\n'),
+      'Good account/playlists/Good_List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-01T00:00:00Z\n'),
+      'Good account/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original),Playlist Description (Original),Playlist Create Timestamp,Playlist Update Timestamp\nPLgood,Good/List,Good account,2024-01-01T00:00:00Z,2025-01-01T00:00:00Z\nPLempty,Good empty,,,\n'),
       [`${root}/subscriptions/subscriptions.csv`]: strToU8('Channel Id,Channel Url,Channel Title\nUCmetadatafailure,https://www.youtube.com/channel/UCmetadatafailure,Metadata failure channel\n'),
       [`${root}/history/watch-history.json`]: strToU8(JSON.stringify([{
         products: ['YouTube'], title: 'Watched Example', titleUrl: 'https://www.youtube.com/watch?v=abcdefghijk', time: '2025-01-01T00:00:00Z'
@@ -162,14 +164,30 @@ for (const [name, metadata] of [
     await page.locator('.takeoutSelectionCentered').getByRole('button', { name: 'Import selected data' }).click()
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const goodPlaylist = store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good/List')
       return {
         subscribed: store.getters.getProfileList[0].subscriptions.some(channel => channel.id === 'UCmetadatafailure'),
         watched: Boolean(store.getters.getHistoryCacheById.abcdefghijk),
         searched: store.getters.getSearchHistoryEntries.some(entry => entry.query === 'metadata failure'),
         playlistCount: store.getters.getAllPlaylists.length,
         videoIds: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === '本地清單')?.videos.map(video => video.videoId),
+        goodPlaylist: goodPlaylist && {
+          description: goodPlaylist.description,
+          createdAt: goodPlaylist.createdAt,
+          lastUpdatedAt: goodPlaylist.lastUpdatedAt,
+          videoIds: goodPlaylist.videos.map(video => video.videoId),
+        },
+        empty: store.getters.getAllPlaylists.find(playlist => playlist.playlistName === 'Good empty')?.videos,
       }
-    })).toEqual({ subscribed: true, watched: true, searched: true, playlistCount: 3, videoIds: ['abcdefghijk'] })
+    })).toEqual({
+      subscribed: true,
+      watched: true,
+      searched: true,
+      playlistCount: 5,
+      videoIds: ['abcdefghijk'],
+      goodPlaylist: { description: 'Good account', createdAt: Date.parse('2024-01-01T00:00:00Z'), lastUpdatedAt: Date.parse('2025-01-01T00:00:00Z'), videoIds: ['lmnopqrstuv'] },
+      empty: [],
+    })
     await expect(page.locator('.takeoutSelectionCentered')).toBeHidden()
     await expect(page.locator('.toast', { hasText: 'Unable to read file' })).toBeVisible()
     await expect(page.locator('.toast', { hasText: 'All playlists has been successfully imported' })).toHaveCount(0)
