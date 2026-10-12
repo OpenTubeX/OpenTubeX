@@ -1,6 +1,7 @@
 export const SUBSCRIPTION_FEED_TYPES = Object.freeze(['videos', 'shorts', 'live', 'posts'])
 export const MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES = 5000
 const CHANNEL_SETTING_KEYS = ['feedTypes', 'dailyVideoLimit', 'showMembersOnly']
+export const MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS = 20
 
 /**
  * @param {(key: string) => string} t

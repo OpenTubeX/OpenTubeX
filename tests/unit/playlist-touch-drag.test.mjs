@@ -3,12 +3,12 @@ import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
 import { ref } from 'vue'
-import { handleDragAndDrop } from '../../src/renderer/helpers/dragAndDrop.js'
+import { handleDragAndDrop, isSamePlaylistMember } from '../../src/renderer/helpers/dragAndDrop.js'
 
 const source = readFileSync(new URL('../../src/renderer/composables/usePlaylistDrag.js', import.meta.url), 'utf8')
   .replace(/^import .*\n/gm, '').replace('export function', 'function')
 
-function createDrag() {
+function createDrag(legacyItemId = null) {
   const moves = []
   const listeners = new Map()
   const frames = new Map()
@@ -27,7 +27,7 @@ function createDrag() {
   }
   const row = index => ({
     parentElement: list,
-    dataset: { videoId: `video-${index}`, playlistItemId: `item-${index}` },
+    dataset: legacyItemId === null ? { videoId: `video-${index}`, playlistItemId: `item-${index}` } : { videoId: 'duplicate', playlistItemId: legacyItemId || undefined, libraryMemberId: `member-${index}` },
     closest() { return this }
   })
   const rows = [row(0), row(1), row(2)]
@@ -35,6 +35,7 @@ function createDrag() {
     ref,
     onBeforeUnmount(callback) { cleanup = callback },
     handleDragAndDrop,
+    isSamePlaylistMember,
     emit(name, ...args) { moves.push({ name, args }) },
     performance: { now: () => time },
     getComputedStyle: () => ({ overflowY: 'visible' }),
@@ -48,7 +49,7 @@ function createDrag() {
     currentTarget: rows[0], target: { closest: () => ({}) }, clientX: 400, clientY: 400,
     preventDefault() {}, stopPropagation() {}
   })
-  api.startPointerDrag(event('pointerdown'), { videoId: 'video-0', playlistItemId: 'item-0' })
+  api.startPointerDrag(event('pointerdown'), { videoId: rows[0].dataset.videoId, playlistItemId: rows[0].dataset.playlistItemId, ...(legacyItemId === null ? {} : { _libraryMemberId: rows[0].dataset.libraryMemberId }) })
   return {
     api, moves, frames, listeners, cleanup,
     move(index, at) { target = rows[index]; time = at; listeners.get('pointermove')(event('pointermove')) },
@@ -97,4 +98,38 @@ test('cancellation discards a pending touch destination and releases drag resour
   assert.equal(drag.frames.size, 0)
   drag.cleanup()
   assert.equal(drag.moves.filter(move => move.name === 'drag-video-end').length, 1)
+})
+
+for (const legacyItemId of ['', 'repeated']) {
+  test(`pointer drag keeps duplicate member identities with ${legacyItemId || 'missing'} legacy item IDs`, () => {
+    const drag = createDrag(legacyItemId)
+    drag.move(1, 1000)
+    drag.move(2, 1050)
+    drag.end()
+    const moves = drag.moves.filter(move => move.name === 'move-dragged-video')
+    assert.deepEqual(moves.map(move => move.args[0]._libraryMemberId), ['member-1', 'member-2'])
+    assert.ok(moves.every(move => move.args[1]._libraryMemberId === 'member-0'))
+    assert.equal(drag.moves.at(-1).name, 'drag-video-end')
+  })
+}
+
+test('a mixed normalized and legacy drag identity cannot match an ambiguous occurrence', () => {
+  const legacy = { videoId: 'same', playlistItemId: 'repeated' }
+  const first = { ...legacy, _libraryMemberId: 'first' }
+  const second = { ...legacy, _libraryMemberId: 'second' }
+  assert.equal(isSamePlaylistMember(first, legacy), false)
+  assert.equal(isSamePlaylistMember(legacy, first), false)
+  assert.equal(isSamePlaylistMember(first, second), false)
+  assert.equal(isSamePlaylistMember(first, { ...first }), true)
+  assert.equal(isSamePlaylistMember(legacy, { ...legacy }), true)
+})
+
+test('native drag emits only stable member identity fields', () => {
+  const events = []
+  const handlers = handleDragAndDrop((name, payload) => events.push([name, payload]))
+  const event = { dataTransfer: { setData() {} } }
+  const video = { videoId: 'same', playlistItemId: 'repeated', _libraryMemberId: 'last', title: 'Unrelated metadata', pointerDragging: true }
+  handlers.dragVideo(event, video)
+  assert.deepEqual(events, [['drag-video', { videoId: 'same', playlistItemId: 'repeated', _libraryMemberId: 'last' }]])
+  assert.equal(event.dataTransfer.effectAllowed, 'move')
 })

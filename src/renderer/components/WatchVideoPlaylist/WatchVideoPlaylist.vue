@@ -283,7 +283,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { deepCopy, extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
+import { extractNumberFromString, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -428,11 +428,19 @@ const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value
 /** @type {import('vue').ComputedRef<number | undefined>} */
 const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.value?.lastUpdatedAt)
 
+function getPlayableUserPlaylistVideos(playlist) {
+  if (!Array.isArray(playlist?.videos)) return []
+  return playlist.videos.filter(video => (
+    video != null && typeof video === 'object' && !Array.isArray(video) &&
+    typeof video.videoId === 'string' && video.videoId !== ''
+  ))
+}
+
 const userPlaylistWatchedVideoCount = computed(() => {
   if (!isUserPlaylist.value) { return 0 }
 
   const historyCacheById = store.getters.getHistoryCacheById
-  return selectedUserPlaylist.value?.videos.reduce((count, video) => {
+  return getPlayableUserPlaylistVideos(selectedUserPlaylist.value).reduce((count, video) => {
     return isHistoryEntryWatched(historyCacheById[video.videoId]) ? count + 1 : count
   }, 0) ?? 0
 })
@@ -806,16 +814,17 @@ async function persistPlaylistOrder(items) {
   const selectedPlaylist = selectedUserPlaylist.value
   if (selectedPlaylist == null) { return }
 
-  const playlist = {
-    playlistName: selectedPlaylist.playlistName,
-    protected: selectedPlaylist.protected,
-    description: selectedPlaylist.description,
-    videos: deepCopy(reversePlaylist.value ? items.toReversed() : items),
-    _id: selectedPlaylist._id,
-  }
-
   try {
-    await store.dispatch('updatePlaylist', playlist)
+    const original = getPlayableUserPlaylistVideos(selectedPlaylist)
+    const ordered = reversePlaylist.value ? items.toReversed() : items
+    if (!Array.isArray(selectedPlaylist.videos) || ordered.length !== original.length) throw new Error('The playlist changed; reload it before reordering')
+    const playable = new Set(original)
+    let index = 0
+    const playlist = {
+      ...selectedPlaylist,
+      videos: selectedPlaylist.videos.map(video => playable.has(video) ? ordered[index++] : video),
+    }
+    if (await store.dispatch('updatePlaylist', playlist) !== true) throw new Error('Could not update playlist')
   } catch (error) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
@@ -883,7 +892,7 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
   if (option !== 'delete' || selectedUserPlaylist.value == null) { return }
 
   const historyCacheById = store.getters.getHistoryCacheById
-  const watchedVideos = selectedUserPlaylist.value.videos
+  const watchedVideos = getPlayableUserPlaylistVideos(selectedUserPlaylist.value)
     .filter((video) => isHistoryEntryWatched(historyCacheById[video.videoId]))
   const playlistItemIds = watchedVideos.map((video) => video.playlistItemId)
 
@@ -1167,7 +1176,8 @@ function parseUserPlaylist(playlist) {
   channelName.value = ''
   channelId.value = ''
 
-  const isCurrentVideoInParsedPlaylist = findIndexOfCurrentVideoInPlaylist(playlist.videos) !== -1
+  const videos = getPlayableUserPlaylistVideos(playlist)
+  const isCurrentVideoInParsedPlaylist = findIndexOfCurrentVideoInPlaylist(videos) !== -1
   if (!isCurrentVideoInParsedPlaylist) {
     // grab 2nd video if the 1st one is current & deleted
     // or the prior video in the list before the current video's deletion
@@ -1175,7 +1185,7 @@ function parseUserPlaylist(playlist) {
     prevVideoBeforeDeletion.value = targetVideoIndex >= 0 ? playlistItems.value[targetVideoIndex] : null
   }
 
-  playlistItems.value = getSortedPlaylistItems(playlist.videos, sortOrder.value, locale.value, reversePlaylist.value)
+  playlistItems.value = getSortedPlaylistItems(videos, sortOrder.value, locale.value, reversePlaylist.value)
 
   isLoading.value = false
 }

@@ -258,8 +258,13 @@ export async function verifyPlaylistSwipeRemoval(page, session, screenshot = asy
         await page.getByText('Video has been removed. Click here to undo.', { exact: true }).click()
         await expect(cards).toHaveCount(2)
       } else {
-        await expect.poll(() => page.evaluate(id => {
-          const playlist = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist(id)
+        await expect.poll(() => page.evaluate(async id => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          if (store.state.history.libraryPaged) {
+            const playlist = await window.ftElectron.libraryQuery('playlistSnapshot', { id })
+            return playlist.videos.map(video => video.playlistItemId)
+          }
+          const playlist = store.getters.getPlaylist(id)
           return playlist.videos.map(video => video.playlistItemId)
         }, saved.playlistId), { timeout: 10_000 }).toEqual(['swipe-second'])
       }

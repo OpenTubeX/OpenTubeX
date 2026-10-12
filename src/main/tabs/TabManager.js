@@ -13,7 +13,7 @@ import {
   normalizeNavigationItems,
 } from '../../navigationItems.js'
 import { filterAvailableNavigationItems } from '../../navigationAvailability.js'
-import * as baseHandlers from '../../datastores/handlers/base.js'
+import * as baseHandlers from '../../datastores/handlers/main.js'
 import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
   clearTabSession,
@@ -276,13 +276,22 @@ export class TabManager {
 
       let landingPage = landingPageSetting?.value
       if (typeof landingPage !== 'string' || landingPage.length === 0) {
-        const [settings, profiles] = await Promise.all([
-          baseHandlers.settings.find(),
-          baseHandlers.profiles.find(),
-        ])
-        landingPage = settings.length > 0 || profiles.length > 0
-          ? LEGACY_DEFAULT_LANDING_PAGE
-          : DEFAULT_LANDING_PAGE
+        // Any preference read above already proves this is an existing profile.
+        // Avoid running mutating legacy handlers just to check its presence.
+        if ([landingPageSetting, navigationItemsSetting, hideHomeSetting,
+          hidePlaylistsSetting, hidePopularVideosSetting, hideTrendingVideosSetting,
+          backendPreferenceSetting, backendFallbackSetting, rememberHistorySetting,
+          enableWatchStatsSetting].some(Boolean)) {
+          landingPage = LEGACY_DEFAULT_LANDING_PAGE
+        } else {
+          const [settings, profiles] = await Promise.all([
+            baseHandlers.settings.find(),
+            baseHandlers.profiles.find(),
+          ])
+          landingPage = settings.length > 0 || profiles.length > 0
+            ? LEGACY_DEFAULT_LANDING_PAGE
+            : DEFAULT_LANDING_PAGE
+        }
       }
 
       const configuredPages = navigationItemsSetting == null

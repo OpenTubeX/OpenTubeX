@@ -61,6 +61,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const storedReceipts = new Map()
   const common = {
     DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
+    DBLibraryHandlers: { query: async method => {
+      assert.equal(method, 'syncSnapshotRead')
+      return settings.syncServerSnapshot
+    } },
     DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo, mergeSyncIds, syncVideoToRemote,
     runBackgroundJob: backgroundJob,
     toRaw,

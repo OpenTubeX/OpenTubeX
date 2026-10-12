@@ -337,7 +337,7 @@ const activeProfile = computed(() => store.getters.getActiveProfile)
 const profileId = ref(props.profile._id)
 
 /** @type {import('vue').Ref<string>} */
-const profileName = ref(props.profile.name)
+const profileName = ref(props.profile.name ?? '')
 
 /** @type {import('vue').Ref<string>} */
 const profileBgColor = ref(props.profile.bgColor)
@@ -487,17 +487,19 @@ const editOrCreateProfileNameLabel = computed(() => {
 })
 
 function saveProfile() {
-  if (profileName.value === '') {
+  const retainedNullName = !props.isNew && props.profile.name === null && profileName.value === ''
+  if (profileName.value === '' && !retainedNullName) {
     showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
   const profile = {
-    name: profileName.value,
+    ...props.profile,
+    name: retainedNullName ? null : profileName.value,
     bgColor: profileBgColor.value,
     textColor: profileTextColor.value,
     icon: deepCopy(profileIcon.value),
-    subscriptions: deepCopy(props.profile.subscriptions)
+    subscriptions: props.profile.subscriptions
   }
 
   if (!props.isNew) {

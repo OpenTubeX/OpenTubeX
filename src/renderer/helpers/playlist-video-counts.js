@@ -22,7 +22,8 @@ export function incrementPlaylistVideoCounts(counts, videos) {
     return
   }
 
-  for (const { videoId } of videos) {
+  for (const video of videos) {
+    const videoId = video?.videoId
     if (videoId == null) {
       continue
     }
@@ -40,7 +41,8 @@ export function decrementPlaylistVideoCounts(counts, videos) {
     return
   }
 
-  for (const { videoId } of videos) {
+  for (const video of videos) {
+    const videoId = video?.videoId
     const count = counts.get(videoId)
 
     if (count === undefined) {

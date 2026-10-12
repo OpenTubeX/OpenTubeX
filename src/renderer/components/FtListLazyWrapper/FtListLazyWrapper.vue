@@ -11,12 +11,13 @@
       list: layout === 'list',
       draggable: isDraggable,
       pointerDragging,
-      draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      draggedVideo: isVideoDragging && isSamePlaylistMember(videoData, draggedVideo),
     }"
     :draggable="isDraggable && !pointerDragging"
     :data-playlist-drag-item="isDraggable ? '' : null"
     :data-video-id="data.videoId"
     :data-playlist-item-id="playlistItemId"
+    :data-library-member-id="data._libraryMemberId"
     @pointerdown.capture="isDraggable && startPointerDrag($event, videoData)"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
@@ -199,7 +200,7 @@ const emit = defineEmits([
 const inUserPlaylist = props.playlistType === 'user'
 const showGrabBar = computed(() => inUserPlaylist && props.videoDraggingPossible)
 const isDraggable = computed(() => showGrabBar.value && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, isSamePlaylistMember } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -369,40 +370,40 @@ function onVisibilityChanged(isVisible) {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
-  emit('move-video-up', videoId, playlistItemId)
+function moveVideoUp(videoId, playlistItemId, memberId) {
+  emit('move-video-up', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoDown(videoId, playlistItemId) {
-  emit('move-video-down', videoId, playlistItemId)
+function moveVideoDown(videoId, playlistItemId, memberId) {
+  emit('move-video-down', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheTop(videoId, playlistItemId) {
-  emit('move-video-to-the-top', videoId, playlistItemId)
+function moveVideoToTheTop(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-top', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheBottom(videoId, playlistItemId) {
-  emit('move-video-to-the-bottom', videoId, playlistItemId)
+function moveVideoToTheBottom(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-bottom', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function removeFromPlaylist(videoId, playlistItemId) {
-  emit('remove-from-playlist', videoId, playlistItemId)
+function removeFromPlaylist(videoId, playlistItemId, memberId) {
+  emit('remove-from-playlist', videoId, playlistItemId, memberId)
 }
 
 function onDragVideo(event) {
@@ -418,6 +419,7 @@ function onDragVideo(event) {
 const videoData = {
   videoId: props.data.videoId,
   playlistItemId: props.playlistItemId,
+  _libraryMemberId: props.data._libraryMemberId,
 }
 
 </script>

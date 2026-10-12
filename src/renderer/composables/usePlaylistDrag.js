@@ -1,5 +1,5 @@
 import { onBeforeUnmount, ref } from 'vue'
-import { handleDragAndDrop } from '../helpers/dragAndDrop'
+import { handleDragAndDrop, isSamePlaylistMember } from '../helpers/dragAndDrop'
 
 const ROW_SELECTOR = '[data-playlist-drag-item]'
 
@@ -44,8 +44,8 @@ export function usePlaylistDrag(emit) {
   function updateTarget(flush = false) {
     const row = document.elementFromPoint(session.x, session.y)?.closest(ROW_SELECTOR)
     if (!row || row.parentElement !== session.list) return
-    const video = { videoId: row.dataset.videoId, playlistItemId: row.dataset.playlistItemId }
-    if (video.videoId === session.video.videoId && video.playlistItemId === session.video.playlistItemId) {
+    const video = { videoId: row.dataset.videoId, playlistItemId: row.dataset.playlistItemId, _libraryMemberId: row.dataset.libraryMemberId }
+    if (isSamePlaylistMember(video, session.video)) {
       session.lastTarget = null
       return
     }
@@ -117,5 +117,5 @@ export function usePlaylistDrag(emit) {
   }
 
   onBeforeUnmount(stopPointerDrag)
-  return { ...nativeDrag, dragVideo, pointerDragging, startPointerDrag }
+  return { ...nativeDrag, dragVideo, pointerDragging, startPointerDrag, isSamePlaylistMember }
 }

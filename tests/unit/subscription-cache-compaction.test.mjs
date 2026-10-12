@@ -14,6 +14,7 @@ test('a running desktop session compacts cache revisions without losing the late
   t.mock.timers.enable({ apis: ['setInterval'] })
   const createDatastore = vm.runInNewContext(`(${factory})`, {
     Datastore,
+    createWorkerCollection: undefined,
     dbPath: name => join(directory, `${name}.db`),
     process: { env: { IS_ELECTRON_MAIN: true } },
     setInterval,
@@ -53,6 +54,7 @@ test('a failed periodic compaction is reported and the next attempt succeeds', a
   const errors = []
   const createDatastore = vm.runInNewContext(`(${factory})`, {
     Datastore,
+    createWorkerCollection: undefined,
     dbPath: () => undefined,
     process: { env: { IS_ELECTRON_MAIN: true } },
     setInterval,
@@ -79,6 +81,7 @@ test('slow compaction does not queue redundant rewrites', async (t) => {
   t.mock.timers.enable({ apis: ['setInterval'] })
   const createDatastore = vm.runInNewContext(`(${factory})`, {
     Datastore,
+    createWorkerCollection: undefined,
     dbPath: () => undefined,
     process: { env: { IS_ELECTRON_MAIN: true } },
     setInterval,

@@ -204,7 +204,7 @@ test('portable backup restoration retains every identified history occurrence ac
   ]
   const { data: decoded } = await readUnifiedBackup(createUnifiedBackup({ ...data, history: incoming }))
   const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
-  const baseDependencies = { db, ...historyHelpers, HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated', recommendations: { async remove() {} } }
+  const baseDependencies = { model, db, ...historyHelpers, HISTORY_WATCHED_STATUS_MIGRATION_ID: 'historyWatchedStatusMigrated', recommendations: { async remove() {} } }
   const baseClasses = parseJavaScript(base, { sourceType: 'module' }).program.body
     .filter(node => node.type === 'ClassDeclaration' && ['Settings', 'History'].includes(node.id.name))
     .map(node => base.slice(node.start, node.end)).join('\n')
@@ -230,7 +230,7 @@ test('portable backup restoration retains every identified history occurrence ac
   const messages = []
   const bindings = {
     ...backupHelpers, store, DBHistoryHandlers: History, process: { env: { IS_ELECTRON: false } },
-    backupBusy: { value: false }, selectedBackupSections: { value: ['history'] }, backupData: { value: decoded },
+    backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null, backupBusy: { value: false }, selectedBackupSections: { value: ['history'] }, backupData: { value: decoded },
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   }
   const thumbnailHelpers = parseJavaScript(script, { sourceType: 'module' }).program.body.filter(node => node.type === 'FunctionDeclaration' && ['isJsonObject', 'normalizeImportedPlaylistThumbnail'].includes(node.id.name)).map(node => script.slice(node.start, node.end)).join('\n')

@@ -18,6 +18,51 @@ const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js
 const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
 const historySource = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
 
+for (const method of ['syncHistoryChunk', 'syncPlaylistChunk']) {
+  test(`${method} preserves typed records while removing nested Vue proxies`, async () => {
+    const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+    let received
+    const result = { id: 'staged', accepted: 1 }
+    const context = vm.createContext({
+      toRaw, Object,
+      window: { ftElectron: { libraryQuery: (_method, value) => { received = structuredClone(value); return result } } },
+    })
+    vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
+    const original = { id: 'job', records: [{ _id: 'record', date: new Date(123), explicit: undefined,
+      nested: { date: new Date(456), values: [undefined, null, new Date(789)] },
+      ...JSON.parse('{"__proto__":{"retained":true}}'),
+    }] }
+    const input = reactive({ ...original, records: reactive(original.records.map(record => reactive(record))) })
+    assert.equal(await context.library.query(method, input), result)
+    assert.deepEqual(received, original)
+    assert.equal(Object.hasOwn(received.records[0], 'explicit'), true)
+    assert.deepEqual(toRaw(input), original)
+  })
+}
+
+test('desktop library errors preserve the collection, counts and affected items', async () => {
+  const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const details = { collection: 'history', deleted: 3, previous: 7, items: [{ videoId: 'retained' }] }
+  const context = vm.createContext({ toRaw, Object, SyncServerDataLossError, window: { ftElectron: { libraryQuery: async () => ({ libraryError: details }) } } })
+  vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
+  await assert.rejects(context.library.query('syncHistoryPlan', {}), error => {
+    assert.ok(error instanceof SyncServerDataLossError)
+    for (const [field, value] of Object.entries(details)) assert.deepEqual(error[field], value)
+    return true
+  })
+})
+
+test('IPC cloning keeps native values even when their string tag claims to be a plain object', async () => {
+  const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  let received
+  const context = vm.createContext({ toRaw, Object, window: { ftElectron: { libraryQuery: (_method, value) => { received = structuredClone(value) } } } })
+  vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
+  const names = new Set(['Retained channel'])
+  Object.defineProperty(names, Symbol.toStringTag, { value: 'Object' })
+  await context.library.query('recommendationInputs', { preferences: reactive({ hiddenChannelNames: names }) })
+  assert.deepEqual(received.preferences.hiddenChannelNames, new Set(['Retained channel']))
+})
+
 function createJobs(onMessage = () => {}) {
   return new BackgroundJobClient(() => {
     const worker = new Worker(new URL('../helpers/renderer-processing-worker.mjs', import.meta.url))

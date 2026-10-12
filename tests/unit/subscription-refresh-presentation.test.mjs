@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, watch } from 'vue'
-import { getSubscriptionsForFeed } from '../../src/renderer/helpers/subscription-channels.js'
+import { getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../../src/renderer/helpers/subscription-channels.js'
 
 const source = (await readFile(new URL('../../src/renderer/composables/useSubscriptionChannelUpdates.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace(/^export /gm, '')
@@ -20,7 +20,7 @@ function setup(channelCount, presented = true, feed = 'videos') {
   let updates = 0
   const scope = effectScope()
   const context = vm.createContext({
-    window, computed, reactive, watch, store: { getters: state }, getSubscriptionsForFeed,
+    window, computed, reactive, watch, store: { getters: state }, getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS,
     SUBSCRIPTION_REFRESH_CHANNEL_EVENT: 'channel',
     useTabContext: () => ({ isTabPresented: visibility }),
     onActivated() {}, onDeactivated() {}, onBeforeUnmount() {},

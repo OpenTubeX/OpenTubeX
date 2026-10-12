@@ -76,7 +76,8 @@ class Settings {
         premiereTimestamp: 1,
         watchProgress: 1,
         lengthSeconds: 1,
-      })
+      }).sort({ timeWatched: 1, _id: 1 })
+      // The last occurrence must agree with the newest-history lookup.
       for (const entry of history) historyById[entry.videoId] = entry
     }
     const value = JSON.stringify(mergeSubscriptionSeenVideos(local, incoming, historyById))
@@ -191,7 +192,7 @@ class History {
 
   static async find() {
     await this.migrateWatchedStatus()
-    const records = await db.history.findAsync({}).sort({ timeWatched: -1 })
+    const records = await db.history.findAsync({}).sort({ timeWatched: -1, _id: -1 })
     // Prepare the index once the datastore is loaded, before playback and bulk
     // edits start writing by video ID. Seen-mark merging is not always enabled.
     await db.history.ensureIndexAsync({ fieldName: 'videoId' })
@@ -229,8 +230,13 @@ class History {
           }
           if (Object.keys(fields).length === 0) continue
           try {
+            // Repairs of stored occurrences carry _id and must match videoId
+            // too. An ID-less patch keeps the legacy single-match fallback;
+            // it must never update every duplicate occurrence.
+            const query = { videoId: patch.videoId }
+            if (Object.hasOwn(patch, '_id')) query._id = patch._id
             const { affectedDocuments } = await db.history.updateAsync(
-              { videoId: patch.videoId }, { $set: fields }, { returnUpdatedDocs: true }
+              query, { $set: fields }, { returnUpdatedDocs: true }
             )
             if (affectedDocuments) updatedRecords.push(affectedDocuments)
           } catch (error) {
@@ -298,7 +304,8 @@ class History {
 
     await db.history.removeAsync({}, { multi: true })
 
-    await db.history.insertAsync(migratedRecords)
+    const savedRecords = await db.history.insertAsync(migratedRecords)
+    return savedRecords.toSorted((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(b._id, a._id))
   }
 
   static async applySyncChanges({ insertions, updates, deletions }) {
@@ -383,12 +390,29 @@ class History {
     return db.history.updateAsync({ videoId }, { $set: { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId } }, { upsert: true })
   }
 
-  static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId) {
+  static unsetLastViewedPlaylistForVideos(videoIds, lastViewedPlaylistId, retainedVideos = []) {
+    const query = {
+      ...createIdQuery('videoId', videoIds),
+      lastViewedPlaylistId: lastViewedPlaylistId
+    }
+    if (retainedVideos.length) {
+      const retained = new Map()
+      for (const video of retainedVideos) {
+        if (video === null || typeof video !== 'object') continue
+        if (!retained.has(video.videoId)) retained.set(video.videoId, new Set())
+        retained.get(video.videoId).add(video.playlistItemId)
+      }
+      query.$and = [{
+        $where() {
+          const members = retained.get(this.videoId)
+          // A retained legacy member without an ID cannot disprove the saved
+          // item identity. Preserve its context instead of guessing it is gone.
+          return !members || (this.lastViewedPlaylistItemId != null && !members.has(undefined) && !members.has(null) && !members.has(this.lastViewedPlaylistItemId))
+        }
+      }]
+    }
     return db.history.updateAsync(
-      {
-        ...createIdQuery('videoId', videoIds),
-        lastViewedPlaylistId: lastViewedPlaylistId
-      },
+      query,
       { $unset: { lastViewedPlaylistId: '', lastViewedPlaylistType: '', lastViewedPlaylistItemId: '' } },
       { multi: true }
     )
@@ -1008,6 +1032,29 @@ class Playlists {
         $set: { lastUpdatedAt }
       },
       { upsert: true }
+    )
+  }
+
+  static async replaceIfUnchanged(previousPlaylist, playlist) {
+    const previous = previousPlaylist == null ? null : model.serialize(previousPlaylist)
+    try {
+      return await db.playlists.updateAsync(
+        { _id: playlist._id, $where: function () { return previous !== null && model.serialize(this) === previous } },
+        playlist,
+        { upsert: previous === null }
+      )
+    } catch (error) {
+      if (previous === null && error.errorType === 'uniqueViolated' && await db.playlists.findOneAsync({ _id: playlist._id })) return { numAffected: 0 }
+      throw error
+    }
+  }
+
+  static replaceVideosIfUnchanged(_id, previousVideos, videos, lastUpdatedAt) {
+    const previous = model.serialize(previousVideos)
+    return db.playlists.updateAsync(
+      { _id, $where: function () { return model.serialize(this.videos) === previous } },
+      { $set: { videos, lastUpdatedAt } },
+      { upsert: false }
     )
   }
 

@@ -5,6 +5,8 @@ import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { babelParse, parse } from 'vue/compiler-sfc'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
+import { babelParse, parse } from 'vue/compiler-sfc'
+import { ref } from 'vue'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
 const handlers = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -16,13 +18,14 @@ function playlist(_id, playlistName, protectedValue = false) {
   }
 }
 
-async function fixture(records) {
+async function fixture(records, quickBookmarkTargetPlaylistId = records[0]?._id) {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
     handlers.slice(handlers.indexOf('class Playlists {'), handlers.indexOf('class SearchHistory {')) + '\nPlaylists', { db }
   )
   const errors = []
+  const dispatched = []
   // Observe detached writes too, so the test reports their errors as assertions.
   const pending = []
   for (const method of ['create', 'upsert', 'delete']) {
@@ -35,16 +38,16 @@ async function fixture(records) {
   }
   const module = vm.runInNewContext(
     source.slice(source.indexOf('function generateRandomPlaylistId()')).replace('export default', 'globalThis.playlistsModule =') + '\nplaylistsModule',
-    { DBPlaylistHandlers, ...videoCounts, processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
+    { process: { env: { IS_ELECTRON: false } }, DBPlaylistHandlers, ...videoCounts, processToBeAddedPlaylistVideo: () => {}, console: { error: error => errors.push(error) } }
   )
   const context = {
     state: module.state,
-    rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]?._id } },
+    rootState: { settings: { quickBookmarkTargetPlaylistId } },
     commit: (name, value) => module.mutations[name](module.state, value),
-    dispatch: (name, value) => module.actions[name]?.(context, value),
+    dispatch: (name, value) => { dispatched.push([name, value]); return module.actions[name]?.(context, value) },
   }
   return {
-    db, module, errors, handlers: DBPlaylistHandlers, context,
+    db, module, errors, handlers: DBPlaylistHandlers, dispatched, context,
     dispatch: context.dispatch,
     async load(options) {
       const result = await module.actions.grabAllPlaylists(context, options)
@@ -173,3 +176,222 @@ for (const name of [undefined, null, false, 42, { retained: true }]) {
     assert.deepEqual(await db.playlists.findOneAsync({ _id: original._id }), original)
   })
 }
+for (const videos of [undefined, null, false, 'retained', { unknown: true }, [null, false, 'retained'], [{}, { videoId: null }, { videoId: 42 }, { videoId: '' }, new Date(1)]]) {
+  test(`portable startup retains opaque playlist members ${JSON.stringify(videos)}`, async () => {
+    const record = { ...playlist('legacy', 'Retained'), ...(videos === undefined ? {} : { videos }) }
+    if (videos === undefined) delete record.videos
+    const { db, module, errors, load } = await fixture([record], null)
+    await load()
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: record._id }), record)
+    assert.equal(module.state.playlistsReady, true)
+    assert.deepEqual(errors, [])
+    assert.equal(module.state.playlists[0]._id, record._id)
+    assert.deepEqual([...module.getters.getQuickBookmarkVideoIds(module.state, { getQuickBookmarkPlaylist: module.state.playlists[0] })], [])
+  })
+}
+
+test('playlist card metadata tolerates retained scalar fields without changing the playlist', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/FtListPlaylist/FtListPlaylist.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const initializer = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistMetadata').init
+  for (const videos of [undefined, null, false, 42, 'retained', {}, [null], [{ videoId: 42 }]]) {
+    const data = { _id: 'legacy', playlistName: 'Retained', ...(videos === undefined ? {} : { videos }) }, before = structuredClone(data)
+    const metadata = vm.runInNewContext(script.slice(initializer.start, initializer.end), {
+      computed: callback => callback(), isUserPlaylist: { value: true }, props: { data }, thumbnailPlaceholder: 'placeholder',
+      backendPreference: { value: 'local' }, currentInvidiousInstanceUrl: { value: 'instance' },
+    })
+    assert.equal(metadata.thumbnailUrl, 'placeholder')
+    assert.equal(metadata.videoCount, Array.isArray(videos) ? videos.length : 0)
+    assert.deepEqual(data, before)
+  }
+})
+
+for (const hasEditable of [false, true]) {
+  test(`automatic bookmarks skip opaque playlists, array-backed present: ${hasEditable}`, async () => {
+    const opaque = { ...playlist('a-opaque', 'Opaque'), videos: 'retained', unknown: new Date(1) }
+    const protectedPlaylist = { ...playlist('b-protected', 'Protected', true), videos: { retained: true } }
+    const editable = playlist('z-editable', 'Writable protected list', true)
+    const records = [opaque, protectedPlaylist, ...(hasEditable ? [editable] : [])]
+    const { db, module, errors, dispatched, load } = await fixture(records, null)
+    await load()
+    assert.deepEqual(dispatched.filter(([name]) => name === 'updateQuickBookmarkTargetPlaylistId'), hasEditable ? [['updateQuickBookmarkTargetPlaylistId', editable._id]] : [])
+    assert.equal(module.state.playlistsReady, true)
+    assert.deepEqual(errors, [])
+    for (const record of records) assert.deepEqual(await db.playlists.findOneAsync({ _id: record._id }), record)
+  })
+}
+
+for (const hasEditable of [false, true]) {
+  test(`an existing opaque bookmark target is replaced or disabled, editable present: ${hasEditable}`, async () => {
+    const opaque = { ...playlist('opaque', 'Opaque'), videos: null, unknown: new Date(1) }
+    const records = [opaque, ...(hasEditable ? [playlist('editable', 'Editable')] : [])]
+    const { db, module, errors, dispatched, load } = await fixture(records, opaque._id)
+    await load()
+    assert.deepEqual(dispatched.filter(([name]) => name === 'updateQuickBookmarkTargetPlaylistId'), [
+      ['updateQuickBookmarkTargetPlaylistId', hasEditable ? 'editable' : null],
+    ])
+    assert.equal(module.getters.getQuickBookmarkPlaylist(module.state, { getQuickBookmarkTargetPlaylistId: 'opaque' }), undefined)
+    assert.deepEqual(errors, [])
+    for (const record of records) assert.deepEqual(await db.playlists.findOneAsync({ _id: record._id }), record)
+  })
+}
+
+test('removing a known portable playlist member keeps opaque members and refreshes the index', async () => {
+  const valid = { videoId: 'valid', playlistItemId: 'item', unknown: new Date(3) }
+  const record = { ...playlist('p', 'Retained'), videos: [null, false, {}, valid] }
+  const { db, module, errors, load, context } = await fixture([record])
+  await load()
+  assert.equal(await module.actions.removeVideo(context, { _id: 'p', videoId: 'valid', playlistItemId: 'item' }), true)
+  assert.deepEqual(Array.from(module.state.playlists[0].videos), record.videos.slice(0, -1))
+  assert.equal(module.state.playlistVideoCounts.has('valid'), false)
+  assert.deepEqual((await db.playlists.findOneAsync({ _id: 'p' })).videos, record.videos.slice(0, -1))
+  assert.deepEqual(errors, [])
+})
+
+test('portable playback skips opaque members without rewriting their stored playlist', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const valid = { videoId: 'valid', playlistItemId: 'item', title: 'Valid' }
+  for (const videos of [null, false, 'retained', [null, false, {}, { videoId: 42 }, valid]]) {
+    const playlist = { _id: 'p', playlistName: 'Retained', videos }, before = structuredClone(playlist)
+    const context = vm.createContext({
+      computed: getter => ({ get value() { return getter() } }),
+      isUserPlaylist: { value: true }, isPagedPlaylist: { value: false }, selectedUserPlaylist: { value: playlist },
+      store: { getters: { getHistoryCacheById: { valid: { isWatched: true } } } },
+      isHistoryEntryWatched: history => history?.isWatched === true,
+      props: { playlistItemId: 'item', videoId: 'valid' }, prevVideoBeforeDeletion: { value: null },
+      playlistTitle: ref(''), channelName: ref(''), channelId: ref(''), playlistItems: ref([]),
+      currentVideoIndexZeroBased: ref(-1), sortOrder: ref('custom'), locale: ref('en-US'), reversePlaylist: ref(false), isLoading: ref(true),
+      getSortedPlaylistItems: items => items,
+    })
+    for (const node of ast.program.body.filter(node => node.type === 'FunctionDeclaration' && ['getPlayableUserPlaylistVideos', 'findIndexOfCurrentVideoInPlaylist', 'parseUserPlaylist'].includes(node.id.name))) {
+      vm.runInContext(script.slice(node.start, node.end), context)
+    }
+    const initializer = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'userPlaylistWatchedVideoCount').init
+    assert.equal(vm.runInContext(script.slice(initializer.start, initializer.end), context).value, Array.isArray(videos) ? 1 : 0)
+    context.parseUserPlaylist(playlist)
+    assert.deepEqual(Array.from(context.playlistItems.value), Array.isArray(videos) ? [valid] : [])
+    assert.deepEqual(playlist, before)
+  }
+})
+
+
+test('portable Watch reorders playable slots without deleting opaque members or metadata', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const a = { videoId: 'A', unknown: new Date(1) }, b = { videoId: 'B', unknown: new Date(2) }
+  for (const reverse of [false, true]) {
+    const playlist = { _id: 'p', playlistName: 'Retained', unknown: new Date(3), videos: [a, null, 'opaque', new Date(4), b] }
+    const before = structuredClone(playlist)
+    let written
+    const context = vm.createContext({ selectedUserPlaylist: { value: playlist }, reversePlaylist: ref(reverse), isPagedPlaylist: ref(false),
+      deepCopy: value => JSON.parse(JSON.stringify(value)),
+      store: { dispatch: async (_method, data) => { written = data; return true } }, console, showToast() {}, t: key => key,
+    })
+    for (const node of ast.program.body.filter(node => node.type === 'FunctionDeclaration' && ['getPlayableUserPlaylistVideos', 'persistPlaylistOrder'].includes(node.id.name))) vm.runInContext(script.slice(node.start, node.end), context)
+    await context.persistPlaylistOrder(reverse ? [a, b] : [b, a])
+    assert.deepEqual(structuredClone(written), { ...playlist, videos: [b, null, 'opaque', new Date(4), a] })
+    assert.deepEqual(playlist, before)
+  }
+})
+
+test('playlist selector thumbnails and counts tolerate every retained membership shape', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/FtPlaylistSelector/FtPlaylistSelector.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const declarations = ast.program.body.flatMap(node => node.declarations ?? [])
+  for (const videos of [undefined, null, false, 42, 'opaque', [null], [{ videoId: 42 }], [{ videoId: 'A' }]]) {
+    const playlist = { videos }, before = structuredClone(playlist)
+    const context = vm.createContext({ computed: getter => ({ get value() { return getter() } }), props: { playlist },
+      thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'), getVideoThumbnailUrl: () => 'valid',
+    })
+    for (const name of ['videoCount', 'thumbnail']) {
+      const init = declarations.find(node => node.id.name === name).init
+      const result = vm.runInContext(script.slice(init.start, init.end), context).value
+      assert.equal(result, name === 'videoCount' ? (Array.isArray(videos) ? videos.length : 0) : videos?.[0]?.videoId === 'A' ? 'valid' : 'placeholder')
+    }
+    assert.deepEqual(playlist, before)
+  }
+})
+
+
+test('portable Home and Save readers preserve opaque playlist records', async () => {
+  const playlists = [{ _id: 'opaque', playlistName: 'Opaque', videos: null, unknown: new Date(1) }, { _id: 'retained', playlistName: 'Retained', videos: [null, 'opaque', { videoId: 'A' }] }]
+  const before = structuredClone(playlists)
+  const home = parse(await readFile(new URL('../../src/renderer/views/Home/Home.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const homeAst = babelParse(home, { sourceType: 'module' })
+  const homeInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'recentPlaylists').init
+  const countInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistVideoCount')?.init
+  const playlistVideoCount = countInit ? vm.runInNewContext(home.slice(countInit.start, countInit.end)) : null
+  const recent = vm.runInNewContext(home.slice(homeInit.start, homeInit.end), { playlistVideoCount, computed: getter => getter(), store: { getters: { getAllPlaylists: playlists } } })
+  assert.deepEqual(Array.from(recent, playlist => playlist._id), ['opaque', 'retained'])
+  const prompt = parse(await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const promptAst = babelParse(prompt, { sourceType: 'module' })
+  const filter = promptAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'getPlaylistIdsFiltered').init
+  const ids = vm.runInNewContext(prompt.slice(filter.start, filter.end), { allPlaylists: ref(playlists), toBeAddedToPlaylistVideoIdList: ref(['A']) })( (incoming, members) => incoming.some(id => members.has(id)) )
+  assert.deepEqual([...ids], ['retained'])
+  assert.deepEqual(playlists, before)
+})
+
+
+test('Home renders retained opaque memberships with counts and safe thumbnail placeholders', async () => {
+  const component = await readFile(new URL('../../src/renderer/views/Home/Home.vue', import.meta.url), 'utf8')
+  const parsed = parse(component).descriptor, script = parsed.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const count = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistVideoCount')
+  assert.ok(count, 'the template and thumbnail helper share the retained membership count')
+  assert.doesNotMatch(parsed.template.content, /playlist\.videos\.length/)
+  const thumbnail = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistThumbnail')
+  const context = vm.createContext({ thumbnailPlaceholder: 'placeholder', videoThumbnail: () => 'video' })
+  vm.runInContext(script.slice(count.start, count.end), context)
+  vm.runInContext(script.slice(thumbnail.start, thumbnail.end), context)
+  for (const videos of [undefined, null, false, 42, 'retained', [], [null], [{ videoId: 42 }]]) {
+    assert.equal(context.playlistThumbnail({ videos }), 'placeholder')
+  }
+  assert.equal(context.playlistThumbnail({ videos: [{ videoId: 'A' }] }), 'video')
+})
+
+test('portable matching-video search ignores opaque playlist members without altering them', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'activePlaylists').init
+  const playlists = [
+    { _id: 'scalar', playlistName: 'Scalar', videos: 42 },
+    { _id: 'opaque', playlistName: 'Opaque', videos: [null, 42, false, {}, { title: 42, author: 42 }] },
+    { _id: 'matching', playlistName: 'Matching', videos: [{ title: 'Needle', author: null }] },
+  ]
+  const before = structuredClone(playlists)
+  const context = { process: { env: { IS_ELECTRON: false } }, computed: getter => getter(), processedQuery: ref('needle'), doSearchPlaylistsWithMatchingVideos: ref(true), allPlaylists: ref(playlists) }
+  const results = vm.runInNewContext(script.slice(init.start, init.end), context)
+  assert.deepEqual(Array.from(results, playlist => playlist._id), ['matching'])
+  assert.deepEqual(playlists, before)
+})
+
+test('portable Save preserves hidden members and distinct incoming occurrences', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const action = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'addSelectedToPlaylists')
+  for (const allowDuplicates of [false, true]) {
+    const playlists = [{ _id: 'p', videos: [null, false, { unknown: true }, { videoId: 'old' }] }]
+    const before = structuredClone(playlists)
+    const incoming = [{ videoId: 'old' }, { videoId: 'new', title: 'First' }, { videoId: 'new', title: 'Second' }]
+    const calls = []
+    const context = vm.createContext({
+      process: { env: { IS_ELECTRON: false } }, addInProgress: false,
+      allPlaylists: ref(playlists), selectedPlaylistIdList: ref(['p']), addingDuplicateVideosEnabled: ref(allowDuplicates),
+      toBeAddedToPlaylistVideoList: ref(incoming), store: { dispatch: (action, payload) => calls.push({ action, payload }) },
+      showToast() {}, t: key => key, hide() {},
+    })
+    vm.runInContext(script.slice(action.start, action.end), context)
+    await context.addSelectedToPlaylists()
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].action, 'addVideos')
+    assert.deepEqual(Array.from(calls[0].payload.videos), allowDuplicates ? incoming : incoming.slice(1))
+    assert.deepEqual(playlists, before)
+  }
+})

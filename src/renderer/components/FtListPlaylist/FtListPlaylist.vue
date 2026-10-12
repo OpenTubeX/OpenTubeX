@@ -272,11 +272,12 @@ const playlistTypeIcon = computed(() => {
 const playlistMetadata = computed(() => {
   if (isUserPlaylist.value) {
     let thumbnailUrl = thumbnailPlaceholder
-    if (props.data.videos.length > 0) {
+    const firstVideo = props.data.firstVideo ?? (Array.isArray(props.data.videos) ? props.data.videos[0] : null)
+    if (typeof firstVideo?.videoId === 'string' && firstVideo.videoId !== '') {
       const origin = backendPreference.value === 'invidious'
         ? currentInvidiousInstanceUrl.value
         : 'https://i.ytimg.com'
-      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/maxresdefault.jpg`
+      thumbnailUrl = `${origin}/vi/${firstVideo.videoId}/maxresdefault.jpg`
     }
 
     return {
@@ -286,7 +287,7 @@ const playlistMetadata = computed(() => {
       defaultThumbnailUrl: thumbnailUrl,
       channelName: '',
       channelId: '',
-      videoCount: props.data.videos.length,
+      videoCount: props.data.videoCount ?? (Array.isArray(props.data.videos) ? props.data.videos.length : 0),
     }
   }
 

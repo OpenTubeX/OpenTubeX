@@ -7,12 +7,13 @@
       placeholder: !visible,
       draggable: canBecomeDraggable,
       pointerDragging,
-      draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      draggedVideo: isVideoDragging && isSamePlaylistMember(videoData, draggedVideo),
     }"
     :draggable="canBecomeDraggable && !pointerDragging"
     :data-playlist-drag-item="canBecomeDraggable ? '' : null"
     :data-video-id="data.videoId"
     :data-playlist-item-id="playlistItemId"
+    :data-library-member-id="data._libraryMemberId"
     @pointerdown.capture="canBecomeDraggable && startPointerDrag($event, videoData)"
     v-on="canBecomeDraggable ? draggableEventHandlers : {}"
   >
@@ -196,7 +197,7 @@ const downloadAvailable = computed(() => {
 
 const inUserPlaylist = props.playlistType === 'user'
 const canBecomeDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
-const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag } = usePlaylistDrag(emit)
+const { dragVideo, moveDraggedVideo, afterDrag, pointerDragging, startPointerDrag, isSamePlaylistMember } = usePlaylistDrag(emit)
 const draggableEventHandlers = {
   dragstart: onDragVideo,
   dragover: event => event.preventDefault(),
@@ -241,32 +242,32 @@ function pausePlayer() {
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoUp(videoId, playlistItemId) {
-  emit('move-video-up', videoId, playlistItemId)
+function moveVideoUp(videoId, playlistItemId, memberId) {
+  emit('move-video-up', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoDown(videoId, playlistItemId) {
-  emit('move-video-down', videoId, playlistItemId)
+function moveVideoDown(videoId, playlistItemId, memberId) {
+  emit('move-video-down', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheTop(videoId, playlistItemId) {
-  emit('move-video-to-the-top', videoId, playlistItemId)
+function moveVideoToTheTop(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-top', videoId, playlistItemId, memberId)
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function moveVideoToTheBottom(videoId, playlistItemId) {
-  emit('move-video-to-the-bottom', videoId, playlistItemId)
+function moveVideoToTheBottom(videoId, playlistItemId, memberId) {
+  emit('move-video-to-the-bottom', videoId, playlistItemId, memberId)
 }
 
 function onDragVideo(event) {
@@ -282,14 +283,15 @@ function onDragVideo(event) {
 const videoData = {
   videoId: props.data.videoId,
   playlistItemId: props.playlistItemId,
+  _libraryMemberId: props.data._libraryMemberId,
 }
 
 /**
  * @param {string} videoId
  * @param {string} playlistItemId
  */
-function removeFromPlaylist(videoId, playlistItemId) {
-  emit('remove-from-playlist', videoId, playlistItemId)
+function removeFromPlaylist(videoId, playlistItemId, memberId) {
+  emit('remove-from-playlist', videoId, playlistItemId, memberId)
 }
 </script>
 

@@ -105,9 +105,10 @@ export async function expectScrollAtRenderedEnd(scroller) {
  * @param {object[]} [seed.tabSessions] tab-session.db documents
  * @param {object[]} [seed.watchStats] watch-stats.db documents
  * @param {object[]} [seed.downloads] persisted downloads
+ * @param {string} [parentDirectory] directory for isolated benchmark profiles
  */
-export async function createUserDataDir(seed = {}) {
-  const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
+export async function createUserDataDir(seed = {}, parentDirectory = tmpdir()) {
+  const userDataDir = await mkdtemp(path.join(parentDirectory, 'opentubex-e2e-'))
 
   if (!seed.freshProfile) {
     const settings = { ...BASE_SETTINGS, ...seed.settings }
@@ -144,7 +145,8 @@ export async function createUserDataDir(seed = {}) {
  * @param {object} [options]
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
- * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page) => void|Promise<void>} [options.onPhase]
+ * @param {number} [options.startupTimeoutMs] allow a measured first-time large migration
+ * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page: import('@playwright/test').Page|undefined, electronApp: import('@playwright/test').ElectronApplication) => void|Promise<void>} [options.onPhase]
  * @param {number} [windowRetry] internal first-window retry count
  */
 export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
@@ -204,7 +206,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   const notifyPhase = async (phase, page) => {
     try {
-      await options.onPhase?.(phase, page)
+      await options.onPhase?.(phase, page, electronApp)
     } catch (error) {
       await electronApp.close().catch(() => {})
       throw error
@@ -217,7 +219,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 
   let page
   try {
-    page = await electronApp.firstWindow()
+    page = await electronApp.firstWindow({ timeout: options.startupTimeoutMs ?? 30000 })
   } catch (error) {
     context.off('weberror', recordStartupError)
     const exited = electronProcess.exitCode !== null || electronProcess.signalCode !== null
@@ -269,7 +271,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
   }
 
   try {
-    await waitForAppReady(page)
+    await waitForAppReady(page, options.startupTimeoutMs)
     await notifyPhase('interactive', page)
     expect(startupErrors, 'Renderer errors during startup').toEqual([])
   } catch (error) {
@@ -286,11 +288,11 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}, windo
 /**
  * Waits until the renderer has booted far enough to interact with.
  */
-export async function waitForAppReady(page) {
+export async function waitForAppReady(page, timeout = 30000) {
   // The top nav is rendered once Vue has mounted and the locale has loaded.
-  await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.topNav')).toBeVisible({ timeout })
   await expect(page.locator('.tabBar')).toBeVisible()
-  await expect(page.locator('#startup-splash')).toHaveCount(0)
+  await expect(page.locator('#startup-splash')).toHaveCount(0, { timeout })
 }
 
 /** Opens a new app window through the tab bar's empty-space context menu. */

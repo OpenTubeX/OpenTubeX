@@ -14,6 +14,7 @@ const config = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
     subscriptionBackgroundWorker: path.join(__dirname, '../src/main/subscriptionBackgroundWorker.js'),
+    libraryWorker: path.join(__dirname, '../src/main/libraryWorker.js'),
   },
   module: {
     rules: [
@@ -32,6 +33,8 @@ const config = {
   },
   resolve: {
     alias: {
+      // Main-process feed helpers use reactivity without compiling templates.
+      vue$: require.resolve('vue/dist/vue.runtime.esm-bundler.js'),
       // electron-context-menu only needs mime-db for its "save as" feature.
       // As we only activate the save image and save as image features,
       // we can remove all other mimetypes, as they will never get used.
@@ -43,6 +46,19 @@ const config = {
   },
   // webpack defaults to only optimising the production builds, so having this here is fine
   optimization: {
+    splitChunks: isDevMode
+      ? false
+      : {
+          // Main and worker entrypoints share the datastore handlers and helpers.
+          // Keep the renderer's standalone youtubei UMD bundle independent.
+          chunks: chunk => ['main', 'libraryWorker', 'subscriptionBackgroundWorker'].includes(chunk.name),
+          minSize: 0,
+          cacheGroups: {
+            default: false,
+            defaultVendors: false,
+            shared: { name: 'mainShared', minChunks: 2, reuseExistingChunk: true }
+          }
+        },
     minimizer: [
       new MinimizerPlugin({
         test: /\.js(?:on)?(\?.*)?$/i,

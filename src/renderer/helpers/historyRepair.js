@@ -90,7 +90,14 @@ export function startHistoryRepair({ useCookies = false } = {}) {
   return runMetadataRepair(historyRepairState, {
     useCookies,
     records: store.getters.getHistoryCacheSorted,
-    getRecord: id => store.getters.getHistoryCacheById[id],
+    getRecord: (videoId, id) => {
+      const indexed = store.getters.getHistoryCacheByRecordId[id]
+      // Object indexes coerce legacy numeric/boolean IDs to string keys.
+      const record = id == null
+        ? store.getters.getHistoryCacheById[videoId]
+        : indexed?._id === id ? indexed : store.getters.getHistoryCacheSorted.find(record => record._id === id)
+      return record?.videoId === videoId ? record : undefined
+    },
     saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
   })
 }

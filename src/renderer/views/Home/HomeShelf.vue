@@ -6,13 +6,14 @@
     :style="{ '--home-shelf-transition-duration': transitionDuration }"
     data-home-shelf
     data-animation-speed-managed
+    :aria-busy="loading"
   >
     <FtIconButton
       v-if="layout.showControls"
       class="shelfArrow"
       :title="t('Home Page.Previous shelf page', { section: label })"
       :icon="['fas', 'angle-left']"
-      :disabled="pageIndex === 0"
+      :disabled="loading || pageIndex === 0"
       :use-shadow="false"
       theme="base-no-default"
       @click="changePage(-1)"
@@ -41,7 +42,7 @@
       class="shelfArrow"
       :title="t('Home Page.Next shelf page', { section: label })"
       :icon="['fas', 'angle-right']"
-      :disabled="pageIndex === pageCount - 1"
+      :disabled="loading || pageIndex === pageCount - 1"
       :use-shadow="false"
       theme="base-no-default"
       @click="changePage(1)"
@@ -59,7 +60,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
@@ -85,6 +86,8 @@ const props = defineProps({
     type: Number,
     default: 12,
   },
+  totalItems: { type: Number, default: null },
+  loadMore: { type: Function, default: null },
 })
 
 const { t } = useI18n()
@@ -92,16 +95,17 @@ const shelfElement = useTemplateRef('shelfElement')
 const shelfWidth = ref(0)
 const pageIndex = ref(0)
 const pageAnnouncement = ref('')
+const loading = ref(false)
 const slideDirection = ref('next')
 let resizeObserver = null
 
 const layout = computed(() => getHomeShelfLayout(
   shelfWidth.value,
-  props.items.length,
+  props.totalItems ?? props.items.length,
   props.itemMinWidth,
   props.itemGap
 ))
-const pageCount = computed(() => Math.max(1, Math.ceil(props.items.length / layout.value.pageSize)))
+const pageCount = computed(() => Math.max(1, Math.ceil((props.totalItems ?? props.items.length) / layout.value.pageSize)))
 const slideTransitionName = computed(() => `shelf-${slideDirection.value}`)
 const transitionDuration = computed(() => {
   return `${240 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
@@ -111,13 +115,27 @@ const pageItems = computed(() => {
   return props.items.slice(start, start + layout.value.pageSize)
 })
 
-watch([pageCount, () => props.items], () => {
-  pageIndex.value = Math.min(pageIndex.value, pageCount.value - 1)
+watch([pageCount, () => layout.value.pageSize, () => props.items], ([count, size], [, previousSize]) => {
+  const firstVisible = pageIndex.value * previousSize
+  const lastLoadedPage = Math.max(0, Math.ceil(props.items.length / size) - 1)
+  pageIndex.value = Math.min(Math.floor(firstVisible / size), count - 1, lastLoadedPage)
 })
 
-function changePage(offset) {
+async function changePage(offset) {
+  if (loading.value) return
   const targetPage = Math.min(pageCount.value - 1, Math.max(0, pageIndex.value + offset))
   if (targetPage === pageIndex.value) { return }
+
+  if (props.loadMore && (targetPage + 1) * layout.value.pageSize > props.items.length && props.items.length < props.totalItems) {
+    loading.value = true
+    try {
+      if (!await props.loadMore()) return
+      await nextTick()
+    } finally {
+      loading.value = false
+    }
+    if (targetPage >= pageCount.value || targetPage * layout.value.pageSize >= props.items.length) return
+  }
 
   slideDirection.value = offset > 0 ? 'next' : 'previous'
   pageIndex.value = targetPage

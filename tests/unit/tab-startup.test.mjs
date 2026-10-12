@@ -11,9 +11,10 @@ const hooks = registerHooks({
         export const app = { getName: () => 'OpenTubeX' };
       `) }
     }
-    if (specifier.endsWith('/datastores/handlers/base.js')) {
+    if (specifier.endsWith('/datastores/handlers/main.js')) {
       return { shortCircuit: true, url: 'data:text/javascript,' + encodeURIComponent(`
-        export const settings = { _findOne: async () => null };
+        export const settings = { _findOne: async () => null, find: async () => [] };
+        export const profiles = { find: async () => [] };
         export const tabSession = {
           saved: null,
           cleared: [],
@@ -26,7 +27,7 @@ const hooks = registerHooks({
   }
 })
 const { TabManager } = await import('../../src/main/tabs/TabManager.js')
-const { tabSession } = await import('../../src/datastores/handlers/base.js')
+const { settings, profiles, tabSession } = await import('../../src/datastores/handlers/main.js')
 const { tabPreviewStorage } = await import('../../src/main/tabs/TabPreviewStorage.js')
 const { setupTabsIPC } = await import('../../src/main/tabs/tabIpc.js')
 const { BrowserWindow, ipcMain, nativeImage } = await import('electron')
@@ -875,3 +876,15 @@ test('retries a scheduled preview refresh after the hover tooltip closes', async
   assert.equal(captures, 1, 'refreshes without another navigation or activation')
   assert.equal(tab.previewCaptureTimeoutId, null)
 })
+
+
+for (const value of ['local', false]) {
+  test(`startup landing route uses existing preferences without running mutating handlers: ${value}`, async t => {
+    t.mock.method(settings, '_findOne', async id => id === 'backendPreference' ? { _id: id, value } : null)
+    const settingsRead = t.mock.method(settings, 'find', async () => [{ _id: 'backendPreference', value }])
+    const profilesRead = t.mock.method(profiles, 'find', async () => [])
+    assert.equal(await TabManager.getStoredLandingRoute(), '/subscriptions')
+    assert.equal(settingsRead.mock.callCount(), 0)
+    assert.equal(profilesRead.mock.callCount(), 0)
+  })
+}

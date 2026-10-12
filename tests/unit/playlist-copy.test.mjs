@@ -4,7 +4,7 @@ import vm from 'node:vm'
 import test from 'node:test'
 
 const source = readFileSync(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
-const copyFunction = source.slice(source.search(/(?:async )?function toggleCopyVideosPrompt/), source.indexOf('async function addMissingVideos'))
+const copyFunction = source.slice(source.search(/(?:async )?function (?:playablePlaylistVideos|toggleCopyVideosPrompt)/), source.indexOf('async function addMissingVideos'))
 
 test('copying a remote playlist fetches the complete snapshot before opening the prompt', async () => {
   const completeVideos = [{ videoId: 'first' }, { videoId: 'later-page' }]

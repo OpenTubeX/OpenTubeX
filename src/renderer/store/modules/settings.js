@@ -1588,10 +1588,7 @@ const customActions = {
             break
 
           case SyncEvents.GENERAL.OVERWRITE: {
-            const byId = {}
-            data.forEach(video => {
-              byId[video.videoId] = video
-            })
+            const byId = Object.fromEntries(data.toReversed().filter(record => typeof record.videoId === 'string').map(record => [record.videoId, record]))
 
             // It comes pre-sorted, so we don't have to sort it here
             commit('setHistoryCacheSorted', data)
@@ -1609,6 +1606,10 @@ const customActions = {
 
           case SyncEvents.HISTORY.APPLY_SYNC_CHANGES:
             commit('applyHistorySyncChanges', data)
+            break
+
+          case SyncEvents.HISTORY.APPLY_METADATA:
+            commit('applyHistoryMetadata', data)
             break
 
           case SyncEvents.GENERAL.DELETE:

@@ -57,9 +57,9 @@ test.describe('search', () => {
     const href = await thumbnail.getAttribute('href')
     const videoId = /\/watch\/([^?]+)/.exec(href)?.[1]
     expect(videoId).toBeTruthy()
-    await page.evaluate((videoId) => {
+    await page.evaluate(async (videoId) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('upsertToHistoryCache', { videoId, isWatched: true })
+      await store.dispatch('updateHistory', { videoId, isWatched: true })
     }, videoId)
     await expect(video).toHaveClass(/watched/)
 

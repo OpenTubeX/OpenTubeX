@@ -4,6 +4,35 @@ import path from 'node:path'
 import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 
+for (const theme of ['dark', 'light']) {
+  test.describe(`retained opaque playlist thumbnails in ${theme}`, () => {
+    const playlists = [null, 'retained member', { videoId: null }, { videoId: '' }].map((first, index) => ({
+      _id: `opaque-${index}`,
+      playlistName: `Retained playlist ${index + 1}`,
+      protected: false,
+      lastUpdatedAt: 1,
+      unknown: { keep: true },
+      videos: [first, { videoId: 'abcdefghijk', title: 'Retained later video', playlistItemId: `later-${index}` }],
+    }))
+    test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: 95, baseTheme: theme, playlistViewType: 'list' }, playlists } })
+    test('renders placeholder cards without changing opaque members', async ({ app, page }, testInfo) => {
+      await goTo(page, 'userplaylists')
+      for (const playlist of playlists) {
+        const card = page.locator('.playlistList .ft-list-item').filter({ has: page.getByRole('link', { name: playlist.playlistName, exact: true }) })
+        await expect(card).toBeVisible()
+        await expect(card.locator('.thumbnailImage')).toHaveAttribute('src', /thumbnail_placeholder|^data:image\/svg/)
+        await expectImagesLoaded(card.locator('.thumbnailImage'))
+        await expect(card.locator('.videoCountContainer .inner > div').first()).toHaveText('2')
+      }
+      const rows = (await readPersistedDatastore(path.join(app.userDataDir, 'playlists.db'), 'utf8')).trim().split('\n').map(line => JSON.parse(line))
+      for (const playlist of playlists) expect(rows.find(row => row._id === playlist._id)).toStrictEqual(playlist)
+      const screenshot = testInfo.outputPath(`opaque-playlist-cards-${theme}.png`)
+      await page.locator('.playlistList').screenshot({ path: screenshot })
+      await testInfo.attach(`retained playlist cards (${theme})`, { path: screenshot, contentType: 'image/png' })
+    })
+  })
+}
+
 const videos = Array.from({ length: 30 }, (_, index) => ({
   videoId: String(index).padStart(11, '0'),
   playlistItemId: `sizing-${index}`,

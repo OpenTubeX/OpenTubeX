@@ -274,9 +274,10 @@ const activePlaylists = computed(() => {
 
     if (
       doSearchPlaylistsWithMatchingVideos.value &&
-      playlist.videos.some((v) => {
-        return v.author?.toLowerCase().includes(processedQuery_) || v.title.toLowerCase().includes(processedQuery_)
-      })
+      (Array.isArray(playlist.videos) ? playlist.videos : []).some(v =>
+        (typeof v?.author === 'string' && v.author.toLowerCase().includes(processedQuery_)) ||
+        (typeof v?.title === 'string' && v.title.toLowerCase().includes(processedQuery_))
+      )
     ) {
       return true
     }
@@ -292,7 +293,7 @@ const getPlaylistIdsFiltered = (filter) => {
   const toBeAddedToPlaylistVideoIdList_ = toBeAddedToPlaylistVideoIdList.value
 
   allPlaylists.value.forEach((playlist) => {
-    const playlistVideoIdSet = playlist.videos.reduce((s, v) => s.add(v.videoId), new Set())
+    const playlistVideoIdSet = (Array.isArray(playlist.videos) ? playlist.videos : []).reduce((s, v) => v?.videoId == null ? s : s.add(v.videoId), new Set())
 
     if (filter(toBeAddedToPlaylistVideoIdList_, playlistVideoIdSet)) {
       ids.add(playlist._id)
@@ -414,13 +415,13 @@ function addSelectedToPlaylists() {
 
   selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
     const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null) { return }
+    if (playlist == null || !Array.isArray(playlist.videos)) { return }
 
     let videosToBeAdded
 
     if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
+      const playlistVideoIds = new Set(playlist.videos.flatMap((v) => typeof v?.videoId === 'string' ? [v.videoId] : []))
+      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.has(v.videoId))
     } else {
       // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
       videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()

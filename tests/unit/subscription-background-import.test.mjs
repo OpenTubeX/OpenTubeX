@@ -2,6 +2,11 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { DatabaseSync } from 'node:sqlite'
+import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
+import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
+import { subscriptionPage, updateSubscriptionFeed } from '../../src/datastores/sqlite/subscriptions.js'
+import { reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
 
 const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
 function section(start, end) {
@@ -73,9 +78,12 @@ test('an imported background completion prevents an unnecessary foreground refre
 test('background playlist imports restore missing authors and keep explicit bylines', async () => {
   const cache = { UCchannel: { videos: [{ videoId: 'missing', thumbnailUrl: 'https://images.example/portrait.jpg' }] } }
   let saved
+  let finishEnrichment
+  const enrichment = new Promise(resolve => { finishEnrichment = resolve })
   const context = vm.createContext({
     console, Date,
     store: {
+      state: { subscriptionCache: { libraryPaged: false } },
       getters: {
         getSubscribedChannelIdSet: new Set(['UCchannel']),
         getSubscribedChannelsById: new Map([['UCchannel', { id: 'UCchannel', name: 'Subscribed creator' }]])
@@ -85,11 +93,11 @@ test('background playlist imports restore missing authors and keep explicit byli
     getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey: 'videos', idKey: 'videoId', action: 'save' }),
     shouldHideMembersOnlyContent: () => false,
     enrichSubscriptionRssEntries: async entries => entries,
-    enrichSubscriptionShortDates: async entries => entries.map(entry => ({ ...entry, published: 123456 })),
+    enrichSubscriptionShortDates: async entries => { await enrichment; return entries.map(entry => ({ ...entry, published: 123456 })) },
     reconcileFetchedSubscriptionEntries: entries => entries
   })
   vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
-  await context.reconcileAndroidSubscriptionRefreshChannelResult({
+  const pending = context.reconcileAndroidSubscriptionRefreshChannelResult({
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
       { videoId: 'missing', author: 'N/A', authorId: 'N/A', isRSS: true },
@@ -97,6 +105,10 @@ test('background playlist imports restore missing authors and keep explicit byli
       { videoId: 'explicit', author: 'Explicit creator', authorId: 'UCexplicit' }
     ] }
   })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(saved, undefined, 'background imports must wait for asynchronous Shorts enrichment before persisting')
+  finishEnrichment()
+  await pending
   assert.equal(saved[0].author, 'Subscribed creator')
   assert.equal(saved[0].authorId, 'UCchannel')
   assert.equal(saved[0].thumbnailUrl, 'https://images.example/portrait.jpg')
@@ -107,6 +119,53 @@ test('background playlist imports restore missing authors and keep explicit byli
   assert.ok(saved.every(video => video.isShort))
   assert.ok(saved.every(video => video.published === 123456))
 })
+
+for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
+  test(`desktop background ${feedType} imports reconcile with durable entries instead of summary arrays`, async t => {
+    const database = new DatabaseSync(':memory:')
+    database.exec('PRAGMA foreign_keys = ON;' + SCHEMA_SQL)
+    t.after(() => database.close())
+    const engine = new LibraryEngine(database)
+    const field = { videos: 'videos', shorts: 'shorts', live: 'liveStreams', posts: 'communityPosts' }[feedType]
+    const entriesKey = feedType === 'posts' ? 'posts' : 'videos'
+    const idKey = feedType === 'posts' ? 'postId' : 'videoId'
+    const previousTimestamp = 10_000_000, timestamp = 20_000_000
+    const old = { [idKey]: 'old', author: 'Creator', authorId: 'UCchannel', thumbnailUrl: 'old-image', attachments: [], published: 1, publishedTime: 1, isNewInSubscriptionFeed: false, unknown: new Date(1) }
+    const incoming = [
+      { [idKey]: 'new', author: 'Creator', authorId: 'UCchannel', thumbnailUrl: 'new-image', attachments: [], published: timestamp - 1, publishedTime: timestamp - 1 },
+      { ...old, isNewInSubscriptionFeed: undefined },
+    ]
+    await engine.collections.subscriptionCache.insertAsync({ _id: 'UCchannel', [field]: [old], [field + 'Timestamp']: new Date(previousTimestamp) })
+    const cache = { UCchannel: { [entriesKey]: [], timestamp: new Date(previousTimestamp) } }
+    const context = vm.createContext({
+      console, Date,
+      store: {
+        state: { subscriptionCache: { libraryPaged: true } },
+        getters: { getSubscribedChannelIdSet: new Set(['UCchannel']), getSubscribedChannelsById: new Map(), getHistoryCacheById: {} },
+        dispatch: async (action, data) => {
+          assert.equal(action, 'save')
+          const applied = await engine.transaction(() => updateSubscriptionFeed(engine, { channelId: data.channelId, field, entries: data[entriesKey], timestamp: data.timestamp }))
+          cache.UCchannel = { [entriesKey]: [], timestamp: data.timestamp }
+          return applied
+        },
+      },
+      getAndroidSubscriptionCacheConfig: () => ({ getCache: () => cache, entriesKey, idKey, action: 'save' }),
+      shouldHideMembersOnlyContent: () => false,
+      enrichSubscriptionRssEntries: async entries => entries,
+      enrichSubscriptionShortDates: async entries => entries,
+      reconcileFetchedSubscriptionEntries,
+    })
+    vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
+    await context.reconcileAndroidSubscriptionRefreshChannelResult({ channelId: 'UCchannel', feedType, timestamp, payload: { backgroundFormat: 'entries', entries: incoming } })
+    const saved = await engine.collections.subscriptionCache.findOneAsync({ _id: 'UCchannel' })
+    assert.deepEqual(saved[field], [{ ...incoming[0], isNewInSubscriptionFeed: true }, { ...incoming[1], isNewInSubscriptionFeed: false }])
+    assert.deepEqual(saved[field + 'Timestamp'], new Date(timestamp))
+    assert.deepEqual(incoming.map(entry => entry.isNewInSubscriptionFeed), [undefined, undefined])
+    const page = await subscriptionPage(engine, { subscriptions: [{ id: 'UCchannel' }], category: feedType, onlyNew: true, enabledCategories: [feedType], preferences: { forbiddenTitles: [] }, now: timestamp })
+    assert.deepEqual(page.records.map(entry => entry[idKey]), ['new'])
+    assert.equal(page.hasNew, true)
+  })
+}
 
 
 test('separate Electron renderers serialize background result imports', async () => {

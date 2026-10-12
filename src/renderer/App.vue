@@ -2884,13 +2884,17 @@ async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
   }
   if (feedType === 'shorts') entries = await enrichSubscriptionShortDates(entries, result.channelId)
   entries = await enrichSubscriptionRssEntries(entries)
-  const reconciledEntries = reconcileFetchedSubscriptionEntries(
-    entries,
-    previousCache?.[config.entriesKey],
-    config.idKey,
-    previousCache?.timestamp,
-    feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
-  )
+  // Desktop caches contain summaries. The worker reconciles against the live
+  // entries; assigning flags here would hide new background results.
+  const reconciledEntries = store.state.subscriptionCache.libraryPaged
+    ? entries
+    : reconcileFetchedSubscriptionEntries(
+        entries,
+        previousCache?.[config.entriesKey],
+        config.idKey,
+        previousCache?.timestamp,
+        feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
+      )
 
   const applied = await store.dispatch(config.action, {
     channelId: result.channelId,

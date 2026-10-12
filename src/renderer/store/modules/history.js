@@ -19,6 +19,25 @@ function getRetentionCutoff(days) {
   return Date.now() - parsedDays * MILLISECONDS_PER_DAY
 }
 
+const historyRecordPositions = new WeakMap()
+const HISTORY_STRUCTURE_MUTATIONS = new Set([
+  'setHistoryCacheSorted', 'upsertToHistoryCache', 'removeFromHistoryCacheById',
+  'removeMultipleFromHistoryCache', 'applyHistorySyncChanges',
+])
+
+function indexHistoryRecords(state) {
+  const positions = new Map()
+  const byId = Object.create(null)
+  state.historyCacheSorted.forEach((record, index) => {
+    if (record._id == null) return
+    positions.set(record._id, index)
+    byId[record._id] = record
+  })
+  state.historyCacheByRecordId = byId
+  historyRecordPositions.set(state.historyCacheSorted, positions)
+  return positions
+}
+
 const continueWatchingCache = new WeakMap()
 const CONTINUE_WATCHING_MUTATIONS = new Set([
   'setHistoryCacheSorted',
@@ -27,12 +46,14 @@ const CONTINUE_WATCHING_MUTATIONS = new Set([
   'removeFromHistoryCacheById',
   'removeMultipleFromHistoryCache',
   'applyHistorySyncChanges',
+  'applyHistoryMetadata',
 ])
 
 const state = {
   historyRevision: 0,
   continueWatchingRevision: 0,
   historyCacheSorted: [],
+  historyCacheByRecordId: Object.create(null),
 
   // Vuex doesn't support Maps, so we have to use an object here instead
   // TODO: switch to a Map during the Pinia migration
@@ -60,6 +81,10 @@ const getters = {
 
   getHistoryCacheSorted(state) {
     return state.historyCacheSorted
+  },
+
+  getHistoryCacheByRecordId(state) {
+    return state.historyCacheByRecordId
   },
 
   getHistoryCacheById(state) {
@@ -94,7 +119,9 @@ const actions = {
 
   async updateSubscriptionHistory({ commit, dispatch }, update) {
     const result = await DBHistoryHandlers.updateSubscriptionState(update)
-    if (result.records.length === 1) {
+    if (update.metadata) {
+      commit('applyHistoryMetadata', result.records)
+    } else if (result.records.length === 1) {
       commit('upsertToHistoryCache', result.records[0])
     } else if (result.records.length > 1) {
       commit('applyHistorySyncChanges', { insertions: [], updates: result.records, deletions: [] })
@@ -126,12 +153,13 @@ const actions = {
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
-      sortedRecords.sort((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(a._id, b._id))
+      sortedRecords.sort((a, b) => model.compareThings(b.timeWatched, a.timeWatched) || model.compareThings(b._id, a._id))
 
-      await DBHistoryHandlers.overwrite(sortedRecords)
-
-      commit('setHistoryCacheSorted', sortedRecords)
-      commit('setHistoryCacheById', Object.fromEntries(sortedRecords.toReversed().filter(record => typeof record.videoId === 'string').map(record => [record.videoId, record])))
+      // The datastore assigns IDs to imported records. Cache its saved copies
+      // directly so a failed reread cannot hide an already successful write.
+      const savedRecords = await DBHistoryHandlers.overwrite(sortedRecords)
+      commit('setHistoryCacheSorted', savedRecords)
+      commit('setHistoryCacheById', Object.fromEntries(savedRecords.toReversed().filter(record => typeof record.videoId === 'string').map(record => [record.videoId, record])))
       return true
     } catch (errMessage) {
       console.error(errMessage)
@@ -261,6 +289,13 @@ const mutations = {
       if (record.timeWatched === currentRecord.timeWatched) {
         state.historyCacheSorted.splice(i, 1, record)
         state.historyCacheById[record.videoId] = record
+        const positions = historyRecordPositions.get(state.historyCacheSorted)
+        if (positions && record._id === currentRecord._id) {
+          // The positions stay valid. Duplicate cache IDs retain the same
+          // last-occurrence lookup as a complete index rebuild.
+          if (positions.get(record._id) === i && state.historyCacheByRecordId[record._id] === currentRecord) state.historyCacheByRecordId[record._id] = record
+          return true
+        }
         return
       }
 
@@ -346,6 +381,23 @@ const mutations = {
     }
   },
 
+  applyHistoryMetadata(state, records) {
+    // Structural mutations rebuild positions for the current array. Metadata
+    // patches leave record IDs and positions unchanged.
+    const positions = historyRecordPositions.get(state.historyCacheSorted) ?? indexHistoryRecords(state)
+    for (const record of records) {
+      const position = positions.get(record._id)
+      const previous = position === undefined ? null : state.historyCacheSorted[position]
+      if (previous && previous.videoId === record.videoId) {
+        state.historyCacheSorted[position] = record
+        // Distinct legacy ID types can coerce to the same object key. Preserve
+        // the last indexed occurrence when replacing an earlier one.
+        if (state.historyCacheByRecordId[record._id] === previous) state.historyCacheByRecordId[record._id] = record
+      }
+      if (state.historyCacheById[record.videoId]?._id === record._id) state.historyCacheById[record.videoId] = record
+    }
+  },
+
   applyHistorySyncChanges(state, { insertions, updates, deletions }) {
     const upserts = [...insertions, ...updates]
     const deletedIds = new Set(deletions)
@@ -376,8 +428,10 @@ export default {
   // Only changes to shelf records invalidate selection. Playlist-only metadata
   // edits cannot affect membership or any details displayed by Home.
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
-    mutation(state, payload)
+    const previousHistory = state.historyCacheSorted
+    const indexRetained = mutation(state, payload) === true
     state.historyRevision++
+    if (state.historyCacheSorted !== previousHistory || (HISTORY_STRUCTURE_MUTATIONS.has(name) && !indexRetained)) indexHistoryRecords(state)
     if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

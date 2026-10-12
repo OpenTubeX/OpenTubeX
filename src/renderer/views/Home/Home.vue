@@ -408,7 +408,7 @@
                       loading="lazy"
                     />
                     <span class="playlistCount">
-                      {{ playlist.videos.length }}
+                      {{ playlistVideoCount(playlist) }}
                       <FtIcon :icon="['fas', 'list']" />
                     </span>
                   </span>
@@ -417,7 +417,7 @@
                       dir="auto"
                       :title="playlist.playlistName"
                     >{{ playlist.playlistName }}</strong>
-                    <span>{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
+                    <span>{{ t('Global.Counts.Video Count', { count: playlistVideoCount(playlist) }, playlistVideoCount(playlist)) }}</span>
                   </span>
                 </RouterLink>
               </li>
@@ -641,8 +641,9 @@ function recommendationReason(video) {
 
 const continueWatching = computed(() => store.getters.getContinueWatchingHistory())
 const watchQueue = computed(() => store.getters.getWatchQueue)
+const playlistVideoCount = playlist => playlist.videoCount ?? (Array.isArray(playlist.videos) ? playlist.videos.length : 0)
 const recentPlaylists = computed(() => store.getters.getAllPlaylists
-  .filter(playlist => playlist.videos.length > 0 || !['favorites', 'watchLater'].includes(playlist._id))
+  .filter(playlist => playlistVideoCount(playlist) > 0 || !['favorites', 'watchLater'].includes(playlist._id))
   .toSorted((a, b) => {
     const aTimestamp = a.lastPlayedAt ?? a.lastUpdatedAt ?? a.createdAt ?? 0
     const bTimestamp = b.lastPlayedAt ?? b.lastUpdatedAt ?? b.createdAt ?? 0
@@ -754,8 +755,10 @@ function videoThumbnail(video) {
 function playlistThumbnail(playlist) {
   if (thumbnailPreference.value === 'hidden') return thumbnailPlaceholder
   if (playlist.customThumbnail) return playlist.customThumbnail
-  return playlist.videos.length > 0
-    ? videoThumbnail(playlist.videos[0])
+  const first = playlist.firstVideo ?? playlist.videos?.[0]
+  return playlistVideoCount(playlist) > 0 && first !== null && typeof first === 'object' && !Array.isArray(first) && typeof first.videoId === 'string' && first.videoId.length > 0
+    ? videoThumbnail(first)
+
     : thumbnailPlaceholder
 }
 

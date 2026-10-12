@@ -24,7 +24,7 @@
       >
         <div class="background" />
         <div class="inner">
-          <div>{{ playlist.videos.length }}</div>
+          <div>{{ videoCount }}</div>
           <div><FtIcon :icon="['fas', 'list']" /></div>
         </div>
       </div>
@@ -101,6 +101,8 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 /** @type {import('vue').ComputedRef<object[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
+const videoCount = computed(() => Array.isArray(props.playlist.videos) ? props.playlist.videos.length : 0)
+
 const titleForDisplay = computed(() => {
   const title = props.playlist.playlistName
 
@@ -119,8 +121,8 @@ const loneVideoPresenceCountInPlaylist = computed(() => {
 
   const loneToBeAddedToPlaylistVideoVideoId = toBeAddedToPlaylistVideoList.value[0].videoId
 
-  return props.playlist.videos.reduce((accumulator, video) => {
-    return video.videoId === loneToBeAddedToPlaylistVideoVideoId
+  return (Array.isArray(props.playlist.videos) ? props.playlist.videos : []).reduce((accumulator, video) => {
+    return video?.videoId === loneToBeAddedToPlaylistVideoVideoId
       ? accumulator + 1
       : accumulator
   }, 0)
@@ -142,7 +144,7 @@ const multiVideoPresenceCountInPlaylist = computed(() => {
 
   // Count of to be added videos already present in this playlist
   return toBeAddedToPlaylistVideoList.value.reduce((accumulator, toBeAddedToVideo) => {
-    return props.playlist.videos.some((pv) => pv.videoId === toBeAddedToVideo.videoId)
+    return (Array.isArray(props.playlist.videos) ? props.playlist.videos : []).some((pv) => pv?.videoId === toBeAddedToVideo.videoId)
       ? accumulator + 1
       : accumulator
   }, 0)
@@ -179,8 +181,10 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
 const thumbnail = computed(() => {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (props.playlist.customThumbnail) return props.playlist.customThumbnail
-  return props.playlist.videos.length > 0
-    ? getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
+  const first = Array.isArray(props.playlist.videos) ? props.playlist.videos[0] : null
+  return first && typeof first.videoId === 'string' && first.videoId !== ''
+    ? getVideoThumbnailUrl(first.videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
+
     : thumbnailPlaceholder
 })
 

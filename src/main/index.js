@@ -5284,12 +5284,14 @@ function runApp() {
         case DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE: {
           const result = await baseHandlers.history.updateSubscriptionState(data)
           if (result.records.length > 0) {
-            syncOtherWindows(IpcChannels.SYNC_HISTORY, event, result.records.length === 1
-              ? { event: SyncEvents.GENERAL.UPSERT, data: result.records[0] }
-              : {
-                  event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES,
-                  data: { insertions: [], updates: result.records, deletions: [] }
-                })
+            syncOtherWindows(IpcChannels.SYNC_HISTORY, event, data.metadata
+              ? { event: SyncEvents.HISTORY.APPLY_METADATA, data: result.records }
+              : result.records.length === 1
+                ? { event: SyncEvents.GENERAL.UPSERT, data: result.records[0] }
+                : {
+                    event: SyncEvents.HISTORY.APPLY_SYNC_CHANGES,
+                    data: { insertions: [], updates: result.records, deletions: [] }
+                  })
           }
           if (result.seenVideos != null) {
             syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
@@ -5312,14 +5314,15 @@ function runApp() {
           )
           return null
 
-        case DBActions.GENERAL.OVERWRITE:
-          await baseHandlers.history.overwrite(data)
+        case DBActions.GENERAL.OVERWRITE: {
+          const savedRecords = await baseHandlers.history.overwrite(data)
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
             event,
-            { event: SyncEvents.GENERAL.OVERWRITE, data }
+            { event: SyncEvents.GENERAL.OVERWRITE, data: savedRecords }
           )
-          return null
+          return savedRecords
+        }
 
         case DBActions.HISTORY.APPLY_SYNC_CHANGES:
           if (typeof data === 'string') data = JSON.parse(data)

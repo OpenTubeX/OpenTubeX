@@ -22,7 +22,7 @@ test.use({
 
 async function savedProgress(app) {
   const contents = await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')
-  return contents.trim().split('\n').map(line => JSON.parse(line))
+  return contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
     .filter(record => record.videoId === 'jNQXAC9IVRw').at(-1)?.watchProgress
 }
 

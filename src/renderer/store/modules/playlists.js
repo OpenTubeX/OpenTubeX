@@ -60,19 +60,20 @@ function removeUndesiredVideoAttributes(videoData) {
 *  This is a good default quick bookmark target if one needs to be set.
 */
 function findEmptyOrLatestPlayedPlaylist(playlists) {
-  const emptyPlaylist = playlists.find((playlist) => playlist.videos.length === 0)
+  const editable = playlists.filter(playlist => Array.isArray(playlist.videos))
+  const emptyPlaylist = editable.find((playlist) => (playlist.videoCount ?? playlist.videos.length) === 0)
   if (emptyPlaylist) return emptyPlaylist
 
   let max = -1
   let maxIndex = 0
-  for (let i = 0; i < playlists.length; i++) {
-    if (playlists[i].lastPlayedAt != null && playlists[i].lastPlayedAt > max) {
+  for (let i = 0; i < editable.length; i++) {
+    if (editable[i].lastPlayedAt != null && editable[i].lastPlayedAt > max) {
       maxIndex = i
-      max = playlists[i].lastPlayedAt
+      max = editable[i].lastPlayedAt
     }
   }
 
-  return playlists[maxIndex]
+  return editable[maxIndex]
 }
 
 /**
@@ -150,12 +151,20 @@ const getters = {
       return undefined
     }
 
-    return state.playlists.find((playlist) => playlist._id === playlistId)
+    return state.playlists.find((playlist) => playlist._id === playlistId && Array.isArray(playlist.videos))
   },
   // Share one index across all mounted cards and watch tabs. Each consumer
   // previously scanned the entire target playlist for its own video.
   getQuickBookmarkVideoIds(_state, getters) {
-    return new Set(getters.getQuickBookmarkPlaylist?.videos.map(video => video.videoId))
+    const videos = getters.getQuickBookmarkPlaylist?.videos
+    const ids = new Set()
+    if (Array.isArray(videos)) {
+      for (const video of videos) {
+        const id = video?.videoId
+        if (typeof id === 'string' && id.length > 0) ids.add(id)
+      }
+    }
+    return ids
   },
   getQuickBookmarkIcon(state, getters) {
     const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
@@ -204,7 +213,7 @@ const actions = {
       const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !state.playlists.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
       if (noQuickBookmarkSet) {
         const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-        dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+        if (chosenPlaylist) dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
       }
 
       commit('addPlaylists', payload)
@@ -381,36 +390,39 @@ const actions = {
             playlist.lastUpdatedAt = dateNow
             anythingUpdated = true
           }
-          playlist.videos.forEach((v) => {
-            // Ensure all videos has `timeAdded` property
-            if (v.timeAdded == null) {
-              v.timeAdded = currentTime
-              anythingUpdated = true
-            }
-
-            // Ensure all videos has `playlistItemId` property
-            if (v.playlistItemId == null) {
-              v.playlistItemId = generateRandomUniqueId()
-              anythingUpdated = true
-            }
-
-            // For backward compatibility
-            if (v.type == null) {
-              v.type = 'video'
-              anythingUpdated = true
-            }
-
-            // Undesired attributes, even with `null` values
-            [
-              'description',
-              'viewCount',
-            ].forEach(attrName => {
-              if (typeof v[attrName] !== 'undefined') {
-                delete v[attrName]
+          if (Array.isArray(playlist.videos)) {
+            playlist.videos.forEach((v) => {
+              if (v === null || typeof v !== 'object' || Array.isArray(v) || v instanceof Date || typeof v.videoId !== 'string' || v.videoId.length === 0) return
+              // Ensure all videos has `timeAdded` property
+              if (v.timeAdded == null) {
+                v.timeAdded = currentTime
                 anythingUpdated = true
               }
+
+              // Ensure all videos has `playlistItemId` property
+              if (v.playlistItemId == null) {
+                v.playlistItemId = generateRandomUniqueId()
+                anythingUpdated = true
+              }
+
+              // For backward compatibility
+              if (v.type == null) {
+                v.type = 'video'
+                anythingUpdated = true
+              }
+
+              // Undesired attributes, even with `null` values
+              [
+                'description',
+                'viewCount',
+              ].forEach(attrName => {
+                if (typeof v[attrName] !== 'undefined') {
+                  delete v[attrName]
+                  anythingUpdated = true
+                }
+              })
             })
-          })
+          }
           // Save updated playlist object
           if (anythingUpdated) {
             DBPlaylistHandlers.upsert(playlist)
@@ -432,10 +444,11 @@ const actions = {
         }
 
         // if no quick bookmark is set, try to find another playlist
-        const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId)
+        const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId && Array.isArray(playlist.videos))
         if (noQuickBookmarkSet && payload.length > 0) {
           const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
-          dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+          if (chosenPlaylist) dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
+          else if (rootState.settings.quickBookmarkTargetPlaylistId) dispatch('updateQuickBookmarkTargetPlaylistId', null, { root: true })
         }
 
         commit('setAllPlaylists', payload)
@@ -545,7 +558,7 @@ function dropPlaylistVideos(state, playlist, matches) {
   const kept = []
 
   for (const video of playlist.videos) {
-    (matches(video) ? removed : kept).push(video)
+    (video != null && matches(video) ? removed : kept).push(video)
   }
 
   decrementPlaylistVideoCounts(state.playlistVideoCounts, removed)
