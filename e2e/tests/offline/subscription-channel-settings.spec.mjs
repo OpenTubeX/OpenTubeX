@@ -356,6 +356,7 @@ test('changes subscription settings for selected channels', async ({ app, attach
   await expect(bulkMembersOnly).toBeChecked()
   await expect(bulkMembersOnly).toHaveJSProperty('indeterminate', false)
   await expect(bulkDailyLimit).toHaveText('2')
+  await expect(page.getByRole('listbox', { name: 'Videos per day', exact: true })).toHaveCount(0)
 
   await expect.poll(async () => {
     const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
@@ -383,8 +384,18 @@ test('changes subscription settings for selected channels', async ({ app, attach
 
   const scroller = page.locator('.channelSettingsScroller')
   const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-  await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
-  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  // Consume the setup scroll before clearing selection changes the header height.
+  await scroller.evaluate(element => new Promise(resolve => {
+    const settle = () => {
+      element.removeEventListener('scroll', settle)
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }
+    element.addEventListener('scroll', settle, { once: true })
+    const previous = element.scrollTop
+    element.scrollTop = element.scrollHeight
+    if (element.scrollTop === previous) settle()
+  }))
+  await expectScrollAtRenderedEnd(scroller)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
   await selectNone.evaluate(button => button.click())
