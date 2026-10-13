@@ -221,7 +221,7 @@ export function updatePlaylistSnapshot({ snapshot, id, remoteId, metadata, previ
   const videos = new Set(Array.isArray(previous.videos) ? previous.videos : Array.isArray(previousVideos) ? previousVideos : [])
   for (const videoId of acknowledged.deletions) videos.delete(videoId)
   for (const videoId of acknowledged.upserts) videos.add(videoId)
-  return JSON.stringify({ ...saved, playlists: { ...saved?.playlists, [id]: { ...previous, remoteId, metadata, videos: next?.videos ?? [...videos] } } })
+  return JSON.stringify({ ...saved, playlists: { ...saved?.playlists, [id]: { ...previous, remoteId, metadata: next ? metadata : previous.metadata ?? metadata, videos: next?.videos ?? [...videos] } } })
 }
 
 export function mergeHistory({ localHistory, remoteHistory, previous = {}, acknowledged = {}, options = {} }) {

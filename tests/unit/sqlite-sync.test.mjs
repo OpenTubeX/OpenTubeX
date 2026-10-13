@@ -43,7 +43,7 @@ for (const enabled of [false, true]) {
       await engine.collections.settings.insertAsync(Object.entries(settings).map(([_id, value]) => ({ _id, value })))
       const result = await syncSnapshotSection(engine, { account: ['server', 'token', 'legacy', '', ''], collection: 'playlists', value: { id: 'p', remoteId: 'remote', metadata: { title: 'Written remotely' }, acknowledged: { upserts: ['added'], deletions: ['removed'] } } })
       assert.equal(result.updated, !changedAccount)
-      assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), changedAccount ? snapshot : { ...snapshot, playlists: { ...snapshot.playlists, p: { ...snapshot.playlists.p, metadata: { title: 'Written remotely' }, videos: ['kept', 'added'] } } })
+      assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), changedAccount ? snapshot : { ...snapshot, playlists: { ...snapshot.playlists, p: { ...snapshot.playlists.p, videos: ['kept', 'added'] } } })
     })
   }
 }
@@ -502,4 +502,17 @@ test('SQLite playlist downloads restore unknown uploader markers as missing loca
   assert.equal(typeof timeAdded, 'number')
   assert.deepEqual(metadata, { videoId: 'remote', title: 'Remote', lengthSeconds: 30, published: 0, type: 'video' })
   await sync.cancel(job)
+})
+
+
+test('playlist metadata baseline changes only after the local apply succeeds', async t => {
+  const { engine } = fixture(t)
+  const account = ['server', 'token', 'legacy', '', '']
+  const snapshot = { history: ['keep'], playlists: { p: { remoteId: 'remote', metadata: { title: 'Shared' }, videos: ['old'] } } }
+  await engine.collections.settings.insertAsync(Object.entries({ syncServerEnabled: true, syncServerUrl: 'server', syncServerToken: 'token', syncServerSnapshot: JSON.stringify(snapshot) }).map(([_id, value]) => ({ _id, value })))
+  const value = { id: 'p', remoteId: 'remote', metadata: { title: 'Pending local save' }, acknowledged: { upserts: ['new'], deletions: [] } }
+  await syncSnapshotSection(engine, { account, collection: 'playlists', value })
+  assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), { ...snapshot, playlists: { p: { ...snapshot.playlists.p, videos: ['old', 'new'] } } })
+  await syncSnapshotSection(engine, { account, collection: 'playlists', value: { ...value, next: { videos: ['new'] } } })
+  assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), { ...snapshot, playlists: { p: { ...snapshot.playlists.p, metadata: value.metadata, videos: ['new'] } } })
 })
