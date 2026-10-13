@@ -103,13 +103,13 @@ export async function runMetadataRepair(state, { useCookies = false, ...options 
         cursor = page.cursor
       } while (cursor && !controller.signal.aborted)
     } else {
-    await repairHistory({
-      ...options,
-      fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),
-      signal: controller.signal,
-      onProgress: progress => Object.assign(state, progress),
-      onPhase: phase => { state.phase = phase },
-    })
+      await repairHistory({
+        ...options,
+        fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),
+        signal: controller.signal,
+        onProgress: progress => Object.assign(state, progress),
+        onPhase: phase => { state.phase = phase },
+      })
     }
     state.phase = controller.signal.aborted ? 'stopped' : 'finished'
   } catch (error) {
@@ -125,6 +125,7 @@ export async function runMetadataRepair(state, { useCookies = false, ...options 
 export const cancelHistoryRepair = cancelMetadataRepair
 
 export function startHistoryRepair({ useCookies = false } = {}) {
+  if (store.state.history.libraryPaged) return runMetadataRepair(historyRepairState, { useCookies })
   return runMetadataRepair(historyRepairState, {
     useCookies,
     records: store.getters.getHistoryCacheSorted,

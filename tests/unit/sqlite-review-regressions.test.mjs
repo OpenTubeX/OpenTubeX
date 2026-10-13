@@ -17,7 +17,7 @@ import { markSubscriptionEntries } from '../../src/datastores/sqlite/subscriptio
 import * as operations from '../../src/datastores/sqlite/operations.js'
 import { LibrarySync } from '../../src/datastores/sqlite/sync.js'
 import { LibraryImports } from '../../src/datastores/sqlite/import.js'
-import { getSortedPlaylistItems } from '../../src/renderer/helpers/playlists.js'
+import { getSortedPlaylistItems, processToBeAddedPlaylistVideo } from '../../src/renderer/helpers/playlists.js'
 import { mergeIds, videoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import Datastore from '@seald-io/nedb'
 import { DEFAULT_SEARCH_SETTINGS, mergeSearchHistoryEntries, normalizeSearchHistoryEntry, normalizeSearchSettings } from '../../src/search-history.js'
@@ -175,7 +175,7 @@ for (const action of ['upload', 'delete']) {
     const readBaseline = async () => JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value)
     const query = async (method, options) => sync[{ syncPlaylistStart: 'start', syncPlaylistChunk: 'chunk', syncPlaylistPlan: 'plan', syncPlaylistPage: 'page', syncPlaylistApply: 'apply', syncPlaylistCancel: 'cancel' }[method]](options)
     const memberSync = await functions('src/renderer/helpers/librarySync.js', ['syncPlaylistMembers'], { DBLibraryHandlers: { query } })
-    const store = { dispatch: async () => {}, persistPlaylistSyncBaseline: changes => operations.syncSnapshotSection(engine, { account, collection: 'playlists', value: changes }) }
+    const store = { dispatch: async () => {}, persistPlaylistSyncBaseline: (id, changes) => operations.syncSnapshotSection(engine, { account, collection: 'playlists', value: { ...changes, id } }) }
     const run = async () => memberSync.syncPlaylistMembers(client, store, { localId: 'p', remoteId: 'p', remoteVideos: [...server.values()], previousVideos: (await readBaseline()).playlists.p.videos, metadata: { title: 'Before', description: 'Original' }, options: {} })
     await assert.rejects(run(), /playlist changed during sync/i)
     const baseline = await readBaseline()
@@ -198,11 +198,11 @@ for (const encrypted of [false, true]) {
       const settings = { syncServerUrl: 'server', syncServerToken: 'token', syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerPrivacySalt: '' }
       const calls = []
       const context = await functions('src/renderer/store/modules/sync-server.js', ['persistPlaylistSyncBaseline'], {
-        encrypted, rootState: { settings: { ...settings, ...(changedAccount ? { syncServerToken: 'other' } : {}) } }, historyAccount: Object.values(settings),
+        process: { env: { IS_ELECTRON: true } }, encrypted, rootState: { settings: { ...settings, ...(changedAccount ? { syncServerToken: 'other' } : {}) } }, historyAccount: Object.values(settings),
         DBLibraryHandlers: { query: async (method, options) => { calls.push([method, options]); return { updated: true, value: 'preview' } } },
         commit: (...args) => calls.push(args),
       })
-      await context.persistPlaylistSyncBaseline({ id: 'p', acknowledged: { upserts: ['confirmed'], deletions: [] } })
+      await context.persistPlaylistSyncBaseline('p', { acknowledged: { upserts: ['confirmed'], deletions: [] } })
       assert.equal(calls.length, !encrypted && !changedAccount ? 2 : 0)
     })
   }
@@ -2800,3 +2800,81 @@ for (const fails of [false, true]) {
     assert.equal(toasts.length, 1)
   })
 }
+
+
+for (const format of ['array', 'ndjson']) {
+  for (const race of ['picker', 'write']) {
+    test(`portable legacy playlist ${format} import preserves concurrent ${race} edits`, async () => {
+      const db = { playlists: new Datastore({ inMemoryOnly: true }) }
+      const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+      const Playlists = vm.runInNewContext(base.slice(base.indexOf('class Playlists {'), base.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, model })
+      const member = id => ({ videoId: id, title: id, lengthSeconds: 60, timeAdded: 1, type: 'video', playlistItemId: id })
+      const original = { _id: 'p', playlistName: 'Retained', description: 'Keep', lastUpdatedAt: 1, videos: [{ ...member('A'), unknown: new Date(123) }], unknown: new Date(456) }
+      await db.playlists.insertAsync(original)
+      const concurrent = { ...original, description: 'Concurrent edit', videos: [...original.videos, member('concurrent')] }
+      const incoming = { _id: 'p', playlistName: 'Retained', videos: [member('B')] }
+      let readFinished = false, savedBeforeWrite
+      const replace = Playlists.replaceIfUnchanged.bind(Playlists)
+      const DBPlaylistHandlers = {
+        find: () => Playlists.find(),
+        async replaceIfUnchanged(previous, next) {
+          assert.equal(readFinished, true)
+          if (race === 'write') await db.playlists.updateAsync({ _id: 'p' }, concurrent)
+          savedBeforeWrite = await db.playlists.findOneAsync({ _id: 'p' })
+          return replace(previous, next)
+        },
+      }
+      const toasts = []
+      const context = await functions('src/renderer/components/DataSettings/DataSettings.vue', ['importPlaylists', 'isJsonObject'], {
+        process: { env: { IS_ELECTRON: false } }, IMPORT_DIRECTORY_ID: 'import', START_IN_DIRECTORY: 'documents', DBPlaylistHandlers,
+        readFileWithPicker: async () => {
+          if (race === 'picker') await db.playlists.updateAsync({ _id: 'p' }, concurrent)
+          readFinished = true
+          return { filename: 'backup.db', content: format === 'array' ? JSON.stringify([incoming]) : JSON.stringify(incoming) + '\n' }
+        },
+        parseImportedLineDelimitedJson: value => value.trim().split('\n').map(line => JSON.parse(line)),
+        processToBeAddedPlaylistVideo, deepCopy: structuredClone, structuredClone,
+        showToast: toast => toasts.push(toast), t: key => key,
+        store: { commit() {}, dispatch: async (action, payload) => {
+          if (action === 'updatePlaylist') await Playlists.upsert(payload)
+          else assert.ok(['grabAllPlaylists', 'scheduleSyncServer'].includes(action), action)
+        } },
+      })
+      if (race === 'write') {
+        await assert.rejects(context.importPlaylists(), /playlist changed/i)
+        assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), savedBeforeWrite)
+        assert.ok(toasts.every(toast => !toast.message.includes('successfully imported')))
+      } else {
+        await context.importPlaylists()
+        const saved = await db.playlists.findOneAsync({ _id: 'p' })
+        assert.deepEqual(saved, { ...concurrent, videos: [...concurrent.videos, incoming.videos[0]], lastUpdatedAt: saved.lastUpdatedAt })
+        assert.ok(toasts.some(toast => toast.message.includes('successfully imported')))
+      }
+    })
+  }
+}
+
+
+for (const subscriptions of [undefined, null, false, 42, 'retained', {}, new Date(123)]) {
+  test(`Watch Shorts tolerates retained subscriptions ${String(subscriptions)}`, async () => {
+    const profile = { _id: 'retained', subscriptions, unknown: new Date(456) }
+    const before = structuredClone(profile)
+    const context = await functions('src/renderer/views/Watch/Watch.js', ['libraryShortsRequest'], { hasConfiguredRestrictedPlaybackAuthentication: () => false })
+    const result = context.libraryShortsRequest.call({ subscriptionShortsFeedActive: true, tabRoute: { query: {} }, videoId: 'video', $store: { getters: { getActiveProfile: profile }, state: { subscriptionCache: { subscriptionVideosFeedVersion: 1 }, history: { historyRevision: 2 } } } })
+    assert.deepEqual(Array.from(result.subscriptions), [])
+    assert.deepEqual(profile, before)
+  })
+}
+
+test('paged playlist removal queues the durable ID when the legacy item ID is absent', async () => {
+  const queued = [], videos = [], toasts = []
+  const context = await functions('src/renderer/views/Playlist/Playlist.vue', ['removeVideoFromPlaylist'], {
+    playlistItems: ref([{ videoId: 'video', _libraryMemberId: 'durable' }]), toBeDeletedPlaylistItemIds: ref(queued), videosWithPlaylistToUnset: ref(videos),
+    undoToastAbortController: null, AbortController, setTimeout: () => 1, clearTimeout() {}, removeToBeDeletedVideosSometimes() {},
+    showToast: toast => toasts.push(toast), t: key => key, getVideoThumbnailUrl: () => 'thumbnail', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref(''), thumbnailPreference: ref('default'),
+  })
+  context.removeVideoFromPlaylist('video', null, 'durable')
+  assert.deepEqual(queued, ['durable'])
+  assert.deepEqual(videos, ['video'])
+  assert.equal(toasts.length, 1)
+})

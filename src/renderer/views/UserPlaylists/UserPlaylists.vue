@@ -259,7 +259,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { playlistRepairRecords } from '../../../playlistRepair'
 import { metadataRepairBusy, repairCookiesConfigured } from '../../helpers/historyRepair'
-import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '../../helpers/playlistRepair'
+import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair, readPlaylistRepairRecords } from '../../helpers/playlistRepair'
 import { DBLibraryHandlers } from '../../../datastores/handlers/index'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
@@ -417,7 +417,18 @@ const selectAllOptions = computed({
 const selectedRepairPlaylists = computed(() => repairPlaylists.value.filter(playlist => selectedPlaylistIds.value.includes(playlist._id)))
 
 const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
-const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && playlistRepairRecords(selectedRepairPlaylists.value).length > 500)
+const pagedRepairCandidateCount = ref(0)
+const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && (process.env.IS_ELECTRON ? pagedRepairCandidateCount.value : playlistRepairRecords(selectedRepairPlaylists.value).length) > 500)
+watch([showRepairPrompt, selectedPlaylistIds, () => store.state.playlists.playlistRevision], async ([open, ids], _previous, onCleanup) => {
+  if (!process.env.IS_ELECTRON || !open) return
+  const controller = new AbortController()
+  onCleanup(() => controller.abort())
+  pagedRepairCandidateCount.value = 0
+  try {
+    const records = await readPlaylistRepairRecords(ids, controller.signal, 501)
+    if (!controller.signal.aborted) pagedRepairCandidateCount.value = records.length
+  } catch (error) { if (!controller.signal.aborted) console.error(error) }
+})
 watch(showRepairPrompt, open => {
   if (open) {
     selectedPlaylistIds.value = []

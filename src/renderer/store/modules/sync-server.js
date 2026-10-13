@@ -337,8 +337,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       if (![current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
         current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])) return
       if (process.env.IS_ELECTRON) {
-        const result = await DBLibraryHandlers.query('syncSnapshotSection', { account: historyAccount, collection: 'playlists', value: { ...changes, id } })
-        if (result.updated) commit('setSyncServerSnapshot', result.value)
+        const result = await DBLibraryHandlers.query('syncSnapshotSection', { account: historyAccount, collection: 'playlists', value: { ...changes, id, acknowledged: changes.acknowledged ?? { upserts: added, deletions: removed }, ...(applied ? { next: { remoteId, metadata, videos: syncedVideos } } : {}) } })
+        const active = rootState.settings
+        if (result.updated && [active.syncServerUrl, active.syncServerToken, active.syncServerPrivacyMode, active.syncServerPrivacyKey, active.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])) commit('setSyncServerSnapshot', result.value)
         return
       }
       const saved = parseSnapshot(current.syncServerSnapshot)

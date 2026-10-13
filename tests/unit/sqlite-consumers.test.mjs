@@ -527,7 +527,7 @@ test('paged history repair keeps its initial denominator across repaired pages',
   const totals = []
   let page = 0
   const result = vm.runInNewContext(source.replace(/^import .*\n/gm, '').replaceAll('export ', '') + '\n({ startHistoryRepair, historyRepairState })', {
-    reactive: value => value, AbortController, console,
+    ref, computed, reactive: value => value, AbortController, console,
     store: { state: { history: { libraryPaged: true } } },
     DBLibraryHandlers: { query: async () => ({ records: Array.from({ length: ++page < 3 ? 100 : 50 }), total: 250, cursor: page < 3 ? { id: page, total: 250 } : null }) },
     repairHistory: async ({ records, onProgress }) => {
@@ -576,7 +576,7 @@ for (const [cancel, reloadFailure, repairFailure] of [[false, false, false], [tr
     queries.length = 0
     const source = await readFile(new URL('../../src/renderer/helpers/historyRepair.js', import.meta.url), 'utf8')
     const helperDependencies = {
-      store, DBLibraryHandlers: { query }, reactive: value => value,
+      store, DBLibraryHandlers: { query }, ref, computed, reactive: value => value,
       repairHistory: async options => {
         const progress = await repairHistory({ ...options, wait: async () => {} })
         if (repairFailure) throw new Error('original repair failure')

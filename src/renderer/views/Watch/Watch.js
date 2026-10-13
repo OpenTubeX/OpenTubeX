@@ -822,7 +822,7 @@ export default defineComponent({
     libraryShortsRequest: function () {
       if (!process.env.IS_ELECTRON || !this.subscriptionShortsFeedActive || this.tabRoute.query.shortSource === 'channel') return null
       return {
-        subscriptions: this.$store.getters.getActiveProfile.subscriptions.slice(),
+        subscriptions: Array.isArray(this.$store.getters.getActiveProfile?.subscriptions) ? this.$store.getters.getActiveProfile.subscriptions.slice() : [],
         currentVideoId: this.videoId,
         revision: [this.$store.state.subscriptionCache.subscriptionVideosFeedVersion, this.$store.state.history.historyRevision],
         preferences: {

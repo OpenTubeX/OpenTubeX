@@ -5709,8 +5709,8 @@ function runApp() {
         }
 
         case DBActions.PLAYLISTS.REPAIR_METADATA:
-          return await baseHandlers.playlists.repairMetadata(data, update => {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.PLAYLISTS.REPAIR_METADATA, data: update })
+          return await baseHandlers.playlists.repairMetadata(data, () => {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
           })
 
         case DBActions.PLAYLISTS.UPSERT_VIDEO: {

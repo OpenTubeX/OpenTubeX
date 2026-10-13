@@ -808,9 +808,13 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
   })
   const nextSnapshot = {}
-  const assertCurrent = (local, id) => {
-    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
-    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
+  const assertCurrent = async (local, id) => {
+    const playlists = store.state.playlists.libraryPaged ? await DBLibraryHandlers.query('playlistSummaries') : store.state.playlists.playlists
+    const current = playlists.find(playlist => playlist._id === id)
+    const unchanged = store.state.playlists.libraryPaged && local && current
+      ? metadataEquals(playlistMetadataFromLocal(local), playlistMetadataFromLocal(current))
+      : metadataEquals(local, current)
+    if (!unchanged) throw new Error('Playlist changed during sync. Try again.')
   }
 
   for (const [id, remote] of remoteById) {
@@ -844,7 +848,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       }
     }
     let remoteId = remote?.remoteId ?? id
-    assertCurrent(local, id)
+    await assertCurrent(local, id)
 
     if (!remote) {
       const createdPlaylist = await client.createPlaylist(metadata)
@@ -948,7 +952,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         .filter(videoId => !localVideosById.has(videoId))
         .map(videoId => videoToLocal(remoteVideosById.get(videoId))))
 
-    assertCurrent(local, id)
+    await assertCurrent(local, id)
     if (!local) {
       local = {
         _id: id,

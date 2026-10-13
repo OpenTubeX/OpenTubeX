@@ -1453,7 +1453,9 @@ function onMoveDraggedVideo(video, source) {
 function removeVideoFromPlaylist(videoId, playlistItemId, memberId) {
   try {
     const foundVideo = playlistItems.value.some((video) => {
-      return video.videoId === videoId && video.playlistItemId === playlistItemId
+      return process.env.IS_ELECTRON
+        ? video._libraryMemberId === memberId
+        : video.videoId === videoId && video.playlistItemId === playlistItemId
     })
 
     if (foundVideo) {

@@ -1873,7 +1873,6 @@ async function normalizeImportedPlaylistThumbnail(playlist) {
 }
 
 async function importPlaylists() {
-  const existingPlaylists = process.env.IS_ELECTRON ? [] : await DBPlaylistHandlers.find()
   let response
   try {
     response = await readFileWithPicker(
@@ -1971,6 +1970,8 @@ async function importPlaylists() {
     // 'playlistItemId',
   ]
 
+  const existingPlaylists = process.env.IS_ELECTRON ? [] : await DBPlaylistHandlers.find()
+  let updatedExistingPlaylists = false
   const newPlaylists = []
   const existingByName = new Map()
   if (process.env.IS_ELECTRON && playlists.some(playlist => isJsonObject(playlist) && playlist._id == null)) {
@@ -1983,10 +1984,7 @@ async function importPlaylists() {
   let importedCount = 0
 
   for (const playlistData of playlists) {
-    await normalizeImportedPlaylistThumbnail(playlistData)
-  }
-
-  playlists.forEach((playlistData) => {
+    if (!process.env.IS_ELECTRON) await normalizeImportedPlaylistThumbnail(playlistData)
     // We would technically already be done by the time the data is parsed,
     // however we want to limit the possibility of malicious data being sent
     // to the app, so we'll only grab the data we need here.
@@ -1994,7 +1992,7 @@ async function importPlaylists() {
     if (!isJsonObject(playlistData) || !Array.isArray(playlistData.videos)) {
       const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: '' })
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
-      return
+      continue
     }
 
     const playlistObject = process.env.IS_ELECTRON
@@ -2041,7 +2039,7 @@ async function importPlaylists() {
     if (countRequiredKeysPresent !== requiredKeys.length) {
       const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName })
       showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
-      return
+      continue
     }
 
     importedCount++
@@ -2052,7 +2050,7 @@ async function importPlaylists() {
         existingByName.set(playlistObject.playlistName, playlistObject._id)
       }
       newPlaylists.push(playlistObject)
-      return
+      continue
     }
 
     const existingPlaylist = existingPlaylists.find((playlist) => {
@@ -2065,20 +2063,22 @@ async function importPlaylists() {
 
     if (existingPlaylist === undefined) {
       newPlaylists.push(playlistObject)
-      return
+      continue
     }
 
     /** @type {Set<string> | undefined} */
     let existingVideoIdSet
 
+    if (!Array.isArray(existingPlaylist.videos)) throw new Error('Cannot merge incompatible playlist videos')
+
     let shouldAddDuplicateVideos = playlistObject.videos.length > videoIdToBeAddedSet.size
 
     if (!shouldAddDuplicateVideos) {
-      existingVideoIdSet = existingPlaylist.videos.reduce((set, video) => set.add(video.videoId), new Set())
+      existingVideoIdSet = existingPlaylist.videos.reduce((set, video) => set.add(video?.videoId), new Set())
       shouldAddDuplicateVideos = existingPlaylist.videos.length > existingVideoIdSet.size
     }
 
-    const playlistVideos = deepCopy(existingPlaylist.videos)
+    const playlistVideos = structuredClone(existingPlaylist.videos)
 
     playlistObject.videos.forEach((video) => {
       let videoExists = false
@@ -2087,14 +2087,14 @@ async function importPlaylists() {
           // Find by `playlistItemId` if present
           videoExists = playlistVideos.some((x) => {
             // Allow duplicate (by videoId) videos to be added
-            return x.videoId === video.videoId && x.playlistItemId === video.playlistItemId
+            return x?.videoId === video.videoId && x.playlistItemId === video.playlistItemId
           })
         } else {
           // Older playlist exports have no `playlistItemId` but have `timeAdded`
           // Which might be duplicate for copied playlists with duplicate `videoId`
           videoExists = playlistVideos.some((x) => {
             // Allow duplicate (by videoId) videos to be added
-            return x.videoId === video.videoId && x.timeAdded === video.timeAdded
+            return x?.videoId === video.videoId && x.timeAdded === video.timeAdded
           })
         }
       } else if (existingVideoIdSet !== undefined) {
@@ -2108,7 +2108,7 @@ async function importPlaylists() {
       } else {
         videoExists = playlistVideos.some((x) => {
           // Disallow duplicate (by videoId) videos to be added
-          return x.videoId === video.videoId
+          return x?.videoId === video.videoId
         })
       }
 
@@ -2118,16 +2118,21 @@ async function importPlaylists() {
         playlistVideos.push(video)
       }
     })
-    // Update playlist's `lastUpdatedAt` & other attributes
-    store.dispatch('updatePlaylist', {
-      _id: existingPlaylist._id,
-      // Only these attributes would be updated (besides videos)
+    const merged = {
+      ...existingPlaylist,
       playlistName: playlistObject.playlistName,
-      description: playlistObject.description,
+      ...(Object.hasOwn(playlistObject, 'description') ? { description: playlistObject.description } : {}),
       ...(Object.hasOwn(playlistObject, 'customThumbnail') ? { customThumbnail: playlistObject.customThumbnail } : {}),
-      videos: playlistVideos
-    })
-  })
+      videos: playlistVideos,
+      lastUpdatedAt: Date.now(),
+    }
+    const { numAffected } = await DBPlaylistHandlers.replaceIfUnchanged(existingPlaylist, merged)
+    if (!numAffected) throw new Error('The playlist changed; retry the import')
+    existingPlaylists[existingPlaylists.indexOf(existingPlaylist)] = merged
+    store.commit('upsertPlaylistToList', merged)
+    store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+    updatedExistingPlaylists = true
+  }
 
   if (importedCount === 0) {
     return
@@ -2135,8 +2140,10 @@ async function importPlaylists() {
 
   if (newPlaylists.length > 0) {
     if (process.env.IS_ELECTRON) await importLibraryRecords('playlists', newPlaylists)
-    else await store.dispatch('addPlaylists', newPlaylists)
+    else if (await store.dispatch('addPlaylists', newPlaylists) === false) throw new Error('Could not import playlists')
   }
+
+  if (updatedExistingPlaylists) await store.dispatch('grabAllPlaylists')
 
   showToast({
     message: t('Settings.Data Settings.All playlists has been successfully imported'),
