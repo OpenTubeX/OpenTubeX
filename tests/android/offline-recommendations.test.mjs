@@ -9,12 +9,14 @@ import { findWatchComponent } from '../../e2e/helpers/player.mjs'
 test('Android swaps cached recommendations for saved thumbnails on disconnect and restores them on reconnect', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
-  const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
-  const page = browser.contexts()[0].pages()[0]
   const ids = [Date.now(), Date.now() + 1]
+  let browser
+  let page
   let saved
   let watch
   try {
+    browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
+    page = browser.contexts()[0].pages()[0]
     await page.locator('.profileTrigger').waitFor()
     const tutorial = page.locator('.tutorialOverlay')
     if (await tutorial.isVisible()) await tutorial.locator('.tutorialActions').getByRole('button').last().click()
@@ -114,7 +116,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
       try {
         await watch?.dispose()
       } finally {
-        await browser.close()
+        await browser?.close()
       }
     }
   }

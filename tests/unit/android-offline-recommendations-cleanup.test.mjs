@@ -4,7 +4,10 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../android/offline-recommendations.test.mjs', import.meta.url), 'utf8')
-const cleanup = source.slice(source.indexOf('\n  } finally {'), source.lastIndexOf('\n})'))
+const cleanupStart = source.indexOf('\n  } finally {')
+const cleanupEnd = source.lastIndexOf('\n})')
+assert.ok(cleanupStart >= 0 && cleanupEnd > cleanupStart, 'Android cleanup source markers must exist in order')
+const cleanup = source.slice(cleanupStart, cleanupEnd)
 
 for (const failure of ['store', 'handle']) {
   test(`Android recommendation cleanup restores network overrides and closes CDP after a ${failure} failure`, async () => {
@@ -41,3 +44,19 @@ for (const failure of ['store', 'handle']) {
     assert.equal(closed, true)
   })
 }
+
+test('Android recommendation cleanup closes CDP when WebView context discovery fails', async () => {
+  let closed = false
+  const browser = {
+    contexts: () => [],
+    async close() { closed = true },
+  }
+  const callbackStart = source.indexOf('}, async () => {')
+  const setupEnd = source.indexOf("    await page.locator('.profileTrigger')")
+  assert.ok(callbackStart >= 0 && setupEnd > callbackStart, 'Android setup source markers must exist in order')
+  const setup = source.slice(callbackStart + '}, async () => {'.length, setupEnd)
+  await assert.rejects(runInNewContext(`(async () => {${setup}${cleanup}})()`, {
+    chromium: { async connectOverCDP() { return browser } }, process: { env: {} },
+  }), /pages/)
+  assert.equal(closed, true)
+})
