@@ -51,7 +51,31 @@ for (const uiScale of [100, 125]) {
       await expect(page.locator('.settingsSearchTarget')).toContainText('Thumbnail Preference')
     })
 
-    for (const targetType of ['setting', 'category']) {
+    test('keeps keyboard shortcut navigation unavailable while Settings is locked', async ({ page }) => {
+      await goTo(page, 'settings')
+      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+      const themeName = page.locator('.customThemeEditor .themeNameField input')
+      await themeName.fill('Unfinished theme')
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await expect(passwordInput).toBeFocused()
+      const shortcuts = page.locator('.settingsHeaderActions').getByRole('button', { name: 'Show keyboard shortcuts', exact: true })
+      await expect(shortcuts).toHaveCount(0)
+      await expect(themeName).toHaveValue('Unfinished theme')
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(themeName).toBeVisible()
+      await expect(themeName).toHaveValue('Unfinished theme')
+      await shortcuts.click()
+      await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
+    })
+
+    for (const targetType of ['setting', 'category', 'root']) {
       test(`keeps a draft locked until the latest command-palette target can open (${targetType})`, async ({ page }) => {
         await goTo(page, 'settings')
         const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
@@ -80,13 +104,28 @@ for (const uiScale of [100, 125]) {
           await page.locator('[role="option"][id$="-settings-general"]').click()
           await expect(themeName).toHaveValue('Unfinished theme')
         }
+        if (targetType === 'root') {
+          await page.keyboard.press('Control+k')
+          const search = page.getByRole('combobox', { name: 'Search commands' })
+          await search.fill('check for updates')
+          await page.getByRole('option', { name: /Check for updates/i }).click()
+          await expect(themeName).toHaveValue('Unfinished theme')
+          await page.keyboard.press('Control+k')
+          await page.getByRole('combobox', { name: 'Search commands' }).fill('settings')
+          await page.locator('[role="option"][id$="-settings-root"]').click()
+          await expect(themeName).toHaveValue('Unfinished theme')
+        }
         await passwordInput.fill(password)
         await passwordInput.press('Enter')
         await expect(page.locator('.settingsPassword')).toHaveCount(0)
         if (targetType === 'setting') {
           await expect(page.locator('.settingsSearchTarget')).toContainText('UI Scale')
-        } else {
+        } else if (targetType === 'category') {
           await expect(page.locator('.section[data-section="general"]')).toBeVisible()
+          await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+        } else {
+          await expect(themeName).toBeVisible()
+          await expect(themeName).toHaveValue('Unfinished theme')
           await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
         }
       })
@@ -410,6 +449,49 @@ for (const uiScale of [100, 125]) {
 for (const uiScale of [100, 125]) {
   test.describe(`settings subpage reopening at ${uiScale}%`, () => {
     test.use({ seed: { settings: { uiScale } } })
+
+    test('opens a command-palette category before compact Settings first mounts', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 375, height: 700 })
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('appearance')
+      await page.locator('[role="option"][id$="-settings-appearance"]').click()
+      await expect(page.locator('.section[data-section="appearance"]')).toBeVisible()
+      await expect(page.locator('.mobileSettingsMenu')).toBeHidden()
+    })
+
+    test('keeps the compact category menu when Settings is reopened', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 375, height: 700 })
+      await goToSettingsSection(page, 'appearance')
+      await page.locator('.settingsBackButton').click()
+      const menu = page.locator('.mobileSettingsMenu')
+      await expect(menu).toBeVisible()
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await expect(menu).toBeVisible()
+      await expect(page.locator('.settingsContentPane')).toBeHidden()
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await page.keyboard.press('Control+k')
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('appearance')
+      await page.locator('[role="option"][id$="-settings-appearance"]').click()
+      await expect(page.locator('.section[data-section="appearance"]')).toBeVisible()
+    })
+
+    test('keeps search results when Settings is reopened', async ({ page }) => {
+      await goToSettingsSection(page, 'appearance')
+      const search = page.getByRole('searchbox', { name: 'Search settings' })
+      await search.fill('thumbnail')
+      const results = page.locator('.settingsSearchResults')
+      await expect(results).toBeVisible()
+      await page.locator('.settingsCloseButton').click()
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await expect(search).toHaveValue('thumbnail')
+      await expect(results).toBeVisible()
+      await search.fill('')
+      await expect(page.locator('.section[data-section="appearance"]')).toBeVisible()
+    })
 
     for (const { section, label, title, content } of [
       { section: 'appearance', label: 'Customize navigation', content: '.selectedItem' },

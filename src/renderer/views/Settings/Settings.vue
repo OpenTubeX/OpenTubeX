@@ -137,7 +137,7 @@
       />
       <div class="settingsHeaderActions">
         <button
-          v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
+          v-if="unlocked && showKeyboardShortcutAction && !isStandaloneViewOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -830,27 +830,27 @@ watch(() => store.getters.getSettingsWindowView, async (view) => {
 })
 watch(activeSection, (section) => {
   if (section !== null) {
-    store.commit('setSettingsWindowSection', section)
+    store.commit('rememberSettingsWindowSection', section)
   }
   nextTick(observeActiveSettingsSection)
 })
-watch([() => store.getters.getSettingsWindowSection, canNavigateSettings], async ([section, canNavigate]) => {
-  if (!canNavigate || props.searchTarget) return
+let handledSectionRequest = null
+watch([() => store.getters.getSettingsWindowSectionRequest, canNavigateSettings], async ([request, canNavigate]) => {
+  if (!canNavigate || !request || request === handledSectionRequest || props.searchTarget) return
   await nextTick()
-  if (!canNavigateSettings.value || section !== store.getters.getSettingsWindowSection || props.searchTarget) return
+  if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
+  handledSectionRequest = request
+  const { section } = request
   if (section === 'storage') activeDataStorageTab.value = 'storage'
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
-  if (
-    normalizedSection !== activeSection.value &&
-    settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)
-  ) {
+  if (settingsSectionComponents.value.some(candidate => candidate.type === normalizedSection)) {
     navigateToSection(normalizedSection)
   }
   if (section === 'storage') {
     await nextTick()
     await activeSettingsSectionRef.value?.activateTab('storage')
   }
-})
+}, { immediate: true })
 watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
   if (!target || !canNavigate) return
   await nextTick()
@@ -1296,6 +1296,7 @@ function returnToCategory() {
 }
 
 function showKeyboardShortcutPrompt() {
+  if (!canNavigateSettings.value) return
   store.dispatch('showKeyboardShortcutPrompt')
 }
 

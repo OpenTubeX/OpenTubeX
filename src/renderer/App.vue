@@ -3585,6 +3585,8 @@ function handleHardwareKeyboardChange(event) {
 }
 
 function openSettingsView(view) {
+  settingsSearchTarget.value = null
+  store.commit('setSettingsWindowSection', null)
   store.dispatch('showSettingsWindow', view)
 }
 
@@ -3596,7 +3598,7 @@ function openSettingsSection(section) {
 
 function openSettingsSearchResult(section, match) {
   settingsSearchTarget.value = { section, ...match }
-  store.commit('setSettingsWindowSection', section)
+  store.commit('setSettingsWindowSection', null)
   store.dispatch('showSettingsWindow')
 }
 
