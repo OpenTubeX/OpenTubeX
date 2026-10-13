@@ -9,6 +9,7 @@ import {
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { deepCopy } from '../../helpers/utils'
+import { isRemoteSyncDispatch } from '../../helpers/sync-server-scheduling'
 
 function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
@@ -176,9 +177,13 @@ const getters = {
 
 const actions = {
   async repairPlaylistMetadata({ state, commit, dispatch }, payload) {
+    const localRepair = !isRemoteSyncDispatch()
     const result = await DBPlaylistHandlers.repairMetadata(payload)
     if (state.libraryPaged) {
-      if (result.updates.length) await dispatch('grabAllPlaylists')
+      if (result.updates.length) {
+        if (localRepair) await dispatch('scheduleSyncServer', 'playlists')
+        await dispatch('grabAllPlaylists')
+      }
     } else {
       for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
     }

@@ -3153,3 +3153,51 @@ test('portable unavailable scans skip retained null and scalar members', async (
   assert.deepEqual(scanned.map(video => video.videoId), ['valid'])
   assert.deepEqual(videos, [null, false, 42, {}, { videoId: 'valid' }])
 })
+
+for (const remote of [false, true]) {
+  test(`desktop playlist repair schedules committed local changes before a failed refresh, remote: ${remote}`, async () => {
+    let inRemoteDispatch = remote
+    const events = [], gate = Promise.withResolvers()
+    const context = await functions('src/renderer/store/modules/playlists.js', ['repairPlaylistMetadata'], {
+      isRemoteSyncDispatch: () => inRemoteDispatch,
+      DBPlaylistHandlers: { repairMetadata: async () => { await gate.promise; return { updates: ['p'], repaired: 1, failed: 0 } } },
+    })
+    const repaired = context.repairPlaylistMetadata({ state: { libraryPaged: true }, commit() {}, dispatch: async action => {
+      events.push(action)
+      if (action === 'grabAllPlaylists') throw new Error('refresh failed')
+    } }, {})
+    inRemoteDispatch = false
+    gate.resolve()
+    await assert.rejects(repaired, /refresh failed/)
+    assert.deepEqual(events, [...(remote ? [] : ['scheduleSyncServer']), 'grabAllPlaylists'])
+  })
+}
+
+test('Watch reloads a paged duration window after same-size same-timestamp playlist metadata changes', async t => {
+  const file = 'src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
+  const { script, ast } = await source(file)
+  const node = matching(ast, node => node.type === 'CallExpression' && node.callee?.name === 'watch' &&
+    node.arguments[0]?.type === 'ArrayExpression' && script.slice(node.start, node.end).includes('parseUserPlaylist(selectedUserPlaylist.value)'))[0]
+  assert.ok(node)
+  const selectedUserPlaylist = vueRef({ _id: 'p', videoCount: 3, lastUpdatedAt: 1 })
+  const current = { videoId: 'current', _libraryMemberId: 'current' }, earlier = { videoId: 'earlier', _libraryMemberId: 'earlier' }, later = { videoId: 'later', _libraryMemberId: 'later' }
+  const nextWindow = { index: 1, total: 3, previous: earlier, next: later, records: [earlier, current, later] }
+  let reads = 0
+  const context = await functions(file, ['loadUserPlaylistWindow', 'parseUserPlaylist'], {
+    selectedUserPlaylistVideoCount: computed(() => selectedUserPlaylist.value.videoCount), selectedUserPlaylistLastUpdatedAt: computed(() => selectedUserPlaylist.value.lastUpdatedAt),
+    playlistTitle: vueRef('p'), playlistTotalVideoCount: vueRef(3), channelName: vueRef(''), channelId: vueRef(''), shufflePlaylistItems() {},
+    watch: (...args) => { const stop = watch(...args); t.after(stop); return stop },
+    selectedUserPlaylist, props: reactive({ videoId: current.videoId }), sortOrder: vueRef('video_duration_asc'), locale: vueRef('en_US'),
+    isPagedPlaylist: vueRef(true), store: { state: { history: reactive({ historyRevision: 0 }) } },
+    userWindowGeneration: 0, userWindowReady: vueRef(true), userWindowOwner: vueRef('p'), userWindowKey: () => 'p', isLoading: vueRef(false),
+    prevVideoBeforeDeletion: vueRef(null), playlistItems: vueRef([current, later, earlier]), userWindow: vueRef({ index: 0, total: 3, previous: null, next: later }),
+    userPlaylistWindowOptions: () => ({ id: 'p' }), DBLibraryHandlers: { query: async () => { reads++; return nextWindow } }, t: key => key, showToast() {},
+  })
+  vm.runInContext(script.slice(node.start, node.end), context)
+  selectedUserPlaylist.value = { _id: 'p', videoCount: 3, lastUpdatedAt: 1 }
+  await nextTick(); await setImmediate()
+  assert.equal(reads, 1)
+  assert.equal(context.userWindow.value.previous.videoId, earlier.videoId)
+  assert.equal(context.userWindow.value.next.videoId, later.videoId)
+  assert.deepEqual(context.playlistItems.value.map(video => video.videoId), nextWindow.records.map(video => video.videoId))
+})

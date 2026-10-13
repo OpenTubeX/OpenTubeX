@@ -627,15 +627,12 @@ watch(userPlaylistsReady, () => {
   getPlaylistInfoWithDelay()
 })
 
-watch(selectedUserPlaylistVideoCount, () => {
-  // Re-fetch from local store when current user playlist updated
+watch([selectedUserPlaylistVideoCount, selectedUserPlaylistLastUpdatedAt,
+  () => isPagedPlaylist.value ? selectedUserPlaylist.value : null], ([count], [previousCount]) => {
+  // Summary replacement also signals member metadata edits whose count and
+  // timestamp stay unchanged. Coalesce these sources into one window refresh.
   parseUserPlaylist(selectedUserPlaylist.value)
-  shufflePlaylistItems()
-})
-
-watch(selectedUserPlaylistLastUpdatedAt, () => {
-  // Re-fetch from local store when current user playlist updated
-  parseUserPlaylist(selectedUserPlaylist.value)
+  if (count !== previousCount) shufflePlaylistItems()
 })
 
 watch(() => props.videoId, (newId, oldId) => {
