@@ -564,3 +564,20 @@ test('Electron watch-stat preflight is read-only and keeps the published merge p
   assert.equal(broadcasts.length, 1)
   assert.equal((await db.watchStats.findOneAsync({ _id: original._id })).seconds, 10)
 })
+
+
+test('foundation Save filtering displays retained names without modifying durable values', async () => {
+  const db = new Datastore({ inMemoryOnly: true })
+  const records = [undefined, null, false, 42, {}, [], new Date(1)].map((playlistName, index) => ({ _id: `retained-${index}`, ...(playlistName === undefined ? {} : { playlistName }), videos: [], unknown: new Date(index) }))
+  await db.insertAsync(records)
+  const component = await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')
+  const script = parseVue(component).descriptor.scriptSetup.content
+  const ast = parseJavaScript(script, { sourceType: 'module' }).program.body
+  const helper = ast.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistDisplayName')
+  const name = compileFunction('return ' + script.slice(helper.start, helper.end), ['t'])(key => key)
+  const initializer = ast.find(node => node.type === 'VariableDeclaration' && node.declarations.some(item => item.id.name === 'filteredPlaylists')).declarations.find(item => item.id.name === 'filteredPlaylists').init
+  const filter = compileFunction('return ' + script.slice(initializer.start, initializer.end), ['computed', 'playlists', 'search', 'playlistDisplayName'])
+  const saved = await db.findAsync({}).sort({ _id: 1 })
+  assert.deepEqual(filter(callback => callback(), { value: saved }, { value: 'playlists' }, name), saved)
+  assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), records)
+})

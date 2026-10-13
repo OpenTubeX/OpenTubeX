@@ -53,7 +53,7 @@
               :src="playlistThumbnail(playlist)"
             />
             <span class="playlistDetails">
-              <span class="playlistName">{{ playlist.playlistName }}</span>
+              <span class="playlistName">{{ playlistDisplayName(playlist) }}</span>
               <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
             </span>
             <FtIcon
@@ -117,8 +117,11 @@ const sheetOpen = ref(true)
 const listScroller = useTemplateRef('listScroller')
 const listContent = useTemplateRef('listContent')
 useScrollClamp(listScroller, listContent)
+function playlistDisplayName(playlist) {
+  return typeof playlist.playlistName === 'string' ? playlist.playlistName : t('Playlists')
+}
 const filteredPlaylists = computed(() => playlists.value.filter(playlist =>
-  playlist.playlistName.toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
+  playlistDisplayName(playlist).toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
@@ -183,7 +186,7 @@ function playlistThumbnail(playlist) {
  * @param {object} playlist
  */
 async function togglePlaylist(playlist) {
-  const playlistName = playlist.playlistName
+  const playlistName = playlistDisplayName(playlist)
 
   if (containedIds.value.has(playlist._id)) {
     const removed = await store.dispatch('removeVideo', {

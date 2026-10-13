@@ -1185,3 +1185,33 @@ test('escaped history imports choose the decoded latest-occurrence fallback befo
   assert.equal(target, current._id)
   assert.deepEqual(await engine.collections.history.findAsync({}), [current])
 })
+
+
+for (const identity of [7, null, undefined]) {
+  test(`history restores reserve exact IDs independently of video identity ${identity}`, async t => {
+    const { engine, imports } = await fixture(t)
+    const original = { _id: 'A', videoId: 'same', timeWatched: 1, watchProgress: 5, unknown: new Date(1) }
+    await engine.collections.history.insertAsync(original)
+    const incoming = [{ _id: 'B', videoId: 'same', timeWatched: 2, watchProgress: 10, imported: new Date(2) }, { _id: 'A', ...(identity === undefined ? {} : { videoId: identity }), timeWatched: 3, unknown: new Date(3) }]
+    const expected = [{ ...mergeBackupHistoryRecord(original, migrateLegacyHistoryRecord(incoming[1])), _id: 'A' }, migrateLegacyHistoryRecord(incoming[0])]
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await imports.apply({ ...stage(imports, Buffer.from(await createUnifiedBackup({ history: incoming }).arrayBuffer())), sections: ['history'] }, {})
+      assert.deepEqual(await engine.collections.history.findAsync({}).sort({ _id: 1 }), expected)
+    }
+  })
+}
+
+for (const videoId of ['\ud800', '\udc00', 'x\ud800y']) {
+  test(`history fallback preserves surrogate video identity ${JSON.stringify(videoId)}`, async t => {
+    const { engine, imports } = await fixture(t)
+    const original = { _id: 'target', videoId, timeWatched: 1, watchProgress: 5, unknown: new Date(1) }
+    const other = { _id: 'replacement', videoId: videoId.toWellFormed(), timeWatched: 100, watchProgress: 90, unknown: new Date(2) }
+    await engine.collections.history.insertAsync([original, other])
+    const incoming = { _id: 'source', videoId, timeWatched: 2, watchProgress: 10, imported: new Date(3) }
+    const expected = [other, { ...mergeBackupHistoryRecord(original, migrateLegacyHistoryRecord(incoming)), _id: original._id }]
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await imports.apply({ ...stage(imports, Buffer.from(await createUnifiedBackup({ history: [incoming] }).arrayBuffer())), sections: ['history'] }, {})
+      assert.deepEqual(await engine.collections.history.findAsync({}).sort({ _id: 1 }), expected)
+    }
+  })
+}

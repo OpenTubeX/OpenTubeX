@@ -58,21 +58,23 @@ function emptyBackup() { return { settings: {}, profiles: [], playlists: [], his
 
 function prepareHistoryTargets(engine, job) {
   engine.database.exec(`
-    CREATE TEMP TABLE import_history_sources (record_id TEXT, video_id TEXT NOT NULL);
+    CREATE TEMP TABLE import_history_sources (record_id TEXT, video_id TEXT);
     CREATE INDEX import_history_source_ids ON import_history_sources(record_id);
     CREATE INDEX import_history_source_videos ON import_history_sources(video_id);
     CREATE TEMP TABLE import_history_targets (id TEXT PRIMARY KEY, video_id TEXT NOT NULL, available INTEGER NOT NULL) WITHOUT ROWID;
     CREATE INDEX import_history_target_videos ON import_history_targets(video_id, available);
   `)
-  const insert = engine.prepare('INSERT INTO import_history_sources VALUES (?, ?)')
+  const insert = engine.prepare("INSERT INTO import_history_sources VALUES (?, json_extract(?, '$'))")
   for (const row of job.database.prepare(`
-    SELECT json_extract(data, '$._id') AS id, json_extract(data, '$.videoId') AS video_id,
+    SELECT data -> '$._id' AS id_key,
+      CASE WHEN json_type(data, '$.videoId') = 'text' THEN data -> '$.videoId' END AS video_key,
       CASE WHEN json_type(data, '$.$$backupObject') = 'array' THEN data END AS escaped
     FROM incoming WHERE section = 'history'
-      AND (json_type(data, '$.videoId') = 'text' OR json_type(data, '$.$$backupObject') = 'array')
   `).iterate()) {
-    const source = row.escaped ? job.decode(row.escaped) : { _id: row.id, videoId: row.video_id }
-    if (typeof source.videoId === 'string') insert.run(source._id ?? null, source.videoId)
+    const source = row.escaped ? job.decode(row.escaped) : { _id: JSON.parse(row.id_key ?? 'null'), videoId: JSON.parse(row.video_key ?? 'null') }
+    // Reserve every exact ID, even if its incoming video identity is not a string.
+    // JSON keys avoid converting retained surrogate bytes at the JS/TEXT boundary.
+    insert.run(source._id ?? null, JSON.stringify(typeof source.videoId === 'string' ? source.videoId : null))
   }
   // Freeze the eligible destinations before writing. Reserve exact IDs first,
   // so an earlier fallback cannot consume a later row's exact match. Only
@@ -83,7 +85,7 @@ function prepareHistoryTargets(engine, job) {
     INSERT INTO import_history_targets
     SELECT r.id, r.video_id, NOT EXISTS (SELECT 1 FROM import_history_sources s WHERE s.record_id = r.id)
     FROM records r WHERE r.collection = 'history' AND r.video_id IN (SELECT video_id FROM import_history_sources)
-    AND r.video_id NOT IN (SELECT video_id FROM import_history_sources WHERE record_id IS NULL OR record_id = '');
+    AND r.video_id NOT IN (SELECT video_id FROM import_history_sources WHERE video_id IS NOT NULL AND (record_id IS NULL OR record_id = ''));
   `)
 }
 
@@ -299,8 +301,8 @@ export class LibraryImports {
           current = incoming._id ? await collection.findOneAsync({ _id: incoming._id }) : null
           if (!current && matchHistory && incoming._id && typeof incoming.videoId === 'string') {
             const match = [...engine.orderedHistoryRows({
-              where: 'r.id IN (SELECT id FROM import_history_targets WHERE video_id = ? AND available = 1)',
-              parameters: [incoming.videoId],
+              where: "r.id IN (SELECT id FROM import_history_targets WHERE video_id = json_extract(?, '$') AND available = 1)",
+              parameters: [JSON.stringify(incoming.videoId)],
               limit: 1,
             })][0]
             if (match) {
@@ -308,7 +310,7 @@ export class LibraryImports {
               // Match at most one unidentified occurrence per video. Matching
               // several by mutable timestamps can swap them on repeat restores.
               // Preserve remaining source IDs and existing duplicates instead.
-              engine.prepare('DELETE FROM import_history_targets WHERE video_id = ?').run(incoming.videoId)
+              engine.prepare("DELETE FROM import_history_targets WHERE video_id = json_extract(?, '$')").run(JSON.stringify(incoming.videoId))
             }
           } else if (!incoming._id && !matchHistory) {
             current = await collection.findAsync({ videoId: incoming.videoId }).sort({ timeWatched: -1 }).limit(1).then(records => records[0])
