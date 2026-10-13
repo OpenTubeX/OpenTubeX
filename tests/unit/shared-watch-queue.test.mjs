@@ -31,6 +31,81 @@ function sharedWindows() {
 
 const addVideo = (store, videoId) => store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
 
+test('a failed restore blocks writes and retries before applying the next change', () => {
+  let unreadable = true
+  let saved = [{ videoId: 'saved', title: 'Saved' }]
+  let writes = 0
+  const update = createSharedWatchQueue({
+    read() {
+      if (unreadable) throw new Error('Temporary read failure')
+      return structuredClone(saved)
+    },
+    write(items) { saved = structuredClone(items); writes++ },
+  })
+  assert.throws(() => update({}), /Temporary read failure/)
+  assert.throws(() => update({ type: 'clearWatchQueue' }), /Temporary read failure/)
+  assert.equal(writes, 0)
+  unreadable = false
+  const snapshot = update({ type: 'addVideoToWatchQueue', payload: { video: { videoId: 'new' } } })
+  assert.deepEqual(snapshot.items.map(item => item.videoId), ['saved', 'new'])
+  assert.equal(snapshot.revision, 1)
+  assert.deepEqual(saved, snapshot.items)
+})
+
+test('failed writes roll back every window to the durable queue with a newer revision', () => {
+  let unwritable = false
+  let saved = [{ videoId: 'saved', title: 'Saved' }]
+  const update = createSharedWatchQueue({
+    read: () => structuredClone(saved),
+    write(items) {
+      if (unwritable) throw new Error('Disk full')
+      saved = structuredClone(items)
+    },
+  })
+  const listeners = []
+  const adapter = {
+    update(request) {
+      const snapshot = update(request)
+      listeners.forEach(handler => handler(snapshot))
+      return snapshot
+    },
+    onUpdated: handler => listeners.push(handler),
+  }
+  const window = () => createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
+  const first = window()
+  const second = window()
+  const initial = JSON.parse(JSON.stringify(first.getters.getWatchQueue))
+  unwritable = true
+  addVideo(first, 'unsaved')
+  for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue, initial)
+  first.commit('clearWatchQueue')
+  for (const store of [first, second]) assert.deepEqual(store.getters.getWatchQueue, initial)
+  assert.equal(update({}).revision, 2)
+  unwritable = false
+  addVideo(second, 'new')
+  assert.deepEqual(saved.map(item => item.videoId), ['saved', 'new'])
+})
+
+test('a restore error allows app startup and a later edit retries the shared queue', () => {
+  let unavailable = true
+  const update = createSharedWatchQueue({
+    read: () => [{ videoId: 'saved' }],
+    write() {},
+  })
+  const adapter = {
+    update(request) {
+      if (unavailable) throw new Error('Queue unavailable')
+      return update(request)
+    },
+    onUpdated() {},
+  }
+  const store = createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
+  assert.equal(store.getters.getWatchQueueLength, 0)
+  unavailable = false
+  addVideo(store, 'new')
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['saved', 'new'])
+})
+
 const component = await readFile(new URL('../../src/renderer/components/WatchVideoQueue/WatchVideoQueue.vue', import.meta.url), 'utf8')
 const moveSource = component.slice(component.indexOf('function move(queueItemId, offset)'), component.indexOf('\nfunction setQueueDragHandle('))
 

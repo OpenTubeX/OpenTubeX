@@ -225,8 +225,9 @@ const {
   rowSelector: '.queueItem',
   itemIdAttribute: 'data-queue-item-id',
   updateItems(order) {
-    const id = Number(pointerDraggedId.value)
-    const from = items.value.findIndex(item => item.queueItemId === id)
+    const from = items.value.findIndex(item => String(item.queueItemId) === pointerDraggedId.value)
+    if (from === -1) return
+    const id = items.value[from].queueItemId
     move(id, order.indexOf(String(id)) - from)
   },
   announceMoved(id, position) {
