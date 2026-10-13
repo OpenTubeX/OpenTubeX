@@ -1,5 +1,5 @@
 import { toRaw } from 'vue'
-import { historyRepairPatch } from '../../src/historyRepair.js'
+import { historyRepairPatch, needsHistoryRepair, repairHistory } from '../../src/historyRepair.js'
 import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import { EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
@@ -47,10 +47,26 @@ test('synced history with unknown duration does not label ordinary videos as liv
 
 test('newly synced history retains its video ID as the fallback title until repaired', async () => {
   const entry = structuredClone(remote)
+  entry.video.id = 'abcdefghijk'
   entry.video.title = entry.video.id
+  entry.video.duration = 120
   const changes = await downloadHistory([], entry)
-  assert.equal(changes.insertions[0].title, entry.video.id)
-  const repaired = { ...changes.insertions[0], title: 'Recovered title' }
+  const repaired = changes.insertions[0]
+  assert.equal(repaired.title, entry.video.id)
+  const result = await repairHistory({
+    records: [repaired],
+    getRecord: () => repaired,
+    fetchMetadata: async () => ({ title: 'Recovered title' }),
+    saveMetadata: async patches => {
+      assert.deepEqual(patches, [{ videoId: entry.video.id, title: 'Recovered title' }])
+      Object.assign(repaired, patches[0])
+      return { repaired: patches.length, failed: 0 }
+    },
+    signal: new AbortController().signal,
+    onProgress: () => {},
+  })
+  assert.deepEqual(result, { total: 1, checked: 1, repaired: 1, failed: 0 })
+  assert.equal(needsHistoryRepair(repaired), false)
   const uploaded = []
   await downloadHistory([repaired], entry, uploaded)
   assert.equal(uploaded.length, 1)

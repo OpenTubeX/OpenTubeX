@@ -1,9 +1,9 @@
-const nonEmpty = value => typeof value === 'string' && value.trim().length > 0
+const nonEmpty = (value, placeholder) => typeof value === 'string' && value.trim().length > 0 && value !== placeholder
 const positive = value => Number.isFinite(Number(value)) && Number(value) > 0
 
 export function needsHistoryRepair(record) {
   return !record.isStation && /^[\w-]{11}$/.test(record.videoId) && (
-    !nonEmpty(record.title) || !nonEmpty(record.author) || !nonEmpty(record.authorId) ||
+    !nonEmpty(record.title, record.videoId) || !nonEmpty(record.author) || !nonEmpty(record.authorId) ||
     !positive(record.published) || !positive(record.lengthSeconds) || record.isLive === true || record.liveNow === true || record.isUpcoming === true
   )
 }
@@ -13,7 +13,7 @@ export function needsHistoryRepair(record) {
 export function historyRepairPatch(record, metadata) {
   const patch = { videoId: record.videoId }
   for (const key of ['title', 'author', 'authorId', 'description']) {
-    if (!nonEmpty(record[key]) && nonEmpty(metadata[key])) patch[key] = metadata[key]
+    if (!nonEmpty(record[key], key === 'title' ? record.videoId : undefined) && nonEmpty(metadata[key])) patch[key] = metadata[key]
   }
   if (!positive(record.published) && positive(metadata.published)) patch.published = metadata.published
   if (metadata.isLive === true || metadata.isUpcoming === true) {

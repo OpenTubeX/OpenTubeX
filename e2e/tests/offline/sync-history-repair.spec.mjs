@@ -38,7 +38,7 @@ async function sync(page) {
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
 }
 
-for (const { encrypted, beforeFirstSync, failure } of [
+for (const { encrypted, beforeFirstSync, failure, placeholderTitle } of [
   { encrypted: false, beforeFirstSync: false },
   { encrypted: true, beforeFirstSync: false },
   { encrypted: false, beforeFirstSync: true },
@@ -47,9 +47,22 @@ for (const { encrypted, beforeFirstSync, failure } of [
   { encrypted: true, beforeFirstSync: true, failure: 'conflict' },
   { encrypted: true, beforeFirstSync: true, failure: 'newer repair' },
   { encrypted: true, beforeFirstSync: true, failure: 'later collection' },
+  { encrypted: false, beforeFirstSync: true, placeholderTitle: true },
+  { encrypted: true, beforeFirstSync: true, placeholderTitle: true },
 ]) {
-  test(`history repairs sync without repeated uploads, encrypted ${encrypted}, before first sync ${beforeFirstSync}, failure ${failure ?? 'none'}`, async ({ page }, testInfo) => {
+  test(`history repairs sync without repeated uploads, encrypted ${encrypted}, before first sync ${beforeFirstSync}, failure ${failure ?? 'none'}, title placeholder ${placeholderTitle === true}`, async ({ page }, testInfo) => {
     const record = { ...original, lengthSeconds: beforeFirstSync ? 100 : 0 }
+    if (placeholderTitle) {
+      Object.assign(record, {
+        title: record.videoId,
+        author: 'Recovered channel',
+        published: Date.parse('2025-01-01'),
+        lengthSeconds: 120,
+        isLive: false,
+        liveNow: false,
+        isUpcoming: false,
+      })
+    }
     const metadata = { added_date: record.timeWatched, watched_state: 'completed', position_millis: record.watchProgress * 1000 }
     const server = encrypted ? await createTakeoutSyncServer() : null
     const receiverData = await createUserDataDir({ ...seed, history: [record] })
@@ -175,6 +188,7 @@ for (const { encrypted, beforeFirstSync, failure } of [
         await sync(page)
       }
       await expect.poll(async () => (await getRepairedEntry()).video.duration).toBe(120)
+      await expect.poll(async () => (await getRepairedEntry()).video.title).toBe('Recovered title')
       const hasNewerRepair = failure === 'newer repair' || failure === 'later collection'
       const finalDuration = hasNewerRepair ? 130 : 120
       if (hasNewerRepair) {

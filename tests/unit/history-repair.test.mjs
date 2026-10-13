@@ -14,6 +14,15 @@ test('repair selects incomplete imports and live entries, excluding stations and
   assert.equal(needsHistoryRepair({ ...record, ...metadata, authorId: '' }), true)
 })
 
+test('a video ID placeholder title is selected and repaired without changing complete metadata', () => {
+  const imported = { ...record, ...metadata, liveNow: false, title: record.videoId }
+  assert.equal(needsHistoryRepair(imported), true)
+  assert.deepEqual(historyRepairPatch(imported, { ...metadata, title: 'Recovered title' }), {
+    videoId: record.videoId, title: 'Recovered title',
+  })
+  assert.equal(needsHistoryRepair({ ...imported, title: 'Recovered title' }), false)
+})
+
 test('confirmed duration repairs false live flags without changing personal data', () => {
   assert.deepEqual(historyRepairPatch(record, metadata), { videoId: record.videoId, ...metadata, liveNow: false, pendingDurationRepair: true })
   assert.equal(historyRepairPatch(record, { lengthSeconds: 120 }), null)
