@@ -332,7 +332,7 @@ test('mounted portable playlist statistics tolerate opaque members and follow in
   const statistics = useStatistics(store, () => 'p', () => true)
   const settle = async () => { await nextTick(); await setImmediate() }
   await settle()
-  assert.deepEqual(statistics.value, { total: 8, uniqueCount: 4, duration: 270, missingDuration: 5, watchedCount: 1 })
+  assert.deepEqual(statistics.value, { total: 8, uniqueCount: 7, duration: 270, missingDuration: 5, watchedCount: 1 })
   assert.equal(queries, 1)
   state.playlists = [structuredClone(original), { _id: 'unrelated', videos: [] }]
   await settle()
@@ -368,10 +368,12 @@ test('mounted portable playlist statistics tolerate opaque members and follow in
   cached.videos = typed
   await settle()
   assert.equal(statistics.value.uniqueCount, 2)
+  const beforeIdentityChangeQueries = queries
   await db.playlists.updateAsync({ _id: 'p' }, { $set: { videos: typed.map(video => ({ ...video, videoId: null })) } })
   cached.videos[0].videoId = null
   await settle()
-  assert.equal(statistics.value.uniqueCount, 1, 'missing and null identities must remain distinct in the change signature')
+  assert.equal(statistics.value.uniqueCount, 2, 'cleanup preserves both unidentified occurrences')
+  assert.equal(queries, beforeIdentityChangeQueries + 1, 'missing and null identities must remain distinct in the change signature')
   assert.deepEqual((await db.playlists.findOneAsync({ _id: 'p' })).videos, typed.map(video => ({ ...video, videoId: null })))
   assert.deepEqual(await db.history.findAsync({}).sort({ _id: 1 }), history)
 })
@@ -434,7 +436,7 @@ for (const method of ['playlistStatistics', 'videoState', 'cleanupPlaylist:watch
     const history = await db.history.findAsync({}).sort({ _id: 1 })
     if (method === 'playlistStatistics') {
       assert.deepEqual(await library.query(method, { id: 'p' }), {
-        total: 9, uniqueCount: 4, duration: 270, missingDuration: 6, watchedCount: 1,
+        total: 9, uniqueCount: 8, duration: 270, missingDuration: 6, watchedCount: 1,
       })
     } else if (method === 'videoState') {
       const state = await library.query(method, { ids: ['repeated', 'explicit', 'missing'] })
@@ -717,3 +719,19 @@ for (const adapter of ['nedb', 'sqlite']) {
     assert.deepEqual(result.affectedDocuments, expected)
   })
 }
+
+
+test('portable duplicate statistics count exactly the members cleanup removes', async () => {
+  const { db, library } = await fixture(false)
+  const videos = [null, false, {}, { videoId: null }, { videoId: null }, { videoId: { retained: true } }, { videoId: { retained: true } }, { videoId: 'same' }, { videoId: 'same' }, { videoId: 42 }, { videoId: 42 }]
+  const original = { _id: 'p', videos, unknown: new Date(123) }
+  await db.playlists.updateAsync({ _id: 'p' }, original)
+  const stats = await library.query('playlistStatistics', { id: 'p' })
+  assert.equal(stats.total - stats.uniqueCount, 2)
+  assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), original)
+  assert.equal(await library.query('cleanupPlaylist', { id: 'p', mode: 'duplicates' }), 2)
+  const saved = await db.playlists.findOneAsync({ _id: 'p' })
+  assert.deepEqual(saved.videos, videos.filter((_, index) => index !== 8 && index !== 10))
+  const cleaned = await library.query('playlistStatistics', { id: 'p' })
+  assert.equal(cleaned.uniqueCount, cleaned.total)
+})

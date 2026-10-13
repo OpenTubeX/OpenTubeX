@@ -54,7 +54,7 @@
             />
             <span class="playlistDetails">
               <span class="playlistName">{{ playlistDisplayName(playlist) }}</span>
-              <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
+              <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlistVideoCount(playlist) }, playlistVideoCount(playlist)) }}</span>
             </span>
             <FtIcon
               class="stateIcon"
@@ -164,7 +164,7 @@ const containedIds = computed(() => {
 
   return new Set(
     allPlaylists.value
-      .filter((playlist) => playlist.videos.some((video) => video.videoId === videoId))
+      .filter((playlist) => Array.isArray(playlist.videos) && playlist.videos.some((video) => video?.videoId === videoId))
       .map((playlist) => playlist._id)
   )
 })
@@ -172,14 +172,23 @@ const containedIds = computed(() => {
 /**
  * @param {object} playlist
  */
+function playlistVideoCount(playlist) {
+  return playlist.videoCount ?? (Array.isArray(playlist.videos) ? playlist.videos.length : 0)
+}
+
+/**
+ * @param {object} playlist
+ */
 function playlistThumbnail(playlist) {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (playlist.customThumbnail) return playlist.customThumbnail
-  if (playlist.videos.length === 0) {
+  const first = playlist.firstVideo ?? playlist.videos?.[0]
+  if (playlistVideoCount(playlist) === 0 || first === null || typeof first !== 'object' || Array.isArray(first) || typeof first.videoId !== 'string' || first.videoId.length === 0) {
+
     return thumbnailPlaceholder
   }
 
-  return getVideoThumbnailUrl(playlist.videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
+  return getVideoThumbnailUrl(first.videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
 }
 
 /**

@@ -66,6 +66,7 @@ export async function runMetadataRepair(state, { useCookies = false, ...options 
   controller = new AbortController()
   Object.assign(state, { ...initialRepairState, running: true, started: true })
   try {
+    if (typeof options.records === 'function') options.records = await options.records(controller.signal)
     await repairHistory({
       ...options,
       fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),

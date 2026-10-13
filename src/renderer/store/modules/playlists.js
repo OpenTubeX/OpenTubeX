@@ -173,9 +173,13 @@ const getters = {
 }
 
 const actions = {
-  async repairPlaylistMetadata({ commit }, payload) {
+  async repairPlaylistMetadata({ state, commit, dispatch }, payload) {
     const result = await DBPlaylistHandlers.repairMetadata(payload)
-    for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
+    if (state.libraryPaged) {
+      if (result.updates.length) await dispatch('grabAllPlaylists')
+    } else {
+      for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
+    }
     return { repaired: result.repaired, failed: result.failed }
   },
 

@@ -1,13 +1,14 @@
 import { historyRepairPatch, needsHistoryRepair } from './historyRepair.js'
 
 export function needsPlaylistRepair(video) {
+  if (video === null || typeof video !== 'object' || Array.isArray(video)) return false
   return needsHistoryRepair(video) || (!video.isStation && /^[\w-]{11}$/.test(video.videoId) && video.title === video.videoId)
 }
 
 export function playlistRepairRecords(playlists) {
   const records = new Map()
   for (const playlist of playlists) {
-    for (const video of playlist.videos) {
+    for (const video of Array.isArray(playlist.videos) ? playlist.videos : []) {
       if (needsPlaylistRepair(video) && !records.has(video.videoId)) records.set(video.videoId, video)
     }
   }
@@ -18,6 +19,7 @@ export function playlistRepairPatch(video, metadata) {
   if (!needsPlaylistRepair(video)) return null
   const patch = historyRepairPatch(video.title === video.videoId ? { ...video, title: '' } : video, metadata)
   if (!patch) return null
+  delete patch._id
   delete patch.description
   delete patch.pendingDurationRepair
   if (!Object.hasOwn(video, 'liveNow')) delete patch.liveNow
@@ -33,7 +35,8 @@ export function applyPlaylistRepairUpdate(playlists, update) {
     changes.push(change)
     changesById.set(change.videoId, changes)
   }
-  for (const video of playlist.videos) {
+  for (const video of Array.isArray(playlist.videos) ? playlist.videos : []) {
+    if (video === null || typeof video !== 'object' || Array.isArray(video)) continue
     for (const change of changesById.get(video.videoId) ?? []) {
       if (change.playlistItemId != null && video.playlistItemId !== change.playlistItemId) continue
       for (const [key, value] of Object.entries(change.fields)) {

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import model from '@seald-io/nedb/lib/model.js'
 import { computed, reactive } from 'vue'
 import { applyPlaylistRepairUpdate, needsPlaylistRepair, playlistRepairPatch, playlistRepairRecords } from '../../src/playlistRepair.js'
 import { repairHistory } from '../../src/historyRepair.js'
@@ -12,7 +13,7 @@ const metadata = { videoId: video.videoId, title: 'Fetched title', author: 'Chan
 const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
 async function fixture() {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
-  const Playlists = vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, playlistRepairPatch, console, PlaylistVideoAddResult: {} })
+  const Playlists = vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, model, playlistRepairPatch, console, PlaylistVideoAddResult: {} })
   await db.playlists.insertAsync({ _id: 'selected', playlistName: 'Takeout', description: 'Keep', protected: true, lastPlayedAt: 50, createdAt: 1, lastUpdatedAt: 2, videos: [video, { ...video, playlistItemId: 'duplicate', author: 'Existing channel' }] })
   await db.playlists.insertAsync({ _id: 'unselected', videos: [video] })
   return { db, Playlists }
@@ -274,3 +275,85 @@ test('conditional sync writes update an unchanged playlist', async () => {
   assert.equal(await Playlists.upsertIfUnchanged({ ...previous, playlistName: 'Synced name' }, previous), true)
   assert.equal((await db.playlists.findOneAsync({ _id: previous._id })).playlistName, 'Synced name')
 })
+
+
+test('playlist repair skips opaque members and preserves retained member identities', async () => {
+  const { db, Playlists } = await fixture()
+  const original = { _id: 'selected', videos: [null, false, { ...video, _id: 'retained member', unknown: new Date(123) }] }
+  await db.playlists.updateAsync({ _id: 'selected' }, original)
+  assert.deepEqual(playlistRepairRecords([original, { videos: null }]), [original.videos[2]])
+  assert.equal(playlistRepairPatch(original.videos[2], metadata)._id, undefined)
+  const result = await Playlists.repairMetadata({ playlistIds: ['selected'], metadata: [metadata] })
+  assert.equal(result.repaired, 1)
+  const saved = await db.playlists.findOneAsync({ _id: 'selected' })
+  assert.deepEqual(saved.videos.slice(0, 2), [null, false])
+  assert.equal(saved.videos[2]._id, 'retained member')
+  assert.deepEqual(saved.videos[2].unknown, original.videos[2].unknown)
+  applyPlaylistRepairUpdate([original], result.updates[0])
+  assert.deepEqual(original, saved)
+})
+
+test('desktop playlist repair reads complete selected playlists through bounded pages', async t => {
+  const { DatabaseSync } = await import('node:sqlite')
+  const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+  const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+  const database = new DatabaseSync(':memory:')
+  t.after(() => database.close())
+  database.exec(SCHEMA_SQL)
+  const engine = new LibraryEngine(database)
+  const complete = { ...metadata, videoId: 'complete___', published: 100 }
+  const members = [...Array.from({ length: 20000 }, () => complete), null, false, { ...video, unknown: new Date(123) }]
+  const original = { _id: 'selected', videos: members, retained: new Date(456) }
+  await engine.collections.playlists.insertAsync(original)
+  const calls = []
+  const helper = await readFile(new URL('../../src/renderer/helpers/playlistRepair.js', import.meta.url), 'utf8')
+  const start = vm.runInNewContext(helper.replace(/^import[^\n]+\n/gm, '').replaceAll('export ', '') + '\nstartPlaylistRepair', {
+    computed, needsPlaylistRepair, playlistRepairRecords,
+    DBLibraryHandlers: { query: async (method, options) => { assert.equal(method, 'playlistPage'); const page = engine.playlistPage(options); calls.push(page.records.length); return page } },
+    createRepairState: () => ({}), cancelMetadataRepair: () => {}, runMetadataRepair: (_state, options) => options,
+    store: { state: { playlists: { libraryPaged: true } }, getters: { getAllPlaylists: [{ _id: 'selected', videos: [] }] } },
+  })
+  const options = start({ playlistIds: ['selected'] })
+  const records = await options.records(new AbortController().signal)
+  assert.equal(records.length, 1)
+  const { _libraryMemberId, ...retained } = records[0]
+  assert.deepEqual(retained, members.at(-1))
+  assert.ok(calls.length > 80)
+  assert.ok(calls.every(length => length <= 250))
+  assert.equal(options.getRecord(video.videoId), records[0])
+  assert.deepEqual(await engine.playlistSnapshot({ id: 'selected' }), original)
+})
+
+
+for (const backend of ['nedb', 'sqlite']) {
+  test(`playlist repair preserves a concurrent Date-to-string edit on ${backend}`, async t => {
+    let collection
+    if (backend === 'sqlite') {
+      const { DatabaseSync } = await import('node:sqlite')
+      const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+      const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+      const database = new DatabaseSync(':memory:')
+      t.after(() => database.close())
+      database.exec('PRAGMA foreign_keys = ON;' + SCHEMA_SQL)
+      collection = new LibraryEngine(database).collections.playlists
+    } else collection = new Datastore({ inMemoryOnly: true })
+    const db = { playlists: collection }
+    const Playlists = vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, model, playlistRepairPatch, console })
+    const original = { _id: 'p', videos: [{ ...video, unknown: new Date(123) }] }
+    await collection.insertAsync(original)
+    const update = collection.updateAsync.bind(collection)
+    let intercepted = false
+    collection.updateAsync = async (query, changes, options) => {
+      if (query.$where && !intercepted) {
+        intercepted = true
+        await update({ _id: 'p' }, { $set: { videos: [{ ...original.videos[0], unknown: original.videos[0].unknown.toISOString() }] } })
+      }
+      return update(query, changes, options)
+    }
+    const result = await Playlists.repairMetadata({ playlistIds: ['p'], metadata: [metadata] })
+    assert.equal(result.repaired, 1)
+    const saved = await collection.findOneAsync({ _id: 'p' })
+    assert.equal(saved.videos[0].unknown, original.videos[0].unknown.toISOString())
+    assert.equal(saved.videos[0].authorId, metadata.authorId)
+  })
+}

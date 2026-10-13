@@ -19,7 +19,7 @@ const baselineMethod = storeSource.slice(storeSource.indexOf('    async persistP
 function playlistBaseline(previous = {}) {
   const settings = { syncServerSnapshot: JSON.stringify({ playlists: previous }) }
   const persistPlaylistSyncBaseline = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
-    rootState: { settings }, encrypted: false, historyAccount: Array(5).fill(undefined), parseSnapshot: JSON.parse,
+    process: { env: {} }, rootState: { settings }, encrypted: false, historyAccount: Array(5).fill(undefined), parseSnapshot: JSON.parse,
     dispatch: async (action, value) => { assert.equal(action, 'updateSyncServerSnapshot'); settings.syncServerSnapshot = value },
   })
   return { persistPlaylistSyncBaseline, readBaseline: () => JSON.parse(settings.syncServerSnapshot).playlists }

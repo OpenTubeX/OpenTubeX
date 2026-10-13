@@ -1547,7 +1547,7 @@ const customActions = {
   },
 
   // Should be a root action, but we'll tolerate
-  setupListenersToSyncWindows: ({ commit, dispatch }) => {
+  setupListenersToSyncWindows: ({ commit, dispatch, rootState }) => {
     if (process.env.IS_ELECTRON) {
       window.ftElectron.handleSyncSettings((event, data) => {
         switch (event) {
@@ -1733,7 +1733,8 @@ const customActions = {
             break
 
           case SyncEvents.PLAYLISTS.REPAIR_METADATA:
-            commit('applyPlaylistMetadataRepairs', data)
+            if (rootState.playlists.libraryPaged) dispatch('grabAllPlaylists').catch(console.error)
+            else commit('applyPlaylistMetadataRepairs', data)
             break
 
           case SyncEvents.PLAYLISTS.UPSERT_VIDEO:

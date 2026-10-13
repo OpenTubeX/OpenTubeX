@@ -68,7 +68,7 @@ export async function syncPlaylistMembers(client, store, { localId, remoteId, re
       // Persist only completed legacy remote effects, even when the local
       // revision or account activity changed before apply. The store checks
       // account identity and excludes uncommitted encrypted-client writes.
-      await store.persistPlaylistSyncBaseline?.({ id: localId, remoteId, metadata, previousVideos, acknowledged, next })
+      await store.persistPlaylistSyncBaseline?.(localId, { remoteId, metadata, previousVideos, acknowledged, next })
     }
   }
 }

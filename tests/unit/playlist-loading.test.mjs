@@ -435,3 +435,61 @@ test('Save displays and searches retained missing or non-string names without re
   assert.deepEqual(Array.from(vm.runInContext(script.slice(init.start, init.end), context), playlist => playlist._id), playlists.slice(0, -1).map(playlist => playlist._id))
   assert.deepEqual(playlists, before)
 })
+
+
+test('Save handles retained scalar and opaque memberships without changing records', async () => {
+  const parsed = parse(await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')).descriptor
+  const script = parsed.scriptSetup.content, ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'containedIds').init
+  const playlists = [null, false, 42, 'retained', [null, false], [null, { videoId: 'A' }]].map((videos, index) => ({ _id: String(index), videos, unknown: new Date(index) }))
+  const before = structuredClone(playlists)
+  const context = vm.createContext({ computed: getter => getter(), allPlaylists: ref(playlists), props: { videoData: { videoId: 'A' } }, store: { state: { playlists: { libraryPaged: false } } }, thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: () => 'video' })
+  const ids = vm.runInContext(script.slice(init.start, init.end), context)
+  assert.deepEqual([...ids], ['5'])
+  for (const name of ['playlistVideoCount', 'playlistThumbnail']) {
+    const declaration = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name)
+    vm.runInContext(script.slice(declaration.start, declaration.end), context)
+  }
+  for (const playlist of playlists) {
+    assert.equal(context.playlistVideoCount(playlist), Array.isArray(playlist.videos) ? playlist.videos.length : 0)
+    assert.equal(context.playlistThumbnail(playlist), 'placeholder')
+  }
+  assert.doesNotMatch(parsed.template.content, /playlist\.videos\.length/)
+  assert.deepEqual(playlists, before)
+})
+
+
+test('paged playlist repair refreshes summaries after durable metadata changes', async () => {
+  const ast = babelParse(source, { sourceType: 'module' })
+  const actions = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'actions').init
+  const method = actions.properties.find(property => property.key.name === 'repairPlaylistMetadata')
+  let updates = [{ _id: 'p', changes: [{ videoId: 'A', fields: { title: 'Repaired' } }] }]
+  const repair = vm.runInNewContext('({' + source.slice(method.start, method.end) + '}).repairPlaylistMetadata', {
+    DBPlaylistHandlers: { repairMetadata: async () => ({ updates, repaired: updates.length, failed: 0 }) },
+  })
+  const calls = []
+  const context = { state: { libraryPaged: true }, commit: () => assert.fail('paged summaries must not receive whole-member patches'), dispatch: async action => { calls.push(action) } }
+  assert.deepEqual(structuredClone(await repair(context, {})), { repaired: 1, failed: 0 })
+  assert.deepEqual(calls, ['grabAllPlaylists'])
+  updates = []
+  assert.deepEqual(structuredClone(await repair(context, {})), { repaired: 0, failed: 0 })
+  assert.deepEqual(calls, ['grabAllPlaylists'])
+})
+
+
+test('cross-window playlist repairs invalidate paged summaries and patch portable entries', async () => {
+  const { SyncEvents } = await import('../../src/constants.js')
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const listener = source.slice(source.indexOf('window.ftElectron.handleSyncPlaylists('), source.indexOf('window.ftElectron.handleSyncSubscriptionCache('))
+  for (const libraryPaged of [false, true]) {
+    let receive
+    const calls = []
+    vm.runInNewContext(listener, { SyncEvents, rootState: { playlists: { libraryPaged } }, console,
+      window: { ftElectron: { handleSyncPlaylists: callback => { receive = callback } } },
+      dispatch: async action => { calls.push(['dispatch', action]) }, commit: (...args) => calls.push(['commit', ...args]),
+    })
+    const update = { _id: 'p', changes: [] }
+    receive(SyncEvents.PLAYLISTS.REPAIR_METADATA, update)
+    assert.deepEqual(calls, libraryPaged ? [['dispatch', 'grabAllPlaylists']] : [['commit', 'applyPlaylistMetadataRepairs', update]])
+  }
+})

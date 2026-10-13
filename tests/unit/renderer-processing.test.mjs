@@ -18,13 +18,13 @@ const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js
 const subscriptions = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
 const historySource = await readFile(new URL('../../src/renderer/store/modules/history.js', import.meta.url), 'utf8')
 
-for (const method of ['syncHistoryChunk', 'syncPlaylistChunk']) {
+for (const method of ['syncHistoryChunk', 'syncPlaylistChunk', 'importChunk']) {
   test(`${method} preserves typed records while removing nested Vue proxies`, async () => {
     const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
     let received
     const result = { id: 'staged', accepted: 1 }
     const context = vm.createContext({
-      toRaw, Object,
+      toRaw, Object, structuredClone,
       window: { ftElectron: { libraryQuery: (_method, value) => { received = structuredClone(value); return result } } },
     })
     vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
@@ -43,7 +43,7 @@ for (const method of ['syncHistoryChunk', 'syncPlaylistChunk']) {
 test('desktop library errors preserve the collection, counts and affected items', async () => {
   const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
   const details = { collection: 'history', deleted: 3, previous: 7, items: [{ videoId: 'retained' }] }
-  const context = vm.createContext({ toRaw, Object, SyncServerDataLossError, window: { ftElectron: { libraryQuery: async () => ({ libraryError: details }) } } })
+  const context = vm.createContext({ toRaw, Object, structuredClone, SyncServerDataLossError, window: { ftElectron: { libraryQuery: async () => ({ libraryError: details }) } } })
   vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
   await assert.rejects(context.library.query('syncHistoryPlan', {}), error => {
     assert.ok(error instanceof SyncServerDataLossError)
@@ -55,7 +55,7 @@ test('desktop library errors preserve the collection, counts and affected items'
 test('IPC cloning keeps native values even when their string tag claims to be a plain object', async () => {
   const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
   let received
-  const context = vm.createContext({ toRaw, Object, window: { ftElectron: { libraryQuery: (_method, value) => { received = structuredClone(value) } } } })
+  const context = vm.createContext({ toRaw, Object, structuredClone, window: { ftElectron: { libraryQuery: (_method, value) => { received = structuredClone(value) } } } })
   vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
   const names = new Set(['Retained channel'])
   Object.defineProperty(names, Symbol.toStringTag, { value: 'Object' })
@@ -630,5 +630,16 @@ test('cancelling sync during history serialization prevents the database write',
   } finally {
     clearTimeout(timer)
     jobs.dispose()
+  }
+})
+
+
+test('desktop IPC explicitly rejects non-cloneable class values before sending data', async () => {
+  const handlers = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const context = vm.createContext({ toRaw, Object, structuredClone, window: { ftElectron: { libraryQuery: () => assert.fail('invalid data must not reach IPC') } } })
+  vm.runInContext(handlers.slice(handlers.indexOf('function toPlain('), handlers.indexOf('\nexport const recommendations')) + '\nglobalThis.library = library', context)
+  class Invalid { constructor(value) { this.value = value } }
+  for (const value of [() => {}, reactive({ retained: true })]) {
+    await assert.rejects(context.library.query('importChunk', { records: [new Invalid(value)] }), /Non-plain database IPC values must be structured-cloneable/)
   }
 })

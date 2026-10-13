@@ -4,7 +4,7 @@ import test from 'node:test'
 import { compileFunction } from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import model from '@seald-io/nedb/lib/model.js'
-import { toRaw } from 'vue'
+import { toRaw, ref, computed } from 'vue'
 import { createStore } from 'vuex'
 import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
@@ -151,7 +151,7 @@ test('the production renderer repair updates each duplicate occurrence and keeps
   const source = await readFile(new URL('../../src/renderer/helpers/historyRepair.js', import.meta.url), 'utf8')
   const dependencies = {
     store, ...repair, repairHistory: options => repair.repairHistory({ wait: async () => {}, ...options }),
-    reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
+    ref, computed, reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
     getInvidiousHistoryMetadata: async videoId => ({ videoId, published: 1, lengthSeconds: 120, liveNow: false, isUpcoming: false }),
   }
   const helper = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '').replaceAll('export ', '')
@@ -303,7 +303,7 @@ for (const [firstId, secondId] of [[1, '1'], [true, 'true'], [0, '0'], [false, '
     const source = await readFile(new URL('../../src/renderer/helpers/historyRepair.js', import.meta.url), 'utf8')
     const dependencies = {
       store, ...repair, repairHistory: options => repair.repairHistory({ wait: async () => {}, ...options }),
-      reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
+      ref, computed, reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
       getInvidiousHistoryMetadata: async videoId => ({ videoId, published: 1, lengthSeconds: 120, liveNow: false, isUpcoming: false }),
     }
     const helper = compileFunction(source.replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '').replaceAll('export ', '')
@@ -347,7 +347,7 @@ test('portable repair rejects an occurrence whose video changed while metadata w
   const source = await readFile(new URL('../../src/renderer/helpers/historyRepair.js', import.meta.url), 'utf8')
   const dependencies = {
     store, ...repair, repairHistory: options => repair.repairHistory({ wait: async () => {}, ...options }),
-    reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
+    ref, computed, reactive: value => value, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } },
     getInvidiousHistoryMetadata: async videoId => {
       await f.db.history.updateAsync({ _id: 'reused' }, replacement)
       f.context.commit('setHistoryCacheSorted', [replacement])

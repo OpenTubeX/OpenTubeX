@@ -35,7 +35,7 @@ const dbRecommendations = (action, data) => window.ftElectron.dbRecommendations(
 
 const library = {
   query: async (method, data) => {
-    const result = await window.ftElectron.libraryQuery(method, method === 'importChunk' ? data : toPlain(data))
+    const result = await window.ftElectron.libraryQuery(method, toPlain(data))
     if (result?.libraryError) {
       const error = result.libraryError
       throw new SyncServerDataLossError(error.collection, error.deleted, error.previous, error.items)

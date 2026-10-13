@@ -50,7 +50,12 @@ export function createPortableLibrary({ history, playlists }) {
           }
           let duration = 0
           let missingDuration = 0
+          let uniqueCount = 0
+          const uniqueIds = new Set()
           for (const video of videos) {
+            if (video !== null && typeof video === 'object' && ['string', 'number', 'boolean'].includes(typeof video.videoId)) {
+              if (!uniqueIds.has(video.videoId)) { uniqueCount++; uniqueIds.add(video.videoId) }
+            } else uniqueCount++
             if (video === null || typeof video !== 'object') {
               missingDuration++
               continue
@@ -66,7 +71,7 @@ export function createPortableLibrary({ history, playlists }) {
           }
           return {
             total: videos.length,
-            uniqueCount: new Set(videos.map(video => video?.videoId)).size,
+            uniqueCount,
             duration,
             missingDuration,
             watchedCount: videos.filter(video => video !== null && typeof video === 'object' && isHistoryEntryWatched(byId.get(video.videoId))).length,

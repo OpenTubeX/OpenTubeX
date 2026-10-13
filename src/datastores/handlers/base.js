@@ -933,7 +933,7 @@ class Playlists {
       if (!target) continue
       // If a later read fails, count only videos this playlist could change.
       let pendingIds = [...new Set(target.videos
-        .filter(video => byId.has(video.videoId) && playlistRepairPatch(video, byId.get(video.videoId)))
+        .filter(video => video !== null && typeof video === 'object' && byId.has(video.videoId) && playlistRepairPatch(video, byId.get(video.videoId)))
         .map(video => video.videoId))]
       if (!pendingIds.length) continue
       try {
@@ -944,7 +944,9 @@ class Playlists {
           if (!current) break
           const changed = new Set()
           const changes = []
+          if (!Array.isArray(current.videos)) break
           const videos = current.videos.map(video => {
+            if (video === null || typeof video !== 'object') return video
             const info = byId.get(video.videoId)
             const patch = info && playlistRepairPatch(video, info)
             if (!patch) return video
@@ -957,9 +959,9 @@ class Playlists {
           })
           pendingIds = [...changed]
           if (!changed.size) break
-          const snapshot = JSON.stringify(current.videos)
+          const snapshot = model.serialize(current.videos)
           const { affectedDocuments } = await db.playlists.updateAsync(
-            { _id, $where() { return JSON.stringify(this.videos) === snapshot } },
+            { _id, $where() { return model.serialize(this.videos) === snapshot } },
             { $set: { videos } },
             { returnUpdatedDocs: true }
           )
