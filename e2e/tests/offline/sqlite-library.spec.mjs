@@ -1907,3 +1907,36 @@ test.describe('Watch playlist metadata repair', () => {
     await page.locator('.watchVideoPlaylist.resizablePlaylist').screenshot({ path: testInfo.outputPath('watch-neighbors-after-duration-repair-95.png') })
   })
 })
+
+test.describe('retained full-record playlist counts', () => {
+  const saved = { _id: 'counted', playlistName: 'Retained counted playlist', protected: false, createdAt: 1, lastUpdatedAt: 1, videoCount: 0, videos: [{ videoId: history[0].videoId, playlistItemId: 'first' }, { videoId: history[0].videoId, playlistItemId: 'duplicate' }], unknown: { retained: true } }
+  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, currentLocale: 'en_US', uiScale: 95 }, history: [history[0]], playlists: [saved] } })
+  test('renders full-record card and Save counts without rewriting stale imported metadata', async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 1400, height: 1000 })
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    const useFullRecord = async () => page.evaluate(saved => {
+      // Exercise the shared renderer's full-record contract while retaining a
+      // real immutable SQLite snapshot to verify rendering does not write it.
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.state.playlists.libraryPaged = false
+      store.state.playlists.playlists = [saved]
+    }, saved)
+    await goTo(page, 'playlists')
+    await useFullRecord()
+    const card = page.locator('.ft-list-item').filter({ has: page.locator('.h3Title', { hasText: saved.playlistName }) })
+    await expect(card.locator('.videoCountContainer')).toContainText('2')
+    await card.screenshot({ path: testInfo.outputPath('retained-full-record-card-count-95.png') })
+    await goTo(page, 'history')
+    await useFullRecord()
+    const historyCard = page.locator('.tabContent[aria-hidden="false"] .ft-list-video').first()
+    await historyCard.hover()
+    await historyCard.locator('.addToPlaylistIcon .iconButton').click()
+    const picker = historyCard.locator('.addToPlaylistDropdown')
+    const row = picker.getByRole('option').filter({ has: page.locator('.playlistName', { hasText: saved.playlistName }) })
+    await expect(row.locator('.videoCount')).toHaveText('2 videos')
+    await expect(row.locator('img')).toHaveAttribute('src', new RegExp(`/vi/${history[0].videoId}/`))
+    await expectImagesLoaded(row.locator('img'))
+    await picker.screenshot({ path: testInfo.outputPath('retained-full-record-save-count-95.png') })
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'counted' }))).toStrictEqual(saved)
+  })
+})
