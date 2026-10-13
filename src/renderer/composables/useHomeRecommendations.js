@@ -37,7 +37,7 @@ export function useHomeRecommendations(visible) {
   const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
   function * savedPlaylistVideos() {
     for (const playlist of store.getters.getAllPlaylists) {
-      if (playlist._id !== 'favorites') yield * playlist.videos
+      if (playlist._id !== 'favorites' && Array.isArray(playlist.videos)) yield * playlist.videos
     }
   }
   const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
