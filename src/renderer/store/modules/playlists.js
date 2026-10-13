@@ -99,8 +99,8 @@ function processNewPlayist(playlist) {
   }
 
   const now = Date.now()
-  playlist.createdAt = now
-  playlist.lastUpdatedAt = now
+  if (!Number.isFinite(playlist.createdAt)) { playlist.createdAt = now }
+  if (!Number.isFinite(playlist.lastUpdatedAt)) { playlist.lastUpdatedAt = now }
 
   // Ensure all videos have required attributes
   if (Array.isArray(playlist.videos)) {
@@ -167,6 +167,12 @@ const getters = {
 }
 
 const actions = {
+  async importPlaylist({ commit }, playlist) {
+    processNewPlayist(playlist)
+    await DBPlaylistHandlers.upsert(playlist)
+    commit('upsertPlaylistToList', playlist)
+  },
+
   async addPlaylist({ state, commit, rootState, dispatch }, payload) {
     processNewPlayist(payload)
 
@@ -179,8 +185,10 @@ const actions = {
       }
 
       commit('addPlaylist', payload)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

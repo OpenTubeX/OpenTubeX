@@ -21,6 +21,7 @@ export const SYNC_ACTION_REASONS = new Map([
   ['addChannelToProfiles', 'profilesOrSubscriptions'],
   ['addPlaylist', 'playlists'],
   ['addPlaylists', 'playlists'],
+  ['importPlaylist', 'playlists'],
   ['addVideo', 'playlists'],
   ['addVideos', 'playlists'],
   ['createProfile', 'profiles'],
