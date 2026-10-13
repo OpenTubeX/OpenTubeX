@@ -1169,7 +1169,8 @@ test.describe('history date and channel browsing', () => {
     const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
     await page.getByLabel('To', { exact: true }).fill('2026-10-12')
     await expect(videos).toHaveCount(100)
-    await expect(videos.first()).toContainText('City walk')
+    // SQLite pages use the stable record ID to order equal timestamps.
+    await expect(videos.first()).toContainText('Other city walk')
     await page.getByRole('button', { name: 'Load More Videos' }).click()
     await expect(videos).toHaveCount(200)
     await page.getByRole('button', { name: 'Load More Videos' }).click()
