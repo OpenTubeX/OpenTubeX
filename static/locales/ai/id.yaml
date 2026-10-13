@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
   Data Settings:
+    Import Preview:
+      Title: Pratinjau perubahan
+      New: "Baru: {count}"
+      Existing: "Sudah ada: {count}"
+      Skipped: "Dilewati: {count}"
+      Unreadable files: "Berkas tidak terbaca: {count}"
+      Settings effect: Pengaturan yang cocok diganti. Pengaturan pribadi dan tidak dikenal dilewati.
+      Details effect: Langganan atau video yang sudah ada dipertahankan. Detail profil atau daftar putar yang diimpor menggantikan detail saat ini.
+      Merge effect: Data yang sudah ada dipertahankan dan digabungkan dengan catatan yang cocok.
+      Subscriptions effect: Langganan yang sudah ada dipertahankan. Hanya saluran baru yang ditambahkan.
+      History replace effect: Riwayat tontonan video yang cocok diganti. Riwayat lainnya dipertahankan.
     Select export data: "Pilih data yang akan diekspor"
     Export selected data: "Ekspor data yang dipilih"
     Complete backup: "Cadangan lengkap"

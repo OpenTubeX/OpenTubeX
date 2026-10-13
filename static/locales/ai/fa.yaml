@@ -969,6 +969,17 @@ Settings:
     Add: افزودن
     Remove: حذف
   Data Settings:
+    Import Preview:
+      Title: پیش‌نمایش تغییرات
+      New: "جدید: {count}"
+      Existing: "موجود: {count}"
+      Skipped: "ردشده: {count}"
+      Unreadable files: "پرونده‌های ناخوانا: {count}"
+      Settings effect: تنظیمات منطبق جایگزین می‌شوند. تنظیمات خصوصی و ناشناخته رد می‌شوند.
+      Details effect: اشتراک‌ها یا ویدیوهای موجود حفظ می‌شوند. جزئیات نمایه یا فهرست پخش واردشده جایگزین جزئیات فعلی می‌شوند.
+      Merge effect: داده‌های موجود حفظ و با رکوردهای منطبق ادغام می‌شوند.
+      Subscriptions effect: اشتراک‌های موجود حفظ می‌شوند. تنها کانال‌های جدید افزوده می‌شوند.
+      History replace effect: سابقه تماشای ویدیوهای منطبق جایگزین می‌شود. سایر سوابق حفظ می‌شوند.
     Select export data: "داده‌های مورد نظر برای صادر کردن را انتخاب کنید"
     Export selected data: "صادر کردن داده‌های انتخاب‌شده"
     Complete backup: "پشتیبان‌گیری کامل"

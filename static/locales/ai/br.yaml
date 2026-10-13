@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
   Data Settings:
+    Import Preview:
+      Title: Rakwel ar cʼhemmoù
+      New: "Nevez: {count}"
+      Existing: "A zo anezho: {count}"
+      Skipped: "Laosket a-gostez: {count}"
+      Unreadable files: "Restroù dilennus: {count}"
+      Settings effect: Arventennoù a glot a vez erlecʼhiet. Arventennoù prevez ha dianav a vez laosket a-gostez.
+      Details effect: Ar cʼhoumanantoù pe videoioù a zo anezho a vez miret. Munudoù ar profil pe roll-lenn enporzhiet a erlecʼh ar munudoù bremañ.
+      Merge effect: Ar roadennoù a zo anezho a vez miret ha kendeuzet gant an enrolladennoù a glot.
+      Subscriptions effect: Ar cʼhoumanantoù a zo anezho a vez miret. Chadennoù nevez hepken a vez ouzhpennet.
+      History replace effect: Istor an arvestoù evit ar videoioù a glot a vez erlecʼhiet. An istor all a vez miret.
     Select export data: "Dibabit ar roadennoù da ezporzhiañ"
     Export selected data: "Ezporzhiañ ar roadennoù dibabet"
     Complete backup: "Gwareziñ klok"

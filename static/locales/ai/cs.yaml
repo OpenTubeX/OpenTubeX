@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: Zobrazovat panel akcí vpravo dole
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
   Data Settings:
+    Import Preview:
+      Title: Náhled změn
+      New: "Nové: {count}"
+      Existing: "Existující: {count}"
+      Skipped: "Přeskočené: {count}"
+      Unreadable files: "Nečitelné soubory: {count}"
+      Settings effect: Odpovídající nastavení budou nahrazena. Soukromá a neznámá nastavení budou přeskočena.
+      Details effect: Existující odběry nebo videa zůstanou zachovány. Importované údaje profilů nebo seznamů nahradí současné údaje.
+      Merge effect: Existující data zůstanou zachována a sloučí se s odpovídajícími záznamy.
+      Subscriptions effect: Existující odběry zůstanou zachovány. Přidají se pouze nové kanály.
+      History replace effect: Historie sledování odpovídajících videí bude nahrazena. Ostatní historie zůstane zachována.
     Select export data: "Vyberte data k exportu"
     Export selected data: "Exportovat vybraná data"
     Complete backup: "Úplná záloha"

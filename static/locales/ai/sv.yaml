@@ -940,6 +940,17 @@ Settings:
     Add: Lägg till
     Remove: Ta bort
   Data Settings:
+    Import Preview:
+      Title: Förhandsgranska ändringar
+      New: "Nya: {count}"
+      Existing: "Befintliga: {count}"
+      Skipped: "Överhoppade: {count}"
+      Unreadable files: "Oläsbara filer: {count}"
+      Settings effect: Matchande inställningar ersätts. Privata och okända inställningar hoppas över.
+      Details effect: Befintliga prenumerationer eller videor behålls. Importerade profil- eller spellistedetaljer ersätter de nuvarande.
+      Merge effect: Befintliga data behålls och slås samman med matchande poster.
+      Subscriptions effect: Befintliga prenumerationer behålls. Endast nya kanaler läggs till.
+      History replace effect: Visningshistorik för matchande videor ersätts. Övrig historik behålls.
     Select export data: "Välj data att exportera"
     Export selected data: "Exportera valda data"
     Complete backup: "Fullständig säkerhetskopia"

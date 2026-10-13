@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
   Data Settings:
+    Import Preview:
+      Title: Aldaketen aurrebista
+      New: "Berriak: {count}"
+      Existing: "Daudenak: {count}"
+      Skipped: "Saltatuak: {count}"
+      Unreadable files: "Irakurri ezin diren fitxategiak: {count}"
+      Settings effect: Bat datozen ezarpenak ordezten dira. Ezarpen pribatuak eta ezezagunak saltatzen dira.
+      Details effect: Dauden harpidetzak edo bideoak mantentzen dira. Inportatutako profilen edo erreprodukzio-zerrenden xehetasunek unekoak ordezten dituzte.
+      Merge effect: Dauden datuak mantendu eta bat datozen erregistroekin bateratzen dira.
+      Subscriptions effect: Dauden harpidetzak mantentzen dira. Kanal berriak soilik gehitzen dira.
+      History replace effect: Bat datozen bideoen ikustaldi-historia ordezten da. Gainerako historia mantentzen da.
     Select export data: "Hautatu esportatu nahi dituzun datuak"
     Export selected data: "Esportatu hautatutako datuak"
     Complete backup: "Babeskopia osoa"

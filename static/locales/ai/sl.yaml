@@ -1197,6 +1197,17 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
   Data Settings:
+    Import Preview:
+      Title: Predogled sprememb
+      New: "Novi: {count}"
+      Existing: "Obstoječi: {count}"
+      Skipped: "Preskočeni: {count}"
+      Unreadable files: "Neberljive datoteke: {count}"
+      Settings effect: Ujemajoče se nastavitve bodo zamenjane. Zasebne in neznane nastavitve bodo preskočene.
+      Details effect: Obstoječe naročnine ali videoposnetki bodo ohranjeni. Uvožene podrobnosti profilov ali seznamov bodo zamenjale trenutne.
+      Merge effect: Obstoječi podatki bodo ohranjeni in združeni z ujemajočimi se vnosi.
+      Subscriptions effect: Obstoječe naročnine bodo ohranjene. Dodani bodo samo novi kanali.
+      History replace effect: Zgodovina ogledov ujemajočih se videoposnetkov bo zamenjana. Druga zgodovina bo ohranjena.
     Select export data: "Izberite podatke za izvoz"
     Export selected data: "Izvozi izbrane podatke"
     Complete backup: "Celotna varnostna kopija"

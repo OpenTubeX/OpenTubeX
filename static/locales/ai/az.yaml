@@ -938,6 +938,17 @@ Settings:
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
   Data Settings:
+    Import Preview:
+      Title: Dəyişikliklərə ön baxış
+      New: "Yeni: {count}"
+      Existing: "Mövcud: {count}"
+      Skipped: "Ötürülən: {count}"
+      Unreadable files: "Oxunmayan fayllar: {count}"
+      Settings effect: Uyğun parametrlər əvəz edilir. Məxfi və naməlum parametrlər ötürülür.
+      Details effect: Mövcud abunəliklər və ya videolar saxlanılır. İdxal edilmiş profil və ya pleylist məlumatları cari məlumatları əvəz edir.
+      Merge effect: Mövcud məlumatlar saxlanılır və uyğun qeydlərlə birləşdirilir.
+      Subscriptions effect: Mövcud abunəliklər saxlanılır. Yalnız yeni kanallar əlavə edilir.
+      History replace effect: Uyğun videoların baxış tarixçəsi əvəz edilir. Digər tarixçə saxlanılır.
     Select export data: "İxrac ediləcək məlumatları seçin"
     Export selected data: "Seçilmiş məlumatları ixrac et"
     Complete backup: "Tam ehtiyat nüsxəsi"

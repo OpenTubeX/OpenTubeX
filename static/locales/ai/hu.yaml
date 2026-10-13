@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
   Data Settings:
+    Import Preview:
+      Title: Változások előnézete
+      New: "Új: {count}"
+      Existing: "Meglévő: {count}"
+      Skipped: "Kihagyott: {count}"
+      Unreadable files: "Olvashatatlan fájlok: {count}"
+      Settings effect: Az egyező beállítások lecserélődnek. A privát és ismeretlen beállítások kimaradnak.
+      Details effect: A meglévő feliratkozások vagy videók megmaradnak. Az importált profil- vagy lejátszólista-adatok lecserélik a jelenlegieket.
+      Merge effect: A meglévő adatok megmaradnak, és egyesülnek az egyező bejegyzésekkel.
+      Subscriptions effect: A meglévő feliratkozások megmaradnak. Csak új csatornák kerülnek hozzáadásra.
+      History replace effect: Az egyező videók megtekintési előzményei lecserélődnek. A többi előzmény megmarad.
     Select export data: "Válassza ki az exportálni kívánt adatokat"
     Export selected data: "Kijelölt adatok exportálása"
     Complete backup: "Teljes biztonsági mentés"

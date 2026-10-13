@@ -46,7 +46,7 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
     const offsetY = Math.abs((selected.top + selected.bottom - content.top - content.bottom) / 2)
     return Math.max(offsetX, offsetY)
   })).toBeLessThanOrEqual(1)
-  await selection.getByText('Search history', { exact: true }).click()
+  await selection.getByRole('checkbox', { name: 'Search history', exact: true }).locator('+ label').click()
   await expect(selection.getByRole('checkbox', { name: /Search history/i })).not.toBeChecked()
   await selection.getByRole('button', { name: 'Import selected data' }).click()
 

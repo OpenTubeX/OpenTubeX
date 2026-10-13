@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
   Data Settings:
+    Import Preview:
+      Title: 変更をプレビュー
+      New: "新規: {count}"
+      Existing: "既存: {count}"
+      Skipped: "スキップ: {count}"
+      Unreadable files: "読み取れないファイル: {count}"
+      Settings effect: 一致する設定は置き換えられます。非公開の設定と不明な設定はスキップされます。
+      Details effect: 既存の登録チャンネルや動画は保持されます。インポートしたプロフィールや再生リストの詳細で現在の詳細が置き換えられます。
+      Merge effect: 既存のデータは保持され、一致する記録と統合されます。
+      Subscriptions effect: 既存の登録チャンネルは保持されます。新しいチャンネルのみ追加されます。
+      History replace effect: 一致する動画の再生履歴は置き換えられます。その他の履歴は保持されます。
     Select export data: "エクスポートするデータを選択"
     Export selected data: "選択したデータをエクスポート"
     Complete backup: "完全なバックアップ"

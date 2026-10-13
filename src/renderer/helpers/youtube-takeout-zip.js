@@ -127,7 +127,7 @@ export function getTakeoutPlaylistName(filename) {
 }
 
 /** Parse CSV records, including quoted commas, escaped quotes and line breaks. */
-function parseCsvRecords(content) {
+export function parseCsvRecords(content) {
   const records = []
   let record = []
   let field = ''
@@ -313,5 +313,65 @@ export function isSupportedTakeoutEntry(entry) {
     return Array.isArray(JSON.parse(entry.content))
   } catch {
     return false
+  }
+}
+
+/** Read supported data one entry at a time, using the same names for preview and import. */
+export async function forEachTakeoutImportEntry(file, selected, entries, onEntry, onError) {
+  const playlistNameCounts = new Map()
+  const allocatedPlaylistNames = new Set()
+  let metadata = new Map()
+  if (selected.has('playlists')) {
+    try {
+      const result = await readTakeoutPlaylistMetadata(file)
+      metadata = result.metadata
+      result.errors.forEach(error => onError(error, 'playlists'))
+    } catch (error) {
+      onError(error, 'playlists')
+    }
+  }
+  const reservedPlaylistNames = new Set([
+    ...[...metadata.values()].map(playlist => playlist.playlistName.trim()),
+    ...entries.filter(entry => entry.type === 'playlists')
+      .map(entry => (metadata.get(entry.path)?.playlistName ?? getTakeoutPlaylistName(entry.path.split('/').at(-1))).trim()),
+  ])
+  const importedPaths = new Set()
+  async function importPlaylist(playlist) {
+    const name = playlist.playlistName.trim()
+    const count = (playlistNameCounts.get(name) ?? 0) + 1
+    playlistNameCounts.set(name, count)
+    let playlistName = name
+    if (count > 1) {
+      let suffix = 2
+      while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
+        suffix++
+      }
+      playlistName = `${name} (${suffix})`
+    }
+    allocatedPlaylistNames.add(playlistName)
+    await onEntry({ type: 'playlists', playlist: { ...playlist, playlistName } })
+  }
+  await forEachSelectedTakeoutZipEntry(file, selected, async entry => {
+    if (entry.type === 'playlists') { importedPaths.add(entry.path) }
+    try {
+      if (!isSupportedTakeoutEntry(entry)) { throw new Error(`Invalid Takeout entry: ${entry.path}`) }
+      if (entry.type === 'playlists') {
+        const playlist = parseTakeoutPlaylistCsv(entry.content, entry.path.split('/').at(-1), metadata.get(entry.path))
+        await importPlaylist(playlist)
+      } else {
+        await onEntry(entry)
+      }
+    } catch (error) {
+      onError(error, entry.type, entry.path)
+    }
+  })
+  for (const [path, playlist] of metadata) {
+    if (!importedPaths.has(path)) {
+      try {
+        await importPlaylist({ ...playlist, videos: [] })
+      } catch (error) {
+        onError(error, 'playlists', path)
+      }
+    }
   }
 }

@@ -938,6 +938,17 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Import Preview:
+      Title: Forhåndsvis endringer
+      New: "Nye: {count}"
+      Existing: "Eksisterende: {count}"
+      Skipped: "Hoppet over: {count}"
+      Unreadable files: "Uleselige filer: {count}"
+      Settings effect: Samsvarende innstillinger erstattes. Private og ukjente innstillinger hoppes over.
+      Details effect: Eksisterende abonnementer eller videoer beholdes. Importerte profil- eller spillelistedetaljer erstatter de gjeldende.
+      Merge effect: Eksisterende data beholdes og slås sammen med samsvarende oppføringer.
+      Subscriptions effect: Eksisterende abonnementer beholdes. Bare nye kanaler legges til.
+      History replace effect: Seerhistorikken for samsvarende videoer erstattes. Annen historikk beholdes.
     Select export data: "Velg dataene som skal eksporteres"
     Export selected data: "Eksporter valgte data"
     Complete backup: "Komplett sikkerhetskopi"

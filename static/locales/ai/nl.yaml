@@ -951,6 +951,17 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
   Data Settings:
+    Import Preview:
+      Title: Wijzigingen vooraf bekijken
+      New: "Nieuw: {count}"
+      Existing: "Bestaand: {count}"
+      Skipped: "Overgeslagen: {count}"
+      Unreadable files: "Onleesbare bestanden: {count}"
+      Settings effect: Overeenkomende instellingen worden vervangen. Privé- en onbekende instellingen worden overgeslagen.
+      Details effect: Bestaande abonnementen of video’s blijven behouden. Geïmporteerde profiel- of afspeellijstgegevens vervangen de huidige gegevens.
+      Merge effect: Bestaande gegevens blijven behouden en worden samengevoegd met overeenkomende records.
+      Subscriptions effect: Bestaande abonnementen blijven behouden. Alleen nieuwe kanalen worden toegevoegd.
+      History replace effect: De kijkgeschiedenis van overeenkomende video’s wordt vervangen. Andere geschiedenis blijft behouden.
     Select export data: "Selecteer de gegevens om te exporteren"
     Export selected data: "Geselecteerde gegevens exporteren"
     Complete backup: "Volledige back-up"

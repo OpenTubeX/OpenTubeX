@@ -940,6 +940,17 @@ Settings:
     Add: Adaugă
     Remove: Elimină
   Data Settings:
+    Import Preview:
+      Title: Previzualizează modificările
+      New: "Noi: {count}"
+      Existing: "Existente: {count}"
+      Skipped: "Omise: {count}"
+      Unreadable files: "Fișiere ilizibile: {count}"
+      Settings effect: Setările corespunzătoare sunt înlocuite. Setările private și necunoscute sunt omise.
+      Details effect: Abonamentele sau videoclipurile existente sunt păstrate. Detaliile importate ale profilurilor sau listelor înlocuiesc detaliile actuale.
+      Merge effect: Datele existente sunt păstrate și îmbinate cu înregistrările corespunzătoare.
+      Subscriptions effect: Abonamentele existente sunt păstrate. Se adaugă doar canale noi.
+      History replace effect: Istoricul de vizionare al videoclipurilor corespunzătoare este înlocuit. Restul istoricului este păstrat.
     Select export data: "Selectați datele de exportat"
     Export selected data: "Exportă datele selectate"
     Complete backup: "Copie de rezervă completă"

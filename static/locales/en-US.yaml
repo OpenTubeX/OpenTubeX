@@ -1512,6 +1512,17 @@ Settings:
     Add: Add
     Remove: Remove
   Data Settings:
+    Import Preview:
+      Title: Preview changes
+      New: "New: {count}"
+      Existing: "Existing: {count}"
+      Skipped: "Skipped: {count}"
+      Unreadable files: "Unreadable files: {count}"
+      Settings effect: Matching settings are replaced. Private and unknown settings are skipped.
+      Details effect: Existing subscriptions or videos are kept. Imported profile or playlist details replace current details.
+      Merge effect: Existing data is kept and merged with matching records.
+      Subscriptions effect: Existing subscriptions are kept. Only new channels are added.
+      History replace effect: Watch history for matching videos is replaced. Other history is kept.
     Select export data: "Select the data to export"
     Export selected data: "Export selected data"
     Complete backup: Complete backup

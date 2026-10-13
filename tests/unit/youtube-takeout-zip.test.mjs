@@ -17,11 +17,11 @@ test('does not announce complete success after an empty playlist fails and a lat
     selectedTakeoutTypes: { value: ['playlists'] },
     takeoutEntries: { value: [] },
     takeoutFile: { value: new Blob() },
-    readTakeoutPlaylistMetadata: async () => ({ errors: [], metadata: new Map([
-      ['playlists/Failed-videos.csv', { playlistName: 'Failed' }],
-      ['playlists/Success-videos.csv', { playlistName: 'Success' }],
-    ]) }),
-    forEachSelectedTakeoutZipEntry: async () => {},
+    forEachTakeoutImportEntry: async (_file, _types, _entries, onEntry, onError) => {
+      for (const name of ['Failed', 'Success']) {
+        try { await onEntry({ type: 'playlists', playlist: { playlistName: name } }) } catch (error) { onError(error, 'playlists', `playlists/${name}-videos.csv`) }
+      }
+    },
     importTakeoutPlaylist: async playlist => {
       imported.push(playlist.playlistName)
       if (playlist.playlistName === 'Failed') { throw new Error('Database write failed') }

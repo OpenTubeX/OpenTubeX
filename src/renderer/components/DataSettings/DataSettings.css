@@ -46,3 +46,7 @@
   color: var(--primary-text-color);
   text-decoration: underline;
 }
+
+.takeoutSelectionImport {
+  inline-size: min(100%, 48rem);
+}

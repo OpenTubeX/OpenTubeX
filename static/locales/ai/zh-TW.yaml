@@ -936,6 +936,17 @@ Settings:
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
   Data Settings:
+    Import Preview:
+      Title: 預覽變更
+      New: 新增：{count}
+      Existing: 已有：{count}
+      Skipped: 略過：{count}
+      Unreadable files: 無法讀取的檔案：{count}
+      Settings effect: 相符的設定將被取代。私人和未知設定將被略過。
+      Details effect: 現有訂閱或影片將被保留。匯入的個人資料或播放清單詳細資料將取代目前的詳細資料。
+      Merge effect: 現有資料將被保留，並與相符的記錄合併。
+      Subscriptions effect: 現有訂閱將被保留。僅新增頻道。
+      History replace effect: 相符影片的觀看記錄將被取代。其他記錄將被保留。
     Select export data: "選擇要匯出的資料"
     Export selected data: "匯出所選資料"
     Complete backup: "完整備份"

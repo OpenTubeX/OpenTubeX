@@ -951,6 +951,17 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
+    Import Preview:
+      Title: תצוגה מקדימה של השינויים
+      New: "חדשים: {count}"
+      Existing: "קיימים: {count}"
+      Skipped: "דולגו: {count}"
+      Unreadable files: "קבצים שאינם ניתנים לקריאה: {count}"
+      Settings effect: הגדרות תואמות מוחלפות. הגדרות פרטיות ולא מוכרות מדולגות.
+      Details effect: מינויים או סרטונים קיימים נשמרים. פרטי הפרופילים או רשימות ההשמעה המיובאים מחליפים את הפרטים הנוכחיים.
+      Merge effect: נתונים קיימים נשמרים וממוזגים עם רשומות תואמות.
+      Subscriptions effect: מינויים קיימים נשמרים. רק ערוצים חדשים נוספים.
+      History replace effect: היסטוריית הצפייה של סרטונים תואמים מוחלפת. שאר ההיסטוריה נשמרת.
     Select export data: "בחרו את הנתונים לייצוא"
     Export selected data: "ייצוא הנתונים שנבחרו"
     Complete backup: "גיבוי מלא"
