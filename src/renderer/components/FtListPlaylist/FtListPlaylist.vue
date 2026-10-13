@@ -272,7 +272,7 @@ const playlistTypeIcon = computed(() => {
 const playlistMetadata = computed(() => {
   if (isUserPlaylist.value) {
     let thumbnailUrl = thumbnailPlaceholder
-    const firstVideo = props.data.firstVideo ?? (Array.isArray(props.data.videos) ? props.data.videos[0] : null)
+    const firstVideo = store.state.playlists.libraryPaged ? props.data.firstVideo : (Array.isArray(props.data.videos) ? props.data.videos[0] : null)
     if (typeof firstVideo?.videoId === 'string' && firstVideo.videoId !== '') {
       const origin = backendPreference.value === 'invidious'
         ? currentInvidiousInstanceUrl.value

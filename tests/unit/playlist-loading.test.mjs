@@ -559,3 +559,57 @@ test('Save offers only array-backed memberships without rewriting retained opaqu
   assert.deepEqual(Array.from(result, playlist => playlist._id), ['6', '7'])
   assert.deepEqual(records, before)
 })
+
+
+test('bookmark fallback uses full memberships and only trusts counts for explicit paged summaries', async () => {
+  const ast = babelParse(source, { sourceType: 'module' })
+  const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'findEmptyOrLatestPlayedPlaylist')
+  const choose = vm.runInNewContext(`(${source.slice(node.start, node.end)})`)
+  const occupied = { ...playlist('occupied', 'Occupied'), videoCount: 0, lastPlayedAt: 1 }
+  const empty = { ...playlist('empty', 'Empty'), videos: [], videoCount: 42 }
+  const latest = { ...playlist('latest', 'Latest'), videoCount: 10, lastPlayedAt: 2 }
+  const before = structuredClone([occupied, empty, latest])
+  assert.equal(choose([occupied, empty, latest])._id, 'empty')
+  assert.equal(choose([occupied, latest])._id, 'latest')
+  assert.equal(choose([{ ...occupied, videos: [], videoCount: 20000 }, { ...empty, videoCount: 0 }], true)._id, 'empty')
+  assert.deepEqual([occupied, empty, latest], before)
+  const { db, module, dispatched, load } = await fixture([occupied, empty, latest], null)
+  await load()
+  assert.deepEqual(dispatched.filter(([name]) => name === 'updateQuickBookmarkTargetPlaylistId'), [['updateQuickBookmarkTargetPlaylistId', 'empty']])
+  assert.equal(module.state.playlistsReady, true)
+  for (const record of [occupied, empty, latest]) assert.deepEqual(await db.playlists.findOneAsync({ _id: record._id }), record)
+})
+
+for (const name of ['FtListPlaylist', 'FtPlaylistSelector', 'Home']) {
+  test(`${name} derives full-record thumbnails from memberships while preserving stale summary fields`, async () => {
+    const file = name === 'Home' ? 'views/Home/Home.vue' : `components/${name}/${name}.vue`
+    const content = parse(await readFile(new URL(`../../src/renderer/${file}`, import.meta.url), 'utf8')).descriptor.scriptSetup.content
+    const ast = babelParse(content, { sourceType: 'module' })
+    for (const paged of name === 'FtPlaylistSelector' ? [false] : [false, true]) {
+      for (const first of [null, { videoId: 'member' }]) {
+        const data = { _id: 'p', playlistName: 'Retained', videoCount: 1, videos: [first], firstVideo: { videoId: 'retained-summary' }, unknown: new Date(1) }
+        const before = structuredClone(data)
+        const context = vm.createContext({ computed: getter => getter(), isUserPlaylist: ref(true), props: { data, playlist: data },
+          store: { state: { playlists: { libraryPaged: paged } } }, thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
+          getVideoThumbnailUrl: id => `thumbnail:${id}`, videoThumbnail: video => `thumbnail:${video.videoId}`,
+        })
+        let actual
+        if (name === 'Home') {
+          const count = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistVideoCount')
+          vm.runInContext(content.slice(count.start, count.end), context)
+          const method = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistThumbnail')
+          vm.runInContext(content.slice(method.start, method.end), context)
+          actual = context.playlistThumbnail(data)
+        } else {
+          const key = name === 'FtListPlaylist' ? 'playlistMetadata' : 'thumbnail'
+          const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === key).init
+          const result = vm.runInContext(content.slice(init.start, init.end), context)
+          actual = name === 'FtListPlaylist' ? result.thumbnailUrl : result
+        }
+        const id = paged ? 'retained-summary' : first?.videoId
+        assert.equal(actual, !id ? 'placeholder' : name === 'FtListPlaylist' ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : `thumbnail:${id}`)
+        assert.deepEqual(data, before)
+      }
+    }
+  })
+}

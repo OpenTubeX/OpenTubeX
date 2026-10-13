@@ -755,10 +755,9 @@ function videoThumbnail(video) {
 function playlistThumbnail(playlist) {
   if (thumbnailPreference.value === 'hidden') return thumbnailPlaceholder
   if (playlist.customThumbnail) return playlist.customThumbnail
-  const first = playlist.firstVideo ?? playlist.videos?.[0]
+  const first = store.state.playlists.libraryPaged ? playlist.firstVideo : playlist.videos?.[0]
   return playlistVideoCount(playlist) > 0 && first !== null && typeof first === 'object' && !Array.isArray(first) && typeof first.videoId === 'string' && first.videoId.length > 0
     ? videoThumbnail(first)
-
     : thumbnailPlaceholder
 }
 

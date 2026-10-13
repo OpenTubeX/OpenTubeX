@@ -59,9 +59,9 @@ function removeUndesiredVideoAttributes(videoData) {
 *  Function to find the first playlist with 0 videos, or otherwise the most recently accessed.
 *  This is a good default quick bookmark target if one needs to be set.
 */
-function findEmptyOrLatestPlayedPlaylist(playlists) {
+function findEmptyOrLatestPlayedPlaylist(playlists, paged = false) {
   const editable = playlists.filter(playlist => Array.isArray(playlist.videos))
-  const emptyPlaylist = editable.find((playlist) => (playlist.videoCount ?? playlist.videos.length) === 0)
+  const emptyPlaylist = editable.find((playlist) => (paged ? playlist.videoCount ?? playlist.videos.length : playlist.videos.length) === 0)
   if (emptyPlaylist) return emptyPlaylist
 
   let max = -1
