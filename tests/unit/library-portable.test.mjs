@@ -754,3 +754,12 @@ for (const direction of ['top', 'bottom']) {
     assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), saved)
   })
 }
+
+
+test('unknown portable queries reject before reading either datastore', async () => {
+  let reads = 0
+  const find = async () => { reads++; return [] }
+  const library = createPortableLibrary({ history: { find }, playlists: { find } })
+  await assert.rejects(library.query('unsupported'), /Unknown library query/)
+  assert.equal(reads, 0)
+})

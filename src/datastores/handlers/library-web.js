@@ -183,6 +183,7 @@ export function createPortableLibrary({ history, playlists }) {
         const records = playlistOrder.positions.slice(offset, offset + limit).map(pageEntry)
         return { records, revision, cursor: offset + limit < playlistOrder.positions.length ? { position: offset + limit, revision, view, historyRevision } : null }
       }
+      if (!['historySummary', 'historyPage', 'videoState'].includes(method)) throw new Error('Unknown library query')
       const records = await newestHistory()
       if (method === 'historySummary') {
         return {
