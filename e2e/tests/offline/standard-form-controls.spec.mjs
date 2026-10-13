@@ -107,7 +107,7 @@ test.describe('standard pairing fields', () => {
   })
 })
 
-for (const uiScale of [100, 95]) {
+for (const uiScale of [100, 95, 125]) {
   test.describe(`inline field alignment at ${uiScale}%`, () => {
     test.use({ seed: { settings: { uiScale, useQuickPlaybackSpeedBar: true, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }, playlists: [{ _id: 'layout-test', playlistName: 'Layout test', videos: [] }] } })
     test('centers settings, theme and playback fields without stacked-form spacing', async ({ page }) => {
@@ -135,25 +135,22 @@ for (const uiScale of [100, 95]) {
       await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
       expect.soft(await centerOffset('.quickPlaybackSpeedValueField input', '.quickPlaybackSpeedDragHandle')).toBeLessThanOrEqual(1)
     })
-    test('keeps playlist search close to its list and uses a filled indicator', async ({ app, page }) => {
+    test('keeps playlist search compact with balanced spacing and a filled indicator', async ({ app, page }, testInfo) => {
       const { mockPlayableWatchPage } = await import('../../helpers/watch.mjs')
       const { openMockedVideo } = await import('../../helpers/player.mjs')
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
       const field = page.locator('.playlistSearch input')
-      expect.soft(await field.evaluate(input => {
-        const list = document.querySelector('.playlistList').getBoundingClientRect()
-        return list.top - input.getBoundingClientRect().bottom
-      })).toBeLessThanOrEqual(8)
       const verticalGaps = await field.evaluate(input => {
         const picker = input.closest('.addToPlaylistDropdown')
         const field = input.getBoundingClientRect()
         const header = picker.querySelector('.dropdownHeader').getBoundingClientRect()
-        const details = picker.querySelector('.playlistDetails').getBoundingClientRect()
-        return [field.top - header.bottom, details.top - field.bottom]
+        const list = picker.querySelector('.playlistList').getBoundingClientRect()
+        return [field.top - header.bottom, list.top - field.bottom]
       })
-      expect(Math.abs(verticalGaps[0] - verticalGaps[1])).toBeLessThanOrEqual(1)
+      for (const gap of verticalGaps) expect.soft(gap).toBeCloseTo(8, 0)
+      expect.soft(await field.evaluate(input => input.getBoundingClientRect().height)).toBeCloseTo(36, 0)
       const insets = await field.evaluate(input => {
         const field = input.getBoundingClientRect()
         const picker = input.closest('.addToPlaylistDropdown').getBoundingClientRect()
@@ -162,6 +159,17 @@ for (const uiScale of [100, 95]) {
       for (const inset of insets) expect.soft(inset).toBeGreaterThanOrEqual(9)
       await expect.soft(field).toHaveCSS('border-top-width', '0px')
       expect(await field.evaluate(input => parseFloat(getComputedStyle(input).borderBottomWidth))).toBeCloseTo(1, 0)
+      if (uiScale === 100) {
+        await field.focus()
+        await page.locator('.addToPlaylistDropdown').screenshot({ path: testInfo.outputPath('playlist-search-desktop.png') })
+      }
+      await page.locator('.iconDropdown').focus()
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.addToPlaylistDropdown')).toBeHidden()
+      await setWindowSize(app, page, { width: 375, height: 850 })
+      await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
+      await expect(page.locator('.phonePlaylistPicker')).toBeVisible()
+      expect(await field.evaluate(input => input.getBoundingClientRect().height)).toBeGreaterThanOrEqual(45)
     })
   })
 }
