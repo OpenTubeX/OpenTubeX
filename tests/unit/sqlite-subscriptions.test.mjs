@@ -1298,3 +1298,15 @@ for (const lengthSeconds of [null, 100]) {
     assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'h' }), history)
   })
 }
+
+test('undated metadata ties do not force full-history ordering for distinct numeric revisions', async t => {
+  const engine = memory(t), videoId = 'abcdefghijk'
+  await engine.collections.videoMetadataCache.insertAsync([
+    { _id: 'undated-a', videoId, title: 'Undated A' }, { _id: 'undated-b', videoId, title: 'Undated B' },
+    ...Array.from({ length: 2000 }, (_, i) => ({ _id: `dated-${i}`, videoId, title: `Title ${i}`, cachedAt: i + 1, hasThumbnailChange: false })),
+  ])
+  const page = await metadataPage(engine, { videoId, field: 'title', limit: 1 })
+  assert.equal(page.records[0].value, 'Title 1998')
+  assert.equal(engine.legacyMetadataOrders.get(videoId).ids, null, 'timestamp-less rows are excluded from ordering candidates')
+  assert.equal(engine.collections.videoMetadataCache.count(), 2002)
+})

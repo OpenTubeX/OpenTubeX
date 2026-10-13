@@ -53,7 +53,7 @@ function legacyMetadataOrder(engine, videoId) {
   const cached = engine.legacyMetadataOrders.get(videoId)
   if (cached?.revision === revision) return cached.ids
   const legacy = engine.prepare("SELECT 1 FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') NOT IN ('integer', 'real') LIMIT 1").get(videoId)
-  const tied = engine.prepare("SELECT 1 FROM metadata_order WHERE collection = 'videoMetadataCache' AND video_id = ? GROUP BY sort_time HAVING count(*) > 1 LIMIT 1").get(videoId)
+  const tied = engine.prepare("SELECT 1 FROM metadata_order o JOIN records r ON r.collection = o.collection AND r.id = o.record_id WHERE o.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IN ('integer', 'real') GROUP BY o.sort_time HAVING count(*) > 1 LIMIT 1").get(videoId)
   // Distinct numeric observations keep their indexed path. Retained values and ties need
   // NeDB ordering before slicing; read only sort keys, never thumbnail blobs
   // or unrelated title/description data.
