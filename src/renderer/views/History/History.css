@@ -63,6 +63,10 @@
     grid-template-rows: auto auto;
     align-items: stretch;
   }
+
+  .optionsRow > .sortSelect.contentSized {
+    inline-size: 100%;
+  }
 }
 
 .sortSelect {
