@@ -6,19 +6,30 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
     test.skip(browserName !== 'chromium', 'Image listener counts require the Chromium DevTools Protocol')
     const library = await readFile(new URL(`../../../node_modules/overlayscrollbars/${entry}`, import.meta.url), 'utf8')
     const css = await readFile(new URL('../../../node_modules/overlayscrollbars/styles/overlayscrollbars.css', import.meta.url), 'utf8')
-    await page.setContent(`<style>${css}</style><div id="host" style="width:400px;height:200px;overflow:auto"><div id="content" style="height:1000px"><img id="avatar" alt="" style="position:absolute" width="1" height="1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><span id="clock" style="display:inline-block;width:80px;height:20px">00:00</span></div></div>`)
+    const imageSource = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+    await page.setContent(`<style>${css}</style><div id="host" style="width:400px;height:200px;overflow:auto"><div id="content" style="height:1000px"><img id="avatar" alt="" style="position:absolute" width="1" height="1" src="${imageSource}"><div class="tabBar" style="position:absolute"><div><img id="ignored-avatar" alt="" width="1" height="1" src="${imageSource}"></div></div><span id="clock" style="display:inline-block;width:80px;height:20px">00:00</span></div></div>`)
     const api = entry.includes('cjs') ? 'exports.OverlayScrollbars' : 'OverlayScrollbars'
     await page.addScriptTag({ type: 'module', content: `const exports = {};\n${library}\nwindow.OverlayScrollbars = ${api}` })
     await page.evaluate(() => {
       const host = document.querySelector('#host')
-      window.scrollbar = window.OverlayScrollbars({ target: host, elements: { viewport: host } }, {})
+      window.__ignoredImageRemovals = 0
+      window.scrollbar = window.OverlayScrollbars({ target: host, elements: { viewport: host } }, {
+        update: {
+          ignoreMutation: mutation => {
+            const element = mutation.target instanceof Element ? mutation.target : mutation.target.parentElement
+            const ignored = element?.closest('.tabBar') != null
+            if (ignored && mutation.type === 'childList' && mutation.removedNodes.length > 0) window.__ignoredImageRemovals++
+            return ignored
+          }
+        }
+      })
       window.scrollbar.update(true)
     })
     await page.locator('#avatar').evaluate(image => image.decode())
     await expect.poll(() => page.evaluate(() => window.scrollbar.state().overflowAmount.y)).toBe(800)
     const session = await page.context().newCDPSession(page)
-    const imageListeners = async () => {
-      const { result } = await session.send('Runtime.evaluate', { expression: 'document.querySelector("#avatar")' })
+    const imageListeners = async (selector = '#avatar') => {
+      const { result } = await session.send('Runtime.evaluate', { expression: `document.querySelector(${JSON.stringify(selector)})` })
       const { listeners } = await session.send('DOMDebugger.getEventListeners', { objectId: result.objectId })
       await session.send('Runtime.releaseObject', { objectId: result.objectId })
       return listeners.filter(listener => listener.type === 'load').length
@@ -55,6 +66,25 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
       }
     })
     expect(await imageListeners()).toBe(initialListeners)
+    // Ignoring tab-bar measurements must still release removed image handlers,
+    // including images inside a removed subtree and their replacements.
+    expect(await imageListeners('#ignored-avatar')).toBe(1)
+    await page.evaluate(async () => {
+      window.__ignoredImageReferences = []
+      const tabBar = document.querySelector('.tabBar')
+      for (let index = 0; index < 10; index++) {
+        const oldImage = tabBar.querySelector('img')
+        window.__ignoredImageReferences.push(new WeakRef(oldImage))
+        tabBar.replaceChildren(oldImage.cloneNode())
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
+    })
+    await expect.poll(() => page.evaluate(() => window.__ignoredImageRemovals)).toBe(10)
+    await expect.poll(async () => {
+      await session.send('HeapProfiler.collectGarbage')
+      return page.evaluate(() => window.__ignoredImageReferences.filter(reference => reference.deref()).length)
+    }).toBe(0)
+    expect(await imageListeners('#ignored-avatar')).toBe(1)
     await page.evaluate(() => {
       document.querySelector('#host').scrollTop = 800
       document.querySelector('#content').style.height = '150px'
@@ -65,6 +95,7 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
     await expect(page.locator('#host > .os-scrollbar-vertical')).toContainClass('os-scrollbar-unusable')
     await page.evaluate(() => window.scrollbar.destroy())
     expect(await imageListeners()).toBe(0)
+    expect(await imageListeners('#ignored-avatar')).toBe(0)
     await session.detach()
   })
 }
