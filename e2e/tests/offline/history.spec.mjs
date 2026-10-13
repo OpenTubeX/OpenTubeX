@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, updateInputWithoutScrolling, sel } from '../../helpers/app.mjs'
 import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const now = Date.now()
@@ -38,6 +38,12 @@ function matchingHistoryEntries(prefix, count, timeOffset = 0) {
   })
 }
 
+async function openHistoryFilters(page) {
+  const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
+  if (await toggle.getAttribute('aria-expanded') === 'false') await toggle.click()
+  await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeVisible()
+}
+
 async function scrollPageToEnd(page) {
   await expect.poll(() => page.evaluate(() => {
     document.activeElement?.blur()
@@ -45,7 +51,7 @@ async function scrollPageToEnd(page) {
     // the rendered end instead of mixing rounded dimensions at fractional zoom.
     window.scrollTo(0, document.documentElement.scrollHeight)
     const content = document.querySelector('.app > .routerView')
-    const marginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    const marginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
     const viewportHeight = window.visualViewport?.height ?? window.innerHeight
     const remaining = Math.max(-window.scrollY, content.getBoundingClientRect().bottom + marginBottom - viewportHeight)
     return Math.abs(remaining) * window.devicePixelRatio
@@ -56,7 +62,8 @@ async function expectPageScrollWithinRenderedRange(page) {
   await expect.poll(() => page.evaluate(() => {
     const content = document.querySelector('.app > .routerView')
     const contentBox = content.getBoundingClientRect()
-    const contentMarginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    // Negative margins do not shorten the element's scrollable overflow box.
+    const contentMarginBottom = Math.max(0, Number.parseFloat(getComputedStyle(content).marginBottom) || 0)
     const renderedMaximumScrollY = Math.max(
       0,
       contentBox.bottom + window.scrollY + contentMarginBottom - window.innerHeight
@@ -127,16 +134,16 @@ test.use({
 test.describe('single history entry', () => {
   test.use({ seed: { history: [historyEntry('aaaaaaaaaaa', 'Only history video', now - 1000)] } })
 
-  test('keeps a heading-to-results gap when search controls are hidden', async ({ app, page }) => {
+  test('keeps a filter-button-to-results gap when search controls are hidden', async ({ app, page }) => {
     await goTo(page, 'history')
     await expect(page.getByText('Only history video')).toBeVisible()
     await expect(page.locator('.historySearch')).toBeHidden()
-    await expect(page.locator('.optionsRow')).toHaveCount(0)
+    await expect(page.locator('.sortSelect')).toHaveCount(0)
     for (const zoom of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
       for (const width of [1440, 375]) {
         await setWindowSize(app, page, { width, height: width === 1440 ? 950 : 850 })
-        await expect.poll(() => page.locator('.headingRow').evaluate(element => {
+        await expect.poll(() => page.locator('.historyFilterToggleRow').evaluate(element => {
           const headingBottom = Math.max(...[...element.children].map(child => child.getBoundingClientRect().bottom))
           const results = element.closest('.card').querySelector('.autoGrid').getBoundingClientRect()
           return results.top - headingBottom
@@ -237,33 +244,20 @@ test.describe('watch history', () => {
   test('keeps consistent gaps between history controls and results at narrow widths and fractional zoom', async ({ app, page, attachScreenshot }) => {
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await goTo(page, 'history')
+    await openHistoryFilters(page)
     for (const zoom of [1, 1.25]) {
       await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
       for (const width of [320, 375, 732, 1500]) {
         await setWindowSize(app, page, { width, height: width === 320 ? 820 : width === 375 ? 850 : width === 732 ? 550 : 900 })
-        await expect.poll(() => page.locator('.headingActions').evaluate(element => {
-          const actions = element.getBoundingClientRect()
-          const card = element.closest('.card')
-          const headingBottom = Math.max(...[...element.closest('.headingRow').children].map(child => child.getBoundingClientRect().bottom))
+        await expect.poll(() => page.locator('.card').evaluate(card => {
+          const headingBottom = Math.max(...[...card.querySelector('.headingRow').children].map(child => child.getBoundingClientRect().bottom))
           const search = card.querySelector('.historySearch .ft-input').getBoundingClientRect()
           const searchLabel = card.querySelector('.historySearch .selectLabel').getBoundingClientRect()
-          const toggleText = card.querySelector('.toggleOptions .switch-label-text')
-          const text = toggleText.getBoundingClientRect()
-          const trackHeight = Number.parseFloat(getComputedStyle(toggleText, '::before').height)
-          const toggleTop = Math.min(text.top, text.top + (text.height - trackHeight) / 2)
-          const toggleBottom = Math.max(text.bottom, text.top + (text.height + trackHeight) / 2)
-          const sort = card.querySelector('.sortSelect .select-text').getBoundingClientRect()
-          const sortLabel = card.querySelector('.sortSelect .select-label').getBoundingClientRect()
+          const toggle = card.querySelector('.historyFilterToggleRow').getBoundingClientRect()
+          const panel = card.querySelector('.historyFilterCard').getBoundingClientRect()
           const results = card.querySelector('.autoGrid').getBoundingClientRect()
-          const gaps = [Math.min(search.top, searchLabel.top) - headingBottom, results.top - Math.max(sort.bottom, toggleBottom)]
-          if (getComputedStyle(card.querySelector('.optionsRow')).gridTemplateRows.split(' ').length === 2) {
-            gaps.push(toggleTop - search.bottom, Math.min(sort.top, sortLabel.top) - toggleBottom)
-            gaps.push(Math.min(search.top, searchLabel.top) - actions.bottom)
-          } else {
-            gaps.push(Math.min(toggleTop, sort.top, sortLabel.top) - search.bottom)
-          }
-          return gaps
-        })).toEqual(Array(width / zoom <= 800 ? 5 : 3).fill(expect.closeTo(20, 0)))
+          return [Math.min(search.top, searchLabel.top) - headingBottom, toggle.top - search.bottom, panel.top - toggle.bottom, results.top - panel.bottom]
+        })).toEqual(Array(4).fill(expect.closeTo(20, 0)))
         if (width / zoom <= 680) {
           const touchTarget = await page.locator('.toggleOptions .switch-label').boundingBox()
           // Electron zoom can introduce tiny fractions in CSS-pixel bounds.
@@ -483,7 +477,7 @@ test.describe('watch history', () => {
     await goTo(page, 'history')
     await expect(page.getByText('First test video')).toBeVisible()
 
-    const filterInput = page.locator('.ft-input-component input').last()
+    const filterInput = page.getByRole('searchbox', { name: 'Search in History' })
     await filterInput.fill('Second')
 
     await expect(page.getByText('Second test video')).toBeVisible()
@@ -1034,5 +1028,272 @@ test.describe('history search locale changes', () => {
     await expect(videos).toHaveCount(0)
     await expect(page.locator('.historySearchLoader')).toHaveCount(0)
     await expectPageScrollWithinRenderedRange(page)
+  })
+})
+
+test.describe('history date and channel browsing', () => {
+  const dated = (id, title, day, extra = {}) => historyEntry(id, title, new Date(2026, 9, day, 12).getTime(), false, extra)
+  test.use({
+    seed: {
+      settings: { generalAutoLoadMorePaginatedItemsEnabled: false, uiScale: 125 },
+      history: [
+        ...Array.from({ length: 100 }, (_, index) => dated(`decoy${String(index).padStart(6, '0')}`, `Recent video ${index}`, 14)),
+        ...Array.from({ length: 220 }, (_, index) => dated(`older${String(index).padStart(6, '0')}`, `City walk ${index}`, 12, { author: 'Walking Channel', authorId: 'UC-walking' })),
+        dated('nightwalk01', 'Night walk', 13, { author: 'Walking Channel', authorId: 'UC-walking' }),
+        dated('otherwalk01', 'Other city walk', 12, { author: 'Other Channel', authorId: 'UC-other' }),
+        dated('imported001', 'Imported video', 11, { author: 'Imported Channel', authorId: '' }),
+      ]
+    }
+  })
+
+  async function chooseChannel(page, name) {
+    await page.getByRole('combobox', { name: 'Channel', exact: true }).click()
+    await page.getByRole('option', { name, exact: true }).click()
+  }
+
+  test('combines dates, channel and search across the complete history', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-13')
+    await chooseChannel(page, 'Walking Channel')
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('Night walk')
+    await page.getByRole('searchbox', { name: 'Search in History' }).fill('City walk')
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('City walk')
+    await expect(videos.filter({ hasText: 'Other city walk' })).toHaveCount(0)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(200)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(220)
+    await expect(page.getByRole('button', { name: 'Load More Videos' })).toHaveCount(0)
+    await page.getByRole('combobox', { name: 'Sort By' }).click()
+    await page.getByRole('option', { name: 'Date Watched (Oldest)' }).click()
+    await expect(videos.first()).toContainText('City walk 219')
+
+    const savedUrl = page.url()
+    await goTo(page, 'trending')
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(savedUrl)
+    await openHistoryFilters(page)
+    await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
+    await expect(page.getByLabel('To', { exact: true })).toHaveValue('2026-10-13')
+    await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Walking Channel')
+    await expect(videos).toHaveCount(220)
+    await expect(page.getByRole('searchbox', { name: 'Search in History' })).toHaveValue('City walk')
+
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await expect(page.getByLabel('From', { exact: true })).toHaveValue('')
+    await expect(page.getByLabel('To', { exact: true })).toHaveValue('')
+    await expect(page.getByRole('searchbox', { name: 'Search in History' })).toHaveValue('City walk')
+    await expect(videos).toHaveCount(100)
+  })
+
+  test('paginates date-only results and resets the limit when changing filters', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-12')
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('City walk')
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(200)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(222)
+    await expect(page.getByRole('button', { name: 'Load More Videos' })).toHaveCount(0)
+    await chooseChannel(page, 'Walking Channel')
+    await expect(videos).toHaveCount(100)
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('Recent video')
+    await expect(page.getByRole('button', { name: 'Clear filters' })).toBeDisabled()
+  })
+
+  test('shows invalid and empty ranges and supports channels without IDs', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    await page.getByLabel('From', { exact: true }).fill('2026-10-14')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-12')
+    await expect(page.getByRole('alert')).toHaveText('The From date must be on or before the To date.')
+    await expect(page.getByLabel('To', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+    await expect(page.getByText('No videos in your history match these filters.')).toBeVisible()
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await chooseChannel(page, 'Imported Channel')
+    await expect(page.locator('.ft-list-video')).toHaveCount(1)
+    await expect(page.locator('.ft-list-video')).toContainText('Imported video')
+    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await expect(page.getByText('No videos in your history match these filters.')).toBeVisible()
+    await page.getByLabel('From', { exact: true }).fill('')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeFromHistory', 'imported001'))
+    await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Imported Channel')
+    await expect(page.locator('.ft-list-video')).toHaveCount(0)
+  })
+
+  test('clamps scroll after date and channel filters shorten results', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    for (const [label, date] of [['From', '2026-10-13'], ['To', '2026-10-11']]) {
+      await scrollPageToEnd(page)
+      await updateInputWithoutScrolling(page.getByLabel(label, { exact: true }), date)
+      await expectPageScrollWithinRenderedRange(page)
+      await page.getByRole('button', { name: 'Clear filters' }).click()
+      await expect(videos).toHaveCount(100)
+    }
+    await chooseChannel(page, 'Walking Channel')
+    await expect(videos).toHaveCount(100)
+    await scrollPageToEnd(page)
+    // Change the picker without scrolling the page back to the control.
+    await page.locator('.historyChannelFilter select').evaluate(select => {
+      select.value = 'id:UC-other'
+      select.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    await expect(videos).toHaveCount(1)
+    await expectPageScrollWithinRenderedRange(page)
+
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    await chooseChannel(page, 'Walking Channel')
+    await expect(videos).toHaveCount(100)
+    await scrollPageToEnd(page)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const record = store.getters.getHistoryCacheSorted.find(record => record.authorId === 'UC-walking')
+      await store.dispatch('overwriteHistory', new Map([[record.videoId, record]]))
+    })
+    await expect(videos).toHaveCount(1)
+    await expectPageScrollWithinRenderedRange(page)
+    await scrollPageToEnd(page)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('removeFromHistory', store.getters.getHistoryCacheSorted[0].videoId)
+    })
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+  })
+
+  test('collapses the grouped filter card without changing active options or results', async ({ page }) => {
+    await goTo(page, 'history')
+    const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
+    const panel = page.getByRole('region', { name: /^Search filters$/i })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(panel).toBeHidden()
+    await expect(page.getByRole('combobox', { name: 'Sort By' })).toBeVisible()
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeVisible()
+    await toggle.focus()
+    await toggle.press('Enter')
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await expect(panel).toHaveAttribute('id', await toggle.getAttribute('aria-controls'))
+    await expect(panel.getByRole('checkbox', { name: 'Case Sensitive Search' })).toHaveCount(0)
+    await panel.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await panel.getByLabel('To', { exact: true }).fill('2026-10-13')
+    await chooseChannel(page, 'Walking Channel')
+    await page.locator('.historySearchOptions .switch-label').click()
+    await page.getByRole('combobox', { name: 'Sort By' }).click()
+    await page.getByRole('option', { name: 'Date Watched (Oldest)' }).click()
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('City walk 219')
+    await scrollPageToEnd(page)
+    await toggle.evaluate(button => button.click())
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await expect(panel).toBeHidden()
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeVisible()
+    await expect(videos).toHaveCount(100)
+    // Offscreen cards release their text while keeping the stable video ID.
+    await expect(videos.first()).toHaveAttribute('data-video-id', 'older000219')
+    await expectPageScrollWithinRenderedRange(page)
+    const sort = page.getByRole('combobox', { name: 'Sort By' })
+    await expect(sort).toBeVisible()
+    await sort.click()
+    await page.getByRole('option', { name: 'Date Watched (Newest)' }).click()
+    await expect(videos.first()).toContainText('Night walk')
+    await sort.click()
+    await page.getByRole('option', { name: 'Date Watched (Oldest)' }).click()
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await toggle.evaluate(button => button.click())
+    await expect(panel).toBeVisible()
+    await expect(panel.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
+    await expect(panel.getByLabel('To', { exact: true })).toHaveValue('2026-10-13')
+    await expect(panel.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Walking Channel')
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
+    await expect(page.getByRole('combobox', { name: 'Sort By' })).toContainText('Date Watched (Oldest)')
+    await expect(videos).toHaveCount(100)
+  })
+
+  test('keeps filters usable at narrow widths and fractional scale in both themes', async ({ app, page }, testInfo) => {
+    // Exercise twelve layouts plus theme captures, including Electron startup.
+    test.slow()
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-13')
+    await chooseChannel(page, 'Walking Channel')
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'system')
+      await store.dispatch('updateSystemDarkTheme', 'dark')
+      await store.dispatch('updateSystemLightTheme', 'light')
+    })
+    for (const theme of ['dark', 'light']) {
+      await page.emulateMedia({ colorScheme: theme })
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+      for (const zoom of [1, 1.25]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        for (const width of [375, 732, 1500]) {
+          await scrollPageToEnd(page)
+          await setWindowSize(app, page, { width, height: width === 375 ? 850 : width === 732 ? 600 : 900 })
+          await expectPageScrollWithinRenderedRange(page)
+          if (width === 1500) {
+            await expect.poll(() => page.locator('.historySearchOptions').evaluate(element => {
+              const button = element.querySelector('.historyFilterToggle').getBoundingClientRect()
+              const toggle = element.querySelector('.toggleOptions').getBoundingClientRect()
+              return { beside: toggle.left >= button.right, aligned: Math.abs((toggle.top + toggle.bottom) / 2 - (button.top + button.bottom) / 2) <= 1 }
+            }), { message: `Filter controls settle beside one another in ${theme} theme at ${zoom * 100}% scale` }).toEqual({ beside: true, aligned: true })
+          }
+          const geometry = await page.locator('.historyFilters').evaluate(element => {
+            const box = element.getBoundingClientRect()
+            return [...element.children].map(child => {
+              const rect = child.getBoundingClientRect()
+              const within = rect.left >= box.left - 1 && rect.right <= box.right + 1
+              // Ripple pseudo-elements enlarge a button's scrollWidth even
+              // though they are clipped. Measure its visible label and icon.
+              if (child.matches('button')) {
+                const range = document.createRange()
+                range.selectNodeContents(child)
+                const content = range.getBoundingClientRect()
+                return within && content.left >= rect.left - 1 && content.right <= rect.right + 1
+              }
+              return within && child.scrollWidth <= child.clientWidth + 1
+            })
+          })
+          expect(geometry).toEqual(Array(4).fill(true))
+          await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
+          await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Walking Channel')
+        }
+      }
+      await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1))
+      await setWindowSize(app, page, { width: 1440, height: 950 })
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expectImagesLoaded(page.locator('.card img:visible'))
+      await page.mouse.move(0, 0)
+      await expect(page.getByLabel('From', { exact: true })).toHaveCSS('color-scheme', theme)
+      const clip = await page.locator('.card').evaluate(element => {
+        const card = element.getBoundingClientRect()
+        const firstVideo = element.querySelector('.autoGrid > :first-child').getBoundingClientRect()
+        return { x: card.x, y: card.y, width: card.width, height: firstVideo.bottom - card.top + 4 }
+      })
+      await page.screenshot({ path: testInfo.outputPath(`history-browse-${theme}.png`), clip })
+      const toggle = page.locator('.historyFilterToggleRow').getByRole('button', { name: /^Search filters$/i })
+      await toggle.click()
+      await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeHidden()
+      await page.mouse.move(0, 0)
+      await page.screenshot({ path: testInfo.outputPath(`history-browse-collapsed-${theme}.png`), clip, animations: 'disabled' })
+      await toggle.click()
+      await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeVisible()
+      await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
+    }
   })
 })

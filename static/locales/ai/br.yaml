@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: "N'eus ket bet gallet kargañ ar roll-videoioù-mañ."
     More videos could not be loaded.: "N'eus ket bet gallet kargañ muioc'h a videoioù."
 History:
+  From Date: 'Adalek'
+  To Date: 'Betek'
+  Channel Filter: 'Kanol'
+  All Channels: 'An holl ganolioù'
+  Clear Filters: 'Diverkañ ar siloù'
+  Invalid Date Range: 'An deiziad deraouiñ a rank bezañ a-raok pe war an deiziad echuiñ.'
+  Empty Filter Message: 'N''eus video ebet en ho roll istor a glot gant ar siloù-mañ.'
   Delete Old Compact: "Dilemel ar re gozh"
   Repair Compact: "Ratreañ"
   Mark All Watched Compact: "Merkañ pep tra gwelet"

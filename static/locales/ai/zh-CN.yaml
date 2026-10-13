@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
 History:
+  From Date: '开始日期'
+  To Date: '结束日期'
+  Channel Filter: '频道'
+  All Channels: '所有频道'
+  Clear Filters: '清除筛选'
+  Invalid Date Range: '开始日期必须早于或等于结束日期。'
+  Empty Filter Message: '历史记录中没有符合这些筛选条件的视频。'
   Delete Old Compact: "删除旧记录"
   Repair Compact: "修复"
   Mark All Watched Compact: "全部标为已看"

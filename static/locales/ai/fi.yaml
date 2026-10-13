@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
 History:
+  From Date: 'Alkaen'
+  To Date: 'Asti'
+  Channel Filter: 'Kanava'
+  All Channels: 'Kaikki kanavat'
+  Clear Filters: 'Tyhjennä suodattimet'
+  Invalid Date Range: 'Alkupäivän on oltava ennen loppupäivää tai sama kuin loppupäivä.'
+  Empty Filter Message: 'Mikään videosi historiassa ei vastaa näitä suodattimia.'
   Delete Old Compact: "Siivoa"
   Repair Compact: "Korjaa"
   Mark All Watched Compact: "Kaikki katsottu"

@@ -291,6 +291,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
 History:
+  From Date: '시작일'
+  To Date: '종료일'
+  Channel Filter: '채널'
+  All Channels: '모든 채널'
+  Clear Filters: '필터 초기화'
+  Invalid Date Range: '시작일은 종료일보다 이전이거나 같아야 합니다.'
+  Empty Filter Message: '기록에 이 필터와 일치하는 동영상이 없습니다.'
   Delete Old Compact: "오래된 기록 삭제"
   Repair Compact: "복구"
   Mark All Watched Compact: "모두 시청 완료로"

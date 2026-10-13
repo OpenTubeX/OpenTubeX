@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
 History:
+  From Date: 'Van'
+  To Date: 'Tot'
+  Channel Filter: 'Kanaal'
+  All Channels: 'Alle kanalen'
+  Clear Filters: 'Filters wissen'
+  Invalid Date Range: 'De begindatum moet vóór of op de einddatum liggen.'
+  Empty Filter Message: 'Geen video''s in je geschiedenis komen overeen met deze filters.'
   Delete Old Compact: "Oude wissen"
   Repair Compact: "Herstellen"
   Mark All Watched Compact: "Alles bekeken"

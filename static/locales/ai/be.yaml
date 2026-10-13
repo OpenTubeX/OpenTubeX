@@ -221,6 +221,13 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
 History:
+  From Date: 'Ад'
+  To Date: 'Да'
+  Channel Filter: 'Канал'
+  All Channels: 'Усе каналы'
+  Clear Filters: 'Скінуць фільтры'
+  Invalid Date Range: 'Пачатковая дата павінна быць не пазней за канчатковую.'
+  Empty Filter Message: 'У вашай гісторыі няма відэа, якія адпавядаюць гэтым фільтрам.'
   Delete Old Compact: "Выдаліць старыя"
   Repair Compact: "Аднавіць"
   Mark All Watched Compact: "Усе прагледжаны"

@@ -290,6 +290,13 @@ User Playlists:
   Choose Image: Bild auswählen
   Use Bookmark Icon: Lesezeichensymbol verwenden
 History:
+  From Date: 'Von'
+  To Date: 'Bis'
+  Channel Filter: 'Kanal'
+  All Channels: 'Alle Kanäle'
+  Clear Filters: 'Filter zurücksetzen'
+  Invalid Date Range: 'Das Von-Datum muss vor oder am Bis-Datum liegen.'
+  Empty Filter Message: 'Keine Videos in deinem Verlauf entsprechen diesen Filtern.'
   Repair Use Cookies: "Konfigurierte yt-dlp-Cookies verwenden"
   Repair Cookies Hint: "Mehr als 500 Videos müssen geprüft werden. Konfiguriere Cookies in den yt-dlp-Einstellungen und aktiviere sie hier, um das Risiko einer Anfragelimitierung zu verringern."
   Repair Description: "Nutze diese Funktion nach einem Verlaufsimport oder wenn Videodetails fehlen oder Videos fälschlich als LIVE angezeigt werden."

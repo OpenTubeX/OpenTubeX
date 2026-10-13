@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: Не вдалося завантажити цей список відтворення.
     More videos could not be loaded.: Не вдалося завантажити інші відео.
 History:
+  From Date: 'Від'
+  To Date: 'До'
+  Channel Filter: 'Канал'
+  All Channels: 'Усі канали'
+  Clear Filters: 'Скинути фільтри'
+  Invalid Date Range: 'Початкова дата має бути не пізніше кінцевої.'
+  Empty Filter Message: 'У вашій історії немає відео, які відповідають цим фільтрам.'
   Delete Old Compact: "Видалити старі"
   Repair Compact: "Відновити"
   Mark All Watched Compact: "Усі переглянуті"

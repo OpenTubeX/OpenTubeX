@@ -182,6 +182,13 @@ User Playlists:
     This playlist could not be loaded.: Не удалось загрузить этот плейлист.
     More videos could not be loaded.: Не удалось загрузить другие видео.
 History:
+  From Date: 'С'
+  To Date: 'По'
+  Channel Filter: 'Канал'
+  All Channels: 'Все каналы'
+  Clear Filters: 'Сбросить фильтры'
+  Invalid Date Range: 'Начальная дата должна быть не позже конечной.'
+  Empty Filter Message: 'В вашей истории нет видео, соответствующих этим фильтрам.'
   Delete Old Compact: "Удалить старые"
   Repair Compact: "Восстановить"
   Mark All Watched Compact: "Все просмотрены"

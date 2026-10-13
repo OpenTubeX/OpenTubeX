@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
 History:
+  From Date: 'Από'
+  To Date: 'Έως'
+  Channel Filter: 'Κανάλι'
+  All Channels: 'Όλα τα κανάλια'
+  Clear Filters: 'Εκκαθάριση φίλτρων'
+  Invalid Date Range: 'Η ημερομηνία έναρξης πρέπει να είναι πριν ή ίδια με την ημερομηνία λήξης.'
+  Empty Filter Message: 'Κανένα βίντεο στο ιστορικό σας δεν ταιριάζει με αυτά τα φίλτρα.'
   Delete Old Compact: "Διαγραφή παλιών"
   Repair Compact: "Επιδιόρθωση"
   Mark All Watched Compact: "Όλα προβλήθηκαν"

@@ -316,6 +316,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  From Date: 'Nuo'
+  To Date: 'Iki'
+  Channel Filter: 'Kanalas'
+  All Channels: 'Visi kanalai'
+  Clear Filters: 'Išvalyti filtrus'
+  Invalid Date Range: 'Pradžios data turi būti ankstesnė už pabaigos datą arba jai lygi.'
+  Empty Filter Message: 'Jūsų istorijoje nėra vaizdo įrašų, atitinkančių šiuos filtrus.'
   Delete Old Compact: "Šalinti senus"
   Repair Compact: "Taisyti"
   Mark All Watched Compact: "Visi peržiūrėti"

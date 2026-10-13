@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: 無法載入此播放清單。
     More videos could not be loaded.: 無法載入更多影片。
 History:
+  From Date: '開始日期'
+  To Date: '結束日期'
+  Channel Filter: '頻道'
+  All Channels: '所有頻道'
+  Clear Filters: '清除篩選'
+  Invalid Date Range: '開始日期必須早於或等於結束日期。'
+  Empty Filter Message: '觀看記錄中沒有符合這些篩選條件的影片。'
   Delete Old Compact: "刪除舊紀錄"
   Repair Compact: "修復"
   Mark All Watched Compact: "全部標為已看"

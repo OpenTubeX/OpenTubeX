@@ -207,6 +207,13 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
 History:
+  From Date: 'Başlanğıc'
+  To Date: 'Son'
+  Channel Filter: 'Kanal'
+  All Channels: 'Bütün kanallar'
+  Clear Filters: 'Filtrləri təmizlə'
+  Invalid Date Range: 'Başlanğıc tarixi son tarixdən əvvəl və ya ona bərabər olmalıdır.'
+  Empty Filter Message: 'Tarixçənizdə bu filtrlərə uyğun video yoxdur.'
   Delete Old Compact: "Köhnəni sil"
   Repair Compact: "Təmir et"
   Mark All Watched Compact: "Hamısı izlənib"

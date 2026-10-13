@@ -326,6 +326,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  From Date: 'Od'
+  To Date: 'Do'
+  Channel Filter: 'Kanal'
+  All Channels: 'Vsi kanali'
+  Clear Filters: 'Počisti filtre'
+  Invalid Date Range: 'Začetni datum mora biti pred končnim datumom ali enak njemu.'
+  Empty Filter Message: 'Noben videoposnetek v vaši zgodovini ne ustreza tem filtrom.'
   Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Vse ogledano"

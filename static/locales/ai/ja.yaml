@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
 History:
+  From Date: '開始日'
+  To Date: '終了日'
+  Channel Filter: 'チャンネル'
+  All Channels: 'すべてのチャンネル'
+  Clear Filters: 'フィルターをクリア'
+  Invalid Date Range: '開始日は終了日以前にしてください。'
+  Empty Filter Message: '履歴にこれらのフィルターに一致する動画はありません。'
   Delete Old Compact: "古い履歴を削除"
   Repair Compact: "修復"
   Mark All Watched Compact: "すべて視聴済みに"

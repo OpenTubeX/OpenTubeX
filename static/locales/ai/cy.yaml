@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  From Date: 'O'
+  To Date: 'Hyd at'
+  Channel Filter: 'Sianel'
+  All Channels: 'Pob sianel'
+  Clear Filters: 'Clirio hidlwyr'
+  Invalid Date Range: 'Rhaid i''r dyddiad cychwyn fod ar neu cyn y dyddiad gorffen.'
+  Empty Filter Message: 'Nid oes fideos yn eich hanes sy''n cyfateb i''r hidlwyr hyn.'
   Delete Old Compact: "Dileu hen"
   Repair Compact: "Trwsio"
   Mark All Watched Compact: "Pob un wedi’i weld"

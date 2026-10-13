@@ -334,6 +334,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
 History:
+  From Date: 'Des de'
+  To Date: 'Fins a'
+  Channel Filter: 'Canal'
+  All Channels: 'Tots els canals'
+  Clear Filters: 'Neteja els filtres'
+  Invalid Date Range: 'La data inicial ha de ser anterior o igual a la data final.'
+  Empty Filter Message: 'Cap vídeo de l''historial coincideix amb aquests filtres.'
   Delete Old Compact: "Esborra antics"
   Repair Compact: "Repara"
   Mark All Watched Compact: "Marca tots vistos"

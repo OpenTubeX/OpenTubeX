@@ -9,7 +9,7 @@
   margin-inline: auto;
 }
 
-.card:not(:has(.optionsRow)) .historyResults {
+.historyResults {
   margin-block-start: var(--history-control-gap);
 }
 
@@ -60,7 +60,7 @@
   .optionsRow {
     /* Switch to 2 rows from 2 columns */
     grid-template-columns: auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto;
     align-items: stretch;
   }
 
@@ -244,4 +244,79 @@
 :global(.promptCard.fixedLayout.historyRepairPrompt) {
   inline-size: min(520px, 100%);
   block-size: auto;
+}
+
+.historyFilterToggleRow {
+  margin-block: var(--history-control-gap);
+}
+
+.historySearchOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--history-control-gap);
+  min-inline-size: 0;
+}
+
+.historySearchOptions > .toggleOptions {
+  min-inline-size: 0;
+}
+
+.historyFilterToggle {
+  justify-self: start;
+  margin: 0;
+  min-block-size: 48px;
+}
+
+.historyFilterCard {
+  padding: var(--history-control-gap);
+  border: 1px solid var(--divider-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  background-color: var(--secondary-card-bg-color);
+}
+
+.historyFilters {
+  --settings-control-margin: 0;
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: var(--history-control-gap);
+  margin-block: var(--history-field-label-outset) 0;
+}
+
+.historyFilters > * {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.historyDateFilter,
+.historyChannelFilter {
+  inline-size: 100%;
+}
+
+.historyDateFilter {
+  color-scheme: var(--native-color-scheme, light);
+}
+
+.historyClearFilters {
+  min-block-size: 48px;
+}
+
+.historyFilterError {
+  grid-column: 1 / -1;
+  color: var(--primary-text-color);
+}
+
+@media only screen and (width <= 1000px) {
+  .historyFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media only screen and (width <= 400px) {
+  .historyFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

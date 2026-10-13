@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: Non se puido cargar esta lista de reprodución.
     More videos could not be loaded.: Non se puideron cargar máis vídeos.
 History:
+  From Date: 'Desde'
+  To Date: 'Ata'
+  Channel Filter: 'Canle'
+  All Channels: 'Todas as canles'
+  Clear Filters: 'Limpar filtros'
+  Invalid Date Range: 'A data inicial debe ser anterior ou igual á data final.'
+  Empty Filter Message: 'Ningún vídeo do teu historial coincide con estes filtros.'
   Delete Old Compact: "Borrar antigos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"

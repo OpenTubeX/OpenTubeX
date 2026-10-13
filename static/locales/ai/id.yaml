@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
 History:
+  From Date: 'Dari'
+  To Date: 'Sampai'
+  Channel Filter: 'Kanal'
+  All Channels: 'Semua kanal'
+  Clear Filters: 'Hapus filter'
+  Invalid Date Range: 'Tanggal awal harus sebelum atau sama dengan tanggal akhir.'
+  Empty Filter Message: 'Tidak ada video dalam riwayat Anda yang cocok dengan filter ini.'
   Delete Old Compact: "Hapus lama"
   Repair Compact: "Perbaiki"
   Mark All Watched Compact: "Tandai semua ditonton"
