@@ -1062,7 +1062,7 @@ onBeforeUnmount(() => {
   line-height: 1.5;
   overflow-wrap: anywhere;
   padding: 16px;
-  text-align: start;
+  text-align: center;
 }
 
 .externalMediaRetry {

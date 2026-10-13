@@ -2137,12 +2137,16 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   }
   await expect(state.locator('h1')).toHaveText('videos.example.test')
   await expect(state).toContainText('HTTP Error 503: Service Unavailable')
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await expect(state.locator('.externalMediaDiagnostic')).toHaveCSS('text-align', 'center')
   for (const theme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: theme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
     await state.screenshot({ path: testInfo.outputPath(`external-media-error-${theme}.png`) })
   }
   await page.setViewportSize({ width: 375, height: 667 })
+  await expect(state.locator('.externalMediaDiagnostic')).toHaveCSS('text-align', 'center')
+  await state.screenshot({ path: testInfo.outputPath('external-media-error-phone.png') })
   expect(await state.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
   const errorBounds = await state.boundingBox()
   const contentBounds = await state.locator('.externalMediaStateContent').boundingBox()
