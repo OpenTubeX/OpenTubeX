@@ -448,3 +448,18 @@ test('portable startup preserves every retained playlist name without writing ge
     assert.deepEqual(toRaw(store.state.playlists.playlists[0]), record)
   }
 })
+
+
+test('profile ordering tolerates retained names without coercing or changing stored records', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
+  const node = parseJavaScript(source, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'profileSort')
+  const collator = new Intl.Collator(undefined, { usage: 'sort', caseFirst: 'upper', sensitivity: 'case', numeric: true })
+  const compare = compileFunction('return ' + source.slice(node.start, node.end), ['MAIN_PROFILE_ID', 'collator'])('allChannels', collator)
+  const labels = [undefined, null, false, 42, [], {}, new Date(1)]
+  const records = [{ _id: 'allChannels', name: 42 }, ...labels.map((name, index) => ({ _id: `unknown-${index}`, unknown: new Date(index), ...(name === undefined ? {} : { name }) })), { _id: 'named', name: 'Zebra' }]
+  const db = new Datastore({ inMemoryOnly: true })
+  await db.insertAsync(records)
+  assert.deepEqual((await db.findAsync({})).sort(compare).map(record => record._id), records.map(record => record._id))
+  assert.equal(compare({ _id: 'a', name: 'é' }, { _id: 'b', name: 'e\u0301' }), 0)
+  assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), records.toSorted((a, b) => model.compareThings(a._id, b._id)))
+})

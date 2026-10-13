@@ -59,8 +59,8 @@ function profileSort(a, b) {
   if (a._id === MAIN_PROFILE_ID) return -1
   if (b._id === MAIN_PROFILE_ID) return 1
 
-  const nameA = a.name.normalize('NFC')
-  const nameB = b.name.normalize('NFC')
+  const nameA = typeof a.name === 'string' ? a.name.normalize('NFC') : ''
+  const nameB = typeof b.name === 'string' ? b.name.normalize('NFC') : ''
 
   return collator.compare(nameA, nameB)
 }
