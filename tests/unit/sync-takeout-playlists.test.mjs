@@ -186,3 +186,63 @@ test('newer imported history preserves known remote uploader metadata and local 
   const knownResult = mergeHistory({ localHistory: [knownLocal], remoteHistory: [remote], options: { allowMissingUploader: true } })
   assert.equal(knownResult.historyToUpload[0].video.uploader.name, knownLocal.author)
 })
+
+test('newer imported history preserves richer remote video metadata through repeated syncs', () => {
+  const imported = parseTakeoutPlaylistCsv(
+    'Video ID,Playlist Video Creation Timestamp\nabcdefghijk,2025-01-01T00:00:00Z', 'Imported.csv'
+  ).videos[0]
+  const local = { ...imported, timeWatched: 200, watchProgress: 42, isWatched: false }
+  const known = {
+    ...local, title: 'Actual video title', published: 123,
+    thumbnail: 'https://example.com/video.jpg', authorThumbnail: 'https://example.com/channel.jpg',
+    authorId: 'known-channel', author: 'Known channel', lengthSeconds: 500,
+    timeWatched: 100, watchProgress: 10,
+  }
+  const options = { allowMissingUploader: true }
+  const remote = releasedHistoryToRemote(known)
+  const result = mergeHistory({ localHistory: [local], remoteHistory: [remote], options })
+  assert.equal(result.updates.length, 1)
+  assert.deepEqual(result.historyToUpload[0].video, remote.video)
+  assert.equal(result.historyToUpload[0].metadata.position_millis, 42_000)
+  const repeated = mergeHistory({
+    localHistory: result.updates, remoteHistory: result.historyToUpload, previous: result.next, options,
+  })
+  assert.deepEqual(repeated.updates, [])
+  assert.deepEqual(repeated.historyToUpload, [])
+  const edited = { ...result.updates[0], timeWatched: 300, watchProgress: 50 }
+  const next = mergeHistory({ localHistory: [edited], remoteHistory: result.historyToUpload, previous: result.next, options })
+  assert.deepEqual(next.historyToUpload[0].video, remote.video)
+  const renamed = { ...edited, title: 'Local title', thumbnail: 'https://example.com/local.jpg', published: 456 }
+  const renamedResult = mergeHistory({ localHistory: [renamed], remoteHistory: [remote], options })
+  assert.equal(renamedResult.historyToUpload[0].video.title, renamed.title)
+  assert.equal(renamedResult.historyToUpload[0].video.thumbnail_url, renamed.thumbnail)
+  assert.equal(renamedResult.historyToUpload[0].video.upload_date, renamed.published)
+})
+
+test('newer unknown remote history preserves locally known video metadata', () => {
+  const local = {
+    videoId: 'abcdefghijk', title: 'Actual video title', published: 123,
+    thumbnail: 'https://example.com/video.jpg', authorThumbnail: 'https://example.com/channel.jpg',
+    authorId: 'known-channel', author: 'Known channel', lengthSeconds: 500,
+    timeWatched: 100, watchProgress: 10, isWatched: false,
+  }
+  const options = { allowMissingUploader: true }
+  const remote = {
+    video: syncVideoToRemote({ videoId: local.videoId }, options),
+    metadata: { added_date: 200, watched_state: 'completed', position_millis: 42_000 },
+  }
+  const result = mergeHistory({ localHistory: [local], remoteHistory: [remote], options })
+  assert.equal(result.updates.length, 1)
+  const updated = result.updates[0]
+  assert.deepEqual(syncVideoToRemote(updated), syncVideoToRemote(local))
+  assert.equal(updated.timeWatched, 200)
+  assert.equal(updated.watchProgress, 42)
+  assert.equal(updated.isWatched, true)
+  const repeated = mergeHistory({ localHistory: [updated], remoteHistory: [remote], previous: result.next, options })
+  assert.deepEqual(repeated.updates, [])
+  const edited = { ...updated, timeWatched: 300 }
+  const next = mergeHistory({ localHistory: [edited], remoteHistory: [remote], previous: result.next, options })
+  assert.deepEqual(next.historyToUpload[0].video, syncVideoToRemote(local))
+  const received = mergeHistory({ localHistory: [], remoteHistory: next.historyToUpload, options })
+  assert.deepEqual(syncVideoToRemote(received.insertions[0]), syncVideoToRemote(local))
+})

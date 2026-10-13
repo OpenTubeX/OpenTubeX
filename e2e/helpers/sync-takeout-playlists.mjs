@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import { expect } from '@playwright/test'
-import { decryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
+import { decryptSyncDocument, encryptSyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
 const key = Buffer.alloc(32, 1).toString('base64')
@@ -43,6 +43,12 @@ export async function createTakeoutSyncServer() {
     },
     async history() {
       return decryptSyncDocument(collections.get('history').payload, key)
+    },
+    async setHistory(entries) {
+      collections.set('history', {
+        revision: (collections.get('history')?.revision ?? 0) + 1,
+        payload: await encryptSyncDocument(entries, key, salt),
+      })
     },
     async close() {
       server.closeAllConnections()
@@ -133,6 +139,40 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       await store.dispatch('syncWithSyncServer')
     }, { id: playlist._id, historyId })
     expect((await server.history()).find(entry => entry.video.id === historyId)?.metadata.watched_state).toBe('completed')
+    const history = await server.history()
+    const entry = history.find(entry => entry.video.id === historyId)
+    const knownVideo = {
+      ...entry.video,
+      title: 'Actual title',
+      upload_date: 123,
+      duration: 500,
+      thumbnail_url: 'https://example.com/video.jpg',
+      uploader: { ...entry.video.uploader, id: 'known-channel', name: 'Known channel', avatar: 'https://example.com/channel.jpg' },
+    }
+    const syncHistory = async () => page.evaluate(() => {
+      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer')
+    })
+    await server.setHistory(history.map(item => item === entry
+      ? { ...entry, video: knownVideo, metadata: { ...entry.metadata, added_date: 50 } }
+      : item))
+    await syncHistory()
+    expect((await server.history()).find(entry => entry.video.id === historyId).video).toEqual(knownVideo)
+    // A newer watch-state edit from an imported copy must also retain local details.
+    await server.setHistory(history.map(item => item === entry
+      ? { ...entry, metadata: { added_date: 200, watched_state: 'watching', position_millis: 42_000 } }
+      : item))
+    await syncHistory()
+    expect(await page.evaluate(id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const record = store.getters.getHistoryCacheById[id]
+      return { title: record.title, authorId: record.authorId, watchProgress: record.watchProgress, timeWatched: record.timeWatched }
+    }, historyId)).toEqual({ title: knownVideo.title, authorId: knownVideo.uploader.id, watchProgress: 42, timeWatched: 200 })
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateHistory', { ...store.getters.getHistoryCacheById[id], timeWatched: 300, isWatched: true })
+    }, historyId)
+    await syncHistory()
+    expect((await server.history()).find(entry => entry.video.id === historyId).video).toEqual(knownVideo)
     expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.syncServer.syncServerStatus)).toBe('success')
   } finally {
     await page.evaluate(async ({ original, id, historyId, originalHistory }) => {

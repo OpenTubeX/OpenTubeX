@@ -103,12 +103,16 @@ function historyToRemote(record, options) {
 }
 
 function historyToLocal(entry, local) {
-  return {
+  const avatar = normalizeChannelAvatar(entry.video.uploader.avatar)
+  const thumbnail = entry.video.thumbnail_url
+  const record = {
     ...local,
     videoId: entry.video.id,
     title: entry.video.title,
     ...uploaderToLocal(entry.video.uploader),
     published: entry.video.upload_date,
+    ...(thumbnail && thumbnail !== `https://i.ytimg.com/vi/${entry.video.id}/hqdefault.jpg` ? { thumbnail } : {}),
+    ...(avatar ? { authorThumbnail: avatar } : {}),
     description: local?.description ?? '',
     lengthSeconds: entry.video.duration > 0 ? entry.video.duration : (local?.lengthSeconds ?? 0),
     watchProgress: (entry.metadata.position_millis ?? 0) / 1000,
@@ -119,6 +123,30 @@ function historyToLocal(entry, local) {
     isUpcoming: entry.video.duration > 0 ? false : local?.isUpcoming === true,
     type: 'video',
   }
+  return local ? fillMissingVideoMetadata(record, local) : record
+}
+
+function fillMissingVideoMetadata(record, fallback) {
+  const metadata = {}
+  // Watch-state timestamps do not tell us which side has richer video details.
+  if ((!record.title || record.title === record.videoId) && fallback.title && fallback.title !== record.videoId) {
+    metadata.title = fallback.title
+  }
+  if ((!Number.isFinite(record.published) || record.published <= 0) && Number.isFinite(fallback.published) && fallback.published > 0) {
+    metadata.published = fallback.published
+  }
+  const placeholderThumbnail = `https://i.ytimg.com/vi/${record.videoId}/hqdefault.jpg`
+  if ((!record.thumbnail || record.thumbnail === placeholderThumbnail) && fallback.thumbnail && fallback.thumbnail !== placeholderThumbnail) {
+    metadata.thumbnail = fallback.thumbnail
+  }
+  const uploader = uploaderToLocal({ id: fallback.authorId, name: fallback.author })
+  if (!record.authorId || record.authorId === uploader.authorId) {
+    if (!record.authorId && uploader.authorId) metadata.authorId = uploader.authorId
+    if (!record.author && uploader.author) metadata.author = uploader.author
+    const avatar = normalizeChannelAvatar(fallback.authorThumbnail)
+    if (!normalizeChannelAvatar(record.authorThumbnail) && avatar) metadata.authorThumbnail = avatar
+  }
+  return Object.keys(metadata).length > 0 ? { ...record, ...metadata } : record
 }
 
 function historyStateEquals(localPayload, remote) {
@@ -197,15 +225,7 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
     if (useLocal && local.authorId === UNKNOWN_SYNC_UPLOADER_ID) {
       merged = { ...local, ...uploaderToLocal({ id: local.authorId, name: local.author }) }
     }
-    // A newer watch-state edit must not replace a known uploader with the marker.
-    if (useLocal && remote && (!merged.authorId || merged.authorId === remote.video.uploader.id)) {
-      const uploader = uploaderToLocal(remote.video.uploader)
-      const authorId = merged.authorId || uploader.authorId
-      const author = merged.author || uploader.author
-      if (authorId !== merged.authorId || author !== merged.author) {
-        merged = { ...merged, authorId, author }
-      }
-    }
+    if (useLocal && remote) merged = fillMissingVideoMetadata(merged, historyToLocal(remote))
     // Watch time orders progress, not metadata completeness. Fill an unknown
     // local duration before uploading so it cannot erase a known server value.
     // Equal timestamps also refresh metadata without replacing local progress.
