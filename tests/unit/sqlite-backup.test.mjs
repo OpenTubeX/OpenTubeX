@@ -11,7 +11,7 @@ import { zipSync, strToU8, unzipSync } from 'fflate'
 import { openLibrary } from '../../src/datastores/sqlite/migration.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { LibraryImports } from '../../src/datastores/sqlite/import.js'
-import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, validateUnifiedBackup, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
+import { mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, validateUnifiedBackup, readUnifiedBackup, createUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 import { parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 import { importTakeoutPlaylist } from '../../src/renderer/helpers/takeout-playlist-import.js'
 import Datastore from '@seald-io/nedb'
@@ -1085,3 +1085,69 @@ for (const section of ['settings', 'watchStats']) {
     assert.deepEqual(await engine.collections.playlists.findAsync({}), [])
   })
 }
+
+
+test('generated backups round trip every retained profile and playlist label shape', async t => {
+  const labels = [undefined, null, false, 42, ['retained'], { future: true }, new Date(123)]
+  const profiles = labels.map((name, index) => ({ _id: `label-${index}`, subscriptions: [], unknown: index, ...(name === undefined ? {} : { name }) }))
+  const playlists = labels.map((playlistName, index) => ({ _id: `label-${index}`, videos: [], protected: false, unknown: index, ...(playlistName === undefined ? {} : { playlistName }) }))
+  const source = await fixture(t, playlists, profiles)
+  const originals = await Promise.all(['profiles.db', 'playlists.db'].map(file => readFile(join(source.path, file))))
+  const job = source.exports.start({ sections: ['profiles', 'playlists'] }), chunks = []
+  for (;;) { const next = source.exports.next(job); chunks.push(next.data); if (next.done) break }
+  const bytes = Buffer.concat(chunks)
+  assert.deepEqual((await readUnifiedBackup(new Blob([bytes]))).data, { profiles, playlists })
+  const target = await fixture(t)
+  const portableProfiles = new Datastore({ inMemoryOnly: true }), portablePlaylists = new Datastore({ inMemoryOnly: true })
+  for (let repeat = 0; repeat < 2; repeat++) {
+    for (const record of profiles) await portableProfiles.updateAsync({ _id: record._id }, mergeBackupProfile(await portableProfiles.findOneAsync({ _id: record._id }), record), { upsert: true })
+    for (const record of playlists) await portablePlaylists.updateAsync({ _id: record._id }, mergeBackupPlaylist(await portablePlaylists.findOneAsync({ _id: record._id }), record), { upsert: true })
+    assert.deepEqual(await portableProfiles.findAsync({}).sort({ _id: 1 }), profiles)
+    assert.deepEqual(await portablePlaylists.findAsync({}).sort({ _id: 1 }), playlists)
+    await target.imports.apply({ ...stage(target.imports, bytes, 7), sections: ['profiles', 'playlists'] }, {})
+    assert.deepEqual(await target.engine.collections.profiles.findAsync({}).sort({ _id: 1 }), profiles)
+    assert.deepEqual(await target.engine.collections.playlists.findAsync({}).sort({ _id: 1 }), playlists)
+  }
+  assert.deepEqual(await Promise.all(['profiles.db', 'playlists.db'].map(file => readFile(join(source.path, file)))), originals)
+})
+
+for (const manifestLast of [false, true]) {
+  test(`staged backups validate decoded escaped records with manifest last: ${manifestLast}`, async t => {
+    const data = {
+      ...empty(),
+      profiles: [{ _id: 'p', name: 'Retained', subscriptions: [], $$backupObject: 'literal' }],
+      playlists: [{ _id: 'p', playlistName: 'Retained', videos: [], $$backupObject: 'literal' }],
+      history: [{ _id: 'h', timeWatched: 1, $$backupObject: 'literal' }],
+      searchHistory: [{ _id: 's', query: 'search', $$backupObject: 'literal' }],
+      watchStats: { records: [], adjustment: null, $$backupObject: 'literal' },
+    }
+    let bytes = Buffer.from(await createUnifiedBackup(data).arrayBuffer())
+    if (manifestLast) {
+      const entries = unzipSync(bytes), manifest = entries['manifest.json']
+      delete entries['manifest.json']
+      bytes = zipSync({ ...entries, 'manifest.json': manifest })
+    }
+    assert.deepEqual((await readUnifiedBackup(new Blob([bytes]))).data, data)
+    const { engine, imports } = await fixture(t)
+    const imported = stage(imports, bytes, 7), job = imports.jobs.get(imported.id)
+    for (const section of ['profiles', 'playlists', 'history', 'searchHistory']) {
+      assert.deepEqual(job.database.prepare('SELECT data FROM incoming WHERE section = ?').all(section).map(row => job.decode(row.data)), data[section])
+    }
+    assert.deepEqual(job.roots.get('watchStats'), data.watchStats)
+    // An unsupported selected NeDB field must still fail atomically; unaffected sections remain restorable.
+    await assert.rejects(imports.apply({ ...imported, sections: ['profiles'] }, {}), /cannot mix modifiers and normal fields/)
+    assert.equal(engine.collections.profiles.count(), 0)
+    await imports.apply({ ...imported, sections: ['settings'] }, {})
+  })
+}
+
+
+test('staged decoded record validation rejects missing identity before any live write', async t => {
+  const { engine, imports } = await fixture(t)
+  const retained = { _id: 'retained', subscriptions: [], unknown: new Date(1) }
+  await engine.collections.profiles.insertAsync(retained)
+  const bytes = Buffer.from(await createUnifiedBackup({ profiles: [{ name: 'Missing identity', $$backupObject: 'literal' }] }).arrayBuffer())
+  assert.throws(() => stage(imports, bytes, 7), /Invalid backup profiles/)
+  assert.equal(imports.jobs.size, 0)
+  assert.deepEqual(await engine.collections.profiles.findAsync({}), [retained])
+})

@@ -128,7 +128,7 @@ export class LibraryImports {
           let root = ''
           const reader = ['profiles', 'playlists', 'history', 'searchHistory'].includes(section)
             ? new ArrayReader(record => {
-                const check = emptyBackup(); check[section] = [record]; validateUnifiedBackup(check)
+                // The manifest may follow the records; validate after its codec is known.
                 insert.run(section, JSON.stringify(record))
               })
             : null
@@ -145,7 +145,6 @@ export class LibraryImports {
                 if (root.length > MAX_RECORD) throw new Error('Backup metadata is too large')
                 if (final) {
                   const value = JSON.parse(root)
-                  if (section !== 'manifest') { const check = emptyBackup(); check[section] = value; validateUnifiedBackup(check) }
                   job.roots.set(section, value)
                 }
               }
@@ -228,6 +227,16 @@ export class LibraryImports {
       job.decode = manifest.encoding ? decodeBackupValue : JSON.parse
       if (manifest.encoding) for (const section of ['settings', 'watchStats']) if (sections.includes(section)) job.roots.set(section, decodeBackupValue(JSON.stringify(job.roots.get(section))))
       this.verifyChecksums(job)
+      // Validate decoded values before making the stage available. Iterate the
+      // staging database so even a large archive needs only one record in memory.
+      for (const row of job.database.prepare('SELECT section, data FROM incoming').iterate()) {
+        const check = emptyBackup(); check[row.section] = [job.decode(row.data)]; validateUnifiedBackup(check)
+      }
+      for (const section of ['settings', 'watchStats']) {
+        if (sections.includes(section)) {
+          const check = emptyBackup(); check[section] = job.roots.get(section); validateUnifiedBackup(check)
+        }
+      }
       job.sections = sections
       job.ready = true
       return { id, sections, counts: Object.fromEntries(job.database.prepare('SELECT section, count(*) AS count FROM incoming GROUP BY section').all().map(row => [row.section, row.count])) }

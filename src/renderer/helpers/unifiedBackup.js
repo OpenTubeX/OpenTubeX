@@ -253,11 +253,11 @@ export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (Object.hasOwn(data, 'settings') && (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__'))) throw new Error('Invalid backup settings')
   const sections = {
-    // Profiles can retain opaque or missing subscription fields after migration.
-    profiles: record => object(record) && typeof record._id === 'string' && (typeof record.name === 'string' || record.name === null),
+    // Migration retains names and membership fields, including missing or opaque values.
+    profiles: record => object(record) && typeof record._id === 'string',
     // Migration retains opaque members, scalar videos fields and missing
     // videos fields. Their generated backups must remain restorable unchanged.
-    playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string',
+    playlists: record => object(record) && typeof record._id === 'string',
     // Migration retains legacy timestamp values. Restoring a generated backup
     // must preserve those values, progress and non-string video identities.
     history: record => object(record) && (typeof record.videoId === 'string' || typeof record._id === 'string') && (typeof record.timeWatched !== 'number' || Number.isFinite(record.timeWatched)) && (typeof record.watchProgress !== 'number' || Number.isFinite(record.watchProgress)),

@@ -2833,3 +2833,24 @@ for (const direction of [-1, 1]) {
     assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, [b, ...opaque, a])
   })
 }
+
+
+for (const failure of ['metadata', 'history']) {
+  test(`worker transaction rolls back single-member removal when ${failure} fails`, async t => {
+    const engine = memory(t)
+    const playlist = { _id: 'atomic', lastUpdatedAt: 1, videos: [{ videoId: 'video', playlistItemId: 'member', unknown: new Date(1) }] }
+    const history = { _id: 'h', videoId: 'video', timeWatched: 2, lastViewedPlaylistId: 'atomic', lastViewedPlaylistType: 'user', unknown: new Date(2) }
+    await engine.collections.playlists.insertAsync(playlist)
+    await engine.collections.history.insertAsync(history)
+    const memberId = engine.playlistPage({ id: 'atomic' }).records[0]._libraryMemberId
+    const revision = engine.revision('playlists')
+    if (failure === 'metadata') t.mock.method(engine.collections.playlists, 'updateAsync', async () => { throw new Error('injected write failure') })
+    else t.mock.method(engine, 'clearRemovedPlaylistContext', () => { throw new Error('injected write failure') })
+    // libraryWorker dispatches every operation through this transaction boundary.
+    await assert.rejects(engine.transaction(() => removePlaylistMember(engine, { id: 'atomic', memberId })), /injected write failure/)
+    assert.deepEqual(await engine.playlistSnapshot({ id: 'atomic' }), playlist)
+    assert.deepEqual(await engine.collections.history.findAsync({}), [history])
+    assert.equal(engine.playlistPage({ id: 'atomic' }).records[0]._libraryMemberId, memberId)
+    assert.equal(engine.revision('playlists'), revision)
+  })
+}

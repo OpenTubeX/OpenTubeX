@@ -76,7 +76,7 @@ test('rejects an incomplete archive before restoring data', async () => {
 })
 
 test('rejects malformed records before restoring data', async () => {
-  const malformed = { ...data, playlists: [{ _id: 'broken', videos: [] }] }
+  const malformed = { ...data, playlists: [{ _id: 42, videos: [] }] }
   await assert.rejects(readUnifiedBackup(createUnifiedBackup(malformed)), /Invalid backup playlists/)
   await assert.rejects(readUnifiedBackup(createUnifiedBackup({
     ...data,
