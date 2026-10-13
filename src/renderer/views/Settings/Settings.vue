@@ -118,6 +118,7 @@
             </span>
           </template>
           <span
+            v-show="unlocked"
             :id="subpageBreadcrumbTargetId"
             class="settingsBreadcrumbAction"
           />
@@ -225,9 +226,10 @@
           <Downloads />
         </div>
       </template>
-      <template v-else-if="unlocked">
+      <template v-else-if="hasUnlockedSettings">
         <template v-if="isProfileManagerOpen">
           <div
+            v-show="unlocked"
             ref="profileManagerScrollRef"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
@@ -238,6 +240,7 @@
         </template>
         <template v-else-if="isKeyboardShortcutPromptOpen">
           <div
+            v-show="unlocked"
             class="settingsSubpageScroll settingsKeyboardShortcutPage"
           >
             <FtKeyboardShortcutPrompt embedded />
@@ -245,7 +248,7 @@
         </template>
         <template v-else>
           <FtSettingsMenu
-            v-show="!subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
+            v-show="unlocked && !subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
             ref="menuRef"
             v-overlay-scrollbars
             :class="[
@@ -259,7 +262,7 @@
             @navigate-to-section="navigateToSection"
           />
           <div
-            v-show="!subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
+            v-show="unlocked && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
             class="settingsContentPane"
           >
             <div
@@ -330,7 +333,7 @@
             </div>
           </div>
           <div
-            v-show="subpageTitle"
+            v-show="unlocked && subpageTitle"
             :id="subpageTargetId"
             ref="settingsSubpageContentRef"
             v-overlay-scrollbars
@@ -340,7 +343,7 @@
         </template>
       </template>
       <div
-        v-else
+        v-if="!unlocked && !isStandaloneViewOpen"
         v-overlay-scrollbars
         class="settingsPassword"
       >
@@ -520,8 +523,6 @@ const subpageTitle = ref('')
 const subpageIcon = ref(null)
 const subpageFlush = ref(false)
 let closeSubpage = null
-let subpagePersistsOnDeactivate = false
-let closeSubpageOnActivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -745,17 +746,22 @@ const showBackButton = computed(() => {
 })
 
 const unlocked = ref(store.getters.getSettingsPassword === '')
+// Mount pages after the first unlock, then hide them while settings is locked.
+const hasUnlockedSettings = ref(unlocked.value)
+
+watch(unlocked, value => {
+  if (value) hasUnlockedSettings.value = true
+})
 
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
   contentHeaderTargetId,
-  open(title, close, persistOnDeactivate = false, icon = null, flush = false) {
+  open(title, close, icon = null, flush = false) {
     subpageTitle.value = title
     subpageIcon.value = icon
     subpageFlush.value = flush
     closeSubpage = close
-    subpagePersistsOnDeactivate = persistOnDeactivate
   },
   close(close) {
     if (closeSubpage === close) {
@@ -763,7 +769,6 @@ provide(settingsSubpageKey, {
       subpageIcon.value = null
       subpageFlush.value = false
       closeSubpage = null
-      subpagePersistsOnDeactivate = false
     }
   }
 })
@@ -773,27 +778,14 @@ onMounted(() => {
   systemColorScheme.addEventListener('change', updateSystemColorScheme)
 })
 onActivated(() => {
-  if (closeSubpageOnActivate) {
-    closeSubpageOnActivate = false
-    const deferredCloseSubpage = closeSubpage
-    deferredCloseSubpage?.()
-    if (closeSubpage === deferredCloseSubpage) {
-      subpageTitle.value = ''
-      subpageIcon.value = null
-      subpageFlush.value = false
-      closeSubpage = null
-      subpagePersistsOnDeactivate = false
-    }
-  }
   handleMounted()
-  nextTick(restorePreservedScrollPositions)
+  nextTick(() => {
+    if (unlocked.value) restorePreservedScrollPositions()
+  })
 })
 onDeactivated(() => {
   if (!settingsWindowMorphing.value) {
     preserveScrollPositions()
-    if (!subpagePersistsOnDeactivate) {
-      closeSubpageOnActivate = true
-    }
   }
   stopObserving()
   stopDragging()
@@ -1031,7 +1023,10 @@ function getSettingsContentEnd(content) {
 
 function handleUnlock() {
   unlocked.value = true
-  nextTick(setInitialSection)
+  nextTick(() => {
+    setInitialSection()
+    restorePreservedScrollPositions()
+  })
 }
 
 function setInitialSection() {

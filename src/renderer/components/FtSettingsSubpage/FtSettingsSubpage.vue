@@ -40,10 +40,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  persistOnDeactivate: {
-    type: Boolean,
-    default: false
-  },
   flush: {
     type: Boolean,
     default: false
@@ -58,10 +54,10 @@ function close() {
 }
 
 watch(
-  () => [props.open, props.title, props.icon, props.persistOnDeactivate, props.flush],
-  ([open, title, icon, persist, flush]) => {
+  () => [props.open, props.title, props.icon, props.flush],
+  ([open, title, icon, flush]) => {
     if (open) {
-      settingsWindow.open(title, close, persist, icon, flush)
+      settingsWindow.open(title, close, icon, flush)
     } else {
       settingsWindow.close(close)
     }

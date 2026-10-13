@@ -3,7 +3,6 @@
     :open="open"
     :title="t('Settings.Theme Settings.Custom Theme.Custom Theme Creator')"
     :icon="['fas', 'palette']"
-    persist-on-deactivate
     flush
     @close="closeEditor"
   >
