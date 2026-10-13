@@ -1874,11 +1874,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Палитра команд
   Open: Открыть палитру команд
-  Search Label: Поиск команд
+  Search Label: "Поиск команд, настроек и локальных видео"
   Search Placeholder: Поиск команд, настроек и локальных видео…
-  Results: Команды
-  No Results: Подходящих команд нет
-  Result Count: Найдена 1 команда | Найдено {count} команды | Найдено {count} команд
+  Results: "Результаты"
+  No Results: "Подходящих результатов нет"
+  Result Count: "Результаты: 1 | Результаты: {count} | Результаты: {count}"
   Move: Перемещение
   Run: Выполнить
   Keys:

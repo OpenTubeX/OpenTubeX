@@ -1915,11 +1915,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Opdrachtpalet
   Open: Opdrachtpalet openen
-  Search Label: Opdrachten zoeken
+  Search Label: "Zoek opdrachten, instellingen en lokale video’s"
   Search Placeholder: Zoek opdrachten, instellingen en lokale video’s…
-  Results: Opdrachten
-  No Results: Geen overeenkomende opdrachten
-  Result Count: 1 opdracht gevonden | {count} opdrachten gevonden
+  Results: "Resultaten"
+  No Results: "Geen overeenkomende resultaten"
+  Result Count: "Resultaten: 1 | Resultaten: {count}"
   Move: Verplaatsen
   Run: Uitvoeren
   Keys:

@@ -1853,11 +1853,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta příkazů
   Open: Otevřít paletu příkazů
-  Search Label: Hledat příkazy
+  Search Label: "Hledat příkazy, nastavení a místní videa"
   Search Placeholder: Hledat příkazy, nastavení a místní videa…
-  Results: Příkazy
-  No Results: Žádné odpovídající příkazy
-  Result Count: Nalezen 1 příkaz | Nalezeny {count} příkazy | Nalezeno {count} příkazů
+  Results: "Výsledky"
+  No Results: "Žádné odpovídající výsledky"
+  Result Count: "Výsledky: 1 | Výsledky: {count} | Výsledky: {count}"
   Move: Přesunout
   Run: Spustit
   Keys:

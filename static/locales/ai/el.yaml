@@ -1882,11 +1882,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Παλέτα εντολών
   Open: Άνοιγμα παλέτας εντολών
-  Search Label: Αναζήτηση εντολών
+  Search Label: "Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο"
   Search Placeholder: Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο…
-  Results: Εντολές
-  No Results: Δεν βρέθηκαν αντίστοιχες εντολές
-  Result Count: Βρέθηκε 1 εντολή | Βρέθηκαν {count} εντολές
+  Results: "Αποτελέσματα"
+  No Results: "Δεν βρέθηκαν αντίστοιχα αποτελέσματα"
+  Result Count: "Αποτελέσματα: 1 | Αποτελέσματα: {count}"
   Move: Μετακίνηση
   Run: Εκτέλεση
   Keys:

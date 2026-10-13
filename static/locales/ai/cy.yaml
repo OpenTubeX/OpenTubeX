@@ -1882,11 +1882,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Palet gorchmynion
   Open: Agor y palet gorchmynion
-  Search Label: Chwilio gorchmynion
+  Search Label: "Chwilio gorchmynion, gosodiadau a fideos lleol"
   Search Placeholder: Chwilio gorchmynion, gosodiadau a fideos lleol…
-  Results: Gorchmynion
-  No Results: Dim gorchmynion cyfatebol
-  Result Count: 'Wedi canfod {count} o orchmynion | Wedi canfod 1 gorchymyn | Wedi canfod {count} orchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} gorchymyn | Wedi canfod {count} o orchmynion'
+  Results: "Canlyniadau"
+  No Results: "Dim canlyniadau cyfatebol"
+  Result Count: "Canlyniadau: {count} | Canlyniadau: 1 | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count}"
   Move: Symud
   Run: Rhedeg
   Keys:

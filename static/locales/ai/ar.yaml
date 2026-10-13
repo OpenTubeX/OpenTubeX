@@ -1882,11 +1882,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: لوحة الأوامر
   Open: افتح لوحة الأوامر
-  Search Label: أوامر البحث
+  Search Label: "ابحث في الأوامر والإعدادات ومقاطع الفيديو المحلية"
   Search Placeholder: ابحث في الأوامر والإعدادات ومقاطع الفيديو المحلية…
-  Results: الأوامر
-  No Results: لا توجد أوامر مطابقة
-  Result Count: 'لم يُعثر على أي أمر ({count}) | عُثر على أمر واحد | عُثر على أمرين ({count}) | عُثر على {count} أوامر | عُثر على {count} أمرًا | عُثر على {count} أمر'
+  Results: "النتائج"
+  No Results: "لا توجد نتائج مطابقة"
+  Result Count: "النتائج: {count} | النتائج: 1 | النتائج: {count} | النتائج: {count} | النتائج: {count} | النتائج: {count}"
   Move: يتحرك
   Run: يجري
   Keys:

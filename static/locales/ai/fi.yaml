@@ -1904,11 +1904,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Komentopaletti
   Open: Avaa komentopaletti
-  Search Label: Hae komentoja
+  Search Label: "Hae komentoja, asetuksia ja paikallisia videoita"
   Search Placeholder: Hae komentoja, asetuksia ja paikallisia videoita…
-  Results: Komennot
-  No Results: Ei vastaavia komentoja
-  Result Count: 1 komento löytyi | {count} komentoa löytyi
+  Results: "Tulokset"
+  No Results: "Ei vastaavia tuloksia"
+  Result Count: "Tulokset: 1 | Tulokset: {count}"
   Move: Siirrä
   Run: Suorita
   Keys:

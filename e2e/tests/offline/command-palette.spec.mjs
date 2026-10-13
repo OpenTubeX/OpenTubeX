@@ -51,6 +51,8 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   const input = page.getByRole('combobox', { name: 'Search commands' })
   await expect(dialog).toBeVisible()
   await expect(input).toBeFocused()
+  await expect(input).toHaveAccessibleName('Search commands, settings, and local videos')
+  await expect(page.getByRole('listbox')).toHaveAccessibleName('Results')
   await expect(input).toHaveAttribute('placeholder', 'Search commands, settings, and local videos…')
   await expect(dialog.locator('.textInputLabelText')).toHaveCount(0)
   await expect(dialog.locator('.commandPaletteTitle')).toHaveCount(0)
@@ -378,7 +380,7 @@ test.describe('local video commands', () => {
     await expect(videos.getByRole('option')).toHaveCount(1)
     await input.fill('zzzzzz')
     await expect(page.getByRole('option')).toHaveCount(0)
-    await expect(page.getByText('No matching commands', { exact: true })).toBeVisible()
+    await expect(page.getByText('No matching results', { exact: true })).toBeVisible()
   })
 
   for (const [source, query] of [
@@ -419,6 +421,58 @@ test.describe('local video commands', () => {
       }
     })
   }
+
+  for (const enabled of [true, false]) {
+    test(`history results respect saved playlist context when the setting is ${enabled}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.evaluate(({ enabled, video, playlistId }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('upsertToHistoryCache', {
+          ...video, lastViewedPlaylistId: playlistId, lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'journey-item',
+        })
+        store.commit('setSaveVideoHistoryWithLastViewedPlaylist', enabled)
+      }, { enabled, video, playlistId: playlist._id })
+      await page.getByRole('combobox', { name: 'Search commands' }).fill('journey')
+      const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+      await videos.getByRole('option').filter({ has: page.locator('small', { hasText: 'History ·' }) }).click()
+      await expect(page).toHaveURL(url => {
+        const [path, query = ''] = url.hash.slice(1).split('?')
+        const params = new URLSearchParams(query)
+        return path === `/watch/${video.videoId}` &&
+          params.get('playlistId') === (enabled ? playlist._id : null) &&
+          params.get('playlistType') === (enabled ? 'user' : null) &&
+          params.get('playlistItemId') === (enabled ? 'journey-item' : null)
+      })
+    })
+  }
+
+  test('restarts an already open queued video and removes only the selected duplicate', async ({ app, page }) => {
+    await page.getByRole('combobox', { name: 'Search commands' }).press('Escape')
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const player = page.locator('video').first()
+    await expect.poll(() => player.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
+    await player.evaluate(element => { element.pause(); element.currentTime = 5 })
+    await expect.poll(() => player.evaluate(element => element.paused && element.currentTime >= 4)).toBe(true)
+    const firstId = await page.evaluate(video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('clearWatchQueue')
+      const route = store.getters.getPresentedTab.route
+      const queued = { ...video, title: 'Current queued journey', route: { path: route.path, query: { ...route.query } } }
+      store.commit('addVideoToWatchQueue', { video: queued })
+      store.commit('addVideoToWatchQueue', { video: queued })
+      return store.getters.getWatchQueue[0].queueItemId
+    }, video)
+    await page.keyboard.press('Control+k')
+    await page.getByRole('combobox', { name: 'Search commands' }).fill('current queued journey')
+    const options = page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')
+    await expect(options).toHaveCount(2)
+    await options.last().click()
+    await expect.poll(() => player.evaluate(element => !element.paused && element.currentTime < 3)).toBe(true)
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.queueItemId)
+    ))).toEqual([firstId])
+  })
 
   test('keeps local video scrolling valid when resizing at fractional scale', async ({ app, page }) => {
     await page.evaluate(video => {

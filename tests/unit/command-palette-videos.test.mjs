@@ -15,6 +15,7 @@ function registry(overrides = {}) {
     group: 'Local videos',
     sources: { history: 'History', playlists: 'Playlists', downloads: 'Downloads', queue: 'Queue' },
     navigate: route => navigations.push(route),
+    playQueuedVideo: route => navigations.push(route),
     removeQueuedVideo: id => removedItems.push(id),
     ...overrides,
   }))
@@ -52,6 +53,27 @@ test('keeps duplicate videos in each source and preserves the selected playlist 
   assert.deepEqual(navigations[1], { path: '/watch/local123456', query: { short: 'false' } })
 })
 
+test('history playback respects the saved-playlist setting and reads current context', () => {
+  const video = {
+    videoId: 'local123456', title: 'Journey', isShort: false,
+    lastViewedPlaylistId: 'playlist-1', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'first',
+  }
+  for (const enabled of [true, false]) {
+    const { commands, navigations } = registry({ history: [video], saveVideoHistoryWithLastViewedPlaylist: enabled })
+    commands[0].run()
+    assert.deepEqual(navigations[0], {
+      path: '/watch/local123456',
+      query: { short: 'false', ...(enabled ? {
+        playlistId: 'playlist-1', playlistType: 'user', playlistItemId: 'first',
+      } : {}) },
+    })
+    video.lastViewedPlaylistItemId = 'second'
+    commands[0].run()
+    assert.equal(navigations[1].query.playlistItemId, enabled ? 'second' : undefined)
+    video.lastViewedPlaylistItemId = 'first'
+  }
+})
+
 test('searches individual available download files with their titles and local playback route', () => {
   const { commands, navigations } = registry({
     downloads: {
@@ -60,7 +82,7 @@ test('searches individual available download files with their titles and local p
         { videoId: 'second', title: 'Second journey' },
         { videoId: 'deleted', title: 'Deleted journey', available: false },
       ] },
-      43: { id: 43, title: 'Audio journey', author: 'South Channel', status: 'completed', mode: 'audio', files: [{ videoId: 'audio' }] },
+      43: { id: 43, videoId: 'audio', title: 'Audio journey', author: 'South Channel', status: 'completed', mode: 'audio', files: [{ videoId: 'audio' }] },
       44: { id: 44, title: 'Metadata journey', mode: 'info', files: [{ videoId: 'info' }] },
       45: { id: 45, title: 'Pending journey', mode: 'video', files: [] },
     },
@@ -72,6 +94,28 @@ test('searches individual available download files with their titles and local p
   assert.deepEqual(navigations[0], {
     path: '/watch/second', query: { downloadId: '42', playlistId: 'saved-playlist', playlistType: 'user' },
   })
+})
+
+test('untitled playlist downloads use each file name or ID rather than the aggregate title', () => {
+  const { commands } = registry({ downloads: {
+    42: { id: 42, status: 'completed', mode: 'video', title: 'Whole playlist', files: [
+      { videoId: 'first', path: '/downloads/First journey.webm' },
+      { videoId: 'second', path: 'C:\\downloads\\Second journey.mp4' },
+      { videoId: 'third' },
+    ] },
+    43: { id: 43, status: 'completed', mode: 'audio', title: 'Audio journey', videoId: 'audio', files: [{ videoId: 'audio' }] },
+  } })
+  assert.deepEqual(commands.map(command => command.label), ['First journey', 'Second journey', 'third', 'Audio journey'])
+})
+
+test('normalized-empty streaming queries never read library metadata', async () => {
+  let reads = 0
+  function * commands() {
+    reads++
+    yield { label: 'Journey', group: 'Local videos', localVideo: true }
+  }
+  assert.deepEqual(await filterCommandPaletteCommandsAsync(commands(), '\u0301', 'en-US', () => false), [])
+  assert.equal(reads, 0)
 })
 
 test('removes only the selected queue entry and retains its saved route', () => {
@@ -179,7 +223,7 @@ test('download byte-count updates do not invalidate search, but file metadata ch
   const download = { id: 42, title: 'Journey', status: 'downloading', mode: 'video', files: [{ videoId: 'local123456', title: 'Mountain journey', author: 'North Channel', available: true }] }
   const progress = { ...download, status: 'downloading', progress: 90, files: download.files.map(file => ({ ...file })) }
   assert.equal(hasDownloadSearchChanged(download, progress), false)
-  for (const fields of [{ title: 'Renamed file' }, { author: 'Other channel' }, { available: false }, { videoId: 'other' }, { extension: 'webm' }]) {
+  for (const fields of [{ title: 'Renamed file' }, { author: 'Other channel' }, { available: false }, { videoId: 'other' }, { extension: 'webm' }, { path: '/renamed.webm' }]) {
     assert.equal(hasDownloadSearchChanged(download, { ...progress, files: [{ ...download.files[0], ...fields }] }), true)
   }
   assert.equal(hasDownloadSearchChanged(download, { ...progress, playlistKey: 'saved' }), true)

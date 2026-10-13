@@ -5,6 +5,11 @@ export function isPlayableDownloadFile(file) {
     (!process.env.IS_IOS || IOS_PLAYABLE_EXTENSIONS.has(file.extension?.toLowerCase()))
 }
 
+export function downloadFileTitle(download, file) {
+  return file.title || (download.videoId === file.videoId ? download.title : '') ||
+    file.path?.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId
+}
+
 export function downloadWatchRoute(download, videoId) {
   const query = { downloadId: String(download.id) }
   if (download.playlistId) {
@@ -22,8 +27,7 @@ export function downloadQueueVideos(download) {
     .filter(file => file.videoId && isPlayableDownloadFile(file))
     .map(file => ({
       videoId: file.videoId,
-      title: file.title || (download.videoId === file.videoId ? download.title : '') ||
-        file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') || file.videoId,
+      title: downloadFileTitle(download, file),
       author: file.author || download.author || '',
       authorId: file.authorId || download.authorId || '',
       thumbnail: download.thumbnail,

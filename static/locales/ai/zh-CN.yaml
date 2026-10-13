@@ -1853,11 +1853,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: 命令面板
   Open: 打开命令面板
-  Search Label: 搜索命令
+  Search Label: "搜索命令、设置和本地视频"
   Search Placeholder: 搜索命令、设置和本地视频…
-  Results: 命令
-  No Results: 没有匹配的命令
-  Result Count: '找到 {count} 个命令'
+  Results: "搜索结果"
+  No Results: "没有匹配的搜索结果"
+  Result Count: "搜索结果: {count}"
   Move: 移动
   Run: 运行
   Keys:

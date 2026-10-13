@@ -20,7 +20,11 @@ test('palette opening stays independent of library size on a throttled renderer'
           const end = performance.now() + 10
           while (performance.now() < end) { /* simulate costly metadata */ }
         }
-        return index === 19999 ? 'Unique destination' : `Practical mountain photography techniques episode ${index}`
+        return index === 19999
+          ? 'Unique destination'
+          : index === 19998
+            ? 'New palette demonstration'
+            : `Practical mountain photography techniques episode ${index}`
       },
     }))
     store.commit('setHistoryCacheSorted', history)
@@ -34,6 +38,10 @@ test('palette opening stays independent of library size on a throttled renderer'
     const input = page.getByRole('combobox', { name: 'Search commands' })
     await expect(input).toBeFocused()
     expect(await page.evaluate(() => window.__paletteMetadataReads)).toBe(0)
+    await input.fill('\u0301')
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false')
+    expect(await page.evaluate(() => window.__paletteMetadataReads)).toBe(0)
+    await expect(page.getByRole('group', { name: 'Local videos', exact: true })).toHaveCount(0)
     const responsive = await input.evaluate(async element => {
       const probe = new Promise(resolve => setTimeout(() => resolve(
         document.querySelector('.commandPalette [role="listbox"]').getAttribute('aria-busy') === 'true'
@@ -43,6 +51,20 @@ test('palette opening stays independent of library size on a throttled renderer'
       return probe
     })
     expect(responsive, 'pending input must run before the library scan finishes').toBe(true)
+    await input.fill('tab')
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'true')
+    await input.press('End')
+    const selected = await input.getAttribute('aria-activedescendant')
+    expect(selected).not.toBe(await page.getByRole('option').first().getAttribute('id'))
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false', { timeout: 60000 })
+    await expect(input).toHaveAttribute('aria-activedescendant', selected)
+    await input.fill('new')
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'true')
+    await input.press('End')
+    const selectedWithMatches = await input.getAttribute('aria-activedescendant')
+    await expect(page.getByRole('group', { name: 'Local videos', exact: true }).getByRole('option')).toHaveCount(2, { timeout: 60000 })
+    await expect(page.getByRole('listbox')).toHaveAttribute('aria-busy', 'false')
+    await expect(input).toHaveAttribute('aria-activedescendant', selectedWithMatches)
     // Commands must remain usable before the library finishes searching.
     await input.fill('new tab')
     const newTab = page.getByRole('option', { name: /^Create a new tab\b/ })

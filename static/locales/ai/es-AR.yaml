@@ -2419,11 +2419,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
-  Search Label: Buscar comandos
+  Search Label: "Buscar comandos, ajustes y videos locales"
   Search Placeholder: Buscar comandos, ajustes y videos locales…
-  Results: Comandos
-  No Results: No hay comandos coincidentes
-  Result Count: Se ha encontrado 1 comando | Se han encontrado {count} comandos | Se han encontrado {count} comandos
+  Results: "Resultados"
+  No Results: "No hay resultados coincidentes"
+  Result Count: "Resultados: 1 | Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Ejecutar
   Keys:

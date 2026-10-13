@@ -1878,11 +1878,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Kommandopalett
   Open: Åpne kommandopaletten
-  Search Label: Søk etter kommandoer
+  Search Label: "Søk etter kommandoer, innstillinger og lokale videoer"
   Search Placeholder: Søk etter kommandoer, innstillinger og lokale videoer…
-  Results: Kommandoer
-  No Results: Ingen samsvarende kommandoer
-  Result Count: Fant 1 kommando | Fant {count} kommandoer
+  Results: "Resultater"
+  No Results: "Ingen samsvarende resultater"
+  Result Count: "Resultater: 1 | Resultater: {count}"
   Move: Flytt
   Run: Kjør
   Keys:

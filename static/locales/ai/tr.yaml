@@ -1854,11 +1854,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Komut paleti
   Open: Komut paletini aç
-  Search Label: Komutlarda ara
+  Search Label: "Komutları, ayarları ve yerel videoları ara"
   Search Placeholder: Komutları, ayarları ve yerel videoları ara…
-  Results: Komutlar
-  No Results: Eşleşen komut yok
-  Result Count: 1 komut bulundu | {count} komut bulundu
+  Results: "Sonuçlar"
+  No Results: "Eşleşen sonuç yok"
+  Result Count: "Sonuçlar: 1 | Sonuçlar: {count}"
   Move: Taşı
   Run: Çalıştır
   Keys:

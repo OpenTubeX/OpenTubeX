@@ -1876,11 +1876,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Komando-paleta
   Open: Ireki komando-paleta
-  Search Label: Bilatu komandoak
+  Search Label: "Bilatu komandoak, ezarpenak eta tokiko bideoak"
   Search Placeholder: Bilatu komandoak, ezarpenak eta tokiko bideoak…
-  Results: Komandoak
-  No Results: Ez dago bat datorren komandorik
-  Result Count: Komando 1 aurkitu da | {count} komando aurkitu dira
+  Results: "Emaitzak"
+  No Results: "Ez dago bat datorren emaitzarik"
+  Result Count: "Emaitzak: 1 | Emaitzak: {count}"
   Move: Mugitu
   Run: Exekutatu
   Keys:

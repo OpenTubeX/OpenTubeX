@@ -1911,11 +1911,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: கட்டளைத் தட்டு
   Open: கட்டளைத் தட்டைத் திற
-  Search Label: கட்டளைகளைத் தேடு
+  Search Label: "கட்டளைகள், அமைப்புகள் மற்றும் உள்ளூர் காணொளிகளைத் தேடுங்கள்"
   Search Placeholder: கட்டளைகள், அமைப்புகள் மற்றும் உள்ளூர் காணொளிகளைத் தேடுங்கள்…
-  Results: கட்டளைகள்
-  No Results: பொருந்தும் கட்டளைகள் இல்லை
-  Result Count: 1 கட்டளை கிடைத்தது | {count} கட்டளைகள் கிடைத்தன
+  Results: "முடிவுகள்"
+  No Results: "பொருந்தும் முடிவுகள் இல்லை"
+  Result Count: "முடிவுகள்: 1 | முடிவுகள்: {count}"
   Move: நகர்த்து
   Run: இயக்கு
   Keys:

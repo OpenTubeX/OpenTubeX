@@ -3395,6 +3395,7 @@ const commandPaletteDownloads = computed(previous => {
 })
 const commandPaletteVideoSources = computed(() => ({
   history: store.getters.getHistoryCacheSorted,
+  saveVideoHistoryWithLastViewedPlaylist: store.getters.getSaveVideoHistoryWithLastViewedPlaylist,
   playlists: store.getters.getAllPlaylists,
   downloads: store.getters.getYtDlpDownloads,
   queue: store.getters.getWatchQueue,
@@ -3406,6 +3407,7 @@ const commandPaletteVideoSources = computed(() => ({
     queue: t('Video.Queue'),
   },
   navigate: navigateFromCommandPalette,
+  playQueuedVideo: playQueuedVideoFromCommandPalette,
   removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
 }))
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
@@ -3463,6 +3465,22 @@ function navigateFromCommandPalette(location) {
     return navigation.push(presentedTabId.value, location)
   }
   return router.push(location)
+}
+
+function playQueuedVideoFromCommandPalette(location) {
+  const currentRoute = usesLogicalTabs ? store.getters.getTabById(presentedTabId.value)?.route : route
+  const withoutTimestamp = fullPath => {
+    const url = new URL(fullPath, 'https://opentubex.invalid')
+    url.searchParams.delete('timestamp')
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+  if (currentRoute && withoutTimestamp(router.resolve(location).fullPath) === withoutTimestamp(currentRoute.fullPath)) {
+    const mediaTabId = usesLogicalTabs ? presentedTabId.value : 'web'
+    tabMediaCoordinator.dispatchAction('seekto', { seekTime: 0 }, mediaTabId)
+    tabMediaCoordinator.dispatchAction('play', {}, mediaTabId)
+    return
+  }
+  return navigateFromCommandPalette(location)
 }
 
 function goHistoryFromCommandPalette(offset) {

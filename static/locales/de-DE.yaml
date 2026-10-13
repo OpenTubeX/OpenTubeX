@@ -2990,11 +2990,11 @@ Stats:
 CommandPalette:
   Title: Befehlspalette
   Open: Befehlspalette öffnen
-  Search Label: Befehle durchsuchen
+  Search Label: "Befehle, Einstellungen und lokale Videos durchsuchen"
   Search Placeholder: Befehle, Einstellungen und lokale Videos durchsuchen…
-  Results: Befehle
-  No Results: Keine passenden Befehle
-  Result Count: 1 Befehl gefunden | {count} Befehle gefunden
+  Results: "Ergebnisse"
+  No Results: "Keine passenden Ergebnisse"
+  Result Count: "1 Ergebnis gefunden | {count} Ergebnisse gefunden"
   Move: Verschieben
   Run: Ausführen
   Keys:

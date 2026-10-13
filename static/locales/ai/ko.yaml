@@ -2311,11 +2311,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: 명령 팔레트
   Open: 명령 팔레트 열기
-  Search Label: 명령 검색
+  Search Label: "명령, 설정 및 로컬 동영상 검색"
   Search Placeholder: 명령, 설정 및 로컬 동영상 검색…
-  Results: 명령
-  No Results: 일치하는 명령 없음
-  Result Count: '명령 {count}개 찾음'
+  Results: "검색 결과"
+  No Results: "일치하는 검색 결과 없음"
+  Result Count: "검색 결과: {count}"
   Move: 이동
   Run: 실행
   Keys:

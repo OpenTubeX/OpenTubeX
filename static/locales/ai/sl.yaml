@@ -2457,11 +2457,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta ukazov
   Open: Odpri paleto ukazov
-  Search Label: Išči ukaze
+  Search Label: "Poišči ukaze, nastavitve in lokalne videoposnetke"
   Search Placeholder: Poišči ukaze, nastavitve in lokalne videoposnetke…
-  Results: Ukazi
-  No Results: Ni ujemajočih se ukazov
-  Result Count: Najden je 1 ukaz | Najdena sta {count} ukaza | Najdeni so {count} ukazi | Najdenih je {count} ukazov
+  Results: "Rezultati"
+  No Results: "Ni ujemajočih se rezultatov"
+  Result Count: "Rezultati: 1 | Rezultati: {count} | Rezultati: {count} | Rezultati: {count}"
   Move: Premakni
   Run: Zaženi
   Keys:

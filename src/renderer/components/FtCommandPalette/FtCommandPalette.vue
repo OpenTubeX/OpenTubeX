@@ -325,10 +325,16 @@ onBeforeUnmount(() => {
   })
 })
 
-watch(filteredCommands, async () => {
-  selectedIndex.value = 0
+watch([query, displayedCommands], async ([search, commands], [previousSearch, previousCommands]) => {
+  const previousCommand = previousCommands?.[selectedIndex.value]
+  // Video IDs are positional within a scan. Preserve ordinary commands while
+  // background video results arrive, and reset video selection for a new scan.
+  const preservedIndex = search === previousSearch && previousCommand && !previousCommand.localVideo
+    ? commands.findIndex(command => command.id === previousCommand.id)
+    : -1
+  selectedIndex.value = Math.max(0, preservedIndex)
   await nextTick()
-  if (resultsRef.value) restoreOverlayScrollTop(resultsRef.value, 0)
+  if (preservedIndex < 0 && resultsRef.value) restoreOverlayScrollTop(resultsRef.value, 0)
   clampResultsScroll()
 })
 

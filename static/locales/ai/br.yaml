@@ -1862,11 +1862,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: "Paled arc'hadoù"
   Open: "Digeriñ ar baled arc'hadoù"
-  Search Label: "Klask arc'hadoù"
-  Search Placeholder: Klask urzhioù, arventennoù ha videoioù lec’hel…
-  Results: "Arc'hadoù"
-  No Results: "N'eus arc'had ebet o klotañ"
-  Result Count: "1 arc'had kavet | {count} arc'had kavet | {count} arc'had kavet | {count} arc'had kavet | {count} arc'had kavet"
+  Search Label: "Klask arc'hadoù, arventennoù ha videoioù lec’hel"
+  Search Placeholder: "Klask arc'hadoù, arventennoù ha videoioù lec’hel…"
+  Results: "Disoc'hoù"
+  No Results: "N'eus disoc'h ebet o klotañ"
+  Result Count: "Disoc'hoù: 1 | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count}"
   Move: "Dilec'hiañ"
   Run: "Erounit"
   Keys:

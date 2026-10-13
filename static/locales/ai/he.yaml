@@ -1906,11 +1906,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: לוח הפקודות
   Open: פתיחת לוח הפקודות
-  Search Label: חיפוש פקודות
+  Search Label: "חיפוש פקודות, הגדרות וסרטונים מקומיים"
   Search Placeholder: חיפוש פקודות, הגדרות וסרטונים מקומיים…
-  Results: פקודות
-  No Results: לא נמצאו פקודות תואמות
-  Result Count: נמצאה פקודה אחת | נמצאו {count} פקודות | נמצאו {count} פקודות
+  Results: "תוצאות"
+  No Results: "לא נמצאו תוצאות תואמות"
+  Result Count: "תוצאות: 1 | תוצאות: {count} | תוצאות: {count}"
   Move: הזזה
   Run: הפעלה
   Keys:

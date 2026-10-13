@@ -1882,11 +1882,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta naredbi
   Open: Otvori paletu naredbi
-  Search Label: Pretraži naredbe
+  Search Label: "Pretraži naredbe, postavke i lokalne videozapise"
   Search Placeholder: Pretraži naredbe, postavke i lokalne videozapise…
-  Results: Naredbe
-  No Results: Nema odgovarajućih naredbi
-  Result Count: Pronađena je 1 naredba | Pronađene su {count} naredbe | Pronađeno je {count} naredbi
+  Results: "Rezultati"
+  No Results: "Nema odgovarajućih rezultata"
+  Result Count: "Rezultati: 1 | Rezultati: {count} | Rezultati: {count}"
   Move: Pomakni
   Run: Pokreni
   Keys:

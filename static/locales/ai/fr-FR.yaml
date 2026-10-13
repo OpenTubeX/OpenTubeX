@@ -1852,11 +1852,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Palette de commandes
   Open: Ouvrir la palette de commandes
-  Search Label: Rechercher des commandes
+  Search Label: "Rechercher des commandes, des paramètres et des vidéos locales"
   Search Placeholder: Rechercher des commandes, des paramètres et des vidéos locales…
-  Results: Commandes
-  No Results: Aucune commande correspondante
-  Result Count: 1 commande trouvée | {count} commandes trouvées | {count} commandes trouvées
+  Results: "Résultats"
+  No Results: "Aucun résultat correspondant"
+  Result Count: "Résultats: 1 | Résultats: {count} | Résultats: {count}"
   Move: Déplacer
   Run: Exécuter
   Keys:

@@ -1893,11 +1893,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta de comandos
   Open: Abrir paleta de comandos
-  Search Label: Pesquisar comandos
+  Search Label: "Pesquisar comandos, definições e vídeos locais"
   Search Placeholder: Pesquisar comandos, definições e vídeos locais…
-  Results: Comandos
-  No Results: Nenhum comando correspondente
-  Result Count: 1 comando encontrado | {count} comandos encontrados | {count} comandos encontrados
+  Results: "Resultados"
+  No Results: "Nenhum resultado correspondente"
+  Result Count: "Resultados: 1 | Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Executar
   Keys:

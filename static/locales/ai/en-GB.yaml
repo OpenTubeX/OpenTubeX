@@ -1844,11 +1844,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Command palette
   Open: Open command palette
-  Search Label: Search commands
+  Search Label: "Search commands, settings, and local videos"
   Search Placeholder: Search commands, settings, and local videos…
-  Results: Commands
-  No Results: No matching commands
-  Result Count: 1 command found | {count} commands found
+  Results: "Results"
+  No Results: "No matching results"
+  Result Count: "1 result found | {count} results found"
   Move: Move
   Run: Run
   Keys:

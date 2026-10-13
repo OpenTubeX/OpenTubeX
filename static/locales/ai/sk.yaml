@@ -1861,11 +1861,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Paleta príkazov
   Open: Otvoriť paletu príkazov
-  Search Label: Hľadať príkazy
+  Search Label: "Hľadať príkazy, nastavenia a miestne videá"
   Search Placeholder: Hľadať príkazy, nastavenia a miestne videá…
-  Results: Príkazy
-  No Results: Žiadne zodpovedajúce príkazy
-  Result Count: Našiel sa 1 príkaz | Našli sa {count} príkazy | Našlo sa {count} príkazov
+  Results: "Výsledky"
+  No Results: "Žiadne zodpovedajúce výsledky"
+  Result Count: "Výsledky: 1 | Výsledky: {count} | Výsledky: {count}"
   Move: Presunúť
   Run: Spustiť
   Keys:

@@ -2247,11 +2247,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Kommandopalett
   Open: Opne kommandopaletten
-  Search Label: Søk etter kommandoar
+  Search Label: "Søk etter kommandoar, innstillingar og lokale videoar"
   Search Placeholder: Søk etter kommandoar, innstillingar og lokale videoar…
-  Results: Kommandoar
-  No Results: Ingen kommandoar samsvarar
-  Result Count: 1 kommando funnen | {count} kommandoar funne
+  Results: "Resultat"
+  No Results: "Ingen resultat samsvarar"
+  Result Count: "Resultat: 1 | Resultat: {count}"
   Move: Flytt
   Run: Køyr
   Keys:

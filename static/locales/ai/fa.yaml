@@ -1945,11 +1945,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: پالت فرمان
   Open: بازکردن پالت فرمان
-  Search Label: جست‌وجوی فرمان‌ها
+  Search Label: "جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی"
   Search Placeholder: جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی…
-  Results: فرمان‌ها
-  No Results: فرمان منطبقی نیست
-  Result Count: 1 فرمان یافت شد | {count} فرمان یافت شد
+  Results: "نتایج"
+  No Results: "نتیجهٔ منطبقی نیست"
+  Result Count: "نتایج: 1 | نتایج: {count}"
   Move: جابه‌جایی
   Run: اجرا
   Keys:

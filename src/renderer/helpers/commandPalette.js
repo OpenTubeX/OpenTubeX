@@ -71,7 +71,7 @@ export function filterCommandPaletteCommandsAsync(commands, query, locale, isCan
 
 function * filterCommandSteps(commands, query, locale) {
   const normalizedQuery = normalizeCommandText(query, locale)
-  if (normalizedQuery === '') return Array.isArray(commands) ? commands : Array.from(commands)
+  if (normalizedQuery === '') return Array.isArray(commands) ? commands : []
 
   // Source, channel and group text repeat across large libraries. Bound these
   // per-search caches so unique titles cannot retain the whole collection.

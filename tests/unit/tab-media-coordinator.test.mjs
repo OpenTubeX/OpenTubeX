@@ -56,6 +56,30 @@ function enableCapacitorMode(t) {
   })
 }
 
+test('explicit tab actions restart the presented player without controlling a playing background tab', t => {
+  const actions = []
+  t.after(() => {
+    tabMediaCoordinator.unregister('current-video')
+    tabMediaCoordinator.unregister('background-video')
+    tabMediaCoordinator.setPresented(null)
+  })
+  tabMediaCoordinator.setPresented('current-video')
+  tabMediaCoordinator.setActionHandlers('current-video', 'player', {
+    seekto: details => actions.push(['current', details.seekTime]),
+    play: () => actions.push(['current', 'play']),
+  })
+  tabMediaCoordinator.setActionHandlers('background-video', 'player', {
+    seekto: details => actions.push(['background', details.seekTime]),
+    play: () => actions.push(['background', 'play']),
+  })
+  tabMediaCoordinator.setPlaybackState('background-video', 'playing')
+  tabMediaCoordinator.dispatchAction('seekto', { seekTime: 0 }, 'current-video')
+  tabMediaCoordinator.dispatchAction('play', {}, 'current-video')
+  assert.deepEqual(actions, [['current', 0], ['current', 'play']])
+  tabMediaCoordinator.dispatchAction('play')
+  assert.deepEqual(actions.at(-1), ['background', 'play'])
+})
+
 test('Android keeps the playing WebView tab as media owner while browsing another tab', t => {
   enableCapacitorMode(t)
   const actions = []

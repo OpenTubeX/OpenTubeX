@@ -1941,11 +1941,11 @@ KeyboardShortcutPrompt:
 CommandPalette:
   Title: Kommandopalet
   Open: Åbn kommandopalet
-  Search Label: Søg i kommandoer
+  Search Label: "Søg efter kommandoer, indstillinger og lokale videoer"
   Search Placeholder: Søg efter kommandoer, indstillinger og lokale videoer…
-  Results: Kommandoer
-  No Results: Ingen matchende kommandoer
-  Result Count: 1 kommando fundet | {count} kommandoer fundet
+  Results: "Resultater"
+  No Results: "Ingen matchende resultater"
+  Result Count: "Resultater: 1 | Resultater: {count}"
   Move: Flyt
   Run: Kør
   Keys:

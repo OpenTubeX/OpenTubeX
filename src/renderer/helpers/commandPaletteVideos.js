@@ -1,4 +1,4 @@
-import { isPlayableDownloadFile } from './downloadPlayback.js'
+import { downloadFileTitle, isPlayableDownloadFile } from './downloadPlayback.js'
 
 /**
  * Builds searchable video actions from metadata already held in the local
@@ -8,7 +8,7 @@ import { isPlayableDownloadFile } from './downloadPlayback.js'
  * Yields actions one at a time so searching never builds the full registry.
  */
 export function * iterateLocalVideoCommands(context) {
-  const { history, playlists, downloads, queue, group, sources, navigate, removeQueuedVideo } = context
+  const { history, playlists, downloads, queue, group, sources, navigate, playQueuedVideo, removeQueuedVideo } = context
   let index = 0
   function entry(video, source, icon, run) {
     if (!video?.videoId) return null
@@ -27,7 +27,15 @@ export function * iterateLocalVideoCommands(context) {
   }
 
   for (const video of history) {
-    const command = entry(video, sources.history, ['fas', 'history'], () => navigate(videoRoute(video)))
+    const command = entry(video, sources.history, ['fas', 'history'], () => navigate(videoRoute(video,
+      context.saveVideoHistoryWithLastViewedPlaylist && video.lastViewedPlaylistId
+        ? {
+            playlistId: video.lastViewedPlaylistId,
+            playlistType: video.lastViewedPlaylistType,
+            playlistItemId: video.lastViewedPlaylistItemId,
+          }
+        : {}
+    )))
     if (command) yield command
   }
   for (const playlist of playlists) {
@@ -52,7 +60,7 @@ export function * iterateLocalVideoCommands(context) {
     }
     for (const file of download.files ?? []) {
       if (!isPlayableDownloadFile(file)) continue
-      const command = entry({ ...file, title: file.title || download.title, author: file.author || download.author },
+      const command = entry({ ...file, title: downloadFileTitle(download, file), author: file.author || download.author },
         sources.downloads, ['fas', 'download'], () => navigate(videoRoute(file, query)))
       if (command) yield command
     }
@@ -60,7 +68,7 @@ export function * iterateLocalVideoCommands(context) {
   for (const video of queue) {
     const command = entry(video, sources.queue, ['fas', 'list'], () => {
       removeQueuedVideo(video.queueItemId)
-      return navigate(video.route ?? videoRoute(video))
+      return playQueuedVideo(video.route ?? videoRoute(video))
     })
     if (command) yield command
   }
@@ -85,11 +93,11 @@ export function isLocalVideoMutation(type) {
 /** Ignore download progress updates that leave locally searchable files unchanged. */
 export function hasDownloadSearchChanged(previous, next) {
   if (!previous) return true
-  if (['id', 'title', 'author', 'status', 'mode', 'playlistId', 'playlistKey'].some(key => previous[key] !== next[key])) return true
+  if (['id', 'videoId', 'title', 'author', 'status', 'mode', 'playlistId', 'playlistKey'].some(key => previous[key] !== next[key])) return true
   const previousFiles = previous.files ?? []
   const nextFiles = next.files ?? []
   return previousFiles.length !== nextFiles.length || previousFiles.some((file, index) => (
-    ['videoId', 'title', 'author', 'isShort', 'available', 'extension'].some(key => file[key] !== nextFiles[index][key])
+    ['videoId', 'title', 'author', 'isShort', 'available', 'extension', 'path'].some(key => file[key] !== nextFiles[index][key])
   ))
 }
 
