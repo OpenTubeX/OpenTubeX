@@ -391,6 +391,12 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(2)
 
+    await expect.poll(async () => {
+      const contents = await readPersistedDatastore(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      return records.some(record => record._id === 'android tutorial' && !record.$$deleted)
+    }).toBe(true)
+
     const firstEntry = suggestions(page).first()
     await firstEntry.hover()
     await firstEntry.locator('.removeButton').click()
