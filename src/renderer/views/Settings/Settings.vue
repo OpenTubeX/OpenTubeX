@@ -835,8 +835,12 @@ watch(activeSection, (section) => {
   nextTick(observeActiveSettingsSection)
 })
 let handledSectionRequest = null
-watch([() => store.getters.getSettingsWindowSectionRequest, canNavigateSettings], async ([request, canNavigate]) => {
-  if (!canNavigate || !request || request === handledSectionRequest || props.searchTarget) return
+watch([
+  () => store.getters.getSettingsWindowSectionRequest,
+  canNavigateSettings,
+  () => props.searchTarget
+], async ([request, canNavigate, searchTarget]) => {
+  if (!canNavigate || !request || request === handledSectionRequest || searchTarget) return
   await nextTick()
   if (!canNavigateSettings.value || request !== store.getters.getSettingsWindowSectionRequest || request === handledSectionRequest || props.searchTarget) return
   handledSectionRequest = request

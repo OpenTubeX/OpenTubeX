@@ -1224,6 +1224,9 @@ function releaseMobileContextSheet() {
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
+watch(() => store.getters.getSettingsWindowSectionRequest, request => {
+  if (request) settingsSearchTarget.value = null
+}, { flush: 'sync' })
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,

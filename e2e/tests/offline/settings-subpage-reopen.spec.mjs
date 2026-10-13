@@ -51,6 +51,45 @@ for (const uiScale of [100, 125]) {
       await expect(page.locator('.settingsSearchTarget')).toContainText('Thumbnail Preference')
     })
 
+    for (const opener of ['header', 'toast']) {
+      test(`a direct section opener replaces a pending search target (${opener})`, async ({ page }) => {
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        const appearance = await goToSettingsSection(page, 'appearance')
+        await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+        const themeName = page.locator('.customThemeEditor .themeNameField input')
+        await themeName.fill('Unfinished theme')
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await page.keyboard.press('Control+k')
+        await page.getByRole('combobox', { name: 'Search commands' }).fill('ui scale')
+        await page.getByRole('option', { name: /UI Scale/ }).click()
+        await expect(passwordInput).toBeFocused()
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        if (opener === 'header') {
+          await page.evaluate(() => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setSyncServerStatus', 'syncing')
+          })
+          await page.locator('.topNav .syncIndicator').click()
+        } else {
+          await page.evaluate(() => {
+            window.ftElectron.showToastOnAllTabs('Sync needs attention', 30000, ['fas', 'sync'], 'open-sync-settings')
+          })
+          await page.locator('.toast', { hasText: 'Sync needs attention' }).getByRole('button', { name: /^Sync(?: Settings)?$/i }).click()
+        }
+        await expect(passwordInput).toBeFocused()
+        await expect(themeName).toHaveValue('Unfinished theme')
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.section[data-section="sync"]')).toBeVisible()
+        await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+      })
+    }
+
     test('keeps keyboard shortcut navigation unavailable while Settings is locked', async ({ page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
