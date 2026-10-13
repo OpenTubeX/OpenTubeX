@@ -34,24 +34,30 @@ for (const backendPreference of ['local', 'invidious']) {
       await expect.poll(async () => (await requests()).length).toBe(3)
       await input.blur()
       await expect.poll(async () => (await requests())[2].aborted).toBe(true)
-      await input.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await input.focus()
       await expect.poll(async () => (await requests()).length).toBe(4)
+      await input.blur()
+      await expect.poll(async () => (await requests())[3].aborted).toBe(true)
+      await input.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await expect.poll(async () => (await requests()).length).toBe(5)
       await input.press('Enter')
       await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
       await expect.poll(async () => (await requests()).every(request => request.aborted)).toBe(true)
       await page.waitForTimeout(300)
-      expect((await requests()).length).toBe(4)
+      expect((await requests()).length).toBe(5)
     })
 
     test('shows current suggestions and ignores a late response for an older query', async ({ page }) => {
       await page.evaluate(() => {
         window.__pendingSuggestions = new Map()
+        window.__suggestionQueries = []
         const originalFetch = window.fetch
         window.fetch = (input, init) => {
           const url = new URL(input instanceof Request ? input.url : input.toString())
           const local = url.hostname.startsWith('suggestqueries')
           if (!local && !url.pathname.includes('/search/suggestions')) return originalFetch(input, init)
           const query = url.searchParams.get('q')
+          window.__suggestionQueries.push(query)
           // Deliberately ignore cancellation to exercise the stale-response guard.
           return new Promise(resolve => window.__pendingSuggestions.set(query, suggestion => {
             window.__pendingSuggestions.delete(query)
@@ -72,6 +78,15 @@ for (const backendPreference of ['local', 'invidious']) {
       await expect(options).toHaveText(['new current suggestion'])
       await page.evaluate(() => window.__pendingSuggestions.get('old')('old stale suggestion'))
       await page.waitForTimeout(300)
+      await expect(options).toHaveText(['new current suggestion'])
+      // Same-query events and refocusing can reuse completed results.
+      await input.dispatchEvent('input')
+      await page.waitForTimeout(300)
+      expect(await page.evaluate(() => window.__suggestionQueries)).toEqual(['old', 'new'])
+      await input.blur()
+      await input.focus()
+      await page.waitForTimeout(300)
+      expect(await page.evaluate(() => window.__suggestionQueries)).toEqual(['old', 'new'])
       await expect(options).toHaveText(['new current suggestion'])
       await page.getByRole('button', { name: 'Use suggestion: new current suggestion', exact: true }).click()
       await expect(input).toHaveValue('new current suggestion')

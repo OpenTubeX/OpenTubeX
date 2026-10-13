@@ -394,6 +394,8 @@ const searchSuggestionsDataList = shallowRef([])
 const lastSuggestionQuery = ref('')
 /** @type {AbortController | null} */
 let suggestionController = null
+/** @type {string | null} */
+let completedSuggestionQuery = null
 let suggestionTimeout
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -1005,9 +1007,11 @@ function updateSearchInputText(text) {
  */
 function getSearchSuggestionsDebounce(query) {
   currentSearchText = query
-  if (query === lastSuggestionQuery.value && suggestionController != null) return
+  if (query === lastSuggestionQuery.value &&
+      (suggestionController != null || completedSuggestionQuery === query.trim())) return
 
   cancelSearchSuggestions()
+  completedSuggestionQuery = null
   lastSuggestionQuery.value = query
   if (!enableSearchSuggestions.value || query.trim() === '') {
     searchSuggestionsDataList.value = []
@@ -1026,6 +1030,7 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 
 watch([enableSearchSuggestions, backendPreference, backendFallback], () => {
   cancelSearchSuggestions()
+  completedSuggestionQuery = null
   searchSuggestionsDataList.value = []
 })
 
@@ -1048,7 +1053,10 @@ async function loadSearchSuggestions(query, controller) {
     } else {
       suggestions = await getLocalSearchSuggestions(query, signal)
     }
-    if (!signal.aborted) searchSuggestionsDataList.value = suggestions
+    if (!signal.aborted) {
+      searchSuggestionsDataList.value = suggestions
+      completedSuggestionQuery = query
+    }
   } catch (error) {
     if (!signal.aborted) console.error('Error getting search suggestions', error)
   } finally {
