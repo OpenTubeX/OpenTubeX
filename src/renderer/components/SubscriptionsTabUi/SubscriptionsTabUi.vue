@@ -330,12 +330,12 @@ async function increaseLimit() {
     try {
       await pagedFeed.value.more()
       dataLimit.value = pagedFeed.value.records.value.length
-      sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
+      sessionStorage.setItem(subscriptionLimitStorageKey, Math.max(Number(sessionStorage.getItem(subscriptionLimitStorageKey)) || 0, dataLimit.value).toFixed(0))
     } catch (error) { console.error(error) }
     return
   }
   dataLimit.value += props.initialDataLimit
-  sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
+  sessionStorage.setItem(subscriptionLimitStorageKey, Math.max(Number(sessionStorage.getItem(subscriptionLimitStorageKey)) || 0, dataLimit.value).toFixed(0))
 }
 
 /**

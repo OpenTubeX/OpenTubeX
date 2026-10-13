@@ -91,8 +91,12 @@ export async function startAutomaticDownloadsForChannel(channel, videos, source,
   const rule = normalizeAutomaticDownloadRule(rawRule)
   if (process.env.IS_ELECTRON) {
     const current = []
-    for (let offset = 0; offset < videos.length; offset += 250) current.push(...await DBLibraryHandlers.query('subscriptionEntries', { channelId: channel.id, field: source === 'live' ? 'liveStreams' : source, ids: videos.slice(offset, offset + 250).map(video => video.videoId) }))
-    videos = current
+    try {
+      for (let offset = 0; offset < videos.length; offset += 250) current.push(...await DBLibraryHandlers.query('subscriptionEntries', { channelId: channel.id, field: source === 'live' ? 'liveStreams' : source, ids: videos.slice(offset, offset + 250).map(video => video.videoId) }))
+    } catch (error) { console.error(error) }
+    const savedById = new Map(current.map(video => [video.videoId, video]))
+    videos = videos.map(video => savedById.get(video.videoId) ?? video)
+    if (source === 'shorts') videos = videos.filter(video => Number.isFinite(video.published))
   }
   const customTemplates = parseCustomTemplates()
   const templateOptions = getDownloadTemplateOptions(rule.template, customTemplates)

@@ -271,6 +271,7 @@ let selectionGeneration = 0
 if (process.env.IS_ELECTRON) {
   watch([toBeAddedToPlaylistVideoIdList, processedQuery, allPlaylists], async () => {
     const current = ++selectionGeneration
+    selection.value = { counts: [], matches: [] }
     try {
       const result = await DBLibraryHandlers.query('playlistSelection', { ids: toBeAddedToPlaylistVideoIdList.value, query: processedQuery.value })
       if (current === selectionGeneration) selection.value = result
@@ -424,6 +425,7 @@ let addInProgress = false
 async function addSelectedToPlaylists() {
   if (addInProgress) return
   const addedPlaylistIds = new Set()
+  const selectedIds = [...selectedPlaylistIdList.value]
 
   if (selectedPlaylistIdList.value.length === 0) {
     showToast({
@@ -439,9 +441,9 @@ async function addSelectedToPlaylists() {
   if (process.env.IS_ELECTRON) {
     addInProgress = true
     try {
-      const changed = await DBLibraryHandlers.query('addSelectedPlaylistVideos', { ids: selectedPlaylistIdList.value, videos: toBeAddedToPlaylistVideoList_, allowDuplicates: addingDuplicateVideosEnabled.value })
-      if (changed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
-      for (const id of selectedPlaylistIdList.value) addedPlaylistIds.add(id)
+      const { changedIds } = await DBLibraryHandlers.query('addSelectedPlaylistVideos', { ids: selectedIds, videos: toBeAddedToPlaylistVideoList_, allowDuplicates: addingDuplicateVideosEnabled.value })
+      if (changedIds.length) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      for (const id of changedIds) addedPlaylistIds.add(id)
     } catch (error) {
       console.error(error)
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })

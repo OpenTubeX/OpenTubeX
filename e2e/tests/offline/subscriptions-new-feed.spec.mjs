@@ -1764,7 +1764,7 @@ test.describe('large combined new feed', () => {
           await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
           await expect(page.getByText('New video 0', { exact: true })).toHaveCount(0)
           const cache = (await persistedSubscriptionCache(app)).find(record => record._id === CHANNEL_ID)
-          expect(['videos', 'shorts', 'liveStreams', 'communityPosts'].map(field => cache[field].map(item => item.isNewInSubscriptionFeed))).toEqual([
+          expect(['videos', 'shorts', 'liveStreams', 'communityPosts'].map(field => cache[field].map(item => item.isNewInSubscriptionFeed))).toStrictEqual([
             [true, false, true, ...Array(118).fill(false)],
             [true, ...Array(24).fill(view === 'tabbed')],
             [true, view === 'tabbed'],

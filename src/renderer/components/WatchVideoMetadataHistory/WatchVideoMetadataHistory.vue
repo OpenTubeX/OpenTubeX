@@ -43,6 +43,7 @@
         </ol>
         <FtButton
           v-if="isPaged && fields.title.cursor.value && !fields.title.failed.value"
+          :disabled="fields.title.busy.value"
           :label="$t('Theme Discovery.Load More')"
           :icon="['fas', 'arrow-down']"
           @click="load('title', true)"
@@ -93,6 +94,7 @@
         </ol>
         <FtButton
           v-if="isPaged && fields.thumbnail.cursor.value && !fields.thumbnail.failed.value"
+          :disabled="fields.thumbnail.busy.value"
           :label="$t('Theme Discovery.Load More')"
           :icon="['fas', 'arrow-down']"
           @click="load('thumbnail', true)"
@@ -140,6 +142,7 @@
         </ol>
         <FtButton
           v-if="isPaged && fields.description.cursor.value && !fields.description.failed.value"
+          :disabled="fields.description.busy.value"
           :label="$t('Theme Discovery.Load More')"
           :icon="['fas', 'arrow-down']"
           @click="load('description', true)"

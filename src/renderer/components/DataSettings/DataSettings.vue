@@ -1035,7 +1035,9 @@ async function importFreeTubeSubscriptions(profileRecords) {
 
     const profileObject = {}
     Object.keys(profileData).forEach((key) => {
-      if (!knownKeys.includes(key)) {
+      if (process.env.IS_ELECTRON) {
+        Object.defineProperty(profileObject, key, { value: profileData[key], enumerable: true, configurable: true, writable: true })
+      } else if (!knownKeys.includes(key)) {
         const message = t('Settings.Data Settings.Unknown data key')
         showToast({ message: `${message}: ${key}`, icon: ['fas', 'circle-exclamation'] })
       } else {
@@ -1105,8 +1107,8 @@ async function importFreeTubeSubscriptions(profileRecords) {
   if (process.env.IS_ELECTRON) {
     if (!importedProfiles.length) return
     await DBLibraryHandlers.query('importSubscriptionProfiles', { profiles: importedProfiles })
+    if (await store.dispatch('grabAllProfiles') !== true) throw new Error('Restored profiles could not be refreshed')
     store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
-    await store.dispatch('grabAllProfiles')
   } else {
     if (!shouldUpdatePrimaryProfile) return
     await saveProfile('updateProfile', updatedPrimaryProfile)

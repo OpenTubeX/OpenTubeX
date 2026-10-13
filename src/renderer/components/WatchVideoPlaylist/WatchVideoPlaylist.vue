@@ -1083,9 +1083,9 @@ function playNextVideo() {
     if (!canPlayNextVideo.value) { showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] }); return }
     const next = userWindow.value.next
     const reshuffle = shuffleEnabled.value && (userWindow.value.index < 0 || userWindow.value.index === userWindow.value.total - 1) && expectedAutoSkipItem === null
-    playUserPlaylistItem(next, reshuffle)
-    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
-    return
+    return playUserPlaylistItem(next, reshuffle).then(played => {
+      if (played) showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
+    })
   }
   if (isWaitingForNextVideo.value) return
   const videoIndex = videoIndexInPlaylistItems.value
@@ -1651,7 +1651,7 @@ async function loadUserPlaylistWindow(offset = null) {
     if (!requestIsCurrent()) return
     const previous = prevVideoBeforeDeletion.value ?? userWindow.value.previous
     prevVideoBeforeDeletion.value = null
-    if (result.index < 0 && userWindow.value.index >= 0 && previous) {
+    if (result.index < 0 && userWindow.value.index > 0 && previous) {
       try {
         const fallback = await DBLibraryHandlers.query('playlistWindow', { ...options, anchor: { memberId: previous._libraryMemberId } })
         if (!requestIsCurrent()) return

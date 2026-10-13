@@ -111,9 +111,9 @@ for (const [category, method, next] of [['videos', 'channelInvidiousVideos', 'la
         assert.deepEqual(filter(target.value), [records[1]], 'refresh must retain off-page filter state')
         assert.deepEqual(calls, [records.map(record => record.videoId), records.map(record => record.videoId)])
       } else {
-        assert.deepEqual(target.value, [])
+        assert.deepEqual(target.value, outcome === 'failure' ? records : [])
         assert.equal(loading[category], outcome === 'stale')
-        assert.deepEqual(errors, outcome === 'failure' ? ['saved state unavailable'] : [])
+        assert.deepEqual(errors, [])
       }
       assert.deepEqual(await engine.collections.history.findAsync({}).sort({ _id: 1 }), original.toSorted((a, b) => model.compareThings(a._id, b._id)))
     })

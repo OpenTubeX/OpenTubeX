@@ -823,16 +823,30 @@ function updateUserPlaylistSortOrder(value) {
   store.dispatch('updateUserPlaylistSortOrder', value)
 }
 
+const pendingDeletionStatistics = computed(() => {
+  let duration = 0
+  let missingDuration = 0
+  const ids = new Set(toBeDeletedPlaylistItemIds.value)
+  for (const video of playlistItems.value) {
+    if (!ids.has(process.env.IS_ELECTRON ? video._libraryMemberId : video.playlistItemId)) continue
+    const savedDuration = historyCacheById.value[video.videoId]?.lengthSeconds
+    const length = Number.isFinite(video.lengthSeconds) && video.lengthSeconds > 0 ? video.lengthSeconds : savedDuration
+    if (Number.isFinite(length) && length > 0) duration += length
+    else missingDuration++
+  }
+  return { duration, missingDuration }
+})
+
 /** @type {import('vue').ComputedRef<number>} */
 const totalPlaylistDuration = computed(() => {
-  if (isUserPlaylistRequested.value) return userStatistics.value.duration
+  if (isUserPlaylistRequested.value) return Math.max(0, userStatistics.value.duration - pendingDeletionStatistics.value.duration)
   return shownPlaylistItems.value.reduce((acc, video) => {
     return typeof video.lengthSeconds === 'number' ? acc + video.lengthSeconds : acc
   }, 0)
 })
 
 const isDurationApproximate = computed(() => {
-  if (isUserPlaylistRequested.value) return userStatistics.value.missingDuration > 0
+  if (isUserPlaylistRequested.value) return userStatistics.value.missingDuration - pendingDeletionStatistics.value.missingDuration > 0
   return shownPlaylistItems.value.some((video) => typeof video.lengthSeconds !== 'number')
 })
 

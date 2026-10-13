@@ -641,11 +641,7 @@ async function startDownload() {
   try {
     let videoIds = [...props.videoIds]
     if (props.userPlaylistId) {
-      const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id: props.userPlaylistId })
-      if (!playlist) throw new Error('The playlist no longer exists')
-      videoIds = (Array.isArray(playlist.videos) ? playlist.videos : [])
-        .filter(video => video !== null && typeof video === 'object' && !Array.isArray(video) && typeof video.videoId === 'string' && video.videoId.length > 0)
-        .map(video => video.videoId)
+      videoIds = await DBLibraryHandlers.query('playlistVideoIds', { id: props.userPlaylistId })
     }
     const result = await ytDlp.ytDlpDownload({
       ...normalizeOptions(options),

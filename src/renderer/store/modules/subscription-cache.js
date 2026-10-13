@@ -513,9 +513,9 @@ const mutations = {
   },
 
   updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
-    state.subscriptionVideosFeedVersion++
     const existingObject = state.videoCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
+    state.subscriptionVideosFeedVersion++
     const newObject = existingObject ?? { videos: null }
     if (state.libraryPaged && entries != null) newObject.count = entries.length
     if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
@@ -523,9 +523,9 @@ const mutations = {
     state.videoCache[channelId] = newObject
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
-    state.subscriptionVideosFeedVersion++
     const existingObject = state.shortsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
+    state.subscriptionVideosFeedVersion++
     const newObject = existingObject ?? { videos: null }
     if (state.libraryPaged && entries != null) newObject.count = entries.length
     if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
@@ -560,9 +560,9 @@ const mutations = {
     }
   },
   updateLiveCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
-    state.subscriptionVideosFeedVersion++
     const existingObject = state.liveCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
+    state.subscriptionVideosFeedVersion++
     const newObject = existingObject ?? { videos: null }
     if (state.libraryPaged && entries != null) newObject.count = entries.length
     if (entries != null) { newObject.videos = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
@@ -570,9 +570,9 @@ const mutations = {
     state.liveCache[channelId] = newObject
   },
   updatePostsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
-    state.subscriptionVideosFeedVersion++
     const existingObject = state.postsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
+    state.subscriptionVideosFeedVersion++
     const newObject = existingObject ?? { posts: null }
     if (state.libraryPaged && entries != null) newObject.count = entries.length
     if (entries != null) { newObject.posts = state.libraryPaged ? [] : preserveSubscriptionSeenEntries(entries, existingObject?.posts, 'postId') }

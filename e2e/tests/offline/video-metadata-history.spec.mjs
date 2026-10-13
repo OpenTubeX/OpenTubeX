@@ -68,7 +68,7 @@ test('failed metadata revision reads retain their section and offer a lossless R
 test.describe('metadata thumbnail read recovery', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, uiScale: 95 } } })
   for (const fallback of [true, false]) {
-    test(`failed metadata thumbnail reads ${fallback ? 'offer a lossless Retry with a fallback URL' : 'offer a lossless Retry without a fallback'}`, async ({ app, page }, testInfo) => {
+    test(`failed metadata thumbnail reads ${fallback ? 'display the fallback URL without losing the saved revision' : 'offer a lossless Retry without a fallback'}`, async ({ app, page }, testInfo) => {
       let revision = 0
       const server = createServer((request, response) => {
         response.writeHead(200, { 'content-type': 'image/png' })
@@ -103,11 +103,20 @@ test.describe('metadata thumbnail read recovery', () => {
         await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
         const frame = page.getByRole('dialog', { name: 'Metadata history' }).locator('.metadataThumbnail').first()
         const retry = frame.getByRole('button', { name: 'Retry', exact: true })
-        await expect(retry).toBeVisible()
-        await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveCount(0)
-        await page.getByRole('dialog', { name: 'Metadata history' }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-retry-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
+        if (fallback) {
+          await expect(retry).toHaveCount(0)
+          await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveAttribute('src', original.records[0].thumbnailUrl)
+        } else {
+          await expect(retry).toBeVisible()
+          await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveCount(0)
+        }
+        await page.getByRole('dialog', { name: 'Metadata history' }).screenshot({ path: testInfo.outputPath(`metadata-thumbnail-read-recovery-95-${fallback ? 'with-fallback' : 'without-fallback'}.png`) })
         await app.electronApp.evaluate(() => globalThis.restoreThumbnailRead())
-        await retry.click()
+        if (fallback) {
+          await page.keyboard.press('Escape')
+          await expect(page.getByRole('dialog', { name: 'Metadata history' })).toBeHidden()
+          await page.locator(`${activeTab} .infoArea`).getByRole('button', { name: 'Metadata history' }).click()
+        } else await retry.click()
         await expect(retry).toHaveCount(0)
         await expect(frame.locator('img:not([aria-hidden="true"])')).toHaveAttribute('src', expectedThumbnail)
         await frame.screenshot({ path: testInfo.outputPath(`metadata-thumbnail-${fallback ? 'fallback' : 'retry'}.png`) })

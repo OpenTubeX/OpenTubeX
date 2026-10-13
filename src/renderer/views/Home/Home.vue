@@ -699,7 +699,7 @@ const pagedNewContent = IS_ELECTRON
   ? Object.fromEntries(['videos', 'shorts', 'live', 'posts'].map(category => [category, useSubscriptionPage(
       () => category,
       () => true,
-      () => store.getters.getShowNewSubscriptionFeed,
+      () => store.getters.getShowNewSubscriptionFeed && visibleSections.value.some(section => section.id === 'newSinceLastVisit'),
       () => 100,
       () => 100,
       () => 'newest'

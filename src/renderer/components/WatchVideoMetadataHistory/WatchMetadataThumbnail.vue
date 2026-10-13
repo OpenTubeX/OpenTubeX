@@ -47,7 +47,8 @@ async function load() {
     if (current === generation) source.value = data || props.fallbackUrl
   } catch (error) {
     if (current !== generation) return
-    failed.value = true
+    source.value = props.fallbackUrl
+    failed.value = !source.value
     console.error(error)
   } finally {
     if (current === generation) busy.value = false

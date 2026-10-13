@@ -47,6 +47,7 @@ function matching(root, predicate) {
 }
 
 async function functions(file, names, bindings = {}) {
+  if (file === 'src/renderer/store/modules/playlists.js' && !names.includes('updateCachedPlaylistMembers')) names = [...names, 'updateCachedPlaylistMembers']
   if (file === 'src/renderer/components/PlaylistInfo/PlaylistInfo.vue' && !names.includes('playablePlaylistVideos')) names = [...names, 'playablePlaylistVideos']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
@@ -701,7 +702,7 @@ for (const result of ['rejection', 'deleted']) {
     const toasts = []
     const context = await functions('src/renderer/components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue', ['startDownload'], {
       props: { userPlaylistId: 'p', isPlaylist: true, videoIds: [] }, options: {}, isDirty: ref(false), selectedTemplate: ref(''), downloadId: ref(null), normalizeOptions: value => value,
-      DBLibraryHandlers: { query: async () => { if (fail) { if (result === 'deleted') return null; throw new Error('read failed') }; return { videos: [{ videoId: 'A' }, { videoId: 'B' }] } } },
+      DBLibraryHandlers: { query: async () => { if (fail) throw new Error(result === 'deleted' ? 'The playlist no longer exists' : 'read failed'); return ['A', 'B'] } },
       ytDlp: { ytDlpDownload: async request => { downloads++; assert.deepEqual(structuredClone(request.videoIds), ['A', 'B']); return { id: 'job' } } },
       t: key => key, showToast: toast => toasts.push(toast),
     })
@@ -1292,7 +1293,7 @@ for (const outcome of ['saved', 'rejected write', 'no change', 'rejected refresh
     const saving = context.addSelectedToPlaylists()
     assert.deepEqual(scheduled, [])
     if (outcome === 'rejected write') write.reject(new Error('transaction rolled back'))
-    else write.resolve(outcome === 'no change' ? 0 : 1)
+    else write.resolve({ changedIds: outcome === 'no change' ? [] : ['playlist'] })
     await saving
     assert.deepEqual(scheduled, ['saved', 'rejected refresh'].includes(outcome) ? ['playlists'] : [])
     assert.equal(context.addInProgress, false)
@@ -2406,7 +2407,7 @@ test('a paged playlist summary download reads all 20000 members before submittin
   let requested
   const context = await functions('src/renderer/components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue', ['startDownload'], {
     props: { userPlaylistId: playlist._id, videoIds: [], videoId: '', playlistId: '', playlistKey: playlist._id, isPlaylist: true, title: playlist.playlistName },
-    DBLibraryHandlers: { query: async (method, options) => { assert.equal(method, 'playlistSnapshot'); return structuredClone(await engine.playlistSnapshot(options)) } },
+    DBLibraryHandlers: { query: async (method, options) => { assert.equal(method, 'playlistVideoIds'); return structuredClone(operations.playlistVideoIds(engine, options)) } },
     ytDlp: { ytDlpDownload: async data => { requested = structuredClone(data); return { id: 'download' } } },
     normalizeOptions: () => ({}), options: {}, isDirty: ref(false), selectedTemplate: ref(''), downloadId: ref(null), showToast() {}, t: key => key,
   })
@@ -2901,4 +2902,196 @@ test('playlist repair IPC sends only cloneable arguments to the worker and inval
   updates = []
   assert.deepEqual(structuredClone(await request(event, { action: DBActions.PLAYLISTS.REPAIR_METADATA, data })), { updates, repaired: 0, failed: 0 })
   assert.equal(events.length, 1)
+})
+
+async function componentComputed(file, name, bindings) {
+  const { script, ast } = await source(file)
+  const declaration = matching(ast, node => node.type === 'VariableDeclarator' && node.id?.name === name)[0]
+  assert.ok(declaration, name)
+  return vm.runInNewContext(script.slice(declaration.init.start, declaration.init.end), { computed, ...bindings })
+}
+
+test('failed additional New categories suppress empty state without claiming new content', async () => {
+  const bindings = { isElectron: true, newShorts: vueRef([]), newLive: vueRef([]), newPosts: vueRef([]), pagedFeeds: { shorts: { failed: vueRef(true) }, live: { failed: vueRef(false) }, posts: { failed: vueRef(false) } } }
+  const content = await componentComputed('src/renderer/components/SubscriptionsNew.vue', 'hasAdditionalContent', bindings)
+  assert.equal(content.value, false)
+  const failure = await componentComputed('src/renderer/components/SubscriptionsNew.vue', 'hasAdditionalFailure', bindings)
+  assert.equal(failure.value, true)
+  bindings.newShorts.value = [{ videoId: 'short' }]
+  assert.equal(content.value, true)
+})
+
+test('metadata thumbnail read failure displays its available fallback and releases busy state', async () => {
+  const context = await functions('src/renderer/components/WatchVideoMetadataHistory/WatchMetadataThumbnail.vue', ['load'], { generation: 0, visible: true, source: ref(null), failed: ref(false), busy: ref(false), props: { revisionId: 'old', fallbackUrl: 'available.png' }, DBLibraryHandlers: { query: async () => { throw new Error('thumbnail read failed') } } })
+  await context.load()
+  assert.equal(context.source.value, 'available.png')
+  assert.equal(context.failed.value, false)
+  assert.equal(context.busy.value, false)
+})
+
+test('subscription load more preserves the shared maximum restored category extent', async () => {
+  let extent = '400'
+  const context = await functions('src/renderer/components/SubscriptionsTabUi/SubscriptionsTabUi.vue', ['increaseLimit'], { isPaged: true, pagedFeed: ref({ busy: ref(false), records: ref(Array(200)), more: async () => {} }), dataLimit: ref(100), subscriptionLimitStorageKey: 'new', sessionStorage: { getItem: () => extent, setItem: (_, value) => { extent = value } } })
+  await context.increaseLimit()
+  assert.equal(extent, '400')
+  assert.equal(context.dataLimit.value, 200)
+})
+
+test('Save snapshots selected playlist IDs and reports only actual committed additions', async () => {
+  const write = Promise.withResolvers(), selection = ref(['first', 'unchanged']), dispatched = [], toasts = []
+  let requested
+  const context = await functions('src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', ['addSelectedToPlaylists'], { addInProgress: false, selectedPlaylistIdList: selection, allPlaylists: ref([]), toBeAddedToPlaylistVideoList: ref([{ videoId: 'v' }]), addingDuplicateVideosEnabled: ref(false), DBLibraryHandlers: { query: (_, options) => { requested = options.ids; return write.promise } }, store: { dispatch: async (action, reason) => dispatched.push([action, reason]) }, t: (_, options) => options.playlistCount, showToast: toast => toasts.push(toast), hide() {}, getVideoThumbnailUrl: () => null, backendPreference: ref('local'), currentInvidiousInstanceUrl: ref(''), thumbnailPreference: ref('') })
+  const saving = context.addSelectedToPlaylists()
+  selection.value.push('changed-while-pending')
+  write.resolve({ changedIds: ['first'] })
+  await saving
+  assert.deepEqual(Array.from(requested), ['first', 'unchanged'])
+  assert.equal(toasts[0].message, 1)
+  assert.deepEqual(dispatched[0], ['scheduleSyncServer', 'playlists'])
+})
+
+test('rejected paged next-video navigation does not announce successful playback', async () => {
+  const toasts = []
+  const context = await functions('src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', ['playNextVideo'], { isPagedPlaylist: ref(true), canPlayNextVideo: ref(true), userWindow: ref({ next: { videoId: 'next' }, index: 0, total: 2 }), shuffleEnabled: ref(false), expectedAutoSkipItem: null, playUserPlaylistItem: async () => false, showToast: toast => toasts.push(toast), t: key => key })
+  await context.playNextVideo()
+  assert.deepEqual(toasts, [])
+})
+
+for (const field of ['Video', 'Shorts', 'Live', 'Posts']) {
+  test(`stale ${field} cache writes do not invalidate subscription feeds`, async () => {
+    const cache = field === 'Video' ? 'video' : field.toLowerCase()
+    const state = { subscriptionVideosFeedVersion: 7, [cache + 'Cache']: { channel: { timestamp: new Date(10), videos: [], posts: [] } } }
+    const name = `update${field}CacheByChannel`
+    const context = await functions('src/renderer/store/modules/subscription-cache.js', [name], { toDate: value => new Date(value) })
+    context[name](state, { channelId: 'channel', entries: [], timestamp: new Date(5) })
+    assert.equal(state.subscriptionVideosFeedVersion, 7)
+  })
+}
+
+test('playlist pending deletions subtract their known and missing durations until undo', async () => {
+  const bindings = { process: { env: { IS_ELECTRON: true } }, toBeDeletedPlaylistItemIds: vueRef(['a', 'b', 'c']), playlistItems: vueRef([{ _libraryMemberId: 'a', videoId: 'first', lengthSeconds: 30 }, { _libraryMemberId: 'b', videoId: 'second' }, { _libraryMemberId: 'c', videoId: 'third' }, { _libraryMemberId: 'kept', lengthSeconds: 100 }]), historyCacheById: vueRef({ second: { lengthSeconds: 20 } }) }
+  const contribution = await componentComputed('src/renderer/views/Playlist/Playlist.vue', 'pendingDeletionStatistics', bindings)
+  assert.deepEqual(structuredClone(contribution.value), { duration: 50, missingDuration: 1 })
+  const totals = { isUserPlaylistRequested: vueRef(true), userStatistics: vueRef({ duration: 150, missingDuration: 1 }), pendingDeletionStatistics: contribution }
+  const duration = await componentComputed('src/renderer/views/Playlist/Playlist.vue', 'totalPlaylistDuration', totals)
+  const approximate = await componentComputed('src/renderer/views/Playlist/Playlist.vue', 'isDurationApproximate', totals)
+  assert.equal(duration.value, 100)
+  assert.equal(approximate.value, false)
+  bindings.toBeDeletedPlaylistItemIds.value = []
+  assert.equal(duration.value, 150)
+  assert.equal(approximate.value, true)
+})
+
+test('channel hydration failure preserves fetched results and releases retained IDs', async () => {
+  const commits = [], target = ref([]), videos = [{ videoId: 'v' }]
+  const context = await functions('src/renderer/views/Channel/Channel.vue', ['setChannelVideoResults'], { store: { state: { history: { libraryPaged: true } }, commit: (...args) => commits.push(args), dispatch: async () => { throw new Error('history unavailable') } } })
+  assert.equal(await context.setChannelVideoResults(target, videos, () => true), true)
+  assert.equal(target.value, videos)
+  assert.deepEqual(commits.map(([action]) => action), ['retainVideoState', 'releaseVideoState'])
+})
+
+for (const cache of ['empty', 'failed', 'partial']) {
+  test(`automatic Shorts download retains dated fetched candidates after ${cache} cache reads`, async () => {
+    const downloads = [], videos = [{ videoId: 'dated', title: 'Fetched', published: 1 }, { videoId: 'undated' }]
+    const context = await functions('src/renderer/helpers/automaticDownloads.js', ['startAutomaticDownloadsForChannel'], { supportsYtDlp: true, store: { getters: { getEnableDownloads: true, getYtDlpDownloads: {}, getYtDlpAutomaticDownloadRules: '' } }, parseAutomaticDownloadRules: () => ({ channel: {} }), normalizeAutomaticDownloadRule: () => ({}), DBLibraryHandlers: { query: async () => { if (cache === 'failed') throw new Error('cache read failed'); return cache === 'partial' ? [{ ...videos[0], title: 'Saved' }] : [] } }, parseCustomTemplates: () => ({}), getDownloadTemplateOptions: () => ({}), matchesAutomaticDownloadRule: () => true, scheduledVideoIds: new Set(), ytDlp: { ytDlpDownload: async data => { downloads.push(data); return { id: 'd' } } }, getThumbnail: () => null })
+    await context.startAutomaticDownloadsForChannel({ id: 'channel' }, videos, 'shorts', key => key, null)
+    assert.deepEqual(downloads.map(video => video.videoId), ['dated'])
+    assert.equal(downloads[0].title, cache === 'partial' ? 'Saved' : 'Fetched')
+  })
+}
+
+async function componentWatcher(file, dependency, bindings) {
+  const { script, ast } = await source(file)
+  const call = matching(ast, node => node.type === 'CallExpression' && node.callee?.name === 'watch' && script.slice(node.arguments[0].start, node.arguments[0].end).includes(dependency))[0]
+  let callback
+  vm.runInNewContext(script.slice(call.start, call.end), { console: { error() {} }, watch: (_, cb) => { callback = cb }, ...bindings })
+  return callback
+}
+
+test('Save presence resets immediately and ignores an older completed selection read', async () => {
+  const old = Promise.withResolvers(), current = Promise.withResolvers(), selection = ref({ counts: [{ id: 'stale' }], matches: ['stale'] })
+  let calls = 0
+  const read = await componentWatcher('src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', 'toBeAddedToPlaylistVideoIdList', { selectionGeneration: 0, selection, toBeAddedToPlaylistVideoIdList: vueRef(['v']), processedQuery: vueRef(''), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
+  const a = read()
+  assert.deepEqual(structuredClone(selection.value), { counts: [], matches: [] })
+  const b = read()
+  current.reject(new Error('current read failed'))
+  await b
+  old.resolve({ counts: [{ id: 'old' }], matches: ['old'] })
+  await a
+  assert.deepEqual(structuredClone(selection.value), { counts: [], matches: [] })
+})
+
+test('video playlist search stays pending until the current read finishes', async () => {
+  const old = Promise.withResolvers(), current = Promise.withResolvers(), pending = vueRef(false), matches = vueRef(new Set())
+  let calls = 0
+  const read = await componentWatcher('src/renderer/views/UserPlaylists/UserPlaylists.vue', 'appliedQuery', { searchGeneration: 0, librarySearchPending: pending, libraryMatches: matches, appliedQuery: vueRef('video'), doSearchPlaylistsWithMatchingVideos: vueRef(true), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
+  const a = read(), b = read()
+  assert.equal(pending.value, true)
+  old.resolve({ matches: ['old'] }); await a
+  assert.equal(pending.value, true)
+  assert.equal(matches.value.size, 0)
+  current.resolve({ matches: ['new'] }); await b
+  assert.equal(pending.value, false)
+  assert.deepEqual([...matches.value], ['new'])
+})
+
+test('subscription profile import does not schedule sync before a durable refresh succeeds', async () => {
+  const refresh = Promise.withResolvers(), scheduled = [], toasts = []
+  const context = await functions(dataSettings, ['importFreeTubeSubscriptions'], { profileList: ref([{ _id: 'allChannels', subscriptions: [] }]), MAIN_PROFILE_ID: 'allChannels', isJsonObject: value => !!value && typeof value === 'object', t: key => key, showToast: toast => toasts.push(toast), DBLibraryHandlers: { query: async (_, { profiles }) => { assert.deepEqual(profiles[0].unknown, new Date(2)); return true } }, store: { dispatch: (action, reason) => action === 'grabAllProfiles' ? refresh.promise : Promise.resolve(scheduled.push(reason)) } })
+  const importing = context.importFreeTubeSubscriptions([{ _id: 'p', name: 'Imported', bgColor: '#000', textColor: '#fff', subscriptions: [{ id: 'channel', name: 'Channel' }], unknown: new Date(2) }])
+  await setImmediate()
+  assert.deepEqual(scheduled, [])
+  refresh.resolve(null)
+  await assert.rejects(importing, /could not be refreshed/)
+  assert.deepEqual(scheduled, [])
+  assert.deepEqual(toasts, [])
+})
+
+test('unavailable-video scans exclude opaque members without changing page records', async () => {
+  const records = [null, false, 42, {}, { videoId: '' }, { videoId: 42 }, { videoId: 'valid', _libraryMemberId: 'member', unknown: new Date(1) }]
+  const original = structuredClone(records), scanned = [], toasts = []
+  const context = await functions(playlistInfo, ['scanDeadVideos'], { props: { id: 'p' }, deadVideoScanRunning: ref(false), deadVideoScanController: null, deadVideoProgress: ref({}), deadVideoItemIds: ref(new Set()), showRemoveDeadVideosPrompt: ref(false), AbortController, DBLibraryHandlers: { query: async () => ({ records, cursor: null }) }, store: { getters: { getBackendPreference: 'invidious' } }, findDeadPlaylistItems: async entries => { scanned.push(...entries); return { itemIds: new Set() } }, showToast: toast => toasts.push(toast), t: key => key })
+  await context.scanDeadVideos()
+  assert.deepEqual(scanned.map(entry => entry.videoId), ['valid'])
+  assert.equal(context.deadVideoProgress.value.total, 1)
+  assert.deepEqual(records, original)
+  assert.equal(toasts.length, 1)
+  assert.match(toasts[0].message, /no videos to remove/)
+})
+
+test('deleting the first playing member keeps the missing anchor and next surviving video', async () => {
+  const initial = { index: -1, total: 2, next: { videoId: 'B' }, records: [{ videoId: 'B' }, { videoId: 'C' }] }
+  let reads = 0
+  const context = await functions('src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', ['loadUserPlaylistWindow'], { userWindowGeneration: 0, userWindowReady: ref(true), userWindowOwner: ref('current'), userWindowKey: () => 'current', isLoading: ref(false), prevVideoBeforeDeletion: ref(null), playlistItems: ref([]), userWindow: ref({ index: 0, previous: { videoId: 'C', _libraryMemberId: 'last' } }), userPlaylistWindowOptions: () => ({}), DBLibraryHandlers: { query: async () => ++reads === 1 ? initial : { ...initial, index: 1, next: { videoId: 'B' } } }, t: key => key, showToast() {} })
+  await context.loadUserPlaylistWindow()
+  assert.equal(reads, 1)
+  assert.equal(context.userWindow.value.index, -1)
+  assert.equal(context.userWindow.value.next.videoId, 'B')
+  assert.equal(context.prevVideoBeforeDeletion.value, null)
+})
+
+test('desktop large create and delete cycles keep membership counts limited to hydrated IDs', async () => {
+  const { script, ast } = await source('src/renderer/store/modules/playlists.js')
+  const counts = await import('../../src/renderer/helpers/playlist-video-counts.js')
+  const context = vm.createContext({ ...counts })
+  for (const name of ['summarizePlaylist', 'updateCachedPlaylistMembers']) {
+    const fn = matching(ast, node => node.type === 'FunctionDeclaration' && node.id?.name === name)[0]
+    if (fn) context[name] = vm.runInContext('(' + script.slice(fn.start, fn.end) + ')', context)
+  }
+  const declaration = matching(ast, node => node.type === 'VariableDeclarator' && node.id?.name === 'desktopMutations')[0]
+  const mutations = vm.runInContext('(' + script.slice(declaration.init.start, declaration.init.end) + ')', context)
+  context.mutations = mutations
+  const state = { playlists: [], playlistMemberships: { active: { other: 2 } }, playlistVideoCounts: new Map([['active', 2]]) }
+  const videos = [{ videoId: 'active' }, ...Array.from({ length: 20000 }, (_, i) => ({ videoId: `v-${i}` }))]
+  for (let repeat = 0; repeat < 3; repeat++) {
+    mutations.addPlaylist(state, { _id: 'large', videos })
+    assert.equal(state.playlistVideoCounts.size, 1)
+    assert.equal(state.playlistVideoCounts.get('active'), 3)
+    assert.equal(state.playlistMemberships.active.large, 1)
+    mutations.removePlaylists(state, ['large'])
+    assert.equal(state.playlistVideoCounts.size, 1)
+    assert.equal(state.playlistVideoCounts.get('active'), 2)
+    assert.deepEqual(Object.keys(state.playlistMemberships.active), ['other'])
+  }
 })

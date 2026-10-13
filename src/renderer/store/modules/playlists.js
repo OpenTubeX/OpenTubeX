@@ -703,6 +703,32 @@ function summarizePlaylist(playlist) {
   const members = Array.isArray(videos) ? videos : []
   return { ...metadata, _librarySummary: true, videoCount: playlist.videoCount ?? members.length, firstVideo: playlist.firstVideo ?? members[0] ?? null, videos: Array.isArray(videos) ? [] : videos }
 }
+function updateCachedPlaylistMembers(state, playlistId, videos, replace = false) {
+  const changed = new Set()
+  if (replace) {
+    for (const [videoId, memberships] of Object.entries(state.playlistMemberships)) {
+      if (!Object.hasOwn(memberships, playlistId)) continue
+      delete memberships[playlistId]
+      changed.add(videoId)
+    }
+  }
+  if (Array.isArray(videos)) {
+    for (const video of videos) {
+      const videoId = video?.videoId
+      if (typeof videoId !== 'string' || !Object.hasOwn(state.playlistMemberships, videoId)) continue
+      const memberships = state.playlistMemberships[videoId]
+      const count = Object.hasOwn(memberships, playlistId) ? memberships[playlistId] : 0
+      state.playlistMemberships[videoId] = { ...memberships, [playlistId]: count + 1 }
+      changed.add(videoId)
+    }
+  }
+  for (const videoId of changed) {
+    const count = Object.values(state.playlistMemberships[videoId]).reduce((total, value) => total + value, 0)
+    if (count) state.playlistVideoCounts.set(videoId, count)
+    else state.playlistVideoCounts.delete(videoId)
+  }
+}
+
 const desktopGetters = {
   getPlaylistMemberships: state => state.playlistMemberships,
   getQuickBookmarkVideoIds(state, getters) {
@@ -775,12 +801,12 @@ const desktopMutations = {
   },
   addPlaylist(state, payload) {
     state.playlists.push(summarizePlaylist(payload))
-    incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
+    updateCachedPlaylistMembers(state, payload._id, payload.videos)
   },
   addPlaylists(state, payload) {
     state.playlists.push(...payload.map(summarizePlaylist))
     for (const playlist of payload) {
-      incrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+      updateCachedPlaylistMembers(state, playlist._id, playlist.videos)
     }
   },
   upsertPlaylistToList(state, updatedPlaylist) {
@@ -790,15 +816,14 @@ const desktopMutations = {
 
     if (i === -1) {
       state.playlists.push(summarizePlaylist(updatedPlaylist))
-      incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
+      updateCachedPlaylistMembers(state, updatedPlaylist._id, updatedPlaylist.videos)
     } else {
       const foundPlaylist = state.playlists[i]
       // Playback timestamps and metadata edits leave membership unchanged.
       // Recount only when the update actually replaces the video list.
       const replacesVideos = Object.hasOwn(updatedPlaylist, 'videos')
-      if (replacesVideos) decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
       state.playlists.splice(i, 1, Object.assign(foundPlaylist, Object.hasOwn(updatedPlaylist, 'videos') ? summarizePlaylist(updatedPlaylist) : updatedPlaylist))
-      if (replacesVideos) incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
+      if (replacesVideos) updateCachedPlaylistMembers(state, updatedPlaylist._id, updatedPlaylist.videos, true)
     }
   },
   addVideo(state, payload) {
@@ -807,7 +832,7 @@ const desktopMutations = {
       playlist.videoCount++
       playlist.firstVideo ??= payload.videoData
       playlist.lastUpdatedAt = payload.lastUpdatedAt
-      incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
+      updateCachedPlaylistMembers(state, payload._id, [payload.videoData])
     }
   },
   addVideos(state, payload) {
@@ -816,8 +841,14 @@ const desktopMutations = {
       playlist.videoCount += payload.videos.length
       playlist.firstVideo ??= payload.videos[0] ?? null
       playlist.lastUpdatedAt = payload.lastUpdatedAt
-      incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
+      updateCachedPlaylistMembers(state, payload._id, payload.videos)
     }
+  },
+  removePlaylists(state, playlistIds) {
+    const requested = new Set(playlistIds)
+    const removed = new Set(state.playlists.filter(playlist => requested.has(playlist._id) && !playlist.protected).map(playlist => playlist._id))
+    for (const id of removed) updateCachedPlaylistMembers(state, id, [], true)
+    state.playlists = state.playlists.filter(playlist => !removed.has(playlist._id))
   },
   setAllPlaylists(state, payload) {
     state.playlists = payload.map(summarizePlaylist)

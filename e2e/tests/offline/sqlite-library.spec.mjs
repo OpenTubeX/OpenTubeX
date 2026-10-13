@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { readPersistedDatastore } from '../../helpers/datastore.mjs'
 import path from 'node:path'
 import { test, expect, goTo, goToSettingsSection, openNewWindowFromTabBar, waitForAppReady, updateInputWithoutScrolling, repoRoot, sel } from '../../helpers/app.mjs'
 import { DBActions, IpcChannels } from '../../../src/constants.js'
@@ -1439,7 +1440,7 @@ test('migrates immutable originals, hydrates bounded views, and preserves concur
     })
     return window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' })
   }, { action: DBActions.GENERAL.UPSERT, record: concurrentHistory })
-  const expectedHistory = { ...concurrentHistory, importedUnknown: 'keep' }
+  const expectedHistory = concurrentHistory
   await page.evaluate(async job => {
     await window.ftElectron.libraryQuery('importApply', { ...job, sections: ['history', 'playlists'] })
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -1451,6 +1452,10 @@ test('migrates immutable originals, hydrates bounded views, and preserves concur
     const [record] = await window.evaluate(async () => (await window.ftElectron.libraryQuery('videoState', { ids: ['v0000000000'] })).history)
     expect(record).toStrictEqual(expectedHistory)
   }
+  const persistedHistory = (await readPersistedDatastore(path.join(app.userDataDir, 'history.db'), 'utf8')).trim().split('\n').map(line => JSON.parse(line))
+  expect(persistedHistory).toHaveLength(history.length + 1)
+  const importedHistory = persistedHistory.filter(record => record.importedUnknown === 'keep')
+  expect(importedHistory).toStrictEqual([{ _id: expect.any(String), videoId: 'v0000000000', timeWatched: 1, watchProgress: 1, isWatched: false, importedUnknown: 'keep' }])
   const saved = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))
   const concurrentEntry = concurrentPlaylist.videos.at(-1)
   expect(concurrentEntry).toStrictEqual({
@@ -1851,5 +1856,24 @@ test.describe('Watch moves across retained hidden members', () => {
     await expect(rows.last().getByText(a.title, { exact: true })).toBeVisible()
     const after = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'hidden-move' }))
     expect(after).toStrictEqual({ ...before, videos: [b, ...hidden, a], lastUpdatedAt: after.lastUpdatedAt })
+  })
+})
+
+test.describe('deleted first playing member', () => {
+  const retained = { ...playlist, _id: 'first-deletion', videos: playlist.videos.slice(0, 3) }
+  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, uiScale: 95, autoplayVideos: false, autoplayPlaylists: false, skipUnavailablePlaylistVideos: false, userPlaylistSortOrder: 'custom' }, history, playlists: [retained] } })
+  test('deleting the first playing member continues to the first survivor without wrapping', async ({ page }) => {
+    await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
+    const first = await page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistWindow', { id: 'first-deletion', offset: 0, limit: 1 })).records[0])
+    await page.evaluate(item => window.ftElectron.tabs.create({ route: `/watch/${item.videoId}?playlistId=first-deletion&playlistType=user&libraryMemberId=${encodeURIComponent(item._libraryMemberId)}`, makeActive: true }), first)
+    const playerPlaylist = page.locator('.watchVideoPlaylist.resizablePlaylist')
+    await expect(playerPlaylist.locator('.playlistIndex label')).toHaveText('1 / 3')
+    const view = await watchViewHandle(page)
+    await page.evaluate(item => window.ftElectron.libraryQuery('removePlaylistMembers', { id: 'first-deletion', memberIds: [item._libraryMemberId] }), first)
+    await expect.poll(() => view.evaluate(watch => ({ next: watch.$refs.watchVideoPlaylist.nextVideo?.videoId, enabled: watch.canSkipToNextVideo }))).toStrictEqual({ next: retained.videos[1].videoId, enabled: true })
+    await view.evaluate(watch => watch.handleSkipToNext())
+    await expect(playerPlaylist.locator('.playlistIndex label')).toHaveText('1 / 2')
+    const saved = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'first-deletion' }))
+    expect(saved.videos).toStrictEqual(retained.videos.slice(1))
   })
 })

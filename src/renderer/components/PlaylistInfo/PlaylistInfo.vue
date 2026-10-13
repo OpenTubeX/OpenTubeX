@@ -1082,7 +1082,7 @@ async function scanDeadVideos() {
         const page = await DBLibraryHandlers.query('playlistPage', { id: playlistId, cursor })
         if (signal.aborted || props.id !== playlistId) return
         if (page.stale) throw new Error('The playlist changed before the scan started')
-        videos.push(...page.records.map(video => ({ ...video, playlistItemId: video._libraryMemberId })))
+        videos.push(...page.records.filter(video => typeof video?.videoId === 'string' && video.videoId).map(video => ({ ...video, playlistItemId: video._libraryMemberId })))
         cursor = page.cursor
       } while (cursor)
     } else {
@@ -1131,7 +1131,8 @@ async function handleRemoveDeadVideosPromptAnswer(option) {
   if (process.env.IS_ELECTRON) {
     try {
       const removed = await DBLibraryHandlers.query('removePlaylistMembers', { id: props.id, memberIds: [...deadVideoItemIds.value] })
-      if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      if (!removed) return
+      store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed), icon: ['fas', 'trash'] })
       await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
     } catch (error) {
@@ -1184,7 +1185,7 @@ async function cleanupUserPlaylist(mode) {
     const removed = await DBLibraryHandlers.query('cleanupPlaylist', { id: props.id, mode })
     if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
     showToast({
-      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed),
+      message: removed ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed) : t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
       icon: ['fas', 'trash'],
     })
     await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)

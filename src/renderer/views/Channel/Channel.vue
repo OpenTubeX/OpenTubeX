@@ -1245,7 +1245,9 @@ async function setChannelVideoResults(target, videos, isCurrentRequest, append =
   // Keep lookup results alive until the published list owns these references.
   if (ids.length) store.commit('retainVideoState', ids)
   try {
-    if (ids.length) await store.dispatch('hydrateVideoState', ids)
+    if (ids.length) {
+      try { await store.dispatch('hydrateVideoState', ids) } catch (error) { console.error(error) }
+    }
     if (!isCurrentRequest()) return false
     target.value = append ? target.value.concat(videos) : videos
     return true

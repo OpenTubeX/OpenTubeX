@@ -11,7 +11,7 @@
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
-    :has-additional-content="showCombinedView && hasAdditionalContent"
+    :has-additional-content="showCombinedView && (hasAdditionalContent || hasAdditionalFailure)"
     :is-community="activeCategory === 'posts'"
     :youtube-style-shorts="activeCategory === 'shorts' && useCustomShortsPlayer"
     :track-global-refresh="false"
@@ -378,9 +378,10 @@ const displayedEntries = computed(() => {
 })
 
 const hasAdditionalContent = computed(() => {
-  return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0 ||
-    (isElectron && ['shorts', 'live', 'posts'].some(category => pagedFeeds[category].failed.value))
+  return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
 })
+
+const hasAdditionalFailure = computed(() => isElectron && ['shorts', 'live', 'posts'].some(category => pagedFeeds[category].failed.value))
 
 const isLoading = computed(() => {
   return !store.getters.getSubscriptionCacheReady || isRefreshing.value ||
