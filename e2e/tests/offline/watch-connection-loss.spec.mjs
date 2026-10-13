@@ -97,6 +97,7 @@ for (const width of [1600, 480]) {
     const recommendations = page.locator('.watchVideoRecommendations .h3Title')
     await expect(recommendations.first()).toBeVisible()
     const loadedRecommendations = await recommendations.allTextContents()
+    const cachedRecommendations = await watch.evaluate(vm => JSON.stringify(vm.recommendedVideos))
     await page.getByRole('button', { name: 'Open SponsorBlock info', exact: true }).first().click()
     const sponsorSegments = page.locator('.sponsorBlockSegment')
     await expect(sponsorSegments.first()).toBeVisible()
@@ -120,7 +121,8 @@ for (const width of [1600, 480]) {
     })
     await expect(page.locator('.connectionStatus')).toHaveText('Offline')
     await expect.poll(commentTexts).toEqual(loadedComments)
-    await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
+    await expect(page.locator('.watchVideoRecommendations')).toHaveCount(0)
+    expect(await watch.evaluate(vm => JSON.stringify(vm.recommendedVideos))).toBe(cachedRecommendations)
     await expect.poll(() => sponsorSegments.allTextContents()).toEqual(loadedSponsorSegments)
     await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
     await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeDisabled()
@@ -142,7 +144,9 @@ for (const width of [1600, 480]) {
     })
     await expect.poll(() => watch.evaluate(vm => vm.isOffline)).toBe(false)
     await expect.poll(commentTexts).toEqual(loadedComments)
-    await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
+    expect(await watch.evaluate(vm => JSON.stringify(vm.recommendedVideos))).toBe(cachedRecommendations)
+    // The re-mounted list eagerly renders five rows; the others load as they enter the viewport.
+    await expect.poll(() => recommendations.evaluateAll(rows => rows.slice(0, 5).map(row => row.textContent))).toEqual(loadedRecommendations.slice(0, 5))
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeEnabled()
     if (width === 480) {
       // A closed mobile sheet excludes its controls from role locators.

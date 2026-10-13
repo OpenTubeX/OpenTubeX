@@ -62,6 +62,10 @@
   object-fit: cover;
 }
 
+.offlineDownloadThumbnail.blur {
+  filter: blur(20px);
+}
+
 .offlineDownloadText {
   display: grid;
   min-inline-size: 0;

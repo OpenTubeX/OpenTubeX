@@ -606,6 +606,7 @@ export default defineComponent({
           title: file.title || (download.videoId === file.videoId ? download.title : '') || file.videoId,
           author: file.author || download.author || '',
           authorId: file.authorId || download.authorId || '',
+          thumbnail: download.thumbnail,
           route: downloadWatchRoute(download, file.videoId)
         })))
         .filter(video => {
@@ -617,6 +618,9 @@ export default defineComponent({
             hideChannelsBasedOnText: false
           })
         })
+    },
+    displayedRecommendations() {
+      return this.isOffline ? this.offlineDownloadSuggestions : this.recommendedVideos
     },
     hasScheduledPremiereStarted: function () {
       return this.premiereDate instanceof Date &&
@@ -1086,9 +1090,7 @@ export default defineComponent({
     },
     fullscreenRecommendationsAvailable() {
       if (this.isLoading || this.hideRecommendedVideos || (this.isFamilyFriendly === false && this.showFamilyFriendlyOnly)) return false
-      if (this.recommendedVideos.length === 0) {
-        return this.isOffline && this.localFilePlayback && this.offlineDownloadSuggestions.length > 0
-      }
+      if (this.isOffline) return this.offlineDownloadSuggestions.length > 0
       return this.recommendedVideos.some(video => !isVideoHiddenByPreferences(video, {
         hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
         forbiddenTitles: this.$store.getters.getActiveForbiddenTitles,
@@ -1153,7 +1155,7 @@ export default defineComponent({
       return this.$store.getters.getHideVideoLikesAndDislikes
     },
     theatrePossible: function () {
-      return this.showTranscript || (!this.hideRecommendedVideos && (!this.isOffline || this.recommendedVideos.length > 0 || this.offlineDownloadSuggestions.length > 0)) ||
+      return this.showTranscript || (!this.hideRecommendedVideos && (!this.isOffline || this.displayedRecommendations.length > 0)) ||
         this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },

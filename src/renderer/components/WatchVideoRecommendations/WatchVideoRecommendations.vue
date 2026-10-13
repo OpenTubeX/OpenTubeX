@@ -44,11 +44,12 @@
             class="offlineDownloadRecommendation"
             @click="pausePlayer"
           >
-            <img
-              :src="thumbnailPlaceholder"
+            <FtRetryImage
+              :src="hideThumbnails ? thumbnailPlaceholder : video.thumbnail || thumbnailPlaceholder"
               alt=""
               class="offlineDownloadThumbnail"
-            >
+              :class="{ blur: blurThumbnails }"
+            />
             <span class="offlineDownloadText">
               <span class="offlineDownloadTitle">{{ video.title }}</span>
               <span
@@ -84,6 +85,7 @@ import { useScrollClamp } from '../../composables/useScrollClamp'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtCard from '../ft-card/ft-card.vue'
 import FtListVideoLazy from '../FtListVideoLazy.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import store from '../../store'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -109,6 +111,8 @@ const visibleData = computed(() => props.offline
     })))
 
 const emit = defineEmits(['pause-player', 'close'])
+const hideThumbnails = computed(() => store.getters.getThumbnailPreference === 'hidden')
+const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
 const scroller = useTemplateRef('scroller')
 const content = useTemplateRef('content')
 const clampScroll = useScrollClamp(scroller, content)
