@@ -359,12 +359,40 @@
   max-inline-size: none;
   margin-block: 0;
   margin-inline: 0;
+}
+
+/* Nested headers and watch surfaces also meet the phone's screen edges.
+   Keep rounding on inset controls and floating panels, but not these surfaces. */
+.app.capacitorPhoneLayout > .routerView :deep(.ft-card),
+.app.capacitorPhoneLayout :deep(.playlistInfoContainer),
+.app.capacitorPhoneLayout :deep(.channelDetails .bannerContainer),
+.app.capacitorPhoneLayout :deep(.channelDetails .infoContainer),
+.app.capacitorPhoneLayout :deep(.subscriptionsHeader),
+.app.capacitorPhoneLayout :deep(.trendingPage .pageHeader),
+.app.capacitorPhoneLayout :deep(.popularPage .pageHeader),
+.app.capacitorPhoneLayout :deep(.infoSkeleton),
+.app.capacitorPhoneLayout :deep(.commentsSkeleton),
+.app.capacitorPhoneLayout :deep(.videoSummary),
+.app.capacitorPhoneLayout :deep(.externalMediaState),
+.app.capacitorPhoneLayout :deep(.externalMediaPlayer),
+.app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsSwipeViewport),
+.app.capacitorPhoneLayout :deep(.videoLayout.shortsPlayerActive .videoPlayer),
+.app.capacitorPhoneLayout :deep(.shortsPlayerActive .ftVideoPlayer),
+.app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsNextPreview) {
+  border-radius: 0;
+}
+
+/* Menu sheets may be teleported outside the app, including into the player. */
+:global(body:has(.app.capacitorPhoneLayout) .moreOptionContainer),
+:global(body:has(.app.capacitorPhoneLayout) .mobileLinkActions),
+.app.capacitorPhoneLayout :deep(.mobileSheet.dockedSheet) {
   border-radius: 0;
 }
 
 @media (width <= 680px) {
   /* Match the phone layout's removal of the screen and header gaps. */
   .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayer),
+  .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayerPlaceholder),
   .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .ftVideoPlayer:not(.scrollMiniPlayer)) {
     border-radius: 0;
   }
