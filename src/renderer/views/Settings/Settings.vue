@@ -749,6 +749,7 @@ const showBackButton = computed(() => {
 const unlocked = ref(store.getters.getSettingsPassword === '')
 // Mount pages after the first unlock, then hide them while settings is locked.
 const hasUnlockedSettings = ref(unlocked.value)
+const canNavigateSettings = computed(() => unlocked.value && store.getters.getSettingsWindowOpen)
 
 watch(unlocked, value => {
   if (value) hasUnlockedSettings.value = true
@@ -833,7 +834,10 @@ watch(activeSection, (section) => {
   }
   nextTick(observeActiveSettingsSection)
 })
-watch(() => store.getters.getSettingsWindowSection, async (section) => {
+watch([() => store.getters.getSettingsWindowSection, canNavigateSettings], async ([section, canNavigate]) => {
+  if (!canNavigate || props.searchTarget) return
+  await nextTick()
+  if (!canNavigateSettings.value || section !== store.getters.getSettingsWindowSection || props.searchTarget) return
   if (section === 'storage') activeDataStorageTab.value = 'storage'
   const normalizedSection = LEGACY_SETTINGS_SECTION_MAP[section] ?? section
   if (
@@ -847,11 +851,14 @@ watch(() => store.getters.getSettingsWindowSection, async (section) => {
     await activeSettingsSectionRef.value?.activateTab('storage')
   }
 })
-watch(() => props.searchTarget, async (target) => {
-  if (!target) return
+watch([() => props.searchTarget, canNavigateSettings], async ([target, canNavigate]) => {
+  if (!target || !canNavigate) return
   await nextTick()
-  await openSearchResult(target.section, target)
-  emit('search-target-opened', target)
+  if (!canNavigateSettings.value || target !== props.searchTarget) return
+  const opened = await openSearchResult(target.section, target)
+  if (opened && canNavigateSettings.value && target === props.searchTarget) {
+    emit('search-target-opened', target)
+  }
 }, { immediate: true })
 
 function handleMounted() {

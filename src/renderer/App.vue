@@ -3589,6 +3589,7 @@ function openSettingsView(view) {
 }
 
 function openSettingsSection(section) {
+  settingsSearchTarget.value = null
   store.commit('setSettingsWindowSection', section)
   store.dispatch('showSettingsWindow')
 }

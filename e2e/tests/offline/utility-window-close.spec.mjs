@@ -26,7 +26,10 @@ for (const { width, height, uiScale } of [
           const transitionClasses = []
           const observer = new MutationObserver(mutations => {
             for (const mutation of mutations) {
-              if (mutation.type === 'childList') addedContent.push(...mutation.addedNodes)
+              if (mutation.type === 'childList') {
+                // Vue replaces dismissed overlay Teleports with empty comment anchors.
+                addedContent.push(...[...mutation.addedNodes].filter(node => node.nodeType !== Node.COMMENT_NODE))
+              }
               if (mutation.type === 'attributes' && mutation.target === dialog) {
                 transitionClasses.push(mutation.oldValue)
               }

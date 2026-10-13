@@ -35,6 +35,63 @@ for (const uiScale of [100, 125]) {
       }
     })
 
+    test('opens a pending command-palette target after the first Settings unlock', async ({ page }) => {
+      await page.keyboard.press('Control+k')
+      const search = page.getByRole('combobox', { name: 'Search commands' })
+      await search.fill('thumbnail preference')
+      await page.getByRole('option', { name: /Thumbnail Preference/ }).click()
+      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+      await expect(passwordInput).toBeFocused()
+      await passwordInput.fill('wrong-password')
+      await passwordInput.press('Enter')
+      await expect(page.getByRole('alert')).toHaveText('Incorrect password')
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(page.locator('.settingsPassword')).toHaveCount(0)
+      await expect(page.locator('.settingsSearchTarget')).toContainText('Thumbnail Preference')
+    })
+
+    for (const targetType of ['setting', 'category']) {
+      test(`keeps a draft locked until the latest command-palette target can open (${targetType})`, async ({ page }) => {
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        const appearance = await goToSettingsSection(page, 'appearance')
+        await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+        const themeName = page.locator('.customThemeEditor .themeNameField input')
+        await themeName.fill('Unfinished theme')
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        for (const [query, label] of [['thumbnail preference', /Thumbnail Preference/], ['ui scale', /UI Scale/]]) {
+          await page.keyboard.press('Control+k')
+          const search = page.getByRole('combobox', { name: 'Search commands' })
+          await search.fill(query)
+          await page.getByRole('option', { name: label }).click()
+          await expect(search).toHaveCount(0)
+          await expect(themeName).toHaveCount(1)
+          await expect(themeName).toHaveValue('Unfinished theme')
+        }
+        if (targetType === 'category') {
+          await page.keyboard.press('Control+k')
+          await page.getByRole('combobox', { name: 'Search commands' }).fill('general settings')
+          await page.locator('[role="option"][id$="-settings-general"]').click()
+          await expect(themeName).toHaveValue('Unfinished theme')
+        }
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsPassword')).toHaveCount(0)
+        if (targetType === 'setting') {
+          await expect(page.locator('.settingsSearchTarget')).toContainText('UI Scale')
+        } else {
+          await expect(page.locator('.section[data-section="general"]')).toBeVisible()
+          await expect(page.locator('.settingsSearchTarget')).toHaveCount(0)
+        }
+      })
+    }
+
     test('keeps standalone Downloads pickers available with a Settings password', async ({ page }) => {
       await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
