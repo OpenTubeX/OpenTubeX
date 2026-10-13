@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  Repair Playlists: Atgyweirio rhestrau chwarae
+  Repair Description: Adfer manylion fideo coll ar ôl mewnforio ZIP YouTube Takeout. Mae trefn y rhestrau chwarae yn aros yr un fath.
   Remove Unavailable Videos: "Dileu fideos nad ydynt ar gael"
   Remove Unavailable Videos Confirmation: "Dileu fideos nad ydynt ar gael? Wedi dod o hyd: {count}. Methu gwirio: {uncertain}. Bydd fideos heb eu gwirio yn cael eu cadw."
   Add Missing Videos: "Ychwanegu fideos coll o’r rhestr chwarae wreiddiol"

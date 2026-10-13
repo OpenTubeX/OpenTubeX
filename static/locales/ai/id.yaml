@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Batalkan pembaruan
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
+  Repair Playlists: Perbaiki playlist
+  Repair Description: Pulihkan detail video yang hilang setelah mengimpor ZIP YouTube Takeout. Urutan playlist tetap sama.
   Remove Unavailable Videos: "Hapus video yang tidak tersedia"
   Remove Unavailable Videos Confirmation: "Hapus video yang tidak tersedia? Ditemukan: {count}. Tidak dapat diperiksa: {uncertain}. Video yang tidak dapat diperiksa akan disimpan."
   Add Missing Videos: "Tambahkan video yang belum ada dari playlist sumber"

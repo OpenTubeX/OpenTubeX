@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Yenilemeyi iptal et
   Next Auto Refresh: 'Sonraki otomatik yenileme: {date}'
 User Playlists:
+  Repair Playlists: Oynatma listelerini onar
+  Repair Description: YouTube Takeout ZIP dosyasını içe aktardıktan sonra eksik video bilgilerini geri yükleyin. Oynatma listesi sırası değişmez.
   Remove Unavailable Videos: "Kullanılamayan videoları kaldır"
   Remove Unavailable Videos Confirmation: "Kullanılamayan videolar kaldırılsın mı? Bulundu: {count}. Kontrol edilemedi: {uncertain}. Kontrol edilemeyen videolar saklanacak."
   Add Missing Videos: "Kaynak oynatma listesinden eksik videoları ekle"

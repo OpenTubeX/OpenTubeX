@@ -167,6 +167,12 @@ const getters = {
 }
 
 const actions = {
+  async repairPlaylistMetadata({ commit }, payload) {
+    const result = await DBPlaylistHandlers.repairMetadata(payload)
+    for (const playlist of result.playlists) commit('upsertPlaylistToList', playlist)
+    return { repaired: result.repaired, failed: result.failed }
+  },
+
   async importPlaylist({ commit }, playlist) {
     processNewPlayist(playlist)
     await DBPlaylistHandlers.upsert(playlist)

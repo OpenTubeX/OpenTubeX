@@ -187,6 +187,8 @@ Feed:
   Cancel Refresh: Cancel refresh
   Next Auto Refresh: 'Next auto refresh: {date}'
 User Playlists:
+  Repair Playlists: Repair Playlists
+  Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Remove Unavailable Videos: "Remove unavailable videos"
   Remove Unavailable Videos Confirmation: "Remove unavailable videos? Found: {count}. Could not check: {uncertain}. Videos that could not be checked will be kept."
   Add Missing Videos: "Add missing videos from source playlist"

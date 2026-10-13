@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Hætta við endurnýjun
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
+  Repair Playlists: Lagfæra spilunarlista
+  Repair Description: Endurheimtu upplýsingar sem vantar um myndskeið eftir innflutning á YouTube Takeout ZIP-skrá. Röð spilunarlista helst óbreytt.
   Remove Unavailable Videos: "Fjarlægðu ótiltæk myndbönd"
   Remove Unavailable Videos Confirmation: "Fjarlægja ótiltæk myndbönd? Fundin: {count}. Ekki tókst að athuga: {uncertain}. Myndbönd sem ekki voru athuguð verða varðveitt."
   Add Missing Videos: "Bæta við myndböndum sem vantar úr upprunalega spilunarlistanum"

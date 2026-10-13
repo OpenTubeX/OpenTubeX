@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Cancelar a actualización
   Next Auto Refresh: 'Seguinte actualización automática: {date}'
 User Playlists:
+  Repair Playlists: Reparar listas de reprodución
+  Repair Description: Restaura os datos dos vídeos que faltan tras importar un ZIP de YouTube Takeout. A orde das listas mantense.
   Remove Unavailable Videos: "Eliminar vídeos non dispoñibles"
   Remove Unavailable Videos Confirmation: "Queres eliminar os vídeos non dispoñibles? Atopados: {count}. Non se puido comprobar: {uncertain}. Os vídeos sen comprobar manteranse."
   Add Missing Videos: "Engadir os vídeos que faltan desde a lista de reprodución orixinal"

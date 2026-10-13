@@ -196,6 +196,10 @@ class Profiles {
 }
 
 class Playlists {
+  static repairMetadata(payload) {
+    return dbPlaylists(DBActions.PLAYLISTS.REPAIR_METADATA, payload)
+  }
+
   static create(playlists) {
     return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
   }

@@ -114,8 +114,8 @@ function waitForRepair(milliseconds, signal) {
   })
 }
 
-export async function repairHistory({ records, getRecord, fetchMetadata, saveMetadata, signal, onProgress, onPhase = () => {}, wait = waitForRepair }) {
-  let pending = records.filter(needsHistoryRepair).map(({ videoId }) => ({ videoId, checked: false, failed: false, failures: 0 }))
+export async function repairHistory({ records, getRecord, fetchMetadata, saveMetadata, signal, onProgress, onPhase = () => {}, createPatch = historyRepairPatch, needsRepair = needsHistoryRepair, wait = waitForRepair }) {
+  let pending = records.filter(needsRepair).map(({ videoId }) => ({ videoId, checked: false, failed: false, failures: 0 }))
   let cooldowns = 0
   let cooldownPending = false
   const result = { total: pending.length, checked: 0, repaired: 0, failed: 0 }
@@ -146,7 +146,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
         try {
           if (target.checked) {
             const current = getRecord(target.videoId)
-            if (!current || !needsHistoryRepair(current)) {
+            if (!current || !needsRepair(current)) {
               if (target.failed) result.failed--
               target.failed = false
               return null
@@ -155,7 +155,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
           const metadata = await fetchMetadata(target.videoId, signal)
           if (signal.aborted) return null
           const current = getRecord(target.videoId)
-          const patch = current && needsHistoryRepair(current) ? historyRepairPatch(current, metadata) : null
+          const patch = current && needsRepair(current) ? createPatch(current, metadata) : null
           if (target.failed) result.failed--
           target.failed = false
           return patch

@@ -217,6 +217,8 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  Repair Playlists: Taisyti grojaraščius
+  Repair Description: Atkurkite trūkstamus vaizdo įrašų duomenis importavę YouTube Takeout ZIP. Grojaraščių tvarka nesikeičia.
   Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"
   Remove Unavailable Videos Confirmation: "Pašalinti nepasiekiamus vaizdo įrašus? Rasta: {count}. Nepavyko patikrinti: {uncertain}. Nepatikrinti vaizdo įrašai bus išsaugoti."
   Add Missing Videos: "Pridėti trūkstamus vaizdo įrašus iš šaltinio grojaraščio"

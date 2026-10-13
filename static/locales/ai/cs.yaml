@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Zrušit obnovení
   Next Auto Refresh: 'Další automatické obnovení: {date}'
 User Playlists:
+  Repair Playlists: Opravit playlisty
+  Repair Description: Obnovte chybějící údaje o videích po importu ZIP archivu YouTube Takeout. Pořadí v playlistech se nezmění.
   Remove Unavailable Videos: "Odstraňte nedostupná videa"
   Remove Unavailable Videos Confirmation: "Odstranit nedostupná videa? Nalezeno: {count}. Nelze zkontrolovat: {uncertain}. Nezkontrolovaná videa budou zachována."
   Add Missing Videos: "Přidat chybějící videa ze zdrojového playlistu"

@@ -1,21 +1,38 @@
-import { reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import store from '../store'
 import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, parseHistoryRepairYtDlp, repairHistory } from '../../historyRepair'
 import { ytDlp } from './ytDlp'
 import { getLocalHistoryMetadata } from './api/local'
 import { getInvidiousHistoryMetadata } from './api/invidious'
 
-export const historyRepairState = reactive({
+export const metadataRepairBusy = ref(false)
+
+const initialRepairState = {
   running: false, total: 0, checked: 0, repaired: 0, failed: 0, started: false, phase: 'checking', error: ''
+}
+
+export function createRepairState() {
+  return reactive({ ...initialRepairState })
+}
+
+export const historyRepairState = createRepairState()
+
+export const repairCookiesConfigured = computed(() => {
+  if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) return false
+  const getters = store.getters
+  return getters.getYtDlpPlaybackAuthMode === 'file'
+    ? !!getters.getYtDlpPlaybackCookiesPath?.trim()
+    : process.env.IS_ELECTRON && getters.getYtDlpPlaybackAuthMode === 'browser' && !!getters.getYtDlpPlaybackCookiesBrowser?.trim()
 })
+
 let controller
 
-export function cancelHistoryRepair() {
+export function cancelMetadataRepair() {
   controller?.abort()
   if (process.env.IS_ELECTRON) ytDlp.ytDlpCancelHistoryRepair().catch(console.error)
 }
 
-async function fetchMetadata(videoId, signal, useCookies) {
+export async function fetchRepairMetadata(videoId, signal, useCookies) {
   if (useCookies) {
     signal.throwIfAborted()
     // Native extraction has its own timeout. Stop waiting on cancellation and
@@ -43,26 +60,37 @@ async function fetchMetadata(videoId, signal, useCookies) {
   return parseHistoryRepairPlayer(await getLocalHistoryMetadata(videoId, timeoutSignal), videoId)
 }
 
-export async function startHistoryRepair({ useCookies = false } = {}) {
-  if (historyRepairState.running) return
+export async function runMetadataRepair(state, { useCookies = false, ...options }) {
+  if (metadataRepairBusy.value) return
+  metadataRepairBusy.value = true
   controller = new AbortController()
-  Object.assign(historyRepairState, { running: true, started: true, total: 0, checked: 0, repaired: 0, failed: 0, phase: 'checking', error: '' })
+  Object.assign(state, { ...initialRepairState, running: true, started: true })
   try {
     await repairHistory({
-      records: store.getters.getHistoryCacheSorted,
-      getRecord: id => store.getters.getHistoryCacheById[id],
-      fetchMetadata: (videoId, signal) => fetchMetadata(videoId, signal, useCookies),
-      saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
+      ...options,
+      fetchMetadata: (videoId, signal) => fetchRepairMetadata(videoId, signal, useCookies),
       signal: controller.signal,
-      onProgress: progress => Object.assign(historyRepairState, progress),
-      onPhase: phase => { historyRepairState.phase = phase },
+      onProgress: progress => Object.assign(state, progress),
+      onPhase: phase => { state.phase = phase },
     })
-    historyRepairState.phase = controller.signal.aborted ? 'stopped' : 'finished'
+    state.phase = controller.signal.aborted ? 'stopped' : 'finished'
   } catch (error) {
-    historyRepairState.phase = 'stopped'
-    historyRepairState.error = error.message || String(error)
+    state.phase = 'stopped'
+    state.error = error.message || String(error)
   } finally {
-    historyRepairState.running = false
+    state.running = false
     controller = null
+    metadataRepairBusy.value = false
   }
+}
+
+export const cancelHistoryRepair = cancelMetadataRepair
+
+export function startHistoryRepair({ useCookies = false } = {}) {
+  return runMetadataRepair(historyRepairState, {
+    useCookies,
+    records: store.getters.getHistoryCacheSorted,
+    getRecord: id => store.getters.getHistoryCacheById[id],
+    saveMetadata: metadata => store.dispatch('updateSubscriptionHistory', { metadata }),
+  })
 }

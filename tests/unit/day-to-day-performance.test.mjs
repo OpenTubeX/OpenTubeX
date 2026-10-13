@@ -34,7 +34,9 @@ function overview(store) {
   const cleanups = []
   const scope = effectScope()
   const api = scope.run(() => vm.runInNewContext(`${code}\n;({ activeData, query, handleQueryChange, filterPlaylist, doSearchPlaylistsWithMatchingVideos })`, {
-    computed, ref, watch, store,
+    computed, ref, watch, store, nextTick,
+    playlistRepairState: { running: false }, metadataRepairBusy: ref(false), repairCookiesConfigured: ref(false),
+    process: { env: {} },
     onMounted() {}, onBeforeUnmount: callback => cleanups.push(callback),
     useTemplateRef: () => ref(null),
     useI18n: () => ({ locale: ref('en-US'), t: key => key }),

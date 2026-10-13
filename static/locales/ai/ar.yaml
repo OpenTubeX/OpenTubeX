@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: إلغاء التحديث
   Next Auto Refresh: 'التحديث التلقائي التالي: {date}'
 User Playlists:
+  Repair Playlists: إصلاح قوائم التشغيل
+  Repair Description: استعد تفاصيل الفيديو المفقودة بعد استيراد ملف ZIP من YouTube Takeout. يبقى ترتيب قوائم التشغيل دون تغيير.
   Remove Unavailable Videos: "إزالة مقاطع الفيديو غير المتاحة"
   Remove Unavailable Videos Confirmation: "هل تريد إزالة مقاطع الفيديو غير المتوفرة؟ تم العثور على: {count}. تعذر التحقق من: {uncertain}. سيتم الاحتفاظ بمقاطع الفيديو التي لم يتم التحقق منها."
   Add Missing Videos: "إضافة الفيديوهات المفقودة من قائمة التشغيل المصدر"

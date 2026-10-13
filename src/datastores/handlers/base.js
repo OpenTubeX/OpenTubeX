@@ -1,3 +1,4 @@
+import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
@@ -801,6 +802,52 @@ class Playlists {
 
   static upsert(playlist) {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
+  }
+
+  static async repairMetadata({ playlistIds, metadata }) {
+    const playlists = []
+    const repaired = new Set()
+    const failed = new Set()
+    const byId = new Map(metadata.map(info => [info.videoId, info]))
+    for (const _id of new Set(playlistIds)) {
+      let pendingIds = [...byId.keys()]
+      try {
+        // Re-read and conditionally save so edits made in another window during
+        // the lookup cannot be overwritten or resurrect deleted entries.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const current = await db.playlists.findOneAsync({ _id })
+          if (!current) break
+          const changed = new Set()
+          const videos = current.videos.map(video => {
+            const info = byId.get(video.videoId)
+            const patch = info && playlistRepairPatch(video, info)
+            if (!patch) return video
+            changed.add(video.videoId)
+            return { ...video, ...patch }
+          })
+          pendingIds = [...changed]
+          if (!changed.size) break
+          const snapshot = JSON.stringify(current.videos)
+          const { affectedDocuments } = await db.playlists.updateAsync(
+            { _id, $where() { return JSON.stringify(this.videos) === snapshot } },
+            { $set: { videos, lastUpdatedAt: Date.now() } },
+            { returnUpdatedDocs: true }
+          )
+          if (affectedDocuments) {
+            playlists.push(affectedDocuments)
+            for (const id of changed) repaired.add(id)
+            break
+          }
+          if (attempt === 2) for (const id of changed) failed.add(id)
+        }
+      } catch (error) {
+        console.error(error)
+        for (const id of pendingIds) failed.add(id)
+      }
+    }
+    // Progress counts unique videos, including ones shared by several playlists.
+    for (const id of failed) repaired.delete(id)
+    return { playlists, repaired: repaired.size, failed: failed.size }
   }
 
   /**
