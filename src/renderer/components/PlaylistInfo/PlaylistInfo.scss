@@ -2,9 +2,16 @@
   inline-size: 100%;
 }
 
+.playlistThumbnail {
+  border-radius: calc(8px * var(--ui-roundness));
+  overflow: hidden;
+}
+
 .playlistThumbnail img,
 .playlistThumbnail .retryImagePlaceholder {
   aspect-ratio: 16 / 9;
+  border-radius: calc(8px * var(--ui-roundness));
+  display: block;
   inline-size: 100%;
   object-fit: cover;
 

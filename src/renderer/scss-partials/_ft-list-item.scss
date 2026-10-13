@@ -207,9 +207,12 @@ $watched-transition-duration: 0.5s;
 
     .videoCountContainer {
       place-self: stretch end;
+      border-start-end-radius: calc(8px * var(--ui-roundness));
+      border-end-end-radius: calc(8px * var(--ui-roundness));
       display: grid;
       font-size: 20px;
       inline-size: 60px;
+      overflow: hidden;
       pointer-events: none;
 
       .background {
