@@ -538,3 +538,25 @@ test('SQLite sync uploads repaired metadata for existing IDs without changing du
     await sync.cancel(job)
   }
 })
+
+for (const allowMissingUploader of [false, true]) {
+  test(`remote-matched retained playlist occurrences remain present before merge with missing uploaders: ${allowMissingUploader}`, async t => {
+    const { engine, sync } = fixture(t)
+    const known = { ...video(2), playlistItemId: 'known' }
+    const missing = { videoId: video(1).videoId, title: 'Saved title', lengthSeconds: 30, playlistItemId: 'duplicate', unknown: new Date(1) }
+    const original = { _id: 'retained', playlistName: 'Retained', description: '', videos: [missing, { ...missing, playlistItemId: 'duplicate-2' }, known], unknown: new Date(2) }
+    await engine.collections.playlists.insertAsync(original)
+    const identities = engine.prepare("SELECT membership_id FROM members WHERE collection = 'playlists' AND record_id = ? ORDER BY position").all(original._id)
+    const remote = [videoToRemote(video(1)), videoToRemote(known)]
+    const job = await sync.start({ kind: 'playlist', playlistId: original._id, metadata: { title: original.playlistName, description: '' }, options: { allowMissingUploader } })
+    await sync.chunk({ ...job, section: 'remote', records: remote })
+    await sync.chunk({ ...job, section: 'previous', records: remote.map(record => record.id) })
+    await sync.plan(job)
+    assert.deepEqual((await sync.page({ ...job, section: 'playlistRemovals' })).records, [])
+    assert.deepEqual((await sync.page({ ...job, section: 'playlistIds' })).records, remote.map(record => record.id))
+    assert.equal(await sync.apply(job, {}), true)
+    const saved = await engine.playlistSnapshot({ id: original._id })
+    assert.deepEqual(saved, { ...original, lastUpdatedAt: saved.lastUpdatedAt, videos: original.videos.map(record => record === known ? record : { ...record, authorId: 'channel', author: 'Author' }) })
+    assert.deepEqual(engine.prepare("SELECT membership_id FROM members WHERE collection = 'playlists' AND record_id = ? ORDER BY position").all(original._id), identities)
+  })
+}

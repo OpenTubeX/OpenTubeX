@@ -114,8 +114,12 @@ export class LibrarySync {
       return { revision: job.revision, skipped: true, counts: { playlistUploads: 0, playlistRemovals: 0, playlistIds: 0, playlistMembers: 0 } }
     }
     const videos = local?.videos ?? []
-    const localById = new Map(videos.filter(video => video !== null && videoToRemote(video, job.options)).map(video => [video.videoId, video]))
     const remoteById = new Map(this.read(id, 'remote').map(video => [video.id, video]))
+    // A retained member already on the server is present locally even if its
+    // missing uploader prevents a fresh upload. Preserve that membership before
+    // applying deletion precedence; remote metadata can repair it afterward.
+    const localById = new Map(videos.filter(video => video !== null && typeof video === 'object' && !Array.isArray(video) &&
+      (videoToRemote(video, job.options) || remoteById.has(video.videoId))).map(video => [video.videoId, video]))
     const localMetadataById = new Map()
     for (const video of videos) {
       const payload = videoToRemote(video, job.options)
