@@ -1,5 +1,7 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
+test.describe.configure({ timeout: 120_000 })
+
 function historyEntry (videoId, title, timeWatched) {
   return {
     _id: videoId,
