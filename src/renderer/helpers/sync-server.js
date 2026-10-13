@@ -1,6 +1,6 @@
 import { toRaw } from 'vue'
 import {
-  DEFAULT_CHANNEL_AVATAR, normalizeChannelAvatar,
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar,
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
@@ -607,16 +607,15 @@ function channelToLocal(channel) {
   }
 }
 
-function videoToRemote(video) {
-  return syncVideoToRemote(video)
+function videoToRemote(video, options) {
+  return syncVideoToRemote(video, options)
 }
 
 function videoToLocal(video, timeAdded = Date.now()) {
   return {
     videoId: video.id,
     title: video.title,
-    author: video.uploader.name,
-    authorId: video.uploader.id,
+    ...uploaderToLocal(video.uploader),
     lengthSeconds: video.duration,
     published: video.upload_date,
     timeAdded,
@@ -664,7 +663,8 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
     playlist.videos.length === videos.length &&
-    playlist.videos.every((video, index) => video.videoId === videos[index].videoId)
+    playlist.videos.every((video, index) => video.videoId === videos[index].videoId &&
+      video.authorId === videos[index].authorId && video.author === videos[index].author)
 }
 
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
@@ -805,10 +805,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
     const localVideos = local?.videos ?? []
     const localVideosById = mapBy(
-      localVideos.filter(video => videoToRemote(video) !== null),
+      localVideos.filter(video => videoToRemote(video, options) !== null),
       video => video.videoId
     )
-    const unsyncableLocalVideos = localVideos.filter(video => videoToRemote(video) === null)
     const remoteVideosById = mapBy(remote.videos, video => video.id)
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
@@ -822,7 +821,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     )
     const remoteVideosToAdd = Array.from(mergedVideoIds)
       .filter(videoId => !remoteVideosById.has(videoId))
-      .map(videoId => videoToRemote(localVideosById.get(videoId)))
+      .map(videoId => videoToRemote(localVideosById.get(videoId), options))
       .filter(Boolean)
 
     if (remoteVideosToAdd.length > 0) {
@@ -834,9 +833,23 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       }
     }
 
-    const mergedVideos = Array.from(mergedVideoIds).map(videoId => {
-      return localVideosById.get(videoId) ?? videoToLocal(remoteVideosById.get(videoId))
-    }).concat(unsyncableLocalVideos)
+    // Sync tracks membership by video ID, but local playlists can contain
+    // repeated occurrences with their own timestamps and playlist item IDs.
+    const mergedVideos = localVideos.filter(video => {
+      return videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId)
+    }).map(video => {
+      // An older client may have retained the wire marker in its local metadata.
+      if (video.authorId !== UNKNOWN_SYNC_UPLOADER_ID) return video
+      return {
+        ...video,
+        ...uploaderToLocal({ id: video.authorId, name: video.author }),
+      }
+    })
+    for (const videoId of mergedVideoIds) {
+      if (!localVideosById.has(videoId)) {
+        mergedVideos.push(videoToLocal(remoteVideosById.get(videoId)))
+      }
+    }
 
     if (!local) {
       local = {
