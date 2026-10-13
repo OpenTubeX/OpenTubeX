@@ -847,7 +847,7 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     await expect(syncSection.locator('.syncProgress')).toBeHidden()
-    const settings = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+    const settings = latestSettings(await readPersistedDatastore(path.join(app.userDataDir, 'settings.db'), 'utf8'))
     const headers = { Authorization: settings.syncServerToken, 'Content-Type': 'application/json' }
     const playlistHeaders = await (await fetch(`${syncServerUrl}/v1/playlists/`, { headers })).json()
     const remoteId = playlistHeaders.find(playlist => playlist.title === 'Synced playlist').id
