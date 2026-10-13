@@ -33,7 +33,10 @@ export function useHomeRecommendations(visible) {
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
   const history = computed(() => store.getters.getHistoryCacheSorted)
   const eligibleHistory = computed(() => getRecommendationLearningEntries(history.value, isVisible))
-  const favorites = computed(() => getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
+  const favorites = computed(() => {
+    const videos = store.getters.getPlaylist('favorites')?.videos
+    return getRecommendationLearningEntries(Array.isArray(videos) ? videos : [], isVisible, 500)
+  })
   const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
   function * savedPlaylistVideos() {
     for (const playlist of store.getters.getAllPlaylists) {

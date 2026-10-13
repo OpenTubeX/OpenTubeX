@@ -360,8 +360,8 @@ test('Home selects and snapshots only the existing saved and favorite learning b
 })
 
 for (const videos of [undefined, null, 42, 'retained scalar', { retained: true }]) {
-  test(`Home recommendations ignore retained non-array memberships: ${JSON.stringify(videos)}`, async () => {
-    const playlists = [{ _id: 'opaque', videos, unknown: { keep: true } }]
+  for (const id of ['opaque', 'favorites']) test(`Home recommendations ignore retained non-array ${id} memberships: ${JSON.stringify(videos)}`, async () => {
+    const playlists = [{ _id: id, videos, unknown: { keep: true } }]
     const before = structuredClone(playlists)
     const instance = createFeed({ playlists, settings: { getHistoryCacheSorted: [] } })
     try {
