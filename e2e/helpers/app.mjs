@@ -145,8 +145,9 @@ export async function createUserDataDir(seed = {}) {
  * @param {string} [options.appRoot] repository root containing dist-e2e
  * @param {string} [options.executablePath] Electron executable to launch
  * @param {(phase: 'electronConnected'|'windowCreated'|'routeCommitted'|'interactive', page?: import('@playwright/test').Page) => void|Promise<void>} [options.onPhase]
+ * @param {number} [windowRetry] internal first-window retry count
  */
-export async function launchApp(userDataDir, extraArgs = [], options = {}) {
+export async function launchApp(userDataDir, extraArgs = [], options = {}, windowRetry = 0) {
   const appRoot = options.appRoot ?? repoRoot
   // Force X11 so the app renders on the xvfb display instead of escaping
   // to the user's real Wayland session.
@@ -195,6 +196,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   }
   // Listen before waiting for the first window or renderer readiness so startup
   // exceptions cannot disappear before a test gets access to its page fixture.
+  const electronProcess = electronApp.process()
   const context = electronApp.context()
   const startupErrors = []
   const recordStartupError = error => startupErrors.push(error.error().message)
@@ -213,7 +215,22 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   await notifyPhase('electronConnected')
 
-  const page = await electronApp.firstWindow()
+  let page
+  try {
+    page = await electronApp.firstWindow()
+  } catch (error) {
+    context.off('weberror', recordStartupError)
+    const exited = electronProcess.exitCode !== null || electronProcess.signalCode !== null
+      ? Promise.resolve()
+      : new Promise(resolve => electronProcess.once('exit', resolve))
+    await electronApp.close().catch(() => {})
+    await exited
+    // A stalled Linux startup can connect without creating a window. Close
+    // that process before retrying; persistent failures still fail the test.
+    if (error.name !== 'TimeoutError' || windowRetry === 2) throw error
+    expect(startupErrors, 'Renderer errors during startup').toEqual([])
+    return launchApp(userDataDir, extraArgs, options, windowRetry + 1)
+  }
   await notifyPhase('windowCreated', page)
 
   // Fail fast if dist-e2e contains a development build (it would load the
