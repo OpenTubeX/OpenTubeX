@@ -62,6 +62,12 @@ async function functions(file, names, bindings = {}) {
     context.userPlaylistReordering ??= ref(false)
     context.userWindowReady ??= ref(true)
   }
+  if (file === 'src/renderer/views/History/History.vue') {
+    context.fromDate ??= ref('')
+    context.toDate ??= ref('')
+    context.channel ??= ref('')
+    context.hasFilters ??= { get value() { return !!(context.fromDate.value || context.toDate.value || context.channel.value || context.query?.value.trim()) } }
+  }
   if (file === 'src/renderer/views/Playlist/Playlist.vue') {
     for (const name of ['playlistReordering', 'playlistOrderReady']) {
       if (Object.hasOwn(bindings, name)) continue
