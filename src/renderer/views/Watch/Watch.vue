@@ -1313,11 +1313,11 @@
         :disabled="!fullscreenRecommendationsOpen"
       >
         <watch-video-recommendations
-          v-if="!isLoading && !hideRecommendedVideos && (recommendedVideos.length > 0 || (isOffline && localFilePlayback && offlineDownloadSuggestions.length > 0))"
+          v-if="!isLoading && !hideRecommendedVideos && displayedRecommendations.length > 0"
           ref="watchVideoRecommendations"
           :fullscreen-overlay="fullscreenRecommendationsOpen"
-          :data="recommendedVideos.length > 0 ? recommendedVideos : offlineDownloadSuggestions"
-          :offline="isOffline && recommendedVideos.length === 0"
+          :data="displayedRecommendations"
+          :offline="isOffline"
           class="watchVideoSideBar watchVideoRecommendations"
           :class="{
             theatreRecommendations: useTheatreMode,
