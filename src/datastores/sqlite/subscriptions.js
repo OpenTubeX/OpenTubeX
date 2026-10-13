@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import model from '@seald-io/nedb/lib/model.js'
 import { getNewSubscriptionFeedEntries } from '../../renderer/helpers/newSubscriptionFeed.js'
 import { isVideoHiddenByPreferences } from '../../renderer/helpers/subscription-visibility.js'
-import { applySubscriptionVideoLimit, filterMembersOnlySubscriptionVideos, getSubscriptionsForFeed } from '../../renderer/helpers/subscription-channels.js'
+import { applySubscriptionVideoLimit, filterMembersOnlySubscriptionVideos, getSubscriptionsForFeed, getValidSubscriptionChannels } from '../../renderer/helpers/subscription-channels.js'
 import { ensureUpcomingSubscriptionFeedPublished, getSubscriptionVideoSortTimestamp, updateUpcomingPremiereState, ensureSubscriptionFeedEntryState, getUpcomingPremiereTimestamp } from '../../renderer/helpers/subscription-entries.js'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../renderer/helpers/subscription-seen-videos.js'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState.js'
@@ -126,7 +126,8 @@ export async function subscriptionPage(engine, options) {
 }
 
 async function readSubscriptionPage(engine, options) {
-  const { subscriptions, category = 'videos', onlyNew = false, cursor = null, limit = 100, preferences = {}, enabledCategories = ['videos', 'shorts', 'live', 'posts'] } = options
+  const { subscriptions: savedSubscriptions, category = 'videos', onlyNew = false, cursor = null, limit = 100, preferences = {}, enabledCategories = ['videos', 'shorts', 'live', 'posts'] } = options
+  const subscriptions = getValidSubscriptionChannels(savedSubscriptions)
   const now = Number.isFinite(options.now) ? options.now : Date.now()
   const revisions = [engine.revision('subscriptionCache'), engine.revision('history'), engine.revision('settings')]
   const keyPreferences = { ...preferences, hiddenChannelNames: preferences.hiddenChannelNames instanceof Set ? [...preferences.hiddenChannelNames].toSorted() : preferences.hiddenChannelNames }
@@ -208,8 +209,6 @@ async function readSubscriptionPage(engine, options) {
             // Keep only an ordered member reference unless a shared feed helper
             // added a display override. Revisions invalidate this view on edits.
             const memberId = entry?.[memberIdentity]
-            const timestamp = entry == null ? null : getUpcomingPremiereTimestamp(entry)
-            if (timestamp > now && (nextPremiereTimestamp === null || timestamp < nextPremiereTimestamp)) nextPremiereTimestamp = timestamp
             return memberIds.has(entry) ? memberId : null
           })
           if (references.every(memberId => typeof memberId === 'string')) {

@@ -1512,3 +1512,32 @@ for (const failWrite of [false, true]) {
     }
   })
 }
+
+
+for (const [category, field, idKey] of [['videos', 'videos', 'videoId'], ['shorts', 'shorts', 'videoId'], ['live', 'liveStreams', 'videoId'], ['posts', 'communityPosts', 'postId']]) {
+  for (const onlyNew of [false, true]) {
+    test(`subscription pages ignore opaque profile members without rewriting them: ${category}, New: ${onlyNew}`, async t => {
+      const engine = memory(t)
+      const subscriptions = [null, false, 42, 'retained', [], {}, { id: 42 }, { id: '' }, new Date(123), { id: 'channel', name: 'Valid', feedTypes: [category], unknown: new Date(456) }]
+      const profile = { _id: 'retained-profile', name: 'Retained', subscriptions, unknown: new Date(789) }
+      const entries = ['first', 'second'].map((id, index) => ({ [idKey]: id, authorId: 'channel', published: 1000 + index, publishedTime: 1000 + index, isNewInSubscriptionFeed: true }))
+      const cache = { _id: 'channel', [field]: entries, [field + 'Timestamp']: new Date(1500), unknown: new Date(1) }
+      await engine.collections.profiles.insertAsync(profile)
+      await engine.collections.subscriptionCache.insertAsync(cache)
+      const saved = await engine.collections.profiles.findOneAsync({ _id: profile._id })
+      const options = { subscriptions: saved.subscriptions, category, onlyNew, enabledCategories: [category], preferences: { forbiddenTitles: [] }, now: 2000, limit: 1 }
+      const records = []
+      let cursor = null
+      do {
+        const page = await subscriptionPage(engine, { ...options, cursor })
+        assert.equal(page.stale, undefined)
+        records.push(...page.records.map(withoutMemberIdentity))
+        cursor = page.cursor
+      } while (cursor)
+      assert.deepEqual(records, entries.toReversed())
+      assert.deepEqual(saved, profile)
+      assert.deepEqual(await engine.collections.profiles.findOneAsync({ _id: profile._id }), profile)
+      assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: cache._id }), cache)
+    })
+  }
+}
