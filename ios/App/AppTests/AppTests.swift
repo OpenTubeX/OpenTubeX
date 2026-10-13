@@ -2761,6 +2761,8 @@ final class AppTests: XCTestCase {
             await testStore.dispatch('updateRememberHistory', false);
             Array.from(document.querySelectorAll('.settingsWindow button')).find(button => button.textContent.trim() === 'Export backup').click();
             """, arguments: arguments, in: nil, contentWorld: .page)
+            try await wait("Array.from(document.querySelectorAll('.settingsSubpageContent button')).some(button => button.textContent.trim() === 'Export selected data' && !button.disabled)")
+            _ = try await evaluate("Array.from(document.querySelectorAll('.settingsSubpageContent button')).find(button => button.textContent.trim() === 'Export selected data').click(); true")
             let controller = try XCTUnwrap(webView.window?.rootViewController)
             try await waitForNative { controller.presentedViewController != nil }
             let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
@@ -2771,6 +2773,8 @@ final class AppTests: XCTestCase {
             picker.delegate?.documentPickerWasCancelled?(picker)
             try await dismiss(picker)
             XCTAssertFalse(FileManager.default.fileExists(atPath: exported.path))
+            _ = try await evaluate("document.querySelector('.settingsWindow .settingsBackButton').click(); true")
+            try await wait("!document.querySelector('.settingsSubpageContent')")
             _ = try await webView.callAsyncJavaScript("""
             await testStore.dispatch('removeProfile', id);
             await testStore.dispatch('removePlaylist', id);
