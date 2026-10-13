@@ -255,6 +255,27 @@ for (const success of [false, true]) {
   })
 }
 
+test('conditional profile restore preserves Dates and rejects stale writes over desktop IPC', async ({ page }) => {
+  const result = await page.evaluate(async actions => {
+    const initial = { _id: 'conditional-restore', name: 'Conditional restore', subscriptions: [{ id: 'channel', unknown: new Date(1) }], unknown: new Date(2) }
+    await window.ftElectron.dbProfiles(actions.upsert, initial)
+    const previous = (await window.ftElectron.dbProfiles(actions.find)).find(profile => profile._id === initial._id)
+    const imported = { ...previous, subscriptions: [...previous.subscriptions, { id: 'restored' }], unknown: new Date(3) }
+    const saved = await window.ftElectron.dbProfiles(actions.replace, { previous, profile: imported })
+    const rejected = await window.ftElectron.dbProfiles(actions.replace, { previous, profile: { ...previous, name: 'Stale overwrite' } })
+    const final = (await window.ftElectron.dbProfiles(actions.find)).find(profile => profile._id === initial._id)
+    return { saved: saved.numAffected, rejected: rejected.numAffected, final, dates: [final.unknown instanceof Date, final.subscriptions[0].unknown instanceof Date] }
+  }, { upsert: DBActions.GENERAL.UPSERT, find: DBActions.GENERAL.FIND, replace: DBActions.PROFILES.REPLACE_IF_UNCHANGED })
+  expect(result).toStrictEqual({
+    saved: 1,
+    rejected: 0,
+    dates: [true, true],
+    final: {
+      _id: 'conditional-restore', name: 'Conditional restore', subscriptions: [{ id: 'channel', unknown: new Date(1) }, { id: 'restored' }], unknown: new Date(3),
+    }
+  })
+})
+
 test('exports and imports search history and merges changed history IDs through the unified ZIP', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async action => {

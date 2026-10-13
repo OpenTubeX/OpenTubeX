@@ -87,7 +87,7 @@ test('portable restore preflights every selected playlist merge before profiles 
   const context = await functions(dataSettings, ['importUnifiedBackup'], {
     process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
     backupBusy: ref(false), selectedBackupSections: ref(['profiles', 'playlists']), backupData: ref(data),
-    DBProfileHandlers: { find: async () => [], upsert: async record => writes.push(record) },
+    DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async (_previous, record) => { writes.push(record); return { numAffected: 1 } } },
     DBPlaylistHandlers: { find: async () => [retained] }, mergeBackupProfile, mergeBackupPlaylist,
     store: { dispatch: async (action, record) => { if (action === 'updatePlaylist') writes.push(record); return true } },
     t: key => key, showToast: toast => toasts.push(toast),
@@ -106,7 +106,7 @@ test('portable restore rejects unsupported selected profiles before any write bu
       const context = await functions(dataSettings, ['importUnifiedBackup'], {
         process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
         backupBusy: ref(false), selectedBackupSections: ref(selected), backupData: ref({ profiles: [{ _id: 'p', name: 'Retained', ...(subscriptions === undefined ? {} : { subscriptions }) }], settings: { theme: 'dark' } }),
-        DBProfileHandlers: { find: async () => [], upsert: async record => writes.push(record) }, mergeBackupProfile,
+        DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async (_previous, record) => { writes.push(record); return { numAffected: 1 } } }, mergeBackupProfile,
         store: { dispatch: async () => true }, applyImportedSettings: async settings => writes.push(settings),
         compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => toasts.push(toast),
       })
@@ -2398,7 +2398,7 @@ test('portable backup can restore supported selected sections while retaining an
   const context = await functions(dataSettings, ['importUnifiedBackup'], {
     process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
     backupBusy: ref(false), selectedBackupSections: ref(['profiles']), backupData: ref(data), mergeBackupProfile,
-    DBProfileHandlers: { find: async () => [], upsert: async record => saved.push(record) }, store: { dispatch: async () => {} },
+    DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async (_previous, record) => { saved.push(record); return { numAffected: 1 } } }, store: { dispatch: async () => {} },
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   })
   await context.importUnifiedBackup()
@@ -2661,7 +2661,7 @@ for (const afterRead of [false, true]) {
     const context = await functions(dataSettings, ['importUnifiedBackup'], {
       process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
       backupBusy: ref(false), selectedBackupSections: ref(['profiles', 'playlists']), backupData: ref({ profiles: [{ _id: 'profile', name: 'Profile', subscriptions: [] }], playlists: [incoming] }),
-      DBPlaylistHandlers: Playlists, DBProfileHandlers: { find: async () => [], upsert: async () => { if (!afterRead) await add() } },
+      DBPlaylistHandlers: Playlists, DBProfileHandlers: { find: async () => [], replaceIfUnchanged: async () => { if (!afterRead) await add(); return { numAffected: 1 } } },
       mergeBackupPlaylist, mergeBackupProfile: (_previous, profile) => profile,
       store: { dispatch: async (method, value) => { if (method === 'updatePlaylist') { if (afterRead) await add(); await db.playlists.updateAsync({ _id: value._id }, value); return true } } },
       compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),

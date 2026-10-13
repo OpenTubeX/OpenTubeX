@@ -1973,6 +1973,7 @@ test.describe('retained full-record playlist counts', () => {
     const card = page.locator('.tabContent[aria-hidden="false"] .ft-list-item').filter({ has: page.locator('.h3Title', { hasText: saved.playlistName }) })
     await expect(card).toBeVisible()
     await useFullRecord()
+    await expect(card).toHaveCount(1)
     await expect(card.locator('.videoCountContainer')).toContainText('2')
     await expect(card.locator('.thumbnailImage')).toHaveAttribute('src', new RegExp(`/vi/${history[0].videoId}/`))
     await expectImagesLoaded(card.locator('.thumbnailImage'))
