@@ -388,3 +388,36 @@ for (const adapter of ['nedb', 'sqlite']) {
     })
   }
 }
+
+
+test('portable restore accumulates repeated playlist records without dropping incoming members', async () => {
+  const db = new Datastore({ inMemoryOnly: true })
+  const original = { _id: 'retained', playlistName: 'Retained', protected: false, videos: [{ videoId: 'local', playlistItemId: 'local' }], unknown: new Date(1) }
+  await db.insertAsync(original)
+  const incoming = ['A', 'B'].map(videoId => ({ _id: original._id, playlistName: 'Imported', videos: [{ videoId, playlistItemId: videoId, unknown: new Date(videoId === 'A' ? 2 : 3) }] }))
+  const { data: decoded } = await readUnifiedBackup(createUnifiedBackup({ playlists: incoming }))
+  const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+  const script = parseVue(component).descriptor.scriptSetup.content
+  const declaration = parseJavaScript(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+  const messages = []
+  const bindings = {
+    ...backupHelpers, process: { env: { IS_ELECTRON: false } },
+    backupBusy: { value: false }, selectedBackupSections: { value: ['playlists'] }, backupData: { value: decoded },
+    backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+    DBPlaylistHandlers: {
+      find: () => db.findAsync({}),
+      replaceIfUnchanged: async (previous, record) => db.updateAsync({ _id: record._id, $where() { return model.serialize(this) === model.serialize(previous) } }, record),
+    },
+    store: { dispatch: async (action, record) => {
+      if (action === 'updatePlaylist') { await db.updateAsync({ _id: record._id }, record); return true }
+    } },
+    compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
+  }
+  const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
+  for (let repeat = 0; repeat < 2; repeat++) {
+    await restore()
+    const saved = await db.findOneAsync({ _id: original._id })
+    assert.deepEqual(saved, { ...original, playlistName: 'Imported', videos: [original.videos[0], ...incoming.flatMap(playlist => playlist.videos)], ...(Object.hasOwn(saved, 'lastUpdatedAt') ? { lastUpdatedAt: saved.lastUpdatedAt } : {}) })
+    assert.match(messages.at(-1).message, /Backup imported/)
+  }
+})
