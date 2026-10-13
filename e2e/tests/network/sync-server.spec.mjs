@@ -872,7 +872,14 @@ test.describe('OpenTubeX sync server', () => {
     await dialog.getByText('Synced playlist', { exact: true }).click()
     await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
     await expect(page.locator('.repairStatus').getByRole('status')).toContainText('Repaired 1 · Failed 0')
-    const repairedIds = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))
+    const readIds = () => page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id: 'sync-playlist' })
+        : store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist')
+      return playlist.videos.map(video => video.playlistItemId)
+    })
+    const repairedIds = await readIds()
     expect(new Set(repairedIds).size).toBe(2)
     const section = await goToSettingsSection(page, 'sync')
     await section.getByRole('button', { name: 'Sync now' }).click()
@@ -883,7 +890,7 @@ test.describe('OpenTubeX sync server', () => {
       upload_date: Date.parse('2025-01-01'),
       uploader: expect.objectContaining({ id: repairChannelId, name: 'Recovered channel' })
     })])
-    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))).toEqual(repairedIds)
+    expect(await readIds()).toStrictEqual(repairedIds)
     const cleanup = await fetch(`${syncServerUrl}/v1/account/delete`, {
       method: 'DELETE',
       headers: { ...headers, 'X-Forwarded-For': rateLimitClient(testInfo) },
