@@ -1199,11 +1199,11 @@ async function cleanupUserPlaylist(mode) {
   }
 }
 
+const router = useRouter()
+
 /**
  * @param {'delete' | 'cancel' | null} option
  */
-const router = useRouter()
-
 function handleDeletePlaylistPromptAnswer(option) {
   showDeletePlaylistPrompt.value = false
   if (option !== 'delete') { return }
