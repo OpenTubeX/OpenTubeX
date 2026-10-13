@@ -56,6 +56,7 @@ export function normalizeChannelAvatar(avatar) {
 }
 
 export function videoToRemote(video, { allowMissingUploader = false } = {}) {
+  if (video === null || typeof video !== 'object' || Array.isArray(video)) return null
   const videoId = video.videoId
   const uploaderId = video.authorId === UNKNOWN_SYNC_UPLOADER_ID ? '' : video.authorId || ''
 
@@ -331,4 +332,50 @@ export function applyRemoteHistoryChanges({ history, upserts, deletions }) {
   }
   const deleted = new Set(deletions)
   return history.filter(entry => !deleted.has(entry.video.id) && !byId.has(entry.video.id)).concat([...byId.values()])
+}
+
+// Repairs enrich missing metadata; populated values retain their existing
+// conflict behavior. Keep thumbnails and uploader verification on their side.
+export function enrichPlaylistVideo(video, source) {
+  const result = { ...video, uploader: { ...video.uploader } }
+  const known = (value, placeholder) => typeof value === 'string' && value.trim() && value !== placeholder
+  if ((!video.uploader.id || video.uploader.id === UNKNOWN_SYNC_UPLOADER_ID) &&
+      known(source.uploader.id, UNKNOWN_SYNC_UPLOADER_ID)) {
+    result.uploader.id = source.uploader.id
+  }
+  if (!known(video.title, video.id) && known(source.title, source.id)) result.title = source.title
+  if (!known(video.uploader.name, video.uploader.id) &&
+      result.uploader.id === source.uploader.id && known(source.uploader.name, source.uploader.id)) {
+    result.uploader.name = source.uploader.name
+  }
+  for (const key of ['upload_date', 'duration']) {
+    if ((!Number.isFinite(video[key]) || video[key] <= 0) && Number.isFinite(source[key]) && source[key] > 0) {
+      result[key] = source[key]
+    }
+  }
+  return result
+}
+
+export function enrichLocalPlaylistVideo(video, remoteVideo, options = {}) {
+  if (video === null || typeof video !== 'object' || Array.isArray(video)) return video
+  const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
+    ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
+    : video
+  if (!remoteVideo) return current
+  const uploader = uploaderToLocal(remoteVideo.uploader)
+  const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
+  const payload = videoToRemote(identified, options)
+  if (!payload) return current
+  const enriched = enrichPlaylistVideo(payload, remoteVideo)
+  const result = { ...identified }
+  if (payload.title !== enriched.title) result.title = enriched.title
+  if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
+  if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
+  if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
+    result.lengthSeconds = enriched.duration
+    result.isLive = false
+    result.liveNow = false
+    result.isUpcoming = false
+  }
+  return result
 }

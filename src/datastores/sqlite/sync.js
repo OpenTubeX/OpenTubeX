@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import model from '@seald-io/nedb/lib/model.js'
-import { mergeHistory, mergeIds, videoToRemote, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
+import { mergeHistory, mergeIds, enrichPlaylistVideo, enrichLocalPlaylistVideo, videoToRemote, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
 import { migrateLegacyHistoryRecord } from '../../history.js'
 
 const playlistMetadata = record => record ? { playlistName: record.playlistName, description: record.description } : null
@@ -116,10 +116,24 @@ export class LibrarySync {
     const videos = local?.videos ?? []
     const localById = new Map(videos.filter(video => video !== null && videoToRemote(video, job.options)).map(video => [video.videoId, video]))
     const remoteById = new Map(this.read(id, 'remote').map(video => [video.id, video]))
+    const localMetadataById = new Map()
+    for (const video of videos) {
+      const payload = videoToRemote(video, job.options)
+      if (!payload) continue
+      const previous = localMetadataById.get(video.videoId)
+      localMetadataById.set(video.videoId, previous ? enrichPlaylistVideo(previous, payload) : payload)
+    }
     const merged = mergeIds(localById.keys(), remoteById.keys(), this.read(id, 'previous'), { ...job.options, collection: `videos in playlist ${job.metadata.title}`, getItemName: id => localById.get(id)?.title || remoteById.get(id)?.title })
-    const desired = videos.filter(video => video === null || !videoToRemote(video, job.options) || merged.has(video.videoId)).map(video => video?.authorId === UNKNOWN_SYNC_UPLOADER_ID
-      ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
-      : video)
+    const uploads = []
+    for (const videoId of merged) {
+      const localMetadata = localMetadataById.get(videoId)
+      if (!localMetadata) continue
+      const remote = remoteById.get(videoId)
+      const enriched = remote ? enrichPlaylistVideo(remote, localMetadata) : localMetadata
+      if (JSON.stringify(remote) !== JSON.stringify(enriched)) uploads.push(enriched)
+      remoteById.set(videoId, enriched)
+    }
+    const desired = videos.filter(video => video === null || !videoToRemote(video, job.options) || merged.has(video.videoId)).map(video => enrichLocalPlaylistVideo(video, remoteById.get(video?.videoId), job.options))
     for (const videoId of merged) {
       if (!localById.has(videoId)) {
         const video = remoteById.get(videoId)
@@ -127,7 +141,7 @@ export class LibrarySync {
       }
     }
     const outputs = {
-      playlistUploads: [...merged].filter(videoId => !remoteById.has(videoId)).map(videoId => videoToRemote(localById.get(videoId), job.options)).filter(Boolean),
+      playlistUploads: uploads,
       playlistRemovals: [...remoteById.keys()].filter(videoId => !merged.has(videoId)),
       playlistIds: [...merged],
       playlistMembers: desired

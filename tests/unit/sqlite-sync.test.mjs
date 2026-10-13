@@ -516,3 +516,25 @@ test('playlist metadata baseline changes only after the local apply succeeds', a
   await syncSnapshotSection(engine, { account, collection: 'playlists', value: { ...value, next: { videos: ['new'] } } })
   assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), { ...snapshot, playlists: { p: { ...snapshot.playlists.p, metadata: value.metadata, videos: ['new'] } } })
 })
+
+test('SQLite sync uploads repaired metadata for existing IDs without changing duplicate occurrences', async t => {
+  const { engine, sync } = fixture(t)
+  const old = { videoId: 'abcdefghijk', title: 'abcdefghijk', authorId: 'channel', author: 'channel', published: 0, lengthSeconds: 0 }
+  const repaired = { ...old, title: 'Repaired', author: 'Known channel', published: 1735689600000, lengthSeconds: 120 }
+  const original = { _id: 'p', playlistName: 'Saved', videos: [{ ...repaired, playlistItemId: 'first', unknown: new Date(1) }, { ...repaired, playlistItemId: 'second', unknown: new Date(2) }], unknown: new Date(3) }
+  await engine.collections.playlists.insertAsync(original)
+  const memberIds = engine.playlistPage({ id: 'p' }).records.map(record => record._libraryMemberId)
+  for (const remote of [videoToRemote(old), videoToRemote(repaired)]) {
+    const job = await sync.start({ kind: 'playlist', playlistId: 'p', metadata: { title: 'Saved', description: '' } })
+    await sync.chunk({ ...job, section: 'remote', records: [remote] })
+    await sync.plan(job)
+    const uploads = (await sync.page({ ...job, section: 'playlistUploads' })).records
+    assert.deepEqual(uploads, remote.title === old.title ? [videoToRemote(repaired)] : [])
+    assert.equal(await sync.apply(job, {}), true)
+    const saved = await engine.playlistSnapshot({ id: 'p' })
+    assert.deepEqual(saved.videos, original.videos)
+    assert.equal(saved.unknown.getTime(), 3)
+    assert.deepEqual(engine.playlistPage({ id: 'p' }).records.map(record => record._libraryMemberId), memberIds)
+    await sync.cancel(job)
+  }
+})
