@@ -4,6 +4,10 @@
   flex-direction: column;
 }
 
+.videoDescription:not(:has(.descriptionStatus)) {
+  padding-block: 16px;
+}
+
 .descriptionScroll {
   overflow-y: auto;
   overflow-anchor: none;
@@ -62,6 +66,10 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   padding-inline-end: 40px;
+}
+
+.videoDescription:not(:has(.descriptionStatus)) .description {
+  margin-block: 0;
 }
 
 .descriptionCopyButton {
