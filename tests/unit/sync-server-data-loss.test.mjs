@@ -14,6 +14,17 @@ import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
 import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
+const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
+const baselineMethod = storeSource.slice(storeSource.indexOf('    async persistPlaylistSyncBaseline('), storeSource.indexOf('    async persistHistorySyncBaseline('))
+function playlistBaseline(previous = {}) {
+  const settings = { syncServerSnapshot: JSON.stringify({ playlists: previous }) }
+  const persistPlaylistSyncBaseline = vm.runInNewContext(`({${baselineMethod}}).persistPlaylistSyncBaseline`, {
+    rootState: { settings }, encrypted: false, historyAccount: Array(5).fill(undefined), parseSnapshot: JSON.parse,
+    dispatch: async (action, value) => { assert.equal(action, 'updateSyncServerSnapshot'); settings.syncServerSnapshot = value },
+  })
+  return { persistPlaylistSyncBaseline, readBaseline: () => JSON.parse(settings.syncServerSnapshot).playlists }
+}
+
 const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw, MAIN_PROFILE_ID, deepCopy: structuredClone, generateRandomUniqueId: randomUUID, ...errors, ...bookmarks, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -74,7 +85,7 @@ const cases = [
 
 for (const scenario of cases) {
   test(`identifies deletions in ${scenario.collection} before applying them`, async () => {
-    const store = { state: scenario.state, dispatch: () => assert.fail('Unexpected local change') }
+    const store = { ...playlistBaseline(), state: scenario.state, dispatch: () => assert.fail('Unexpected local change') }
     await assert.rejects(context[scenario.method](scenario.client, store, scenario.previous), error => {
       assert.ok(error instanceof errors.SyncServerDataLossError, error.stack)
       assert.equal(error.collection, scenario.collection)
@@ -111,6 +122,7 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   const upload = adapter.addPlaylistVideos.bind(adapter)
   adapter.addPlaylistVideos = async (...args) => { uploads++; return upload(...args) }
   const store = {
+    ...playlistBaseline(),
     state: { playlists: { playlists: [local] } },
     dispatch: async (action, value) => {
       assert.equal(action, 'updatePlaylistFromSync')
@@ -183,7 +195,7 @@ for (const lengthSeconds of [120.5, 0.4]) {
 for (const edit of ['delete playlist', 'remove entry', 'add entry', 'rename']) {
   test(`playlist sync rejects a stale snapshot after another window's ${edit}`, async () => {
     const local = { ...playlist, videos: [{ ...video, title: 'Repaired title', author: 'Channel', published: 0, lengthSeconds: 120, playlistItemId: 'keep' }] }
-    const store = { state: { playlists: { playlists: [structuredClone(local)] } }, dispatch: () => assert.fail('A stale playlist must not be written') }
+    const store = { ...playlistBaseline(), state: { playlists: { playlists: [structuredClone(local)] } }, dispatch: () => assert.fail('A stale playlist must not be written') }
     const client = {
       getPlaylists: async () => [{ id: local._id }],
       getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [syncVideoToRemote({ ...video, title: video.videoId, published: 100, lengthSeconds: 120 })] }),
@@ -209,7 +221,7 @@ test('accepting a recorded playlist duration clears stale live and upcoming flag
   await context.syncPlaylists({
     getPlaylists: async () => [{ id: local._id }],
     getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [syncVideoToRemote({ ...video, lengthSeconds: 120 })] }),
-  }, { state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } })
+  }, { ...playlistBaseline(), state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } })
   assert.equal(saved.videos[0].lengthSeconds, 120)
   assert.equal(saved.videos[0].isLive, false)
   assert.equal(saved.videos[0].liveNow, false)
@@ -222,6 +234,98 @@ test('legacy sync preserves an unsyncable occurrence when a syncable duplicate i
   await context.syncPlaylists({
     getPlaylists: async () => [{ id: local._id }],
     getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [] }),
-  }, { state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } }, { [local._id]: { videos: [video.videoId] } }, { allowDataLoss: true })
+  }, { ...playlistBaseline(), state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } }, { [local._id]: { videos: [video.videoId] } }, { allowDataLoss: true })
   assert.deepEqual(Array.from(saved.videos, entry => entry.playlistItemId), ['unsyncable'])
+})
+
+for (const stage of ['headers', 'creation', 'upload', 'save']) {
+  test(`a deletion during first playlist sync at ${stage} cannot return through an orphaned remote copy`, async () => {
+    const local = { ...playlist, videos: [{ ...video, title: 'Known title', playlistItemId: 'keep' }] }
+    const remote = new Map()
+    let created = 0
+    const store = {
+    ...playlistBaseline(),
+      state: { playlists: { playlists: [local] } },
+      dispatch: async (action, payload) => {
+        if (action === 'addPlaylist') store.state.playlists.playlists.push(payload)
+        else if (stage === 'save') { store.state.playlists.playlists = []; return false }
+        else assert.fail(`Unexpected action: ${action}`)
+      },
+    }
+    const client = {
+      getPlaylists: async () => {
+        if (stage === 'headers') store.state.playlists.playlists = []
+        return [...remote.values()].map(entry => entry.playlist)
+      },
+      getPlaylist: async id => remote.get(id),
+      createPlaylist: async metadata => {
+        created++
+        const header = { ...metadata, id: 'server-generated' }
+        remote.set(header.id, { playlist: header, videos: [] })
+        if (stage === 'creation') store.state.playlists.playlists = []
+        return header
+      },
+      addPlaylistVideos: async (id, videos) => {
+        remote.get(id).videos.push(...videos)
+        if (stage === 'upload') store.state.playlists.playlists = []
+      },
+      deletePlaylist: async id => remote.delete(id),
+    }
+    // Make the sync save a local metadata improvement so the final CAS can fail.
+    if (stage === 'save') {
+      local.videos.push({ ...video, title: video.videoId, playlistItemId: 'duplicate' })
+    }
+    await assert.rejects(context.syncPlaylists(client, store), /Playlist changed during sync/)
+    assert.equal(remote.size, stage === 'headers' ? 0 : 1)
+    if (stage === 'headers') assert.equal(created, 0, 'no remote mutation after a stale header download')
+    await context.syncPlaylists(client, store, store.readBaseline(), { allowDataLoss: true })
+    assert.equal(remote.size, 0)
+    assert.equal(store.state.playlists.playlists.length, 0, 'the next sync cannot re-import the deleted playlist')
+  })
+}
+
+test('a rejected multi-playlist sync remembers new IDs and preserves remote edits from another device', async () => {
+  const first = { ...playlist, _id: 'first' }
+  const second = { ...playlist, _id: 'second' }
+  const remote = new Map([['existing', { playlist: { id: 'existing', title: 'Keep me', description: '' }, videos: [] }]])
+  const removed = []
+  let interrupt = true
+  const store = {
+    ...playlistBaseline(),
+    state: { playlists: { playlists: [first, second] } },
+    dispatch: async (action, value) => {
+      if (action === 'addPlaylist') store.state.playlists.playlists.push(value)
+      else {
+        assert.equal(action, 'updatePlaylistFromSync')
+        store.state.playlists.playlists[0] = value.playlist
+      }
+      return true
+    },
+  }
+  const client = {
+    getPlaylists: async () => [...remote.values()].map(entry => entry.playlist),
+    getPlaylist: async id => remote.get(id),
+    createPlaylist: async metadata => {
+      const header = { ...metadata, id: `remote-${metadata.id}` }
+      remote.set(header.id, { playlist: header, videos: [] })
+      if (metadata.id === 'second' && interrupt) {
+        store.state.playlists.playlists = [first]
+        remote.get('remote-first').playlist.title = 'Edited elsewhere'
+        remote.get('remote-first').videos.push(syncVideoToRemote({ ...video, videoId: 'remote-added', title: 'Added elsewhere' }))
+        interrupt = false
+      }
+      return header
+    },
+    addPlaylistVideos: async (id, videos) => remote.get(id).videos.push(...videos),
+    deletePlaylist: async id => { removed.push(id); remote.delete(id) },
+  }
+  await assert.rejects(context.syncPlaylists(client, store), /Playlist changed during sync/)
+  assert.deepEqual(removed, [])
+  assert.deepEqual([...remote.keys()], ['existing', 'remote-first', 'remote-second'])
+  await context.syncPlaylists(client, store, store.readBaseline(), { allowDataLoss: true })
+  assert.deepEqual(removed, ['remote-second'])
+  assert.equal(store.state.playlists.playlists[0].playlistName, 'Edited elsewhere')
+  assert.equal(store.state.playlists.playlists[0].videos[1].videoId, 'remote-added')
+  assert.deepEqual(store.state.playlists.playlists.map(entry => entry._id), ['first', 'existing'])
+  assert.deepEqual([...remote.keys()], ['existing', 'remote-first'])
 })

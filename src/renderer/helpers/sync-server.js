@@ -796,6 +796,10 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     getItemName: id => localById.get(id)?.playlistName || remoteById.get(id)?.playlist.title || previous[id]?.metadata?.title,
   })
   const nextSnapshot = {}
+  const assertCurrent = (local, id) => {
+    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
+    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
+  }
 
   for (const [id, remote] of remoteById) {
     if (!mergedIds.has(id)) {
@@ -815,10 +819,14 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const remoteMetadata = remote ? { ...remote.playlist, id } : null
     const metadata = selectPlaylistMetadata(local, remoteMetadata, previous[id]?.metadata)
     let remoteId = remote?.remoteId ?? id
+    assertCurrent(local, id)
 
     if (!remote) {
       const createdPlaylist = await client.createPlaylist(metadata)
       remoteId = createdPlaylist?.id ?? id
+      // Keep the generated ID even if a later stale-state guard aborts this
+      // sync. A retry must recognize our copy instead of importing it as new.
+      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata })
       remote = { playlist: { ...metadata, id: remoteId }, videos: [], remoteId }
     } else if (!metadataEquals(metadata, playlistMetadataFromRemote(remoteMetadata))) {
       await client.updatePlaylist(remoteId, metadata)
@@ -859,10 +867,12 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
 
     if (remoteVideosToAdd.length > 0) {
       await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
+      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, added: remoteVideosToAdd.map(video => video.id) })
     }
     for (const videoId of remoteVideosById.keys()) {
       if (!mergedVideoIds.has(videoId)) {
         await client.removePlaylistVideo(remoteId, videoId)
+        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, removed: [videoId] })
       }
     }
 
@@ -897,8 +907,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         .filter(videoId => !localVideosById.has(videoId))
         .map(videoId => videoToLocal(remoteVideosById.get(videoId))))
 
-    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
-    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
+    assertCurrent(local, id)
     if (!local) {
       local = {
         _id: id,

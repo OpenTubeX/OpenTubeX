@@ -270,6 +270,21 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit,
     dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
     assertActive: assertSyncStillActive,
+    async persistPlaylistSyncBaseline(id, { remoteId, metadata, added = [], removed = [] }) {
+      // Encrypted adapter mutations are only published in the final upload.
+      if (encrypted) return
+      const current = rootState.settings
+      if (![current.syncServerUrl, current.syncServerToken, current.syncServerPrivacyMode,
+        current.syncServerPrivacyKey, current.syncServerPrivacySalt].every((value, index) => value === historyAccount[index])) return
+      const saved = parseSnapshot(current.syncServerSnapshot)
+      const videos = new Set(saved.playlists?.[id]?.videos ?? [])
+      for (const videoId of added) videos.add(videoId)
+      for (const videoId of removed) videos.delete(videoId)
+      await dispatch('updateSyncServerSnapshot', JSON.stringify({
+        ...saved,
+        playlists: { ...saved.playlists, [id]: { remoteId, metadata, videos: [...videos] } },
+      }), { root: true })
+    },
     async persistHistorySyncBaseline(changes) {
       const sameAccount = () => {
         const current = rootState.settings

@@ -26,6 +26,7 @@ function createStore(playlists = []) {
   const state = reactive({ playlists: { playlists } })
   return {
     state,
+    async persistPlaylistSyncBaseline() {},
     async dispatch(action, payload) {
       const playlist = action === 'updatePlaylistFromSync' ? payload.playlist : payload
       if (action === 'addPlaylist') state.playlists.playlists.push(playlist)

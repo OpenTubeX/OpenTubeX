@@ -41,24 +41,33 @@ test.describe('playlist sync while another window edits the library', () => {
     }
   })
 
-  for (const edit of ['delete playlist', 'remove entry']) {
-    test(`sync cannot undo another window's ${edit} while uploading metadata`, async ({ app, page }) => {
+  for (const [edit, firstUpload] of [['delete playlist', false], ['remove entry', false], ['delete playlist', true]]) {
+    test(`sync cannot undo another window's ${edit} during ${firstUpload ? 'first upload' : 'metadata upload'}`, async ({ app, page }) => {
       let release
       const pending = new Promise(resolve => { release = resolve })
       let uploading = false
+      let remoteExists = !firstUpload
+      let removedRemoteCopy = false
+      const remoteId = firstUpload ? 'server-generated' : 'sync-race'
+      let remoteVideos = firstUpload ? [] : [{ id: 'abcdefghijk', title: 'abcdefghijk', uploader: { id: 'UCchannel', name: 'Recovered channel' }, duration: 120, upload_date: 100 }]
       await page.route('http://playlist-sync.test/**', async route => {
         const pathname = new URL(route.request().url()).pathname
         let json = []
         if (pathname === '/health') json = { capabilities: { encrypted_sync: 0 } }
-        else if (pathname === '/v1/playlists/') json = [{ id: 'sync-race', title: 'Imported', description: '' }]
-        else if (pathname === '/v1/playlists/sync-race') {
-          json = {
-            playlist: { id: 'sync-race', title: 'Imported', description: '' },
-            videos: [{ id: 'abcdefghijk', title: 'abcdefghijk', uploader: { id: 'UCchannel', name: 'Recovered channel' }, duration: 120, upload_date: 100 }],
-          }
-        } else if (pathname === '/v1/playlists/sync-race/videos') {
+        else if (pathname === '/v1/playlists/') {
+          if (route.request().method() === 'POST') {
+            remoteExists = true
+            json = { id: 'server-generated', title: 'Imported', description: '' }
+          } else json = remoteExists ? [{ id: firstUpload ? 'server-generated' : 'sync-race', title: 'Imported', description: '' }] : []
+        } else if (pathname === `/v1/playlists/${remoteId}`) {
+          if (route.request().method() === 'DELETE') {
+            remoteExists = false
+            removedRemoteCopy = true
+          } else json = { playlist: { id: remoteId, title: 'Imported', description: '' }, videos: remoteVideos }
+        } else if (pathname === `/v1/playlists/${remoteId}/videos`) {
           uploading = true
           await pending
+          remoteVideos = route.request().postDataJSON()
         }
         await route.fulfill({ json })
       })
@@ -93,8 +102,22 @@ test.describe('playlist sync while another window edits the library', () => {
           return { playlist: store.getters.getPlaylist('sync-race'), error: store.state.syncServer.syncServerError }
         })
         expect(result.error).toContain('Playlist changed during sync')
+        expect(removedRemoteCopy).toBe(false)
         if (edit === 'delete playlist') expect(result.playlist).toBeUndefined()
         else expect(result.playlist.videos).toEqual([])
+        if (firstUpload) {
+          const nextError = await page.evaluate(async () => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            try { await store.dispatch('syncWithSyncServer', { notifyDataLoss: false }) } catch (error) { return error.message }
+            return null
+          })
+          expect(nextError).toContain('would delete')
+          expect(remoteExists).toBe(true)
+          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(0)
+          await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer', { allowDataLoss: true }))
+          expect(remoteExists).toBe(false)
+          expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.length)).toBe(0)
+        }
         const relaunched = await app.relaunch()
         expect(await relaunched.page.evaluate(() => {
           return document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race')?.videos.length ?? -1
