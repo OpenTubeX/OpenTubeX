@@ -1731,6 +1731,10 @@ const customActions = {
             commit('upsertPlaylistToList', data)
             break
 
+          case SyncEvents.PLAYLISTS.REPAIR_METADATA:
+            commit('applyPlaylistMetadataRepairs', data)
+            break
+
           case SyncEvents.PLAYLISTS.UPSERT_VIDEO:
             commit('addVideo', data)
             break

@@ -187,7 +187,7 @@ Feed:
   Next Auto Refresh: 'Prossimo aggiornamento automatico: {date}'
 User Playlists:
   Repair Playlists: Ripara le playlist
-  Repair Description: Ripristina i dettagli dei video mancanti dopo l’importazione di un ZIP di YouTube Takeout. L’ordine delle playlist resta invariato.
+  Repair Description: Ripristina i dettagli mancanti dei video dopo l’importazione di un ZIP di YouTube Takeout. L’ordine delle playlist resta invariato.
   Remove Unavailable Videos: "Rimuovi i video non disponibili"
   Remove Unavailable Videos Confirmation: "Rimuovere i video non disponibili? Trovati: {count}. Impossibile controllare: {uncertain}. I video non verificati verranno conservati."
   Add Missing Videos: "Aggiungi i video mancanti dalla playlist originale"

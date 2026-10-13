@@ -5602,13 +5602,10 @@ function runApp() {
           )
           return null
 
-        case DBActions.PLAYLISTS.REPAIR_METADATA: {
-          const result = await baseHandlers.playlists.repairMetadata(data)
-          for (const playlist of result.playlists) {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: playlist })
-          }
-          return result
-        }
+        case DBActions.PLAYLISTS.REPAIR_METADATA:
+          return await baseHandlers.playlists.repairMetadata(data, update => {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.PLAYLISTS.REPAIR_METADATA, data: update })
+          })
 
         case DBActions.PLAYLISTS.UPSERT_VIDEO: {
           const result = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)

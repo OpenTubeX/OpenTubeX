@@ -22,3 +22,24 @@ export function playlistRepairPatch(video, metadata) {
   delete patch.liveNow
   return Object.keys(patch).length > 1 ? patch : null
 }
+
+export function applyPlaylistRepairUpdate(playlists, update) {
+  const playlist = playlists.find(item => item._id === update._id)
+  if (!playlist) return
+  const changesById = new Map()
+  for (const change of update.changes) {
+    const changes = changesById.get(change.videoId) ?? []
+    changes.push(change)
+    changesById.set(change.videoId, changes)
+  }
+  for (const video of playlist.videos) {
+    for (const change of changesById.get(video.videoId) ?? []) {
+      if (change.playlistItemId != null && video.playlistItemId !== change.playlistItemId) continue
+      for (const [key, value] of Object.entries(change.fields)) {
+        // A newer edit or a duplicate delivery must not be overwritten. Missing
+        // values survive IPC serialization as absent keys in previous.
+        if (Object.is(video[key], change.previous[key])) video[key] = value
+      }
+    }
+  }
+}

@@ -263,6 +263,7 @@
               :icon="['fas', 'sync']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
+              :disabled="metadataRepairBusy"
               @click="beginHistoryRepair"
             />
           </div>
@@ -412,6 +413,7 @@ const repairProgressValue = computed(() => historyRepairState.running && history
   : historyRepairState.checked)
 
 function beginHistoryRepair() {
+  if (metadataRepairBusy.value) return
   showRepairPrompt.value = false
   startHistoryRepair({ useCookies: repairUseCookies.value })
   nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))

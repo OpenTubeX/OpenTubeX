@@ -16,6 +16,7 @@ export function startPlaylistRepair({ playlistIds, useCookies = false }) {
     useCookies,
     records: [...recordsById.value.values()],
     needsRepair: needsPlaylistRepair,
+    saveBatchSize: 100,
     getRecord: id => recordsById.value.get(id),
     // Each saved occurrence may be missing different fields. Apply the public
     // metadata to the current entries in the datastore, rather than a snapshot.

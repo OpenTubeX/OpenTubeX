@@ -321,6 +321,7 @@ const SyncEvents = {
     UPSERT_VIDEOS: 21,
     DELETE_VIDEO: 22,
     DELETE_VIDEOS: 23,
+    REPAIR_METADATA: 24,
   },
 
   SUBSCRIPTION_CACHE: {

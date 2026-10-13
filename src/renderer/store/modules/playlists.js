@@ -1,3 +1,4 @@
+import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
 import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import {
@@ -169,7 +170,7 @@ const getters = {
 const actions = {
   async repairPlaylistMetadata({ commit }, payload) {
     const result = await DBPlaylistHandlers.repairMetadata(payload)
-    for (const playlist of result.playlists) commit('upsertPlaylistToList', playlist)
+    for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
     return { repaired: result.repaired, failed: result.failed }
   },
 
@@ -537,6 +538,10 @@ function dropPlaylistVideos(state, playlist, matches) {
 }
 
 const mutations = {
+  applyPlaylistMetadataRepairs(state, update) {
+    applyPlaylistRepairUpdate(state.playlists, update)
+  },
+
   addPlaylist(state, payload) {
     state.playlists.push(payload)
     incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)

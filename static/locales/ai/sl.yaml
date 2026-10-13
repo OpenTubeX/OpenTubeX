@@ -228,7 +228,7 @@ Feed:
   Refresh Feed: Osveži {subscriptionName}
 User Playlists:
   Repair Playlists: Popravi sezname predvajanja
-  Repair Description: Obnovite manjkajoče podatke o videoposnetkih po uvozu ZIP-a YouTube Takeout. Vrstni red seznamov ostane nespremenjen.
+  Repair Description: Obnovite manjkajoče podatke o videoposnetkih po uvozu ZIP-a YouTube Takeout. Vrstni red videoposnetkov na seznamih predvajanja ostane nespremenjen.
   Remove Unavailable Videos: "Odstranite videoposnetke, ki niso na voljo"
   Remove Unavailable Videos Confirmation: "Želite odstraniti videoposnetke, ki niso na voljo? Najdeno: {count}. Ni bilo mogoče preveriti: {uncertain}. Nepreverjeni videoposnetki bodo ohranjeni."
   Add Missing Videos: "Dodaj manjkajoče videoposnetke iz izvornega seznama predvajanja"

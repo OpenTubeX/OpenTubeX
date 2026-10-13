@@ -4,7 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { computed, reactive } from 'vue'
-import { needsPlaylistRepair, playlistRepairPatch, playlistRepairRecords } from '../../src/playlistRepair.js'
+import { applyPlaylistRepairUpdate, needsPlaylistRepair, playlistRepairPatch, playlistRepairRecords } from '../../src/playlistRepair.js'
 import { repairHistory } from '../../src/historyRepair.js'
 
 const video = { videoId: 'abcdefghijk', title: 'Imported title', author: '', authorId: '', published: 0, lengthSeconds: 0, playlistItemId: 'first', timeAdded: 10 }
@@ -13,7 +13,7 @@ const source = await readFile(new URL('../../src/datastores/handlers/base.js', i
 async function fixture() {
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   const Playlists = vm.runInNewContext(source.slice(source.indexOf('class Playlists {'), source.indexOf('\nclass SearchHistory {')) + '\nPlaylists', { db, playlistRepairPatch, console, PlaylistVideoAddResult: {} })
-  await db.playlists.insertAsync({ _id: 'selected', playlistName: 'Takeout', description: 'Keep', protected: true, lastPlayedAt: 50, videos: [video, { ...video, playlistItemId: 'duplicate', author: 'Existing channel' }] })
+  await db.playlists.insertAsync({ _id: 'selected', playlistName: 'Takeout', description: 'Keep', protected: true, lastPlayedAt: 50, createdAt: 1, lastUpdatedAt: 2, videos: [video, { ...video, playlistItemId: 'duplicate', author: 'Existing channel' }] })
   await db.playlists.insertAsync({ _id: 'unselected', videos: [video] })
   return { db, Playlists }
 }
@@ -42,6 +42,8 @@ test('repairs every occurrence only in selected playlists and preserves playlist
   assert.equal(saved.description, 'Keep')
   assert.equal(saved.protected, true)
   assert.equal(saved.lastPlayedAt, 50)
+  assert.equal(saved.createdAt, 1)
+  assert.equal(saved.lastUpdatedAt, 2)
   assert.deepEqual(saved.videos.map(v => v.playlistItemId), ['first', 'duplicate'])
   assert.deepEqual(saved.videos.map(v => v.author), ['Channel', 'Existing channel'])
   assert.ok(saved.videos.every(v => v.timeAdded === 10 && v.authorId === 'UCchannel' && v.title === 'Imported title'))
@@ -118,7 +120,7 @@ test('a partial save failure counts the shared video as failed while keeping suc
   const result = await Playlists.repairMetadata({ playlistIds: ['selected', 'unselected'], metadata: [metadata] })
   assert.equal(result.repaired, 0)
   assert.equal(result.failed, 1)
-  assert.equal(result.playlists.length, 1)
+  assert.equal(result.updates.length, 1)
   assert.equal((await db.playlists.findOneAsync({ _id: 'unselected' })).videos[0].authorId, metadata.authorId)
   assert.equal((await db.playlists.findOneAsync({ _id: 'selected' })).videos[0].authorId, '')
 })
@@ -151,4 +153,74 @@ test('playlist lookup scans once between changes and follows removed or repaired
   assert.equal(options.getRecord(firstId), undefined)
   playlists.splice(0)
   assert.equal(options.getRecord('00000000001'), undefined)
+})
+
+test('conditional repair updates preserve newer fields, membership, and playlist details', async () => {
+  const { Playlists } = await fixture()
+  const result = await Playlists.repairMetadata({ playlistIds: ['selected'], metadata: [metadata] })
+  const update = JSON.parse(JSON.stringify(result.updates[0]))
+  const current = [{ _id: 'selected', playlistName: 'Renamed later', lastUpdatedAt: 9e12, videos: [
+    { ...video, author: 'Edited later', lengthSeconds: 321 },
+    { videoId: 'new-video', playlistItemId: 'new', title: 'Added later' },
+    { ...video, playlistItemId: 'duplicate', author: 'Existing channel' },
+  ] }]
+  applyPlaylistRepairUpdate(current, update)
+  assert.equal(current[0].playlistName, 'Renamed later')
+  assert.equal(current[0].lastUpdatedAt, 9e12)
+  assert.deepEqual(current[0].videos.map(v => v.playlistItemId), ['first', 'new', 'duplicate'])
+  assert.equal(current[0].videos[0].author, 'Edited later')
+  assert.equal(current[0].videos[0].lengthSeconds, 321)
+  assert.equal(current[0].videos[0].authorId, metadata.authorId)
+  current[0].videos[0].authorId = 'Edited after repair'
+  applyPlaylistRepairUpdate(current, update)
+  assert.equal(current[0].videos[0].authorId, 'Edited after repair')
+  current.splice(0)
+  applyPlaylistRepairUpdate(current, update)
+  assert.equal(current.length, 0, 'late repair updates cannot recreate a deleted playlist')
+})
+
+test('playlist repair verifies saved durations using the same procedure as history repair', () => {
+  const patch = playlistRepairPatch({ ...video, lengthSeconds: 999 }, metadata)
+  assert.equal(patch.lengthSeconds, 120)
+})
+
+test('large playlist repairs persist larger batches and flush the final short batch', async () => {
+  const records = Array.from({ length: 201 }, (_, index) => ({ ...video, videoId: String(index).padStart(11, '0') }))
+  const byId = new Map(records.map(record => [record.videoId, record]))
+  const writes = []
+  const result = await repairHistory({
+    records, getRecord: id => byId.get(id), saveBatchSize: 100,
+    fetchMetadata: async () => metadata,
+    saveMetadata: async patches => { writes.push(patches.length); return { repaired: patches.length, failed: 0 } },
+    signal: new AbortController().signal, onProgress: () => {}, wait: async () => {},
+  })
+  assert.deepEqual(writes, [100, 100, 1])
+  assert.equal(result.repaired, 201)
+})
+
+test('cancellation discards metadata that has not reached a persistence checkpoint', async () => {
+  const records = Array.from({ length: 8 }, (_, index) => ({ ...video, videoId: String(index).padStart(11, '0') }))
+  const controller = new AbortController()
+  let requests = 0
+  let writes = 0
+  const result = await repairHistory({
+    records, getRecord: id => records.find(record => record.videoId === id), saveBatchSize: 100,
+    fetchMetadata: async () => { if (++requests === 5) controller.abort(); return metadata },
+    saveMetadata: async patches => { writes++; return { repaired: patches.length, failed: 0 } },
+    signal: controller.signal, onProgress: () => {}, wait: async () => {},
+  })
+  assert.equal(result.repaired, 0)
+  assert.equal(writes, 0)
+})
+
+test('publishes each saved metadata update before processing the next playlist', async () => {
+  const { db, Playlists } = await fixture()
+  const published = []
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  db.playlists.updateAsync = async (query, changes, options) => {
+    if (query._id === 'unselected') assert.deepEqual(published, ['selected'])
+    return update(query, changes, options)
+  }
+  await Playlists.repairMetadata({ playlistIds: ['selected', 'unselected'], metadata: [metadata] }, update => published.push(update._id))
+  assert.deepEqual(published, ['selected', 'unselected'])
 })

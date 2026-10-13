@@ -560,3 +560,23 @@ test('automatic sync can restart before any collection is enabled', async t => {
   await f.tick(30000)
   assert.equal(f.calls.length, 1)
 })
+
+test('repaired playlist metadata schedules sync after saved updates, excluding empty or remote repairs', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
+  const action = source.slice(source.indexOf('  async repairPlaylistMetadata('), source.indexOf('  async importPlaylist('))
+  const repairPlaylistMetadata = vm.runInNewContext(`({${action}}).repairPlaylistMetadata`, {
+    DBPlaylistHandlers: { repairMetadata: async payload => ({ updates: payload.updates, repaired: payload.updates.length, failed: 0 }) }
+  })
+  const scheduled = []
+  const store = createStore({
+    state: { settings: settings({ syncServerSyncPlaylists: true }) },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: { applyPlaylistMetadataRepairs() {} },
+    actions: { repairPlaylistMetadata, scheduleSyncServer: (_, reason) => scheduled.push(reason) },
+  })
+  await store.dispatch('repairPlaylistMetadata', { updates: [{ _id: 'saved' }] })
+  assert.deepEqual(scheduled, ['playlists'])
+  await store.dispatch('repairPlaylistMetadata', { updates: [] })
+  await dispatchRemoteSyncAction(store.dispatch, 'repairPlaylistMetadata', { updates: [{ _id: 'remote' }] })
+  assert.deepEqual(scheduled, ['playlists'])
+})

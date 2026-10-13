@@ -236,7 +236,7 @@ Feed:
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
   Repair Playlists: Repara les llistes
-  Repair Description: Restaura les dades dels vídeos que falten després d’importar un ZIP de YouTube Takeout. L’ordre de les llistes es manté.
+  Repair Description: Restaura les dades que falten dels vídeos després d’importar un ZIP de YouTube Takeout. L’ordre dels vídeos a les llistes de reproducció es manté.
   Remove Unavailable Videos: "Suprimeix els vídeos no disponibles"
   Remove Unavailable Videos Confirmation: "Vols suprimir els vídeos no disponibles? Trobats: {count}. No s'han pogut comprovar: {uncertain}. Els vídeos no comprovats es mantindran."
   Add Missing Videos: "Afegeix els vídeos que falten de la llista de reproducció original"
