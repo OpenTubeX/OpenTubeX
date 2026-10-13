@@ -431,18 +431,16 @@ test.describe('search suggestion remove button layout', () => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(2)
 
-    // Narrow the middle column further; the input keeps focus so the dropdown
-    // stays open.
+    // Narrow the middle column further to trigger the compact header.
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setTabBarPosition', 'left')
       store.commit('setVerticalTabBarWidth', 300)
     })
     await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
-    // The narrower header may switch to its compact search layout.
-    if (await page.getByRole('button', { name: 'Open Search Container', exact: true }).isVisible()) {
-      await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
-    }
+    // Wait for ResizeObserver to apply the compact header before opening search.
+    await expect(page.locator('.topNav')).toHaveClass(/phoneLayout/)
+    await page.getByRole('button', { name: 'Open Search Container', exact: true }).click()
     await page.locator(sel.searchInput).focus()
 
     const entry = suggestions(page).first()
