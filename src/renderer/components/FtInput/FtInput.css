@@ -278,6 +278,7 @@
   padding: 0;
   border: 1px solid var(--secondary-text-color);
   border-radius: calc(4px * var(--ui-roundness));
+  text-align: start;
   pointer-events: none;
   transition: border-color 150ms ease;
 }
