@@ -115,6 +115,8 @@
             :data-list-properties="activeDataListProperties"
             show-data-when-empty
             @input="getSearchSuggestionsDebounce"
+            @focus="getSearchSuggestionsDebounce(currentSearchText)"
+            @blur="cancelSearchSuggestions"
             @click="goToSearch"
             @clear="handleSearchInputClear"
             @remove="removeSearchHistoryEntryInDbAndCache"
@@ -278,9 +280,9 @@ import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchHistoryEntryQuery } from '../../../search-history'
-import { debounce, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
+import { isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
-import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
+import { getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
@@ -390,6 +392,9 @@ const navigationHistoryDropdownOptions = computed(() => {
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
 const lastSuggestionQuery = ref('')
+/** @type {AbortController | null} */
+let suggestionController = null
+let suggestionTimeout
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
@@ -772,7 +777,7 @@ watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) 
   const searchText = getSearchTextFromPath(path)
   if (searchText != null) {
     updateSearchInputText(searchText)
-    clearLastSuggestionQuery()
+    cancelSearchSuggestions()
   }
 })
 
@@ -797,7 +802,7 @@ if (usesLogicalTabs) {
     searchTextByTabId.set(previousTabId, currentSearchText)
     if (phoneLayout.value) closePhoneSearch()
     updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
-    clearLastSuggestionQuery()
+    cancelSearchSuggestions()
   })
 }
 
@@ -933,7 +938,7 @@ async function goToSearch(queryText, { event, dataListIndex }) {
     }
   }
 
-  clearLocalSearchSuggestionsSession()
+  cancelSearchSuggestions()
 
   const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
     ? activeSearchHistoryEntries.value[dataListIndex]
@@ -972,19 +977,24 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   }
 }
 
-function clearLastSuggestionQuery() {
+function cancelSearchSuggestions() {
+  clearTimeout(suggestionTimeout)
+  suggestionController?.abort()
+  suggestionController = null
   lastSuggestionQuery.value = ''
 }
 
 function handleSearchInputClear() {
+  searchSuggestionsDataList.value = []
   currentSearchText = ''
-  clearLastSuggestionQuery()
+  cancelSearchSuggestions()
 }
 
 /**
  * @param {string} text
  */
 function updateSearchInputText(text) {
+  cancelSearchSuggestions()
   currentSearchText = text
   searchInput.value?.setText(text)
 }
@@ -994,16 +1004,18 @@ function updateSearchInputText(text) {
  */
 function getSearchSuggestionsDebounce(query) {
   currentSearchText = query
+  if (query === lastSuggestionQuery.value) return
 
-  if (query === lastSuggestionQuery.value) {
+  cancelSearchSuggestions()
+  lastSuggestionQuery.value = query
+  if (!enableSearchSuggestions.value || query.trim() === '') {
+    searchSuggestionsDataList.value = []
     return
   }
 
-  lastSuggestionQuery.value = query
-
-  if (enableSearchSuggestions.value) {
-    debounceSearchResults(query.trim())
-  }
+  const controller = new AbortController()
+  suggestionController = controller
+  suggestionTimeout = setTimeout(() => loadSearchSuggestions(query.trim(), controller), 200)
 }
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
@@ -1011,40 +1023,35 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)
 
-const debounceSearchResults = debounce(/** @param {string} query */(query) => {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    getSearchSuggestionsInvidious(query)
-  } else {
-    getSearchSuggestionsLocal(query)
-  }
-}, 200)
+watch([enableSearchSuggestions, backendPreference, backendFallback], () => {
+  cancelSearchSuggestions()
+  searchSuggestionsDataList.value = []
+})
 
 /**
  * @param {string} query
+ * @param {AbortController} controller
  */
-async function getSearchSuggestionsLocal(query) {
-  searchSuggestionsDataList.value = query.length > 0
-    ? await getLocalSearchSuggestions(query)
-    : []
-}
-
-async function getSearchSuggestionsInvidious(query) {
-  if (query === '') {
-    searchSuggestionsDataList.value = []
-    return
-  }
-
+async function loadSearchSuggestions(query, controller) {
+  const { signal } = controller
+  if (signal.aborted) return
   try {
-    searchSuggestionsDataList.value = (await getInvidiousSearchSuggestions(query)).suggestions
-  } catch (err) {
-    console.error(err)
-
-    if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
-      console.error(
-        'Error gettings search suggestions.  Falling back to Local API'
-      )
-      getSearchSuggestionsLocal(query)
+    let suggestions
+    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+      try {
+        suggestions = (await getInvidiousSearchSuggestions(query, signal)).suggestions
+      } catch (error) {
+        if (signal.aborted || !process.env.SUPPORTS_LOCAL_API || !backendFallback.value) throw error
+        suggestions = await getLocalSearchSuggestions(query, signal)
+      }
+    } else {
+      suggestions = await getLocalSearchSuggestions(query, signal)
     }
+    if (!signal.aborted) searchSuggestionsDataList.value = suggestions
+  } catch (error) {
+    if (!signal.aborted) console.error('Error getting search suggestions', error)
+  } finally {
+    if (suggestionController === controller) suggestionController = null
   }
 }
 
@@ -1153,6 +1160,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  cancelSearchSuggestions()
   headerResizeObserver.disconnect()
   window.removeEventListener('opentubex:focus-search', handleFocusSearch)
 

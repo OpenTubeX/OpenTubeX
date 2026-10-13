@@ -126,22 +126,18 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
   })
 }
 
-/** @type {Innertube | null} */
-let searchSuggestionsSession = null
+/**
+ * @param {string} query
+ * @param {AbortSignal} [signal]
+ */
+export async function getLocalSearchSuggestions(query, signal) {
+  // The suggestions endpoint rejects queries longer than SEARCH_CHAR_LIMIT.
+  if (query.length > SEARCH_CHAR_LIMIT) return []
 
-export async function getLocalSearchSuggestions(query) {
-  // The search suggestions endpoint does not like search queries larger than SEARCH_CHAR_LIMIT
-  // so return an empty array instead
-  if (query.length > SEARCH_CHAR_LIMIT) {
-    return []
-  }
-
-  // reuse innertube instance to keep the search suggestions snappy
-  if (searchSuggestionsSession === null) {
-    searchSuggestionsSession = await createInnertube()
-  }
-
-  return await searchSuggestionsSession.getSearchSuggestions(query)
+  // Sessions are generated locally. Bind each query's transport to its lifetime
+  // so superseded requests can leave the network-recovery queue immediately.
+  const innertube = await createInnertube({ signal })
+  return await innertube.getSearchSuggestions(query)
 }
 
 /**
@@ -155,10 +151,6 @@ export async function translateCommentText(text, targetLanguage) {
     const innertube = await createInnertube()
     return await innertube.interact.translate(source, language)
   })
-}
-
-export function clearLocalSearchSuggestionsSession() {
-  searchSuggestionsSession = null
 }
 
 export async function getLocalPlaylist(id, signal) {

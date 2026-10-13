@@ -1,5 +1,5 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 15a75205adac5ae9c14227791bcd307d5687b67c..0e8dea964e512f034c9325dd2d29b8ef587a7f60 100644
+index 15a75205adac5ae9c14227791bcd307d5687b67c..18ae58539168931eeb4a312fb9c231b68e3fb6eb 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
 @@ -1548,7 +1548,7 @@ iI(this)}ke(a){var b=this.g.Va;b&&b.ri(a);this.m&&(b=kI(this),b.title=a,navigato
@@ -51,6 +51,15 @@ index 15a75205adac5ae9c14227791bcd307d5687b67c..0e8dea964e512f034c9325dd2d29b8ef
  const a=this.o;return a.webkitSupportsFullscreen?a.webkitDisplayingFullscreen:!1}async me(){this.Mb()?await zJ(this):await FJ(this)}Xe(){return this.C.La()?!1:document.pictureInPictureEnabled||EJ(this)?!this.o.disablePictureInPicture:!1}yd(){return!!(window.documentPictureInPicture&&window.documentPictureInPicture.window||document.pictureInPictureElement)}async Fc(){try{EJ(this)?(this.Mb()&&await zJ(this),await GJ(this)):document.pictureInPictureElement?await document.exitPictureInPicture():(this.Mb()&&
  zJ(this),await this.o.requestPictureInPicture())}catch(a){this.dispatchEvent(new C("error",(new Map).set("detail",a)))}}Bi(){V(this.X,!0);this.F&&this.F.hasChildNodes()&&V(this.F,!0);this.G&&this.G.hasChildNodes()&&V(this.G,!0);this.l.hasCustomClick()?this.h.setAttribute("ad-active","true"):this.h.removeAttribute("ad-active")}Sh(){V(this.X,!1);V(this.F,!1);V(this.G,!1);this.h.removeAttribute("ad-active")}Fa(){return this.Aa?this.h.getAttribute("shown")!=null||this.h.getAttribute("casting")!=null:
  !1}He(){let a=!0;this.zc()&&(a=!1);a&&this.C.La()&&(a=!1);a&&(this.j.drmInfo()||this.j.yc())&&(a=!1);a&&this.l&&(a=!1);a&&this.j.Ga()&&(a=!1);return a}fh(){if(this.He()){var a=document.createElement("canvas"),b=a.getContext("2d"),c=this.o;a.width=c.videoWidth;a.height=c.videoHeight;b.drawImage(c,0,0,a.width,a.height);a=a.toDataURL("image/png");b=document.createElement("a");b.href=a;b.download="videoframe_"+c.currentTime.toFixed(3)+".png";b.click()}}Rf(){let a=this.He();navigator.clipboard&&navigator.clipboard.write||
+@@ -1861,7 +1861,7 @@ async function TL(a,b=!1){if(a.controls.C.Qf()&&a.controls.Oa||!a.i)V(a.g,!1),a.
+ var VL=class extends JH{constructor(a,b){super(a,b);a=lb();this.j=a.M();this.g=sj();this.g.classList.add("shaka-remote-button");this.g.classList.add("shaka-tooltip");this.g.classList.add("shaka-no-propagation");this.g.ariaPressed="false";this.m=new NH(this.g,this.j?KH.AIRPLAY:KH.CAST);b=N("label");b.classList.add("shaka-overflow-button-label");b.classList.add("shaka-overflow-menu-only");this.o=N("span");b.appendChild(this.o);this.l=N("span");this.l.classList.add("shaka-current-selection-span");b.appendChild(this.l);
+ this.g.appendChild(b);this.parent.appendChild(this.g);this.h=-1;SL(this);V(this.g,!1);(this.i=Kh(a,this.video))?(this.eventManager.N(this.localization,["locale-updated","locale-changed"],()=>{SL(this)}),this.eventManager.u(this.controls,"caststatuschanged",()=>{TL(this)}),this.eventManager.u(this.g,"click",()=>{this.controls.Fa()&&this.i.prompt().catch(()=>{})}),this.eventManager.N(this.i,["connect","connecting","disconnect"],()=>{TL(this);UL(this)}),this.eventManager.u(this.player,"loaded",()=>{TL(this)}),
+ this.isSubMenu&&this.eventManager.N(this.controls,["submenuopen","submenuclose"],()=>{TL(this,!0)}),TL(this,!0),UL(this)):this.g.classList.add("shaka-hidden")}release(){this.i&&this.h!=-1&&this.i.cancelWatchAvailability(this.h).catch(()=>{});super.release()}};x("shaka.ui.RemoteButton",VL);var WL=class{create(a,b){return new VL(a,b)}};VJ("remote",new WL);kJ("remote",new WL);mJ("remote",new WL);function XL(a){const b=a.player.yc()?"QUALITY":"RESOLUTION";a.button.ariaLabel=a.localization.resolve(b);a.backButton.ariaLabel=a.localization.resolve(b);a.backSpan.textContent=a.localization.resolve(b);a.nameSpan.textContent=a.localization.resolve(b);a.m.textContent=a.localization.resolve("AUTO_QUALITY");a.player.getConfiguration().abr.enabled&&(a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"))}
+-function YL(a){var b=OH(a.menu);wj(a.menu);a.menu.appendChild(b);b=0;b=a.player.yc()?ZL(a):$L(a);const c=sj();c.classList.add("shaka-enable-abr-button");a.eventManager.u(c,"click",()=>{a.player.configure({abr:{enabled:!0}});YL(a)});a.m=N("span");a.m.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.m);a.player.getConfiguration().abr.enabled&&(c.ariaSelected="true",c.appendChild(RH()),a.m.classList.add("shaka-chosen-item"),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
++function YL(a){var b=OH(a.menu);for(const c of a.menu.querySelectorAll(".explicit-resolution, .shaka-enable-abr-button"))a.eventManager.Ea(c,"click");wj(a.menu);a.menu.appendChild(b);b=0;b=a.player.yc()?ZL(a):$L(a);const c=sj();c.classList.add("shaka-enable-abr-button");a.eventManager.u(c,"click",()=>{a.player.configure({abr:{enabled:!0}});YL(a)});a.m=N("span");a.m.textContent=a.localization.resolve("AUTO_QUALITY");c.appendChild(a.m);a.player.getConfiguration().abr.enabled&&(c.ariaSelected="true",c.appendChild(RH()),a.m.classList.add("shaka-chosen-item"),a.currentSelection.textContent=a.localization.resolve("AUTO_QUALITY"));
+ a.button.setAttribute("shaka-status",a.currentSelection.textContent);a.menu.appendChild(c);QH(a.menu);a.controls.dispatchEvent(new C("resolutionselectionupdated"));XL(a);V(a.button,b>0&&!a.isSubMenuOpened)}
+ function aM(a){var b=a.player.getConfiguration().abr.enabled;if(a.player.yc()){a.i.textContent="";a.i.style.display="none";a.g&&(a.g.textContent="",a.g.style.display="none");var c=a.player.dc()||[],d=c.find(e=>e.active);d&&(b?(a.h.textContent=d.bandwidth?bM(a,d,c):"Unknown",a.h.style.display=""):a.h.style.display="none")}else c=a.player.getVideoTracks()||[],(d=c.find(e=>e.active))?(b?(a.h.textContent=d.height&&d.width?cM(a,d,c):d.bandwidth?dM(d.bandwidth):"Unknown",a.h.style.display=""):a.h.style.display=
+ "none",b=eM(a,d.width,d.height),a.i.textContent=b,a.i.style.display=b!==""?"":"none",a.g&&(a.g.textContent=b,a.g.style.display=b!==""?"":"none")):a.g&&(b=a.player.getStats(),b=eM(a,b.width,b.height),a.g.textContent=b,a.g.style.display=b!==""?"":"none")}function bM(a,b,c){let d=dM(b.bandwidth);if(a.controls.g.showAudioCodec){const e=f=>{let g="";f&&(g=ue(f).toUpperCase());return g?" "+g:g};c.some(f=>e(f.codecs)!=e(b.codecs))&&(d+=e(b.codecs))}return d}
 diff --git a/ui/controls.js b/ui/controls.js
 index b525e966d69c8e891adf54b7349b36add9b5e8b5..403b503bbcc90d0f00a5de02477f3f3d38d75813 100644
 --- a/ui/controls.js
@@ -118,6 +127,24 @@ index 88a7135583067f6378054953ab204179566f41e5..cb524a5768880c6cb1691e6e73e0196a
  
      // Ensure the value stays within the min and max bounds
      value = Math.min(max, Math.max(min, value));
+diff --git a/ui/resolution_selection.js b/ui/resolution_selection.js
+index 2e212ee53ba6bcdeb667ea3c99319e6f455334f0..31d33a43d6cafff57f5924fed037d59b9a305806 100644
+--- a/ui/resolution_selection.js
++++ b/ui/resolution_selection.js
+@@ -214,6 +214,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
+     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
+         this.menu, 'shaka-back-to-overflow-button');
+ 
++    // Release the event manager's references before discarding the choices.
++    // Track changes and submenu transitions rebuild this menu during playback.
++    for (const button of this.menu.querySelectorAll(
++      '.explicit-resolution, .shaka-enable-abr-button')) {
++      this.eventManager.unlisten(button, 'click');
++    }
++
+     // 2. Remove everything
+     shaka.util.Dom.removeAllChildren(this.menu);
+ 
 diff --git a/ui/seek_bar.js b/ui/seek_bar.js
 index a5f4162b45c06d7ae196fbe163219f07c1ee9780..7e8797e4ce7b313daba6592faac9aebbedb2c49c 100644
 --- a/ui/seek_bar.js
