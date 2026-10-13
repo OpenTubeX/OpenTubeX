@@ -209,8 +209,8 @@ const actions = {
 
   async updateProfile({ commit }, profile) {
     try {
-      await DBProfileHandlers.upsert(profile)
-      commit('upsertProfileToList', profile)
+      const { affectedDocuments } = await DBProfileHandlers.upsert(profile)
+      commit('upsertProfileToList', affectedDocuments)
       return true
     } catch (errMessage) {
       console.error(errMessage)

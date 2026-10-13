@@ -34,7 +34,7 @@ async function profileStore(subscriptions = [{ id: 'channel', name: 'Old name', 
     }
     handlers.upsert = async profile => {
       const result = await DBProfileHandlers.upsert(profile)
-      broadcast('upsertProfileToList', profile)
+      broadcast('upsertProfileToList', result.affectedDocuments)
       return result
     }
     handlers.updateChannelSettings = async (channel, requestedProfileIds) => {
@@ -527,4 +527,23 @@ test('checks each profile subscription once for a large no-op refresh', () => {
 
   assert.equal(getProfileWithUpdatedSubscriptionDetails({ subscriptions }, channels), null)
   assert.equal(idReads, channelCount)
+})
+
+
+test('profile form patches publish the complete saved record to both window stores', async () => {
+  const { db, store, createStore } = await profileStore()
+  const other = createStore()
+  const stored = {
+    _id: 'custom', name: 'custom',
+    subscriptions: [{ id: 'concurrent-channel', name: 'Concurrent channel' }],
+    futureMetadata: { date: new Date(123), retained: true }
+  }
+  await db.profiles.updateAsync({ _id: 'custom' }, stored)
+  const patch = { _id: 'custom', name: 'Renamed', icon: { type: 'icon', value: 'circle-user' } }
+  assert.equal(await store.dispatch('updateProfile', patch), true)
+  const expected = { ...stored, ...patch }
+  assert.deepEqual(await db.profiles.findOneAsync({ _id: 'custom' }), expected)
+  for (const windowStore of [store, other]) {
+    assert.deepEqual(structuredClone(windowStore.state.profileList.find(profile => profile._id === 'custom')), expected)
+  }
 })

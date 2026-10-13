@@ -750,7 +750,7 @@ class Profiles {
   }
 
   static upsert(profile) {
-    return db.profiles.updateAsync({ _id: profile._id }, profile, { upsert: true })
+    return db.profiles.updateAsync({ _id: profile._id }, { $set: profile }, { upsert: true, returnUpdatedDocs: true })
   }
 
   static async replaceIfUnchanged(previousProfile, profile) {

@@ -5522,14 +5522,15 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.profiles.find(data)
 
-        case DBActions.GENERAL.UPSERT:
-          await baseHandlers.profiles.upsert(data)
+        case DBActions.GENERAL.UPSERT: {
+          const result = await baseHandlers.profiles.upsert(data)
           syncOtherWindows(
             IpcChannels.SYNC_PROFILES,
             event,
-            { event: SyncEvents.GENERAL.UPSERT, data }
+            { event: SyncEvents.GENERAL.UPSERT, data: result.affectedDocuments }
           )
-          return null
+          return result
+        }
 
         case DBActions.PROFILES.REPLACE_IF_UNCHANGED: {
           const result = await baseHandlers.profiles.replaceIfUnchanged(data.previous, data.profile)

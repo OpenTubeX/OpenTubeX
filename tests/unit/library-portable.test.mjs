@@ -692,3 +692,28 @@ for (const direction of [-1, 1]) {
     assert.deepEqual((await db.playlists.findOneAsync({ _id: 'p' })).videos, [b, ...hidden, a])
   })
 }
+
+for (const adapter of ['nedb', 'sqlite']) {
+  test(`profile form patches retain concurrent metadata and subscriptions: ${adapter}`, async t => {
+    let database
+    const collection = adapter === 'nedb' ? new Datastore({ inMemoryOnly: true }) : await (async () => {
+      const { DatabaseSync } = await import('node:sqlite')
+      const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+      const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+      database = new DatabaseSync(':memory:')
+      database.exec(SCHEMA_SQL)
+      t.after(() => database.close())
+      return new LibraryEngine(database).collections.profiles
+    })()
+    const db = { profiles: collection }
+    const source = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+    const Profiles = compileFunction(source.slice(source.indexOf('class Profiles {'), source.indexOf('class Playlists {')) + '\nreturn Profiles', ['db'])(db)
+    const captured = { _id: 'p', name: null, icon: { type: 'icon', value: 'circle-user' } }
+    const stored = { _id: 'p', name: null, subscriptions: [{ id: 'concurrent-channel', retained: new Date(123) }], unknown: { concurrent: true, date: new Date(456) } }
+    await collection.insertAsync(stored)
+    const result = await Profiles.upsert(captured)
+    const expected = { ...stored, icon: captured.icon }
+    assert.deepEqual(await collection.findOneAsync({ _id: 'p' }), expected)
+    assert.deepEqual(result.affectedDocuments, expected)
+  })
+}

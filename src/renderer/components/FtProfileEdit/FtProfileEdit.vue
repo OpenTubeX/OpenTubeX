@@ -494,12 +494,10 @@ function saveProfile() {
   }
 
   const profile = {
-    ...props.profile,
     name: retainedNullName ? null : profileName.value,
     bgColor: profileBgColor.value,
     textColor: profileTextColor.value,
-    icon: deepCopy(profileIcon.value),
-    subscriptions: props.profile.subscriptions
+    icon: deepCopy(profileIcon.value)
   }
 
   if (!props.isNew) {
@@ -507,6 +505,7 @@ function saveProfile() {
   }
 
   if (props.isNew) {
+    profile.subscriptions = props.profile.subscriptions
     store.dispatch('createProfile', profile)
     showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
