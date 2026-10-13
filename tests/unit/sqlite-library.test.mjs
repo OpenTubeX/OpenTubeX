@@ -16,6 +16,7 @@ import { openLibrary } from '../../src/datastores/sqlite/migration.js'
 import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
 import { metadataPage } from '../../src/datastores/sqlite/metadata.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
+import { filterHistoryByDateAndChannel, getHistoryChannels } from '../../src/renderer/helpers/historyBrowse.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
 import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
@@ -3010,3 +3011,37 @@ test('legacy import preflights a later scalar conflict before inserting or updat
   assert.equal(inserts.mock.callCount(), 0)
   assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals)
 })
+
+for (const oldest of [false, true]) {
+  test(`history date/channel filters preserve whole-library identities across pages, oldest: ${oldest}`, async t => {
+    const engine = memory(t)
+    const day = new Date('2026-10-12T00:00:00').getTime()
+    const rows = [
+      { _id: 'a', videoId: 'a', author: 'Unique', authorId: 'one', timeWatched: day, title: 'Find', unknown: new Date(0) },
+      { _id: 'b', videoId: 'b', author: 'Unique', timeWatched: day + 1, title: 'Find' },
+      { _id: 'c', videoId: 'c', author: 'Shared', authorId: 'two', timeWatched: day + 2 },
+      { _id: 'd', videoId: 'd', author: 'Shared', authorId: 'three', timeWatched: day + 3 },
+      { _id: 'e', videoId: 'e', author: 'Shared', timeWatched: day + 4 },
+      { _id: 'f', videoId: 'f', author: 'Unique', authorId: 'one', timeWatched: day - 1 },
+      { _id: 'g', videoId: 'g', author: 'Unique', authorId: 'one', timeWatched: new Date(day) },
+    ]
+    await engine.collections.history.insertAsync(rows)
+    const before = await engine.collections.history.findAsync({})
+    const ordered = await engine.collections.history.findAsync({}).sort({ timeWatched: oldest ? 1 : -1, _id: oldest ? 1 : -1 })
+    for (const filters of [{ fromDate: '2026-10-12', toDate: '2026-10-12' }, { channel: 'id:one' }, { channel: 'name:Shared' }, { channel: 'id:two' }, { fromDate: '2026-10-12', channel: 'id:one' }]) {
+      const expected = filterHistoryByDateAndChannel(ordered, filters).map(row => row._id)
+      const actual = []
+      let cursor = null
+      do {
+        const page = engine.historyPage({ ...filters, oldest, limit: 1, cursor })
+        actual.push(...page.records.map(row => row._id))
+        cursor = page.cursor
+      } while (cursor)
+      assert.deepEqual(actual, expected)
+    }
+    assert.deepEqual(engine.historyChannels(), getHistoryChannels(await engine.collections.history.findAsync({}).sort({ timeWatched: -1, _id: -1 }), 'en-US'))
+    const page = engine.historyPage({ limit: 1, channel: 'id:one' })
+    assert.equal(engine.historyPage({ cursor: page.cursor, channel: 'id:two' }).stale, true)
+    assert.deepEqual(await engine.collections.history.findAsync({}), before)
+  })
+}

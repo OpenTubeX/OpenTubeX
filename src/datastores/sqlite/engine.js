@@ -3,6 +3,7 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 import { createHash, randomUUID } from 'node:crypto'
 import { ARRAY_FIELDS, COLLECTIONS } from './schema.js'
 import { filterVideosWithQuery } from '../../renderer/helpers/historySearch.js'
+import { getHistoryChannels, getHistoryChannelKey, parseHistoryDate } from '../../renderer/helpers/historyBrowse.js'
 import { normalizeSearchText } from '../../renderer/helpers/textSearch.js'
 import { isHistoryEntryWatched, migrateLegacyHistoryRecord } from '../../history.js'
 import { needsHistoryRepair } from '../../historyRepair.js'
@@ -328,6 +329,7 @@ export class LibraryEngine {
           }
           this.playlistOrders.clear()
           this.playlistStatisticsCache.clear()
+          this.historyBrowseCache = null
           this.legacyMetadataOrders.clear()
           this.subscriptionViews?.clear()
           this.legacyHistoryPage = null
@@ -564,10 +566,31 @@ export class LibraryEngine {
     })) this.indexSearch(record)
   }
 
-  historyPage({ cursor = null, limit = 100, oldest = false, query = '', caseSensitive = false, locale = 'en-US' } = {}) {
+  historyChannelMetadata() {
+    const revision = this.revision('history')
+    if (this.historyBrowseCache?.revision !== revision) {
+      // Channel controls need only identities, never member arrays or thumbnails.
+      const records = this.prepare("SELECT id, json_object('author', json_extract(data, '$.author'), 'authorId', json_extract(data, '$.authorId'), 'timeWatched', json_extract(data, '$.timeWatched')) AS data FROM records WHERE collection = 'history' ORDER BY sort_time DESC, nedb_id_sort(id) DESC").all().map(row => ({ ...deserialize(row.data), _id: row.id }))
+      if (records.some(record => !Number.isFinite(record.timeWatched))) records.sort((a, b) => -(model.compareThings(a.timeWatched, b.timeWatched) || model.compareThings(a._id, b._id)))
+      const idsByName = new Map()
+      for (const record of records) {
+        if (!record.author || !record.authorId) continue
+        if (!idsByName.has(record.author)) idsByName.set(record.author, record.authorId)
+        else if (idsByName.get(record.author) !== record.authorId) idsByName.set(record.author, null)
+      }
+      this.historyBrowseCache = { revision, records, idsByName }
+    }
+    return this.historyBrowseCache
+  }
+
+  historyChannels({ locale = 'en-US' } = {}) {
+    return getHistoryChannels(this.historyChannelMetadata().records, locale)
+  }
+
+  historyPage({ cursor = null, limit = 100, oldest = false, query = '', caseSensitive = false, locale = 'en-US', fromDate = '', toDate = '', channel = '' } = {}) {
     limit = Math.max(1, Math.min(MAX_PAGE_SIZE, Math.trunc(limit) || 100))
     const revision = this.revision('history')
-    const spec = JSON.stringify([oldest, query, caseSensitive, locale])
+    const spec = JSON.stringify([oldest, query, caseSensitive, locale, fromDate, toDate, channel])
     if (cursor && (cursor.revision !== revision || cursor.spec !== spec)) return { stale: true, revision, records: [], cursor: null }
     const comparator = oldest ? '>' : '<'
     const direction = oldest ? 'ASC' : 'DESC'
@@ -585,6 +608,15 @@ export class LibraryEngine {
       parameters.push(JSON.stringify(anchors))
       return "id IN (SELECT record_id FROM search_characters WHERE collection = 'history' AND character IN (SELECT value FROM json_each(?)))"
     })
+    if (fromDate || toDate) {
+      const start = parseHistoryDate(fromDate)?.getTime()
+      const end = parseHistoryDate(toDate)
+      if (end) { end.setDate(end.getDate() + 1); end.setHours(0, 0, 0, 0) }
+      candidates.push("json_type(data, '$.timeWatched') IN ('integer', 'real')")
+      if (start !== undefined) { candidates.push('sort_time >= ?'); parameters.push(start) }
+      if (end) { candidates.push('sort_time < ?'); parameters.push(end.getTime()) }
+    }
+    const channelIdsByName = channel ? this.historyChannelMetadata().idsByName : null
     const where = candidates.length ? `AND (${candidates.join(' AND ')})` : ''
     const legacy = this.prepare('SELECT 1 FROM records r WHERE r.collection = \'history\' AND (json_type(r.data, \'$."timeWatched"\') IS NULL OR json_type(r.data, \'$."timeWatched"\') NOT IN (\'integer\', \'real\')) = 1 LIMIT 1').get()
     if (legacy) {
@@ -596,6 +628,7 @@ export class LibraryEngine {
         const ordered = []
         for (const row of this.prepare(`SELECT id, data FROM records WHERE collection = 'history' ${where}`).iterate(...parameters)) {
           const record = deserialize(row.data)
+          if (channel && getHistoryChannelKey(record, channelIdsByName) !== channel) continue
           if (query.trim() && filterVideosWithQuery([record], query, caseSensitive, locale).length === 0) continue
           ordered.push({ id: row.id, time: record.timeWatched })
         }
@@ -617,6 +650,7 @@ export class LibraryEngine {
     let more = false
     for (const row of statement.iterate(...parameters)) {
       const record = migrateLegacyHistoryRecord(deserialize(row.data))
+      if (channel && getHistoryChannelKey(record, channelIdsByName) !== channel) continue
       if (query.trim() && filterVideosWithQuery([record], query, caseSensitive, locale).length === 0) continue
       if (records.length === limit) { more = true; break }
       records.push(record)
