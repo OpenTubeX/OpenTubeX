@@ -182,9 +182,8 @@ function playlistVideoCount(playlist) {
 function playlistThumbnail(playlist) {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (playlist.customThumbnail) return playlist.customThumbnail
-  const first = playlist.firstVideo ?? playlist.videos?.[0]
-  if (playlistVideoCount(playlist) === 0 || first === null || typeof first !== 'object' || Array.isArray(first) || typeof first.videoId !== 'string' || first.videoId.length === 0) {
-
+  const first = store.state.playlists.libraryPaged ? playlist.firstVideo : playlist.videos?.[0]
+  if (first === null || typeof first !== 'object' || Array.isArray(first) || typeof first.videoId !== 'string' || first.videoId.length === 0) {
     return thumbnailPlaceholder
   }
 

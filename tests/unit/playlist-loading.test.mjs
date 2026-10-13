@@ -530,3 +530,20 @@ for (const paged of [false, true]) {
     }
   })
 }
+
+
+test('Save thumbnails use the backend membership source independently of retained counts', async () => {
+  const content = parse(await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const ast = babelParse(content, { sourceType: 'module' })
+  for (const paged of [false, true]) {
+    const context = vm.createContext({ store: { state: { playlists: { libraryPaged: paged } }, getters: {} }, thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: id => `thumbnail:${id}` })
+    for (const name of ['playlistVideoCount', 'playlistThumbnail']) {
+      const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name)
+      vm.runInContext(content.slice(node.start, node.end), context)
+    }
+    const data = { videoCount: 0, firstVideo: { videoId: 'stale-summary' }, videos: [{ videoId: 'full-member' }] }
+    const before = structuredClone(data)
+    assert.equal(context.playlistThumbnail(data), paged ? 'thumbnail:stale-summary' : 'thumbnail:full-member')
+    assert.deepEqual(data, before)
+  }
+})
