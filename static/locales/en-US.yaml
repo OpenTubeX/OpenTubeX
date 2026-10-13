@@ -338,6 +338,8 @@ Feed:
   Refresh Feed: Refresh {subscriptionName}
 Playlists: Playlists
 User Playlists:
+  Repair Playlists: Repair Playlists
+  Repair Description: Restore missing video details after importing a YouTube Takeout ZIP. Playlist order stays unchanged.
   Add Missing Videos: "Add missing videos from source playlist"
   Source Playlist: "Source playlist"
   Your Playlists: Your Playlists

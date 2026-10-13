@@ -1,3 +1,4 @@
+import { applyPlaylistRepairUpdate } from '../../../playlistRepair'
 import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import {
@@ -167,6 +168,12 @@ const getters = {
 }
 
 const actions = {
+  async repairPlaylistMetadata({ commit }, payload) {
+    const result = await DBPlaylistHandlers.repairMetadata(payload)
+    for (const update of result.updates) commit('applyPlaylistMetadataRepairs', update)
+    return { repaired: result.repaired, failed: result.failed }
+  },
+
   async importPlaylist({ commit }, playlist) {
     processNewPlayist(playlist)
     await DBPlaylistHandlers.upsert(playlist)
@@ -230,6 +237,16 @@ const actions = {
       console.error(errMessage)
       return false
     }
+  },
+
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous }) {
+    playlist.lastUpdatedAt = Date.now()
+    const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
+    if (!saved) return false
+    const current = state.playlists.find(item => item._id === playlist._id)
+    if (JSON.stringify(current) !== JSON.stringify(previous)) return false
+    commit('upsertPlaylistToList', playlist)
+    return true
   },
 
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
@@ -531,6 +548,10 @@ function dropPlaylistVideos(state, playlist, matches) {
 }
 
 const mutations = {
+  applyPlaylistMetadataRepairs(state, update) {
+    applyPlaylistRepairUpdate(state.playlists, update)
+  },
+
   addPlaylist(state, payload) {
     state.playlists.push(payload)
     incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)

@@ -193,6 +193,8 @@ Feed:
   Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
   Next Auto Refresh: 'அடுத்த தானியக்கப் புதுப்பிப்பு: {date}'
 User Playlists:
+  Repair Playlists: பிளேலிஸ்ட்களைச் சரிசெய்
+  Repair Description: YouTube Takeout ZIP கோப்பை இறக்குமதி செய்த பிறகு விடுபட்ட வீடியோ விவரங்களை மீட்டெடுக்கவும். பிளேலிஸ்ட் வரிசை மாறாது.
   Remove Unavailable Videos: "கிடைக்காத காணொளிக்களை அகற்று"
   Remove Unavailable Videos Confirmation: "கிடைக்காத காணொளிக்களை அகற்றவா? கண்டறியப்பட்டது: {count}. சரிபார்க்க முடியவில்லை: {uncertain}. சரிபார்க்கப்படாத காணொளிக்கள் வைக்கப்படும்."
   Add Missing Videos: "மூல இயக்கப்பட்டியலிலிருந்து விடுபட்ட காணொளிகளைச் சேர்"

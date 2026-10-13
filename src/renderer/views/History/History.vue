@@ -40,7 +40,7 @@
             :aria-label="t('History.Repair')"
             :title="t('History.Repair')"
             :icon="['fas', 'sync']"
-            :disabled="historyRepairState.running"
+            :disabled="metadataRepairBusy"
             @click="showRepairPrompt = true"
           >
             <template #label>
@@ -263,6 +263,7 @@
               :icon="['fas', 'sync']"
               background-color="var(--primary-color)"
               text-color="var(--text-with-main-color)"
+              :disabled="metadataRepairBusy"
               @click="beginHistoryRepair"
             />
           </div>
@@ -360,7 +361,7 @@ import store from '../../store'
 import { needsHistoryRepair } from '../../../historyRepair'
 import { filterVideosWithQueryAsync } from '../../helpers/historySearch'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
-import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
+import { historyRepairState, metadataRepairBusy, repairCookiesConfigured, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
@@ -387,13 +388,7 @@ const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
 const showRepairPrompt = ref(false)
 const repairOptions = ref([])
-const repairCookiesConfigured = computed(() => {
-  if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) return false
-  const getters = store.getters
-  return getters.getYtDlpPlaybackAuthMode === 'file'
-    ? !!getters.getYtDlpPlaybackCookiesPath?.trim()
-    : process.env.IS_ELECTRON && getters.getYtDlpPlaybackAuthMode === 'browser' && !!getters.getYtDlpPlaybackCookiesBrowser?.trim()
-})
+
 const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
 const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
 watch(showRepairPrompt, open => {
@@ -418,6 +413,7 @@ const repairProgressValue = computed(() => historyRepairState.running && history
   : historyRepairState.checked)
 
 function beginHistoryRepair() {
+  if (metadataRepairBusy.value) return
   showRepairPrompt.value = false
   startHistoryRepair({ useCookies: repairUseCookies.value })
   nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
@@ -702,3 +698,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped src="./History.css" />
+
+<style scoped src="../../components/metadataRepair.css" />

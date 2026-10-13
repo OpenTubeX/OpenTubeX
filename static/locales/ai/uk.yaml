@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Скасувати оновлення
   Next Auto Refresh: 'Наступне автоматичне оновлення: {date}'
 User Playlists:
+  Repair Playlists: Відновити списки відтворення
+  Repair Description: Відновіть відсутні відомості про відео після імпорту ZIP-архіву YouTube Takeout. Порядок у списках не зміниться.
   Remove Unavailable Videos: "Видалити недоступні відео"
   Remove Unavailable Videos Confirmation: "Видалити недоступні відео? Знайдено: {count}. Не вдалося перевірити: {uncertain}. Неперевірені відео будуть збережені."
   Add Missing Videos: "Додати відсутні відео з початкового списку відтворення"

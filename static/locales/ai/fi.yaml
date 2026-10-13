@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  Repair Playlists: Korjaa soittolistat
+  Repair Description: Palauta puuttuvat videotiedot YouTube Takeout -ZIP-tiedoston tuonnin jälkeen. Soittolistojen järjestys ei muutu.
   Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"
   Remove Unavailable Videos Confirmation: "Poistetaanko videot, jotka eivät ole käytettävissä? Löytyi: {count}. Ei voitu tarkistaa: {uncertain}. Tarkistamattomat videot säilytetään."
   Add Missing Videos: "Lisää puuttuvat videot alkuperäisestä soittolistasta"

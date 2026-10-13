@@ -1,3 +1,4 @@
+import { playlistRepairPatch } from '../../playlistRepair'
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
 import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
@@ -801,6 +802,84 @@ class Playlists {
 
   static upsert(playlist) {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
+  }
+
+  static async upsertIfUnchanged(playlist, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { numAffected } = await db.playlists.updateAsync(
+      { _id: playlist._id, $where() { return JSON.stringify(this) === snapshot } },
+      { $set: playlist },
+      { upsert: false }
+    )
+    return numAffected > 0
+  }
+
+  static async repairMetadata({ playlistIds, metadata }, onUpdate = () => {}) {
+    const updates = []
+    const repaired = new Set()
+    const failed = new Set()
+    const byId = new Map(metadata.map(info => [info.videoId, info]))
+    const selectedIds = [...new Set(playlistIds)]
+    const targets = await db.playlists.findAsync({
+      _id: { $in: selectedIds },
+      videos: { $elemMatch: { videoId: { $in: [...byId.keys()] } } }
+    })
+    const targetsById = new Map(targets.map(playlist => [playlist._id, playlist]))
+    for (const _id of selectedIds) {
+      const target = targetsById.get(_id)
+      if (!target) continue
+      // If a later read fails, count only videos this playlist could change.
+      let pendingIds = [...new Set(target.videos
+        .filter(video => byId.has(video.videoId) && playlistRepairPatch(video, byId.get(video.videoId)))
+        .map(video => video.videoId))]
+      if (!pendingIds.length) continue
+      try {
+        // Re-read and conditionally save so edits made in another window during
+        // the lookup cannot be overwritten or resurrect deleted entries.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          const current = await db.playlists.findOneAsync({ _id })
+          if (!current) break
+          const changed = new Set()
+          const changes = []
+          const videos = current.videos.map(video => {
+            const info = byId.get(video.videoId)
+            const patch = info && playlistRepairPatch(video, info)
+            if (!patch) return video
+            changed.add(video.videoId)
+            const fields = { ...patch }
+            delete fields.videoId
+            const previous = Object.fromEntries(Object.keys(fields).map(key => [key, video[key]]))
+            changes.push({ videoId: video.videoId, playlistItemId: video.playlistItemId, fields, previous })
+            return { ...video, ...fields }
+          })
+          pendingIds = [...changed]
+          if (!changed.size) break
+          const snapshot = JSON.stringify(current.videos)
+          const { affectedDocuments } = await db.playlists.updateAsync(
+            { _id, $where() { return JSON.stringify(this.videos) === snapshot } },
+            { $set: { videos } },
+            { returnUpdatedDocs: true }
+          )
+          if (affectedDocuments) {
+            // Return conditional metadata changes, never an earlier full playlist
+            // snapshot that could replace edits made while later writes await.
+            const update = { _id, changes }
+            updates.push(update)
+            onUpdate(update)
+            for (const id of changed) repaired.add(id)
+            break
+          }
+          if (attempt === 2) for (const id of changed) failed.add(id)
+        }
+      } catch (error) {
+        console.error(error)
+        for (const id of pendingIds) failed.add(id)
+      }
+    }
+    // Progress counts unique videos. A video is failed if any selected occurrence
+    // could not be saved, even when its other occurrences were repaired.
+    for (const id of failed) repaired.delete(id)
+    return { updates, repaired: repaired.size, failed: failed.size }
   }
 
   /**

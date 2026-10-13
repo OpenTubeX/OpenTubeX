@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Vernieuwen annuleren
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
+  Repair Playlists: Afspeellijsten herstellen
+  Repair Description: Herstel ontbrekende videogegevens na het importeren van een YouTube Takeout-ZIP. De volgorde van video's in afspeellijsten blijft gelijk.
   Remove Unavailable Videos: "Verwijder niet-beschikbare video's"
   Remove Unavailable Videos Confirmation: "Niet-beschikbare video's verwijderen? Gevonden: {count}. Kon niet controleren: {uncertain}. Niet-gecontroleerde video's worden bewaard."
   Add Missing Videos: "Ontbrekende video’s uit de bronafspeellijst toevoegen"

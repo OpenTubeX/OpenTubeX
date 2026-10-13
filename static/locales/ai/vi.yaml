@@ -188,6 +188,8 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Repair Playlists: Sửa danh sách phát
+  Repair Description: Khôi phục thông tin video bị thiếu sau khi nhập ZIP YouTube Takeout. Thứ tự danh sách phát không thay đổi.
   Remove Unavailable Videos: "Xóa video không có sẵn"
   Remove Unavailable Videos Confirmation: "Xóa video không có sẵn? Đã tìm thấy: {count}. Không thể kiểm tra: {uncertain}. Các video không được kiểm tra sẽ được giữ lại."
   Add Missing Videos: "Thêm video còn thiếu từ danh sách phát nguồn"

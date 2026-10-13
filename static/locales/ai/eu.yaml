@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Utzi freskatzeari
   Next Auto Refresh: 'Hurrengo freskatze automatikoa: {date}'
 User Playlists:
+  Repair Playlists: Konpondu erreprodukzio-zerrendak
+  Repair Description: Berreskuratu falta diren bideo-datuak YouTube Takeout ZIP bat inportatu ondoren. Zerrenden ordena ez da aldatzen.
   Remove Unavailable Videos: "Kendu erabilgarri ez dauden bideoak"
   Remove Unavailable Videos Confirmation: "Eskuragarri ez dauden bideoak kendu? Aurkitu: {count}. Ezin izan da egiaztatu: {uncertain}. Egiaztatu gabeko bideoak gordeko dira."
   Add Missing Videos: "Gehitu falta diren bideoak jatorrizko erreprodukzio-zerrendatik"

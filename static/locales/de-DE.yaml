@@ -188,6 +188,8 @@ Trending:
 Most Popular: Am beliebtesten
 Playlists: Playlists
 User Playlists:
+  Repair Playlists: Playlists reparieren
+  Repair Description: Stelle fehlende Videodaten nach dem Import einer YouTube-Takeout-ZIP-Datei wieder her. Die Reihenfolge der Playlists bleibt unverändert.
   Add Missing Videos: "Fehlende Videos aus der Quellplaylist hinzufügen"
   Source Playlist: "Quellplaylist"
   Your Playlists: Deine Playlists

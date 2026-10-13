@@ -196,6 +196,14 @@ class Profiles {
 }
 
 class Playlists {
+  static upsertIfUnchanged(playlist, previous) {
+    return dbPlaylists(DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED, { playlist, previous })
+  }
+
+  static repairMetadata(payload) {
+    return dbPlaylists(DBActions.PLAYLISTS.REPAIR_METADATA, payload)
+  }
+
   static create(playlists) {
     return dbPlaylists(DBActions.GENERAL.CREATE, playlists)
   }

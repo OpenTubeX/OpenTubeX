@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Tühista värskendamine
   Next Auto Refresh: 'Järgmine automaatne värskendamine: {date}'
 User Playlists:
+  Repair Playlists: Paranda esitusloendeid
+  Repair Description: Taasta puuduvad videoandmed pärast YouTube Takeouti ZIP-faili importimist. Esitusloendite järjekord ei muutu.
   Remove Unavailable Videos: "Eemalda kättesaamatud videod"
   Remove Unavailable Videos Confirmation: "Kas eemaldada kättesaamatud videod? Leitud: {count}. Ei saanud kontrollida: {uncertain}. Kontrollimata videod jäävad alles."
   Add Missing Videos: "Lisa algsest esitusloendist puuduvad videod"

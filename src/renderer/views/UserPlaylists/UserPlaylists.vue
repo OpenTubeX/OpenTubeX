@@ -5,20 +5,34 @@
     >
       <div class="heading">
         <div class="headingRow">
-          <h2 class="headingText">
+          <h2
+            ref="playlistHeading"
+            class="headingText"
+            tabindex="-1"
+          >
             <FtIcon
               :icon="['fas', 'bookmark']"
               class="headingIcon"
             />
             {{ $t("User Playlists.Your Playlists") }}
           </h2>
-          <FtIconButton
-            :title="$t('User Playlists.Create New Playlist')"
-            :icon="['fas', 'plus']"
-            theme="secondary"
-            class="newPlaylistButton"
-            @click="createNewPlaylist"
-          />
+          <div class="headingActions">
+            <FtButton
+              v-if="repairPlaylists.length > 0 || playlistRepairState.running"
+              ref="repairAction"
+              :label="t('User Playlists.Repair Playlists')"
+              :icon="['fas', 'sync']"
+              :disabled="metadataRepairBusy"
+              @click="showRepairPrompt = true"
+            />
+            <FtIconButton
+              :title="$t('User Playlists.Create New Playlist')"
+              :icon="['fas', 'plus']"
+              theme="secondary"
+              class="newPlaylistButton"
+              @click="createNewPlaylist"
+            />
+          </div>
         </div>
         <div
           v-if="fullData.length > 1"
@@ -59,6 +73,59 @@
           />
         </div>
       </div>
+      <section
+        v-if="playlistRepairState.started"
+        class="repairStatus"
+        :aria-label="t('User Playlists.Repair Playlists')"
+      >
+        <div class="repairStatusHeader">
+          <h3
+            class="repairStatusTitle"
+            aria-live="polite"
+          >
+            <FtIcon
+              :icon="['fas', 'sync']"
+              aria-hidden="true"
+            />
+            {{ repairPhaseLabel }}
+          </h3>
+          <FtButton
+            v-if="playlistRepairState.running"
+            ref="repairCancel"
+            class="playlistActionButton"
+            :label="t('Cancel')"
+            :icon="['fas', 'xmark']"
+            @click="cancelPlaylistRepair"
+          />
+          <FtButton
+            v-else
+            ref="repairClose"
+            class="playlistActionButton"
+            :label="t('Close')"
+            :icon="['fas', 'xmark']"
+            @click="closePlaylistRepairStatus"
+          />
+        </div>
+        <p
+          class="repairCounts"
+          role="status"
+        >
+          {{ t('History.Repair Progress', playlistRepairState) }}
+        </p>
+        <progress
+          class="repairProgress"
+          :max="playlistRepairState.total || 1"
+          :value="repairProgressValue"
+          :aria-label="t('History.Repair Progress', playlistRepairState)"
+        />
+        <p
+          v-if="playlistRepairState.error"
+          class="repairError"
+          role="alert"
+        >
+          {{ playlistRepairState.error }}
+        </p>
+      </section>
       <FtFlexBox
         v-if="fullData.length === 0"
       >
@@ -96,18 +163,91 @@
           />
         </FtFlexBox>
       </FtAutoLoadNextPageWrapper>
+      <FtPrompt
+        v-if="showRepairPrompt"
+        card-class="playlistRepairPrompt"
+        autosize
+        fixed-layout
+        @click="showRepairPrompt = false"
+      >
+        <template #label="{ labelId }">
+          <h2
+            :id="labelId"
+            class="repairPromptTitle"
+          >
+            <FtIcon
+              :icon="['fas', 'sync']"
+              class="headingIcon"
+              aria-hidden="true"
+            />
+            {{ t('User Playlists.Repair Playlists') }}
+          </h2>
+        </template>
+        <div class="repairPromptContent">
+          <p class="repairDescription">
+            {{ t('User Playlists.Repair Description') }}
+          </p>
+          <FtCheckboxList
+            v-model="selectAllOptions"
+            :labels="[t('Select all')]"
+            :values="['all']"
+            :indeterminate-values="selectedPlaylistIds.length > 0 && !allRepairPlaylistsSelected ? ['all'] : []"
+          />
+          <FtCheckboxList
+            v-model="selectedPlaylistIds"
+            :labels="repairPlaylists.map(playlist => playlist.playlistName)"
+            :values="repairPlaylists.map(playlist => playlist._id)"
+          />
+          <p class="repairDetails">
+            {{ t('History.Repair Details') }}
+          </p>
+          <FtCheckboxList
+            v-if="repairCookiesConfigured"
+            v-model="repairOptions"
+            :labels="[t('History.Repair Use Cookies')]"
+            :values="['cookies']"
+          />
+          <p
+            v-if="showRepairCookieHint"
+            class="repairNotice"
+          >
+            {{ t('History.Repair Cookies Hint') }}
+          </p>
+        </div>
+        <template #footer>
+          <div class="repairPromptActions">
+            <FtButton
+              :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
+              text-color="var(--primary-text-color)"
+              background-color="var(--secondary-card-bg-color)"
+              @click="showRepairPrompt = false"
+            />
+            <FtButton
+              :label="t('History.Start Repair')"
+              :icon="['fas', 'sync']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              :disabled="selectedPlaylistIds.length === 0 || metadataRepairBusy"
+              @click="beginPlaylistRepair"
+            />
+          </div>
+        </template>
+      </FtPrompt>
     </FtCard>
   </div>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
+import FtCheckboxList from '../../components/FtCheckboxList/FtCheckboxList.vue'
+import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
@@ -117,6 +257,9 @@ import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { playlistRepairRecords } from '../../../playlistRepair'
+import { metadataRepairBusy, repairCookiesConfigured } from '../../helpers/historyRepair'
+import { playlistRepairState, startPlaylistRepair, cancelPlaylistRepair } from '../../helpers/playlistRepair'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
 import { isValidPlaylistBookmark, playlistBookmarkToListData } from '../../helpers/playlist-bookmarks'
@@ -259,6 +402,62 @@ const allPlaylists = computed(() => {
         return 0
     }
   })
+})
+
+const showRepairPrompt = ref(false)
+const repairOptions = ref([])
+const selectedPlaylistIds = ref([])
+const repairPlaylists = computed(() => store.getters.getAllPlaylists.toSorted((a, b) => cachedCollator.value.compare(a.playlistName, b.playlistName)))
+const allRepairPlaylistsSelected = computed(() => repairPlaylists.value.length > 0 && repairPlaylists.value.every(playlist => selectedPlaylistIds.value.includes(playlist._id)))
+const selectAllOptions = computed({
+  get: () => allRepairPlaylistsSelected.value ? ['all'] : [],
+  set: options => { selectedPlaylistIds.value = options.includes('all') ? repairPlaylists.value.map(playlist => playlist._id) : [] }
+})
+const selectedRepairPlaylists = computed(() => repairPlaylists.value.filter(playlist => selectedPlaylistIds.value.includes(playlist._id)))
+
+const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
+const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && playlistRepairRecords(selectedRepairPlaylists.value).length > 500)
+watch(showRepairPrompt, open => {
+  if (open) {
+    selectedPlaylistIds.value = []
+    repairOptions.value = []
+  }
+})
+watch(repairPlaylists, playlists => {
+  selectedPlaylistIds.value = selectedPlaylistIds.value.filter(id => playlists.some(playlist => playlist._id === id))
+})
+const repairAction = useTemplateRef('repairAction')
+const repairCancel = useTemplateRef('repairCancel')
+const repairClose = useTemplateRef('repairClose')
+const playlistHeading = useTemplateRef('playlistHeading')
+const repairPhaseLabel = computed(() => ({
+  checking: t('History.Repair Checking'),
+  waiting: t('History.Repair Waiting'),
+  retrying: t('History.Repair Retrying'),
+  finished: t('History.Repair Finished'),
+  stopped: t('History.Repair Stopped')
+})[playlistRepairState.phase])
+const repairProgressValue = computed(() => playlistRepairState.running && playlistRepairState.phase !== 'checking'
+  ? undefined
+  : playlistRepairState.checked)
+
+function beginPlaylistRepair() {
+  if (selectedPlaylistIds.value.length === 0 || metadataRepairBusy.value) return
+  showRepairPrompt.value = false
+  startPlaylistRepair({ playlistIds: [...selectedPlaylistIds.value], useCookies: repairUseCookies.value })
+  nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
+}
+
+function closePlaylistRepairStatus() {
+  if (playlistRepairState.running) return
+  playlistRepairState.started = false
+  nextTick(() => (repairAction.value?.$el ?? playlistHeading.value)?.focus({ preventScroll: true }))
+}
+
+watch(() => playlistRepairState.running, running => {
+  if (!running && document.activeElement === repairCancel.value?.$el) {
+    nextTick(() => repairClose.value?.$el.focus({ preventScroll: true }))
+  }
 })
 
 const fullData = computed(() => {
@@ -444,3 +643,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped src="./UserPlaylists.css" />
+
+<style scoped src="../../components/metadataRepair.css" />

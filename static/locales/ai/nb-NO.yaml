@@ -186,6 +186,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Repair Playlists: Reparer spillelister
+  Repair Description: Gjenopprett manglende videodetaljer etter import av en YouTube Takeout-ZIP. Rekkefølgen i spillelistene forblir uendret.
   Remove Unavailable Videos: "Fjern utilgjengelige videoer"
   Remove Unavailable Videos Confirmation: "Vil du fjerne utilgjengelige videoer? Funnet: {count}. Kunne ikke sjekke: {uncertain}. Ukontrollerte videoer blir beholdt."
   Add Missing Videos: "Legg til manglende videoer fra den opprinnelige spillelisten"

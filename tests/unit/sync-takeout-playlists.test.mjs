@@ -26,9 +26,11 @@ function createStore(playlists = []) {
   const state = reactive({ playlists: { playlists } })
   return {
     state,
-    async dispatch(action, playlist) {
+    async persistPlaylistSyncBaseline() {},
+    async dispatch(action, payload) {
+      const playlist = action === 'updatePlaylistFromSync' ? payload.playlist : payload
       if (action === 'addPlaylist') state.playlists.playlists.push(playlist)
-      else if (action === 'updatePlaylist') {
+      else if (action === 'updatePlaylist' || action === 'updatePlaylistFromSync') {
         const index = state.playlists.playlists.findIndex(item => item._id === playlist._id)
         state.playlists.playlists[index] = playlist
       } else assert.fail(`Unexpected action: ${action}`)
@@ -100,6 +102,36 @@ test('only permits unknown uploaders when encrypted playlist sync opts in', () =
   assert.deepEqual(uploaderToLocal(syncVideoToRemote(namedLikeMarker).uploader), {
     authorId: known.authorId, author: UNKNOWN_SYNC_UPLOADER_ID,
   })
+})
+
+test('repaired Takeout metadata replaces encrypted unknown uploaders and fills the receiving device', async () => {
+  const options = { allowMissingUploader: true }
+  const imported = { _id: 'repaired', playlistName: 'Imported', videos: [
+    { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'first', timeAdded: 1 },
+    { videoId: 'abcdefghijk', title: 'abcdefghijk', playlistItemId: 'duplicate', timeAdded: 2 },
+  ] }
+  const sender = createStore([imported])
+  const adapter = new EncryptedSyncAdapter(createEmptySyncDocument())
+  const sent = await context.syncPlaylists(adapter, sender, {}, options)
+  const receiver = createStore()
+  const received = await context.syncPlaylists(adapter, receiver, {}, options)
+  const receivingId = receiver.state.playlists.playlists[0].videos[0].playlistItemId
+  for (const video of sender.state.playlists.playlists[0].videos) {
+    Object.assign(video, { title: 'Fetched title', authorId: 'known-channel', author: 'Known channel', published: 100, lengthSeconds: 120 })
+  }
+  await context.syncPlaylists(adapter, sender, sent, options)
+  const remote = (await adapter.getPlaylist(imported._id)).videos
+  assert.equal(remote.length, 1)
+  assert.equal(remote[0].uploader.id, 'known-channel')
+  assert.equal(remote[0].uploader.name, 'Known channel')
+  await context.syncPlaylists(adapter, receiver, received, options)
+  const restored = receiver.state.playlists.playlists[0].videos[0]
+  assert.equal(restored.playlistItemId, receivingId)
+  assert.equal(restored.title, 'Fetched title')
+  assert.equal(restored.authorId, 'known-channel')
+  assert.equal(restored.author, 'Known channel')
+  assert.equal(restored.lengthSeconds, 120)
+  assert.deepEqual(Array.from(sender.state.playlists.playlists[0].videos, video => video.playlistItemId), ['first', 'duplicate'])
 })
 
 test('released clients preserve imported memberships during mixed-version sync', async () => {

@@ -136,3 +136,27 @@
     inline-size: 100%;
   }
 }
+
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.headingActions > .btn {
+  min-block-size: 44px;
+  margin: 0;
+}
+
+@media (width <= 680px) {
+  .headingRow {
+    flex-wrap: wrap;
+  }
+}
+
+:global(.promptCard.fixedLayout.playlistRepairPrompt) {
+  inline-size: min(520px, 100%);
+  block-size: auto;
+}

@@ -148,7 +148,17 @@ export class EncryptedSyncAdapter {
   }
 
   async addPlaylistVideos(id, videos) {
-    this.document.playlists.find(entry => entry.playlist.id === id).videos.push(...structuredClone(videos))
+    const current = this.document.playlists.find(entry => entry.playlist.id === id).videos
+    const indices = new Map(current.map((video, index) => [video.id, index]))
+    for (const video of structuredClone(videos)) {
+      const index = indices.get(video.id)
+      if (index == null) {
+        indices.set(video.id, current.length)
+        current.push(video)
+      } else {
+        current[index] = video
+      }
+    }
   }
 
   async removePlaylistVideo(playlistId, videoId) {

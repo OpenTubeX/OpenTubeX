@@ -114,8 +114,8 @@ function waitForRepair(milliseconds, signal) {
   })
 }
 
-export async function repairHistory({ records, getRecord, fetchMetadata, saveMetadata, signal, onProgress, onPhase = () => {}, wait = waitForRepair }) {
-  let pending = records.filter(needsHistoryRepair).map(({ videoId }) => ({ videoId, checked: false, failed: false, failures: 0 }))
+export async function repairHistory({ records, getRecord, fetchMetadata, saveMetadata, signal, onProgress, onPhase = () => {}, createPatch = historyRepairPatch, needsRepair = needsHistoryRepair, saveBatchSize = 1, wait = waitForRepair }) {
+  let pending = records.filter(needsRepair).map(({ videoId }) => ({ videoId, checked: false, failed: false, failures: 0 }))
   let cooldowns = 0
   let cooldownPending = false
   const result = { total: pending.length, checked: 0, repaired: 0, failed: 0 }
@@ -134,8 +134,9 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
     if (!signal.aborted) onPhase(pass > 0 || cooldowns ? 'retrying' : 'checking')
     let failed = []
     let rateLimitError
-    // Save once per batch, avoiding a full history sort and cross-window
-    // broadcast for every individual video.
+    const updates = []
+    // Keep network concurrency independent of persistence: large playlists can
+    // accumulate metadata instead of rewriting their document every four checks.
     for (let offset = 0; offset < pending.length && !signal.aborted; offset += concurrency) {
       // Space batches out even when the server replies quickly. After a bot
       // check, keep requests sequential for the rest of this repair.
@@ -146,7 +147,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
         try {
           if (target.checked) {
             const current = getRecord(target.videoId)
-            if (!current || !needsHistoryRepair(current)) {
+            if (!current || !needsRepair(current)) {
               if (target.failed) result.failed--
               target.failed = false
               return null
@@ -155,7 +156,7 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
           const metadata = await fetchMetadata(target.videoId, signal)
           if (signal.aborted) return null
           const current = getRecord(target.videoId)
-          const patch = current && needsHistoryRepair(current) ? historyRepairPatch(current, metadata) : null
+          const patch = current && needsRepair(current) ? createPatch(current, metadata) : null
           if (target.failed) result.failed--
           target.failed = false
           return patch
@@ -181,14 +182,15 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
           }
         }
       }))
-      const updates = patches.filter(Boolean)
-      if (updates.length && !signal.aborted) {
+      updates.push(...patches.filter(Boolean))
+      if (updates.length && !signal.aborted && (updates.length >= saveBatchSize || rateLimitError || offset + batch.length === pending.length)) {
+        const writes = updates.splice(0)
         try {
-          const saved = await saveMetadata(updates)
+          const saved = await saveMetadata(writes)
           result.repaired += saved.repaired
           result.failed += saved.failed
         } catch {
-          result.failed += updates.length
+          result.failed += writes.length
         }
       }
       onProgress({ ...result })
