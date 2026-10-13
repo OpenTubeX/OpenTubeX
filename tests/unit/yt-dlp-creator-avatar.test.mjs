@@ -2,12 +2,25 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from '../../src/main/ytDlpCreatorAvatar.js'
+import { TWITCH_CHAT_CLIENT_ID } from '../../src/twitchChatReplayRequest.js'
 
 test('uses an avatar URL supplied by yt-dlp without another request', async () => {
   const url = await resolveYtDlpCreatorAvatarUrl({
     channel_thumbnail: 'https://images.example.test/channel.png'
   }, () => { throw new Error('unexpected profile request') })
   assert.equal(url, 'https://images.example.test/channel.png')
+})
+
+test('resolves Twitch avatars when the profile page contains only the client shell', async () => {
+  const avatar = await resolveYtDlpCreatorAvatarUrl({
+    webpage_url: 'https://www.twitch.tv/videos/123456789',
+    uploader_id: 'example_streamer'
+  }, async url => url === 'https://gql.twitch.tv/gql'
+    ? Response.json({ data: { user: { profileImageURL: 'https://static-cdn.jtvnw.net/profile_image-300x300.png' } } })
+    : new Response('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Twitch</title></head><body><script src="client.js"></script></body></html>', {
+        headers: { 'content-type': 'text/html' }
+      }))
+  assert.equal(avatar, 'https://static-cdn.jtvnw.net/profile_image-300x300.png')
 })
 
 test('reads the SoundCloud creator image from the uploader profile', async () => {
@@ -33,16 +46,19 @@ test('reads the TikTok avatar from its profile data', async () => {
   assert.equal(url, 'https://cdn.example.test/avatar.jpg')
 })
 
-test('reads the Twitch channel image from its profile page', async () => {
+test('reads the Twitch broadcaster image from profile metadata', async () => {
   const url = await resolveYtDlpCreatorAvatarUrl({
     webpage_url: 'https://clips.twitch.tv/SomeClip',
     channel: 'Creator_1',
     uploader_id: '12345'
-  }, async profileUrl => {
-    assert.equal(profileUrl, 'https://www.twitch.tv/creator_1')
-    return new Response('<meta property="og:image" content="https://static-cdn.jtvnw.net/profile_image-300x300.png">', {
-      headers: { 'content-type': 'text/html' }
-    })
+  }, async (url, options) => {
+    assert.equal(url, 'https://gql.twitch.tv/gql')
+    assert.equal(options.method, 'POST')
+    assert.equal(options.credentials, 'omit')
+    assert.equal(options.redirect, 'manual')
+    assert.equal(options.headers['Client-ID'], TWITCH_CHAT_CLIENT_ID)
+    assert.deepEqual(JSON.parse(options.body).variables, { login: 'creator_1' })
+    return Response.json({ data: { user: { profileImageURL: 'https://static-cdn.jtvnw.net/profile_image-300x300.png' } } })
   })
   assert.equal(url, 'https://static-cdn.jtvnw.net/profile_image-300x300.png')
 })
@@ -64,15 +80,27 @@ for (const webpageUrl of [
       webpage_url: webpageUrl,
       uploader: 'example_streamer',
       uploader_id: 'example_streamer'
-    }, async profileUrl => {
-      assert.equal(profileUrl, 'https://www.twitch.tv/example_streamer')
-      return new Response('<meta property="og:image" content="https://static-cdn.jtvnw.net/profile_image-300x300.png">', {
-        headers: { 'content-type': 'text/html' }
-      })
+    }, async (url, options) => {
+      assert.equal(url, 'https://gql.twitch.tv/gql')
+      assert.deepEqual(JSON.parse(options.body).variables, { login: 'example_streamer' })
+      return Response.json({ data: { user: { profileImageURL: 'https://static-cdn.jtvnw.net/profile_image-300x300.png' } } })
     })
     assert.equal(avatar, 'https://static-cdn.jtvnw.net/profile_image-300x300.png')
   })
 }
+
+test('handles unavailable Twitch metadata and rejects unsafe avatar URLs', async () => {
+  const info = { webpage_url: 'https://www.twitch.tv/example_streamer', uploader_id: 'example_streamer' }
+  for (const payload of [
+    { data: { user: null } },
+    { errors: [{ message: 'Unavailable' }] },
+    { data: { user: { profileImageURL: 'http://images.example.test/avatar.png' } } },
+    { data: { user: { profileImageURL: 'javascript:alert(1)' } } }
+  ]) {
+    assert.equal(await resolveYtDlpCreatorAvatarUrl(info, async () => Response.json(payload)), null)
+  }
+  assert.equal(await resolveYtDlpCreatorAvatarUrl(info, async () => new Response(null, { status: 403 })), null)
+})
 
 test('does not derive Twitch profiles from unrelated URLs or invalid logins', () => {
   for (const webpageUrl of ['https://twitch.tv.example.test/videos/1', 'http://www.twitch.tv/creator', 'not a URL']) {
