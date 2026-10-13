@@ -701,6 +701,42 @@ test('library worker rejects internal helpers and inherited targets while retain
   for (const error of renderer.startupDenied) expect(error).toContain('Unknown library query')
 })
 
+test.describe('playlist content search recovery', () => {
+  test.use({
+    seed: {
+      settings: { historyWatchedStatusMigrated: true, uiScale: 95, currentLocale: 'en_US', userPlaylistSortOrder: 'custom' },
+      history,
+      playlists: [playlist, { _id: 'other-search-playlist', playlistName: 'Other playlist', videos: [] }],
+      watchStats: [{ _id: 'history-watch-time-v1' }],
+    }
+  })
+  test('failed playlist content search offers Retry without hiding retained matches at 95% scale', async ({ app, page }, testInfo) => {
+    const original = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('library-query')
+      let fail = true
+      ipcMain.removeHandler('library-query')
+      ipcMain.handle('library-query', (event, request) => {
+        if (request.method === 'playlistSelection' && fail) { fail = false; throw new Error('simulated content search failure') }
+        return handler(event, request)
+      })
+    })
+    await goTo(page, 'userplaylists')
+    await page.locator('.matchingVideosToggle label').click()
+    await page.locator('.playlistSearch input').fill('Playlist entry 19999')
+    const error = page.locator('.playlistSearchError')
+    await expect(error.getByRole('alert')).toBeVisible()
+    await expect(page.locator('.card .message')).toHaveCount(1)
+    const screenshot = testInfo.outputPath('playlist-content-search-retry-95.png')
+    await page.locator('.card').filter({ has: error }).screenshot({ path: screenshot })
+    await testInfo.attach('playlist content search Retry at 95%', { path: screenshot, contentType: 'image/png' })
+    await error.getByRole('button', { name: 'Retry', exact: true }).click()
+    await expect(error).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Large legacy playlist', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))).toStrictEqual(original)
+  })
+})
+
 test('a failed paged playlist load offers Retry and restores the unchanged library at 95% scale', async ({ app, page }, testInfo) => {
   const original = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))
   await app.electronApp.evaluate(({ ipcMain }) => {
@@ -1769,6 +1805,7 @@ test.describe('retained opaque playlist preview', () => {
     await card.hover()
     await card.locator('.addToPlaylistIcon .iconButton').click()
     const picker = card.locator('.addToPlaylistDropdown')
+    await expect(picker.getByRole('option').filter({ hasText: 'Retained opaque membership' })).toHaveCount(0)
     const row = picker.getByRole('option').filter({ has: page.locator('.playlistName', { hasText: /^Playlists$/ }) })
     await picker.locator('.playlistSearch input').fill('Playlists')
     await expect(row).toBeVisible()
@@ -1787,6 +1824,7 @@ test.describe('retained opaque playlist preview', () => {
       await testInfo.attach(`Opaque playlist Save ${scheme}`, { path: capture, contentType: 'image/png' })
     }
     expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), retained._id)).toStrictEqual(retained)
+    expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaqueMembership._id)).toStrictEqual(opaqueMembership)
     expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
   })
 })

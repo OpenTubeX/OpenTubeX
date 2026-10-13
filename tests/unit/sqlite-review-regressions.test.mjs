@@ -49,6 +49,7 @@ function matching(root, predicate) {
 async function functions(file, names, bindings = {}) {
   if (file === 'src/renderer/store/modules/playlists.js' && !names.includes('updateCachedPlaylistMembers')) names = [...names, 'updateCachedPlaylistMembers']
   if (file === 'src/renderer/components/PlaylistInfo/PlaylistInfo.vue' && !names.includes('playablePlaylistVideos')) names = [...names, 'playablePlaylistVideos']
+  if (file === playlistInfo && !names.includes('playlistExportSource')) names = [...names, 'playlistExportSource']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
   if (file === 'src/renderer/views/Playlist/Playlist.vue') {
@@ -1526,7 +1527,7 @@ for (const action of ['exportAsFreeTubeDatabase', 'exportAsYouTubeCsv', 'exportA
         isUserPlaylist: ref(true), locale: ref('en-US'), store: { getters: { getUserPlaylistSortOrder: 'custom' } },
         getExportFilename: () => 'retained.db', getSortedPlaylistItems: videos => videos,
         DBLibraryHandlers: { query: async () => { if (deleted) return null; throw new Error('snapshot unavailable') } },
-        writeFileWithPicker() { writes++; return false }, t: key => key, showToast: toast => toasts.push(toast),
+        async writeFileWithPicker(_name, content) { await content(); writes++; return false }, t: key => key, showToast: toast => toasts.push(toast),
       })
       await context[action]()
       assert.equal(writes, 0)
@@ -1632,7 +1633,7 @@ test('CSV export handles missing legacy timestamps without changing playlist rec
     store: { getters: { getUserPlaylistSortOrder: 'custom' } },
     DBLibraryHandlers: { query: async () => ({ records: videos, cursor: null }) },
     getExportFilename: () => 'legacy.csv', t: key => key,
-    writeFileWithPicker: async (_name, data) => { exported = data; return false },
+    writeFileWithPicker: async (_name, data) => { exported = await data(); return false },
   })
   await exportAsYouTubeCsv()
   assert.equal(exported, 'Video ID,Playlist video creation timestamp\nmissing,1970-01-01T00:00:00+00:00\ninvalid,1970-01-01T00:00:00+00:00\nvalid,1970-01-01T00:00:01+00:00\n\n\n\n\n\n')
@@ -2124,7 +2125,7 @@ for (const sort of ['video_duration_ascending', 'video_duration_descending']) {
           return engine[method](options)
         } },
         getExportFilename: () => 'retained', t: key => key, showToast: toast => assert.fail(toast.message),
-        writeFileWithPicker: async (_name, value) => { exported = value; return false },
+        writeFileWithPicker: async (_name, value) => { exported = await value(); return false },
       })
       await context[action]()
       const ids = action === 'exportAsYouTubeCsv' ? exported.split('\n').slice(1).filter(Boolean).map(row => row.split(',')[0]) : exported.trim().split('\n').map(url => new URL(url).searchParams.get('v'))
@@ -3032,7 +3033,7 @@ test('Save presence resets immediately and ignores an older completed selection 
 test('video playlist search stays pending until the current read finishes', async () => {
   const old = Promise.withResolvers(), current = Promise.withResolvers(), pending = vueRef(false), matches = vueRef(new Set())
   let calls = 0
-  const read = await componentWatcher('src/renderer/views/UserPlaylists/UserPlaylists.vue', 'appliedQuery', { searchGeneration: 0, librarySearchPending: pending, libraryMatches: matches, appliedQuery: vueRef('video'), doSearchPlaylistsWithMatchingVideos: vueRef(true), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
+  const { loadLibrarySearch: read } = await functions('src/renderer/views/UserPlaylists/UserPlaylists.vue', ['loadLibrarySearch'], { searchGeneration: 0, librarySearchError: ref(false), librarySearchPending: pending, libraryMatches: matches, appliedQuery: vueRef('video'), doSearchPlaylistsWithMatchingVideos: vueRef(true), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
   const a = read(), b = read()
   assert.equal(pending.value, true)
   old.resolve({ matches: ['old'] }); await a
@@ -3216,5 +3217,80 @@ for (const file of ['src/renderer/views/Playlist/Playlist.vue', 'src/renderer/co
         }
       }
     }
+  })
+}
+
+for (const action of ['exportAsFreeTubeDatabase', 'exportAsYouTubeCsv', 'exportAsListOfUrls']) {
+  test(`${action} opens the picker before reading and cancellation performs no library read`, async () => {
+    let picked = false, reads = 0
+    const writer = await functions('src/renderer/helpers/utils.js', ['writeFileWithPicker'], {
+      process: { env: { IS_ELECTRON: true } },
+      window: { showSaveFilePicker: async () => { picked = true; throw Object.assign(new Error('Canceled'), { name: 'AbortError' }) } },
+    })
+    const context = await functions(playlistInfo, ['orderedExportVideos', action], {
+      props: { id: 'original', title: 'Retained' }, selectedUserPlaylist: ref({ playlistName: 'Retained' }),
+      isUserPlaylist: ref(true), locale: ref('en-US'), store: { getters: { getUserPlaylistSortOrder: 'custom' } },
+      DBLibraryHandlers: { query: async method => { reads++; return method === 'playlistSnapshot' ? { _id: 'original', videos: [] } : { records: [], cursor: null } } },
+      getExportFilename: () => 'retained', writeFileWithPicker: writer.writeFileWithPicker, t: key => key, showToast: toast => assert.fail(toast.message),
+    })
+    await context[action]()
+    assert.equal(picked, true)
+    assert.equal(reads, 0)
+  })
+}
+
+test('failed playlist content searches expose a retry state and stale failures cannot replace a newer result', async () => {
+  const older = Promise.withResolvers(), newer = Promise.withResolvers()
+  let calls = 0
+  const context = await functions('src/renderer/views/UserPlaylists/UserPlaylists.vue', ['loadLibrarySearch'], {
+    searchGeneration: 0, librarySearchPending: ref(false), librarySearchError: ref(false), libraryMatches: ref(new Set()),
+    appliedQuery: ref('video'), doSearchPlaylistsWithMatchingVideos: ref(true), console: { error() {} },
+    DBLibraryHandlers: { query: () => { calls++; if (calls === 1) throw new Error('failed read'); return calls === 2 ? older.promise : newer.promise } },
+  })
+  await context.loadLibrarySearch()
+  assert.equal(context.librarySearchError.value, true)
+  assert.equal(context.librarySearchPending.value, false)
+  const a = context.loadLibrarySearch(), b = context.loadLibrarySearch()
+  assert.equal(context.librarySearchError.value, false)
+  newer.resolve({ matches: ['retained'] }); await b
+  older.reject(new Error('stale failure')); await a
+  assert.equal(context.librarySearchError.value, false)
+  assert.deepEqual([...context.libraryMatches.value], ['retained'])
+  context.appliedQuery.value = ''
+  await context.loadLibrarySearch()
+  assert.equal(context.librarySearchError.value, false)
+  assert.equal(calls, 3)
+})
+
+for (const action of ['exportAsFreeTubeDatabase', 'exportAsYouTubeCsv', 'exportAsListOfUrls']) {
+  test(`${action} retains the clicked playlist and sort while the picker is open`, async () => {
+    const picker = Promise.withResolvers(), calls = []
+    let picked = false, written, closed = false
+    const props = { id: 'original', title: 'Original' }, locale = ref('en-US'), store = { getters: { getUserPlaylistSortOrder: 'custom' } }
+    const writer = await functions('src/renderer/helpers/utils.js', ['writeFileWithPicker'], {
+      process: { env: { IS_ELECTRON: true } }, window: { showSaveFilePicker: () => { picked = true; return picker.promise } },
+    })
+    const context = await functions(playlistInfo, ['orderedExportVideos', action], {
+      props, locale, store, selectedUserPlaylist: ref({ playlistName: 'Original' }), isUserPlaylist: ref(true),
+      DBLibraryHandlers: { query: async (method, options) => {
+        calls.push({ method, options: structuredClone(options) })
+        return method === 'playlistSnapshot' ? { _id: options.id, videos: [{ videoId: 'original-video' }] } : { records: [{ videoId: 'original-video' }], cursor: null }
+      } },
+      getExportFilename: title => title, writeFileWithPicker: writer.writeFileWithPicker, t: key => key, showToast() {},
+    })
+    const exporting = context[action]()
+    assert.equal(picked, true)
+    assert.equal(calls.length, 0)
+    props.id = 'different'; locale.value = 'de-DE'; store.getters.getUserPlaylistSortOrder = 'video_title_descending'
+    picker.resolve({ createWritable: async () => ({ write: async data => { written = data }, close: async () => { closed = true } }) })
+    await exporting
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].options.id, 'original')
+    if (action !== 'exportAsFreeTubeDatabase') {
+      assert.equal(calls[0].options.sort, 'custom')
+      assert.equal(calls[0].options.locale, 'en-US')
+    }
+    assert.match(written, /original-video/)
+    assert.equal(closed, true)
   })
 }

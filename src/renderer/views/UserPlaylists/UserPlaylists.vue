@@ -134,6 +134,24 @@
         </p>
       </FtFlexBox>
       <FtFlexBox
+        v-else-if="librarySearchError"
+        class="playlistSearchError"
+      >
+        <p
+          class="message"
+          role="alert"
+        >
+          {{ t('Storage Startup Error.Title') }}
+        </p>
+        <FtButton
+          :label="t('User Playlists.SinglePlaylistView.Retry')"
+          :icon="['fas', 'sync']"
+          background-color="var(--primary-color)"
+          text-color="var(--text-with-main-color)"
+          @click="loadLibrarySearch"
+        />
+      </FtFlexBox>
+      <FtFlexBox
         v-else-if="!librarySearchPending && activeData.length === 0 && fullData.length > 0"
       >
         <p class="message">
@@ -482,21 +500,29 @@ const lowerCaseQuery = computed(() => query.value.toLowerCase())
 const appliedQuery = ref('')
 const libraryMatches = ref(new Set())
 const librarySearchPending = ref(false)
+const librarySearchError = ref(false)
 let searchGeneration = 0
-if (process.env.IS_ELECTRON) {
-  watch([appliedQuery, doSearchPlaylistsWithMatchingVideos, allPlaylists], async () => {
-    const generation = ++searchGeneration
-    libraryMatches.value = new Set()
-    librarySearchPending.value = false
-    if (!appliedQuery.value || !doSearchPlaylistsWithMatchingVideos.value) return
-    librarySearchPending.value = true
-    try {
-      const result = await DBLibraryHandlers.query('playlistSelection', { ids: [], query: appliedQuery.value })
-      if (generation === searchGeneration) libraryMatches.value = new Set(result.matches)
-    } catch (error) { console.error(error) } finally {
-      if (generation === searchGeneration) librarySearchPending.value = false
+async function loadLibrarySearch() {
+  const generation = ++searchGeneration
+  libraryMatches.value = new Set()
+  librarySearchPending.value = false
+  librarySearchError.value = false
+  if (!appliedQuery.value || !doSearchPlaylistsWithMatchingVideos.value) return
+  librarySearchPending.value = true
+  try {
+    const result = await DBLibraryHandlers.query('playlistSelection', { ids: [], query: appliedQuery.value })
+    if (generation === searchGeneration) libraryMatches.value = new Set(result.matches)
+  } catch (error) {
+    if (generation === searchGeneration) {
+      librarySearchError.value = true
+      console.error(error)
     }
-  }, { immediate: true })
+  } finally {
+    if (generation === searchGeneration) librarySearchPending.value = false
+  }
+}
+if (process.env.IS_ELECTRON) {
+  watch([appliedQuery, doSearchPlaylistsWithMatchingVideos, allPlaylists], loadLibrarySearch, { immediate: true })
 }
 onBeforeUnmount(() => { searchGeneration++ })
 

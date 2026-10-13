@@ -902,16 +902,18 @@ function getExportFilename(title, extension) {
 
 async function exportAsFreeTubeDatabase() {
   const exportFileName = getExportFilename(selectedUserPlaylist.value.playlistName, 'db')
+  const id = props.id
 
   // See DataSettings.vue `promptAndWriteToFile`
 
   try {
-    const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id: props.id })
-    if (!playlist) throw new Error('Playlist was deleted')
-    const data = JSON.stringify(playlist) + '\n'
     const response = await writeFileWithPicker(
       exportFileName,
-      data,
+      async () => {
+        const playlist = await DBLibraryHandlers.query('playlistSnapshot', { id })
+        if (!playlist) throw new Error('Playlist was deleted')
+        return JSON.stringify(playlist) + '\n'
+      },
       t('Settings.Data Settings.Playlist File'),
       'application/x-freetube-db',
       '.db',
@@ -931,11 +933,18 @@ async function exportAsFreeTubeDatabase() {
   }
 }
 
-async function orderedExportVideos() {
-  if (!isUserPlaylist.value) return playablePlaylistVideos(props.sortedVideos)
-  const options = { id: props.id, sort: store.getters.getUserPlaylistSortOrder, locale: locale.value, limit: 250 }
+function playlistExportSource() {
+  return {
+    options: { id: props.id, sort: store.getters.getUserPlaylistSortOrder, locale: locale.value, limit: 250 },
+    userPlaylist: isUserPlaylist.value,
+    playlist: process.env.IS_ELECTRON ? null : selectedUserPlaylist.value,
+    sortedVideos: props.sortedVideos,
+  }
+}
+
+async function orderedExportVideos({ options, userPlaylist, playlist, sortedVideos } = playlistExportSource()) {
+  if (!userPlaylist) return playablePlaylistVideos(sortedVideos)
   if (!process.env.IS_ELECTRON) {
-    const playlist = selectedUserPlaylist.value
     if (!Array.isArray(playlist?.videos)) throw new Error('The playlist could not be loaded')
     const videos = playablePlaylistVideos(playlist.videos).map(video => {
       const entry = { ...video }
@@ -965,25 +974,21 @@ async function orderedExportVideos() {
 
 async function exportAsYouTubeCsv() {
   const exportFileName = getExportFilename(props.title, 'csv')
+  const source = playlistExportSource()
 
   try {
-    const videoData = (await orderedExportVideos()).map((video) => {
-      // Legacy members can lack a timestamp. Use the epoch only for this
-      // export; the losslessly stored record remains unchanged.
-      const added = new Date(video.timeAdded ?? 0)
-      const timestamp = (Number.isNaN(added.getTime()) ? new Date(0) : added).toISOString().slice(0, -5) + '+00:00'
-
-      return `${video.videoId},${timestamp}`
-    }).join('\n')
-
-    // YouTube includes 6 line feed characters at the end of the file, so we do the same here
-    const data = `Video ID,Playlist video creation timestamp\n${videoData}\n\n\n\n\n\n`
-
-    // See DataSettings.vue `promptAndWriteToFile`
-
     const response = await writeFileWithPicker(
       exportFileName,
-      data,
+      async () => {
+        const videoData = (await orderedExportVideos(source)).map((video) => {
+          // Missing timestamps use the epoch only in this export.
+          const added = new Date(video.timeAdded ?? 0)
+          const timestamp = (Number.isNaN(added.getTime()) ? new Date(0) : added).toISOString().slice(0, -5) + '+00:00'
+          return `${video.videoId},${timestamp}`
+        }).join('\n')
+        // Match YouTube's six trailing line feeds.
+        return `Video ID,Playlist video creation timestamp\n${videoData}\n\n\n\n\n\n`
+      },
       '',
       'text/csv',
       '.csv',
@@ -1005,16 +1010,14 @@ async function exportAsYouTubeCsv() {
 
 async function exportAsListOfUrls() {
   const exportFileName = getExportFilename(props.title, 'txt')
+  const source = playlistExportSource()
 
   // See DataSettings.vue `promptAndWriteToFile`
 
   try {
-    const data = (await orderedExportVideos()).map((video) => {
-      return `https://www.youtube.com/watch?v=${video.videoId}`
-    }).join('\n') + '\n'
     const response = await writeFileWithPicker(
       exportFileName,
-      data,
+      async () => (await orderedExportVideos(source)).map(video => `https://www.youtube.com/watch?v=${video.videoId}`).join('\n') + '\n',
       '',
       'text/plain',
       '.txt',
