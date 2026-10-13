@@ -278,7 +278,9 @@ export async function updateSubscriptionFeed(engine, { channelId, entries, times
   for (let index = 0; index < ids.length; index += 250) {
     for (const record of await engine.collections.history.findAsync({ videoId: { $in: ids.slice(index, index + 250) } }).sort({ timeWatched: 1 })) historyById[record.videoId] = migrateLegacyHistoryRecord(record)
   }
-  const reconciled = ensureSubscriptionFeedEntryState(entries, previous?.[field], field === 'communityPosts' ? 'postId' : 'videoId', previous?.[field + 'Timestamp'], historyById)
+  const idKey = field === 'communityPosts' ? 'postId' : 'videoId'
+  const previousEntries = Array.isArray(previous?.[field]) ? previous[field].filter(entry => entry?.[idKey] != null) : previous?.[field]
+  const reconciled = ensureSubscriptionFeedEntryState(entries, previousEntries, idKey, previous?.[field + 'Timestamp'], historyById)
   await engine.collections.subscriptionCache.updateAsync({ _id: channelId }, { $set: { [field]: preserveSubscriptionSeenEntries(reconciled, previous?.[field], field === 'communityPosts' ? 'postId' : 'videoId'), [field + 'Timestamp']: timestamp } }, { upsert: true })
   return true
 }

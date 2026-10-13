@@ -2974,7 +2974,13 @@ for (const previous of [undefined, null, false, 42, 'retained', { retained: new 
     const originals = [{ _id: 'allChannels', name: 'Primary' }, { _id: 'custom', name: 'Saved' }].map(profile => ({ ...profile, ...(previous === undefined ? {} : { subscriptions: previous }), unknown: new Date(5) }))
     await engine.collections.profiles.insertAsync(originals)
     const existing = { id: 'existing', name: 'Incoming' }, added = { id: 'new', unknown: new Date(6) }
-    await importSubscriptionProfiles(engine, { profiles: [{ _id: 'incoming', name: 'Saved', subscriptions: [existing, added, added] }] })
+    const importing = importSubscriptionProfiles(engine, { profiles: [{ _id: 'incoming', name: 'Saved', subscriptions: [existing, added, added] }] })
+    if (previous !== undefined && !Array.isArray(previous)) {
+      await assert.rejects(importing, /incompatible profile subscriptions/)
+      assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals)
+      return
+    }
+    await importing
     const retained = Array.isArray(previous) ? previous : previous === undefined ? [] : [previous]
     const expected = [...retained, ...(Array.isArray(previous) ? [] : [existing]), added]
     assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals.map(profile => ({ ...profile, subscriptions: expected })).toSorted((a, b) => a._id.localeCompare(b._id)))
@@ -2990,4 +2996,17 @@ test('empty legacy subscription imports retain non-array field shapes and missin
     await importSubscriptionProfiles(engine, { profiles: [{ _id: 'incoming', name: 'Saved', subscriptions: [] }] })
     assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals)
   }
+})
+
+
+test('legacy import preflights a later scalar conflict before inserting or updating any profile', async t => {
+  const engine = memory(t)
+  const originals = [{ _id: 'allChannels', name: 'Primary', subscriptions: [] }, { _id: 'custom', name: 'Saved', subscriptions: false, unknown: new Date(1) }]
+  await engine.collections.profiles.insertAsync(originals)
+  const writes = t.mock.method(engine.collections.profiles, 'updateAsync')
+  const inserts = t.mock.method(engine.collections.profiles, 'insertAsync')
+  await assert.rejects(importSubscriptionProfiles(engine, { profiles: [{ _id: 'earlier', name: 'Earlier', subscriptions: [{ id: 'new' }] }, { _id: 'later', name: 'Saved', subscriptions: [{ id: 'later' }] }] }), /incompatible profile subscriptions/)
+  assert.equal(writes.mock.callCount(), 0)
+  assert.equal(inserts.mock.callCount(), 0)
+  assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals)
 })

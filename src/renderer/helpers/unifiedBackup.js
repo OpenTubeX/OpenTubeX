@@ -7,8 +7,8 @@ const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const MAX_TOTAL_SIZE = 256 * 1024 * 1024
 
 /**
- * Appends legacy channels while preserving every saved occurrence. A retained
- * scalar becomes one opaque slot only when channels are actually being added.
+ * Appends legacy channels while preserving every saved occurrence. Rejects
+ * scalar conflicts rather than reinterpret their stored shape.
  * @param {unknown} previous
  * @param {unknown[]} incoming
  * @returns {unknown}
@@ -16,7 +16,8 @@ const MAX_TOTAL_SIZE = 256 * 1024 * 1024
 export function mergeLegacySubscriptionChannels(previous, incoming) {
   if (!Array.isArray(incoming)) throw new TypeError('Invalid imported subscriptions')
   if (incoming.length === 0) return previous
-  const channels = Array.isArray(previous) ? previous.slice() : previous === undefined ? [] : [previous]
+  if (previous !== undefined && !Array.isArray(previous)) throw new Error('Cannot merge incompatible profile subscriptions')
+  const channels = previous === undefined ? [] : previous.slice()
   const identified = channel => channel !== null && typeof channel === 'object' && !Array.isArray(channel) && typeof channel.id === 'string' && channel.id.length > 0
   const ids = new Set(channels.filter(identified).map(channel => channel.id))
   for (const channel of incoming) {

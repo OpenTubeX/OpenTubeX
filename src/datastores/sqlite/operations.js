@@ -79,10 +79,14 @@ export async function importSubscriptionProfiles(engine, { profiles }) {
     const current = await collection.findAsync({})
     const primary = current.find(profile => profile._id === MAIN_PROFILE_ID)
     if (!primary) throw new Error('The primary subscription profile is missing')
-    const primaryChannels = []
-    const primaryPatch = {}
+    const primaryChannels = profiles.flatMap(profile => profile.subscriptions)
+    const primaryPatch = { subscriptions: mergeLegacySubscriptionChannels(primary.subscriptions, primaryChannels) }
+    // Reject every incompatible saved shape before any profile is written.
     for (const imported of profiles) {
-      for (const channel of imported.subscriptions) primaryChannels.push(channel)
+      const existing = current.find(profile => profile._id !== MAIN_PROFILE_ID && (imported.name === null ? profile._id === imported._id : profile.name === imported.name))
+      if (existing && !Array.isArray(existing.subscriptions)) mergeLegacySubscriptionChannels(existing.subscriptions, imported.subscriptions)
+    }
+    for (const imported of profiles) {
       if (imported._id === MAIN_PROFILE_ID) {
         if (Object.hasOwn(imported, 'icon')) primaryPatch.icon = imported.icon
         continue
@@ -99,7 +103,6 @@ export async function importSubscriptionProfiles(engine, { profiles }) {
         current.push(await collection.insertAsync(profile))
       }
     }
-    primaryPatch.subscriptions = mergeLegacySubscriptionChannels(primary.subscriptions, primaryChannels)
     await collection.updateAsync({ _id: MAIN_PROFILE_ID }, { $set: primaryPatch })
     return true
   })

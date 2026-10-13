@@ -1607,3 +1607,19 @@ test('classic media feeds compute timestamp keys once and retain legacy stable o
   assert.deepEqual(structuredClone(result), records.toSorted((a, b) => b.published - a.published))
   assert.deepEqual(records, before)
 })
+
+
+for (const field of ['videos', 'shorts', 'liveStreams', 'communityPosts']) {
+  test(`raw ${field} refresh reconciles retained opaque previous entries without mutating comparison inputs`, async t => {
+    const engine = memory(t), idKey = field === 'communityPosts' ? 'postId' : 'videoId', publishedKey = field === 'communityPosts' ? 'publishedTime' : 'published'
+    const old = { [idKey]: 'old', [publishedKey]: 1000, isNewInSubscriptionFeed: true, unknown: new Date(1) }
+    const original = { _id: 'channel', [field]: [null, false, 42, 'opaque', {}, old], [field + 'Timestamp']: new Date(1000), unknown: new Date(2) }
+    await engine.collections.subscriptionCache.insertAsync(original)
+    const { isNewInSubscriptionFeed, ...fetched } = old
+    const incoming = [{ [idKey]: 'new', [publishedKey]: 2000 }, fetched], before = structuredClone(incoming)
+    await engine.transaction(() => updateSubscriptionFeed(engine, { channelId: 'channel', entries: incoming, field, timestamp: new Date(3000) }))
+    assert.deepEqual(incoming, before)
+    assert.deepEqual(original[field], [null, false, 42, 'opaque', {}, old])
+    assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), { ...original, [field]: [{ ...incoming[0], isNewInSubscriptionFeed: true }, old], [field + 'Timestamp']: new Date(3000) })
+  })
+}
