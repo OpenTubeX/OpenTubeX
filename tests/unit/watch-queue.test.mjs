@@ -16,11 +16,74 @@ import {
   createWatchQueueState,
   watchQueueGetters,
   watchQueueMutations,
+  persistWatchQueue,
 } from '../../src/renderer/store/modules/watch-queue.js'
 
 function video (videoId) {
   return { videoId, title: `Video ${videoId}` }
 }
+
+function queueStorage(initialItems = []) {
+  let saved = JSON.stringify(initialItems)
+  return {
+    getItem: () => saved,
+    setItem: (_key, value) => { saved = value },
+  }
+}
+
+function persistentQueue(storage) {
+  return createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, storage)] })
+}
+
+test('restores pending videos in order with metadata, download routes, and distinct duplicate IDs', () => {
+  const storage = queueStorage()
+  let store = persistentQueue(storage)
+  const downloadedVideo = { ...video('download'), author: 'Channel', route: { path: '/watch/download', query: { downloadId: '42' } } }
+  store.commit('addVideoToWatchQueue', { video: video('one') })
+  store.commit('addVideoToWatchQueue', { video: downloadedVideo })
+  store.commit('addVideoToWatchQueue', { video: downloadedVideo, playNext: true })
+  store.commit('moveVideoInWatchQueue', { queueItemId: store.getters.getWatchQueue[1].queueItemId, offset: 1 })
+
+  store = persistentQueue(storage)
+  assert.deepEqual(store.getters.getWatchQueue.map(({ queueItemId, ...item }) => item), [downloadedVideo, downloadedVideo, video('one')])
+  const ids = store.getters.getWatchQueue.map(item => item.queueItemId)
+  store.commit('addVideoToWatchQueue', { video: video('new') })
+  assert.equal(new Set([...ids, store.getters.getWatchQueue.at(-1).queueItemId]).size, 4)
+})
+
+test('played, removed, deleted-download, and cleared entries stay absent after restart', () => {
+  const storage = queueStorage()
+  let store = persistentQueue(storage)
+  for (const id of ['played', 'removed', 'download', 'remaining']) {
+    store.commit('addVideoToWatchQueue', { video: { ...video(id), route: id === 'download' ? { query: { downloadId: '42' } } : undefined } })
+  }
+  store.commit('removeVideoFromWatchQueue', store.getters.getNextQueuedVideo.queueItemId)
+  store.commit('removeVideoFromWatchQueue', store.getters.getWatchQueue[0].queueItemId)
+  store.commit('removeYtDlpDownload', 42)
+  store = persistentQueue(storage)
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['remaining'])
+  store.commit('clearWatchQueue')
+  assert.deepEqual(persistentQueue(storage).getters.getWatchQueue, [])
+})
+
+test('ignores malformed stored queues and invalid entries', () => {
+  for (const saved of ['{', '{}', 'null']) {
+    assert.deepEqual(persistentQueue({ getItem: () => saved }).getters.getWatchQueue, [])
+  }
+  const store = persistentQueue(queueStorage([null, {}, { videoId: 42 }, { videoId: '' }, video('valid')]))
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['valid'])
+})
+
+test('storage failures leave the in-memory queue usable', () => {
+  const store = persistentQueue({
+    getItem() { throw new Error('Storage unavailable') },
+    setItem() { throw new Error('Storage full') },
+  })
+  store.commit('addVideoToWatchQueue', { video: video('one') })
+  assert.equal(store.getters.getNextQueuedVideo.videoId, 'one')
+  store.commit('clearWatchQueue')
+  assert.equal(store.getters.getWatchQueueLength, 0)
+})
 
 test('removing a download also removes its queued copies without affecting other sources', () => {
   const store = createStore({ modules: {

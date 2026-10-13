@@ -76,6 +76,18 @@ ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
 })
 
 export default {
+  watchQueue: {
+    update: request => {
+      const snapshot = ipcRenderer.sendSync(IpcChannels.WATCH_QUEUE_UPDATE, JSON.parse(JSON.stringify(request)))
+      if (snapshot.error) throw new Error(snapshot.error)
+      return snapshot
+    },
+    onUpdated: handler => {
+      const listener = (_event, snapshot) => handler(snapshot)
+      ipcRenderer.on(IpcChannels.WATCH_QUEUE_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.WATCH_QUEUE_UPDATED, listener)
+    }
+  },
   setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),

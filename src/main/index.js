@@ -1,4 +1,5 @@
 import { ClosedWindowHistory } from './tabs/ClosedWindowHistory.js'
+import { createFileWatchQueue } from './watchQueue.js'
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
@@ -1712,6 +1713,25 @@ function runApp() {
       contextMenuSessions.set(webContents.id, { sessionId, actions })
     }
     return { sessionId, items: serializedItems }
+  })
+
+  const updateWatchQueue = createFileWatchQueue(path.join(app.getPath('userData'), 'watch-queue.json'))
+  ipcMain.on(IpcChannels.WATCH_QUEUE_UPDATE, (event, request) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      event.returnValue = { error: 'Invalid watch queue sender' }
+      return
+    }
+    try {
+      const snapshot = updateWatchQueue(request)
+      event.returnValue = snapshot
+      if (request.type) {
+        for (const window of BrowserWindow.getAllWindows()) {
+          window.webContents.send(IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
+        }
+      }
+    } catch (error) {
+      event.returnValue = { error: error.message }
+    }
   })
 
   ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, payload) => {
