@@ -651,13 +651,15 @@ test('old record imports retain progress, concurrent writes, duplicate item IDs 
   imports.finish(job)
   await engine.collections.history.insertAsync({ videoId: 'concurrent', timeWatched: 20 })
   await imports.apply({ ...job, sections: ['history', 'playlists'] }, {})
-  assert.equal(await engine.collections.history.countAsync({}), 2)
+  assert.equal(await engine.collections.history.countAsync({}), 3)
   const history = await engine.collections.history.findOneAsync({ videoId: 'video' })
   assert.equal(history.watchProgress, 40)
   assert.equal(history.timeWatched, 10)
   assert.equal(history.isWatched, true)
   assert.deepEqual(history.future, { keep: true })
-  assert.equal(history.importedUnknown, 1)
+  assert.equal(Object.hasOwn(history, 'importedUnknown'), false)
+  const [{ _id, ...imported }] = await engine.collections.history.findAsync({ videoId: 'video', timeWatched: 5 })
+  assert.deepEqual(imported, { videoId: 'video', timeWatched: 5, watchProgress: 1, isWatched: false, importedUnknown: 1 })
   const playlist = await engine.playlistSnapshot({ id: 'p' })
   assert.deepEqual(playlist.videos.map(video => video.videoId), ['first'])
   assert.equal(playlist.protected, true)
@@ -1215,3 +1217,24 @@ for (const videoId of ['\ud800', '\udc00', 'x\ud800y']) {
     }
   })
 }
+
+
+test('ID-less legacy history imports retain each occurrence and every existing record', async t => {
+  const { engine, imports } = await fixture(t)
+  const saved = { _id: 'saved', videoId: 'same', timeWatched: 1, watchProgress: 99, isWatched: true, title: 'Saved', unknown: new Date(123) }
+  await engine.collections.history.insertAsync(saved)
+  const incoming = [{ videoId: 'same', title: 'First incoming', timeWatched: 2, watchProgress: 10, isWatched: false, unknown: new Date(456) }, { videoId: 'same', title: 'Second incoming', timeWatched: 3, watchProgress: 20, isWatched: false, unknown: new Date(789) }]
+  let previous = [saved]
+  for (let repeat = 0; repeat < 2; repeat++) {
+    const job = imports.start({ format: 'records' })
+    imports.chunk({ ...job, section: 'history', records: structuredClone(incoming) })
+    imports.finish(job)
+    await imports.apply({ ...job, sections: ['history'] }, {})
+    const rows = await engine.collections.history.findAsync({})
+    assert.equal(rows.length, previous.length + incoming.length)
+    for (const row of previous) assert.deepEqual(rows.find(candidate => candidate._id === row._id), row)
+    const added = rows.filter(row => !previous.some(saved => saved._id === row._id)).map(({ _id, ...row }) => row).sort((left, right) => left.timeWatched - right.timeWatched)
+    assert.deepEqual(added, incoming)
+    previous = rows
+  }
+})

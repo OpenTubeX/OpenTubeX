@@ -312,11 +312,9 @@ export class LibraryImports {
               // Preserve remaining source IDs and existing duplicates instead.
               engine.prepare("DELETE FROM import_history_targets WHERE video_id = json_extract(?, '$')").run(JSON.stringify(incoming.videoId))
             }
-          } else if (!incoming._id && !matchHistory) {
-            current = await collection.findAsync({ videoId: incoming.videoId }).sort({ timeWatched: -1 }).limit(1).then(records => records[0])
           }
-          // Identified legacy occurrences are distinct records, even when they
-          // share a video ID. Only unidentified imports match by video above.
+          // Without a stable ID, an incoming row cannot be proved to replace a
+          // saved visit. Keep it separate in both backup and legacy formats.
           if (current && matchHistory) engine.prepare('DELETE FROM import_history_targets WHERE id = ?').run(current._id)
           merged = mergeBackupHistoryRecord(current, migrateLegacyHistoryRecord(incoming))
         } else if (row.section === 'playlists') {
