@@ -26,17 +26,19 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       const downloads = structuredClone(Object.values(store.getters.getYtDlpDownloads).map(download => JSON.parse(JSON.stringify(download))))
       const queue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
+      window.__offlineRecommendationsOnline = Object.getOwnPropertyDescriptor(navigator, 'onLine')
+      window.__offlineRecommendationsFetch = window.fetch
+      return { route: location.hash, settings, downloads, queue, values }
+    })
+    await page.evaluate(({ downloads, values }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('clearWatchQueue')
       for (const download of downloads) store.commit('removeYtDlpDownload', download.id)
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
-      window.__offlineRecommendationsOnline = Object.getOwnPropertyDescriptor(navigator, 'onLine')
-      window.__offlineRecommendationsFetch = window.fetch
       window.fetch = (url, options) => String(url).startsWith('https://localhost/')
         ? window.__offlineRecommendationsFetch(url, options) : Promise.reject(new Error('Offline recommendations test'))
-      const route = location.hash
       location.hash = '#/watch/jNQXAC9IVRw'
-      return { route, settings, downloads, queue }
-    })
+    }, saved)
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
       try {
