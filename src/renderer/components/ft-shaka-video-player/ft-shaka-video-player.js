@@ -135,7 +135,7 @@ import {
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
-import { findSponsorBlockSeekBarSegment } from '../../helpers/player/sponsorBlockSeekBar'
+import { findSponsorBlockSeekBarSegment, updateSponsorBlockSeekBarState } from '../../helpers/player/sponsorBlockSeekBar'
 import {
   AbRepeatValidation,
   formatAbRepeatTimestamp,
@@ -7447,6 +7447,7 @@ export default defineComponent({
       seekBar.max = seekRange.end.toString()
       seekBar.value = clampedCurrentTime.toString()
       seekBarContainer.style.background = `linear-gradient(${gradient.join(', ')})`
+      updateSponsorBlockSeekBarState(seekBarContainer)
     }
 
     /**
@@ -11368,6 +11369,9 @@ export default defineComponent({
 
       markerDiv.title = title
       markerDiv.className = className
+      markerDiv.style.setProperty('--marker-start', (startTime / duration * 100).toString())
+      // A point switches state as a whole; keep its gradient divisor nonzero.
+      markerDiv.style.setProperty('--marker-width', Math.max((endTime - startTime) / duration * 100, 0.001).toString())
       if (customColor !== null) {
         markerDiv.style.setProperty('--primary-color', customColor)
       }
