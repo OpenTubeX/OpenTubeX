@@ -84,6 +84,7 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['applyPlaylistMetadataRepairs', 'playlists'],
   ['upsertToHistoryCache', 'history'],
   ['applyHistorySyncChanges', 'history'],
+  ['applyHistoryMetadata', 'history'],
   ['setHistoryCacheSorted', 'history'],
   ['setHistoryCacheById', 'history'],
   ['setSubscriptionSeenVideos', 'history'],
