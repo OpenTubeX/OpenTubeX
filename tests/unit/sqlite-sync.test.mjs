@@ -19,6 +19,21 @@ function fixture(t) {
 }
 const video = i => ({ videoId: String(i).padStart(11, '0'), authorId: 'channel', author: 'Author', title: `Video ${i}`, lengthSeconds: 100, timeWatched: i + 1, watchProgress: 5, isWatched: false })
 
+for (const preference of [undefined, true, false, null]) {
+  test(`watch-stat snapshot respects the default and stored preference: ${preference}`, async t => {
+    const { engine } = fixture(t)
+    const snapshot = { history: { retained: { progress: 42 } } }
+    const settings = { syncServerEnabled: true, syncServerUrl: 'server', syncServerToken: 'token', syncServerSnapshot: JSON.stringify(snapshot) }
+    if (preference !== undefined) settings.syncServerSyncWatchStats = preference
+    await engine.collections.settings.insertAsync(Object.entries(settings).map(([_id, value]) => ({ _id, value })))
+    const watchStats = [{ deviceId: 'device', days: { '2026-10-13': 60 } }]
+    const result = await syncSnapshotSection(engine, { account: ['server', 'token', 'legacy', '', ''], collection: 'watchStats', value: watchStats })
+    const enabled = preference === undefined || preference === true
+    assert.equal(result.updated, enabled)
+    assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: 'syncServerSnapshot' })).value), enabled ? { ...snapshot, watchStats } : snapshot)
+  })
+}
+
 for (const enabled of [false, true]) {
   for (const changedAccount of [false, true]) {
     test(`playlist acknowledgements retain unrelated snapshots when enabled=${enabled} accountChanged=${changedAccount}`, async t => {

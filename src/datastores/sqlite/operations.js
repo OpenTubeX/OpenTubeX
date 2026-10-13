@@ -48,7 +48,11 @@ export async function syncSnapshotSection(engine, { account, collection, value, 
   if (collection === 'playlists' && (typeof value?.id !== 'string' || !Array.isArray(value.acknowledged?.upserts) || !Array.isArray(value.acknowledged?.deletions))) throw new TypeError('Invalid playlist sync acknowledgement')
   return engine.transaction(async () => {
     if (!await snapshotAccountMatches(engine, account) || (collection !== 'playlists' && (await engine.collections.settings.findOneAsync({ _id: 'syncServerEnabled' }))?.value !== true)) return { updated: false }
-    if (collection === 'watchStats' && !remove && (await engine.collections.settings.findOneAsync({ _id: 'syncServerSyncWatchStats' }))?.value !== true) return { updated: false }
+    if (collection === 'watchStats' && !remove) {
+      const preference = await engine.collections.settings.findOneAsync({ _id: 'syncServerSyncWatchStats' })
+      // An absent preference uses the renderer's enabled-by-default setting.
+      if (preference && preference.value !== true) return { updated: false }
+    }
     const current = await syncSnapshotRead(engine)
     const snapshot = JSON.parse(current)
     if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new TypeError('Invalid sync snapshot')
