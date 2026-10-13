@@ -700,6 +700,55 @@ for (const uiScale of [100, 125]) {
   test.describe(`settings subpage reopening at ${uiScale}%`, () => {
     test.use({ seed: { settings: { uiScale } } })
 
+    for (const width of [375, 1000]) {
+      for (const view of ['downloads', 'about']) {
+        test(`keeps category scrolling through a direct ${view} switch at width ${width}`, async ({ app, page }) => {
+          await setWindowSize(app, page, { width: Math.round(width * uiScale / 100), height: Math.round(650 * uiScale / 100) })
+          const category = await goToSettingsSection(page, 'appearance')
+          const content = page.locator('.settingsContent')
+          const scrollbar = content.locator(':scope > .os-scrollbar-vertical')
+          for (const resize of [false, true]) {
+            await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+            await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(100)
+            const scrollTop = await content.evaluate(element => element.scrollTop)
+            if (view === 'downloads') await page.keyboard.press('Control+j')
+            else {
+              await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'about'))
+            }
+            await expect(page.locator(view === 'downloads' ? '.settingsDownloadsPage' : '.settingsAboutPage')).toBeVisible()
+            await expect(category).toBeHidden()
+            // Let the hidden section's ResizeObserver notification run.
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+            if (resize) {
+              await app.electronApp.evaluate(({ BrowserWindow }, { width, uiScale }) => {
+                const window = BrowserWindow.getAllWindows()[0]
+                window.setBounds({ ...window.getBounds(), width: Math.round((width === 375 ? 1000 : 375) * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+              }, { width, uiScale })
+              await expect.poll(() => page.evaluate(() => innerHeight)).toBeGreaterThan(800)
+              await page.locator('.settingsCloseButton').click()
+              await expect(page.locator('.settingsWindow')).toBeHidden()
+            }
+            await toggleSettingsFromPreferences(app)
+            await expect(category).toBeVisible()
+            await expect.poll(() => content.evaluate((element, saved) => {
+              const maximum = Math.max(0, element.scrollHeight - element.clientHeight)
+              return Math.abs(element.scrollTop - Math.min(saved, maximum))
+            }, scrollTop)).toBeLessThanOrEqual(1)
+            await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+            await expect.poll(() => content.evaluate(element => {
+              const section = element.querySelector(':scope > [data-section="appearance"]')
+              const end = section.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
+              const bounds = element.getBoundingClientRect()
+              const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+              const thumb = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+              return end >= bounds.bottom - 2 / devicePixelRatio && element.scrollTop <= element.scrollHeight - element.clientHeight + 1 &&
+                Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+            })).toBe(true)
+          }
+        })
+      }
+    }
+
     test('opens a command-palette category before compact Settings first mounts', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 375, height: 700 })
       await page.keyboard.press('Control+k')

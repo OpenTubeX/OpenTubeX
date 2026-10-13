@@ -840,13 +840,20 @@ watch(isProfileManagerOpen, (open) => {
     nextTick(observeProfileManager)
   }
 })
-watch(() => store.getters.getSettingsWindowView, async (view) => {
+watch(() => store.getters.getSettingsWindowView, async (view, previousView) => {
+  if (['about', 'downloads'].includes(view) && !['about', 'downloads'].includes(previousView)) {
+    preserveScrollPositions(false)
+  }
   stopObservingStandaloneContent()
   if (view === 'downloads' && canReturnFromDownloads.value) {
     downloadsReturnScrollTop = settingsContentRef.value?.scrollTop ?? 0
   }
-  if (!['about', 'downloads'].includes(view)) return
   await nextTick()
+  if (view !== store.getters.getSettingsWindowView) return
+  if (!['about', 'downloads'].includes(view)) {
+    if (unlocked.value) restorePreservedScrollPositions()
+    return
+  }
   const scrollViewport = standaloneScrollRef.value
   if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
   observeStandaloneContent()
@@ -931,7 +938,7 @@ function handleMounted() {
           })
           scheduleBoundsSave()
         }
-        if (settingsContentRef.value) {
+        if (protectedSettingsVisible.value && settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
             getSettingsContentEnd(settingsContentRef.value)
@@ -1008,6 +1015,7 @@ function observeActiveSettingsSection() {
   if (!content || !contentEnd) return
   let previousHeight = null
   settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
+    if (!protectedSettingsVisible.value) return
     const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
     const contentShrank = previousHeight !== null && height < previousHeight
     previousHeight = height
@@ -1354,9 +1362,9 @@ function minimizeSettings() {
   store.dispatch('minimizeSettingsWindow')
 }
 
-function preserveScrollPositions() {
-  if (!unlocked.value && !isStandaloneViewOpen.value) return
-  const viewports = getCurrentScrollViewports()
+function preserveScrollPositions(standalone = isStandaloneViewOpen.value) {
+  if (!unlocked.value && !standalone) return
+  const viewports = getCurrentScrollViewports(standalone)
   preservedScrollPositions = [
     ...preservedScrollPositions.filter(({ element }) => !viewports.has(element)),
     ...[...viewports].filter(element => element.scrollTop > 0)
@@ -1364,8 +1372,8 @@ function preserveScrollPositions() {
   ]
 }
 
-function getCurrentScrollViewports() {
-  const content = isStandaloneViewOpen.value ? standaloneScrollRef.value : settingsPageRef.value
+function getCurrentScrollViewports(standalone = isStandaloneViewOpen.value) {
+  const content = standalone ? standaloneScrollRef.value : settingsPageRef.value
   if (!content) return new Set()
   const selector = '[data-overlayscrollbars-initialize]'
   return new Set([
