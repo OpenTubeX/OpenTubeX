@@ -1154,12 +1154,11 @@ async function handleRemoveDeadVideosPromptAnswer(option) {
     if (removed === 0) return
     const { numAffected } = await DBPlaylistHandlers.replaceVideosIfUnchanged(playlist._id, playlist.videos, videos, Date.now())
     if (numAffected !== 1) throw new Error('The playlist changed; reload it before removing unavailable videos')
-    store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed),
       icon: ['fas', 'trash'],
     })
-    await store.dispatch('grabAllPlaylists', { preserveRetained: true }).catch(console.error)
+    await refreshPortablePlaylistAfterCleanup()
   } catch (error) {
     console.error(error)
     showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
@@ -1184,15 +1183,31 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
   await cleanupUserPlaylist('watched')
 }
 
+async function refreshPortablePlaylistAfterCleanup(removed = true) {
+  try {
+    const refreshed = await store.dispatch('grabAllPlaylists', { preserveRetained: true })
+    if (refreshed !== true) throw new Error('The committed playlist could not be refreshed')
+    if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+  } catch (error) {
+    console.error(error)
+    showToast({ message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"), icon: ['fas', 'circle-exclamation'] })
+  }
+}
+
 async function cleanupUserPlaylist(mode) {
   try {
     const removed = await DBLibraryHandlers.query('cleanupPlaylist', { id: props.id, mode })
-    if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+    if (removed && process.env.IS_ELECTRON) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
     showToast({
       message: removed ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed) : t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
       icon: ['fas', 'trash'],
     })
-    await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
+    if (process.env.IS_ELECTRON) {
+      await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
+    } else {
+      await refreshPortablePlaylistAfterCleanup(removed)
+      await store.dispatch('grabHistory').catch(console.error)
+    }
   } catch (error) {
     console.error(error)
     showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })

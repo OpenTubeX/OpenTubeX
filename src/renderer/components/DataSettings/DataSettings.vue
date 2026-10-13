@@ -335,7 +335,7 @@ import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
 import { previewBackupImport, previewTakeoutImport, parseTakeoutSubscriptions, parseTakeoutWatchHistory, parseTakeoutSearchHistory } from '../../helpers/import-preview'
 import FtImportPreview from '../FtImportPreview/FtImportPreview.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistory, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistory, mergeBackupPlaylist, mergeBackupProfile, mergeLegacySubscriptionChannels, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { importLibraryRecords, stageLibraryBackup, writeLibraryBackup } from '../../helpers/libraryBackup'
 import { compactAllDatastores, DBLibraryHandlers, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { forEachTakeoutImportEntry, forEachSelectedTakeoutZipEntry, getTakeoutPlaylistName, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, readTakeoutPlaylistMetadata } from '../../helpers/youtube-takeout-zip'
@@ -1023,7 +1023,7 @@ async function importFreeTubeSubscriptions(profileRecords) {
   ]
   const knownKeys = [...requiredKeys, ...optionalKeys]
   const importedProfiles = []
-  const updatedPrimaryProfile = process.env.IS_ELECTRON ? null : { ...profileList.value[0], subscriptions: [...profileList.value[0].subscriptions] }
+  const updatedPrimaryProfile = process.env.IS_ELECTRON ? null : { ...profileList.value[0] }
   let shouldUpdatePrimaryProfile = false
 
   for (const profileData of profileRecords) {
@@ -1072,14 +1072,7 @@ async function importFreeTubeSubscriptions(profileRecords) {
           if (Object.hasOwn(profileObject, 'icon')) {
             existingProfile.icon = profileObject.icon
           }
-          existingProfile.subscriptions = existingProfile.subscriptions.concat(profileObject.subscriptions)
-          existingProfile.subscriptions = existingProfile.subscriptions.filter((sub, index) => {
-            const profileIndex = existingProfile.subscriptions.findIndex((x) => {
-              return x.id === sub.id
-            })
-
-            return profileIndex === index
-          })
+          existingProfile.subscriptions = mergeLegacySubscriptionChannels(existingProfile.subscriptions, profileObject.subscriptions)
           await saveProfile('updateProfile', existingProfile)
         } else {
           const hasProfileIdCollision = profileList.value.some((profile) => {
@@ -1096,14 +1089,7 @@ async function importFreeTubeSubscriptions(profileRecords) {
         }
       }
 
-      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.concat(profileObject.subscriptions)
-      updatedPrimaryProfile.subscriptions = updatedPrimaryProfile.subscriptions.filter((sub, index) => {
-        const profileIndex = updatedPrimaryProfile.subscriptions.findIndex((x) => {
-          return x.id === sub.id
-        })
-
-        return profileIndex === index
-      })
+      updatedPrimaryProfile.subscriptions = mergeLegacySubscriptionChannels(updatedPrimaryProfile.subscriptions, profileObject.subscriptions)
       shouldUpdatePrimaryProfile = true
     }
   }

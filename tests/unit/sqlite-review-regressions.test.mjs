@@ -1,3 +1,4 @@
+import * as backupHelpers from '../../src/renderer/helpers/unifiedBackup.js'
 import model from '@seald-io/nedb/lib/model.js'
 import assert from 'node:assert/strict'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
@@ -50,6 +51,7 @@ async function functions(file, names, bindings = {}) {
   if (file === 'src/renderer/store/modules/playlists.js' && !names.includes('updateCachedPlaylistMembers')) names = [...names, 'updateCachedPlaylistMembers']
   if (file === 'src/renderer/components/PlaylistInfo/PlaylistInfo.vue' && !names.includes('playablePlaylistVideos')) names = [...names, 'playablePlaylistVideos']
   if (file === playlistInfo && !names.includes('playlistExportSource')) names = [...names, 'playlistExportSource']
+  if (file === playlistInfo && !names.includes('refreshPortablePlaylistAfterCleanup')) names = [...names, 'refreshPortablePlaylistAfterCleanup']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
   if (file === 'src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue') {
@@ -3518,3 +3520,30 @@ test('paged subscription cards omit opaque members without changing raw paginati
   assert.deepEqual(cards.value.map(entry => ({ ...entry })), raw.slice(-2))
   assert.deepEqual(raw, original)
 })
+
+
+for (const previous of [undefined, null, false, 42, 'retained', { retained: new Date(1) }, new Date(2), [null, null, false, {}, {}, { id: 42 }, { id: '' }, { id: 'existing', unknown: new Date(3) }, { id: 'existing', unknown: new Date(4) }]]) {
+  test(`portable legacy import retains previous scalar/opaque subscriptions: ${model.serialize({ previous })}`, async () => {
+    const db = new Datastore({ inMemoryOnly: true })
+    const originals = [{ _id: 'allChannels', name: 'Primary' }, { _id: 'custom', name: 'Saved' }].map(profile => ({ ...profile, ...(previous === undefined ? {} : { subscriptions: previous }), unknown: new Date(5) }))
+    await db.insertAsync(originals)
+    const profileList = ref(await db.findAsync({}).sort({ _id: 1 }))
+    const context = await functions(dataSettings, ['importFreeTubeSubscriptions'], {
+      process: { env: { IS_ELECTRON: false } }, MAIN_PROFILE_ID: 'allChannels', profileList,
+      mergeLegacySubscriptionChannels: backupHelpers.mergeLegacySubscriptionChannels,
+      isJsonObject: value => value !== null && typeof value === 'object' && !Array.isArray(value),
+      showToast() {}, t: key => key,
+      store: { dispatch: async (action, profile) => {
+        assert.equal(action, 'updateProfile')
+        await db.updateAsync({ _id: profile._id }, { $set: structuredClone(profile) })
+        profileList.value = await db.findAsync({}).sort({ _id: 1 })
+        return true
+      } }
+    })
+    const existing = { id: 'existing', name: 'Incoming' }, added = { id: 'new', unknown: new Date(6) }
+    await context.importFreeTubeSubscriptions([{ _id: 'incoming', name: 'Saved', bgColor: '#000', textColor: '#fff', subscriptions: [existing, added, added] }])
+    const retained = Array.isArray(previous) ? previous : previous === undefined ? [] : [previous]
+    const expected = [...retained, ...(Array.isArray(previous) ? [] : [existing]), added]
+    assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), originals.map(profile => ({ ...profile, subscriptions: expected })).toSorted((a, b) => a._id.localeCompare(b._id)))
+  })
+}

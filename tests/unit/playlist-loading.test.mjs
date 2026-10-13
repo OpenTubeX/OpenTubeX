@@ -696,7 +696,8 @@ test('portable unavailable confirmation keeps unsupported members while removing
   const script = parse(component).descriptor.scriptSetup.content
   const node = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'handleRemoveDeadVideosPromptAnswer')
   const selected = ref(new Set([undefined, 'dead']))
-  const action = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
+  const helper = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'refreshPortablePlaylistAfterCleanup')
+    const action = vm.runInNewContext(script.slice(helper.start, helper.end) + `\n(${script.slice(node.start, node.end)})`, {
     process: { env: { IS_ELECTRON: false } }, showRemoveDeadVideosPrompt: ref(true), selectedUserPlaylist: ref(structuredClone(original)), deadVideoItemIds: selected, props: { id: 'p' },
     DBLibraryHandlers: { query: async () => db.playlists.findOneAsync({ _id: 'p' }) }, DBPlaylistHandlers: handlers, store: { dispatch }, showToast() {}, t: key => key,
   })
@@ -834,7 +835,8 @@ for (const concurrent of ['none', 'metadata', 'membership']) {
       if (concurrent !== 'none') await db.playlists.updateAsync({ _id: 'p' }, { $set: { description: 'Concurrent', unknown: new Date(4) }, ...(concurrent === 'membership' ? { $push: { videos: added } } : {}) })
       return previous
     }
-    const action = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
+    const helper = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'refreshPortablePlaylistAfterCleanup')
+    const action = vm.runInNewContext(script.slice(helper.start, helper.end) + `\n(${script.slice(node.start, node.end)})`, {
       process: { env: { IS_ELECTRON: false } }, props: { id: 'p' }, showRemoveDeadVideosPrompt: ref(true), deadVideoItemIds: selection,
       DBLibraryHandlers: { query }, DBPlaylistHandlers: handlers,
       store: { dispatch: async (name, payload) => name === 'grabAllPlaylists' ? load({ preserveRetained: true }) : name === 'scheduleSyncServer' ? undefined : module.actions[name](storeContext, payload) },
@@ -856,4 +858,58 @@ for (const concurrent of ['none', 'metadata', 'membership']) {
     }
     assert.equal(selection.value.size, 0)
   })
+}
+
+
+for (const operation of ['watched', 'duplicates', 'unavailable']) {
+  for (const outcome of ['success', 'reject', 'false']) {
+    test(`portable ${operation} cleanup publishes fresh membership before sync: ${outcome}`, async () => {
+      const original = { _id: 'p', playlistName: 'Retained', lastUpdatedAt: 1, videos: [null, { videoId: 'dead', playlistItemId: 'first', unknown: new Date(1) }, { videoId: 'dead', playlistItemId: 'duplicate', unknown: new Date(2) }, { videoId: 'keep', playlistItemId: 'keep' }], unknown: new Date(3) }
+      const { db, module, handlers, load } = await fixture([original])
+      await load({ preserveRetained: true })
+      const library = createPortableLibrary({ playlists: handlers, history: { find: async () => [{ videoId: 'dead', isWatched: true, timeWatched: 1 }], unsetLastViewedPlaylistForVideos: async () => {} } })
+      let release, started
+      const gate = new Promise(resolve => { release = resolve })
+      const refreshStarted = new Promise(resolve => { started = resolve })
+      const synced = [], errors = [], toasts = []
+      const store = { dispatch: async (name, payload) => {
+        if (name === 'grabAllPlaylists') {
+          started()
+          await gate
+          assert.equal(payload?.preserveRetained, true)
+          if (outcome === 'reject') throw new Error('Refresh failed')
+          if (outcome === 'false') return false
+          return load(payload)
+        }
+        if (name === 'scheduleSyncServer') synced.push(structuredClone(module.state.playlists))
+      } }
+      const script = parse(await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+      const nodes = babelParse(script, { sourceType: 'module' }).program.body
+      const name = operation === 'unavailable' ? 'handleRemoveDeadVideosPromptAnswer' : 'cleanupUserPlaylist'
+      const method = nodes.find(node => node.type === 'FunctionDeclaration' && node.id.name === name)
+      const helper = nodes.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'refreshPortablePlaylistAfterCleanup')
+      const code = (helper ? script.slice(helper.start, helper.end) : '') + '\n(' + script.slice(method.start, method.end) + ')'
+      const run = vm.runInNewContext(code, { process: { env: { IS_ELECTRON: false } }, props: { id: 'p' }, store, DBLibraryHandlers: library, DBPlaylistHandlers: handlers, console: { error: error => errors.push(error) }, showToast: toast => toasts.push(toast), t: key => key, showRemoveDeadVideosPrompt: ref(true), deadVideoItemIds: ref(new Set(['first', 'duplicate'])) })
+      const pending = run(operation === 'unavailable' ? 'delete' : operation)
+      try {
+        await refreshStarted
+        assert.deepEqual(synced, [], 'no sync may be queued while cache publication is pending')
+        release()
+        await pending
+        const saved = await db.playlists.findOneAsync({ _id: 'p' })
+        const remaining = operation === 'duplicates' ? [original.videos[0], original.videos[1], original.videos[3]] : [original.videos[0], original.videos[3]]
+        assert.deepEqual(saved, { ...original, videos: remaining, lastUpdatedAt: saved.lastUpdatedAt })
+        if (outcome === 'success') {
+          assert.deepEqual(synced, [[saved]])
+          assert.deepEqual(errors, [])
+        } else {
+          assert.deepEqual(synced, [])
+          assert.equal(errors.length, 1)
+          assert.deepEqual(structuredClone(module.state.playlists), [original])
+          assert.match(toasts.at(-1).message, /could not be loaded/)
+        }
+        assert.match(toasts[0].message, /have been removed/)
+      } finally { release(); await pending }
+    })
+  }
 }
