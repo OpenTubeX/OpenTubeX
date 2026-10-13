@@ -14,7 +14,12 @@ async function openRepair(page) {
   return page.getByRole('dialog', { name: 'Repair Playlists' })
 }
 async function savedPlaylists(page) {
-  return page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists)
+  return page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    if (!store.state.playlists.libraryPaged) return store.getters.getAllPlaylists
+    const summaries = await window.ftElectron.libraryQuery('playlistSummaries')
+    return Promise.all(summaries.map(playlist => window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })))
+  })
 }
 function playerResponse() {
   return { videoDetails: { videoId: video.videoId, title: 'Fetched title', author: 'Recovered channel', channelId: 'UCabcdefghijklmnopqrstuv', lengthSeconds: '120', isLiveContent: true }, microformat: { playerMicroformatRenderer: { publishDate: '2025-01-01' } } }
