@@ -3,9 +3,9 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, nextTick, reactive, ref, shallowRef, watch } from 'vue'
-import { getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../../src/renderer/helpers/subscription-channels.js'
+import { getSubscriptionsForFeed, getValidSubscriptionChannels, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../../src/renderer/helpers/subscription-channels.js'
 
-async function feed(t, query, initiallyPresented = true, initialExtent = () => 100, sortPreference = () => null, initiallyReady = true) {
+async function feed(t, query, initiallyPresented = true, initialExtent = () => 100, sortPreference = () => null, initiallyReady = true, onlyNew = () => false) {
   t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 1_700_000_000_000 })
   const advance = async milliseconds => {
     await nextTick()
@@ -27,12 +27,12 @@ async function feed(t, query, initiallyPresented = true, initialExtent = () => 1
     store: { getters, state: reactive({ history: { historyRevision: 0 }, subscriptionCache: { videoCache: {}, shortsCache: {}, liveCache: {}, postsCache: {}, subscriptionVideosFeedVersion: 0 } }) },
     DBLibraryHandlers: { query }, hasConfiguredRestrictedPlaybackAuthentication: () => false,
     MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES: 500,
-    MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS, getSubscriptionsForFeed,
+    MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS, getSubscriptionsForFeed, getValidSubscriptionChannels,
     setTimeout(callback, delay) { const timer = setTimeout(callback, delay); timers.add(timer); return timer }, clearTimeout,
   }
   t.after(() => { stops.forEach(stop => stop()); timers.forEach(clearTimeout) })
   const create = vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export function', 'function') + '\nuseSubscriptionPage', context)
-  return { result: create(() => 'videos', () => false, () => true, () => 100, initialExtent, sortPreference), getters, state: context.store.state, presented, advance, activate: () => activate(), deactivate: () => deactivate() }
+  return { result: create(() => 'videos', onlyNew, () => true, () => 100, initialExtent, sortPreference), getters, state: context.store.state, presented, advance, activate: () => activate(), deactivate: () => deactivate() }
 }
 
 test('restored feed extent loads bounded pages before reporting completion and can force newest Home order', async t => {
@@ -517,3 +517,39 @@ test('subscription page publication retains opaque positions without rejecting n
   assert.equal(result.records.value, previous)
   assert.equal(result.total.value, records.length)
 })
+
+
+for (const onlyNew of [false, true]) {
+  test(`subscription page requests and refresh counts ignore opaque profile members, New: ${onlyNew}`, async t => {
+    const requests = []
+    const { result, getters, state, advance } = await feed(t, async (_, options) => {
+      requests.push(options)
+      return { ...page(), records: [{ videoId: 'visible' }], cursor: null, total: 1 }
+    }, true, () => 100, () => null, false, () => onlyNew)
+    const profile = { _id: 'profile-a', subscriptions: [null, false, 42, 'retained', [], {}, { id: 42 }, { id: '' }, new Date(123), { id: 'channel', unknown: new Date(456) }], unknown: new Date(789) }
+    const before = structuredClone(profile)
+    getters.getActiveProfile = profile
+    getters.getSubscriptionCacheReady = true
+    await advance(0)
+    assert.deepEqual(Array.from(requests.at(-1).subscriptions), [profile.subscriptions.at(-1)])
+    assert.equal(requests.at(-1).onlyNew, onlyNew)
+    assert.equal(result.failed.value, false)
+    assert.deepEqual(Array.from(result.records.value), [{ videoId: 'visible' }])
+    state.subscriptionCache.videoCache = { channel: { count: 600 } }
+    getters.getSubscriptionFeedRefreshInProgress = true
+    await advance(0)
+    const count = requests.length
+    state.subscriptionCache.subscriptionVideosFeedVersion++
+    await advance(1100)
+    assert.equal(requests.length, count, 'a large refresh keeps the completed feed')
+    getters.getSubscriptionFeedRefreshInProgress = false
+    await advance(101)
+    assert.equal(result.failed.value, false)
+    assert.deepEqual(profile, before)
+    const added = { id: 'added', unknown: new Date(987) }
+    getters.getActiveProfile.subscriptions.push(added)
+    await advance(101)
+    assert.deepEqual(Array.from(requests.at(-1).subscriptions), [profile.subscriptions.at(-2), added])
+    assert.deepEqual(profile, { ...before, subscriptions: [...before.subscriptions, added] })
+  })
+}

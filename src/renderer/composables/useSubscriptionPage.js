@@ -2,7 +2,7 @@ import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, shallowRef,
 import store from '../store/index'
 import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restricted-playback'
-import { getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS, MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
+import { getSubscriptionsForFeed, getValidSubscriptionChannels, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS, MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES } from '../helpers/subscription-channels'
 import { useTabContext } from '../tabs/TabContext'
 
 // IPC returns fresh objects. Reuse unchanged visible entries so channel refreshes
@@ -52,7 +52,7 @@ export function useSubscriptionPage(category, onlyNew = () => false, enabled = (
   let expiresAt = 0
   const presented = () => active && isTabPresented?.value !== false
   const options = computed(() => ({
-    subscriptions: Array.isArray(store.getters.getActiveProfile?.subscriptions) ? store.getters.getActiveProfile.subscriptions.slice() : [],
+    subscriptions: getValidSubscriptionChannels(store.getters.getActiveProfile?.subscriptions),
     category: category(),
     onlyNew: onlyNew(),
     limit: limit(),
