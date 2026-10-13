@@ -50,7 +50,7 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { containsWatchStatsDevice, mergeWatchStats, replaceWatchStatsDevice, persistUploadedWatchStatsReset, syncWatchStats, watchStatsDeviceDays } from '../../helpers/sync-watch-stats'
 import { areJsonValuesEqual } from '../../helpers/jsonValues'
-import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
+import { DBSettingHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { syncLiveReminders } from '../../helpers/sync-live-reminders'
 import { liveReminder } from '../../helpers/liveReminders'
 import { MAIN_PROFILE_ID } from '../../../constants'
@@ -198,9 +198,9 @@ function parseSnapshot(value) {
   }
 }
 
-async function clearUnsupportedWatchStats({ commit, dispatch, rootState }) {
+async function clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshotValue = rootState.settings.syncServerSnapshot) {
   commit('setSyncedWatchStats', [])
-  const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+  const snapshot = parseSnapshot(snapshotValue)
   if (!('watchStats' in snapshot)) return
   delete snapshot.watchStats
   await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
@@ -1535,7 +1535,19 @@ const actions = {
         commit('setSyncServerWatchStatsSupported', watchStatsSupported)
         commit('setSyncServerLiveRemindersSupported', privacySupported && capabilities.live_reminders === 1)
         if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
-          await clearUnsupportedWatchStats({ commit, dispatch, rootState })
+          const accountKeys = ['syncServerUrl', 'syncServerToken', 'syncServerPrivacyMode', 'syncServerPrivacyKey', 'syncServerPrivacySalt']
+          const account = accountKeys.map(key => rootState.settings[key])
+          await withSyncLock(async () => {
+            const sameAccount = () => accountKeys.every((key, index) => rootState.settings[key] === account[index])
+            if (!sameAccount()) throw new SyncServerCancelledError()
+            // A different window may have synced while this initializer waited.
+            // Read the shared datastore after acquiring the sync lock, rather
+            // than trusting a renderer snapshot whose IPC update is still queued.
+            const saved = await DBSettingHandlers.find()
+            if (!sameAccount()) throw new SyncServerCancelledError()
+            const snapshot = saved.find(setting => setting._id === 'syncServerSnapshot')?.value ?? '{}'
+            await clearUnsupportedWatchStats({ commit, dispatch, rootState }, snapshot)
+          })
         }
         if (liveSupported) await dispatch('refreshSyncServerDevices')
       } finally {

@@ -37,7 +37,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer, locks, desktopTabs, connectionChanges, capacitor = false, backgroundJob = runBackgroundJob, settingsReader } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -60,6 +60,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const storedReceipts = new Map()
   const common = {
+    DBSettingHandlers: { find: () => settingsReader?.(settings) ?? Object.entries(settings).map(([_id, value]) => ({ _id, value })) },
     DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote,
     runBackgroundJob: backgroundJob,
     toRaw,
@@ -192,6 +193,64 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   return { network, connectionEvents, settings, requests, commits, notifications, dispatched, context, actions: store.exports.actions, Client: helper.exports.SyncServerClient }
+}
+
+test('unsupported watch-stat initialization preserves another window’s newer sync baseline', async () => {
+  const newer = { playlists: { local: { remoteId: 'server-generated', videos: ['uploaded-video'] } }, watchStats: [] }
+  let locked = false
+  const f = fixture({
+    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerAutoSync: false,
+    syncServerSyncWatchStats: true, syncServerSnapshot: JSON.stringify({ playlists: {}, watchStats: [] }),
+  }, {
+    locks: { request: async (name, callback) => {
+      assert.equal(name, 'opentubex-sync-server')
+      locked = true
+      try { return await callback() } finally { locked = false }
+    } },
+    settingsReader: settings => {
+      assert.equal(locked, true, 'read the persisted baseline while holding the shared sync lock')
+      return Object.entries({ ...settings, syncServerSnapshot: JSON.stringify(newer) }).map(([_id, value]) => ({ _id, value }))
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot), { playlists: newer.playlists })
+})
+
+for (const stage of ['waiting for lock', 'reading snapshot']) {
+  test(`unsupported watch-stat initialization preserves a changed account while ${stage}`, async () => {
+    const entered = Promise.withResolvers()
+    const release = Promise.withResolvers()
+    const newerSnapshot = JSON.stringify({ playlists: { otherAccount: { remoteId: 'keep' } } })
+    let reads = 0
+    const f = fixture({
+      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '', syncServerAutoSync: false,
+      syncServerSyncWatchStats: true, syncServerSnapshot: JSON.stringify({ watchStats: [] }),
+    }, {
+      locks: { request: async (name, callback) => {
+        assert.equal(name, 'opentubex-sync-server')
+        entered.resolve()
+        if (stage === 'waiting for lock') await release.promise
+        return callback()
+      } },
+      settingsReader: settings => {
+        reads++
+        settings.syncServerToken = 'other-account-token'
+        settings.syncServerSnapshot = newerSnapshot
+        return [{ _id: 'syncServerSnapshot', value: JSON.stringify({ watchStats: [] }) }]
+      },
+    })
+    const initializing = f.actions.initializeSyncServer(f.context)
+    if (stage === 'waiting for lock') {
+      await entered.promise
+      f.settings.syncServerToken = 'other-account-token'
+      f.settings.syncServerSnapshot = newerSnapshot
+      release.resolve()
+    }
+    await initializing
+    assert.equal(reads, stage === 'waiting for lock' ? 0 : 1)
+    assert.equal(f.settings.syncServerSnapshot, newerSnapshot)
+    assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
+  })
 }
 
 for (const transition of ['concurrent snapshot', 'disabled', 'new token', 'new privacy key', 'new privacy mode']) {
