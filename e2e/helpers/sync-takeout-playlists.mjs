@@ -110,6 +110,10 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getPlaylist(id)?.videos.map(video => video.videoId)
     }, playlist._id)).toEqual(expected)
+    expect(await page.evaluate(id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getPlaylist(id).videos.every(video => video.author == null && video.authorId == null)
+    }, playlist._id)).toBe(true)
     await onDownloaded()
   } finally {
     await page.evaluate(async ({ original, id }) => {

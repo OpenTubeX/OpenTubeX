@@ -63,6 +63,10 @@ test('syncs videos imported from a Takeout ZIP to a second device and repairs an
   const secondDevice = createStore()
   const secondSnapshot = await context.syncPlaylists(adapter, secondDevice, {}, options)
   assert.deepEqual(Array.from(secondDevice.state.playlists.playlists[0].videos, video => video.videoId), expectedIds)
+  for (const video of secondDevice.state.playlists.playlists[0].videos) {
+    assert.equal(video.author, undefined)
+    assert.equal(video.authorId, undefined)
+  }
   await context.syncPlaylists(adapter, secondDevice, secondSnapshot, options)
   await context.syncPlaylists(adapter, firstDevice, snapshot, options)
   assert.deepEqual(Array.from(firstDevice.state.playlists.playlists[0].videos, video => structuredClone({ ...video })), originalVideos)

@@ -615,8 +615,8 @@ function videoToLocal(video, timeAdded = Date.now()) {
   return {
     videoId: video.id,
     title: video.title,
-    author: video.uploader.name,
-    authorId: video.uploader.id,
+    author: video.uploader.name || undefined,
+    authorId: video.uploader.id || undefined,
     lengthSeconds: video.duration,
     published: video.upload_date,
     timeAdded,
