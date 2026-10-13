@@ -595,7 +595,7 @@ function updateSubscriptionDetails(results) {
       channels.push({
         channelId: result.id,
         // Keep the saved name until the channel card resolves its original name.
-        channelName: store.getters.getAvoidTranslation === 'entire_app' ? undefined : result.name,
+        channelName: store.getters.getAvoidTranslation === 'entire_app' && !result.isGame ? undefined : result.name,
         channelThumbnailUrl: result.thumbnail.replace(/^\/\//, 'https://')
       })
     } else {
