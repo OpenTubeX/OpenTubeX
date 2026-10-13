@@ -415,6 +415,7 @@ const isUserPlaylist = computed(() => props.playlistType === 'user')
 const isPagedPlaylist = computed(() => process.env.IS_ELECTRON && isUserPlaylist.value)
 const userWindow = shallowRef({ offset: 0, index: -1, total: 0, revision: 0, next: null, previous: null })
 const userWindowReady = ref(false)
+const userPlaylistReordering = ref(false)
 const userWindowOwner = ref('')
 const userShuffleSeed = ref('')
 let userShuffleAnchor = null
@@ -570,7 +571,7 @@ const sortOrder = computed(() => isUserPlaylist.value ? userPlaylistSortOrder.va
 const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom && (!isPagedPlaylist.value || !shuffleEnabled.value))
 
 const canMoveVideos = computed(() => {
-  return isUserPlaylist.value && isSortOrderCustom.value && (isPagedPlaylist.value ? userWindow.value.total : playlistItems.value.length) > 1
+  return isUserPlaylist.value && isSortOrderCustom.value && (!isPagedPlaylist.value || (userWindowReady.value && !userPlaylistReordering.value)) && (isPagedPlaylist.value ? userWindow.value.total : playlistItems.value.length) > 1
 })
 
 const MAX_ENHANCED_PLAYLIST_ITEMS = 200
@@ -881,17 +882,22 @@ async function persistPlaylistOrder(items) {
   const selectedPlaylist = selectedUserPlaylist.value
   if (selectedPlaylist == null) { return }
   if (isPagedPlaylist.value) {
+    if (userPlaylistReordering.value || !userWindowReady.value) return
     if (shuffleEnabled.value) { await loadUserPlaylistWindow(); return }
+    userPlaylistReordering.value = true
     try {
       const changed = await DBLibraryHandlers.query('reorderPlaylistMembers', { id: props.playlistId, memberIds: (reversePlaylist.value ? items.toReversed() : items).map(item => item._libraryMemberId), revision: userWindow.value.revision })
-      if (changed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      if (changed) {
+        userWindowReady.value = false
+        store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      }
       await store.dispatch('grabAllPlaylists')
       await loadUserPlaylistWindow()
     } catch (error) {
       console.error(error)
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
       await loadUserPlaylistWindow()
-    }
+    } finally { userPlaylistReordering.value = false }
     return
   }
 
@@ -922,19 +928,23 @@ async function persistPlaylistOrder(items) {
  */
 async function moveVideo(videoId, playlistItemId, offset, memberId) {
   if (isPagedPlaylist.value) {
-    if (shuffleEnabled.value) return
+    if (shuffleEnabled.value || userPlaylistReordering.value || !userWindowReady.value) return
     const item = playlistItems.value.find(item => memberId ? item._libraryMemberId === memberId : item.videoId === videoId && item.playlistItemId === playlistItemId)
     if (!item) return
+    userPlaylistReordering.value = true
     try {
       const changed = await DBLibraryHandlers.query('movePlaylistMember', { id: props.playlistId, memberId: item._libraryMemberId, direction: reversePlaylist.value ? -offset : offset, revision: userWindow.value.revision, playableOnly: true })
-      if (changed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      if (changed) {
+        userWindowReady.value = false
+        store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+      }
       await store.dispatch('grabAllPlaylists')
       await loadUserPlaylistWindow()
     } catch (error) {
       console.error(error)
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })
       await loadUserPlaylistWindow()
-    }
+    } finally { userPlaylistReordering.value = false }
     return
   }
   const items = playlistItems.value.slice()
@@ -1051,7 +1061,7 @@ function onDragVideoEnd() {
  * @param {VideoData} draggedVideo_
  */
 function moveDraggedVideoTemporarily(draggedOverVideo, draggedVideo_) {
-  if (isPagedPlaylist.value && shuffleEnabled.value) return
+  if (isPagedPlaylist.value && (shuffleEnabled.value || userPlaylistReordering.value || !userWindowReady.value)) return
   const items = playlistItems.value.slice()
   const draggedOverIndex = items.findIndex(video => isSamePlaylistMember(video, draggedOverVideo))
   const draggedVideoIndex = items.findIndex(video => isSamePlaylistMember(video, draggedVideo_))

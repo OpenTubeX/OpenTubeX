@@ -52,6 +52,10 @@ async function functions(file, names, bindings = {}) {
   if (file === playlistInfo && !names.includes('playlistExportSource')) names = [...names, 'playlistExportSource']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
+  if (file === 'src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue') {
+    context.userPlaylistReordering ??= ref(false)
+    context.userWindowReady ??= ref(true)
+  }
   if (file === 'src/renderer/views/Playlist/Playlist.vue') {
     for (const name of ['playlistReordering', 'playlistOrderReady']) {
       if (Object.hasOwn(bindings, name)) continue
@@ -3359,3 +3363,43 @@ for (const action of ['exportFreeTubeWatchHistory', 'exportYouTubeWatchHistory',
     })
   }
 }
+
+for (const method of ['persistPlaylistOrder', 'moveVideo']) {
+  test(`Watch ${method} blocks overlapping edits until the refreshed revision arrives`, async () => {
+    const write = Promise.withResolvers(), refresh = Promise.withResolvers()
+    let writes = 0
+    const item = { videoId: 'video', playlistItemId: 'item', _libraryMemberId: 'member' }
+    const context = await functions('src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', [method], {
+      selectedUserPlaylist: ref({ _id: 'playlist' }), isPagedPlaylist: ref(true), shuffleEnabled: ref(false), userPlaylistReordering: ref(false), userWindowReady: ref(true),
+      props: { playlistId: 'playlist' }, reversePlaylist: ref(false), playlistItems: ref([item]), userWindow: ref({ revision: 1 }),
+      DBLibraryHandlers: { query: () => { writes++; return write.promise } }, store: { dispatch: async () => {} },
+      loadUserPlaylistWindow: async () => { await refresh.promise; context.userWindowReady.value = true }, showToast() {}, t: key => key,
+    })
+    const edit = () => method === 'moveVideo' ? context[method]('video', 'item', 1, 'member') : context[method]([item])
+    const first = edit()
+    const second = edit()
+    await Promise.resolve()
+    assert.equal(writes, 1)
+    assert.equal(context.userPlaylistReordering.value, true)
+    write.resolve(true)
+    await setImmediate()
+    assert.equal(context.userPlaylistReordering.value, true)
+    const third = edit()
+    await Promise.resolve()
+    assert.equal(writes, 1)
+    refresh.resolve()
+    await Promise.all([first, second, third])
+    assert.equal(context.userPlaylistReordering.value, false)
+    assert.equal(context.userWindowReady.value, true)
+  })
+}
+
+test('portable Takeout import rejects an unsuccessful existing-playlist write', async () => {
+  const { importTakeoutPlaylist } = await import('../../src/renderer/helpers/takeout-playlist-import.js')
+  const context = await functions(dataSettings, ['importTakeoutPlaylist'], {
+    process: { env: { IS_ELECTRON: false } }, importTakeoutPlaylistWithStorage: importTakeoutPlaylist,
+    DBPlaylistHandlers: { find: async () => [{ _id: 'p', playlistName: 'Imported', videos: [] }] },
+    store: { dispatch: async () => false },
+  })
+  await assert.rejects(context.importTakeoutPlaylist({ playlistName: 'Imported', videos: [] }), /Unable to save playlist/)
+})

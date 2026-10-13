@@ -1866,7 +1866,9 @@ async function importTakeoutPlaylist(playlist) {
         create: async playlist => {
           if (await store.dispatch('addPlaylist', playlist) !== true) throw new Error('Unable to save playlist')
         },
-        update: playlist => store.dispatch('updatePlaylist', playlist),
+        update: async playlist => {
+          if (await store.dispatch('updatePlaylist', playlist) !== true) throw new Error('Unable to save playlist')
+        },
       })
 }
 
