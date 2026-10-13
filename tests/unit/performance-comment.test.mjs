@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import test from 'node:test'
 
 import { load as loadYaml } from 'js-yaml'
@@ -11,10 +14,10 @@ import {
 } from '../../_scripts/performanceComment.mjs'
 import { isValidPerformanceValue } from '../../e2e/performance/report.mjs'
 
-const headSha = 'abcdef1234567890abcdef1234567890abcdef12'
+const candidateSha = 'abcdef1234567890abcdef1234567890abcdef12'
 const runUrl = 'https://github.com/OpenTubeX/OpenTubeX/actions/runs/123'
 
-test('benchmarks the pull request head reported to the comment workflow', async () => {
+test('benchmarks the merged pull request with the fork build and test scripts', async () => {
   const workflow = loadYaml(await readFile(
     '.github/workflows/performance.yml',
     'utf8'
@@ -25,7 +28,7 @@ test('benchmarks the pull request head reported to the comment workflow', async 
 
   assert.equal(
     checkout.with.ref,
-    '${{ github.event.pull_request.head.sha }}'
+    '${{ github.sha }}'
   )
 })
 
@@ -59,7 +62,7 @@ function sample (overrides = {}) {
 function result (candidateOverrides = {}) {
   return {
     base: { commit: '123456789' },
-    candidate: { commit: headSha.slice(0, 9) },
+    candidate: { commit: candidateSha.slice(0, 9) },
     sampleCount: 7,
     warmupCount: 2,
     reportOnly: false,
@@ -70,12 +73,47 @@ function result (candidateOverrides = {}) {
   }
 }
 
+test('comment workflow validates the measured merge instead of the upstream head', async () => {
+  const workflow = loadYaml(await readFile('.github/workflows/performance-comment.yml', 'utf8'))
+  const render = workflow.jobs.comment.steps.find(step => step.name === 'Render performance comment')
+  const root = await mkdtemp(path.join(tmpdir(), 'opentubex-performance-comment-'))
+  try {
+    const input = path.join(root, 'results.json')
+    const output = path.join(root, 'comment.md')
+    await writeFile(input, JSON.stringify(result()))
+    const script = render.run
+      .replace('performance-results/performance-results.json', input)
+      .replace('performance-comment.md', output)
+    const run = mergeSha => execFileSync('bash', ['-c',
+      `function gh() { printf '%s\\n' "$EXPECTED_MERGE_SHA"; }\n${script}`
+    ], {
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        EXPECTED_MERGE_SHA: mergeSha,
+        RUN_SHA: 'fedcba9876543210fedcba9876543210fedcba98',
+        RUN_URL: runUrl,
+        REPOSITORY: 'OpenTubeX/OpenTubeX',
+        PR_NUMBER: '2052'
+      }
+    })
+
+    run(candidateSha)
+    assert.match(await readFile(output, 'utf8'), /No regression crossed the configured thresholds/)
+
+    run('1234567890abcdef1234567890abcdef12345678')
+    assert.equal(await readFile(output, 'utf8'), renderUnavailablePerformanceComment(runUrl))
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
+})
+
 test('renders a fixed sticky comment from raw samples', () => {
   const input = result()
   input.metrics = [{ label: '@maintainers injected result' }]
   input.failures = ['@maintainers injected failure']
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.ok(comment.startsWith(`${performanceCommentMarker}\n## Performance comparison`))
   assert.match(comment, /First subscription switch elapsed \| 100\.0 ms \| 100\.0 ms \| 0\.0%/)
@@ -89,7 +127,7 @@ test('recomputes regressions instead of trusting artifact conclusions', () => {
   input.metrics = []
   input.failures = []
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Repeated subscription switch elapsed .+ Regression/)
   assert.match(comment, /Repeated subscription switch elapsed is 180\.0 ms, at or above the 150\.0 ms limit/)
@@ -102,7 +140,7 @@ test('does not fail an absolute limit when the candidate improves on an over-lim
     firstSwitchElapsedMs: 258
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /First subscription switch elapsed .+ -2\.1% .+ Pass/)
   assert.match(comment, /First subscription switch elapsed .+ Pass \(above budget\)/)
@@ -115,7 +153,7 @@ test('fails when the candidate crosses an absolute limit from below', () => {
     firstSwitchElapsedMs: 240
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /First subscription switch elapsed .+ \+4\.2% .+ Regression/)
   assert.match(comment, /First subscription switch elapsed is 250\.0 ms, at or above/)
@@ -128,7 +166,7 @@ test('ignores a one-frame shift in longest-frame samples', () => {
     subscribedChannelsNavigationLongestFrameMs: 66.7
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Large route navigation longest frame .+ \+24\.9% .+ Pass/)
   assert.doesNotMatch(comment, /Large route navigation longest frame regressed/)
@@ -140,7 +178,7 @@ test('ignores a one-frame shift that reaches a longest-frame limit', () => {
     firstSwitchLongestFrameMs: 183.3
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /First subscription switch longest frame .+ \+9\.1% .+ Pass/)
   assert.doesNotMatch(comment, /First subscription switch longest frame is .+ at or above/)
@@ -152,7 +190,7 @@ test('reports a two-frame shift in longest-frame samples', () => {
     subscribedChannelsNavigationLongestFrameMs: 66.7
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Large route navigation longest frame .+ Regression/)
   assert.match(comment, /Large route navigation longest frame regressed by 33\.3 ms/)
@@ -161,7 +199,7 @@ test('reports a two-frame shift in longest-frame samples', () => {
 test('reports diagnostic startup phases without gating on them', () => {
   const comment = renderPerformanceComment(
     result({ startupElectronConnectedMs: 10000 }),
-    { headSha, runUrl }
+    { candidateSha, runUrl }
   )
 
   assert.match(comment, /Startup: Electron connected .+ Diagnostic \| Reported/)
@@ -174,7 +212,7 @@ test('ignores startup frame scheduling noise below 100 ms', () => {
     startupLongestFrameMs: 249.9
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Startup: renderer longest frame .+ \+20\.0% .+ Pass/)
   assert.doesNotMatch(comment, /Startup: renderer longest frame regressed/)
@@ -186,7 +224,7 @@ test('reports startup frame regressions above the scheduling noise floor', () =>
     startupLongestFrameMs: 249.9
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Startup: renderer longest frame .+ Regression/)
   assert.match(comment, /Startup: renderer longest frame regressed by 150\.1 ms/)
@@ -198,7 +236,7 @@ test('gates renderer heap growth after repeated navigation', () => {
     navigationHeapGrowthMiB: 6.5
   }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Renderer heap growth after 10 navigation cycles .+ \+5\.5 MiB .+ Regression/)
   assert.match(comment, /Renderer heap growth after 10 navigation cycles regressed by 5\.5 MiB/)
@@ -208,7 +246,7 @@ test('accepts zero heap growth and renders its absolute change', () => {
   const input = result({ navigationHeapGrowthMiB: 0 })
   input.samples.base = Array.from({ length: 7 }, () => sample({ navigationHeapGrowthMiB: 0 }))
 
-  const comment = renderPerformanceComment(input, { headSha, runUrl })
+  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
 
   assert.match(comment, /Renderer heap growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
 })
@@ -220,21 +258,21 @@ test('accepts zero when a metric omits its minimum value', () => {
 
 test('rejects stale, report-only, and malformed artifacts', () => {
   assert.throws(
-    () => renderPerformanceComment(result(), { headSha: 'fedcba9876543210fedcba9876543210fedcba98', runUrl }),
-    /does not match the workflow head/
+    () => renderPerformanceComment(result(), { candidateSha: 'fedcba9876543210fedcba9876543210fedcba98', runUrl }),
+    /does not match the workflow candidate/
   )
 
   const reportOnly = result()
   reportOnly.reportOnly = true
   assert.throws(
-    () => renderPerformanceComment(reportOnly, { headSha, runUrl }),
+    () => renderPerformanceComment(reportOnly, { candidateSha, runUrl }),
     /did not enforce regressions/
   )
 
   const malformed = result()
   malformed.samples.candidate[0].firstSwitchElapsedMs = '@maintainers'
   assert.throws(
-    () => renderPerformanceComment(malformed, { headSha, runUrl }),
+    () => renderPerformanceComment(malformed, { candidateSha, runUrl }),
     /candidate sample firstSwitchElapsedMs is invalid/
   )
 })
@@ -254,5 +292,5 @@ test('rejects reports that enforce thresholds with too few samples', () => {
   input.sampleCount = 1
   input.samples.base.length = 1
   input.samples.candidate.length = 1
-  assert.throws(() => renderPerformanceComment(input, { headSha, runUrl }), /sample count is invalid/)
+  assert.throws(() => renderPerformanceComment(input, { candidateSha, runUrl }), /sample count is invalid/)
 })

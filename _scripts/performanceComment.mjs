@@ -29,7 +29,7 @@ function validateSamples(samples, sampleCount) {
   validatePerformanceSamples(samples)
 }
 
-function validateResult(result, headSha) {
+function validateResult(result, candidateSha) {
   if (!result || typeof result !== 'object') {
     throw new Error('Performance result is invalid')
   }
@@ -38,10 +38,10 @@ function validateResult(result, headSha) {
   const candidateCommit = result.candidate?.commit
   assertCommit(baseCommit, 'Base')
   assertCommit(candidateCommit, 'Candidate')
-  assertCommit(headSha, 'Workflow head')
+  assertCommit(candidateSha, 'Workflow candidate')
 
-  if (!headSha.startsWith(candidateCommit)) {
-    throw new Error('Performance result does not match the workflow head')
+  if (!candidateSha.startsWith(candidateCommit)) {
+    throw new Error('Performance result does not match the workflow candidate')
   }
   if (!Number.isSafeInteger(result.sampleCount) || result.sampleCount < minimumPerformanceSamples) {
     throw new Error('Performance sample count is invalid')
@@ -59,8 +59,8 @@ function validateResult(result, headSha) {
   }
 }
 
-export function renderPerformanceComment(result, { headSha, runUrl }) {
-  const validated = validateResult(result, headSha)
+export function renderPerformanceComment(result, { candidateSha, runUrl }) {
+  const validated = validateResult(result, candidateSha)
   const comparison = comparePerformanceSamples(validated.samples)
   const summary = renderPerformanceSummary(
     validated.base,
@@ -89,8 +89,8 @@ function parseArguments(argv) {
     }
 
     switch (argument) {
-      case '--head-sha':
-        options.headSha = value
+      case '--candidate-sha':
+        options.candidateSha = value
         break
       case '--input':
         options.input = value
@@ -106,8 +106,8 @@ function parseArguments(argv) {
     }
   }
 
-  if (!options.headSha || !options.input || !options.output || !options.runUrl) {
-    throw new Error('Usage: performanceComment.mjs --input <path> --output <path> --head-sha <sha> --run-url <url>')
+  if (!options.candidateSha || !options.input || !options.output || !options.runUrl) {
+    throw new Error('Usage: performanceComment.mjs --input <path> --output <path> --candidate-sha <sha> --run-url <url>')
   }
 
   return options
