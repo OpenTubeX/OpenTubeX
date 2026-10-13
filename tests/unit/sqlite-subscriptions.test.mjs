@@ -9,7 +9,7 @@ import model from '@seald-io/nedb/lib/model.js'
 import Datastore from '@seald-io/nedb'
 import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
 import { SCHEMA_SQL } from '../../src/datastores/sqlite/schema.js'
-import { subscriptionPage, subscriptionShortsWindow, subscriptionEntry, subscriptionSummaries, updateSubscriptionFeed, updateSubscriptionShortsMetadata, markSubscriptionEntries } from '../../src/datastores/sqlite/subscriptions.js'
+import { subscriptionPage, subscriptionPremieres, subscriptionShortsWindow, subscriptionEntry, subscriptionSummaries, updateSubscriptionFeed, updateSubscriptionShortsMetadata, markSubscriptionEntries } from '../../src/datastores/sqlite/subscriptions.js'
 import { buildSubscriptionShortsFeed } from '../../src/renderer/helpers/player/shorts.js'
 import { isVideoHiddenByPreferences } from '../../src/renderer/helpers/subscription-visibility.js'
 import { isHistoryEntryWatched } from '../../src/history.js'
@@ -1541,3 +1541,23 @@ for (const [category, field, idKey] of [['videos', 'videos', 'videoId'], ['short
     })
   }
 }
+
+
+test('premiere polling skips opaque members, pages valid entries and keeps every cached field', async t => {
+  const engine = memory(t)
+  const opaque = [null, false, 42, 'retained', [], {}, { videoId: 42, isPremiere: true }, { videoId: '', isPremiere: true }, new Date(1)]
+  const valid = Array.from({ length: 101 }, (_, index) => video(index, { isPremiere: true, premiereDate: new Date(0), unknown: new Date(index) }))
+  const originals = [{ _id: 'channel', videos: [...opaque, ...valid, null], unknown: new Date(2) }, { _id: 'later', videos: [null, valid[0]] }]
+  await engine.collections.subscriptionCache.insertAsync(originals)
+  const records = []
+  let cursor = -1
+  do {
+    const page = subscriptionPremieres(engine, { channelId: 'channel', cursor, now: 1000 })
+    assert.ok(page.records.length <= 100)
+    records.push(...page.records.map(entry => entry.video))
+    cursor = page.cursor
+  } while (cursor !== null)
+  assert.deepEqual(records, valid)
+  assert.deepEqual(subscriptionPremieres(engine, { channelId: 'later', now: 1000 }).records.map(entry => entry.video), [valid[0]])
+  assert.deepEqual(await engine.collections.subscriptionCache.findAsync({}).sort({ _id: 1 }), originals)
+})

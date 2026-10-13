@@ -1,7 +1,7 @@
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp } from '../../helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getNextSubscriptionSettingsTimestamp, isValidSubscriptionSettingsTimestamp, getValidSubscriptionChannels } from '../../helpers/subscription-channels'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 const state = {
@@ -36,7 +36,7 @@ const getters = {
     // The all channels profile is always the first profile in the array
     const mainProfile = state.profileList[0]
 
-    return mainProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
+    return getValidSubscriptionChannels(mainProfile?.subscriptions).reduce((set, channel) => set.add(channel.id), new Set())
   },
 
   /** Cached subscription details, so channel ids can be resolved to names without a network request */
@@ -44,7 +44,7 @@ const getters = {
     // The all channels profile is always the first profile in the array
     const mainProfile = state.profileList[0]
 
-    return new Map(mainProfile.subscriptions.map((channel) => [channel.id, channel]))
+    return new Map(getValidSubscriptionChannels(mainProfile?.subscriptions).map((channel) => [channel.id, channel]))
   },
 }
 

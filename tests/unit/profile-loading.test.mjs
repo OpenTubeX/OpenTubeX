@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 
+import { getValidSubscriptionChannels } from '../../src/renderer/helpers/subscription-channels.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
@@ -20,7 +21,7 @@ async function fixture(main = mainProfile) {
   const errors = []
   const globals = {
     MAIN_PROFILE_ID: 'allChannels', THEME_BG_COLOR: '#000000', THEME_TEXT_COLOR: '#ffffff',
-    DEFAULT_PROFILE_ICON,
+    DEFAULT_PROFILE_ICON, getValidSubscriptionChannels,
     console: { error: error => errors.push(error) }
   }
   const DBProfileHandlers = vm.runInNewContext(
@@ -108,3 +109,18 @@ test('restore of an empty profile store initializes the default successfully wit
   assert.equal(created[0].name, 'All Channels')
   assert.deepEqual(structuredClone(module.state.profileList), structuredClone(created))
 })
+
+
+for (const subscriptions of [null, false, [null, false, 42, 'retained', {}, { id: 42 }, { id: '' }, { id: 'channel', unknown: new Date(1) }]]) {
+  test(`read-only profile lookup ignores opaque subscriptions without changing the cache or database: ${JSON.stringify(subscriptions)}`, async () => {
+    const { db, module, load } = await fixture({ ...mainProfile, icon: DEFAULT_PROFILE_ICON, subscriptions, unknown: new Date(2) })
+    assert.equal(await load({ preserveRetained: true }), true)
+    const before = await db.profiles.findAsync({})
+    const cached = structuredClone(module.state.profileList)
+    const expected = Array.isArray(subscriptions) ? ['channel'] : []
+    assert.deepEqual(Array.from(module.getters.getSubscribedChannelIdSet(module.state)), expected)
+    assert.deepEqual(Array.from(module.getters.getSubscribedChannelsById(module.state).keys()), expected)
+    assert.deepEqual(structuredClone(module.state.profileList), cached)
+    assert.deepEqual(await db.profiles.findAsync({}), before)
+  })
+}

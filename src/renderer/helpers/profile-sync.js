@@ -1,3 +1,4 @@
+import { getValidSubscriptionChannels } from './subscription-channels.js'
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../constants.js'
 
 const DEFAULT_PROFILE_BACKGROUND = '#000000'
@@ -7,7 +8,7 @@ const DEFAULT_PROFILE_TEXT = '#FFFFFF'
 // subscriptions are merged by membership, not updated by metadata refreshes.
 export function getProfileSyncSignature(profiles) {
   return JSON.stringify(profiles.map(profile => {
-    const channels = profile.subscriptions.map(channel => channel.id).sort()
+    const channels = getValidSubscriptionChannels(profile.subscriptions).map(channel => channel.id).sort()
     return profile._id === MAIN_PROFILE_ID
       ? [profile._id, channels]
       : [profile._id, profile.name,

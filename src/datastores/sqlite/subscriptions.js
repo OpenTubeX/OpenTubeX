@@ -40,7 +40,7 @@ export function subscriptionPremieres(engine, { channelId, cursor = -1, now = Da
   let last = null
   for (const row of engine.prepare("SELECT position, membership_id, data FROM members WHERE collection = 'subscriptionCache' AND record_id = ? AND field = 'videos' AND position > ? ORDER BY position").iterate(channelId, cursor)) {
     const video = model.deserialize(row.data)
-    if (!shouldRefreshSubscriptionPremiere(video, now)) continue
+    if (typeof video?.videoId !== 'string' || !video.videoId || !shouldRefreshSubscriptionPremiere(video, now)) continue
     if (records.length === 100) return { records, cursor: last }
     records.push({ video, memberId: row.membership_id }); last = row.position
   }
