@@ -63,7 +63,10 @@ for (const usePlayerMenuGrid of [true, false]) {
           player.selectTextTrack(player.getTextTracks()[0])
         })
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
-        await page.locator('.shaka-turn-captions-off-button').evaluate(element => element.click())
+        await page.locator('.ftVideoPlayer').hover()
+        await page.locator('.shaka-overflow-menu-button').click()
+        await page.locator('.shaka-caption-button').click()
+        await page.locator('.shaka-turn-captions-off-button').click()
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(false)
       } finally {
         await watch.dispose()
@@ -108,11 +111,12 @@ for (const usePlayerMenuGrid of [true, false]) {
           expect(current.jsEventListeners - baseline.jsEventListeners).toBeLessThan(100)
         }
         // New controls remain interactive after releasing the previous layout.
-        await page.locator('.shaka-overflow-menu-button').evaluate(element => element.click())
+        await page.locator('.ftVideoPlayer').hover()
+        await page.locator('.shaka-overflow-menu-button').click()
         await expect(page.locator('.shaka-overflow-menu')).toBeVisible()
-        await page.locator('.shaka-caption-button').evaluate(element => element.click())
+        await page.locator('.shaka-caption-button').click()
         await expect(page.locator('.shaka-text-languages')).toBeVisible()
-        await page.locator('.ft-caption-options-button').evaluate(element => element.click())
+        await page.locator('.ft-caption-options-button').click()
         await expect(page.locator('.ft-caption-appearance-menu')).toBeVisible()
       } finally {
         await session.detach()

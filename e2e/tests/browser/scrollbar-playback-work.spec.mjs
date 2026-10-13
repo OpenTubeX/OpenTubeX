@@ -13,7 +13,8 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
       window.scrollbar = window.OverlayScrollbars({ target: host, elements: { viewport: host } }, {})
       window.scrollbar.update(true)
     })
-    await page.waitForTimeout(200)
+    await page.locator('#avatar').evaluate(image => image.decode())
+    await expect.poll(() => page.evaluate(() => window.scrollbar.state().overflowAmount.y)).toBe(800)
     const session = await page.context().newCDPSession(page)
     const imageListeners = async () => {
       const { result } = await session.send('Runtime.evaluate', { expression: 'document.querySelector("#avatar")' })
@@ -39,12 +40,10 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
         observer.disconnect()
         return { viewportMutations, overflow: window.scrollbar.state().overflowAmount }
       }, force)
-      console.log('Playback scrollbar work:', { entry, force, ...result })
       expect(result.overflow.y).toBe(800)
       expect(result.viewportMutations).toBe(0)
     }
     const finalListeners = await imageListeners()
-    console.log('Retained image load handlers:', { entry, initialListeners, finalListeners })
     expect(finalListeners).toBe(initialListeners)
     await page.evaluate(async () => {
       const content = document.querySelector('#content')
