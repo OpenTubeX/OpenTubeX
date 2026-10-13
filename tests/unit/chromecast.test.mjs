@@ -141,8 +141,32 @@ test('Cast reports actual startup stages while connecting and loading media', as
 })
 
 test('Cast loads the selected playback speed for playing and paused handoffs', async t => {
-  const manager = await managerForTest(t)
-  if (!manager) return
+  // This table checks LOAD fields, not process startup or native deadlines.
+  // Other bridge tests still exercise the executable and real sender transport.
+  const manager = new ChromecastManager('/must-not-run')
+  manager.devices.set('device', { id: 'device', address: '127.0.0.1', port: 8009 })
+  t.after(() => manager.stop())
+  const loads = []
+  manager.createSender = () => {
+    const sender = new EventEmitter()
+    let media = null
+    sender.connect = async () => '127.0.0.1'
+    sender.close = () => { sender.closed = true }
+    sender.send = async (namespace, _destination, command) => {
+      if (namespace.endsWith('.receiver')) return { type: 'RECEIVER_STATUS', status: { applications: [{ appId: 'CC1AD845', transportId: 'transport', sessionId: 'session' }] } }
+      if (command.type === 'CONNECT') return {}
+      if (command.type === 'LOAD') {
+        loads.push(structuredClone(command))
+        const response = await fetch(command.media.contentId)
+        assert.ok(response.ok, 'the real media relay must serve the load URL')
+        await response.text()
+        media = { mediaSessionId: 7, currentTime: command.currentTime, playbackRate: command.playbackRate, playerState: command.autoplay ? 'PLAYING' : 'PAUSED', media: { ...command.media, duration: 120 } }
+      }
+      if (command.type === 'STOP') media.playerState = 'IDLE'
+      return { type: 'MEDIA_STATUS', status: media ? [media] : [] }
+    }
+    return sender
+  }
   for (const paused of [false, true]) {
     for (const playbackRate of [0.5, 1, 1.5, 2]) {
       const result = await manager.start(42, { ...payload, playbackRate, paused })
@@ -153,6 +177,7 @@ test('Cast loads the selected playback speed for playing and paused handoffs', a
       await manager.stop(42, result.castId)
     }
   }
+  assert.deepEqual(loads.map(({ playbackRate, autoplay }) => ({ playbackRate, autoplay })), [false, true].flatMap(paused => [0.5, 1, 1.5, 2].map(playbackRate => ({ playbackRate, autoplay: !paused }))))
 })
 
 test('Cast rejects invalid playback speeds before connecting to a receiver', async () => {
