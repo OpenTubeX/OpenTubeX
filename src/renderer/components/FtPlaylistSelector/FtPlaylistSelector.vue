@@ -187,7 +187,7 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
 const thumbnail = computed(() => {
   if (store.getters.getThumbnailPreference === 'hidden') return thumbnailPlaceholder
   if (props.playlist.customThumbnail) return props.playlist.customThumbnail
-  const first = props.playlist.firstVideo ?? (Array.isArray(props.playlist.videos) ? props.playlist.videos[0] : null)
+  const first = store.state.playlists.libraryPaged ? props.playlist.firstVideo : (Array.isArray(props.playlist.videos) ? props.playlist.videos[0] : null)
   return first && typeof first.videoId === 'string' && first.videoId !== ''
     ? getVideoThumbnailUrl(first.videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
     : thumbnailPlaceholder

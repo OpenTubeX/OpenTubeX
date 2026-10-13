@@ -2436,7 +2436,7 @@ test('Home uses placeholders for opaque playlist first members without reading h
   let reads = 0
   const context = await functions(file, ['videoThumbnail', 'playlistThumbnail'], {
     playlistVideoCount, thumbnailPlaceholder: 'placeholder', thumbnailPreference: ref('visible'), thumbnailOrigin: ref('origin'),
-    store: { getters: { getHistoryCacheById: new Proxy({}, { get() { reads++; return undefined } }) } },
+    store: { state: { playlists: { libraryPaged: true } }, getters: { getHistoryCacheById: new Proxy({}, { get() { reads++; return undefined } }) } },
   })
   for (const firstVideo of [undefined, null, false, 42, 'opaque', [], {}, { videoId: null }, { videoId: 42 }, { videoId: '' }]) {
     for (const playlist of [{ videoCount: 2, firstVideo, videos: [] }, { videos: [firstVideo] }]) {
@@ -3321,4 +3321,41 @@ for (const outcome of ['success', 'false', 'reject']) {
     assert.match(toasts.at(-1).message, /Backup imported/)
     assert.equal(context.backupBusy.value, false)
   })
+}
+
+for (const action of ['exportFreeTubeWatchHistory', 'exportYouTubeWatchHistory', 'exportPlaylists']) {
+  for (const outcome of ['cancel', 'read failure', 'success']) {
+    test(`portable ${action} opens its picker before reading and handles ${outcome}`, async () => {
+      const rows = [{ _id: 'retained', videoId: 'A', title: 'Title', author: 'Channel', authorId: 'channel', timeWatched: 1000, videos: [{ videoId: 'A' }, { videoId: 'A' }], unknown: { keep: true } }]
+      const before = structuredClone(rows), toasts = []
+      let picked = false, reads = 0, opened = 0, written, closed = 0
+      const find = async () => { reads++; if (outcome === 'read failure') throw new Error('datastore read failed'); return rows }
+      const writer = await functions('src/renderer/helpers/utils.js', ['writeFileWithPicker'], {
+        process: { env: { IS_ELECTRON: false, IS_CAPACITOR: false } },
+        window: { showSaveFilePicker: async () => {
+          picked = true
+          if (outcome === 'cancel') throw Object.assign(new Error('Canceled'), { name: 'AbortError' })
+          return { createWritable: async () => { opened++; return { write: async content => { written = content }, close: async () => { closed++ } } } }
+        } },
+      })
+      const context = await functions(dataSettings, [action, 'promptAndWriteToFile'], {
+        process: { env: { IS_ELECTRON: false } }, DBHistoryHandlers: { find }, DBPlaylistHandlers: { find },
+        getTodayDateStrLocalTimezone: () => '2026-10-13', START_IN_DIRECTORY: 'downloads', writeFileWithPicker: writer.writeFileWithPicker,
+        t: key => key, showToast: toast => toasts.push(toast),
+      })
+      const exporting = context[action]()
+      assert.equal(picked, true)
+      assert.equal(reads, 0)
+      await exporting
+      assert.equal(reads, outcome === 'cancel' ? 0 : 1)
+      assert.equal(opened, outcome === 'success' ? 1 : 0)
+      assert.equal(closed, outcome === 'success' ? 1 : 0)
+      if (outcome === 'success') {
+        if (action === 'exportYouTubeWatchHistory') assert.deepEqual(JSON.parse(written), [{ header: 'YouTube', title: 'Watched Title', titleUrl: 'https://www.youtube.com/watch?v=A', subtitles: [{ name: 'Channel', url: 'https://www.youtube.com/channel/channel' }], time: '1970-01-01T00:00:01.000Z', products: ['YouTube'], activityControls: ['YouTube watch history'] }])
+        else assert.equal(written, JSON.stringify(rows[0]) + '\n')
+      }
+      if (outcome === 'read failure') assert.match(toasts.at(-1).message, /Unable to write file/)
+      assert.deepEqual(rows, before)
+    })
+  }
 }

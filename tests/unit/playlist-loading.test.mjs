@@ -657,7 +657,7 @@ for (const name of ['FtListPlaylist', 'FtPlaylistSelector', 'Home']) {
     const file = name === 'Home' ? 'views/Home/Home.vue' : `components/${name}/${name}.vue`
     const content = parse(await readFile(new URL(`../../src/renderer/${file}`, import.meta.url), 'utf8')).descriptor.scriptSetup.content
     const ast = babelParse(content, { sourceType: 'module' })
-    for (const paged of name === 'FtPlaylistSelector' ? [false] : [false, true]) {
+    for (const paged of [false, true]) {
       for (const first of [null, { videoId: 'member' }]) {
         const data = { _id: 'p', playlistName: 'Retained', videoCount: 1, videos: [first], firstVideo: { videoId: 'retained-summary' }, unknown: new Date(1) }
         const before = structuredClone(data)

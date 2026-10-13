@@ -746,7 +746,7 @@ function openProfileSettings() {
 
 /**
  * @param {string} fileName
- * @param {string | Blob | (() => Promise<Blob>)} content
+ * @param {string | Blob | (() => Promise<string | Blob>)} content
  * @param {string} fileTypeDescription
  * @param {string} mimeType
  * @param {string} fileExtension
@@ -1796,15 +1796,12 @@ async function exportFreeTubeWatchHistory() {
     }
     return
   }
-  const historyDb = (await DBHistoryHandlers.find()).map((historyEntry) => {
-    return JSON.stringify(historyEntry)
-  }).join('\n') + '\n'
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'opentubex-watch-history-' + dateStr + '.db'
 
   await promptAndWriteToFile(
     exportFileName,
-    historyDb,
+    async () => (await DBHistoryHandlers.find()).map(entry => JSON.stringify(entry)).join('\n') + '\n',
     t('Settings.Data Settings.History File'),
     'application/x-freetube-db',
     '.db',
@@ -1822,31 +1819,34 @@ async function exportYouTubeWatchHistory() {
     }
     return
   }
-  const historyData = (await DBHistoryHandlers.find()).map((entry) => {
-    return {
-      header: 'YouTube',
-      title: `Watched ${entry.title}`,
-      titleUrl: `https://www.youtube.com/watch?v=${entry.videoId}`,
-      subtitles: [{
-        name: entry.author,
-        url: `https://www.youtube.com/channel/${entry.authorId}`
-      }],
-      time: new Date(entry.timeWatched).toISOString(),
-      products: [
-        'YouTube'
-      ],
-      activityControls: [
-        'YouTube watch history'
-      ]
-    }
-  })
+  const content = async () => {
+    const historyData = (await DBHistoryHandlers.find()).map((entry) => {
+      return {
+        header: 'YouTube',
+        title: `Watched ${entry.title}`,
+        titleUrl: `https://www.youtube.com/watch?v=${entry.videoId}`,
+        subtitles: [{
+          name: entry.author,
+          url: `https://www.youtube.com/channel/${entry.authorId}`
+        }],
+        time: new Date(entry.timeWatched).toISOString(),
+        products: [
+          'YouTube'
+        ],
+        activityControls: [
+          'YouTube watch history'
+        ]
+      }
+    })
+    return JSON.stringify(historyData)
+  }
 
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'youtube-watch-history-' + dateStr + '.json'
 
   await promptAndWriteToFile(
     exportFileName,
-    JSON.stringify(historyData),
+    content,
     t('Settings.Data Settings.History File'),
     'application/json',
     '.json',
@@ -2173,13 +2173,9 @@ async function exportPlaylists() {
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = 'opentubex-playlists-' + dateStr + '.db'
 
-  const playlistsDb = (await DBPlaylistHandlers.find()).map(playlist => {
-    return JSON.stringify(playlist)
-  }).join('\n') + '\n'
-
   await promptAndWriteToFile(
     exportFileName,
-    playlistsDb,
+    async () => (await DBPlaylistHandlers.find()).map(playlist => JSON.stringify(playlist)).join('\n') + '\n',
     t('Settings.Data Settings.Playlist File'),
     'application/x-freetube-db',
     '.db',

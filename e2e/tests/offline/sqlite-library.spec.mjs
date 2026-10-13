@@ -1955,9 +1955,11 @@ test.describe('Watch playlist metadata repair', () => {
 })
 
 test.describe('retained full-record playlist counts', () => {
-  const saved = { _id: 'counted', playlistName: 'Retained counted playlist', protected: false, createdAt: 1, lastUpdatedAt: 1, videoCount: 0, videos: [{ videoId: history[0].videoId, playlistItemId: 'first' }, { videoId: history[0].videoId, playlistItemId: 'duplicate' }], unknown: { retained: true } }
-  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, currentLocale: 'en_US', uiScale: 95 }, history: [history[0]], playlists: [saved] } })
+  const saved = { _id: 'counted', playlistName: 'Retained counted playlist', protected: false, createdAt: 1, lastUpdatedAt: 1, videoCount: 0, firstVideo: { videoId: 'abcdefghijk', unknown: { retained: true } }, videos: [{ videoId: history[0].videoId, playlistItemId: 'first' }, { videoId: history[0].videoId, playlistItemId: 'duplicate' }], unknown: { retained: true } }
+  const empty = { _id: 'z-counted-empty', playlistName: 'Actually empty', protected: false, createdAt: 1, lastUpdatedAt: 1, videoCount: 42, videos: [], unknown: { retained: true } }
+  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, currentLocale: 'en_US', uiScale: 95, quickBookmarkTargetPlaylistId: 'missing' }, history: [history[0]], playlists: [saved, empty] } })
   test('renders full-record card and Save counts without rewriting stale imported metadata', async ({ page }, testInfo) => {
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getQuickBookmarkTargetPlaylistId)).toBe(empty._id)
     await page.setViewportSize({ width: 1400, height: 1000 })
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     const useFullRecord = async () => page.evaluate(saved => {
@@ -1968,10 +1970,12 @@ test.describe('retained full-record playlist counts', () => {
       store.state.playlists.playlists = [saved]
     }, saved)
     await goTo(page, 'userplaylists')
-    const card = page.locator('.ft-list-item').filter({ has: page.locator('.h3Title', { hasText: saved.playlistName }) })
+    const card = page.locator('.tabContent[aria-hidden="false"] .ft-list-item').filter({ has: page.locator('.h3Title', { hasText: saved.playlistName }) })
     await expect(card).toBeVisible()
     await useFullRecord()
     await expect(card.locator('.videoCountContainer')).toContainText('2')
+    await expect(card.locator('.thumbnailImage')).toHaveAttribute('src', new RegExp(`/vi/${history[0].videoId}/`))
+    await expectImagesLoaded(card.locator('.thumbnailImage'))
     await card.screenshot({ path: testInfo.outputPath('retained-full-record-card-count-95.png') })
     await goTo(page, 'history')
     await useFullRecord()
@@ -1985,5 +1989,6 @@ test.describe('retained full-record playlist counts', () => {
     await expectImagesLoaded(row.locator('img'))
     await picker.screenshot({ path: testInfo.outputPath('retained-full-record-save-count-95.png') })
     expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'counted' }))).toStrictEqual(saved)
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'z-counted-empty' }))).toStrictEqual(empty)
   })
 })

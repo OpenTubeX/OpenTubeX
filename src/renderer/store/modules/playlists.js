@@ -772,7 +772,7 @@ const desktopActions = {
         // if no quick bookmark is set, try to find another playlist
         const noQuickBookmarkSet = !rootState.settings.quickBookmarkTargetPlaylistId || !payload.some((playlist) => playlist._id === rootState.settings.quickBookmarkTargetPlaylistId && Array.isArray(playlist.videos))
         if (noQuickBookmarkSet && payload.length > 0) {
-          const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload)
+          const chosenPlaylist = findEmptyOrLatestPlayedPlaylist(payload, true)
           if (chosenPlaylist) dispatch('updateQuickBookmarkTargetPlaylistId', chosenPlaylist._id, { root: true })
           else if (rootState.settings.quickBookmarkTargetPlaylistId) dispatch('updateQuickBookmarkTargetPlaylistId', null, { root: true })
         }
