@@ -99,6 +99,7 @@
 </template>
 
 <script setup>
+import { getValidSubscriptionChannels } from '../../helpers/subscription-channels'
 import FtRetryImage from '../FtRetryImage.vue'
 import NavLabel from './NavLabel.vue'
 import { FtIcon } from '@opentubex/icons'
@@ -177,13 +178,13 @@ const activeProfile = computed(() => {
 })
 
 const activeSubscriptions = computed(() => {
-  /** @type {any[]} */
-  const subscriptions = deepCopy(activeProfile.value.subscriptions)
+  const subscriptions = deepCopy(getValidSubscriptionChannels(activeProfile.value?.subscriptions))
 
   subscriptions.forEach(channel => {
     // Change thumbnail size to 35x35, as that's the size we display it
     // so we don't need to download a bigger image (the default is 176x176)
-    channel.thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
+    channel.name = typeof channel.name === 'string' ? channel.name : channel.id
+    channel.thumbnail = typeof channel.thumbnail === 'string' ? channel.thumbnail.replace(/=s\d+/, '=s35') : null
   })
 
   const locale_ = locale.value
@@ -394,7 +395,7 @@ watch(mobileNavigationMinimizePreview, tabId => {
 watch(alwaysShowNavigationBar, resetScrollVisibility)
 watch([
   () => activeProfile.value._id,
-  () => activeProfile.value.subscriptions.length
+  () => Array.isArray(activeProfile.value?.subscriptions) ? activeProfile.value.subscriptions.length : 0
 ], () => {
   activeSubscriptionLimit.value = activeSubscriptionsPerPage
 })

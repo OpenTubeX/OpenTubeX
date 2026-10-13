@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { babelParse, parse } from 'vue/compiler-sfc'
 
 import { getValidSubscriptionChannels } from '../../src/renderer/helpers/subscription-channels.js'
 import { DEFAULT_PROFILE_ICON } from '../../src/renderer/helpers/profileIcons.js'
@@ -124,3 +125,26 @@ for (const subscriptions of [null, false, [null, false, 42, 'retained', {}, { id
     assert.deepEqual(await db.profiles.findAsync({}), before)
   })
 }
+
+
+test('sidebar presentation skips opaque memberships and safely displays retained channel metadata without rewriting it', async () => {
+  const valid = { id: 'channel', name: 'Example', thumbnail: 'https://example.test/avatar=s176', unknown: new Date(1) }
+  const unsupportedMetadata = { id: 'other', name: 42, thumbnail: false, unknown: new Date(2) }
+  const subscriptions = [null, false, 42, 'retained', {}, { id: 42 }, { id: '' }, valid, unsupportedMetadata]
+  const original = { ...mainProfile, icon: DEFAULT_PROFILE_ICON, subscriptions, unknown: new Date(3) }
+  const { db, load } = await fixture(original)
+  await load({ preserveRetained: true })
+  const before = await db.profiles.findOneAsync({ _id: 'allChannels' })
+  const component = parse(await readFile(new URL('../../src/renderer/components/SideNav/SideNav.vue', import.meta.url), 'utf8')).descriptor
+  const script = component.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'activeSubscriptions').init
+  const context = { computed: getter => ({ get value() { return getter() } }), activeProfile: { value: before }, getValidSubscriptionChannels, deepCopy: structuredClone, backendPreference: { value: 'local' }, locale: { value: 'en-US' } }
+  const visible = vm.runInNewContext(script.slice(init.start, init.end), context).value
+  assert.deepEqual(Array.from(visible, channel => channel.id).sort(), ['channel', 'other'])
+  assert.equal(visible.find(channel => channel.id === 'channel').thumbnail, 'https://example.test/avatar=s35')
+  assert.equal(visible.find(channel => channel.id === 'other').name, 'other')
+  assert.equal(visible.find(channel => channel.id === 'other').thumbnail, null)
+  assert.deepEqual(await db.profiles.findOneAsync({ _id: 'allChannels' }), before)
+  assert.deepEqual(before, original)
+})
