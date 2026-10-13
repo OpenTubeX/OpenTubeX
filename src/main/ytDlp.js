@@ -5,7 +5,7 @@ import {
   splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl,
 } from '../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
-import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
+import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
@@ -1868,10 +1868,10 @@ export async function handleYtDlpGetPlaybackInfo(
     title: toNonEmptyString(info.title),
     description: toNonEmptyString(info.description),
     uploader: toNonEmptyString(info.uploader),
-    uploaderUrl: toNonEmptyString(info.uploader_url),
+    uploaderUrl: toNonEmptyString(info.uploader_url) ?? getTwitchCreatorUrl(info),
     uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
     channel: toNonEmptyString(info.channel),
-    channelUrl: toNonEmptyString(info.channel_url),
+    channelUrl: toNonEmptyString(info.channel_url) ?? getTwitchCreatorUrl(info),
     channelThumbnail: info.channel ? creatorAvatarUrl : null,
     thumbnail: toNonEmptyString(info.thumbnail),
     webpageUrl: toNonEmptyString(info.webpage_url),

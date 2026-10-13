@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { resolveYtDlpCreatorAvatarUrl } from '../../src/main/ytDlpCreatorAvatar.js'
+import { getTwitchCreatorUrl, resolveYtDlpCreatorAvatarUrl } from '../../src/main/ytDlpCreatorAvatar.js'
 
 test('uses an avatar URL supplied by yt-dlp without another request', async () => {
   const url = await resolveYtDlpCreatorAvatarUrl({
@@ -36,7 +36,8 @@ test('reads the TikTok avatar from its profile data', async () => {
 test('reads the Twitch channel image from its profile page', async () => {
   const url = await resolveYtDlpCreatorAvatarUrl({
     webpage_url: 'https://clips.twitch.tv/SomeClip',
-    channel: 'creator_1'
+    channel: 'Creator_1',
+    uploader_id: '12345'
   }, async profileUrl => {
     assert.equal(profileUrl, 'https://www.twitch.tv/creator_1')
     return new Response('<meta property="og:image" content="https://static-cdn.jtvnw.net/profile_image-300x300.png">', {
@@ -44,6 +45,50 @@ test('reads the Twitch channel image from its profile page', async () => {
     })
   })
   assert.equal(url, 'https://static-cdn.jtvnw.net/profile_image-300x300.png')
+})
+
+for (const webpageUrl of [
+  'https://www.twitch.tv/videos/123456789',
+  'https://www.twitch.tv/example_streamer',
+  'https://go.twitch.tv/videos/123456789',
+  'https://go.twitch.tv/example_streamer',
+  'https://player.twitch.tv/?video=123456789',
+  'https://player.twitch.tv/?channel=example_streamer'
+]) {
+  test(`links the Twitch uploader ID to its profile for ${webpageUrl}`, () => {
+    assert.equal(getTwitchCreatorUrl({ webpage_url: webpageUrl, uploader_id: 'example_streamer' }),
+      'https://www.twitch.tv/example_streamer')
+  })
+  test(`resolves the Twitch avatar with only an uploader ID for ${webpageUrl}`, async () => {
+    const avatar = await resolveYtDlpCreatorAvatarUrl({
+      webpage_url: webpageUrl,
+      uploader: 'example_streamer',
+      uploader_id: 'example_streamer'
+    }, async profileUrl => {
+      assert.equal(profileUrl, 'https://www.twitch.tv/example_streamer')
+      return new Response('<meta property="og:image" content="https://static-cdn.jtvnw.net/profile_image-300x300.png">', {
+        headers: { 'content-type': 'text/html' }
+      })
+    })
+    assert.equal(avatar, 'https://static-cdn.jtvnw.net/profile_image-300x300.png')
+  })
+}
+
+test('does not derive Twitch profiles from unrelated URLs or invalid logins', () => {
+  for (const webpageUrl of ['https://twitch.tv.example.test/videos/1', 'http://www.twitch.tv/creator', 'not a URL']) {
+    assert.equal(getTwitchCreatorUrl({ webpage_url: webpageUrl, uploader_id: 'creator' }), null)
+  }
+  for (const login of ['../other', 'creator/videos', '', 123, null]) {
+    assert.equal(getTwitchCreatorUrl({ webpage_url: 'https://www.twitch.tv/videos/1', uploader_id: login }), null)
+  }
+  assert.equal(getTwitchCreatorUrl({ webpage_url: 'https://clips.twitch.tv/SomeClip', channel: 'Creator_1' }),
+    'https://www.twitch.tv/creator_1')
+})
+
+test('does not replace an invalid clip broadcaster with its numeric curator ID', async () => {
+  const info = { webpage_url: 'https://clips.twitch.tv/SomeClip', channel: 'Creator name', uploader_id: '12345' }
+  assert.equal(getTwitchCreatorUrl(info), null)
+  assert.equal(await resolveYtDlpCreatorAvatarUrl(info, () => { throw new Error('unexpected curator lookup') }), null)
 })
 
 test('reads the Dailymotion user image from the public user API', async () => {

@@ -31,6 +31,7 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
   let profileUrl = null
   let source = null
   const uploaderUrl = httpsUrl(info.uploader_url)
+  const twitchCreatorUrl = getTwitchCreatorUrl(info)
   if (['soundcloud.com', 'www.soundcloud.com'].includes(pageUrl.hostname) && uploaderUrl) {
     const url = new URL(uploaderUrl)
     if (['soundcloud.com', 'www.soundcloud.com'].includes(url.hostname)) {
@@ -43,8 +44,8 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
       profileUrl = url.href
       source = 'tiktok'
     }
-  } else if (pageUrl.hostname === 'clips.twitch.tv' && /^[a-zA-Z0-9_]+$/.test(info.channel ?? '')) {
-    profileUrl = `https://www.twitch.tv/${info.channel}`
+  } else if (twitchCreatorUrl) {
+    profileUrl = twitchCreatorUrl
     source = 'twitch'
   } else if (['dailymotion.com', 'www.dailymotion.com'].includes(pageUrl.hostname) && /^[a-zA-Z0-9]+$/.test(info.uploader_id ?? '')) {
     profileUrl = `https://api.dailymotion.com/user/${info.uploader_id}?fields=avatar_360_url`
@@ -97,6 +98,20 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
     if (source === 'soundcloud' && !imageUrl?.includes('/avatars-')) return null
     if (source === 'twitch' && !imageUrl?.includes('profile_image')) return null
     return imageUrl
+  } catch {
+    return null
+  }
+}
+
+/** @param {Record<string, unknown>} info */
+export function getTwitchCreatorUrl(info) {
+  try {
+    const pageUrl = new URL(info.webpage_url)
+    if (pageUrl.protocol !== 'https:' || !['twitch.tv', 'www.twitch.tv', 'm.twitch.tv', 'go.twitch.tv', 'player.twitch.tv', 'clips.twitch.tv'].includes(pageUrl.hostname)) return null
+    const login = info.channel ?? info.uploader_id
+    return typeof login === 'string' && /^[a-zA-Z0-9_]+$/.test(login)
+      ? `https://www.twitch.tv/${login.toLowerCase()}`
+      : null
   } catch {
     return null
   }
