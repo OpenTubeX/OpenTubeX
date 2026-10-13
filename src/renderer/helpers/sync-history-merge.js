@@ -52,11 +52,11 @@ export function normalizeChannelAvatar(avatar) {
   return avatar
 }
 
-export function videoToRemote(video) {
+export function videoToRemote(video, { allowMissingUploader = false } = {}) {
   const videoId = video.videoId
-  const uploaderId = video.authorId
+  const uploaderId = video.authorId || ''
 
-  if (!videoId || !uploaderId) {
+  if (!videoId || (!uploaderId && !allowMissingUploader)) {
     return null
   }
 

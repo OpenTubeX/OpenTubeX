@@ -378,7 +378,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.playlists,
-          { allowDataLoss }
+          // Takeout only supplies video IDs. Encrypted sync can carry unknown
+          // uploaders; the legacy server requires real channel metadata.
+          { allowDataLoss, allowMissingUploader: encrypted }
         )
         result.playlists = Object.keys(next.playlists).length
         break
