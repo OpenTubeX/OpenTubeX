@@ -51,6 +51,13 @@ async function functions(file, names, bindings = {}) {
   if (file === 'src/renderer/components/PlaylistInfo/PlaylistInfo.vue' && !names.includes('playablePlaylistVideos')) names = [...names, 'playablePlaylistVideos']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
+  if (file === 'src/renderer/views/Playlist/Playlist.vue') {
+    for (const name of ['playlistReordering', 'playlistOrderReady']) {
+      if (Object.hasOwn(bindings, name)) continue
+      const declaration = matching(ast, node => node.type === 'VariableDeclarator' && node.id?.name === name)[0]
+      if (declaration) context[name] = vm.runInNewContext(script.slice(declaration.init.start, declaration.init.end), { ref: vueRef })
+    }
+  }
   for (const name of names) {
     const declaration = matching(ast, node => node.type === 'FunctionDeclaration' && node.id?.name === name).at(-1)
     const property = matching(ast, node => node.type === 'ObjectProperty' && node.key?.name === name && node.value?.type === 'FunctionExpression').at(-1)
@@ -2422,7 +2429,7 @@ test('Home uses placeholders for opaque playlist first members without reading h
   const file = 'src/renderer/views/Home/Home.vue'
   const { script, ast } = await source(file)
   const count = matching(ast, node => node.type === 'VariableDeclarator' && node.id.name === 'playlistVideoCount')[0].init
-  const playlistVideoCount = vm.runInNewContext(`(${script.slice(count.start, count.end)})`)
+  const playlistVideoCount = vm.runInNewContext(`(${script.slice(count.start, count.end)})`, { store: { state: { playlists: { libraryPaged: true } } } })
   let reads = 0
   const context = await functions(file, ['videoThumbnail', 'playlistThumbnail'], {
     playlistVideoCount, thumbnailPlaceholder: 'placeholder', thumbnailPreference: ref('visible'), thumbnailOrigin: ref('origin'),
@@ -3102,4 +3109,47 @@ test('a profile switch during the seen-removal DOM update skips stale manual rel
   const context = await functions('src/renderer/components/SubscriptionsNew.vue', ['markAllAsSeen'], { store: { getters: { getActiveProfile: profile } }, props: { activeCategory: 'videos' }, isElectron: true, feed: ref(null), clearingVisibleContent: ref(false), isReducedMotionEnabled: () => true, nextTick: async () => { if (++ticks === 2) profile._id = 'replacement' }, cancelRemovalAnimation() {}, pagedFeeds: { videos: { records: ref([]), failed: ref(false), load: async () => loads.push(profile._id) } } })
   await context.markAllAsSeen(async () => {})
   assert.deepEqual(loads, [])
+})
+
+test('playlist move and drag writes block another edit until a current page revision is ready', { timeout: 5000 }, async t => {
+  for (const action of ['moveUserVideo', 'onDragVideoEnd']) {
+    const write = Promise.withResolvers(), refresh = Promise.withResolvers(), page = Promise.withResolvers()
+    const playlistReordering = ref(false), playlistOrderReady = ref(true)
+    let writes = 0
+    const context = await functions('src/renderer/views/Playlist/Playlist.vue', [action], { playlistReordering, playlistOrderReady, playlistItems: ref([{ videoId: 'v', _libraryMemberId: 'member' }]), tempShownPlaylistItems: ref([{ videoId: 'v', _libraryMemberId: 'member' }]), toBeDeletedPlaylistItemIds: ref([]), playlistId: ref('p'), userPageRevision: 1, userPlaylistVisibleLimit: ref(300), DBLibraryHandlers: { query: () => { writes++; return write.promise } }, store: { getters: { getPlaylist: () => ({ _id: 'p' }) }, dispatch: action => action === 'grabAllPlaylists' ? refresh.promise : Promise.resolve() }, parseUserPlaylist: async (_, extent) => { assert.equal(extent, 300); await page.promise; playlistOrderReady.value = true }, setDraggedVideo() {}, removePendingVideosAfterDrag: false, showToast() {}, showTabToast() {}, t: key => key })
+    const invoke = () => action === 'moveUserVideo' ? context[action]('v', null, 1, 'member') : context[action]()
+    t.after(() => { write.resolve(false); refresh.resolve(); page.resolve() })
+    const first = invoke(), repeated = invoke()
+    await setImmediate()
+    assert.equal(writes, 1)
+    assert.equal(playlistReordering.value, true)
+    write.resolve(true); await setImmediate(); await invoke()
+    assert.equal(writes, 1)
+    assert.equal(playlistOrderReady.value, false)
+    refresh.resolve(); await setImmediate(); await invoke()
+    assert.equal(writes, 1)
+    page.resolve(); await Promise.all([first, repeated])
+    assert.equal(playlistReordering.value, false)
+    assert.equal(playlistOrderReady.value, true)
+  }
+})
+
+test('portable Home derives counts from full arrays despite retained synthetic-looking metadata', async () => {
+  const { script, ast } = await source('src/renderer/views/Home/Home.vue')
+  const declaration = matching(ast, node => node.type === 'VariableDeclarator' && node.id?.name === 'playlistVideoCount')[0]
+  const state = { playlists: { libraryPaged: false } }
+  const count = vm.runInNewContext('(' + script.slice(declaration.init.start, declaration.init.end) + ')', { store: { state } })
+  const record = { _id: 'favorites', videoCount: 0, _librarySummary: true, videos: [{ videoId: 'v' }] }
+  assert.equal(count(record), 1)
+  assert.equal(count({ ...record, videoCount: 42, videos: [] }), 0)
+  state.playlists.libraryPaged = true
+  assert.equal(count({ videoCount: 20000, videos: [] }), 20000)
+})
+
+test('portable unavailable scans skip retained null and scalar members', async () => {
+  const videos = [null, false, 42, {}, { videoId: 'valid' }], scanned = []
+  const context = await functions(playlistInfo, ['scanDeadVideos'], { process: { env: { IS_ELECTRON: false } }, props: { id: 'p' }, deadVideoScanRunning: ref(false), deadVideoScanController: null, deadVideoProgress: ref({}), deadVideoItemIds: ref(new Set()), showRemoveDeadVideosPrompt: ref(false), AbortController, DBLibraryHandlers: { query: async () => ({ videos }) }, store: { getters: { getBackendPreference: 'invidious' } }, findDeadPlaylistItems: async entries => { scanned.push(...entries); return { itemIds: new Set() } }, showToast() {}, t: key => key })
+  await context.scanDeadVideos()
+  assert.deepEqual(scanned.map(video => video.videoId), ['valid'])
+  assert.deepEqual(videos, [null, false, 42, {}, { videoId: 'valid' }])
 })

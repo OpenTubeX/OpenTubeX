@@ -1089,7 +1089,7 @@ async function scanDeadVideos() {
       const snapshot = await DBLibraryHandlers.query('playlistSnapshot', { id: playlistId })
       if (signal.aborted || props.id !== playlistId) return
       if (!snapshot) throw new Error('The playlist no longer exists')
-      videos.push(...snapshot.videos)
+      videos.push(...playablePlaylistVideos(snapshot.videos))
     }
     deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
     const useLocal = process.env.SUPPORTS_LOCAL_API && store.getters.getBackendPreference !== 'invidious'

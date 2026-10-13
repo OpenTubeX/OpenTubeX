@@ -1853,7 +1853,7 @@ async function exportYouTubeWatchHistory() {
 
 async function importTakeoutPlaylist(playlist) {
   await importTakeoutPlaylistWithStorage(playlist, process.env.IS_ELECTRON
-    ? { importRecords: importLibraryRecords, find: DBPlaylistHandlers.find }
+    ? { importRecords: importLibraryRecords, find: () => DBLibraryHandlers.query('playlistImportCandidates', { name: playlist.playlistName }) }
     : {
         find: () => DBPlaylistHandlers.find(),
         create: async playlist => {
