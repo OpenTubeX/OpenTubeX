@@ -361,27 +361,6 @@
   margin-inline: 0;
 }
 
-/* Nested headers and watch surfaces also meet the phone's screen edges.
-   Keep rounding on inset controls and floating panels, but not these surfaces. */
-.app.capacitorPhoneLayout > .routerView :deep(.ft-card),
-.app.capacitorPhoneLayout :deep(.playlistInfoContainer),
-.app.capacitorPhoneLayout :deep(.channelDetails .bannerContainer),
-.app.capacitorPhoneLayout :deep(.channelDetails .infoContainer),
-.app.capacitorPhoneLayout :deep(.subscriptionsHeader),
-.app.capacitorPhoneLayout :deep(.trendingPage .pageHeader),
-.app.capacitorPhoneLayout :deep(.popularPage .pageHeader),
-.app.capacitorPhoneLayout :deep(.infoSkeleton),
-.app.capacitorPhoneLayout :deep(.commentsSkeleton),
-.app.capacitorPhoneLayout :deep(.videoSummary),
-.app.capacitorPhoneLayout :deep(.externalMediaState),
-.app.capacitorPhoneLayout :deep(.externalMediaPlayer),
-.app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsSwipeViewport),
-.app.capacitorPhoneLayout :deep(.videoLayout.shortsPlayerActive .videoPlayer),
-.app.capacitorPhoneLayout :deep(.shortsPlayerActive .ftVideoPlayer),
-.app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsNextPreview) {
-  border-radius: 0;
-}
-
 /* Menu sheets may be teleported outside the app, including into the player. */
 :global(body:has(.app.capacitorPhoneLayout) .moreOptionContainer),
 :global(body:has(.app.capacitorPhoneLayout) .mobileLinkActions),
@@ -390,7 +369,40 @@
 }
 
 @media (width <= 680px) {
-  /* Match the phone layout's removal of the screen and header gaps. */
+  /* Match the phone layout's removal of the screen and header gaps. Inset
+     sidebar cards and wider layouts retain their configured rounding. */
+  .app.capacitorPhoneLayout > .routerView :deep(.ft-card:not(.watchVideo, .watchVideoSideBar)),
+  .app.capacitorPhoneLayout :deep(.playlistInfoContainer),
+  .app.capacitorPhoneLayout :deep(.channelDetails .bannerContainer),
+  .app.capacitorPhoneLayout :deep(.channelDetails .infoContainer),
+  .app.capacitorPhoneLayout :deep(.subscriptionsHeader),
+  .app.capacitorPhoneLayout :deep(.trendingPage .pageHeader),
+  .app.capacitorPhoneLayout :deep(.popularPage .pageHeader),
+  .app.capacitorPhoneLayout :deep(.infoSkeleton),
+  .app.capacitorPhoneLayout :deep(.commentsSkeleton),
+  .app.capacitorPhoneLayout :deep(.videoSummary),
+  .app.capacitorPhoneLayout :deep(.videoLayout .ft-card.watchVideo),
+  .app.capacitorPhoneLayout :deep(.videoLayout .watchVideoRecommendations),
+  .app.capacitorPhoneLayout :deep(.videoLayout .watchVideoPlaylist) {
+    border-radius: 0;
+  }
+}
+
+/* The short landscape layout centers Shorts beside their action rail. */
+@media (width <= 680px) and ((orientation: portrait) or (height > 600px)) {
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsSwipeViewport),
+  .app.capacitorPhoneLayout :deep(.videoLayout.shortsPlayerActive .videoPlayer),
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .ftVideoPlayer),
+  .app.capacitorPhoneLayout :deep(.shortsPlayerActive .shortsNextPreview) {
+    border-radius: 0;
+  }
+}
+
+/* Players and external-media states are centered below a width cap of
+   calc(80vh * 1.78). They reach the phone edges only at this aspect ratio. */
+@media (width <= 680px) and (aspect-ratio <= 178 / 125) {
+  .app.capacitorPhoneLayout :deep(.externalMediaState),
+  .app.capacitorPhoneLayout :deep(.externalMediaPlayer .ftVideoPlayer:not(.scrollMiniPlayer)),
   .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayer),
   .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .videoPlayerPlaceholder),
   .app.capacitorPhoneLayout :deep(.videoLayout:not(.shortsPlayerActive) .ftVideoPlayer:not(.scrollMiniPlayer)) {

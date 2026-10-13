@@ -1,4 +1,8 @@
+import { chmod, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { mockCapacitorPhoneLayout } from '../../helpers/mobile.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
@@ -20,13 +24,26 @@ async function expectFullWidth(surface) {
   })).toBeLessThanOrEqual(1)
 }
 
+async function expectInsetRounded(surface) {
+  await expect(surface).toBeVisible()
+  await expect.poll(() => surface.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return Math.min(bounds.left, innerWidth - bounds.right)
+  })).toBeGreaterThan(0)
+  await expect.poll(() => surface.evaluate(element => Number.parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeGreaterThan(0)
+}
+
 async function navigate(page, route) {
   const tab = await page.evaluate(route => {
     const url = new URL(`https://app.test/${route}`)
     return window.ftElectron.tabs.create({ route: url.pathname, query: Object.fromEntries(url.searchParams) })
   }, route)
   await expect(page.locator(`.tabContent[data-tab-id="${tab.id}"]`)).toHaveAttribute('aria-hidden', 'false')
-  await expect(page).toHaveURL(url => url.hash === `#/${route}`)
+  const expected = new URL(`https://app.test/${route}`)
+  await expect(page).toHaveURL(url => {
+    const actual = new URL(`https://app.test/${url.hash.slice(2)}`)
+    return actual.pathname === expected.pathname && actual.searchParams.toString() === expected.searchParams.toString()
+  })
 }
 
 for (const uiScale of [100, 125]) {
@@ -167,6 +184,7 @@ for (const uiScale of [100, 125]) {
               const title = page.locator('.tabContent[aria-hidden="false"] .ft-list-video .title').first()
               await title.click({ trial: true })
               const bounds = await title.boundingBox()
+              if (!bounds) throw new Error('Context menu video title has no visible bounding box')
               await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }] })
               try {
                 await expect(menu).toBeVisible()
@@ -238,6 +256,80 @@ for (const uiScale of [100, 125]) {
       await expect(info).toHaveCSS('border-bottom-left-radius', '8px')
     })
 
+    test('preserves rounding on phone page panels above the edge-to-edge breakpoint', async ({ page }) => {
+      await mockCapacitorPhoneLayout(page)
+      for (const width of [700, 1000]) {
+        await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(900 * uiScale / 100) })
+        await navigate(page, 'playlist/empty-corners?playlistType=user')
+        await expectInsetRounded(page.locator('.playlistInfoContainer:visible'))
+        await expectInsetRounded(page.locator('.playlistItemsCard:visible'))
+        await navigate(page, 'history')
+        await expectInsetRounded(page.locator('.tabContent[aria-hidden="false"] .ft-card:visible').first())
+      }
+    })
+
+    test('preserves constrained external-media error corners in landscape', async ({ page }) => {
+      await mockCapacitorPhoneLayout(page)
+      await navigate(page, 'external-media?url=invalid')
+      const surface = page.locator('.externalMediaError:visible')
+      for (const [width, height] of [[375, 812], [640, 390]]) {
+        await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+        if (width === 375) {
+          await expectFullWidth(surface)
+          await expectSquare(surface)
+        } else {
+          await expectInsetRounded(surface)
+        }
+      }
+    })
+
+    test('preserves constrained external-player corners in landscape', async ({ app, page }) => {
+      test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+      const executable = path.join(app.userDataDir, 'surface-corners-yt-dlp.sh')
+      const response = JSON.stringify({
+        title: 'External video',
+        duration: 30,
+        formats: [{ format_id: 'webm-360', url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus', width: 640, height: 360 }],
+      })
+      await writeFile(executable, ['#!/bin/sh', 'if [ "$1" = "--version" ]; then echo 2026.09.01; exit; fi', "cat <<'RESPONSE'", response, 'RESPONSE'].join('\n'))
+      await chmod(executable, 0o755)
+      await routeDemoMedia(page)
+      await page.evaluate(async executable => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateYtDlpSource', 'system')
+        await store.dispatch('updateYtDlpPath', executable)
+      }, executable)
+      await mockCapacitorPhoneLayout(page)
+      await navigate(page, `external-media?url=${encodeURIComponent('https://videos.example.test/video')}`)
+      const player = page.locator('.externalMediaPlayer .ftVideoPlayer:visible')
+      for (const [width, height] of [[375, 812], [640, 390]]) {
+        await page.setViewportSize({ width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+        if (width === 375) {
+          await expectFullWidth(player)
+          await expectSquare(player)
+        } else {
+          await expectInsetRounded(player)
+        }
+      }
+    })
+
+    test('preserves rounding on inset watch sidebar cards', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: Math.round(650 * uiScale / 100), height: Math.round(812 * uiScale / 100) })
+      await mockCapacitorPhoneLayout(page)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('addVideoToWatchQueue', {
+        video: { videoId: 'jNQXAC9IVRw', title: 'Me at the zoo', author: 'jawed' }
+      }))
+      const queue = page.locator('.watchVideoQueue:visible')
+      await expectInsetRounded(queue)
+      await expectFullWidth(page.locator('.watchVideoInfo:visible'))
+      await expectSquare(page.locator('.watchVideoInfo:visible'))
+      await expectSquare(page.locator('.ftVideoPlayer:visible'))
+      await setWindowSize(app, page, { width: Math.round(640 * uiScale / 100), height: Math.round(390 * uiScale / 100) })
+      await expectInsetRounded(page.locator('.ftVideoPlayer:visible'))
+    })
+
     test('keeps full-width watch cards square while preserving inset action panels', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
@@ -267,25 +359,32 @@ for (const uiScale of [100, 125]) {
       await expect(sheet).toHaveCount(0)
 
       const watch = await watchViewHandle(page)
-      await watch.evaluate(view => { view.isLoading = true })
-      for (const surface of ['.videoPlayerPlaceholder', '.infoSkeleton']) {
-        await expectSquare(page.locator(`${surface}:visible`))
+      try {
+        await watch.evaluate(view => { view.isLoading = true })
+        for (const surface of ['.videoPlayerPlaceholder', '.infoSkeleton']) {
+          await expectSquare(page.locator(`${surface}:visible`))
+        }
+        await watch.evaluate(view => { view.mobilePanel = 'comments' })
+        await expectSquare(page.locator('.commentsSkeleton:visible'))
+        await watch.evaluate(async view => {
+          view.mobilePanel = null
+          view.isLoading = false
+          view.useCustomShortsPlayerForCurrentVideo = true
+          view.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+          await view.$nextTick()
+        })
+        for (const surface of ['.shortsSwipeViewport', '.videoPlayer', '.ftVideoPlayer']) {
+          const element = page.locator(`.shortsPlayerActive ${surface}:visible`)
+          await expectFullWidth(element)
+          await expectSquare(element)
+        }
+        await setWindowSize(app, page, { width: Math.round(640 * uiScale / 100), height: Math.round(390 * uiScale / 100) })
+        for (const surface of ['.shortsSwipeViewport', '.videoPlayer', '.ftVideoPlayer']) {
+          await expectInsetRounded(page.locator(`.shortsPlayerActive ${surface}:visible`))
+        }
+      } finally {
+        await watch.dispose()
       }
-      await watch.evaluate(view => { view.mobilePanel = 'comments' })
-      await expectSquare(page.locator('.commentsSkeleton:visible'))
-      await watch.evaluate(async view => {
-        view.mobilePanel = null
-        view.isLoading = false
-        view.useCustomShortsPlayerForCurrentVideo = true
-        view.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
-        await view.$nextTick()
-      })
-      for (const surface of ['.shortsSwipeViewport', '.videoPlayer', '.ftVideoPlayer']) {
-        const element = page.locator(`.shortsPlayerActive ${surface}:visible`)
-        await expectFullWidth(element)
-        await expectSquare(element)
-      }
-      await watch.dispose()
     })
   })
 }
