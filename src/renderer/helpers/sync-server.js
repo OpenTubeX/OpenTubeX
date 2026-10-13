@@ -2,7 +2,7 @@ import { prepareHistorySync, historySyncPage, applyHistorySync, cancelHistorySyn
 import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { toRaw } from 'vue'
 import {
-  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo,
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo,
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
@@ -871,7 +871,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const localVideos = local?.videos ?? []
     const remoteVideosById = mapBy(remote.videos, video => video.id)
     const localVideosById = mapBy(
-      localVideos.filter(video => videoToRemote(video, options) !== null || remoteVideosById.has(video.videoId)),
+      localVideos.filter(video => videoToRemote(video, options) !== null || remoteVideosById.has(video?.videoId)),
       video => video.videoId
     )
     const localMetadataById = new Map()
@@ -926,27 +926,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     const mergedVideos = localVideos
       .filter(video => videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId))
       .map(video => {
-        const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
-          ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
-          : video
-        const remoteVideo = remoteVideosById.get(video.videoId)
-        if (!remoteVideo) return current
-        const uploader = uploaderToLocal(remoteVideo.uploader)
-        const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
-        const payload = videoToRemote(identified, options)
-        if (!payload) return current
-        const enriched = enrichSyncVideo(payload, remoteVideo)
-        const result = { ...identified }
-        if (payload.title !== enriched.title) result.title = enriched.title
-        if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
-        if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
-        if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
-          result.lengthSeconds = enriched.duration
-          result.isLive = false
-          result.liveNow = false
-          result.isUpcoming = false
-        }
-        return result
+        return enrichLocalPlaylistVideo(video, remoteVideosById.get(video?.videoId), options)
       })
       .concat(Array.from(mergedVideoIds)
         .filter(videoId => !localVideosById.has(videoId))
