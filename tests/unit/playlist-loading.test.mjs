@@ -43,7 +43,7 @@ async function fixture(records) {
     dispatch: (name, value) => module.actions[name]?.(context, value),
   }
   return {
-    db, module, errors, handlers: DBPlaylistHandlers,
+    db, module, errors, handlers: DBPlaylistHandlers, context,
     dispatch: context.dispatch,
     async load(options) {
       const result = await module.actions.grabAllPlaylists(context, options)
@@ -120,5 +120,23 @@ for (const records of [[], [{ _id: 'restored', playlistName: 'Retained', videos:
     assert.deepEqual(await db.playlists.findAsync({}), before)
     assert.deepEqual(structuredClone(module.state.playlists), before)
     assert.equal(module.state.playlistsReady, true)
+  })
+}
+
+for (const available of [false, true]) {
+  test(`restore refresh repairs only the missing quick-bookmark target, available: ${available}`, async () => {
+    const records = available ? [{ _id: 'restored', playlistName: 'Retained', videos: [], unknown: new Date(1) }] : []
+    const { db, module, handlers, context, load } = await fixture(records)
+    const before = await db.playlists.findAsync({}), dispatches = []
+    context.rootState.settings.quickBookmarkTargetPlaylistId = 'deleted'
+    context.dispatch = async (name, value, options) => {
+      dispatches.push([name, value, options])
+      if (name === 'updateQuickBookmarkTargetPlaylistId') context.rootState.settings.quickBookmarkTargetPlaylistId = value
+    }
+    handlers.upsert = () => assert.fail('Bookmark fallback must not rewrite playlists')
+    assert.equal(await load({ preserveRetained: true }), true)
+    assert.deepEqual(structuredClone(dispatches), [['updateQuickBookmarkTargetPlaylistId', available ? 'restored' : null, { root: true }]])
+    assert.deepEqual(await db.playlists.findAsync({}), before)
+    assert.deepEqual(structuredClone(module.state.playlists), before)
   })
 }

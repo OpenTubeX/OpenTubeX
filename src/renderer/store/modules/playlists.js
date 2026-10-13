@@ -341,6 +341,12 @@ const actions = {
       // Restore publication is a read: startup repairs would rewrite retained
       // fields on imported and unrelated playlists.
       if (preserveRetained) {
+        const configured = rootState.settings.quickBookmarkTargetPlaylistId
+        if (!payload.some(playlist => playlist._id === configured && Array.isArray(playlist.videos))) {
+          const eligible = payload.filter(playlist => Array.isArray(playlist.videos))
+          const chosen = eligible.length ? findEmptyOrLatestPlayedPlaylist(eligible) : null
+          if (chosen || configured != null) await dispatch('updateQuickBookmarkTargetPlaylistId', chosen?._id ?? null, { root: true })
+        }
         commit('setAllPlaylists', payload)
         commit('setPlaylistsReady', true)
         return true

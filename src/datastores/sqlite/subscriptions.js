@@ -29,7 +29,10 @@ export function subscriptionEntries(engine, { channelId, field = 'videos', ids }
 
 export async function subscriptionRssVerdicts(engine, { ids }) {
   if (!Array.isArray(ids) || ids.length > 250 || ids.some(id => typeof id !== 'string')) throw new TypeError('Invalid RSS verdict query')
-  return engine.read(() => engine.prepare("SELECT DISTINCT video_id FROM members WHERE collection = 'subscriptionCache' AND video_id IN (SELECT value FROM json_each(?)) AND field IN ('videos', 'shorts', 'liveStreams') AND json_type(data, '$.isUpcoming') = 'false'").all(JSON.stringify(ids)).map(row => row.video_id))
+  const requested = [...new Set(ids)]
+  // Returning SQLite TEXT can replace an unpaired surrogate. Return the input
+  // position instead so the renderer receives the exact requested identity.
+  return engine.read(() => engine.prepare("SELECT DISTINCT requested.key AS position FROM json_each(?) AS requested CROSS JOIN members AS m INDEXED BY members_video ON m.video_id = requested.value WHERE m.collection = 'subscriptionCache' AND m.field IN ('videos', 'shorts', 'liveStreams') AND json_type(m.data, '$.isUpcoming') = 'false'").all(JSON.stringify(requested)).map(row => requested[row.position]))
 }
 
 export function subscriptionPremieres(engine, { channelId, cursor = -1, now = Date.now() }) {

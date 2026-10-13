@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import model from '@seald-io/nedb/lib/model.js'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import { decryptSyncDocument, encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
@@ -130,7 +131,7 @@ for (const [feed, action, cache, entriesKey, storedKey, idKey] of [
     expect(result.afterStale).toEqual(['old', 'new'])
     expect(result.final[entriesKey].map(entry => entry[idKey])).toEqual(['newest'])
     const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-      .trim().split('\n').map(line => JSON.parse(line))
+      .trim().split('\n').map(line => model.deserialize(line))
     const persisted = records.filter(record => record._id === 'audit-channel').at(-1)
     expect(persisted[storedKey].map(entry => entry[idKey])).toEqual(['newest'])
     expect(new Date(persisted[`${storedKey}Timestamp`]).getTime()).toBe(4000)
@@ -154,7 +155,7 @@ test('Shorts metadata enrichment cannot replace a concurrent feed refresh', asyn
   })
   expect(result.map(video => video.videoId)).toEqual(['new'])
   const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-    .trim().split('\n').map(line => JSON.parse(line))
+    .trim().split('\n').map(line => model.deserialize(line))
   const persisted = records.filter(record => record._id === 'audit-channel').at(-1)
   expect(persisted.shorts.map(video => video.videoId)).toEqual(['new'])
   expect(new Date(persisted.shortsTimestamp).getTime()).toBe(2000)
@@ -219,7 +220,7 @@ for (const mode of ['all', 'video', 'post']) {
     }, mode)
     expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
     const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-      .trim().split('\n').map(line => JSON.parse(line))
+      .trim().split('\n').map(line => model.deserialize(line))
     const persisted = records.filter(record => record._id === 'audit-seen').at(-1)
     expect(persisted[mode === 'post' ? 'communityPosts' : 'videos']).toEqual(result)
   })
@@ -300,7 +301,7 @@ test('queued bulk seen writes and their final mutation retain the original snaps
   await app.electronApp.evaluate(() => globalThis.blockedSeenWrites.splice(0).forEach(resolve => resolve()))
   await page.evaluate(() => window.bulkSeenWrite)
   const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
-    .trim().split('\n').map(line => JSON.parse(line))
+    .trim().split('\n').map(line => model.deserialize(line))
   for (const id of [0, 8]) {
     const expected = [{ videoId: 'new', isNewInSubscriptionFeed: true }]
     expect(records.filter(record => record._id === `audit-bulk-${id}`).at(-1).videos).toEqual(expected)

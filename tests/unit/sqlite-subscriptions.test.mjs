@@ -1365,3 +1365,24 @@ for (const id of ['\ud800', '\udc00', 'embedded-\ud800-id']) {
     for (const record of records) assert.deepEqual(await engine.collections.videoMetadataCache.findOneAsync({ _id: record._id }), record)
   })
 }
+
+test('RSS verdicts preserve malformed UTF-16 requested identities without hydrating member records', async t => {
+  const { subscriptionRssVerdicts } = await import('../../src/datastores/sqlite/subscriptions.js')
+  const engine = memory(t)
+  const ids = ['a\ud800', 'b\udc00', 'a\ufffd', 'b\ufffd']
+  const videos = ids.map((videoId, index) => ({ videoId, isUpcoming: index >= 2, unknown: new Date(index) }))
+  await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', videos })
+  const before = engine.prepare('SELECT data FROM members ORDER BY record_id, field, position').all()
+  const prepare = engine.prepare.bind(engine)
+  const observed = []
+  t.mock.method(engine, 'prepare', sql => {
+    if (sql.includes('requested.key AS position')) observed.push(...prepare('EXPLAIN QUERY PLAN ' + sql).all(JSON.stringify(ids)))
+    return prepare(sql)
+  })
+  const deserialize = t.mock.method(model, 'deserialize', () => assert.fail('RSS verdicts must not hydrate members'))
+  try {
+    assert.deepEqual(new Set(await subscriptionRssVerdicts(engine, { ids: [...ids, ids[0]] })), new Set(ids.slice(0, 2)))
+    assert.ok(observed.some(row => /members_video.*collection=\? AND video_id=\?/.test(row.detail)))
+    assert.deepEqual(engine.prepare('SELECT data FROM members ORDER BY record_id, field, position').all(), before)
+  } finally { deserialize.mock.restore() }
+})
