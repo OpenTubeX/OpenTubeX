@@ -6,14 +6,14 @@ import vm from 'node:vm'
 import { reactive } from 'vue'
 import { strToU8, zipSync } from 'fflate'
 
-import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeHistory, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo, mergeHistory, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { createEmptySyncDocument, EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import { forEachSelectedTakeoutZipEntry, parseTakeoutPlaylistCsv } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 import { historyToRemote as releasedHistoryToRemote, syncPlaylists as syncReleasedPlaylists } from '../helpers/released-sync-playlists.mjs'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const context = vm.createContext({
-  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote,
+  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo, mergeSyncIds, syncVideoToRemote,
   generateRandomUniqueId: randomUUID,
   deepCopy: value => JSON.parse(JSON.stringify(value)),
   normalizePlaylistThumbnail: async value => {

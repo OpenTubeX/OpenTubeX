@@ -1,5 +1,5 @@
 import { toRaw } from 'vue'
-import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -25,7 +25,7 @@ function playlistBaseline(previous = {}) {
   return { persistPlaylistSyncBaseline, readBaseline: () => JSON.parse(settings.syncServerSnapshot).playlists }
 }
 
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw, MAIN_PROFILE_ID, deepCopy: structuredClone, generateRandomUniqueId: randomUUID, ...errors, ...bookmarks, ...profileSync })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw, MAIN_PROFILE_ID, deepCopy: structuredClone, generateRandomUniqueId: randomUUID, ...errors, ...bookmarks, ...profileSync })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')
