@@ -2,25 +2,25 @@ import { test, expect } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
+const settings = {
+  videoPlaybackEngine: 'built-in',
+  ytDlpPlaybackEngineDefaultMigration: true,
+  fetchSubscriptionsAutomatically: false,
+  useSponsorBlock: false,
+  playNextVideo: false,
+  keepPlayingOnNavigation: false,
+  hideSideBarOnWatchPages: false,
+  reducedMotion: 'on'
+}
+
 test.use({
   launchArgs: ['--js-flags=--expose-gc', '--enable-precise-memory-info'],
-  seed: {
-    settings: {
-      videoPlaybackEngine: 'built-in',
-      ytDlpPlaybackEngineDefaultMigration: true,
-      fetchSubscriptionsAutomatically: false,
-      useSponsorBlock: false,
-      playNextVideo: false,
-      keepPlayingOnNavigation: false,
-      hideSideBarOnWatchPages: false,
-      reducedMotion: 'on'
-    }
-  }
+  seed: { settings }
 })
 
 for (const usePlayerMenuGrid of [true, false]) {
   test.describe(`caption resources in ${usePlayerMenuGrid ? 'grid' : 'list'} menus`, () => {
-    test.use({ seed: { settings: { usePlayerMenuGrid } } })
+    test.use({ seed: { settings: { ...settings, usePlayerMenuGrid } } })
 
     test('collects replaced caption and translation choices during playback', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page, { captionTranslations: true })
@@ -65,8 +65,10 @@ for (const usePlayerMenuGrid of [true, false]) {
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
         await page.locator('.ftVideoPlayer').hover()
         await page.locator('.shaka-overflow-menu-button').click()
+        await expect(page.locator('.shaka-caption-button')).toHaveAttribute('aria-pressed', 'true')
         await page.locator('.shaka-caption-button').click()
         await page.locator('.shaka-turn-captions-off-button').click()
+        await expect(page.locator('.shaka-caption-button')).toHaveAttribute('aria-pressed', 'false')
         await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(false)
       } finally {
         await watch.dispose()

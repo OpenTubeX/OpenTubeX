@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises'
 import { test, expect } from '@playwright/test'
 
 for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overlayscrollbars.cjs', 'overlayscrollbars.cjs.js']) {
-  test(`${entry}: playback updates preserve viewport attributes and image listeners`, async ({ page }) => {
+  test(`${entry}: playback updates preserve viewport attributes and image listeners`, async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Image listener counts require the Chromium DevTools Protocol')
     const library = await readFile(new URL(`../../../node_modules/overlayscrollbars/${entry}`, import.meta.url), 'utf8')
     const css = await readFile(new URL('../../../node_modules/overlayscrollbars/styles/overlayscrollbars.css', import.meta.url), 'utf8')
     await page.setContent(`<style>${css}</style><div id="host" style="width:400px;height:200px;overflow:auto"><div id="content" style="height:1000px"><img id="avatar" alt="" style="position:absolute" width="1" height="1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><span id="clock" style="display:inline-block;width:80px;height:20px">00:00</span></div></div>`)
@@ -61,7 +62,7 @@ for (const entry of ['overlayscrollbars.mjs', 'overlayscrollbars.esm.js', 'overl
     })
     await expect.poll(() => page.evaluate(() => window.scrollbar.state().overflowAmount.y)).toBe(0)
     await expect.poll(() => page.locator('#host').evaluate(element => element.scrollTop)).toBe(0)
-    await expect(page.locator('#host > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    await expect(page.locator('#host > .os-scrollbar-vertical')).toContainClass('os-scrollbar-unusable')
     await page.evaluate(() => window.scrollbar.destroy())
     expect(await imageListeners()).toBe(0)
     await session.detach()
