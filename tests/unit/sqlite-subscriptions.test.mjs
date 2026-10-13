@@ -37,7 +37,7 @@ for (const cachedAt of [1000, '1000', new Date(1000)]) {
   })
 }
 
-for (const cachedAt of [null, false, '1000', new Date(1000), [1000], { retained: true }]) {
+for (const cachedAt of [1, null, false, '1000', new Date(1000), [1000], { retained: true }]) {
   test(`metadata selection and pages retain NeDB cachedAt ordering for ${model.serialize({ cachedAt })}`, async t => {
     const engine = memory(t), legacy = new Datastore({ inMemoryOnly: true })
     const videoId = 'abcdefghijk'
@@ -942,7 +942,7 @@ test('metadata digest comparisons preserve legacy bytes, URL fallback and stale 
   }
 })
 
-test('equal-time metadata observations preserve arrival order, thumbnail inheritance and durable pagination', async t => {
+test('equal-time metadata observations preserve NeDB ID order, thumbnail inheritance and durable pagination', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'opentubex-metadata-order-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
   const path = join(directory, 'library.sqlite')
@@ -952,7 +952,7 @@ test('equal-time metadata observations preserve arrival order, thumbnail inherit
   t.after(() => db.close())
   const collection = engine.collections.videoMetadataCache
   const insert = collection.insertAsync.bind(collection)
-  const ids = ['z-first', 'y-second', 'x-third', 'w-rollback']
+  const ids = ['a-first', 'b-second', 'c-third', 'd-rollback']
   t.mock.method(collection, 'insertAsync', record => insert({ ...record, _id: ids.shift() }))
   const id = 'abcdefghijk'
   const first = 'data:image/png;base64,AAAA'
@@ -965,7 +965,7 @@ test('equal-time metadata observations preserve arrival order, thumbnail inherit
   assert.equal(collection.count(), 3, 'the current tied revision must prevent a duplicate observation')
   const assertPages = async () => {
     const title = await metadataPage(engine, { videoId: id, field: 'title', limit: 1 })
-    assert.deepEqual(title.records.map(row => [row._id, row.value, row.cachedAt]), [['y-second', 'Second', 1000]])
+    assert.deepEqual(title.records.map(row => [row._id, row.value, row.cachedAt]), [['b-second', 'Second', 1000]])
     assert.equal((await metadataPage(engine, { videoId: id, field: 'title', cursor: title.cursor, limit: 1 })).records[0].value, 'First')
     assert.deepEqual((await metadataPage(engine, { videoId: id, field: 'description' })).records.map(row => row.value), ['Second', 'First'])
     const thumbnails = await metadataPage(engine, { videoId: id, field: 'thumbnail' })
@@ -977,13 +977,13 @@ test('equal-time metadata observations preserve arrival order, thumbnail inherit
     await updateVideoMetadataCache(engine, { videoId: id, title: 'Rolled back', description: 'Rolled back', observedAt: 1000 })
     throw new Error('rollback')
   }), /rollback/)
-  await collection.updateAsync({ _id: 'z-first' }, { $set: { unknown: { date: new Date(1234) } } })
+  await collection.updateAsync({ _id: 'a-first' }, { $set: { unknown: { date: new Date(1234) } } })
   await assertPages()
-  const secondOrder = db.prepare('SELECT * FROM metadata_order WHERE record_id = ?').get('y-second')
-  await collection.updateAsync({ _id: 'y-second' }, { $set: { videoId: 'other-video', cachedAt: 2000 } })
-  assert.deepEqual({ ...db.prepare('SELECT * FROM metadata_order WHERE record_id = ?').get('y-second') }, { ...secondOrder, video_id: 'other-video', sort_time: 2000 })
+  const secondOrder = db.prepare('SELECT * FROM metadata_order WHERE record_id = ?').get('b-second')
+  await collection.updateAsync({ _id: 'b-second' }, { $set: { videoId: 'other-video', cachedAt: 2000 } })
+  assert.deepEqual({ ...db.prepare('SELECT * FROM metadata_order WHERE record_id = ?').get('b-second') }, { ...secondOrder, video_id: 'other-video', sort_time: 2000 })
   assert.deepEqual((await metadataPage(engine, { videoId: id, field: 'title' })).records.map(row => row.value), ['First'])
-  await collection.updateAsync({ _id: 'y-second' }, { $set: { videoId: id, cachedAt: 1000 } })
+  await collection.updateAsync({ _id: 'b-second' }, { $set: { videoId: id, cachedAt: 1000 } })
   await assertPages()
   const documents = await collection.findAsync({})
   db.close()
@@ -994,20 +994,20 @@ test('equal-time metadata observations preserve arrival order, thumbnail inherit
   assert.deepEqual(await engine.collections.videoMetadataCache.findAsync({}), documents)
   await update('Third', null)
   assert.equal(engine.collections.videoMetadataCache.count(), 3)
-  const latest = await engine.collections.videoMetadataCache.findOneAsync({ _id: 'x-third' })
-  await engine.collections.videoMetadataCache.removeAsync({ _id: 'x-third' })
+  const latest = await engine.collections.videoMetadataCache.findOneAsync({ _id: 'c-third' })
+  await engine.collections.videoMetadataCache.removeAsync({ _id: 'c-third' })
   await engine.collections.videoMetadataCache.insertAsync(latest)
   await assertPages()
   const backfillId = 'backfill001'
   const backfill = engine.collections.videoMetadataCache
   await backfill.insertAsync([
-    { _id: 'backfill-z', videoId: backfillId, title: 'First', description: '', cachedAt: 1000, thumbnail: null, thumbnailUrl: 'same', hasThumbnailChange: true },
-    { _id: 'backfill-a', videoId: backfillId, title: 'Second', description: '', cachedAt: 1000, thumbnail: null, thumbnailUrl: 'same', hasThumbnailChange: false },
+    { _id: 'backfill-0', videoId: backfillId, title: 'First', description: '', cachedAt: 1000, thumbnail: null, thumbnailUrl: 'same', hasThumbnailChange: true },
+    { _id: 'backfill-1', videoId: backfillId, title: 'Second', description: '', cachedAt: 1000, thumbnail: null, thumbnailUrl: 'same', hasThumbnailChange: false },
   ])
   const order = db.prepare('SELECT * FROM metadata_order ORDER BY sequence').all()
   await engine.transaction(() => updateVideoMetadataCache(engine, { videoId: backfillId, title: 'Second', thumbnail: second, thumbnailUrl: 'same', observedAt: 1000 }))
-  assert.deepEqual(db.prepare('SELECT * FROM metadata_order ORDER BY sequence').all(), order, 'thumbnail backfill must retain arrival order without inserting a revision')
-  assert.equal(metadataThumbnail(engine, { id: 'backfill-z' }), second)
+  assert.deepEqual(db.prepare('SELECT * FROM metadata_order ORDER BY sequence').all(), order, 'thumbnail backfill must retain ID order without inserting a revision')
+  assert.equal(metadataThumbnail(engine, { id: 'backfill-0' }), second)
   assert.deepEqual((await metadataPage(engine, { videoId: backfillId, field: 'title' })).records.map(row => row.value), ['First'])
   assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(), [])
 })
@@ -1282,3 +1282,19 @@ test('legacy metadata pages reuse bounded sort orders and discard writes that ro
   for (const id of ['other1', 'other2', 'other3']) await metadataPage(engine, { videoId: id, field: 'title' })
   assert.equal(engine.legacyMetadataOrders.size, 2, 'orders for different videos must not grow without a bound')
 })
+
+for (const lengthSeconds of [null, 100]) {
+  test(`retained imported watched history is converted for statistics, cleanup and Shorts without writes: ${lengthSeconds}`, async t => {
+    const engine = memory(t), videoId = 'abcdefghijk'
+    const history = { _id: 'h', videoId, timeWatched: 1, published: 1, description: '', type: 'video', isLive: false, lengthSeconds, watchProgress: 1, unknown: new Date(2) }
+    const member = { videoId, title: 'Retained', published: 1 }
+    await engine.collections.history.insertAsync(history)
+    await engine.collections.playlists.insertAsync({ _id: 'p', videos: [member, member] })
+    await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', shorts: [member], shortsTimestamp: 2 })
+    assert.equal(engine.playlistStatistics({ id: 'p' }).watchedCount, 2)
+    assert.deepEqual(await subscriptionShortsWindow(engine, { subscriptions: [{ id: 'channel' }], preferences: { hideWatched: true } }), [])
+    assert.equal(await engine.cleanupPlaylist({ id: 'p', mode: 'watched' }), 2)
+    assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, [])
+    assert.deepEqual(await engine.collections.history.findOneAsync({ _id: 'h' }), history)
+  })
+}

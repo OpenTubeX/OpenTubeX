@@ -53,11 +53,12 @@ function legacyMetadataOrder(engine, videoId) {
   const cached = engine.legacyMetadataOrders.get(videoId)
   if (cached?.revision === revision) return cached.ids
   const legacy = engine.prepare("SELECT 1 FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') NOT IN ('integer', 'real') LIMIT 1").get(videoId)
-  // Numeric observations keep their indexed path. Retained legacy values need
+  const tied = engine.prepare("SELECT 1 FROM metadata_order WHERE collection = 'videoMetadataCache' AND video_id = ? GROUP BY sort_time HAVING count(*) > 1 LIMIT 1").get(videoId)
+  // Distinct numeric observations keep their indexed path. Retained values and ties need
   // NeDB ordering before slicing; read only sort keys, never thumbnail blobs
   // or unrelated title/description data.
   let ids = null
-  if (legacy) {
+  if (legacy || tied) {
     const rows = engine.prepare("SELECT r.id, r.data -> '$._id' AS original_id, r.data -> '$.cachedAt' AS cached_at FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IS NOT NULL").all(videoId)
       .map(row => ({ id: row.id, recordId: model.deserialize(row.original_id), cachedAt: model.deserialize(row.cached_at) }))
     ids = rows.toSorted((left, right) => model.compareThings(left.cachedAt, right.cachedAt) || model.compareThings(left.recordId, right.recordId)).map(row => row.id)

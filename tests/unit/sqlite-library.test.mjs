@@ -18,7 +18,7 @@ import { metadataPage } from '../../src/datastores/sqlite/metadata.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
-import { recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos } from '../../src/datastores/sqlite/operations.js'
+import { recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds } from '../../src/datastores/sqlite/operations.js'
 
 test('legacy subscription imports accept nullable custom profile names without discarding subscriptions', async t => {
   const engine = memory(t)
@@ -1427,7 +1427,7 @@ for (const interruption of ['replay', 'verification']) {
   })
 }
 
-test('resumed legacy metadata migration retains equal-time arrival order through replacement records', async t => {
+test('resumed legacy metadata migration retains NeDB equal-time ID order through replacement records', async t => {
   const path = await directory(t)
   const revisions = ['z-first', 'y-second', 'x-third'].map((_id, index) => ({
     _id, videoId: 'abcdefghijk', title: ['First', 'Second', 'Third'][index], cachedAt: 1000,
@@ -1444,7 +1444,10 @@ test('resumed legacy metadata migration retains equal-time arrival order through
   const engine = await openLibrary(path, { batchSize: 1 })
   try {
     assert.deepEqual(engine.prepare('SELECT record_id FROM metadata_order ORDER BY sequence').all().map(row => row.record_id), revisions.map(record => record._id))
-    assert.deepEqual((await metadataPage(engine, { videoId: 'abcdefghijk', field: 'title' })).records.map(row => row.value), ['Second', 'First'])
+    const legacy = new Datastore({ inMemoryOnly: true })
+    await legacy.insertAsync(revisions)
+    const ordered = await legacy.findAsync({ videoId: 'abcdefghijk' }).sort({ cachedAt: 1 })
+    assert.deepEqual((await metadataPage(engine, { videoId: 'abcdefghijk', field: 'title' })).records.map(row => row.value), ordered.slice(0, -1).toReversed().map(row => row.title))
     for (const record of revisions) assert.deepEqual(await engine.collections.videoMetadataCache.findOneAsync({ _id: record._id }), record)
     assert.deepEqual(engine.prepare('PRAGMA foreign_key_check').all(), [])
     assert.equal(await readFile(source, 'utf8'), contents)
@@ -2410,7 +2413,7 @@ test('$pull closes the member read cursor before deletion and preserves every un
 
 test('cross-type scalar predicates retain NeDB candidates for reads and mutations', async t => {
   const values = [0, 1, 2, false, true, null, '0', '1', 'true', new Date(1), [true], { nested: true }, undefined]
-  const conditions = [{ $ne: true }, { $ne: false }, { $ne: 1 }, { $nin: [true] }, { $nin: [1] }, { $nin: [false, 1, 'true'] }, { $in: [true, 1] }, ...['$lt', '$lte', '$gt', '$gte'].flatMap(operator => [false, true, 1, new Date(1)].map(value => ({ [operator]: value })))]
+  const conditions = [{ $in: [null] }, { $in: [null, 1] }, { $nin: [null] }, { $ne: true }, { $ne: false }, { $ne: 1 }, { $nin: [true] }, { $nin: [1] }, { $nin: [false, 1, 'true'] }, { $in: [true, 1] }, ...['$lt', '$lte', '$gt', '$gte'].flatMap(operator => [false, true, 1, new Date(1)].map(value => ({ [operator]: value })))]
   for (const field of ['value', 'videoId', 'videos']) {
     for (const condition of conditions) {
       await t.test(`${field}: ${JSON.stringify(condition)}`, async t => {
@@ -2871,11 +2874,13 @@ test('selected additions preserve repeated incoming occurrences and exclude alre
   const engine = memory(t)
   await engine.collections.playlists.insertAsync({ _id: 'batch', videos: [], unknown: new Date(1) })
   const videos = [{ videoId: 'same', title: 'First', unknown: new Date(2) }, { videoId: 'same', title: 'Second', unknown: new Date(3) }]
-  assert.equal(await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false })), 1)
+  assert.deepEqual(await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false })), { changedIds: ['batch'] })
   const first = await engine.playlistSnapshot({ id: 'batch' })
   assert.deepEqual(first.videos.map(({ playlistItemId, timeAdded, ...record }) => record), videos.map(video => ({ ...video, type: 'video' })))
   assert.equal(new Set(first.videos.map(video => video.playlistItemId)).size, 2)
-  await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false }))
+  const revision = engine.revision('playlists')
+  assert.deepEqual(await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false })), { changedIds: [] })
+  assert.equal(engine.revision('playlists'), revision)
   assert.deepEqual(await engine.playlistSnapshot({ id: 'batch' }), first)
 })
 
@@ -2895,4 +2900,13 @@ test('SQLite duplicate statistics count exactly the members cleanup removes', as
   assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, videos.filter((_, index) => index !== 8 && index !== 10))
   const cleaned = engine.playlistStatistics({ id: 'p' })
   assert.equal(cleaned.uniqueCount, cleaned.total)
+})
+
+test('playlist download IDs preserve member order without hydrating metadata or opaque entries', async t => {
+  const engine = memory(t)
+  const videos = [null, false, {}, { videoId: '' }, { videoId: 42 }, { videoId: '\ud800', unknown: new Date(1) }, ...Array.from({ length: 20000 }, (_, i) => ({ videoId: `id-${i}`, title: 'Retained', unknown: new Date(i) })), { videoId: 'id-0' }]
+  await engine.collections.playlists.insertAsync({ _id: 'p', videos })
+  t.mock.method(engine, 'materialize', () => { throw new Error('must not hydrate records') })
+  assert.deepEqual(playlistVideoIds(engine, { id: 'p' }), videos.filter(video => typeof video?.videoId === 'string' && video.videoId).map(video => video.videoId))
+  assert.throws(() => playlistVideoIds(engine, { id: 'missing' }), /no longer exists/)
 })

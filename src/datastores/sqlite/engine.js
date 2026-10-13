@@ -101,7 +101,7 @@ function compileQuery(query, alias = 'r', normalizedFields = [], collection = nu
         for (const [operator, argument] of Object.entries(condition)) {
           if (operator === '$exists') { clauses.push(`${type} IS ${argument || argument === '' ? 'NOT ' : ''}NULL`); continue }
           if (operator === '$in' || operator === '$nin') {
-            if (!Array.isArray(argument) || argument.some(item => (item && typeof item === 'object') || (indexedId && typeof item !== 'string') || (operator === '$nin' && typeof item === 'boolean'))) { clauses.push('1'); exact = false; continue }
+            if (!Array.isArray(argument) || argument.some(item => item === null || (item && typeof item === 'object') || (indexedId && typeof item !== 'string') || (operator === '$nin' && typeof item === 'boolean'))) { clauses.push('1'); exact = false; continue }
             args.push(serialize(argument.map(bind)))
             clauses.push(`coalesce(${expression} ${operator === '$nin' ? 'NOT ' : ''}IN (SELECT value FROM json_each(?)), ${operator === '$nin' ? '1' : '0'})`)
             continue
@@ -650,7 +650,7 @@ export class LibraryEngine {
     let watchedCount = 0
     let expiresAt = Infinity
     const applyHistory = row => {
-      const history = row.history ? deserialize(row.history) : null
+      const history = row.history ? migrateLegacyHistoryRecord(deserialize(row.history)) : null
       if (history && isHistoryEntryWatched(history, now)) watchedCount += row.count
       if (history?.isUpcoming === true && history.premiereTimestamp != null) {
         const premiere = Number(history.premiereTimestamp) * 1000
@@ -880,7 +880,7 @@ export class LibraryEngine {
       if (mode === 'watched') {
         const ids = this.prepare("SELECT DISTINCT coalesce(nullif(data -> '$.videoId', 'null'), data -> '$.postId') AS original_video_id FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND video_id IS NOT NULL").all(id).map(row => deserialize(row.original_video_id))
         for (let offset = 0; offset < ids.length; offset += MAX_PAGE_SIZE) {
-          for (const [videoId, row] of this.latestHistoryRows(ids.slice(offset, offset + MAX_PAGE_SIZE))) if (isHistoryEntryWatched(deserialize(row.data))) watchedIds.push(videoId)
+          for (const [videoId, row] of this.latestHistoryRows(ids.slice(offset, offset + MAX_PAGE_SIZE))) if (isHistoryEntryWatched(migrateLegacyHistoryRecord(deserialize(row.data)))) watchedIds.push(videoId)
         }
       }
       const removed = this.prepare(`SELECT m.position, coalesce(nullif(m.data -> '$.videoId', 'null'), m.data -> '$.postId') AS original_video_id FROM members m WHERE m.collection = 'playlists' AND m.record_id = ? AND m.field = 'videos' AND (${condition})`).all(id, mode === 'duplicates' ? id : JSON.stringify(watchedIds)).map(row => ({ position: row.position, video_id: deserialize(row.original_video_id) }))
@@ -902,7 +902,7 @@ export class LibraryEngine {
           if (videoId === null || typeof videoId !== 'object') identities.set(row.legacy_id, videoId)
         }
         const watched = new Set()
-        for (const [identity, history] of legacyHistoryRows(this, identities.keys())) if (isHistoryEntryWatched(deserialize(history))) watched.add(identity)
+        for (const [identity, history] of legacyHistoryRows(this, identities.keys())) if (isHistoryEntryWatched(migrateLegacyHistoryRecord(deserialize(history)))) watched.add(identity)
         for (const row of legacyMembers) if (watched.has(row.legacy_id)) removed.push({ position: row.position, video_id: identities.get(row.legacy_id) })
       }
       const remove = this.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND position = ?")

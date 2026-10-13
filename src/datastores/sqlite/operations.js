@@ -207,7 +207,7 @@ export function playlistSelection(engine, { ids, query = '' }) {
 
 export async function addSelectedPlaylistVideos(engine, { ids, videos, allowDuplicates = false }) {
   if (!Array.isArray(ids) || ids.some(id => typeof id !== 'string') || !Array.isArray(videos) || videos.some(video => !video || typeof video.videoId !== 'string')) throw new TypeError('Invalid playlist selection')
-  let count = 0
+  const changedIds = []
   for (const id of ids) {
     if (!await engine.collections.playlists.countAsync({ _id: id })) throw new Error('The playlist no longer exists')
     const existing = allowDuplicates ? new Set() : new Set(engine.prepare("SELECT DISTINCT video_id FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND video_id IN (SELECT value FROM json_each(?))").all(id, JSON.stringify(videos.map(video => video.videoId))).map(row => row.video_id))
@@ -219,10 +219,12 @@ export async function addSelectedPlaylistVideos(engine, { ids, videos, allowDupl
       delete result._libraryMemberId
       return result
     })
-    if (added.length) await engine.collections.playlists.updateAsync({ _id: id }, { $push: { videos: { $each: added } }, $set: { lastUpdatedAt: Date.now() } })
-    count++
+    if (added.length) {
+      await engine.collections.playlists.updateAsync({ _id: id }, { $push: { videos: { $each: added } }, $set: { lastUpdatedAt: Date.now() } })
+      changedIds.push(id)
+    }
   }
-  return count
+  return { changedIds }
 }
 
 export async function removePlaylistMember(engine, { id, memberId, revision }) {
@@ -273,4 +275,9 @@ export function recommendationSubscriptionCandidates(engine, { channelIds }) {
   // Home learns from the first cached candidates, independently of feed-only
   // channel preferences. Its shared visibility check applies authentication.
   return channelIds.flatMap(id => query.all(id).map(row => ({ ...model.deserialize(row.data), recommendationSources: [{ type: 'subscription', id }] })))
+}
+
+export function playlistVideoIds(engine, { id }) {
+  if (!engine.prepare("SELECT 1 FROM records WHERE collection = 'playlists' AND id = ?").get(id)) throw new Error('The playlist no longer exists')
+  return engine.prepare("SELECT data -> '$.videoId' AS video_id FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND json_type(data, '$.videoId') = 'text' ORDER BY position").all(id).map(row => model.deserialize(row.video_id)).filter(Boolean)
 }

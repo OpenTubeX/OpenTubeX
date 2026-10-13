@@ -74,7 +74,7 @@ function readSubscriptionShortsWindow(engine, { subscriptions, preferences = {},
     // than loading unrelated feed arrays or issuing a query for each Short.
     for (let offset = 0; offset < videoIds.length; offset += 250) {
       for (const row of engine.latestHistoryRows(videoIds.slice(offset, offset + 250)).values()) {
-        const record = model.deserialize(row.data)
+        const record = migrateLegacyHistoryRecord(model.deserialize(row.data))
         historyById.set(record.videoId, record)
       }
     }
