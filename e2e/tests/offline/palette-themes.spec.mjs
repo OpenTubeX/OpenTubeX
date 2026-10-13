@@ -118,132 +118,132 @@ async function expectPaletteContrast(page) {
 }
 
 for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].entries()) {
-  for (const scale of [100, 125]) {
-    test.describe(`${names[index]} at ${scale}%`, () => {
-      test.use({
-        seed: {
-          settings: {
-            baseTheme: theme,
-            currentLocale: 'en-US',
-            uiScale: scale,
-            // These normally activate destructive-color overrides. Fixed palettes
-            // must remain readable regardless of the user's previous accent choices.
-            mainColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoMauve' : 'Red',
-            secColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoTeal' : 'Purple',
-            quickSettings: ['baseTheme'],
-          }
+  // Palette values do not depend on zoom; cover both scales across themes.
+  const scale = index % 2 === 0 ? 100 : 125
+  test.describe(`${names[index]} at ${scale}%`, () => {
+    test.use({
+      seed: {
+        settings: {
+          baseTheme: theme,
+          currentLocale: 'en-US',
+          uiScale: scale,
+          // These normally activate destructive-color overrides. Fixed palettes
+          // must remain readable regardless of the user's previous accent choices.
+          mainColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoMauve' : 'Red',
+          secColor: theme === 'catppuccinMacchiato' ? 'CatppuccinMacchiatoTeal' : 'Purple',
+          quickSettings: ['baseTheme'],
         }
+      }
+    })
+
+    test('keeps text, controls and both headers readable', async ({ page, app }, testInfo) => {
+      await goToSettingsSection(page, 'theme')
+      await expect(page.getByRole('combobox', { name: /^Base theme/i })).toHaveText(names[index])
+      await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled({ enabled: theme === 'catppuccinMacchiato' })
+      await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeEnabled({ enabled: theme === 'catppuccinMacchiato' })
+      await expectPaletteContrast(page)
+
+      const button = page.getByRole('button', { name: 'Test toast', exact: true })
+      await expectElementContrast(button)
+      await button.hover()
+      await expectElementContrast(button)
+      await button.focus()
+      await expectElementContrast(button)
+      await page.keyboard.press('Shift+Tab')
+      await page.keyboard.press('Tab')
+      await expect(button).toBeFocused()
+      // Settings handles Tab locally. Enable the app's keyboard outlines so
+      // this checks the painted outline, not the color of a hidden outline.
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showOutlines'))
+      await expect(button).toHaveCSS('outline-style', 'solid')
+      const focus = await button.evaluate(element => {
+        const style = getComputedStyle(element)
+        const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+          .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
+        return { outline: rgb(style.outlineColor), background: rgb(style.backgroundColor) }
       })
+      expect.soft(contrast(focus.outline, focus.background), 'Button focus outline against its fill')
+        .toBeGreaterThanOrEqual(3)
+      await page.mouse.down()
+      await expectElementContrast(button)
+      await page.mouse.move(0, 0)
+      await page.mouse.up()
 
-      test('keeps text, controls and both headers readable', async ({ page, app }, testInfo) => {
-        await goToSettingsSection(page, 'theme')
-        await expect(page.getByRole('combobox', { name: /^Base theme/i })).toHaveText(names[index])
-        await expect(page.getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled({ enabled: theme === 'catppuccinMacchiato' })
-        await expect(page.getByRole('combobox', { name: /Secondary colou?r theme/i })).toBeEnabled({ enabled: theme === 'catppuccinMacchiato' })
-        await expectPaletteContrast(page)
+      const select = page.getByRole('combobox', { name: /^Base theme/i })
+      await select.click()
+      const option = page.getByRole('option', { name: names[index], exact: true })
+      await option.hover()
+      await expectElementContrast(option)
+      await page.keyboard.press('Escape')
 
-        const button = page.getByRole('button', { name: 'Test toast', exact: true })
-        await expectElementContrast(button)
-        await button.hover()
-        await expectElementContrast(button)
-        await button.focus()
-        await expectElementContrast(button)
-        await page.keyboard.press('Shift+Tab')
-        await page.keyboard.press('Tab')
-        await expect(button).toBeFocused()
-        // Settings handles Tab locally. Enable the app's keyboard outlines so
-        // this checks the painted outline, not the color of a hidden outline.
-        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showOutlines'))
-        await expect(button).toHaveCSS('outline-style', 'solid')
-        const focus = await button.evaluate(element => {
-          const style = getComputedStyle(element)
-          const rgb = color => color.match(/[\d.]+/g).slice(0, 3).map(Number)
+      const toggle = page.getByRole('checkbox', { name: /Match top bar with main color/i })
+      const label = toggle.locator('..').locator('.switch-label')
+      await label.scrollIntoViewIfNeeded()
+      for (const checked of [false, true]) {
+        if (await toggle.isChecked() !== checked) await label.click()
+        await expect(toggle).toBeChecked({ checked })
+        const thumb = label.locator('.switch-thumb')
+        await expect.soft(thumb).toHaveCSS('outline-style', 'solid')
+        await expectElementContrast(thumb, 3)
+        await expect.poll(async () => {
+          const height = await label.evaluate(element => element.getBoundingClientRect().height)
+          const x = checked ? 12 : 34
+          const [track, surface, thumb, ...thumbEdge] = await sampleColors(app, label, [
+            [x, height / 2], [x, height / 2 - 15],
+            // Sample the thumb's upper quarter, clear of its state glyph.
+            [checked ? 34 : 18, height / 2 - (checked ? 4.5 : 3)],
+            // Fractional scroll offsets can put one sample on an antialiased edge.
+            ...[-0.5, 0, 0.5].map(offset => [checked ? 31 : 15, height / 2 - 9 + offset]),
+          ])
+          return Math.min(contrast(track, surface), contrast(thumb, track), Math.max(...thumbEdge.map(color => contrast(color, surface))))
+        }, { message: 'Painted toggle track, thumb and surrounding surface' }).toBeGreaterThanOrEqual(3)
+        if (scale === 100) {
+          await testInfo.attach(`${theme}-toggle-${checked ? 'on' : 'off'}`, {
+            body: await label.screenshot({ animations: 'disabled' }), contentType: 'image/png',
+          })
+        }
+      }
+      await page.locator('.settingsCloseButton').click()
+      for (const colored of [false, true]) {
+        await page.evaluate(async colored => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateBarColor', colored)
+        }, colored)
+        await expectElementContrast(page.locator('.topNav .menuButton'), 3)
+        const search = page.locator('.topNav .ft-input')
+        await expectElementContrast(search, 4.5, '::placeholder')
+        const filter = page.locator('.topNav .navFilterButton')
+        // The absolutely positioned filter sits over its sibling input,
+        // whose fill is absent from the button's ancestor backgrounds.
+        const inputBackground = await search.evaluate(element => {
+          const color = getComputedStyle(element).backgroundColor
+          return color.match(/[\d.]+/g).slice(0, 3).map(Number)
             .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
-          return { outline: rgb(style.outlineColor), background: rgb(style.backgroundColor) }
         })
-        expect.soft(contrast(focus.outline, focus.background), 'Button focus outline against its fill')
-          .toBeGreaterThanOrEqual(3)
+        await expectElementContrast(filter, 3, null, inputBackground)
+        await filter.hover()
+        await expectElementContrast(filter, 3, null, inputBackground)
+        await page.mouse.move(0, 0)
+        await search.fill('Contrast check')
+        await expectElementContrast(search)
+        const action = page.locator('.topNav .inputAction.enabled')
+        await expectElementContrast(action, 3, null, inputBackground)
+        await action.hover()
+        await expectElementContrast(action, 3, null, inputBackground)
         await page.mouse.down()
-        await expectElementContrast(button)
+        await expectElementContrast(action, 3, null, inputBackground)
         await page.mouse.move(0, 0)
         await page.mouse.up()
-
-        const select = page.getByRole('combobox', { name: /^Base theme/i })
-        await select.click()
-        const option = page.getByRole('option', { name: names[index], exact: true })
-        await option.hover()
-        await expectElementContrast(option)
-        await page.keyboard.press('Escape')
-
-        const toggle = page.getByRole('checkbox', { name: /Match top bar with main color/i })
-        const label = toggle.locator('..').locator('.switch-label')
-        await label.scrollIntoViewIfNeeded()
-        for (const checked of [false, true]) {
-          if (await toggle.isChecked() !== checked) await label.click()
-          await expect(toggle).toBeChecked({ checked })
-          const thumb = label.locator('.switch-thumb')
-          await expect.soft(thumb).toHaveCSS('outline-style', 'solid')
-          await expectElementContrast(thumb, 3)
-          await expect.poll(async () => {
-            const height = await label.evaluate(element => element.getBoundingClientRect().height)
-            const x = checked ? 12 : 34
-            const [track, surface, thumb, ...thumbEdge] = await sampleColors(app, label, [
-              [x, height / 2], [x, height / 2 - 15],
-              // Sample the thumb's upper quarter, clear of its state glyph.
-              [checked ? 34 : 18, height / 2 - (checked ? 4.5 : 3)],
-              // Fractional scroll offsets can put one sample on an antialiased edge.
-              ...[-0.5, 0, 0.5].map(offset => [checked ? 31 : 15, height / 2 - 9 + offset]),
-            ])
-            return Math.min(contrast(track, surface), contrast(thumb, track), Math.max(...thumbEdge.map(color => contrast(color, surface))))
-          }, { message: 'Painted toggle track, thumb and surrounding surface' }).toBeGreaterThanOrEqual(3)
-          if (scale === 100) {
-            await testInfo.attach(`${theme}-toggle-${checked ? 'on' : 'off'}`, {
-              body: await label.screenshot({ animations: 'disabled' }), contentType: 'image/png',
-            })
-          }
-        }
-        await page.locator('.settingsCloseButton').click()
-        for (const colored of [false, true]) {
-          await page.evaluate(async colored => {
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-            await store.dispatch('updateBarColor', colored)
-          }, colored)
-          await expectElementContrast(page.locator('.topNav .menuButton'), 3)
-          const search = page.locator('.topNav .ft-input')
-          await expectElementContrast(search, 4.5, '::placeholder')
-          const filter = page.locator('.topNav .navFilterButton')
-          // The absolutely positioned filter sits over its sibling input,
-          // whose fill is absent from the button's ancestor backgrounds.
-          const inputBackground = await search.evaluate(element => {
-            const color = getComputedStyle(element).backgroundColor
-            return color.match(/[\d.]+/g).slice(0, 3).map(Number)
-              .map(value => color.startsWith('color(srgb ') ? value * 255 : value)
+        await expectElementContrast(action, 3, null, inputBackground)
+        await search.fill('')
+        if (scale === 100) {
+          await testInfo.attach(`${theme}-${colored ? 'colored' : 'neutral'}-header`, {
+            body: await page.screenshot({ animations: 'disabled' }), contentType: 'image/png',
           })
-          await expectElementContrast(filter, 3, null, inputBackground)
-          await filter.hover()
-          await expectElementContrast(filter, 3, null, inputBackground)
-          await page.mouse.move(0, 0)
-          await search.fill('Contrast check')
-          await expectElementContrast(search)
-          const action = page.locator('.topNav .inputAction.enabled')
-          await expectElementContrast(action, 3, null, inputBackground)
-          await action.hover()
-          await expectElementContrast(action, 3, null, inputBackground)
-          await page.mouse.down()
-          await expectElementContrast(action, 3, null, inputBackground)
-          await page.mouse.move(0, 0)
-          await page.mouse.up()
-          await expectElementContrast(action, 3, null, inputBackground)
-          await search.fill('')
-          if (scale === 100) {
-            await testInfo.attach(`${theme}-${colored ? 'colored' : 'neutral'}-header`, {
-              body: await page.screenshot({ animations: 'disabled' }), contentType: 'image/png',
-            })
-          }
         }
-      })
+      }
     })
-  }
+  })
 }
 
 test('offers the new palettes in quick settings, system choices and the custom editor', async ({ page }) => {

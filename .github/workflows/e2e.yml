@@ -43,6 +43,8 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
+        # Only PR test selection needs the base branch history.
+        fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
         ref: ${{ inputs.checkoutRef }}
 
     - name: Use Node.js 24.x
@@ -86,51 +88,26 @@ jobs:
       id: shards
       env:
         SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
+        PR_BASE_REF: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
       run: |
-        # JavaScript template literals belong to Node.
-        # shellcheck disable=SC2016
-        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json |
-          node --input-type=module -e '
-            let input = ""
-            for await (const chunk of process.stdin) input += chunk
+        set -euo pipefail
+        full_report="$RUNNER_TEMP/e2e-full.json"
+        changed_report="$full_report"
+        pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json > "$full_report"
+        if [ -n "$PR_BASE_REF" ]; then
+          # Fetch only the base history needed for Playwright's merge-base check.
+          git fetch --no-tags origin "$PR_BASE_REF:refs/remotes/origin/$PR_BASE_REF"
+          changed_report="$RUNNER_TEMP/e2e-changed.json"
+          pnpm exec playwright test -c e2e/playwright.config.mjs --list --reporter=json \
+            "--only-changed=origin/$PR_BASE_REF" --pass-with-no-tests > "$changed_report"
+        fi
+        node --input-type=module - "$full_report" "$changed_report" <<'NODE' >> "$GITHUB_OUTPUT"
+        import { readFileSync } from 'node:fs'
+        import { createShardMatrix } from './e2e/shards.mjs'
 
-            const counts = {}
-            const visit = (value) => {
-              if (Array.isArray(value)) {
-                value.forEach(visit)
-              } else if (value && typeof value === "object") {
-                if (value.projectName) {
-                  counts[value.projectName] = (counts[value.projectName] ?? 0) + 1
-                } else {
-                  Object.values(value).forEach(visit)
-                }
-              }
-            }
-
-            visit(JSON.parse(input).suites)
-
-            const projects = process.env.SELECTED_PROJECT === "all"
-              ? ["offline", "performance", "browser", "network"]
-              : process.env.SELECTED_PROJECT === "offline"
-                ? ["offline", "performance", "browser"]
-                : [process.env.SELECTED_PROJECT]
-            // Keep full-suite runs short without sharing an X server between workers.
-            const testsPerShard = 100
-            const maxShards = 16
-            const include = projects.flatMap((project) => {
-              const testCount = counts[project]
-              if (!testCount) throw new Error(`No tests found for project ${project}`)
-
-              const shardTotal = project === "browser" ? 1 : Math.min(maxShards, Math.ceil(testCount / testsPerShard))
-              return Array.from({ length: shardTotal }, (_, index) => ({
-                project,
-                shard: index + 1,
-                shardTotal
-              }))
-            })
-
-            console.log(`matrix=${JSON.stringify({ include })}`)
-          ' >> "$GITHUB_OUTPUT"
+        const [full, changed] = process.argv.slice(2).map(file => JSON.parse(readFileSync(file, 'utf8')))
+        console.log(`matrix=${JSON.stringify(createShardMatrix(full, changed, process.env.SELECTED_PROJECT))}`)
+        NODE
       shell: bash
 
     - name: Get Electron version
