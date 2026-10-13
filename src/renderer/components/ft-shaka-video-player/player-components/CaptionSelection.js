@@ -59,6 +59,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.getTranslations_ = getTranslations
     this.isTranslationSelected_ = isTranslationSelected
     this.selectTranslation_ = selectTranslation
+    this.captionsOffButton_ = null
     this.openColorControl_ = null
     this.translationOverlayFrame_ = 0
 
@@ -520,6 +521,13 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
   /** @private */
   addCaptionActions_() {
+    const captionsOffButton = this.menu.querySelector('.shaka-turn-captions-off-button')
+    if (this.captionsOffButton_ && this.captionsOffButton_ !== captionsOffButton) {
+      // Shaka removes the old choice from the menu but its EventManager still
+      // retains the button and callback until the entire control is released.
+      this.eventManager.unlisten(this.captionsOffButton_, 'click')
+    }
+    this.captionsOffButton_ = captionsOffButton
     this.updateTranslationOptions_()
 
     if (!this.menu.contains(this.optionsButton_)) {
@@ -546,6 +554,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
 
     this.translationSignature_ = signature
     for (const button of this.translationButtons_) {
+      this.eventManager.unlisten(button, 'click')
       button.remove()
     }
     this.translationButtons_ = []

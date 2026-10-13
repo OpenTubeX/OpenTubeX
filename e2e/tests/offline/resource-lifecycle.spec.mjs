@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -17,6 +17,109 @@ test.use({
     }
   }
 })
+
+for (const usePlayerMenuGrid of [true, false]) {
+  test.describe(`caption resources in ${usePlayerMenuGrid ? 'grid' : 'list'} menus`, () => {
+    test.use({ seed: { settings: { usePlayerMenuGrid } } })
+
+    test('collects replaced caption and translation choices during playback', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      const video = await openMockedVideo(page)
+      await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
+      await video.evaluate(element => element.pause())
+      const watch = await page.evaluateHandle(findWatchComponent)
+      const session = await page.context().newCDPSession(page)
+      try {
+        await page.evaluate(() => { window.__replacedCaptionChoices = [] })
+        for (let index = 0; index < 40; index++) {
+          await watch.evaluate(async (component, index) => {
+            const host = document.querySelector('.ftVideoPlayer')
+            const controls = host.ui.getControls()
+            const player = controls.getPlayer()
+            const oldOff = host.querySelector('.shaka-turn-captions-off-button')
+            window.__replacedCaptionChoices.push(new WeakRef(oldOff))
+            // Track refreshes rebuild Shaka's caption choices even when the
+            // selected track is unchanged (for example, manifest updates).
+            player.dispatchEvent({ type: 'trackschanged' })
+            for (const button of host.querySelectorAll('.ft-caption-translation-options button')) {
+              window.__replacedCaptionChoices.push(new WeakRef(button))
+            }
+            component.proxy.captionTranslations = component.proxy.captionTranslations.map(choice => ({
+              ...choice, url: `${choice.url.split('&resource=')[0]}&resource=${index}`
+            }))
+            await component.proxy.$nextTick()
+            controls.dispatchEvent({ type: 'submenuopen' })
+            controls.dispatchEvent({ type: 'submenuclose' })
+            await new Promise(resolve => requestAnimationFrame(resolve))
+          }, index)
+        }
+        await expect.poll(async () => {
+          await session.send('HeapProfiler.collectGarbage')
+          return page.evaluate(() => window.__replacedCaptionChoices.filter(reference => reference.deref()).length)
+        }).toBe(0)
+        // The currently rendered choices must retain their working handlers.
+        await video.evaluate(element => {
+          const player = element.ui.getControls().getPlayer()
+          player.selectTextTrack(player.getTextTracks()[0])
+        })
+        await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(true)
+        await page.locator('.shaka-turn-captions-off-button').evaluate(element => element.click())
+        await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().some(track => track.active))).toBe(false)
+      } finally {
+        await watch.dispose()
+        await session.detach()
+      }
+    })
+
+    test('collects old menu trees after player controls are rebuilt', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await expect(page.locator('.ft-caption-appearance-menu')).toHaveCount(1)
+      await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
+      const session = await page.context().newCDPSession(page)
+      try {
+        const rebuild = () => page.locator('.ftVideoPlayer').evaluate(async element => {
+          // The same rebuild occurs when responsive layout changes call
+          // configureUI; keep the config fixed to isolate its lifecycle.
+          const controls = element.ui.getControls()
+          controls.configure(controls.getConfig())
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        })
+        const sample = async () => {
+          // Collect both JavaScript bindings and the native DOM trees they held.
+          for (let index = 0; index < 3; index++) {
+            await session.send('HeapProfiler.collectGarbage')
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          }
+          return session.send('Memory.getDOMCounters')
+        }
+        // Measure the fully customized layout rather than first-load controls.
+        await rebuild()
+        await rebuild()
+        const baseline = await sample()
+        for (const scale of [1, 1.25]) {
+          await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+          for (let index = 0; index < 20; index++) {
+            await rebuild()
+          }
+          const current = await sample()
+          expect(current.nodes - baseline.nodes).toBeLessThan(500)
+          expect(current.jsEventListeners - baseline.jsEventListeners).toBeLessThan(100)
+        }
+        // New controls remain interactive after releasing the previous layout.
+        await page.locator('.shaka-overflow-menu-button').evaluate(element => element.click())
+        await expect(page.locator('.shaka-overflow-menu')).toBeVisible()
+        await page.locator('.shaka-caption-button').evaluate(element => element.click())
+        await expect(page.locator('.shaka-text-languages')).toBeVisible()
+        await page.locator('.ft-caption-options-button').evaluate(element => element.click())
+        await expect(page.locator('.ft-caption-appearance-menu')).toBeVisible()
+      } finally {
+        await session.detach()
+      }
+    })
+  })
+}
 
 async function navigateAway(page) {
   await page.locator('.sideNav').getByRole('button', { name: 'Playlists', exact: true }).click()
