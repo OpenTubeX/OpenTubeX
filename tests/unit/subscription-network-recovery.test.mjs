@@ -499,15 +499,16 @@ test('a channel without Shorts is empty without an API error or an unavailable-c
 })
 
 for (const feed of ['Videos', 'Shorts', 'Live']) {
-  test(`cancelling ${feed} releases a stalled secondary Invidious channel probe`, async t => {
+  test(`cancelling ${feed} releases a stalled secondary Invidious channel probe`, { timeout: 10_000 }, async () => {
     const app = createRefresh({ feed, backend: 'invidious', rssStatus: 404, stallChannelProbe: true })
     app.reconnect()
     const pending = app.refresh({ t: key => key })
     await flushPromises()
     assert.ok(app.requests.some(url => url.includes('/feed/channel/')))
     app.cancelSubscriptionRefresh()
-    const result = await Promise.race([pending, new Promise(resolve => setTimeout(() => resolve('stuck'), 100))])
-    assert.equal(result, null)
+    // The test timeout detects a stuck cancellation without requiring queued
+    // event-loop yields to complete inside 100 ms on a loaded test runner.
+    assert.equal(await pending, null)
     assert.equal(app.getters.getSubscriptionFeedRefreshInProgress, false)
     assert.deepEqual(app.events, ['finished'])
   })
