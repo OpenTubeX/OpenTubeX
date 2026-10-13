@@ -467,11 +467,13 @@ test.describe('overlay scrollbars', () => {
     // Needs the ClickScrollPlugin to be registered; without it the library
     // ignores clickScroll and the track does nothing.
     const track = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-track`)
+    // DOM overflow can precede the deferred scrollbar measurement. Reveal the
+    // idle track and use an actionable click after its range has caught up.
+    await expect.poll(() => pageScrollbarRangeError(page)).toBeLessThanOrEqual(1)
+    await page.mouse.move(800, 400)
+    await track.hover()
     const box = await track.boundingBox()
-
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height - 20)
-    await page.mouse.down()
-    await page.mouse.up()
+    await track.click({ position: { x: box.width / 2, y: box.height - 20 } })
 
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   })
