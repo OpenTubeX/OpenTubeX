@@ -41,6 +41,68 @@ test.describe('playlist sync while another window edits the library', () => {
     }
   })
 
+  test('retry preserves a remote rename after another window edits during repair upload', async ({ app, page }) => {
+    let release
+    const pending = new Promise(resolve => { release = resolve })
+    let uploading = false
+    let header = { id: 'sync-race', title: 'Renamed elsewhere', description: 'Changed elsewhere', thumbnail_url: null }
+    let videos = [{ id: 'abcdefghijk', title: 'abcdefghijk', uploader: { id: 'UCchannel', name: 'Recovered channel' }, duration: 120, upload_date: 100 }]
+    await page.route('http://playlist-sync.test/**', async route => {
+      const pathname = new URL(route.request().url()).pathname
+      let json = []
+      if (pathname === '/health') json = { capabilities: { encrypted_sync: 0 } }
+      else if (pathname === '/v1/playlists/') json = [header]
+      else if (pathname === '/v1/playlists/sync-race') {
+        if (route.request().method() === 'PATCH') header = route.request().postDataJSON()
+        else json = { playlist: header, videos }
+      } else if (pathname === '/v1/playlists/sync-race/videos') {
+        uploading = true
+        await pending
+        const uploaded = new Map(videos.map(video => [video.id, video]))
+        for (const video of route.request().postDataJSON()) uploaded.set(video.id, video)
+        videos = [...uploaded.values()]
+      }
+      await route.fulfill({ json })
+    })
+    let syncing
+    try {
+      const otherWindow = await openNewWindowFromTabBar(app, page)
+      await waitForAppReady(otherWindow)
+      syncing = page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateSyncServerSnapshot', JSON.stringify({
+          playlists: {
+            'sync-race': {
+              remoteId: 'sync-race', metadata: { id: 'sync-race', title: 'Imported', description: '', thumbnail_url: null }, videos: ['abcdefghijk']
+            }
+          }
+        }))
+        await store.dispatch('updateSyncServerEnabled', true)
+        try { await store.dispatch('syncWithSyncServer') } catch (error) { return error.message }
+        return null
+      })
+      await expect.poll(() => uploading).toBe(true)
+      await otherWindow.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('addVideo', { _id: 'sync-race', videoData: { videoId: 'bcdefghijkl', title: 'Added locally', authorId: 'UCchannel', author: 'Recovered channel', lengthSeconds: 50 } })
+      })
+      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race').videos.length)).toBe(2)
+      release()
+      expect(await syncing).toContain('Playlist changed during sync')
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('syncWithSyncServer'))
+      expect(header.title).toBe('Renamed elsewhere')
+      expect(header.description).toBe('Changed elsewhere')
+      const relaunched = await app.relaunch()
+      const saved = await relaunched.page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylist('sync-race'))
+      expect(saved.playlistName).toBe('Renamed elsewhere')
+      expect(saved.description).toBe('Changed elsewhere')
+      expect(saved.videos.map(video => video.videoId)).toEqual(['abcdefghijk', 'bcdefghijkl'])
+    } finally {
+      release()
+      await syncing?.catch(() => {})
+    }
+  })
+
   for (const [edit, firstUpload] of [['delete playlist', false], ['remove entry', false], ['delete playlist', true]]) {
     test(`sync cannot undo another window's ${edit} during ${firstUpload ? 'first upload' : 'metadata upload'}`, async ({ app, page }) => {
       let release

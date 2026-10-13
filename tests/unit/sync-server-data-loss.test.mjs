@@ -146,6 +146,7 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, item => item.playlistItemId), ['first', 'duplicate'])
   assert.ok(store.state.playlists.playlists[0].videos.every(item => item.title === 'Repaired title' && item.lengthSeconds === 120))
   const fresh = {
+    ...playlistBaseline(),
     state: { playlists: { playlists: [] } },
     dispatch: async (action, value) => {
       assert.equal(action, 'addPlaylist')
@@ -165,7 +166,7 @@ test('playlist metadata enrichment preserves populated conflicting values on eac
     getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [remote] }),
     addPlaylistVideos: () => assert.fail('Populated metadata should not be overwritten'),
   }
-  await context.syncPlaylists(client, { state: { playlists: { playlists: [local] } }, dispatch: () => assert.fail('Local metadata should not be overwritten') })
+  await context.syncPlaylists(client, { ...playlistBaseline(), state: { playlists: { playlists: [local] } }, dispatch: () => assert.fail('Local metadata should not be overwritten') })
 })
 
 for (const lengthSeconds of [120.5, 0.4]) {
@@ -180,6 +181,7 @@ for (const lengthSeconds of [120.5, 0.4]) {
       removePlaylistVideo: () => assert.fail('An incomplete local entry is still a member'),
     }
     await context.syncPlaylists(client, {
+      ...playlistBaseline(),
       state: { playlists: { playlists: [local] } },
       dispatch: async (action, value) => { assert.equal(action, 'updatePlaylistFromSync'); saved = value.playlist; return true },
     }, { [local._id]: { videos: [video.videoId] } })
@@ -328,4 +330,85 @@ test('a rejected multi-playlist sync remembers new IDs and preserves remote edit
   assert.equal(store.state.playlists.playlists[0].videos[1].videoId, 'remote-added')
   assert.deepEqual(store.state.playlists.playlists.map(entry => entry._id), ['first', 'existing'])
   assert.deepEqual([...remote.keys()], ['existing', 'remote-first'])
+})
+
+test('retry after a rejected metadata save preserves another device’s playlist rename and description', async () => {
+  const local = { ...playlist, description: 'Original description', videos: [{ ...video, title: 'Recovered title' }] }
+  const metadata = { id: local._id, title: local.playlistName, description: local.description, thumbnail_url: null }
+  const previous = { [local._id]: { remoteId: local._id, metadata, videos: [video.videoId] } }
+  const remote = { playlist: { ...metadata, title: 'Renamed elsewhere', description: 'Changed elsewhere' }, videos: [syncVideoToRemote({ ...video, title: video.videoId })] }
+  let interrupt = true
+  const store = {
+    ...playlistBaseline(previous),
+    state: { playlists: { playlists: [local] } },
+    dispatch: async (action, value) => {
+      assert.equal(action, 'updatePlaylistFromSync')
+      store.state.playlists.playlists[0] = value.playlist
+      return true
+    },
+  }
+  const client = {
+    getPlaylists: async () => [remote.playlist],
+    getPlaylist: async () => remote,
+    updatePlaylist: async (_, value) => { remote.playlist = value },
+    addPlaylistVideos: async (_, videos) => {
+      remote.videos = videos
+      if (interrupt) {
+        local.videos.push({ ...video, videoId: 'concurrent-add', title: 'Added locally' })
+        interrupt = false
+      }
+    },
+  }
+  await assert.rejects(context.syncPlaylists(client, store, previous), /Playlist changed during sync/)
+  await context.syncPlaylists(client, store, store.readBaseline())
+  assert.equal(remote.playlist.title, 'Renamed elsewhere')
+  assert.equal(remote.playlist.description, 'Changed elsewhere')
+  assert.equal(store.state.playlists.playlists[0].playlistName, 'Renamed elsewhere')
+  assert.equal(store.state.playlists.playlists[0].description, 'Changed elsewhere')
+})
+
+test('playlist removal acknowledgments are batched and retain completed removals on failure', async () => {
+  const local = { ...playlist, videos: [video] }
+  const metadata = { id: local._id, title: local.playlistName, description: '', thumbnail_url: null }
+  const remoteVideos = [video, ...['removed-first', 'removed-second', 'fails-third', 'unattempted'].map(videoId => ({ ...video, videoId }))].map(syncVideoToRemote)
+  const previous = { [local._id]: { remoteId: local._id, metadata, videos: remoteVideos.map(entry => entry.id) } }
+  const baseline = playlistBaseline(previous)
+  const acknowledgments = []
+  const store = {
+    ...baseline,
+    state: { playlists: { playlists: [local] } },
+    persistPlaylistSyncBaseline: async (id, changes) => {
+      acknowledgments.push(changes)
+      await baseline.persistPlaylistSyncBaseline(id, changes)
+    },
+    dispatch: () => assert.fail('The failed remote stage must not save local metadata'),
+  }
+  await assert.rejects(context.syncPlaylists({
+    getPlaylists: async () => [metadata],
+    getPlaylist: async () => ({ playlist: metadata, videos: remoteVideos }),
+    removePlaylistVideo: async (_, id) => { if (id === 'fails-third') throw new Error('Removal failed') },
+  }, store, previous, { allowDataLoss: true }), /Removal failed/)
+  assert.equal(acknowledgments.length, 1)
+  assert.deepEqual(Array.from(acknowledgments[0].removed), ['removed-first', 'removed-second'])
+  assert.deepEqual(store.readBaseline()[local._id].videos, [video.videoId, 'fails-third', 'unattempted'])
+})
+
+test('a completed playlist baseline forgets obsolete membership so a later remote addition survives retry', async () => {
+  const local = { ...playlist, videos: [] }
+  const metadata = { id: local._id, title: local.playlistName, description: '', thumbnail_url: null }
+  const baseline = playlistBaseline({ [local._id]: { remoteId: local._id, metadata, videos: [video.videoId] } })
+  // A later stage fails after this playlist succeeds, leaving the partial
+  // baseline in place. Another device then re-adds the formerly deleted video.
+  await baseline.persistPlaylistSyncBaseline(local._id, { remoteId: local._id, metadata, applied: true, videos: [] })
+  const store = {
+    ...baseline,
+    state: { playlists: { playlists: [local] } },
+    dispatch: async (_, value) => { store.state.playlists.playlists[0] = value.playlist; return true },
+  }
+  await context.syncPlaylists({
+    getPlaylists: async () => [metadata],
+    getPlaylist: async () => ({ playlist: metadata, videos: [syncVideoToRemote(video)] }),
+    removePlaylistVideo: () => assert.fail('A newly re-added remote video must survive retry'),
+  }, store, store.readBaseline(), { allowDataLoss: true })
+  assert.equal(store.state.playlists.playlists[0].videos[0].videoId, video.videoId)
 })

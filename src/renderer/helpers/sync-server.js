@@ -865,14 +865,23 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       remoteVideosById.set(videoId, enriched)
     }
 
-    if (remoteVideosToAdd.length > 0) {
-      await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
-      await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, added: remoteVideosToAdd.map(video => video.id) })
-    }
-    for (const videoId of remoteVideosById.keys()) {
-      if (!mergedVideoIds.has(videoId)) {
-        await client.removePlaylistVideo(remoteId, videoId)
-        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, removed: [videoId] })
+    let added = []
+    const removed = []
+    try {
+      if (remoteVideosToAdd.length > 0) {
+        await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
+        added = remoteVideosToAdd.map(video => video.id)
+      }
+      for (const videoId of remoteVideosById.keys()) {
+        if (!mergedVideoIds.has(videoId)) {
+          await client.removePlaylistVideo(remoteId, videoId)
+          removed.push(videoId)
+        }
+      }
+    } finally {
+      // Record completed writes once, including when a later removal fails.
+      if (added.length > 0 || removed.length > 0) {
+        await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, added, removed })
       }
     }
 
@@ -930,6 +939,7 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       if (!saved) throw new Error('Playlist changed during sync. Try again.')
     }
 
+    await store.persistPlaylistSyncBaseline(id, { remoteId, metadata, applied: true, videos: Array.from(mergedVideoIds) })
     nextSnapshot[id] = {
       remoteId,
       metadata,

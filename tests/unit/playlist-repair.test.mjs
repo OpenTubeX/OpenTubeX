@@ -31,6 +31,21 @@ test('fills public metadata without changing existing titles or adding history-o
   assert.equal(patch.playlistItemId, undefined)
 })
 
+test('clears an existing liveNow flag once a playlist video becomes a recording', async () => {
+  const recorded = { ...metadata, liveNow: true, playlistItemId: 'recorded' }
+  assert.equal(needsPlaylistRepair(recorded), true)
+  const patch = playlistRepairPatch(recorded, metadata)
+  assert.equal(patch?.liveNow, false)
+  assert.equal(needsPlaylistRepair({ ...recorded, ...patch }), false)
+  const { db, Playlists } = await fixture()
+  await db.playlists.updateAsync({ _id: 'selected' }, { $set: { videos: [recorded] } })
+  const result = await Playlists.repairMetadata({ playlistIds: ['selected'], metadata: [metadata] })
+  assert.equal(result.repaired, 1)
+  const saved = await db.playlists.findOneAsync({ _id: 'selected' })
+  assert.equal(saved.videos[0].liveNow, false)
+  assert.equal(needsPlaylistRepair(saved.videos[0]), false)
+})
+
 test('repairs every occurrence only in selected playlists and preserves playlist context', async () => {
   const { db, Playlists } = await fixture()
   const unselected = await db.playlists.findOneAsync({ _id: 'unselected' })
