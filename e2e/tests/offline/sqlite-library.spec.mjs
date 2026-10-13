@@ -1884,13 +1884,17 @@ test.describe('Watch playlist metadata repair', () => {
     lengthSeconds: [50, 0, 100][index], isLive: false, isUpcoming: false, unknown: { retained: index },
   }))
   const retained = { _id: 'repair-order', playlistName: 'Repair order', protected: false, createdAt: 1, lastUpdatedAt: 1, videos: members }
-  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, userPlaylistSortOrder: 'video_duration_asc', uiScale: 95, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }, history: [], playlists: [retained], watchStats: [{ _id: 'history-watch-time-v1' }] } })
+  test.use({ seed: { settings: { historyWatchedStatusMigrated: true, historyRetentionDays: 0, userPlaylistSortOrder: 'video_duration_ascending', uiScale: 95, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }, history: [], playlists: [retained], watchStats: [{ _id: 'history-watch-time-v1' }] } })
   test('refreshes Watch neighbors after a same-size same-timestamp duration repair', async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)
     const first = await page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistPage', { id: 'repair-order' })).records[0])
     await page.evaluate(item => window.ftElectron.tabs.create({ route: `/watch/${item.videoId}?playlistId=repair-order&playlistType=user&libraryMemberId=${item._libraryMemberId}`, makeActive: true }), first)
+    await expect(page.locator('.watchVideoPlaylist.resizablePlaylist')).toBeVisible()
     const view = await watchViewHandle(page)
     await expect.poll(() => view.evaluate(watch => watch.$refs.watchVideoPlaylist.nextVideo?.videoId)).toBe(members[2].videoId)
+    const before = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'repair-order' }))
+    expect(Number.isFinite(before.lastPlayedAt)).toBe(true)
+    expect(before).toStrictEqual({ ...retained, lastPlayedAt: before.lastPlayedAt })
     await page.evaluate(async videoId => {
       await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('repairPlaylistMetadata', {
         playlistIds: ['repair-order'], metadata: [{ videoId, lengthSeconds: 75, isLive: false, isUpcoming: false }],
@@ -1898,8 +1902,8 @@ test.describe('Watch playlist metadata repair', () => {
     }, members[1].videoId)
     await expect.poll(() => view.evaluate(watch => watch.$refs.watchVideoPlaylist.nextVideo?.videoId)).toBe(members[1].videoId)
     expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'repair-order' }))).toStrictEqual({
-      ...retained, videos: members.map((member, index) => index === 1 ? { ...member, lengthSeconds: 75 } : member),
+      ...before, videos: members.map((member, index) => index === 1 ? { ...member, lengthSeconds: 75 } : member),
     })
-    await page.locator('.watchVideoPlaylist').screenshot({ path: testInfo.outputPath('watch-neighbors-after-duration-repair-95.png') })
+    await page.locator('.watchVideoPlaylist.resizablePlaylist').screenshot({ path: testInfo.outputPath('watch-neighbors-after-duration-repair-95.png') })
   })
 })

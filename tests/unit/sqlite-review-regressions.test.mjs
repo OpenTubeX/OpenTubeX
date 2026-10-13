@@ -3187,7 +3187,7 @@ test('Watch reloads a paged duration window after same-size same-timestamp playl
     selectedUserPlaylistVideoCount: computed(() => selectedUserPlaylist.value.videoCount), selectedUserPlaylistLastUpdatedAt: computed(() => selectedUserPlaylist.value.lastUpdatedAt),
     playlistTitle: vueRef('p'), playlistTotalVideoCount: vueRef(3), channelName: vueRef(''), channelId: vueRef(''), shufflePlaylistItems() {},
     watch: (...args) => { const stop = watch(...args); t.after(stop); return stop },
-    selectedUserPlaylist, props: reactive({ videoId: current.videoId }), sortOrder: vueRef('video_duration_asc'), locale: vueRef('en_US'),
+    selectedUserPlaylist, props: reactive({ videoId: current.videoId }), sortOrder: vueRef('video_duration_ascending'), locale: vueRef('en_US'),
     isPagedPlaylist: vueRef(true), store: { state: { history: reactive({ historyRevision: 0 }) } },
     userWindowGeneration: 0, userWindowReady: vueRef(true), userWindowOwner: vueRef('p'), userWindowKey: () => 'p', isLoading: vueRef(false),
     prevVideoBeforeDeletion: vueRef(null), playlistItems: vueRef([current, later, earlier]), userWindow: vueRef({ index: 0, total: 3, previous: null, next: later }),
