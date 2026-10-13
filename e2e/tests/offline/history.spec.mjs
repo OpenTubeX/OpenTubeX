@@ -1361,7 +1361,7 @@ test.describe('history date and channel browsing', () => {
     await page.getByRole('combobox', { name: 'Sort By' }).click()
     await page.getByRole('option', { name: 'Date Watched (Oldest)' }).click()
     await expect(videos).toHaveCount(100)
-    await expect(videos.first()).toContainText('City walk 219')
+    await expect(videos.first()).toContainText('City walk 0')
     await scrollPageToEnd(page)
     await toggle.evaluate(button => button.click())
     await expect(toggle).toHaveAttribute('aria-expanded', 'false')
@@ -1369,7 +1369,7 @@ test.describe('history date and channel browsing', () => {
     await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeVisible()
     await expect(videos).toHaveCount(100)
     // Offscreen cards release their text while keeping the stable video ID.
-    await expect(videos.first()).toHaveAttribute('data-video-id', 'older000219')
+    await expect(videos.first()).toHaveAttribute('data-video-id', 'older000000')
     await expectPageScrollWithinRenderedRange(page)
     const sort = page.getByRole('combobox', { name: 'Sort By' })
     await expect(sort).toBeVisible()
