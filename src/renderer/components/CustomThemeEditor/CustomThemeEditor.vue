@@ -141,13 +141,14 @@
 
 <script setup>
 import FtInput from '../FtInput/FtInput.vue'
-import { computed, onBeforeUnmount, ref, shallowReactive, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, ref, shallowReactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
+import { settingsSubpageKey } from '../FtSettingsSubpage/settingsSubpage'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import FtColorPicker from '../FtColorPicker/FtColorPicker.vue'
@@ -190,6 +191,7 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['close'])
+const settingsWindow = inject(settingsSubpageKey, null)
 const { t, tm } = useI18n()
 const draft = shallowReactive(cloneDefaultCustomTheme())
 const savedTheme = ref(null)
@@ -292,7 +294,7 @@ function resolveSelectedTheme(theme) {
     : store.getters.getSystemLightTheme
 }
 
-watch(() => store.getters.getIsKeyboardShortcutPromptShown, (open) => {
+watch(() => store.getters.getIsKeyboardShortcutPromptShown && (settingsWindow?.isActive.value ?? true), (open) => {
   if (open && props.open) closeEditor()
 }, { flush: 'sync' })
 

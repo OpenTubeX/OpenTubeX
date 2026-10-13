@@ -301,6 +301,69 @@ for (const uiScale of [100, 125]) {
       })
     }
 
+    for (const opener of ['palette', 'keyboard', 'quick-settings']) {
+      test(`defers shortcut navigation without discarding a locked draft (${opener})`, async ({ app, page }) => {
+        await setWindowSize(app, page, { width: Math.round(1400 * uiScale / 100), height: Math.round(750 * uiScale / 100) })
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        const selectedTextColor = await page.locator('body').evaluate(element => getComputedStyle(element).getPropertyValue('--primary-text-color'))
+        const appearance = await goToSettingsSection(page, 'appearance')
+        await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+        const themeName = page.locator('.customThemeEditor .themeNameField input')
+        await themeName.fill('Unfinished theme')
+        await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
+        const picker = page.locator('.colorPickerPopover')
+        await picker.locator('.hexInputControl input').fill('#123456')
+        await picker.getByRole('button', { name: /^Apply(?: colou?r)?$/i }).click()
+        await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).getPropertyValue('--primary-text-color'))).toBe('#123456')
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        if (opener === 'palette') {
+          await page.keyboard.press('Control+k')
+          await page.getByRole('combobox', { name: 'Search commands' }).fill('keyboard shortcuts')
+          await page.locator('[role="option"][id$="-app-shortcuts"]').click()
+        } else if (opener === 'keyboard') {
+          await passwordInput.evaluate(input => input.blur())
+          await page.keyboard.press('Shift+?')
+        } else {
+          await page.locator('.profileTrigger').click()
+          await page.locator('.quickSettingsMenu').getByRole('button', { name: /^Keyboard shortcuts$/i }).click()
+        }
+        await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getIsKeyboardShortcutPromptShown)).toBe(true)
+        await expect(themeName).toHaveValue('Unfinished theme')
+        await expect(themeName).toBeHidden()
+        await expect(page.locator('.settingsKeyboardShortcutPage')).toHaveCount(0)
+        await passwordInput.fill('wrong-password')
+        await passwordInput.press('Enter')
+        await expect(page.getByRole('alert')).toHaveText('Incorrect password')
+        await expect(themeName).toHaveValue('Unfinished theme')
+        // Cancelling the pending request must still restore the original draft.
+        await page.keyboard.press('Control+k')
+        await page.getByRole('combobox', { name: 'Search commands' }).fill('settings')
+        await page.locator('[role="option"][id$="-settings-root"]').click()
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(themeName).toBeVisible()
+        await expect(themeName).toHaveValue('Unfinished theme')
+        // A new request made while locked should execute after a successful unlock.
+        await page.locator('.settingsCloseButton').click()
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showKeyboardShortcutPrompt'))
+        await expect(themeName).toHaveValue('Unfinished theme')
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsKeyboardShortcutPage')).toBeVisible()
+        await expect(themeName).toHaveCount(0)
+        await expect.poll(() => page.locator('body').evaluate(element => getComputedStyle(element).getPropertyValue('--primary-text-color'))).toBe(selectedTextColor)
+      })
+    }
+
     test('keeps keyboard shortcut navigation unavailable while Settings is locked', async ({ page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
