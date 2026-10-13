@@ -12,7 +12,7 @@ import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../su
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { isBackupWatchStatsDay, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
-import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings } from '../../renderer/helpers/subscription-channels'
+import { copySubscriptionChannelSettings, getChannelWithUpdatedSettings, getValidSubscriptionChannels } from '../../renderer/helpers/subscription-channels'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../renderer/helpers/subscription-profile-details'
 
 const recommendations = createRecommendationStore(db.recommendations)
@@ -779,8 +779,8 @@ class Profiles {
       subscriptions: { $elemMatch: { id: channel.id } }
     })
     const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
-      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) return null
-      return profile.subscriptions.map(subscription => subscription.id === channel.id
+      if (!getValidSubscriptionChannels(profile.subscriptions).some(subscription => subscription.id === channel.id)) return null
+      return profile.subscriptions.map(subscription => subscription?.id === channel.id
         ? copySubscriptionChannelSettings(subscription, channel)
         : subscription)
     })
@@ -794,8 +794,10 @@ class Profiles {
       subscriptions: { $elemMatch: { id: { $in: [...updatesById.keys()] } } }
     })
     const { profileIds: updatedProfileIds } = await this.updateSubscriptions(profiles, profile => {
-      if (!profile.subscriptions.some(subscription => updatesById.has(subscription.id))) return null
+      const valid = new Set(getValidSubscriptionChannels(profile.subscriptions))
+      if (![...valid].some(subscription => updatesById.has(subscription.id))) return null
       return profile.subscriptions.map(subscription => {
+        if (!valid.has(subscription)) return subscription
         const update = updatesById.get(subscription.id)
         if (!update) return subscription
         return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)

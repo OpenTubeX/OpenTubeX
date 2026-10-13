@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { DatabaseSync } from 'node:sqlite'
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { setImmediate } from 'node:timers/promises'
+import vm from 'node:vm'
+import * as subscriptionEntries from '../../src/renderer/helpers/subscription-entries.js'
+import * as subscriptionChannels from '../../src/renderer/helpers/subscription-channels.js'
 import model from '@seald-io/nedb/lib/model.js'
 import Datastore from '@seald-io/nedb'
 import { LibraryEngine } from '../../src/datastores/sqlite/engine.js'
@@ -1560,4 +1563,47 @@ test('premiere polling skips opaque members, pages valid entries and keeps every
   assert.deepEqual(records, valid)
   assert.deepEqual(subscriptionPremieres(engine, { channelId: 'later', now: 1000 }).records.map(entry => entry.video), [valid[0]])
   assert.deepEqual(await engine.collections.subscriptionCache.findAsync({}).sort({ _id: 1 }), originals)
+})
+
+
+test('subscription summaries omit unrelated parent payloads without hydrating or rewriting members', async t => {
+  const engine = memory(t)
+  const original = { _id: 'channel', videos: [video(1), null], videosTimestamp: new Date(1), shorts: false, unknown: 'x'.repeat(1000000) }
+  await engine.collections.subscriptionCache.insertAsync(original)
+  assert.deepEqual(subscriptionSummaries(engine), [{ _id: 'channel', videos: [], videosTimestamp: new Date(1), shorts: false, _libraryFeedCounts: { videos: 2 } }])
+  assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), original)
+})
+
+for (const channelId of ['\ud800', '\udc00', 'embedded-\ud800-id']) {
+  test(`bulk seen actions ignore malformed channel IDs without selecting a replacement ID: ${JSON.stringify(channelId)}`, async t => {
+    const engine = memory(t)
+    const original = { _id: channelId.toWellFormed(), videos: [video(1, { isNewInSubscriptionFeed: true })] }
+    await engine.collections.subscriptionCache.insertAsync(original)
+    await assert.rejects(engine.collections.subscriptionCache.insertAsync({ ...original, _id: channelId }), /unpaired UTF-16 surrogate/)
+    for (const scope of [{ channelIds: [channelId] }, { channelIdsByTab: { videos: [channelId] }, timestampsByTab: { videos: { [channelId]: 1 } } }]) {
+      const capture = await markSubscriptionEntries(engine, { ...scope, tabs: ['videos'], capture: true }, {})
+      assert.deepEqual(capture, { entriesByTab: { videos: [] } })
+      await engine.transaction(() => markSubscriptionEntries(engine, { ...scope, tabs: ['videos'] }, { settings: { mergeSeenVideos: () => assert.fail('Unexpected seen write') } }))
+      assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: original._id }), original)
+    }
+  })
+}
+
+
+test('classic media feeds compute timestamp keys once and retain legacy stable ordering', async () => {
+  const script = await readFile(new URL('../../src/datastores/sqlite/subscriptions.js', import.meta.url), 'utf8')
+  const start = script.indexOf('function classicSubscriptionEntries(')
+  let computations = 0
+  const context = vm.createContext({
+    ...subscriptionEntries, ...subscriptionChannels, isVideoHiddenByPreferences, isHistoryEntryWatched,
+    getSubscriptionVideoSortTimestamp: (...args) => { computations++; return subscriptionEntries.getSubscriptionVideoSortTimestamp(...args) }
+  })
+  vm.runInContext(script.slice(start, script.indexOf('export async function subscriptionPage(', start)), context)
+  const records = Array.from({ length: 3000 }, (_, index) => video(index, { published: (index * 71) % 500 }))
+  const before = structuredClone(records)
+  const preferences = { showScheduledLiveStreamsFirst: true }
+  const result = context.classicSubscriptionEntries({ videos: { channel: { videos: records, timestamp: new Date(0) } } }, 'videos', [{ id: 'channel' }], preferences, {}, 10000)
+  assert.equal(computations, records.length)
+  assert.deepEqual(structuredClone(result), records.toSorted((a, b) => b.published - a.published))
+  assert.deepEqual(records, before)
 })

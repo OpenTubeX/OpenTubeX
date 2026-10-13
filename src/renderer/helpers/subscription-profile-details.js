@@ -7,6 +7,7 @@
  * @returns {object | null} a copied profile when details changed
  */
 export function getProfileWithUpdatedSubscriptionDetails(profile, channels) {
+  if (!Array.isArray(profile.subscriptions)) return null
   const updatesByChannelId = new Map()
 
   for (const update of channels) {
@@ -21,7 +22,7 @@ export function getProfileWithUpdatedSubscriptionDetails(profile, channels) {
   let updatedProfile = null
 
   for (let index = 0; index < profile.subscriptions.length; index++) {
-    const updates = updatesByChannelId.get(profile.subscriptions[index].id)
+    const updates = updatesByChannelId.get(profile.subscriptions[index]?.id)
     if (updates === undefined) {
       continue
     }
@@ -39,14 +40,13 @@ export function getProfileWithUpdatedSubscriptionDetails(profile, channels) {
       }
 
       if (updatedProfile === null) {
-        updatedProfile = JSON.parse(JSON.stringify(profile))
+        updatedProfile = { ...profile, subscriptions: profile.subscriptions.slice() }
       }
 
-      if (nameChanged) {
-        updatedProfile.subscriptions[index].name = channelName
-      }
-      if (thumbnailChanged) {
-        updatedProfile.subscriptions[index].thumbnail = thumbnail
+      updatedProfile.subscriptions[index] = {
+        ...channel,
+        ...(nameChanged ? { name: channelName } : {}),
+        ...(thumbnailChanged ? { thumbnail } : {})
       }
     }
   }

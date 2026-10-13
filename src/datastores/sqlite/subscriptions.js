@@ -102,14 +102,19 @@ export function subscriptionSummaries(engine) {
     if (!counts.has(row.record_id)) counts.set(row.record_id, {})
     counts.get(row.record_id)[row.field] = row.length
   }
-  return engine.prepare("SELECT id, data FROM records WHERE collection = 'subscriptionCache' ORDER BY id").all().map(row => ({ ...model.deserialize(row.data), _libraryFeedCounts: counts.get(row.id) ?? {} }))
+  return engine.prepare("SELECT id, (SELECT json_group_object(key, json(r.data -> fullkey)) FROM json_each(r.data) WHERE key IN ('_id', 'videos', 'videosTimestamp', 'shorts', 'shortsTimestamp', 'liveStreams', 'liveStreamsTimestamp', 'communityPosts', 'communityPostsTimestamp')) AS data FROM records r WHERE collection = 'subscriptionCache' ORDER BY id").all().map(row => ({ ...model.deserialize(row.data), _libraryFeedCounts: counts.get(row.id) ?? {} }))
 }
 
 function classicSubscriptionEntries(caches, category, subscriptions, preferences, historyById, now) {
   const channelIds = new Set(getSubscriptionsForFeed(subscriptions, category).map(channel => channel.id))
   let records = Object.entries(caches[category]).filter(([id]) => channelIds.has(id)).flatMap(([, cache]) => (cache[category === 'posts' ? 'posts' : 'videos'] ?? []).map(video => category === 'videos' && video != null ? ensureUpcomingSubscriptionFeedPublished(video, cache.timestamp.getTime(), now) : video))
   if (category === 'posts') records = records.toSorted((a, b) => b?.publishedTime - a?.publishedTime)
-  if (category !== 'posts') records = records.map(video => video == null ? video : updateUpcomingPremiereState(video, now)).toSorted((a, b) => getSubscriptionVideoSortTimestamp(b ?? {}, preferences.showScheduledLiveStreamsFirst, now) - getSubscriptionVideoSortTimestamp(a ?? {}, preferences.showScheduledLiveStreamsFirst, now))
+  if (category !== 'posts') {
+    records = records.map(video => {
+      const entry = video == null ? video : updateUpcomingPremiereState(video, now)
+      return { entry, timestamp: getSubscriptionVideoSortTimestamp(entry ?? {}, preferences.showScheduledLiveStreamsFirst, now) }
+    }).toSorted((a, b) => b.timestamp - a.timestamp).map(({ entry }) => entry)
+  }
   records = records.filter(video => video == null || !isVideoHiddenByPreferences(video, preferences, now))
   if (category !== 'posts') {
     records = filterMembersOnlySubscriptionVideos(records, subscriptions, preferences.restrictedPlaybackConfigured)

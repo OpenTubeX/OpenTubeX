@@ -137,15 +137,15 @@ const actions = {
 
   async batchUpdateChannelSettings({ commit, state }, updates) {
     if (updates.length === 0) return true
-    const subscriptionsById = new Map(state.profileList[0].subscriptions.map(channel => [channel.id, channel]))
+    const subscriptionsById = new Map(getValidSubscriptionChannels(state.profileList[0]?.subscriptions).map(channel => [channel.id, channel]))
     const availableUpdates = updates.filter(({ channelId }) => subscriptionsById.has(channelId))
     if (availableUpdates.length === 0) return false
     const channelIds = new Set(availableUpdates.map(({ channelId }) => channelId))
     const profiles = state.profileList
-      .filter(profile => profile.subscriptions.some(channel => channelIds.has(channel.id)))
+      .filter(profile => getValidSubscriptionChannels(profile.subscriptions).some(channel => channelIds.has(channel.id)))
     const subscriptionsByChannelId = new Map([...channelIds].map(channelId => [channelId, []]))
     for (const profile of profiles) {
-      for (const channel of profile.subscriptions) {
+      for (const channel of getValidSubscriptionChannels(profile.subscriptions)) {
         subscriptionsByChannelId.get(channel.id)?.push(channel)
       }
     }
@@ -171,17 +171,17 @@ const actions = {
   async updateChannelSettings({ commit, state }, { channelId, settings, fromSync = false, updatedAt }) {
     if (fromSync && !isValidSubscriptionSettingsTimestamp(updatedAt)) return false
 
-    const primarySubscription = state.profileList[0].subscriptions
+    const primarySubscription = getValidSubscriptionChannels(state.profileList[0]?.subscriptions)
       .find(channel => channel.id === channelId)
     if (primarySubscription === undefined) return false
 
     const profiles = state.profileList
-      .filter(profile => profile.subscriptions.some(subscription => subscription.id === channelId))
+      .filter(profile => getValidSubscriptionChannels(profile.subscriptions).some(subscription => subscription.id === channelId))
     try {
       const editTimestamp = fromSync
         ? updatedAt
         : getNextSubscriptionSettingsTimestamp(profiles.map(profile => (
-            profile.subscriptions.find(subscription => subscription.id === channelId)
+            getValidSubscriptionChannels(profile.subscriptions).find(subscription => subscription.id === channelId)
           )))
       const channel = getChannelWithUpdatedSettings(primarySubscription, settings, editTimestamp)
       const profileIds = profiles.map(profile => profile._id)
@@ -307,9 +307,9 @@ const mutations = {
   addChannelToProfiles(state, { channel, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
-      if (!profile) { continue }
+      if (!profile || !Array.isArray(profile.subscriptions)) { continue }
 
-      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) {
+      if (!getValidSubscriptionChannels(profile.subscriptions).some(subscription => subscription.id === channel.id)) {
         profile.subscriptions.push(channel)
       }
     }
@@ -318,11 +318,11 @@ const mutations = {
   removeChannelFromProfiles(state, { channelId, profileIds }) {
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
-      if (!profile) { continue }
+      if (!profile || !Array.isArray(profile.subscriptions)) { continue }
 
       // use filter instead of splice in case the subscription appears multiple times
       // https://github.com/FreeTubeApp/FreeTube/pull/3468#discussion_r1179290877
-      profile.subscriptions = profile.subscriptions.filter(channel => channel.id !== channelId)
+      profile.subscriptions = profile.subscriptions.filter(channel => channel?.id !== channelId)
     }
   },
 
@@ -330,9 +330,11 @@ const mutations = {
     const updatesById = new Map(updates?.map(update => [update.channelId, update]))
     for (const id of profileIds) {
       const profile = state.profileList.find(profile => profile._id === id)
-      if (!profile) continue
+      if (!profile || !Array.isArray(profile.subscriptions)) continue
 
+      const valid = new Set(getValidSubscriptionChannels(profile.subscriptions))
       profile.subscriptions = profile.subscriptions.map(subscription => {
+        if (!valid.has(subscription)) return subscription
         const update = updatesById.get(subscription.id)
         if (update) {
           return getChannelWithUpdatedSettings(subscription, update.settings, update.updatedAt, true)
