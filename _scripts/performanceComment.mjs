@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 import {
@@ -29,19 +30,25 @@ function validateSamples(samples, sampleCount) {
   validatePerformanceSamples(samples)
 }
 
-function validateResult(result, candidateSha) {
+function validateResult(result, headSha, candidateCommit) {
   if (!result || typeof result !== 'object') {
     throw new Error('Performance result is invalid')
   }
 
   const baseCommit = result.base?.commit
-  const candidateCommit = result.candidate?.commit
+  const candidateLabel = result.candidate?.commit
   assertCommit(baseCommit, 'Base')
-  assertCommit(candidateCommit, 'Candidate')
-  assertCommit(candidateSha, 'Workflow candidate')
+  assertCommit(candidateLabel, 'Candidate')
+  assertCommit(headSha, 'Workflow head')
+  assertCommit(candidateCommit?.sha, 'GitHub candidate')
 
-  if (!candidateSha.startsWith(candidateCommit)) {
+  if (!candidateCommit.sha.startsWith(candidateLabel)) {
     throw new Error('Performance result does not match the workflow candidate')
+  }
+  const parents = candidateCommit.parents
+  if (parents?.length !== 2 || parents[1]?.sha !== headSha ||
+    typeof parents[0]?.sha !== 'string' || !parents[0].sha.startsWith(baseCommit)) {
+    throw new Error('Performance candidate does not merge the reported base and workflow head')
   }
   if (!Number.isSafeInteger(result.sampleCount) || result.sampleCount < minimumPerformanceSamples) {
     throw new Error('Performance sample count is invalid')
@@ -54,13 +61,13 @@ function validateResult(result, candidateSha) {
 
   return {
     base: { commit: baseCommit },
-    candidate: { commit: candidateCommit },
+    candidate: { commit: candidateLabel },
     samples: result.samples
   }
 }
 
-export function renderPerformanceComment(result, { candidateSha, runUrl }) {
-  const validated = validateResult(result, candidateSha)
+export function renderPerformanceComment(result, { headSha, candidateCommit, runUrl }) {
+  const validated = validateResult(result, headSha, candidateCommit)
   const comparison = comparePerformanceSamples(validated.samples)
   const summary = renderPerformanceSummary(
     validated.base,
@@ -89,8 +96,14 @@ function parseArguments(argv) {
     }
 
     switch (argument) {
+      case '--head-sha':
+        options.headSha = value
+        break
       case '--candidate-sha':
         options.candidateSha = value
+        break
+      case '--repository':
+        options.repository = value
         break
       case '--input':
         options.input = value
@@ -106,8 +119,9 @@ function parseArguments(argv) {
     }
   }
 
-  if (!options.candidateSha || !options.input || !options.output || !options.runUrl) {
-    throw new Error('Usage: performanceComment.mjs --input <path> --output <path> --candidate-sha <sha> --run-url <url>')
+  options.repository ??= process.env.GITHUB_REPOSITORY
+  if ((!options.headSha && !options.candidateSha) || !options.repository || !options.input || !options.output || !options.runUrl) {
+    throw new Error('Usage: performanceComment.mjs --input <path> --output <path> --head-sha <sha> --repository <owner/repo> --run-url <url>')
   }
 
   return options
@@ -119,7 +133,20 @@ async function main() {
 
   try {
     const result = JSON.parse(await readFile(options.input, 'utf8'))
-    comment = renderPerformanceComment(result, options)
+    // Existing reporter runs retain the published --candidate-sha invocation
+    // when rerun, even though they check out the current reporter script.
+    if (!options.headSha) {
+      assertCommit(options.candidateSha, 'Workflow candidate')
+      const workflowCandidate = JSON.parse(execFileSync('gh', [
+        'api', `repos/${options.repository}/commits/${options.candidateSha}`
+      ], { encoding: 'utf8' }))
+      options.headSha = workflowCandidate.parents?.[1]?.sha
+    }
+    assertCommit(result.candidate?.commit, 'Candidate')
+    const candidateCommit = JSON.parse(execFileSync('gh', [
+      'api', `repos/${options.repository}/commits/${result.candidate.commit}`
+    ], { encoding: 'utf8' }))
+    comment = renderPerformanceComment(result, { ...options, candidateCommit })
   } catch (error) {
     console.error(error)
     comment = renderUnavailablePerformanceComment(options.runUrl)

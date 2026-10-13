@@ -45,15 +45,15 @@ jobs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
-        PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+        RUN_SHA: ${{ github.event.workflow_run.head_sha }}
         REPOSITORY: ${{ github.repository }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
       run: |
-        candidate_sha="$(gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" --jq '.merge_commit_sha')"
         node _scripts/performanceComment.mjs \
           --input performance-results/performance-results.json \
           --output performance-comment.md \
-          --candidate-sha "$candidate_sha" \
+          --head-sha "$RUN_SHA" \
+          --repository "$REPOSITORY" \
           --run-url "$RUN_URL"
 
     - name: Create or update pull request comment

@@ -15,7 +15,13 @@ import {
 import { isValidPerformanceValue } from '../../e2e/performance/report.mjs'
 
 const candidateSha = 'abcdef1234567890abcdef1234567890abcdef12'
+const headSha = 'fedcba9876543210fedcba9876543210fedcba98'
+const candidateCommit = {
+  sha: candidateSha,
+  parents: [{ sha: '1234567890abcdef1234567890abcdef12345678' }, { sha: headSha }]
+}
 const runUrl = 'https://github.com/OpenTubeX/OpenTubeX/actions/runs/123'
+const context = { headSha, candidateCommit, runUrl }
 
 test('benchmarks the merged pull request with the fork build and test scripts', async () => {
   const workflow = loadYaml(await readFile(
@@ -73,7 +79,7 @@ function result (candidateOverrides = {}) {
   }
 }
 
-test('comment workflow validates the measured merge instead of the upstream head', async () => {
+test('comment workflow accepts an earlier merge after GitHub regenerates its merge SHA', async () => {
   const workflow = loadYaml(await readFile('.github/workflows/performance-comment.yml', 'utf8'))
   const render = workflow.jobs.comment.steps.find(step => step.name === 'Render performance comment')
   const root = await mkdtemp(path.join(tmpdir(), 'opentubex-performance-comment-'))
@@ -81,30 +87,65 @@ test('comment workflow validates the measured merge instead of the upstream head
     const input = path.join(root, 'results.json')
     const output = path.join(root, 'comment.md')
     await writeFile(input, JSON.stringify(result()))
+    await writeFile(path.join(root, 'gh'), `#!/bin/sh
+case "$2" in
+  repos/OpenTubeX/OpenTubeX/commits/abcdef123) printf '%s\\n' "$GITHUB_CANDIDATE_COMMIT" ;;
+  repos/OpenTubeX/OpenTubeX/commits/1111111111111111111111111111111111111111) printf '%s\\n' "$GITHUB_WORKFLOW_CANDIDATE_COMMIT" ;;
+  *) exit 1 ;;
+esac
+`, { mode: 0o755 })
     const script = render.run
       .replace('performance-results/performance-results.json', input)
       .replace('performance-comment.md', output)
-    const run = mergeSha => execFileSync('bash', ['-c',
-      `function gh() { printf '%s\\n' "$EXPECTED_MERGE_SHA"; }\n${script}`
-    ], {
+    const run = commit => execFileSync('bash', ['-c', script], {
       stdio: 'pipe',
       env: {
         ...process.env,
-        EXPECTED_MERGE_SHA: mergeSha,
-        RUN_SHA: 'fedcba9876543210fedcba9876543210fedcba98',
+        PATH: `${root}${path.delimiter}${process.env.PATH}`,
+        GITHUB_CANDIDATE_COMMIT: JSON.stringify(commit),
+        RUN_SHA: headSha,
         RUN_URL: runUrl,
         REPOSITORY: 'OpenTubeX/OpenTubeX',
         PR_NUMBER: '2052'
       }
     })
 
-    run(candidateSha)
+    run(candidateCommit)
     assert.match(await readFile(output, 'utf8'), /No regression crossed the configured thresholds/)
 
-    run('1234567890abcdef1234567890abcdef12345678')
+    run({ ...candidateCommit, parents: [candidateCommit.parents[0], { sha: candidateSha }] })
     assert.equal(await readFile(output, 'utf8'), renderUnavailablePerformanceComment(runUrl))
+
+    // Replay the already-published workflow, whose merge SHA has changed.
+    execFileSync('node', ['_scripts/performanceComment.mjs',
+      '--input', input, '--output', output,
+      '--candidate-sha', '1111111111111111111111111111111111111111', '--run-url', runUrl
+    ], {
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        PATH: `${root}${path.delimiter}${process.env.PATH}`,
+        GITHUB_REPOSITORY: 'OpenTubeX/OpenTubeX',
+        GITHUB_CANDIDATE_COMMIT: JSON.stringify(candidateCommit),
+        GITHUB_WORKFLOW_CANDIDATE_COMMIT: JSON.stringify({ ...candidateCommit, sha: '1111111111111111111111111111111111111111' })
+      }
+    })
+    assert.match(await readFile(output, 'utf8'), /No regression crossed the configured thresholds/)
   } finally {
     await rm(root, { recursive: true, force: true })
+  }
+})
+
+test('merge provenance rejects a different base, head or non-merge commit', () => {
+  for (const parents of [
+    [{ sha: headSha }, { sha: headSha }],
+    [{ sha: candidateCommit.parents[0].sha }, { sha: candidateSha }],
+    [candidateCommit.parents[0]]
+  ]) {
+    assert.throws(
+      () => renderPerformanceComment(result(), { ...context, candidateCommit: { ...candidateCommit, parents } }),
+      /does not merge the reported base and workflow head/
+    )
   }
 })
 
@@ -113,7 +154,7 @@ test('renders a fixed sticky comment from raw samples', () => {
   input.metrics = [{ label: '@maintainers injected result' }]
   input.failures = ['@maintainers injected failure']
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.ok(comment.startsWith(`${performanceCommentMarker}\n## Performance comparison`))
   assert.match(comment, /First subscription switch elapsed \| 100\.0 ms \| 100\.0 ms \| 0\.0%/)
@@ -127,7 +168,7 @@ test('recomputes regressions instead of trusting artifact conclusions', () => {
   input.metrics = []
   input.failures = []
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Repeated subscription switch elapsed .+ Regression/)
   assert.match(comment, /Repeated subscription switch elapsed is 180\.0 ms, at or above the 150\.0 ms limit/)
@@ -140,7 +181,7 @@ test('does not fail an absolute limit when the candidate improves on an over-lim
     firstSwitchElapsedMs: 258
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /First subscription switch elapsed .+ -2\.1% .+ Pass/)
   assert.match(comment, /First subscription switch elapsed .+ Pass \(above budget\)/)
@@ -153,7 +194,7 @@ test('fails when the candidate crosses an absolute limit from below', () => {
     firstSwitchElapsedMs: 240
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /First subscription switch elapsed .+ \+4\.2% .+ Regression/)
   assert.match(comment, /First subscription switch elapsed is 250\.0 ms, at or above/)
@@ -166,7 +207,7 @@ test('ignores a one-frame shift in longest-frame samples', () => {
     subscribedChannelsNavigationLongestFrameMs: 66.7
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Large route navigation longest frame .+ \+24\.9% .+ Pass/)
   assert.doesNotMatch(comment, /Large route navigation longest frame regressed/)
@@ -178,7 +219,7 @@ test('ignores a one-frame shift that reaches a longest-frame limit', () => {
     firstSwitchLongestFrameMs: 183.3
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /First subscription switch longest frame .+ \+9\.1% .+ Pass/)
   assert.doesNotMatch(comment, /First subscription switch longest frame is .+ at or above/)
@@ -190,7 +231,7 @@ test('reports a two-frame shift in longest-frame samples', () => {
     subscribedChannelsNavigationLongestFrameMs: 66.7
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Large route navigation longest frame .+ Regression/)
   assert.match(comment, /Large route navigation longest frame regressed by 33\.3 ms/)
@@ -199,7 +240,7 @@ test('reports a two-frame shift in longest-frame samples', () => {
 test('reports diagnostic startup phases without gating on them', () => {
   const comment = renderPerformanceComment(
     result({ startupElectronConnectedMs: 10000 }),
-    { candidateSha, runUrl }
+    context
   )
 
   assert.match(comment, /Startup: Electron connected .+ Diagnostic \| Reported/)
@@ -212,7 +253,7 @@ test('ignores startup frame scheduling noise below 100 ms', () => {
     startupLongestFrameMs: 249.9
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Startup: renderer longest frame .+ \+20\.0% .+ Pass/)
   assert.doesNotMatch(comment, /Startup: renderer longest frame regressed/)
@@ -224,7 +265,7 @@ test('reports startup frame regressions above the scheduling noise floor', () =>
     startupLongestFrameMs: 249.9
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Startup: renderer longest frame .+ Regression/)
   assert.match(comment, /Startup: renderer longest frame regressed by 150\.1 ms/)
@@ -236,7 +277,7 @@ test('gates renderer heap growth after repeated navigation', () => {
     navigationHeapGrowthMiB: 6.5
   }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Renderer heap growth after 10 navigation cycles .+ \+5\.5 MiB .+ Regression/)
   assert.match(comment, /Renderer heap growth after 10 navigation cycles regressed by 5\.5 MiB/)
@@ -246,7 +287,7 @@ test('accepts zero heap growth and renders its absolute change', () => {
   const input = result({ navigationHeapGrowthMiB: 0 })
   input.samples.base = Array.from({ length: 7 }, () => sample({ navigationHeapGrowthMiB: 0 }))
 
-  const comment = renderPerformanceComment(input, { candidateSha, runUrl })
+  const comment = renderPerformanceComment(input, context)
 
   assert.match(comment, /Renderer heap growth after 10 navigation cycles \| 0\.0 MiB \| 0\.0 MiB \| 0\.0 MiB/)
 })
@@ -258,21 +299,21 @@ test('accepts zero when a metric omits its minimum value', () => {
 
 test('rejects stale, report-only, and malformed artifacts', () => {
   assert.throws(
-    () => renderPerformanceComment(result(), { candidateSha: 'fedcba9876543210fedcba9876543210fedcba98', runUrl }),
+    () => renderPerformanceComment(result(), { ...context, candidateCommit: { ...candidateCommit, sha: headSha } }),
     /does not match the workflow candidate/
   )
 
   const reportOnly = result()
   reportOnly.reportOnly = true
   assert.throws(
-    () => renderPerformanceComment(reportOnly, { candidateSha, runUrl }),
+    () => renderPerformanceComment(reportOnly, context),
     /did not enforce regressions/
   )
 
   const malformed = result()
   malformed.samples.candidate[0].firstSwitchElapsedMs = '@maintainers'
   assert.throws(
-    () => renderPerformanceComment(malformed, { candidateSha, runUrl }),
+    () => renderPerformanceComment(malformed, context),
     /candidate sample firstSwitchElapsedMs is invalid/
   )
 })
@@ -292,5 +333,5 @@ test('rejects reports that enforce thresholds with too few samples', () => {
   input.sampleCount = 1
   input.samples.base.length = 1
   input.samples.candidate.length = 1
-  assert.throws(() => renderPerformanceComment(input, { candidateSha, runUrl }), /sample count is invalid/)
+  assert.throws(() => renderPerformanceComment(input, context), /sample count is invalid/)
 })
