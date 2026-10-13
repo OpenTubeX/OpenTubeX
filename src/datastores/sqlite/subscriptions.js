@@ -165,7 +165,7 @@ async function readSubscriptionPage(engine, options) {
         source[row.field].push(entry)
       }
     }
-    const videoIds = [...new Set(sources.flatMap(source => fields.filter(field => field !== 'communityPosts').flatMap(key => (source[key] ?? []).map(video => video?.videoId))).filter(id => typeof id === 'string'))]
+    const videoIds = [...new Set(sources.flatMap(source => fields.filter(field => field !== 'communityPosts').flatMap(key => (Array.isArray(source[key]) ? source[key] : []).map(video => video?.videoId))).filter(id => typeof id === 'string'))]
     const historyById = {}
     for (let offset = 0; offset < videoIds.length; offset += 250) {
       for (const row of engine.latestHistoryRows(videoIds.slice(offset, offset + 250)).values()) {
@@ -188,7 +188,7 @@ async function readSubscriptionPage(engine, options) {
     let nextPremiereTimestamp = null
     for (const source of sources) {
       for (const field of ['videos', 'shorts', 'liveStreams']) {
-        for (const entry of source[field] ?? []) {
+        for (const entry of Array.isArray(source[field]) ? source[field] : []) {
           const timestamp = entry == null ? null : getUpcomingPremiereTimestamp(entry)
           if (timestamp > now && (nextPremiereTimestamp === null || timestamp < nextPremiereTimestamp)) nextPremiereTimestamp = timestamp
         }

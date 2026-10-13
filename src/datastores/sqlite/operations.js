@@ -245,14 +245,16 @@ export async function addSelectedPlaylistVideos(engine, { ids, videos, allowDupl
 }
 
 export async function removePlaylistMember(engine, { id, memberId, revision }) {
-  if (revision !== undefined && revision !== engine.revision('playlists')) throw new Error('The playlist changed; reload it before removing this member')
-  const row = engine.prepare("SELECT data FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").get(id, memberId)
-  if (!row) return false
-  engine.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").run(id, memberId)
-  await engine.collections.playlists.updateAsync({ _id: id }, { $set: { lastUpdatedAt: Date.now() } })
-  const video = model.deserialize(row.data)
-  engine.clearRemovedPlaylistContext(id, [video?.videoId])
-  return true
+  return engine.transaction(async () => {
+    if (revision !== undefined && revision !== engine.revision('playlists')) throw new Error('The playlist changed; reload it before removing this member')
+    const row = engine.prepare("SELECT data FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").get(id, memberId)
+    if (!row) return false
+    engine.prepare("DELETE FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND membership_id = ?").run(id, memberId)
+    await engine.collections.playlists.updateAsync({ _id: id }, { $set: { lastUpdatedAt: Date.now() } })
+    const video = model.deserialize(row.data)
+    engine.clearRemovedPlaylistContext(id, [video?.videoId])
+    return true
+  })
 }
 
 export async function removePlaylistMembers(engine, { id, memberIds }) {

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { babelParse, parse } from 'vue/compiler-sfc'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
@@ -150,7 +151,13 @@ for (const name of [undefined, null, false, 42, { retained: true }]) {
     const selected = module.state.playlists.find(entry => entry._id === original._id)
     assert.deepEqual(selected, original)
     const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
-    const functions = component.slice(component.indexOf('function getExportFilename('), component.indexOf('async function exportAsYouTubeCsv('))
+    const script = parse(component).descriptor.scriptSetup.content
+    const ast = babelParse(script, { sourceType: 'module' })
+    const functions = ['getExportFilename', 'exportAsFreeTubeDatabase'].map(name => {
+      const declaration = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === name)
+      assert.ok(declaration, `Missing export function ${name}`)
+      return script.slice(declaration.start, declaration.end)
+    }).join('\n')
     let exported
     const context = vm.createContext({
       selectedUserPlaylist: { value: selected }, props: { id: original._id },

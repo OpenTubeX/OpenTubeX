@@ -14,7 +14,7 @@ import { buildSubscriptionShortsFeed } from '../../src/renderer/helpers/player/s
 import { isVideoHiddenByPreferences } from '../../src/renderer/helpers/subscription-visibility.js'
 import { isHistoryEntryWatched } from '../../src/history.js'
 import { updateVideoMetadataCache, metadataPage, metadataThumbnail } from '../../src/datastores/sqlite/metadata.js'
-import { removePlaylistMembers, addSelectedPlaylistVideos, playlistSelection, historyRepairPage, markAllHistory, applySubscriptionUnseenHistory, storageUsage, rendererSettings, syncSnapshotRead, syncSnapshotHistory, syncSnapshotSection } from '../../src/datastores/sqlite/operations.js'
+import { removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistSelection, historyRepairPage, markAllHistory, applySubscriptionUnseenHistory, storageUsage, rendererSettings, syncSnapshotRead, syncSnapshotHistory, syncSnapshotSection } from '../../src/datastores/sqlite/operations.js'
 
 function withoutMemberIdentity({ _libraryMemberId, ...entry }) { return entry }
 
@@ -1450,5 +1450,65 @@ for (const [category, field, idKey] of [['videos', 'videos', 'videoId'], ['short
     assert.equal(next.cursor, null)
     if (category === 'shorts') assert.deepEqual(await subscriptionShortsWindow(engine, { subscriptions: options.subscriptions, currentVideoId: entry.videoId, preferences: { hideWatched: true } }), [entry])
     assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), original)
+  })
+}
+
+for (const [category, field] of [['videos', 'videos'], ['shorts', 'shorts'], ['live', 'liveStreams'], ['posts', 'communityPosts']]) {
+  for (const retained of [undefined, null, false, 42, 'legacy', { retained: true }, new Date(123)]) {
+    test(`subscription pages skip retained non-array ${field}: ${model.serialize({ retained })}`, async t => {
+      const engine = memory(t)
+      const fields = { videos: 'videos', shorts: 'shorts', live: 'liveStreams', posts: 'communityPosts' }
+      const entry = (name, authorId) => ({ ...video(1, { videoId: name, authorId, published: 1000 }), postId: name, publishedTime: 1000 })
+      const source = { _id: 'channel', unknown: new Date(1) }
+      const other = { _id: 'other', [field]: [entry(category + '-other', 'other')], [field + 'Timestamp']: 1500 }
+      for (const [name, key] of Object.entries(fields)) {
+        source[key] = [entry(name, 'channel')]
+        source[key + 'Timestamp'] = 1500
+      }
+      if (retained === undefined) delete source[field]
+      else source[field] = retained
+      await engine.collections.subscriptionCache.insertAsync([source, other])
+      for (const name of Object.keys(fields)) {
+        const expected = name === category ? [category + '-other'] : [name]
+        const options = { subscriptions: [{ id: 'channel' }, { id: 'other' }], category: name, enabledCategories: Object.keys(fields), preferences: { forbiddenTitles: [] }, now: 2000 }
+        for (const onlyNew of [false, true, false]) {
+          const page = await subscriptionPage(engine, { ...options, onlyNew })
+          assert.deepEqual(page.records.map(record => name === 'posts' ? record.postId : record.videoId), expected)
+          assert.equal(page.cursor, null)
+        }
+      }
+      assert.deepEqual(await engine.collections.subscriptionCache.findAsync({}).sort({ _id: 1 }), [source, other])
+    })
+  }
+}
+
+for (const failWrite of [false, true]) {
+  test(`single member removal is atomic without an outer transaction, failed metadata: ${failWrite}`, async t => {
+    const engine = memory(t)
+    const playlist = { _id: 'single', videos: [{ videoId: 'remove', playlistItemId: 'item', unknown: new Date(1) }, { videoId: 'keep' }], lastUpdatedAt: 1, unknown: new Date(2) }
+    const history = { _id: 'history', videoId: 'remove', timeWatched: 1, watchProgress: 17, lastViewedPlaylistId: 'single', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'item', unknown: new Date(3) }
+    await engine.collections.playlists.insertAsync(playlist)
+    await engine.collections.history.insertAsync(history)
+    const members = engine.playlistPage({ id: playlist._id }).records.map(record => record._libraryMemberId)
+    const revision = engine.revision('playlists')
+    if (failWrite) t.mock.method(engine.collections.playlists, 'updateAsync', async () => { throw new Error('metadata write failed') })
+    const request = { id: playlist._id, memberId: members[0], revision }
+    if (failWrite) {
+      await assert.rejects(removePlaylistMember(engine, request), /metadata write failed/)
+      assert.deepEqual(await engine.playlistSnapshot({ id: playlist._id }), playlist)
+      assert.deepEqual(await engine.collections.history.findOneAsync({ _id: history._id }), history)
+      assert.deepEqual(engine.playlistPage({ id: playlist._id }).records.map(record => record._libraryMemberId), members)
+      assert.equal(engine.revision('playlists'), revision)
+    } else {
+      assert.equal(await removePlaylistMember(engine, request), true)
+      const saved = await engine.playlistSnapshot({ id: playlist._id })
+      assert.deepEqual(saved, { ...playlist, lastUpdatedAt: saved.lastUpdatedAt, videos: playlist.videos.slice(1) })
+      const { lastViewedPlaylistId, lastViewedPlaylistType, lastViewedPlaylistItemId, ...retained } = history
+      assert.deepEqual(await engine.collections.history.findOneAsync({ _id: history._id }), retained)
+      assert.equal(engine.revision('playlists'), revision + 1)
+      await assert.rejects(removePlaylistMember(engine, { ...request, memberId: members[1] }), /playlist changed/)
+      assert.equal(await removePlaylistMember(engine, { id: playlist._id, memberId: members[0] }), false)
+      assert.deepEqual(await engine.playlistSnapshot({ id: playlist._id }), saved)
+    }
   })
 }
