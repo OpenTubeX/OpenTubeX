@@ -92,22 +92,30 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
     await expect(recommendations.getByRole('heading', { name: 'Up Next', exact: true })).toBeVisible()
     await expect(recommendations.locator('.h3Title')).toHaveText(['Online recommendation'])
   } finally {
-    await watch?.dispose()
-    if (saved) await page.evaluate(({ saved, ids }) => {
-      document.querySelector('video')?.pause()
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      for (const id of ids) store.commit('removeYtDlpDownload', id)
-      for (const download of saved.downloads) store.commit('upsertYtDlpDownload', download)
-      store.state.watchQueue.items.splice(0, store.state.watchQueue.items.length, ...saved.queue)
-      for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
-      if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
-      else delete navigator.onLine
-      window.fetch = window.__offlineRecommendationsFetch
-      delete window.__offlineRecommendationsOnline
-      delete window.__offlineRecommendationsFetch
-      window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))
-      location.hash = saved.route
-    }, { saved, ids })
-    await browser.close()
+    try {
+      if (saved) await page.evaluate(() => {
+        window.fetch = window.__offlineRecommendationsFetch
+        if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
+        else delete navigator.onLine
+        delete window.__offlineRecommendationsOnline
+        delete window.__offlineRecommendationsFetch
+      })
+      if (saved) await page.evaluate(({ saved, ids }) => {
+        document.querySelector('video')?.pause()
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        for (const id of ids) store.commit('removeYtDlpDownload', id)
+        for (const download of saved.downloads) store.commit('upsertYtDlpDownload', download)
+        store.state.watchQueue.items.splice(0, store.state.watchQueue.items.length, ...saved.queue)
+        for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
+        window.dispatchEvent(new Event(navigator.onLine ? 'online' : 'offline'))
+        location.hash = saved.route
+      }, { saved, ids })
+    } finally {
+      try {
+        await watch?.dispose()
+      } finally {
+        await browser.close()
+      }
+    }
   }
 })
