@@ -1,17 +1,30 @@
 import { DBActions } from '../../constants'
 import { runBackgroundJob } from '../../renderer/helpers/background-jobs.js'
+import { toRaw } from 'vue'
 
 /**
  * Payloads can contain Vue reactivity proxies (e.g. objects taken from Vuex
  * state), which Electron IPC cannot structured-clone ("An object could not be
- * cloned"). Datastore payloads are plain JSON documents, so strip reactivity
- * once here at the process boundary instead of in every caller.
+ * cloned"). Remove nested proxies without changing retained Date values,
+ * explicit undefined fields, or other values supported by structured clone.
  * @template T
  * @param {T} data
  * @returns {T}
  */
 function toPlain(data) {
-  return data === undefined ? undefined : JSON.parse(JSON.stringify(data))
+  if (data == null || typeof data !== 'object') return data
+  const raw = toRaw(data)
+  if (Array.isArray(raw)) return raw.map(toPlain)
+  const prototype = Object.getPrototypeOf(raw)
+  if (prototype === Object.prototype || prototype === null) {
+    return Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, toPlain(value)]))
+  }
+  if (raw instanceof Date || raw instanceof ArrayBuffer || ArrayBuffer.isView(raw)) return raw
+  try {
+    return structuredClone(raw)
+  } catch {
+    throw new TypeError('Non-plain database IPC values must be structured-cloneable')
+  }
 }
 
 const dbSettings = (action, data) => window.ftElectron.dbSettings(action, toPlain(data))
@@ -162,6 +175,10 @@ class Profiles {
 
   static upsert(profile) {
     return dbProfiles(DBActions.GENERAL.UPSERT, profile)
+  }
+
+  static replaceIfUnchanged(previous, profile) {
+    return dbProfiles(DBActions.PROFILES.REPLACE_IF_UNCHANGED, { previous, profile })
   }
 
   static addChannelToProfiles(channel, profileIds) {

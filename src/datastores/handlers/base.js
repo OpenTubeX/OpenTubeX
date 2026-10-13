@@ -728,6 +728,20 @@ class Profiles {
     return db.profiles.updateAsync({ _id: profile._id }, profile, { upsert: true })
   }
 
+  static async replaceIfUnchanged(previousProfile, profile) {
+    const previous = previousProfile == null ? null : model.serialize(previousProfile)
+    try {
+      return await db.profiles.updateAsync(
+        { _id: profile._id, $where: function () { return previous !== null && model.serialize(this) === previous } },
+        profile,
+        { upsert: previous === null, returnUpdatedDocs: true }
+      )
+    } catch (error) {
+      if (previous === null && (error.errorType === 'uniqueViolated' || (error.code === 'ERR_SQLITE_ERROR' && [1555, 2067].includes(error.errcode))) && await db.profiles.findOneAsync({ _id: profile._id })) return { numAffected: 0 }
+      throw error
+    }
+  }
+
   static addChannelToProfiles(channel, profileIds) {
     if (profileIds.length === 1) {
       return db.profiles.updateAsync(

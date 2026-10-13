@@ -5528,6 +5528,16 @@ function runApp() {
           )
           return null
 
+        case DBActions.PROFILES.REPLACE_IF_UNCHANGED: {
+          const result = await baseHandlers.profiles.replaceIfUnchanged(data.previous, data.profile)
+          if (result.numAffected) {
+            syncOtherWindows(IpcChannels.SYNC_PROFILES, event, {
+              event: SyncEvents.GENERAL.UPSERT, data: result.affectedDocuments
+            })
+          }
+          return result
+        }
+
         case DBActions.PROFILES.ADD_CHANNEL:
           await baseHandlers.profiles.addChannelToProfiles(data.channel, data.profileIds)
           syncOtherWindows(

@@ -1259,3 +1259,117 @@ test('a conflicting watch-stat adjustment fails before another selected section 
   assert.deepEqual(writes, [])
   assert.match(toasts.at(-1).message, /Conflicting retained adjustment/)
 })
+
+
+for (const backend of ['NeDB', 'SQLite']) {
+  for (const afterRead of [false, true]) {
+    test(`portable profile restore retains concurrent subscriptions on ${backend}, after final read: ${afterRead}`, async t => {
+      let database, db
+      if (backend === 'NeDB') db = { profiles: new Datastore({ inMemoryOnly: true }) }
+      else {
+        const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+        const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+        database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL); t.after(() => database.close())
+        db = new LibraryEngine(database).collections
+      }
+      const initial = { _id: 'p', name: 'Original', subscriptions: [{ id: 'old', unknown: new Date(1) }], unknown: new Date(2) }
+      const incoming = { _id: 'p', name: 'Imported', subscriptions: [{ id: 'imported' }] }
+      await db.profiles.insertAsync(initial)
+      const concurrent = { id: 'concurrent', unknown: new Date(3) }
+      const change = () => db.profiles.updateAsync({ _id: 'p' }, { $push: { subscriptions: concurrent }, $set: { latestUnknown: new Date(4) } })
+      const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+      const Profiles = runInNewContext(base.slice(base.indexOf('class Profiles {'), base.indexOf('class Playlists {')) + '\nProfiles', { db, model, loadProfilesDatastore: async () => {}, MAIN_PROFILE_ID: 'allChannels', DEFAULT_PROFILE_ICON: {}, console })
+      Profiles.find = () => db.profiles.findAsync({})
+      if (afterRead) {
+        if (Profiles.replaceIfUnchanged) {
+          const replace = Profiles.replaceIfUnchanged.bind(Profiles)
+          Profiles.replaceIfUnchanged = async (...args) => { await change(); return replace(...args) }
+        } else {
+          const upsert = Profiles.upsert.bind(Profiles)
+          Profiles.upsert = async (...args) => { await change(); return upsert(...args) }
+        }
+      }
+      const content = parse(await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+      const ast = babelParse(content, { sourceType: 'module' })
+      const node = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+      const toasts = []
+      const restore = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+        process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+        backupBusy: { value: false }, selectedBackupSections: { value: ['profiles', 'watchStats'] }, backupData: { value: { profiles: [incoming], watchStats: { records: [], adjustment: null } } },
+        DBProfileHandlers: Profiles, DBWatchStatsHandlers: { validateBackup: async () => { if (!afterRead) await change() }, mergeBackup: async () => {} },
+        mergeBackupProfile, compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => toasts.push(toast),
+        store: { dispatch: async () => true }, console,
+      })
+      await restore()
+      assert.deepEqual(await db.profiles.findOneAsync({ _id: 'p' }), {
+        ...initial, name: afterRead ? 'Original' : 'Imported', latestUnknown: new Date(4),
+        subscriptions: [...initial.subscriptions, concurrent, ...(afterRead ? [] : incoming.subscriptions)],
+      })
+      assert.match(toasts.at(-1).message, afterRead ? /profile changed; retry the import/ : /Backup imported/)
+    })
+  }
+}
+
+
+for (const backend of ['NeDB', 'SQLite']) {
+  test(`profile conditional restore rejects concurrent creation and stale metadata on ${backend}`, async t => {
+    let db
+    if (backend === 'NeDB') db = { profiles: new Datastore({ inMemoryOnly: true }) }
+    else {
+      const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+      const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+      const database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL); t.after(() => database.close())
+      db = new LibraryEngine(database).collections
+    }
+    const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+    const Profiles = runInNewContext(base.slice(base.indexOf('class Profiles {'), base.indexOf('class Playlists {')) + '\nProfiles', { db, model })
+    const current = { _id: 'p', subscriptions: [{ id: 'current' }], unknown: new Date(1) }
+    await db.profiles.insertAsync(current)
+    assert.equal((await Profiles.replaceIfUnchanged(undefined, { _id: 'p', subscriptions: [] })).numAffected, 0)
+    const stale = await db.profiles.findOneAsync({ _id: 'p' })
+    await db.profiles.updateAsync({ _id: 'p' }, { $set: { unknown: new Date(2) } })
+    assert.equal((await Profiles.replaceIfUnchanged(stale, { ...stale, name: 'Imported' })).numAffected, 0)
+    const previous = await db.profiles.findOneAsync({ _id: 'p' })
+    const imported = { ...previous, name: 'Imported', subscriptions: [...previous.subscriptions, { id: 'restored' }] }
+    const result = await Profiles.replaceIfUnchanged(previous, imported)
+    assert.equal(result.numAffected, 1)
+    assert.deepEqual(result.affectedDocuments, imported)
+    assert.deepEqual(await db.profiles.findOneAsync({ _id: 'p' }), imported)
+  })
+}
+
+
+test('conditional profile restore IPC preserves Dates and broadcasts only committed records', async () => {
+  const { DBActions, IpcChannels, SyncEvents } = await import('../../src/constants.js')
+  const { reactive, toRaw } = await import('vue')
+  const db = { profiles: new Datastore({ inMemoryOnly: true }) }
+  const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+  const Profiles = runInNewContext(base.slice(base.indexOf('class Profiles {'), base.indexOf('class Playlists {')) + '\nProfiles', { db, model })
+  const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const stack = [babelParse(main, { sourceType: 'module' })]
+  let handlerNode
+  while (stack.length) {
+    const node = stack.pop()
+    if (!node || typeof node !== 'object') continue
+    if (node.type === 'CallExpression' && node.callee?.object?.name === 'ipcMain' && node.callee?.property?.name === 'handle' && node.arguments[0]?.property?.name === 'DB_PROFILES') handlerNode = node.arguments[1]
+    for (const child of Object.values(node)) if (Array.isArray(child)) stack.push(...child); else if (child && typeof child === 'object') stack.push(child)
+  }
+  assert.ok(handlerNode)
+  const events = []
+  const handle = runInNewContext(`(${main.slice(handlerNode.start, handlerNode.end)})`, {
+    DBActions, IpcChannels, SyncEvents, baseHandlers: { profiles: Profiles }, isOpenTubeXUrl: () => true,
+    syncOtherWindows: (channel, _event, data) => events.push({ channel, data: structuredClone(data) }), console,
+  })
+  const renderer = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const plainNode = babelParse(renderer, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'toPlain')
+  const plain = compileFunction(renderer.slice(plainNode.start, plainNode.end) + '\nreturn toPlain', ['toRaw'])(toRaw)
+  const Client = compileFunction(renderer.slice(renderer.indexOf('class Profiles {'), renderer.indexOf('class Playlists {')) + '\nreturn Profiles', ['DBActions', 'dbProfiles'])(DBActions, (action, data) => handle({ senderFrame: { url: 'file://app' } }, { action, data: structuredClone(plain(data)) }))
+  const current = { _id: 'p', subscriptions: [{ id: 'current', unknown: new Date(1) }], unknown: new Date(2) }
+  await db.profiles.insertAsync(current)
+  const next = { ...current, subscriptions: [...current.subscriptions, { id: 'restored' }], unknown: new Date(3) }
+  assert.equal((await Client.replaceIfUnchanged(reactive(current), reactive(next))).numAffected, 1)
+  assert.deepEqual(events, [{ channel: IpcChannels.SYNC_PROFILES, data: { event: SyncEvents.GENERAL.UPSERT, data: next } }])
+  assert.equal((await Client.replaceIfUnchanged(current, { ...current, name: 'stale' })).numAffected, 0)
+  assert.equal(events.length, 1)
+  assert.deepEqual(await db.profiles.findOneAsync({ _id: 'p' }), next)
+})

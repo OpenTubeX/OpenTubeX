@@ -471,13 +471,11 @@ async function importUnifiedBackup() {
     if (selected.has('profiles') && data.profiles.some(profile => !Array.isArray(profile.subscriptions) || profile.subscriptions.some(channel => channel === null || typeof channel !== 'object' || Array.isArray(channel) || typeof channel.id !== 'string'))) {
       throw new Error('Invalid backup profiles')
     }
-    const preparedProfiles = []
     if (selected.has('profiles')) {
       const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
       for (const profile of data.profiles) {
         const merged = mergeBackupProfile(currentProfiles.get(profile._id), profile)
         currentProfiles.set(profile._id, merged)
-        preparedProfiles.push(merged)
       }
     }
     if (selected.has('playlists')) {
@@ -493,7 +491,14 @@ async function importUnifiedBackup() {
       await store.dispatch('grabWatchStats')
     }
     if (selected.has('profiles')) {
-      for (const profile of preparedProfiles) await DBProfileHandlers.upsert(profile)
+      const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
+      for (const profile of data.profiles) {
+        const previous = currentProfiles.get(profile._id)
+        const merged = mergeBackupProfile(previous, profile)
+        const { numAffected } = await DBProfileHandlers.replaceIfUnchanged(previous, merged)
+        if (!numAffected) throw new Error('The profile changed; retry the import')
+        currentProfiles.set(profile._id, merged)
+      }
       await store.dispatch('grabAllProfiles')
     }
     if (selected.has('playlists')) {
