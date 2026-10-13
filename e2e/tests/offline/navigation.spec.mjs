@@ -154,6 +154,37 @@ for (const uiScale of [100, 125]) {
   test.describe(`compact navigation labels at ${uiScale}%`, () => {
     test.use({ seed: { settings: { compactNavigationLabels: true, showProgressBarToast: false, uiScale } } })
 
+    test('shows More only when destinations are hidden from the compact bar', async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      const nav = page.locator('.sideNav')
+      const more = nav.getByRole('button', { name: 'More', exact: true })
+      const items = ['home', 'subscriptions', 'userplaylists', 'history', 'subscribedchannels', 'stats']
+      for (const viewport of [{ width: 375, height: 700 }, { width: 667, height: 375 }]) {
+        await setWindowSize(app, page, {
+          width: Math.round(viewport.width * uiScale / 100),
+          height: Math.round(viewport.height * uiScale / 100)
+        })
+        for (const count of [4, 5, 6, 5]) {
+          await page.evaluate(items => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setNavigationItems', items), items.slice(0, count))
+          const primaryIds = count > 5 ? items.slice(0, 4) : items.slice(0, count)
+          await expect.poll(() => nav.locator('.inner > .navOption:visible').evaluateAll(links =>
+            links.map(link => link.getAttribute('href'))
+          )).toEqual(primaryIds.map(id => `#/${id}`))
+          await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
+          if (count > 5) {
+            await expect(more).toBeVisible()
+            await more.click()
+            await expect.poll(() => page.locator('.moreOptionContainer a').evaluateAll(links =>
+              links.map(link => link.getAttribute('href'))
+            )).toEqual(items.slice(4, count).map(id => `#/${id}`))
+            await page.keyboard.press('Escape')
+          } else {
+            await expect(more).toHaveCount(0)
+          }
+        }
+      }
+    })
+
     test('hides all mobile labels, centers icons and keeps overflow entries readable', async ({ app, page }) => {
       const nav = page.locator('.sideNav')
       const primary = nav.locator('.inner > .navOption:not(.mobileHidden)')
@@ -178,6 +209,13 @@ for (const uiScale of [100, 125]) {
           await expect(more.locator('.navLabel')).toBeHidden()
         }
         await more.click()
+        const overflowIds = await page.locator('.moreOptionContainer a').evaluateAll(items =>
+          items.map(item => item.getAttribute('href'))
+        )
+        const visibleIds = await nav.locator('.inner > .navOption:visible').evaluateAll(items =>
+          items.map(item => item.getAttribute('href'))
+        )
+        expect(visibleIds.filter(id => overflowIds.includes(id))).toEqual([])
         for (const label of await page.locator('.moreOptionContainer .navLabel').all()) {
           await expect(label).toBeVisible()
         }
