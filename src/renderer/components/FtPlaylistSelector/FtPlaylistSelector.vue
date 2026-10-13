@@ -101,7 +101,7 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 /** @type {import('vue').ComputedRef<object[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
-const videoCount = computed(() => Array.isArray(props.playlist.videos) ? props.playlist.videos.length : 0)
+const videoCount = computed(() => store.state.playlists.libraryPaged ? props.playlist.videoCount ?? 0 : Array.isArray(props.playlist.videos) ? props.playlist.videos.length : 0)
 
 const titleForDisplay = computed(() => {
   const title = props.playlist.playlistName

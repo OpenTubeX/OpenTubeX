@@ -287,7 +287,7 @@ const playlistMetadata = computed(() => {
       defaultThumbnailUrl: thumbnailUrl,
       channelName: '',
       channelId: '',
-      videoCount: props.data.videoCount ?? (Array.isArray(props.data.videos) ? props.data.videos.length : 0),
+      videoCount: store.state.playlists.libraryPaged ? props.data.videoCount ?? 0 : Array.isArray(props.data.videos) ? props.data.videos.length : 0,
     }
   }
 

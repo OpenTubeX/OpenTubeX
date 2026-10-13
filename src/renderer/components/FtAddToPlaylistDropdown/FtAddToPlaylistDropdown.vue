@@ -173,7 +173,7 @@ const containedIds = computed(() => {
  * @param {object} playlist
  */
 function playlistVideoCount(playlist) {
-  return playlist.videoCount ?? (Array.isArray(playlist.videos) ? playlist.videos.length : 0)
+  return store.state.playlists.libraryPaged ? playlist.videoCount ?? 0 : Array.isArray(playlist.videos) ? playlist.videos.length : 0
 }
 
 /**

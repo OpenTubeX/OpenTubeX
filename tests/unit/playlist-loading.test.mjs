@@ -198,7 +198,7 @@ test('playlist card metadata tolerates retained scalar fields without changing t
   for (const videos of [undefined, null, false, 42, 'retained', {}, [null], [{ videoId: 42 }]]) {
     const data = { _id: 'legacy', playlistName: 'Retained', ...(videos === undefined ? {} : { videos }) }, before = structuredClone(data)
     const metadata = vm.runInNewContext(script.slice(initializer.start, initializer.end), {
-      computed: callback => callback(), isUserPlaylist: { value: true }, props: { data }, thumbnailPlaceholder: 'placeholder',
+      computed: callback => callback(), isUserPlaylist: { value: true }, props: { data }, thumbnailPlaceholder: 'placeholder', store: { state: { playlists: { libraryPaged: false } } },
       backendPreference: { value: 'local' }, currentInvidiousInstanceUrl: { value: 'instance' },
     })
     assert.equal(metadata.thumbnailUrl, 'placeholder')
@@ -305,7 +305,7 @@ test('playlist selector thumbnails and counts tolerate every retained membership
   const declarations = ast.program.body.flatMap(node => node.declarations ?? [])
   for (const videos of [undefined, null, false, 42, 'opaque', [null], [{ videoId: 42 }], [{ videoId: 'A' }]]) {
     const playlist = { videos }, before = structuredClone(playlist)
-    const context = vm.createContext({ computed: getter => ({ get value() { return getter() } }), props: { playlist },
+    const context = vm.createContext({ computed: getter => ({ get value() { return getter() } }), props: { playlist }, store: { state: { playlists: { libraryPaged: false } } },
       thumbnailPlaceholder: 'placeholder', backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'), getVideoThumbnailUrl: () => 'valid',
     })
     for (const name of ['videoCount', 'thumbnail']) {
@@ -493,3 +493,40 @@ test('cross-window playlist repairs invalidate paged summaries and patch portabl
     assert.deepEqual(calls, libraryPaged ? [['dispatch', 'grabAllPlaylists']] : [['commit', 'applyPlaylistMetadataRepairs', update]])
   }
 })
+
+for (const paged of [false, true]) {
+  test(`playlist cards, selectors and Save counts distinguish full records from paged summaries: ${paged}`, async () => {
+    const files = ['FtListPlaylist', 'FtPlaylistSelector', 'FtAddToPlaylistDropdown']
+    const scripts = await Promise.all(files.map(async name => {
+      const content = parse(await readFile(new URL(`../../src/renderer/components/${name}/${name}.vue`, import.meta.url), 'utf8')).descriptor.scriptSetup.content
+      return { name, content, ast: babelParse(content, { sourceType: 'module' }) }
+    }))
+    for (const videos of [undefined, null, 42, [], [{ videoId: 'real' }, { videoId: 'real' }]]) {
+      for (const staleCount of [0, 42]) {
+        const data = { _id: 'retained', playlistName: 'Retained', videoCount: paged ? 20000 : staleCount, videos, unknown: new Date(1) }
+        if (paged) data.firstVideo = { videoId: 'real' }
+        const before = structuredClone(data), expectedCount = paged ? 20000 : Array.isArray(videos) ? videos.length : 0
+        for (const { name, content, ast } of scripts) {
+          const context = vm.createContext({ computed: callback => callback(), isUserPlaylist: { value: true }, props: { data, playlist: data },
+            store: { state: { playlists: { libraryPaged: paged } }, getters: { getBackendPreference: 'local', getCurrentInvidiousInstanceUrl: 'instance' } },
+            thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl: videoId => `thumbnail:${videoId}`, backendPreference: ref('local'), currentInvidiousInstanceUrl: ref('instance'),
+          })
+          if (name === 'FtAddToPlaylistDropdown') {
+            for (const method of ['playlistVideoCount', 'playlistThumbnail']) {
+              const declaration = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === method)
+              vm.runInContext(content.slice(declaration.start, declaration.end), context)
+            }
+            assert.equal(context.playlistVideoCount(data), expectedCount)
+            assert.equal(context.playlistThumbnail(data), expectedCount && (paged || videos?.[0]?.videoId === 'real') ? 'thumbnail:real' : 'placeholder')
+          } else {
+            const key = name === 'FtListPlaylist' ? 'playlistMetadata' : 'videoCount'
+            const declaration = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === key)
+            const result = vm.runInContext(content.slice(declaration.init.start, declaration.init.end), context)
+            assert.equal(name === 'FtListPlaylist' ? result.videoCount : result, expectedCount)
+          }
+        }
+        assert.deepEqual(data, before)
+      }
+    }
+  })
+}
