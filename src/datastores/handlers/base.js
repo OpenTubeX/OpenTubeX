@@ -197,14 +197,27 @@ class History {
     return records
   }
 
-  static updateSubscriptionState({ records = [], unseenVideo, metadata }) {
+  static updateSubscriptionState({ records = [], unseenVideo, metadata, acknowledgedRepairs }) {
     return Settings.runSeenStateUpdate(async () => {
       const updatedRecords = []
+      if (acknowledgedRepairs) {
+        for (const repair of acknowledgedRepairs) {
+          // Only clear the repair that reached the server. Another repair or
+          // deletion while an upload was pending must remain untouched.
+          const { affectedDocuments } = await db.history.updateAsync(
+            { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
+            { $unset: { pendingDurationRepair: true } },
+            { returnUpdatedDocs: true }
+          )
+          if (affectedDocuments) updatedRecords.push(affectedDocuments)
+        }
+        return { records: updatedRecords, seenVideos: null }
+      }
       if (metadata) {
         let failedCount = 0
         for (const patch of metadata) {
           const fields = {}
-          for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming']) {
+          for (const key of ['title', 'author', 'authorId', 'description', 'published', 'lengthSeconds', 'isLive', 'liveNow', 'isUpcoming', 'pendingDurationRepair']) {
             if (patch[key] !== undefined) fields[key] = patch[key]
           }
           if (Object.keys(fields).length === 0) continue

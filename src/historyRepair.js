@@ -29,6 +29,11 @@ export function historyRepairPatch(record, metadata) {
   for (const key of Object.keys(patch)) {
     if (key !== 'videoId' && record[key] === patch[key]) delete patch[key]
   }
+  if (patch.lengthSeconds !== undefined) {
+    // Sync this explicit correction once, even before the first sync or if a
+    // newer repair arrives while another upload is still pending.
+    patch.pendingDurationRepair = true
+  }
   return Object.keys(patch).length > 1 ? patch : null
 }
 

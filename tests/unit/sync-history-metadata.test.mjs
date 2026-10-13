@@ -1,13 +1,15 @@
 import { toRaw } from 'vue'
-import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
+import { historyRepairPatch } from '../../src/historyRepair.js'
+import { DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote } from '../../src/renderer/helpers/sync-history-merge.js'
 import { executeBackgroundJob as runBackgroundJob } from '../../src/renderer/helpers/background-job-operations.js'
+import { EncryptedSyncAdapter } from '../../src/renderer/helpers/sync-server-privacy.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
-const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw })
+const context = vm.createContext({ DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, mergeSyncIds, syncVideoToRemote, runBackgroundJob, toRaw })
 vm.runInContext(source
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
   .replace(/^export \{[\s\S]*?\}\n/gm, '')
@@ -173,6 +175,10 @@ function historyDevice(record, savedSnapshot = [record.videoId]) {
         getWatchHistory: async () => structuredClone(server.entries),
         supportsBulkSync: async () => true,
         putWatchHistoryBulk: async entries => {
+          if (server.failWrites > 0) {
+            server.failWrites--
+            throw new Error('Upload failed')
+          }
           server.writes++
           server.entries = structuredClone(entries)
         },
@@ -189,6 +195,269 @@ function historyDevice(record, savedSnapshot = [record.videoId]) {
       }, snapshot))
     },
   }
+}
+
+test('history repairs upload without watch-state changes and settle across two devices', async () => {
+  const incomplete = { ...imported, title: '', author: '', published: 0 }
+  const entry = structuredClone(remote)
+  entry.video.title = incomplete.videoId
+  entry.video.upload_date = 0
+  entry.video.uploader.name = entry.video.uploader.id
+  const server = { entries: [entry], writes: 0 }
+  const laptop = historyDevice(incomplete)
+  const phone = historyDevice(incomplete)
+  await laptop.sync(server)
+  await phone.sync(server)
+  Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], {
+    title: 'Recovered title', author: 'Recovered channel', authorId: incomplete.authorId,
+    published: 100, lengthSeconds: 120, isLive: false, isUpcoming: false,
+  }))
+  await laptop.sync(server)
+  assert.equal(server.writes, 1, 'a metadata-only repair must upload')
+  assert.equal(server.entries[0].video.duration, 120)
+  assert.equal(server.entries[0].video.title, 'Recovered title')
+  assert.equal(server.entries[0].video.upload_date, 100)
+  assert.deepEqual(server.entries[0].metadata, entry.metadata)
+  await phone.sync(server)
+  assert.equal(phone.records[0].lengthSeconds, 120)
+  assert.equal(phone.records[0].author, 'Recovered channel')
+  assert.equal(phone.records[0].title, 'Recovered title')
+  assert.equal(phone.records[0].isLive, false)
+  for (let turn = 0; turn < 4; turn++) {
+    await laptop.sync(server)
+    await phone.sync(server)
+  }
+  assert.equal(server.writes, 1, 'receiving metadata must not upload it back')
+})
+
+test('history repairs enrich newer remote watch state without rolling progress back', async () => {
+  const laptop = historyDevice({ ...imported, lengthSeconds: 120, published: 300, timeWatched: 100 })
+  const server = { entries: [{ ...structuredClone(remote), video: { ...remote.video, upload_date: 0 } }], writes: 0 }
+  await laptop.sync(server)
+  assert.equal(server.writes, 1)
+  assert.equal(server.entries[0].video.duration, 120)
+  assert.equal(server.entries[0].video.upload_date, 300)
+  assert.deepEqual(server.entries[0].metadata, remote.metadata)
+  assert.equal(laptop.records[0].timeWatched, remote.metadata.added_date)
+  await laptop.sync(server)
+  assert.equal(server.writes, 1)
+})
+
+test('conflicting history metadata does not alternate uploads between devices', async () => {
+  const laptop = historyDevice({ ...imported, title: 'Laptop title', author: 'Laptop channel', published: 100, lengthSeconds: 120 })
+  const phone = historyDevice({ ...imported, title: 'Phone title', author: 'Phone channel', published: 150, lengthSeconds: 125 })
+  const server = { entries: [structuredClone(remote)], writes: 0 }
+  for (let turn = 0; turn < 4; turn++) {
+    await laptop.sync(server)
+    await phone.sync(server)
+  }
+  assert.equal(server.writes, 1, 'only the missing duration needs uploading')
+  assert.equal(server.entries[0].video.title, remote.video.title)
+  assert.equal(server.entries[0].video.duration, 120)
+})
+
+for (const newerProgress of [false, true]) {
+  test(`a duration repair before the first upgraded sync is preserved with newer progress ${newerProgress}`, async () => {
+    const record = { ...imported, lengthSeconds: 100, isLive: true }
+    const server = { entries: [{ ...structuredClone(remote), video: { ...remote.video, duration: 100 } }], writes: 0 }
+    if (newerProgress) server.entries[0].metadata.added_date++
+    const laptop = historyDevice(record, { [record.videoId]: remote.metadata })
+    const phone = historyDevice(record, { [record.videoId]: remote.metadata })
+    Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], {
+      lengthSeconds: 120, isLive: false, isUpcoming: false,
+    }))
+    const watchState = structuredClone(server.entries[0].metadata)
+    await laptop.sync(server)
+    assert.equal(server.entries[0].video.duration, 120)
+    assert.deepEqual(server.entries[0].metadata, watchState)
+    for (let turn = 0; turn < 4; turn++) {
+      await phone.sync(server)
+      await laptop.sync(server)
+    }
+    assert.equal(phone.records[0].lengthSeconds, 120)
+    assert.equal(server.writes, 1)
+  })
+
+  test(`a repaired known duration syncs once with newer remote progress ${newerProgress}`, async () => {
+    const record = { ...imported, lengthSeconds: 100, isLive: false }
+    const entry = { ...structuredClone(remote), video: { ...remote.video, duration: 100 } }
+    const server = { entries: [entry], writes: 0 }
+    const laptop = historyDevice(record)
+    const phone = historyDevice(record)
+    await laptop.sync(server)
+    await phone.sync(server)
+    Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], {
+      lengthSeconds: 120.4, isLive: false, isUpcoming: false,
+    }))
+    if (newerProgress) {
+      phone.records[0].timeWatched++
+      phone.records[0].watchProgress = 50
+      await phone.sync(server)
+    }
+    const originalState = structuredClone(server.entries[0].metadata)
+    const originalWrites = server.writes
+    await laptop.sync(server)
+    await phone.sync(server)
+    assert.equal(server.entries[0].video.duration, 120)
+    assert.equal(phone.records[0].lengthSeconds, 120)
+    assert.deepEqual(server.entries[0].metadata, originalState)
+    for (let turn = 0; turn < 4; turn++) {
+      await phone.sync(server)
+      await laptop.sync(server)
+    }
+    assert.equal(server.writes, originalWrites + 1)
+  })
+}
+
+for (const newerProgress of [false, true]) {
+  test(`concurrent duration repairs settle after each explicit correction uploads once with newer progress ${newerProgress}`, async () => {
+    const record = { ...imported, lengthSeconds: 100, isLive: false }
+    const server = { entries: [{ ...structuredClone(remote), video: { ...remote.video, duration: 100 } }], writes: 0 }
+    const laptop = historyDevice(record)
+    const phone = historyDevice(record)
+    await laptop.sync(server)
+    await phone.sync(server)
+    Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], { lengthSeconds: 120, isLive: false, isUpcoming: false }))
+    Object.assign(phone.records[0], historyRepairPatch(phone.records[0], { lengthSeconds: 125, isLive: false, isUpcoming: false }))
+    if (newerProgress) phone.records[0].timeWatched++
+    for (let turn = 0; turn < 4; turn++) {
+      await laptop.sync(server)
+      await phone.sync(server)
+    }
+    assert.equal(laptop.records[0].lengthSeconds, 125)
+    assert.equal(phone.records[0].lengthSeconds, 125)
+    assert.equal(server.writes, 2)
+  })
+}
+
+test('history sync replaces blank metadata and does not upload placeholder channel names', async () => {
+  const entry = structuredClone(remote)
+  entry.video.title = '   '
+  entry.video.uploader.name = ''
+  const blank = { ...imported, title: '   ', author: '' }
+  const uploaded = []
+  await downloadHistory([blank], entry, uploaded)
+  assert.equal(uploaded.length, 0)
+  const repaired = { ...blank, title: 'Recovered title', author: 'Recovered channel' }
+  await downloadHistory([repaired], entry, uploaded)
+  assert.equal(uploaded.length, 1)
+  assert.equal(uploaded[0].video.title, repaired.title)
+  assert.equal(uploaded[0].video.uploader.name, repaired.author)
+  const received = await downloadHistory([blank], uploaded[0])
+  assert.equal(received.updates[0].title, repaired.title)
+  assert.equal(received.updates[0].author, repaired.author)
+})
+
+for (const failWrites of [0, 1]) {
+  test(`successive unsynced duration repairs retain the latest correction with ${failWrites} failed uploads`, async () => {
+    const record = { ...imported, lengthSeconds: 100, isLive: true, published: 0 }
+    const server = { entries: [{ ...structuredClone(remote), video: { ...remote.video, duration: 100, upload_date: 0 } }], writes: 0, failWrites }
+    const laptop = historyDevice(record, { [record.videoId]: remote.metadata })
+    for (const lengthSeconds of [120, 130]) {
+      Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], { lengthSeconds, isLive: false, isUpcoming: false }))
+    }
+    assert.equal(laptop.records[0].pendingDurationRepair, true)
+    if (failWrites) {
+      await assert.rejects(laptop.sync(server), /Upload failed/)
+      assert.equal(laptop.records[0].pendingDurationRepair, true)
+      assert.equal(laptop.records[0].lengthSeconds, 130)
+    }
+    await laptop.sync(server)
+    assert.equal(server.entries[0].video.duration, 130)
+    assert.equal(laptop.records[0].pendingDurationRepair, undefined)
+    await laptop.sync(server)
+    assert.equal(server.writes, 1)
+  })
+}
+
+test('consumed repair markers cannot resurrect a superseded duration when a later repair returns to it', async () => {
+  const record = { ...imported, lengthSeconds: 100, isLive: true, published: 0 }
+  const server = { entries: [{ ...structuredClone(remote), video: { ...remote.video, duration: 100, upload_date: 0 } }], writes: 0 }
+  const laptop = historyDevice(record)
+  const phone = historyDevice(record)
+  Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], { lengthSeconds: 120, isLive: false, isUpcoming: false }))
+  Object.assign(phone.records[0], historyRepairPatch(phone.records[0], { lengthSeconds: 125, isLive: false, isUpcoming: false }))
+  await laptop.sync(server)
+  await phone.sync(server)
+  assert.equal(laptop.records[0].pendingDurationRepair, undefined)
+  assert.equal(phone.records[0].pendingDurationRepair, undefined)
+  Object.assign(laptop.records[0], historyRepairPatch(laptop.records[0], { lengthSeconds: 100, isLive: false, isUpcoming: false }))
+  for (let turn = 0; turn < 4; turn++) {
+    await laptop.sync(server)
+    await phone.sync(server)
+  }
+  assert.equal(laptop.records[0].lengthSeconds, 100)
+  assert.equal(phone.records[0].lengthSeconds, 100)
+  assert.equal(server.writes, 3)
+})
+
+test('a newer repair during an upload survives the stale-history retry', async () => {
+  const record = { ...imported, lengthSeconds: 100, isLive: true, published: 0 }
+  Object.assign(record, historyRepairPatch(record, { lengthSeconds: 120, isLive: false, isUpcoming: false }))
+  const history = { historyCacheSorted: [record], historyRevision: 0 }
+  let entry = { ...structuredClone(remote), video: { ...remote.video, duration: 100, upload_date: 0 } }
+  let writes = 0
+  await context.syncHistory({
+    getWatchHistory: async () => [structuredClone(entry)],
+    supportsBulkSync: async () => true,
+    putWatchHistoryBulk: async entries => {
+      entry = structuredClone(entries[0])
+      if (++writes === 1) {
+        Object.assign(record, historyRepairPatch(record, { lengthSeconds: 130, isLive: false, isUpcoming: false }))
+        history.historyRevision++
+      }
+    },
+  }, {
+    state: { history },
+    dispatch: async (action, changes) => {
+      assert.equal(action, 'applyHistorySyncChanges')
+      history.historyCacheSorted = structuredClone(changes.updates)
+      history.historyRevision++
+    },
+  }, { [record.videoId]: remote.metadata })
+  assert.equal(entry.video.duration, 130)
+  assert.equal(history.historyCacheSorted[0].lengthSeconds, 130)
+  assert.equal(history.historyCacheSorted[0].pendingDurationRepair, undefined)
+  assert.equal(writes, 2)
+})
+
+for (const failure of ['upload failure', 'revision conflict']) {
+  test(`encrypted staging preserves pending repairs through ${failure}`, async () => {
+    const record = { ...imported, lengthSeconds: 100, isLive: true, published: 0 }
+    Object.assign(record, historyRepairPatch(record, { lengthSeconds: 120, isLive: false, isUpcoming: false }))
+    const records = [record]
+    let serverHistory = [{ ...structuredClone(remote), video: { ...remote.video, duration: 100, upload_date: 0 } }]
+    const store = {
+      state: { history: { historyCacheSorted: records } },
+      dispatch: async (action, changes) => {
+        assert.equal(action, 'applyHistorySyncChanges')
+        for (const entry of [...changes.insertions, ...changes.updates]) {
+          const index = records.findIndex(record => record.videoId === entry.videoId)
+          if (index === -1) records.push(structuredClone(entry))
+          else records[index] = structuredClone(entry)
+        }
+      },
+    }
+    const stage = async () => {
+      const adapter = new EncryptedSyncAdapter({ history: structuredClone(serverHistory) })
+      await context.syncHistory(adapter, store, { [record.videoId]: remote.metadata })
+      return adapter.document.history
+    }
+    const first = await stage()
+    assert.equal(first[0].video.duration, 120)
+    assert.equal(records[0].pendingDurationRepair, true, 'staging is not an accepted upload')
+    assert.equal(serverHistory[0].video.duration, 100)
+    if (failure === 'revision conflict') {
+      serverHistory.push({ ...structuredClone(remote), video: { ...remote.video, id: 'other-video' } })
+    }
+    const retry = await stage()
+    assert.equal(retry.find(entry => entry.video.id === record.videoId).video.duration, 120)
+    assert.equal(records.find(entry => entry.videoId === record.videoId).lengthSeconds, 120)
+    assert.equal(records.find(entry => entry.videoId === record.videoId).pendingDurationRepair, true)
+    serverHistory = structuredClone(retry)
+    const repeated = await stage()
+    assert.deepEqual(repeated, serverHistory)
+  })
 }
 
 test('two devices with equal watch timestamps and conflicting progress converge', async () => {

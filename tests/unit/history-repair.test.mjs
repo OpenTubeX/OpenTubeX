@@ -15,7 +15,7 @@ test('repair selects incomplete imports and live entries, excluding stations and
 })
 
 test('confirmed duration repairs false live flags without changing personal data', () => {
-  assert.deepEqual(historyRepairPatch(record, metadata), { videoId: record.videoId, ...metadata, liveNow: false })
+  assert.deepEqual(historyRepairPatch(record, metadata), { videoId: record.videoId, ...metadata, liveNow: false, pendingDurationRepair: true })
   assert.equal(historyRepairPatch(record, { lengthSeconds: 120 }), null)
   assert.equal(historyRepairPatch(record, { ...metadata, lengthSeconds: 0 }), null)
 })
@@ -326,7 +326,7 @@ test('yt-dlp history metadata repairs fields without overwriting watch state', a
   }, record.videoId)
   assert.equal(parsed.published, Date.parse('2025-09-20'))
   assert.equal(parsed.authorId, 'channel')
-  assert.deepEqual(historyRepairPatch(record, parsed), { videoId: record.videoId, lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false })
+  assert.deepEqual(historyRepairPatch(record, parsed), { videoId: record.videoId, lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false, pendingDurationRepair: true })
   assert.throws(() => parseHistoryRepairYtDlp({ id: 'wrong' }, record.videoId))
   assert.equal(parseHistoryRepairYtDlp({ id: record.videoId, timestamp: 123, live_status: 'is_upcoming' }, record.videoId).isUpcoming, true)
   assert.equal(parseHistoryRepairYtDlp({ id: record.videoId, timestamp: 123 }, record.videoId).published, 123000)

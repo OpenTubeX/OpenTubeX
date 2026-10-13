@@ -19,6 +19,7 @@ export function playlistRepairPatch(video, metadata) {
   const patch = historyRepairPatch(video.title === video.videoId ? { ...video, title: '' } : video, metadata)
   if (!patch) return null
   delete patch.description
+  delete patch.pendingDurationRepair
   if (!Object.hasOwn(video, 'liveNow')) delete patch.liveNow
   return Object.keys(patch).length > 1 ? patch : null
 }

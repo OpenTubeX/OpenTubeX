@@ -4,6 +4,7 @@ export const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/def
 // Released clients require a truthy uploader ID to preserve video membership.
 export const UNKNOWN_SYNC_UPLOADER_ID = 'opentubex:unknown-uploader'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
+const knownText = (value, placeholder) => typeof value === 'string' && value.trim().length > 0 && value !== placeholder
 
 function mapBy(items, getId) {
   return new Map(items.map(item => [getId(item), item]))
@@ -105,11 +106,13 @@ function historyToRemote(record, options) {
 function historyToLocal(entry, local) {
   const avatar = normalizeChannelAvatar(entry.video.uploader.avatar)
   const thumbnail = entry.video.thumbnail_url
+  const uploader = uploaderToLocal(entry.video.uploader)
+  if (uploader.author === uploader.authorId) uploader.author = undefined
   const record = {
     ...local,
     videoId: entry.video.id,
-    title: entry.video.title,
-    ...uploaderToLocal(entry.video.uploader),
+    title: entry.video.title === entry.video.id ? local?.title ?? '' : entry.video.title,
+    ...uploader,
     published: entry.video.upload_date,
     ...(thumbnail && thumbnail !== `https://i.ytimg.com/vi/${entry.video.id}/hqdefault.jpg` ? { thumbnail } : {}),
     ...(avatar ? { authorThumbnail: avatar } : {}),
@@ -120,6 +123,7 @@ function historyToLocal(entry, local) {
     timeWatched: entry.metadata.added_date,
     // Sync stores unknown durations as zero and does not carry live status.
     isLive: entry.video.duration > 0 ? false : local?.isLive === true,
+    ...(entry.video.duration > 0 && local?.liveNow === true ? { liveNow: false } : {}),
     isUpcoming: entry.video.duration > 0 ? false : local?.isUpcoming === true,
     type: 'video',
   }
@@ -129,7 +133,7 @@ function historyToLocal(entry, local) {
 function fillMissingVideoMetadata(record, fallback) {
   const metadata = {}
   // Watch-state timestamps do not tell us which side has richer video details.
-  if ((!record.title || record.title === record.videoId) && fallback.title && fallback.title !== record.videoId) {
+  if (!knownText(record.title, record.videoId) && knownText(fallback.title, fallback.videoId)) {
     metadata.title = fallback.title
   }
   if ((!Number.isFinite(record.published) || record.published <= 0) && Number.isFinite(fallback.published) && fallback.published > 0) {
@@ -140,13 +144,50 @@ function fillMissingVideoMetadata(record, fallback) {
     metadata.thumbnail = fallback.thumbnail
   }
   const uploader = uploaderToLocal({ id: fallback.authorId, name: fallback.author })
-  if (!record.authorId || record.authorId === uploader.authorId) {
-    if (!record.authorId && uploader.authorId) metadata.authorId = uploader.authorId
-    if (!record.author && uploader.author) metadata.author = uploader.author
+  if (uploader.author === uploader.authorId) uploader.author = undefined
+  if (!knownText(record.authorId, UNKNOWN_SYNC_UPLOADER_ID) || record.authorId === uploader.authorId) {
+    if (!knownText(record.authorId, UNKNOWN_SYNC_UPLOADER_ID) && knownText(uploader.authorId, UNKNOWN_SYNC_UPLOADER_ID)) metadata.authorId = uploader.authorId
+    if (!knownText(record.author, record.authorId) && knownText(uploader.author, uploader.authorId)) metadata.author = uploader.author
     const avatar = normalizeChannelAvatar(fallback.authorThumbnail)
     if (!normalizeChannelAvatar(record.authorThumbnail) && avatar) metadata.authorThumbnail = avatar
   }
   return Object.keys(metadata).length > 0 ? { ...record, ...metadata } : record
+}
+
+// Repairs fill missing shared fields while keeping populated values and
+// server-only metadata on their side of the merge.
+export function enrichSyncVideo(video, source) {
+  const fields = {}
+  const uploader = { ...video.uploader }
+  if (!knownText(video.title, video.id) && knownText(source.title, source.id)) fields.title = source.title
+  for (const key of ['upload_date', 'duration']) {
+    if ((!Number.isFinite(video[key]) || video[key] <= 0) && Number.isFinite(source[key]) && source[key] > 0) {
+      fields[key] = source[key]
+    }
+  }
+  if (!knownText(uploader.id, UNKNOWN_SYNC_UPLOADER_ID) && knownText(source.uploader.id, UNKNOWN_SYNC_UPLOADER_ID)) {
+    uploader.id = source.uploader.id
+  }
+  if (!knownText(video.uploader.name, video.uploader.id) && knownText(source.uploader.name, source.uploader.id) && uploader.id === source.uploader.id) {
+    uploader.name = source.uploader.name
+  }
+  return Object.keys(fields).length || ['id', 'name'].some(key => uploader[key] !== video.uploader[key])
+    ? { ...video, ...fields, uploader }
+    : video
+}
+
+function enrichHistoryVideo(video, source) {
+  const enriched = enrichSyncVideo(video, source)
+  const fields = {}
+  const uploader = { ...enriched.uploader }
+  if (uploader.id === source.uploader.id && !normalizeChannelAvatar(uploader.avatar) && normalizeChannelAvatar(source.uploader.avatar)) uploader.avatar = source.uploader.avatar
+  const placeholder = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`
+  if ((!video.thumbnail_url || video.thumbnail_url === placeholder) && source.thumbnail_url !== placeholder) fields.thumbnail_url = source.thumbnail_url
+  // Only improvements cause uploads. Conflicting populated fields, server-only
+  // fields, and harmless serialization differences cannot bounce between devices.
+  return Object.keys(fields).length || uploader.avatar !== enriched.uploader.avatar
+    ? { ...enriched, ...fields, uploader }
+    : enriched
 }
 
 function historyStateEquals(localPayload, remote) {
@@ -206,10 +247,14 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
   for (const id of mergedIds) {
     const local = localById.get(id)
     const remote = remoteById.get(id)
+    const baseline = previousStates.get(id)
+    const localState = local && historyToRemote(local, options)
+    const localDuration = localState?.video.duration
+    // Explicit corrections upload once; ordinary stale metadata does not. Both
+    // devices may have a pending repair, but each stops uploading when accepted.
+    const repairedDuration = local?.pendingDurationRepair === true && localDuration > 0 && localDuration !== remote?.video.duration
     let useLocal = local && (!remote || local.timeWatched > remote.metadata.added_date)
     if (local && remote && local.timeWatched === remote.metadata.added_date) {
-      const localState = historyToRemote(local, options)
-      const baseline = previousStates.get(id)
       const localChanged = !baseline || !historyStateEquals(localState, { metadata: baseline })
       const remoteChanged = !baseline || !historyStateEquals(remote, { metadata: baseline })
       // A sole local edit can move progress backwards or clear watched status.
@@ -229,24 +274,37 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
     // Watch time orders progress, not metadata completeness. Fill an unknown
     // local duration before uploading so it cannot erase a known server value.
     // Equal timestamps also refresh metadata without replacing local progress.
-    if (useLocal && remote &&
+    if (repairedDuration && merged.lengthSeconds !== local.lengthSeconds) {
+      merged = { ...merged, lengthSeconds: local.lengthSeconds, isLive: false, isUpcoming: false }
+    }
+    if (useLocal && remote && !repairedDuration &&
         (local.timeWatched === remote.metadata.added_date ||
           !Number.isFinite(local.lengthSeconds) || local.lengthSeconds <= 0) &&
         Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
-        (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
+        (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.liveNow === true || local.isUpcoming === true)) {
       merged = { ...merged, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
+      if (local.liveNow === true) merged.liveNow = false
+    }
+    if (local?.pendingDurationRepair === true && !options.deferRepairAcknowledgement) {
+      // syncHistory persists these updates only after successful uploads. Clear
+      // accepted repairs; failed writes keep the marker. Encrypted staging waits
+      // until the store confirms the collection upload.
+      merged = { ...merged }
+      delete merged.pendingDurationRepair
     }
     if (useLocal && merged !== local) localUpdates.push(merged)
-    const localPayload = useLocal ? historyToRemote(merged, options) : null
-    next[id] = { ...(localPayload ?? remote).metadata }
-
-    if (useLocal && localPayload && (
+    const localPayload = merged === local ? localState : local && historyToRemote(merged, options)
+    const watchStateChanged = useLocal && (
       !remote ||
       local.timeWatched > remote.metadata.added_date ||
       !historyStateEquals(localPayload, remote)
-    )) {
-      historyToUpload.push(localPayload)
-    } else if (!useLocal) {
+    )
+    let enrichedVideo = remote && local ? enrichHistoryVideo(remote.video, localPayload.video) : remote?.video
+    if (repairedDuration) enrichedVideo = { ...enrichedVideo, duration: localDuration }
+    const payload = watchStateChanged ? localPayload : { ...remote, video: enrichedVideo }
+    next[id] = { ...payload.metadata }
+    if (watchStateChanged || (remote && enrichedVideo !== remote.video)) historyToUpload.push(payload)
+    if (!useLocal) {
       if (local) localUpdates.push(merged)
       else localInsertions.push(merged)
     }
