@@ -181,6 +181,7 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import {
   DEFAULT_FULLSCREEN_ACTIONS,
@@ -198,6 +199,7 @@ const itemPickerContentRef = useTemplateRef('itemPickerContentRef')
 const actionListRef = useTemplateRef('actionListRef')
 let itemPickerResizeObserver = null
 let actionResizeObserver = null
+const settingsOverlayActive = useSettingsOverlay(closeItemPicker)
 
 const catalog = computed(() => FULLSCREEN_ACTION_DEFINITIONS
   .map(item => ({
@@ -225,6 +227,7 @@ function close() {
 }
 
 async function toggleItemPicker() {
+  if (!settingsOverlayActive.value) return
   if (itemPickerOpen.value) {
     closeItemPicker()
     return
@@ -232,13 +235,16 @@ async function toggleItemPicker() {
 
   itemPickerOpen.value = true
   await nextTick()
+  if (!settingsOverlayActive.value || !itemPickerOpen.value) return
   itemPickerListRef.value?.querySelector('.itemPickerOption')?.focus()
 }
 
 function closeItemPicker(restoreFocus = false) {
   itemPickerOpen.value = false
   if (restoreFocus) {
-    nextTick(() => itemPickerAnchorRef.value?.querySelector('button')?.focus())
+    nextTick(() => {
+      if (settingsOverlayActive.value) itemPickerAnchorRef.value?.querySelector('button')?.focus()
+    })
   }
 }
 
@@ -288,7 +294,7 @@ watch(itemPickerOpen, async (isOpen) => {
   if (!isOpen) return
 
   await nextTick()
-  if (itemPickerListRef.value === null || itemPickerContentRef.value === null) return
+  if (!settingsOverlayActive.value || !itemPickerOpen.value || itemPickerListRef.value === null || itemPickerContentRef.value === null) return
 
   itemPickerResizeObserver = new ResizeObserver(clampItemPickerScroll)
   itemPickerResizeObserver.observe(itemPickerListRef.value)

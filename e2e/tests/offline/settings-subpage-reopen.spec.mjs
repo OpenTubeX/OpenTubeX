@@ -21,6 +21,74 @@ async function expectPromptResourcesReleased(page) {
 }
 
 for (const uiScale of [100, 125]) {
+  for (const protectedSettings of [false, true]) {
+    test.describe(`customizer picker dismissal at ${uiScale}%, password ${protectedSettings}`, () => {
+      test.use({
+        seed: {
+          settings: {
+            uiScale,
+            settingsPassword: protectedSettings ? settingsPassword : '',
+            navigationItems: ['home', 'subscriptions'],
+            fullscreenActions: ['share']
+          }
+        }
+      })
+
+      for (const { label, addLabel, pickerSelector } of [
+        { label: 'Customize navigation', addLabel: 'Add item', pickerSelector: '.itemPickerPopover' },
+        { label: 'Customize fullscreen actions', addLabel: 'Add action', pickerSelector: '.itemPickerPopover' },
+        { label: 'Customize quick settings', addLabel: 'Add setting', pickerSelector: '.settingPickerPopover' },
+      ]) {
+        test(`dismisses ${label} picker through Preferences`, async ({ app, page }) => {
+          await goTo(page, 'settings')
+          const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+          if (protectedSettings) {
+            await passwordInput.fill(password)
+            await passwordInput.press('Enter')
+          }
+          const appearance = await goToSettingsSection(page, 'appearance')
+          await appearance.getByRole('button', { name: new RegExp(`^${label}$`, 'i') }).click()
+          const addButton = page.getByRole('button', { name: new RegExp(`^${addLabel}$`, 'i') })
+          const addButtonHandle = await addButton.elementHandle()
+          const picker = page.locator(pickerSelector)
+          await addButton.click()
+          await expect(picker).toBeVisible()
+          await toggleSettingsFromPreferences(app)
+          await expect(page.locator('.settingsWindow')).toBeHidden()
+          await toggleSettingsFromPreferences(app)
+          if (protectedSettings) {
+            await expect(passwordInput).toBeFocused()
+            await passwordInput.fill(password)
+            await passwordInput.press('Enter')
+          }
+          await expect(page.locator('.settingsBreadcrumb')).toContainText(new RegExp(label, 'i'))
+          await expect(picker).toHaveCount(0)
+          await expect(addButton).toHaveAttribute('aria-expanded', 'false')
+          await addButton.click()
+          await expect(picker).toBeVisible()
+          await page.keyboard.press('Escape')
+          await expect(picker).toHaveCount(0)
+          await expect(addButton).toBeFocused()
+
+          // A queued click on the retained control must not reopen a hidden picker.
+          await toggleSettingsFromPreferences(app)
+          await expect(page.locator('.settingsWindow')).toBeHidden()
+          await addButtonHandle.evaluate(button => button.click())
+          await toggleSettingsFromPreferences(app)
+          if (protectedSettings) {
+            await expect(passwordInput).toBeFocused()
+            await passwordInput.fill(password)
+            await passwordInput.press('Enter')
+          }
+          await expect(picker).toHaveCount(0)
+          await expect(addButton).toHaveAttribute('aria-expanded', 'false')
+        })
+      }
+    })
+  }
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`protected settings subpage reopening at ${uiScale}%`, () => {
     test.use({
       seed: {

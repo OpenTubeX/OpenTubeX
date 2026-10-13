@@ -199,6 +199,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useOrderedItemReorder } from '../../composables/useOrderedItemReorder'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import { moveItemByVisibleOffset } from '../../../orderedItems'
 import {
   DEFAULT_NAVIGATION_ITEMS,
@@ -218,6 +219,7 @@ const itemPickerContentRef = useTemplateRef('itemPickerContentRef')
 const fixedNavigationOptionsRef = useTemplateRef('fixedNavigationOptionsRef')
 let itemPickerResizeObserver = null
 let navigationResizeObserver = null
+const settingsOverlayActive = useSettingsOverlay(closeItemPicker)
 
 const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
   .filter(item => !item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API)
@@ -249,6 +251,7 @@ function close() {
 }
 
 async function toggleItemPicker() {
+  if (!settingsOverlayActive.value) return
   if (itemPickerOpen.value) {
     closeItemPicker()
     return
@@ -256,13 +259,16 @@ async function toggleItemPicker() {
 
   itemPickerOpen.value = true
   await nextTick()
+  if (!settingsOverlayActive.value || !itemPickerOpen.value) return
   itemPickerListRef.value?.querySelector('.itemPickerOption')?.focus()
 }
 
 function closeItemPicker(restoreFocus = false) {
   itemPickerOpen.value = false
   if (restoreFocus) {
-    nextTick(() => itemPickerAnchorRef.value?.querySelector('button')?.focus())
+    nextTick(() => {
+      if (settingsOverlayActive.value) itemPickerAnchorRef.value?.querySelector('button')?.focus()
+    })
   }
 }
 
@@ -312,7 +318,7 @@ watch(itemPickerOpen, async (isOpen) => {
   if (!isOpen) return
 
   await nextTick()
-  if (itemPickerListRef.value === null || itemPickerContentRef.value === null) return
+  if (!settingsOverlayActive.value || !itemPickerOpen.value || itemPickerListRef.value === null || itemPickerContentRef.value === null) return
 
   itemPickerResizeObserver = new ResizeObserver(clampItemPickerScroll)
   itemPickerResizeObserver.observe(itemPickerListRef.value)
