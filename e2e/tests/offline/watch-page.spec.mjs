@@ -86,7 +86,7 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
-test('phone watch players have square corners where the layout meets the screen or header', async ({ app, page }) => {
+test('phone watch players square screen-edge corners and retain centered landscape rounding', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   let releaseMetadata
   const metadataPending = new Promise(resolve => { releaseMetadata = resolve })
@@ -117,18 +117,19 @@ test('phone watch players have square corners where the layout meets the screen 
   await player.locator('video').evaluate(element => element.pause())
   for (const scale of [1, 1.25]) {
     await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-    for (const size of [{ width: 375, height: 812 }, { width: 667, height: 375 }, { width: 812, height: 375 }]) {
-      await page.setViewportSize(size)
-      if (size.width === 375) {
-        await expect(player).toHaveCSS('border-radius', '0px')
-        continue
-      }
-      const headerGap = await player.evaluate(element => {
+    for (const { width, height, radius } of [
+      { width: 375, height: 812, radius: '0px' },
+      { width: 667, height: 500, radius: '0px' },
+      { width: 667, height: 375, radius: '24px' },
+      { width: 812, height: 375, radius: '24px' }
+    ]) {
+      await page.setViewportSize({ width, height })
+      // Centered landscape players keep rounding even when they touch the header.
+      await expect(player).toHaveCSS('border-radius', radius)
+      await expect.poll(() => player.evaluate(element => {
         const bounds = element.getBoundingClientRect()
-        const header = document.querySelector('.topNav').getBoundingClientRect()
-        return Math.abs(bounds.top - header.bottom)
-      })
-      await expect(player).toHaveCSS('border-radius', headerGap <= 1 ? '0px' : '24px')
+        return Math.abs(bounds.left) <= 1 && Math.abs(bounds.right - innerWidth) <= 1
+      })).toBe(radius === '0px')
     }
   }
 

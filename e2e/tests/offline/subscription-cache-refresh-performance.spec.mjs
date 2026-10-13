@@ -265,24 +265,33 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
-    await page.evaluate(async () => {
+    // Retain the pending promise while the large IPC payload triggers garbage collection.
+    const refresh = await page.evaluateHandle(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const [channelId, cache] = Object.entries(store.getters.getVideoCache)[0]
       const videos = JSON.parse(JSON.stringify(cache.videos))
       store.commit('setSubscriptionFeedRefreshTab', 'videos')
       store.commit('setSubscriptionFeedRefreshInProgress', true)
-      await store.dispatch('updateSubscriptionVideosCacheByChannel', {
-        channelId,
-        videos: [
-          { ...videos[0], title: 'Finished Videos snapshot' },
-          ...Array.from({ length: 5000 }, (_, index) => ({
-            ...videos[0], videoId: `hidden-${index}`, isNewInSubscriptionFeed: false
-          }))
-        ]
-      })
-      // A synchronized refresh can switch feeds without an idle state.
-      store.commit('setSubscriptionFeedRefreshTab', 'shorts')
+      return {
+        finished: store.dispatch('updateSubscriptionVideosCacheByChannel', {
+          channelId,
+          videos: [
+            { ...videos[0], title: 'Finished Videos snapshot' },
+            ...Array.from({ length: 5000 }, (_, index) => ({
+              ...videos[0], videoId: `hidden-${index}`, isNewInSubscriptionFeed: false
+            }))
+          ]
+        }).then(() => {
+          // A synchronized refresh can switch feeds without an idle state.
+          store.commit('setSubscriptionFeedRefreshTab', 'shorts')
+        })
+      }
     })
+    try {
+      await refresh.evaluate(state => state.finished)
+    } finally {
+      await refresh.dispose()
+    }
     await expect(page.getByText('Finished Videos snapshot', { exact: true })).toBeVisible()
 
     await page.evaluate(async () => {

@@ -151,6 +151,7 @@ for (const zoom of [1, 0.95]) {
       })
       const sheet = page.locator('.dockedSheet[open]')
       await expect(sheet).toBeVisible()
+      await expect(sheet).toHaveCSS('transform', 'none')
       const description = await sheet.locator('.description').elementHandle()
       await description.evaluate(el => { el.textContent = 'Description line\n'.repeat(100) })
       const viewport = sheet.locator('.phonePanelScroller')
@@ -178,7 +179,11 @@ for (const zoom of [1, 0.95]) {
           return Math.abs(panel.y - video.y - video.height)
         }).toBeLessThan(2)
         if (!shorten) {
-          await expect.poll(() => viewport.evaluate(el => el.scrollTop)).toBeCloseTo(position, 0)
+          // At fractional zoom the restored boundary can round by one device pixel.
+          await expect.poll(() => viewport.evaluate((el, position) => (
+            Math.abs(el.scrollTop - position) * devicePixelRatio
+          ), position)).toBeLessThanOrEqual(1.01)
+          await expect(viewport.locator('.os-scrollbar-vertical')).not.toHaveClass(/os-scrollbar-unusable/)
         } else {
           await expect.poll(() => viewport.evaluate(el => el.scrollTop)).toBe(0)
           await expect(viewport.locator('.os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
