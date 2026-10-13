@@ -154,10 +154,6 @@
     padding: 12px;
   }
 
-  .promptCard.fixedLayout {
-    block-size: 100%;
-  }
-
   .promptContentScroller {
     flex: 1;
   }

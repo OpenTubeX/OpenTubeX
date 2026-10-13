@@ -326,10 +326,6 @@
   }
 }
 
-:global(.promptCard.downloadPromptCard.fixedLayout) {
-  block-size: auto;
-}
-
 @media (height <= 400px) {
   :global(.promptCard.downloadPromptCard.fixedLayout) {
     padding-block: 0;
