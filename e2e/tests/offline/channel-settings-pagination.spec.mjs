@@ -98,6 +98,8 @@ for (const uiScale of [95, 125]) {
         await setWindowSize(app, page, size)
         await search.fill('')
         await expect(picker.locator('.addSubscribedChannelOption')).toHaveCount(50)
+        // The dialog's entry transform moves its fixed search field too.
+        await expect(picker).toHaveCSS('transform', 'none')
         const searchTop = await search.evaluate(element => element.getBoundingClientRect().top)
         await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
         await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
