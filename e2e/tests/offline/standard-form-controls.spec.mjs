@@ -163,8 +163,7 @@ for (const uiScale of [100, 95, 125]) {
         await field.focus()
         await page.locator('.addToPlaylistDropdown').screenshot({ path: testInfo.outputPath('playlist-search-desktop.png') })
       }
-      await page.locator('.iconDropdown').focus()
-      await page.keyboard.press('Escape')
+      await page.locator('.iconDropdown').press('Escape')
       await expect(page.locator('.addToPlaylistDropdown')).toBeHidden()
       await setWindowSize(app, page, { width: 375, height: 850 })
       await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
