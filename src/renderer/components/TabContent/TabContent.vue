@@ -211,7 +211,7 @@ async function disposeMountedContent() {
 }
 
 watch(
-  () => [shouldMount.value, props.tab.mountRevision, props.tab.refreshKey],
+  [shouldMount, () => props.tab.mountRevision, () => props.tab.refreshKey],
   async ([mount, mountRevision, refreshKey]) => {
     const revision = ++lifecycleRevision
     if (!mount) {
