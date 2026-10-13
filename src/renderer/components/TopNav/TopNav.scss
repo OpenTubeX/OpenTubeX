@@ -307,11 +307,6 @@
 
   &.profiles {
     justify-self: end;
-
-    :deep(.quickSettings) {
-      // The filled profile circle extends 10px beyond the shortcut glyphs.
-      margin-inline-start: 10px;
-    }
   }
 }
 
