@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import model from '@seald-io/nedb/lib/model.js'
-import { mergeHistory, mergeIds, enrichPlaylistVideo, enrichLocalPlaylistVideo, videoToRemote, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
+import { mergeHistory, mergeIds, enrichSyncVideo, enrichLocalPlaylistVideo, videoToRemote, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
 import { migrateLegacyHistoryRecord } from '../../history.js'
 
 const playlistMetadata = record => record ? { playlistName: record.playlistName, description: record.description } : null
@@ -121,7 +121,7 @@ export class LibrarySync {
       const payload = videoToRemote(video, job.options)
       if (!payload) continue
       const previous = localMetadataById.get(video.videoId)
-      localMetadataById.set(video.videoId, previous ? enrichPlaylistVideo(previous, payload) : payload)
+      localMetadataById.set(video.videoId, previous ? enrichSyncVideo(previous, payload) : payload)
     }
     const merged = mergeIds(localById.keys(), remoteById.keys(), this.read(id, 'previous'), { ...job.options, collection: `videos in playlist ${job.metadata.title}`, getItemName: id => localById.get(id)?.title || remoteById.get(id)?.title })
     const uploads = []
@@ -129,7 +129,7 @@ export class LibrarySync {
       const localMetadata = localMetadataById.get(videoId)
       if (!localMetadata) continue
       const remote = remoteById.get(videoId)
-      const enriched = remote ? enrichPlaylistVideo(remote, localMetadata) : localMetadata
+      const enriched = remote ? enrichSyncVideo(remote, localMetadata) : localMetadata
       if (JSON.stringify(remote) !== JSON.stringify(enriched)) uploads.push(enriched)
       remoteById.set(videoId, enriched)
     }
