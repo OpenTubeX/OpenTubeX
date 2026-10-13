@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import vm from 'node:vm'
+import { updateSponsorBlockSeekBarState } from '../../src/renderer/helpers/player/sponsorBlockSeekBar.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/player-components/SeekPreviewBar.js', import.meta.url), 'utf8')
 
@@ -11,12 +12,19 @@ function fixture() {
     constructor(parent, controls) {
       this.video = controls.video
       this.eventManager = { listen: (_, type, listener) => controls.listeners.set(type, listener) }
+      const properties = new Map()
+      this.container = { style: { background: '', setProperty: (name, value) => properties.set(name, value), getPropertyValue: name => properties.get(name) } }
       this.setValue(this.video.currentTime)
+      this.update()
     }
     setValue(time) { this.value = time }
-    update() { this.paintedTime = this.value }
+    update() {
+      this.paintedTime = this.value
+      this.container.style.background = `linear-gradient(to right, red 0%, red 0%, red ${this.value / 30 * 100}%, white ${this.value / 30 * 100}%, white 90%, black 90%)`
+    }
   }
-  vm.runInNewContext(source.replace(/^import .*\n/, '').replace('export class', 'class'), {
+  vm.runInNewContext(source.replace(/^import .*\n/gm, '').replace('export class', 'class'), {
+    updateSponsorBlockSeekBarState,
     shaka: { ui: { SeekBar, Controls: { registerSeekBar: value => { factory = value } } } },
   })
   const controls = {
@@ -31,6 +39,7 @@ function fixture() {
 test('ordinary seek bar updates keep following playback', () => {
   const { bar, controls } = fixture()
   assert.equal(bar.value, 15, 'Initial update works before the subclass constructor finishes')
+  assert.equal(bar.container.style.getPropertyValue('--sponsorblock-played'), '50')
   controls.video.currentTime = 16
   bar.setValue(16)
   assert.equal(bar.value, 16)
@@ -43,6 +52,7 @@ test('preview thumb and played track follow the gesture instead of progress upda
   preview(21)
   assert.equal(bar.value, 21)
   assert.equal(bar.paintedTime, 21)
+  assert.equal(bar.container.style.getPropertyValue('--sponsorblock-played'), '70')
   assert.equal(controls.seeking, true)
   assert.equal(controls.shown, 1)
   assert.equal(controls.video.currentTime, 15)
@@ -66,6 +76,7 @@ for (const paused of [false, true]) {
     preview(null)
     assert.equal(bar.value, 16)
     assert.equal(bar.paintedTime, 16)
+    assert.equal(Number(bar.container.style.getPropertyValue('--sponsorblock-played')), 16 / 30 * 100)
     assert.equal(controls.seeking, false)
     assert.equal(controls.video.paused, paused)
     bar.setValue(16.5)

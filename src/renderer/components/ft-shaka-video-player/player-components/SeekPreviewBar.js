@@ -1,4 +1,5 @@
 import shaka from 'shaka-player'
+import { updateSponsorBlockSeekBarState } from '../../../helpers/player/sponsorBlockSeekBar'
 
 export class SeekPreviewBar extends shaka.ui.SeekBar {
   constructor(parent, controls) {
@@ -22,6 +23,11 @@ export class SeekPreviewBar extends shaka.ui.SeekBar {
    */
   setValue(time) {
     super.setValue(this.previewTime ?? time)
+  }
+
+  update() {
+    super.update()
+    updateSponsorBlockSeekBarState(this.container)
   }
 
   // Notify after Shaka updates the preview text for mouse, touch and keyboard.

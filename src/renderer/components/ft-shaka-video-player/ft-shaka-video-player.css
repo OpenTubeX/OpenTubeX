@@ -3040,13 +3040,25 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.sponsorBlockMarker) {
+  --marker-played-end: clamp(0%, calc((var(--sponsorblock-played, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%);
+  --marker-buffered-start: max(var(--marker-played-end), clamp(0%, calc((var(--sponsorblock-buffered-start, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%));
+  --marker-buffered-end: max(var(--marker-buffered-start), clamp(0%, calc((var(--sponsorblock-buffered-end, 0) - var(--marker-start)) / var(--marker-width) * 100%), 100%));
+
   position: absolute;
   z-index: 1;
   height: 100%;
   background-color: var(--primary-color);
 
-  /* Keep category hue/saturation; use seekbar luminosity so played/buffer stay visible. */
-  mix-blend-mode: color;
+  /* Neutral shading preserves category hues regardless of the track's accent. */
+  background-image: linear-gradient(
+    to right,
+    rgb(0 0 0 / 35%) var(--marker-played-end),
+    rgb(0 0 0 / 15%) var(--marker-played-end),
+    rgb(0 0 0 / 15%) var(--marker-buffered-start),
+    transparent var(--marker-buffered-start),
+    transparent var(--marker-buffered-end),
+    rgb(0 0 0 / 15%) var(--marker-buffered-end)
+  );
 }
 
 :deep(.sponsorBlockPointMarker) {
@@ -3055,10 +3067,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.sponsorBlockDraftMarker) {
   background-color: #fff;
+  background-image: none;
   box-shadow: 0 0 0 1px #000;
-
-  /* Keep drafts bright over played/buffered tracks; the dark edge defines their bounds. */
-  mix-blend-mode: normal;
 }
 
 :deep(.chapterMarker) {
