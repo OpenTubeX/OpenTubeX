@@ -70,9 +70,11 @@ async function trackHistoryNavigations(page, block = false) {
 }
 
 async function releaseHistoryNavigation(page, completedCount) {
-  await expect.poll(() => page.evaluate(() => window.__historyNavigations.releases.length)).toBe(1)
+  // Superseded saves may complete as cancelled before reaching the next guard.
+  if (await page.evaluate(() => window.__historyNavigations.completed.length) >= completedCount) return
+  await expect.poll(() => page.evaluate(() => window.__historyNavigations.releases.length)).toBeGreaterThan(0)
   await page.evaluate(() => window.__historyNavigations.releases.shift()())
-  await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.length)).toBe(completedCount)
+  await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.length)).toBeGreaterThanOrEqual(completedCount)
 }
 
 async function scrollPageToEnd(page) {
