@@ -50,13 +50,15 @@ for (const scale of [100, 125]) {
       }), { message: 'Copy control is vertically centered in the one-line card' }).toBeLessThanOrEqual(1)
       await expect.poll(() => card.evaluate(element => {
         const text = element.querySelector('.description').getBoundingClientRect()
-        return element.getBoundingClientRect().height - text.height
-      }), { message: 'Card reserves only its normal vertical padding' }).toBeLessThanOrEqual(33)
+        const style = getComputedStyle(element)
+        const padding = Number.parseFloat(style.paddingBlockStart) + Number.parseFloat(style.paddingBlockEnd)
+        return Math.abs(element.getBoundingClientRect().height - text.height - padding)
+      }), { message: 'Card reserves only its normal vertical padding' }).toBeLessThanOrEqual(1)
 
       await page.mouse.move(0, 0)
       for (const theme of ['dark', 'light']) {
         await page.emulateMedia({ colorScheme: theme })
-        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+        await expect(page.locator('body')).toContainClass(theme)
         await testInfo.attach(`one-line description ${theme}`, {
           body: await card.screenshot(), contentType: 'image/png'
         })
