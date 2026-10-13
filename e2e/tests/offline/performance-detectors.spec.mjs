@@ -110,6 +110,27 @@ test('detects sustained slower frame delivery below the longest-frame noise floo
   expect(comparison.metrics.find(metric => metric.key === 'largeFeedScrollLongestFrameMs').passed).toBe(true)
 })
 
+test('collects disposed players when application data grows during heap sampling', async ({ app, page }) => {
+  test.setTimeout(120_000)
+  await mockPlayableWatchPage(app, page)
+  await page.evaluate(() => {
+    const seen = new WeakSet()
+    window.__performanceDisposedPlayers = []
+    document.addEventListener('playing', event => {
+      if (!(event.target instanceof HTMLVideoElement) || seen.has(event.target)) return
+      seen.add(event.target)
+      window.__performanceDisposedPlayers.push(new WeakRef(event.target))
+      // Exercise collection under allocation pressure without retaining a player.
+      if (window.__performanceDisposedPlayers.length === 2) {
+        window.__performanceApplicationCache = Array(2_000_000).fill(123)
+      }
+    }, true)
+  })
+  await measurePlaybackHeapGrowth(page)
+  const retained = await page.evaluate(() => window.__performanceDisposedPlayers.filter(reference => reference.deref()).length)
+  expect(retained).toBe(0)
+})
+
 test('detects retained players across complete playback and tab disposal cycles', async ({ app, page }, testInfo) => {
   test.setTimeout(120_000)
   await mockPlayableWatchPage(app, page)

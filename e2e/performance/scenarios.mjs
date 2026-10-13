@@ -167,22 +167,22 @@ export async function measureLargeFeedScroll(page) {
 
 async function collectRendererHeapAfterGcKiB(page, settleMs = 0) {
   if (settleMs > 0) await page.waitForTimeout(settleMs)
-  return page.evaluate(async () => {
-    if (typeof globalThis.gc !== 'function') {
-      throw new Error('Renderer garbage collection is unavailable')
-    }
-
+  const session = await page.context().newCDPSession(page)
+  try {
+    // Collect Blink's disposed DOM wrappers as well as ordinary V8 objects.
     for (let index = 0; index < 3; index++) {
-      globalThis.gc()
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      await session.send('HeapProfiler.collectGarbage')
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
     }
 
-    const usedJSHeapSize = performance.memory?.usedJSHeapSize
-    if (!Number.isFinite(usedJSHeapSize)) {
+    const { usedSize } = await session.send('Runtime.getHeapUsage')
+    if (!Number.isFinite(usedSize)) {
       throw new Error('Precise renderer heap information is unavailable')
     }
-    return usedJSHeapSize / 1024
-  })
+    return usedSize / 1024
+  } finally {
+    await session.detach()
+  }
 }
 
 async function measureNavigationHeapGrowth(page) {
