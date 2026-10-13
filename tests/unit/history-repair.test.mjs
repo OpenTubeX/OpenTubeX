@@ -51,7 +51,7 @@ test('repair retains duplicate record identities through retries and emits only 
     },
   })
   assert.deepEqual(result, { total: 2, checked: 2, repaired: 2, failed: 0 })
-  assert.deepEqual(saved.sort((a, b) => a._id.localeCompare(b._id)), rows.map(row => ({ _id: row._id, videoId: row.videoId, ...metadata, liveNow: false })))
+  assert.deepEqual(saved.sort((a, b) => a._id.localeCompare(b._id)), rows.map(row => ({ _id: row._id, videoId: row.videoId, ...metadata, liveNow: false, pendingDurationRepair: true })))
   assert.equal(historyRepairPatch(current.get('first'), metadata), null, 'record identity alone must not count as a metadata change')
   assert.deepEqual([...current.values()].map(row => row.watchProgress), [12, 99])
 })
