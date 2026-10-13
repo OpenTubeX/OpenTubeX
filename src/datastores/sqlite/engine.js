@@ -670,13 +670,13 @@ export class LibraryEngine {
     }
     applyBatch(batch)
     // Retained legacy scalar IDs cannot populate the text index. Preserve their
-    // JSON types without loading full members, arrays or thumbnails. Object IDs
-    // have distinct reference identity, as in the portable Set/Map contract.
+    // JSON types without loading full members, arrays or thumbnails. Unidentified
+    // and object-valued members are retained separately by duplicate cleanup.
     const legacyMembers = new Map()
     for (const row of this.prepare(`SELECT data -> '$.videoId' AS legacy_id, count(*) AS count, sum(CASE WHEN ${validDuration} THEN 0 ELSE 1 END) AS missing FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND video_id IS NULL GROUP BY legacy_id`).iterate(id)) {
       const videoId = row.legacy_id === null ? undefined : deserialize(row.legacy_id)
       const objectId = videoId !== null && typeof videoId === 'object'
-      counts.uniqueCount += objectId ? row.count : 1
+      counts.uniqueCount += ['string', 'number', 'boolean'].includes(typeof videoId) ? 1 : row.count
       if (!objectId) legacyMembers.set(row.legacy_id, row)
     }
     for (const [identity, history] of legacyHistoryRows(this, legacyMembers.keys())) applyHistory({ ...legacyMembers.get(identity), history })

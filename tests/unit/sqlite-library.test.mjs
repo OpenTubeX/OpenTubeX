@@ -2878,3 +2878,21 @@ test('selected additions preserve repeated incoming occurrences and exclude alre
   await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false }))
   assert.deepEqual(await engine.playlistSnapshot({ id: 'batch' }), first)
 })
+
+
+test('SQLite duplicate statistics count exactly the members cleanup removes', async t => {
+  const database = new DatabaseSync(':memory:')
+  t.after(() => database.close())
+  database.exec('PRAGMA foreign_keys = ON;' + SCHEMA_SQL)
+  const engine = new LibraryEngine(database)
+  const videos = [null, false, {}, { videoId: null }, { videoId: null }, { videoId: { retained: true } }, { videoId: { retained: true } }, { videoId: 'same' }, { videoId: 'same' }, { videoId: 42 }, { videoId: 42 }]
+  const original = { _id: 'p', videos, unknown: new Date(123) }
+  await engine.collections.playlists.insertAsync(original)
+  const stats = engine.playlistStatistics({ id: 'p' })
+  assert.equal(stats.total - stats.uniqueCount, 2)
+  assert.deepEqual(await engine.playlistSnapshot({ id: 'p' }), original)
+  assert.equal(await engine.cleanupPlaylist({ id: 'p', mode: 'duplicates' }), 2)
+  assert.deepEqual((await engine.playlistSnapshot({ id: 'p' })).videos, videos.filter((_, index) => index !== 8 && index !== 10))
+  const cleaned = engine.playlistStatistics({ id: 'p' })
+  assert.equal(cleaned.uniqueCount, cleaned.total)
+})
