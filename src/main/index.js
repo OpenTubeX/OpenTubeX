@@ -1726,7 +1726,12 @@ function runApp() {
       event.returnValue = snapshot
       if (request.type) {
         for (const window of BrowserWindow.getAllWindows()) {
-          window.webContents.send(IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
+          try {
+            if (window.isDestroyed() || window.webContents.isDestroyed() || !isOpenTubeXUrl(window.webContents.getURL())) continue
+            window.webContents.send(IpcChannels.WATCH_QUEUE_UPDATED, snapshot)
+          } catch (error) {
+            console.warn('Could not update a window\'s watch queue', error)
+          }
         }
       }
     } catch (error) {

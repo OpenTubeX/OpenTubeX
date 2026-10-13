@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, rm } from 'node:fs/promises'
+import { mkdtemp, rm, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { runInNewContext } from 'node:vm'
 import { createStore } from 'vuex'
 import { createSharedWatchQueue, createFileWatchQueue } from '../../src/main/watchQueue.js'
 import watchQueue, { persistWatchQueue } from '../../src/renderer/store/modules/watch-queue.js'
@@ -29,6 +30,23 @@ function sharedWindows() {
 }
 
 const addVideo = (store, videoId) => store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
+
+const component = await readFile(new URL('../../src/renderer/components/WatchVideoQueue/WatchVideoQueue.vue', import.meta.url), 'utf8')
+const moveSource = component.slice(component.indexOf('function move(queueItemId, offset)'), component.indexOf('\nfunction setQueueDragHandle('))
+
+for (const upwards of [true, false]) {
+  test(`a stale window's ${upwards ? 'upward' : 'downward'} drag keeps its target after another window removes an intervening item`, () => {
+    const windows = sharedWindows()
+    const first = windows.window()
+    for (const id of ['one', 'two', 'three', 'four']) addVideo(first, id)
+    const second = windows.window()
+    second.commit('removeVideoFromWatchQueue', second.getters.getWatchQueue[1].queueItemId)
+    const movedItem = first.getters.getWatchQueue[upwards ? 3 : 0]
+    const move = runInNewContext(`${moveSource}\nmove`, { store: first, items: { value: first.getters.getWatchQueue } })
+    move(movedItem.queueItemId, upwards ? -3 : 3)
+    assert.deepEqual(windows.restored(), upwards ? ['four', 'one', 'three'] : ['three', 'four', 'one'])
+  })
+}
 
 test('a stale window cannot resurrect a cleared item when adding another video', () => {
   const windows = sharedWindows()

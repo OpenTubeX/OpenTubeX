@@ -93,14 +93,14 @@ export const watchQueueMutations = {
     }
   },
 
-  moveVideoInWatchQueue(state, { queueItemId, offset }) {
+  moveVideoInWatchQueue(state, { queueItemId, targetQueueItemId, after = false }) {
     const index = state.items.findIndex(item => item.queueItemId === queueItemId)
-    const targetIndex = index + offset
-    if (index === -1 || targetIndex < 0 || targetIndex >= state.items.length) {
+    if (index === -1 || queueItemId === targetQueueItemId || !state.items.some(item => item.queueItemId === targetQueueItemId)) {
       return
     }
 
     const [item] = state.items.splice(index, 1)
+    const targetIndex = state.items.findIndex(item => item.queueItemId === targetQueueItemId) + (after ? 1 : 0)
     state.items.splice(targetIndex, 0, item)
   },
 

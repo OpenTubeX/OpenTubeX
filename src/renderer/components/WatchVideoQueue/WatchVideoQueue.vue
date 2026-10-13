@@ -253,7 +253,14 @@ function playQueuedVideo(queueItemId, event) {
 }
 
 function move(queueItemId, offset) {
-  store.commit('moveVideoInWatchQueue', { queueItemId, offset })
+  const index = items.value.findIndex(item => item.queueItemId === queueItemId)
+  const target = items.value[index + offset]
+  if (index === -1 || !target) return
+  store.commit('moveVideoInWatchQueue', {
+    queueItemId,
+    targetQueueItemId: target.queueItemId,
+    after: offset > 0
+  })
 }
 
 function setQueueDragHandle(queueItemId, element) {

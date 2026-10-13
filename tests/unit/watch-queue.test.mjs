@@ -42,7 +42,7 @@ test('restores pending videos in order with metadata, download routes, and disti
   store.commit('addVideoToWatchQueue', { video: video('one') })
   store.commit('addVideoToWatchQueue', { video: downloadedVideo })
   store.commit('addVideoToWatchQueue', { video: downloadedVideo, playNext: true })
-  store.commit('moveVideoInWatchQueue', { queueItemId: store.getters.getWatchQueue[1].queueItemId, offset: 1 })
+  store.commit('moveVideoInWatchQueue', { queueItemId: store.getters.getWatchQueue[1].queueItemId, targetQueueItemId: store.getters.getWatchQueue[2].queueItemId, after: true })
 
   store = persistentQueue(storage)
   assert.deepEqual(store.getters.getWatchQueue.map(({ queueItemId, ...item }) => item), [downloadedVideo, downloadedVideo, video('one')])
@@ -120,7 +120,7 @@ test('reorders, removes, and clears queued videos', () => {
   }
 
   const secondId = state.items[1].queueItemId
-  watchQueueMutations.moveVideoInWatchQueue(state, { queueItemId: secondId, offset: -1 })
+  watchQueueMutations.moveVideoInWatchQueue(state, { queueItemId: secondId, targetQueueItemId: state.items[0].queueItemId })
   assert.deepEqual(state.items.map(item => item.videoId), ['two', 'one', 'three'])
 
   watchQueueMutations.removeVideoFromWatchQueue(state, secondId)
