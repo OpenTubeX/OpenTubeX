@@ -52,7 +52,7 @@ export function useSubscriptionPage(category, onlyNew = () => false, enabled = (
   let expiresAt = 0
   const presented = () => active && isTabPresented?.value !== false
   const options = computed(() => ({
-    subscriptions: store.getters.getActiveProfile.subscriptions.slice(),
+    subscriptions: Array.isArray(store.getters.getActiveProfile?.subscriptions) ? store.getters.getActiveProfile.subscriptions.slice() : [],
     category: category(),
     onlyNew: onlyNew(),
     limit: limit(),

@@ -462,3 +462,18 @@ test('an unrelated large-category refresh keeps local visible feed updates respo
   await advance(150)
   assert.equal(result.records.value[0].title, 'Updated')
 })
+
+
+for (const subscriptions of [undefined, null, false, 42, 'retained', {}, new Date(123)]) {
+  test(`paged feed tolerates retained subscriptions ${String(subscriptions)} without changing the profile`, async t => {
+    const calls = []
+    const { getters, advance, result } = await feed(t, async (_, options) => { calls.push(options.subscriptions); return { records: [], cursor: null, total: 0, revision: 1 } })
+    getters.getActiveProfile = { _id: 'retained', subscriptions, unknown: new Date(456) }
+    await advance(0)
+    assert.ok(calls.length > 0)
+    assert.deepEqual(Array.from(calls.at(-1)), [])
+    assert.deepEqual(getters.getActiveProfile.subscriptions instanceof Date ? getters.getActiveProfile.subscriptions.getTime() : getters.getActiveProfile.subscriptions, subscriptions instanceof Date ? subscriptions.getTime() : subscriptions)
+    assert.equal(getters.getActiveProfile.unknown.getTime(), 456)
+    assert.equal(result.failed.value, false)
+  })
+}
