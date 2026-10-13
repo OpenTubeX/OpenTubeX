@@ -466,3 +466,40 @@ test('a rolled-back sync cancellation retains its job and all staged rows for re
   assert.throws(() => sync.job(job.id), /Unknown library sync/)
   assert.deepEqual(sync.read(job.id, 'remote'), [])
 })
+
+
+for (const allowMissingUploader of [false, true]) {
+  test(`SQLite playlist sync preserves the current missing-uploader option: ${allowMissingUploader}`, async t => {
+    const { engine, sync } = fixture(t)
+    const imported = { videoId: 'missing-channel', title: 'Imported', lengthSeconds: 30, playlistItemId: 'first', unknown: new Date(1) }
+    const original = { _id: 'imported', playlistName: 'Imported', description: '', videos: [imported, { ...imported, playlistItemId: 'second' }, { ...video(1), playlistItemId: 'known' }], unknown: new Date(2) }
+    await engine.collections.playlists.insertAsync(original)
+    const job = await sync.start({ kind: 'playlist', playlistId: original._id, metadata: { title: original.playlistName, description: '' }, options: { allowMissingUploader } })
+    await sync.chunk({ ...job, section: 'remote', records: [] })
+    await sync.plan(job)
+    const uploads = (await sync.page({ ...job, section: 'playlistUploads' })).records
+    assert.deepEqual(uploads.map(entry => entry.id).sort(), [video(1).videoId, ...(allowMissingUploader ? [imported.videoId] : [])].sort())
+    if (allowMissingUploader) assert.equal(uploads.find(entry => entry.id === imported.videoId).uploader.id, 'opentubex:unknown-uploader')
+    assert.equal(await sync.apply(job, {}), true)
+    assert.deepEqual(await engine.playlistSnapshot({ id: original._id }), original)
+    await sync.cancel(job)
+  })
+}
+
+test('SQLite playlist downloads restore unknown uploader markers as missing local metadata', async t => {
+  const { engine, sync } = fixture(t)
+  await engine.collections.playlists.insertAsync({ _id: 'download', playlistName: 'Downloaded', description: '', videos: [] })
+  const remote = videoToRemote({ videoId: 'remote', title: 'Remote', lengthSeconds: 30 }, { allowMissingUploader: true })
+  const job = await sync.start({ kind: 'playlist', playlistId: 'download', metadata: { title: 'Downloaded', description: '' }, options: { allowMissingUploader: true } })
+  await sync.chunk({ ...job, section: 'remote', records: [remote] })
+  await sync.plan(job)
+  await sync.apply(job, {})
+  const member = (await engine.playlistSnapshot({ id: 'download' })).videos[0]
+  assert.equal(Object.hasOwn(member, 'authorId'), false)
+  assert.equal(Object.hasOwn(member, 'author'), false)
+  const { playlistItemId, timeAdded, ...metadata } = member
+  assert.equal(typeof playlistItemId, 'string')
+  assert.equal(typeof timeAdded, 'number')
+  assert.deepEqual(metadata, { videoId: 'remote', title: 'Remote', lengthSeconds: 30, published: 0, type: 'video' })
+  await sync.cancel(job)
+})

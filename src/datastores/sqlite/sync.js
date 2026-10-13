@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import model from '@seald-io/nedb/lib/model.js'
-import { mergeHistory, mergeIds, videoToRemote } from '../../renderer/helpers/sync-history-merge.js'
+import { mergeHistory, mergeIds, videoToRemote, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal } from '../../renderer/helpers/sync-history-merge.js'
 import { migrateLegacyHistoryRecord } from '../../history.js'
 
 const playlistMetadata = record => record ? { playlistName: record.playlistName, description: record.description } : null
@@ -114,18 +114,20 @@ export class LibrarySync {
       return { revision: job.revision, skipped: true, counts: { playlistUploads: 0, playlistRemovals: 0, playlistIds: 0, playlistMembers: 0 } }
     }
     const videos = local?.videos ?? []
-    const localById = new Map(videos.filter(video => video !== null && videoToRemote(video)).map(video => [video.videoId, video]))
+    const localById = new Map(videos.filter(video => video !== null && videoToRemote(video, job.options)).map(video => [video.videoId, video]))
     const remoteById = new Map(this.read(id, 'remote').map(video => [video.id, video]))
     const merged = mergeIds(localById.keys(), remoteById.keys(), this.read(id, 'previous'), { ...job.options, collection: `videos in playlist ${job.metadata.title}`, getItemName: id => localById.get(id)?.title || remoteById.get(id)?.title })
-    const desired = videos.filter(video => video === null || !videoToRemote(video) || merged.has(video.videoId))
+    const desired = videos.filter(video => video === null || !videoToRemote(video, job.options) || merged.has(video.videoId)).map(video => video?.authorId === UNKNOWN_SYNC_UPLOADER_ID
+      ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
+      : video)
     for (const videoId of merged) {
       if (!localById.has(videoId)) {
         const video = remoteById.get(videoId)
-        desired.push({ videoId, title: video.title, author: video.uploader.name, authorId: video.uploader.id, lengthSeconds: video.duration, published: video.upload_date, timeAdded: Date.now(), playlistItemId: randomUUID(), type: 'video' })
+        desired.push({ videoId, title: video.title, ...uploaderToLocal(video.uploader), lengthSeconds: video.duration, published: video.upload_date, timeAdded: Date.now(), playlistItemId: randomUUID(), type: 'video' })
       }
     }
     const outputs = {
-      playlistUploads: [...merged].filter(videoId => !remoteById.has(videoId)).map(videoId => videoToRemote(localById.get(videoId))).filter(Boolean),
+      playlistUploads: [...merged].filter(videoId => !remoteById.has(videoId)).map(videoId => videoToRemote(localById.get(videoId), job.options)).filter(Boolean),
       playlistRemovals: [...remoteById.keys()].filter(videoId => !merged.has(videoId)),
       playlistIds: [...merged],
       playlistMembers: desired
