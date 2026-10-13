@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import vm, { compileFunction } from 'node:vm'
 import { computed, ref } from 'vue'
+import { filterHistoryByDateAndChannel } from '../../src/renderer/helpers/historyBrowse.js'
 import { filterVideosWithQuery, filterVideosWithQueryAsync } from '../../src/renderer/helpers/historySearch.js'
 import { load as loadYaml } from 'js-yaml'
 import { composeLocaleMessages } from '../../src/localeComposition.js'
@@ -49,6 +50,7 @@ test('portable history restores and extends the cached snapshot without datastor
     const cached = ref(original), activeData = ref([]), dataLimit = ref(10000), searchDataLimit = ref(100), query = ref('')
     const flags = Object.fromEntries(['isSearching', 'showSearchFeedback', 'historyReadFailed', 'historyPageReadFailed', 'showLoadMoreButton'].map(key => [key, ref(false)]))
     const bindings = { process: { env: { IS_ELECTRON: false } }, DBLibraryHandlers: { query() { assert.fail('portable history must filter the existing cache once, without querying the library') } },
+      filterHistoryByDateAndChannel, fromDate: ref(''), toDate: ref(''), channel: ref(''), hasFilters: computed(() => query.value.trim().length > 0),
       filterVideosWithQuery, filterVideosWithQueryAsync, historyCacheSorted: computed(() => cached.value), activeData, dataLimit, searchDataLimit, query, ...flags,
       sortBy: ref(oldest ? 'oldest' : 'newest'), HISTORY_SORT_BY_VALUES: { DateAddedOldest: 'oldest' }, doCaseSensitiveSearch: ref(false), locale: ref('en-US'),
       filterHistoryAsync: { cancel() {} }, clampHistoryScroll() {}, saveStateInRouter() {}, dataLimitStorageKey: 'history', sessionStorage: { setItem() {} },
@@ -97,6 +99,7 @@ test('portable history yields between search batches and ignores a superseded re
   const activeData = ref([]), query = ref('Unmatchablephrase'), isSearching = ref(false)
   let eventRan = false, yielded = false, obsoletePublished = false
   const bindings = { process: { env: { IS_ELECTRON: false } }, filterVideosWithQuery,
+    filterHistoryByDateAndChannel, fromDate: ref(''), toDate: ref(''), channel: ref(''), hasFilters: computed(() => query.value.trim().length > 0),
     async filterVideosWithQueryAsync(...args) {
       const records = await filterVideosWithQueryAsync(...args)
       yielded = eventRan
