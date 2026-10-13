@@ -219,7 +219,7 @@ test.describe('Home new subscription content paging', () => {
     test(`${view} hides previous-profile subscriptions when the replacement read fails`, async ({ app, page }) => {
       await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
       await goTo(page, view === 'Home' ? 'home' : 'subscriptions')
-      if (view === 'New feed') await page.getByRole('tab', { name: 'New', exact: true }).click()
+      if (view === 'New feed') await page.locator('[data-subscription-feed-tab="all"]').click()
       const content = page.locator(view === 'Home' ? '[data-home-section="newSinceLastVisit"]' : '.newFeed')
       await expect(content).toContainText('Unseen library video 0')
       await app.electronApp.evaluate(({ ipcMain }) => {
@@ -335,7 +335,7 @@ test.describe('Home new subscription content paging', () => {
     const tabId = state.activeTabId
     await page.evaluate(id => sessionStorage.setItem(`Subscriptions/${id}/new/dataLimit`, '200'), tabId)
     await goTo(page, 'subscriptions')
-    await page.getByRole('tab', { name: 'New', exact: true }).click()
+    await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('.newFeed [data-feed-item-key]')).toHaveCount(200)
     await page.evaluate(() => window.scrollTo(0, 1500))
     const top = await page.evaluate(() => window.scrollY)
@@ -415,7 +415,7 @@ test.describe('paged library review recovery', () => {
       })
     })
     await goTo(page, 'subscriptions')
-    await page.getByRole('tab', { name: 'New', exact: true }).click()
+    await page.locator('[data-subscription-feed-tab="all"]').click()
     const feed = page.locator('.newFeed')
     await expect(feed.getByRole('alert')).toHaveCount(3)
     await expect(feed.getByText('No new content', { exact: true })).toHaveCount(0)
@@ -444,7 +444,7 @@ test.describe('paged library review recovery', () => {
       })
     })
     await goTo(page, 'subscriptions')
-    await page.getByRole('tab', { name: 'New', exact: true }).click()
+    await page.locator('[data-subscription-feed-tab="all"]').click()
     for (const [category, { title }] of Object.entries(categories)) {
       const section = page.locator(`[data-new-feed-category="${category}"]`)
       await section.scrollIntoViewIfNeeded()
@@ -1864,6 +1864,8 @@ test.describe('retained opaque playlist preview', () => {
     expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaqueMembership._id)).toStrictEqual(opaqueMembership)
     expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
   })
+
+
 })
 
 test.describe('saved to remote playlist ownership', () => {
@@ -2053,7 +2055,8 @@ test.describe('retained full-record playlist counts', () => {
 
 test.describe('retained null subscription members', () => {
   const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
-  const entry = { videoId: 'abcdefghijk', title: 'Visible after retained null members', author: 'Example channel', authorId: channelId, type: 'video', lengthSeconds: 120, published: 1700000000000, viewCount: 1000 }
+  const entry = { videoId: 'abcdefghijk', title: 'Visible after retained null members', author: 'Example channel', authorId: channelId, type: 'video', lengthSeconds: 120, published: 1700000000000, viewCount: 1000, isNewInSubscriptionFeed: true }
+  const profile = { _id: 'allChannels', name: 'All Channels', icon: { type: 'icon', value: 'circle-user' }, subscriptions: [null, false, { retained: true }, { id: 42 }, { id: channelId, name: 'Example channel', thumbnail: '' }], unknown: { retained: true } }
   const cache = { _id: channelId, videos: [...Array(100).fill(null), entry], videosTimestamp: '2026-10-13T00:00:00.000Z', shorts: false, liveStreams: { retained: true }, communityPosts: 'legacy', unknown: { retained: true } }
   test.use({
     seed: {
@@ -2061,7 +2064,7 @@ test.describe('retained null subscription members', () => {
       history: [],
       playlists: [],
       watchStats: [{ _id: 'history-watch-time-v1' }],
-      profiles: [{ _id: 'allChannels', name: 'All Channels', subscriptions: [{ id: channelId, name: 'Example channel', thumbnail: '' }] }],
+      profiles: [profile],
       subscriptionCache: [cache],
     }
   })
@@ -2081,6 +2084,13 @@ test.describe('retained null subscription members', () => {
     expect(original).toBe(JSON.stringify(cache) + '\n')
     const records = (await readPersistedDatastore(file, 'utf8')).trim().split('\n').map(line => JSON.parse(line))
     expect(records.find(record => record._id === channelId)).toStrictEqual(cache)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('.newFeed').getByText(entry.title, { exact: true })).toBeVisible()
+    await expect(content.getByRole('button', { name: 'Retry', exact: true })).toHaveCount(0)
+    const profileFile = path.join(app.userDataDir, 'profiles.db')
+    expect(await readFile(profileFile, 'utf8')).toBe(JSON.stringify(profile) + '\n')
+    const profiles = (await readPersistedDatastore(profileFile, 'utf8')).trim().split('\n').map(line => JSON.parse(line))
+    expect(profiles.find(record => record._id === profile._id)).toStrictEqual(profile)
     await content.screenshot({ path: testInfo.outputPath('retained-null-subscription-members-95.png') })
   })
 })

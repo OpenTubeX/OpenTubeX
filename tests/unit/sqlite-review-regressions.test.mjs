@@ -1583,14 +1583,24 @@ for (const outcome of ['rejected read', 'missing playlist', 'rejected write', 'n
       process: { env: { IS_ELECTRON: false } }, showRemoveDeadVideosPrompt: ref(true), props: { id: 'playlist' },
       deadVideoItemIds: ref(new Set([outcome === 'no matches' ? 'absent' : 'member'])),
       DBLibraryHandlers: { query: async () => { if (outcome === 'rejected read') throw new Error('read failed'); return outcome === 'missing playlist' ? null : playlist } },
-      store: { dispatch: async (_, record) => { if (outcome === 'rejected write') throw new Error('write failed'); writes.push(record); return true } },
+      DBPlaylistHandlers: { replaceVideosIfUnchanged: async (id, previous, videos, lastUpdatedAt) => {
+        assert.equal(id, playlist._id)
+        assert.deepEqual(structuredClone(previous), before.videos)
+        if (outcome === 'rejected write') throw new Error('write failed')
+        writes.push({ id, videos, lastUpdatedAt })
+        return { numAffected: 1 }
+      } },
+      store: { dispatch: async () => true },
       t: key => key, showToast: toast => toasts.push(toast),
     })
     await context.handleRemoveDeadVideosPromptAnswer('delete')
     assert.equal(context.deadVideoItemIds.value.size, 0)
     assert.deepEqual(playlist, before)
     assert.equal(toasts.length, outcome === 'no matches' ? 0 : 1)
-    if (outcome === 'saved') assert.deepEqual(structuredClone(writes), [{ ...before, videos: [before.videos[1]] }])
+    if (outcome === 'saved') {
+      assert.deepEqual(structuredClone(writes), [{ id: playlist._id, videos: [before.videos[1]], lastUpdatedAt: writes[0].lastUpdatedAt }])
+      assert.equal(Number.isFinite(writes[0].lastUpdatedAt), true)
+    }
     else {
       assert.equal(writes.length, 0)
       if (outcome !== 'no matches') assert.match(toasts[0].message, /There was an issue/)

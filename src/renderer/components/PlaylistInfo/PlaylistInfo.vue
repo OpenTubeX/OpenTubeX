@@ -375,7 +375,7 @@ import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
-import { DBLibraryHandlers } from '../../../datastores/handlers/index'
+import { DBLibraryHandlers, DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import { usePlaylistStatistics } from '../../composables/usePlaylistStatistics'
 
 import {
@@ -1152,13 +1152,14 @@ async function handleRemoveDeadVideosPromptAnswer(option) {
     const videos = playlist.videos.filter(video => video?.playlistItemId == null || !deadVideoItemIds.value.has(video.playlistItemId))
     const removed = playlist.videos.length - videos.length
     if (removed === 0) return
-    const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
+    const { numAffected } = await DBPlaylistHandlers.replaceVideosIfUnchanged(playlist._id, playlist.videos, videos, Date.now())
+    if (numAffected !== 1) throw new Error('The playlist changed; reload it before removing unavailable videos')
+    store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
     showToast({
-      message: saved
-        ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
-        : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
-      icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed),
+      icon: ['fas', 'trash'],
     })
+    await store.dispatch('grabAllPlaylists', { preserveRetained: true }).catch(console.error)
   } catch (error) {
     console.error(error)
     showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })

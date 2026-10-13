@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import model from '@seald-io/nedb/lib/model.js'
 import { effectScope, nextTick, reactive, ref, watch } from 'vue'
 import { createPortableLibrary } from '../../src/datastores/handlers/library-web.js'
 import { SORT_BY_VALUES } from '../../src/renderer/helpers/playlists.js'
@@ -35,7 +36,7 @@ async function fixture(records, quickBookmarkTargetPlaylistId = records[0]?._id)
   const db = { playlists: new Datastore({ inMemoryOnly: true }) }
   await db.playlists.insertAsync(records)
   const DBPlaylistHandlers = vm.runInNewContext(
-    handlers.slice(handlers.indexOf('class Playlists {'), handlers.indexOf('class SearchHistory {')) + '\nPlaylists', { db }
+    handlers.slice(handlers.indexOf('class Playlists {'), handlers.indexOf('class SearchHistory {')) + '\nPlaylists', { db, model }
   )
   const errors = []
   const dispatched = []
@@ -690,14 +691,14 @@ test('portable unavailable confirmation keeps unsupported members while removing
   const preserved = [null, false, 42, 'retained', [], new Date(1), { unknown: true }, { videoId: 'unidentified', unknown: new Date(2) }, { videoId: 'kept', playlistItemId: 'kept', unknown: new Date(3) }]
   const dead = { videoId: 'unavailable', playlistItemId: 'dead', unknown: new Date(4) }
   const original = { _id: 'p', playlistName: 'Retained', videos: [...preserved, dead], unknown: new Date(5) }
-  const { db, dispatch } = await fixture([original])
+  const { db, dispatch, handlers } = await fixture([original])
   const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
   const script = parse(component).descriptor.scriptSetup.content
   const node = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'handleRemoveDeadVideosPromptAnswer')
   const selected = ref(new Set([undefined, 'dead']))
   const action = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
     process: { env: { IS_ELECTRON: false } }, showRemoveDeadVideosPrompt: ref(true), selectedUserPlaylist: ref(structuredClone(original)), deadVideoItemIds: selected, props: { id: 'p' },
-    DBLibraryHandlers: { query: async () => db.playlists.findOneAsync({ _id: 'p' }) }, store: { dispatch }, showToast() {}, t: key => key,
+    DBLibraryHandlers: { query: async () => db.playlists.findOneAsync({ _id: 'p' }) }, DBPlaylistHandlers: handlers, store: { dispatch }, showToast() {}, t: key => key,
   })
   await action('delete')
   const saved = await db.playlists.findOneAsync({ _id: 'p' })
@@ -814,5 +815,45 @@ for (const paged of [false, true]) {
     const result = vm.runInContext(script.slice(all.start, all.end), context)
     assert.deepEqual(Array.from(result, playlist => playlist._id), ['array', 'empty', 'paged'])
     assert.deepEqual(records, before)
+  })
+}
+
+for (const concurrent of ['none', 'metadata', 'membership']) {
+  test(`portable unavailable cleanup preserves concurrent ${concurrent} edits with atomic membership writes`, async () => {
+    const original = { _id: 'p', playlistName: 'Retained', description: 'Original', videos: [null, { videoId: 'dead', playlistItemId: 'dead', unknown: new Date(1) }, { videoId: 'keep', playlistItemId: 'keep' }], unknown: new Date(2), lastUpdatedAt: 1 }
+    const { db, module, handlers, context: storeContext, load } = await fixture([original])
+    await load({ preserveRetained: true })
+    const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
+    const script = parse(component).descriptor.scriptSetup.content
+    const node = babelParse(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'handleRemoveDeadVideosPromptAnswer')
+    const added = { videoId: 'concurrent', playlistItemId: 'new', unknown: new Date(3) }
+    const selection = ref(new Set(['dead']))
+    const errors = [], toasts = []
+    const query = async () => {
+      const previous = await db.playlists.findOneAsync({ _id: 'p' })
+      if (concurrent !== 'none') await db.playlists.updateAsync({ _id: 'p' }, { $set: { description: 'Concurrent', unknown: new Date(4) }, ...(concurrent === 'membership' ? { $push: { videos: added } } : {}) })
+      return previous
+    }
+    const action = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
+      process: { env: { IS_ELECTRON: false } }, props: { id: 'p' }, showRemoveDeadVideosPrompt: ref(true), deadVideoItemIds: selection,
+      DBLibraryHandlers: { query }, DBPlaylistHandlers: handlers,
+      store: { dispatch: async (name, payload) => name === 'grabAllPlaylists' ? load({ preserveRetained: true }) : name === 'scheduleSyncServer' ? undefined : module.actions[name](storeContext, payload) },
+      console: { error: error => errors.push(error) }, showToast: toast => toasts.push(toast), t: key => key,
+    })
+    await action('delete')
+    const saved = await db.playlists.findOneAsync({ _id: 'p' })
+    if (concurrent === 'membership') {
+      assert.deepEqual(saved, { ...original, description: 'Concurrent', unknown: new Date(4), videos: [...original.videos, added] })
+      assert.equal(errors.length, 1)
+      assert.match(errors[0].message, /playlist changed/)
+      assert.equal(toasts[0].icon[1], 'circle-exclamation')
+    } else {
+      assert.deepEqual(saved, { ...original, ...(concurrent === 'metadata' ? { description: 'Concurrent', unknown: new Date(4) } : {}), videos: [original.videos[0], original.videos[2]], lastUpdatedAt: saved.lastUpdatedAt })
+      assert.equal(Number.isFinite(saved.lastUpdatedAt), true)
+      assert.deepEqual(errors, [])
+      assert.deepEqual(structuredClone(module.state.playlists.find(record => record._id === 'p')), saved)
+      assert.equal(toasts[0].icon[1], 'trash')
+    }
+    assert.equal(selection.value.size, 0)
   })
 }
