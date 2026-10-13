@@ -1879,7 +1879,7 @@ test.describe('Watch moves across retained hidden members', () => {
   const hidden = [null, false, { postId: 'post', unknown: { keep: true } }, { videoId: 42 }, { videoId: '' }]
   const playlist = { _id: 'hidden-move', playlistName: 'Retained hidden members', createdAt: 1, lastUpdatedAt: 1, protected: false, videos: [a, ...hidden, b], future: { keep: true } }
   test.use({ seed: { settings: { historyWatchedStatusMigrated: true, uiScale: 95, userPlaylistSortOrder: 'custom', fetchSubscriptionsAutomatically: false }, history: [], playlists: [playlist] } })
-  test('one downward move changes the visible Watch order while preserving hidden members', async ({ page }) => {
+  test('one downward move changes the visible Watch order while preserving hidden members', async ({ app, page, attachScreenshot }) => {
     await page.route(/^https?:\/\//, route => route.fulfill({ status: 404, body: '' }))
     const item = await page.evaluate(async () => (await window.ftElectron.libraryQuery('playlistWindow', { id: 'hidden-move', playableOnly: true, limit: 1 })).records[0])
     await page.evaluate(item => window.ftElectron.tabs.create({ route: `/watch/${item.videoId}?playlistId=hidden-move&playlistType=user&playlistItemId=${item.playlistItemId}&libraryMemberId=${item._libraryMemberId}`, makeActive: true }), item)
@@ -1888,10 +1888,30 @@ test.describe('Watch moves across retained hidden members', () => {
     await expect(rows).toHaveCount(2)
     await expect(rows.first().getByText(a.title, { exact: true })).toBeVisible()
     const before = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'hidden-move' }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('library-query')
+      globalThis.watchMoveGate = Promise.withResolvers()
+      globalThis.watchMovePending = false
+      ipcMain.removeHandler('library-query')
+      ipcMain.handle('library-query', async (event, request) => {
+        if (request.method === 'movePlaylistMember') {
+          globalThis.watchMovePending = true
+          await globalThis.watchMoveGate.promise
+        }
+        return handler(event, request)
+      })
+    })
     await rows.first().hover()
     await rows.first().locator('.downArrowIcon').click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.watchMovePending)).toBe(true)
+    await expect(panel.locator('.downArrowIcon, .upArrowIcon')).toHaveCount(0)
+    await expect(panel.locator('.playlistItem[draggable="true"]')).toHaveCount(0)
+    await attachScreenshot('watch-reorder-controls-disabled-95')
+    await app.electronApp.evaluate(() => globalThis.watchMoveGate.resolve())
     await expect(rows.first().getByText(b.title, { exact: true })).toBeVisible()
     await expect(rows.last().getByText(a.title, { exact: true })).toBeVisible()
+    await expect(panel.locator('.downArrowIcon')).toHaveCount(1)
+    await expect(panel.locator('.playlistItem[draggable="true"]')).toHaveCount(2)
     const after = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'hidden-move' }))
     expect(after).toStrictEqual({ ...before, videos: [b, ...hidden, a], lastUpdatedAt: after.lastUpdatedAt })
   })
