@@ -594,7 +594,8 @@ function updateSubscriptionDetails(results) {
     if (result.dataSource === 'local') {
       channels.push({
         channelId: result.id,
-        channelName: result.name,
+        // Keep the saved name until the channel card resolves its original name.
+        channelName: store.getters.getAvoidTranslation === 'entire_app' ? undefined : result.name,
         channelThumbnailUrl: result.thumbnail.replace(/^\/\//, 'https://')
       })
     } else {

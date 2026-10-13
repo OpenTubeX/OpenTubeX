@@ -140,3 +140,46 @@ test.describe('channel name request lifecycle', () => {
     await expect(page.locator('.ft-list-channel .h3Title')).toHaveText(translatedName)
   })
 })
+
+test.describe('original names for existing subscriptions', () => {
+  const savedName = 'Saved Channel Name'
+  test.use({
+    seed: {
+      settings: { avoidTranslation: 'entire_app' },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{ id: channelId, name: savedName, thumbnail: '' }]
+      }]
+    }
+  })
+
+  test('preserves existing names while resolving and reusing original names', async ({ page }) => {
+    let releaseFeed
+    let feedRequests = 0
+    await mockSearch(page, async route => {
+      feedRequests++
+      await new Promise(resolve => { releaseFeed = resolve })
+      await route.fulfill({ contentType: 'application/atom+xml', body: rss })
+    })
+    const subscription = () => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getProfileList[0].subscriptions[0]
+    })
+    await search(page)
+    await expect.poll(() => typeof releaseFeed).toBe('function')
+    // Search can update the avatar while it waits, but must not persist a translated name.
+    await expect.poll(async () => (await subscription()).thumbnail).toBe('https://yt3.ggpht.com/channel-avatar')
+    expect((await subscription()).name).toBe(savedName)
+    releaseFeed()
+    await expect(page.locator('.ft-list-channel .h3Title')).toHaveText(originalName)
+    await expect.poll(async () => (await subscription()).name).toBe(originalName)
+
+    await search(page, 'another channel search')
+    await expect(page.locator('.ft-list-channel .h3Title')).toHaveText(originalName)
+    await expect.poll(async () => (await subscription()).name).toBe(originalName)
+    expect(feedRequests).toBe(1)
+  })
+})

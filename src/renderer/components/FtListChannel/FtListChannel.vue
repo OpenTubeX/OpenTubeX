@@ -182,7 +182,11 @@ watch([() => props.data, () => store.getters.getAvoidTranslation], ([data, prefe
   let active = true
   onCleanup(() => { active = false })
   getOriginalChannelName(data.id).then(originalName => {
-    if (active && originalName) name.value = originalName
+    if (!active || !originalName) return
+    name.value = originalName
+    if (store.getters.getSubscribedChannelIdSet.has(data.id)) {
+      store.dispatch('updateSubscriptionDetails', { channelId: data.id, channelName: originalName })
+    }
   })
 }, { immediate: true })
 
