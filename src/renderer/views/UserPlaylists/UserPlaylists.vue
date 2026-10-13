@@ -476,10 +476,10 @@ const filteredPlaylists = computed(() => {
   if (needle === '') return allPlaylists.value
   const findMatchingVideos = doSearchPlaylistsWithMatchingVideos.value
   return allPlaylists.value.filter(playlist => {
-    if (typeof playlist.playlistName !== 'string') return false
-    return playlist.playlistName.toLowerCase().includes(needle) ||
-      (findMatchingVideos && playlist.videos.some(video => (
-        video.author?.toLowerCase().includes(needle) || video.title.toLowerCase().includes(needle)
+    return (typeof playlist.playlistName === 'string' && playlist.playlistName.toLowerCase().includes(needle)) ||
+      (findMatchingVideos && (Array.isArray(playlist.videos) ? playlist.videos : []).some(video => (
+        (typeof video?.author === 'string' && video.author.toLowerCase().includes(needle)) ||
+        (typeof video?.title === 'string' && video.title.toLowerCase().includes(needle))
       )))
   })
 })

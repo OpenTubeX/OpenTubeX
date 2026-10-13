@@ -395,3 +395,25 @@ test('portable Save preserves hidden members and distinct incoming occurrences',
     assert.deepEqual(playlists, before)
   }
 })
+
+
+test('portable overview search tolerates retained memberships and names without rewriting records', async () => {
+  const component = await readFile(new URL('../../src/renderer/views/UserPlaylists/UserPlaylists.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'filteredPlaylists').init
+  const playlists = [
+    ...[undefined, null, false, 42, 'retained', {}].map((videos, index) => ({ _id: `scalar-${index}`, playlistName: 'Scalar', videos })),
+    { _id: 'opaque', playlistName: 'Opaque', videos: [null, false, {}, { title: 42, author: 42 }] },
+    { _id: 'by-title', playlistName: 'Title', videos: [null, { title: 'Needle', author: null }] },
+    { _id: 'by-author', playlistName: 'Author', videos: [{ author: 'Needle', title: null }] },
+    { _id: 'unnamed', playlistName: null, videos: [{ title: 'Needle' }], unknown: new Date(1) },
+  ]
+  const before = structuredClone(playlists)
+  const results = vm.runInNewContext(script.slice(init.start, init.end), {
+    process: { env: { IS_ELECTRON: false } }, computed: getter => getter(),
+    appliedQuery: ref('needle'), doSearchPlaylistsWithMatchingVideos: ref(true), allPlaylists: ref(playlists),
+  })
+  assert.deepEqual(Array.from(results, playlist => playlist._id), ['by-title', 'by-author', 'unnamed'])
+  assert.deepEqual(playlists, before)
+})
