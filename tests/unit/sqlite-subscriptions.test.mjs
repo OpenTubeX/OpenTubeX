@@ -1331,3 +1331,37 @@ test('new equal-time observations keep their title and inherited thumbnail throu
   await restored.transaction(() => updateVideoMetadataCache(restored, { videoId, title: 'Second observation', description: '', thumbnailUrl: 'same', thumbnail, observedAt: 1000 }))
   assert.equal(restored.collections.videoMetadataCache.count(), 3)
 })
+
+for (const id of ['\ud800', '\udc00', 'embedded-\ud800-id']) {
+  for (const kind of ['videoId', 'postId']) {
+    test(`subscription entry and seen actions preserve malformed ${kind}: ${JSON.stringify(id)}`, async t => {
+      const engine = memory(t), tab = kind === 'postId' ? 'posts' : 'videos', field = kind === 'postId' ? 'communityPosts' : 'videos'
+      const original = { [kind]: id, isNewInSubscriptionFeed: true, unknown: new Date(1) }
+      const other = { ...original, [kind]: id.toWellFormed() }
+      await engine.collections.subscriptionCache.insertAsync({ _id: 'channel', [field]: [original, other] })
+      await t.test('lookup', async () => assert.deepEqual(await subscriptionEntry(engine, { [kind]: id }), original))
+      const scope = { [kind]: id, tabs: [tab] }
+      const captured = await markSubscriptionEntries(engine, { ...scope, capture: true }, {})
+      await t.test('captured identity', () => assert.deepEqual(captured.entriesByTab[tab], [kind === 'postId' ? { postId: id } : { videoId: id, isMembersOnly: false }]))
+      const seen = []
+      const merge = async records => { seen.push(...(records.videos ?? records.posts)); return 'updated' }
+      await engine.transaction(() => markSubscriptionEntries(engine, scope, { settings: { mergeSeenVideos: merge, mergeSeenPosts: merge } }))
+      const saved = await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' })
+      assert.deepEqual(saved[field], [{ ...original, isNewInSubscriptionFeed: false }, other])
+      assert.equal(seen[0][kind], id)
+    })
+  }
+  test(`retained metadata pages keep malformed video identity distinct: ${JSON.stringify(id)}`, async t => {
+    const engine = memory(t)
+    const records = [
+      { _id: 'target-old', videoId: id, cachedAt: 1, title: 'Target old', unknown: new Date(1) },
+      { _id: 'target-new', videoId: id, cachedAt: 2, title: 'Target new' },
+      { _id: 'other-old', videoId: id.toWellFormed(), cachedAt: 1, title: 'Other old' },
+      { _id: 'other-new', videoId: id.toWellFormed(), cachedAt: 2, title: 'Other new' },
+    ]
+    await engine.collections.videoMetadataCache.insertAsync(records)
+    assert.deepEqual((await metadataPage(engine, { videoId: id, field: 'title' })).records.map(record => record.value), ['Target old'])
+    assert.deepEqual((await metadataPage(engine, { videoId: id.toWellFormed(), field: 'title' })).records.map(record => record.value), ['Other old'])
+    for (const record of records) assert.deepEqual(await engine.collections.videoMetadataCache.findOneAsync({ _id: record._id }), record)
+  })
+}

@@ -243,9 +243,13 @@ async function readSubscriptionPage(engine, options) {
 
 export async function subscriptionEntry(engine, { videoId, postId }) {
   return engine.read(() => {
+    const id = videoId || postId
+    const escaped = typeof id === 'string' && !id.isWellFormed()
+    const parameter = escaped ? JSON.stringify(id) : id
+    const identity = escaped ? "json_extract(?, '$')" : '?'
     const row = videoId
-      ? engine.prepare("SELECT data FROM members WHERE collection = 'subscriptionCache' AND video_id = ? LIMIT 1").get(videoId)
-      : engine.prepare("SELECT data FROM members WHERE collection = 'subscriptionCache' AND json_extract(data, '$.postId') = ? LIMIT 1").get(postId)
+      ? engine.prepare(`SELECT data FROM members WHERE collection = 'subscriptionCache' AND video_id = ${identity} LIMIT 1`).get(parameter)
+      : engine.prepare(`SELECT data FROM members WHERE collection = 'subscriptionCache' AND json_extract(data, '$.postId') = ${identity} LIMIT 1`).get(parameter)
     return row ? model.deserialize(row.data) : null
   })
 }
@@ -291,6 +295,10 @@ export async function markSubscriptionEntries(engine, { tabs = ['videos', 'short
   const videos = []
   const posts = []
   const capturedEntries = {}
+  const requestedId = videoId ?? postId
+  const escaped = typeof requestedId === 'string' && !requestedId.isWellFormed()
+  const parameter = escaped ? JSON.stringify(requestedId) : requestedId
+  const identity = escaped ? "json_extract(?, '$')" : '?'
   const videoMarks = new Map(parseSubscriptionSeenVideos((await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' }))?.value).map(mark => [mark.videoId, mark]))
   const postMarks = new Map(parseSubscriptionSeenPosts((await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenPosts' }))?.value).map(mark => [mark.postId, mark]))
   for (const tab of tabs) {
@@ -298,13 +306,15 @@ export async function markSubscriptionEntries(engine, { tabs = ['videos', 'short
     const ids = channelIdsByTab[tab] ?? channelIds
     const captured = entriesByTab == null ? null : new Set((entriesByTab[tab] ?? []).map(entry => tab === 'posts' ? entry.postId : JSON.stringify([entry.videoId, entry.isMembersOnly === true])))
     if (capture) capturedEntries[tab] = []
-    const rows = engine.prepare(`SELECT record_id, position, created_at, video_id, json_extract(data, '$.postId') AS post_id, json_type(data, '$.isMembersOnly') AS membership, json_type(data, '$.isNewInSubscriptionFeed') AS new_state${capture ? '' : ', data'} FROM members WHERE collection = 'subscriptionCache' AND field = ? AND ${videoId ? 'video_id = ?' : postId ? "json_extract(data, '$.postId') = ?" : 'record_id IN (SELECT value FROM json_each(?))'}`).all(field, videoId ?? postId ?? JSON.stringify(ids))
+    const rows = engine.prepare(`SELECT record_id, position, created_at, data -> '$.videoId' AS video_id, data -> '$.postId' AS post_id, json_type(data, '$.isMembersOnly') AS membership, json_type(data, '$.isNewInSubscriptionFeed') AS new_state${capture ? '' : ', data'} FROM members WHERE collection = 'subscriptionCache' AND field = ? AND ${videoId ? `video_id = ${identity}` : postId ? `json_extract(data, '$.postId') = ${identity}` : 'record_id IN (SELECT value FROM json_each(?))'}`).all(field, parameter ?? JSON.stringify(ids))
     for (const row of rows) {
       // Bulk actions belong to the feed known at the gesture, even when a
       // concurrent refresh reaches the worker before this transaction.
       const cutoff = timestampsByTab[tab]?.[row.record_id]
       if (entriesByTab == null && !videoId && !postId && Number.isFinite(cutoff) && row.created_at > cutoff) continue
-      const id = tab === 'posts' ? row.post_id : row.video_id
+      // Read identities as their original JSON text: SQLite string results
+      // also replace unpaired surrogates, which would corrupt captured marks.
+      const id = JSON.parse((tab === 'posts' ? row.post_id : row.video_id) ?? 'null')
       const mark = tab === 'posts' ? postMarks.get(id) : videoMarks.get(id)
       const isNew = mark
         ? mark.unseenAt >= mark.seenAt || (tab !== 'posts' && mark.isMembersOnly && row.membership === 'false' && row.new_state === 'true')

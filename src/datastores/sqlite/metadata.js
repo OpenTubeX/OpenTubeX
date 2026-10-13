@@ -58,18 +58,26 @@ function compareRevisions(previous, current) {
   return changedFields
 }
 
+function metadataIdentitySql(videoId) {
+  return videoId.isWellFormed() ? '?' : "json_extract(?, '$')"
+}
+
+function metadataIdentityParameter(videoId) {
+  return videoId.isWellFormed() ? videoId : JSON.stringify(videoId)
+}
+
 function legacyMetadataOrder(engine, videoId) {
   const revision = engine.revision('videoMetadataCache')
   const cached = engine.legacyMetadataOrders.get(videoId)
   if (cached?.revision === revision) return cached.ids
-  const legacy = engine.prepare("SELECT 1 FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') NOT IN ('integer', 'real') LIMIT 1").get(videoId)
-  const tied = engine.prepare("SELECT 1 FROM metadata_order o JOIN records r ON r.collection = o.collection AND r.id = o.record_id WHERE o.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IN ('integer', 'real') GROUP BY o.sort_time HAVING count(*) > 1 LIMIT 1").get(videoId)
+  const legacy = engine.prepare(`SELECT 1 FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND json_type(r.data, '$.cachedAt') NOT IN ('integer', 'real') LIMIT 1`).get(metadataIdentityParameter(videoId))
+  const tied = engine.prepare(`SELECT 1 FROM metadata_order o JOIN records r ON r.collection = o.collection AND r.id = o.record_id WHERE o.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND json_type(r.data, '$.cachedAt') IN ('integer', 'real') GROUP BY o.sort_time HAVING count(*) > 1 LIMIT 1`).get(metadataIdentityParameter(videoId))
   // Distinct numeric observations keep their indexed path. Retained values and ties need
   // NeDB ordering before slicing; read only sort keys, never thumbnail blobs
   // or unrelated title/description data.
   let ids = null
   if (legacy || tied) {
-    const rows = engine.prepare("SELECT r.id, r.data -> '$._id' AS original_id, r.data -> '$.cachedAt' AS cached_at FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IS NOT NULL").all(videoId)
+    const rows = engine.prepare(`SELECT r.id, r.data -> '$._id' AS original_id, r.data -> '$.cachedAt' AS cached_at FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND json_type(r.data, '$.cachedAt') IS NOT NULL`).all(metadataIdentityParameter(videoId))
       .map(row => ({ id: row.id, recordId: model.deserialize(row.original_id), cachedAt: model.deserialize(row.cached_at) }))
     ids = rows.toSorted((left, right) => model.compareThings(left.cachedAt, right.cachedAt) || model.compareThings(left.recordId, right.recordId)).map(row => row.id)
   }
@@ -81,7 +89,7 @@ function legacyMetadataOrder(engine, videoId) {
 function inheritedThumbnail(engine, videoId, record, sequence, order = null, id = record._id) {
   const row = order
     ? engine.prepare("SELECT r.data, b.digest FROM json_each(?) j JOIN records r ON r.collection = 'videoMetadataCache' AND r.id = j.value LEFT JOIN record_blobs b ON b.collection = r.collection AND b.record_id = r.id AND b.field = 'thumbnail' WHERE CAST(j.key AS INTEGER) <= ? AND json_extract(r.data, '$.hasThumbnailChange') = 1 ORDER BY CAST(j.key AS INTEGER) DESC LIMIT 1").get(JSON.stringify(order), order.indexOf(id))
-    : engine.prepare("SELECT r.data, b.digest FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id LEFT JOIN record_blobs b ON b.collection = r.collection AND b.record_id = r.id AND b.field = 'thumbnail' WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND (o.sort_time < ? OR (o.sort_time = ? AND o.sequence <= ?)) AND json_extract(r.data, '$.hasThumbnailChange') = 1 ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 1").get(videoId, record.cachedAt, record.cachedAt, sequence)
+    : engine.prepare(`SELECT r.data, b.digest FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id LEFT JOIN record_blobs b ON b.collection = r.collection AND b.record_id = r.id AND b.field = 'thumbnail' WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND (o.sort_time < ? OR (o.sort_time = ? AND o.sequence <= ?)) AND json_extract(r.data, '$.hasThumbnailChange') = 1 ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 1`).get(metadataIdentityParameter(videoId), record.cachedAt, record.cachedAt, sequence)
   // Empty legacy strings were falsy in byte comparisons. Nonempty legacy
   // strings remain present even if they are not valid current data URLs.
   return row ? { record: model.deserialize(row.data), digest: row.digest === EMPTY_THUMBNAIL_DIGEST ? null : row.digest } : { record: null, digest: null }
@@ -91,7 +99,7 @@ async function metadataSummary(engine, videoId) {
   const order = legacyMetadataOrder(engine, videoId)
   const rows = order
     ? engine.prepare("SELECT r.id, r.data FROM json_each(?) j JOIN records r ON r.collection = 'videoMetadataCache' AND r.id = j.value ORDER BY CAST(j.key AS INTEGER) DESC LIMIT 2").all(JSON.stringify(order))
-    : engine.prepare("SELECT r.id, r.data, o.sequence FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IS NOT NULL ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 2").all(videoId)
+    : engine.prepare(`SELECT r.id, r.data, o.sequence FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND json_type(r.data, '$.cachedAt') IS NOT NULL ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 2`).all(metadataIdentityParameter(videoId))
   if (rows.length < 2) return null
   const revisions = rows.map(row => { const record = model.deserialize(row.data); return { ...record, thumbnailDigest: inheritedThumbnail(engine, videoId, record, row.sequence, order, row.id).digest } })
   return compareRevisions(revisions[1], revisions[0]).length ? { videoId, revisionCount: await engine.collections.videoMetadataCache.countAsync({ videoId, cachedAt: { $exists: true } }) } : null
@@ -111,7 +119,7 @@ export async function updateVideoMetadataCache(engine, input) {
   const order = legacyMetadataOrder(engine, input.videoId)
   const row = order
     ? engine.prepare("SELECT id, data FROM records WHERE collection = 'videoMetadataCache' AND id = ?").get(order.at(-1))
-    : engine.prepare("SELECT r.id, r.data, o.sequence FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IS NOT NULL ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 1").get(input.videoId)
+    : engine.prepare(`SELECT r.id, r.data, o.sequence FROM records r JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(input.videoId)} AND json_type(r.data, '$.cachedAt') IS NOT NULL ORDER BY o.sort_time DESC, o.sequence DESC LIMIT 1`).get(metadataIdentityParameter(input.videoId))
   let previous = row ? model.deserialize(row.data) : null
   const inherited = previous ? inheritedThumbnail(engine, input.videoId, previous, row.sequence, order, row.id) : { record: null, digest: null }
   if (previous) previous = { ...previous, thumbnailDigest: inherited.digest }
@@ -170,7 +178,7 @@ function readMetadataPage(engine, { videoId, field, cursor = null, limit = 25 })
     SELECT r.id, r.data, row_number() OVER (ORDER BY ${ordering}) AS ordinal FROM records r
       JOIN metadata_order o ON o.collection = r.collection AND o.record_id = r.id
       ${orderingJoin}
-      WHERE r.collection = 'videoMetadataCache' AND o.video_id = ? AND json_type(r.data, '$.cachedAt') IS NOT NULL
+      WHERE r.collection = 'videoMetadataCache' AND o.video_id = ${metadataIdentitySql(videoId)} AND json_type(r.data, '$.cachedAt') IS NOT NULL
   ), inherited AS (
     SELECT *, max(CASE WHEN json_extract(data, '$.hasThumbnailChange') = 1 THEN ordinal END) OVER (ORDER BY ordinal ROWS UNBOUNDED PRECEDING) AS thumbnail_ordinal FROM source
   ), values_by_revision AS (
@@ -185,7 +193,7 @@ function readMetadataPage(engine, { videoId, field, cursor = null, limit = 25 })
     SELECT *, row_number() OVER (ORDER BY ordinal DESC) AS version FROM compared WHERE ordinal = 1 OR value IS NOT previous_value OR value_type IS NOT previous_type OR value_type IN ('array', 'object')
   ) SELECT id, data, thumbnail_id, value FROM versions WHERE version > 1 ORDER BY ordinal DESC LIMIT ? OFFSET ?`
   const boundedLimit = Math.max(1, Math.min(50, limit))
-  const rows = engine.prepare(sql).all(...(order ? [JSON.stringify(order)] : []), videoId, boundedLimit + 1, offset)
+  const rows = engine.prepare(sql).all(...(order ? [JSON.stringify(order)] : []), metadataIdentityParameter(videoId), boundedLimit + 1, offset)
   const records = rows.slice(0, boundedLimit).map(row => {
     const record = model.deserialize(row.data)
     return { _id: row.id, cachedAt: record.cachedAt, value: field === 'thumbnail' ? null : record[field], thumbnailRevisionId: field === 'thumbnail' ? row.thumbnail_id : null, thumbnailUrl: record.thumbnailUrl }
