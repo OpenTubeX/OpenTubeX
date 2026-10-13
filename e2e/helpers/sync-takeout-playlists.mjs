@@ -41,6 +41,9 @@ export async function createTakeoutSyncServer() {
     async playlists() {
       return decryptSyncDocument(collections.get('playlists').payload, key)
     },
+    async history() {
+      return decryptSyncDocument(collections.get('history').payload, key)
+    },
     async close() {
       server.closeAllConnections()
       await new Promise(resolve => server.close(resolve))
@@ -74,6 +77,11 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
     syncServerSyncSessions: false,
     syncServerSyncSettings: false,
   }
+  const historyId = playlist.videos[0].videoId
+  const originalHistory = await page.evaluate(id => {
+    const record = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id]
+    return record ? JSON.parse(JSON.stringify(record)) : null
+  }, historyId)
   const original = await page.evaluate(async settings => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     const original = Object.fromEntries(Object.keys(settings).map(key => [key, store.state.settings[key]]))
@@ -115,17 +123,30 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       return store.getters.getPlaylist(id).videos.every(video => video.author == null && video.authorId == null)
     }, playlist._id)).toBe(true)
     await onDownloaded()
+    await page.evaluate(async ({ id, historyId }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const video = store.getters.getPlaylist(id).videos.find(video => video.videoId === historyId)
+      await store.dispatch('removeFromHistory', historyId)
+      await store.dispatch('updateHistory', { ...video, timeWatched: 100, isWatched: true })
+      await store.dispatch('updateSyncServerSyncHistory', true)
+      await store.dispatch('syncWithSyncServer')
+      await store.dispatch('syncWithSyncServer')
+    }, { id: playlist._id, historyId })
+    expect((await server.history()).find(entry => entry.video.id === historyId)?.metadata.watched_state).toBe('completed')
+    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.syncServer.syncServerStatus)).toBe('success')
   } finally {
-    await page.evaluate(async ({ original, id }) => {
+    await page.evaluate(async ({ original, id, historyId, originalHistory }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateSyncServerEnabled', false)
       await store.dispatch('removePlaylist', id)
+      await store.dispatch('removeFromHistory', historyId)
+      if (originalHistory) await store.dispatch('updateHistory', originalHistory)
       for (const [key, value] of Object.entries(original)) {
         if (key === 'syncServerEnabled' || key === 'syncServerAutoSync') continue
         await store.dispatch(`update${key[0].toUpperCase()}${key.slice(1)}`, value)
       }
       await store.dispatch('updateSyncServerEnabled', original.syncServerEnabled)
       await store.dispatch('updateSyncServerAutoSync', original.syncServerAutoSync)
-    }, { original, id: playlist._id })
+    }, { original, id: playlist._id, historyId, originalHistory })
   }
 }

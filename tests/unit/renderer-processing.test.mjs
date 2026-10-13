@@ -167,7 +167,13 @@ test('history edits during serialization prevent stale writes and retry with fre
       applyWatchHistoryChanges: async entries => uploads.push(...entries),
     }, store)
     assert.equal(downloads, 2)
-    assert.equal(writes.length, 0)
+    // The retry can persist missing uploader metadata, but must use fresh progress.
+    assert.equal(writes.length, 1)
+    assert.deepEqual(writes[0].insertions, [])
+    assert.deepEqual(writes[0].deletions, [])
+    assert.equal(writes[0].updates.length, 1)
+    assert.equal(writes[0].updates[0].watchProgress, 99)
+    assert.equal(writes[0].updates[0].author, 'Channel')
     assert.equal(store.state.history.historyCacheById.video.watchProgress, 99)
     assert.equal(snapshot.video.position_millis, 99_000)
     assert.equal(uploads[0].metadata.position_millis, 99_000)

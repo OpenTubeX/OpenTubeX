@@ -398,7 +398,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           targetClient,
           store,
           previous.history,
-          { allowDataLoss }
+          // Imported playlist videos can enter history without uploader metadata.
+          { allowDataLoss, allowMissingUploader: encrypted }
         )
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)

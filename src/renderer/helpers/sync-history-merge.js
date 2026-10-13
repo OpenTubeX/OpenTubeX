@@ -1,6 +1,8 @@
 import { SyncServerDataLossError } from './sync-server-errors.js'
 
 export const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
+// Released clients require a truthy uploader ID to preserve video membership.
+export const UNKNOWN_SYNC_UPLOADER_ID = 'opentubex:unknown-uploader'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
 
 function mapBy(items, getId) {
@@ -54,7 +56,7 @@ export function normalizeChannelAvatar(avatar) {
 
 export function videoToRemote(video, { allowMissingUploader = false } = {}) {
   const videoId = video.videoId
-  const uploaderId = video.authorId || ''
+  const uploaderId = video.authorId === UNKNOWN_SYNC_UPLOADER_ID ? '' : video.authorId || ''
 
   if (!videoId || (!uploaderId && !allowMissingUploader)) {
     return null
@@ -65,8 +67,10 @@ export function videoToRemote(video, { allowMissingUploader = false } = {}) {
     title: video.title || videoId,
     upload_date: Number.isFinite(video.published) ? video.published : 0,
     uploader: {
-      id: uploaderId,
-      name: video.author || uploaderId,
+      id: uploaderId || UNKNOWN_SYNC_UPLOADER_ID,
+      name: video.authorId === UNKNOWN_SYNC_UPLOADER_ID && video.author === UNKNOWN_SYNC_UPLOADER_ID
+        ? ''
+        : video.author || uploaderId,
       avatar: normalizeChannelAvatar(video.authorThumbnail) || DEFAULT_CHANNEL_AVATAR,
       verified: false,
     },
@@ -75,8 +79,16 @@ export function videoToRemote(video, { allowMissingUploader = false } = {}) {
   }
 }
 
-function historyToRemote(record) {
-  const video = videoToRemote(record)
+export function uploaderToLocal(uploader) {
+  const unknownUploader = uploader.id === UNKNOWN_SYNC_UPLOADER_ID
+  return {
+    author: unknownUploader && uploader.name === UNKNOWN_SYNC_UPLOADER_ID ? undefined : uploader.name || undefined,
+    authorId: unknownUploader ? undefined : uploader.id || undefined,
+  }
+}
+
+function historyToRemote(record, options) {
+  const video = videoToRemote(record, options)
   if (!video) return null
 
   const watchProgress = Number.isFinite(record.watchProgress) ? record.watchProgress : 0
@@ -95,8 +107,7 @@ function historyToLocal(entry, local) {
     ...local,
     videoId: entry.video.id,
     title: entry.video.title,
-    author: entry.video.uploader.name,
-    authorId: entry.video.uploader.id,
+    ...uploaderToLocal(entry.video.uploader),
     published: entry.video.upload_date,
     description: local?.description ?? '',
     lengthSeconds: entry.video.duration > 0 ? entry.video.duration : (local?.lengthSeconds ?? 0),
@@ -138,7 +149,7 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
   const previousStates = historyBaseline(previous, acknowledged)
   const previousIds = previousStates.keys()
   const next = {}
-  const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
+  const syncableLocalHistory = localHistory.filter(record => historyToRemote(record, options) !== null)
   const localById = mapBy(syncableLocalHistory, record => record.videoId)
   const remoteById = mapBy(remoteHistory, entry => entry.video.id)
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
@@ -169,7 +180,7 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
     const remote = remoteById.get(id)
     let useLocal = local && (!remote || local.timeWatched > remote.metadata.added_date)
     if (local && remote && local.timeWatched === remote.metadata.added_date) {
-      const localState = historyToRemote(local)
+      const localState = historyToRemote(local, options)
       const baseline = previousStates.get(id)
       const localChanged = !baseline || !historyStateEquals(localState, { metadata: baseline })
       const remoteChanged = !baseline || !historyStateEquals(remote, { metadata: baseline })
@@ -183,6 +194,18 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
       if (historyStateEquals(localState, remote)) useLocal = true
     }
     let merged = useLocal ? local : historyToLocal(remote, local)
+    if (useLocal && local.authorId === UNKNOWN_SYNC_UPLOADER_ID) {
+      merged = { ...local, ...uploaderToLocal({ id: local.authorId, name: local.author }) }
+    }
+    // A newer watch-state edit must not replace a known uploader with the marker.
+    if (useLocal && remote && (!merged.authorId || merged.authorId === remote.video.uploader.id)) {
+      const uploader = uploaderToLocal(remote.video.uploader)
+      const authorId = merged.authorId || uploader.authorId
+      const author = merged.author || uploader.author
+      if (authorId !== merged.authorId || author !== merged.author) {
+        merged = { ...merged, authorId, author }
+      }
+    }
     // Watch time orders progress, not metadata completeness. Fill an unknown
     // local duration before uploading so it cannot erase a known server value.
     // Equal timestamps also refresh metadata without replacing local progress.
@@ -191,10 +214,10 @@ export function mergeHistory({ localHistory, remoteHistory, previous = {}, ackno
           !Number.isFinite(local.lengthSeconds) || local.lengthSeconds <= 0) &&
         Number.isFinite(remote.video.duration) && remote.video.duration > 0 &&
         (local.lengthSeconds !== remote.video.duration || local.isLive === true || local.isUpcoming === true)) {
-      merged = { ...local, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
-      localUpdates.push(merged)
+      merged = { ...merged, lengthSeconds: remote.video.duration, isLive: false, isUpcoming: false }
     }
-    const localPayload = useLocal ? historyToRemote(merged) : null
+    if (useLocal && merged !== local) localUpdates.push(merged)
+    const localPayload = useLocal ? historyToRemote(merged, options) : null
     next[id] = { ...(localPayload ?? remote).metadata }
 
     if (useLocal && localPayload && (
