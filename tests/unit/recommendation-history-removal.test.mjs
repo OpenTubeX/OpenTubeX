@@ -11,6 +11,7 @@ import { createRecommendationStore } from '../../src/datastores/recommendations.
 import { createIdQuery } from '../../src/datastores/idQuery.js'
 import { buildRecommendationProfile } from '../../src/renderer/helpers/recommendations.js'
 import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync.js'
+import watchQueue, { persistWatchQueue } from '../../src/renderer/store/modules/watch-queue.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -38,6 +39,8 @@ function fixture () {
     ...otherModules,
     history,
     recommendations,
+    watchQueue,
+    persistWatchQueue: store => persistWatchQueue(store, { getItem: () => null, setItem() {} }),
     createStore,
     getProfileSyncSignature,
     settings: {

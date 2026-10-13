@@ -1,4 +1,4 @@
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe.configure({ timeout: 120_000 })
 
@@ -41,7 +41,7 @@ async function chooseVideoOption (page, title, option) {
   await page.getByRole('menuitem', { name: option }).click()
 }
 
-test('manages a temporary queue from video menus and the watch sidebar', async ({ page }) => {
+test('manages the queue from video menus and the watch sidebar', async ({ page }) => {
   await goTo(page, 'history')
 
   await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
@@ -169,6 +169,70 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
 
   await queue.getByRole('button', { name: 'Clear Queue' }).click()
   await expect(queue).toBeHidden()
+})
+
+test('restores the remaining queue in order after restarting and keeps clearing it persistent', async ({ app, page }) => {
+  test.setTimeout(120_000)
+  await goTo(page, 'history')
+  await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
+  await chooseVideoOption(page, 'Queue video two', 'Add to Queue')
+  await chooseVideoOption(page, 'Queue video three', 'Play Next')
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  await page.locator('.queueItem').filter({ hasText: 'Queue video two' })
+    .getByRole('button', { name: 'Reorder Queue video two' }).press('ArrowUp')
+
+  ;({ page } = await app.relaunch())
+  let queue = page.locator('.watchQueue')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText([
+    'Queue video three', 'Queue video two', 'Queue video one'
+  ])
+
+  // Restored IDs must remain distinct from IDs assigned to new duplicates.
+  await page.getByRole('button', { name: 'Expand side navigation' }).click()
+  await goTo(page, 'history')
+  await chooseVideoOption(page, 'Queue video two', 'Add to Queue')
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  await expect(queue.locator('.queueItem')).toHaveCount(4)
+  await queue.getByRole('button', { name: 'Remove Queue video one from queue' }).click()
+  await queue.locator('.queueVideo').first().click()
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
+
+  ;({ page } = await app.relaunch())
+  queue = page.locator('.watchQueue')
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two', 'Queue video two'])
+  await queue.getByRole('button', { name: 'Remove Queue video two from queue' }).last().click()
+  await expect(queue.locator('.queueVideoTitle')).toHaveText(['Queue video two'])
+  await queue.getByRole('button', { name: 'Clear Queue' }).click()
+
+  ;({ page } = await app.relaunch())
+  await expect(page.locator('.watchQueue')).toBeHidden()
+  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueueLength)).toBe(0)
+})
+
+test('shares queue changes across windows without restoring cleared items', async ({ app, page }) => {
+  test.setTimeout(120_000)
+  await goTo(page, 'history')
+  await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
+  const second = await openNewWindowFromTabBar(app, page)
+  await waitForAppReady(second)
+  await goTo(second, 'history')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('clearWatchQueue'))
+  await chooseVideoOption(second, 'Queue video two', 'Add to Queue')
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
+  await second.locator('a.title').filter({ hasText: /Current video/ }).click()
+  for (const window of [page, second]) {
+    await expect(window.locator('.queueVideoTitle')).toHaveText(['Queue video two'])
+  }
+  // Updates issued together by different renderers must both be saved.
+  await Promise.all([page, second].map((window, index) => window.evaluate(videoId => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
+  }, `concurrent-${index}`)))
+  for (const window of [page, second]) await expect(window.locator('.queueItem')).toHaveCount(3)
+  await second.close()
+  ;({ page } = await app.relaunch())
+  await expect(page.locator('.queueItem')).toHaveCount(3)
+  await expect(page.locator('.queueVideoTitle').first()).toHaveText('Queue video two')
+  expect(await page.locator('.queueVideoTitle').allTextContents()).toEqual(expect.arrayContaining(['concurrent-0', 'concurrent-1']))
 })
 
 for (const clearAll of [false, true]) {

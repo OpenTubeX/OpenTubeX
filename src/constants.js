@@ -1,6 +1,8 @@
 // IPC Channels
 const IpcChannels = {
   STARTUP_SPLASH_READY: 'startup-splash-ready',
+  WATCH_QUEUE_UPDATE: 'watch-queue-update',
+  WATCH_QUEUE_UPDATED: 'watch-queue-updated',
   ENABLE_PROXY: 'enable-proxy',
   DISABLE_PROXY: 'disable-proxy',
   GET_DEVICE_NAME: 'get-device-name',

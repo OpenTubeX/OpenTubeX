@@ -14,7 +14,7 @@ import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
-import watchQueue from './modules/watch-queue'
+import watchQueue, { persistWatchQueue } from './modules/watch-queue'
 import syncServer from './modules/sync-server'
 import { getProfileSyncSignature } from '../helpers/profile-sync'
 import {
@@ -120,7 +120,7 @@ export default createStore({
   // but we have to turn it off despite its usefulness as we have so much data in the store
   // that it causes a noticable slow-down :(
   strict: false,
-  plugins: [syncOnLocalChanges, reloadRecommendationEvidenceAfterHistoryRemoval]
+  plugins: [syncOnLocalChanges, reloadRecommendationEvidenceAfterHistoryRemoval, persistWatchQueue]
 
   // TODO: Enable when deploy
   // plugins: [createPersistedState()]
