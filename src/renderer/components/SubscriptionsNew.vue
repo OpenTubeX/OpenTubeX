@@ -226,6 +226,7 @@ async function markAllAsSeen(markSeen) {
       // not remount and then leave one by one when the queued refresh lands.
       await nextTick()
       await Promise.all(categories.map(async category => {
+        if (profileId !== store.getters.getActiveProfile._id) return
         const page = pagedFeeds[category]
         try { await page.load() } catch (error) {
           if (profileId === store.getters.getActiveProfile._id && page.failed.value) page.records.value = []

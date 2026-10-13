@@ -3095,3 +3095,11 @@ test('desktop large create and delete cycles keep membership counts limited to h
     assert.deepEqual(Object.keys(state.playlistMemberships.active), ['other'])
   }
 })
+
+test('a profile switch during the seen-removal DOM update skips stale manual reloads', async () => {
+  const profile = { _id: 'original' }, loads = []
+  let ticks = 0
+  const context = await functions('src/renderer/components/SubscriptionsNew.vue', ['markAllAsSeen'], { store: { getters: { getActiveProfile: profile } }, props: { activeCategory: 'videos' }, isElectron: true, feed: ref(null), clearingVisibleContent: ref(false), isReducedMotionEnabled: () => true, nextTick: async () => { if (++ticks === 2) profile._id = 'replacement' }, cancelRemovalAnimation() {}, pagedFeeds: { videos: { records: ref([]), failed: ref(false), load: async () => loads.push(profile._id) } } })
+  await context.markAllAsSeen(async () => {})
+  assert.deepEqual(loads, [])
+})
