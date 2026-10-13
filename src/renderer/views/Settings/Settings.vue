@@ -69,7 +69,7 @@
             />
             <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
           </span>
-          <template v-if="!isStandaloneViewOpen && currentSectionTitle">
+          <template v-if="unlocked && !isStandaloneViewOpen && currentSectionTitle">
             <FtIcon
               v-show="isInDesktopView"
               class="settingsBreadcrumbSeparator"
@@ -102,7 +102,7 @@
               <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
             </span>
           </template>
-          <template v-if="!isStandaloneViewOpen && subpageTitle">
+          <template v-if="unlocked && !isStandaloneViewOpen && subpageTitle">
             <FtIcon
               class="settingsBreadcrumbSeparator"
               :icon="['fas', 'angle-right']"
@@ -740,6 +740,7 @@ const currentSectionIcon = computed(() => {
 const showBackButton = computed(() => {
   if (isDownloadsOpen.value) return canReturnFromDownloads.value
   if (isStandaloneViewOpen.value) return false
+  if (!unlocked.value) return false
 
   return isKeyboardShortcutPromptOpen.value || isProfileManagerOpen.value || subpageTitle.value !== '' ||
     (!isInDesktopView.value && activeSection.value !== null)

@@ -380,6 +380,7 @@
         v-if="showPasswordPrompt"
         :label="t('Settings.Sync Settings.Change Password')"
         theme="readable-width"
+        :busy="accountActionBusy"
         @click="closePasswordPrompt"
       >
         <div class="deleteAccountContent passwordForm">
@@ -445,6 +446,7 @@
         v-if="showDeleteAccountPrompt"
         :label="t('Settings.Sync Settings.Delete Account Confirmation')"
         theme="readable-width"
+        :busy="busy || accountActionBusy"
         @click="closeDeleteAccountPrompt"
       >
         <div class="deleteAccountContent">
@@ -833,8 +835,8 @@ function setSyncEnabled(enabled) {
   store.dispatch('setSyncServerEnabled', enabled)
 }
 
-function closeDeleteAccountPrompt() {
-  if (busy.value || accountActionBusy.value) return
+function closeDeleteAccountPrompt(value) {
+  if ((busy.value || accountActionBusy.value) && value !== null) return
   showDeleteAccountPrompt.value = false
   deleteAccountPassword.value = ''
   deleteAccountError.value = ''
@@ -869,8 +871,8 @@ function openPasswordPrompt() {
   showPasswordPrompt.value = true
 }
 
-function closePasswordPrompt() {
-  if (accountActionBusy.value) return
+function closePasswordPrompt(value) {
+  if (accountActionBusy.value && value !== null) return
   resetPasswordPrompt()
 }
 

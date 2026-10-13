@@ -389,7 +389,7 @@ async function refresh() {
 }
 
 async function clearActivity(option) {
-  if (clearing.value) return
+  if (clearing.value && option !== null) return
   clearError.value = ''
   if (option !== 'clear') {
     showClearPrompt.value = false

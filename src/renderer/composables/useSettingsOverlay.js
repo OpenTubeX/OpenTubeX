@@ -1,4 +1,4 @@
-import { inject, ref, watch } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 
 import { settingsSubpageKey } from '../components/FtSettingsSubpage/settingsSubpage'
 
@@ -9,6 +9,9 @@ import { settingsSubpageKey } from '../components/FtSettingsSubpage/settingsSubp
 export function useSettingsOverlay(dismiss) {
   const settingsWindow = inject(settingsSubpageKey, null)
   const active = settingsWindow?.isActive ?? ref(true)
+  onMounted(() => {
+    if (!active.value) dismiss()
+  })
   watch(active, value => {
     if (!value) dismiss()
   }, { flush: 'sync' })

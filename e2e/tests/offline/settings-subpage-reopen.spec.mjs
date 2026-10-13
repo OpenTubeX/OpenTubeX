@@ -86,50 +86,168 @@ for (const uiScale of [100, 125]) {
       await expect(prompt.getByRole('button', { name: 'Alpha Channel', exact: true })).toBeEnabled()
     })
 
-    test('hides a busy prompt that cannot cancel while settings is locked', async ({ app, page }) => {
-      if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 700 })
+    for (const outcome of ['success', 'failure']) {
+      test(`dismisses a busy prompt through unlocking while its operation is still pending (${outcome})`, async ({ app, page }) => {
+        if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 700 })
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsPassword')).toHaveCount(0)
+        const sync = await goToSettingsSection(page, 'sync')
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setSyncServerUrl', '')
+          store.commit('setSyncServerToken', 'test-token')
+          store.commit('setSyncServerLiveSupported', true)
+          store.commit('setSyncServerEnabled', true)
+          store.commit('setSyncServerActivity', [{
+            id: 'overlay-test',
+            deviceName: 'Laptop',
+            collection: 'subscriptions',
+            action: 'added',
+            item: 'Alpha Channel',
+            createdAt: Date.now()
+          }])
+          store._actions.clearSyncServerActivity = [() => new Promise((resolve, reject) => {
+            window.finishOverlayActivityClear = resolve
+            window.failOverlayActivityClear = () => reject(new Error('Activity clear failed'))
+          })]
+        })
+        await sync.locator('.activityClear').click()
+        const prompt = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
+        await prompt.getByRole('button', { name: 'Clear on this device', exact: true }).click()
+        await expect(prompt).toHaveAttribute('inert', '')
+        await toggleSettingsFromPreferences(app)
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await expect(prompt).toHaveCount(0)
+        await expectPromptResourcesReleased(page)
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        await expect(prompt).toHaveCount(0)
+        await expectPromptResourcesReleased(page)
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsPassword')).toHaveCount(0)
+        await expect(prompt).toHaveCount(0)
+        await expectPromptResourcesReleased(page)
+        await page.evaluate(outcome => {
+          if (outcome === 'success') window.finishOverlayActivityClear()
+          else window.failOverlayActivityClear()
+        }, outcome)
+        await expect(sync.locator('.activityClear')).toBeEnabled()
+        await expect(prompt).toHaveCount(0)
+        await sync.locator('.activityClear').click()
+        await expect(prompt).toBeVisible()
+      })
+    }
+
+    test('dismisses a pending account prompt and permits retry after failure', async ({ app, page }) => {
       await goTo(page, 'settings')
       const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
-      await expect(page.locator('.settingsPassword')).toHaveCount(0)
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('setSyncServerUrl', '')
         store.commit('setSyncServerToken', 'test-token')
-        store.commit('setSyncServerLiveSupported', true)
         store.commit('setSyncServerEnabled', true)
-        store.commit('setSyncServerActivity', [{
-          id: 'overlay-test',
-          deviceName: 'Laptop',
-          collection: 'subscriptions',
-          action: 'added',
-          item: 'Alpha Channel',
-          createdAt: Date.now()
-        }])
-        store._actions.clearSyncServerActivity = [() => new Promise(resolve => {
-          window.finishOverlayActivityClear = resolve
-        })]
+        store._actions.deleteSyncServerAccount = [password => {
+          window.accountDeletionPassword = password
+          return new Promise((resolve, reject) => {
+            window.failAccountDeletion = () => reject(new Error('Account deletion failed'))
+          })
+        }]
       })
-      await sync.locator('.activityClear').click()
-      const prompt = page.getByRole('dialog', { name: 'Clear on this device', exact: true })
-      await prompt.getByRole('button', { name: 'Clear on this device', exact: true }).click()
+      const openPrompt = sync.getByRole('button', { name: 'Delete sync account', exact: true })
+      await openPrompt.click()
+      const prompt = page.getByRole('dialog', { name: 'Delete sync account?', exact: true })
+      await prompt.getByLabel('Password', { exact: true }).fill('account-password')
+      await prompt.getByRole('button', { name: 'Delete account', exact: true }).click()
       await expect(prompt).toHaveAttribute('inert', '')
+      await page.keyboard.press('Escape')
+      await expect(prompt).toBeVisible()
       await toggleSettingsFromPreferences(app)
       await expect(page.locator('.settingsWindow')).toBeHidden()
-      await expect(prompt).toHaveCount(0)
-      await expectPromptResourcesReleased(page)
       await goTo(page, 'settings')
       await expect(passwordInput).toBeFocused()
-      await expect(prompt).toHaveCount(0)
-      await expectPromptResourcesReleased(page)
-      await page.evaluate(() => window.finishOverlayActivityClear())
-      await expect(prompt).toHaveCount(0)
       await passwordInput.fill(password)
       await passwordInput.press('Enter')
-      await expect(page.locator('.settingsPassword')).toHaveCount(0)
       await expect(prompt).toHaveCount(0)
+      await expectPromptResourcesReleased(page)
+      expect(await page.evaluate(() => window.accountDeletionPassword)).toBe('account-password')
+      await page.evaluate(() => window.failAccountDeletion())
+      await expect(openPrompt).toBeEnabled()
+      await openPrompt.click()
+      await expect(prompt).toBeVisible()
+      await expect(prompt.getByLabel('Password', { exact: true })).toHaveValue('')
+    })
+
+    test.describe('late prompts', () => {
+      test.use({
+        seed: {
+          settings: {
+            uiScale,
+            settingsPassword,
+            syncServerEnabled: true,
+            syncServerToken: 'test-token',
+            syncServerUrl: 'https://sync.example',
+            syncServerUsername: 'test-user',
+            syncServerPrivacyMode: 'legacy',
+            syncServerAutoSync: false,
+            syncServerSyncSubscriptions: false,
+            syncServerSyncPlaylists: false,
+            syncServerSyncHistory: false,
+            syncServerSyncProfiles: true,
+            syncServerSnapshot: JSON.stringify({
+              profiles: Object.fromEntries(Array.from({ length: 16 }, (_, index) => [
+                `removed-profile-${index}`,
+                { remoteId: `removed-profile-${index}`, metadata: { title: `Removed profile ${index}` }, channels: [] }
+              ]))
+            })
+          }
+        }
+      })
+
+      test('dismisses a prompt created while Settings is already locked', async ({ app, page }) => {
+        await page.route('https://sync.example/**', route => route.fulfill({
+          contentType: 'application/json',
+          body: JSON.stringify(route.request().url().endsWith('/health')
+            ? { capabilities: { encrypted_sync: 0 } }
+            : [])
+        }))
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        const sync = await goToSettingsSection(page, 'sync')
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          const syncAction = store._actions.syncWithSyncServer[0]
+          store._actions.syncWithSyncServer = [payload => new Promise((resolve, reject) => {
+            window.finishLateSettingsSync = () => {
+              const result = syncAction(payload)
+              result.then(resolve, reject)
+              return result.catch(error => { window.lateSettingsSyncError = { name: error.name, message: error.message } })
+            }
+          })]
+        })
+        await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
+        await toggleSettingsFromPreferences(app)
+        await expect(page.locator('.settingsWindow')).toBeHidden()
+        await goTo(page, 'settings')
+        await expect(passwordInput).toBeFocused()
+        await page.evaluate(() => window.finishLateSettingsSync())
+        expect(await page.evaluate(() => window.lateSettingsSyncError)).toMatchObject({ name: 'SyncServerDataLossError' })
+        const prompt = page.getByRole('dialog', { name: 'Confirm destructive sync?', exact: true })
+        await expect(prompt).toHaveCount(0)
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        await expect(page.locator('.settingsPassword')).toHaveCount(0)
+        await expect(prompt).toHaveCount(0)
+        await expectPromptResourcesReleased(page)
+      })
     })
 
     for (const picker of ['select', 'color']) {
@@ -164,6 +282,32 @@ for (const uiScale of [100, 125]) {
       })
     }
 
+    test('keeps an unsaved theme draft through closing the locked password screen', async ({ app, page }) => {
+      if (uiScale === 125) await setWindowSize(app, page, { width: 500, height: 700 })
+      await goTo(page, 'settings')
+      const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+      const themeName = page.locator('.customThemeEditor .themeNameField input')
+      await themeName.fill('Unfinished theme')
+      await toggleSettingsFromPreferences(app)
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await expect(passwordInput).toBeFocused()
+      await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
+      await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.settingsWindow')).toBeHidden()
+      await goTo(page, 'settings')
+      await passwordInput.fill(password)
+      await passwordInput.press('Enter')
+      await expect(page.locator('.settingsPassword')).toHaveCount(0)
+      await expect(page.locator('.settingsBreadcrumb')).toContainText('Custom theme creator')
+      await expect(themeName).toHaveValue('Unfinished theme')
+    })
+
     test('keeps Customize navigation and scroll after unlocking again', async ({ app, page }) => {
       await setWindowSize(app, page, uiScale === 125 ? { width: 500, height: 700 } : { width: 1100, height: 600 })
       await goTo(page, 'settings')
@@ -184,6 +328,8 @@ for (const uiScale of [100, 125]) {
       await goTo(page, 'settings')
       await expect(passwordInput).toBeFocused()
       await expect(subpage).toBeHidden()
+      await expect(page.locator('.settingsBreadcrumb')).toHaveText('Settings')
+      await expect(page.locator('.settingsBackButton, .settingsBreadcrumbRoot, .settingsBreadcrumbParent')).toHaveCount(0)
       await passwordInput.fill('wrong-password')
       await passwordInput.press('Enter')
       await expect(page.getByRole('alert')).toHaveText('Incorrect password')

@@ -144,6 +144,7 @@
       v-if="sessionToRename"
       :label="t('Settings.Sync Settings.Rename Device')"
       theme="readable-width"
+      :busy="actionBusy"
       @click="closeRenamePrompt"
     >
       <div class="promptContent renameForm">
@@ -185,6 +186,7 @@
       v-if="sessionToRevoke"
       :label="t('Settings.Sync Settings.Revoke Session Confirmation')"
       theme="readable-width"
+      :busy="actionBusy"
       @click="closeRevokePrompt"
     >
       <div class="promptContent">
@@ -426,8 +428,8 @@ function openRenamePrompt(session) {
   renamedDeviceName.value = session.deviceInfo.name
 }
 
-function closeRenamePrompt() {
-  if (actionBusy.value) return
+function closeRenamePrompt(value) {
+  if (actionBusy.value && value !== null) return
   sessionToRename.value = null
   renamedDeviceName.value = ''
   promptError.value = ''
@@ -480,8 +482,8 @@ function openRevokePrompt(session) {
   sessionToRevoke.value = session
 }
 
-function closeRevokePrompt() {
-  if (actionBusy.value) return
+function closeRevokePrompt(value) {
+  if (actionBusy.value && value !== null) return
   sessionToRevoke.value = null
   promptError.value = ''
 }
