@@ -325,7 +325,7 @@ test('portable Home and Save readers preserve opaque playlist records', async ()
   const homeAst = babelParse(home, { sourceType: 'module' })
   const homeInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'recentPlaylists').init
   const countInit = homeAst.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'playlistVideoCount')?.init
-  const playlistVideoCount = countInit ? vm.runInNewContext(home.slice(countInit.start, countInit.end)) : null
+  const playlistVideoCount = countInit ? vm.runInNewContext(home.slice(countInit.start, countInit.end), { store: { state: { playlists: { libraryPaged: false } } } }) : null
   const recent = vm.runInNewContext(home.slice(homeInit.start, homeInit.end), { playlistVideoCount, computed: getter => getter(), store: { getters: { getAllPlaylists: playlists } } })
   assert.deepEqual(Array.from(recent, playlist => playlist._id), ['opaque', 'retained'])
   const prompt = parse(await readFile(new URL('../../src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
@@ -345,7 +345,7 @@ test('Home renders retained opaque memberships with counts and safe thumbnail pl
   assert.ok(count, 'the template and thumbnail helper share the retained membership count')
   assert.doesNotMatch(parsed.template.content, /playlist\.videos\.length/)
   const thumbnail = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistThumbnail')
-  const context = vm.createContext({ thumbnailPlaceholder: 'placeholder', videoThumbnail: () => 'video' })
+  const context = vm.createContext({ thumbnailPlaceholder: 'placeholder', videoThumbnail: () => 'video', store: { state: { playlists: { libraryPaged: false } } } })
   vm.runInContext(script.slice(count.start, count.end), context)
   vm.runInContext(script.slice(thumbnail.start, thumbnail.end), context)
   for (const videos of [undefined, null, false, 42, 'retained', [], [null], [{ videoId: 42 }]]) {
