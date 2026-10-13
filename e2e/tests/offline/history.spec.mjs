@@ -1267,7 +1267,7 @@ test.describe('history date and channel browsing', () => {
       }
       await expect(page).toHaveURL(/searchDataLimit=100/)
       await expect(page.locator('.historyResults')).toHaveAttribute('aria-busy', 'false')
-      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *').first()).toContainText('City walk')
+      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *').first()).toContainText('Other city walk')
       await trackHistoryNavigations(page)
       await scrollPageToEnd(page)
       const scrollTop = await page.evaluate(() => window.scrollY)
