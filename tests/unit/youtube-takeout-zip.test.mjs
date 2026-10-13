@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { strToU8, Zip, ZipDeflate, zipSync } from 'fflate'
+import { strToU8, Unzip, UnzipInflate, Zip, ZipDeflate, zipSync } from 'fflate'
 
 import { classifyTakeoutEntry, forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv, parseTakeoutPlaylistMetadataCsv, readTakeoutPlaylistMetadata } from '../../src/renderer/helpers/youtube-takeout-zip.js'
 
@@ -264,6 +264,79 @@ test('rejects oversized selected entries before inflation', async () => {
     /Takeout entry is too large/
   )
 })
+
+test('stops inflating an understated entry after the output limit while retaining later files', async () => {
+  const source = await readFile(new URL('../../src/renderer/helpers/youtube-takeout-zip.js', import.meta.url), 'utf8')
+  let historyPushes = 0
+  class OversizedInflate extends UnzipInflate {
+    constructor(name) {
+      super()
+      this.history = name.endsWith('watch-history.json')
+    }
+
+    push(chunk, final) {
+      if (this.history) {
+        historyPushes++
+        // Exercise the real limit without allocating a 256 MiB test fixture.
+        this.ondata(null, { length: 256 * 1024 * 1024 + 1 }, final)
+      } else {
+        super.push(chunk, final)
+      }
+    }
+  }
+  const context = vm.createContext({ Unzip, UnzipInflate: OversizedInflate, TextDecoder, Uint8Array })
+  vm.runInContext(source.replace(/^import .*\n/m, '').replaceAll('export ', ''), context)
+  const archive = zipSync({
+    'Account/history/watch-history.json': strToU8('[123456789]'),
+    'Account/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nnew,url,New'),
+  })
+  const header = new DataView(archive.buffer)
+  header.setUint32(22, 1, true)
+  const firstChunkEnd = 30 + header.getUint16(26, true) + header.getUint16(28, true) + 1
+  const file = {
+    stream: () => new ReadableStream({
+      start(controller) {
+        controller.enqueue(archive.subarray(0, firstChunkEnd))
+        controller.enqueue(archive.subarray(firstChunkEnd))
+        controller.close()
+      },
+    }),
+  }
+  const entries = []
+  const errors = []
+  await context.forEachSelectedTakeoutZipEntry(file, new Set(['history', 'subscriptions']), entry => entries.push(entry), error => errors.push(error))
+  assert.equal(historyPushes, 1, 'No further compressed chunks should reach the failed inflater')
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Takeout entry is too large/)
+  assert.deepEqual(entries.map(entry => entry.type), ['subscriptions'])
+  assert.match(entries[0].content, /new,url,New/)
+})
+
+for (const unreadableFirst of [true, false]) {
+  test(`invalidates account metadata when a duplicate cannot be inflated, unreadable first: ${unreadableFirst}`, async () => {
+    const chunks = []
+    const zip = new Zip((error, chunk) => {
+      if (error) throw error
+      chunks.push(chunk)
+    })
+    const duplicatePath = 'Repeated account/playlists/playlists.csv'
+    for (const unreadable of unreadableFirst ? [true, false] : [false, true]) {
+      const entry = new ZipDeflate(duplicatePath)
+      zip.add(entry)
+      const chunkIndex = chunks.length
+      entry.push(strToU8(`${metadataHeader}\nPLfirst,First,Original,,`), true)
+      if (unreadable) chunks[chunkIndex + 1][0] = 7 // Reserved DEFLATE block type after the local header.
+    }
+    const good = new ZipDeflate('Good account/playlists/playlists.csv')
+    zip.add(good)
+    good.push(strToU8(`${metadataHeader}\nPLgood,Good,List,,`), true)
+    zip.end()
+    const { metadata, errors } = await readTakeoutPlaylistMetadata(new Blob(chunks))
+    assert.equal(metadata.size, 1)
+    assert.equal(metadata.get('Good account/playlists/Good-videos.csv').description, 'List')
+    assert.ok(errors.length > 0)
+  })
+}
 
 test('parses Takeout playlist CSV and rejects other CSV files', () => {
   assert.deepEqual(parseTakeoutPlaylistCsv('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00+00:00\n', 'My list.csv'), {

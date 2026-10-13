@@ -46,7 +46,11 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntry
     }
 
     push(chunk, final) {
-      this.decoder.push(chunk, final)
+      this.decoder?.push(chunk, final)
+    }
+
+    terminate() {
+      this.decoder = null
     }
   }
 
@@ -63,6 +67,7 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntry
     const reportError = error => {
       if (failed) return
       failed = true
+      entry.terminate()
       if (onEntryError) onEntryError(error, { type, path: entry.name })
       else failure = error
     }
@@ -242,7 +247,11 @@ export async function readTakeoutPlaylistMetadata(file) {
     if (playlists === null) {
       errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
     }
-  }, error => errors.push(error))
+  }, (error, entry) => {
+    const directory = entry.path.slice(0, entry.path.lastIndexOf('/') + 1)
+    playlistsByDirectory.set(directory, null)
+    errors.push(error)
+  })
   // Resolve paths after the scan so either filename form can follow the metadata.
   for (const [directory, playlists] of playlistsByDirectory) {
     if (playlists === null) { continue }
