@@ -1323,6 +1323,10 @@ for (const backend of ['NeDB', 'SQLite']) {
     }
     const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
     const Profiles = runInNewContext(base.slice(base.indexOf('class Profiles {'), base.indexOf('class Playlists {')) + '\nProfiles', { db, model })
+    const created = { _id: 'created', subscriptions: [], unknown: new Date(0) }
+    const creation = await Profiles.replaceIfUnchanged(undefined, created)
+    assert.equal(creation.numAffected, 1)
+    assert.deepEqual(creation.affectedDocuments, created)
     const current = { _id: 'p', subscriptions: [{ id: 'current' }], unknown: new Date(1) }
     await db.profiles.insertAsync(current)
     assert.equal((await Profiles.replaceIfUnchanged(undefined, { _id: 'p', subscriptions: [] })).numAffected, 0)
@@ -1455,4 +1459,50 @@ test('conditional playlist restore IPC preserves Dates and broadcasts only commi
   assert.equal((await Client.replaceIfUnchanged(current, { ...current, name: 'stale' })).numAffected, 0)
   assert.equal(events.length, 1)
   assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), next)
+})
+
+for (const section of ['profiles', 'playlists']) {
+  test(`portable ${section} restore reports a failed cache publication and retries it`, async () => {
+    const content = parse(await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+    const node = babelParse(content, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+    const records = section === 'profiles' ? [{ _id: 'p', subscriptions: [] }] : [{ _id: 'p', videos: [] }]
+    const refreshAction = section === 'profiles' ? 'grabAllProfiles' : 'grabAllPlaylists'
+    let refreshes = 0
+    const toasts = [], errors = []
+    const handler = { find: async () => [], replaceIfUnchanged: async () => ({ numAffected: 1 }) }
+    const apply = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+      process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+      backupBusy: { value: false }, selectedBackupSections: { value: [section] }, backupData: { value: { [section]: records } },
+      DBProfileHandlers: handler, DBPlaylistHandlers: handler, mergeBackupProfile, mergeBackupPlaylist,
+      compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => toasts.push(toast), console: { error: error => errors.push(error) },
+      store: { dispatch: async action => { if (action === refreshAction) { refreshes++; return false } return true } },
+    })
+    await apply()
+    assert.equal(refreshes, 2)
+    assert.match(toasts.at(-1).message, /could not be refreshed/)
+    assert.equal(errors.length, 1)
+    assert.ok(!toasts.some(toast => toast.message === 'Settings.Data Settings.Backup imported'))
+  })
+}
+
+test('portable playlist cache refresh returns an observable success or read failure', async () => {
+  const text = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
+  const pending = [babelParse(text, { sourceType: 'module' })]
+  let method
+  while (pending.length) {
+    const node = pending.shift()
+    if (!node || typeof node !== 'object') continue
+    if (node.type === 'ObjectMethod' && node.key.name === 'grabAllPlaylists') { method = node; break }
+    for (const value of Object.values(node)) if (Array.isArray(value)) pending.push(...value); else if (value && typeof value === 'object') pending.push(value)
+  }
+  assert.ok(method)
+  for (const failed of [false, true]) {
+    const record = { _id: 'p', videos: [], createdAt: 1, lastUpdatedAt: 1 }
+    const action = runInNewContext(`(async function(${method.params.map(node => text.slice(node.start, node.end)).join(',')})${text.slice(method.body.start, method.body.end)})`, {
+      DBPlaylistHandlers: { find: async () => { if (failed) throw new Error('read failed'); return [record] } }, console: { error() {} },
+    })
+    const commits = []
+    assert.equal(await action({ rootState: { settings: { quickBookmarkTargetPlaylistId: 'p' } }, state: { defaultPlaylists: [] }, commit: (...args) => commits.push(args), dispatch: async () => true }), !failed)
+    assert.equal(commits.length, failed ? 0 : 2)
+  }
 })

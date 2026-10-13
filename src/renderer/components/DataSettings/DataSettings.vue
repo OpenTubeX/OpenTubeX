@@ -462,6 +462,9 @@ async function importUnifiedBackup() {
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
+  const refreshRestored = async action => {
+    if (await store.dispatch(action) !== true) throw new Error('Restored library records could not be refreshed')
+  }
   let profilesNeedRefresh = false
   let playlistsNeedRefresh = false
   try {
@@ -502,7 +505,7 @@ async function importUnifiedBackup() {
         profilesNeedRefresh = true
         currentProfiles.set(profile._id, merged)
       }
-      await store.dispatch('grabAllProfiles')
+      await refreshRestored('grabAllProfiles')
       profilesNeedRefresh = false
     }
     if (selected.has('playlists')) {
@@ -518,7 +521,7 @@ async function importUnifiedBackup() {
 
         currentPlaylists.set(playlist._id, merged)
       }
-      await store.dispatch('grabAllPlaylists')
+      await refreshRestored('grabAllPlaylists')
       playlistsNeedRefresh = false
     }
     if (selected.has('history')) {
@@ -542,9 +545,9 @@ async function importUnifiedBackup() {
     // Separate portable stores may have committed earlier records before a
     // later conditional write fails. Publish those records on the error path.
     const refreshes = await Promise.allSettled([
-      ...(profilesNeedRefresh ? [store.dispatch('grabAllProfiles')] : []),
-      ...(playlistsNeedRefresh ? [store.dispatch('grabAllPlaylists')] : []),
-    ])
+      ...(profilesNeedRefresh ? ['grabAllProfiles'] : []),
+      ...(playlistsNeedRefresh ? ['grabAllPlaylists'] : []),
+    ].map(refreshRestored))
     for (const result of refreshes) if (result.status === 'rejected') console.error(result.reason)
     backupBusy.value = false
   }

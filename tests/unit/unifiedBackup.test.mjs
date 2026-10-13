@@ -411,8 +411,9 @@ test('portable restore accumulates repeated playlist records without dropping in
       find: () => db.findAsync({}),
       replaceIfUnchanged: async (previous, record) => db.updateAsync({ _id: record._id, $where() { return model.serialize(this) === model.serialize(previous) } }, record),
     },
-    store: { dispatch: async (action, record) => {
-      if (action === 'updatePlaylist') { await db.updateAsync({ _id: record._id }, record); return true }
+    store: { dispatch: async action => {
+      if (action === 'grabAllPlaylists') return true
+      assert.equal(action, 'scheduleSyncServer')
     } },
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   }
