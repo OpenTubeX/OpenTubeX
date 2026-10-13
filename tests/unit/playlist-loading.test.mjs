@@ -417,3 +417,21 @@ test('portable overview search tolerates retained memberships and names without 
   assert.deepEqual(Array.from(results, playlist => playlist._id), ['by-title', 'by-author', 'unnamed'])
   assert.deepEqual(playlists, before)
 })
+
+
+test('Save displays and searches retained missing or non-string names without rewriting them', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'filteredPlaylists').init
+  const labels = [undefined, null, false, 42, [], {}, 'Named']
+  const playlists = labels.map((playlistName, index) => ({ _id: String(index), ...(playlistName === undefined ? {} : { playlistName }), unknown: new Date(index) }))
+  const before = structuredClone(playlists)
+  const context = vm.createContext({ computed: getter => getter(), playlists: ref(playlists), search: ref(''), t: key => key })
+  const helper = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playlistDisplayName')
+  if (helper) vm.runInContext(script.slice(helper.start, helper.end), context)
+  assert.deepEqual(Array.from(vm.runInContext(script.slice(init.start, init.end), context), playlist => playlist._id), playlists.map(playlist => playlist._id))
+  context.search.value = 'playlists'
+  assert.deepEqual(Array.from(vm.runInContext(script.slice(init.start, init.end), context), playlist => playlist._id), playlists.slice(0, -1).map(playlist => playlist._id))
+  assert.deepEqual(playlists, before)
+})

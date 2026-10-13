@@ -187,6 +187,18 @@ function playlistThumbnail(playlist) {
  */
 async function togglePlaylist(playlist) {
   const playlistName = playlistDisplayName(playlist)
+  if (store.state.playlists.libraryPaged) {
+    const videoId = props.videoData.videoId
+    try {
+      await store.dispatch('hydrateVideoState', [videoId])
+      if (videoId !== props.videoData.videoId) return
+    } catch (error) {
+      console.error(error)
+      if (videoId !== props.videoData.videoId) return
+      showToast({ message: t('Video.There was a problem saving the video to {playlistName}', { playlistName }), image: videoThumbnail.value, icon: ['fas', 'circle-exclamation'] })
+      return
+    }
+  }
 
   if (containedIds.value.has(playlist._id)) {
     const removed = await store.dispatch('removeVideo', {
