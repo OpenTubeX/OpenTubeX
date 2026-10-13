@@ -2,8 +2,8 @@ import { rm } from 'node:fs/promises'
 import { test, expect, _electron as electron } from '@playwright/test'
 import { createUserDataDir, launchApp } from '../../helpers/app.mjs'
 
-for (const persistent of [false, true]) {
-  test(persistent ? 'fails after bounded first-window retries and closes every process' : 'recovers from a first-window timeout and closes the abandoned process', async () => {
+for (const [persistent, terminatedBySignal] of [[false, false], [true, false], [false, true]]) {
+  test(terminatedBySignal ? 'recovers after a timed-out process is terminated by a signal' : persistent ? 'fails after bounded first-window retries and closes every process' : 'recovers from a first-window timeout and closes the abandoned process', async () => {
     const userDataDir = await createUserDataDir()
     const originalLaunch = electron.launch
     const applications = []
@@ -14,6 +14,7 @@ for (const persistent of [false, true]) {
       processes.push(application.process())
       if (persistent || applications.length === 1) {
         application.firstWindow = async () => {
+          if (terminatedBySignal) application.process().kill('SIGKILL')
           const error = new Error('electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"')
           error.name = 'TimeoutError'
           throw error
@@ -25,11 +26,11 @@ for (const persistent of [false, true]) {
       if (persistent) {
         await expect(launchApp(userDataDir)).rejects.toThrow('electronApplication.firstWindow')
         expect(applications).toHaveLength(3)
-        for (const process of processes) expect(process.exitCode).not.toBeNull()
+        for (const process of processes) expect(process.exitCode ?? process.signalCode).not.toBeNull()
       } else {
         const { electronApp, page } = await launchApp(userDataDir)
         expect(applications).toHaveLength(2)
-        expect(processes[0].exitCode).not.toBeNull()
+        expect(processes[0].exitCode ?? processes[0].signalCode).not.toBeNull()
         await expect(page.locator('.topNav')).toBeVisible()
         await electronApp.close()
       }
