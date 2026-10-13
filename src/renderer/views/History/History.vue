@@ -627,8 +627,18 @@ function updateUserHistorySortBy(value) {
   store.dispatch('updateUserHistorySortBy', value)
 }
 
+const desktopChannels = ref([])
+let channelsGeneration = 0
+watch([() => store.state.history.historyRevision, locale], async () => {
+  if (!process.env.IS_ELECTRON) return
+  const generation = ++channelsGeneration
+  try {
+    const options = await DBLibraryHandlers.query('historyChannels', { locale: locale.value })
+    if (generation === channelsGeneration) desktopChannels.value = options
+  } catch (error) { if (generation === channelsGeneration) console.error(error) }
+}, { immediate: true })
 const channels = computed(() => {
-  const options = getHistoryChannels(store.getters.getHistoryCacheSorted, locale.value)
+  const options = process.env.IS_ELECTRON ? desktopChannels.value.slice() : getHistoryChannels(store.getters.getHistoryCacheSorted, locale.value)
   // Retain the selected option if its last record is removed or repaired.
   // Silently clearing it would unexpectedly broaden the results.
   if (channel.value && !options.some(option => option.value === channel.value)) {
@@ -743,7 +753,9 @@ async function increaseLimit() {
       query: query.value,
       caseSensitive: doCaseSensitiveSearch.value,
       locale: locale.value,
-      fromDate: fromDate.value, toDate: toDate.value, channel: channel.value,
+      fromDate: fromDate.value,
+      toDate: toDate.value,
+      channel: channel.value,
     })
     if (generation !== searchGeneration) return
     if (page.stale) return await filterHistory()
@@ -799,8 +811,9 @@ async function filterHistory() {
           query: query.value,
           caseSensitive: doCaseSensitiveSearch.value,
           locale: locale.value,
-          fromDate: fromDate.value, toDate: toDate.value, channel: channel.value,
-      fromDate: fromDate.value, toDate: toDate.value, channel: channel.value,
+          fromDate: fromDate.value,
+          toDate: toDate.value,
+          channel: channel.value,
         })
         if (generation !== searchGeneration) return
         if (page.stale) { stale = true; break }
@@ -930,6 +943,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  channelsGeneration++
   searchGeneration++
   filterHistoryAsync.cancel()
   document.removeEventListener('keydown', keyboardShortcutHandler)

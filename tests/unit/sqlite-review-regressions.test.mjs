@@ -3564,3 +3564,40 @@ test('portable legacy import rejects a later scalar conflict before any profile 
   assert.deepEqual(writes, [])
   assert.deepEqual(profiles, before)
 })
+
+for (const staleFailure of [false, true]) {
+  test(`desktop preview opens at position one and follows same-position playlist switches, stale rejection: ${staleFailure}`, async () => {
+    const file = 'src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
+    const pending = Promise.withResolvers(), calls = []
+    const owner = vueRef('first'), visible = vueRef(false), index = vueRef(1)
+    const context = await functions(file, ['loadUserPlaylistPreview'], {
+      userPreviewGeneration: 0, userPreviewBusy: false, userPreviewVideo: vueRef(null),
+      isPagedPlaylist: vueRef(true), showProgressBarPreview: visible, previewVideoIndex: index,
+      userWindowKey: () => owner.value, userPlaylistWindowOptions: offset => ({ owner: owner.value, offset }),
+      DBLibraryHandlers: { query: async (_method, options) => { calls.push(options); return calls.length === 1 ? pending.promise : { records: [{ title: options.owner }] } } },
+    })
+    const { script, ast } = await source(file)
+    const registration = matching(ast, node => node.type === 'CallExpression' && node.callee.name === 'watch' && node.arguments[1]?.name === 'loadUserPlaylistPreview')[0]
+    const stop = vm.runInContext(script.slice(registration.start, registration.end), vm.createContext({ ...context, watch }))
+    try {
+      visible.value = true
+      await nextTick()
+      assert.deepEqual(structuredClone(calls), [{ owner: 'first', offset: 0 }])
+      owner.value = 'second'
+      await nextTick()
+      assert.equal(context.userPreviewVideo.value, null)
+      if (staleFailure) pending.reject(new Error('old playlist unavailable'))
+      else pending.resolve({ records: [{ title: 'stale first' }] })
+      await setImmediate()
+      assert.equal(context.userPreviewVideo.value.title, 'second')
+      assert.equal(calls.length, 2)
+      visible.value = false
+      await nextTick()
+      assert.equal(context.userPreviewVideo.value, null)
+      visible.value = true
+      await nextTick(); await setImmediate()
+      assert.equal(calls.length, 3)
+      assert.equal(context.userPreviewVideo.value.title, 'second')
+    } finally { stop() }
+  })
+}

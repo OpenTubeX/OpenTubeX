@@ -1713,20 +1713,27 @@ watch([() => props.videoId, () => props.playlistItemId, () => props.libraryMembe
   if (isPagedPlaylist.value) loadUserPlaylistWindow().catch(console.error)
 })
 let userPreviewBusy = false
-watch(previewVideoIndex, async () => {
-  if (!isPagedPlaylist.value || !showProgressBarPreview.value) return
+async function loadUserPlaylistPreview() {
   userPreviewGeneration++
-  if (userPreviewBusy) return
+  userPreviewVideo.value = null
+  if (!isPagedPlaylist.value || !showProgressBarPreview.value || userPreviewBusy) return
   userPreviewBusy = true
   try {
     while (showProgressBarPreview.value && isPagedPlaylist.value) {
       const generation = userPreviewGeneration
       const owner = userWindowKey()
-      const result = await DBLibraryHandlers.query('playlistWindow', userPlaylistWindowOptions(previewVideoIndex.value - 1, 1))
-      if (generation === userPreviewGeneration && owner === userWindowKey()) { userPreviewVideo.value = result.records[0] ?? null; break }
+      try {
+        const result = await DBLibraryHandlers.query('playlistWindow', userPlaylistWindowOptions(previewVideoIndex.value - 1, 1))
+        if (generation === userPreviewGeneration && owner === userWindowKey()) { userPreviewVideo.value = result.records[0] ?? null; break }
+      } catch (error) {
+        if (generation !== userPreviewGeneration || owner !== userWindowKey()) continue
+        console.error(error)
+        break
+      }
     }
-  } catch (error) { console.error(error) } finally { userPreviewBusy = false }
-})
+  } finally { userPreviewBusy = false }
+}
+watch([previewVideoIndex, showProgressBarPreview, userWindowKey], loadUserPlaylistPreview)
 
 defineExpose({
   centerCurrentVideo,
