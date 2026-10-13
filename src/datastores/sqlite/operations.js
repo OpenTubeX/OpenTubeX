@@ -281,3 +281,8 @@ export function playlistVideoIds(engine, { id }) {
   if (!engine.prepare("SELECT 1 FROM records WHERE collection = 'playlists' AND id = ?").get(id)) throw new Error('The playlist no longer exists')
   return engine.prepare("SELECT data -> '$.videoId' AS video_id FROM members WHERE collection = 'playlists' AND record_id = ? AND field = 'videos' AND json_type(data, '$.videoId') = 'text' ORDER BY position").all(id).map(row => model.deserialize(row.video_id)).filter(Boolean)
 }
+
+export async function playlistImportCandidates(engine, { name }) {
+  if (typeof name !== 'string') throw new TypeError('Invalid playlist name')
+  return engine.collections.playlists.findAsync({ playlistName: name }, { _id: 1, playlistName: 1, protected: 1 })
+}

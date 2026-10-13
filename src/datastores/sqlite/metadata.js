@@ -10,6 +10,16 @@ const METADATA_FIELD_SQL = new Map([
   ['thumbnail', { value: "coalesce(b.digest, json_extract(s.data, '$.thumbnailUrl'))", type: "CASE WHEN b.digest IS NOT NULL THEN 'text' ELSE json_type(s.data, '$.thumbnailUrl') END" }]
 ])
 
+function nextTiedMetadataId(previousId) {
+  const match = /^(.*)~observed-(\d{20})$/s.exec(previousId)
+  const sequence = match ? BigInt(match[2]) + 1n : 1n
+  // IDs carry the tie order through legacy exports and backup restoration.
+  // Retained IDs are unchanged, and no separate ordering format is needed.
+  const prefix = match && sequence < 10n ** 20n ? match[1] : previousId
+  const next = match && sequence < 10n ** 20n ? sequence : 1n
+  return `${prefix}~observed-${String(next).padStart(20, '0')}`
+}
+
 function normalizeText(value, maximumLength) {
   if (typeof value !== 'string') return ''
   const end = value.length > maximumLength && value.codePointAt(maximumLength - 1) > 0xFFFF
@@ -129,7 +139,14 @@ export async function updateVideoMetadataCache(engine, input) {
     return null
   }
   const changedFields = compareRevisions(previous, { ...current, thumbnailDigest })
-  if (changedFields.length) await collection.insertAsync({ videoId: input.videoId, ...current, thumbnail: changedFields.includes('thumbnail') ? current.thumbnail : null, hasThumbnailChange: changedFields.includes('thumbnail') })
+  if (changedFields.length) {
+    let id
+    if (typeof previous._id === 'string' && previous.cachedAt === current.cachedAt) {
+      id = nextTiedMetadataId(previous._id)
+      while (await collection.countAsync({ _id: id })) id = nextTiedMetadataId(id)
+    }
+    await collection.insertAsync({ ...(id ? { _id: id } : {}), videoId: input.videoId, ...current, thumbnail: changedFields.includes('thumbnail') ? current.thumbnail : null, hasThumbnailChange: changedFields.includes('thumbnail') })
+  }
   return metadataSummary(engine, input.videoId)
 }
 

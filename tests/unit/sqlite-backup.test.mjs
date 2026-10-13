@@ -6,7 +6,8 @@ import { DatabaseSync } from 'node:sqlite'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
-import { compileFunction } from 'node:vm'
+import { compileFunction, runInNewContext } from 'node:vm'
+import { parse, babelParse } from 'vue/compiler-sfc'
 import { zipSync, strToU8, unzipSync } from 'fflate'
 import { openLibrary } from '../../src/datastores/sqlite/migration.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
@@ -1237,4 +1238,24 @@ test('ID-less legacy history imports retain each occurrence and every existing r
     assert.deepEqual(added, incoming)
     previous = rows
   }
+})
+
+test('a conflicting watch-stat adjustment fails before another selected section is restored', async () => {
+  const component = parse(await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')).descriptor
+  const script = (component.scriptSetup ?? component.script).content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const fn = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+  const writes = [], toasts = []
+  let adjustment = null
+  const apply = runInNewContext('(' + script.slice(fn.start, fn.end) + ')', {
+    process: { env: { IS_ELECTRON: false } }, console: { error() {} }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+    backupBusy: { value: false }, selectedBackupSections: { value: ['profiles', 'watchStats'] },
+    backupData: { value: { profiles: [{ _id: 'p', name: 'Imported', subscriptions: [] }], watchStats: { records: [], adjustment: 'incoming' } } },
+    DBProfileHandlers: { find: async () => [], upsert: async record => writes.push(record) }, mergeBackupProfile,
+    DBWatchStatsHandlers: { validateBackup: async () => { adjustment = 'concurrent' }, mergeBackup: async () => { if (adjustment !== null) throw new Error('Conflicting retained adjustment') } },
+    store: { dispatch: async () => true }, t: key => key, showToast: toast => toasts.push(toast),
+  })
+  await apply()
+  assert.deepEqual(writes, [])
+  assert.match(toasts.at(-1).message, /Conflicting retained adjustment/)
 })

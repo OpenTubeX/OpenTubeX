@@ -18,7 +18,7 @@ import { metadataPage } from '../../src/datastores/sqlite/metadata.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
-import { recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds } from '../../src/datastores/sqlite/operations.js'
+import { recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
 
 test('legacy subscription imports accept nullable custom profile names without discarding subscriptions', async t => {
   const engine = memory(t)
@@ -2909,4 +2909,16 @@ test('playlist download IDs preserve member order without hydrating metadata or 
   t.mock.method(engine, 'materialize', () => { throw new Error('must not hydrate records') })
   assert.deepEqual(playlistVideoIds(engine, { id: 'p' }), videos.filter(video => typeof video?.videoId === 'string' && video.videoId).map(video => video.videoId))
   assert.throws(() => playlistVideoIds(engine, { id: 'missing' }), /no longer exists/)
+})
+
+test('Takeout target lookup returns matching headers without reading member arrays', async t => {
+  const engine = memory(t)
+  const videos = Array.from({ length: 20000 }, (_, i) => ({ videoId: `v-${i}`, unknown: new Date(i) }))
+  await engine.collections.playlists.insertAsync([{ _id: 'saved', playlistName: 'Target', videos, unknown: new Date(1) }, { _id: 'other', playlistName: 'Other', videos }])
+  const original = engine.materialize.bind(engine)
+  const guard = t.mock.method(engine, 'materialize', (collection, row, options) => { assert.equal(options.arrays, false); return original(collection, row, options) })
+  assert.deepEqual(await playlistImportCandidates(engine, { name: 'Target' }), [{ _id: 'saved', playlistName: 'Target' }])
+  assert.deepEqual(await playlistImportCandidates(engine, { name: 'missing' }), [])
+  guard.mock.restore()
+  assert.deepEqual((await engine.playlistSnapshot({ id: 'saved' })).videos, videos)
 })

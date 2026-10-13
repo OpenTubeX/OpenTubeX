@@ -1310,3 +1310,24 @@ test('undated metadata ties do not force full-history ordering for distinct nume
   assert.equal(engine.legacyMetadataOrders.get(videoId).ids, null, 'timestamp-less rows are excluded from ordering candidates')
   assert.equal(engine.collections.videoMetadataCache.count(), 2002)
 })
+
+test('new equal-time observations keep their title and inherited thumbnail through legacy record round trips', async t => {
+  const engine = memory(t), videoId = 'abcdefghijk', thumbnail = 'data:image/png;base64,QUFB'
+  const original = { _id: 'z-retained', videoId, title: 'Original', description: '', cachedAt: 1000, thumbnailUrl: 'same', thumbnail, hasThumbnailChange: true, unknown: new Date(1) }
+  await engine.collections.videoMetadataCache.insertAsync(original)
+  const update = title => engine.transaction(() => updateVideoMetadataCache(engine, { videoId, title, description: '', thumbnailUrl: 'same', thumbnail: null, observedAt: 1000 }))
+  for (const title of ['First observation', 'Second observation']) await update(title)
+  const rows = await engine.collections.videoMetadataCache.findAsync({}).sort({ cachedAt: 1 })
+  assert.equal(rows.at(-1).title, 'Second observation')
+  assert.deepEqual(rows[0], original)
+  await engine.transaction(() => updateVideoMetadataCache(engine, { videoId, title: 'Second observation', description: '', thumbnailUrl: 'same', thumbnail, observedAt: 1000 }))
+  assert.equal(engine.collections.videoMetadataCache.count(), 3, 'an unchanged inherited thumbnail must not add a revision')
+  const legacy = new Datastore({ inMemoryOnly: true })
+  await legacy.insertAsync(rows.map(row => model.deserialize(model.serialize(row))))
+  assert.equal((await legacy.findAsync({ videoId }).sort({ cachedAt: 1 })).at(-1).title, 'Second observation')
+  const restored = memory(t)
+  await restored.collections.videoMetadataCache.insertAsync(rows)
+  assert.equal((await restored.collections.videoMetadataCache.findAsync({}).sort({ cachedAt: 1 })).at(-1).title, 'Second observation')
+  await restored.transaction(() => updateVideoMetadataCache(restored, { videoId, title: 'Second observation', description: '', thumbnailUrl: 'same', thumbnail, observedAt: 1000 }))
+  assert.equal(restored.collections.videoMetadataCache.count(), 3)
+})

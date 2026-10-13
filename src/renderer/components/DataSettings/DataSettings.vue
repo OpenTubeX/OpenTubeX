@@ -488,6 +488,10 @@ async function importUnifiedBackup() {
       }
     }
     if (selected.has('watchStats')) await DBWatchStatsHandlers.validateBackup(data.watchStats)
+    if (selected.has('watchStats')) {
+      await DBWatchStatsHandlers.mergeBackup(data.watchStats)
+      await store.dispatch('grabWatchStats')
+    }
     if (selected.has('profiles')) {
       for (const profile of preparedProfiles) await DBProfileHandlers.upsert(profile)
       await store.dispatch('grabAllProfiles')
@@ -508,10 +512,6 @@ async function importUnifiedBackup() {
     if (selected.has('searchHistory')) {
       const entries = mergeSearchHistoryEntries(await DBSearchHistoryHandlers.find(), data.searchHistory)
       if (await store.dispatch('overwriteSearchHistory', entries) !== true) throw new Error('Could not restore search history')
-    }
-    if (selected.has('watchStats')) {
-      await DBWatchStatsHandlers.mergeBackup(data.watchStats)
-      await store.dispatch('grabWatchStats')
     }
     if (selected.has('settings')) await applyImportedSettings(data.settings)
     const compaction = await compactAllDatastores().catch(() => false)
