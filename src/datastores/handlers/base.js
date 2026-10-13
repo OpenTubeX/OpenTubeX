@@ -446,7 +446,11 @@ class WatchStats {
     return db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
   }
 
-  static mergeBackup(backup) {
+  static validateBackup(backup) {
+    return this.mergeBackup(backup, { validateOnly: true }).then(() => true)
+  }
+
+  static mergeBackup(backup, { validateOnly = false } = {}) {
     validateBackupWatchStats(backup)
     return this.runWrite(async () => {
       const savedRecords = await db.watchStats.findAsync({})
@@ -484,6 +488,7 @@ class WatchStats {
       const adjustment = mergeBackupWatchStatsAdjustment(
         retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
       )
+      if (validateOnly) return { records, adjustment }
       const currentByDate = new Map(currentRecords.map(record => [record.date, record]))
       for (const record of records) {
         const current = currentByDate.get(record.date)

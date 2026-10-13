@@ -2854,3 +2854,27 @@ for (const failure of ['metadata', 'history']) {
     assert.equal(engine.revision('playlists'), revision)
   })
 }
+
+
+test('worker transaction rolls back selected playlist additions when a later target is missing', async t => {
+  const engine = memory(t)
+  const original = { _id: 'retained', lastUpdatedAt: 1, videos: [{ videoId: 'keep', unknown: new Date(1) }], unknown: new Date(2) }
+  await engine.collections.playlists.insertAsync(original)
+  const revision = engine.revision('playlists')
+  await assert.rejects(engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: [original._id, 'missing'], videos: [{ videoId: 'new' }] })), /playlist no longer exists/)
+  assert.deepEqual(await engine.playlistSnapshot({ id: original._id }), original)
+  assert.equal(engine.revision('playlists'), revision)
+})
+
+
+test('selected additions preserve repeated incoming occurrences and exclude already stored video IDs', async t => {
+  const engine = memory(t)
+  await engine.collections.playlists.insertAsync({ _id: 'batch', videos: [], unknown: new Date(1) })
+  const videos = [{ videoId: 'same', title: 'First', unknown: new Date(2) }, { videoId: 'same', title: 'Second', unknown: new Date(3) }]
+  assert.equal(await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false })), 1)
+  const first = await engine.playlistSnapshot({ id: 'batch' })
+  assert.deepEqual(first.videos.map(({ playlistItemId, timeAdded, ...record }) => record), videos.map(video => ({ ...video, type: 'video' })))
+  assert.equal(new Set(first.videos.map(video => video.playlistItemId)).size, 2)
+  await engine.transaction(() => addSelectedPlaylistVideos(engine, { ids: ['batch'], videos, allowDuplicates: false }))
+  assert.deepEqual(await engine.playlistSnapshot({ id: 'batch' }), first)
+})

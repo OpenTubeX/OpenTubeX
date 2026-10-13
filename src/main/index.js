@@ -5441,6 +5441,9 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.watchStats.find()
 
+        case DBActions.WATCH_STATS.VALIDATE_BACKUP:
+          return await baseHandlers.watchStats.validateBackup(data)
+
         case DBActions.WATCH_STATS.MERGE_BACKUP: {
           const merged = await baseHandlers.watchStats.mergeBackup(data)
           syncOtherWindows(IpcChannels.SYNC_WATCH_STATS, event, { event: SyncEvents.GENERAL.OVERWRITE, data: merged })

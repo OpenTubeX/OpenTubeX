@@ -65,10 +65,18 @@ function prepareHistoryTargets(engine, job) {
     CREATE INDEX import_history_target_videos ON import_history_targets(video_id, available);
   `)
   const insert = engine.prepare('INSERT INTO import_history_sources VALUES (?, ?)')
-  for (const row of job.database.prepare("SELECT json_extract(data, '$._id') AS id, json_extract(data, '$.videoId') AS video_id FROM incoming WHERE section = 'history' AND json_type(data, '$.videoId') = 'text'").iterate()) insert.run(row.id, row.video_id)
+  for (const row of job.database.prepare(`
+    SELECT json_extract(data, '$._id') AS id, json_extract(data, '$.videoId') AS video_id,
+      CASE WHEN json_type(data, '$.$$backupObject') = 'array' THEN data END AS escaped
+    FROM incoming WHERE section = 'history'
+      AND (json_type(data, '$.videoId') = 'text' OR json_type(data, '$.$$backupObject') = 'array')
+  `).iterate()) {
+    const source = row.escaped ? job.decode(row.escaped) : { _id: row.id, videoId: row.video_id }
+    if (typeof source.videoId === 'string') insert.run(source._id ?? null, source.videoId)
+  }
   // Freeze the eligible destinations before writing. Reserve exact IDs first,
   // so an earlier fallback cannot consume a later row's exact match. Only
-  // projected keys for videos in this import are copied, never full documents.
+  // projected keys are copied; escaped records are decoded one at a time.
   // An ID-less source cannot reserve its prior copy on a later restore. Avoid
   // fallback for that entire video so identified rows cannot consume those copies.
   engine.database.exec(`

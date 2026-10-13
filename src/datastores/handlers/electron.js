@@ -116,6 +116,10 @@ class WatchStats {
     return dbWatchStats(DBActions.GENERAL.FIND)
   }
 
+  static validateBackup(backup) {
+    return dbWatchStats(DBActions.WATCH_STATS.VALIDATE_BACKUP, backup)
+  }
+
   static mergeBackup(backup) {
     return dbWatchStats(DBActions.WATCH_STATS.MERGE_BACKUP, backup)
   }

@@ -487,6 +487,7 @@ async function importUnifiedBackup() {
         currentPlaylists.set(playlist._id, merged)
       }
     }
+    if (selected.has('watchStats')) await DBWatchStatsHandlers.validateBackup(data.watchStats)
     if (selected.has('profiles')) {
       for (const profile of preparedProfiles) await DBProfileHandlers.upsert(profile)
       await store.dispatch('grabAllProfiles')

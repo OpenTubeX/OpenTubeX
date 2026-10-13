@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-test('portable backup codecs retain Dates and leave historical ISO strings unchanged', async () => {
-  const base = { settings: {}, profiles: [], playlists: [], history: [], searchHistory: [], watchStats: { records: [], adjustment: null } }
-  const original = { ...base, history: [{ _id: 'dated', videoId: 'video', timeWatched: new Date(0), unknown: [new Date(1), '1970-01-01T00:00:00.001Z'] }] }
-  assert.deepEqual((await readUnifiedBackup(createUnifiedBackup(original))).data, original)
-})
 import { strToU8, unzipSync, zipSync } from 'fflate'
 import { readFile } from 'node:fs/promises'
 import { compileFunction } from 'node:vm'
@@ -18,6 +13,12 @@ import * as historyHelpers from '../../src/history.js'
 import * as backupHelpers from '../../src/renderer/helpers/unifiedBackup.js'
 
 import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup, validateBackupWatchStats } from '../../src/renderer/helpers/unifiedBackup.js'
+
+test('portable backup codecs retain Dates and leave historical ISO strings unchanged', async () => {
+  const base = { settings: {}, profiles: [], playlists: [], history: [], searchHistory: [], watchStats: { records: [], adjustment: null } }
+  const original = { ...base, history: [{ _id: 'dated', videoId: 'video', timeWatched: new Date(0), unknown: [new Date(1), '1970-01-01T00:00:00.001Z'] }] }
+  assert.deepEqual((await readUnifiedBackup(createUnifiedBackup(original))).data, original)
+})
 
 const data = {
   settings: { theme: 'dark' },
@@ -326,6 +327,8 @@ for (const adapter of ['nedb', 'sqlite']) {
     const current = { _id: 'current', date: '2026-10-09', seconds: 100, unknown: new Date(5) }
     await db.watchStats.insertAsync(current)
     const backup = { records, adjustment: null }
+    await WatchStats.validateBackup(backup)
+    assert.deepEqual(await db.watchStats.findAsync({}), [current])
     for (let repeat = 0; repeat < 2; repeat++) {
       await WatchStats.mergeBackup(backup)
       assert.deepEqual(await db.watchStats.findAsync({ date: { $exists: true } }).sort({ _id: 1 }), [...records, current].toSorted((a, b) => model.compareThings(a._id, b._id)))
@@ -462,4 +465,102 @@ test('profile ordering tolerates retained names without coercing or changing sto
   assert.deepEqual((await db.findAsync({})).sort(compare).map(record => record._id), records.map(record => record._id))
   assert.equal(compare({ _id: 'a', name: 'é' }, { _id: 'b', name: 'e\u0301' }), 0)
   assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), records.toSorted((a, b) => model.compareThings(a._id, b._id)))
+})
+
+
+for (const conflict of ['adjustment', 'record']) {
+  test(`portable restore preflights watch-stat ${conflict} conflicts before any selected section writes`, async () => {
+    const db = Object.fromEntries(['watchStats', 'profiles', 'playlists', 'history', 'searchHistory'].map(name => [name, new Datastore({ inMemoryOnly: true })]))
+    const original = {
+      watchStats: [{ _id: 'history-watch-time-v1', adjustment: 'retained', completedAt: 1 }, { _id: 'malformed', date: null, seconds: 'original' }],
+      profiles: [{ _id: 'profile', name: 'Original', subscriptions: [] }],
+      playlists: [{ _id: 'playlist', playlistName: 'Original', videos: [] }],
+      history: [{ _id: 'history', videoId: 'same', timeWatched: 1 }],
+      searchHistory: [{ _id: 'search', query: 'original' }],
+    }
+    for (const [name, records] of Object.entries(original)) await db[name].insertAsync(records)
+    const incoming = {
+      profiles: [{ _id: 'profile', name: 'Changed', subscriptions: [] }],
+      playlists: [{ _id: 'playlist', playlistName: 'Changed', videos: [] }],
+      history: [{ _id: 'new-history', videoId: 'new', timeWatched: 2 }],
+      searchHistory: [{ _id: 'new-search', query: 'changed' }],
+      watchStats: { records: conflict === 'record' ? [{ _id: 'malformed', date: null, seconds: 'changed' }] : [], adjustment: conflict === 'adjustment' ? 42 : 'retained' },
+    }
+    const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+    const dependencies = { db, model, ...backupHelpers }
+    const WatchStats = compileFunction(base.slice(base.indexOf('class WatchStats {'), base.indexOf('class Profiles {')) + '\nreturn WatchStats', Object.keys(dependencies))(...Object.values(dependencies))
+    const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
+    const script = parseVue(component).descriptor.scriptSetup.content
+    const declaration = parseJavaScript(script, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+    const messages = [], writes = []
+    const bindings = {
+      ...backupHelpers, mergeSearchHistoryEntries: (_current, entries) => entries,
+      backupBusy: { value: false }, selectedBackupSections: { value: Object.keys(incoming) }, backupData: { value: incoming },
+      process: { env: { IS_ELECTRON: false } }, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+      DBWatchStatsHandlers: WatchStats,
+      DBProfileHandlers: { find: () => db.profiles.findAsync({}), upsert: async record => { writes.push('profiles'); return db.profiles.updateAsync({ _id: record._id }, record, { upsert: true }) } },
+      DBPlaylistHandlers: { find: () => db.playlists.findAsync({}) },
+      DBHistoryHandlers: { find: () => db.history.findAsync({}) },
+      DBSearchHistoryHandlers: { find: () => db.searchHistory.findAsync({}) },
+      store: { dispatch: async (action, value) => {
+        if (action === 'updatePlaylist') { writes.push('playlists'); await db.playlists.updateAsync({ _id: value._id }, value, { upsert: true }); return true }
+        if (action === 'overwriteHistory' || action === 'overwriteSearchHistory') { writes.push(action); return true }
+      } },
+      compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
+    }
+    const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
+    await restore()
+    assert.match(messages.at(-1).message, /Conflicting retained watch[- ]stat/)
+    assert.deepEqual(writes, [])
+    for (const [name, records] of Object.entries(original)) assert.deepEqual(await db[name].findAsync({}).sort({ _id: 1 }), records.toSorted((a, b) => model.compareThings(a._id, b._id)))
+    assert.equal(bindings.backupBusy.value, false)
+  })
+}
+
+
+test('Electron watch-stat preflight is read-only and keeps the published merge payload unchanged', async () => {
+  const { DBActions, IpcChannels, SyncEvents } = await import('../../src/constants.js')
+  const db = { watchStats: new Datastore({ inMemoryOnly: true }) }
+  const original = { _id: 'day', date: '2026-10-13', seconds: 5 }
+  await db.watchStats.insertAsync(original)
+  const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+  const dependencies = { db, model, ...backupHelpers }
+  const WatchStats = compileFunction(base.slice(base.indexOf('class WatchStats {'), base.indexOf('class Profiles {')) + '\nreturn WatchStats', Object.keys(dependencies))(...Object.values(dependencies))
+  const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const nodes = [parseJavaScript(main, { sourceType: 'module' }).program]
+  let call
+  while (nodes.length) {
+    const node = nodes.pop()
+    if (node.type === 'CallExpression' && node.callee.object?.name === 'ipcMain' &&
+        node.callee.property?.name === 'handle' && node.arguments[0]?.property?.name === 'DB_WATCH_STATS') { call = node; break }
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) nodes.push(...value.filter(entry => entry?.type))
+      else if (value?.type) nodes.push(value)
+    }
+  }
+  assert.ok(call, 'exercise the actual main-process watch-stat endpoint')
+  const handlerNode = call.arguments[1]
+  const broadcasts = []
+  const bindings = { DBActions, IpcChannels, SyncEvents, baseHandlers: { watchStats: WatchStats }, isOpenTubeXUrl: () => true, syncOtherWindows: (...args) => broadcasts.push(args) }
+  const endpoint = compileFunction('return ' + main.slice(handlerNode.start, handlerNode.end), Object.keys(bindings))(...Object.values(bindings))
+  const renderer = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const classNode = parseJavaScript(renderer, { sourceType: 'module' }).program.body.find(node => node.type === 'ClassDeclaration' && node.id.name === 'WatchStats')
+  const calls = []
+  const RendererWatchStats = compileFunction(renderer.slice(classNode.start, classNode.end) + '\nreturn WatchStats', ['DBActions', 'dbWatchStats'])(DBActions, async (action, data) => {
+    calls.push({ action, data })
+    return endpoint({ senderFrame: { url: 'app://test' } }, { action, data })
+  })
+  const backup = { records: [{ date: original.date, seconds: 10 }], adjustment: null }
+  assert.equal(await RendererWatchStats.validateBackup(backup), true)
+  assert.deepEqual(await db.watchStats.findAsync({}), [original])
+  assert.deepEqual(broadcasts, [])
+  assert.deepEqual(calls, [{ action: DBActions.WATCH_STATS.VALIDATE_BACKUP, data: backup }])
+  const retained = { _id: 'retained', date: null, seconds: 'unknown' }
+  await assert.rejects(RendererWatchStats.validateBackup({ records: [retained, { ...retained }], adjustment: null }), /Duplicate retained watch statistics/)
+  assert.deepEqual(await db.watchStats.findAsync({}), [original])
+  assert.deepEqual(broadcasts, [])
+  await RendererWatchStats.mergeBackup(backup)
+  assert.deepEqual(calls.at(-1), { action: DBActions.WATCH_STATS.MERGE_BACKUP, data: backup })
+  assert.equal(broadcasts.length, 1)
+  assert.equal((await db.watchStats.findOneAsync({ _id: original._id })).seconds, 10)
 })

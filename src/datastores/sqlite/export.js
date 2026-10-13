@@ -17,18 +17,20 @@ function * collectionJson(engine, collection, ndjson = false) {
     const arrays = engine.prepare('SELECT field FROM record_arrays WHERE collection = ? AND record_id = ? ORDER BY field').all(collection, row.id)
     for (const { field } of arrays) delete record[field]
     const text = ndjson ? model.serialize(record) : encodeBackupValue(record)
-    yield arrays.length ? text.slice(0, -1) : text
+    const escaped = !ndjson && (Object.hasOwn(record, '$$date') || Object.hasOwn(record, '$$backupObject'))
+    yield arrays.length ? text.slice(0, escaped ? -2 : -1) : text
     for (const [index, { field }] of arrays.entries()) {
-      yield (Object.keys(record).length || index ? ',' : '') + JSON.stringify(field) + ':['
+      yield (Object.keys(record).length || index ? ',' : '') +
+        (escaped ? '[' + JSON.stringify(field) + ',' : JSON.stringify(field) + ':') + '['
       let firstMember = true
       for (const member of engine.prepare('SELECT data FROM members WHERE collection = ? AND record_id = ? AND field = ? ORDER BY position').iterate(collection, row.id, field)) {
         if (!firstMember) yield ','
         firstMember = false
         yield ndjson ? member.data : encodeBackupValue(model.deserialize(member.data))
       }
-      yield ']'
+      yield escaped ? ']]' : ']'
     }
-    if (arrays.length) yield '}'
+    if (arrays.length) yield escaped ? ']}' : '}'
   }
   yield ndjson ? '\n' : ']'
 }

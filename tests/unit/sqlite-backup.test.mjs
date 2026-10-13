@@ -1151,3 +1151,37 @@ test('staged decoded record validation rejects missing identity before any live 
   assert.equal(imports.jobs.size, 0)
   assert.deepEqual(await engine.collections.profiles.findAsync({}), [retained])
 })
+
+
+test('streamed escaped records keep normalized arrays inside the codec envelope', async t => {
+  const { engine, exports, imports } = await fixture(t)
+  const original = { _id: 'escaped', playlistName: 'Retained', videos: [{ videoId: 'same', unknown: new Date(3) }, null, { videoId: 'same', unknown: new Date(4) }], unknown: new Date(2), $$backupObject: 'literal' }
+  const stored = { ...original }; delete stored.$$backupObject
+  await engine.collections.playlists.insertAsync(stored)
+  const row = engine.prepare("SELECT data FROM records WHERE collection = 'playlists' AND id = ?").get(original._id)
+  const metadata = JSON.parse(row.data)
+  metadata.$$backupObject = original.$$backupObject
+  engine.prepare("UPDATE records SET data = ? WHERE collection = 'playlists' AND id = ?").run(JSON.stringify(metadata), original._id)
+  const job = exports.start({ sections: ['playlists'] }), chunks = []
+  for (;;) { const next = exports.next(job); chunks.push(next.data); if (next.done) break }
+  const bytes = Buffer.concat(chunks)
+  assert.deepEqual((await readUnifiedBackup(new Blob([bytes]))).data.playlists, [original])
+  const staged = stage(imports, bytes, 7)
+  const incoming = imports.jobs.get(staged.id)
+  assert.deepEqual(incoming.decode(incoming.database.prepare('SELECT data FROM incoming').get().data), original)
+  assert.deepEqual(await engine.playlistSnapshot({ id: original._id }), original)
+})
+
+
+test('escaped history imports choose the decoded latest-occurrence fallback before writing', async t => {
+  const { engine, imports } = await fixture(t)
+  const current = { _id: 'local', videoId: 'same', timeWatched: 1, watchProgress: 10, unknown: new Date(1) }
+  const incoming = { _id: 'incoming', videoId: 'same', timeWatched: 2, watchProgress: 20, $$backupObject: 'literal' }
+  await engine.collections.history.insertAsync(current)
+  const bytes = Buffer.from(await createUnifiedBackup({ history: [incoming] }).arrayBuffer())
+  let target
+  t.mock.method(engine.collections.history, 'updateAsync', async query => { target = query._id; throw new Error('stop before reserved-key write') })
+  await assert.rejects(imports.apply({ ...stage(imports, bytes), sections: ['history'] }, {}), /stop before reserved-key write/)
+  assert.equal(target, current._id)
+  assert.deepEqual(await engine.collections.history.findAsync({}), [current])
+})
