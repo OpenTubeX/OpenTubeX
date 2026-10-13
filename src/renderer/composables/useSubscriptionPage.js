@@ -19,7 +19,7 @@ function equalEntryValue(left, right) {
 
 function retainPageEntries(previous, next) {
   const byId = new Map()
-  const key = entry => JSON.stringify([entry.type, entry.videoId, entry.postId, entry.authorId])
+  const key = entry => JSON.stringify([entry?.type, entry?.videoId, entry?.postId, entry?.authorId])
   for (const entry of previous) {
     const id = key(entry)
     if (!byId.has(id)) byId.set(id, [])

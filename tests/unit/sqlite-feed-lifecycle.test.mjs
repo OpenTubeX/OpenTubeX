@@ -504,3 +504,16 @@ for (const largeBy of ['entry count', 'channel count']) {
     assert.equal(result.records.value[0].title, 'Updated')
   })
 }
+
+
+test('subscription page publication retains opaque positions without rejecting null entry identities', async t => {
+  const records = [null, 'retained', false, { videoId: 'valid', type: 'video', title: 'Visible' }]
+  const { result } = await feed(t, async () => ({ ...page(), records: structuredClone(records), cursor: null, total: records.length }))
+  await result.load()
+  assert.equal(result.failed.value, false)
+  assert.deepEqual(Array.from(result.records.value), records)
+  const previous = result.records.value
+  await result.load()
+  assert.equal(result.records.value, previous)
+  assert.equal(result.total.value, records.length)
+})
