@@ -870,7 +870,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .externalMedia {
   margin-inline: auto;
-  padding-block: 24px;
+  padding-block-end: 24px;
 }
 
 .externalMediaLayout {
