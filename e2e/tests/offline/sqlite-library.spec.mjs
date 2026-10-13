@@ -1753,13 +1753,19 @@ test.describe('retained opaque playlist preview', () => {
       await testInfo.attach(`Opaque playlist Home ${scheme}`, { path: capture, contentType: 'image/png' })
     }
   })
-  test('Save renders an opaque first member at 95% scale without changing the library', async ({ page }, testInfo) => {
+  test('Save renders an unnamed opaque playlist at 95% scale without changing retained data', async ({ page }, testInfo) => {
+    const retained = { ...opaquePlaylist, playlistName: null }
+    await page.evaluate(async ({ playlist, action }) => {
+      await window.ftElectron.dbPlaylists(action, playlist)
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('grabAllPlaylists')
+    }, { playlist: retained, action: DBActions.GENERAL.UPSERT })
     await goTo(page, 'history')
     const card = page.locator('.tabContent[aria-hidden="false"] .ft-list-video').first()
     await card.hover()
     await card.locator('.addToPlaylistIcon .iconButton').click()
     const picker = card.locator('.addToPlaylistDropdown')
-    const row = picker.getByRole('option').filter({ hasText: opaquePlaylist.playlistName })
+    const row = picker.getByRole('option').filter({ has: page.locator('.playlistName', { hasText: /^Playlists$/ }) })
+    await picker.locator('.playlistSearch input').fill('Playlists')
     await expect(row).toBeVisible()
     await expect(row.locator('.videoCount')).toHaveText('2 videos')
     await expect(row.locator('img')).toHaveAttribute('src', /thumbnail_placeholder|data:image\/svg/)
@@ -1775,7 +1781,7 @@ test.describe('retained opaque playlist preview', () => {
       await page.screenshot({ path: capture, clip: { x: bounds.x - 12, y: bounds.y - 16, width: bounds.width + 24, height: bounds.height + 32 } })
       await testInfo.attach(`Opaque playlist Save ${scheme}`, { path: capture, contentType: 'image/png' })
     }
-    expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), opaquePlaylist._id)).toStrictEqual(opaquePlaylist)
+    expect(await page.evaluate(id => window.ftElectron.libraryQuery('playlistSnapshot', { id }), retained._id)).toStrictEqual(retained)
     expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 10 }))).records).toStrictEqual([history[0]])
   })
 })

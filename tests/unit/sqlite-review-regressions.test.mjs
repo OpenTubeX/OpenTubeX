@@ -2769,3 +2769,34 @@ test('portable backup export completes its picked file after Data Settings close
   assert.deepEqual(toasts, [])
   assert.deepEqual(await db.findAsync({}), [playlist])
 })
+
+
+for (const fails of [false, true]) {
+  test(`Save awaits membership before toggling a bookmark, lookup fails: ${fails}`, async () => {
+    const db = new Datastore({ inMemoryOnly: true })
+    const playlist = { _id: 'p', playlistName: 'Retained', videos: [{ videoId: 'same', unknown: new Date(1) }], unknown: new Date(2) }
+    await db.insertAsync(playlist)
+    const pending = Promise.withResolvers(), calls = [], toasts = [], containedIds = ref(new Set())
+    const context = await functions('src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', ['togglePlaylist'], {
+      props: { videoData: { videoId: 'same' } }, containedIds, videoThumbnail: ref('thumbnail'),
+      playlistDisplayName: playlist => playlist.playlistName, t: key => key, showToast: toast => toasts.push(toast),
+      store: { state: { playlists: { libraryPaged: true } }, dispatch: async (action, payload) => {
+        calls.push(action)
+        if (action === 'hydrateVideoState') { await pending.promise; containedIds.value = new Set(['p']); return }
+        if (action === 'removeVideo') await db.updateAsync({ _id: payload._id }, { $pull: { videos: { videoId: payload.videoId } } })
+        if (action === 'addVideo') await db.updateAsync({ _id: payload._id }, { $push: { videos: payload.videoData } })
+        return true
+      } },
+    })
+    const toggling = context.togglePlaylist(playlist)
+    await setImmediate()
+    assert.deepEqual(calls, ['hydrateVideoState'])
+    assert.deepEqual(await db.findOneAsync({ _id: 'p' }), playlist)
+    if (fails) pending.reject(new Error('membership unavailable'))
+    else pending.resolve()
+    await toggling
+    assert.deepEqual(calls, fails ? ['hydrateVideoState'] : ['hydrateVideoState', 'removeVideo'])
+    assert.deepEqual(await db.findOneAsync({ _id: 'p' }), fails ? playlist : { ...playlist, videos: [] })
+    assert.equal(toasts.length, 1)
+  })
+}
