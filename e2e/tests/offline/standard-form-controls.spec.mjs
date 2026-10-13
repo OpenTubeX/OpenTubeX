@@ -168,7 +168,7 @@ for (const uiScale of [100, 95, 125]) {
       await setWindowSize(app, page, { width: 375, height: 850 })
       await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
       await expect(page.locator('.phonePlaylistPicker')).toBeVisible()
-      expect(await field.evaluate(input => input.getBoundingClientRect().height)).toBeGreaterThanOrEqual(45)
+      await expect.poll(() => field.evaluate(input => input.getBoundingClientRect().height)).toBeGreaterThanOrEqual(45)
     })
   })
 }

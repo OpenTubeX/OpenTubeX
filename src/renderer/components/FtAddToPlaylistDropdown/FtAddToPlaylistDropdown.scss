@@ -96,7 +96,7 @@
   padding-inline: 10px;
 }
 
-@media (any-pointer: fine) {
+@media (any-pointer: fine) and (not (any-pointer: coarse)) {
   .addToPlaylistDropdown:not(.phonePlaylistPicker) .playlistSearch {
     --form-control-height: 36px;
   }
