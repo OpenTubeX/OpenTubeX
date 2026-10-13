@@ -10,7 +10,15 @@ test.use({ seed: { playlists } })
 test('bulk deletion updates the overview and persists while preserving protected playlists', async ({ page, app }) => {
   await goTo(page, 'userplaylists')
   await expect(page.getByText('Remove this playlist', { exact: true })).toBeVisible()
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removePlaylists', ['remove', 'protected']))
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    if (store.state.playlists.libraryPaged) {
+      const ids = ['abcdefghijk', 'bcdefghijkl']
+      await store.dispatch('retainVideoState', ids)
+      await store.dispatch('hydrateVideoState', ids)
+    }
+    await store.dispatch('removePlaylists', ['remove', 'protected'])
+  })
   await expect(page.getByText('Remove this playlist', { exact: true })).toHaveCount(0)
   await expect(page.getByText('Keep this playlist', { exact: true })).toBeVisible()
   await expect(page.getByText('Protected playlist', { exact: true })).toBeVisible()
