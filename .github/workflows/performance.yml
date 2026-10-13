@@ -27,13 +27,22 @@ jobs:
         # Upstream-sync's head contains upstream alone. Benchmark the merged
         # app, including the fork's build scripts and performance helpers.
         ref: ${{ github.sha }}
+        fetch-depth: 2
         path: candidate
         persist-credentials: false
+
+    - name: Resolve benchmark base
+      id: benchmark_base
+      shell: bash
+      run: |
+        # The event base can differ from the base used by this pinned merge.
+        benchmark_base="$(git -C candidate rev-parse HEAD^1)"
+        printf 'sha=%s\n' "$benchmark_base" >> "$GITHUB_OUTPUT"
 
     - name: Check out base
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        ref: ${{ github.event.pull_request.base.sha }}
+        ref: ${{ steps.benchmark_base.outputs.sha }}
         path: base
         persist-credentials: false
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -36,6 +36,60 @@ test('benchmarks the merged pull request with the fork build and test scripts', 
     checkout.with.ref,
     '${{ github.sha }}'
   )
+})
+
+test('performance workflow benchmarks the pinned merge parent when the event base differs', async () => {
+  const workflow = loadYaml(await readFile('.github/workflows/performance.yml', 'utf8'))
+  const steps = workflow.jobs.performance.steps
+  const checkout = steps.find(step => step.name === 'Check out candidate')
+  const base = steps.find(step => step.name === 'Check out base')
+  const root = await mkdtemp(path.join(tmpdir(), 'opentubex-performance-base-'))
+  const repository = path.join(root, 'repository')
+  const candidate = path.join(root, 'candidate')
+  const env = {
+    ...process.env,
+    GIT_AUTHOR_NAME: 'Performance test', GIT_AUTHOR_EMAIL: 'test@example.com',
+    GIT_COMMITTER_NAME: 'Performance test', GIT_COMMITTER_EMAIL: 'test@example.com',
+  }
+  const git = (cwd, args, input) => execFileSync('git', ['-c', 'commit.gpgsign=false', '-C', cwd, ...args], {
+    encoding: 'utf8', env, input, stdio: ['pipe', 'pipe', 'pipe'],
+  }).trim()
+  try {
+    await mkdir(repository)
+    git(repository, ['init', '--quiet'])
+    const tree = git(repository, ['mktree'], '')
+    const commit = (message, parents = []) => git(repository, ['commit-tree', tree, '-m', message, ...parents.flatMap(parent => ['-p', parent])])
+    const eventBase = commit('Event base')
+    const actualBase = commit('Updated base', [eventBase])
+    const head = commit('PR head', [eventBase])
+    const merge = commit('Pinned merge', [actualBase, head])
+    await mkdir(candidate)
+    git(candidate, ['init', '--quiet'])
+    git(candidate, ['fetch', '--depth', String(checkout.with['fetch-depth'] ?? 1), repository, merge])
+    git(candidate, ['checkout', '--detach', 'FETCH_HEAD'])
+    let ref = base.with.ref.replace('${{ github.event.pull_request.base.sha }}', eventBase)
+    for (const step of steps.filter(step => step.id && step.run)) {
+      const expression = new RegExp(`\\$\\{\\{ steps\\.${step.id}\\.outputs\\.(\\w+) \\}\\}`)
+      const outputKey = ref.match(expression)?.[1]
+      if (!outputKey) continue
+      const output = path.join(root, 'output')
+      execFileSync('bash', ['-e', '-o', 'pipefail', '-c', step.run], {
+        cwd: root, env: { ...env, GITHUB_OUTPUT: output }, stdio: 'pipe',
+      })
+      const value = (await readFile(output, 'utf8')).split('\n').find(line => line.startsWith(`${outputKey}=`))?.slice(outputKey.length + 1)
+      assert.ok(value)
+      ref = ref.replace(expression, value)
+    }
+    assert.equal(ref, actualBase, 'benchmark the first parent of the exact candidate, rather than the event’s stale base')
+    const artifact = result()
+    artifact.base.commit = ref.slice(0, 9)
+    artifact.candidate.commit = merge.slice(0, 9)
+    assert.doesNotThrow(() => renderPerformanceComment(artifact, {
+      headSha: head, runUrl, candidateCommit: { sha: merge, parents: [{ sha: actualBase }, { sha: head }] },
+    }))
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
 })
 
 function sample (overrides = {}) {
