@@ -456,7 +456,7 @@ const quickBookmarkButtonEnabled = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<number | undefined>} */
-const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value?.videoCount ?? selectedUserPlaylist.value?.videos?.length)
+const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value == null ? undefined : store.state.playlists.libraryPaged ? selectedUserPlaylist.value.videoCount ?? 0 : Array.isArray(selectedUserPlaylist.value.videos) ? selectedUserPlaylist.value.videos.length : 0)
 
 /** @type {import('vue').ComputedRef<number | undefined>} */
 const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.value?.lastUpdatedAt)

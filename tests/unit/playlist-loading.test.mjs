@@ -22,12 +22,12 @@ function playlist(_id, playlistName, protectedValue = false) {
 
 test('playlist view counts retained browser/mobile members and bounded desktop summaries', () => {
   const expression = view.match(/^const selectedUserPlaylistVideoCount = (.+)$/m)[1]
-  const count = value => vm.runInNewContext(expression, {
+  const count = (value, libraryPaged = false) => vm.runInNewContext(expression, {
     computed: getter => ({ value: getter() }),
-    selectedUserPlaylist: { value },
+    selectedUserPlaylist: { value }, store: { state: { playlists: { libraryPaged } } },
   }).value
   assert.equal(count(playlist('portable', 'Mobile and browser')), 1)
-  assert.equal(count({ _id: 'desktop', videoCount: 20000, videos: [] }), 20000)
+  assert.equal(count({ _id: 'desktop', videoCount: 20000, videos: [] }, true), 20000)
   assert.equal(count(undefined), 0)
 })
 

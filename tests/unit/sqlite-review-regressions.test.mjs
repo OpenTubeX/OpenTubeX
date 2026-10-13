@@ -2454,7 +2454,7 @@ test('Save thumbnails skip opaque first members and retain every playlist shape'
   let requests = 0
   const context = await functions('src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', ['playlistVideoCount', 'playlistThumbnail'], {
     thumbnailPlaceholder: 'placeholder', getVideoThumbnailUrl() { requests++; return 'valid-thumbnail' },
-    store: { getters: { getBackendPreference: 'local', getCurrentInvidiousInstanceUrl: 'instance' } },
+    store: { state: { playlists: { libraryPaged: true } }, getters: { getBackendPreference: 'local', getCurrentInvidiousInstanceUrl: 'instance' } },
   })
   for (const firstVideo of [undefined, null, false, 42, 'opaque', [], {}, { videoId: null }, { videoId: 42 }, { videoId: '' }]) {
     const playlist = { videoCount: 2, firstVideo, videos: [] }, before = structuredClone(playlist)
@@ -3201,3 +3201,20 @@ test('Watch reloads a paged duration window after same-size same-timestamp playl
   assert.equal(context.userWindow.value.next.videoId, later.videoId)
   assert.deepEqual(context.playlistItems.value.map(video => video.videoId), nextWindow.records.map(video => video.videoId))
 })
+
+for (const file of ['src/renderer/views/Playlist/Playlist.vue', 'src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue']) {
+  test(`${file} derives full-record counts from memberships and summary counts from the paged backend`, async () => {
+    const { script, ast } = await source(file)
+    const declaration = matching(ast, node => node.type === 'VariableDeclarator' && node.id?.name === 'selectedUserPlaylistVideoCount')[0]
+    for (const paged of [false, true]) {
+      for (const videos of [null, [], [{ videoId: 'real' }]]) {
+        for (const stale of [0, 42]) {
+          const data = { _id: 'p', videoCount: paged ? 20000 : stale, videos, unknown: new Date(1) }, before = structuredClone(data)
+          const count = vm.runInNewContext(script.slice(declaration.init.start, declaration.init.end), { computed: callback => callback(), selectedUserPlaylist: ref(data), store: { state: { playlists: { libraryPaged: paged } } } })
+          assert.equal(count, paged ? 20000 : Array.isArray(videos) ? videos.length : 0)
+          assert.deepEqual(data, before)
+        }
+      }
+    }
+  })
+}
