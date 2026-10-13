@@ -107,6 +107,9 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
     id, title: id, uploader: { id: 'UCchannel', name: 'UCchannel', avatar: 'keep-avatar', verified: true },
     upload_date: 0, duration: 0, thumbnail_url: 'keep-thumbnail',
   }])
+  let uploads = 0
+  const upload = adapter.addPlaylistVideos.bind(adapter)
+  adapter.addPlaylistVideos = async (...args) => { uploads++; return upload(...args) }
   const store = {
     state: { playlists: { playlists: [local] } },
     dispatch: async (action, value) => {
@@ -125,6 +128,7 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   assert.equal(remote[0].uploader.verified, true)
   assert.equal(remote[0].thumbnail_url, 'keep-thumbnail')
   await context.syncPlaylists(adapter, store, previous)
+  assert.equal(uploads, 1, 'unchanged repeat sync does not upload metadata again')
   assert.equal((await adapter.getPlaylist(local._id)).videos.length, 1, 'repeat sync does not append duplicates')
   assert.deepEqual(Array.from(store.state.playlists.playlists[0].videos, item => item.playlistItemId), ['first', 'duplicate'])
   assert.ok(store.state.playlists.playlists[0].videos.every(item => item.title === 'Repaired title' && item.lengthSeconds === 120))
