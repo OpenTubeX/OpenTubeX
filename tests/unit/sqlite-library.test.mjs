@@ -2966,3 +2966,28 @@ test('legacy profile import retains own prototype keys safely and rolls back inv
   assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), before)
   assert.equal(Object.prototype.polluted, undefined)
 })
+
+
+for (const previous of [undefined, null, false, 42, 'retained', { retained: new Date(1) }, new Date(2), [null, null, false, {}, {}, { id: 42 }, { id: '' }, { id: 'existing', unknown: new Date(3) }, { id: 'existing', unknown: new Date(4) }]]) {
+  test(`legacy subscription imports retain every previous membership value: ${model.serialize({ previous })}`, async t => {
+    const engine = memory(t)
+    const originals = [{ _id: 'allChannels', name: 'Primary' }, { _id: 'custom', name: 'Saved' }].map(profile => ({ ...profile, ...(previous === undefined ? {} : { subscriptions: previous }), unknown: new Date(5) }))
+    await engine.collections.profiles.insertAsync(originals)
+    const existing = { id: 'existing', name: 'Incoming' }, added = { id: 'new', unknown: new Date(6) }
+    await importSubscriptionProfiles(engine, { profiles: [{ _id: 'incoming', name: 'Saved', subscriptions: [existing, added, added] }] })
+    const retained = Array.isArray(previous) ? previous : previous === undefined ? [] : [previous]
+    const expected = [...retained, ...(Array.isArray(previous) ? [] : [existing]), added]
+    assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals.map(profile => ({ ...profile, subscriptions: expected })).toSorted((a, b) => a._id.localeCompare(b._id)))
+  })
+}
+
+
+test('empty legacy subscription imports retain non-array field shapes and missing fields', async t => {
+  for (const subscriptions of [undefined, null, false, 'retained', { unknown: new Date(1) }]) {
+    const engine = memory(t)
+    const originals = [{ _id: 'allChannels', name: 'Primary' }, { _id: 'custom', name: 'Saved' }].map(profile => ({ ...profile, ...(subscriptions === undefined ? {} : { subscriptions }), unknown: new Date(2) }))
+    await engine.collections.profiles.insertAsync(originals)
+    await importSubscriptionProfiles(engine, { profiles: [{ _id: 'incoming', name: 'Saved', subscriptions: [] }] })
+    assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), originals)
+  }
+})

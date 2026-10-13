@@ -1,3 +1,4 @@
+import { mergeLegacySubscriptionChannels } from '../../renderer/helpers/unifiedBackup.js'
 import model from '@seald-io/nedb/lib/model.js'
 import { randomUUID } from 'node:crypto'
 import { MAIN_PROFILE_ID } from '../../constants.js'
@@ -78,14 +79,6 @@ export async function importSubscriptionProfiles(engine, { profiles }) {
     const current = await collection.findAsync({})
     const primary = current.find(profile => profile._id === MAIN_PROFILE_ID)
     if (!primary) throw new Error('The primary subscription profile is missing')
-    const mergeChannels = (previous, incoming) => {
-      const ids = new Set()
-      return [...previous, ...incoming].filter(channel => {
-        if (ids.has(channel.id)) return false
-        ids.add(channel.id)
-        return true
-      })
-    }
     const primaryChannels = []
     const primaryPatch = {}
     for (const imported of profiles) {
@@ -96,7 +89,7 @@ export async function importSubscriptionProfiles(engine, { profiles }) {
       }
       const existing = current.find(profile => profile._id !== MAIN_PROFILE_ID && (imported.name === null ? profile._id === imported._id : profile.name === imported.name))
       if (existing) {
-        const patch = { subscriptions: mergeChannels(existing.subscriptions, imported.subscriptions) }
+        const patch = { subscriptions: mergeLegacySubscriptionChannels(existing.subscriptions, imported.subscriptions) }
         if (Object.hasOwn(imported, 'icon')) patch.icon = imported.icon
         await collection.updateAsync({ _id: existing._id }, { $set: patch })
         Object.assign(existing, patch)
@@ -106,7 +99,7 @@ export async function importSubscriptionProfiles(engine, { profiles }) {
         current.push(await collection.insertAsync(profile))
       }
     }
-    primaryPatch.subscriptions = mergeChannels(primary.subscriptions, primaryChannels)
+    primaryPatch.subscriptions = mergeLegacySubscriptionChannels(primary.subscriptions, primaryChannels)
     await collection.updateAsync({ _id: MAIN_PROFILE_ID }, { $set: primaryPatch })
     return true
   })

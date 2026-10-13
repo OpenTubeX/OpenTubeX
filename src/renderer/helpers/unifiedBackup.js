@@ -6,6 +6,29 @@ const MAX_ARCHIVE_SIZE = 128 * 1024 * 1024
 const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 const MAX_TOTAL_SIZE = 256 * 1024 * 1024
 
+/**
+ * Appends legacy channels while preserving every saved occurrence. A retained
+ * scalar becomes one opaque slot only when channels are actually being added.
+ * @param {unknown} previous
+ * @param {unknown[]} incoming
+ * @returns {unknown}
+ */
+export function mergeLegacySubscriptionChannels(previous, incoming) {
+  if (!Array.isArray(incoming)) throw new TypeError('Invalid imported subscriptions')
+  if (incoming.length === 0) return previous
+  const channels = Array.isArray(previous) ? previous.slice() : previous === undefined ? [] : [previous]
+  const identified = channel => channel !== null && typeof channel === 'object' && !Array.isArray(channel) && typeof channel.id === 'string' && channel.id.length > 0
+  const ids = new Set(channels.filter(identified).map(channel => channel.id))
+  for (const channel of incoming) {
+    if (identified(channel)) {
+      if (ids.has(channel.id)) continue
+      ids.add(channel.id)
+    }
+    channels.push(channel)
+  }
+  return channels
+}
+
 export function mergeBackupProfile(current, imported) {
   if (!current) return imported
   if (!Array.isArray(current.subscriptions) || !Array.isArray(imported.subscriptions)) {
