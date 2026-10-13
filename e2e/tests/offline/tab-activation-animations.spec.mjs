@@ -149,6 +149,29 @@ test('returning to subscription tabs preserves their highlight without replaying
   await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
 })
 
+test('hidden subscription tabs clear their highlight when every feed is removed', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+  const tabs = page.getByRole('tablist', { name: /^Subscriptions tabs$/i, includeHidden: true })
+  await expect(tabs.locator('.tabsIndicator')).toBeVisible()
+  await page.evaluate(() => window.ftElectron.tabs.create({ route: '/history', makeActive: true }))
+  await expect(tabs).toBeHidden()
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUiScale', 95)
+    await Promise.all(['Videos', 'Shorts', 'Live', 'Community']
+      .map(feed => store.dispatch(`updateHideSubscriptions${feed}`, true)))
+  })
+  await expect(tabs.locator('[role="tab"]')).toHaveCount(0)
+  // Clear while hidden, rather than starting a visible leave on activation.
+  await expect(tabs.locator('.tabsIndicator')).toHaveCount(0)
+  await page.locator(sel.tabs).first().click()
+  await expect(page).toHaveURL(/#\/subscriptions$/)
+  await expect(page.locator('.subscriptionsHeader')).toBeVisible()
+  expect(await tabs.evaluate(element => [...element.querySelectorAll('.tabsIndicator, .tabsIndicatorOutgoing')]
+    .filter(pill => pill.getClientRects().length && Number(getComputedStyle(pill).opacity) > 0).length)).toBe(0)
+  await expect(tabs.locator('.tabsIndicator, .tabsIndicatorOutgoing')).toHaveCount(0)
+})
+
 test('retained subscription highlights stay aligned in the Watch minimize preview after layout changes', async ({ app, page }) => {
   await mockWatchPage(app, page)
   await goTo(page, 'subscriptions')

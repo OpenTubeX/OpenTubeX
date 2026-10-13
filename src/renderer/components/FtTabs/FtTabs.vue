@@ -52,6 +52,8 @@ let inactive = false
 function markOutgoing(element) {
   element.classList.replace('tabsIndicator', 'tabsIndicatorOutgoing')
   element.style.transitionProperty = 'opacity'
+  // A missing selection must not reveal a pending leave on a quick return.
+  if (!indicatorStyle.value) element.style.display = 'none'
 }
 
 function hideIndicator() {
@@ -63,6 +65,10 @@ function hideIndicator() {
 function updateIndicator() {
   const container = root.value
   const selected = container?.querySelector('[role="tab"][aria-selected="true"]')
+  if (!selected) {
+    hideIndicator()
+    return
+  }
   if (inactive || isTabPresented?.value === false) {
     // Retain the pill while its page is hidden to avoid replaying its entrance.
     // Browsing pages behind Watch still have layout boxes: measure them so the
