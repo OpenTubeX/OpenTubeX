@@ -1880,7 +1880,7 @@ CommandPalette:
   Search Placeholder: Bilatu komandoak, ezarpenak eta tokiko bideoak…
   Results: "Emaitzak"
   No Results: "Ez dago bat datorren emaitzarik"
-  Result Count: "Emaitzak: 1 | Emaitzak: {count}"
+  Result Count: "Emaitzak: {count} | Emaitzak: {count}"
   Move: Mugitu
   Run: Exekutatu
   Keys:

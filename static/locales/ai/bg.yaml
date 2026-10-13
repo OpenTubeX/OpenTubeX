@@ -1882,7 +1882,7 @@ CommandPalette:
   Search Placeholder: Търсене на команди, настройки и локални видеоклипове…
   Results: "Резултати"
   No Results: "Няма съответстващи резултати"
-  Result Count: "Резултати: 1 | Резултати: {count}"
+  Result Count: "Резултати: {count} | Резултати: {count}"
   Move: Преместване
   Run: Изпълняване
   Keys:

@@ -1945,7 +1945,7 @@ CommandPalette:
   Search Placeholder: Søg efter kommandoer, indstillinger og lokale videoer…
   Results: "Resultater"
   No Results: "Ingen matchende resultater"
-  Result Count: "Resultater: 1 | Resultater: {count}"
+  Result Count: "Resultater: {count} | Resultater: {count}"
   Move: Flyt
   Run: Kør
   Keys:

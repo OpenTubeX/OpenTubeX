@@ -1886,7 +1886,7 @@ CommandPalette:
   Search Placeholder: Αναζήτηση εντολών, ρυθμίσεων και τοπικών βίντεο…
   Results: "Αποτελέσματα"
   No Results: "Δεν βρέθηκαν αντίστοιχα αποτελέσματα"
-  Result Count: "Αποτελέσματα: 1 | Αποτελέσματα: {count}"
+  Result Count: "Αποτελέσματα: {count} | Αποτελέσματα: {count}"
   Move: Μετακίνηση
   Run: Εκτέλεση
   Keys:

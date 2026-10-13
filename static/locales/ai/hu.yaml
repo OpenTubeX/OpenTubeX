@@ -1858,7 +1858,7 @@ CommandPalette:
   Search Placeholder: Parancsok, beállítások és helyi videók keresése…
   Results: "Találatok"
   No Results: "Nincs megfelelő találat"
-  Result Count: "Találatok: 1 | Találatok: {count}"
+  Result Count: "Találatok: {count} | Találatok: {count}"
   Move: Mozgatás
   Run: Futtatás
   Keys:

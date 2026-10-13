@@ -1870,7 +1870,7 @@ CommandPalette:
   Search Placeholder: Əmrləri, parametrləri və yerli videoları axtarın…
   Results: "Nəticələr"
   No Results: "Uyğun nəticə yoxdur"
-  Result Count: "Nəticələr: 1 | Nəticələr: {count}"
+  Result Count: "Nəticələr: {count} | Nəticələr: {count}"
   Move: Köçür
   Run: İcra et
   Keys:

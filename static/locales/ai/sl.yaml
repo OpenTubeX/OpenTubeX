@@ -2461,7 +2461,7 @@ CommandPalette:
   Search Placeholder: Poišči ukaze, nastavitve in lokalne videoposnetke…
   Results: "Rezultati"
   No Results: "Ni ujemajočih se rezultatov"
-  Result Count: "Rezultati: 1 | Rezultati: {count} | Rezultati: {count} | Rezultati: {count}"
+  Result Count: "Rezultati: {count} | Rezultati: {count} | Rezultati: {count} | Rezultati: {count}"
   Move: Premakni
   Run: Zaženi
   Keys:

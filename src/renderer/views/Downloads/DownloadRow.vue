@@ -200,8 +200,7 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { downloadTemplateName } from '../../helpers/downloadTemplates'
 import { formatBytes } from '../../helpers/fileSize'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
-import { isPlayableDownloadFile } from '../../helpers/downloadPlayback'
-import { isYouTubeMediaUrl } from '../../helpers/externalMediaUrl'
+import { isDownloadPlaybackSupported, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 
 // keeps a playlist download from filling the page with one line per video
 const MAX_VISIBLE_DESTINATIONS = 3
@@ -236,9 +235,7 @@ const canAccessFiles = computed(() => (
   props.download.availability !== 'missing'
 ))
 const canPlay = computed(() => (
-  (process.env.IS_IOS || !props.download.retryPayload?.externalUrl || isYouTubeMediaUrl(props.download.retryPayload.externalUrl)) &&
-  (props.download.status === 'completed' || (process.env.IS_CAPACITOR && !process.env.IS_IOS && props.download.status === 'failed')) &&
-  ['video', 'audio'].includes(props.download.mode) &&
+  isDownloadPlaybackSupported(props.download) &&
   Array.isArray(props.download.files) &&
   props.download.files.some(isPlayableDownloadFile)
 ))

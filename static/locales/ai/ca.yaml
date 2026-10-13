@@ -2513,7 +2513,7 @@ CommandPalette:
   Search Placeholder: Cerca ordres, configuració i vídeos locals…
   Results: "Resultats"
   No Results: "Cap resultat coincideix amb la cerca"
-  Result Count: "Resultats: 1 | Resultats: {count} | Resultats: {count}"
+  Result Count: "Resultats: {count} | Resultats: {count} | Resultats: {count}"
   Move: Mou
   Run: Executa
   Keys:

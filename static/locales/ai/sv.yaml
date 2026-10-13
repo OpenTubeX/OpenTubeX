@@ -1879,7 +1879,7 @@ CommandPalette:
   Search Placeholder: Sök efter kommandon, inställningar och lokala videor…
   Results: "Resultat"
   No Results: "Inga matchande resultat"
-  Result Count: "Resultat: 1 | Resultat: {count}"
+  Result Count: "Resultat: {count} | Resultat: {count}"
   Move: Flytta
   Run: Kör
   Keys:

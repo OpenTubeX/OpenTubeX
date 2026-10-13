@@ -558,6 +558,7 @@ import '@fontsource-variable/manrope'
 import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
+import { playDownloadedFile, refreshDownloadRecords } from './helpers/downloadPlayback'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppActive, setAndroidAppVisible } from './helpers/appVisibility.js'
@@ -3407,6 +3408,7 @@ const commandPaletteVideoSources = computed(() => ({
     queue: t('Video.Queue'),
   },
   navigate: navigateFromCommandPalette,
+  playDownloadedVideo: playDownloadedVideoFromCommandPalette,
   playQueuedVideo: playQueuedVideoFromCommandPalette,
   removeQueuedVideo: id => store.commit('removeVideoFromWatchQueue', id),
 }))
@@ -3481,6 +3483,15 @@ function playQueuedVideoFromCommandPalette(location) {
     return
   }
   return navigateFromCommandPalette(location)
+}
+
+function playDownloadedVideoFromCommandPalette(id, file) {
+  return playDownloadedFile(id, file, {
+    refreshDownloads: () => refreshDownloadRecords(ytDlp, store),
+    playNative: (id, path) => ytDlp.ytDlpPlayDownload(id, path),
+    navigate: navigateFromCommandPalette,
+    fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] }),
+  })
 }
 
 function goHistoryFromCommandPalette(offset) {

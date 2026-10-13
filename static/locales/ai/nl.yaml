@@ -1919,7 +1919,7 @@ CommandPalette:
   Search Placeholder: Zoek opdrachten, instellingen en lokale video’s…
   Results: "Resultaten"
   No Results: "Geen overeenkomende resultaten"
-  Result Count: "Resultaten: 1 | Resultaten: {count}"
+  Result Count: "Resultaten: {count} | Resultaten: {count}"
   Move: Verplaatsen
   Run: Uitvoeren
   Keys:

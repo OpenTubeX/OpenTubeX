@@ -1949,7 +1949,7 @@ CommandPalette:
   Search Placeholder: جستجوی فرمان‌ها، تنظیمات و ویدیوهای محلی…
   Results: "نتایج"
   No Results: "نتیجهٔ منطبقی نیست"
-  Result Count: "نتایج: 1 | نتایج: {count}"
+  Result Count: "نتایج: {count} | نتایج: {count}"
   Move: جابه‌جایی
   Run: اجرا
   Keys:

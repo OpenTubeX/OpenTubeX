@@ -1958,7 +1958,7 @@ CommandPalette:
   Search Placeholder: Пошук каманд, налад і лакальных відэа…
   Results: "Вынікі"
   No Results: "Адпаведных вынікаў няма"
-  Result Count: "Вынікі: 1 | Вынікі: {count} | Вынікі: {count}"
+  Result Count: "Вынікі: {count} | Вынікі: {count} | Вынікі: {count}"
   Move: Перамясціць
   Run: Выканаць
   Keys:

@@ -1,4 +1,4 @@
-import { downloadFileTitle, isPlayableDownloadFile } from './downloadPlayback.js'
+import { downloadFileTitle, isDownloadPlaybackSupported, isPlayableDownloadFile } from './downloadPlayback.js'
 
 /**
  * Builds searchable video actions from metadata already held in the local
@@ -8,17 +8,17 @@ import { downloadFileTitle, isPlayableDownloadFile } from './downloadPlayback.js
  * Yields actions one at a time so searching never builds the full registry.
  */
 export function * iterateLocalVideoCommands(context) {
-  const { history, playlists, downloads, queue, group, sources, navigate, playQueuedVideo, removeQueuedVideo } = context
+  const { history, playlists, downloads, queue, group, sources, navigate, playDownloadedVideo, playQueuedVideo, removeQueuedVideo } = context
   let index = 0
-  function entry(video, source, icon, run) {
-    if (!video?.videoId) return null
+  function entry(video, source, icon, run, identifier = video?.videoId) {
+    if (!identifier) return null
     const author = video.author || video.channelName || ''
     return {
       id: `videos.local.${index++}`,
-      label: video.title || video.videoId,
+      label: video.title || identifier,
       group,
       detail: [source, author].filter(Boolean).join(' · '),
-      aliases: [source, author, video.videoId],
+      aliases: [source, author, identifier],
       icon,
       searchOnly: true,
       localVideo: true,
@@ -49,19 +49,12 @@ export function * iterateLocalVideoCommands(context) {
     }
   }
   for (const download of Object.values(downloads)) {
-    if (download.status !== 'completed' && !(process.env.IS_CAPACITOR && !process.env.IS_IOS && download.status === 'failed')) continue
-    if (!['video', 'audio'].includes(download.mode)) continue
-    const query = { downloadId: String(download.id) }
-    if (download.playlistId) {
-      query.playlistId = download.playlistId
-    } else if (download.playlistKey) {
-      query.playlistId = download.playlistKey
-      query.playlistType = 'user'
-    }
+    if (!isDownloadPlaybackSupported(download)) continue
     for (const file of download.files ?? []) {
       if (!isPlayableDownloadFile(file)) continue
       const command = entry({ ...file, title: downloadFileTitle(download, file), author: file.author || download.author },
-        sources.downloads, ['fas', 'download'], () => navigate(videoRoute(file, query)))
+        sources.downloads, ['fas', 'download'], () => playDownloadedVideo(download.id, file),
+        process.env.IS_IOS ? file.videoId || file.path : file.videoId)
       if (command) yield command
     }
   }
@@ -94,6 +87,7 @@ export function isLocalVideoMutation(type) {
 export function hasDownloadSearchChanged(previous, next) {
   if (!previous) return true
   if (['id', 'videoId', 'title', 'author', 'status', 'mode', 'playlistId', 'playlistKey'].some(key => previous[key] !== next[key])) return true
+  if (previous.retryPayload?.externalUrl !== next.retryPayload?.externalUrl) return true
   const previousFiles = previous.files ?? []
   const nextFiles = next.files ?? []
   return previousFiles.length !== nextFiles.length || previousFiles.some((file, index) => (

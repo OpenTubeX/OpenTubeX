@@ -1886,7 +1886,7 @@ CommandPalette:
   Search Placeholder: Chwilio gorchmynion, gosodiadau a fideos lleol…
   Results: "Canlyniadau"
   No Results: "Dim canlyniadau cyfatebol"
-  Result Count: "Canlyniadau: {count} | Canlyniadau: 1 | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count}"
+  Result Count: "Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count} | Canlyniadau: {count}"
   Move: Symud
   Run: Rhedeg
   Keys:

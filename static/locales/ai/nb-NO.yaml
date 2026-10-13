@@ -1882,7 +1882,7 @@ CommandPalette:
   Search Placeholder: Søk etter kommandoer, innstillinger og lokale videoer…
   Results: "Resultater"
   No Results: "Ingen samsvarende resultater"
-  Result Count: "Resultater: 1 | Resultater: {count}"
+  Result Count: "Resultater: {count} | Resultater: {count}"
   Move: Flytt
   Run: Kjør
   Keys:

@@ -1860,7 +1860,7 @@ CommandPalette:
   Search Placeholder: Otsi käske, seadeid ja kohalikke videoid…
   Results: "Tulemused"
   No Results: "Sobivaid tulemusi ei leitud"
-  Result Count: "Tulemused: 1 | Tulemused: {count}"
+  Result Count: "Tulemused: {count} | Tulemused: {count}"
   Move: Liigu
   Run: Käivita
   Keys:

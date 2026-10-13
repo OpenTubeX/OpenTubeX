@@ -1901,7 +1901,7 @@ CommandPalette:
   Search Placeholder: Пошук команд, налаштувань і локальних відео…
   Results: "Результати"
   No Results: "Відповідних результатів немає"
-  Result Count: "Результати: 1 | Результати: {count} | Результати: {count}"
+  Result Count: "Результати: {count} | Результати: {count} | Результати: {count}"
   Move: Перемістити
   Run: Виконати
   Keys:

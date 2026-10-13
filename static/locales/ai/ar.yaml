@@ -1886,7 +1886,7 @@ CommandPalette:
   Search Placeholder: ابحث في الأوامر والإعدادات ومقاطع الفيديو المحلية…
   Results: "النتائج"
   No Results: "لا توجد نتائج مطابقة"
-  Result Count: "النتائج: {count} | النتائج: 1 | النتائج: {count} | النتائج: {count} | النتائج: {count} | النتائج: {count}"
+  Result Count: "النتائج: {count} | النتائج: {count} | النتائج: {count} | النتائج: {count} | النتائج: {count} | النتائج: {count}"
   Move: يتحرك
   Run: يجري
   Keys:

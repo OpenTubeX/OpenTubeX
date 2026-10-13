@@ -1884,7 +1884,7 @@ CommandPalette:
   Search Placeholder: Leita að skipunum, stillingum og staðbundnum myndskeiðum…
   Results: "Niðurstöður"
   No Results: "Engar samsvarandi niðurstöður"
-  Result Count: "Niðurstöður: 1 | Niðurstöður: {count}"
+  Result Count: "Niðurstöður: {count} | Niðurstöður: {count}"
   Move: Færa
   Run: Keyra
   Keys:

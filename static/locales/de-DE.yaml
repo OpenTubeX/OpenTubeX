@@ -2994,7 +2994,7 @@ CommandPalette:
   Search Placeholder: Befehle, Einstellungen und lokale Videos durchsuchen…
   Results: "Ergebnisse"
   No Results: "Keine passenden Ergebnisse"
-  Result Count: "1 Ergebnis gefunden | {count} Ergebnisse gefunden"
+  Result Count: "{count} Ergebnis gefunden | {count} Ergebnisse gefunden"
   Move: Verschieben
   Run: Ausführen
   Keys:

@@ -1858,7 +1858,7 @@ CommandPalette:
   Search Placeholder: Komutları, ayarları ve yerel videoları ara…
   Results: "Sonuçlar"
   No Results: "Eşleşen sonuç yok"
-  Result Count: "Sonuçlar: 1 | Sonuçlar: {count}"
+  Result Count: "Sonuçlar: {count} | Sonuçlar: {count}"
   Move: Taşı
   Run: Çalıştır
   Keys:

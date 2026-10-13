@@ -1886,7 +1886,7 @@ CommandPalette:
   Search Placeholder: Pretraži naredbe, postavke i lokalne videozapise…
   Results: "Rezultati"
   No Results: "Nema odgovarajućih rezultata"
-  Result Count: "Rezultati: 1 | Rezultati: {count} | Rezultati: {count}"
+  Result Count: "Rezultati: {count} | Rezultati: {count} | Rezultati: {count}"
   Move: Pomakni
   Run: Pokreni
   Keys:

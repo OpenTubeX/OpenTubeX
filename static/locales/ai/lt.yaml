@@ -2361,7 +2361,7 @@ CommandPalette:
   Search Placeholder: Ieškoti komandų, nustatymų ir vietinių vaizdo įrašų…
   Results: "Rezultatai"
   No Results: "Atitinkančių rezultatų nėra"
-  Result Count: "Rezultatai: 1 | Rezultatai: {count} | Rezultatai: {count}"
+  Result Count: "Rezultatai: {count} | Rezultatai: {count} | Rezultatai: {count}"
   Move: Judėti
   Run: Vykdyti
   Keys:

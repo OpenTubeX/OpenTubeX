@@ -1908,7 +1908,7 @@ CommandPalette:
   Search Placeholder: Hae komentoja, asetuksia ja paikallisia videoita…
   Results: "Tulokset"
   No Results: "Ei vastaavia tuloksia"
-  Result Count: "Tulokset: 1 | Tulokset: {count}"
+  Result Count: "Tulokset: {count} | Tulokset: {count}"
   Move: Siirrä
   Run: Suorita
   Keys:

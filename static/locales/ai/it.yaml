@@ -1857,7 +1857,7 @@ CommandPalette:
   Search Placeholder: Cerca comandi, impostazioni e video locali…
   Results: "Risultati"
   No Results: "Nessun risultato corrispondente"
-  Result Count: "Risultati: 1 | Risultati: {count} | Risultati: {count}"
+  Result Count: "Risultati: {count} | Risultati: {count} | Risultati: {count}"
   Move: Sposta
   Run: Esegui
   Keys:

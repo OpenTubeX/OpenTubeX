@@ -1866,7 +1866,7 @@ CommandPalette:
   Search Placeholder: "Klask arc'hadoù, arventennoù ha videoioù lec’hel…"
   Results: "Disoc'hoù"
   No Results: "N'eus disoc'h ebet o klotañ"
-  Result Count: "Disoc'hoù: 1 | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count}"
+  Result Count: "Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count} | Disoc'hoù: {count}"
   Move: "Dilec'hiañ"
   Run: "Erounit"
   Keys:

@@ -252,7 +252,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
-import { downloadQueueVideos, downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { downloadQueueVideos, playDownloadedFile, refreshDownloadRecords } from '../../helpers/downloadPlayback'
 import { downloadFormats, filterCompletedDownloads } from '../../helpers/downloadFilters'
 import { showToast } from '../../helpers/utils'
 
@@ -331,10 +331,8 @@ watch(enableDownloads, enabled => {
   }
 })
 
-async function refreshDownloads() {
-  const records = await ytDlp.ytDlpListDownloads()
-  for (const download of records) store.commit('upsertYtDlpDownload', download)
-  return records
+function refreshDownloads() {
+  return refreshDownloadRecords(ytDlp, store)
 }
 
 // The utility window stays cached after closing. Refresh on every opening so
@@ -393,22 +391,15 @@ async function queueDownload(download) {
   showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'list'] })
 }
 async function playDownload(download) {
-  const refreshedDownload = (await refreshDownloads()).find(record => record.id === download.id)
-  const firstFile = refreshedDownload?.files?.find(file => file.available && isPlayableDownloadFile(file))
-  if (!firstFile) {
-    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
-    return
-  }
-
-  if (process.env.IS_IOS) {
-    if (!await ytDlp.ytDlpPlayDownload(download.id, firstFile.path).catch(() => false)) {
-      showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
-    }
-    return
-  }
-
-  store.dispatch('hideSettingsWindow')
-  router.push(downloadWatchRoute(refreshedDownload, firstFile.videoId))
+  return playDownloadedFile(download.id, null, {
+    refreshDownloads,
+    playNative: (id, path) => ytDlp.ytDlpPlayDownload(id, path),
+    navigate: route => {
+      store.dispatch('hideSettingsWindow')
+      return router.push(route)
+    },
+    fileNotFound: () => showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] }),
+  })
 }
 async function retryDownload(download) {
   if (retryingDownloadIds.value.includes(download.id)) return

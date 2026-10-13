@@ -1936,7 +1936,7 @@ CommandPalette:
   Search Placeholder: Претражи команде, подешавања и локалне видео-снимке…
   Results: "Резултати"
   No Results: "Нема одговарајућих резултата"
-  Result Count: "Резултати: 1 | Резултати: {count} | Резултати: {count}"
+  Result Count: "Резултати: {count} | Резултати: {count} | Резултати: {count}"
   Move: Премести
   Run: Покрени
   Keys:

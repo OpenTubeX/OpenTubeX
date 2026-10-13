@@ -929,6 +929,80 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(retained, true)
     }
 
+    func testCommandPalettePlaysNativeDownloadAndRechecksDeletedFile() async throws {
+        try await openApplication()
+        let fixture = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+        let bytes = try Data(contentsOf: fixture)
+        let listener = try await loopbackServer { header, connection in
+            let response = "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n"
+            connection.send(content: Data(response.utf8) + (header.hasPrefix("HEAD ") ? Data() : bytes),
+                            completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { listener.cancel() }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("palette-download-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent, "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]], in: nil, contentWorld: .page)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload:{mode:'video',externalUrl:url,title:'Palette native fixture'},args:['--no-playlist',url]})",
+            arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int)
+        addTeardownBlock { @MainActor [weak self] in
+            _ = try? await self?.webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.remove({id}); testStore.commit('removeYtDlpDownload', id)",
+                arguments: ["id": id], in: nil, contentWorld: .page)
+        }
+        var record: [String: Any] = [:]
+        for _ in 0..<120 {
+            record = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.list()).downloads.find(record=>record.id===id)",
+                arguments: ["id": id], in: nil, contentWorld: .page) as? [String: Any] ?? [:]
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(for: .milliseconds(250))
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let file = try XCTUnwrap((record["files"] as? [[String: Any]])?.first)
+        let path = try XCTUnwrap(file["path"] as? String)
+        _ = try await webView.callAsyncJavaScript("""
+            await testRouter.push('/subscriptions');
+            window.iosPaletteSeed = record;
+            record.files[0].title = 'Palette native fixture';
+            testStore.commit('upsertYtDlpDownload', record);
+            document.dispatchEvent(new KeyboardEvent('keydown', {key:'k',code:'KeyK',ctrlKey:true,bubbles:true}));
+            """, arguments: ["record": record], in: nil, contentWorld: .page)
+        try await wait("!!document.querySelector('.commandPalette input')")
+        _ = try await evaluate("(() => { const input=document.querySelector('.commandPalette input'); input.value='palette native fixture'; input.dispatchEvent(new Event('input',{bubbles:true})); return true })()")
+        try await wait("document.querySelectorAll('.commandPalette [role=option]').length > 0 && Array.from(document.querySelectorAll('.commandPalette [role=option]')).some(option=>option.querySelector('small')?.textContent.includes('Downloads'))")
+        _ = try await evaluate("Array.from(document.querySelectorAll('.commandPalette [role=option]')).find(option=>option.querySelector('small')?.textContent.includes('Downloads')).click(); true")
+        let controller = try XCTUnwrap(webView.window?.rootViewController)
+        var nativePlayer: AVPlayerViewController?
+        for _ in 0..<60 {
+            nativePlayer = controller.presentedViewController as? AVPlayerViewController
+            if nativePlayer != nil { break }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        let player = try XCTUnwrap(nativePlayer)
+        XCTAssertEqual((player.player?.currentItem?.asset as? AVURLAsset)?.url.path, path)
+        let routeAfterPlayback = try await evaluate("testStore.getters.getPresentedTab.route.path") as? String
+        XCTAssertEqual(routeAfterPlayback, "/subscriptions")
+        player.player?.pause()
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in player.dismiss(animated: false) { continuation.resume() } }
+        try FileManager.default.removeItem(atPath: path)
+        _ = try await evaluate("testStore.commit('upsertYtDlpDownload', iosPaletteSeed); document.dispatchEvent(new KeyboardEvent('keydown', {key:'k',code:'KeyK',ctrlKey:true,bubbles:true})); true")
+        try await wait("!!document.querySelector('.commandPalette input')")
+        _ = try await evaluate("(() => { const input=document.querySelector('.commandPalette input'); input.value='palette native fixture'; input.dispatchEvent(new Event('input',{bubbles:true})); return true })()")
+        try await wait("Array.from(document.querySelectorAll('.commandPalette [role=option]')).some(option=>option.querySelector('small')?.textContent.includes('Downloads'))")
+        _ = try await evaluate("Array.from(document.querySelectorAll('.commandPalette [role=option]')).find(option=>option.querySelector('small')?.textContent.includes('Downloads')).click(); true")
+        try await wait("document.body.textContent.includes('The downloaded file could not be found.')")
+        XCTAssertNil(controller.presentedViewController)
+        let routeAfterDeletion = try await evaluate("testStore.getters.getPresentedTab.route.path") as? String
+        let availableAfterDeletion = try await evaluate("testStore.getters.getYtDlpDownloads[iosPaletteSeed.id].files[0].available") as? Bool
+        XCTAssertEqual(routeAfterDeletion, "/subscriptions")
+        XCTAssertEqual(availableAfterDeletion, false)
+    }
+
     func testYtDlpRuntimeLoadsBundledCertificates() async throws {
         try await openApplication()
         let available = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available",

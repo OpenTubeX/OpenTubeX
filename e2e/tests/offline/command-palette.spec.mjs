@@ -2,6 +2,10 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 import { DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
+import { copyFile, rm } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 
 const mainProfile = {
   _id: 'allChannels',
@@ -603,6 +607,45 @@ test.describe('local video commands', () => {
     await input.fill('renamed expedition')
     await expect(videos.getByRole('option')).toHaveCount(1)
     await expect(videos.getByRole('option')).toContainText('Other Channel')
+  })
+})
+
+test.describe('download availability recheck', () => {
+  const filePath = path.join(tmpdir(), `opentubex-palette-${randomUUID()}.webm`)
+  test.use({
+    seed: {
+      settings: { enableDownloads: true },
+      downloads: [{
+        id: 42,
+        videoId: 'vanish00001',
+        title: 'Vanishing palette download',
+        status: 'completed',
+        mode: 'video',
+        destination: filePath,
+        destinations: [filePath],
+        files: [{ videoId: 'vanish00001', title: 'Vanishing palette download', path: filePath, extension: 'webm' }],
+      }],
+    }
+  })
+  test.beforeAll(() => copyFile(DEMO_MEDIA_PATH, filePath))
+  test.afterAll(() => rm(filePath, { force: true }))
+
+  test('rechecks a selected download after its file is deleted externally', async ({ page }) => {
+    await page.keyboard.press('Control+k')
+    const input = page.getByRole('combobox', { name: 'Search commands' })
+    await input.fill('vanishing palette download')
+    const videos = page.getByRole('group', { name: 'Local videos', exact: true })
+    await expect(videos.getByRole('option')).toHaveCount(1)
+    await rm(filePath)
+    await videos.getByRole('option').click()
+    await expect(page.getByText('The downloaded file could not be found.', { exact: true })).toBeVisible()
+    await expect(page).not.toHaveURL(/#\/watch\/vanish00001/)
+    await expect.poll(() => page.evaluate(() => (
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getYtDlpDownloads[42].files[0].available
+    ))).toBe(false)
+    await page.keyboard.press('Control+k')
+    await input.fill('vanishing palette download')
+    await expect(videos).toHaveCount(0)
   })
 })
 

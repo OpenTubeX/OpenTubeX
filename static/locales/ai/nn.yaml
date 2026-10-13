@@ -2251,7 +2251,7 @@ CommandPalette:
   Search Placeholder: Søk etter kommandoar, innstillingar og lokale videoar…
   Results: "Resultat"
   No Results: "Ingen resultat samsvarar"
-  Result Count: "Resultat: 1 | Resultat: {count}"
+  Result Count: "Resultat: {count} | Resultat: {count}"
   Move: Flytt
   Run: Køyr
   Keys:

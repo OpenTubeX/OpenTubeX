@@ -1908,7 +1908,7 @@ CommandPalette:
   Search Placeholder: Caută comenzi, setări și videoclipuri locale…
   Results: "Rezultate"
   No Results: "Niciun rezultat corespunzător"
-  Result Count: "Rezultate: 1 | Rezultate: {count} | Rezultate: {count}"
+  Result Count: "Rezultate: {count} | Rezultate: {count} | Rezultate: {count}"
   Move: Mută
   Run: Rulează
   Keys:

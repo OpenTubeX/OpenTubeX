@@ -1857,7 +1857,7 @@ CommandPalette:
   Search Placeholder: Hledat příkazy, nastavení a místní videa…
   Results: "Výsledky"
   No Results: "Žádné odpovídající výsledky"
-  Result Count: "Výsledky: 1 | Výsledky: {count} | Výsledky: {count}"
+  Result Count: "Výsledky: {count} | Výsledky: {count} | Výsledky: {count}"
   Move: Přesunout
   Run: Spustit
   Keys:

@@ -1864,7 +1864,7 @@ CommandPalette:
   Search Placeholder: Buscar comandos, ajustes y vídeos locales…
   Results: "Resultados"
   No Results: "No hay resultados coincidentes"
-  Result Count: "Resultados: 1 | Resultados: {count} | Resultados: {count}"
+  Result Count: "Resultados: {count} | Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Ejecutar
   Keys:

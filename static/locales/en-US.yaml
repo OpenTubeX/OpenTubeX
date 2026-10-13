@@ -3084,7 +3084,7 @@ CommandPalette:
   Search Placeholder: Search commands, settings, and local videos…
   Results: "Results"
   No Results: "No matching results"
-  Result Count: "1 result found | {count} results found"
+  Result Count: "{count} result found | {count} results found"
   Move: Move
   Run: Run
   Keys:

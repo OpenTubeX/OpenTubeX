@@ -1860,7 +1860,7 @@ CommandPalette:
   Search Placeholder: Pesquisar comandos, configurações e vídeos locais…
   Results: "Resultados"
   No Results: "Nenhum resultado correspondente"
-  Result Count: "Resultados: 1 | Resultados: {count} | Resultados: {count}"
+  Result Count: "Resultados: {count} | Resultados: {count} | Resultados: {count}"
   Move: Mover
   Run: Executar
   Keys:

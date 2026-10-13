@@ -1910,7 +1910,7 @@ CommandPalette:
   Search Placeholder: חיפוש פקודות, הגדרות וסרטונים מקומיים…
   Results: "תוצאות"
   No Results: "לא נמצאו תוצאות תואמות"
-  Result Count: "תוצאות: 1 | תוצאות: {count} | תוצאות: {count}"
+  Result Count: "תוצאות: {count} | תוצאות: {count} | תוצאות: {count}"
   Move: הזזה
   Run: הפעלה
   Keys:

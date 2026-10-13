@@ -7,6 +7,7 @@ import { filterCommandPaletteCommands, filterCommandPaletteCommandsAsync } from 
 function registry(overrides = {}) {
   const navigations = []
   const removedItems = []
+  const playedDownloads = []
   const commands = Array.from(iterateLocalVideoCommands({
     history: [],
     playlists: [],
@@ -15,11 +16,12 @@ function registry(overrides = {}) {
     group: 'Local videos',
     sources: { history: 'History', playlists: 'Playlists', downloads: 'Downloads', queue: 'Queue' },
     navigate: route => navigations.push(route),
+    playDownloadedVideo: (id, file) => playedDownloads.push({ id, file }),
     playQueuedVideo: route => navigations.push(route),
     removeQueuedVideo: id => removedItems.push(id),
     ...overrides,
   }))
-  return { commands, navigations, removedItems }
+  return { commands, navigations, removedItems, playedDownloads }
 }
 
 test('finds stored video titles, authors, IDs, and sources with fuzzy matching', () => {
@@ -74,8 +76,8 @@ test('history playback respects the saved-playlist setting and reads current con
   }
 })
 
-test('searches individual available download files with their titles and local playback route', () => {
-  const { commands, navigations } = registry({
+test('searches available download files and delegates playback of the selected file', () => {
+  const { commands, playedDownloads } = registry({
     downloads: {
       42: { id: 42, title: 'Downloaded playlist', status: 'completed', mode: 'video', playlistKey: 'saved-playlist', files: [
         { videoId: 'first', title: 'First journey', author: 'North Channel' },
@@ -91,9 +93,7 @@ test('searches individual available download files with their titles and local p
   assert.equal(commands[0].detail, 'Downloads · North Channel')
   assert.equal(commands[2].detail, 'Downloads · South Channel')
   commands[1].run()
-  assert.deepEqual(navigations[0], {
-    path: '/watch/second', query: { downloadId: '42', playlistId: 'saved-playlist', playlistType: 'user' },
-  })
+  assert.deepEqual(playedDownloads[0], { id: 42, file: { videoId: 'second', title: 'Second journey' } })
 })
 
 test('untitled playlist downloads use each file name or ID rather than the aggregate title', () => {
@@ -137,6 +137,14 @@ test('offers downloaded files only once local playback accepts their status', ()
   }
 })
 
+test('does not offer external downloads as YouTube watch-page results on desktop', () => {
+  const { commands } = registry({ downloads: { 42: {
+    id: 42, status: 'completed', mode: 'video', retryPayload: { externalUrl: 'https://vimeo.com/123456' },
+    files: [{ videoId: '123456', title: 'External video', extension: 'mp4', path: '/downloads/external.mp4' }],
+  } } })
+  assert.deepEqual(commands, [])
+})
+
 test('respects the existing iOS playable-file filter', () => {
   const previous = process.env.IS_IOS
   process.env.IS_IOS = 'true'
@@ -148,6 +156,24 @@ test('respects the existing iOS playable-file filter', () => {
       ] } },
     })
     assert.deepEqual(commands.map(command => command.label), ['supported'])
+  } finally {
+    if (previous === undefined) delete process.env.IS_IOS
+    else process.env.IS_IOS = previous
+  }
+})
+
+test('iOS native downloads without YouTube IDs remain searchable by their file titles', () => {
+  const previous = process.env.IS_IOS
+  process.env.IS_IOS = 'true'
+  try {
+    const { commands, playedDownloads } = registry({ downloads: { 42: {
+      id: 42, videoId: '', title: 'Aggregate title', status: 'completed', mode: 'video',
+      retryPayload: { externalUrl: 'https://vimeo.com/123' },
+      files: [{ videoId: '', path: '/downloads/Native file.mp4', extension: 'mp4', available: true }],
+    } } })
+    assert.equal(commands[0].label, 'Native file')
+    commands[0].run()
+    assert.equal(playedDownloads[0].file.path, '/downloads/Native file.mp4')
   } finally {
     if (previous === undefined) delete process.env.IS_IOS
     else process.env.IS_IOS = previous
@@ -227,6 +253,7 @@ test('download byte-count updates do not invalidate search, but file metadata ch
     assert.equal(hasDownloadSearchChanged(download, { ...progress, files: [{ ...download.files[0], ...fields }] }), true)
   }
   assert.equal(hasDownloadSearchChanged(download, { ...progress, playlistKey: 'saved' }), true)
+  assert.equal(hasDownloadSearchChanged(download, { ...progress, retryPayload: { externalUrl: 'https://vimeo.com/123' } }), true)
   assert.equal(hasDownloadSearchChanged(download, { ...progress, status: 'completed' }), true)
   assert.equal(hasDownloadSearchChanged(download, { ...progress, files: [] }), true)
   assert.equal(hasDownloadSearchChanged(undefined, download), true)
