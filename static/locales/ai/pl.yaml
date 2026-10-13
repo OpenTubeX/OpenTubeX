@@ -1045,7 +1045,7 @@ CommandPalette:
   Search Placeholder: Szukaj poleceń, ustawień i lokalnych filmów…
   Results: "Wyniki"
   No Results: "Brak pasujących wyników"
-  Result Count: "Wyniki: {count} | Wyniki: {count} | Wyniki: {count}"
+  Result Count: "Znaleziono {count} wynik | Znaleziono {count} wyniki | Znaleziono {count} wyników"
   Move: Przenieś
   Run: Uruchom
   Keys:
