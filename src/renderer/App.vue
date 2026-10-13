@@ -1264,9 +1264,10 @@ let utilityRoutePreloadId = null
 let utilityRoutePreloadUsesIdleCallback = false
 
 function isSyncSettingsVisible() {
-  return settingsWindowOpen.value && document.querySelector(
+  const section = document.querySelector(
     '.settingsWindow .settingsContent > [data-section="sync"]'
-  ) !== null
+  )
+  return settingsWindowOpen.value && section !== null && section.getClientRects().length > 0
 }
 
 watch([dataReady, () => store.getters.getSyncServerError], ([ready, error]) => {

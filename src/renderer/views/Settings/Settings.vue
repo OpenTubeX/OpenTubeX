@@ -118,7 +118,7 @@
             </span>
           </template>
           <span
-            v-show="unlocked"
+            v-show="protectedSettingsVisible"
             :id="subpageBreadcrumbTargetId"
             class="settingsBreadcrumbAction"
           />
@@ -226,10 +226,13 @@
           <Downloads />
         </div>
       </template>
-      <template v-else-if="hasUnlockedSettings">
-        <template v-if="isProfileManagerOpen">
+      <SettingsView
+        v-if="hasUnlockedSettings"
+        :active="canNavigateSettings && !isStandaloneViewOpen"
+      >
+        <template v-if="renderedProfileManagerOpen">
           <div
-            v-show="unlocked"
+            v-show="protectedSettingsVisible"
             ref="profileManagerScrollRef"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
@@ -238,9 +241,9 @@
             <ProfileSettings />
           </div>
         </template>
-        <template v-else-if="isKeyboardShortcutPromptOpen">
+        <template v-else-if="renderedKeyboardShortcutPromptOpen">
           <div
-            v-show="unlocked"
+            v-show="protectedSettingsVisible"
             class="settingsSubpageScroll settingsKeyboardShortcutPage"
           >
             <FtKeyboardShortcutPrompt embedded />
@@ -248,7 +251,7 @@
         </template>
         <template v-else>
           <FtSettingsMenu
-            v-show="unlocked && !subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
             ref="menuRef"
             v-overlay-scrollbars
             :class="[
@@ -262,7 +265,7 @@
             @navigate-to-section="navigateToSection"
           />
           <div
-            v-show="unlocked && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
+            v-show="protectedSettingsVisible && !subpageTitle && (isInDesktopView || activeSection || settingsSearchQuery !== '')"
             class="settingsContentPane"
           >
             <div
@@ -333,7 +336,7 @@
             </div>
           </div>
           <div
-            v-show="unlocked && subpageTitle"
+            v-show="protectedSettingsVisible && subpageTitle"
             :id="subpageTargetId"
             ref="settingsSubpageContentRef"
             v-overlay-scrollbars
@@ -341,7 +344,7 @@
             :class="{ settingsSubpageFlush: subpageFlush }"
           />
         </template>
-      </template>
+      </SettingsView>
       <div
         v-if="!unlocked && !isStandaloneViewOpen"
         v-overlay-scrollbars
@@ -371,6 +374,8 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
 import {
   computed,
+  defineComponent,
+  inject,
   nextTick,
   onActivated,
   onBeforeUnmount,
@@ -748,11 +753,29 @@ const showBackButton = computed(() => {
 
 const unlocked = ref(store.getters.getSettingsPassword === '')
 // Mount pages after the first unlock, then hide them while settings is locked.
-const hasUnlockedSettings = ref(unlocked.value)
+const hasUnlockedSettings = ref(unlocked.value && !isStandaloneViewOpen.value)
 const canNavigateSettings = computed(() => unlocked.value && store.getters.getSettingsWindowOpen)
+const protectedSettingsVisible = computed(() => unlocked.value && !isStandaloneViewOpen.value)
+const renderedProfileManagerOpen = ref(isProfileManagerOpen.value)
+const renderedKeyboardShortcutPromptOpen = ref(isKeyboardShortcutPromptOpen.value)
 
-watch(unlocked, value => {
-  if (value) hasUnlockedSettings.value = true
+watch([unlocked, isStandaloneViewOpen, isProfileManagerOpen, isKeyboardShortcutPromptOpen], ([isUnlocked, standalone, profile, shortcuts]) => {
+  if (!isUnlocked || standalone) return
+  hasUnlockedSettings.value = true
+  renderedProfileManagerOpen.value = profile
+  renderedKeyboardShortcutPromptOpen.value = shortcuts
+})
+
+const SettingsView = defineComponent({
+  props: { active: Boolean },
+  setup(props, { slots }) {
+    const settingsWindow = inject(settingsSubpageKey)
+    provide(settingsSubpageKey, {
+      ...settingsWindow,
+      isActive: computed(() => props.active)
+    })
+    return () => slots.default?.()
+  }
 })
 
 provide(settingsSubpageKey, {
@@ -783,7 +806,7 @@ onMounted(() => {
 onActivated(() => {
   handleMounted()
   nextTick(() => {
-    if (unlocked.value) restorePreservedScrollPositions()
+    if (unlocked.value || isStandaloneViewOpen.value) restorePreservedScrollPositions()
   })
 })
 onDeactivated(() => {
@@ -1333,19 +1356,33 @@ function minimizeSettings() {
 
 function preserveScrollPositions() {
   if (!unlocked.value && !isStandaloneViewOpen.value) return
-  const settingsWindow = settingsWindowRef.value
-  preservedScrollPositions = settingsWindow
-    ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]
-        .filter(element => element.scrollTop > 0)
-        .map(element => ({ element, scrollTop: element.scrollTop }))
-    : []
+  const viewports = getCurrentScrollViewports()
+  preservedScrollPositions = [
+    ...preservedScrollPositions.filter(({ element }) => !viewports.has(element)),
+    ...[...viewports].filter(element => element.scrollTop > 0)
+      .map(element => ({ element, scrollTop: element.scrollTop }))
+  ]
+}
+
+function getCurrentScrollViewports() {
+  const content = isStandaloneViewOpen.value ? standaloneScrollRef.value : settingsPageRef.value
+  if (!content) return new Set()
+  const selector = '[data-overlayscrollbars-initialize]'
+  return new Set([
+    ...(content.matches(selector) ? [content] : []),
+    ...content.querySelectorAll(selector)
+  ])
 }
 
 function restorePreservedScrollPositions() {
+  const viewports = getCurrentScrollViewports()
+  const pending = []
   for (const { element, scrollTop } of preservedScrollPositions) {
-    if (element.isConnected) restoreOverlayScrollTop(element, scrollTop)
+    if (!element.isConnected) continue
+    if (viewports.has(element)) restoreOverlayScrollTop(element, scrollTop)
+    else pending.push({ element, scrollTop })
   }
-  preservedScrollPositions = []
+  preservedScrollPositions = pending
 }
 
 async function toggleMaximized() {
