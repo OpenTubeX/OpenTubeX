@@ -565,6 +565,7 @@ test('repaired playlist metadata schedules sync after saved updates, excluding e
   const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
   const action = source.slice(source.indexOf('  async repairPlaylistMetadata('), source.indexOf('  async importPlaylist('))
   const repairPlaylistMetadata = vm.runInNewContext(`({${action}}).repairPlaylistMetadata`, {
+    isRemoteSyncDispatch,
     DBPlaylistHandlers: { repairMetadata: async payload => ({ updates: payload.updates, repaired: payload.updates.length, failed: 0 }) }
   })
   const scheduled = []
