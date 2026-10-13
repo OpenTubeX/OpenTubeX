@@ -38,7 +38,7 @@ export async function syncSnapshotHistory(engine, { account, changes }) {
   return engine.transaction(async () => {
     if (!await snapshotAccountMatches(engine, account)) return { updated: false }
     const value = updateHistorySnapshot({ snapshot: await syncSnapshotRead(engine), ...changes })
-    await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { _id: 'syncServerSnapshot', value }, { upsert: true })
+    await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { $set: { value } }, { upsert: true })
     return { updated: true, value: syncSnapshotPreview(value) }
   })
 }
@@ -54,17 +54,19 @@ export async function syncSnapshotSection(engine, { account, collection, value, 
       if (preference && preference.value !== true) return { updated: false }
     }
     const current = await syncSnapshotRead(engine)
-    const snapshot = JSON.parse(current)
-    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) throw new TypeError('Invalid sync snapshot')
+    let snapshot
+    try { snapshot = JSON.parse(current) } catch { snapshot = null }
+    const validSnapshot = snapshot !== null && typeof snapshot === 'object' && !Array.isArray(snapshot)
+    if (!validSnapshot) snapshot = {}
     if (collection === 'playlists') {
-      const updated = updatePlaylistSnapshot({ snapshot: current, ...value })
-      await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { _id: 'syncServerSnapshot', value: updated }, { upsert: true })
+      const updated = updatePlaylistSnapshot({ snapshot: validSnapshot ? current : '{}', ...value })
+      await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { $set: { value: updated } }, { upsert: true })
       return { updated: true, value: syncSnapshotPreview(updated) }
     }
     if (remove) delete snapshot[collection]
     else snapshot[collection] = value
     const updated = JSON.stringify(snapshot)
-    await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { _id: 'syncServerSnapshot', value: updated }, { upsert: true })
+    await engine.collections.settings.updateAsync({ _id: 'syncServerSnapshot' }, { $set: { value: updated } }, { upsert: true })
     return { updated: true, value: syncSnapshotPreview(updated) }
   })
 }

@@ -82,7 +82,7 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
 function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids) {
   if (byId.size === 0) return cached
   const entries = cached[entriesKey].map((video, index) => {
-    const seen = byId.get(ids ? ids[index] : video[idKey])
+    const seen = byId.get(ids ? ids[index] : video?.[idKey])
     if (!seen) return video
     if (seen.unseenAt >= seen.seenAt) {
       return video.isNewInSubscriptionFeed ? video : { ...video, isNewInSubscriptionFeed: true }

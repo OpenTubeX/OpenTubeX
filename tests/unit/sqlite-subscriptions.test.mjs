@@ -1431,3 +1431,24 @@ for (const previous of ['\uD800', '\uDC00']) {
     assert.deepEqual((await metadataPage(engine, { videoId, field: 'thumbnail' })).records, [])
   })
 }
+
+
+for (const [category, field, idKey] of [['videos', 'videos', 'videoId'], ['shorts', 'shorts', 'videoId'], ['live', 'liveStreams', 'videoId'], ['posts', 'communityPosts', 'postId']]) {
+  test(`subscription ${category} pages retain null members with seen marks and warmed New views`, async t => {
+    const engine = memory(t)
+    const entry = { [idKey]: 'retained-entry', published: 1000, publishedTime: 1000, isNewInSubscriptionFeed: false }
+    const original = { _id: 'channel', [field + 'Timestamp']: new Date(1000), [field]: [null, entry], unknown: new Date(1) }
+    await engine.collections.subscriptionCache.insertAsync(original)
+    await engine.collections.settings.insertAsync({ _id: category === 'posts' ? 'subscriptionSeenPosts' : 'subscriptionSeenVideos', value: JSON.stringify([{ [idKey]: entry[idKey], seenAt: 2000 }]) })
+    const options = { subscriptions: [{ id: 'channel' }], category, enabledCategories: [category], preferences: { hideWatched: true }, limit: 1 }
+    assert.deepEqual((await subscriptionPage(engine, { ...options, onlyNew: true })).records, [])
+    const first = await subscriptionPage(engine, options)
+    assert.deepEqual(first.records, [null])
+    assert.equal(first.total, 2)
+    const next = await subscriptionPage(engine, { ...options, cursor: first.cursor })
+    assert.deepEqual(next.records.map(withoutMemberIdentity), [entry])
+    assert.equal(next.cursor, null)
+    if (category === 'shorts') assert.deepEqual(await subscriptionShortsWindow(engine, { subscriptions: options.subscriptions, currentVideoId: entry.videoId, preferences: { hideWatched: true } }), [entry])
+    assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), original)
+  })
+}

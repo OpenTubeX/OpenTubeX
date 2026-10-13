@@ -10,7 +10,7 @@ const snapshots = new WeakMap()
  * @returns {object[]}
  */
 export function getNewSubscriptionEntriesSnapshot(entries) {
-  const select = () => entries.filter(entry => entry.isNewInSubscriptionFeed === true)
+  const select = () => entries.filter(entry => entry?.isNewInSubscriptionFeed === true)
   if (!isReactive(entries)) return select()
 
   let snapshot = snapshots.get(entries)

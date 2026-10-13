@@ -72,7 +72,7 @@ function readSubscriptionShortsWindow(engine, { subscriptions, preferences = {},
   const cache = Object.fromEntries(engine.prepare("SELECT record_id, json_group_array(json(data) ORDER BY position) AS entries FROM members WHERE collection = 'subscriptionCache' AND field = 'shorts' AND record_id IN (SELECT value FROM json_each(?)) GROUP BY record_id").all(JSON.stringify(ids)).map(row => [row.record_id, { videos: deserializeEntry(row.entries) }]))
   const historyById = new Map()
   if (preferences.hideWatched) {
-    const videoIds = [...new Set(Object.values(cache).flatMap(source => source.videos.map(video => video.videoId)).filter(id => typeof id === 'string'))]
+    const videoIds = [...new Set(Object.values(cache).flatMap(source => source.videos.map(video => video?.videoId)).filter(id => typeof id === 'string'))]
     // Resolve the latest duplicate once per video in indexed batches, rather
     // than loading unrelated feed arrays or issuing a query for each Short.
     for (let offset = 0; offset < videoIds.length; offset += 250) {
@@ -107,13 +107,13 @@ export function subscriptionSummaries(engine) {
 
 function classicSubscriptionEntries(caches, category, subscriptions, preferences, historyById, now) {
   const channelIds = new Set(getSubscriptionsForFeed(subscriptions, category).map(channel => channel.id))
-  let records = Object.entries(caches[category]).filter(([id]) => channelIds.has(id)).flatMap(([, cache]) => (cache[category === 'posts' ? 'posts' : 'videos'] ?? []).map(video => category === 'videos' ? ensureUpcomingSubscriptionFeedPublished(video, cache.timestamp.getTime(), now) : video))
-  if (category === 'posts') records = records.toSorted((a, b) => b.publishedTime - a.publishedTime)
-  if (category !== 'posts') records = records.map(video => updateUpcomingPremiereState(video, now)).toSorted((a, b) => getSubscriptionVideoSortTimestamp(b, preferences.showScheduledLiveStreamsFirst, now) - getSubscriptionVideoSortTimestamp(a, preferences.showScheduledLiveStreamsFirst, now))
-  records = records.filter(video => !isVideoHiddenByPreferences(video, preferences, now))
+  let records = Object.entries(caches[category]).filter(([id]) => channelIds.has(id)).flatMap(([, cache]) => (cache[category === 'posts' ? 'posts' : 'videos'] ?? []).map(video => category === 'videos' && video != null ? ensureUpcomingSubscriptionFeedPublished(video, cache.timestamp.getTime(), now) : video))
+  if (category === 'posts') records = records.toSorted((a, b) => b?.publishedTime - a?.publishedTime)
+  if (category !== 'posts') records = records.map(video => video == null ? video : updateUpcomingPremiereState(video, now)).toSorted((a, b) => getSubscriptionVideoSortTimestamp(b ?? {}, preferences.showScheduledLiveStreamsFirst, now) - getSubscriptionVideoSortTimestamp(a ?? {}, preferences.showScheduledLiveStreamsFirst, now))
+  records = records.filter(video => video == null || !isVideoHiddenByPreferences(video, preferences, now))
   if (category !== 'posts') {
     records = filterMembersOnlySubscriptionVideos(records, subscriptions, preferences.restrictedPlaybackConfigured)
-    if (preferences.hideWatched) records = records.filter(video => !isHistoryEntryWatched(historyById[video.videoId], now))
+    if (preferences.hideWatched) records = records.filter(video => !isHistoryEntryWatched(historyById[video?.videoId], now))
     records = applySubscriptionVideoLimit(records, subscriptions, preferences.onlyShowLatestFromChannel ? preferences.onlyShowLatestFromChannelNumber : null)
   }
   return records
@@ -165,7 +165,7 @@ async function readSubscriptionPage(engine, options) {
         source[row.field].push(entry)
       }
     }
-    const videoIds = [...new Set(sources.flatMap(source => fields.filter(field => field !== 'communityPosts').flatMap(key => (source[key] ?? []).map(video => video.videoId))).filter(id => typeof id === 'string'))]
+    const videoIds = [...new Set(sources.flatMap(source => fields.filter(field => field !== 'communityPosts').flatMap(key => (source[key] ?? []).map(video => video?.videoId))).filter(id => typeof id === 'string'))]
     const historyById = {}
     for (let offset = 0; offset < videoIds.length; offset += 250) {
       for (const row of engine.latestHistoryRows(videoIds.slice(offset, offset + 250)).values()) {
@@ -189,7 +189,7 @@ async function readSubscriptionPage(engine, options) {
     for (const source of sources) {
       for (const field of ['videos', 'shorts', 'liveStreams']) {
         for (const entry of source[field] ?? []) {
-          const timestamp = getUpcomingPremiereTimestamp(entry)
+          const timestamp = entry == null ? null : getUpcomingPremiereTimestamp(entry)
           if (timestamp > now && (nextPremiereTimestamp === null || timestamp < nextPremiereTimestamp)) nextPremiereTimestamp = timestamp
         }
       }
@@ -208,7 +208,7 @@ async function readSubscriptionPage(engine, options) {
             // Keep only an ordered member reference unless a shared feed helper
             // added a display override. Revisions invalidate this view on edits.
             const memberId = entry?.[memberIdentity]
-            const timestamp = getUpcomingPremiereTimestamp(entry)
+            const timestamp = entry == null ? null : getUpcomingPremiereTimestamp(entry)
             if (timestamp > now && (nextPremiereTimestamp === null || timestamp < nextPremiereTimestamp)) nextPremiereTimestamp = timestamp
             return memberIds.has(entry) ? memberId : null
           })
@@ -222,7 +222,7 @@ async function readSubscriptionPage(engine, options) {
           }
         }
       }
-      const cached = { id, createdAt: now, counts: Object.fromEntries(Object.entries(allCategories).map(([name, entries]) => [name, entries.length])), hasNew: Object.fromEntries(Object.entries(allCategories).map(([name, entries]) => [name, entries.some(entry => entry.isNewInSubscriptionFeed === true && !isHistoryEntryWatched(historyById[entry.videoId], now))])), nextPremiereTimestamp, expiresAt: Math.min(now + 60_000, nextPremiereTimestamp ?? Infinity) }
+      const cached = { id, createdAt: now, counts: Object.fromEntries(Object.entries(allCategories).map(([name, entries]) => [name, entries.length])), hasNew: Object.fromEntries(Object.entries(allCategories).map(([name, entries]) => [name, entries.some(entry => entry?.isNewInSubscriptionFeed === true && !isHistoryEntryWatched(historyById[entry.videoId], now))])), nextPremiereTimestamp, expiresAt: Math.min(now + 60_000, nextPremiereTimestamp ?? Infinity) }
       if (engine.subscriptionViews.size >= 5) {
         const oldest = engine.subscriptionViews.keys().next().value
         engine.prepare('DELETE FROM subscription_views WHERE view_id = ?').run(engine.subscriptionViews.get(oldest).id)

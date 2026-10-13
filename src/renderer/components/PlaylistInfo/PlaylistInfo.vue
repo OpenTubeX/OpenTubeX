@@ -906,7 +906,7 @@ function handleExport(value) {
  */
 function getExportFilename(title, extension) {
   const dateStr = getTodayDateStrLocalTimezone()
-  const sanitisedTitle = title.replaceAll(/[ "%*/:<>?\\|]/g, '_')
+  const sanitisedTitle = (typeof title === 'string' ? title : '').replaceAll(/[ "%*/:<>?\\|]/g, '_')
   return `freetube-playlist-${sanitisedTitle}-${dateStr}.${extension}`
 }
 

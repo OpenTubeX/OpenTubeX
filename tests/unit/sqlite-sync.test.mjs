@@ -560,3 +560,30 @@ for (const allowMissingUploader of [false, true]) {
     assert.deepEqual(engine.prepare("SELECT membership_id FROM members WHERE collection = 'playlists' AND record_id = ? ORDER BY position").all(original._id), identities)
   })
 }
+
+
+for (const malformed of ['{invalid', 'null', '[]', '42', '"retained"', { retained: new Date(1) }]) {
+  for (const collection of ['sessionsV2', 'watchStats', 'playlists']) {
+    test(`snapshot ${collection} recovers from retained baseline ${JSON.stringify(malformed)}`, async t => {
+      const { engine } = fixture(t)
+      const original = { _id: 'syncServerSnapshot', value: malformed, unknown: { date: new Date(1) } }
+      await engine.collections.settings.insertAsync([original, ...Object.entries({ syncServerEnabled: true, syncServerUrl: 'server', syncServerToken: 'token' }).map(([_id, value]) => ({ _id, value }))])
+      const libraryRecord = { _id: 'kept', videoId: 'retained', unknown: new Date(2), watchProgress: 42 }
+      await engine.collections.history.insertAsync(libraryRecord)
+      const account = ['server', 'token', 'legacy', '', '']
+      const value = collection === 'playlists' ? { id: 'p', acknowledged: { upserts: ['added'], deletions: [] } } : [{ retained: 'section' }]
+      assert.deepEqual(await syncSnapshotSection(engine, { account: ['other', ...account.slice(1)], collection, value }), { updated: false })
+      assert.deepEqual(await engine.collections.settings.findOneAsync({ _id: original._id }), original)
+      const result = await syncSnapshotSection(engine, { account, collection, value })
+      assert.equal(result.updated, true)
+      const expected = collection === 'playlists' ? { playlists: { p: { videos: ['added'] } } } : { [collection]: value }
+      assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: original._id })).value), expected)
+      assert.deepEqual((await engine.collections.settings.findOneAsync({ _id: original._id })).unknown, original.unknown)
+      assert.deepEqual(await engine.collections.history.findOneAsync({ _id: libraryRecord._id }), libraryRecord)
+      if (collection === 'watchStats') {
+        await syncSnapshotSection(engine, { account, collection, remove: true })
+        assert.deepEqual(JSON.parse((await engine.collections.settings.findOneAsync({ _id: original._id })).value), {})
+      }
+    })
+  }
+}

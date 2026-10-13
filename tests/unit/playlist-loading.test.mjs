@@ -140,3 +140,29 @@ for (const available of [false, true]) {
     assert.deepEqual(structuredClone(module.state.playlists), before)
   })
 }
+
+
+for (const name of [undefined, null, false, 42, { retained: true }]) {
+  test(`single-playlist database export uses a safe filename without changing retained name: ${JSON.stringify(name)}`, async () => {
+    const original = { _id: 'retained', ...(name === undefined ? {} : { playlistName: name }), videos: [], unknown: new Date(1) }
+    const { db, module, load } = await fixture([original])
+    await load({ preserveRetained: true })
+    const selected = module.state.playlists.find(entry => entry._id === original._id)
+    assert.deepEqual(selected, original)
+    const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
+    const functions = component.slice(component.indexOf('function getExportFilename('), component.indexOf('async function exportAsYouTubeCsv('))
+    let exported
+    const context = vm.createContext({
+      selectedUserPlaylist: { value: selected }, props: { id: original._id },
+      getTodayDateStrLocalTimezone: () => '2026-10-13',
+      DBLibraryHandlers: { query: async () => await db.playlists.findOneAsync({ _id: original._id }) },
+      writeFileWithPicker: async (filename, data) => { exported = { filename, data: typeof data === 'function' ? await data() : data }; return true },
+      showToast: () => {}, t: key => key,
+    })
+    await vm.runInContext(`(async () => { ${functions}; await exportAsFreeTubeDatabase() })()`, context)
+    assert.ok(exported, 'file picker must open for a retained non-string name')
+    assert.equal(exported.filename, 'freetube-playlist--2026-10-13.db')
+    assert.equal(exported.data, JSON.stringify(original) + '\n')
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: original._id }), original)
+  })
+}

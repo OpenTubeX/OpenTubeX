@@ -304,7 +304,7 @@ export function buildSubscriptionShortsFeed({
     .flatMap(channel => (cache[channel.id]?.videos ?? []).filter(video => (
       isMembersOnlySubscriptionVideoVisible(video, channel, restrictedPlaybackConfigured)
     )))
-    .filter(video => video.videoId && !isHidden(video))
+    .filter(video => video?.videoId && !isHidden(video))
     .filter(video =>
       video.videoId === currentVideoId ||
       !hideWatched ||
