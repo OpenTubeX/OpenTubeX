@@ -92,8 +92,14 @@
 
   box-sizing: border-box;
   flex: none;
-  margin-block: 8px 0;
+  margin-block: 8px;
   padding-inline: 10px;
+}
+
+@media (any-pointer: fine) and (not (any-pointer: coarse)) {
+  .addToPlaylistDropdown:not(.phonePlaylistPicker) .playlistSearch {
+    --form-control-height: 36px;
+  }
 }
 
 .playlistListContent {
@@ -111,6 +117,7 @@
   }
 
   .playlistSearch {
+    margin-block-end: 0;
     min-block-size: var(--phone-touch-target, 48px);
     padding: 10px;
   }
