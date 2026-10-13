@@ -536,15 +536,16 @@ test('paged playlist repair refreshes summaries after durable metadata changes',
   const method = actions.properties.find(property => property.key.name === 'repairPlaylistMetadata')
   let updates = [{ _id: 'p', changes: [{ videoId: 'A', fields: { title: 'Repaired' } }] }]
   const repair = vm.runInNewContext('({' + source.slice(method.start, method.end) + '}).repairPlaylistMetadata', {
+    isRemoteSyncDispatch: () => false,
     DBPlaylistHandlers: { repairMetadata: async () => ({ updates, repaired: updates.length, failed: 0 }) },
   })
   const calls = []
   const context = { state: { libraryPaged: true }, commit: () => assert.fail('paged summaries must not receive whole-member patches'), dispatch: async action => { calls.push(action) } }
   assert.deepEqual(structuredClone(await repair(context, {})), { repaired: 1, failed: 0 })
-  assert.deepEqual(calls, ['grabAllPlaylists'])
+  assert.deepEqual(calls, ['scheduleSyncServer', 'grabAllPlaylists'])
   updates = []
   assert.deepEqual(structuredClone(await repair(context, {})), { repaired: 0, failed: 0 })
-  assert.deepEqual(calls, ['grabAllPlaylists'])
+  assert.deepEqual(calls, ['scheduleSyncServer', 'grabAllPlaylists'])
 })
 
 
