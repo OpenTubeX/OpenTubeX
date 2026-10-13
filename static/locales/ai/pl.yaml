@@ -466,7 +466,7 @@ Settings:
       Skipped: "Pominięte: {count}"
       Unreadable files: "Nieczytelne pliki: {count}"
       Settings effect: Pasujące ustawienia zostaną zastąpione. Prywatne i nieznane ustawienia zostaną pominięte.
-      Details effect: Istniejące subskrypcje lub filmy zostaną zachowane. Importowane dane profili lub list zastąpią obecne dane.
+      Details effect: Istniejące subskrypcje lub filmy zostaną zachowane. Importowane dane profili lub playlist zastąpią obecne dane.
       Merge effect: Istniejące dane zostaną zachowane i połączone z pasującymi wpisami.
       Subscriptions effect: Istniejące subskrypcje zostaną zachowane. Dodane zostaną tylko nowe kanały.
       History replace effect: Historia oglądania pasujących filmów zostanie zastąpiona. Pozostała historia zostanie zachowana.

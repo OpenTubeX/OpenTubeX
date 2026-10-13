@@ -947,7 +947,7 @@ Settings:
       Skipped: "Preskočeni: {count}"
       Unreadable files: "Nečitljive datoteke: {count}"
       Settings effect: Podudarne postavke zamjenjuju se. Privatne i nepoznate postavke preskaču se.
-      Details effect: Postojeće pretplate ili videozapisi zadržavaju se. Uvezeni detalji profila ili popisa zamjenjuju trenutačne.
+      Details effect: Postojeće pretplate ili videozapisi zadržavaju se. Uvezeni detalji profila ili zbirki zamjenjuju trenutačne.
       Merge effect: Postojeći podaci zadržavaju se i spajaju s podudarnim zapisima.
       Subscriptions effect: Postojeće pretplate zadržavaju se. Dodaju se samo novi kanali.
       History replace effect: Povijest gledanja podudarnih videozapisa zamjenjuje se. Ostala povijest zadržava se.

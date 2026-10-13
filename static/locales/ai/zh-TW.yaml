@@ -943,7 +943,7 @@ Settings:
       Skipped: 略過：{count}
       Unreadable files: 無法讀取的檔案：{count}
       Settings effect: 相符的設定將被取代。私人和未知設定將被略過。
-      Details effect: 現有訂閱或影片將被保留。匯入的個人資料或播放清單詳細資料將取代目前的詳細資料。
+      Details effect: 現有訂閱或影片將被保留。匯入的設定檔或播放清單詳細資料將取代目前的詳細資料。
       Merge effect: 現有資料將被保留，並與相符的記錄合併。
       Subscriptions effect: 現有訂閱將被保留。僅新增頻道。
       History replace effect: 相符影片的觀看記錄將被取代。其他記錄將被保留。

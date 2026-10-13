@@ -31,7 +31,7 @@ class SkipDeflate {
   }
 }
 
-async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
+async function streamTakeoutZip(file, selectedTypes, onFound, onContent, onEntryError) {
   const pending = []
   let failure
 
@@ -39,7 +39,7 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
     static compression = 8
 
     constructor(name, compressedSize, originalSize) {
-      this.decoder = selectedTypes.has(classifyTakeoutEntry(name))
+      this.decoder = selectedTypes.has(classifyTakeoutEntry(name)) && !(originalSize > MAX_ENTRY_SIZE)
         ? new UnzipInflate(name, compressedSize, originalSize)
         : new SkipDeflate()
       this.decoder.ondata = (error, data, final) => this.ondata(error, data, final)
@@ -59,8 +59,17 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
       entry.start()
       return
     }
+    let failed = false
+    const reportError = error => {
+      if (failed) return
+      failed = true
+      if (onEntryError) onEntryError(error, { type, path: entry.name })
+      else failure = error
+    }
     if (entry.originalSize > MAX_ENTRY_SIZE) {
-      failure = new Error(`Takeout entry is too large: ${entry.name}`)
+      reportError(new Error(`Takeout entry is too large: ${entry.name}`))
+      entry.ondata = () => {}
+      entry.start()
       return
     }
 
@@ -68,13 +77,14 @@ async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
     let content = ''
     let size = 0
     entry.ondata = (error, chunk, final) => {
+      if (failed) return
       if (error) {
-        failure = error
+        reportError(error)
         return
       }
       size += chunk.length
       if (size > MAX_ENTRY_SIZE) {
-        failure = new Error(`Takeout entry is too large: ${entry.name}`)
+        reportError(new Error(`Takeout entry is too large: ${entry.name}`))
         return
       }
       content += decoder.decode(chunk, { stream: !final })
@@ -118,8 +128,8 @@ export async function listYouTubeTakeoutZipEntries(file) {
 }
 
 /** Import selected entries one at a time, bounding renderer memory. */
-export async function forEachSelectedTakeoutZipEntry(file, types, onEntry) {
-  await streamTakeoutZip(file, types, () => {}, onEntry)
+export async function forEachSelectedTakeoutZipEntry(file, types, onEntry, onEntryError) {
+  await streamTakeoutZip(file, types, () => {}, onEntry, onEntryError)
 }
 
 export function getTakeoutPlaylistName(filename) {
@@ -232,7 +242,7 @@ export async function readTakeoutPlaylistMetadata(file) {
     if (playlists === null) {
       errors.push(new Error(`Invalid playlist metadata CSV: ${entry.path}`))
     }
-  })
+  }, error => errors.push(error))
   // Resolve paths after the scan so either filename form can follow the metadata.
   for (const [directory, playlists] of playlistsByDirectory) {
     if (playlists === null) { continue }
@@ -364,6 +374,9 @@ export async function forEachTakeoutImportEntry(file, selected, entries, onEntry
     } catch (error) {
       onError(error, entry.type, entry.path)
     }
+  }, (error, entry) => {
+    if (entry.type === 'playlists') importedPaths.add(entry.path)
+    onError(error, entry.type, entry.path)
   })
   for (const [path, playlist] of metadata) {
     if (!importedPaths.has(path)) {

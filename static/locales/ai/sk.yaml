@@ -943,7 +943,7 @@ Settings:
       Skipped: "Preskočené: {count}"
       Unreadable files: "Nečitateľné súbory: {count}"
       Settings effect: Zodpovedajúce nastavenia sa nahradia. Súkromné a neznáme nastavenia sa preskočia.
-      Details effect: Existujúce odbery alebo videá sa zachovajú. Importované údaje profilov alebo zoznamov nahradia súčasné údaje.
+      Details effect: Existujúce odbery alebo videá sa zachovajú. Importované údaje profilov alebo playlistov nahradia súčasné údaje.
       Merge effect: Existujúce údaje sa zachovajú a zlúčia so zodpovedajúcimi záznamami.
       Subscriptions effect: Existujúce odbery sa zachovajú. Pridajú sa iba nové kanály.
       History replace effect: História sledovania zodpovedajúcich videí sa nahradí. Ostatná história sa zachová.

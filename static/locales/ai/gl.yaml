@@ -953,7 +953,7 @@ Settings:
       Skipped: "Omitidos: {count}"
       Unreadable files: "Ficheiros ilexibles: {count}"
       Settings effect: Substitúense os axustes coincidentes. Omítense os axustes privados e descoñecidos.
-      Details effect: Consérvanse as subscricións ou os vídeos existentes. Os detalles importados de perfís ou listas substitúen os actuais.
+      Details effect: Consérvanse as subscricións ou os vídeos existentes. Os detalles importados de perfís ou listas de reprodución substitúen os actuais.
       Merge effect: Consérvanse os datos existentes e combínanse cos rexistros coincidentes.
       Subscriptions effect: Consérvanse as subscricións existentes. Só se engaden canles novas.
       History replace effect: Substitúese o historial dos vídeos coincidentes. Consérvase o resto do historial.

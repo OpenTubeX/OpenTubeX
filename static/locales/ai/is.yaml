@@ -942,7 +942,7 @@ Settings:
   Data Settings:
     Import Preview:
       Title: Forskoða breytingar
-      New: "Nýjar: {count}"
+      New: "Nýtt: {count}"
       Existing: "Fyrirliggjandi: {count}"
       Skipped: "Sleppt: {count}"
       Unreadable files: "Ólæsilegar skrár: {count}"

@@ -943,7 +943,7 @@ Settings:
       Skipped: "Ignorés : {count}"
       Unreadable files: "Fichiers illisibles : {count}"
       Settings effect: Les paramètres correspondants sont remplacés. Les paramètres privés et inconnus sont ignorés.
-      Details effect: Les abonnements ou vidéos existants sont conservés. Les détails importés des profils ou listes remplacent les détails actuels.
+      Details effect: Les abonnements ou vidéos existants sont conservés. Les détails importés des profils ou playlists remplacent les détails actuels.
       Merge effect: Les données existantes sont conservées et fusionnées avec les entrées correspondantes.
       Subscriptions effect: Les abonnements existants sont conservés. Seules les nouvelles chaînes sont ajoutées.
       History replace effect: L’historique de visionnage des vidéos correspondantes est remplacé. Le reste de l’historique est conservé.

@@ -119,3 +119,65 @@ test('watch history parsing excludes malformed records from preview counts and p
   assert.equal(entries[0].videoId, 'abcdefghijk')
   assert.equal(skipped, 2)
 })
+
+test('preview reports existing generated playlist names as merge targets on repeated imports', async () => {
+  const file = new Blob([zipSync({
+    'First/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
+    'Second/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nlmnopqrstuv,2025-01-01T00:00:00Z\n'),
+  })])
+  const paths = await listYouTubeTakeoutZipEntries(file)
+  const playlists = { value: [
+    { _id: 'first', playlistName: 'List', videos: [] },
+    { _id: 'second', playlistName: 'List (2)', videos: [{ videoId: 'zzzzzzzzzzz', timeAdded: 10 }] },
+  ] }
+  const context = vm.createContext({
+    allPlaylists: playlists, deepCopy: structuredClone, processToBeAddedPlaylistVideo() {},
+    store: { dispatch: async (action, playlist) => {
+      assert.equal(action, 'importPlaylist', 'Matching names must merge rather than create renamed duplicates')
+      const index = playlists.value.findIndex(saved => saved._id === playlist._id)
+      playlists.value[index] = playlist
+    } },
+  })
+  vm.runInContext(component.slice(component.indexOf('async function importTakeoutPlaylist('), component.indexOf('async function importPlaylists()')), context)
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const preview = await previewTakeoutImport(file, paths, { playlists: playlists.value })
+    assert.deepEqual(counts(preview[0]), [0, 2, 0])
+    await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => context.importTakeoutPlaylist(entry.playlist), error => { throw error })
+    assert.equal(playlists.value.length, 2)
+    assert.deepEqual(Array.from(playlists.value[1].videos, video => video.videoId), ['zzzzzzzzzzz', 'lmnopqrstuv'])
+  }
+})
+
+test('oversized history is reported without preventing smaller subscription previews or imports', async () => {
+  const archive = zipSync({
+    'Takeout/YouTube/history/watch-history.json': strToU8('[]'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCsmall,url,Small channel\n'),
+  })
+  new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
+  const file = new Blob([archive])
+  const paths = await listYouTubeTakeoutZipEntries(file)
+  const rows = await previewTakeoutImport(file, paths, { history: [], subscriptions: [] })
+  assert.equal(rows.find(row => row.category === 'history').failedFiles, 1)
+  assert.equal(rows.find(row => row.category === 'subscriptions').added, 1)
+  const imported = []
+  const errors = []
+  await forEachTakeoutImportEntry(file, new Set(['history', 'subscriptions']), paths, entry => imported.push(entry.type), (error, type) => errors.push(type))
+  assert.deepEqual(imported, ['subscriptions'])
+  assert.deepEqual(errors, ['history'])
+})
+
+test('unreadable playlist video files are not restored as empty metadata-only playlists', async () => {
+  const archive = zipSync({
+    'Takeout/YouTube/playlists/List-videos.csv': strToU8('Video ID,Playlist video creation timestamp\nabcdefghijk,2025-01-01T00:00:00Z\n'),
+    'Takeout/YouTube/playlists/playlists.csv': strToU8('Playlist ID,Playlist Title (Original)\nPLlist,List\nPLempty,Empty\n'),
+  })
+  new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
+  const file = new Blob([archive])
+  const paths = await listYouTubeTakeoutZipEntries(file)
+  const rows = await previewTakeoutImport(file, paths, { playlists: [] })
+  assert.equal(rows[0].failedFiles, 1)
+  assert.equal(rows[0].added, 1)
+  const names = []
+  await forEachTakeoutImportEntry(file, new Set(['playlists']), paths, entry => names.push(entry.playlist.playlistName), () => {})
+  assert.deepEqual(names, ['Empty'])
+})

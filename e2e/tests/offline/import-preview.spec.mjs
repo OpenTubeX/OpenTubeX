@@ -145,3 +145,21 @@ test('Takeout preview shows matching and new records and remains usable when its
   await expect(again.locator('[data-category="history"]')).toContainText('Existing: 1')
   await expect(again.locator('[data-category="playlists"]')).toContainText('Existing: 2')
 })
+
+test('offers smaller Takeout categories when history exceeds the import size limit', async ({ page }, testInfo) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  const archive = zipSync({
+    'Takeout/YouTube/history/watch-history.json': strToU8('[]'),
+    'Takeout/YouTube/subscriptions/subscriptions.csv': strToU8('Channel Id,Channel Url,Channel Title\nUCsmallpreview,url,Small channel\n'),
+  })
+  new DataView(archive.buffer).setUint32(22, 256 * 1024 * 1024 + 1, true)
+  const before = await savedData(page)
+  const preview = await chooseArchive(page, dataSection, archive, 'Import YouTube Takeout ZIP')
+  await expect(preview.locator('[data-category="history"]')).toContainText('Unreadable files: 1')
+  await page.locator('.takeoutSelectionCentered').screenshot({ path: testInfo.outputPath('oversized-takeout-preview.png') })
+  await expect(preview.locator('[data-category="subscriptions"]')).toContainText('New: 1')
+  expect(await savedData(page)).toEqual(before)
+  await page.getByRole('checkbox', { name: 'History', exact: true }).locator('+ label').click()
+  await page.getByRole('button', { name: 'Import selected data', exact: true }).click()
+  await expect.poll(async () => (await savedData(page)).profiles[0].subscriptions.some(channel => channel.id === 'UCsmallpreview')).toBe(true)
+})
