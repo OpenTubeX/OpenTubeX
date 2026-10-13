@@ -735,3 +735,22 @@ test('portable duplicate statistics count exactly the members cleanup removes', 
   const cleaned = await library.query('playlistStatistics', { id: 'p' })
   assert.equal(cleaned.uniqueCount, cleaned.total)
 })
+
+
+for (const direction of ['top', 'bottom']) {
+  test(`portable playable-only endpoint moves retain every opaque slot: ${direction}`, async () => {
+    const { db, library } = await fixture(false)
+    const a = { videoId: 'A', unknown: new Date(1) }, b = { videoId: 'B', unknown: new Date(2) }, c = { videoId: 'C', unknown: new Date(3) }
+    const original = { _id: 'p', playlistName: 'Retained', unknown: new Date(4), videos: [null, a, false, b, { postId: 'post' }, c, 'opaque'] }
+    await db.playlists.updateAsync({ _id: 'p' }, original)
+    const first = await library.query('playlistPage', { id: 'p' })
+    const member = first.records.find(video => video?.videoId === 'B')
+    assert.equal(await library.query('movePlaylistMember', { id: 'p', memberId: member._libraryMemberId, direction, revision: first.revision, playableOnly: true }), true)
+    const saved = await db.playlists.findOneAsync({ _id: 'p' })
+    assert.deepEqual(saved, { ...original, lastUpdatedAt: saved.lastUpdatedAt, videos: direction === 'top' ? [null, b, false, a, { postId: 'post' }, c, 'opaque'] : [null, a, false, c, { postId: 'post' }, b, 'opaque'] })
+    const page = await library.query('playlistPage', { id: 'p' })
+    const endpoint = page.records.find(video => video?.videoId === 'B')
+    assert.equal(await library.query('movePlaylistMember', { id: 'p', memberId: endpoint._libraryMemberId, direction, revision: page.revision, playableOnly: true }), false)
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), saved)
+  })
+}

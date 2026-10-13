@@ -553,3 +553,21 @@ for (const onlyNew of [false, true]) {
     assert.deepEqual(profile, { ...before, subscriptions: [...before.subscriptions, added] })
   })
 }
+
+
+test('a temporarily missing active profile clears the old feed and allows recovery', async t => {
+  const { result, getters, advance } = await feed(t, async (_, options) => ({ ...page(), records: options.subscriptions.length ? [{ videoId: 'recovered' }] : [], total: options.subscriptions.length ? 1 : 0, cursor: null }))
+  getters.getActiveProfile = { _id: 'first', subscriptions: [{ id: 'channel' }] }
+  await advance(101)
+  assert.equal(result.records.value[0].videoId, 'recovered')
+  for (const missing of [null, undefined]) {
+    getters.getActiveProfile = missing
+    assert.equal(result.records.value.length, 0)
+    await advance(101)
+    assert.equal(result.failed.value, false)
+    assert.equal(result.busy.value, false)
+    getters.getActiveProfile = { _id: 'next', subscriptions: [{ id: 'channel' }] }
+    await advance(101)
+    assert.equal(result.records.value[0].videoId, 'recovered')
+  }
+})

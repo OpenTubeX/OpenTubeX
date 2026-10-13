@@ -125,7 +125,7 @@ export function useSubscriptionPage(category, onlyNew = () => false, enabled = (
     } finally { if (current === generation) busy.value = false }
   }
   if (process.env.IS_ELECTRON) {
-    watch(() => store.getters.getActiveProfile._id, () => {
+    watch(() => store.getters.getActiveProfile?._id, () => {
       ++generation
       clearTimeout(timer); clearTimeout(channelTimer); clearTimeout(premiereTimer)
       channelTimer = null

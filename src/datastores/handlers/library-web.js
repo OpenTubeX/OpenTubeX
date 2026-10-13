@@ -91,6 +91,18 @@ export function createPortableLibrary({ history, playlists }) {
           const playable = video => typeof video?.videoId === 'string' && video.videoId.length > 0
           if (options.playableOnly && !playable(videos[index])) throw new Error('The playlist member is not playable')
           const reordered = videos.slice()
+          if (options.playableOnly && (options.direction === 'top' || options.direction === 'bottom')) {
+            const positions = videos.flatMap((video, position) => playable(video) ? [position] : [])
+            const source = positions.indexOf(index)
+            const target = options.direction === 'top' ? 0 : positions.length - 1
+            if (source === target) return false
+            const ordered = positions.map(position => videos[position])
+            const [member] = ordered.splice(source, 1)
+            ordered.splice(target, 0, member)
+            positions.forEach((position, offset) => { reordered[position] = ordered[offset] })
+            await saveVideos(reordered)
+            return true
+          }
           let target = options.direction === 'top' ? 0 : options.direction === 'bottom' ? videos.length - 1 : index + options.direction
           if (options.direction === -1 || options.direction === 1) {
             const excluded = new Set(options.excludedMemberIds ?? [])
