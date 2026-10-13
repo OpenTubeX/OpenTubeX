@@ -154,7 +154,9 @@ export function useSubscriptionPage(category, onlyNew = () => false, enabled = (
       const count = categories.reduce((count, tab) => count + options.value.subscriptions.reduce((sum, channel) => sum + (caches[tab]?.[channel.id]?.count ?? 0), 0), 0)
       // Match the existing feed's large-profile policy, including a first
       // refresh whose initially empty cache cannot indicate the coming work.
-      deferChannelUpdates = refreshing && categories.includes(refreshTab) && (count > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES ||
+      // A global refresh can start before its category is announced. Keep the
+      // completed large feed until completion instead of treating null as unrelated.
+      deferChannelUpdates = refreshing && (refreshTab == null || categories.includes(refreshTab)) && (count > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES ||
         categories.some(tab => getSubscriptionsForFeed(options.value.subscriptions, tab).length > MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS))
       if (previous.length > 0) {
         if (previous[0] && categories.includes(previous[1]) && previous[1] !== refreshTab) {

@@ -168,6 +168,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     dispatch: async (action, value) => {
       dispatched.push([action, value])
+      if (action === 'grabAllProfiles') {
+        assert.equal(value.preserveRetained, true)
+        return true
+      }
       if (action === 'replacePlaylistBookmarks') {
         settings.playlistBookmarks = value
         return true

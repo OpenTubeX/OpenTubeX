@@ -477,3 +477,30 @@ for (const subscriptions of [undefined, null, false, 42, 'retained', {}, new Dat
     assert.equal(result.failed.value, false)
   })
 }
+
+for (const largeBy of ['entry count', 'channel count']) {
+  test(`an uncategorized large refresh defers its page by ${largeBy} until completion`, async t => {
+    let calls = 0, title = 'Original'
+    const { result, getters, state, advance } = await feed(t, async () => { calls++; return { ...page(), records: [{ videoId: 'a', title }], cursor: null } })
+    getters.getActiveProfile.subscriptions = largeBy === 'channel count' ? Array.from({ length: 40 }, (_, index) => ({ id: String(index) })) : [{ id: 'channel' }]
+    state.subscriptionCache.videoCache.channel = { count: largeBy === 'entry count' ? 501 : 1 }
+    getters.getSubscriptionFeedRefreshTab = null
+    await advance(150)
+    const before = calls
+    // Include a pending reload from the last completed channel write.
+    state.subscriptionCache.subscriptionVideosFeedVersion++
+    await nextTick()
+    getters.getSubscriptionFeedRefreshInProgress = true
+    await nextTick()
+    title = 'Updated'
+    state.subscriptionCache.subscriptionVideosFeedVersion++
+    await advance(1250)
+    assert.equal(calls, before, 'no page query may publish through the unknown-category refresh')
+    assert.equal(result.records.value[0].title, 'Original')
+    assert.equal(result.busy.value, false)
+    getters.getSubscriptionFeedRefreshInProgress = false
+    await advance(150)
+    assert.equal(calls, before + 1)
+    assert.equal(result.records.value[0].title, 'Updated')
+  })
+}
