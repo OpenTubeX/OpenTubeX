@@ -421,3 +421,30 @@ test('portable restore accumulates repeated playlist records without dropping in
     assert.match(messages.at(-1).message, /Backup imported/)
   }
 })
+
+
+test('portable startup preserves every retained playlist name without writing generated labels', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
+  const nodes = parseJavaScript(source, { sourceType: 'module' }).program.body
+  const code = nodes.filter(node => node.type !== 'ImportDeclaration').map(node => node.type === 'ExportDefaultDeclaration'
+    ? 'return ' + source.slice(node.declaration.start, node.declaration.end)
+    : source.slice(node.start, node.end)).join('\n')
+  const counts = await import('../../src/renderer/helpers/playlist-video-counts.js')
+  for (const label of [undefined, null, false, 42, ['retained'], { future: true }]) {
+    const db = new Datastore({ inMemoryOnly: true })
+    const record = { _id: 'retained', protected: false, createdAt: 1, lastUpdatedAt: 1, videos: [{ videoId: 'A', playlistItemId: 'item', timeAdded: 1, type: 'video' }], ...(label === undefined ? {} : { playlistName: label }) }
+    await db.insertAsync(record)
+    let writes = 0
+    const bindings = {
+      process: { env: { IS_ELECTRON: false } }, ...counts,
+      DBPlaylistHandlers: { find: () => db.findAsync({}), upsert: async record => { writes++; await db.updateAsync({ _id: record._id }, record) } },
+      console: { error(error) { throw error } },
+    }
+    const playlists = compileFunction(code, Object.keys(bindings))(...Object.values(bindings))
+    const store = createStore({ modules: { playlists }, state: { settings: { quickBookmarkTargetPlaylistId: record._id } } })
+    await store.dispatch('grabAllPlaylists')
+    assert.equal(writes, 0)
+    assert.deepEqual(await db.findOneAsync({ _id: record._id }), record)
+    assert.deepEqual(toRaw(store.state.playlists.playlists[0]), record)
+  }
+})

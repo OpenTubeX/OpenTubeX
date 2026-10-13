@@ -33,10 +33,6 @@ function generateRandomPlaylistId() {
  */
 const pendingVideoAdds = new Map()
 
-function generateRandomPlaylistName() {
-  return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
-}
-
 /** Attributes playlist entries are not meant to carry, even with `null` values */
 const UNDESIRED_VIDEO_ATTRIBUTES = [
   'authorUrl',
@@ -358,12 +354,6 @@ const actions = {
           if (playlist._id == null) {
             // {Time now in unix time}-{0-9999}
             playlist._id = generateRandomPlaylistId()
-            anythingUpdated = true
-          }
-          // Ensure all videos has `playlistName` property
-          if (playlist.playlistName == null) {
-            // Time now in unix time, in ms
-            playlist.playlistName = generateRandomPlaylistName()
             anythingUpdated = true
           }
           // Assign current time as created time in case DB data corrupted
