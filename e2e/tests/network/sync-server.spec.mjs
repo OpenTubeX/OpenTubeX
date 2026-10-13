@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { randomBytes, randomUUID } from 'node:crypto'
 import path from 'node:path'
 
-import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
@@ -820,6 +820,77 @@ test.describe('OpenTubeX sync server', () => {
       body: JSON.stringify({ password: 'local-test-password' })
     })
     expect(cleanupResponse.ok).toBe(true)
+  })
+
+  test('syncs repaired metadata for existing playlist videos without duplicating entries', async ({ app, page }, testInfo) => {
+    const videoId = randomBytes(8).toString('base64url').slice(0, 11)
+    const repairChannelId = `UC${randomBytes(16).toString('base64url')}`
+    const username = `opentubex-repair-${Date.now()}-${randomBytes(4).toString('hex')}`
+    await page.route('**/health', route => route.fulfill({
+      json: {
+        status: 'ok', capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      }
+    }))
+    await page.evaluate(async ({ videoId, channelId }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('addVideos', {
+        _id: 'sync-playlist',
+        videos: [
+          { videoId, title: videoId, authorId: channelId, author: '', published: 0, lengthSeconds: 0 },
+          { videoId, title: videoId, authorId: channelId, author: '', published: 0, lengthSeconds: 0 },
+        ]
+      })
+    }, { videoId, channelId: repairChannelId })
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password', { exact: true }).fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    const settings = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+    const headers = { Authorization: settings.syncServerToken, 'Content-Type': 'application/json' }
+    const playlistHeaders = await (await fetch(`${syncServerUrl}/v1/playlists/`, { headers })).json()
+    const remoteId = playlistHeaders.find(playlist => playlist.title === 'Synced playlist').id
+    const getRemoteVideos = async () => (await (await fetch(`${syncServerUrl}/v1/playlists/${remoteId}`, { headers })).json()).videos
+    expect(await getRemoteVideos()).toEqual([expect.objectContaining({
+      id: videoId,
+      title: videoId,
+      duration: 0,
+      uploader: expect.objectContaining({ id: repairChannelId, name: repairChannelId })
+    })])
+
+    await page.route('**/youtubei/v1/player*', route => route.fulfill({
+      json: {
+        videoDetails: { videoId, title: 'Recovered playlist title', author: 'Recovered channel', channelId: repairChannelId, lengthSeconds: '120' },
+        microformat: { playerMicroformatRenderer: { publishDate: '2025-01-01' } }
+      }
+    }))
+    await page.locator('.settingsCloseButton').click()
+    await goTo(page, 'userplaylists')
+    await page.getByRole('button', { name: 'Repair Playlists', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Repair Playlists' })
+    await dialog.getByText('Synced playlist', { exact: true }).click()
+    await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
+    await expect(page.locator('.repairStatus').getByRole('status')).toContainText('Repaired 1 · Failed 0')
+    const repairedIds = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))
+    expect(new Set(repairedIds).size).toBe(2)
+    const section = await goToSettingsSection(page, 'sync')
+    await section.getByRole('button', { name: 'Sync now' }).click()
+    await expect.poll(getRemoteVideos).toEqual([expect.objectContaining({
+      id: videoId,
+      title: 'Recovered playlist title',
+      duration: 120,
+      upload_date: Date.parse('2025-01-01'),
+      uploader: expect.objectContaining({ id: repairChannelId, name: 'Recovered channel' })
+    })])
+    expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAllPlaylists.find(playlist => playlist._id === 'sync-playlist').videos.map(video => video.playlistItemId))).toEqual(repairedIds)
+    const cleanup = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: { ...headers, 'X-Forwarded-For': rateLimitClient(testInfo) },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanup.ok).toBe(true)
   })
 
   test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {

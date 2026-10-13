@@ -809,8 +809,20 @@ class Playlists {
     const repaired = new Set()
     const failed = new Set()
     const byId = new Map(metadata.map(info => [info.videoId, info]))
-    for (const _id of new Set(playlistIds)) {
-      let pendingIds = [...byId.keys()]
+    const selectedIds = [...new Set(playlistIds)]
+    const targets = await db.playlists.findAsync({
+      _id: { $in: selectedIds },
+      videos: { $elemMatch: { videoId: { $in: [...byId.keys()] } } }
+    })
+    const targetsById = new Map(targets.map(playlist => [playlist._id, playlist]))
+    for (const _id of selectedIds) {
+      const target = targetsById.get(_id)
+      if (!target) continue
+      // If a later read fails, count only videos this playlist could change.
+      let pendingIds = [...new Set(target.videos
+        .filter(video => byId.has(video.videoId) && playlistRepairPatch(video, byId.get(video.videoId)))
+        .map(video => video.videoId))]
+      if (!pendingIds.length) continue
       try {
         // Re-read and conditionally save so edits made in another window during
         // the lookup cannot be overwritten or resurrect deleted entries.

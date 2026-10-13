@@ -663,8 +663,29 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
   return playlist.playlistName === metadata.title &&
     (playlist.description || '') === metadata.description &&
     playlist.videos.length === videos.length &&
-    playlist.videos.every((video, index) => video.videoId === videos[index].videoId &&
-      video.authorId === videos[index].authorId && video.author === videos[index].author)
+    playlist.videos.every((video, index) => metadataEquals(video, videos[index]))
+}
+
+// Repairs enrich missing metadata; populated values retain their existing
+// conflict behavior. Keep thumbnails and uploader verification on their side.
+function enrichPlaylistVideo(video, source) {
+  const result = { ...video, uploader: { ...video.uploader } }
+  const known = (value, placeholder) => typeof value === 'string' && value.trim() && value !== placeholder
+  if ((!video.uploader.id || video.uploader.id === UNKNOWN_SYNC_UPLOADER_ID) &&
+      known(source.uploader.id, UNKNOWN_SYNC_UPLOADER_ID)) {
+    result.uploader.id = source.uploader.id
+  }
+  if (!known(video.title, video.id) && known(source.title, source.id)) result.title = source.title
+  if (!known(video.uploader.name, video.uploader.id) &&
+      result.uploader.id === source.uploader.id && known(source.uploader.name, source.uploader.id)) {
+    result.uploader.name = source.uploader.name
+  }
+  for (const key of ['upload_date', 'duration']) {
+    if ((!Number.isFinite(video[key]) || video[key] <= 0) && Number.isFinite(source[key]) && source[key] > 0) {
+      result[key] = source[key]
+    }
+  }
+  return result
 }
 
 export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
@@ -804,11 +825,18 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
     }
 
     const localVideos = local?.videos ?? []
+    const remoteVideosById = mapBy(remote.videos, video => video.id)
     const localVideosById = mapBy(
-      localVideos.filter(video => videoToRemote(video, options) !== null),
+      localVideos.filter(video => videoToRemote(video, options) !== null || remoteVideosById.has(video.videoId)),
       video => video.videoId
     )
-    const remoteVideosById = mapBy(remote.videos, video => video.id)
+    const localMetadataById = new Map()
+    for (const video of localVideos) {
+      const payload = videoToRemote(video, options)
+      if (!payload) continue
+      const existing = localMetadataById.get(video.videoId)
+      localMetadataById.set(video.videoId, existing ? enrichPlaylistVideo(existing, payload) : payload)
+    }
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
       remoteVideosById.keys(),
@@ -819,10 +847,15 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         getItemName: videoId => localVideosById.get(videoId)?.title || remoteVideosById.get(videoId)?.title,
       }
     )
-    const remoteVideosToAdd = Array.from(mergedVideoIds)
-      .filter(videoId => !remoteVideosById.has(videoId))
-      .map(videoId => videoToRemote(localVideosById.get(videoId), options))
-      .filter(Boolean)
+    const remoteVideosToAdd = []
+    for (const videoId of mergedVideoIds) {
+      const localMetadata = localMetadataById.get(videoId)
+      const existing = remoteVideosById.get(videoId)
+      if (!localMetadata) continue
+      const enriched = existing ? enrichPlaylistVideo(existing, localMetadata) : localMetadata
+      if (!metadataEquals(existing, enriched)) remoteVideosToAdd.push(enriched)
+      remoteVideosById.set(videoId, enriched)
+    }
 
     if (remoteVideosToAdd.length > 0) {
       await client.addPlaylistVideos(remoteId, remoteVideosToAdd)
@@ -833,23 +866,33 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       }
     }
 
-    // Sync tracks membership by video ID, but local playlists can contain
-    // repeated occurrences with their own timestamps and playlist item IDs.
-    const mergedVideos = localVideos.filter(video => {
-      return videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId)
-    }).map(video => {
-      // An older client may have retained the wire marker in its local metadata.
-      if (video.authorId !== UNKNOWN_SYNC_UPLOADER_ID) return video
-      return {
-        ...video,
-        ...uploaderToLocal({ id: video.authorId, name: video.author }),
-      }
-    })
-    for (const videoId of mergedVideoIds) {
-      if (!localVideosById.has(videoId)) {
-        mergedVideos.push(videoToLocal(remoteVideosById.get(videoId)))
-      }
-    }
+    // Preserve each local occurrence and its identity/order when metadata alone
+    // changes. The membership map intentionally deduplicates only remote IDs.
+    const mergedVideos = localVideos
+      .filter(video => videoToRemote(video, options) === null || mergedVideoIds.has(video.videoId))
+      .map(video => {
+        const current = video.authorId === UNKNOWN_SYNC_UPLOADER_ID
+          ? { ...video, ...uploaderToLocal({ id: video.authorId, name: video.author }) }
+          : video
+        const remoteVideo = remoteVideosById.get(video.videoId)
+        if (!remoteVideo) return current
+        const uploader = uploaderToLocal(remoteVideo.uploader)
+        const identified = current.authorId || !uploader.authorId ? current : { ...current, authorId: uploader.authorId }
+        const payload = videoToRemote(identified, options)
+        if (!payload) return current
+        const enriched = enrichPlaylistVideo(payload, remoteVideo)
+        const result = { ...identified }
+        if (payload.title !== enriched.title) result.title = enriched.title
+        if (payload.uploader.name !== enriched.uploader.name) result.author = enriched.uploader.name
+        if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
+        if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
+          result.lengthSeconds = enriched.duration
+        }
+        return result
+      })
+      .concat(Array.from(mergedVideoIds)
+        .filter(videoId => !localVideosById.has(videoId))
+        .map(videoId => videoToLocal(remoteVideosById.get(videoId))))
 
     if (!local) {
       local = {
