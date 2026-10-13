@@ -18,7 +18,7 @@ import { metadataPage } from '../../src/datastores/sqlite/metadata.js'
 import { LibraryExports } from '../../src/datastores/sqlite/export.js'
 import { filterVideosWithQuery } from '../../src/renderer/helpers/historySearch.js'
 import { canMarkHistoryEntryAsWatched, migrateLegacyHistoryRecord } from '../../src/history.js'
-import { recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
+import { historyRepairRecord, markAllHistory, applySubscriptionUnseenHistory, recommendationInputs, importSubscriptionProfiles, removePlaylistMember, removePlaylistMembers, addSelectedPlaylistVideos, playlistVideoIds, playlistImportCandidates } from '../../src/datastores/sqlite/operations.js'
 
 test('legacy subscription imports accept nullable custom profile names without discarding subscriptions', async t => {
   const engine = memory(t)
@@ -124,6 +124,37 @@ test('a busy transaction start releases its async owner before later queued read
   assert.deepEqual(await read, { _id: 'record', value: 1 })
   assert.equal(early, false, 'the failed owner must not observe another suspended transaction')
 })
+
+for (const videoId of ['\ud800', '\udc00', 'embedded-\ud800-id']) {
+  test(`history operations retain exact malformed UTF-16 video identity: ${JSON.stringify(videoId)}`, async t => {
+    const engine = memory(t)
+    const counterpart = videoId.toWellFormed()
+    const original = { _id: 'target', videoId, isWatched: true, timeWatched: 1, watchProgress: 12,
+      lengthSeconds: 20, lastViewedPlaylistItemId: 'member', unknown: { date: new Date(0) } }
+    const other = { ...original, _id: 'other', videoId: counterpart }
+    // Cross the bounded SELECT boundary as well as the first page.
+    const targets = Array.from({ length: 251 }, (_, index) => ({ ...original, _id: `target-${String(index).padStart(3, '0')}` }))
+    await engine.collections.history.insertAsync([original, other, ...targets])
+    await engine.collections.settings.insertAsync({ _id: 'subscriptionSeenVideos', value: JSON.stringify([{ videoId, seenAt: 2, unseenAt: 2 }]) })
+    await t.test('repair lookup', () => {
+      assert.deepEqual(historyRepairRecord(engine, { id: original._id, videoId }), original)
+      assert.equal(historyRepairRecord(engine, { id: other._id, videoId }), null)
+    })
+    await t.test('unseen marks across pages', async () => {
+      assert.equal(await applySubscriptionUnseenHistory(engine), 252)
+      for (const record of [original, ...targets]) assert.deepEqual(await engine.collections.history.findOneAsync({ _id: record._id }), { ...record, isWatched: false })
+      assert.deepEqual(await engine.collections.history.findOneAsync({ _id: other._id }), other)
+    })
+    await engine.collections.history.updateAsync({ _id: { $ne: other._id } }, { $set: { isWatched: false } }, { multi: true })
+    await t.test('mark-all propagation', async () => {
+      let seen
+      const result = await markAllHistory(engine, {}, { settings: { mergeSeenVideos: async ({ videos }) => { seen = videos; return videos } } })
+      assert.equal(result.count, 252)
+      assert.deepEqual(seen, [{ videoId, seenAt: 2, unseenAt: 2 }])
+      for (const record of [original, other, ...targets]) assert.deepEqual(await engine.collections.history.findOneAsync({ _id: record._id }), record)
+    })
+  })
+}
 
 function memory(t) {
   const database = new DatabaseSync(':memory:')

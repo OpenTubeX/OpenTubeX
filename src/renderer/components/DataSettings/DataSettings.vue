@@ -462,6 +462,8 @@ async function importUnifiedBackup() {
   backupBusy.value = true
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
+  let profilesNeedRefresh = false
+  let playlistsNeedRefresh = false
   try {
     // Portable playlist readers require structured member arrays.
     // Reject unsupported selected playlists before any write; desktop restores them exactly.
@@ -497,18 +499,27 @@ async function importUnifiedBackup() {
         const merged = mergeBackupProfile(previous, profile)
         const { numAffected } = await DBProfileHandlers.replaceIfUnchanged(previous, merged)
         if (!numAffected) throw new Error('The profile changed; retry the import')
+        profilesNeedRefresh = true
         currentProfiles.set(profile._id, merged)
       }
       await store.dispatch('grabAllProfiles')
+      profilesNeedRefresh = false
     }
     if (selected.has('playlists')) {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
         await normalizeImportedPlaylistThumbnail(playlist)
-        const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
-        if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
+        const previous = currentPlaylists.get(playlist._id)
+        const merged = { ...mergeBackupPlaylist(previous, playlist), lastUpdatedAt: Date.now() }
+        const { numAffected } = await DBPlaylistHandlers.replaceIfUnchanged(previous, merged)
+        if (!numAffected) throw new Error('The playlist changed; retry the import')
+        playlistsNeedRefresh = true
+        store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
+
         currentPlaylists.set(playlist._id, merged)
       }
+      await store.dispatch('grabAllPlaylists')
+      playlistsNeedRefresh = false
     }
     if (selected.has('history')) {
       const records = mergeBackupHistory(await DBHistoryHandlers.find(), data.history)
@@ -528,6 +539,13 @@ async function importUnifiedBackup() {
   } catch (error) {
     showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   } finally {
+    // Separate portable stores may have committed earlier records before a
+    // later conditional write fails. Publish those records on the error path.
+    const refreshes = await Promise.allSettled([
+      ...(profilesNeedRefresh ? [store.dispatch('grabAllProfiles')] : []),
+      ...(playlistsNeedRefresh ? [store.dispatch('grabAllPlaylists')] : []),
+    ])
+    for (const result of refreshes) if (result.status === 'rejected') console.error(result.reason)
     backupBusy.value = false
   }
 }

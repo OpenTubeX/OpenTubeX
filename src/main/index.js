@@ -5631,6 +5631,14 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.playlists.find()
 
+        case DBActions.PLAYLISTS.REPLACE_IF_UNCHANGED: {
+          const result = await baseHandlers.playlists.replaceIfUnchanged(data.previous, data.playlist)
+          if (result.numAffected) {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: data.playlist })
+          }
+          return result
+        }
+
         case DBActions.GENERAL.UPSERT:
           await baseHandlers.playlists.upsert(data)
           syncOtherWindows(

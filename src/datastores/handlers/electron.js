@@ -217,6 +217,10 @@ class Profiles {
 }
 
 class Playlists {
+  static replaceIfUnchanged(previous, playlist) {
+    return dbPlaylists(DBActions.PLAYLISTS.REPLACE_IF_UNCHANGED, { previous, playlist })
+  }
+
   static upsertIfUnchanged(playlist, previous) {
     return dbPlaylists(DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED, { playlist, previous })
   }

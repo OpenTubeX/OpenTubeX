@@ -125,7 +125,8 @@ export function historyRepairPage(engine, { cursor = null, limit = 100 } = {}) {
 
 export function historyRepairRecord(engine, { id, videoId }) {
   if (typeof id !== 'string' || !id || typeof videoId !== 'string' || !videoId) throw new TypeError('Invalid history repair record')
-  const row = engine.prepare("SELECT data FROM records WHERE collection = 'history' AND id = ? AND video_id = ?").get(id, videoId)
+  const identity = videoId.isWellFormed() ? '?' : "json_extract(?, '$')"
+  const row = engine.prepare(`SELECT data FROM records WHERE collection = 'history' AND id = ? AND video_id = ${identity}`).get(id, videoId.isWellFormed() ? videoId : JSON.stringify(videoId))
   return row ? migrateLegacyHistoryRecord(model.deserialize(row.data)) : null
 }
 
@@ -140,7 +141,11 @@ export async function markAllHistory(engine, options, handlers) {
   }
   if (count) engine.touch('history')
   const saved = await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
-  const videos = parseSubscriptionSeenVideos(saved?.value).filter(mark => mark.unseenAt >= mark.seenAt && engine.prepare('SELECT 1 FROM marked_history WHERE video_id = ? LIMIT 1').get(mark.videoId))
+  const videos = parseSubscriptionSeenVideos(saved?.value).filter(mark => {
+    if (!(mark.unseenAt >= mark.seenAt)) return false
+    const identity = mark.videoId.isWellFormed() ? '?' : "json_extract(?, '$')"
+    return engine.prepare(`SELECT 1 FROM marked_history WHERE video_id = ${identity} LIMIT 1`).get(mark.videoId.isWellFormed() ? mark.videoId : JSON.stringify(mark.videoId))
+  })
   const seenVideos = videos.length ? await handlers.settings.mergeSeenVideos({ videos }) : null
   engine.database.exec('DELETE FROM marked_history; CREATE INDEX IF NOT EXISTS marked_history_video ON marked_history(video_id)')
   return { count, seenVideos }
@@ -150,17 +155,27 @@ export async function applySubscriptionUnseenHistory(engine) {
   const saved = await engine.collections.settings.findOneAsync({ _id: 'subscriptionSeenVideos' })
   const firstPage = engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND video_id = ? ORDER BY id LIMIT 250")
   const nextPage = engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND video_id = ? AND id > ? ORDER BY id LIMIT 250")
+  // JSON extraction retains lone UTF-16 surrogates; direct string bindings
+  // replace them with U+FFFD. Keep ordinary IDs on the direct indexed path.
+  let escapedFirstPage
+  let escapedNextPage
   const now = Date.now()
   let count = 0
   // Read current durable marks and each duplicate's own timestamp in the
   // worker transaction, so a later watch or seen action cannot be overwritten.
   for (const mark of parseSubscriptionSeenVideos(saved?.value)) {
     if (!(mark.unseenAt >= mark.seenAt)) continue
+    const wellFormed = mark.videoId.isWellFormed()
+    const videoId = wellFormed ? mark.videoId : JSON.stringify(mark.videoId)
+    if (!wellFormed) {
+      escapedFirstPage ??= engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND video_id = json_extract(?, '$') ORDER BY id LIMIT 250")
+      escapedNextPage ??= engine.prepare("SELECT id, data FROM records WHERE collection = 'history' AND video_id = json_extract(?, '$') AND id > ? ORDER BY id LIMIT 250")
+    }
     let cursor = null
     while (true) {
       // Complete each bounded SELECT before writing to the same table. SQLite
       // does not define live cursor results when that connection changes rows.
-      const rows = cursor === null ? firstPage.all(mark.videoId) : nextPage.all(mark.videoId, cursor)
+      const rows = cursor === null ? (wellFormed ? firstPage : escapedFirstPage).all(videoId) : (wellFormed ? nextPage : escapedNextPage).all(videoId, cursor)
       if (!rows.length) break
       cursor = rows.at(-1).id
       for (const row of rows) {

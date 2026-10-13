@@ -1373,3 +1373,86 @@ test('conditional profile restore IPC preserves Dates and broadcasts only commit
   assert.equal(events.length, 1)
   assert.deepEqual(await db.profiles.findOneAsync({ _id: 'p' }), next)
 })
+
+for (const backend of ['NeDB', 'SQLite']) {
+  test(`playlist restore rejects concurrent metadata and membership edits on ${backend}`, async t => {
+    let db
+    if (backend === 'NeDB') db = { playlists: new Datastore({ inMemoryOnly: true }) }
+    else {
+      const { LibraryEngine } = await import('../../src/datastores/sqlite/engine.js')
+      const { SCHEMA_SQL } = await import('../../src/datastores/sqlite/schema.js')
+      const database = new DatabaseSync(':memory:'); database.exec(SCHEMA_SQL); t.after(() => database.close())
+      db = new LibraryEngine(database).collections
+    }
+    const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+    const Playlists = runInNewContext(base.slice(base.indexOf('class Playlists {'), base.indexOf('class SearchHistory {')) + '\nPlaylists', { db, model })
+    const original = { _id: 'p', playlistName: 'Original', videos: [{ videoId: 'saved' }], unknown: new Date(1) }
+    await db.playlists.insertAsync(original)
+    const previous = await db.playlists.findOneAsync({ _id: 'p' })
+    const current = { ...original, playlistName: 'Concurrent', videos: [...original.videos, { videoId: 'new' }], unknown: new Date(2) }
+    await db.playlists.updateAsync({ _id: 'p' }, current)
+    const imported = { ...original, playlistName: 'Imported', videos: [...original.videos, { videoId: 'incoming' }] }
+    assert.equal((await Playlists.replaceIfUnchanged(previous, imported)).numAffected, 0)
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), current)
+    assert.equal((await Playlists.replaceIfUnchanged(undefined, imported)).numAffected, 0)
+    assert.equal((await Playlists.replaceIfUnchanged(current, imported)).numAffected, 1)
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), imported)
+  })
+}
+
+for (const section of ['profiles', 'playlists']) {
+  test(`portable ${section} restore refreshes committed records after a later conflict`, async () => {
+    const content = parse(await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+    const node = babelParse(content, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'importUnifiedBackup')
+    const records = section === 'profiles' ? [{ _id: 'first', subscriptions: [] }, { _id: 'second', subscriptions: [] }] : [{ _id: 'first', videos: [] }, { _id: 'second', videos: [] }]
+    let written = 0
+    const refreshed = [], toasts = []
+    const handler = { find: async () => [], replaceIfUnchanged: async () => ({ numAffected: ++written === 1 ? 1 : 0 }) }
+    const apply = runInNewContext(`(${content.slice(node.start, node.end)})`, {
+      process: { env: { IS_ELECTRON: false } }, Date, backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+      backupBusy: { value: false }, selectedBackupSections: { value: [section] }, backupData: { value: { [section]: records } },
+      DBProfileHandlers: handler, DBPlaylistHandlers: handler, mergeBackupProfile, mergeBackupPlaylist,
+      compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => toasts.push(toast), console,
+      store: { dispatch: async action => { refreshed.push(action); return true } },
+    })
+    await apply()
+    assert.equal(written, 2)
+    assert.ok(refreshed.includes(section === 'profiles' ? 'grabAllProfiles' : 'grabAllPlaylists'))
+    assert.match(toasts.at(-1).message, /changed; retry the import/)
+  })
+}
+
+test('conditional playlist restore IPC preserves Dates and broadcasts only committed records', async () => {
+  const { DBActions, IpcChannels, SyncEvents } = await import('../../src/constants.js')
+  const { reactive, toRaw } = await import('vue')
+  const db = { playlists: new Datastore({ inMemoryOnly: true }) }
+  const base = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
+  const Playlists = runInNewContext(base.slice(base.indexOf('class Playlists {'), base.indexOf('class SearchHistory {')) + '\nPlaylists', { db, model })
+  const main = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const stack = [babelParse(main, { sourceType: 'module' })]
+  let handlerNode
+  while (stack.length) {
+    const node = stack.pop()
+    if (!node || typeof node !== 'object') continue
+    if (node.type === 'CallExpression' && node.callee?.object?.name === 'ipcMain' && node.callee?.property?.name === 'handle' && node.arguments[0]?.property?.name === 'DB_PLAYLISTS') handlerNode = node.arguments[1]
+    for (const child of Object.values(node)) if (Array.isArray(child)) stack.push(...child); else if (child && typeof child === 'object') stack.push(child)
+  }
+  assert.ok(handlerNode)
+  const events = []
+  const handle = runInNewContext(`(${main.slice(handlerNode.start, handlerNode.end)})`, {
+    DBActions, IpcChannels, SyncEvents, baseHandlers: { playlists: Playlists }, isOpenTubeXUrl: () => true,
+    syncOtherWindows: (channel, _event, data) => events.push({ channel, data: structuredClone(data) }), console,
+  })
+  const renderer = await readFile(new URL('../../src/datastores/handlers/electron.js', import.meta.url), 'utf8')
+  const plainNode = babelParse(renderer, { sourceType: 'module' }).program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'toPlain')
+  const plain = compileFunction(renderer.slice(plainNode.start, plainNode.end) + '\nreturn toPlain', ['toRaw'])(toRaw)
+  const Client = compileFunction(renderer.slice(renderer.indexOf('class Playlists {'), renderer.indexOf('class SearchHistory {')) + '\nreturn Playlists', ['DBActions', 'dbPlaylists'])(DBActions, (action, data) => handle({ senderFrame: { url: 'file://app' } }, { action, data: structuredClone(plain(data)) }))
+  const current = { _id: 'p', videos: [{ videoId: 'current', unknown: new Date(1) }], unknown: new Date(2) }
+  await db.playlists.insertAsync(current)
+  const next = { ...current, videos: [...current.videos, { videoId: 'restored' }], unknown: new Date(3) }
+  assert.equal((await Client.replaceIfUnchanged(reactive(current), reactive(next))).numAffected, 1)
+  assert.deepEqual(events, [{ channel: IpcChannels.SYNC_PLAYLISTS, data: { event: SyncEvents.GENERAL.UPSERT, data: next } }])
+  assert.equal((await Client.replaceIfUnchanged(current, { ...current, name: 'stale' })).numAffected, 0)
+  assert.equal(events.length, 1)
+  assert.deepEqual(await db.playlists.findOneAsync({ _id: 'p' }), next)
+})
