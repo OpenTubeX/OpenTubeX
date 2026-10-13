@@ -44,10 +44,6 @@ for (const wait of [false, true]) {
 const receiver = `#!/usr/bin/env node
 import { createInterface } from 'node:readline'
 const output = value => process.stdout.write(JSON.stringify(value)+'\\n')
-if (process.argv[2] === 'discover') {
- output([{id:'device',name:'Test TV',address:'127.0.0.1',port:8009}])
- process.exit(0)
-}
 output({event:'connected',address:'127.0.0.1'})
 const receiverStatus = {applications:[{appId:'CC1AD845',transportId:'transport',sessionId:'session'}],volume:{level:0.5,muted:false}}
 let media = null
@@ -100,6 +96,23 @@ for (const code of ['CAST_UNTRUSTED_CERTIFICATE', 'CAST_INVALID_AUTHENTICATION',
   })
 }
 
+test('Cast discovers devices through the helper without exposing connection details', async t => {
+  if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return }
+  const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-discovery-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const executable = path.join(directory, 'discover.sh')
+  // Discovery needs only JSON output. Avoid starting another Node runtime for
+  // every receiver-session test when the full suite saturates process startup.
+  await writeFile(executable, `#!/bin/sh
+printf '%s\\n' '[{"id":"device","name":"Test TV","address":"127.0.0.1","port":8009}]'
+`)
+  await chmod(executable, 0o755)
+  const manager = new ChromecastManager(executable)
+  t.after(() => manager.stop())
+  assert.deepEqual(await manager.discover(), [{ id: 'device', name: 'Test TV' }])
+  assert.equal(manager.devices.get('device').address, '127.0.0.1')
+})
+
 async function managerForTest(t, powerSaveBlocker) {
   if (process.platform === 'win32') { t.skip('POSIX bridge fixture'); return null }
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-'))
@@ -108,7 +121,7 @@ async function managerForTest(t, powerSaveBlocker) {
   await chmod(executable, 0o755)
   const manager = new ChromecastManager(executable, powerSaveBlocker)
   t.after(async () => { await manager.stop(); await rm(directory, { recursive: true, force: true }) })
-  assert.deepEqual(await manager.discover(), [{ id: 'device', name: 'Test TV' }])
+  manager.devices.set('device', { id: 'device', name: 'Test TV', address: '127.0.0.1', port: 8009 })
   return manager
 }
 
