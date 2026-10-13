@@ -61,3 +61,19 @@ test('offline playlist entries do not reuse another video’s record thumbnail',
   assert.equal(suggestions[0].thumbnail, 'data:image/png;base64,first')
   assert.equal(suggestions[1].thumbnail, '')
 })
+
+test('external single-media downloads retain their thumbnail without a record video ID', () => {
+  const watch = {
+    videoId: 'current',
+    $store: { getters: { getYtDlpDownloads: {
+      1: { id: 1, status: 'completed', mode: 'video', videoId: '', thumbnail: 'data:image/png;base64,external',
+        retryPayload: { externalUrl: 'https://example.com/video' },
+        files: [{ videoId: 'external001', path: '/external.mp4' }] },
+      2: { id: 2, status: 'completed', mode: 'video', videoId: '', playlistId: 'playlist', thumbnail: 'data:image/png;base64,playlist',
+        files: [{ videoId: 'playlist001', path: '/playlist.mp4' }] },
+    } } },
+  }
+  const suggestions = computed.offlineDownloadSuggestions.call(watch)
+  assert.equal(suggestions.find(video => video.videoId === 'external001').thumbnail, 'data:image/png;base64,external')
+  assert.equal(suggestions.find(video => video.videoId === 'playlist001').thumbnail, '')
+})

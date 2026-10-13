@@ -9,13 +9,14 @@ import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-f
 const thumbnail = `data:image/svg+xml;base64,${(await readFile(path.join(repoRoot, 'e2e/fixtures/media/video-thumbnail.svg'))).toString('base64')}`
 const downloads = [1, 2, 3].map(id => ({
   id,
-  videoId: `offline000${id}`,
+  videoId: id === 2 ? '' : `offline000${id}`,
+  ...(id === 2 ? { retryPayload: { externalUrl: 'https://example.com/video' } } : {}),
   title: `Saved audio ${id}`,
   author: 'Offline channel',
   status: 'completed',
   mode: 'audio',
   thumbnail: id === 3 ? '' : thumbnail,
-  files: [{ videoId: `offline000${id}`, path: path.join(repoRoot, 'e2e/fixtures/media/demo-audio.mp3'), extension: 'mp3' }],
+  files: [{ videoId: `offline000${id}`, ...(id === 2 ? { title: 'Saved audio 2' } : {}), path: path.join(repoRoot, 'e2e/fixtures/media/demo-audio.mp3'), extension: 'mp3' }],
 }))
 
 for (const width of [1500, 480]) {

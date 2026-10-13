@@ -25,6 +25,8 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
         ThumbnailPreference: '', BlurThumbnails: false }
       const settings = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       const downloads = structuredClone(Object.values(store.getters.getYtDlpDownloads).map(download => JSON.parse(JSON.stringify(download))))
+      const queue = JSON.parse(JSON.stringify(store.getters.getWatchQueue))
+      store.commit('clearWatchQueue')
       for (const download of downloads) store.commit('removeYtDlpDownload', download.id)
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
       window.__offlineRecommendationsOnline = Object.getOwnPropertyDescriptor(navigator, 'onLine')
@@ -33,7 +35,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
         ? window.__offlineRecommendationsFetch(url, options) : Promise.reject(new Error('Offline recommendations test'))
       const route = location.hash
       location.hash = '#/watch/jNQXAC9IVRw'
-      return { route, settings, downloads }
+      return { route, settings, downloads, queue }
     })
     await expect.poll(async () => {
       const handle = await page.evaluateHandle(findWatchComponent)
@@ -53,9 +55,10 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
         recommendedVideos: [{ videoId: 'online00001', title: 'Online recommendation', author: 'Online channel',
           authorId: 'UC-online', lengthSeconds: 60, viewCount: 123, published: Date.now(), type: 'video' }] })
       for (const [index, id] of ids.entries()) watch.$store.commit('upsertYtDlpDownload', {
-        id, videoId: `saved00000${index}`, title: `Saved audio ${index + 1}`, author: 'Offline channel',
+        id, videoId: index === 1 ? '' : `saved00000${index}`, title: `Saved audio ${index + 1}`, author: 'Offline channel',
+        ...(index === 1 ? { retryPayload: { externalUrl: 'https://example.com/video' } } : {}),
         status: 'completed', mode: 'audio', thumbnail,
-        files: [{ videoId: `saved00000${index}`, path: '/test.mp3', extension: 'mp3', available: true }],
+        files: [{ videoId: `saved00000${index}`, ...(index === 1 ? { title: 'Saved audio 2' } : {}), path: '/test.mp3', extension: 'mp3', available: true }],
       })
     }, { ids, thumbnail })
     const recommendations = page.locator('.watchVideoRecommendations')
@@ -93,6 +96,7 @@ test('Android swaps cached recommendations for saved thumbnails on disconnect an
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       for (const id of ids) store.commit('removeYtDlpDownload', id)
       for (const download of saved.downloads) store.commit('upsertYtDlpDownload', download)
+      store.state.watchQueue.items.splice(0, store.state.watchQueue.items.length, ...saved.queue)
       for (const [key, value] of Object.entries(saved.settings)) store.commit('set' + key, value)
       if (window.__offlineRecommendationsOnline) Object.defineProperty(navigator, 'onLine', window.__offlineRecommendationsOnline)
       else delete navigator.onLine
