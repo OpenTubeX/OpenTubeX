@@ -107,10 +107,10 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
 export function getTwitchCreatorUrl(info) {
   try {
     const pageUrl = new URL(info.webpage_url)
-    if (pageUrl.protocol !== 'https:' || !['twitch.tv', 'www.twitch.tv', 'm.twitch.tv', 'clips.twitch.tv'].includes(pageUrl.hostname)) return null
+    if (pageUrl.protocol !== 'https:' || !['twitch.tv', 'www.twitch.tv', 'm.twitch.tv', 'go.twitch.tv', 'player.twitch.tv', 'clips.twitch.tv'].includes(pageUrl.hostname)) return null
     const login = info.channel ?? info.uploader_id
     return typeof login === 'string' && /^[a-zA-Z0-9_]+$/.test(login)
-      ? `https://www.twitch.tv/${login}`
+      ? `https://www.twitch.tv/${login.toLowerCase()}`
       : null
   } catch {
     return null
