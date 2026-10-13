@@ -288,7 +288,7 @@ test('portable Watch reorders playable slots without deleting opaque members or 
     const before = structuredClone(playlist)
     let written
     const context = vm.createContext({ selectedUserPlaylist: { value: playlist }, reversePlaylist: ref(reverse), isPagedPlaylist: ref(false),
-      deepCopy: value => JSON.parse(JSON.stringify(value)),
+      deepCopy: value => structuredClone(value),
       store: { dispatch: async (_method, data) => { written = data; return true } }, console, showToast() {}, t: key => key,
     })
     for (const node of ast.program.body.filter(node => node.type === 'FunctionDeclaration' && ['getPlayableUserPlaylistVideos', 'persistPlaylistOrder'].includes(node.id.name))) vm.runInContext(script.slice(node.start, node.end), context)
