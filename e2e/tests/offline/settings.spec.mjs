@@ -5103,6 +5103,22 @@ test.describe('saved playback engine', () => {
   })
 })
 
+test.describe('live chat replay visibility migration', () => {
+  test.use({ seed: { settings: { hideLiveChat: true } } })
+
+  test('preserves the old live chat visibility choice for replays', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        liveChat: settings.hideLiveChat,
+        replay: settings.hideLiveChatReplay
+      }
+    }).toEqual({ liveChat: true, replay: true })
+  })
+})
+
 test.describe('Downloads placement migration', () => {
   test.use({ seed: { settings: { moveDownloadsToQuickSettings: false } } })
 
