@@ -2054,7 +2054,7 @@ test.describe('retained full-record playlist counts', () => {
 test.describe('retained null subscription members', () => {
   const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
   const entry = { videoId: 'abcdefghijk', title: 'Visible after retained null members', author: 'Example channel', authorId: channelId, type: 'video', lengthSeconds: 120, published: 1700000000000, viewCount: 1000 }
-  const cache = { _id: channelId, videos: [...Array(100).fill(null), entry], videosTimestamp: '2026-10-13T00:00:00.000Z', shorts: [], liveStreams: [], communityPosts: [], unknown: { retained: true } }
+  const cache = { _id: channelId, videos: [...Array(100).fill(null), entry], videosTimestamp: '2026-10-13T00:00:00.000Z', shorts: false, liveStreams: { retained: true }, communityPosts: 'legacy', unknown: { retained: true } }
   test.use({
     seed: {
       settings: { historyWatchedStatusMigrated: true, fetchSubscriptionsAutomatically: false, useRssFeeds: false, uiScale: 95, currentLocale: 'en_US', landingPage: 'history' },
