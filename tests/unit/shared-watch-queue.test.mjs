@@ -31,6 +31,27 @@ function sharedWindows() {
 
 const addVideo = (store, videoId) => store.commit('addVideoToWatchQueue', { video: { videoId, title: videoId } })
 
+test('an async failure rolls back only the failed edit while keeping newer pending edits', async () => {
+  const requests = []
+  const initial = { revision: 1, items: [{ videoId: 'saved', queueItemId: 'saved-id' }] }
+  const adapter = {
+    update: request => new Promise((resolve, reject) => requests.push({ request, resolve, reject })),
+    onUpdated() {},
+  }
+  const store = createStore({ modules: { watchQueue }, plugins: [store => persistWatchQueue(store, null, adapter)] })
+  requests.shift().resolve(initial)
+  await new Promise(setImmediate)
+  addVideo(store, 'failed')
+  addVideo(store, 'pending')
+  requests.shift().reject(new Error('Transaction aborted'))
+  await new Promise(setImmediate)
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['saved', 'pending'])
+  const next = requests.shift()
+  next.resolve({ revision: 2, items: [...initial.items, { ...next.request.payload.video, queueItemId: next.request.payload.queueItemId }] })
+  await new Promise(setImmediate)
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.videoId), ['saved', 'pending'])
+})
+
 test('a failed restore blocks writes and retries before applying the next change', () => {
   let unreadable = true
   let saved = [{ videoId: 'saved', title: 'Saved' }]

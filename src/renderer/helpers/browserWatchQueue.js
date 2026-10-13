@@ -2,19 +2,29 @@ import { watchQueueMutations, PERSISTED_MUTATIONS } from '../../watchQueue.js'
 
 export function createBrowserWatchQueue() {
   const channel = new BroadcastChannel('opentubex-watch-queue')
-  const ready = new Promise((resolve, reject) => {
-    const request = indexedDB.open('opentubex-watch-queue', 1)
-    request.onupgradeneeded = () => request.result.createObjectStore('state')
-    request.onerror = () => reject(request.error)
-    request.onsuccess = () => {
-      request.result.onversionchange = () => request.result.close()
-      resolve(request.result)
-    }
-  })
+  let ready
+  const openDatabase = () => {
+    ready ??= new Promise((resolve, reject) => {
+      const request = indexedDB.open('opentubex-watch-queue', 1)
+      request.onupgradeneeded = () => request.result.createObjectStore('state')
+      request.onerror = () => reject(request.error)
+      request.onsuccess = () => {
+        request.result.onversionchange = () => {
+          request.result.close()
+          ready = undefined
+        }
+        resolve(request.result)
+      }
+    }).catch(error => {
+      ready = undefined
+      throw error
+    })
+    return ready
+  }
 
   return {
     async update(request) {
-      const database = await ready
+      const database = await openDatabase()
       const changesQueue = PERSISTED_MUTATIONS.has(request.type)
       return new Promise((resolve, reject) => {
         // Read and apply the operation within one transaction. IndexedDB

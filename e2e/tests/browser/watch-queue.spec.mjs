@@ -15,8 +15,9 @@ test.beforeEach(async ({ context }) => {
   }))
 })
 
-async function queueTab(context) {
+async function queueTab(context, setup) {
   const page = await context.newPage()
+  if (setup) await page.addInitScript(setup)
   await page.goto('http://localhost/')
   const plain = source => source.replace(/^import .*\n/gm, '').replace(/^export \{.*\}\n/gm, '').replace('export default', 'const queueModule =').replace(/^export /gm, '')
   await page.addScriptTag({ content: `${vue}\n${vuex}\nwindow.process = { env: {} };\n${[shared, browser, queue].map(plain).join('\n')}\nwindow.store = Vuex.createStore({ modules: { watchQueue: queueModule }, plugins: [persistWatchQueue] });` })
@@ -38,6 +39,59 @@ test('two browser tabs retain simultaneous additions after reloading', async ({ 
   await second.close()
   const restored = await queueTab(context)
   await expect.poll(() => videos(restored)).toEqual(order)
+})
+
+function failQueueWrites() {
+  window.failWrites = 0
+  const put = IDBObjectStore.prototype.put
+  IDBObjectStore.prototype.put = function (...args) {
+    const result = put.apply(this, args)
+    if (this.name === 'state' && window.failWrites > 0) {
+      window.failWrites--
+      this.transaction.abort()
+    }
+    return result
+  }
+}
+
+for (const operation of ['add', 'remove', 'clear']) {
+  test(`a failed browser ${operation} immediately rolls back without affecting another tab`, async ({ context }) => {
+    const first = await queueTab(context, failQueueWrites)
+    await add(first, 'saved')
+    const second = await queueTab(context)
+    await expect.poll(() => videos(second)).toEqual(['saved'])
+    await first.evaluate(operation => {
+      window.failWrites = 1
+      const store = window.store
+      if (operation === 'add') store.commit('addVideoToWatchQueue', { video: { videoId: 'unsaved' } })
+      else if (operation === 'remove') store.commit('removeVideoFromWatchQueue', store.getters.getWatchQueue[0].queueItemId)
+      else store.commit('clearWatchQueue')
+    }, operation)
+    await expect.poll(() => first.evaluate(() => window.failWrites)).toBe(0)
+    for (const page of [first, second]) await expect.poll(() => videos(page)).toEqual(['saved'])
+    await add(first, 'recovered')
+    for (const page of [first, second]) await expect.poll(() => videos(page)).toEqual(['saved', 'recovered'])
+    const restored = await queueTab(context)
+    await expect.poll(() => videos(restored)).toEqual(['saved', 'recovered'])
+  })
+}
+
+test('browser queue retries opening storage after a transient startup failure', async ({ context }) => {
+  const page = await queueTab(context, () => {
+    window.openAttempts = 0
+    const open = IDBFactory.prototype.open
+    IDBFactory.prototype.open = function (...args) {
+      if (args[0] === 'opentubex-watch-queue' && ++window.openAttempts === 1) {
+        throw new DOMException('Injected open failure', 'UnknownError')
+      }
+      return open.apply(this, args)
+    }
+  })
+  await expect.poll(() => page.evaluate(() => window.openAttempts)).toBe(1)
+  await add(page, 'recovered')
+  const restored = await queueTab(context)
+  await expect.poll(() => videos(restored)).toEqual(['recovered'])
+  await expect.poll(() => page.evaluate(() => window.openAttempts)).toBe(2)
 })
 
 test('clearing in one browser tab cannot be undone by adding in another', async ({ context }) => {

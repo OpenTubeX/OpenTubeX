@@ -43,6 +43,7 @@ export function persistWatchQueue(store, storage, sharedQueue) {
       }).catch(error => {
         const index = pending.indexOf(request)
         if (index !== -1) pending.splice(index, 1)
+        applySharedQueue(latest, true)
         console.warn('Could not persist the watch queue', error)
       })
     } else applySharedQueue(result)
