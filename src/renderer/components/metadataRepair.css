@@ -11,6 +11,22 @@
   overflow-wrap: anywhere;
 }
 
+.repairPromptContent :deep(.pure-checkbox label) {
+  /* Keep the 40px state circle inside the label's focus outline. */
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 48px 16px;
+}
+
+.repairPromptContent :deep(.pure-checkbox label::before) {
+  inset-inline-start: 16px;
+}
+
+.repairPromptContent :deep(.pure-checkbox label::after),
+.repairPromptContent :deep(.checkboxStateLayer) {
+  inset-inline-start: 25px;
+}
+
 .repairDescription {
   margin-block: 0 20px;
 }
