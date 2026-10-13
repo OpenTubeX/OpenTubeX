@@ -174,3 +174,15 @@ test('playlist search stays debounced and reacts to matching video edits outside
     harness.stop()
   }
 })
+
+test('bulk playlist deletion updates membership and preserves protected and unselected playlists', () => {
+  const store = playlistStore([
+    { _id: 'remove', videos: [{ videoId: 'shared' }, { videoId: 'gone' }] },
+    { _id: 'keep', videos: [{ videoId: 'shared' }] },
+    { _id: 'protected', protected: true, videos: [{ videoId: 'shared' }] },
+  ])
+  store.commit('removePlaylists', ['remove', 'protected', 'missing'])
+  assert.deepEqual(Array.from(store.state.playlists, playlist => playlist._id), ['keep', 'protected'])
+  assert.equal(store.getters.getPlaylistVideoCounts.get('shared'), 2)
+  assert.equal(store.getters.getPlaylistVideoCounts.has('gone'), false)
+})

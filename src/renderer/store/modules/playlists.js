@@ -618,7 +618,12 @@ const mutations = {
   },
 
   removePlaylist(state, playlistId) {
-    const isKept = playlist => playlist._id !== playlistId || playlist.protected
+    mutations.removePlaylists(state, [playlistId])
+  },
+
+  removePlaylists(state, playlistIds) {
+    const removedIds = new Set(playlistIds)
+    const isKept = playlist => !removedIds.has(playlist._id) || playlist.protected
 
     for (const playlist of state.playlists) {
       if (!isKept(playlist)) {
