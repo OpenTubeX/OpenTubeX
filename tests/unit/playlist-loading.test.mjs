@@ -547,3 +547,15 @@ test('Save thumbnails use the backend membership source independently of retaine
     assert.deepEqual(data, before)
   }
 })
+
+
+test('Save offers only array-backed memberships without rewriting retained opaque playlists', async () => {
+  const content = parse(await readFile(new URL('../../src/renderer/components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue', import.meta.url), 'utf8')).descriptor.scriptSetup.content
+  const ast = babelParse(content, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'allPlaylists').init
+  const records = [undefined, null, false, 42, 'retained', {}, [], [null, { videoId: 'A' }]].map((videos, index) => ({ _id: String(index), videos, unknown: new Date(index) }))
+  const before = structuredClone(records)
+  const result = vm.runInNewContext(content.slice(init.start, init.end), { computed: getter => getter(), store: { getters: { getAllPlaylists: records } } })
+  assert.deepEqual(Array.from(result, playlist => playlist._id), ['6', '7'])
+  assert.deepEqual(records, before)
+})

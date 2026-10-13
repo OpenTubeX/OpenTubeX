@@ -123,7 +123,7 @@ function playlistDisplayName(playlist) {
 const filteredPlaylists = computed(() => playlists.value.filter(playlist =>
   playlistDisplayName(playlist).toLocaleLowerCase().includes(search.value.trim().toLocaleLowerCase())))
 
-const allPlaylists = computed(() => store.getters.getAllPlaylists)
+const allPlaylists = computed(() => store.getters.getAllPlaylists.filter(playlist => Array.isArray(playlist.videos)))
 
 // Freeze the row order while the dropdown is open,
 // otherwise toggling a playlist bumps its lastUpdatedAt and makes the rows jump around
