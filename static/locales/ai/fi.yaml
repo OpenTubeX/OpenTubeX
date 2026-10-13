@@ -215,7 +215,7 @@ History:
   All Channels: 'Kaikki kanavat'
   Clear Filters: 'Tyhjennä suodattimet'
   Invalid Date Range: 'Alkupäivän on oltava ennen loppupäivää tai sama kuin loppupäivä.'
-  Empty Filter Message: 'Mikään videosi historiassa ei vastaa näitä suodattimia.'
+  Empty Filter Message: 'Katseluhistoriassasi ei ole videoita, jotka vastaavat näitä suodattimia.'
   Delete Old Compact: "Siivoa"
   Repair Compact: "Korjaa"
   Mark All Watched Compact: "Kaikki katsottu"

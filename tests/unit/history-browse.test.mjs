@@ -60,3 +60,20 @@ test('inclusive end dates respect daylight-saving transitions', () => {
     else process.env.TZ = originalTimezone
   }
 })
+
+test('a midnight daylight-saving gap does not include the next day', () => {
+  const originalTimezone = process.env.TZ
+  process.env.TZ = 'America/Sao_Paulo'
+  try {
+    const videos = [
+      { timeWatched: new Date(2018, 10, 4, 1).getTime() },
+      { timeWatched: new Date(2018, 10, 4, 23, 59, 59, 999).getTime() },
+      { timeWatched: new Date(2018, 10, 5, 0).getTime() },
+      { timeWatched: new Date(2018, 10, 5, 0, 30).getTime() },
+    ]
+    assert.deepEqual(filterHistoryByDateAndChannel(videos, { fromDate: '2018-11-04', toDate: '2018-11-04' }), videos.slice(0, 2))
+  } finally {
+    if (originalTimezone === undefined) delete process.env.TZ
+    else process.env.TZ = originalTimezone
+  }
+})

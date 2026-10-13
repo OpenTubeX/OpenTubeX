@@ -1111,6 +1111,39 @@ test.describe('history date and channel browsing', () => {
     await expect(page.getByRole('button', { name: 'Clear filters' })).toBeDisabled()
   })
 
+  test('synchronizes filters when navigating within the history route', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-13')
+    await chooseChannel(page, 'Walking Channel')
+    await page.getByRole('searchbox', { name: 'Search in History' }).fill('City walk')
+    await page.locator('.historySearchOptions .switch-label').click()
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(200)
+    const savedUrl = page.url()
+
+    await goTo(page, 'history')
+    await expect(page).toHaveURL(/#\/history$/)
+    await expect(page.getByLabel('From', { exact: true })).toHaveValue('')
+    await expect(page.getByLabel('To', { exact: true })).toHaveValue('')
+    await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('All channels')
+    await expect(page.getByRole('searchbox', { name: 'Search in History' })).toHaveValue('')
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).not.toBeChecked()
+    await expect(videos).toHaveCount(100)
+    await expect(videos.first()).toContainText('Recent video')
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(savedUrl)
+    await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
+    await expect(page.getByLabel('To', { exact: true })).toHaveValue('2026-10-13')
+    await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('Walking Channel')
+    await expect(page.getByRole('searchbox', { name: 'Search in History' })).toHaveValue('City walk')
+    await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
+    await expect(videos).toHaveCount(200)
+  })
+
   test('shows invalid and empty ranges and supports channels without IDs', async ({ page }) => {
     await goTo(page, 'history')
     await openHistoryFilters(page)
@@ -1295,5 +1328,23 @@ test.describe('history date and channel browsing', () => {
       await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeVisible()
       await expect(page.getByLabel('From', { exact: true })).toHaveValue('2026-10-12')
     }
+  })
+
+  test('honors scaled touch targets on filter buttons', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 80)
+    })
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await expect.poll(() => page.evaluate(() => {
+      const target = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--phone-touch-target'))
+      return {
+        target,
+        buttons: [...document.querySelectorAll('.historyFilterToggle, .historyClearFilters')]
+          .map(button => button.getBoundingClientRect().height >= target - 1),
+      }
+    })).toEqual({ target: 60, buttons: [true, true] })
   })
 })

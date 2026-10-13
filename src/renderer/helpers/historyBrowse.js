@@ -32,7 +32,10 @@ export function filterHistoryByDateAndChannel(videos, { fromDate = '', toDate = 
   if (!fromDate && !toDate && !channel) return videos
   const start = parseHistoryDate(fromDate)?.getTime() ?? -Infinity
   const endDate = parseHistoryDate(toDate)
-  if (endDate) endDate.setDate(endDate.getDate() + 1)
+  if (endDate) {
+    endDate.setDate(endDate.getDate() + 1)
+    endDate.setHours(0, 0, 0, 0)
+  }
   const end = endDate?.getTime() ?? Infinity
   return videos.filter(video =>
     (!channel || getHistoryChannelKey(video) === channel) &&

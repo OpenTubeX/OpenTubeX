@@ -463,6 +463,7 @@ const query = ref('')
 const fromDate = ref(parseHistoryDate(route.query.fromDate) ? route.query.fromDate : '')
 const toDate = ref(parseHistoryDate(route.query.toDate) ? route.query.toDate : '')
 const channel = ref(typeof route.query.channel === 'string' ? route.query.channel : '')
+let applyingRouteState = false
 const hasBrowseFilters = computed(() => !!(fromDate.value || toDate.value || channel.value))
 const hasFilters = computed(() => hasBrowseFilters.value || query.value.trim().length > 0)
 const invalidDateRange = computed(() => !!(fromDate.value && toDate.value && fromDate.value > toDate.value))
@@ -615,9 +616,10 @@ function clearBrowseFilters() {
 }
 
 watch([fromDate, toDate, channel], () => {
+  if (applyingRouteState) return
   searchDataLimit.value = 100
   saveStateInRouter()
-})
+}, { flush: 'sync' })
 
 const hasUnwatchedHistory = computed(() => {
   return historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
@@ -651,11 +653,12 @@ const fullData = computed(() => {
 watch(fullData, filterHistory)
 watch(locale, scheduleHistorySearch)
 watch(doCaseSensitiveSearch, () => {
+  if (applyingRouteState) return
   if (query.value.trim().length > 0) {
     scheduleHistorySearch()
   }
   saveStateInRouter()
-})
+}, { flush: 'sync' })
 
 /**
  * @param {string} query_
@@ -747,7 +750,7 @@ function scheduleHistorySearch() {
   filterHistoryAsync()
 }
 
-async function saveStateInRouter() {
+function getHistoryRouterState() {
   const state = {}
   if (query.value.trim()) state.searchQueryText = query.value
   if (fromDate.value) state.fromDate = fromDate.value
@@ -755,7 +758,11 @@ async function saveStateInRouter() {
   if (channel.value) state.channel = channel.value
   if (hasFilters.value) state.searchDataLimit = searchDataLimit.value.toFixed(0)
   if (query.value.trim() && doCaseSensitiveSearch.value) state.doCaseSensitiveSearch = 'true'
-  const location = { path: '/history', query: state }
+  return state
+}
+
+async function saveStateInRouter() {
+  const location = { path: '/history', query: getHistoryRouterState() }
 
   try {
     await router.replace(location)
@@ -784,6 +791,26 @@ if (oldQuery != null && oldQuery !== '') {
   // Only display unfiltered data when no query used last time
   filterHistory()
 }
+
+watch(() => route.query, routeQuery => {
+  if (route.path !== '/history') return
+  const state = getHistoryRouterState()
+  const fields = ['fromDate', 'toDate', 'channel', 'searchQueryText', 'searchDataLimit', 'doCaseSensitiveSearch']
+  // UI changes already have the desired state. Only apply external navigation.
+  if (fields.every(field => routeQuery[field] === state[field])) return
+
+  // Restore all fields together without resetting pagination or rewriting the URL.
+  applyingRouteState = true
+  fromDate.value = parseHistoryDate(routeQuery.fromDate) ? routeQuery.fromDate : ''
+  toDate.value = parseHistoryDate(routeQuery.toDate) ? routeQuery.toDate : ''
+  channel.value = typeof routeQuery.channel === 'string' ? routeQuery.channel : ''
+  query.value = typeof routeQuery.searchQueryText === 'string' ? routeQuery.searchQueryText : ''
+  doCaseSensitiveSearch.value = routeQuery.doCaseSensitiveSearch === 'true'
+  const limit = Number.parseInt(routeQuery.searchDataLimit)
+  searchDataLimit.value = limit > 0 ? limit : 100
+  applyingRouteState = false
+  filterHistory()
+})
 
 /**
  * @param {KeyboardEvent} event
