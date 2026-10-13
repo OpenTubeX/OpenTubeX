@@ -239,6 +239,16 @@ const actions = {
     }
   },
 
+  async updatePlaylistFromSync({ state, commit }, { playlist, previous }) {
+    playlist.lastUpdatedAt = Date.now()
+    const saved = await DBPlaylistHandlers.upsertIfUnchanged(playlist, previous)
+    if (!saved) return false
+    const current = state.playlists.find(item => item._id === playlist._id)
+    if (JSON.stringify(current) !== JSON.stringify(previous)) return false
+    commit('upsertPlaylistToList', playlist)
+    return true
+  },
+
   async updatePlaylistLastPlayedAt({ commit }, playlist) {
     // This action does NOT update `lastUpdatedAt` on purpose
     // Only `lastPlayedAt` should be updated

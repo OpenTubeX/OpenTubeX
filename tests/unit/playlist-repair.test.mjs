@@ -238,3 +238,23 @@ test('a playlist read failure counts only its own repair targets', async () => {
   assert.equal(result.failed, 1)
   assert.equal(result.repaired, 1, 'the video unique to the other playlist is still successful')
 })
+
+for (const change of ['delete', 'rename', 'remove entry']) {
+  test(`conditional sync writes reject a concurrent ${change}`, async () => {
+    const { db, Playlists } = await fixture()
+    const previous = await db.playlists.findOneAsync({ _id: 'selected' })
+    if (change === 'delete') await db.playlists.removeAsync({ _id: previous._id })
+    else if (change === 'rename') await db.playlists.updateAsync({ _id: previous._id }, { $set: { playlistName: 'Renamed later' } })
+    else await db.playlists.updateAsync({ _id: previous._id }, { $pull: { videos: { playlistItemId: 'first' } } })
+    const current = await db.playlists.findOneAsync({ _id: previous._id })
+    assert.equal(await Playlists.upsertIfUnchanged({ ...previous, videos: previous.videos.map(entry => ({ ...entry, authorId: metadata.authorId })) }, previous), false)
+    assert.deepEqual(await db.playlists.findOneAsync({ _id: previous._id }), current)
+  })
+}
+
+test('conditional sync writes update an unchanged playlist', async () => {
+  const { db, Playlists } = await fixture()
+  const previous = await db.playlists.findOneAsync({ _id: 'selected' })
+  assert.equal(await Playlists.upsertIfUnchanged({ ...previous, playlistName: 'Synced name' }, previous), true)
+  assert.equal((await db.playlists.findOneAsync({ _id: previous._id })).playlistName, 'Synced name')
+})

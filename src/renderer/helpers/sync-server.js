@@ -776,7 +776,7 @@ export async function syncPlaylistBookmarks(client, store, previousIds = [], opt
 }
 
 export async function syncPlaylists(client, store, previous = {}, options = {}) {
-  const localPlaylists = store.state.playlists.playlists
+  const localPlaylists = deepCopy(store.state.playlists.playlists)
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
   const remotePlaylists = await Promise.all(
@@ -887,6 +887,9 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         if (payload.upload_date !== enriched.upload_date) result.published = enriched.upload_date
         if ((!Number.isFinite(video.lengthSeconds) || video.lengthSeconds <= 0) && payload.duration !== enriched.duration) {
           result.lengthSeconds = enriched.duration
+          result.isLive = false
+          result.liveNow = false
+          result.isUpcoming = false
         }
         return result
       })
@@ -894,6 +897,8 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
         .filter(videoId => !localVideosById.has(videoId))
         .map(videoId => videoToLocal(remoteVideosById.get(videoId))))
 
+    const current = store.state.playlists.playlists.find(playlist => playlist._id === id)
+    if (!metadataEquals(local, current)) throw new Error('Playlist changed during sync. Try again.')
     if (!local) {
       local = {
         _id: id,
@@ -904,12 +909,16 @@ export async function syncPlaylists(client, store, previous = {}, options = {}) 
       }
       await store.dispatch('addPlaylist', local)
     } else if (!isSameLocalPlaylist(local, metadata, mergedVideos)) {
-      await store.dispatch('updatePlaylist', {
-        ...deepCopy(local),
-        playlistName: metadata.title,
-        description: metadata.description,
-        videos: mergedVideos,
+      const saved = await store.dispatch('updatePlaylistFromSync', {
+        previous: local,
+        playlist: {
+          ...local,
+          playlistName: metadata.title,
+          description: metadata.description,
+          videos: mergedVideos,
+        },
       })
+      if (!saved) throw new Error('Playlist changed during sync. Try again.')
     }
 
     nextSnapshot[id] = {

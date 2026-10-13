@@ -113,8 +113,9 @@ test('playlist sync enriches existing remote metadata without losing duplicates 
   const store = {
     state: { playlists: { playlists: [local] } },
     dispatch: async (action, value) => {
-      assert.equal(action, 'updatePlaylist')
-      store.state.playlists.playlists = [value]
+      assert.equal(action, 'updatePlaylistFromSync')
+      store.state.playlists.playlists = [value.playlist]
+      return true
     },
   }
   const previous = await context.syncPlaylists(adapter, store)
@@ -168,7 +169,7 @@ for (const lengthSeconds of [120.5, 0.4]) {
     }
     await context.syncPlaylists(client, {
       state: { playlists: { playlists: [local] } },
-      dispatch: async (action, value) => { assert.equal(action, 'updatePlaylist'); saved = value },
+      dispatch: async (action, value) => { assert.equal(action, 'updatePlaylistFromSync'); saved = value.playlist; return true },
     }, { [local._id]: { videos: [video.videoId] } })
     assert.equal(saved.videos.length, 1)
     assert.equal(saved.videos[0].playlistItemId, 'keep')
@@ -178,3 +179,49 @@ for (const lengthSeconds of [120.5, 0.4]) {
     assert.equal(saved.videos[0].lengthSeconds, lengthSeconds, 'a title/uploader repair must not round a populated duration')
   })
 }
+
+for (const edit of ['delete playlist', 'remove entry', 'add entry', 'rename']) {
+  test(`playlist sync rejects a stale snapshot after another window's ${edit}`, async () => {
+    const local = { ...playlist, videos: [{ ...video, title: 'Repaired title', author: 'Channel', published: 0, lengthSeconds: 120, playlistItemId: 'keep' }] }
+    const store = { state: { playlists: { playlists: [structuredClone(local)] } }, dispatch: () => assert.fail('A stale playlist must not be written') }
+    const client = {
+      getPlaylists: async () => [{ id: local._id }],
+      getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [syncVideoToRemote({ ...video, title: video.videoId, published: 100, lengthSeconds: 120 })] }),
+      addPlaylistVideos: async () => {
+        const current = store.state.playlists.playlists[0]
+        if (edit === 'delete playlist') store.state.playlists.playlists = []
+        else if (edit === 'remove entry') current.videos = []
+        else if (edit === 'add entry') current.videos.push({ videoId: 'new-video', playlistItemId: 'new' })
+        else current.playlistName = 'Renamed later'
+      },
+    }
+    await assert.rejects(context.syncPlaylists(client, store), /Playlist changed during sync/)
+    if (edit === 'delete playlist') assert.equal(store.state.playlists.playlists.length, 0)
+    else if (edit === 'remove entry') assert.equal(store.state.playlists.playlists[0].videos.length, 0)
+    else if (edit === 'add entry') assert.equal(store.state.playlists.playlists[0].videos[1].playlistItemId, 'new')
+    else assert.equal(store.state.playlists.playlists[0].playlistName, 'Renamed later')
+  })
+}
+
+test('accepting a recorded playlist duration clears stale live and upcoming flags', async () => {
+  const local = { ...playlist, videos: [{ ...video, lengthSeconds: 0, isLive: true, liveNow: true, isUpcoming: true, playlistItemId: 'keep' }] }
+  let saved
+  await context.syncPlaylists({
+    getPlaylists: async () => [{ id: local._id }],
+    getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [syncVideoToRemote({ ...video, lengthSeconds: 120 })] }),
+  }, { state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } })
+  assert.equal(saved.videos[0].lengthSeconds, 120)
+  assert.equal(saved.videos[0].isLive, false)
+  assert.equal(saved.videos[0].liveNow, false)
+  assert.equal(saved.videos[0].isUpcoming, false)
+})
+
+test('legacy sync preserves an unsyncable occurrence when a syncable duplicate is deleted remotely', async () => {
+  const local = { ...playlist, videos: [{ ...video, playlistItemId: 'synced' }, { videoId: video.videoId, playlistItemId: 'unsyncable' }] }
+  let saved
+  await context.syncPlaylists({
+    getPlaylists: async () => [{ id: local._id }],
+    getPlaylist: async () => ({ playlist: { id: local._id, title: local.playlistName }, videos: [] }),
+  }, { state: { playlists: { playlists: [local] } }, dispatch: async (_, value) => { saved = value.playlist; return true } }, { [local._id]: { videos: [video.videoId] } }, { allowDataLoss: true })
+  assert.deepEqual(Array.from(saved.videos, entry => entry.playlistItemId), ['unsyncable'])
+})

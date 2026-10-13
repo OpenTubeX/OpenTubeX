@@ -5602,6 +5602,14 @@ function runApp() {
           )
           return null
 
+        case DBActions.PLAYLISTS.UPSERT_IF_UNCHANGED: {
+          const saved = await baseHandlers.playlists.upsertIfUnchanged(data.playlist, data.previous)
+          if (saved) {
+            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.UPSERT, data: data.playlist })
+          }
+          return saved
+        }
+
         case DBActions.PLAYLISTS.REPAIR_METADATA:
           return await baseHandlers.playlists.repairMetadata(data, update => {
             syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.PLAYLISTS.REPAIR_METADATA, data: update })

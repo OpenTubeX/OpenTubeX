@@ -804,6 +804,16 @@ class Playlists {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
+  static async upsertIfUnchanged(playlist, previous) {
+    const snapshot = JSON.stringify(previous)
+    const { numAffected } = await db.playlists.updateAsync(
+      { _id: playlist._id, $where() { return JSON.stringify(this) === snapshot } },
+      { $set: playlist },
+      { upsert: false }
+    )
+    return numAffected > 0
+  }
+
   static async repairMetadata({ playlistIds, metadata }, onUpdate = () => {}) {
     const updates = []
     const repaired = new Set()
