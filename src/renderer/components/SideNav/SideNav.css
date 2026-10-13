@@ -252,7 +252,7 @@
     inline-size: 100%;
   }
 
-  .compactLabels .navOption {
+  .compactLabels .navOption:not(.mobileHidden) {
     align-items: center;
     block-size: var(--mobile-nav-content-height);
     box-sizing: border-box;
