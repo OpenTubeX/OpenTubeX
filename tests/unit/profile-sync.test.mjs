@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import { THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
 import {
+  getProfileSyncSignature,
   getMergedProfileBackground,
   getMergedProfileTextColor,
   getSyncProfileBackground,
@@ -48,3 +49,13 @@ test('keeps following the theme color when a synced color comes back', () => {
   assert.equal(getMergedProfileBackground({ bgColor: '#abcdef' }, '#123456'), '#123456')
   assert.equal(getMergedProfileTextColor({ bgColor: '#abcdef' }, '#123456'), '#123456')
 })
+
+
+for (const subscriptions of [null, false, [null, false, 42, 'retained', {}, { id: 42 }, { id: '' }, { id: 'channel', unknown: new Date(1) }]]) {
+  test(`profile sync signatures ignore opaque memberships without rewriting them: ${JSON.stringify(subscriptions)}`, () => {
+    const profile = { _id: 'allChannels', subscriptions, unknown: new Date(2) }
+    const before = structuredClone(profile)
+    assert.equal(getProfileSyncSignature([profile]), JSON.stringify([['allChannels', Array.isArray(subscriptions) ? ['channel'] : []]]))
+    assert.deepEqual(profile, before)
+  })
+}
