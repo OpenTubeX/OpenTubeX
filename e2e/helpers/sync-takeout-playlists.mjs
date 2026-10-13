@@ -84,8 +84,10 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
     syncServerSyncSettings: false,
   }
   const historyId = playlist.videos[0].videoId
-  const originalHistory = await page.evaluate(id => {
-    const record = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[id]
+  const originalHistory = await page.evaluate(async id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    if (store.state.playlists.libraryPaged) await store.dispatch('hydrateVideoState', [id])
+    const record = store.getters.getHistoryCacheById[id]
     return record ? JSON.parse(JSON.stringify(record)) : null
   }, historyId)
   const original = await page.evaluate(async settings => {
@@ -102,15 +104,21 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
     const originalVideos = await page.evaluate(async playlist => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('importPlaylist', playlist)
-      const videos = JSON.parse(JSON.stringify(store.getters.getPlaylist(playlist._id).videos))
+      const saved = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id: playlist._id })
+        : store.getters.getPlaylist(playlist._id)
+      const videos = JSON.parse(JSON.stringify(saved.videos))
       await store.dispatch('updateSyncServerEnabled', true)
       await store.dispatch('syncWithSyncServer')
       return videos
     }, playlist)
-    expect(await page.evaluate(id => {
+    expect(await page.evaluate(async id => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getPlaylist(id).videos
-    }, playlist._id)).toEqual(originalVideos)
+      const saved = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id })
+        : store.getters.getPlaylist(id)
+      return saved.videos
+    }, playlist._id)).toStrictEqual(originalVideos)
     const expected = [...new Set(playlist.videos.map(video => video.videoId))]
     expect((await server.playlists()).find(entry => entry.playlist.id === playlist._id).videos.map(video => video.id)).toEqual(expected)
     // Reset this installation's playlist and baseline to emulate a fresh receiver.
@@ -120,18 +128,27 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       await store.dispatch('updateSyncServerSnapshot', '{}')
       await store.dispatch('syncWithSyncServer')
     }, playlist._id)
-    await expect.poll(() => page.evaluate(id => {
+    await expect.poll(() => page.evaluate(async id => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getPlaylist(id)?.videos.map(video => video.videoId)
-    }, playlist._id)).toEqual(expected)
-    expect(await page.evaluate(id => {
+      const saved = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id })
+        : store.getters.getPlaylist(id)
+      return saved?.videos.map(video => video.videoId)
+    }, playlist._id)).toStrictEqual(expected)
+    expect(await page.evaluate(async id => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.getters.getPlaylist(id).videos.every(video => video.author == null && video.authorId == null)
+      const saved = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id })
+        : store.getters.getPlaylist(id)
+      return saved.videos.every(video => video.author == null && video.authorId == null)
     }, playlist._id)).toBe(true)
     await onDownloaded()
     await page.evaluate(async ({ id, historyId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      const video = store.getters.getPlaylist(id).videos.find(video => video.videoId === historyId)
+      const saved = store.state.playlists.libraryPaged
+        ? await window.ftElectron.libraryQuery('playlistSnapshot', { id })
+        : store.getters.getPlaylist(id)
+      const video = saved.videos.find(video => video.videoId === historyId)
       await store.dispatch('removeFromHistory', historyId)
       await store.dispatch('updateHistory', { ...video, timeWatched: 100, isWatched: true })
       await store.dispatch('updateSyncServerSyncHistory', true)
@@ -162,8 +179,9 @@ export async function verifyTakeoutPlaylistSync(page, server, onDownloaded = asy
       ? { ...entry, metadata: { added_date: 200, watched_state: 'watching', position_millis: 42_000 } }
       : item))
     await syncHistory()
-    expect(await page.evaluate(id => {
+    expect(await page.evaluate(async id => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      if (store.state.playlists.libraryPaged) await store.dispatch('hydrateVideoState', [id])
       const record = store.getters.getHistoryCacheById[id]
       return { title: record.title, authorId: record.authorId, watchProgress: record.watchProgress, timeWatched: record.timeWatched }
     }, historyId)).toEqual({ title: knownVideo.title, authorId: knownVideo.uploader.id, watchProgress: 42, timeWatched: 200 })
