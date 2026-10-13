@@ -121,7 +121,7 @@ async function profileChangeFixture() {
     getProfileWithUpdatedSubscriptionDetails, copySubscriptionChannelSettings, getValidSubscriptionChannels,
     deepCopy: value => JSON.parse(JSON.stringify(value)),
     DBProfileHandlers: {
-      upsert: async () => {},
+      upsert: async profile => ({ numAffected: 1, affectedDocuments: profile }),
       updateSubscriptionDetails: async () => ({ profileIds: [MAIN_PROFILE_ID, 'profile'], success: true }),
     },
   })
