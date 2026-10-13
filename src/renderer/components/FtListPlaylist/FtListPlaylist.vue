@@ -98,7 +98,7 @@
       v-if="enableDownloads && showDownloadPrompt"
       :playlist-id="isUserPlaylist ? '' : playlistMetadata.playlistId"
       :playlist-key="playlistMetadata.playlistId"
-      :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
+      :video-ids="isUserPlaylist ? (Array.isArray(data.videos) ? data.videos : []).map(video => video?.videoId).filter(id => typeof id === 'string' && id) : []"
       :is-playlist="true"
       :title="playlistMetadata.title"
       :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? playlistMetadata.defaultThumbnailUrl : thumbnailForDisplay"

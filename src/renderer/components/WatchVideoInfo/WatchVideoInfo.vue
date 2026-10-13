@@ -999,17 +999,8 @@ const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != nul
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const isInQuickBookmarkPlaylist = computed(() => {
-  if (!isQuickBookmarkEnabled.value) { return false }
-
-  // Accessing a reactive property has a negligible amount of overhead,
-  // however as we know that some users have playlists that have more than 10k items in them
-  // it adds up quickly. So create a temporary variable outside of the array, so we only have to do it once.
-  // Also the search is retriggered every time any playlist is modified.
-  const id = props.id
-
-  return quickBookmarkPlaylist.value.videos.some((video) => {
-    return video.videoId === id
-  })
+  if (!isQuickBookmarkEnabled.value) return false
+  return store.getters.getQuickBookmarkVideoIds.has(props.id)
 })
 
 const quickBookmarkIconText = computed(() => {

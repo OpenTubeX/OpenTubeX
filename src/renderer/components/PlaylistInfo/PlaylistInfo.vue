@@ -347,7 +347,7 @@
         v-if="enableDownloads && showDownloadPrompt"
         :playlist-id="isUserPlaylist ? '' : id"
         :playlist-key="id"
-        :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
+        :video-ids="isUserPlaylist ? playablePlaylistVideos(videos).map(video => video.videoId) : []"
         :is-playlist="true"
         :title="title"
         :thumbnail="isUserPlaylist && thumbnailPreference !== 'hidden' ? defaultThumbnail : thumbnail"
@@ -627,14 +627,14 @@ const userPlaylistAnyVideoWatched = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.some((video) => {
-    return isHistoryEntryWatched(historyCacheById_[video.videoId])
+    return video?.videoId != null && isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 })
 
 /** @type {import('vue').ComputedRef<number>} */
 const userPlaylistUniqueVideosCount = computed(() => {
   return selectedUserPlaylist.value?.videos.reduce((set, video) => {
-    set.add(video.videoId)
+    set.add(video?.videoId ?? Symbol('opaque member'))
     return set
   }, new Set()).size ?? 0
 })
@@ -755,6 +755,10 @@ async function loadSnapshot(id) {
   }
 }
 
+function playablePlaylistVideos(videos) {
+  return Array.isArray(videos) ? videos.filter(video => video !== null && typeof video === 'object' && !Array.isArray(video) && typeof video.videoId === 'string' && video.videoId !== '') : []
+}
+
 async function toggleCopyVideosPrompt() {
   if (snapshotPending.value) return
   const id = props.id
@@ -784,8 +788,8 @@ async function addMissingVideos() {
   try {
     const playlist = store.getters.getPlaylist(id)
     if (!playlist) throw new Error('Playlist was deleted')
-    const present = new Set(playlist.videos.map(video => video.videoId))
-    for (const video of snapshot.videos) {
+    const present = new Set(playablePlaylistVideos(playlist.videos).map(video => video.videoId))
+    for (const video of playablePlaylistVideos(snapshot.videos)) {
       snapshotController.signal.throwIfAborted()
       if (present.has(video.videoId)) continue
       // The single-video action also checks the database, protecting edits in
@@ -943,7 +947,7 @@ async function exportAsFreeTubeDatabase() {
 async function exportAsYouTubeCsv() {
   const exportFileName = getExportFilename(props.title, 'csv')
 
-  const videoData = props.sortedVideos.map((video) => {
+  const videoData = playablePlaylistVideos(props.sortedVideos).map((video) => {
     // Remove milliseconds and replace "Z" with +00:00 to match YouTube's exports
     const timestamp = new Date(video.timeAdded).toISOString().slice(0, -5) + '+00:00'
 
@@ -981,7 +985,7 @@ async function exportAsYouTubeCsv() {
 async function exportAsListOfUrls() {
   const exportFileName = getExportFilename(props.title, 'txt')
 
-  const data = props.sortedVideos.map((video) => {
+  const data = playablePlaylistVideos(props.sortedVideos).map((video) => {
     return `https://www.youtube.com/watch?v=${video.videoId}`
   }).join('\n') + '\n'
 
@@ -1030,7 +1034,7 @@ const userPlaylistWatchedVideoCount = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.reduce((count, video) => {
-    return isHistoryEntryWatched(historyCacheById_[video.videoId]) ? count + 1 : count
+    return video?.videoId != null && isHistoryEntryWatched(historyCacheById_[video.videoId]) ? count + 1 : count
   }, 0)
 })
 
@@ -1053,7 +1057,7 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
 async function scanDeadVideos() {
   if (deadVideoScanRunning.value) return
   const playlistId = props.id
-  const videos = [...selectedUserPlaylist.value.videos]
+  const videos = playablePlaylistVideos(selectedUserPlaylist.value.videos)
   deadVideoScanController = new AbortController()
   const signal = deadVideoScanController.signal
   deadVideoScanRunning.value = true
@@ -1118,9 +1122,9 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
 
   const videoIdsAdded = new Set()
   const newVideoItems = selectedUserPlaylist.value.videos.reduce((ary, video) => {
-    if (!videoIdsAdded.has(video.videoId)) {
+    if (video?.videoId == null || !videoIdsAdded.has(video.videoId)) {
       ary.push(video)
-      videoIdsAdded.add(video.videoId)
+      if (video?.videoId != null) videoIdsAdded.add(video.videoId)
     }
 
     return ary
@@ -1165,7 +1169,7 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
 
   const historyCacheById_ = historyCacheById.value
   const videosToWatch = selectedUserPlaylist.value.videos.filter((video) => {
-    return !isHistoryEntryWatched(historyCacheById_[video.videoId])
+    return video?.videoId == null || !isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 
   const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length

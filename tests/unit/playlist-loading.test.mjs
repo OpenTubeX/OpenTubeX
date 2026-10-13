@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
-import { babelParse, parse } from 'vue/compiler-sfc'
 import * as videoCounts from '../../src/renderer/helpers/playlist-video-counts.js'
 import { babelParse, parse } from 'vue/compiler-sfc'
 import { ref } from 'vue'
@@ -632,4 +631,72 @@ test('portable unavailable confirmation keeps unsupported members while removing
   assert.deepEqual(saved, { ...original, videos: preserved, lastUpdatedAt: saved.lastUpdatedAt })
   assert.equal(Number.isFinite(saved.lastUpdatedAt), true)
   assert.equal(selected.value.size, 0)
+})
+
+
+test('retained opaque quick-bookmark members do not block Watch button state', async () => {
+  const videos = [null, false, {}, { videoId: 'watched' }]
+  const before = structuredClone(videos)
+  const component = await readFile(new URL('../../src/renderer/components/WatchVideoInfo/WatchVideoInfo.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const init = ast.program.body.flatMap(node => node.declarations ?? []).find(node => node.id.name === 'isInQuickBookmarkPlaylist').init
+  const context = { computed: fn => ({ get value() { return fn() } }), props: { id: 'watched' }, isQuickBookmarkEnabled: { value: true }, quickBookmarkPlaylist: { value: { videos } }, store: { getters: { getQuickBookmarkVideoIds: new Set(['watched']) } } }
+  assert.equal(vm.runInNewContext(script.slice(init.start, init.end), context).value, true)
+  context.props.id = 'absent'
+  assert.equal(vm.runInNewContext(script.slice(init.start, init.end), context).value, false)
+  assert.deepEqual(videos, before)
+})
+
+test('retained opaque members survive PlaylistInfo counts and availability scanning', async () => {
+  const { createPortableLibrary } = await import('../../src/datastores/handlers/library-web.js')
+  const { isHistoryEntryWatched } = await import('../../src/history.js')
+  const videos = [null, false, {}, { videoId: 'watched' }, { videoId: 'watched' }, { videoId: 'unwatched' }]
+  const original = { _id: 'opaque-actions', videos, unknown: new Date(1) }
+  const database = new Datastore({ inMemoryOnly: true })
+  await database.insertAsync(original)
+  const history = [{ _id: 'watched', videoId: 'watched', timeWatched: 1, isWatched: true }]
+  const library = createPortableLibrary({ playlists: { find: () => database.findAsync({}) }, history: { find: async () => history } })
+  const statistics = await library.query('playlistStatistics', { id: original._id })
+  const component = await readFile(new URL('../../src/renderer/components/PlaylistInfo/PlaylistInfo.vue', import.meta.url), 'utf8')
+  const script = parse(component).descriptor.scriptSetup.content
+  const ast = babelParse(script, { sourceType: 'module' })
+  const computedNames = ['userPlaylistAnyVideoWatched', 'userPlaylistUniqueVideosCount', 'userPlaylistDuplicateItemCount', 'userPlaylistWatchedVideoCount']
+  const declarations = ast.program.body.filter(node => node.type === 'VariableDeclaration' && node.declarations.some(declaration => computedNames.includes(declaration.id.name)))
+  const helper = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'playablePlaylistVideos')
+  const scan = ast.program.body.find(node => node.type === 'FunctionDeclaration' && node.id.name === 'scanDeadVideos')
+  let scanned
+  const context = vm.createContext({
+    computed: fn => ({ get value() { return fn() } }), isUserPlaylist: { value: true }, selectedUserPlaylist: { value: original }, historyCacheById: { value: { watched: history[0] } }, isHistoryEntryWatched,
+    playlistStatistics: { value: statistics }, props: { id: original._id }, process: { env: { IS_ELECTRON: false, SUPPORTS_LOCAL_API: false } }, DBLibraryHandlers: library,
+    deadVideoScanRunning: { value: false }, deadVideoProgress: { value: null }, deadVideoItemIds: { value: new Set() }, showRemoveDeadVideosPrompt: { value: false }, deadVideoScanController: null,
+    AbortController, AbortSignal, store: { getters: {} }, showToast() {}, t: key => key, console: { error: error => assert.fail(String(error)) },
+    findDeadPlaylistItems: async entries => { scanned = entries; return { itemIds: new Set() } },
+  })
+  const functions = [helper, scan].filter(Boolean).map(node => script.slice(node.start, node.end)).join('\n')
+  vm.runInContext(functions + '\n' + declarations.map(node => script.slice(node.start, node.end)).join('\n'), context)
+  assert.equal(vm.runInContext('userPlaylistAnyVideoWatched.value', context), true)
+  assert.equal(vm.runInContext('userPlaylistDuplicateItemCount.value', context), 1)
+  assert.equal(vm.runInContext('userPlaylistWatchedVideoCount.value', context), 2)
+  await vm.runInContext('scanDeadVideos()', context)
+  assert.deepEqual(Array.from(scanned, entry => entry.videoId), ['watched', 'watched', 'unwatched'])
+  assert.equal(context.deadVideoScanRunning.value, false)
+  assert.deepEqual(await database.findOneAsync({ _id: original._id }), original)
+})
+
+test('full playlist download cards skip opaque members without rewriting membership', async () => {
+  const videos = [null, false, {}, { videoId: 42 }, { videoId: 'valid' }]
+  const before = structuredClone(videos)
+  const component = parse(await readFile(new URL('../../src/renderer/components/FtListPlaylist/FtListPlaylist.vue', import.meta.url), 'utf8')).descriptor
+  const findPrompt = node => node.tag === 'WatchVideoDownloadPrompt' ? node : (node.children ?? []).map(findPrompt).find(Boolean)
+  const prompt = findPrompt(component.template.ast)
+  assert.ok(prompt)
+  const binding = name => prompt.props.find(prop => prop.type === 7 && prop.name === 'bind' && prop.arg?.content === name)?.exp.content
+  const expression = binding('video-ids')
+  if (expression) {
+    assert.deepEqual(Array.from(vm.runInNewContext(expression, { isUserPlaylist: true, data: { videos } })), ['valid'])
+  } else {
+    assert.equal(vm.runInNewContext(binding('user-playlist-id'), { isUserPlaylist: true, playlistMetadata: { playlistId: 'opaque' } }), 'opaque')
+  }
+  assert.deepEqual(videos, before)
 })
