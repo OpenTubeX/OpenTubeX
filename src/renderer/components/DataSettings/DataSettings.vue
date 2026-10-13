@@ -1025,6 +1025,18 @@ async function importFreeTubeSubscriptions(profileRecords) {
   const importedProfiles = []
   const updatedPrimaryProfile = process.env.IS_ELECTRON ? null : { ...profileList.value[0] }
   let shouldUpdatePrimaryProfile = false
+  if (!process.env.IS_ELECTRON) {
+    const candidates = profileRecords.filter(profile => isJsonObject(profile) && requiredKeys.every(key => Object.hasOwn(profile, key)))
+    const incoming = candidates.flatMap(profile => {
+      if (!Array.isArray(profile.subscriptions)) throw new Error('Invalid imported subscriptions')
+      return profile.subscriptions
+    })
+    mergeLegacySubscriptionChannels(updatedPrimaryProfile.subscriptions, incoming)
+    for (const imported of candidates) {
+      const existing = profileList.value.find(profile => profile._id !== MAIN_PROFILE_ID && profile.name === imported.name)
+      if (existing && !Array.isArray(existing.subscriptions)) mergeLegacySubscriptionChannels(existing.subscriptions, imported.subscriptions)
+    }
+  }
 
   for (const profileData of profileRecords) {
     // Desktop keeps all valid legacy fields for lossless import. The transactional

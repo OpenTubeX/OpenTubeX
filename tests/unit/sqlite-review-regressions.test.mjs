@@ -3541,9 +3541,26 @@ for (const previous of [undefined, null, false, 42, 'retained', { retained: new 
       } }
     })
     const existing = { id: 'existing', name: 'Incoming' }, added = { id: 'new', unknown: new Date(6) }
-    await context.importFreeTubeSubscriptions([{ _id: 'incoming', name: 'Saved', bgColor: '#000', textColor: '#fff', subscriptions: [existing, added, added] }])
+    const importing = context.importFreeTubeSubscriptions([{ _id: 'incoming', name: 'Saved', bgColor: '#000', textColor: '#fff', subscriptions: [existing, added, added] }])
+    if (previous !== undefined && !Array.isArray(previous)) {
+      await assert.rejects(importing, /incompatible profile subscriptions/)
+      assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), originals)
+      return
+    }
+    await importing
     const retained = Array.isArray(previous) ? previous : previous === undefined ? [] : [previous]
     const expected = [...retained, ...(Array.isArray(previous) ? [] : [existing]), added]
     assert.deepEqual(await db.findAsync({}).sort({ _id: 1 }), originals.map(profile => ({ ...profile, subscriptions: expected })).toSorted((a, b) => a._id.localeCompare(b._id)))
   })
 }
+
+
+test('portable legacy import rejects a later scalar conflict before any profile dispatch', async () => {
+  const profiles = [{ _id: 'allChannels', name: 'Primary', subscriptions: [] }, { _id: 'earlier', name: 'Earlier', subscriptions: [] }, { _id: 'custom', name: 'Saved', subscriptions: false, unknown: new Date(1) }]
+  const before = structuredClone(profiles), writes = []
+  const context = await functions(dataSettings, ['importFreeTubeSubscriptions'], { process: { env: { IS_ELECTRON: false } }, MAIN_PROFILE_ID: 'allChannels', profileList: ref(profiles), mergeLegacySubscriptionChannels: backupHelpers.mergeLegacySubscriptionChannels, isJsonObject: value => value !== null && typeof value === 'object', showToast() {}, t: key => key, store: { dispatch: async (...args) => { writes.push(args); return true } } })
+  const incoming = name => ({ _id: 'incoming-' + name, name, bgColor: '#000', textColor: '#fff', subscriptions: [{ id: name }] })
+  await assert.rejects(context.importFreeTubeSubscriptions([incoming('Earlier'), incoming('Saved')]), /incompatible profile subscriptions/)
+  assert.deepEqual(writes, [])
+  assert.deepEqual(profiles, before)
+})
