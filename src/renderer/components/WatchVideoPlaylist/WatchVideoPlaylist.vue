@@ -1003,9 +1003,8 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
     try {
       const removed = await DBLibraryHandlers.query('cleanupPlaylist', { id: props.playlistId, mode: 'watched' })
       if (removed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
-      await store.dispatch('grabAllPlaylists')
-      await store.dispatch('grabHistory')
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed), icon: ['fas', 'trash'] })
+      await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
     } catch (error) {
       console.error(error)
       showToast({ message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'), icon: ['fas', 'circle-exclamation'] })

@@ -447,7 +447,17 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   if (!automatic || !encrypted) startProgress(stages[0])
 
+  let profilesHydrated = false
   async function applyCollection(collection, targetClient) {
+    // Imports commit before UI refresh. Sync must read that committed state,
+    // and fail before any profile/subscription upload if the read fails.
+    if (process.env.IS_ELECTRON && !profilesHydrated && (collection === 'profiles' || collection === 'subscriptions')) {
+      const refreshed = await dispatch('grabAllProfiles', { preserveRetained: true }, { root: true })
+      if (refreshed !== true && refreshed !== false) {
+        throw new Error('Durable profiles could not be read for sync')
+      }
+      profilesHydrated = true
+    }
     switch (collection) {
       case 'seenVideos':
         result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)

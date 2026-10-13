@@ -790,6 +790,9 @@ const desktopActions = {
 const desktopMutations = {
   cachePlaylistMemberships(state, { ids, memberships, retained = [] }) {
     for (const id of ids) {
+      // Reinsert refreshed identities so frequently hydrated videos survive
+      // eviction ahead of unused cache entries.
+      delete state.playlistMemberships[id]
       state.playlistMemberships[id] = {}
       state.playlistVideoCounts.delete(id)
     }

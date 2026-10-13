@@ -152,7 +152,9 @@ test.describe('large cached feed with most entries hidden', () => {
       window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-channel', {
         detail: { tab: 'videos' }
       }))
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Wait beyond the paged feed's debounce/coalescing intervals so this
+      // catches publication during refresh even on a fast renderer.
+      await new Promise(resolve => setTimeout(resolve, 1250))
       const updatedDuringRefresh = document.body.textContent.includes('Refreshed video 0-0')
       for (const response of responses.slice(1)) {
         await store.dispatch('updateSubscriptionVideosCacheByChannel', response)

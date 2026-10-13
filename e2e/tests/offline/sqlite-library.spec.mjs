@@ -1525,6 +1525,43 @@ test('migrates immutable originals, hydrates bounded views, and preserves concur
 
 test.describe('playlist summary metadata', () => {
   test.use({ seed: { settings: { historyWatchedStatusMigrated: true, uiScale: 95, currentLocale: 'en_US' }, history, playlists: [playlist, { _id: 'empty', playlistName: 'Empty playlist', videos: [] }], watchStats: [{ _id: 'history-watch-time-v1' }] } })
+  test('Save lookup failure offers Retry and preserves exact library records at 95% scale', async ({ app, page }, testInfo) => {
+    await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+    const original = await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      const handler = ipcMain._invokeHandlers.get('library-query')
+      let fail = true
+      ipcMain.removeHandler('library-query')
+      ipcMain.handle('library-query', (event, request) => {
+        if (request.method === 'playlistSelection' && fail) { fail = false; throw new Error('simulated Save lookup failure') }
+        return handler(event, request)
+      })
+    })
+    await page.evaluate(async video => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [video] })
+    }, history[0])
+    const prompt = page.getByRole('dialog')
+    await expect(prompt.getByRole('alert')).toBeVisible()
+    await expect(prompt.getByRole('button', { name: 'Save', exact: true })).toBeDisabled()
+    for (const theme of ['dark', 'light']) {
+      await page.evaluate(async theme => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateBaseTheme', theme)
+      }, theme)
+      const screenshot = testInfo.outputPath(`save-lookup-retry-95-${theme}.png`)
+      await prompt.screenshot({ path: screenshot })
+      await testInfo.attach(`Save Retry at 95% ${theme}`, { path: screenshot, contentType: 'image/png' })
+    }
+    await prompt.getByRole('button', { name: 'Retry', exact: true }).click()
+    await expect(prompt.getByRole('alert')).toHaveCount(0)
+    await expect(prompt.getByRole('button', { name: 'Save', exact: true })).toBeEnabled()
+    const selector = prompt.locator('.ft-playlist-selector').filter({ hasText: 'Large legacy playlist' })
+    await expect(selector.locator('.videoPresenceCount')).toContainText('58')
+    await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+    expect(await page.evaluate(() => window.ftElectron.libraryQuery('playlistSnapshot', { id: 'large' }))).toStrictEqual(original)
+    expect((await page.evaluate(() => window.ftElectron.libraryQuery('historyPage', { limit: 250 }))).records).toStrictEqual(history.toReversed().slice(0, 250))
+  })
   test('playlist overview and add prompt use off-page metadata, summary artwork and duplicate counts', async ({ page }) => {
     await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
     await goTo(page, 'userplaylists')

@@ -37,6 +37,7 @@
     <div
       v-if="allPlaylists.length > 1"
       class="optionsRow"
+      :inert="selectionPending || selectionError"
     >
       <div
         class="tightOptions"
@@ -69,8 +70,19 @@
     </div>
     <div
       class="playlists-container"
+      :aria-busy="selectionPending"
     >
-      <FtFlexBox>
+      <FtFlexBox v-if="selectionError">
+        <p role="alert">
+          {{ t('Storage Startup Error.Title') }}
+        </p>
+        <FtButton
+          :label="t('User Playlists.SinglePlaylistView.Retry')"
+          :icon="['fas', 'sync']"
+          @click="loadSelection"
+        />
+      </FtFlexBox>
+      <FtFlexBox v-else-if="!selectionPending">
         <div
           v-for="playlist in activePlaylists"
           :key="playlist._id"
@@ -102,6 +114,7 @@
           />
           <FtButton
             :label="t('User Playlists.AddVideoPrompt.Save')"
+            :disabled="selectionPending || selectionError"
             :icon="['fas', 'floppy-disk']"
             @click="addSelectedToPlaylists"
           />
@@ -267,16 +280,28 @@ const selection = shallowRef({ counts: [], matches: [] })
 const presenceCounts = computed(() => process.env.IS_ELECTRON
   ? new Map(selection.value.counts.map(row => [row.id, toBeAddedToPlaylistVideoCount.value === 1 ? row.occurrences : row.matchingCount]))
   : null)
+const selectionPending = ref(false)
+const selectionError = ref(false)
 let selectionGeneration = 0
+async function loadSelection() {
+  const current = ++selectionGeneration
+  selectionPending.value = true
+  selectionError.value = false
+  selection.value = { counts: [], matches: [] }
+  try {
+    const result = await DBLibraryHandlers.query('playlistSelection', { ids: toBeAddedToPlaylistVideoIdList.value, query: processedQuery.value })
+    if (current === selectionGeneration) selection.value = result
+  } catch (error) {
+    if (current === selectionGeneration) {
+      console.error(error)
+      selectionError.value = true
+    }
+  } finally {
+    if (current === selectionGeneration) selectionPending.value = false
+  }
+}
 if (process.env.IS_ELECTRON) {
-  watch([toBeAddedToPlaylistVideoIdList, processedQuery, allPlaylists], async () => {
-    const current = ++selectionGeneration
-    selection.value = { counts: [], matches: [] }
-    try {
-      const result = await DBLibraryHandlers.query('playlistSelection', { ids: toBeAddedToPlaylistVideoIdList.value, query: processedQuery.value })
-      if (current === selectionGeneration) selection.value = result
-    } catch (error) { console.error(error) }
-  }, { immediate: true })
+  watch([toBeAddedToPlaylistVideoIdList, processedQuery, allPlaylists], loadSelection, { immediate: true })
 }
 
 const activePlaylists = computed(() => {
@@ -423,7 +448,7 @@ function countSelected(playlistId) {
 
 let addInProgress = false
 async function addSelectedToPlaylists() {
-  if (addInProgress) return
+  if (addInProgress || selectionPending.value || selectionError.value) return
   const addedPlaylistIds = new Set()
   const selectedIds = [...selectedPlaylistIdList.value]
 
@@ -515,6 +540,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  selectionGeneration++
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 

@@ -153,6 +153,9 @@ async function collect(target, directory, count, { tabs = false } = {}) {
     await page.evaluate(startRendererMetrics)
     const query = await page.evaluate(async candidate => {
       const start = performance.now()
+      // Measure the first-page consumer boundary: legacy consumers transfer
+      // the full history before windowing; desktop paging transfers 50 rows.
+      // Report that workload alongside latency/bytes rather than hiding it.
       const result = candidate ? await window.ftElectron.libraryQuery('historyPage', { limit: 50 }) : await window.ftElectron.dbHistory(1)
       const elapsedMs = performance.now() - start
       window.__libraryBench.gaps.push(performance.now() - window.__libraryBench.previous)
@@ -160,6 +163,7 @@ async function collect(target, directory, count, { tabs = false } = {}) {
       window.__libraryBench.stopped = true
       return {
         elapsedMs,
+        returnedRows: Array.isArray(result) ? result.length : result.records.length,
         jsonBytes: new TextEncoder().encode(JSON.stringify(result)).length,
         retainedRows: document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.history.historyCacheSorted.length
       }
@@ -227,6 +231,7 @@ try {
       return [target.name, {
         startupMs: median(values.map(value => value.startup.startupMs)),
         queryMs: median(values.map(value => value.query.elapsedMs)),
+        queryReturnedRows: median(values.map(value => value.query.returnedRows)),
         rendererHeapMiB: median(values.map(value => value.startup.rendererHeapMiB)),
         processPssMiB: median(values.map(value => value.startup.processPssMiB)),
         backupMs: median(values.map(value => value.backup.elapsedMs)),

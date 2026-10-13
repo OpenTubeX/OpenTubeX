@@ -453,7 +453,7 @@ test('portable Save preserves hidden members and distinct incoming occurrences',
     const incoming = [{ videoId: 'old' }, { videoId: 'new', title: 'First' }, { videoId: 'new', title: 'Second' }]
     const calls = []
     const context = vm.createContext({
-      process: { env: { IS_ELECTRON: false } }, addInProgress: false,
+      process: { env: { IS_ELECTRON: false } }, addInProgress: false, selectionPending: ref(false), selectionError: ref(false),
       allPlaylists: ref(playlists), selectedPlaylistIdList: ref(['p']), addingDuplicateVideosEnabled: ref(allowDuplicates),
       toBeAddedToPlaylistVideoList: ref(incoming), store: { dispatch: (action, payload) => calls.push({ action, payload }) },
       showToast() {}, t: key => key, hide() {},

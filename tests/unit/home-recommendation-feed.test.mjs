@@ -506,3 +506,49 @@ for (const collection of ['history', 'playlists']) {
     } finally { changed.stop() }
   })
 }
+
+for (const setting of ['getRecommendationExploration', 'getEnableBlockLists']) {
+  for (const failedQuery of ['recommendationInputs', 'videoState']) {
+    test(`Home reranking reports ${failedQuery} failure after changing ${setting}`, async t => {
+      let fail = false
+      const instance = createFeed({ desktop: true, candidates: [{ videoId: 'candidate', title: 'Retained' }], query: async (method, options) => {
+        if (fail && method === failedQuery) throw new Error(`Failed ${method}`)
+        if (method === 'recommendationInputs') return options.revisionsOnly ? {} : { history: [], favorites: [], saved: [] }
+        if (method === 'recommendationSubscriptionCandidates') return []
+        if (method === 'videoState') return { history: [] }
+        assert.fail(method)
+      } })
+      t.after(instance.stop)
+      await instance.feed.refresh()
+      assert.equal(instance.feed.hasError.value, false)
+      fail = true
+      instance.getters[setting] = setting === 'getEnableBlockLists' ? true : 0.8
+      for (let index = 0; index < 50 && !instance.feed.hasError.value; index++) await new Promise(resolve => setTimeout(resolve, 1))
+      assert.equal(instance.feed.hasError.value, true)
+      assert.equal(instance.feed.isLoading.value, false)
+    })
+  }
+}
+
+test('an older failed Home reranking cannot mark a newer successful ranking as failed', async t => {
+  const old = Promise.withResolvers()
+  let defer = false
+  const instance = createFeed({ desktop: true, candidates: [{ videoId: 'candidate', title: 'Retained' }], query: async (method, options) => {
+    if (method === 'recommendationInputs') return options.revisionsOnly ? {} : { history: [], favorites: [], saved: [] }
+    if (method === 'recommendationSubscriptionCandidates') return []
+    if (method === 'videoState') return defer ? old.promise : { history: [] }
+    assert.fail(method)
+  } })
+  t.after(instance.stop)
+  await instance.feed.refresh()
+  defer = true
+  instance.getters.getRecommendationExploration = 0.4
+  await new Promise(resolve => setTimeout(resolve, 5))
+  defer = false
+  instance.getters.getRecommendationExploration = 0.8
+  await new Promise(resolve => setTimeout(resolve, 5))
+  old.reject(new Error('stale ranking read failed'))
+  await new Promise(resolve => setTimeout(resolve, 5))
+  assert.equal(instance.feed.hasError.value, false)
+  assert.equal(instance.feed.recommendations.value.length, 1)
+})

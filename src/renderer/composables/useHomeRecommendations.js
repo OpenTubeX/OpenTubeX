@@ -392,7 +392,15 @@ export function useHomeRecommendations(visible) {
     // Supersede the entire cached restore so a cancelled ranking cannot publish
     // an empty feed while the replacement ranking is still running.
     if (restoringCachedFeed) refresh(true)
-    else rerank()
+    else {
+      const ranking = rerank()
+      const currentRanking = rankingGeneration
+      ranking.catch(error => {
+        if (currentRanking !== rankingGeneration) return
+        console.error(error)
+        hasError.value = true
+      })
+    }
   }
   watch(exploration, updateRanking)
   watch(() => store.getters.getEnableBlockLists, updateRanking)

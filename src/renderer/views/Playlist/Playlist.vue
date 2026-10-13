@@ -1540,8 +1540,7 @@ async function removeToBeDeletedVideosSometimes() {
       if (process.env.IS_ELECTRON) {
         const changed = await DBLibraryHandlers.query('removePlaylistMembers', { id: playlistId.value, memberIds: [...toBeDeletedPlaylistItemIds.value] })
         if (changed) store.dispatch('scheduleSyncServer', 'playlists').catch(console.error)
-        await store.dispatch('grabAllPlaylists')
-        await store.dispatch('grabHistory')
+        await Promise.all(['grabAllPlaylists', 'grabHistory'].map(action => store.dispatch(action))).catch(console.error)
       } else {
         await store.dispatch('removeVideos', {
           _id: playlistId.value,

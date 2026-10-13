@@ -514,17 +514,14 @@ async function importUnifiedBackup() {
   try {
     if (process.env.IS_ELECTRON) {
       const result = await DBLibraryHandlers.query('importApply', { id: data.id, sections: [...selected] })
-      for (const [section, reason] of [['playlists', 'playlists'], ['history', 'history'], ['watchStats', 'watchStats']]) {
+      for (const [section, reason] of [['playlists', 'playlists'], ['history', 'history'], ['watchStats', 'watchStats'], ['profiles', 'profilesOrSubscriptions']]) {
         if (selected.has(section)) store.dispatch('scheduleSyncServer', reason).catch(console.error)
       }
       if (requestIsCurrent()) closeBackupImport()
       try {
         const refreshes = await Promise.allSettled([
           ...(result.settings ? [applyImportedSettings(result.settings)] : []),
-          store.dispatch('grabAllProfiles').then(refreshed => {
-            if (refreshed !== true) throw new Error('Restored profiles could not be refreshed')
-            if (selected.has('profiles')) return store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions')
-          }),
+          refreshRestored('grabAllProfiles'),
           ...['grabAllPlaylists', 'grabHistory', 'grabWatchStats', 'grabSearchHistoryEntries'].map(action => store.dispatch(action))
         ])
         for (const refresh of refreshes) {
@@ -1030,8 +1027,8 @@ async function importFreeTubeSubscriptions(profileRecords) {
   let shouldUpdatePrimaryProfile = false
 
   for (const profileData of profileRecords) {
-    // Desktop keeps all valid legacy fields for lossless import. The staging
-    // serializer rejects invalid NeDB keys before touching the live library.
+    // Desktop keeps all valid legacy fields for lossless import. The transactional
+    // serializer rejects invalid NeDB keys before committing the live library.
     // Portable storage retains its existing allowlist behavior.
 
     if (!isJsonObject(profileData)) {
@@ -1114,8 +1111,11 @@ async function importFreeTubeSubscriptions(profileRecords) {
   if (process.env.IS_ELECTRON) {
     if (!importedProfiles.length) return
     await DBLibraryHandlers.query('importSubscriptionProfiles', { profiles: importedProfiles })
-    if (await store.dispatch('grabAllProfiles') !== true) throw new Error('Restored profiles could not be refreshed')
     store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions').catch(console.error)
+    try {
+      const refreshed = await store.dispatch('grabAllProfiles', { preserveRetained: true })
+      if (refreshed !== true && refreshed !== false) throw new Error('Restored profiles could not be refreshed')
+    } catch (error) { console.error('Profiles applied; refresh failed', error) }
   } else {
     if (!shouldUpdatePrimaryProfile) return
     await saveProfile('updateProfile', updatedPrimaryProfile)

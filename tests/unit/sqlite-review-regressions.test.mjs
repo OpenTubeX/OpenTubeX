@@ -52,6 +52,10 @@ async function functions(file, names, bindings = {}) {
   if (file === playlistInfo && !names.includes('playlistExportSource')) names = [...names, 'playlistExportSource']
   const { script, ast } = await source(file)
   const context = vm.createContext({ process: { env: { IS_ELECTRON: true } }, console: { error() {} }, ...bindings })
+  if (file === 'src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue') {
+    context.selectionPending ??= ref(false)
+    context.selectionError ??= ref(false)
+  }
   if (file === 'src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue') {
     context.userPlaylistReordering ??= ref(false)
     context.userWindowReady ??= ref(true)
@@ -380,7 +384,7 @@ for (const failure of ['none', 'apply', 'refresh', 'settings']) {
     await context.importUnifiedBackup()
     assert.deepEqual(dispatched.filter(([action]) => action === 'scheduleSyncServer'), failure === 'apply' ? [] : [
       ['scheduleSyncServer', 'history'], ['scheduleSyncServer', 'watchStats'],
-      ...(failure === 'refresh' ? [] : [['scheduleSyncServer', 'profilesOrSubscriptions']]),
+      ['scheduleSyncServer', 'profilesOrSubscriptions'],
     ])
     assert.equal(context.backupBusy.value, false)
     assert.match(toasts.at(-1).message, failure === 'apply' ? /Import Failed/ : /Backup imported/)
@@ -3025,7 +3029,7 @@ async function componentWatcher(file, dependency, bindings) {
 test('Save presence resets immediately and ignores an older completed selection read', async () => {
   const old = Promise.withResolvers(), current = Promise.withResolvers(), selection = ref({ counts: [{ id: 'stale' }], matches: ['stale'] })
   let calls = 0
-  const read = await componentWatcher('src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', 'toBeAddedToPlaylistVideoIdList', { selectionGeneration: 0, selection, toBeAddedToPlaylistVideoIdList: vueRef(['v']), processedQuery: vueRef(''), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
+  const { loadSelection: read } = await functions('src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', ['loadSelection'], { selectionGeneration: 0, selection, toBeAddedToPlaylistVideoIdList: vueRef(['v']), processedQuery: vueRef(''), allPlaylists: vueRef([]), DBLibraryHandlers: { query: () => ++calls === 1 ? old.promise : current.promise } })
   const a = read()
   assert.deepEqual(structuredClone(selection.value), { counts: [], matches: [] })
   const b = read()
@@ -3050,16 +3054,16 @@ test('video playlist search stays pending until the current read finishes', asyn
   assert.deepEqual([...matches.value], ['new'])
 })
 
-test('subscription profile import does not schedule sync before a durable refresh succeeds', async () => {
+test('committed subscription profile import stays queued and reports success when UI refresh fails', async () => {
   const refresh = Promise.withResolvers(), scheduled = [], toasts = []
   const context = await functions(dataSettings, ['importFreeTubeSubscriptions'], { profileList: ref([{ _id: 'allChannels', subscriptions: [] }]), MAIN_PROFILE_ID: 'allChannels', isJsonObject: value => !!value && typeof value === 'object', t: key => key, showToast: toast => toasts.push(toast), DBLibraryHandlers: { query: async (_, { profiles }) => { assert.deepEqual(profiles[0].unknown, new Date(2)); return true } }, store: { dispatch: (action, reason) => action === 'grabAllProfiles' ? refresh.promise : Promise.resolve(scheduled.push(reason)) } })
   const importing = context.importFreeTubeSubscriptions([{ _id: 'p', name: 'Imported', bgColor: '#000', textColor: '#fff', subscriptions: [{ id: 'channel', name: 'Channel' }], unknown: new Date(2) }])
   await setImmediate()
-  assert.deepEqual(scheduled, [])
+  assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
   refresh.resolve(null)
-  await assert.rejects(importing, /could not be refreshed/)
-  assert.deepEqual(scheduled, [])
-  assert.deepEqual(toasts, [])
+  await importing
+  assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
+  assert.match(toasts.at(-1).message, /successfully imported/)
 })
 
 test('unavailable-video scans exclude opaque members without changing page records', async () => {
@@ -3302,7 +3306,7 @@ for (const action of ['exportAsFreeTubeDatabase', 'exportAsYouTubeCsv', 'exportA
 }
 
 for (const outcome of ['success', 'false', 'reject']) {
-  test(`desktop restored profiles are synced only after a successful cache refresh: ${outcome}`, async () => {
+  test(`desktop committed profile restores schedule sync even when UI refresh fails: ${outcome}`, async () => {
     const refresh = Promise.withResolvers(), scheduled = [], toasts = []
     let cached = [{ _id: 'old', subscriptions: [] }]
     const restored = [{ _id: 'restored', subscriptions: [{ id: 'retained-channel' }], unknown: new Date(1) }]
@@ -3317,11 +3321,11 @@ for (const outcome of ['success', 'false', 'reject']) {
     })
     const importing = context.importUnifiedBackup()
     await setImmediate()
-    assert.deepEqual(scheduled, [])
+    assert.deepEqual(scheduled, [{ reason: 'profilesOrSubscriptions', cached: [{ _id: 'old', subscriptions: [] }] }])
     if (outcome === 'reject') refresh.reject(new Error('refresh failed'))
     else refresh.resolve(outcome === 'success')
     await importing
-    assert.deepEqual(scheduled, outcome === 'success' ? [{ reason: 'profilesOrSubscriptions', cached: restored }] : [])
+    assert.deepEqual(scheduled, [{ reason: 'profilesOrSubscriptions', cached: [{ _id: 'old', subscriptions: [] }] }])
     assert.match(toasts.at(-1).message, /Backup imported/)
     assert.equal(context.backupBusy.value, false)
   })
@@ -3402,4 +3406,94 @@ test('portable Takeout import rejects an unsuccessful existing-playlist write', 
     store: { dispatch: async () => false },
   })
   await assert.rejects(context.importTakeoutPlaylist({ playlistName: 'Imported', videos: [] }), /Unable to save playlist/)
+})
+
+for (const outcome of ['success', 'null', 'reject']) {
+  test(`profile sync rereads durable profiles before any upload and handles refresh ${outcome}`, async () => {
+    const oldProfiles = [{ _id: 'old', subscriptions: [] }], durable = [{ _id: 'restored', subscriptions: [{ id: 'kept' }] }]
+    const store = { state: { profiles: { profileList: oldProfiles } } }, uploaded = [], reads = []
+    const context = await functions('src/renderer/store/modules/sync-server.js', ['applyCollection'], {
+      store, profilesHydrated: false, next: {}, previous: {}, result: {}, allowDataLoss: false,
+      dispatch: async (...args) => { reads.push(args); if (outcome === 'reject') throw new Error('read failed'); if (outcome === 'success') store.state.profiles.profileList = durable; return outcome === 'success' ? true : null },
+      syncSubscriptions: async (_client, current) => { uploaded.push(structuredClone(current.state.profiles.profileList)); return [] },
+      syncProfiles: async (_client, current) => { uploaded.push(structuredClone(current.state.profiles.profileList)); return {} },
+    })
+    if (outcome === 'success') {
+      await context.applyCollection('subscriptions', {})
+      await context.applyCollection('profiles', {})
+      assert.deepEqual(uploaded, [durable, durable])
+      assert.equal(reads.length, 1)
+      assert.deepEqual(structuredClone(reads[0]), ['grabAllProfiles', { preserveRetained: true }, { root: true }])
+    } else {
+      await assert.rejects(context.applyCollection('subscriptions', {}), /read|profiles/i)
+      assert.deepEqual(uploaded, [])
+    }
+  })
+}
+
+for (const outcome of ['success', 'write failure', 'refresh failure']) {
+  test(`watched cleanup distinguishes committed removal from ${outcome}`, async () => {
+    const events = [], toasts = []
+    const context = await functions('src/renderer/components/WatchVideoPlaylist/WatchVideoPlaylist.vue', ['handleRemoveWatchedVideosPromptAnswer'], {
+      showRemoveWatchedVideosPrompt: ref(true), selectedUserPlaylist: ref({ _id: 'p' }), isPagedPlaylist: ref(true), props: { playlistId: 'p' },
+      DBLibraryHandlers: { query: async () => { if (outcome === 'write failure') throw new Error('write failed'); return 3 } },
+      store: { dispatch: async action => { events.push(action); if (action === 'grabAllPlaylists' && outcome === 'refresh failure') throw new Error('refresh failed') } },
+      showToast: toast => toasts.push(toast), t: (key, params) => ({ key, params }),
+    })
+    await context.handleRemoveWatchedVideosPromptAnswer('delete')
+    if (outcome === 'write failure') {
+      assert.match(toasts[0].message.key, /issue/)
+      assert.deepEqual(events, [])
+    } else {
+      assert.deepEqual(events, ['scheduleSyncServer', 'grabAllPlaylists', 'grabHistory'])
+      assert.equal(toasts.length, 1)
+      assert.equal(toasts[0].message.params.videoCount, 3)
+    }
+  })
+}
+
+test('Save selection read failures expose Retry, prevent writes and preserve user selection across recovery', async () => {
+  const selected = ref(['selected']), retained = { counts: [{ id: 'p', count: 1 }], matches: ['p'] }
+  let fail = true, writes = 0
+  const context = await functions('src/renderer/components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue', ['loadSelection', 'addSelectedToPlaylists'], {
+    selectionGeneration: 0, selection: ref({ counts: [], matches: [] }), toBeAddedToPlaylistVideoIdList: ref(['v']), processedQuery: ref('v'), selectedPlaylistIdList: selected,
+    addInProgress: false, DBLibraryHandlers: { query: async method => { if (method !== 'playlistSelection') { writes++; return {} } if (fail) throw new Error('failed read'); return retained } },
+  })
+  await context.loadSelection()
+  assert.equal(context.selectionError.value, true)
+  assert.equal(context.selectionPending.value, false)
+  await context.addSelectedToPlaylists()
+  assert.equal(writes, 0)
+  fail = false
+  await context.loadSelection()
+  assert.equal(context.selectionError.value, false)
+  assert.deepEqual(context.selection.value, retained)
+  assert.deepEqual(selected.value, ['selected'])
+})
+
+for (const outcome of ['write failure', 'refresh failure']) {
+  test(`deferred playlist removal distinguishes ${outcome} and always releases pending state`, async () => {
+    const events = [], toasts = []
+    const context = await functions('src/renderer/views/Playlist/Playlist.vue', ['removeToBeDeletedVideosSometimes'], {
+      isLoading: ref(false), isVideoDragging: ref(false), toBeDeletedPlaylistItemIds: ref(['member']), videosWithPlaylistToUnset: ref(['v']), playlistId: ref('p'), pendingDeletionRemovalInProgress: ref(false), undoToastAbortController: null,
+      DBLibraryHandlers: { query: async () => { if (outcome === 'write failure') throw new Error('write failed'); return 1 } },
+      store: { dispatch: async action => { events.push(action); if (action === 'grabAllPlaylists') throw new Error('refresh failed') } }, showToast: toast => toasts.push(toast), t: key => key,
+    })
+    await context.removeToBeDeletedVideosSometimes()
+    assert.deepEqual(events, outcome === 'write failure' ? [] : ['scheduleSyncServer', 'grabAllPlaylists', 'grabHistory'])
+    assert.equal(toasts.length, outcome === 'write failure' ? 1 : 0)
+    assert.equal(context.pendingDeletionRemovalInProgress.value, false)
+    assert.equal(context.toBeDeletedPlaylistItemIds.value.length, 0)
+  })
+}
+
+test('hydrating a hot membership promotes it before bounded cache eviction', async () => {
+  const state = { playlistMemberships: Object.fromEntries(Array.from({ length: 2000 }, (_, index) => [`video-${index}`, { p: 1 }])), playlistVideoCounts: new Map() }
+  const context = await functions('src/renderer/store/modules/playlists.js', ['cachePlaylistMemberships'])
+  context.cachePlaylistMemberships(state, { ids: ['video-0'], memberships: [{ videoId: 'video-0', playlistId: 'p', count: 1 }] })
+  context.cachePlaylistMemberships(state, { ids: ['new-video'], memberships: [{ videoId: 'new-video', playlistId: 'p', count: 1 }] })
+  assert.ok(Object.hasOwn(state.playlistMemberships, 'video-0'))
+  assert.ok(Object.hasOwn(state.playlistMemberships, 'new-video'))
+  assert.ok(!Object.hasOwn(state.playlistMemberships, 'video-1'))
+  assert.equal(Object.keys(state.playlistMemberships).length, 2000)
 })
