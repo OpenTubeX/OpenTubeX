@@ -5,10 +5,11 @@ import { DBActions } from '../../../src/constants.js'
 
 test('restores a released null-name profile and saves customization without changing retained fields', async ({ app, page }, testInfo) => {
   const profile = { _id: 'legacy-null-name', name: null, bgColor: '#558B2F', textColor: '#FFFFFF', icon: { type: 'emoji', value: '🌈' }, subscriptions: [], futureMetadata: { keep: true } }
+  const numericProfile = { ...profile, _id: 'legacy-numeric-name', name: 42, icon: { type: 'icon', value: 'circle-user' } }
   const archive = Array.from(zipSync(Object.fromEntries(Object.entries({
     manifest: { format: 'opentubex-backup', version: 1 },
     settings: {},
-    profiles: [profile],
+    profiles: [profile, numericProfile],
     playlists: [],
     history: [],
     searchHistory: [],
@@ -25,6 +26,8 @@ test('restores a released null-name profile and saves customization without chan
   await expect(prompt).toBeHidden()
   const saved = () => page.evaluate(async ({ id, action }) => (await window.ftElectron.dbProfiles(action, {})).find(profile => profile._id === id), { id: profile._id, action: DBActions.GENERAL.FIND })
   await expect.poll(saved).toStrictEqual(profile)
+  const savedNumeric = () => page.evaluate(async ({ id, action }) => (await window.ftElectron.dbProfiles(action, {})).find(profile => profile._id === id), { id: numericProfile._id, action: DBActions.GENERAL.FIND })
+  await expect.poll(savedNumeric).toStrictEqual(numericProfile)
   await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
   const otherWindow = await openNewWindowFromTabBar(app, page)
   await waitForAppReady(otherWindow)
@@ -44,6 +47,7 @@ test('restores a released null-name profile and saves customization without chan
   await expect(page.locator('.toast', { hasText: 'Your profile name cannot be empty' })).toHaveCount(0)
   const expected = { ...concurrent, icon: { type: 'icon', value: 'circle-user' } }
   await expect.poll(saved).toStrictEqual(expected)
+  await expect.poll(savedNumeric).toStrictEqual(numericProfile)
   for (const windowPage of [page, otherWindow]) {
     await expect.poll(() => windowPage.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.profiles.profileList.find(profile => profile._id === id), profile._id)).toStrictEqual(expected)
   }
