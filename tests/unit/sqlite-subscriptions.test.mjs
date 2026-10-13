@@ -1386,3 +1386,48 @@ test('RSS verdicts preserve malformed UTF-16 requested identities without hydrat
     assert.deepEqual(engine.prepare('SELECT data FROM members ORDER BY record_id, field, position').all(), before)
   } finally { deserialize.mock.restore() }
 })
+
+
+test('subscription pages retain primitive members without attaching object identities', async t => {
+  const engine = memory(t)
+  const original = { _id: 'channel', videosTimestamp: new Date(1000), videos: ['retained', 42, false, video(1)], unknown: new Date(1) }
+  await engine.collections.subscriptionCache.insertAsync(original)
+  const options = { subscriptions: [{ id: 'channel' }], category: 'videos', limit: 2 }
+  const records = []
+  let cursor = null
+  do {
+    const page = await subscriptionPage(engine, { ...options, cursor })
+    records.push(...page.records.map(entry => entry !== null && typeof entry === 'object' ? withoutMemberIdentity(entry) : entry))
+    cursor = page.cursor
+  } while (cursor)
+  assert.deepEqual(records, original.videos)
+  assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), original)
+})
+
+test('feed writes reject arbitrary fields before changing retained data', async t => {
+  const engine = memory(t)
+  const original = { _id: 'channel', videos: [video(1)], videosTimestamp: new Date(1000), unknown: new Date(1) }
+  await engine.collections.subscriptionCache.insertAsync(original)
+  for (const field of [undefined, null, '', 'unknown', '__proto__', 'videosTimestamp', 'videos.title']) {
+    await assert.rejects(engine.transaction(() => updateSubscriptionFeed(engine, { channelId: 'channel', field, entries: [video(2)], timestamp: 2000 })), /Invalid subscription feed field/)
+    assert.deepEqual(await engine.collections.subscriptionCache.findOneAsync({ _id: 'channel' }), original)
+  }
+})
+
+for (const previous of ['\uD800', '\uDC00']) {
+  test(`thumbnail digests distinguish retained UTF-16 code units ${JSON.stringify(previous)}`, async t => {
+    const engine = memory(t), videoId = 'abcdefghijk'
+    const before = { _id: 'first', videoId, title: 'Title', description: '', thumbnailUrl: 'same', thumbnail: previous, hasThumbnailChange: true, cachedAt: 1000, unknown: new Date(1) }
+    const after = { ...before, _id: 'second', cachedAt: 2000, thumbnail: '\uFFFD' }
+    await engine.collections.videoMetadataCache.insertAsync([before, after])
+    const digests = engine.prepare("SELECT digest FROM record_blobs WHERE collection = 'videoMetadataCache' ORDER BY record_id").all().map(row => row.digest)
+    assert.notEqual(digests[0], digests[1])
+    assert.deepEqual(await engine.transaction(() => updateVideoMetadataCache(engine, { videoId, title: 'Title', description: '', thumbnailUrl: 'same', thumbnail: null, observedAt: 3000 })), { videoId, revisionCount: 2 })
+    const page = await metadataPage(engine, { videoId, field: 'thumbnail' })
+    assert.equal(page.records.length, 1)
+    assert.equal(metadataThumbnail(engine, { id: page.records[0].thumbnailRevisionId }), previous)
+    assert.deepEqual(await engine.collections.videoMetadataCache.findAsync({}).sort({ cachedAt: 1 }), [before, after])
+    await engine.collections.videoMetadataCache.updateAsync({ _id: after._id }, { $set: { thumbnail: previous } })
+    assert.deepEqual((await metadataPage(engine, { videoId, field: 'thumbnail' })).records, [])
+  })
+}

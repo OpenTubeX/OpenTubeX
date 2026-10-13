@@ -125,7 +125,7 @@ export async function updateVideoMetadataCache(engine, input) {
   if (previous) previous = { ...previous, thumbnailDigest: inherited.digest }
   const thumbnailUrl = normalizeText(input.thumbnailUrl, 20_000)
   const thumbnail = normalizeThumbnailDataUrl(input.thumbnail)
-  let thumbnailDigest = thumbnail && previous ? createHash('sha256').update(thumbnail).digest('hex') : null
+  let thumbnailDigest = thumbnail && previous ? createHash('sha256').update(thumbnail, 'utf16le').digest('hex') : null
   if (!thumbnail && previous && (!thumbnailUrl || thumbnailUrl === previous.thumbnailUrl)) thumbnailDigest = previous.thumbnailDigest
   const current = {
     title: normalizeText(input.title, MAX_TITLE_LENGTH),

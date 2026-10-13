@@ -158,8 +158,10 @@ async function readSubscriptionPage(engine, options) {
       const entries = deserializeEntry(row.entries)
       const source = sourcesById.get(row.record_id)
       for (const [memberId, entry] of entries) {
-        memberIds.set(entry, memberId)
-        entry[memberIdentity] = memberId
+        if (entry !== null && typeof entry === 'object') {
+          memberIds.set(entry, memberId)
+          entry[memberIdentity] = memberId
+        }
         source[row.field].push(entry)
       }
     }
@@ -205,7 +207,7 @@ async function readSubscriptionPage(engine, options) {
           const references = chunk.map(entry => {
             // Keep only an ordered member reference unless a shared feed helper
             // added a display override. Revisions invalidate this view on edits.
-            const memberId = entry[memberIdentity]
+            const memberId = entry?.[memberIdentity]
             const timestamp = getUpcomingPremiereTimestamp(entry)
             if (timestamp > now && (nextPremiereTimestamp === null || timestamp < nextPremiereTimestamp)) nextPremiereTimestamp = timestamp
             return memberIds.has(entry) ? memberId : null
@@ -215,7 +217,7 @@ async function readSubscriptionPage(engine, options) {
             // extraction for every row when only its order and identity vary.
             insertReferences.run(id, name, offset, JSON.stringify(references))
           } else {
-            const rows = chunk.map((entry, index) => [offset + index, entry[memberIdentity], references[index] === null ? model.serialize(entry) : null])
+            const rows = chunk.map((entry, index) => [offset + index, entry?.[memberIdentity], references[index] === null ? model.serialize(entry) : null])
             insert.run(id, name, JSON.stringify(rows))
           }
         }
@@ -240,7 +242,10 @@ async function readSubscriptionPage(engine, options) {
   const offset = cursor?.offset ?? 0
   const end = offset + Math.max(1, Math.min(250, limit))
   const total = view.counts[category] ?? 0
-  const records = engine.prepare("SELECT v.membership_id, coalesce(v.data, m.data) AS data FROM subscription_views v LEFT JOIN members m ON m.collection = 'subscriptionCache' AND m.membership_id = v.membership_id WHERE v.view_id = ? AND v.category = ? AND v.ordinal >= ? AND v.ordinal < ? ORDER BY v.ordinal").all(view.id, category, offset, end).map(row => ({ ...model.deserialize(row.data), _libraryMemberId: row.membership_id }))
+  const records = engine.prepare("SELECT v.membership_id, coalesce(v.data, m.data) AS data FROM subscription_views v LEFT JOIN members m ON m.collection = 'subscriptionCache' AND m.membership_id = v.membership_id WHERE v.view_id = ? AND v.category = ? AND v.ordinal >= ? AND v.ordinal < ? ORDER BY v.ordinal").all(view.id, category, offset, end).map(row => {
+    const entry = model.deserialize(row.data)
+    return entry !== null && typeof entry === 'object' ? { ...entry, _libraryMemberId: row.membership_id } : entry
+  })
   return { records, cursor: end < total ? { revision, view: view.id, offset: end } : null, total, hasNew: view.hasNew[category] ?? false, categoryCounts: onlyNew ? view.counts : null, nextPremiereTimestamp: view.nextPremiereTimestamp }
 }
 
@@ -258,6 +263,7 @@ export async function subscriptionEntry(engine, { videoId, postId }) {
 }
 
 export async function updateSubscriptionFeed(engine, { channelId, entries, timestamp, field }) {
+  if (!['videos', 'shorts', 'liveStreams', 'communityPosts'].includes(field)) throw new TypeError('Invalid subscription feed field')
   if (typeof timestamp !== 'number' && typeof timestamp !== 'string' && !(timestamp instanceof Date)) throw new TypeError('Invalid subscription feed timestamp')
   const incomingTime = new Date(timestamp).getTime()
   if (!Number.isFinite(incomingTime)) throw new TypeError('Invalid subscription feed timestamp')

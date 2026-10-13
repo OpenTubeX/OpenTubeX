@@ -418,7 +418,7 @@ export class LibraryEngine {
       if (canReplayArrays && entries.every(entry => entry !== null && typeof entry === 'object')) this.replayArray(collection, record._id, field, serializedInput, record[field + 'Timestamp'], entries.length === 0)
       else this.replaceArray(collection, record._id, field, entries, record[field + 'Timestamp'])
     }
-    for (const [field, data] of blobs) this.prepare('INSERT INTO record_blobs VALUES (?, ?, ?, ?, ?)').run(collection, record._id, field, serialize(data), createHash('sha256').update(data).digest('hex'))
+    for (const [field, data] of blobs) this.prepare('INSERT INTO record_blobs VALUES (?, ?, ?, ?, ?)').run(collection, record._id, field, serialize(data), createHash('sha256').update(data, 'utf16le').digest('hex'))
     if (collection === 'history') this.indexSearch(record)
     for (const [field, entries] of arrays) record[field] = entries
     for (const [field, data] of blobs) record[field] = data
@@ -555,7 +555,7 @@ export class LibraryEngine {
     this.prepare(`UPDATE records SET data = ?, video_id = ${encodedVideoId ? "json_extract(?, '$')" : '?'}, sort_time = ?, continue_candidate = ?, unwatched_candidate = ?, watchable_after = ?, repair_candidate = ? WHERE collection = ? AND id = ?`).run(serialize(record), encodedVideoId ? JSON.stringify(videoId) : videoId, Number.isFinite(record.timeWatched) ? record.timeWatched : Number.isFinite(record.cachedAt) ? record.cachedAt : 0, ...historyColumns(collection, record), collection, row.id)
     if (collection === 'videoMetadataCache') {
       this.prepare('DELETE FROM record_blobs WHERE collection = ? AND record_id = ?').run(collection, row.id)
-      if (thumbnail !== null) this.prepare('INSERT INTO record_blobs VALUES (?, ?, ?, ?, ?)').run(collection, row.id, 'thumbnail', serialize(thumbnail), createHash('sha256').update(thumbnail).digest('hex'))
+      if (thumbnail !== null) this.prepare('INSERT INTO record_blobs VALUES (?, ?, ?, ?, ?)').run(collection, row.id, 'thumbnail', serialize(thumbnail), createHash('sha256').update(thumbnail, 'utf16le').digest('hex'))
     }
     if (collection === 'history' && ['title', 'author'].some(field => {
       const before = typeof previous[field] === 'string' ? previous[field] : ''
