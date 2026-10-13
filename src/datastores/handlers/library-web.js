@@ -21,6 +21,7 @@ export function createPortableLibrary({ history, playlists }) {
   return {
     async query(method, options = {}) {
       if (method === 'playlistSummaries') return (await playlists.find()).map(playlist => ({ ...playlist, videoCount: Array.isArray(playlist.videos) ? playlist.videos.length : 0, firstVideo: Array.isArray(playlist.videos) ? playlist.videos[0] ?? null : null, videos: [] }))
+      if (method === 'playlistImportCandidates') return (await playlists.find()).filter(playlist => playlist.playlistName === options.name).map(playlist => ({ _id: playlist._id, playlistName: playlist.playlistName, ...(Object.hasOwn(playlist, 'protected') ? { protected: playlist.protected } : {}) }))
       if (method === 'playlistVideoIds') {
         const playlist = (await playlists.find()).find(playlist => playlist._id === options.id)
         if (!playlist) throw new Error('The playlist no longer exists')

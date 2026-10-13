@@ -641,7 +641,7 @@ function recommendationReason(video) {
 
 const continueWatching = computed(() => store.getters.getContinueWatchingHistory())
 const watchQueue = computed(() => store.getters.getWatchQueue)
-const playlistVideoCount = playlist => playlist.videoCount ?? (Array.isArray(playlist.videos) ? playlist.videos.length : 0)
+const playlistVideoCount = playlist => store.state.playlists.libraryPaged ? playlist.videoCount ?? 0 : Array.isArray(playlist.videos) ? playlist.videos.length : 0
 const recentPlaylists = computed(() => store.getters.getAllPlaylists
   .filter(playlist => playlistVideoCount(playlist) > 0 || !['favorites', 'watchLater'].includes(playlist._id))
   .toSorted((a, b) => {
