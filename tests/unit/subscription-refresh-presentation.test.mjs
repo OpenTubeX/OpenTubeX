@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { computed, effectScope, nextTick, reactive, watch } from 'vue'
-import { getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../../src/renderer/helpers/subscription-channels.js'
+import { computed, effectScope, nextTick, reactive, ref, watch } from 'vue'
+import { getSubscriptionsForFeed, getValidSubscriptionChannels, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS } from '../../src/renderer/helpers/subscription-channels.js'
 
 const source = (await readFile(new URL('../../src/renderer/composables/useSubscriptionChannelUpdates.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace(/^export /gm, '')
@@ -20,7 +20,7 @@ function setup(channelCount, presented = true, feed = 'videos') {
   let updates = 0
   const scope = effectScope()
   const context = vm.createContext({
-    window, computed, reactive, watch, store: { getters: state }, getSubscriptionsForFeed, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS,
+    window, computed, reactive, watch, store: { getters: state }, getSubscriptionsForFeed, getValidSubscriptionChannels, MAX_INCREMENTAL_SUBSCRIPTION_CHANNELS,
     SUBSCRIPTION_REFRESH_CHANNEL_EVENT: 'channel',
     useTabContext: () => ({ isTabPresented: visibility }),
     onActivated() {}, onDeactivated() {}, onBeforeUnmount() {},
@@ -104,3 +104,26 @@ test('a completed feed publishes pending results while the next feed refreshes',
     assert.equal(app.updates, 1)
   } finally { app.scope.stop() }
 })
+
+
+for (const subscriptions of [undefined, null, false, [null, false, 42, 'opaque', {}, { id: 42 }, { id: 'channel', unknown: new Date(1) }]]) {
+  test(`Refresh All derives valid IDs without changing retained subscriptions: ${JSON.stringify(subscriptions)}`, async () => {
+    const script = (await readFile(new URL('../../src/renderer/composables/useRefreshAllSubscriptionFeeds.js', import.meta.url), 'utf8'))
+      .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '').replace(/^export /gm, '')
+    const profile = { subscriptions, unknown: new Date(2) }, before = structuredClone(profile)
+    const context = vm.createContext({
+      computed, ref, getValidSubscriptionChannels, useI18n: () => ({ t: value => value }),
+      store: { getters: { getActiveProfile: profile, getUseRssFeeds: false } },
+      getSubscriptionRefreshCancelCount: () => 0, getEnabledSubscriptionFeedSources: () => [],
+      refreshSubscriptionVideosFromRemote() {}, refreshSubscriptionShortsFromRemote() {}, refreshSubscriptionLiveFromRemote() {}, refreshSubscriptionPostsFromRemote() {},
+      withAndroidSubscriptionRefreshBatch: async callback => callback()
+    })
+    vm.runInContext(script, context)
+    const refresh = context.useRefreshAllSubscriptionFeeds()
+    assert.deepEqual(Array.from(refresh.activeSubscriptionIds.value), Array.isArray(subscriptions) ? ['channel'] : [])
+    refresh.refresh()
+    assert.equal(refresh.attemptedFetch.value, true)
+    assert.equal(refresh.isRefreshing.value, false)
+    assert.deepEqual(profile, before)
+  })
+}

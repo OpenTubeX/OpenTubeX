@@ -547,3 +547,34 @@ test('profile form patches publish the complete saved record to both window stor
     assert.deepEqual(structuredClone(windowStore.state.profileList.find(profile => profile._id === 'custom')), expected)
   }
 })
+
+
+for (const subscriptions of [undefined, null, false, [null, false, 42, 'opaque', {}, { id: 42 }, { id: 'channel', name: 'Old', unknown: new Date(1) }]]) {
+  test(`profile details and settings preserve opaque subscriptions: ${JSON.stringify(subscriptions)}`, async () => {
+    const { db, store, createStore } = await profileStore(subscriptions)
+    // The fixture's default parameter requires installing an explicit missing field afterward.
+    if (subscriptions === undefined) {
+      await db.profiles.updateAsync({}, { $unset: { subscriptions: true } }, { multi: true })
+      for (const p of store.state.profileList) delete p.subscriptions
+    }
+    const other = createStore()
+    other.state.profileList = structuredClone(store.state.profileList)
+    const before = await db.profiles.findAsync({})
+    const supported = Array.isArray(subscriptions)
+    assert.equal(await store.dispatch('updateChannelSettings', { channelId: 'channel', settings: { showMembersOnly: true } }), supported)
+    assert.equal(await store.dispatch('batchUpdateChannelSettings', [{ channelId: 'channel', settings: { dailyVideoLimit: 2 } }]), supported)
+    assert.equal(await store.dispatch('updateSubscriptionDetails', { channelId: 'channel', channelName: 'New' }), true)
+    const after = await db.profiles.findAsync({})
+    if (!supported) assert.deepEqual(after, before)
+    else {
+      for (const [index, profile] of after.entries()) {
+        assert.deepEqual(profile.subscriptions.slice(0, -1), before[index].subscriptions.slice(0, -1))
+        assert.equal(profile.subscriptions.at(-1).name, 'New')
+        assert.deepEqual(profile.subscriptions.at(-1).unknown, new Date(1))
+        assert.equal(profile.subscriptions.at(-1).showMembersOnly, true)
+        assert.equal(profile.subscriptions.at(-1).dailyVideoLimit, 2)
+      }
+    }
+    for (const cache of [store, other]) assert.deepEqual(structuredClone(cache.state.profileList), after)
+  })
+}

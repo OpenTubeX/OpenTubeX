@@ -2,6 +2,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../store/index'
+import { getValidSubscriptionChannels } from '../helpers/subscription-channels'
 import {
   getSubscriptionRefreshCancelCount,
   refreshSubscriptionLiveFromRemote,
@@ -22,7 +23,7 @@ export function useRefreshAllSubscriptionFeeds() {
   const showRefreshWarning = ref(false)
 
   const activeSubscriptionIds = computed(() => {
-    return new Set(store.getters.getActiveProfile.subscriptions.map(channel => channel.id))
+    return new Set(getValidSubscriptionChannels(store.getters.getActiveProfile?.subscriptions).map(channel => channel.id))
   })
 
   const enabledFeeds = computed(() => {
