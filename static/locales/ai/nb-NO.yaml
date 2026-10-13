@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
 History:
+  From Date: 'Fra'
+  To Date: 'Til'
+  Channel Filter: 'Kanal'
+  All Channels: 'Alle kanaler'
+  Clear Filters: 'Nullstill filtre'
+  Invalid Date Range: 'Startdatoen må være før eller på sluttdatoen.'
+  Empty Filter Message: 'Ingen videoer i historikken din samsvarer med disse filtrene.'
   Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Merk alle som sett"

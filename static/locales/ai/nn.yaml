@@ -215,6 +215,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
 History:
+  From Date: 'Frå'
+  To Date: 'Til'
+  Channel Filter: 'Kanal'
+  All Channels: 'Alle kanalar'
+  Clear Filters: 'Nullstill filter'
+  Invalid Date Range: 'Startdatoen må vere før eller på sluttdatoen.'
+  Empty Filter Message: 'Ingen videoar i historikken din samsvarar med desse filtera.'
   Delete Old Compact: "Slett gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Merk alle som sette"

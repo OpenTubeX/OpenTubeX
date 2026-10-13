@@ -214,6 +214,13 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
 History:
+  From Date: 'Fra'
+  To Date: 'Til'
+  Channel Filter: 'Kanal'
+  All Channels: 'Alle kanaler'
+  Clear Filters: 'Ryd filtre'
+  Invalid Date Range: 'Startdatoen skal være før eller på slutdatoen.'
+  Empty Filter Message: 'Ingen videoer i din historik matcher disse filtre.'
   Delete Old Compact: "Slet gamle"
   Repair Compact: "Reparer"
   Mark All Watched Compact: "Marker alle set"

@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  From Date: 'Alates'
+  To Date: 'Kuni'
+  Channel Filter: 'Kanal'
+  All Channels: 'Kõik kanalid'
+  Clear Filters: 'Tühjenda filtrid'
+  Invalid Date Range: 'Alguskuupäev peab olema lõppkuupäevast varasem või sellega sama.'
+  Empty Filter Message: 'Ükski video sinu ajaloos ei vasta nendele filtritele.'
   Delete Old Compact: "Kustuta vanad"
   Repair Compact: "Paranda"
   Mark All Watched Compact: "Kõik vaadatud"

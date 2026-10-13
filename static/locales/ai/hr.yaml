@@ -207,6 +207,13 @@ User Playlists:
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
 History:
+  From Date: 'Od'
+  To Date: 'Do'
+  Channel Filter: 'Kanal'
+  All Channels: 'Svi kanali'
+  Clear Filters: 'Očisti filtre'
+  Invalid Date Range: 'Početni datum mora biti prije završnog datuma ili jednak njemu.'
+  Empty Filter Message: 'Nijedan videozapis u vašoj povijesti ne odgovara ovim filtrima.'
   Delete Old Compact: "Izbriši stare"
   Repair Compact: "Popravi"
   Mark All Watched Compact: "Sve pogledano"

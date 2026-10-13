@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
 History:
+  From Date: 'Hasiera'
+  To Date: 'Amaiera'
+  Channel Filter: 'Kanala'
+  All Channels: 'Kanal guztiak'
+  Clear Filters: 'Garbitu iragazkiak'
+  Invalid Date Range: 'Hasiera-datak amaiera-data baino lehenagokoa edo berdina izan behar du.'
+  Empty Filter Message: 'Zure historiako bideorik ez dator bat iragazki hauekin.'
   Delete Old Compact: "Zaharrak ezabatu"
   Repair Compact: "Konpondu"
   Mark All Watched Compact: "Denak ikusita"

@@ -10,6 +10,7 @@ body {
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
   --form-control-height: 45px;
+  --native-color-scheme: light;
   --form-control-value-padding: 18px 4px;
   --form-control-label-top: 4px;
   --switch-track-width: 40px;
@@ -241,6 +242,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
 .carbonfox,
 .catppuccinMacchiato {
   --focus-ring-contrast-color: #fff;
+  --native-color-scheme: dark;
   --primary-shadow-color: rgb(0 0 0 / 75%);
   --members-only-color: #55c86b;
 

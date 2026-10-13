@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Tento zoznam videí sa nepodarilo načítať.
     More videos could not be loaded.: Ďalšie videá sa nepodarilo načítať.
 History:
+  From Date: 'Od'
+  To Date: 'Do'
+  Channel Filter: 'Kanál'
+  All Channels: 'Všetky kanály'
+  Clear Filters: 'Vymazať filtre'
+  Invalid Date Range: 'Počiatočný dátum musí byť pred koncovým dátumom alebo sa mu rovnať.'
+  Empty Filter Message: 'Žiadne videá vo vašej histórii nezodpovedajú týmto filtrom.'
   Delete Old Compact: "Zmazať staré"
   Repair Compact: "Opraviť"
   Mark All Watched Compact: "Všetky pozreté"

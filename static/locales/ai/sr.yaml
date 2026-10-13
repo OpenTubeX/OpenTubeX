@@ -215,6 +215,13 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Видео-снимци су додати на 1 листу за репродукцију | Видео-снимци су додати на {playlistCount} листе за репродукцију | Видео-снимци су додати на {playlistCount} листа за репродукцију
 History:
+  From Date: 'Од'
+  To Date: 'До'
+  Channel Filter: 'Канал'
+  All Channels: 'Сви канали'
+  Clear Filters: 'Обриши филтере'
+  Invalid Date Range: 'Почетни датум мора бити пре крајњег датума или једнак њему.'
+  Empty Filter Message: 'Ниједан видео у вашој историји не одговара овим филтерима.'
   Delete Old Compact: "Обриши старе"
   Repair Compact: "Поправи"
   Mark All Watched Compact: "Све одгледано"

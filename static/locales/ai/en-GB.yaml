@@ -206,6 +206,13 @@ User Playlists:
     This playlist could not be loaded.: This playlist could not be loaded.
     More videos could not be loaded.: More videos could not be loaded.
 History:
+  From Date: 'From'
+  To Date: 'To'
+  Channel Filter: 'Channel'
+  All Channels: 'All channels'
+  Clear Filters: 'Clear filters'
+  Invalid Date Range: 'The From date must be on or before the To date.'
+  Empty Filter Message: 'No videos in your history match these filters.'
   Delete Old Compact: "Delete old"
   Repair Compact: "Repair"
   Mark All Watched Compact: "Mark all watched"

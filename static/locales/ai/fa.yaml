@@ -224,6 +224,13 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
 History:
+  From Date: 'از'
+  To Date: 'تا'
+  Channel Filter: 'کانال'
+  All Channels: 'همهٔ کانال‌ها'
+  Clear Filters: 'پاک کردن فیلترها'
+  Invalid Date Range: 'تاریخ شروع باید قبل از تاریخ پایان یا برابر با آن باشد.'
+  Empty Filter Message: 'هیچ ویدیویی در سابقهٔ شما با این فیلترها مطابقت ندارد.'
   Delete Old Compact: "حذف قدیمی‌ها"
   Repair Compact: "ترمیم"
   Mark All Watched Compact: "همه تماشا شده"

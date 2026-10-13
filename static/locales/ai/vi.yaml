@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
 History:
+  From Date: 'Từ'
+  To Date: 'Đến'
+  Channel Filter: 'Kênh'
+  All Channels: 'Tất cả kênh'
+  Clear Filters: 'Xóa bộ lọc'
+  Invalid Date Range: 'Ngày bắt đầu phải trước hoặc cùng ngày với ngày kết thúc.'
+  Empty Filter Message: 'Không có video nào trong lịch sử khớp với các bộ lọc này.'
   Delete Old Compact: "Xóa mục cũ"
   Repair Compact: "Sửa chữa"
   Mark All Watched Compact: "Đánh dấu tất cả đã xem"

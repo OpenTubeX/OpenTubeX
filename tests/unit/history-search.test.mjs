@@ -62,9 +62,9 @@ for (const queryText of ['', '   ', 'City tour']) {
     const doCaseSensitiveSearch = ref(false)
     let scheduledSearches = 0
     let savedStates = 0
-    const stop = compileFunction(`return ${caseSensitiveWatcher}`, ['watch', 'doCaseSensitiveSearch', 'query', 'scheduleHistorySearch', 'saveStateInRouter'])(
+    const stop = compileFunction(`return ${caseSensitiveWatcher}`, ['watch', 'doCaseSensitiveSearch', 'query', 'scheduleHistorySearch', 'saveStateInRouter', 'applyingRouteState'])(
       watch, doCaseSensitiveSearch, query,
-      () => { scheduledSearches++ }, () => { savedStates++ },
+      () => { scheduledSearches++ }, () => { savedStates++ }, false,
     )
     t.after(stop)
 

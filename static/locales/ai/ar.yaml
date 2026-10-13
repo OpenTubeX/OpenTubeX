@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
 History:
+  From Date: 'من'
+  To Date: 'إلى'
+  Channel Filter: 'القناة'
+  All Channels: 'كل القنوات'
+  Clear Filters: 'مسح عوامل التصفية'
+  Invalid Date Range: 'يجب أن يكون تاريخ البداية قبل تاريخ النهاية أو مطابقًا له.'
+  Empty Filter Message: 'لا توجد فيديوهات في سجلك تطابق عوامل التصفية هذه.'
   Delete Old Compact: "حذف القديم"
   Repair Compact: "إصلاح"
   Mark All Watched Compact: "تمييز الكل كمشاهَد"

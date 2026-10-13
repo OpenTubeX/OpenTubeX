@@ -207,6 +207,13 @@ User Playlists:
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
 History:
+  From Date: 'Frá'
+  To Date: 'Til'
+  Channel Filter: 'Rás'
+  All Channels: 'Allar rásir'
+  Clear Filters: 'Hreinsa síur'
+  Invalid Date Range: 'Upphafsdagsetningin verður að vera fyrir eða á lokadagsetningunni.'
+  Empty Filter Message: 'Engin myndskeið í ferlinum þínum passa við þessar síur.'
   Delete Old Compact: "Eyða gömlu"
   Repair Compact: "Lagfæra"
   Mark All Watched Compact: "Merkja allt skoðað"

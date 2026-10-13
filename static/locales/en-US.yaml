@@ -459,6 +459,13 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Playlist {playlistName} has been successfully created.
       There was an issue with creating the playlist.: There was an issue with creating the playlist.
 History:
+  From Date: 'From'
+  To Date: 'To'
+  Channel Filter: 'Channel'
+  All Channels: 'All channels'
+  Clear Filters: 'Clear filters'
+  Invalid Date Range: 'The From date must be on or before the To date.'
+  Empty Filter Message: 'No videos in your history match these filters.'
   Repair Use Cookies: "Use configured yt-dlp cookies"
   Repair Cookies Hint: "More than 500 videos need checking. Configure cookies in yt-dlp settings and enable them here to reduce the risk of rate limiting."
   Repair Description: "Use this after importing history, or when videos have missing details or an incorrect LIVE label."

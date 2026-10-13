@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: A lejátszási lista nem tölthető be.
     More videos could not be loaded.: Nem tölthető be több videó.
 History:
+  From Date: 'Kezdő dátum'
+  To Date: 'Záró dátum'
+  Channel Filter: 'Csatorna'
+  All Channels: 'Összes csatorna'
+  Clear Filters: 'Szűrők törlése'
+  Invalid Date Range: 'A kezdő dátumnak meg kell előznie a záró dátumot, vagy azonosnak kell lennie vele.'
+  Empty Filter Message: 'Az előzményekben nincs ezeknek a szűrőknek megfelelő videó.'
   Delete Old Compact: "Régiek törlése"
   Repair Compact: "Javítás"
   Mark All Watched Compact: "Mind megtekintve"

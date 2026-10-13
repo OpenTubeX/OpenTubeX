@@ -207,6 +207,13 @@ User Playlists:
     This playlist could not be loaded.: Този плейлист не можа да бъде зареден.
     More videos could not be loaded.: Не можаха да бъдат заредени още видеоклипове.
 History:
+  From Date: 'От'
+  To Date: 'До'
+  Channel Filter: 'Канал'
+  All Channels: 'Всички канали'
+  Clear Filters: 'Изчисти филтрите'
+  Invalid Date Range: 'Началната дата трябва да е преди или на крайната дата.'
+  Empty Filter Message: 'Няма видеоклипове в историята ви, които да отговарят на тези филтри.'
   Delete Old Compact: "Изтрий стари"
   Repair Compact: "Поправи"
   Mark All Watched Compact: "Всички гледани"

@@ -212,6 +212,13 @@ User Playlists:
     This playlist could not be loaded.: இந்தப் பிளேலிஸ்ட்டை ஏற்ற முடியவில்லை.
     More videos could not be loaded.: மேலும் காணொளிகளை ஏற்ற முடியவில்லை.
 History:
+  From Date: 'தொடக்க தேதி'
+  To Date: 'முடிவு தேதி'
+  Channel Filter: 'சேனல்'
+  All Channels: 'அனைத்து சேனல்களும்'
+  Clear Filters: 'வடிகட்டிகளை அழி'
+  Invalid Date Range: 'தொடக்க தேதி முடிவு தேதிக்கு முந்தையதாகவோ அதே தேதியாகவோ இருக்க வேண்டும்.'
+  Empty Filter Message: 'இந்த வடிகட்டிகளுடன் பொருந்தும் காணொளிகள் உங்கள் வரலாற்றில் இல்லை.'
   Delete Old Compact: "பழையது அழி"
   Repair Compact: "சரி"
   Mark All Watched Compact: "யாவும் கண்டது"

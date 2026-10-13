@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
 History:
+  From Date: 'De la'
+  To Date: 'Până la'
+  Channel Filter: 'Canal'
+  All Channels: 'Toate canalele'
+  Clear Filters: 'Șterge filtrele'
+  Invalid Date Range: 'Data de început trebuie să fie înainte de data de sfârșit sau egală cu aceasta.'
+  Empty Filter Message: 'Niciun videoclip din istoric nu corespunde acestor filtre.'
   Delete Old Compact: "Șterge vechi"
   Repair Compact: "Repară"
   Mark All Watched Compact: "Toate vizionate"

@@ -1205,6 +1205,13 @@ App Icon:
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
 History:
+  From Date: 'Od'
+  To Date: 'Do'
+  Channel Filter: 'Kanał'
+  All Channels: 'Wszystkie kanały'
+  Clear Filters: 'Wyczyść filtry'
+  Invalid Date Range: 'Data początkowa musi być wcześniejsza niż data końcowa lub jej równa.'
+  Empty Filter Message: 'Żaden film w historii nie pasuje do tych filtrów.'
   Delete Old Compact: "Usuń stare"
   Repair Compact: "Napraw"
   Mark All Watched Compact: "Wszystkie obejrzane"

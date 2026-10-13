@@ -209,6 +209,13 @@ User Playlists:
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
 History:
+  From Date: 'מתאריך'
+  To Date: 'עד תאריך'
+  Channel Filter: 'ערוץ'
+  All Channels: 'כל הערוצים'
+  Clear Filters: 'ניקוי מסננים'
+  Invalid Date Range: 'תאריך ההתחלה חייב להיות מוקדם מתאריך הסיום או זהה לו.'
+  Empty Filter Message: 'אין סרטונים בהיסטוריה שלך שתואמים למסננים האלה.'
   Delete Old Compact: "מחיקת ישנים"
   Repair Compact: "תיקון"
   Mark All Watched Compact: "סימון הכול כנצפה"

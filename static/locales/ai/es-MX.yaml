@@ -233,6 +233,13 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
 History:
+  From Date: 'Desde'
+  To Date: 'Hasta'
+  Channel Filter: 'Canal'
+  All Channels: 'Todos los canales'
+  Clear Filters: 'Borrar filtros'
+  Invalid Date Range: 'La fecha inicial debe ser anterior o igual a la fecha final.'
+  Empty Filter Message: 'Ningún video de tu historial coincide con estos filtros.'
   Delete Old Compact: "Borrar antiguos"
   Repair Compact: "Reparar"
   Mark All Watched Compact: "Marcar todos vistos"

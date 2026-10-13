@@ -205,6 +205,13 @@ User Playlists:
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
 History:
+  From Date: 'Başlangıç'
+  To Date: 'Bitiş'
+  Channel Filter: 'Kanal'
+  All Channels: 'Tüm kanallar'
+  Clear Filters: 'Filtreleri temizle'
+  Invalid Date Range: 'Başlangıç tarihi bitiş tarihinden önce veya aynı gün olmalıdır.'
+  Empty Filter Message: 'Geçmişinizde bu filtrelerle eşleşen video yok.'
   Delete Old Compact: "Eskileri sil"
   Repair Compact: "Onar"
   Mark All Watched Compact: "Tümü izlendi"

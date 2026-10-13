@@ -120,7 +120,7 @@
         </p>
       </section>
       <FtInput
-        v-show="fullData.length > 1"
+        v-show="historyCacheSorted.length > 1"
         ref="searchBar"
         class="historySearch"
         input-type="search"
@@ -132,20 +132,40 @@
         @input="handleQueryChange"
       />
       <div
-        v-if="fullData.length > 1"
-        class="optionsRow"
+        v-if="historyCacheSorted.length > 0"
+        class="historyFilterToggleRow optionsRow"
       >
-        <div
-          class="toggleOptions"
-        >
-          <FtToggleSwitch
-            :label="t('History.Case Sensitive Search')"
-            :compact="true"
-            :default-value="doCaseSensitiveSearch"
-            @change="doCaseSensitiveSearch = !doCaseSensitiveSearch"
-          />
+        <div class="historySearchOptions">
+          <FtButton
+            class="historyFilterToggle"
+            :label="t('Search Filters.Search Filters')"
+            :icon="['fas', 'filter']"
+            :aria-expanded="showFilters"
+            :aria-controls="filtersPanelId"
+            :selected="showFilters || hasBrowseFilters"
+            @click="showFilters = !showFilters"
+          >
+            <template #label>
+              {{ t('Search Filters.Search Filters') }}
+              <FtIcon
+                :icon="['fas', showFilters ? 'angle-up' : 'angle-down']"
+                aria-hidden="true"
+              />
+            </template>
+          </FtButton>
+          <div
+            class="toggleOptions"
+          >
+            <FtToggleSwitch
+              :label="t('History.Case Sensitive Search')"
+              :compact="true"
+              :default-value="doCaseSensitiveSearch"
+              @change="doCaseSensitiveSearch = !doCaseSensitiveSearch"
+            />
+          </div>
         </div>
         <FtSelect
+          v-if="historyCacheSorted.length > 1"
           size-to-content
           class="sortSelect"
           :placeholder="t('Global.Sort By')"
@@ -156,6 +176,64 @@
           @change="updateUserHistorySortBy"
         />
       </div>
+      <section
+        v-if="historyCacheSorted.length > 0"
+        v-show="showFilters"
+        :id="filtersPanelId"
+        class="historyFilterCard"
+        :aria-label="t('Search Filters.Search Filters')"
+      >
+        <div
+          class="historyFilters"
+        >
+          <FtInput
+            class="historyDateFilter"
+            input-type="date"
+            :label="t('History.From Date')"
+            :placeholder="t('History.From Date')"
+            :icon="['fas', 'calendar-days']"
+            :show-action-button="false"
+            :value="fromDate"
+            :invalid="invalidDateRange"
+            @input="fromDate = $event"
+          />
+          <FtInput
+            class="historyDateFilter"
+            input-type="date"
+            :label="t('History.To Date')"
+            :placeholder="t('History.To Date')"
+            :icon="['fas', 'calendar-days']"
+            :show-action-button="false"
+            :value="toDate"
+            :min="fromDate || null"
+            :invalid="invalidDateRange"
+            @input="toDate = $event"
+          />
+          <FtSelect
+            class="historyChannelFilter"
+            :placeholder="t('History.Channel Filter')"
+            :icon="['fas', 'circle-user']"
+            :value="channel"
+            :select-names="channelNames"
+            :select-values="channelValues"
+            @change="channel = $event"
+          />
+          <FtButton
+            class="historyClearFilters"
+            :label="t('History.Clear Filters')"
+            :icon="['fas', 'xmark']"
+            :disabled="!hasBrowseFilters"
+            @click="clearBrowseFilters"
+          />
+          <p
+            v-if="invalidDateRange"
+            class="historyFilterError"
+            role="alert"
+          >
+            {{ t('History.Invalid Date Range') }}
+          </p>
+        </div>
+      </section>
       <div
         class="historyResults"
         :aria-busy="isSearching"
@@ -168,7 +246,7 @@
         />
         <template v-else>
           <FtFlexBox
-            v-if="fullData.length === 0"
+            v-if="historyCacheSorted.length === 0"
           >
             <p class="message">
               {{ t("History['Your history list is currently empty.']") }}
@@ -178,7 +256,7 @@
             v-else-if="activeData.length === 0"
           >
             <p class="message">
-              {{ t("History['Empty Search Message']") }}
+              {{ hasBrowseFilters ? t('History.Empty Filter Message') : t("History['Empty Search Message']") }}
             </p>
           </FtFlexBox>
           <FtElementList
@@ -340,7 +418,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
@@ -360,6 +438,7 @@ import store from '../../store'
 
 import { needsHistoryRepair } from '../../../historyRepair'
 import { filterVideosWithQueryAsync } from '../../helpers/historySearch'
+import { filterHistoryByDateAndChannel, getHistoryChannels, parseHistoryDate } from '../../helpers/historyBrowse'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, metadataRepairBusy, repairCookiesConfigured, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -377,8 +456,18 @@ const dataLimit = ref(oldDataLimit !== null ? parseInt(oldDataLimit) : 100)
 
 const searchDataLimit = ref(100)
 const doCaseSensitiveSearch = ref(false)
+const showFilters = ref(false)
+const filtersPanelId = useId()
 const showLoadMoreButton = ref(false)
 const query = ref('')
+const fromDate = ref(parseHistoryDate(route.query.fromDate) ? route.query.fromDate : '')
+const toDate = ref(parseHistoryDate(route.query.toDate) ? route.query.toDate : '')
+const channel = ref(typeof route.query.channel === 'string' ? route.query.channel : '')
+let applyingRouteState = false
+const pendingRouteSaves = new Set()
+const hasBrowseFilters = computed(() => !!(fromDate.value || toDate.value || channel.value))
+const hasFilters = computed(() => hasBrowseFilters.value || query.value.trim().length > 0)
+const invalidDateRange = computed(() => !!(fromDate.value && toDate.value && fromDate.value > toDate.value))
 const isSearching = ref(false)
 const activeData = ref([])
 const historyContent = useTemplateRef('historyContent')
@@ -432,6 +521,7 @@ watch(() => historyRepairState.running, running => {
 })
 
 watch(() => historyRepairState.phase, clampHistoryScroll)
+watch(showFilters, clampHistoryScroll)
 
 const MARK_ALL_PROMPT_VALUES = ['confirm', 'cancel']
 const markAllPromptNames = computed(() => [
@@ -505,6 +595,33 @@ const historyCacheSorted = computed(() => {
   }
 })
 
+const channels = computed(() => {
+  const options = getHistoryChannels(store.getters.getHistoryCacheSorted, locale.value)
+  // Retain the selected option if its last record is removed or repaired.
+  // Silently clearing it would unexpectedly broaden the results.
+  if (channel.value && !options.some(option => option.value === channel.value)) {
+    options.push({ value: channel.value, name: channel.value.slice(channel.value.indexOf(':') + 1) })
+  }
+  return options
+})
+const channelNames = computed(() => [t('History.All Channels'), ...channels.value.map(option => option.name)])
+const channelValues = computed(() => ['', ...channels.value.map(option => option.value)])
+const browseData = computed(() => filterHistoryByDateAndChannel(historyCacheSorted.value, {
+  fromDate: fromDate.value, toDate: toDate.value, channel: channel.value,
+}))
+
+function clearBrowseFilters() {
+  fromDate.value = ''
+  toDate.value = ''
+  channel.value = ''
+}
+
+watch([fromDate, toDate, channel], () => {
+  if (applyingRouteState) return
+  searchDataLimit.value = 100
+  saveStateInRouter()
+}, { flush: 'sync' })
+
 const hasUnwatchedHistory = computed(() => {
   return historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
 })
@@ -531,17 +648,18 @@ const fullData = computed(() => {
   // deep watch every record. In-place record field updates (e.g. watch
   // progress) don't affect the filtering, the list items react to those
   // themselves.
-  return historyCacheSorted.value.slice(0, dataLimit.value)
+  return browseData.value.slice(0, hasBrowseFilters.value ? searchDataLimit.value : dataLimit.value)
 })
 
 watch(fullData, filterHistory)
 watch(locale, scheduleHistorySearch)
 watch(doCaseSensitiveSearch, () => {
+  if (applyingRouteState) return
   if (query.value.trim().length > 0) {
     scheduleHistorySearch()
   }
   saveStateInRouter()
-})
+}, { flush: 'sync' })
 
 /**
  * @param {string} query_
@@ -578,8 +696,9 @@ function handleQueryChange(query_, limit = undefined, doCaseSensitiveSearch_ = u
 }
 
 function increaseLimit() {
-  if (query.value.trim().length > 0) {
+  if (hasFilters.value) {
     searchDataLimit.value += 100
+    saveStateInRouter()
     filterHistory()
   } else {
     dataLimit.value += 100
@@ -588,23 +707,29 @@ function increaseLimit() {
 }
 
 let searchGeneration = 0
+let completedSearchInputs = null
 async function filterHistory() {
   filterHistoryAsync.cancel()
   const generation = ++searchGeneration
   if (query.value.trim().length === 0) {
+    completedSearchInputs = null
     isSearching.value = false
     activeData.value = fullData.value
-    showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
+    showLoadMoreButton.value = activeData.value.length < browseData.value.length
     clampHistoryScroll()
     return
   }
 
-  isSearching.value = true
+  const searchInputs = [browseData.value, query.value, doCaseSensitiveSearch.value, locale.value]
+  // Pagination repeats the same search. Keep its existing results visible so
+  // a temporary spinner cannot shorten the page and reset its scroll position.
+  isSearching.value = !completedSearchInputs || searchInputs.some((value, index) => value !== completedSearchInputs[index])
   const filteredQuery = await filterVideosWithQueryAsync(
-    historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value,
+    browseData.value, query.value, doCaseSensitiveSearch.value, locale.value,
     () => generation !== searchGeneration,
   )
   if (!filteredQuery || generation !== searchGeneration) return
+  completedSearchInputs = searchInputs
   isSearching.value = false
 
   const filteredResultCount = filteredQuery.length
@@ -632,26 +757,21 @@ function scheduleHistorySearch() {
   filterHistoryAsync()
 }
 
+function getHistoryRouterState() {
+  const state = {}
+  if (query.value.trim()) state.searchQueryText = query.value
+  if (fromDate.value) state.fromDate = fromDate.value
+  if (toDate.value) state.toDate = toDate.value
+  if (channel.value) state.channel = channel.value
+  if (hasFilters.value) state.searchDataLimit = searchDataLimit.value.toFixed(0)
+  if (query.value.trim() && doCaseSensitiveSearch.value) state.doCaseSensitiveSearch = 'true'
+  return state
+}
+
 async function saveStateInRouter() {
-  const query_ = query.value
-
-  let location
-
-  if (query_.trim().length === 0) {
-    location = { path: '/history' }
-  } else {
-    location = {
-      path: '/history',
-      query: {
-        searchQueryText: query_,
-        searchDataLimit: searchDataLimit.value.toFixed(0)
-      }
-    }
-
-    if (doCaseSensitiveSearch.value) {
-      location.query.doCaseSensitiveSearch = 'true'
-    }
-  }
+  const state = getHistoryRouterState()
+  const location = { path: '/history', query: state, state: { preserveScroll: true } }
+  pendingRouteSaves.add(state)
 
   try {
     await router.replace(location)
@@ -661,8 +781,15 @@ async function saveStateInRouter() {
     }
 
     throw failure
+  } finally {
+    // Keep the snapshot until its route watcher has processed the navigation.
+    await nextTick()
+    pendingRouteSaves.delete(state)
   }
 }
+
+const oldLimit = Number.parseInt(route.query.searchDataLimit)
+if (oldLimit > 0) searchDataLimit.value = oldLimit
 
 const oldQuery = route.query.searchQueryText
 if (oldQuery != null && oldQuery !== '') {
@@ -677,6 +804,28 @@ if (oldQuery != null && oldQuery !== '') {
   // Only display unfiltered data when no query used last time
   filterHistory()
 }
+
+watch(() => route.query, routeQuery => {
+  if (route.path !== '/history') return
+  const state = getHistoryRouterState()
+  const fields = ['fromDate', 'toDate', 'channel', 'searchQueryText', 'searchDataLimit', 'doCaseSensitiveSearch']
+  // Queued UI saves may arrive after newer edits. They must not restore old controls.
+  if ([...pendingRouteSaves].some(saved => fields.every(field => routeQuery[field] === saved[field]))) return
+  // UI changes already have the desired state. Only apply external navigation.
+  if (fields.every(field => routeQuery[field] === state[field])) return
+
+  // Restore all fields together without resetting pagination or rewriting the URL.
+  applyingRouteState = true
+  fromDate.value = parseHistoryDate(routeQuery.fromDate) ? routeQuery.fromDate : ''
+  toDate.value = parseHistoryDate(routeQuery.toDate) ? routeQuery.toDate : ''
+  channel.value = typeof routeQuery.channel === 'string' ? routeQuery.channel : ''
+  query.value = typeof routeQuery.searchQueryText === 'string' ? routeQuery.searchQueryText : ''
+  doCaseSensitiveSearch.value = routeQuery.doCaseSensitiveSearch === 'true'
+  const limit = Number.parseInt(routeQuery.searchDataLimit)
+  searchDataLimit.value = limit > 0 ? limit : 100
+  applyingRouteState = false
+  filterHistory()
+})
 
 /**
  * @param {KeyboardEvent} event
