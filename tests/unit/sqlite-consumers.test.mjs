@@ -732,7 +732,7 @@ test('playlist selectors display summary counts, artwork and indexed duplicate p
       computed, ref, unref, defineProps: () => props, defineEmits: () => () => {},
       useI18n: () => ({ t: () => '' }), thumbnailPlaceholder: 'placeholder',
       getVideoThumbnailUrl: id => `thumbnail:${id}`,
-      store: { getters: { getToBeAddedToPlaylistVideoList: [{ videoId: 'saved' }] } },
+      store: { state: { playlists: { libraryPaged: !portable } }, getters: { getToBeAddedToPlaylistVideoList: [{ videoId: 'saved' }] } },
     })
     assert.equal(result.count, portable ? 3 : 20000)
     assert.equal(result.thumbnail, 'thumbnail:saved')
