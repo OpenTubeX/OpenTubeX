@@ -514,15 +514,22 @@ async function importUnifiedBackup() {
   try {
     if (process.env.IS_ELECTRON) {
       const result = await DBLibraryHandlers.query('importApply', { id: data.id, sections: [...selected] })
-      for (const [section, reason] of [['profiles', 'profilesOrSubscriptions'], ['playlists', 'playlists'], ['history', 'history'], ['watchStats', 'watchStats']]) {
+      for (const [section, reason] of [['playlists', 'playlists'], ['history', 'history'], ['watchStats', 'watchStats']]) {
         if (selected.has(section)) store.dispatch('scheduleSyncServer', reason).catch(console.error)
       }
       if (requestIsCurrent()) closeBackupImport()
       try {
-        await Promise.all([
+        const refreshes = await Promise.allSettled([
           ...(result.settings ? [applyImportedSettings(result.settings)] : []),
-          ...['grabAllProfiles', 'grabAllPlaylists', 'grabHistory', 'grabWatchStats', 'grabSearchHistoryEntries'].map(action => store.dispatch(action))
+          store.dispatch('grabAllProfiles').then(refreshed => {
+            if (refreshed !== true) throw new Error('Restored profiles could not be refreshed')
+            if (selected.has('profiles')) return store.dispatch('scheduleSyncServer', 'profilesOrSubscriptions')
+          }),
+          ...['grabAllPlaylists', 'grabHistory', 'grabWatchStats', 'grabSearchHistoryEntries'].map(action => store.dispatch(action))
         ])
+        for (const refresh of refreshes) {
+          if (refresh.status === 'rejected') console.error('Backup applied; refresh failed', refresh.reason)
+        }
       } catch (error) {
         console.error('Backup applied; refresh failed', error)
       }

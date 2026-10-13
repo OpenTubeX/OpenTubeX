@@ -369,12 +369,14 @@ for (const failure of ['none', 'apply', 'refresh', 'settings']) {
         assert.equal(saved, true)
         dispatched.push([action, reason])
         if (action.startsWith('grab') && failure === 'refresh') throw new Error('refresh failed')
+        return true
       } },
       t: key => key, showToast: toast => toasts.push(toast),
     })
     await context.importUnifiedBackup()
     assert.deepEqual(dispatched.filter(([action]) => action === 'scheduleSyncServer'), failure === 'apply' ? [] : [
-      ['scheduleSyncServer', 'profilesOrSubscriptions'], ['scheduleSyncServer', 'history'], ['scheduleSyncServer', 'watchStats'],
+      ['scheduleSyncServer', 'history'], ['scheduleSyncServer', 'watchStats'],
+      ...(failure === 'refresh' ? [] : [['scheduleSyncServer', 'profilesOrSubscriptions']]),
     ])
     assert.equal(context.backupBusy.value, false)
     assert.match(toasts.at(-1).message, failure === 'apply' ? /Import Failed/ : /Backup imported/)
@@ -3292,5 +3294,31 @@ for (const action of ['exportAsFreeTubeDatabase', 'exportAsYouTubeCsv', 'exportA
     }
     assert.match(written, /original-video/)
     assert.equal(closed, true)
+  })
+}
+
+for (const outcome of ['success', 'false', 'reject']) {
+  test(`desktop restored profiles are synced only after a successful cache refresh: ${outcome}`, async () => {
+    const refresh = Promise.withResolvers(), scheduled = [], toasts = []
+    let cached = [{ _id: 'old', subscriptions: [] }]
+    const restored = [{ _id: 'restored', subscriptions: [{ id: 'retained-channel' }], unknown: new Date(1) }]
+    const context = await functions(dataSettings, ['importUnifiedBackup'], {
+      backupDisposed: false, backupImportGeneration: 0, backupWriteGeneration: null,
+      backupBusy: ref(false), selectedBackupSections: ref(['profiles']), backupData: ref({ id: 'job' }), closeBackupImport() {},
+      DBLibraryHandlers: { query: async () => ({}) }, t: key => key, showToast: toast => toasts.push(toast),
+      store: { dispatch: async (action, reason) => {
+        if (action === 'grabAllProfiles') { const success = await refresh.promise; if (success === true) cached = restored; return success }
+        if (action === 'scheduleSyncServer') scheduled.push({ reason, cached: structuredClone(cached) })
+      } },
+    })
+    const importing = context.importUnifiedBackup()
+    await setImmediate()
+    assert.deepEqual(scheduled, [])
+    if (outcome === 'reject') refresh.reject(new Error('refresh failed'))
+    else refresh.resolve(outcome === 'success')
+    await importing
+    assert.deepEqual(scheduled, outcome === 'success' ? [{ reason: 'profilesOrSubscriptions', cached: restored }] : [])
+    assert.match(toasts.at(-1).message, /Backup imported/)
+    assert.equal(context.backupBusy.value, false)
   })
 }

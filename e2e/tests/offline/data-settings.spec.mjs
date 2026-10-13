@@ -209,6 +209,52 @@ test('shows icons on data actions and vertically centers export choices', async 
   ))).toBe(true)
 })
 
+for (const success of [false, true]) {
+  test(`restored profiles wait for a ${success ? 'successful' : 'failed'} cache refresh before automatic sync`, async ({ page }) => {
+    const profile = { _id: 'restored-sync-profile', name: 'Restored sync profile', subscriptions: [{ id: 'retained-channel', name: 'Retained channel' }], unknown: { keep: true } }
+    const archive = Array.from(zipSync(Object.fromEntries(Object.entries({
+      manifest: { format: 'opentubex-backup', version: 1 }, settings: {}, profiles: [profile], playlists: [], history: [], searchHistory: [], watchStats: { records: [], adjustment: null },
+    }).map(([name, value]) => [`${name}.json`, strToU8(JSON.stringify(value))]))))
+    const section = await goToSettingsSection(page, 'data')
+    await page.evaluate(archive => {
+      window.showOpenFilePicker = async () => [{ getFile: async () => new File([Uint8Array.from(archive)], 'restored-profiles.zip', { type: 'application/zip' }) }]
+    }, archive)
+    await section.getByRole('button', { name: 'Import backup', exact: true }).click()
+    const prompt = page.locator('.settingsSubpageContent', { hasText: 'restored-profiles.zip' })
+    await expect(prompt).toBeVisible()
+    await page.evaluate(success => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const dispatch = store.dispatch
+      const pending = new Promise(resolve => { window.finishProfileRefresh = resolve })
+      window.profileRefreshStarted = false
+      window.restoredProfileSyncs = []
+      store.dispatch = async (...args) => {
+        if (args[0] === 'grabAllProfiles') {
+          window.profileRefreshStarted = true
+          await pending
+          if (!success) return null
+        }
+        if (args[0] === 'scheduleSyncServer' && args[1] === 'profilesOrSubscriptions') {
+          // These generated fixtures contain only JSON values; Vue getters are proxies.
+          window.restoredProfileSyncs.push(JSON.parse(JSON.stringify(store.getters.getProfileList)))
+        }
+        return dispatch(...args)
+      }
+    }, success)
+    await prompt.getByRole('button', { name: 'Import selected data', exact: true }).click()
+    await expect.poll(() => page.evaluate(() => window.profileRefreshStarted)).toBe(true)
+    expect(await page.evaluate(() => window.restoredProfileSyncs)).toStrictEqual([])
+    const saved = () => page.evaluate(async ({ action, id }) => (await window.ftElectron.dbProfiles(action, {})).find(profile => profile._id === id), { action: DBActions.GENERAL.FIND, id: profile._id })
+    expect(await saved()).toStrictEqual(profile)
+    await page.evaluate(() => window.finishProfileRefresh())
+    await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
+    const queued = await page.evaluate(() => window.restoredProfileSyncs)
+    expect(queued).toHaveLength(success ? 1 : 0)
+    if (success) expect(queued[0].find(entry => entry._id === profile._id)).toStrictEqual(profile)
+    expect(await saved()).toStrictEqual(profile)
+  })
+}
+
 test('exports and imports search history and merges changed history IDs through the unified ZIP', async ({ page }) => {
   const dataSection = await goToSettingsSection(page, 'data')
   await page.evaluate(async action => {
@@ -268,7 +314,7 @@ test('exports and imports search history and merges changed history IDs through 
     return store.getters.getWatchSecondsByDate['2026-09-26']
   })).toBe(42)
   await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
-  expect(await page.evaluate(() => window.backupSyncReasons.filter(reason => ['profilesOrSubscriptions', 'playlists', 'history', 'watchStats'].includes(reason)))).toStrictEqual(['profilesOrSubscriptions', 'playlists', 'history', 'watchStats'])
+  expect(await page.evaluate(() => window.backupSyncReasons.filter(reason => ['profilesOrSubscriptions', 'playlists', 'history', 'watchStats'].includes(reason)))).toStrictEqual(['playlists', 'history', 'watchStats', 'profilesOrSubscriptions'])
   expect(await page.evaluate(async () => (await window.ftElectron.libraryQuery('videoState', { ids: ['zipmerge001'] })).history)).toEqual([
     { _id: 'current-history', videoId: 'zipmerge001', timeWatched: 20, watchProgress: 80, isWatched: true, backupUnknown: 'keep', currentUnknown: 'keep' },
   ])
