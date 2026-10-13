@@ -1964,27 +1964,34 @@ test.describe('settings', () => {
     const settingsWindow = page.locator('.settingsWindow')
     const settingsMenu = page.locator('.settingsMenu')
 
+    const closeWithCurrentView = async (contentSelector) => {
+      // Read the closing view in one browser callback before the animation ends.
+      const closingView = await settingsWindow.evaluate(async (element, selector) => {
+        element.querySelector('.settingsCloseButton').click()
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        return {
+          leaving: element.classList.contains('settings-window-leave-active'),
+          menuVisible: element.querySelector('.settingsMenu')?.checkVisibility() ?? false,
+          contentVisible: element.querySelector(selector)?.checkVisibility() ?? false
+        }
+      }, contentSelector)
+      expect(closingView).toEqual({ leaving: true, menuVisible: false, contentVisible: true })
+      await expect(settingsWindow).toBeHidden()
+    }
+
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="playback"]').click()
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
     await expect(page.locator('.channelListContainer')).toBeVisible()
 
-    await page.locator('.settingsCloseButton').click()
-    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
-    await expect(settingsMenu).toBeHidden()
-    await expect(page.locator('.channelListContainer')).toBeVisible()
-    await expect(settingsWindow).toBeHidden()
+    await closeWithCurrentView('.channelListContainer')
 
     await goTo(page, 'settings')
     await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
     await expect(settingsMenu).toBeHidden()
     await expect(page.locator('.shortcutColumns')).toBeVisible()
 
-    await page.locator('.settingsCloseButton').click()
-    await expect(settingsWindow).toHaveClass(/settings-window-leave-active/)
-    await expect(settingsMenu).toBeHidden()
-    await expect(page.locator('.shortcutColumns')).toBeVisible()
-    await expect(settingsWindow).toBeHidden()
+    await closeWithCurrentView('.shortcutColumns')
 
     await goTo(page, 'settings')
     await expect(page.locator('.shortcutColumns')).toHaveCount(0)
