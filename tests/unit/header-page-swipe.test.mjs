@@ -250,6 +250,7 @@ function iconGesture(disabled = false) {
   const emitted = []
   const context = vm.createContext({
     props: { openOnRightOrLongClick: true, disabled }, LONG_CLICK_BOUNDARY_MS: 500,
+    settingsOverlayActive: { value: true },
     setTimeout: fn => { timers.set(++sequence, fn); return sequence }, clearTimeout: id => timers.delete(id),
     handleIconClick: () => opened++, emit: event => emitted.push(event),
     window: {
@@ -277,6 +278,28 @@ test('icon button long presses are cancelled by dragging and pointer cancellatio
   context.handleIconPointerDown(event)
   context.clearLongPress()
   assert.equal(timers.size, 0, 'pointer cancellation must not leave a pending hold')
+})
+
+test('inactive icon controls reject delayed clicks and pointer presses', () => {
+  const { context, event, timers, emitted, listenerCount } = iconGesture(true)
+  context.settingsOverlayActive.value = false
+  context.handleIconClick({ detail: 0 })
+  context.handleIconPointerDown(event)
+  context.handleIconPointerDown({ ...event, button: 2 })
+  assert.equal(timers.size, 0)
+  assert.equal(listenerCount(), 0)
+  assert.deepEqual(emitted, [])
+})
+
+test('an icon hold that expires after deactivation neither opens nor suppresses a future click', () => {
+  const { context, event, timers, opened, listenerCount } = iconGesture()
+  context.handleIconPointerDown(event)
+  context.settingsOverlayActive.value = false
+  for (const timer of [...timers.values()]) timer()
+  assert.equal(opened(), 0)
+  assert.equal(timers.size, 0)
+  assert.equal(listenerCount(), 0)
+  assert.equal(context.suppressLongPressClick({ pointerId: event.pointerId, detail: 1 }), false)
 })
 
 for (const type of ['pointermove', 'pointerup', 'pointercancel']) {

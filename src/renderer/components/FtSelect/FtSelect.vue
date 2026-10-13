@@ -428,7 +428,7 @@ function toggleDropdown() {
 }
 
 function openDropdown() {
-  if (props.disabled) return
+  if (props.disabled || !settingsOverlayActive.value) return
 
   search.value = ''
   emit('open')
@@ -440,6 +440,7 @@ function openDropdown() {
   dropdownShown.value = true
 
   nextTick(async () => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
     await refreshDropdownLayout()
     scrollActiveOptionIntoView()
   })
@@ -543,6 +544,7 @@ function moveActiveIndex(offset) {
 
 function scrollActiveOptionIntoView() {
   nextTick(() => {
+    if (!settingsOverlayActive.value || !dropdownShown.value) return
     const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
     options.value?.[visibleIndex]?.scrollIntoView({ block: 'nearest' })
   })
@@ -552,6 +554,7 @@ function scrollActiveOptionIntoView() {
  * @param {KeyboardEvent} event
  */
 function handleButtonKeydown(event) {
+  if (!settingsOverlayActive.value) return
   // Alt+Arrow is the platform shortcut for opening/closing a select
   if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && event.altKey) {
     event.preventDefault()
@@ -660,6 +663,7 @@ function selectOffset(offset) {
 }
 
 function selectOption(index) {
+  if (!settingsOverlayActive.value) return
   if (props.disabled) {
     closeDropdown()
     return
@@ -670,7 +674,7 @@ function selectOption(index) {
     emit('change', selectedValue)
   }
   closeDropdown()
-  selectButton.value?.focus()
+  if (settingsOverlayActive.value) selectButton.value?.focus()
 }
 
 function handleOutsidePointerDown(event) {
@@ -735,6 +739,7 @@ function removeDropdownListeners() {
  * @param {Event} event
  */
 function change(event) {
+  if (!settingsOverlayActive.value) return
   const select = event.target
   emit('change', select.value)
   nextTick(() => {

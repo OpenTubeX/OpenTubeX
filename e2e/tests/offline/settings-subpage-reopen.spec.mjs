@@ -177,8 +177,90 @@ for (const uiScale of [100, 125]) {
       await passwordInput.press('Enter')
       await expect(themeName).toBeVisible()
       await expect(themeName).toHaveValue('Unfinished theme')
+      await expect(page.locator('.colorPickerPopover')).toHaveCount(0)
       await expect.poll(async () => Math.abs(await scroller.evaluate(element => element.scrollTop) - scrollTop)).toBeLessThanOrEqual(1)
     })
+
+    for (const overlay of ['color', 'select', 'icon', 'tooltip']) {
+      test(`rejects inactive opens of a retained ${overlay} overlay through unlocking`, async ({ app, page }) => {
+        await goTo(page, 'settings')
+        const passwordInput = page.locator('.settingsPassword').getByLabel('Password', { exact: true })
+        await passwordInput.fill(password)
+        await passwordInput.press('Enter')
+        let trigger
+        let popup
+        if (overlay === 'icon') {
+          await page.evaluate(() => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setChannelPlaybackSpeeds', JSON.stringify({ UCaaaaaaaaaaaaaaaaaaaaaa: 1.5 }))
+            store.commit('setRememberVolumePerChannel', true)
+          })
+          const playback = await goToSettingsSection(page, 'playback')
+          await playback.getByRole('button', { name: /^Manage Saved Channels/ }).click()
+          trigger = page.locator('.channelEntry').getByRole('button', { name: 'Remember another setting for this channel', exact: true })
+          popup = page.locator('.iconDropdown')
+        } else {
+          const appearance = await goToSettingsSection(page, 'appearance')
+          if (overlay === 'tooltip') {
+            trigger = appearance.locator('.tooltip .button').first()
+            popup = page.locator('body > [role="tooltip"]:visible')
+          } else {
+            await appearance.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+            const editor = page.locator('.customThemeEditor')
+            trigger = overlay === 'select'
+              ? editor.getByRole('combobox', { name: 'Based on', exact: true })
+              : editor.locator('.colorFieldTrigger').first()
+            popup = page.locator(overlay === 'select' ? '.selectDropdown' : '.colorPickerPopover')
+          }
+        }
+        const triggerHandle = await trigger.elementHandle()
+        let colorSourcesHandle
+        const openPopup = async () => {
+          if (overlay === 'tooltip') await trigger.focus()
+          else await trigger.click()
+          await expect(popup).toBeVisible()
+          if (overlay === 'color') {
+            await expect(page.locator('.colorSourceList')).toHaveCount(0)
+            colorSourcesHandle ??= await popup.locator('.copyFromButton').elementHandle()
+          }
+        }
+        const closePopup = async () => {
+          if (overlay === 'tooltip') await trigger.evaluate(button => button.blur())
+          else await page.keyboard.press('Escape')
+          await expect(popup).toHaveCount(0)
+        }
+        await page.mouse.move(0, 0)
+        await openPopup()
+        await closePopup()
+        for (const phase of ['closed', 'locked']) {
+          await toggleSettingsFromPreferences(app)
+          await expect(page.locator('.settingsWindow')).toBeHidden()
+          if (phase === 'locked') {
+            await toggleSettingsFromPreferences(app)
+            await expect(passwordInput).toBeFocused()
+          }
+          await triggerHandle.evaluate((button, type) => {
+            if (type === 'tooltip') {
+              button.dispatchEvent(new MouseEvent('mouseenter'))
+              button.dispatchEvent(new FocusEvent('focus'))
+            } else button.click()
+          }, overlay)
+          if (colorSourcesHandle) await colorSourcesHandle.evaluate(button => button.click())
+          await expect(popup).toHaveCount(0)
+          if (phase === 'closed') {
+            await toggleSettingsFromPreferences(app)
+            await expect(passwordInput).toBeFocused()
+          }
+          await passwordInput.fill(password)
+          await passwordInput.press('Enter')
+          await expect(page.locator('.settingsPassword')).toHaveCount(0)
+          await expect(trigger).toBeVisible()
+          await expect(popup).toHaveCount(0)
+          await openPopup()
+          await closePopup()
+        }
+      })
+    }
 
     for (const opener of ['header', 'toast']) {
       test(`a direct section opener replaces a pending search target (${opener})`, async ({ page }) => {

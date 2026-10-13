@@ -62,6 +62,7 @@ let trackingPosition = false
  * @param {boolean} value
  */
 function setHovered(value) {
+  if (value && !settingsOverlayActive.value) return
   hovered = value
   updateVisibility()
 }
@@ -70,6 +71,7 @@ function setHovered(value) {
  * @param {boolean} value
  */
 function setFocused(value) {
+  if (value && !settingsOverlayActive.value) return
   focused = value
   updateVisibility()
 }
@@ -79,7 +81,7 @@ function updateVisibility() {
   if (visible.value) {
     tooltipTarget.value = document.fullscreenElement ?? document.body
     nextTick(() => {
-      if (!visible.value) return
+      if (!settingsOverlayActive.value || !visible.value) return
       positionTooltip()
       startTrackingPosition()
     })
