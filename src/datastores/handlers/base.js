@@ -711,8 +711,9 @@ class Profiles {
     return db.profiles.insertAsync(profile)
   }
 
-  static async find() {
+  static async find({ preserveRetained = false } = {}) {
     await loadProfilesDatastore()
+    if (preserveRetained) return db.profiles.findAsync({})
     try {
       await db.profiles.updateAsync(
         { _id: MAIN_PROFILE_ID, $or: [{ icon: null }, { icon: { $exists: false } }] },

@@ -335,9 +335,16 @@ const actions = {
     }
   },
 
-  async grabAllPlaylists({ rootState, commit, dispatch, state }) {
+  async grabAllPlaylists({ rootState, commit, dispatch, state }, { preserveRetained = false } = {}) {
     try {
       const payload = (await DBPlaylistHandlers.find()).filter((e) => e != null)
+      // Restore publication is a read: startup repairs would rewrite retained
+      // fields on imported and unrelated playlists.
+      if (preserveRetained) {
+        commit('setAllPlaylists', payload)
+        commit('setPlaylistsReady', true)
+        return true
+      }
       if (payload.length === 0) {
         // Not using `addPlaylists` to ensure required attributes with dynamic values added
         state.defaultPlaylists.forEach(playlist => {

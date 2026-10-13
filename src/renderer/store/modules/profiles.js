@@ -67,9 +67,10 @@ function profileSort(a, b) {
 
 const actions = {
   async grabAllProfiles({ rootState, commit, state }, defaultName = null) {
+    const preserveRetained = defaultName?.preserveRetained === true
     let profiles
     try {
-      profiles = await DBProfileHandlers.find()
+      profiles = await DBProfileHandlers.find({ preserveRetained })
     } catch (errMessage) {
       console.error(errMessage)
       return null
@@ -81,7 +82,7 @@ const actions = {
       // Create a default profile and persist it
       const defaultProfile = {
         _id: MAIN_PROFILE_ID,
-        name: defaultName,
+        name: preserveRetained ? state.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.name ?? null : defaultName,
         bgColor: THEME_BG_COLOR,
         textColor: THEME_TEXT_COLOR,
         icon: { ...DEFAULT_PROFILE_ICON },

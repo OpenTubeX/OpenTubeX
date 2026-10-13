@@ -2953,3 +2953,16 @@ test('Takeout target lookup returns matching headers without reading member arra
   guard.mock.restore()
   assert.deepEqual((await engine.playlistSnapshot({ id: 'saved' })).videos, videos)
 })
+
+test('legacy profile import retains own prototype keys safely and rolls back invalid NeDB keys', async t => {
+  const engine = memory(t)
+  await engine.collections.profiles.insertAsync({ _id: 'allChannels', name: 'All', subscriptions: [] })
+  const incoming = JSON.parse('{"_id":"safe","name":"Safe","__proto__":{"polluted":true},"subscriptions":[{"id":"channel","unknown":{"__proto__":{"polluted":true}}}]}')
+  await importSubscriptionProfiles(engine, { profiles: [incoming] })
+  assert.deepEqual(await engine.collections.profiles.findOneAsync({ _id: 'safe' }), incoming)
+  assert.equal(Object.prototype.polluted, undefined)
+  const before = await engine.collections.profiles.findAsync({}).sort({ _id: 1 })
+  await assert.rejects(importSubscriptionProfiles(engine, { profiles: [{ _id: 'earlier', name: 'Earlier', subscriptions: [] }, { _id: 'invalid', name: 'Invalid', subscriptions: [], unknown: { $bad: true } }] }), /\$/)
+  assert.deepEqual(await engine.collections.profiles.findAsync({}).sort({ _id: 1 }), before)
+  assert.equal(Object.prototype.polluted, undefined)
+})

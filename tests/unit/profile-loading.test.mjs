@@ -34,11 +34,11 @@ async function fixture(main = mainProfile) {
   const module = context.profileModule
   return {
     db, module, errors,
-    load: () => module.actions.grabAllProfiles({
+    load: options => module.actions.grabAllProfiles({
       rootState: { settings: { defaultProfile: 'second' } },
       state: module.state,
       commit: (mutation, value) => module.mutations[mutation](module.state, value)
-    })
+    }, options)
   }
 }
 
@@ -88,4 +88,23 @@ test('loads existing profiles when persisting the default icon fails', async () 
   ])
   assert.equal(module.state.activeProfile, 'second')
   assert.deepEqual(errors, [writeError])
+})
+
+test('restore profile refresh retains missing icons without repairing persisted records', async () => {
+  const { db, module, load } = await fixture({ ...mainProfile, icon: null, unknown: new Date(1) })
+  const before = await db.profiles.findAsync({})
+  db.profiles.updateAsync = () => assert.fail('Unexpected profile repair')
+  assert.equal(await load({ preserveRetained: true }), true)
+  assert.deepEqual(await db.profiles.findAsync({}), before)
+  assert.deepEqual(structuredClone(module.state.profileList), before.map(profile => ({ ...profile, icon: profile.icon ?? DEFAULT_PROFILE_ICON })))
+})
+
+test('restore of an empty profile store initializes the default successfully without using the options as its name', async () => {
+  const { db, module, load } = await fixture()
+  await db.profiles.removeAsync({}, { multi: true })
+  assert.equal(await load({ preserveRetained: true }), false)
+  const created = await db.profiles.findAsync({})
+  assert.equal(created.length, 1)
+  assert.equal(created[0].name, 'All Channels')
+  assert.deepEqual(structuredClone(module.state.profileList), structuredClone(created))
 })

@@ -38,16 +38,17 @@ async function fixture(records) {
   )
   const context = {
     state: module.state,
-    rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]._id } },
+    rootState: { settings: { quickBookmarkTargetPlaylistId: records[0]?._id } },
     commit: (name, value) => module.mutations[name](module.state, value),
     dispatch: (name, value) => module.actions[name]?.(context, value),
   }
   return {
     db, module, errors, handlers: DBPlaylistHandlers,
     dispatch: context.dispatch,
-    async load() {
-      await module.actions.grabAllPlaylists(context)
+    async load(options) {
+      const result = await module.actions.grabAllPlaylists(context, options)
       for (let i = 0; i < pending.length; i++) await pending[i]
+      return result
     },
   }
 }
@@ -109,3 +110,15 @@ test('a failed protection repair does not hide loaded playlists', async () => {
   assert.deepEqual(Array.from(module.state.playlists, p => p._id).sort(), ['custom', 'watchLater'])
   assert.deepEqual(errors, [failure])
 })
+
+for (const records of [[], [{ _id: 'restored', playlistName: 'Retained', videos: [{ videoId: 'v', description: 'keep', viewCount: 42, unknown: new Date(1) }] }, { _id: 'unselected', playlistName: 'Other', protected: true, videos: [{ videoId: 'other', description: null, viewCount: 0 }] }]]) {
+  test(`read-only restore refresh preserves all playlist fields and performs no writes, count: ${records.length}`, async () => {
+    const { db, module, handlers, load } = await fixture(records)
+    const before = await db.playlists.findAsync({})
+    for (const method of ['create', 'upsert', 'delete']) handlers[method] = () => assert.fail(`Unexpected ${method} during cache refresh`)
+    assert.equal(await load({ preserveRetained: true }), true)
+    assert.deepEqual(await db.playlists.findAsync({}), before)
+    assert.deepEqual(structuredClone(module.state.playlists), before)
+    assert.equal(module.state.playlistsReady, true)
+  })
+}

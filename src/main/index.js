@@ -5517,7 +5517,7 @@ function runApp() {
         }
 
         case DBActions.GENERAL.FIND:
-          return await baseHandlers.profiles.find()
+          return await baseHandlers.profiles.find(data)
 
         case DBActions.GENERAL.UPSERT:
           await baseHandlers.profiles.upsert(data)

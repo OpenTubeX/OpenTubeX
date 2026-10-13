@@ -1475,7 +1475,7 @@ for (const section of ['profiles', 'playlists']) {
       backupBusy: { value: false }, selectedBackupSections: { value: [section] }, backupData: { value: { [section]: records } },
       DBProfileHandlers: handler, DBPlaylistHandlers: handler, mergeBackupProfile, mergeBackupPlaylist,
       compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => toasts.push(toast), console: { error: error => errors.push(error) },
-      store: { dispatch: async action => { if (action === refreshAction) { refreshes++; return false } return true } },
+      store: { dispatch: async action => { if (action === refreshAction) { refreshes++; return section === 'profiles' ? null : false } return true } },
     })
     await apply()
     assert.equal(refreshes, 2)

@@ -395,9 +395,10 @@ for (const adapter of ['nedb', 'sqlite']) {
 
 test('portable restore accumulates repeated playlist records without dropping incoming members', async () => {
   const db = new Datastore({ inMemoryOnly: true })
-  const original = { _id: 'retained', playlistName: 'Retained', protected: false, videos: [{ videoId: 'local', playlistItemId: 'local' }], unknown: new Date(1) }
-  await db.insertAsync(original)
-  const incoming = ['A', 'B'].map(videoId => ({ _id: original._id, playlistName: 'Imported', videos: [{ videoId, playlistItemId: videoId, unknown: new Date(videoId === 'A' ? 2 : 3) }] }))
+  const original = { _id: 'retained', playlistName: 'Retained', protected: false, videos: [{ videoId: 'local', playlistItemId: 'local', description: 'keep local', viewCount: 42 }], unknown: new Date(1) }
+  const unrelated = { _id: 'unselected', playlistName: 'Unrelated', videos: [{ videoId: 'other', description: 'keep other', viewCount: 0, unknown: new Date(4) }] }
+  await db.insertAsync([original, unrelated])
+  const incoming = ['A', 'B'].map(videoId => ({ _id: original._id, playlistName: 'Imported', videos: [{ videoId, playlistItemId: videoId, description: 'keep imported', viewCount: 0, unknown: new Date(videoId === 'A' ? 2 : 3) }] }))
   const { data: decoded } = await readUnifiedBackup(createUnifiedBackup({ playlists: incoming }))
   const component = await readFile(new URL('../../src/renderer/components/DataSettings/DataSettings.vue', import.meta.url), 'utf8')
   const script = parseVue(component).descriptor.scriptSetup.content
@@ -411,18 +412,25 @@ test('portable restore accumulates repeated playlist records without dropping in
       find: () => db.findAsync({}),
       replaceIfUnchanged: async (previous, record) => db.updateAsync({ _id: record._id, $where() { return model.serialize(this) === model.serialize(previous) } }, record),
     },
-    store: { dispatch: async action => {
-      if (action === 'grabAllPlaylists') return true
-      assert.equal(action, 'scheduleSyncServer')
-    } },
+
     compactAllDatastores: async () => true, closeBackupImport() {}, t: key => key, showToast: toast => messages.push(toast),
   }
+  const playlistSource = await readFile(new URL('../../src/renderer/store/modules/playlists.js', import.meta.url), 'utf8')
+  const moduleCode = parseJavaScript(playlistSource, { sourceType: 'module' }).program.body.filter(node => node.type !== 'ImportDeclaration').map(node => node.type === 'ExportDefaultDeclaration'
+    ? 'return ' + playlistSource.slice(node.declaration.start, node.declaration.end)
+    : playlistSource.slice(node.start, node.end)).join('\n')
+  const dependencies = { process: { env: { IS_ELECTRON: false } }, DBPlaylistHandlers: { ...bindings.DBPlaylistHandlers, upsert: () => assert.fail('Refresh must not rewrite records') }, ...await import('../../src/renderer/helpers/playlist-video-counts.js') }
+  const playlists = compileFunction(moduleCode, Object.keys(dependencies))(...Object.values(dependencies))
+  bindings.store = createStore({ modules: { playlists }, actions: { scheduleSyncServer() {} }, state: { settings: { quickBookmarkTargetPlaylistId: original._id } } })
   const restore = compileFunction('return ' + script.slice(declaration.start, declaration.end), Object.keys(bindings))(...Object.values(bindings))
   for (let repeat = 0; repeat < 2; repeat++) {
     await restore()
     const saved = await db.findOneAsync({ _id: original._id })
     assert.deepEqual(saved, { ...original, playlistName: 'Imported', videos: [original.videos[0], ...incoming.flatMap(playlist => playlist.videos)], ...(Object.hasOwn(saved, 'lastUpdatedAt') ? { lastUpdatedAt: saved.lastUpdatedAt } : {}) })
     assert.match(messages.at(-1).message, /Backup imported/)
+    assert.deepEqual(await db.findOneAsync({ _id: unrelated._id }), unrelated)
+    assert.deepEqual(toRaw(bindings.store.state.playlists.playlists.find(record => record._id === unrelated._id)), unrelated)
+    assert.deepEqual(toRaw(bindings.store.state.playlists.playlists.find(record => record._id === original._id)), saved)
   }
 })
 

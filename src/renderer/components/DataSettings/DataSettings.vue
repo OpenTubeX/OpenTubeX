@@ -463,7 +463,9 @@ async function importUnifiedBackup() {
   const selected = new Set(selectedBackupSections.value)
   const data = backupData.value
   const refreshRestored = async action => {
-    if (await store.dispatch(action) !== true) throw new Error('Restored library records could not be refreshed')
+    const refreshed = await store.dispatch(action, { preserveRetained: true })
+    // Profile initialization returns false after successfully creating its default.
+    if (refreshed !== true && !(action === 'grabAllProfiles' && refreshed === false)) throw new Error('Restored library records could not be refreshed')
   }
   let profilesNeedRefresh = false
   let playlistsNeedRefresh = false
@@ -477,7 +479,7 @@ async function importUnifiedBackup() {
       throw new Error('Invalid backup profiles')
     }
     if (selected.has('profiles')) {
-      const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
+      const currentProfiles = new Map((await DBProfileHandlers.find({ preserveRetained: true })).map(profile => [profile._id, profile]))
       for (const profile of data.profiles) {
         const merged = mergeBackupProfile(currentProfiles.get(profile._id), profile)
         currentProfiles.set(profile._id, merged)
@@ -496,7 +498,7 @@ async function importUnifiedBackup() {
       await store.dispatch('grabWatchStats')
     }
     if (selected.has('profiles')) {
-      const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
+      const currentProfiles = new Map((await DBProfileHandlers.find({ preserveRetained: true })).map(profile => [profile._id, profile]))
       for (const profile of data.profiles) {
         const previous = currentProfiles.get(profile._id)
         const merged = mergeBackupProfile(previous, profile)

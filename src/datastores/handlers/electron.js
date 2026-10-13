@@ -169,8 +169,8 @@ class Profiles {
     return dbProfiles(DBActions.GENERAL.CREATE, profile)
   }
 
-  static find() {
-    return dbProfiles(DBActions.GENERAL.FIND)
+  static find(options) {
+    return dbProfiles(DBActions.GENERAL.FIND, options)
   }
 
   static upsert(profile) {
