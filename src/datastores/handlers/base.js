@@ -845,7 +845,8 @@ class Playlists {
         for (const id of pendingIds) failed.add(id)
       }
     }
-    // Progress counts unique videos, including ones shared by several playlists.
+    // Progress counts unique videos. A video is failed if any selected occurrence
+    // could not be saved, even when its other occurrences were repaired.
     for (const id of failed) repaired.delete(id)
     return { playlists, repaired: repaired.size, failed: failed.size }
   }

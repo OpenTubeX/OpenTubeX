@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
+import { computed, reactive } from 'vue'
 import { needsPlaylistRepair, playlistRepairPatch, playlistRepairRecords } from '../../src/playlistRepair.js'
 import { repairHistory } from '../../src/historyRepair.js'
 
@@ -105,4 +106,49 @@ test('replaces Takeout video-ID title placeholders even when other metadata is c
     signal: new AbortController().signal, onProgress: () => {},
   })
   assert.equal(saved[0].title, metadata.title)
+})
+
+test('a partial save failure counts the shared video as failed while keeping successful repairs', async () => {
+  const { db, Playlists } = await fixture()
+  const update = db.playlists.updateAsync.bind(db.playlists)
+  db.playlists.updateAsync = (query, changes, options) => {
+    if (query._id === 'selected') throw new Error('Write failed')
+    return update(query, changes, options)
+  }
+  const result = await Playlists.repairMetadata({ playlistIds: ['selected', 'unselected'], metadata: [metadata] })
+  assert.equal(result.repaired, 0)
+  assert.equal(result.failed, 1)
+  assert.equal(result.playlists.length, 1)
+  assert.equal((await db.playlists.findOneAsync({ _id: 'unselected' })).videos[0].authorId, metadata.authorId)
+  assert.equal((await db.playlists.findOneAsync({ _id: 'selected' })).videos[0].authorId, '')
+})
+
+test('playlist lookup scans once between changes and follows removed or repaired entries', async () => {
+  let reads = 0
+  const playlists = reactive([{ _id: 'selected', videos: Array.from({ length: 1000 }, (_, index) => ({
+    ...video, videoId: String(index).padStart(11, '0'),
+    get title() { reads++; return 'Imported title' },
+  })) }])
+  const helper = await readFile(new URL('../../src/renderer/helpers/playlistRepair.js', import.meta.url), 'utf8')
+  const start = vm.runInNewContext(helper.replace(/^import[^\n]+\n/gm, '').replaceAll('export ', '') + '\nstartPlaylistRepair', {
+    computed, needsPlaylistRepair, playlistRepairRecords,
+    createRepairState: () => ({}), cancelMetadataRepair: () => {},
+    runMetadataRepair: (_state, options) => options,
+    store: { getters: { getAllPlaylists: playlists } },
+  })
+  const options = start({ playlistIds: ['selected'] })
+  assert.equal(reads, 1000)
+  reads = 0
+  for (const record of options.records) assert.equal(options.getRecord(record.videoId).videoId, record.videoId)
+  assert.equal(reads, 0, 'lookups reuse the index instead of traversing every playlist')
+  const removedId = playlists[0].videos.at(-1).videoId
+  playlists[0].videos.pop()
+  assert.equal(options.getRecord(removedId), undefined)
+  assert.equal(reads, 999)
+  reads = 0
+  const firstId = playlists[0].videos[0].videoId
+  playlists[0].videos[0] = { ...metadata, videoId: firstId }
+  assert.equal(options.getRecord(firstId), undefined)
+  playlists.splice(0)
+  assert.equal(options.getRecord('00000000001'), undefined)
 })
