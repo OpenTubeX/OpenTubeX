@@ -143,6 +143,28 @@ for (const uiScale of [100, 125]) {
       await page.screenshot({ path: testInfo.outputPath('balanced-playlist-banner.png'), clip })
       await page.locator('.alertBox').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(page.locator('.alertBox')).toHaveCount(0)
+      await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '3px', { timeout: 1000 })
+      const thumbnailInset = await page.locator('.playlistItemsCard').evaluate(element =>
+        element.querySelector('.videoThumbnail').getBoundingClientRect().top - element.getBoundingClientRect().top
+      )
+      expect(thumbnailInset).toBeCloseTo(9, 0)
+    })
+
+    test('grid playlists without a notice preserve their normal padding', async ({ app, page }) => {
+      await openPlaylist(page)
+      for (const width of [1440, 900, 700]) {
+        await resize(app, page, width, uiScale)
+        await expect(page.locator('.playlistPage.grid')).toBeVisible()
+        await expect(page.locator('.alertBox')).toHaveCount(0)
+        await expect(page.locator('.sortSelect')).toBeVisible()
+        await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '3px', { timeout: 1000 })
+      }
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setAllPlaylists', [{ ...store.getters.getPlaylist('rounded-playlist'), videos: [] }])
+      })
+      await expect(page.locator('.playlistItemsCard .message')).toContainText('This playlist currently has no videos.')
+      await expect(page.locator('.playlistItemsCard')).toHaveCSS('padding-top', '3px', { timeout: 1000 })
     })
 
     test('playlist page thumbnail follows UI roundness', async ({ app, page }, testInfo) => {
