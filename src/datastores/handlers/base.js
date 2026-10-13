@@ -1037,20 +1037,6 @@ class Playlists {
     )
   }
 
-  static async replaceIfUnchanged(previousPlaylist, playlist) {
-    const previous = previousPlaylist == null ? null : model.serialize(previousPlaylist)
-    try {
-      return await db.playlists.updateAsync(
-        { _id: playlist._id, $where: function () { return previous !== null && model.serialize(this) === previous } },
-        playlist,
-        { upsert: previous === null }
-      )
-    } catch (error) {
-      if (previous === null && error.errorType === 'uniqueViolated' && await db.playlists.findOneAsync({ _id: playlist._id })) return { numAffected: 0 }
-      throw error
-    }
-  }
-
   static replaceVideosIfUnchanged(_id, previousVideos, videos, lastUpdatedAt) {
     const previous = model.serialize(previousVideos)
     return db.playlists.updateAsync(
