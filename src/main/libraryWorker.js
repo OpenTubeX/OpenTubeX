@@ -8,7 +8,7 @@ import { updateVideoMetadataCache, metadataPage, metadataThumbnail } from '../da
 import * as operations from '../datastores/sqlite/operations.js'
 import * as subscriptions from '../datastores/sqlite/subscriptions.js'
 
-const operationMethods = new Set(['importSubscriptionProfiles', 'rendererSettings', 'syncSnapshotRead', 'syncSnapshotSummary', 'syncSnapshotHistory', 'syncSnapshotSection', 'storageUsage', 'historyRepairPage', 'historyRepairRecord', 'markAllHistory', 'applySubscriptionUnseenHistory', 'playlistSelection', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers', 'recommendationInputs', 'recommendationSubscriptionCandidates'])
+const operationMethods = new Set(['importSubscriptionProfiles', 'rendererSettings', 'syncSnapshotRead', 'syncSnapshotSummary', 'syncSnapshotHistory', 'syncSnapshotSection', 'storageUsage', 'historyRepairPage', 'historyRepairRecord', 'markAllHistory', 'applySubscriptionUnseenHistory', 'playlistSelection', 'playlistVideoIds', 'addSelectedPlaylistVideos', 'removePlaylistMember', 'removePlaylistMembers', 'recommendationInputs', 'recommendationSubscriptionCandidates'])
 const subscriptionMethods = new Set(['subscriptionEntries', 'subscriptionRssVerdicts', 'subscriptionPremieres', 'updateSubscriptionPremieres', 'subscriptionShortsWindow', 'subscriptionSummaries', 'subscriptionPage', 'subscriptionEntry', 'markSubscriptionEntries'])
 
 let exports

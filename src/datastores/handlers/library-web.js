@@ -21,6 +21,11 @@ export function createPortableLibrary({ history, playlists }) {
   return {
     async query(method, options = {}) {
       if (method === 'playlistSummaries') return (await playlists.find()).map(playlist => ({ ...playlist, videoCount: Array.isArray(playlist.videos) ? playlist.videos.length : 0, firstVideo: Array.isArray(playlist.videos) ? playlist.videos[0] ?? null : null, videos: [] }))
+      if (method === 'playlistVideoIds') {
+        const playlist = (await playlists.find()).find(playlist => playlist._id === options.id)
+        if (!playlist) throw new Error('The playlist no longer exists')
+        return (Array.isArray(playlist.videos) ? playlist.videos : []).filter(video => typeof video?.videoId === 'string' && video.videoId).map(video => video.videoId)
+      }
       if (method === 'playlistSnapshot') return (await playlists.find()).find(playlist => playlist._id === options.id) ?? null
       if (['playlistPage', 'playlistStatistics', 'movePlaylistMember', 'reorderPlaylistMembers', 'cleanupPlaylist'].includes(method)) {
         const playlist = (await playlists.find()).find(playlist => playlist._id === options.id)
