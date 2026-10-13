@@ -612,7 +612,7 @@ for (const [cancel, reloadFailure, repairFailure] of [[false, false, false], [tr
     for (const row of rows) {
       const saved = await engine.collections.history.findOneAsync({ _id: row._id })
       assert.deepEqual(saved, repairedIds.has(row.videoId)
-        ? { ...row, lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false }
+        ? { ...row, lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false, pendingDurationRepair: true }
         : row)
     }
   })

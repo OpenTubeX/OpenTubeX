@@ -253,7 +253,7 @@ test.describe('consecutive refreshes with a changing cache size', () => {
     await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible()
 
     // Retain the pending promise while the large IPC payload triggers garbage collection.
-    const refresh = await page.evaluateHandle(() => {
+    const refresh = await page.evaluateHandle(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const channelId = store.getters.getActiveProfile.subscriptions[0].id
       const videos = (await window.ftElectron.libraryQuery('subscriptionPage', { subscriptions: [{ id: channelId }], limit: 250 })).records

@@ -2,7 +2,7 @@ import { prepareHistorySync, historySyncPage, applyHistorySync, cancelHistorySyn
 import { DBLibraryHandlers } from '../../datastores/handlers/index'
 import { toRaw } from 'vue'
 import {
-  DEFAULT_CHANNEL_AVATAR, UNKNOWN_SYNC_UPLOADER_ID, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo,
+  DEFAULT_CHANNEL_AVATAR, uploaderToLocal, normalizeChannelAvatar, enrichSyncVideo, enrichLocalPlaylistVideo,
   mergeIds as mergeSyncIds, videoToRemote as syncVideoToRemote,
 } from './sync-history-merge.js'
 import { runBackgroundJob } from './background-jobs.js'
