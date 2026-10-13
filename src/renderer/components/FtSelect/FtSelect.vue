@@ -123,7 +123,10 @@
       class="selectSearchHighlightFrame"
       aria-hidden="true"
     />
-    <Teleport :to="dropdownTarget">
+    <Teleport
+      v-if="settingsOverlayActive"
+      :to="dropdownTarget"
+    >
       <FtMobileSheet
         v-if="dropdownRendered"
         :enabled="phoneLayout"
@@ -236,6 +239,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
 import FtInput from '../FtInput/FtInput.vue'
@@ -351,6 +355,10 @@ const filteredOptions = computed(() => props.selectNames
 const dropdownShown = ref(false)
 useAnchoredViewportBounds(selectButton, dropdown, computed(() => dropdownShown.value && !phoneLayout.value))
 const dropdownRendered = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => {
+  closeDropdown()
+  dropdownRendered.value = false
+})
 const activeIndex = ref(0)
 const dropdownStyle = ref({ zIndex: props.dropdownZIndex })
 const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)

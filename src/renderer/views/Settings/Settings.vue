@@ -754,6 +754,7 @@ watch(unlocked, value => {
 })
 
 provide(settingsSubpageKey, {
+  isActive: computed(() => store.getters.getSettingsWindowOpen && (unlocked.value || isStandaloneViewOpen.value)),
   targetId: subpageTargetId,
   breadcrumbTargetId: subpageBreadcrumbTargetId,
   contentHeaderTargetId,
@@ -1318,6 +1319,7 @@ function minimizeSettings() {
 }
 
 function preserveScrollPositions() {
+  if (!unlocked.value && !isStandaloneViewOpen.value) return
   const settingsWindow = settingsWindowRef.value
   preservedScrollPositions = settingsWindow
     ? [...settingsWindow.querySelectorAll('[data-overlayscrollbars-initialize]')]

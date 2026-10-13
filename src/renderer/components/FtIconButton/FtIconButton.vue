@@ -49,7 +49,7 @@
       />
     </button>
     <template
-      v-if="dropdownShown"
+      v-if="dropdownShown && settingsOverlayActive"
     >
       <slot v-if="ownsPhoneSheet" />
       <FtPrompt
@@ -209,6 +209,7 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const props = defineProps({
   mobileSheet: { type: Boolean, default: false },
@@ -310,6 +311,7 @@ const isKebabMenu = computed(() => (
 ))
 
 const dropdownShown = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => { dropdownShown.value = false })
 const phoneLayout = usePhoneLayout()
 const ownsPhoneSheet = computed(() => props.mobileSheet && phoneLayout.value)
 const fullscreenDropdownTarget = ref(null)

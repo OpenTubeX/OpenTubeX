@@ -1,11 +1,17 @@
 <template>
-  <Teleport :to="teleportTarget">
+  <Teleport
+    v-if="settingsOverlayActive"
+    :to="teleportTarget"
+  >
     <div
       ref="prompt"
       class="prompt"
       :class="{ lockScroll }"
       tabindex="-1"
       :inert="inert"
+      @vue:before-mount="preparePrompt"
+      @vue:mounted="activatePrompt"
+      @vue:before-unmount="deactivatePrompt"
       @pointerdown.stop
       @touchstart.stop
       @touchend.stop
@@ -80,9 +86,10 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, useId, useTemplateRef } from 'vue'
+import { nextTick, useId, useTemplateRef } from 'vue'
 
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 import store from '../../store/index'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -147,6 +154,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['click'])
+const settingsOverlayActive = useSettingsOverlay(() => emit('click', null))
 
 const id = useId()
 const teleportTarget = document.fullscreenElement ?? '.app'
@@ -158,19 +166,25 @@ const prompt = useTemplateRef('prompt')
 let promptButtons = []
 let lastActiveElement = null
 let promptContentResizeObserver = null
+let scrollLocked = false
+let registered = false
 
-onBeforeMount(() => {
-  if (props.lockScroll) {
+function preparePrompt() {
+  if (props.lockScroll && settingsOverlayActive.value) {
     lockBodyScroll()
+    scrollLocked = true
   }
-})
+}
 
-onMounted(() => {
+function activatePrompt() {
+  if (!settingsOverlayActive.value || !prompt.value?.isConnected) return
   lastActiveElement = document.activeElement
   document.addEventListener('keydown', handleEscape, true)
   store.commit('addOpenPrompt', id)
+  registered = true
 
   nextTick(() => {
+    if (!settingsOverlayActive.value || !promptCard.value) return
     promptButtons = Array.from(promptCard.value.$el.querySelectorAll('.btn.ripple, .iconButton'))
     focusItem(0)
 
@@ -184,17 +198,24 @@ onMounted(() => {
       clampScroll()
     }
   })
-})
+}
 
-onBeforeUnmount(() => {
+function deactivatePrompt() {
   promptContentResizeObserver?.disconnect()
+  promptContentResizeObserver = null
   document.removeEventListener('keydown', handleEscape, true)
-  store.commit('removeOpenPrompt', id)
-  if (props.lockScroll) {
-    unlockBodyScroll()
+  if (registered) {
+    store.commit('removeOpenPrompt', id)
+    registered = false
+    nextTick(() => {
+      if (settingsOverlayActive.value) lastActiveElement?.focus()
+    })
   }
-  nextTick(() => lastActiveElement?.focus())
-})
+  if (scrollLocked) {
+    unlockBodyScroll()
+    scrollLocked = false
+  }
+}
 
 /**
  * @param {number} index

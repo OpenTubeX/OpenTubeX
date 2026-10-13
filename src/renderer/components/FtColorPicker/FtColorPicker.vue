@@ -24,7 +24,10 @@
       <code>{{ modelValue }}</code>
     </button>
 
-    <Teleport to="body">
+    <Teleport
+      v-if="settingsOverlayActive"
+      to="body"
+    >
       <div
         v-if="open"
         ref="popoverRef"
@@ -218,6 +221,7 @@ import { useI18n } from 'vue-i18n'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getAnchoredPosition, supportsAnchorPositioning } from '../../helpers/anchoredPosition'
 import { useAnchoredViewportBounds } from '../../composables/useAnchoredViewportBounds'
+import { useSettingsOverlay } from '../../composables/useSettingsOverlay'
 
 const props = defineProps({
   modelValue: {
@@ -251,6 +255,7 @@ const copyFromButtonRef = useTemplateRef('copyFromButtonRef')
 const colorSourceListRef = useTemplateRef('colorSourceListRef')
 const colorSourceContentRef = useTemplateRef('colorSourceContentRef')
 const open = ref(false)
+const settingsOverlayActive = useSettingsOverlay(() => closePicker(false, false))
 useAnchoredViewportBounds(triggerRef, popoverRef, open)
 const hue = ref(0)
 const saturation = ref(0)
