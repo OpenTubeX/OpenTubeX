@@ -6,14 +6,16 @@ import { settleAndroidBackAnimation } from './androidBackGesture'
 /** Preview the existing Back action without changing focus, scroll, or view. */
 export function createAndroidBackDialogPreview(element, back, isAvailable) {
   let animation = null
-  let transition = null
+  let styles = null
   const cancel = () => {
     animation?.cancel()
     animation = null
-    if (transition) {
-      if (transition.value) element.style.setProperty('transition', transition.value, transition.priority)
-      else element.style.removeProperty('transition')
-      transition = null
+    if (styles) {
+      for (const { name, value, priority } of styles) {
+        if (value) element.style.setProperty(name, value, priority)
+        else element.style.removeProperty(name)
+      }
+      styles = null
     }
   }
   return {
@@ -21,11 +23,12 @@ export function createAndroidBackDialogPreview(element, back, isAvailable) {
       if (!isAvailable() || isReducedMotionEnabled() || element.inert ||
         element.querySelector('.promptCard[inert]')) return false
       const { transform, opacity } = getComputedStyle(element)
-      transition = {
-        value: element.style.getPropertyValue('transition'),
-        priority: element.style.getPropertyPriority('transition')
-      }
-      // The gesture supplies the exit; suppress a second CSS leave transition.
+      styles = ['transition', 'animation'].map(name => ({
+        name,
+        value: element.style.getPropertyValue(name),
+        priority: element.style.getPropertyPriority(name)
+      }))
+      // Progress must follow the gesture without a competing CSS transition.
       element.style.setProperty('transition', 'none', 'important')
       animation = applyAnimationSpeed(element.animate([
         { transform, opacity },
@@ -44,6 +47,9 @@ export function createAndroidBackDialogPreview(element, back, isAvailable) {
       if (animation !== current) return
       try {
         if (commit && isAvailable()) {
+          // The gesture already supplies the exit. Suppress CSS leave animations
+          // before Back closes the dialog, without interrupting them on cancel.
+          element.style.setProperty('animation', 'none', 'important')
           await back()
           await nextTick()
           // Vue applies CSS leave-to classes after two animation frames. Keep
