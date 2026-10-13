@@ -201,17 +201,23 @@ class History {
     return Settings.runSeenStateUpdate(async () => {
       const updatedRecords = []
       if (acknowledgedRepairs) {
+        let failedCount = 0
         for (const repair of acknowledgedRepairs) {
           // Only clear the repair that reached the server. Another repair or
           // deletion while an upload was pending must remain untouched.
-          const { affectedDocuments } = await db.history.updateAsync(
-            { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
-            { $unset: { pendingDurationRepair: true } },
-            { returnUpdatedDocs: true }
-          )
-          if (affectedDocuments) updatedRecords.push(affectedDocuments)
+          try {
+            const { affectedDocuments } = await db.history.updateAsync(
+              { videoId: repair.videoId, lengthSeconds: repair.lengthSeconds, pendingDurationRepair: repair.pendingDurationRepair },
+              { $unset: { pendingDurationRepair: true } },
+              { returnUpdatedDocs: true }
+            )
+            if (affectedDocuments) updatedRecords.push(affectedDocuments)
+          } catch (error) {
+            console.error(error)
+            failedCount++
+          }
         }
-        return { records: updatedRecords, seenVideos: null }
+        return { records: updatedRecords, seenVideos: null, failedCount }
       }
       if (metadata) {
         let failedCount = 0

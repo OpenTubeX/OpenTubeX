@@ -45,6 +45,32 @@ test('synced history with unknown duration does not label ordinary videos as liv
   assert.equal(changes.insertions[0].isWatched, true)
 })
 
+test('newly synced history retains its video ID as the fallback title until repaired', async () => {
+  const entry = structuredClone(remote)
+  entry.video.title = entry.video.id
+  const changes = await downloadHistory([], entry)
+  assert.equal(changes.insertions[0].title, entry.video.id)
+  const repaired = { ...changes.insertions[0], title: 'Recovered title' }
+  const uploaded = []
+  await downloadHistory([repaired], entry, uploaded)
+  assert.equal(uploaded.length, 1)
+  assert.equal(uploaded[0].video.title, repaired.title)
+  assert.equal(await downloadHistory([repaired], uploaded[0], uploaded), undefined)
+  assert.equal(uploaded.length, 1)
+})
+
+for (const id of ['', UNKNOWN_SYNC_UPLOADER_ID]) {
+  for (const name of [id, remote.video.uploader.id]) {
+    test(`uploader enrichment replaces a placeholder name ${JSON.stringify(name)} while repairing ID ${JSON.stringify(id)}`, () => {
+      const video = { ...remote.video, uploader: { id, name } }
+      const enriched = enrichSyncVideo(video, remote.video)
+      assert.equal(enriched.uploader.id, remote.video.uploader.id)
+      assert.equal(enriched.uploader.name, remote.video.uploader.name)
+      assert.equal(enrichSyncVideo(enriched, remote.video), enriched)
+    })
+  }
+}
+
 const imported = {
   videoId: remote.video.id, title: remote.video.title,
   author: remote.video.uploader.name, authorId: remote.video.uploader.id,

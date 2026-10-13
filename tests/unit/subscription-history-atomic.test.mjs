@@ -217,3 +217,29 @@ for (const change of ['none', 'newer repair', 'deleted']) {
     }
   })
 }
+
+test('failed repair acknowledgement leaves its marker for retry and clears the remaining repairs', async () => {
+  const { db, History, errors } = await fixture()
+  await db.history.insertAsync([{ videoId: 'second' }, { videoId: 'third' }])
+  const repairs = ['video', 'second', 'third'].map(videoId => ({ videoId, lengthSeconds: 120, pendingDurationRepair: true }))
+  await History.updateSubscriptionState({ metadata: repairs })
+  const update = db.history.updateAsync.bind(db.history)
+  db.history.updateAsync = async (query, ...args) => {
+    if (query.videoId === 'second') throw new Error('Acknowledgement write failed')
+    return update(query, ...args)
+  }
+  const result = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
+  assert.deepEqual(Array.from(result.records, record => record.videoId), ['video', 'third'])
+  assert.equal(result.failedCount, 1)
+  assert.equal(errors.length, 1)
+  assert.match(errors[0].message, /Acknowledgement write failed/)
+  for (const videoId of ['video', 'second', 'third']) {
+    const saved = await db.history.findOneAsync({ videoId })
+    assert.equal(saved.pendingDurationRepair, videoId === 'second' ? true : undefined)
+    assert.equal(saved.lengthSeconds, 120)
+  }
+  db.history.updateAsync = update
+  const retried = await History.updateSubscriptionState({ acknowledgedRepairs: repairs })
+  assert.deepEqual(Array.from(retried.records, record => record.videoId), ['second'])
+  assert.equal((await db.history.findOneAsync({ videoId: 'second' })).pendingDurationRepair, undefined)
+})

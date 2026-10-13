@@ -111,7 +111,7 @@ function historyToLocal(entry, local) {
   const record = {
     ...local,
     videoId: entry.video.id,
-    title: entry.video.title === entry.video.id ? local?.title ?? '' : entry.video.title,
+    title: entry.video.title === entry.video.id ? local?.title ?? entry.video.title : entry.video.title,
     ...uploader,
     published: entry.video.upload_date,
     ...(thumbnail && thumbnail !== `https://i.ytimg.com/vi/${entry.video.id}/hqdefault.jpg` ? { thumbnail } : {}),
@@ -168,7 +168,7 @@ export function enrichSyncVideo(video, source) {
   if (!knownText(uploader.id, UNKNOWN_SYNC_UPLOADER_ID) && knownText(source.uploader.id, UNKNOWN_SYNC_UPLOADER_ID)) {
     uploader.id = source.uploader.id
   }
-  if (!knownText(video.uploader.name, video.uploader.id) && knownText(source.uploader.name, source.uploader.id) && uploader.id === source.uploader.id) {
+  if ((!knownText(video.uploader.name, video.uploader.id) || video.uploader.name === uploader.id) && knownText(source.uploader.name, source.uploader.id) && uploader.id === source.uploader.id) {
     uploader.name = source.uploader.name
   }
   return Object.keys(fields).length || ['id', 'name'].some(key => uploader[key] !== video.uploader[key])
