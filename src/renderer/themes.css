@@ -65,11 +65,11 @@ body {
   --logo-tertiary-color: var(--primary-text-color);
   --logo-pressed-color: var(--logo-tertiary-color);
 
-  /* Header interaction colors default to the legacy palette mappings so
-     built-in and version 1 custom themes retain their existing appearance. */
+  /* Neutral headers use the base theme's interaction colors;
+     colored headers use the primary palette. */
   --header-button-hover-color: var(--side-nav-hover-color);
   --header-button-hover-text-color: var(--side-nav-hover-text-color);
-  --header-button-pressed-color: var(--subtle-surface-color);
+  --header-button-pressed-color: var(--side-nav-active-color);
   --header-button-pressed-text-color: var(--side-nav-active-text-color);
   --colored-header-button-hover-color: var(--primary-color-hover);
   --colored-header-button-hover-text-color: var(--text-with-main-color);
