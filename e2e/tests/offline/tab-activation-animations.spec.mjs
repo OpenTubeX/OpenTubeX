@@ -1,4 +1,5 @@
 import { abortUnmockedRequest, expect, goTo, sel, setWindowSize, test } from '../../helpers/app.mjs'
+import { mockWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const now = Date.now()
@@ -146,6 +147,47 @@ test('returning to subscription tabs preserves their highlight without replaying
   await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(1)
   await expect.poll(() => indicator.evaluate(element => element.getAnimations().some(animation => animation.playState === 'running'))).toBe(true)
   await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
+})
+
+test('retained subscription highlights stay aligned in the Watch minimize preview after layout changes', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'subscriptions')
+  const tabs = page.locator('.subscriptionsHeader .tabs')
+  await tabs.locator('[data-subscription-feed-tab="shorts"]').click()
+  await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
+  const retainedIndicator = await tabs.locator('.tabsIndicator').elementHandle()
+  await page.locator(sel.searchInput).fill(`https://www.youtube.com/watch?v=${watchHistoryEntry.videoId}`)
+  await page.locator(sel.searchInput).press('Enter')
+  const preview = page.locator('.watchPreviewHost.watchRouteActive')
+  await expect(preview.locator('.videoLayout')).toBeVisible()
+  const watch = await watchViewHandle(page)
+  const navigation = await watch.evaluateHandle(component => {
+    const provides = component.$.parent.provides
+    const key = Object.getOwnPropertySymbols(provides).find(key => key.description === 'watch-navigation')
+    return provides[key]
+  })
+  await watch.dispose()
+
+  for (const [scale, width, height] of [[95, 600, 800], [125, 900, 600]]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await setWindowSize(app, page, { width, height })
+    // Drive the same preview entry point as the downward minimize gesture.
+    await navigation.evaluate(navigation => navigation.beginMinimizePreview())
+    await expect(preview).toHaveClass(/watchPreviewing/)
+    await expect(tabs).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`#/watch/${watchHistoryEntry.videoId}`))
+    await expect.poll(() => tabs.evaluate(element => {
+      const highlight = element.querySelector('.tabsIndicator').getBoundingClientRect()
+      const selected = element.querySelector('[aria-selected="true"]').getBoundingClientRect()
+      return Math.max(Math.abs(highlight.left - selected.left), Math.abs(highlight.right - selected.right), Math.abs(highlight.bottom - selected.bottom))
+    })).toBeLessThan(0.2)
+    expect(await retainedIndicator.evaluate(element => element.isConnected)).toBe(true)
+    await expect(tabs.locator('.tabsIndicator')).toHaveCSS('opacity', '1')
+    await expect(tabs.locator('.tabsIndicatorOutgoing')).toHaveCount(0)
+    await navigation.evaluate(navigation => navigation.clearMinimizePreview())
+    await expect(preview).not.toHaveClass(/watchPreviewing/)
+  }
+  await navigation.dispose()
 })
 
 test('switching application tabs snaps the active sidebar highlight', async ({ app, page }) => {

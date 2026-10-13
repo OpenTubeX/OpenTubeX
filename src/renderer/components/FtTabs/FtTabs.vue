@@ -64,10 +64,11 @@ function updateIndicator() {
   const container = root.value
   const selected = container?.querySelector('[role="tab"][aria-selected="true"]')
   if (inactive || isTabPresented?.value === false) {
-    // Retain the pill while its page is hidden so presenting it again does not
-    // recreate the element and replay the entrance. Reposition without a fade.
+    // Retain the pill while its page is hidden to avoid replaying its entrance.
+    // Browsing pages behind Watch still have layout boxes: measure them so the
+    // minimize preview reveals an aligned pill, without a selection crossfade.
     previousSelected = null
-    return
+    if (inactive || !selected?.getClientRects().length) return
   }
   if (!selected?.getClientRects().length) {
     hideIndicator()
