@@ -180,7 +180,12 @@ async function collect(target, directory, count, { tabs = false } = {}) {
     await page.evaluate(startRendererMetrics)
     const exportStarted = performance.now()
     await section.getByRole('button', { name: 'Export backup' }).click()
-    await expect.poll(() => page.evaluate(() => window.__libraryBackup.done), { timeout: 180000 }).toBe(true)
+    const confirmExport = page.getByRole('button', { name: 'Export selected data', exact: true })
+    // Published baselines can export immediately; current builds confirm the selection.
+    const remainingExportTime = () => Math.max(1, 180000 - (performance.now() - exportStarted))
+    await expect.poll(async () => await page.evaluate(() => window.__libraryBackup.done) || await confirmExport.isVisible(), { timeout: remainingExportTime() }).toBe(true)
+    if (await confirmExport.isVisible()) await confirmExport.click()
+    await expect.poll(() => page.evaluate(() => window.__libraryBackup.done), { timeout: remainingExportTime() }).toBe(true)
     const backup = {
       elapsedMs: performance.now() - exportStarted,
       ...await stopMetrics(app, page),

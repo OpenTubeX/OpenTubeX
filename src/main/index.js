@@ -5708,10 +5708,11 @@ function runApp() {
           return saved
         }
 
-        case DBActions.PLAYLISTS.REPAIR_METADATA:
-          return await baseHandlers.playlists.repairMetadata(data, () => {
-            syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
-          })
+        case DBActions.PLAYLISTS.REPAIR_METADATA: {
+          const result = await baseHandlers.playlists.repairMetadata(data)
+          if (result.updates.length) syncOtherWindows(IpcChannels.SYNC_PLAYLISTS, event, { event: SyncEvents.GENERAL.INVALIDATE })
+          return { ...result, updates: result.updates.map(update => ({ _id: update._id })) }
+        }
 
         case DBActions.PLAYLISTS.UPSERT_VIDEO: {
           const result = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)

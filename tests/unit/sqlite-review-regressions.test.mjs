@@ -2878,3 +2878,27 @@ test('paged playlist removal queues the durable ID when the legacy item ID is ab
   assert.deepEqual(videos, ['video'])
   assert.equal(toasts.length, 1)
 })
+
+
+test('playlist repair IPC sends only cloneable arguments to the worker and invalidates changed windows', async () => {
+  const { DBActions, IpcChannels, SyncEvents } = await import('../../src/constants.js')
+  const { script, ast } = await source('src/main/index.js')
+  const node = matching(ast, node => node.type === 'CallExpression' && node.callee.object?.name === 'ipcMain' && node.arguments[0]?.property?.name === 'DB_PLAYLISTS')[0]?.arguments[1]
+  assert.ok(node)
+  let updates = [{ _id: 'p', changes: [{ videoId: 'video', fields: { title: 'Repaired' } }] }]
+  const writes = [], events = []
+  const request = vm.runInNewContext(`(${script.slice(node.start, node.end)})`, {
+    DBActions, IpcChannels, SyncEvents, isOpenTubeXUrl: () => true,
+    baseHandlers: { playlists: { repairMetadata: async (...args) => {
+      writes.push(structuredClone(args))
+      return { updates, repaired: updates.length, failed: 0 }
+    } } }, syncOtherWindows: (...args) => events.push(args),
+  })
+  const event = { senderFrame: { url: 'file://app' } }, data = { playlistIds: ['p'], metadata: [{ videoId: 'video', title: 'Repaired' }] }
+  assert.deepEqual(structuredClone(await request(event, { action: DBActions.PLAYLISTS.REPAIR_METADATA, data })), { updates: [{ _id: 'p' }], repaired: 1, failed: 0 })
+  assert.deepEqual(writes, [[data]])
+  assert.deepEqual(structuredClone(events.map(([channel, _event, payload]) => [channel, payload])), [[IpcChannels.SYNC_PLAYLISTS, { event: SyncEvents.GENERAL.INVALIDATE }]])
+  updates = []
+  assert.deepEqual(structuredClone(await request(event, { action: DBActions.PLAYLISTS.REPAIR_METADATA, data })), { updates, repaired: 0, failed: 0 })
+  assert.equal(events.length, 1)
+})
