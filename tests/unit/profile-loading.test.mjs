@@ -92,11 +92,13 @@ test('loads existing profiles when persisting the default icon fails', async () 
   assert.deepEqual(errors, [writeError])
 })
 
-test('restore profile refresh retains missing icons without repairing persisted records', async () => {
-  const { db, module, load } = await fixture({ ...mainProfile, icon: null, unknown: new Date(1) })
+test('restore profile refresh retains missing icons without repairing persisted records', async t => {
+  const { db, module, errors, load } = await fixture({ ...mainProfile, icon: null, unknown: new Date(1) })
   const before = await db.profiles.findAsync({})
-  db.profiles.updateAsync = () => assert.fail('Unexpected profile repair')
+  const repair = t.mock.method(db.profiles, 'updateAsync', () => assert.fail('Unexpected profile repair'))
   assert.equal(await load({ preserveRetained: true }), true)
+  assert.equal(repair.mock.callCount(), 0)
+  assert.deepEqual(errors, [])
   assert.deepEqual(await db.profiles.findAsync({}), before)
   assert.deepEqual(structuredClone(module.state.profileList), before.map(profile => ({ ...profile, icon: profile.icon ?? DEFAULT_PROFILE_ICON })))
 })
