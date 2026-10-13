@@ -464,6 +464,7 @@ const fromDate = ref(parseHistoryDate(route.query.fromDate) ? route.query.fromDa
 const toDate = ref(parseHistoryDate(route.query.toDate) ? route.query.toDate : '')
 const channel = ref(typeof route.query.channel === 'string' ? route.query.channel : '')
 let applyingRouteState = false
+const pendingRouteSaves = new Set()
 const hasBrowseFilters = computed(() => !!(fromDate.value || toDate.value || channel.value))
 const hasFilters = computed(() => hasBrowseFilters.value || query.value.trim().length > 0)
 const invalidDateRange = computed(() => !!(fromDate.value && toDate.value && fromDate.value > toDate.value))
@@ -706,10 +707,12 @@ function increaseLimit() {
 }
 
 let searchGeneration = 0
+let completedSearchInputs = null
 async function filterHistory() {
   filterHistoryAsync.cancel()
   const generation = ++searchGeneration
   if (query.value.trim().length === 0) {
+    completedSearchInputs = null
     isSearching.value = false
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < browseData.value.length
@@ -717,12 +720,16 @@ async function filterHistory() {
     return
   }
 
-  isSearching.value = true
+  const searchInputs = [browseData.value, query.value, doCaseSensitiveSearch.value, locale.value]
+  // Pagination repeats the same search. Keep its existing results visible so
+  // a temporary spinner cannot shorten the page and reset its scroll position.
+  isSearching.value = !completedSearchInputs || searchInputs.some((value, index) => value !== completedSearchInputs[index])
   const filteredQuery = await filterVideosWithQueryAsync(
     browseData.value, query.value, doCaseSensitiveSearch.value, locale.value,
     () => generation !== searchGeneration,
   )
   if (!filteredQuery || generation !== searchGeneration) return
+  completedSearchInputs = searchInputs
   isSearching.value = false
 
   const filteredResultCount = filteredQuery.length
@@ -762,7 +769,9 @@ function getHistoryRouterState() {
 }
 
 async function saveStateInRouter() {
-  const location = { path: '/history', query: getHistoryRouterState() }
+  const state = getHistoryRouterState()
+  const location = { path: '/history', query: state, state: { preserveScroll: true } }
+  pendingRouteSaves.add(state)
 
   try {
     await router.replace(location)
@@ -772,6 +781,10 @@ async function saveStateInRouter() {
     }
 
     throw failure
+  } finally {
+    // Keep the snapshot until its route watcher has processed the navigation.
+    await nextTick()
+    pendingRouteSaves.delete(state)
   }
 }
 
@@ -796,6 +809,8 @@ watch(() => route.query, routeQuery => {
   if (route.path !== '/history') return
   const state = getHistoryRouterState()
   const fields = ['fromDate', 'toDate', 'channel', 'searchQueryText', 'searchDataLimit', 'doCaseSensitiveSearch']
+  // Queued UI saves may arrive after newer edits. They must not restore old controls.
+  if ([...pendingRouteSaves].some(saved => fields.every(field => routeQuery[field] === saved[field]))) return
   // UI changes already have the desired state. Only apply external navigation.
   if (fields.every(field => routeQuery[field] === state[field])) return
 

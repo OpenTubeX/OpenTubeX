@@ -261,6 +261,10 @@ const router = createRouter({
       return false
     }
 
+    if (savedPosition === null && window.history.state?.preserveScroll === true) {
+      return false
+    }
+
     return new Promise((resolve) => {
       setTimeout(() => {
         if (savedPosition !== null) {

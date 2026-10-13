@@ -44,6 +44,36 @@ async function openHistoryFilters(page) {
   await expect(page.getByRole('region', { name: /^Search filters$/i })).toBeVisible()
 }
 
+async function trackHistoryNavigations(page, block = false) {
+  await page.evaluate(block => {
+    const tabContent = document.querySelector('.tabContent[aria-hidden="false"]')
+    function find(vnode) {
+      if (vnode?.component) {
+        if (vnode.component.subTree.el === tabContent) return vnode.component
+        const nested = find(vnode.component.subTree)
+        if (nested) return nested
+      }
+      for (const child of Array.isArray(vnode?.children) ? vnode.children : []) {
+        const nested = find(child)
+        if (nested) return nested
+      }
+    }
+    const instance = find(document.querySelector('#app')._vnode)
+    const router = Reflect.ownKeys(instance.provides).map(key => instance.provides[key])
+      .find(value => value?.currentRoute && typeof value.beforeEach === 'function')
+    const tracker = { releases: [], completed: [] }
+    if (block) router.beforeEach(() => new Promise(resolve => tracker.releases.push(resolve)))
+    router.afterEach(to => { tracker.completed.push(to.fullPath) })
+    window.__historyNavigations = tracker
+  }, block)
+}
+
+async function releaseHistoryNavigation(page, completedCount) {
+  await expect.poll(() => page.evaluate(() => window.__historyNavigations.releases.length)).toBe(1)
+  await page.evaluate(() => window.__historyNavigations.releases.shift()())
+  await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.length)).toBe(completedCount)
+}
+
 async function scrollPageToEnd(page) {
   await expect.poll(() => page.evaluate(() => {
     document.activeElement?.blur()
@@ -775,9 +805,15 @@ test.describe('history search automatic pagination', () => {
     await expect(page.getByRole('button', { name: 'Load More Videos' })).toHaveCount(0)
     await expect(page.locator('.ft-auto-load-next-page-wrapper')).toBeAttached()
 
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await trackHistoryNavigations(page)
+    const scrollTop = await page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight)
+      return window.scrollY
+    })
     await expect(videos).toHaveCount(150)
     await expect(page.locator('.ft-auto-load-next-page-wrapper')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.some(path => path.includes('searchDataLimit=200')))).toBe(true)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(scrollTop - 1)
   })
 })
 
@@ -1143,6 +1179,67 @@ test.describe('history date and channel browsing', () => {
     await expect(page.getByRole('checkbox', { name: 'Case Sensitive Search' })).toBeChecked()
     await expect(videos).toHaveCount(200)
   })
+
+  test('keeps newer text edits while earlier URL saves are queued', async ({ page }) => {
+    await goTo(page, 'history')
+    await trackHistoryNavigations(page, true)
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    await input.fill('City')
+    await expect.poll(() => page.evaluate(() => window.__historyNavigations.releases.length)).toBe(1)
+    await input.fill('City walk')
+    await releaseHistoryNavigation(page, 1)
+    await expect(input).toHaveValue('City walk')
+    await input.press('End')
+    await input.pressSequentially(' 219')
+    // Drain one queued save per keystroke without letting older URLs undo edits.
+    for (let count = 2; count <= 6; count++) {
+      await releaseHistoryNavigation(page, count)
+      await expect(input).toHaveValue('City walk 219')
+    }
+    await expect(page).toHaveURL(/searchQueryText=City\+walk\+219/)
+  })
+
+  test('keeps all browse filters cleared while their URL saves are queued', async ({ page }) => {
+    await goTo(page, 'history')
+    await openHistoryFilters(page)
+    await page.getByLabel('From', { exact: true }).fill('2026-10-12')
+    await page.getByLabel('To', { exact: true }).fill('2026-10-13')
+    await chooseChannel(page, 'Walking Channel')
+    await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('channel')).toBe('id:UC-walking')
+    await trackHistoryNavigations(page, true)
+    await page.getByRole('button', { name: 'Clear filters' }).click()
+    for (let count = 1; count <= 3; count++) {
+      await releaseHistoryNavigation(page, count)
+      await expect(page.getByLabel('From', { exact: true })).toHaveValue('')
+      await expect(page.getByLabel('To', { exact: true })).toHaveValue('')
+      await expect(page.getByRole('combobox', { name: 'Channel', exact: true })).toContainText('All channels')
+    }
+    await expect(page).toHaveURL(/#\/history$/)
+  })
+
+  for (const mode of ['date', 'text']) {
+    test(`preserves scroll when loading more ${mode}-filtered history`, async ({ page }) => {
+      await goTo(page, 'history')
+      if (mode === 'date') {
+        await openHistoryFilters(page)
+        await page.getByLabel('To', { exact: true }).fill('2026-10-12')
+      } else {
+        await page.getByRole('searchbox', { name: 'Search in History' }).fill('City walk')
+      }
+      await expect(page).toHaveURL(/searchDataLimit=100/)
+      await expect(page.locator('.historyResults')).toHaveAttribute('aria-busy', 'false')
+      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *').first()).toContainText('City walk')
+      await trackHistoryNavigations(page)
+      await scrollPageToEnd(page)
+      const scrollTop = await page.evaluate(() => window.scrollY)
+      expect(scrollTop).toBeGreaterThan(100)
+      await page.getByRole('button', { name: 'Load More Videos' }).click()
+      await expect.poll(() => page.evaluate(() => window.__historyNavigations.completed.some(path => path.includes('searchDataLimit=200')))).toBe(true)
+      await expect(page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')).toHaveCount(200)
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(scrollTop - 1)
+      await expectPageScrollWithinRenderedRange(page)
+    })
+  }
 
   test('shows invalid and empty ranges and supports channels without IDs', async ({ page }) => {
     await goTo(page, 'history')
