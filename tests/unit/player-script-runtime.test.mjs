@@ -21,18 +21,21 @@ for (const stackSize of [128, 256]) {
         import { evaluatePlayerCode } from ${JSON.stringify(runtimeUrl.href)}
         const code = gunzipSync(readFileSync(new URL(${JSON.stringify(fixtureUrl.href)}))).toString()
         const expected = { sig: '76543210ZYXWVUTSRQPONMLKJIHGFEDcBAzyxwvutsrqponmlkjih', n: 'mBzrJcW9e13' }
+        // This checks stack recovery, not evaluation speed. Concurrent unit tests
+        // and builds can consume the production wall-clock budget on busy hosts.
+        const evaluate = code => evaluatePlayerCode(code, { timeoutMs: 30_000 })
         // Queue callers before WASM initialization, including a real player that
         // overflows the host stack with the old fixed guest-stack allowance.
         await Promise.all([
-          evaluatePlayerCode(code).then(value => assert.deepEqual(value, expected)),
-          evaluatePlayerCode('function f(){return f()} try {f()} catch(e){return e.message}')
+          evaluate(code).then(value => assert.deepEqual(value, expected)),
+          evaluate('function f(){return f()} try {f()} catch(e){return e.message}')
             .then(value => assert.equal(value, 'stack overflow')),
-          assert.rejects(evaluatePlayerCode('function f(){return f()} f()'), /InternalError: stack overflow/),
-          evaluatePlayerCode(code).then(value => assert.deepEqual(value, expected))
+          assert.rejects(evaluate('function f(){return f()} f()'), /InternalError: stack overflow/),
+          evaluate(code).then(value => assert.deepEqual(value, expected))
         ])
-        assert.equal(await evaluatePlayerCode('return 42'), 42)
+        assert.equal(await evaluate('return 42'), 42)
       `
-    ], { timeout: 20_000 })
+    ], { timeout: 60_000 })
     assert.doesNotMatch(stderr, /Aborted|JS_FreeRuntime/)
   })
 }
