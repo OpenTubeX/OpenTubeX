@@ -63,6 +63,7 @@
 }
 
 .offlineDownloadThumbnail.blur {
+  clip-path: inset(0);
   filter: blur(20px);
 }
 
